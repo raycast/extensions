@@ -5,9 +5,9 @@ import ts from "typescript";
 
 const root = process.cwd();
 
-await verifyProvider("minimax", {
-  expectedAudio: "mini-audio",
-  expectedFormat: "mp3",
+await verifyProvider("qwen", {
+  expectedAudio: "qwen-audio",
+  expectedFormat: "wav",
   expectedRate: 1,
 });
 await verifyProvider("mimo", {
@@ -53,8 +53,10 @@ async function verifyProvider(provider, expected) {
     events.includes(`play:${expected.expectedAudio}:${expected.expectedFormat}:${expected.expectedRate}`),
     `${provider} audio should be played with expected format and rate`,
   );
+  assert(events.includes("qwen-stop:request"), `${provider} test should request any old Qwen-TTS run to stop`);
   assert(events.includes("mimo-stop:request"), `${provider} test should request any old MiMo run to stop`);
   assert(events.includes("openai-stop:request"), `${provider} test should request any old OpenAI run to stop`);
+  assert(events.includes("qwen-state:clear"), `${provider} test should clear stale Qwen-TTS now-playing state`);
   assert(events.includes("mimo-state:clear"), `${provider} test should clear stale MiMo now-playing state`);
   assert(events.includes("openai-state:clear"), `${provider} test should clear stale OpenAI now-playing state`);
   assert(
@@ -65,11 +67,11 @@ async function verifyProvider(provider, expected) {
 
 async function verifyStoppedAfterSynthesis() {
   const events = [];
-  const mod = loadCommand("minimax", events, { stoppedAfterSynthesis: true });
+  const mod = loadCommand("qwen", events, { stoppedAfterSynthesis: true });
 
   await mod.default();
 
-  assert(events.includes("synth:minimax"), "Stopped-after-synthesis test should synthesize first");
+  assert(events.includes("synth:qwen"), "Stopped-after-synthesis test should synthesize first");
   assert(!events.some((event) => event.startsWith("play:")), "Stopped-after-synthesis test should not play audio");
   assert(events.includes("toast:title:Voice test stopped"), "Stopped-after-synthesis test should report stopped");
   assert(
@@ -145,14 +147,16 @@ function loadCommand(provider, events, options = {}) {
   let currentPlayer = null;
   const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
   const providerFile = path.join(root, "src/utils/provider.ts");
-  const miniMaxApiFile = path.join(root, "src/api/minimax-tts.ts");
+  const qwenApiFile = path.join(root, "src/api/qwen-tts.ts");
   const mimoApiFile = path.join(root, "src/api/mimo-tts.ts");
   const openAIApiFile = path.join(root, "src/api/openai-tts.ts");
-  const miniMaxPrefsFile = path.join(root, "src/utils/voice-preferences.ts");
+  const qwenPrefsFile = path.join(root, "src/utils/qwen-voice-preferences.ts");
   const mimoPrefsFile = path.join(root, "src/utils/mimo-voice-preferences.ts");
   const openAIPrefsFile = path.join(root, "src/utils/openai-voice-preferences.ts");
+  const qwenVoicesFile = path.join(root, "src/constants/qwen-tts-voices.ts");
   const mimoVoicesFile = path.join(root, "src/constants/mimo-voices.ts");
   const openAIVoicesFile = path.join(root, "src/constants/openai-voices.ts");
+  const qwenPlaybackFile = path.join(root, "src/utils/qwen-playback-state.ts");
   const mimoPlaybackFile = path.join(root, "src/utils/mimo-playback-state.ts");
   const openAIPlaybackFile = path.join(root, "src/utils/openai-playback-state.ts");
 
@@ -221,14 +225,15 @@ function loadCommand(provider, events, options = {}) {
         return provider;
       },
     },
-    [miniMaxApiFile]: {
+    [qwenApiFile]: {
+      getModelLabel: (model) => model,
       synthesizeSpeech: async () => {
-        events.push("synth:minimax");
+        events.push("synth:qwen");
         nowFromOption(options.synthAdvanceMs);
         if (options.stoppedAfterSynthesis) {
           currentPlayer?.stopPlayback();
         }
-        return "mini-audio";
+        return "qwen-audio";
       },
     },
     [mimoApiFile]: {
@@ -254,16 +259,14 @@ function loadCommand(provider, events, options = {}) {
         return "openai-audio";
       },
     },
-    [miniMaxPrefsFile]: {
+    [qwenPrefsFile]: {
       buildDefaultOptionsFromPrefs: async () => ({
-        voiceId: "mini-voice",
-        model: "speech-2.8-hd",
-        speed: 1,
-        languageBoost: "auto",
-        region: "cn",
-        format: "mp3",
-        sampleRate: 32000,
-        bitrate: 128000,
+        model: "qwen3-tts-flash",
+        voice: "Cherry",
+        format: "wav",
+        languageType: "Auto",
+        baseUrl: "https://dashscope.aliyuncs.com/api/v1",
+        playbackRate: 1,
       }),
     },
     [mimoPrefsFile]: {
@@ -282,11 +285,18 @@ function loadCommand(provider, events, options = {}) {
         playbackRate: 1.5,
       }),
     },
+    [qwenVoicesFile]: {
+      getVoiceById: (voice) => ({ name: voice }),
+    },
     [mimoVoicesFile]: {
       getVoiceById: (voice) => ({ name: voice }),
     },
     [openAIVoicesFile]: {
       getVoiceById: (voice) => ({ name: voice }),
+    },
+    [qwenPlaybackFile]: {
+      clearNowPlaying: async () => events.push("qwen-state:clear"),
+      requestPlaybackStop: async () => events.push("qwen-stop:request"),
     },
     [mimoPlaybackFile]: {
       clearNowPlaying: async () => events.push("mimo-state:clear"),
@@ -358,9 +368,10 @@ function resolveTs(candidate) {
 }
 
 function labelProvider(provider) {
+  if (provider === "qwen") return "Qwen-TTS";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
-  return "MiniMax";
+  return "Qwen-TTS";
 }
 
 function assert(condition, message) {

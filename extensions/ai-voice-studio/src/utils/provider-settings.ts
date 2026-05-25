@@ -1,5 +1,11 @@
 import { LocalStorage } from "@raycast/api";
 import { DEFAULT_VOICE_ID } from "../constants/voices";
+import {
+  DEFAULT_BASE_URL as DEFAULT_QWEN_BASE_URL,
+  DEFAULT_LANGUAGE_TYPE as DEFAULT_QWEN_LANGUAGE_TYPE,
+  DEFAULT_MODEL as DEFAULT_QWEN_MODEL,
+  DEFAULT_VOICE as DEFAULT_QWEN_VOICE,
+} from "../constants/qwen-tts-voices";
 import { DEFAULT_MODEL as DEFAULT_MIMO_MODEL, DEFAULT_VOICE as DEFAULT_MIMO_VOICE } from "../constants/mimo-voices";
 import { DEFAULT_FORMAT, DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/openai-voices";
 import {
@@ -22,6 +28,7 @@ import type {
   OpenAIDelivery,
   OpenAIAccentFocus,
 } from "../api/openai-types";
+import type { QwenTTSLanguageType, QwenTTSModel } from "../api/qwen-tts-types";
 import type { TTSProvider } from "./provider";
 
 export interface OpenAIProviderSettings {
@@ -57,9 +64,19 @@ export interface MimoProviderSettings {
   tokenPlanBaseUrl: string;
 }
 
+export interface QwenProviderSettings {
+  model: QwenTTSModel;
+  voice: string;
+  languageType: QwenTTSLanguageType;
+  playbackRate: string;
+  instructions?: string;
+  baseUrl: string;
+}
+
 export interface ProviderSettings {
   defaultProvider: TTSProvider;
   minimax: MiniMaxProviderSettings;
+  qwen: QwenProviderSettings;
   mimo: MimoProviderSettings;
   openai: OpenAIProviderSettings;
 }
@@ -67,6 +84,7 @@ export interface ProviderSettings {
 export interface ProviderSettingsInput {
   defaultProvider?: string;
   minimax?: Partial<MiniMaxProviderSettings>;
+  qwen?: Partial<QwenProviderSettings>;
   mimo?: Partial<MimoProviderSettings>;
   openai?: Partial<OpenAIProviderSettings>;
 }
@@ -74,7 +92,7 @@ export interface ProviderSettingsInput {
 export const QUICK_SETUP_OVERRIDES_KEY = "ai-voice-studio:quick-setup-overrides";
 
 export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
-  defaultProvider: "minimax",
+  defaultProvider: "qwen",
   minimax: {
     authMode: "auto",
     model: "speech-2.8-hd",
@@ -84,6 +102,14 @@ export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
     languageBoost: "auto",
     speechRate: "1",
     region: "cn",
+  },
+  qwen: {
+    model: DEFAULT_QWEN_MODEL,
+    voice: DEFAULT_QWEN_VOICE,
+    languageType: DEFAULT_QWEN_LANGUAGE_TYPE,
+    playbackRate: "1",
+    instructions: "",
+    baseUrl: DEFAULT_QWEN_BASE_URL,
   },
   mimo: {
     model: DEFAULT_MIMO_MODEL,
@@ -116,6 +142,10 @@ export async function getDefaultProviderSetting(): Promise<TTSProvider> {
 
 export async function getMiniMaxSettings(): Promise<MiniMaxProviderSettings> {
   return (await getProviderSettings()).minimax;
+}
+
+export async function getQwenSettings(): Promise<QwenProviderSettings> {
+  return (await getProviderSettings()).qwen;
 }
 
 export async function getMimoSettings(): Promise<MimoProviderSettings> {
@@ -154,6 +184,7 @@ function mergeSettings(base: ProviderSettings, overrides: ProviderSettingsInput)
   return {
     defaultProvider: overrides.defaultProvider ?? base.defaultProvider,
     minimax: { ...base.minimax, ...overrides.minimax },
+    qwen: { ...base.qwen, ...overrides.qwen },
     mimo: { ...base.mimo, ...overrides.mimo },
     openai: { ...base.openai, ...overrides.openai },
   };
@@ -163,14 +194,15 @@ function normalizeSettings(settings: ProviderSettingsInput): ProviderSettings {
   return {
     defaultProvider: normalizeProvider(settings.defaultProvider),
     minimax: normalizeMiniMaxSettings(settings.minimax),
+    qwen: normalizeQwenSettings(settings.qwen),
     mimo: normalizeMimoSettings(settings.mimo),
     openai: normalizeOpenAISettings(settings.openai),
   };
 }
 
 function normalizeProvider(provider: string | undefined): TTSProvider {
-  if (provider === "mimo" || provider === "openai") return provider;
-  return "minimax";
+  if (provider === "qwen" || provider === "mimo" || provider === "openai") return provider;
+  return "qwen";
 }
 
 function normalizeMiniMaxSettings(settings: Partial<MiniMaxProviderSettings> | undefined): MiniMaxProviderSettings {
@@ -200,6 +232,17 @@ function normalizeMimoSettings(settings: Partial<MimoProviderSettings> | undefin
   };
 }
 
+function normalizeQwenSettings(settings: Partial<QwenProviderSettings> | undefined): QwenProviderSettings {
+  return {
+    model: normalizeQwenModel(settings?.model),
+    voice: settings?.voice?.trim() || DEFAULT_QWEN_VOICE,
+    languageType: normalizeQwenLanguageType(settings?.languageType),
+    playbackRate: normalizePlaybackRate(settings?.playbackRate),
+    instructions: settings?.instructions?.trim() || "",
+    baseUrl: normalizeQwenBaseUrl(settings?.baseUrl),
+  };
+}
+
 function normalizeOpenAISettings(settings: Partial<OpenAIProviderSettings> | undefined): OpenAIProviderSettings {
   return {
     model: normalizeOpenAIModel(settings?.model),
@@ -216,6 +259,27 @@ function normalizeOpenAISettings(settings: Partial<OpenAIProviderSettings> | und
 
 function normalizeOpenAIModel(model: string | undefined): OpenAITTSModel {
   return model === "gpt-4o-mini-tts" ? model : DEFAULT_MODEL;
+}
+
+function normalizeQwenModel(model: string | undefined): QwenTTSModel {
+  return model === "qwen3-tts-instruct-flash" || model === "qwen-tts-latest" || model === "qwen-tts"
+    ? model
+    : DEFAULT_QWEN_MODEL;
+}
+
+function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLanguageType {
+  return languageType === "Chinese" || languageType === "English" || languageType === "German"
+    ? languageType
+    : DEFAULT_QWEN_LANGUAGE_TYPE;
+}
+
+function normalizeQwenBaseUrl(baseUrl: string | undefined): string {
+  return (
+    baseUrl
+      ?.trim()
+      .replace(/\/+$/, "")
+      .replace(/\/services\/aigc\/multimodal-generation\/generation$/, "") || DEFAULT_QWEN_BASE_URL
+  );
 }
 
 const VALID_OPENAI_FORMATS: readonly string[] = ["mp3", "wav", "opus", "aac", "flac"];

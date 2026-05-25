@@ -1,23 +1,23 @@
 import { Icon, LaunchType, Toast, launchCommand, openExtensionPreferences, showHUD, showToast } from "@raycast/api";
-import { synthesizeSpeech as synthesizeMiniMax } from "./api/minimax-tts";
+import { synthesizeSpeech as synthesizeQwen, getModelLabel as getQwenModelLabel } from "./api/qwen-tts";
 import { synthesizeSpeech as synthesizeMimo, getModelLabel as getMimoModelLabel } from "./api/mimo-tts";
 import { synthesizeSpeech as synthesizeOpenAI, getModelLabel as getOpenAIModelLabel } from "./api/openai-tts";
+import { getVoiceById as getQwenVoiceById } from "./constants/qwen-tts-voices";
 import { getVoiceById as getMimoVoiceById } from "./constants/mimo-voices";
 import { getVoiceById as getOpenAIVoiceById } from "./constants/openai-voices";
-import {
-  AudioPlayer,
-  requestExternalStop,
-  stopExternalPlayback,
-  waitForExternalStopPropagation,
-} from "./utils/audio-player";
+import { AudioPlayer, stopExternalPlayback, waitForExternalStopPropagation } from "./utils/audio-player";
 import { getDefaultProvider, type TTSProvider } from "./utils/provider";
-import { buildDefaultOptionsFromPrefs as buildMiniMaxOptions } from "./utils/voice-preferences";
+import { buildDefaultOptionsFromPrefs as buildQwenOptions } from "./utils/qwen-voice-preferences";
 import { buildDefaultOptionsFromPrefs as buildMimoOptions } from "./utils/mimo-voice-preferences";
 import { buildDefaultOptionsFromPrefs as buildOpenAIOptions } from "./utils/openai-voice-preferences";
 import {
   clearNowPlaying as clearMimoNowPlaying,
   requestPlaybackStop as requestMimoPlaybackStop,
 } from "./utils/mimo-playback-state";
+import {
+  clearNowPlaying as clearQwenNowPlaying,
+  requestPlaybackStop as requestQwenPlaybackStop,
+} from "./utils/qwen-playback-state";
 import {
   clearNowPlaying as clearOpenAINowPlaying,
   requestPlaybackStop as requestOpenAIPlaybackStop,
@@ -40,11 +40,10 @@ interface VoiceSetupResult {
 }
 
 export default async function Command() {
-  requestExternalStop();
-  await Promise.all([requestMimoPlaybackStop(), requestOpenAIPlaybackStop()]);
+  await Promise.all([requestQwenPlaybackStop(), requestMimoPlaybackStop(), requestOpenAIPlaybackStop()]);
   stopExternalPlayback();
   await waitForExternalStopPropagation();
-  await Promise.all([clearMimoNowPlaying(), clearOpenAINowPlaying()]);
+  await Promise.all([clearQwenNowPlaying(), clearMimoNowPlaying(), clearOpenAINowPlaying()]);
 
   const provider = await getDefaultProvider();
   const providerLabel = labelProvider(provider);
@@ -60,7 +59,6 @@ export default async function Command() {
       shortcut: { modifiers: ["cmd"], key: "." },
       onAction: () => {
         player.stopPlayback();
-        requestExternalStop();
         stopExternalPlayback();
       },
     },
@@ -143,26 +141,27 @@ async function synthesizeCurrentProvider(provider: TTSProvider, signal: AbortSig
     };
   }
 
-  const options = await buildMiniMaxOptions();
-  const audio = await synthesizeMiniMax(TEST_TEXT, options, signal);
+  const options = await buildQwenOptions();
+  const audio = await synthesizeQwen(TEST_TEXT, options, signal);
   const bytes = Buffer.from(audio, "base64").length;
   return {
-    provider,
-    providerLabel: labelProvider(provider),
-    modelLabel: options.model,
-    voiceLabel: options.voiceId,
+    provider: "qwen",
+    providerLabel: labelProvider("qwen"),
+    modelLabel: getQwenModelLabel(options.model),
+    voiceLabel: getQwenVoiceById(options.voice)?.name ?? options.voice,
     audio,
-    format: "mp3",
-    playbackRate: 1,
+    format: options.format,
+    playbackRate: options.playbackRate,
     synthMs: Date.now() - startedAt,
     bytes,
   };
 }
 
 function labelProvider(provider: TTSProvider): string {
+  if (provider === "qwen" || provider === "minimax") return "Qwen-TTS";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
-  return "MiniMax";
+  return "Qwen-TTS";
 }
 
 function formatBytes(bytes: number): string {

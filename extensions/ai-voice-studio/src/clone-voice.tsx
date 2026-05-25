@@ -410,7 +410,7 @@ function buildResultMarkdown(result: CloneVoiceResult): string {
 }
 
 async function getPreferenceDefaults(): Promise<PreferenceDefaults> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences & { tokenPlanKey?: string; openPlatformApiKey?: string }>();
   const settings = await getMiniMaxSettings();
   const preferTokenPlanModelsOnly =
     settings.authMode === "token-plan" || (!!prefs.tokenPlanKey?.trim() && !prefs.openPlatformApiKey?.trim());

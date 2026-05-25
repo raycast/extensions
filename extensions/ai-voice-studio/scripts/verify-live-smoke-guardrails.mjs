@@ -10,13 +10,12 @@ const fetchLogPath = path.join(tempRoot, "fetch-log.json");
 const afplayLogPath = path.join(tempRoot, "afplay-args.txt");
 const liveSmokeOpenAIAudioPath = path.join(os.tmpdir(), "ai-voice-studio-live-openai.wav");
 const fakeKeys = {
-  minimaxTokenPlan: "tp-live-guard-minimax-token-1234567890",
-  minimaxOpenPlatform: "sk-live-guard-minimax-open-1234567890",
+  dashscope: "sk-live-guard-dashscope-1234567890",
   mimo: "tp-live-guard-mimo-1234567890",
   openai: "sk-live-guard-openai-1234567890",
 };
 const fakeAudio = {
-  minimax: Buffer.from("minimax-live-smoke-audio"),
+  qwen: Buffer.from("qwen-live-smoke-audio"),
   mimo: Buffer.from("mimo-live-smoke-audio"),
   openai: Buffer.from("openai-live-smoke-audio"),
 };
@@ -60,11 +59,9 @@ fs.writeFileSync(
     "    return Response.json({ error: { message: `provider rejected ${process.env.OPENAI_API_KEY}` } }, { status: 500 });",
     "  }",
     "  const urlText = String(url);",
-    "  if (urlText.includes('/v1/t2a_v2')) {",
+    "  if (urlText.includes('/services/aigc/multimodal-generation/generation')) {",
     "    return Response.json({",
-    `      data: { audio: ${JSON.stringify(fakeAudio.minimax.toString("hex"))} },`,
-    "      base_resp: { status_code: 0, status_msg: 'ok' },",
-    "      trace_id: 'guardrail-minimax',",
+    `      output: { audio: { data: ${JSON.stringify(fakeAudio.qwen.toString("base64"))} } },`,
     "    });",
     "  }",
     "  if (urlText.includes('/chat/completions')) {",
@@ -78,27 +75,27 @@ fs.writeFileSync(
 );
 
 try {
-  const result = runLiveSmoke({ providers: "minimax,mimo,openai", play: false });
+  const result = runLiveSmoke({ providers: "qwen,mimo,openai", play: false });
 
   assert(result.status === 0, result.stderr || result.stdout);
   assertNoSecrets(result.stdout, "Live smoke output should not print provider keys");
   assertNoSecrets(result.stderr, "Live smoke errors should not print provider keys");
 
   const parsed = JSON.parse(result.stdout);
-  const minimax = findProviderResult(parsed, "minimax");
+  const qwen = findProviderResult(parsed, "qwen");
   const mimo = findProviderResult(parsed, "mimo");
   const openai = findProviderResult(parsed, "openai");
   assert(parsed.status === "passed", "Live smoke should pass with mocked provider audio");
-  assert(minimax.status === "passed", "MiniMax live smoke result should pass");
+  assert(qwen.status === "passed", "Qwen-TTS live smoke result should pass");
   assert(mimo.status === "passed", "MiMo live smoke result should pass");
   assert(openai.status === "passed", "OpenAI live smoke result should pass");
-  assert(minimax.format === "mp3", "MiniMax live smoke should use setup format");
+  assert(qwen.format === "wav", "Qwen-TTS live smoke should use setup format");
   assert(mimo.format === "wav", "MiMo live smoke should use setup format");
   assert(openai.format === "wav", "OpenAI live smoke should use setup response format");
-  assert(minimax.bytes === fakeAudio.minimax.length, "MiniMax live smoke should report returned audio size");
+  assert(qwen.bytes === fakeAudio.qwen.length, "Qwen-TTS live smoke should report returned audio size");
   assert(mimo.bytes === fakeAudio.mimo.length, "MiMo live smoke should report returned audio size");
   assert(openai.bytes === fakeAudio.openai.length, "OpenAI live smoke should report returned audio size");
-  for (const providerResult of [minimax, mimo, openai]) {
+  for (const providerResult of [qwen, mimo, openai]) {
     assert(typeof providerResult.synthMs === "number", `${providerResult.provider} should report synthMs`);
     assert(typeof providerResult.totalMs === "number", `${providerResult.provider} should report totalMs`);
     assert(
@@ -109,12 +106,14 @@ try {
 
   const fetchLog = readFetchLog();
   assert(fetchLog.length === 3, "Live smoke should call all three mocked provider APIs");
-  const miniMaxFetch = findFetch(fetchLog, "/v1/t2a_v2");
+  const qwenFetch = findFetch(fetchLog, "/services/aigc/multimodal-generation/generation");
   const mimoFetch = findFetch(fetchLog, "/chat/completions");
   const openaiFetch = findFetch(fetchLog, "/audio/speech");
-  assert(miniMaxFetch.authorization === `Bearer ${fakeKeys.minimaxOpenPlatform}`, "MiniMax should use setup auth mode");
-  assert(miniMaxFetch.body.model === "speech-2.8-hd", "MiniMax live smoke should use setup model");
-  assert(miniMaxFetch.body.voice_setting.voice_id === "Chinese (Mandarin)_Radio_Host", "MiniMax should use setup voice");
+  assert(qwenFetch.authorization === `Bearer ${fakeKeys.dashscope}`, "Qwen-TTS should send configured DashScope key");
+  assert(qwenFetch.body.model === "qwen3-tts-instruct-flash", "Qwen-TTS live smoke should use setup model");
+  assert(qwenFetch.body.input.voice === "Ethan", "Qwen-TTS should use setup voice");
+  assert(qwenFetch.body.input.language_type === "German", "Qwen-TTS should use setup language_type");
+  assert(qwenFetch.body.input.instructions.includes("Guardrail Qwen."), "Qwen-TTS should use setup instructions");
   assert(mimoFetch.url === "https://guardrail.mimo/v1/chat/completions", "MiMo should use setup base URL");
   assert(mimoFetch.apiKey === fakeKeys.mimo, "MiMo should send configured API key");
   assert(mimoFetch.body.model === "mimo-v2.5-tts", "MiMo live smoke should use setup model");
@@ -178,7 +177,7 @@ try {
     JSON.stringify(
       {
         checked: [
-          "live smoke uses focused setup overrides for MiniMax, MiMo, and OpenAI",
+          "live smoke uses focused setup overrides for Qwen-TTS, MiMo, and OpenAI",
           "live smoke reports synth and total latency for all providers without playback",
           "live smoke playback uses shared AudioPlayer rate path",
           "live smoke reports playback latency when playback is enabled",
@@ -218,14 +217,13 @@ function runLiveSmoke({ providers, play, forceError = "", maxMs = "30000", afpla
       AI_VOICE_STUDIO_GUARDRAIL_AFPLAY_LOG: afplayLogPath,
       AI_VOICE_STUDIO_GUARDRAIL_FORCE_ERROR: forceError,
       AI_VOICE_STUDIO_GUARDRAIL_AFPLAY_SLEEP_SECONDS: afplaySleepSeconds,
-      MINIMAX_TOKEN_PLAN_KEY: fakeKeys.minimaxTokenPlan,
-      MINIMAX_OPEN_PLATFORM_API_KEY: fakeKeys.minimaxOpenPlatform,
-      MINIMAX_AUTH_MODE: "payg",
-      MINIMAX_MODEL: "speech-2.8-hd",
-      MINIMAX_REGION: "cn",
-      MINIMAX_VOICE: "Chinese (Mandarin)_Radio_Host",
-      MINIMAX_LANGUAGE_BOOST: "auto",
-      MINIMAX_SPEECH_RATE: "1",
+      DASHSCOPE_API_KEY: fakeKeys.dashscope,
+      QWEN_MODEL: "qwen3-tts-instruct-flash",
+      QWEN_VOICE: "Ethan",
+      QWEN_LANGUAGE_TYPE: "German",
+      QWEN_PLAYBACK_RATE: "1",
+      QWEN_INSTRUCTIONS: "Guardrail Qwen.",
+      QWEN_BASE_URL: "https://dashscope.aliyuncs.com/api/v1",
       MIMO_API_KEY: fakeKeys.mimo,
       MIMO_TOKEN_PLAN_BASE_URL: "https://guardrail.mimo/v1",
       MIMO_MODEL: "mimo-v2.5-tts",

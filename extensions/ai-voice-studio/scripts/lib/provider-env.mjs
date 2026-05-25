@@ -3,15 +3,13 @@ import os from "node:os";
 import path from "node:path";
 
 const PROVIDER_ENV_NAMES = [
-  "MINIMAX_API_KEY",
-  "MINIMAX_TOKEN_PLAN_KEY",
-  "MINIMAX_OPEN_PLATFORM_API_KEY",
-  "MINIMAX_MODEL",
-  "MINIMAX_REGION",
-  "MINIMAX_AUTH_MODE",
-  "MINIMAX_VOICE",
-  "MINIMAX_LANGUAGE_BOOST",
-  "MINIMAX_SPEECH_RATE",
+  "DASHSCOPE_API_KEY",
+  "QWEN_MODEL",
+  "QWEN_VOICE",
+  "QWEN_LANGUAGE_TYPE",
+  "QWEN_PLAYBACK_RATE",
+  "QWEN_INSTRUCTIONS",
+  "QWEN_BASE_URL",
   "MIMO_API_KEY",
   "MIMO_TOKEN_PLAN_BASE_URL",
   "MIMO_MODEL",
@@ -27,18 +25,14 @@ const PROVIDER_ENV_NAMES = [
 ];
 
 const SECRET_ENV_NAMES = [
-  "MINIMAX_API_KEY",
-  "MINIMAX_TOKEN_PLAN_KEY",
-  "MINIMAX_OPEN_PLATFORM_API_KEY",
+  "DASHSCOPE_API_KEY",
   "MIMO_API_KEY",
   "OPENAI_API_KEY",
 ];
 
 const providerEnvNames = new Set(PROVIDER_ENV_NAMES);
 
-const ENV_ALIASES = {
-  MINIMAX_API_KEY: "MINIMAX_TOKEN_PLAN_KEY",
-};
+const ENV_ALIASES = {};
 
 export function loadProviderEnvFiles(root = process.cwd()) {
   const loaded = {};
@@ -51,11 +45,10 @@ export function loadProviderEnvFiles(root = process.cwd()) {
 
 export function summarizeProviderKeyStatus(loaded = {}) {
   return {
-    minimax: {
-      status: process.env.MINIMAX_TOKEN_PLAN_KEY || process.env.MINIMAX_OPEN_PLATFORM_API_KEY ? "ready" : "missing",
+    qwen: {
+      status: process.env.DASHSCOPE_API_KEY ? "ready" : "missing",
       keys: {
-        tokenPlan: keyStatus("MINIMAX_TOKEN_PLAN_KEY", loaded),
-        openPlatform: keyStatus("MINIMAX_OPEN_PLATFORM_API_KEY", loaded),
+        apiKey: keyStatus("DASHSCOPE_API_KEY", loaded),
       },
     },
     mimo: {

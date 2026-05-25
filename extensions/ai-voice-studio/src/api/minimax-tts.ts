@@ -36,7 +36,7 @@ async function resolveAuth(
   model?: string,
   settings?: MiniMaxProviderSettings,
 ): Promise<{ apiKey: string; mode: ResolvedAuthMode }> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences & { tokenPlanKey?: string; openPlatformApiKey?: string }>();
   const minimaxSettings = settings ?? (await getMiniMaxSettings());
   const authMode = parseAuthMode(minimaxSettings.authMode);
   const tokenPlanKey = prefs.tokenPlanKey?.trim();

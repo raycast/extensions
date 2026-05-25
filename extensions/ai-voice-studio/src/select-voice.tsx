@@ -313,7 +313,7 @@ function getPreviewText(text: string): string {
 }
 
 function buildConfigStatus(settings: MiniMaxProviderSettings): ConfigStatus {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences & { tokenPlanKey?: string; openPlatformApiKey?: string }>();
   const tokenPlanKey = prefs.tokenPlanKey?.trim();
   const openPlatformApiKey = prefs.openPlatformApiKey?.trim();
   const model = settings.model || "speech-2.8-hd";

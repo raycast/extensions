@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MimoTTSModel } from "../api/mimo-types";
+import type { QwenTTSLanguageType, QwenTTSModel } from "../api/qwen-tts-types";
 import type {
   OpenAIResponseFormat,
   OpenAITone,
@@ -19,6 +20,13 @@ import type {
   OpenAIAccentFocus,
 } from "../api/openai-types";
 import { FALLBACK_VOICES, getVoiceSearchKeywords, groupVoicesByCategory } from "../constants/voices";
+import {
+  LANGUAGE_TYPE_LABELS as QWEN_LANGUAGE_TYPE_LABELS,
+  MODEL_LABELS as QWEN_MODEL_LABELS,
+  VOICE_CATEGORIES as QWEN_VOICE_CATEGORIES,
+  getVoicesByCategory as getQwenVoicesByCategory,
+  getVoicesForModel as getQwenVoicesForModel,
+} from "../constants/qwen-tts-voices";
 import {
   MODEL_LABELS as MIMO_MODEL_LABELS,
   VOICE_CATEGORIES as MIMO_VOICE_CATEGORIES,
@@ -37,8 +45,6 @@ import {
   ACCENT_FOCUS_OPTIONS,
 } from "../constants/openai-style";
 import { SPEECH_RATE_OPTIONS } from "../constants/mimo-controls";
-import { clearQuickReadVoiceOverride as clearMiniMaxQuickReadVoiceOverride } from "../utils/voice-preferences";
-import { clearPlaybackSpeed } from "../utils/playback-speed";
 import {
   clearProviderSettingsOverrides,
   getProviderSettings,
@@ -47,7 +53,10 @@ import {
   type ProviderSettings,
 } from "../utils/provider-settings";
 import type { TTSProvider } from "../utils/provider";
-import { setQuickReadVoiceOverride as setMiniMaxQuickReadVoiceOverride } from "../utils/voice-preferences";
+import {
+  clearQuickReadVoiceOverride as clearQwenQuickReadVoiceOverride,
+  setQuickReadVoiceOverride as setQwenQuickReadVoiceOverride,
+} from "../utils/qwen-voice-preferences";
 import {
   clearQuickReadVoiceOverride as clearMimoQuickReadVoiceOverride,
   setQuickReadVoiceOverride as setMimoQuickReadVoiceOverride,
@@ -58,6 +67,7 @@ import {
 } from "../utils/openai-voice-preferences";
 import { clearSpeedOverride as clearMimoSpeedOverride } from "../utils/mimo-playback-state";
 import { clearSpeedOverride as clearOpenAISpeedOverride } from "../utils/openai-playback-state";
+import { clearSpeedOverride as clearQwenSpeedOverride } from "../utils/qwen-playback-state";
 
 const MINIMAX_MODEL_OPTIONS = [
   { value: "speech-2.8-hd", title: "Speech 2.8 HD" },
@@ -137,6 +147,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
   }, [reload]);
 
   const mimoVoices = useMemo(() => getMimoVoicesForModel(settings?.mimo.model ?? "mimo-v2.5-tts"), [settings]);
+  const qwenVoices = useMemo(() => getQwenVoicesForModel(settings?.qwen.model ?? "qwen3-tts-flash"), [settings]);
   const openaiVoices = useMemo(() => getOpenAIVoicesForModel(settings?.openai.model ?? "gpt-4o-mini-tts"), [settings]);
 
   const updateSettings = useCallback((updater: (current: ProviderSettings) => ProviderSettings) => {
@@ -159,6 +170,13 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
   const updateMiniMax = useCallback(
     (patch: Partial<ProviderSettings["minimax"]>) => {
       updateSettings((current) => ({ ...current, minimax: { ...current.minimax, ...patch } }));
+    },
+    [updateSettings],
+  );
+
+  const updateQwen = useCallback(
+    (patch: Partial<ProviderSettings["qwen"]>) => {
+      updateSettings((current) => ({ ...current, qwen: { ...current.qwen, ...patch } }));
     },
     [updateSettings],
   );
@@ -191,6 +209,20 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
     [updateSettings],
   );
 
+  const handleQwenModelChange = useCallback(
+    (value: string) => {
+      const nextModel = value as QwenTTSModel;
+      updateSettings((current) => {
+        const nextVoices = getQwenVoicesForModel(nextModel);
+        const nextVoice = nextVoices.some((voice) => voice.id === current.qwen.voice)
+          ? current.qwen.voice
+          : (nextVoices[0]?.id ?? "Cherry");
+        return { ...current, qwen: { ...current.qwen, model: nextModel, voice: nextVoice } };
+      });
+    },
+    [updateSettings],
+  );
+
   const handleSubmit = useCallback(async () => {
     if (!settings) return;
     setIsSaving(true);
@@ -198,10 +230,10 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
     try {
       const saved = await saveProviderSettingsOverrides(settings);
       await Promise.all([
-        setMiniMaxQuickReadVoiceOverride(saved.minimax.customDefaultVoice || saved.minimax.defaultVoice),
+        setQwenQuickReadVoiceOverride(saved.qwen.voice),
         setMimoQuickReadVoiceOverride(saved.mimo.defaultVoice),
         setOpenAIQuickReadVoiceOverride(saved.openai.voice),
-        clearPlaybackSpeed(),
+        clearQwenSpeedOverride(),
         clearMimoSpeedOverride(),
         clearOpenAISpeedOverride(),
       ]);
@@ -230,10 +262,10 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
     try {
       await Promise.all([
         clearProviderSettingsOverrides(),
-        clearMiniMaxQuickReadVoiceOverride(),
+        clearQwenQuickReadVoiceOverride(),
         clearMimoQuickReadVoiceOverride(),
         clearOpenAIQuickReadVoiceOverride(),
-        clearPlaybackSpeed(),
+        clearQwenSpeedOverride(),
         clearMimoSpeedOverride(),
         clearOpenAISpeedOverride(),
       ]);
@@ -282,7 +314,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         onChange={handleDefaultProviderChange}
         info={hasOverrides ? "Quick Setup overrides are active." : "This is saved as a Quick Setup override."}
       >
-        <Form.Dropdown.Item value="minimax" title="MiniMax" />
+        <Form.Dropdown.Item value="qwen" title="Qwen-TTS" />
         <Form.Dropdown.Item value="mimo" title="MiMo" />
         <Form.Dropdown.Item value="openai" title="OpenAI" />
       </Form.Dropdown>
@@ -293,7 +325,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         onChange={handleSetupProviderChange}
         info={`Only ${labelProvider(activeProvider)} settings are shown below, so the form stays short in the Raycast sidebar.`}
       >
-        <Form.Dropdown.Item value="minimax" title="MiniMax Defaults" />
+        <Form.Dropdown.Item value="qwen" title="Qwen-TTS Defaults" />
         <Form.Dropdown.Item value="mimo" title="MiMo Defaults" />
         <Form.Dropdown.Item value="openai" title="OpenAI Defaults" />
       </Form.Dropdown>
@@ -348,6 +380,60 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
             title="Speed"
             value={settings.minimax.speechRate}
             onChange={(speechRate) => updateMiniMax({ speechRate })}
+          >
+            {PLAYBACK_RATE_OPTIONS.map((option) => (
+              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+            ))}
+          </Form.Dropdown>
+        </>
+      ) : null}
+
+      {activeProvider === "qwen" ? (
+        <>
+          <Form.Description title="Qwen-TTS" text="Alibaba Cloud Model Studio / DashScope Qwen-TTS synthesis." />
+          <Form.Dropdown id="qwenModel" title="Model" value={settings.qwen.model} onChange={handleQwenModelChange}>
+            {(Object.keys(QWEN_MODEL_LABELS) as QwenTTSModel[]).map((model) => (
+              <Form.Dropdown.Item key={model} value={model} title={QWEN_MODEL_LABELS[model]} />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="qwenVoice"
+            title="Voice"
+            value={settings.qwen.voice}
+            onChange={(voice) => updateQwen({ voice })}
+          >
+            {QWEN_VOICE_CATEGORIES.map((category) => {
+              const voices = getQwenVoicesByCategory(category, settings.qwen.model);
+              if (voices.length === 0) return null;
+              return (
+                <Form.Dropdown.Section key={category} title={category}>
+                  {voices.map((voice) => (
+                    <Form.Dropdown.Item key={voice.id} value={voice.id} title={voice.name} />
+                  ))}
+                </Form.Dropdown.Section>
+              );
+            })}
+            {qwenVoices.length === 0 ? <Form.Dropdown.Item value="Cherry" title="Cherry" /> : null}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="qwenLanguageType"
+            title="Language"
+            value={settings.qwen.languageType}
+            onChange={(languageType) => updateQwen({ languageType: languageType as QwenTTSLanguageType })}
+          >
+            {(Object.keys(QWEN_LANGUAGE_TYPE_LABELS) as QwenTTSLanguageType[]).map((languageType) => (
+              <Form.Dropdown.Item
+                key={languageType}
+                value={languageType}
+                title={QWEN_LANGUAGE_TYPE_LABELS[languageType]}
+              />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="qwenPlaybackRate"
+            title="Speed"
+            value={settings.qwen.playbackRate}
+            onChange={(playbackRate) => updateQwen({ playbackRate })}
           >
             {PLAYBACK_RATE_OPTIONS.map((option) => (
               <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
@@ -534,6 +620,30 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
             </>
           ) : null}
 
+          {activeProvider === "qwen" ? (
+            <>
+              <Form.Separator />
+              <Form.Description
+                title="Qwen-TTS Advanced"
+                text="Optional speaking instructions and DashScope endpoint."
+              />
+              <Form.TextArea
+                id="qwenInstructions"
+                title="Instructions"
+                value={settings.qwen.instructions}
+                placeholder="Optional. Used by Qwen3 TTS Instruct Flash."
+                onChange={(instructions) => updateQwen({ instructions })}
+              />
+              <Form.TextField
+                id="qwenBaseUrl"
+                title="Base URL"
+                value={settings.qwen.baseUrl}
+                placeholder="https://dashscope.aliyuncs.com/api/v1"
+                onChange={(baseUrl) => updateQwen({ baseUrl })}
+              />
+            </>
+          ) : null}
+
           {activeProvider === "openai" ? (
             <>
               <Form.Separator />
@@ -566,14 +676,15 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
 }
 
 function toProvider(value: string): TTSProvider {
-  if (value === "mimo" || value === "openai") return value;
-  return "minimax";
+  if (value === "qwen" || value === "mimo" || value === "openai") return value;
+  return "qwen";
 }
 
 function labelProvider(provider: TTSProvider): string {
+  if (provider === "qwen" || provider === "minimax") return "Qwen-TTS";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
-  return "MiniMax";
+  return "Qwen-TTS";
 }
 
 function openVoiceSetupTest(): Promise<void> {

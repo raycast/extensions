@@ -117,14 +117,13 @@ function installFetch(handler) {
   };
 }
 
-const minimax = loadTs("src/api/minimax-tts.ts");
+const qwen = loadTs("src/api/qwen-tts.ts");
 const mimo = loadTs("src/api/mimo-tts.ts");
 const openai = loadTs("src/api/openai-tts.ts");
 const providerSettings = loadTs("src/utils/provider-settings.ts");
 
 await verifyFocusedSetupOptionBuilders();
-await verifyMiniMaxFocusedSetupAuthRouting();
-await verifyMiniMax();
+await verifyQwen();
 await verifyMiMo();
 await verifyOpenAI();
 
@@ -133,8 +132,7 @@ console.log(
     {
       checked: [
         "Focused setup overrides flow into provider option builders",
-        "Focused setup MiniMax auth mode controls runtime key routing",
-        "MiniMax request/hex decode/error/cancel contract",
+        "Qwen-TTS request/audio-data/audio-url/error/cancel contract",
         "MiMo request/base64/error/cancel contract",
         "OpenAI request/binary decode/error/cancel contract",
       ],
@@ -145,37 +143,29 @@ console.log(
 );
 
 async function verifyFocusedSetupOptionBuilders() {
-  setPreferences({
-    defaultProvider: "minimax",
-    minimaxModel: "speech-2.8-hd",
-    minimaxDefaultVoice: "Chinese (Mandarin)_Radio_Host",
-    minimaxLanguageBoost: "auto",
-    minimaxSpeechRate: "1",
-    region: "cn",
-  });
+  setPreferences({ dashscopeApiKey: "sk-dashscope-test" });
   await providerSettings.saveProviderSettingsOverrides({
-    minimax: {
-      model: "speech-2.6-hd",
-      defaultVoice: "English_CalmWoman",
-      languageBoost: "English",
-      speechRate: "1.25",
-      region: "global",
+    qwen: {
+      model: "qwen3-tts-instruct-flash",
+      voice: "Ethan",
+      languageType: "German",
+      playbackRate: "1.25",
+      instructions: "Warm base",
+      baseUrl: "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
     },
   });
-  const miniMaxOptions = await minimax.buildOptionsFromPrefs();
-  assert(miniMaxOptions.model === "speech-2.6-hd", "MiniMax options should use focused setup model");
-  assert(miniMaxOptions.voiceId === "English_CalmWoman", "MiniMax options should use focused setup voice");
-  assert(miniMaxOptions.languageBoost === "English", "MiniMax options should use focused setup language boost");
-  assert(miniMaxOptions.speed === 1.25, "MiniMax options should parse focused setup speed");
-  assert(miniMaxOptions.region === "global", "MiniMax options should use focused setup region");
+  const qwenOptions = await qwen.buildOptionsFromPrefs();
+  assert(qwenOptions.model === "qwen3-tts-instruct-flash", "Qwen-TTS options should use focused setup model");
+  assert(qwenOptions.voice === "Ethan", "Qwen-TTS options should use focused setup voice");
+  assert(qwenOptions.languageType === "German", "Qwen-TTS options should use focused setup language");
+  assert(qwenOptions.playbackRate === 1.25, "Qwen-TTS options should parse focused setup playback rate");
+  assert(qwenOptions.instructions?.includes("Warm base"), "Qwen-TTS options should include focused setup instructions");
+  assert(
+    qwenOptions.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
+    "Qwen-TTS options should normalize focused setup base URL",
+  );
 
-  setPreferences({
-    mimoModel: "mimo-v2.5-tts",
-    mimoDefaultVoice: "mimo_default",
-    mimoSpeechRate: "0",
-    mimoStylePrompt: "",
-    mimoTokenPlanBaseUrl: "https://token-plan-cn.xiaomimimo.com/v1",
-  });
+  setPreferences({ mimoApiKey: "tp-mimo-test" });
   await providerSettings.saveProviderSettingsOverrides({
     mimo: {
       model: "mimo-v2-tts",
@@ -195,13 +185,7 @@ async function verifyFocusedSetupOptionBuilders() {
     "MiMo options should normalize and use focused setup base URL",
   );
 
-  setPreferences({
-    openaiModel: "gpt-4o-mini-tts",
-    openaiVoice: "cedar",
-    openaiResponseFormat: "mp3",
-    openaiPlaybackRate: "1",
-    openaiInstructions: "",
-  });
+  setPreferences({ openaiApiKey: "sk-openai-test" });
   await providerSettings.saveProviderSettingsOverrides({
     openai: {
       model: "gpt-4o-mini-tts",
@@ -219,178 +203,90 @@ async function verifyFocusedSetupOptionBuilders() {
   assert(openAIOptions.instructions?.includes("Clear base"), "OpenAI options should include focused setup instructions");
 }
 
-async function verifyMiniMaxFocusedSetupAuthRouting() {
-  setPreferences({
-    tokenPlanKey: "tp-minimax-test",
-    openPlatformApiKey: "op-minimax-test",
-    minimaxModel: "speech-2.8-hd",
-    minimaxDefaultVoice: "Chinese (Mandarin)_Radio_Host",
-    minimaxLanguageBoost: "auto",
-    minimaxSpeechRate: "1",
-    region: "cn",
-  });
-  await providerSettings.saveProviderSettingsOverrides({
-    minimax: {
-      authMode: "payg",
-      model: "speech-2.8-hd",
-      defaultVoice: "Chinese (Mandarin)_Radio_Host",
-      languageBoost: "auto",
-      speechRate: "1",
-      region: "cn",
-    },
-  });
+async function verifyQwen() {
+  setPreferences({ dashscopeApiKey: "sk-dashscope-test" });
 
   installFetch((call) => {
     assert(
-      call.init.headers.Authorization === "Bearer op-minimax-test",
-      "MiniMax focused setup payg auth mode should choose the Open Platform key",
+      call.url === "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+      "Qwen-TTS should call DashScope multimodal generation endpoint",
     );
-    return jsonResponse({
-      data: { audio: Buffer.from("payg-audio").toString("hex") },
-      base_resp: { status_code: 0, status_msg: "ok" },
-    });
+    assert(call.init.method === "POST", "Qwen-TTS should use POST");
+    assert(call.init.headers.Authorization === "Bearer sk-dashscope-test", "Qwen-TTS should send bearer auth");
+    assert(call.body.model === "qwen3-tts-instruct-flash", "Qwen-TTS should send model");
+    assert(call.body.input.voice === "Ethan", "Qwen-TTS should send voice");
+    assert(call.body.input.language_type === "German", "Qwen-TTS should send language_type");
+    assert(call.body.input.instructions === "Speak warmly.", "Qwen-TTS should send instruct-model instructions");
+    return jsonResponse({ output: { audio: { data: "cXdlbi1hdWRpbw==" } } });
   });
 
-  await minimax.synthesizeSpeech("Hello MiniMax", {
-    voiceId: "Chinese (Mandarin)_Radio_Host",
-    model: "speech-2.8-hd",
-    speed: 1,
-    languageBoost: "auto",
-    region: "cn",
-    format: "mp3",
-    sampleRate: 32000,
-    bitrate: 128000,
+  const qwenAudio = await qwen.synthesizeSpeech("Hello Qwen", {
+    model: "qwen3-tts-instruct-flash",
+    voice: "Ethan",
+    format: "wav",
+    languageType: "German",
+    baseUrl: "https://dashscope.aliyuncs.com/api/v1",
+    playbackRate: 1.25,
+    instructions: "Speak warmly.",
   });
-
-  setPreferences({
-    tokenPlanKey: "tp-minimax-test",
-    openPlatformApiKey: "op-minimax-test",
-    minimaxModel: "speech-2.8-turbo",
-    minimaxDefaultVoice: "Chinese (Mandarin)_Radio_Host",
-    minimaxLanguageBoost: "auto",
-    minimaxSpeechRate: "1",
-    region: "cn",
-  });
-  await providerSettings.saveProviderSettingsOverrides({
-    minimax: {
-      authMode: "token-plan",
-      model: "speech-2.8-turbo",
-      defaultVoice: "Chinese (Mandarin)_Radio_Host",
-      languageBoost: "auto",
-      speechRate: "1",
-      region: "cn",
-    },
-  });
-  installFetch(() => {
-    throw new Error("MiniMax token-plan turbo rejection should happen before fetch");
-  });
-
-  await expectRejects(
-    () =>
-      minimax.synthesizeSpeech("Hello MiniMax", {
-        voiceId: "Chinese (Mandarin)_Radio_Host",
-        model: "speech-2.8-turbo",
-        speed: 1,
-        languageBoost: "auto",
-        region: "cn",
-        format: "mp3",
-        sampleRate: 32000,
-        bitrate: 128000,
-      }),
-    (error) => error.name === "TTSApiError" && error.code === -6,
-    "MiniMax focused setup token-plan auth mode should reject Token Plan-incompatible models",
-  );
-}
-
-async function verifyMiniMax() {
-  setPreferences({
-    authMode: "auto",
-    tokenPlanKey: "tp-minimax-test",
-    openPlatformApiKey: "",
-    region: "cn",
-    minimaxModel: "speech-2.8-hd",
-    minimaxDefaultVoice: "Chinese (Mandarin)_Radio_Host",
-    minimaxLanguageBoost: "auto",
-    minimaxSpeechRate: "1",
-  });
+  assert(qwenAudio === "cXdlbi1hdWRpbw==", "Qwen-TTS should return base64 audio data");
 
   installFetch((call) => {
-    assert(call.url === "https://api.minimaxi.com/v1/t2a_v2", "MiniMax should call CN t2a_v2 endpoint");
-    assert(call.init.method === "POST", "MiniMax should use POST");
-    assert(call.init.headers.Authorization === "Bearer tp-minimax-test", "MiniMax should send token plan bearer key");
-    assert(call.body.model === "speech-2.8-hd", "MiniMax should send model");
-    assert(call.body.output_format === "hex", "MiniMax should request hex audio");
-    assert(call.body.voice_setting.voice_id === "Chinese (Mandarin)_Radio_Host", "MiniMax should send voice id");
-    return jsonResponse({
-      data: { audio: Buffer.from("minimax-audio").toString("hex") },
-      base_resp: { status_code: 0, status_msg: "ok" },
-      trace_id: "trace-test",
-    });
+    if (call.url.endsWith("/generation")) {
+      return jsonResponse({ output: { audio: { url: "https://example.com/qwen.wav" } } });
+    }
+    assert(call.url === "https://example.com/qwen.wav", "Qwen-TTS should download returned audio URL");
+    return binaryResponse("qwen-url-audio");
   });
 
-  const miniAudio = await minimax.synthesizeSpeech("Hello MiniMax", {
-    voiceId: "Chinese (Mandarin)_Radio_Host",
-    model: "speech-2.8-hd",
-    speed: 1,
-    languageBoost: "auto",
-    region: "cn",
-    format: "mp3",
-    sampleRate: 32000,
-    bitrate: 128000,
+  const qwenUrlAudio = await qwen.synthesizeSpeech("Hello Qwen", {
+    model: "qwen3-tts-flash",
+    voice: "Cherry",
+    format: "wav",
+    languageType: "Chinese",
+    baseUrl: "https://dashscope.aliyuncs.com/api/v1",
+    playbackRate: 1,
   });
-  assert(miniAudio === Buffer.from("minimax-audio").toString("base64"), "MiniMax should return base64 audio");
+  assert(qwenUrlAudio === Buffer.from("qwen-url-audio").toString("base64"), "Qwen-TTS should download audio URL");
 
-  installFetch(() =>
-    jsonResponse({ base_resp: { status_code: 1001, status_msg: "bad request" }, trace_id: "trace-test" }),
-  );
+  installFetch(() => jsonResponse({ code: "InvalidParameter", message: "qwen error" }));
   await expectRejects(
     () =>
-      minimax.synthesizeSpeech("Hello MiniMax", {
-        voiceId: "Chinese (Mandarin)_Radio_Host",
-        model: "speech-2.8-hd",
-        speed: 1,
-        languageBoost: "auto",
-        region: "cn",
-        format: "mp3",
-        sampleRate: 32000,
-        bitrate: 128000,
+      qwen.synthesizeSpeech("Hello Qwen", {
+        model: "qwen3-tts-flash",
+        voice: "Cherry",
+        format: "wav",
+        languageType: "Chinese",
+        baseUrl: "https://dashscope.aliyuncs.com/api/v1",
+        playbackRate: 1,
       }),
-    (error) => error.name === "TTSApiError" && error.message.includes("bad request"),
-    "MiniMax should reject non-zero base_resp",
+    (error) => error.name === "TTSApiError" && error.message.includes("qwen error"),
+    "Qwen-TTS should reject API error payloads",
   );
 
   const controller = new AbortController();
   controller.abort();
   await expectRejects(
     () =>
-      minimax.synthesizeSpeech(
-        "Hello MiniMax",
+      qwen.synthesizeSpeech(
+        "Hello Qwen",
         {
-          voiceId: "Chinese (Mandarin)_Radio_Host",
-          model: "speech-2.8-hd",
-          speed: 1,
-          languageBoost: "auto",
-          region: "cn",
-          format: "mp3",
-          sampleRate: 32000,
-          bitrate: 128000,
+          model: "qwen3-tts-flash",
+          voice: "Cherry",
+          format: "wav",
+          languageType: "Chinese",
+          baseUrl: "https://dashscope.aliyuncs.com/api/v1",
+          playbackRate: 1,
         },
         controller.signal,
       ),
     (error) => error.name === "TTSApiError" && error.code === -7,
-    "MiniMax should reject pre-aborted synthesis",
+    "Qwen-TTS should reject pre-aborted synthesis",
   );
 }
 
 async function verifyMiMo() {
-  setPreferences({
-    mimoApiKey: "tp-mimo-test",
-    mimoTokenPlanBaseUrl: "https://token-plan-cn.xiaomimimo.com/v1",
-    mimoModel: "mimo-v2.5-tts",
-    mimoDefaultVoice: "mimo_default",
-    mimoSpeechRate: "0",
-    mimoStylePrompt: "",
-  });
+  setPreferences({ mimoApiKey: "tp-mimo-test" });
 
   installFetch((call) => {
     assert(call.url === "https://custom.mimo/v1/chat/completions", "MiMo should call the configured endpoint");
@@ -443,14 +339,7 @@ async function verifyMiMo() {
 }
 
 async function verifyOpenAI() {
-  setPreferences({
-    openaiApiKey: "sk-openai-test",
-    openaiModel: "gpt-4o-mini-tts",
-    openaiVoice: "alloy",
-    openaiResponseFormat: "mp3",
-    openaiPlaybackRate: "1",
-    openaiInstructions: "Speak clearly.",
-  });
+  setPreferences({ openaiApiKey: "sk-openai-test" });
 
   installFetch((call) => {
     assert(call.url === "https://api.openai.com/v1/audio/speech", "OpenAI should call audio/speech endpoint");

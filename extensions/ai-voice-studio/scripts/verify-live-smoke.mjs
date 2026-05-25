@@ -43,10 +43,10 @@ if (process.env[LIVE_FLAG] !== "1") {
       "Live TTS smoke test is opt-in.",
       `Set ${LIVE_FLAG}=1 and at least one provider key env var to run.`,
       "Provider keys may come from the shell, ~/.env, or project .env:",
-      "- MINIMAX_TOKEN_PLAN_KEY, MINIMAX_OPEN_PLATFORM_API_KEY, or legacy MINIMAX_API_KEY",
+      "- DASHSCOPE_API_KEY",
       "- MIMO_API_KEY",
       "- OPENAI_API_KEY",
-      "Optional: AI_VOICE_STUDIO_PROVIDERS=minimax,mimo,openai AI_VOICE_STUDIO_PLAY=1",
+      "Optional: AI_VOICE_STUDIO_PROVIDERS=qwen,mimo,openai AI_VOICE_STUDIO_PLAY=1",
       "Optional: AI_VOICE_STUDIO_MAX_MS=30000 AI_VOICE_STUDIO_KEEP_AUDIO=1",
     ].join("\n"),
   );
@@ -72,12 +72,12 @@ try {
 const results = [];
 
 for (const provider of PROVIDERS) {
-  if (provider === "minimax") {
-    if (!process.env.MINIMAX_TOKEN_PLAN_KEY && !process.env.MINIMAX_OPEN_PLATFORM_API_KEY) {
-      results.push({ provider, status: "skipped", reason: "missing MINIMAX_* key in shell env or .env" });
+  if (provider === "qwen") {
+    if (!process.env.DASHSCOPE_API_KEY) {
+      results.push({ provider, status: "skipped", reason: "missing DASHSCOPE_API_KEY in shell env or .env" });
       continue;
     }
-    results.push(await attempt(provider, verifyMiniMax));
+    results.push(await attempt(provider, verifyQwen));
   } else if (provider === "mimo") {
     if (!process.env.MIMO_API_KEY) {
       results.push({ provider, status: "skipped", reason: "missing MIMO_API_KEY in shell env or .env" });
@@ -115,13 +115,13 @@ async function attempt(provider, fn) {
 }
 
 function parseProviders(raw) {
-  const allowed = new Set(["minimax", "mimo", "openai"]);
-  const parsed = (raw || "minimax,mimo,openai")
+  const allowed = new Set(["qwen", "mimo", "openai"]);
+  const parsed = (raw || "qwen,mimo,openai")
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
   const providers = parsed.filter((item) => allowed.has(item));
-  return providers.length > 0 ? providers : ["minimax", "mimo", "openai"];
+  return providers.length > 0 ? providers : ["qwen", "mimo", "openai"];
 }
 
 function parseMaxMs(raw) {
@@ -250,31 +250,28 @@ async function playWithSharedAudioPlayer(audio, format, playbackRate, timeoutMs)
   }
 }
 
-async function verifyMiniMax() {
-  const minimax = loadTs("src/api/minimax-tts.ts");
-  const hasPayg = Boolean(process.env.MINIMAX_OPEN_PLATFORM_API_KEY);
-  const model = process.env.MINIMAX_MODEL || (hasPayg ? "speech-2.8-turbo" : "speech-2.8-hd");
-  const region = process.env.MINIMAX_REGION === "global" ? "global" : "cn";
-  const voice = process.env.MINIMAX_VOICE || "Chinese (Mandarin)_Radio_Host";
+async function verifyQwen() {
+  const qwen = loadTs("src/api/qwen-tts.ts");
+  const model = process.env.QWEN_MODEL || "qwen3-tts-flash";
+  const voice = process.env.QWEN_VOICE || "Cherry";
 
   setPreferences({
-    tokenPlanKey: process.env.MINIMAX_TOKEN_PLAN_KEY || "",
-    openPlatformApiKey: process.env.MINIMAX_OPEN_PLATFORM_API_KEY || "",
+    dashscopeApiKey: process.env.DASHSCOPE_API_KEY,
   });
   await saveSetupOverrides({
-    defaultProvider: "minimax",
-    minimax: {
-      authMode: process.env.MINIMAX_AUTH_MODE || "auto",
+    defaultProvider: "qwen",
+    qwen: {
       model,
-      defaultVoice: voice,
-      languageBoost: process.env.MINIMAX_LANGUAGE_BOOST || "auto",
-      speechRate: process.env.MINIMAX_SPEECH_RATE || "1",
-      region,
+      voice,
+      languageType: process.env.QWEN_LANGUAGE_TYPE || "Auto",
+      playbackRate: process.env.QWEN_PLAYBACK_RATE || "1",
+      instructions: process.env.QWEN_INSTRUCTIONS || "",
+      baseUrl: process.env.QWEN_BASE_URL || "https://dashscope.aliyuncs.com/api/v1",
     },
   });
 
-  const options = await minimax.buildOptionsFromPrefs();
-  return timed("minimax", options.format, 1, () => minimax.synthesizeSpeech(TEXT, options));
+  const options = await qwen.buildOptionsFromPrefs();
+  return timed("qwen", options.format, options.playbackRate, () => qwen.synthesizeSpeech(TEXT, options));
 }
 
 async function verifyMiMo() {

@@ -5,9 +5,20 @@ import ts from "typescript";
 
 const root = process.cwd();
 
-await verifyMiniMaxReadingRunner();
-await verifyMiniMaxLookaheadSpeedInvalidation();
-await verifyMiniMaxLookaheadCancellationOnStop();
+await verifyPipeline({
+  label: "Qwen-TTS",
+  modulePath: "src/utils/qwen-pipelined-reading.ts",
+  apiPath: "src/api/qwen-tts.ts",
+  statePath: "src/utils/qwen-playback-state.ts",
+  options: { format: "wav", playbackRate: 1 },
+});
+await verifyPipelineStopsBeforeNextPlayback({
+  label: "Qwen-TTS",
+  modulePath: "src/utils/qwen-pipelined-reading.ts",
+  apiPath: "src/api/qwen-tts.ts",
+  statePath: "src/utils/qwen-playback-state.ts",
+  options: { format: "wav", playbackRate: 1 },
+});
 
 await verifyPipeline({
   label: "MiMo",
@@ -43,9 +54,8 @@ console.log(
   JSON.stringify(
     {
       checked: [
-        "MiniMax reading runner starts next synthesis before current playback",
-        "MiniMax reading runner cancels stale lookahead after speed changes",
-        "MiniMax reading runner cancels pending lookahead after stop",
+        "Qwen-TTS lookahead starts next synthesis before playback",
+        "Qwen-TTS lookahead stops before playing the next chunk",
         "MiMo lookahead starts next synthesis before playback",
         "MiMo lookahead stops before playing the next chunk",
         "OpenAI lookahead starts next synthesis before playback",
@@ -391,7 +401,7 @@ async function verifyPipelineStopsBeforeNextPlayback({ label, modulePath, apiPat
   assert(!events.includes("play:start:audio:two"), `${label} should not play lookahead audio after stop`);
 }
 
-function loadTs(relativePath, stubs) {
+function loadTs(relativePath, stubs = {}) {
   const filename = path.join(root, relativePath);
   const source = fs.readFileSync(filename, "utf8");
   const compiled = ts.transpileModule(source, {
@@ -414,6 +424,7 @@ function loadTs(relativePath, stubs) {
     if (request.startsWith(".")) {
       const resolved = resolveTs(path.resolve(path.dirname(filename), request));
       if (resolved in stubs) return stubs[resolved];
+      return loadTs(path.relative(root, resolved), stubs);
     }
     return nativeRequire(request);
   };

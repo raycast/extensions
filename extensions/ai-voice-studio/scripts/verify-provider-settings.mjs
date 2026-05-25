@@ -36,8 +36,8 @@ console.log(
   JSON.stringify(
     {
       checked: [
-        "invalid legacy provider preferences fall back safely",
-        "legacy provider preferences are ignored",
+        "invalid provider preferences fall back safely",
+        "legacy command preferences are ignored",
         "text override fields are trimmed",
         "quick setup overrides take precedence and can reset to defaults",
       ],
@@ -59,6 +59,12 @@ async function verifyInvalidFallbacks() {
     minimaxLanguageBoost: "bad-language",
     minimaxSpeechRate: "9",
     region: "bad-region",
+    qwenModel: "bad-qwen",
+    qwenVoice: "   ",
+    qwenLanguageType: "French",
+    qwenPlaybackRate: "9",
+    qwenInstructions: "   ",
+    qwenBaseUrl: "   ",
     mimoModel: "bad-mimo",
     mimoDefaultVoice: "   ",
     mimoSpeechRate: "9",
@@ -72,7 +78,16 @@ async function verifyInvalidFallbacks() {
   };
 
   const result = await settings.getProviderSettings();
-  assert(result.defaultProvider === "minimax", "Invalid default provider should fall back to MiniMax");
+  assert(result.defaultProvider === "qwen", "Invalid default provider should fall back to Qwen-TTS");
+  assert(result.qwen.model === "qwen3-tts-flash", "Invalid Qwen-TTS model should fall back safely");
+  assert(result.qwen.voice === "Cherry", "Blank Qwen-TTS voice should fall back");
+  assert(result.qwen.languageType === "Auto", "Invalid Qwen-TTS language should fall back");
+  assert(result.qwen.playbackRate === "1", "Invalid Qwen-TTS playback rate should fall back");
+  assert(result.qwen.instructions === "", "Blank Qwen-TTS instructions should clear");
+  assert(
+    result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
+    "Blank Qwen-TTS base URL should fall back",
+  );
   assert(result.minimax.authMode === "auto", "Invalid MiniMax auth mode should fall back");
   assert(result.minimax.model === "speech-2.8-hd", "Invalid MiniMax model should fall back safely");
   assert(result.minimax.defaultVoice === "Chinese (Mandarin)_Radio_Host", "Blank MiniMax voice should fall back");
@@ -108,6 +123,12 @@ async function verifyLegacyPreferencesIgnored() {
     minimaxLanguageBoost: "English",
     minimaxSpeechRate: "1.25",
     region: "global",
+    qwenModel: "qwen-tts",
+    qwenVoice: "Ethan",
+    qwenLanguageType: "German",
+    qwenPlaybackRate: "1.5",
+    qwenInstructions: "Read warmly",
+    qwenBaseUrl: "https://example.com/api/v1",
     mimoModel: "mimo-v2-tts",
     mimoDefaultVoice: "default_en",
     mimoSpeechRate: "25",
@@ -121,7 +142,16 @@ async function verifyLegacyPreferencesIgnored() {
   };
 
   const result = await settings.getProviderSettings();
-  assert(result.defaultProvider === "minimax", "Legacy preference default provider should be ignored");
+  assert(result.defaultProvider === "qwen", "Legacy preference default provider should be ignored");
+  assert(result.qwen.model === "qwen3-tts-flash", "Legacy preference Qwen-TTS model should be ignored");
+  assert(result.qwen.voice === "Cherry", "Legacy preference Qwen-TTS voice should be ignored");
+  assert(result.qwen.languageType === "Auto", "Legacy preference Qwen-TTS language should be ignored");
+  assert(result.qwen.playbackRate === "1", "Legacy preference Qwen-TTS rate should be ignored");
+  assert(result.qwen.instructions === "", "Legacy preference Qwen-TTS instructions should be ignored");
+  assert(
+    result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
+    "Legacy preference Qwen-TTS base URL should be ignored",
+  );
   assert(result.minimax.authMode === "auto", "Legacy preference auth mode should be ignored");
   assert(result.minimax.model === "speech-2.8-hd", "Legacy preference MiniMax model should be ignored");
   assert(result.minimax.defaultVoice === "Chinese (Mandarin)_Radio_Host", "Legacy preference MiniMax voice should be ignored");
@@ -155,6 +185,10 @@ async function verifyTrimmedOverrideFields() {
       customDefaultVoice: "  custom_voice  ",
       customVoiceIds: "  a,b  ",
     },
+    qwen: {
+      instructions: "  German newsreader  ",
+      baseUrl: "  https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation  ",
+    },
     mimo: {
       stylePrompt: "  natural  ",
       tokenPlanBaseUrl: "  https://example.com/v1/chat/completions  ",
@@ -166,6 +200,8 @@ async function verifyTrimmedOverrideFields() {
 
   const result = await settings.getProviderSettings();
   assert(result.defaultProvider === "mimo", "MiMo default provider should be preserved");
+  assert(result.qwen.instructions === "German newsreader", "Qwen-TTS instructions should be trimmed");
+  assert(result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1", "Qwen-TTS base URL should be trimmed");
   assert(result.minimax.customDefaultVoice === "custom_voice", "Custom default voice should be trimmed");
   assert(result.minimax.customVoiceIds === "a,b", "Custom voice IDs should be trimmed");
   assert(result.mimo.stylePrompt === "natural", "MiMo style prompt should be trimmed");
@@ -186,6 +222,14 @@ async function verifyQuickSetupOverrides() {
       speechRate: "1.25",
       region: "global",
     },
+    qwen: {
+      model: "qwen3-tts-instruct-flash",
+      voice: "Ethan",
+      languageType: "German",
+      playbackRate: "1.25",
+      instructions: "Energetic but precise",
+      baseUrl: "https://example.com/api/v1",
+    },
     mimo: {
       model: "mimo-v2-tts",
       defaultVoice: "default_en",
@@ -204,6 +248,12 @@ async function verifyQuickSetupOverrides() {
 
   const result = await settings.getProviderSettings();
   assert(result.defaultProvider === "openai", "Quick setup should override default provider");
+  assert(result.qwen.model === "qwen3-tts-instruct-flash", "Quick setup should override Qwen-TTS model");
+  assert(result.qwen.voice === "Ethan", "Quick setup should override Qwen-TTS voice");
+  assert(result.qwen.languageType === "German", "Quick setup should override Qwen-TTS language");
+  assert(result.qwen.playbackRate === "1.25", "Quick setup should override Qwen-TTS playback rate");
+  assert(result.qwen.instructions === "Energetic but precise", "Quick setup should override Qwen-TTS instructions");
+  assert(result.qwen.baseUrl === "https://example.com/api/v1", "Quick setup should override Qwen-TTS base URL");
   assert(result.minimax.authMode === "token-plan", "Quick setup should override MiniMax auth mode");
   assert(result.minimax.model === "speech-2.6-hd", "Quick setup should override MiniMax model");
   assert(result.minimax.region === "global", "Quick setup should override MiniMax region");
@@ -213,7 +263,8 @@ async function verifyQuickSetupOverrides() {
 
   await settings.clearProviderSettingsOverrides();
   const reset = await settings.getProviderSettings();
-  assert(reset.defaultProvider === "minimax", "Clearing quick setup should return to defaults");
+  assert(reset.defaultProvider === "qwen", "Clearing quick setup should return to defaults");
+  assert(reset.qwen.voice === "Cherry", "Clearing quick setup should restore default Qwen-TTS voice");
   assert(reset.minimax.authMode === "auto", "Clearing quick setup should restore default auth mode");
   assert(reset.openai.voice === "cedar", "Clearing quick setup should restore default OpenAI voice");
 }

@@ -56,7 +56,7 @@ evidence.push({
 const readyProviders = liveEnvSummary?.readyProviders ?? [];
 let liveSmoke = null;
 if (readyProviders.length === 0) {
-  blockers.push("No MiniMax, MiMo, or OpenAI provider key is available, so real provider API smoke cannot run.");
+  blockers.push("No Qwen-TTS, MiMo, or OpenAI provider key is available, so real provider API smoke cannot run.");
 } else if (process.env.AI_VOICE_STUDIO_LIVE !== "1") {
   blockers.push("Provider keys are present, but AI_VOICE_STUDIO_LIVE=1 was not set for real provider API smoke.");
 } else {

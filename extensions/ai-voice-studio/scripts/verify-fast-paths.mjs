@@ -85,51 +85,41 @@ function codePointLength(text) {
   return Array.from(text).length;
 }
 
-const miniMaxChunker = loadTs("src/utils/text-chunker.ts");
-const miniMaxVoices = loadTs("src/constants/voices.ts");
+const qwenChunker = loadTs("src/utils/qwen-text-chunker.ts");
+const qwenVoices = loadTs("src/constants/qwen-tts-voices.ts");
 const mimoChunker = loadTs("src/utils/mimo-text-chunker.ts");
 const openAIChunker = loadTs("src/utils/openai-text-chunker.ts");
-const miniMaxSpeed = loadTs("src/utils/playback-speed.ts");
+const qwenSpeed = loadTs("src/utils/qwen-playback-state.ts");
 const mimoSpeed = loadTs("src/utils/mimo-playback-state.ts");
 const openAISpeed = loadTs("src/utils/openai-playback-state.ts");
 
-assert(miniMaxChunker.chunkText("   ").length === 0, "MiniMax chunker should ignore blank text");
+assert(qwenChunker.chunkText("   ").length === 0, "Qwen-TTS chunker should ignore blank text");
 assert(
-  allChunksWithin(miniMaxChunker.chunkText("法".repeat(4300)), 1400, codePointLength),
-  "MiniMax chunks should stay under 1400 code points",
+  allChunksWithin(qwenChunker.chunkText("法".repeat(1600)), 550, codePointLength),
+  "Qwen-TTS chunks should stay under 550 code points",
 );
 assert(
-  allChunksWithin(miniMaxChunker.chunkText("😀".repeat(1500)), 1400, codePointLength),
-  "MiniMax chunks should count emoji as code points",
+  allChunksWithin(qwenChunker.chunkText("😀".repeat(800)), 550, codePointLength),
+  "Qwen-TTS chunks should count emoji as code points",
 );
 
-const miniMaxVoiceKeywords = new Map(
-  miniMaxVoices.FALLBACK_VOICES.map((voice) => [voice.id, miniMaxVoices.getVoiceSearchKeywords(voice)]),
+const qwenVoiceKeywords = new Map(
+  qwenVoices.VOICES.map((voice) => [voice.id, qwenVoices.getVoiceSearchKeywords(voice)]),
 );
 assert(
-  miniMaxVoiceKeywords.get("Chinese (Mandarin)_Radio_Host")?.includes("普通话") &&
-    miniMaxVoiceKeywords.get("Chinese (Mandarin)_Radio_Host")?.includes("Mandarin"),
-  "MiniMax Chinese voices should be searchable by Chinese and English language aliases",
+  qwenVoiceKeywords.get("Cherry")?.includes("Chinese") &&
+    qwenVoiceKeywords.get("Cherry")?.includes("English") &&
+    qwenVoiceKeywords.get("Cherry")?.includes("German"),
+  "Qwen-TTS recommended voices should be searchable by Chinese, English, and German language aliases",
 );
 assert(
-  miniMaxVoiceKeywords.get("English_CalmWoman")?.includes("英语") &&
-    miniMaxVoiceKeywords.get("English_CalmWoman")?.includes("en"),
-  "MiniMax English voices should be searchable by Chinese and ISO-like language aliases",
+  qwenVoiceKeywords.get("Ethan")?.includes("qwen") && qwenVoiceKeywords.get("Ethan")?.includes("dashscope"),
+  "Qwen-TTS voices should be searchable by provider aliases",
 );
 assert(
-  miniMaxVoiceKeywords.get("German_FriendlyMan")?.includes("德语") &&
-    miniMaxVoiceKeywords.get("German_FriendlyMan")?.includes("Deutsch"),
-  "MiniMax German voices should be searchable by Chinese and native language aliases",
-);
-assert(
-  miniMaxVoices.getVoiceSearchKeywords({
-    id: "legacy_voice",
-    name: "Legacy Voice",
-    category: "Legacy",
-    description: ["not", "a", "string"],
-    gender: "neutral",
-  }).includes("Legacy"),
-  "MiniMax voice search keywords should tolerate malformed cached voice metadata",
+  qwenVoices.getVoicesForModel("qwen3-tts-flash").some((voice) => voice.id === "Cherry") &&
+    qwenVoices.getVoicesForModel("qwen-tts").some((voice) => voice.id === "Cherry"),
+  "Qwen-TTS default voice should be available on current and latest aliases",
 );
 
 assert(
@@ -148,15 +138,15 @@ assert(
   "OpenAI chunks should stay under 1800 UTF-16 code units",
 );
 
-assert(miniMaxSpeed.clampSpeed(0.1) === 0.5, "MiniMax speed should clamp to minimum");
-assert(miniMaxSpeed.clampSpeed(9) === 2, "MiniMax speed should clamp to maximum");
-assert(miniMaxSpeed.clampSpeed(1.37) === 1.25, "MiniMax speed should snap to 0.25 steps");
-assert(miniMaxSpeed.formatSpeed(1) === "1.0×", "MiniMax speed formatter should show normal speed");
+assert(qwenSpeed.clampSpeed(0.1) === 0.5, "Qwen-TTS speed should clamp to minimum");
+assert(qwenSpeed.clampSpeed(9) === 2, "Qwen-TTS speed should clamp to maximum");
+assert(qwenSpeed.clampSpeed(1.37) === 1.25, "Qwen-TTS speed should snap to 0.25 steps");
+assert(qwenSpeed.formatSpeed(1) === "1x", "Qwen-TTS speed formatter should show normal speed");
 
-await miniMaxSpeed.writePlaybackSpeed(9);
-assert((await miniMaxSpeed.readPlaybackSpeed()) === 2, "MiniMax stored playback speed should be clamped");
-await miniMaxSpeed.clearPlaybackSpeed();
-assert((await miniMaxSpeed.readPlaybackSpeed()) === null, "MiniMax playback speed should clear");
+await qwenSpeed.setSpeedOverride(9);
+assert((await qwenSpeed.getSpeedOverride()) === 2, "Qwen-TTS stored playback speed should be clamped");
+await qwenSpeed.clearSpeedOverride();
+assert((await qwenSpeed.getSpeedOverride()) === null, "Qwen-TTS playback speed should clear");
 
 assert(mimoSpeed.parseRateString("-50") === 0.5, "MiMo legacy -50 rate should mean 0.5x");
 assert(mimoSpeed.parseRateString("25") === 1.25, "MiMo legacy 25 rate should mean 1.25x");
@@ -172,12 +162,12 @@ console.log(
   JSON.stringify(
     {
       checked: [
-        "MiniMax chunk limits",
-        "MiniMax voice language search keywords",
-        "MiniMax voice malformed metadata guard",
+        "Qwen-TTS chunk limits",
+        "Qwen-TTS voice language search keywords",
+        "Qwen-TTS default voice model coverage",
         "MiMo byte chunk limits",
         "OpenAI chunk limits",
-        "MiniMax speed clamp/storage",
+        "Qwen-TTS speed clamp/storage",
         "MiMo speed parsing/storage",
         "OpenAI speed parsing/storage",
       ],
