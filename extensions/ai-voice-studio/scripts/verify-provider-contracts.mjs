@@ -164,6 +164,11 @@ async function verifyFocusedSetupOptionBuilders() {
     qwenOptions.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
     "Qwen-TTS options should normalize focused setup base URL",
   );
+  await expectRejects(
+    () => qwen.buildOptionsFromPrefs("not-a-qwen-voice"),
+    (error) => error.name === "TTSApiError" && error.message.includes('Unknown voice "not-a-qwen-voice"'),
+    "Qwen-TTS options should reject unknown voice IDs before API calls",
+  );
 
   setPreferences({ mimoApiKey: "tp-mimo-test" });
   await providerSettings.saveProviderSettingsOverrides({

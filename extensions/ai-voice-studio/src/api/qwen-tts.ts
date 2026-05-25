@@ -214,7 +214,7 @@ function buildOptionsFromSettings(
   const voice = voiceOverride || settings.voice || DEFAULT_VOICE;
   const voiceConfig = getVoiceById(voice);
 
-  if (!voiceConfig && !voice) {
+  if (!voiceConfig) {
     throw new TTSApiError(
       `Unknown voice "${voice}". Pick a Qwen-TTS voice in Setup Voice Defaults or Set Quick Read Voice.`,
       -1,
