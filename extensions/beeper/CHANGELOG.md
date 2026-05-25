@@ -1,6 +1,6 @@
 # Beeper Changelog
 
-## [Manual Token Auth + Code Cleanup] - 2026-05-24
+## [Manual Token Auth + Code Cleanup] - {PR_MERGE_DATE}
 
 ### Added
 - **Manual Access Token support**: Users can now paste a token from Beeper Desktop (Settings → Integrations → Approved connections) directly into extension preferences. When set, the entire OAuth flow is bypassed — the token is used as a Bearer token for all requests. This fixes the OAuth redirect_uri mismatch bug that prevented some users from authenticating.

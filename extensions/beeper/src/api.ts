@@ -26,12 +26,8 @@ const useMockData = () => getPreferences().useMockData === true;
 // === Manual Token Support (preferred when user pastes a token from Beeper Desktop) ===
 const getManualToken = (): string | undefined => {
   const prefs = getPreferences();
-  const raw = (prefs as Record<string, unknown>).manualToken as string | undefined;
-  const token = typeof raw === "string" ? raw.trim() : "";
-  if (token.length > 0) {
-    return token;
-  }
-  return undefined;
+  const token = typeof prefs.manualToken === "string" ? prefs.manualToken.trim() : "";
+  return token.length > 0 ? token : undefined;
 };
 
 const createOAuthClient = () =>
