@@ -1,6 +1,6 @@
 # Better World Clock Changelog
 
-## [Initial Version] - 2026-05-25
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Better World Clock extension for checking favorite cities and time zones.
 - Add grid and list layouts.

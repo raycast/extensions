@@ -17,14 +17,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
-type Preferences = {
-  timeZones: string;
-  viewMode: "grid" | "list";
-  clockStyle: "digital" | "analog";
-  use24HourTime: boolean;
-  showSeconds: boolean;
-};
-
 type Clock = {
   id: string;
   label: string;
