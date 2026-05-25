@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [Improve View Workers Command] - {PR_MERGE_DATE}
+## [Improve View Workers Command] - 2026-05-25
 
 - Improve `View Workers` command to show more fields in the detail view
 
