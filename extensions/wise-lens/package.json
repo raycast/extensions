@@ -12,7 +12,7 @@
     {
       "name": "dashboard",
       "title": "Dashboard",
-      "subtitle": "Wise Lens",
+      "subtitle": "Wise",
       "description": "Balances per currency, monthly spend and recent activity.",
       "mode": "view",
       "keywords": ["wise", "balance", "bank", "finance"]
@@ -20,7 +20,7 @@
     {
       "name": "transactions",
       "title": "Transactions",
-      "subtitle": "Wise Lens",
+      "subtitle": "Wise",
       "description": "Movement history with search and filters.",
       "mode": "view",
       "keywords": ["wise", "transactions", "activity", "movements", "tx"]
@@ -28,7 +28,7 @@
     {
       "name": "balance",
       "title": "Balance",
-      "subtitle": "Wise Lens",
+      "subtitle": "Wise",
       "description": "Balance and monthly spend in the menu bar.",
       "mode": "menu-bar",
       "interval": "10m",
@@ -97,8 +97,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -1,6 +1,8 @@
 # Wise Lens
 
-Observe your [Wise](https://wise.com) account without leaving Raycast. Three commands:
+Unofficial, community-built Raycast extension to observe your [Wise](https://wise.com) account. Not affiliated with or endorsed by Wise plc. "Wise" is a trademark of Wise plc — used here only to reference the service the extension reads from.
+
+Three commands:
 
 - **Wise Dashboard** — balances per currency, optional aggregated total, monthly and last‑30‑day spending, and recent activity in a split detail view.
 - **Wise Transactions** — full history with day grouping, keyword search and filters (incoming, outgoing, completed, this month).

@@ -4,7 +4,7 @@ import { DashboardDetail } from "./components/DashboardDetail";
 import { TransactionsDetail } from "./components/TransactionsDetail";
 import { TransactionsView } from "./components/TransactionsView";
 import { classifyDirection, parseAmount, stripHtml } from "./lib/classify";
-import { formatMoney, relativeTime } from "./lib/format";
+import { formatMoney } from "./lib/format";
 import { clearCooldown, getCooldownUntil } from "./lib/rate-limit";
 import { inferPrimaryCurrency } from "./lib/summarize";
 import { useDashboard } from "./lib/useDashboard";
@@ -49,18 +49,7 @@ export default function Dashboard() {
   );
 
   return (
-    <List
-      isShowingDetail
-      isLoading={isLoading}
-      searchBarPlaceholder="Search…"
-      navigationTitle={
-        snapshot
-          ? snapshot.stale
-            ? "Wise Lens (cached)"
-            : `Wise Lens · ${relativeTime(snapshot.fetchedAt)}`
-          : "Wise Lens"
-      }
-    >
+    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search…">
       {snapshot && (
         <List.Section title="Views">
           <List.Item
