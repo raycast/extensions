@@ -1,5 +1,9 @@
 # Google Tasks Changelog
 
+## [New Google Tasks Icon] - {PR_MERGE_DATE}
+
+- Updated extension icon to match Google's 2026 gradient redesign: blue gradient rounded square with prominent white checkmark, dropping the old ring/circle container
+
 ## [Tab Navigation and Icon Refresh] - {PR_MERGE_DATE}
 
 - Added `autoFocus` to the Title field in all three forms (Create Task, Edit Task, Inline Create) so keyboard focus lands on the first field immediately and Tab navigates through subsequent fields
