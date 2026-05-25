@@ -10,7 +10,15 @@ describe("INTERVALS constant", () => {
 
   it("is in correct order", () => {
     expect(INTERVALS).toEqual([
-      "1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "2Y", "5Y",
+      "1D",
+      "1W",
+      "1M",
+      "3M",
+      "6M",
+      "YTD",
+      "1Y",
+      "2Y",
+      "5Y",
     ]);
   });
 });

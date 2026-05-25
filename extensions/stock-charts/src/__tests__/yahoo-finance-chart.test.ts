@@ -21,7 +21,17 @@ describe("INTERVAL_MAP", () => {
   it("contains all 9 intervals", () => {
     const keys = Object.keys(INTERVAL_MAP);
     expect(keys).toHaveLength(9);
-    expect(keys).toEqual(["1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "2Y", "5Y"]);
+    expect(keys).toEqual([
+      "1D",
+      "1W",
+      "1M",
+      "3M",
+      "6M",
+      "YTD",
+      "1Y",
+      "2Y",
+      "5Y",
+    ]);
   });
 
   it("1D maps to range 1d and interval 5m", () => {

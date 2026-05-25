@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { LocalStorage, showToast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 /**
  * Tests for favorites store logic. Since useFavorites is a React hook,

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LocalStorage } from "@raycast/api";
-import { get, YahooFinanceError } from "../yahoo-finance/client";
+import { get } from "../yahoo-finance/client";
 
 const COOKIE_CRUMB_KEY = "yahoo-cookie-crumb";
 
@@ -214,9 +214,7 @@ describe("Yahoo Finance client — get()", () => {
   });
 
   it("throws when no Set-Cookie header from Yahoo", async () => {
-    const fetchMock = mockFetchSequence([
-      { ok: false, status: 302 },
-    ]);
+    const fetchMock = mockFetchSequence([{ ok: false, status: 302 }]);
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(get("/test")).rejects.toThrow("No Set-Cookie header");
@@ -225,7 +223,11 @@ describe("Yahoo Finance client — get()", () => {
   it("throws when crumb response is HTML", async () => {
     const fetchMock = mockFetchSequence([
       cookieResponse(),
-      { ok: true, status: 200, text: () => Promise.resolve("<html>error</html>") },
+      {
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve("<html>error</html>"),
+      },
     ]);
     vi.stubGlobal("fetch", fetchMock);
 

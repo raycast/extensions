@@ -170,6 +170,12 @@ export async function buildChartMarkdown(
   volumes?: number[],
   signal?: AbortSignal,
 ): Promise<string> {
-  const url = await buildChartUrl(timestamps, prices, interval, volumes, signal);
+  const url = await buildChartUrl(
+    timestamps,
+    prices,
+    interval,
+    volumes,
+    signal,
+  );
   return `![Stock Chart](${url}?raycast-width=600&raycast-height=300)`;
 }

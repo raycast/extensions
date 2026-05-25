@@ -119,14 +119,12 @@ describe("buildChartUrl", () => {
       { length: 60 },
       (_, i) => 170.123456789 + i * 0.987654321,
     );
-    const volumes = Array.from(
-      { length: 60 },
-      (_, i) => 10000000 + i * 123456,
-    );
+    const volumes = Array.from({ length: 60 }, (_, i) => 10000000 + i * 123456);
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ url: "https://quickchart.io/chart/render/abc123" }),
+      json: () =>
+        Promise.resolve({ url: "https://quickchart.io/chart/render/abc123" }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -134,7 +132,9 @@ describe("buildChartUrl", () => {
 
     expect(url).toBe("https://quickchart.io/chart/render/abc123");
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0][0]).toBe("https://quickchart.io/chart/create");
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "https://quickchart.io/chart/create",
+    );
     expect(fetchMock.mock.calls[0][1].method).toBe("POST");
   });
 
@@ -147,14 +147,12 @@ describe("buildChartUrl", () => {
       { length: 60 },
       (_, i) => 170.123456789 + i * 0.987654321,
     );
-    const volumes = Array.from(
-      { length: 60 },
-      (_, i) => 10000000 + i * 123456,
-    );
+    const volumes = Array.from({ length: 60 }, (_, i) => 10000000 + i * 123456);
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ url: "https://quickchart.io/chart/render/abc" }),
+      json: () =>
+        Promise.resolve({ url: "https://quickchart.io/chart/render/abc" }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -173,10 +171,7 @@ describe("buildChartUrl", () => {
       { length: 60 },
       (_, i) => 170.123456789 + i * 0.987654321,
     );
-    const volumes = Array.from(
-      { length: 60 },
-      (_, i) => 10000000 + i * 123456,
-    );
+    const volumes = Array.from({ length: 60 }, (_, i) => 10000000 + i * 123456);
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
@@ -222,19 +217,23 @@ describe("buildChartMarkdown", () => {
       { length: 60 },
       (_, i) => 170.123456789 + i * 0.987654321,
     );
-    const volumes = Array.from(
-      { length: 60 },
-      (_, i) => 10000000 + i * 123456,
-    );
+    const volumes = Array.from({ length: 60 }, (_, i) => 10000000 + i * 123456);
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ url: "https://quickchart.io/chart/render/sig" }),
+      json: () =>
+        Promise.resolve({ url: "https://quickchart.io/chart/render/sig" }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
     const controller = new AbortController();
-    await buildChartMarkdown(timestamps, prices, "3M", volumes, controller.signal);
+    await buildChartMarkdown(
+      timestamps,
+      prices,
+      "3M",
+      volumes,
+      controller.signal,
+    );
 
     expect(fetchMock.mock.calls[0][1].signal).toBe(controller.signal);
   });

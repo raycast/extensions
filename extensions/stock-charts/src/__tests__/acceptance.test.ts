@@ -27,7 +27,17 @@ describe("Acceptance: Chart URL generated for all intervals", () => {
   ];
   const samplePrices = [197.1, 197.5, 198.0, 198.2, 198.42];
 
-  const intervals = ["1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "2Y", "5Y"] as const;
+  const intervals = [
+    "1D",
+    "1W",
+    "1M",
+    "3M",
+    "6M",
+    "YTD",
+    "1Y",
+    "2Y",
+    "5Y",
+  ] as const;
 
   for (const interval of intervals) {
     it(`produces a valid URL for interval ${interval}`, async () => {

@@ -16,9 +16,17 @@ export function useFavorites(): {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const persist = useCallback((next: string[]) => {
+  const persist = useCallback(async (next: string[]) => {
     setFavorites(next);
-    LocalStorage.setItem("favorites", JSON.stringify(next));
+    try {
+      await LocalStorage.setItem("favorites", JSON.stringify(next));
+    } catch (e) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Storage Error",
+        message: e instanceof Error ? e.message : "Could not save favorites",
+      });
+    }
   }, []);
 
   useEffect(() => {
