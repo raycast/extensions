@@ -1,6 +1,6 @@
 # Jetbrains Changelog
 
-## [Show Git Branch] - {PR_MERGE_DATE}
+## [Show Git Branch] - 2026-05-25
 
 - Show the current git branch next to projects that live in a git repository
 - Added a "Show Git Branch" preference (default on) to toggle the behavior
