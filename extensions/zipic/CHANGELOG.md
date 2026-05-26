@@ -1,6 +1,6 @@
 # Zipic Changelog
 
-## [AI Extension and Presets] - {PR_MERGE_DATE}
+## [AI Extension and Presets] - 2026-05-26
 
 - Rename extension from `images-compression` to `zipic` to match the brand
 - Add support for AI Extension via the `optimize-images` tool, so Raycast AI can drive Zipic with `@zipic`
