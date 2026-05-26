@@ -10,7 +10,7 @@
 - Chunk-level reading progress for medium-length text.
 - Cross-command playback control via PID file.
 - Speed up Reading and Slow Down Reading commands adjust active or paused readings by 0.25x for the next synthesized segment.
-- Persistent reading-status menu-bar item with Stop / Resume / Restart / Speed Up / Slow Down / Read / Pick Voice controls.
+- Persistent reading-status menu-bar item with Stop / Resume / Restart / Speed / Slow / Read / Pick Voice controls.
 
 ### Performance
 
@@ -29,7 +29,9 @@
 - Reverted the `systemInstruction` split: Gemini's TTS preview models reject it with `HTTP 400 — Developer instruction is not enabled for this model`. The director profile is back inline in `contents`. Verified directly against `gemini-3.1-flash-tts-preview` (HTTP 200, audio returned).
 - Invalid stored voice preferences fall back to the built-in default voice before hitting the Gemini API.
 - Resume Last Reading now reports when the previous text is already complete instead of silently restarting from the beginning.
-- Removed unreachable MiniMax-era "Model Not Available" error branches.
+- Restart Last Reading and Resume Last Reading wait for the previous session to release its lock before clearing the stop signal, so retriggering during lead-chunk synthesis stops the old reading instead of silently failing with a lock-contention toast.
+- Session lock and stop-poll interval always release in a `finally` block, so a transient failure during reading startup can no longer leak the lock and block all subsequent readings.
+- Transient `fetch` network errors (DNS hiccups, ECONNRESET, dropped TLS sockets) are now retried alongside HTTP 429/5xx, so a single packet loss during a long reading no longer aborts the session.
 
 ### Menu Bar
 
@@ -58,7 +60,3 @@
 - Default academic-listening voice: `Sadaltager`.
 - Voice picker marks `Sadaltager`, `Charon`, `Rasalgethi`, and `Iapetus` as Academic Pick.
 - Voice preview and ad-hoc reading both survive view dismissal.
-
-### Removed
-
-- Removed MiniMax authentication modes, regions, models, language boost, custom voice IDs, and voice clone workflow.

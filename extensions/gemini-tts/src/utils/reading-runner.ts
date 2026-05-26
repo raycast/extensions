@@ -35,19 +35,15 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     return;
   }
 
+  // Hoist long-lived resources so the finally block can always tear them
+  // down even if writePlaybackSpeed or the seed prefetch loop throws.
+  // Without the hoist, an early throw would leak the session lock and
+  // the next reading would fail with "Another reading is already in
+  // progress" until Raycast restarts.
   let currentSpeed = clampSpeed(activeSession.options.speed);
-  await writePlaybackSpeed(currentSpeed);
   const synthesisController = new AbortController();
-  const stopPoll = setInterval(() => {
-    if ((player.isStopped() || hasExternalStopRequest()) && !synthesisController.signal.aborted) {
-      synthesisController.abort();
-    }
-  }, 100);
-
-  // Prefetch buffer: fire up to PREFETCH_AHEAD synthesis requests in
-  // parallel so audio is ready before playback catches up. Each entry
-  // maps to chunk index (startIndex + offset).
   const prefetchBuffer: Map<number, Promise<SynthesisResult>> = new Map();
+  let stopPoll: NodeJS.Timeout | null = null;
 
   function firePrefetch(idx: number): void {
     if (idx >= chunkCount || prefetchBuffer.has(idx)) return;
@@ -56,21 +52,28 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     prefetchBuffer.set(idx, p);
   }
 
-  // Seed the buffer: fire lead chunk + next PREFETCH_AHEAD-1 immediately.
-  for (let k = startIndex; k < Math.min(startIndex + PREFETCH_AHEAD, chunkCount); k++) {
-    firePrefetch(k);
-  }
-
-  let lastPhase: PlaybackPhase | null = null;
-
-  const speedSuffix = currentSpeed === 1 ? "" : ` · ${formatSpeed(currentSpeed)}`;
-  await showHUD(
-    `${isResuming ? "Resuming" : "Reading"}${previewSuffix} · ${session.text.length} chars from ${sourceLabel} (${
-      startIndex + 1
-    }/${chunkCount})${speedSuffix}`,
-  );
-
   try {
+    await writePlaybackSpeed(currentSpeed);
+    stopPoll = setInterval(() => {
+      if ((player.isStopped() || hasExternalStopRequest()) && !synthesisController.signal.aborted) {
+        synthesisController.abort();
+      }
+    }, 100);
+
+    // Seed the prefetch buffer: lead chunk + next PREFETCH_AHEAD-1.
+    for (let k = startIndex; k < Math.min(startIndex + PREFETCH_AHEAD, chunkCount); k++) {
+      firePrefetch(k);
+    }
+
+    let lastPhase: PlaybackPhase | null = null;
+
+    const speedSuffix = currentSpeed === 1 ? "" : ` · ${formatSpeed(currentSpeed)}`;
+    await showHUD(
+      `${isResuming ? "Resuming" : "Reading"}${previewSuffix} · ${session.text.length} chars from ${sourceLabel} (${
+        startIndex + 1
+      }/${chunkCount})${speedSuffix}`,
+    );
+
     for (let i = startIndex; i < chunkCount; i++) {
       if (player.isStopped() || hasExternalStopRequest()) break;
 
@@ -171,7 +174,7 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     }
   } finally {
     synthesisController.abort();
-    clearInterval(stopPoll);
+    if (stopPoll) clearInterval(stopPoll);
     for (const p of prefetchBuffer.values()) {
       p.catch(() => undefined);
     }

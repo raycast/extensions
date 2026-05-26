@@ -30,6 +30,16 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 const SYNTHESIS_CANCELLED_CODE = -8;
 
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+const NETWORK_ERROR_CODES = new Set([
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "ETIMEDOUT",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+  "EPIPE",
+  "UND_ERR_SOCKET",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
 
 // Note on keep-alive: Node's global fetch (undici) already pools and
 // reuses TLS sockets for ~4s by default, so chunks fired in quick
@@ -601,10 +611,23 @@ function getLanguageInstruction(languageMode: GeminiLanguageMode): string {
 }
 
 function shouldRetry(error: unknown): boolean {
-  if (!(error instanceof TTSApiError)) {
-    return false;
+  if (error instanceof TTSApiError) {
+    return error.code === -4 || RETRYABLE_STATUS_CODES.has(error.code);
   }
-  return error.code === -4 || RETRYABLE_STATUS_CODES.has(error.code);
+  // Transient fetch failures (DNS hiccups, ECONNRESET, dropped TLS, etc.)
+  // surface as plain Error/TypeError from undici. Retry those too — a
+  // long reading session would otherwise abort on a single packet loss.
+  if (error instanceof Error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code && NETWORK_ERROR_CODES.has(code)) return true;
+    if (error.name === "TypeError" && /fetch failed|network/i.test(error.message)) return true;
+    const cause = (error as { cause?: unknown }).cause;
+    if (cause && typeof cause === "object") {
+      const causeCode = (cause as NodeJS.ErrnoException).code;
+      if (causeCode && NETWORK_ERROR_CODES.has(causeCode)) return true;
+    }
+  }
+  return false;
 }
 
 function throwIfCancelled(signal?: AbortSignal): void {
