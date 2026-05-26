@@ -2,15 +2,15 @@
 
 Paste log lines from any source, normalize timestamps to UTC, and reconstruct a timeline as you debug.
 
-![Parsing log lines](readme-assets/1.png)
+![Parsing log lines](assets/1.png)
 
 Quickly see time offsets from a reference event to a target event.
 
-![Compare time offsets](readme-assets/2.png)
+![Compare time offsets](assets/2.png)
 
 As you conclude investigation, export the timeline as JSON, CSV, or markdown to transcribe into other ticketing systems.
 
-![Export options](readme-assets/3.png)
+![Export options](assets/3.png)
 
 ## Audience
 
