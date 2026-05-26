@@ -26,8 +26,7 @@ export default async function QuickAdd(props: LaunchProps<{ arguments: Arguments
     return;
   }
 
-  const priority =
-    args.priority && args.priority !== "none" ? (args.priority as Priority) : undefined;
+  const priority = args.priority && args.priority !== "none" ? (args.priority as Priority) : undefined;
   const due = args.due ? resolveDueOption(args.due, new Date()) : undefined;
 
   let task = taskFromFields({

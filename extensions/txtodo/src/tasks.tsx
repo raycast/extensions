@@ -36,10 +36,7 @@ import { appendToDone, type FileSnapshot, read, watch, writeAtomic } from "./io/
 import { getPreferences } from "./preferences";
 import { priorityLabel, prioritySquircle } from "./priority";
 
-type Status =
-  | { kind: "loading" }
-  | { kind: "ready"; snapshot: FileSnapshot }
-  | { kind: "notfound" };
+type Status = { kind: "loading" } | { kind: "ready"; snapshot: FileSnapshot } | { kind: "notfound" };
 
 type ArchiveStatus =
   | { kind: "idle" }
@@ -95,15 +92,11 @@ export function TasksView({
   }
 
   const knownProjects = useMemo(
-    () => [
-      ...new Set(status.kind === "ready" ? status.snapshot.tasks.flatMap((t) => t.projects) : []),
-    ],
+    () => [...new Set(status.kind === "ready" ? status.snapshot.tasks.flatMap((t) => t.projects) : [])],
     [status],
   );
   const knownContexts = useMemo(
-    () => [
-      ...new Set(status.kind === "ready" ? status.snapshot.tasks.flatMap((t) => t.contexts) : []),
-    ],
+    () => [...new Set(status.kind === "ready" ? status.snapshot.tasks.flatMap((t) => t.contexts) : [])],
     [status],
   );
 
@@ -205,16 +198,12 @@ export function TasksView({
     if (status.kind !== "ready") return;
     if (archiveStatus.kind !== "ready") return;
 
-    const truncated =
-      task.description.length > 40 ? `${task.description.slice(0, 40)}…` : task.description;
+    const truncated = task.description.length > 40 ? `${task.description.slice(0, 40)}…` : task.description;
 
     // --- Write 1: append to todo.txt, retry once on conflict.
     let activeAfter = status.snapshot;
     {
-      const next = [
-        ...status.snapshot.tasks,
-        { ...task, lineNumber: status.snapshot.tasks.length },
-      ];
+      const next = [...status.snapshot.tasks, { ...task, lineNumber: status.snapshot.tasks.length }];
       const first = await writeAtomic(status.snapshot, next);
       if (first.kind === "ok") {
         activeAfter = first.snapshot;
@@ -243,9 +232,7 @@ export function TasksView({
       if (first.kind === "ok") {
         archiveAfter = first.snapshot;
       } else {
-        const freshHasIt = first.fresh.tasks.some(
-          (t) => t.raw === task.raw && t.lineNumber === task.lineNumber,
-        );
+        const freshHasIt = first.fresh.tasks.some((t) => t.raw === task.raw && t.lineNumber === task.lineNumber);
         if (!freshHasIt) {
           archiveAfter = first.fresh;
         } else {
@@ -285,9 +272,7 @@ export function TasksView({
         knownContexts={knownContexts}
         onSubmit={async (updated) => {
           await applyMutation((tasks) => {
-            const idx = tasks.findIndex(
-              (t) => t.raw === task.raw && t.lineNumber === task.lineNumber,
-            );
+            const idx = tasks.findIndex((t) => t.raw === task.raw && t.lineNumber === task.lineNumber);
             if (idx === -1) return tasks;
             const withLineNumber = { ...updated, lineNumber: task.lineNumber };
             return [...tasks.slice(0, idx), withLineNumber, ...tasks.slice(idx + 1)];
@@ -306,9 +291,7 @@ export function TasksView({
         onSubmit={async (built) => {
           await applyMutation((tasks) => {
             const stamped =
-              prefs.autoStampCreationDate && !built.creationDate
-                ? withCreationDate(built, today())
-                : built;
+              prefs.autoStampCreationDate && !built.creationDate ? withCreationDate(built, today()) : built;
             const withLine = { ...stamped, lineNumber: tasks.length };
             return [...tasks, withLine];
           }, "Added");
@@ -336,9 +319,7 @@ export function TasksView({
       try {
         const result = await read(prefs.todoPath);
         if (cancelled) return;
-        setStatus(
-          result === "notfound" ? { kind: "notfound" } : { kind: "ready", snapshot: result },
-        );
+        setStatus(result === "notfound" ? { kind: "notfound" } : { kind: "ready", snapshot: result });
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
@@ -380,9 +361,7 @@ export function TasksView({
       try {
         const result = await read(prefs.donePath);
         if (cancelled) return;
-        setArchiveStatus(
-          result === "notfound" ? { kind: "notfound" } : { kind: "ready", snapshot: result },
-        );
+        setArchiveStatus(result === "notfound" ? { kind: "notfound" } : { kind: "ready", snapshot: result });
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
@@ -408,11 +387,7 @@ export function TasksView({
             icon={Icon.ExclamationMark}
             actions={
               <ActionPanel>
-                <Action
-                  title="Open Preferences"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
@@ -495,12 +470,9 @@ export function TasksView({
     );
   }
 
-  const visible = applyPreset(status.snapshot.tasks, preset, new Date()).filter((t) =>
-    matchesFilters(t, tagFilters),
-  );
+  const visible = applyPreset(status.snapshot.tasks, preset, new Date()).filter((t) => matchesFilters(t, tagFilters));
   const groups = groupMode === "priority" ? groupByPriority(visible) : null;
-  const dateSections: DateSections | null =
-    groupMode === "date" ? sectionsByDate(visible, new Date()) : null;
+  const dateSections: DateSections | null = groupMode === "date" ? sectionsByDate(visible, new Date()) : null;
 
   function renderDateSections(sections: DateSections): ReactElement[] {
     const out: ReactElement[] = [];
@@ -513,11 +485,7 @@ export function TasksView({
     for (const { title, tasks } of buckets) {
       if (tasks.length === 0) continue;
       out.push(
-        <List.Section
-          key={title}
-          title={title}
-          subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`}
-        >
+        <List.Section key={title} title={title} subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`}>
           {tasks.map((task) => {
             const key: GroupKey = task.priority ?? "none";
             return (
@@ -528,11 +496,7 @@ export function TasksView({
                 onToggle={() => toggleComplete(task)}
                 onEdit={() => openEdit(task)}
                 onSetPriority={(p) =>
-                  applyTransformTo(
-                    task,
-                    (t) => setPriority(t, p),
-                    p ? `Set Priority ${p}` : "Cleared priority",
-                  )
+                  applyTransformTo(task, (t) => setPriority(t, p), p ? `Set Priority ${p}` : "Cleared priority")
                 }
                 onDelete={() => deleteTask(task)}
                 onArchiveCompleted={archiveCompleted}
@@ -681,11 +645,7 @@ export function TasksView({
                   onToggle={() => toggleComplete(task)}
                   onEdit={() => openEdit(task)}
                   onSetPriority={(p) =>
-                    applyTransformTo(
-                      task,
-                      (t) => setPriority(t, p),
-                      p ? `Set Priority ${p}` : "Cleared priority",
-                    )
+                    applyTransformTo(task, (t) => setPriority(t, p), p ? `Set Priority ${p}` : "Cleared priority")
                   }
                   onDelete={() => deleteTask(task)}
                   onArchiveCompleted={archiveCompleted}
@@ -788,17 +748,9 @@ function TaskItem({
               shortcut={{ modifiers: ["cmd"], key: "e" }}
               target={onEdit()}
             />
-            <ActionPanel.Submenu
-              title="Set Priority"
-              icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-            >
+            <ActionPanel.Submenu title="Set Priority" icon={Icon.Star} shortcut={{ modifiers: ["cmd"], key: "p" }}>
               {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
-                <Action
-                  key={letter}
-                  title={letter}
-                  onAction={() => onSetPriority(letter as Priority)}
-                />
+                <Action key={letter} title={letter} onAction={() => onSetPriority(letter as Priority)} />
               ))}
               <Action title="Clear Priority" onAction={() => onSetPriority(undefined)} />
             </ActionPanel.Submenu>
@@ -830,9 +782,7 @@ function TaskItem({
                 >
                   {task.projects.map((p) => {
                     const f: TagFilter = { kind: "project", name: p };
-                    const active = activeTagFilters.some(
-                      (a) => tagFilterKey(a) === tagFilterKey(f),
-                    );
+                    const active = activeTagFilters.some((a) => tagFilterKey(a) === tagFilterKey(f));
                     return (
                       <Action
                         key={`p-${p}`}
@@ -843,9 +793,7 @@ function TaskItem({
                   })}
                   {task.contexts.map((c) => {
                     const f: TagFilter = { kind: "context", name: c };
-                    const active = activeTagFilters.some(
-                      (a) => tagFilterKey(a) === tagFilterKey(f),
-                    );
+                    const active = activeTagFilters.some((a) => tagFilterKey(a) === tagFilterKey(f));
                     return (
                       <Action
                         key={`c-${c}`}
@@ -864,31 +812,15 @@ function TaskItem({
                 >
                   {allKnownProjects.map((p) => {
                     const f: TagFilter = { kind: "project", name: p };
-                    const active = activeTagFilters.some(
-                      (a) => tagFilterKey(a) === tagFilterKey(f),
-                    );
+                    const active = activeTagFilters.some((a) => tagFilterKey(a) === tagFilterKey(f));
                     if (active) return null;
-                    return (
-                      <Action
-                        key={`gp-${p}`}
-                        title={`+${p}`}
-                        onAction={() => onToggleTagFilter(f)}
-                      />
-                    );
+                    return <Action key={`gp-${p}`} title={`+${p}`} onAction={() => onToggleTagFilter(f)} />;
                   })}
                   {allKnownContexts.map((c) => {
                     const f: TagFilter = { kind: "context", name: c };
-                    const active = activeTagFilters.some(
-                      (a) => tagFilterKey(a) === tagFilterKey(f),
-                    );
+                    const active = activeTagFilters.some((a) => tagFilterKey(a) === tagFilterKey(f));
                     if (active) return null;
-                    return (
-                      <Action
-                        key={`gc-${c}`}
-                        title={`@${c}`}
-                        onAction={() => onToggleTagFilter(f)}
-                      />
-                    );
+                    return <Action key={`gc-${c}`} title={`@${c}`} onAction={() => onToggleTagFilter(f)} />;
                   })}
                 </ActionPanel.Submenu>
               )}
@@ -896,11 +828,7 @@ function TaskItem({
           )}
 
           <ActionPanel.Section>
-            <Action.Open
-              title="Open todo.txt"
-              target={prefs.todoPath}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-            />
+            <Action.Open title="Open todo.txt" target={prefs.todoPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <Action
               title="Reload"
               icon={Icon.ArrowClockwise}
@@ -944,19 +872,11 @@ function ArchivedTaskItem({
         ...task.projects.map((p) => `+${p}`),
         ...task.contexts.map((c) => `@${c}`),
       ]}
-      accessories={
-        task.completionDate
-          ? [{ tag: { value: task.completionDate, color: Color.SecondaryText } }]
-          : []
-      }
+      accessories={task.completionDate ? [{ tag: { value: task.completionDate, color: Color.SecondaryText } }] : []}
       actions={
         <ActionPanel>
           <Action title="Unarchive" icon={Icon.ArrowCounterClockwise} onAction={onUnarchive} />
-          <Action.Open
-            title="Open done.txt"
-            target={prefs.donePath}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
+          <Action.Open title="Open done.txt" target={prefs.donePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
@@ -969,25 +889,16 @@ function TaskDetail({ task }: { task: Task }) {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Priority"
-            text={task.priority ? `(${task.priority})` : "—"}
-          />
+          <List.Item.Detail.Metadata.Label title="Priority" text={task.priority ? `(${task.priority})` : "—"} />
           <List.Item.Detail.Metadata.Label title="Created" text={task.creationDate || "—"} />
           {task.completed && task.completionDate && (
             <List.Item.Detail.Metadata.Label title="Completed" text={task.completionDate} />
           )}
-          {task.metadata.due && (
-            <List.Item.Detail.Metadata.Label title="Due" text={task.metadata.due} />
-          )}
+          {task.metadata.due && <List.Item.Detail.Metadata.Label title="Due" text={task.metadata.due} />}
           <List.Item.Detail.Metadata.TagList title="Projects">
             {task.projects.length > 0 ? (
               task.projects.map((p) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={p}
-                  text={`+${p}`}
-                  color={TAG_PROJECT_COLOR}
-                />
+                <List.Item.Detail.Metadata.TagList.Item key={p} text={`+${p}`} color={TAG_PROJECT_COLOR} />
               ))
             ) : (
               <List.Item.Detail.Metadata.TagList.Item text="—" />
@@ -996,11 +907,7 @@ function TaskDetail({ task }: { task: Task }) {
           <List.Item.Detail.Metadata.TagList title="Contexts">
             {task.contexts.length > 0 ? (
               task.contexts.map((c) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={c}
-                  text={`@${c}`}
-                  color={TAG_CONTEXT_COLOR}
-                />
+                <List.Item.Detail.Metadata.TagList.Item key={c} text={`@${c}`} color={TAG_CONTEXT_COLOR} />
               ))
             ) : (
               <List.Item.Detail.Metadata.TagList.Item text="—" />
@@ -1026,9 +933,7 @@ function presetLabel(preset: ViewPreset): string {
 
 function dueChipColor(due: Date): Color.ColorLike {
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round(
-    (startOfDay(due).getTime() - startOfDay(new Date()).getTime()) / 86400000,
-  );
+  const diffDays = Math.round((startOfDay(due).getTime() - startOfDay(new Date()).getTime()) / 86400000);
   if (diffDays < 0) return DUE_OVERDUE_COLOR;
   if (diffDays === 0) return DUE_TODAY_COLOR;
   if (diffDays <= 2) return DUE_SOON_COLOR;

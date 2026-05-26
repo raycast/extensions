@@ -30,9 +30,7 @@ export async function read(path: string): Promise<FileSnapshot | "notfound"> {
   return { path, mtimeMs: st.mtimeMs, tasks, raw };
 }
 
-export type WriteResult =
-  | { kind: "ok"; snapshot: FileSnapshot }
-  | { kind: "conflict"; fresh: FileSnapshot };
+export type WriteResult = { kind: "ok"; snapshot: FileSnapshot } | { kind: "conflict"; fresh: FileSnapshot };
 
 export async function writeAtomic(snapshot: FileSnapshot, nextTasks: Task[]): Promise<WriteResult> {
   if (snapshot.mtimeMs > 0) {

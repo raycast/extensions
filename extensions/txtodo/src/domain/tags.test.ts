@@ -86,10 +86,7 @@ describe("matchingTags", () => {
   });
 
   it("returns tags that start with the partial, case-insensitive", () => {
-    expect(matchingTags("wo", ["work", "home", "Work-overflow"])).toEqual([
-      "work",
-      "Work-overflow",
-    ]);
+    expect(matchingTags("wo", ["work", "home", "Work-overflow"])).toEqual(["work", "Work-overflow"]);
     expect(matchingTags("Ho", ["work", "home"])).toEqual(["home"]);
   });
 

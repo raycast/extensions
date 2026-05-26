@@ -61,9 +61,7 @@ describe("prioritySquircle — D-Z and none", () => {
       throw new Error("expected { source } shape");
     }
     const source = (result as { source: unknown }).source;
-    expect(
-      typeof source === "object" && source !== null && "light" in source && "dark" in source,
-    ).toBe(true);
+    expect(typeof source === "object" && source !== null && "light" in source && "dark" in source).toBe(true);
     const dark = decodeURIComponent((source as { dark: string }).dark);
     expect(dark).toContain('fill="#6F6F77"');
   });

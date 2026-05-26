@@ -2,10 +2,7 @@ import type { Priority, Task } from "./parser";
 
 export type GroupKey = Priority | "none";
 
-export const PRIORITY_KEYS: GroupKey[] = [
-  ...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("") as Priority[]),
-  "none",
-];
+export const PRIORITY_KEYS: GroupKey[] = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("") as Priority[]), "none"];
 
 export function groupByPriority(tasks: Task[]): Map<GroupKey, Task[]> {
   const out = new Map<GroupKey, Task[]>();

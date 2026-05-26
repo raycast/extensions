@@ -100,10 +100,7 @@ export function TaskForm({ mode, initialTask, knownProjects, knownContexts, onSu
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={mode === "edit" ? "Save" : "Add Task"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={mode === "edit" ? "Save" : "Add Task"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -131,12 +128,7 @@ export function TaskForm({ mode, initialTask, knownProjects, knownContexts, onSu
           <Form.TagPicker.Item key={c} value={c} title={c} />
         ))}
       </Form.TagPicker>
-      <Form.DatePicker
-        id="due"
-        title="Due Date"
-        defaultValue={defaults.due}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker id="due" title="Due Date" defaultValue={defaults.due} type={Form.DatePicker.Type.Date} />
     </Form>
   );
 }

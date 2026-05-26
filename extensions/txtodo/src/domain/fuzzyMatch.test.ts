@@ -24,11 +24,7 @@ describe("bestMatch", () => {
   });
 
   it("breaks ties by preferring the lower lineNumber", () => {
-    const tasks = [
-      parseLine("Email Bob", 3),
-      parseLine("Email Alice", 7),
-      parseLine("Email Carol", 1),
-    ];
+    const tasks = [parseLine("Email Bob", 3), parseLine("Email Alice", 7), parseLine("Email Carol", 1)];
     expect(bestMatch(tasks, "email")?.lineNumber).toBe(1);
   });
 

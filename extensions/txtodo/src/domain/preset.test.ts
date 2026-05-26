@@ -45,9 +45,7 @@ const FIXTURES: Record<string, Task> = {
 
 function ids(tasks: Task[]): string[] {
   return tasks.map((t) => {
-    const entry = Object.entries(FIXTURES).find(
-      ([, f]) => f.lineNumber === t.lineNumber && f.raw === t.raw,
-    );
+    const entry = Object.entries(FIXTURES).find(([, f]) => f.lineNumber === t.lineNumber && f.raw === t.raw);
     return entry ? entry[0] : `unknown(${t.lineNumber})`;
   });
 }
@@ -72,12 +70,7 @@ describe("applyPreset", () => {
   });
 
   it("preset 'this-week' returns active tasks with due ≤ upcoming Sunday inclusive", () => {
-    expect(ids(applyPreset(ALL_FIXTURES, "this-week", NOW))).toEqual([
-      "overdue",
-      "today",
-      "saturday",
-      "sunday",
-    ]);
+    expect(ids(applyPreset(ALL_FIXTURES, "this-week", NOW))).toEqual(["overdue", "today", "saturday", "sunday"]);
   });
 
   it("preset 'overdue' returns active tasks with due strictly before today", () => {
@@ -96,10 +89,7 @@ describe("applyPreset", () => {
 
   it("preset 'this-week' on a Sunday returns only that day", () => {
     const sundayNow = new Date(2026, 4, 17, 12, 0, 0); // Sunday
-    const tasks = [
-      parseLine("Plan week due:2026-05-17", 0),
-      parseLine("Next Monday due:2026-05-18", 1),
-    ];
+    const tasks = [parseLine("Plan week due:2026-05-17", 0), parseLine("Next Monday due:2026-05-18", 1)];
     expect(applyPreset(tasks, "this-week", sundayNow)).toHaveLength(1);
     expect(applyPreset(tasks, "this-week", sundayNow)[0].lineNumber).toBe(0);
   });

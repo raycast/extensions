@@ -34,10 +34,7 @@ describe("sectionsByDate", () => {
 
   it("treats a task due exactly at midnight today as Today, and 1 day earlier as Overdue", () => {
     const now = new Date(2026, 4, 25, 14, 30); // mid-afternoon
-    const tasks = [
-      parseLine("Right at today start due:2026-05-25", 0),
-      parseLine("One day before due:2026-05-24", 1),
-    ];
+    const tasks = [parseLine("Right at today start due:2026-05-25", 0), parseLine("One day before due:2026-05-24", 1)];
 
     const sections = sectionsByDate(tasks, now);
 
@@ -86,10 +83,7 @@ describe("sectionsByDate", () => {
 
   it("uses line number as a tiebreaker when priority and due date are equal", () => {
     const now = new Date(2026, 4, 25);
-    const tasks = [
-      parseLine("(A) Second due:2026-05-27", 5),
-      parseLine("(A) First due:2026-05-27", 2),
-    ];
+    const tasks = [parseLine("(A) Second due:2026-05-27", 5), parseLine("(A) First due:2026-05-27", 2)];
 
     const sections = sectionsByDate(tasks, now);
 

@@ -27,9 +27,7 @@ export default async function tool(input: Input): Promise<string> {
     if (!match) return `No active task matched '${input.query}'.`;
 
     const completed = complete(match, todayISO());
-    const idx = current.tasks.findIndex(
-      (t) => t.raw === match.raw && t.lineNumber === match.lineNumber,
-    );
+    const idx = current.tasks.findIndex((t) => t.raw === match.raw && t.lineNumber === match.lineNumber);
     if (idx === -1) return `Couldn't locate the matched task in the file — please retry.`;
 
     const next: Task[] = prefs.archiveOnComplete

@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseLine,
-  serializeTask,
-  stripMetadataFromDescription,
-  stripTagsFromDescription,
-} from "./parser";
+import { parseLine, serializeTask, stripMetadataFromDescription, stripTagsFromDescription } from "./parser";
 
 describe("stripMetadataFromDescription", () => {
   it("removes key:value tokens but keeps +project and @context", () => {
@@ -14,9 +9,7 @@ describe("stripMetadataFromDescription", () => {
   });
 
   it("returns the original when no key:value tokens", () => {
-    expect(stripMetadataFromDescription("Buy milk +grocery @errands")).toBe(
-      "Buy milk +grocery @errands",
-    );
+    expect(stripMetadataFromDescription("Buy milk +grocery @errands")).toBe("Buy milk +grocery @errands");
   });
 
   it("returns empty string for empty input", () => {
@@ -161,15 +154,11 @@ describe("parseLine tolerance", () => {
 
 describe("stripTagsFromDescription", () => {
   it("removes +project, @context, and key:value tokens", () => {
-    expect(stripTagsFromDescription("Call dentist +health @phone due:2026-05-20")).toBe(
-      "Call dentist",
-    );
+    expect(stripTagsFromDescription("Call dentist +health @phone due:2026-05-20")).toBe("Call dentist");
   });
 
   it("collapses internal whitespace left after removing tokens", () => {
-    expect(stripTagsFromDescription("Email +work alice about +urgent project")).toBe(
-      "Email alice about project",
-    );
+    expect(stripTagsFromDescription("Email +work alice about +urgent project")).toBe("Email alice about project");
   });
 
   it("returns empty string when input is only tags", () => {
@@ -177,9 +166,7 @@ describe("stripTagsFromDescription", () => {
   });
 
   it("preserves non-tag tokens that look tag-ish", () => {
-    expect(stripTagsFromDescription("Email alice@example.com about C++")).toBe(
-      "Email alice@example.com about C++",
-    );
+    expect(stripTagsFromDescription("Email alice@example.com about C++")).toBe("Email alice@example.com about C++");
   });
 
   it("returns the original on empty input", () => {
