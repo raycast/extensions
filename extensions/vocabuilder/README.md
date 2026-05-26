@@ -53,12 +53,15 @@ English, Ukrainian, Polish, German, French, Spanish, Italian, Portuguese, Dutch,
 
 ## Development
 
-Run the extension locally in Raycast dev mode:
+Use the Node version pinned in [`.nvmrc`](.nvmrc) — **Node 20.15.1**, which bundles **npm 10.7.0** and matches the Raycast store's CI. Then run the extension in Raycast dev mode:
 
 ```bash
+nvm use        # Node 20.15.1 / npm 10.7.0
 npm install
 npm run dev
 ```
+
+> Regenerate `package-lock.json` only on npm 10.x. npm 11 records optional peer dependencies differently, producing a lockfile that passes locally but fails the store CI's `npm ci`.
 
 Built with the [Raycast API](https://developers.raycast.com), TypeScript + React, and [Zod](https://zod.dev) for runtime validation. Translations use Gemini — defaults `gemini-3-flash-preview` (text) and `gemini-3.1-flash-tts-preview` (speech), configurable in preferences.
 
