@@ -1,102 +1,293 @@
-import { exec, spawn } from "child_process";
+import { execFile, spawn } from "node:child_process";
 import * as fs from "node:fs";
-import { promisify } from "util";
+import * as os from "node:os";
+import * as path from "node:path";
+import { promisify } from "node:util";
 import { DevServer } from "./types";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
-// Grabs all listening ports once up front to avoid repeated lsof calls,
-// then iterates over candidate dev-server PIDs (anything running a script
-// from node_modules/, plus bun processes) and emits one pipe-delimited
-// line per server: PID|PORT|CWD|STARTED|TOOL
+// ---------------------------------------------------------------------------
+// Platform primitives
+// ---------------------------------------------------------------------------
 //
-// Uses `while read -r PID` (not `for PID in $PIDS`) to correctly iterate in zsh,
-// where unquoted variable expansion does not word-split on newlines.
-//
-// lstart format: "Wed Apr 16 10:23:45 2026". V8 parses this correctly via new Date().
-//
-// The awk filter matches node_modules/ anywhere in the command line OR a
-// bare `bun` in the executable column ($11). The broader node_modules/
-// match (vs. the narrower .bin/) catches tools invoked as
-// `node node_modules/<pkg>/...` — e.g. `serve`, `http-server`. Over-
-// collection is harmless: the `[ -z "$PORT" ] && continue` below drops
-// any PID not actually listening on TCP.
-export const FETCH_SCRIPT = `
-PORTS=$(lsof -iTCP -sTCP:LISTEN -nP 2>/dev/null | awk 'NR>1 {n=split($9,a,":"); print $2, a[n]}')
-ps aux | grep -v grep | awk '
-  /node_modules\\// { print $2; next }
-  $11 ~ /(\\/|^)bun$/ { print $2 }
-' | sort -u | while read -r PID; do
-  CMD=$(ps -p $PID -o command= 2>/dev/null) || continue
-  # A single dev-server PID often has multiple LISTEN sockets: the main HTTP
-  # server plus ephemeral OS-assigned ports for HMR/IPC/prebundling. We pick
-  # the LOWEST port because configured dev ports (3000, 4321, 5173, 8080)
-  # are always below ephemeral ports (32768-65535). lsof's order is otherwise
-  # non-deterministic and would flicker the displayed port across refreshes.
-  PORT=$(echo "$PORTS" | awk -v p=$PID '$1==p {print $2}' | sort -n | head -1)
-  [ -z "$PORT" ] && continue
-  # -F n emits machine-readable output (one field per line, prefixed by a
-  # type letter); 'n<path>' lines contain the full cwd including spaces.
-  # The column-formatted form would split on whitespace and truncate.
-  CWD=$(lsof -p $PID -a -d cwd -F n 2>/dev/null | awk '/^n/ {print substr($0,2)}')
-  STARTED=$(ps -p $PID -o lstart= 2>/dev/null)
-  # Prefer the .bin/ name when present, otherwise fall back to the package
-  # name from node_modules/<pkg>/ — handles \`node node_modules/serve/build/main.js\`.
-  TOOL=$(echo "$CMD" | grep -oE 'node_modules/\\.bin/[^ ]+' | xargs basename 2>/dev/null)
-  if [[ -z "$TOOL" ]]; then
-    TOOL=$(echo "$CMD" | grep -oE 'node_modules/(@[^/]+/)?[^/ ]+' | head -1 | sed 's|node_modules/||')
-  fi
-  # Runtime detection: check the actual executable, not the full command line.
-  # ps -o comm= returns the process basename (sometimes a full path on macOS).
-  # This identifies "true bun" only. Bun delegating to node via vite's shebang
-  # shows as node here, which is correct since the listening process IS node.
-  COMM=$(ps -p $PID -o comm= 2>/dev/null)
-  if [[ "$COMM" == "bun" || "$COMM" == */bun ]]; then
-    RUNTIME="bun"
-  else
-    RUNTIME="node"
-  fi
-  # If no node_modules/.bin/ tool was found but the command is bun, label it bun
-  if [[ -z "$TOOL" ]] && echo "$CMD" | grep -qE '(/|^)bun( |$)'; then
-    TOOL="bun"
-  fi
-  # SvelteKit runs under vite, so detect it by the presence of svelte.config in the project root
-  if [[ "$TOOL" == "vite" && (-f "$CWD/svelte.config.js" || -f "$CWD/svelte.config.ts") ]]; then
-    TOOL="sveltekit"
-  fi
-  echo "$PID|$PORT|$CWD|$STARTED|$TOOL|$RUNTIME"
-done
-`;
+// Everything below the next section divider is pure TypeScript and runs
+// unchanged on any OS. To port the extension to a new platform (e.g.
+// Windows), swap the three helpers in this section for equivalents that
+// return the same shapes. Suggested mapping:
+//   listProcesses  → Get-CimInstance Win32_Process     (or PowerShell)
+//   listListeners  → Get-NetTCPConnection -State Listen
+//   listCwds       → Win32_Process.ExecutablePath / CWD via WMI
 
-export function parseServers(stdout: string): DevServer[] {
-  return stdout
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => {
-      const [pid, port, cwd, started, tool, runtime] = line.split("|");
-      return {
-        pid: parseInt(pid),
-        port,
-        url: `http://localhost:${port}`,
-        tool: tool?.trim() || "node",
-        runtime: runtime?.trim() === "bun" ? "bun" : "node",
-        cwd,
-        projectName: cwd?.split("/").pop() || cwd,
-        startedAt: new Date(started?.trim() ?? ""),
-      } as DevServer;
-    })
-    .filter((s) => s.port && !isNaN(s.pid));
+interface RawProcess {
+  pid: number;
+  lstart: string; // raw `ps` lstart text, e.g. "Tue May 19 20:02:57 2026"
+  command: string; // full command line (including the executable path)
 }
 
+interface RawListener {
+  pid: number;
+  port: number;
+}
+
+// Capture stdout even when the child exits non-zero (lsof exits 1 if any of
+// the queried PIDs has died between our two queries, but the rest of the
+// output is still useful).
+function stdoutOrThrow(err: unknown): string {
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "stdout" in err &&
+    typeof (err as { stdout: unknown }).stdout === "string"
+  ) {
+    return (err as { stdout: string }).stdout;
+  }
+  throw err;
+}
+
+async function listProcesses(): Promise<RawProcess[]> {
+  // ps -A: all processes. -ww: don't truncate long command lines.
+  // pid= / lstart= / command= : suppress headers; output each field
+  // as-is. lstart is fixed-width 24 chars (`Tue May 19 20:02:57 2026`).
+  const { stdout } = await execFileAsync("ps", [
+    "-A",
+    "-ww",
+    "-o",
+    "pid=,lstart=,command=",
+  ]);
+  const procs: RawProcess[] = [];
+  for (const line of stdout.split("\n")) {
+    const match = line.match(/^\s*(\d+)\s+(.+)$/);
+    if (!match) continue;
+    const rest = match[2];
+    if (rest.length < 25) continue; // need at least lstart + one char
+    procs.push({
+      pid: parseInt(match[1], 10),
+      lstart: rest.slice(0, 24),
+      command: rest.slice(24).trimStart(),
+    });
+  }
+  return procs;
+}
+
+async function listListeners(): Promise<RawListener[]> {
+  // -F pn outputs one field per line, prefixed by a type letter:
+  //   p<pid> starts a process group
+  //   f<fd>  marks a file within that group (we ignore these)
+  //   n<addr> is the network address, e.g. "*:3000" or "[::1]:5173"
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("lsof", [
+      "-iTCP",
+      "-sTCP:LISTEN",
+      "-nP",
+      "-F",
+      "pn",
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  const out: RawListener[] = [];
+  let currentPid = 0;
+  for (const line of stdout.split("\n")) {
+    if (line[0] === "p") {
+      currentPid = parseInt(line.slice(1), 10);
+    } else if (line[0] === "n" && currentPid > 0) {
+      const addr = line.slice(1);
+      const port = parseInt(addr.slice(addr.lastIndexOf(":") + 1), 10);
+      if (port > 0) out.push({ pid: currentPid, port });
+    }
+  }
+  return out;
+}
+
+async function listCwds(pids: number[]): Promise<Map<number, string>> {
+  const out = new Map<number, string>();
+  if (pids.length === 0) return out;
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("lsof", [
+      "-p",
+      pids.join(","),
+      "-a",
+      "-d",
+      "cwd",
+      "-F",
+      "n",
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  let currentPid = 0;
+  for (const line of stdout.split("\n")) {
+    if (line[0] === "p") {
+      currentPid = parseInt(line.slice(1), 10);
+    } else if (line[0] === "n" && currentPid > 0) {
+      out.set(currentPid, line.slice(1));
+    }
+  }
+  return out;
+}
+
+interface GitInfo {
+  // Absolute path to the shared .git directory. Same value for every
+  // worktree of the same repo, so it's a stable grouping key.
+  commonDir: string;
+  // Branch name, or empty for detached HEAD / non-git.
+  branch: string;
+}
+
+// Resolve git common-dir and branch for a cwd. Returns undefined when cwd
+// isn't inside a git working tree. One process spawn per call.
+async function getGitInfo(cwd: string): Promise<GitInfo | undefined> {
+  try {
+    const { stdout } = await execFileAsync("git", [
+      "-C",
+      cwd,
+      "rev-parse",
+      "--git-common-dir",
+      "--abbrev-ref",
+      "HEAD",
+    ]);
+    const [commonDirRaw, branchRaw] = stdout.trim().split("\n");
+    if (!commonDirRaw) return undefined;
+    const commonDir = path.isAbsolute(commonDirRaw)
+      ? commonDirRaw
+      : path.resolve(cwd, commonDirRaw);
+    const branch = branchRaw === "HEAD" ? "" : (branchRaw ?? "");
+    return { commonDir, branch };
+  } catch {
+    return undefined;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pure aggregation (cross-platform)
+// ---------------------------------------------------------------------------
+
+// A candidate is anything launched from node_modules (broader than .bin/ so
+// we catch `node node_modules/serve/build/main.js` etc.) OR a bare bun
+// process. Over-collection is harmless: only PIDs with a LISTEN socket
+// survive the join below.
+function isCandidate(proc: RawProcess): boolean {
+  if (/node_modules\//.test(proc.command)) return true;
+  const exec = proc.command.split(/\s+/, 1)[0];
+  return /(\/|^)bun$/.test(exec);
+}
+
+function detectRuntime(command: string): "node" | "bun" {
+  const exec = command.split(/\s+/, 1)[0];
+  return /(\/|^)bun$/.test(exec) ? "bun" : "node";
+}
+
+function detectTool(command: string, cwd: string): string {
+  // 1. Prefer the .bin/ name (e.g. node_modules/.bin/vite)
+  const bin = command.match(/node_modules\/\.bin\/(\S+)/);
+  if (bin) {
+    const name = bin[1];
+    // SvelteKit runs under vite; promote when svelte.config is present.
+    if (name === "vite" && hasSvelteConfig(cwd)) return "sveltekit";
+    return name;
+  }
+  // 2. Fall back to the package name from node_modules/<pkg>/ — handles
+  //    `node node_modules/serve/build/main.js` (→ "serve") and scoped
+  //    packages like `node_modules/@vitejs/plugin-react/...`.
+  const pkg = command.match(/node_modules\/(@[^/]+\/[^/\s]+|[^/\s]+)/);
+  if (pkg) return pkg[1];
+  // 3. Bare bun script (no node_modules anywhere in the command).
+  if (detectRuntime(command) === "bun") return "bun";
+  return "node";
+}
+
+function hasSvelteConfig(cwd: string): boolean {
+  return (
+    fs.existsSync(`${cwd}/svelte.config.js`) ||
+    fs.existsSync(`${cwd}/svelte.config.ts`)
+  );
+}
+
+// A single dev-server PID often has multiple LISTEN sockets: the main HTTP
+// server plus ephemeral HMR/IPC/prebundling ports. Pick the LOWEST per PID
+// because configured dev ports (3000, 4321, 5173, 8080) are always below
+// ephemeral ports (32768+); without this the displayed port flickers across
+// refreshes.
+function lowestPortPerPid(listeners: RawListener[]): Map<number, number> {
+  const out = new Map<number, number>();
+  for (const { pid, port } of listeners) {
+    const cur = out.get(pid);
+    if (cur === undefined || port < cur) out.set(pid, port);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+export async function fetchServers(): Promise<DevServer[]> {
+  const [procs, listeners] = await Promise.all([
+    listProcesses(),
+    listListeners(),
+  ]);
+  const candidates = procs.filter(isCandidate);
+  const portByPid = lowestPortPerPid(listeners);
+  // Only query cwds for candidates that are actually listening — keeps the
+  // lsof argument list short and skips dead PIDs.
+  const finalPids = candidates
+    .map((p) => p.pid)
+    .filter((pid) => portByPid.has(pid));
+  const cwdByPid = await listCwds(finalPids);
+
+  // Look up git info per unique cwd, in parallel. Worktrees of the same repo
+  // share a git common-dir, so we use that (well, its parent's basename) as
+  // the project key — collapses sibling worktrees into one group while still
+  // letting us show the branch on each row.
+  const uniqueCwds = [...new Set([...cwdByPid.values()])];
+  const gitByCwd = new Map<string, GitInfo | undefined>();
+  await Promise.all(
+    uniqueCwds.map(async (cwd) => gitByCwd.set(cwd, await getGitInfo(cwd))),
+  );
+
+  const servers: DevServer[] = [];
+  for (const proc of candidates) {
+    const port = portByPid.get(proc.pid);
+    if (port === undefined) continue;
+    const cwd = cwdByPid.get(proc.pid);
+    if (!cwd) continue; // shouldn't happen for live processes, but be safe
+    const git = gitByCwd.get(cwd);
+    // For git projects: project name & key come from the directory holding
+    // the shared .git dir. For non-git: fall back to the worktree basename.
+    const projectName = git
+      ? path.basename(path.dirname(git.commonDir))
+      : path.basename(cwd) || cwd;
+    const projectKey = git ? git.commonDir : cwd;
+    servers.push({
+      pid: proc.pid,
+      port: String(port),
+      url: `http://localhost:${port}`,
+      tool: detectTool(proc.command, cwd),
+      runtime: detectRuntime(proc.command),
+      cwd,
+      projectKey,
+      projectName,
+      branch: git?.branch || undefined,
+      startedAt: new Date(proc.lstart),
+    });
+  }
+  return servers;
+}
+
+// Async-shaped so callers can pass the returned promise to Raycast's
+// `mutate(fn, { optimisticUpdate })` flow. `process.kill` itself is sync.
 export async function killProcess(pid: number): Promise<void> {
-  await execAsync(`kill ${pid}`);
+  process.kill(pid);
 }
 
 export type PackageManager = "bun" | "pnpm" | "yarn" | "npm";
 
-// Detect package manager from lockfile presence. First match wins.
-// Order is bun → pnpm → yarn → npm because bun/pnpm/yarn projects often
-// also retain a stale package-lock.json.
+// Detect package manager from lockfile presence. First match wins; order is
+// bun → pnpm → yarn → npm because bun/pnpm/yarn projects often retain a
+// stale package-lock.json from before a migration.
 export function detectPackageManager(cwd: string): PackageManager {
   if (fs.existsSync(`${cwd}/bun.lockb`) || fs.existsSync(`${cwd}/bun.lock`))
     return "bun";
@@ -112,7 +303,7 @@ const PM_COMMAND: Record<PackageManager, [string, string[]]> = {
   npm: ["npm", ["run", "dev"]],
 };
 
-// Slugify cwd for use in a /tmp log filename.
+// Slugify cwd for use in a temp-dir log filename.
 function cwdSlug(cwd: string): string {
   return cwd.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "root";
 }
@@ -124,17 +315,35 @@ function cwdSlug(cwd: string): string {
 //   `~/.zprofile`; `-i` reads `~/.zshrc`. Most users put their PATH additions
 //   for nvm/bun/pnpm in `~/.zshrc`, so both flags are required. Raycast's
 //   GUI-app PATH is otherwise too minimal to find these tools.
-// - `cwd` is passed as a spawn option (NOT shell-concatenated) which removes
-//   the prior shell-injection surface in the path.
-// - `detached: true` + `unref()` lets the spawned process outlive the extension
-//   command's lifetime.
-// - The log filename is now keyed by a slug of cwd, so it stays meaningful
-//   after the PID has been replaced by the new server.
+// - `cwd` is passed as a spawn option (NOT shell-concatenated) so the path
+//   never goes through the shell, removing one injection surface.
+// - `detached: true` + `unref()` lets the spawned process outlive the
+//   extension command's lifetime.
+// - The log filename is keyed by a slug of cwd so it stays meaningful after
+//   the PID has been replaced by the new server.
 export async function restartServer(server: DevServer): Promise<void> {
-  await execAsync(`kill ${server.pid}`);
+  // SIGKILL (vs default SIGTERM) so the old listener releases the port
+  // immediately — no graceful-shutdown window where the new spawn races
+  // the old process for the same port. Poll process.kill(pid, 0) until
+  // ESRCH to confirm exit before spawning. Both SIGKILL and signal-0 are
+  // mapped to TerminateProcess / OpenProcess on Windows, so this stays
+  // portable when we add the Windows backend.
+  process.kill(server.pid, "SIGKILL");
+  const deadline = Date.now() + 500;
+  while (Date.now() < deadline) {
+    try {
+      process.kill(server.pid, 0);
+      await new Promise((r) => setTimeout(r, 20));
+    } catch {
+      break;
+    }
+  }
   const pm = detectPackageManager(server.cwd);
   const [cmd, args] = PM_COMMAND[pm];
-  const logPath = `/tmp/dev-servers-restart-${cwdSlug(server.cwd)}.log`;
+  const logPath = path.join(
+    os.tmpdir(),
+    `dev-servers-restart-${cwdSlug(server.cwd)}.log`,
+  );
   const out = fs.openSync(logPath, "a");
   const child = spawn("/bin/zsh", ["-ilc", `exec ${cmd} ${args.join(" ")}`], {
     cwd: server.cwd,

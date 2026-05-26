@@ -8,6 +8,19 @@
   "categories": [
     "Developer Tools"
   ],
+  "keywords": [
+    "dev server",
+    "dev servers",
+    "localhost",
+    "port",
+    "ports",
+    "kill",
+    "restart",
+    "process",
+    "dashboard",
+    "manage",
+    "monitor"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -60,6 +73,31 @@
               "value": "30"
             }
           ]
+        },
+        {
+          "name": "showUptime",
+          "title": "Row Accessories",
+          "type": "checkbox",
+          "label": "Show uptime",
+          "description": "Show how long each server has been running",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showBranch",
+          "type": "checkbox",
+          "label": "Show git branch",
+          "description": "Show the current git branch next to each server when the project is a git repo",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showTool",
+          "type": "checkbox",
+          "label": "Show framework tag",
+          "description": "Show the framework / tool tag (Vite, SvelteKit, Astro, etc.) on each row",
+          "default": true,
+          "required": false
         }
       ]
     }
