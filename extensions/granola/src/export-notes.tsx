@@ -46,7 +46,7 @@ const formatDate = (value?: string): string => {
 };
 
 export default function Command() {
-  const { noteData, isLoading, hasError } = useGranolaData();
+  const { noteData, isLoading, hasError, error } = useGranolaData();
 
   // Handle loading and error states
   if (isLoading) {
@@ -54,7 +54,7 @@ export default function Command() {
   }
 
   if (hasError) {
-    return <Unresponsive />;
+    return <Unresponsive context="export-notes" error={error} />;
   }
 
   const untitledNoteTitle = "New note";

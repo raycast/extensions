@@ -1,7 +1,7 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import getAccessToken from "./getAccessToken";
-import { isAbortError, toError, toErrorMessage } from "./errorUtils";
+import { isAbortError, logGranolaError, toError, toErrorMessage } from "./errorUtils";
 import {
   GetDocumentsResponse,
   TranscriptSegment,
@@ -48,7 +48,9 @@ export function fetchGranolaData(route: string) {
       })
       .catch((err) => {
         if (mounted) {
-          setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
+          const tokenError = new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err });
+          logGranolaError("fetchGranolaData.getAccessToken", tokenError, { route });
+          setError(tokenError);
         }
       });
     return () => {
@@ -60,7 +62,12 @@ export function fetchGranolaData(route: string) {
 
   // Use parseResponse to transform data BEFORE useFetch caches it
   // This ensures only stripped data is cached, reducing memory usage
-  const { isLoading, data, revalidate } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
+  const {
+    isLoading,
+    data,
+    error: fetchError,
+    revalidate,
+  } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
@@ -128,6 +135,12 @@ export function fetchGranolaData(route: string) {
 
   if (error) {
     throw error;
+  }
+
+  if (fetchError) {
+    const normalizedFetchError = toError(fetchError);
+    logGranolaError("fetchGranolaData.useFetch", normalizedFetchError, { route, url });
+    throw normalizedFetchError;
   }
 
   // Return transformed data (or original if transformation not needed)
