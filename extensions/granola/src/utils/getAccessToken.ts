@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import { getStoredAccountsPath, getSupabaseConfigPath } from "./granolaConfig";
-import { logGranolaError, logGranolaWarn } from "./errorUtils";
+import { logGranolaError, logGranolaInfo, logGranolaWarn } from "./errorUtils";
 
 const GRANOLA_API_URL = "https://api.granola.ai/v1";
 const GRANOLA_CLIENT_VERSION = "7.162.1";
@@ -95,7 +95,7 @@ async function refreshWorkOsTokensViaApi(
 
     const newTokens = (await response.json()) as Record<string, unknown>;
     newTokens.obtained_at = Date.now();
-    logGranolaWarn("refreshWorkOsTokensViaApi succeeded", {
+    logGranolaInfo("refreshWorkOsTokensViaApi succeeded", {
       expiresIn: typeof newTokens.expires_in === "number" ? newTokens.expires_in : undefined,
     });
     return newTokens;
@@ -150,7 +150,11 @@ async function tryRefreshAndSelectAccessToken(
   }
 
   if (persist) {
-    await persist(refreshed);
+    try {
+      await persist(refreshed);
+    } catch (persistError) {
+      logGranolaError("tryRefreshAndSelectAccessToken.persist", persistError);
+    }
   }
 
   return selectAccessToken(refreshed);

@@ -41,7 +41,7 @@ export function useGranolaData(): GranolaDataState {
     fetchResult = fetchGranolaData("get-documents");
   } catch (error) {
     fetchError = toError(error);
-    logGranolaError("useGranolaData.fetchGranolaData", fetchError);
+    logGranolaError("useGranolaData.fetchGranolaData", fetchError, { route: "get-documents" });
   }
 
   const isValidData = fetchResult && isNoteData(fetchResult);

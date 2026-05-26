@@ -110,3 +110,7 @@ export function logGranolaError(context: string, error: unknown, extra?: Granola
 export function logGranolaWarn(context: string, extra?: GranolaLogContext): void {
   console.warn(`${LOG_PREFIX} ${context}`, extra ?? {});
 }
+
+export function logGranolaInfo(context: string, extra?: GranolaLogContext): void {
+  console.log(`${LOG_PREFIX} ${context}`, extra ?? {});
+}
