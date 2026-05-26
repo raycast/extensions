@@ -96,11 +96,47 @@ type Input = {
   useDefaultSaveDirectory?: boolean;
 
   /**
-   * Optional array of image paths or URLs. If not provided, will try to get selected images from Finder.
+   * Optional image paths or URLs. Use comma/newline-separated values.
+   * If omitted, selected images from Finder are used.
    * Both local file paths and remote URLs (http://, https://) are supported.
    */
-  imagePaths?: string[];
+  imagePaths?: string;
 };
+
+function parseImagePaths(input: unknown): string[] {
+  if (Array.isArray(input)) {
+    return input
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof input !== "string") {
+    return [];
+  }
+
+  const value = input.trim();
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  } catch {
+    // Ignore JSON parse errors and fall back to simple delimiters.
+  }
+
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 /**
  * Compress images using Zipic
@@ -122,9 +158,11 @@ export default async function tool({
   progressive = true,
   keepAspectRatio = true,
   useDefaultSaveDirectory = false,
-  imagePaths = [],
+  imagePaths = "",
 }: Input) {
   try {
+    const normalizedImagePaths = parseImagePaths(imagePaths);
+
     // Check if Zipic is installed
     const zipicInstalled = await checkZipicInstallation();
     if (!zipicInstalled) {
@@ -195,7 +233,7 @@ export default async function tool({
             .on("error", () => {
               resolve(null);
             });
-        } catch (error) {
+        } catch {
           resolve(null);
         }
       });
@@ -244,7 +282,7 @@ export default async function tool({
         }
 
         return false;
-      } catch (e) {
+      } catch {
         // Path doesn't exist or can't be accessed
         return false;
       }
@@ -253,9 +291,9 @@ export default async function tool({
     // Get image paths to process
     let filePaths: string[] = [];
 
-    if (imagePaths.length > 0) {
+    if (normalizedImagePaths.length > 0) {
       // Filter out invalid paths
-      const validPaths = imagePaths.filter(isValidPath);
+      const validPaths = normalizedImagePaths.filter(isValidPath);
       // Process URLs - download them first
       const processedPaths = await Promise.all(
         validPaths.map(async (path) => {
@@ -443,7 +481,7 @@ export default async function tool({
 
             return path.join(outputDir, `${fileName}${fileExt}`);
           }
-        } catch (e) {
+        } catch {
           // If there's an error accessing the file/directory
           return null;
         }
@@ -451,7 +489,9 @@ export default async function tool({
       .filter(Boolean); // Remove null values
 
     // Count how many URLs were in the original paths
-    const urlCount = imagePaths.filter((path) => path.startsWith("http://") || path.startsWith("https://")).length;
+    const urlCount = normalizedImagePaths.filter(
+      (path) => path.startsWith("http://") || path.startsWith("https://"),
+    ).length;
 
     // Count how many URLs are still in filePaths (failed to download)
     const failedUrlCount = filePaths.filter((path) => path.startsWith("http://") || path.startsWith("https://")).length;

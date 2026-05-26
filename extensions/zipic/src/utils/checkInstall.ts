@@ -4,7 +4,7 @@ async function isZipicInstalled() {
   try {
     const applications = await getApplications();
     return applications.some(({ bundleId }) => bundleId === "studio.5km.zipic");
-  } catch (error) {
+  } catch {
     return false;
   }
 }

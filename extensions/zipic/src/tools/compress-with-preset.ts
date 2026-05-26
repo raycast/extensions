@@ -12,18 +12,53 @@ type Input = {
   preset?: string;
 
   /**
-   * Optional list of image paths to compress. If omitted, the currently selected
-   * files in Finder are used. Tilde (~) is expanded.
+   * Optional image paths to compress. Use comma/newline-separated values.
+   * If omitted, currently selected files in Finder are used. Tilde (~) is expanded.
    */
-  imagePaths?: string[];
+  imagePaths?: string;
 };
+
+function parseImagePaths(input: unknown): string[] {
+  if (Array.isArray(input)) {
+    return input
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof input !== "string") {
+    return [];
+  }
+
+  const value = input.trim();
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  } catch {
+    // Ignore JSON parse errors and fall back to simple delimiters.
+  }
+
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 /**
  * Compress images using a preset that the user has configured in the Zipic app.
  * Presets are read from Zipic's settings — they cannot be created or edited from
  * Raycast. Use `list-presets` first if the user did not name a specific preset.
  */
-export default async function tool({ preset, imagePaths = [] }: Input) {
+export default async function tool({ preset, imagePaths = "" }: Input) {
   const installed = await checkZipicInstallation();
   if (!installed) {
     return { success: false, error: "Zipic is not installed" };
@@ -46,8 +81,9 @@ export default async function tool({ preset, imagePaths = [] }: Input) {
   }
 
   let filePaths: string[];
-  if (imagePaths.length > 0) {
-    filePaths = imagePaths
+  const normalizedImagePaths = parseImagePaths(imagePaths);
+  if (normalizedImagePaths.length > 0) {
+    filePaths = normalizedImagePaths
       .map((p) => (p.startsWith("~") ? p.replace(/^~/, homedir()) : p))
       .filter((p) => {
         try {
