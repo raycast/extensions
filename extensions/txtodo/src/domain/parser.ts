@@ -145,7 +145,10 @@ export function serializeTask(task: Task): string {
     if (task.completionDate) parts.push(task.completionDate);
   }
 
-  if (task.priority) parts.push(`(${task.priority})`);
+  // Per the todo.txt spec, completing a task removes its priority. The parser still
+  // accepts `(A)` on a completed line (some legacy/non-conformant files have it), but
+  // we never emit it when serializing.
+  if (!task.completed && task.priority) parts.push(`(${task.priority})`);
   if (task.creationDate) parts.push(task.creationDate);
 
   if (task.description.length > 0) parts.push(task.description);

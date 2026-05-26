@@ -13,7 +13,8 @@ function rebuild(task: Task): Task {
 
 export function complete(task: Task, today: string): Task {
   if (task.completed) return task;
-  return rebuild({ ...task, completed: true, completionDate: today });
+  // Per the todo.txt spec, completing a task removes its priority.
+  return rebuild({ ...task, completed: true, completionDate: today, priority: undefined });
 }
 
 export function uncomplete(task: Task): Task {

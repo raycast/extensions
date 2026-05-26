@@ -12,13 +12,13 @@ import {
 } from "./task";
 
 describe("complete", () => {
-  it("marks a task complete with the given date", () => {
+  it("marks a task complete with the given date and drops priority (todo.txt spec)", () => {
     const t = parseLine("(A) Call dentist", 0);
     const done = complete(t, "2026-05-14");
     expect(done.completed).toBe(true);
     expect(done.completionDate).toBe("2026-05-14");
-    expect(done.priority).toBe("A");
-    expect(serializeTask(done)).toBe("x 2026-05-14 (A) Call dentist");
+    expect(done.priority).toBeUndefined();
+    expect(serializeTask(done)).toBe("x 2026-05-14 Call dentist");
   });
 
   it("is a no-op when task is already complete", () => {

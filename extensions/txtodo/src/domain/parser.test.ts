@@ -115,10 +115,18 @@ describe("serializeTask", () => {
     expect(serializeTask(t)).toBe(line);
   });
 
-  it("round-trips a completed task", () => {
-    const line = "x 2026-05-14 (A) 2026-05-10 Call dentist +health";
+  it("round-trips a completed task (no priority — todo.txt spec)", () => {
+    const line = "x 2026-05-14 2026-05-10 Call dentist +health";
     const t = parseLine(line, 0);
     expect(serializeTask(t)).toBe(line);
+  });
+
+  it("drops priority on serialize for completed tasks (todo.txt spec compliance)", () => {
+    // Parser still accepts non-conformant input like `x date (A) date description`
+    // for legacy/cross-tool compatibility, but the serializer normalizes it.
+    const t = parseLine("x 2026-05-14 (A) 2026-05-10 Call dentist", 0);
+    expect(t.priority).toBe("A");
+    expect(serializeTask(t)).toBe("x 2026-05-14 2026-05-10 Call dentist");
   });
 
   it("serializes a task constructed from fields (description only)", () => {
