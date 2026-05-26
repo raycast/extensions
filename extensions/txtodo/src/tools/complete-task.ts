@@ -21,14 +21,32 @@ export default async function tool(input: Input): Promise<string> {
     return `todo.txt not found at ${prefs.todoPath} — create it via the Show Tasks command first.`;
   }
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const active = current.tasks.filter((t) => !t.completed);
-    const match = bestMatch(active, input.query);
-    if (!match) return `No active task matched '${input.query}'.`;
+  const active = current.tasks.filter((t) => !t.completed);
+  const match = bestMatch(active, input.query);
+  if (!match) return `No active task matched '${input.query}'.`;
 
-    const completed = complete(match, todayISO());
+  const completed = complete(match, todayISO());
+
+  // When archiving, write to done.txt FIRST. If this fails, we abort
+  // without touching todo.txt, so the task is never lost (only the UI's
+  // toggleComplete and this tool need to enforce this ordering — the
+  // append-then-remove sequence is the only safe one).
+  if (prefs.archiveOnComplete) {
+    try {
+      await appendToDone(prefs.donePath, [completed]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return `Couldn't archive to done.txt: ${message}`;
+    }
+  }
+
+  for (let attempt = 0; attempt < 3; attempt++) {
     const idx = current.tasks.findIndex((t) => t.raw === match.raw && t.lineNumber === match.lineNumber);
-    if (idx === -1) return `Couldn't locate the matched task in the file — please retry.`;
+    if (idx === -1) {
+      return prefs.archiveOnComplete
+        ? `Completed: ${match.description} (already gone from todo.txt; appended to done.txt).`
+        : `The matched task is no longer in todo.txt — already completed or deleted externally.`;
+    }
 
     const next: Task[] = prefs.archiveOnComplete
       ? [...current.tasks.slice(0, idx), ...current.tasks.slice(idx + 1)]
@@ -36,15 +54,14 @@ export default async function tool(input: Input): Promise<string> {
 
     const result = await writeAtomic(current, next);
     if (result.kind === "ok") {
-      if (prefs.archiveOnComplete) {
-        await appendToDone(prefs.donePath, [completed]);
-      }
       return `Completed: ${match.description}`;
     }
     current = result.fresh;
   }
 
-  return "Couldn't apply change — the file kept changing. Try again.";
+  return prefs.archiveOnComplete
+    ? "Appended to done.txt but couldn't remove from todo.txt — file kept changing. Use Show Tasks to clean up."
+    : "Couldn't apply change — the file kept changing. Try again.";
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {

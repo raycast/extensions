@@ -503,7 +503,6 @@ export function TasksView({
                 prefs={prefs}
                 onReload={reload}
                 onToggleTagFilter={toggleTagFilter}
-                onClearTagFilters={clearTagFilters}
                 activeTagFilters={tagFilters}
                 allKnownProjects={knownProjects}
                 allKnownContexts={knownContexts}
@@ -652,7 +651,6 @@ export function TasksView({
                   prefs={prefs}
                   onReload={reload}
                   onToggleTagFilter={toggleTagFilter}
-                  onClearTagFilters={clearTagFilters}
                   activeTagFilters={tagFilters}
                   allKnownProjects={knownProjects}
                   allKnownContexts={knownContexts}
@@ -681,7 +679,6 @@ function TaskItem({
   prefs,
   onReload,
   onToggleTagFilter,
-  onClearTagFilters,
   activeTagFilters,
   allKnownProjects,
   allKnownContexts,
@@ -700,7 +697,6 @@ function TaskItem({
   prefs: Preferences;
   onReload: () => Promise<void>;
   onToggleTagFilter: (f: TagFilter) => void;
-  onClearTagFilters: () => void;
   activeTagFilters: TagFilter[];
   allKnownProjects: string[];
   allKnownContexts: string[];

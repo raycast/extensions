@@ -37,7 +37,6 @@ export default function MenuBar() {
     }
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: load is stable for the lifetime of the component and depends only on prefs.todoPath
   useEffect(() => {
     void load();
   }, [prefs.todoPath]);
