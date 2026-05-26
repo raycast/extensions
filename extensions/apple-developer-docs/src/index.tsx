@@ -9,7 +9,7 @@ import useArchiveResults, { ArchiveIndexStatus } from "./hooks/useArchiveResults
 import { getSearchTerms, scoreSearchResult } from "./scoring";
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ includeArchiveResults: boolean }>();
+  const preferences = getPreferenceValues<Preferences>();
   const includeArchiveResults = preferences.includeArchiveResults;
   const [searchText, setSearchText] = useState("");
   const query = searchText.length === 0 ? "SwiftUI" : searchText;
