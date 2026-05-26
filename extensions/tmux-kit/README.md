@@ -1,70 +1,95 @@
 # Tmux Kit
 
-The full tmux workflow inside Raycast — search keybindings, manage sessions, run arbitrary tmux commands, and persist layouts with tmux-resurrect. No more reaching for a terminal just to remember `prefix : kill-session -a` or to clean up stale sessions.
+Live tmux session management from the Raycast launcher — list, switch, rename, kill, drill into panes, and spin up new sessions with a native folder picker. Plus a complete cheatsheet, an arbitrary-command runner, and tmux-resurrect save/restore. The whole tmux workflow without ever opening a terminal first.
 
-## Why this extension
+## Session management is the core
 
-Existing terminal launchers either drop you into the shell every time you need to inspect tmux, or stop at "list sessions." Tmux Kit treats tmux as a first-class workspace:
+Most tmux launchers stop at "show me a list." Tmux Kit is built around the idea that the launcher is the right place to operate tmux:
 
-- **Read** — a fully searchable cheatsheet (panes, windows, sessions, copy mode, command mode, resurrect, file locations) with copy-to-clipboard on every entry.
-- **Inspect** — live session list with attached/detached status, window count, last-activity timestamp, plus drill-down into every pane (PID, command, path, dimensions).
-- **Mutate** — rename, kill, kill-others, switch the focused client, attach via clipboard, create new sessions with a native folder picker for the start directory.
-- **Script** — send arbitrary tmux commands (mirroring `prefix :`) with history and quick presets, and capture stdout/stderr in a detail view.
-- **Persist** — one-shot save/restore via `tmux-resurrect`.
+- **One Enter to switch.** Selecting a session calls `tmux switch-client -t` against the attached terminal client. No prefix, no command mode, no second keystroke.
+- **Native folder picker for new sessions.** No more typing `/Users/me/Projects/...` by hand — click the folder chip, browse in macOS Finder, pick a directory, done.
+- **Live status, not stale text.** Each row shows attached state (filled vs hollow circle), window count, current window name, and last-activity timestamp parsed from tmux's own format engine.
+- **Safe destructive actions.** Kill and Kill-Others are gated behind a confirm alert with a destructive-style red button, so muscle memory doesn't wipe a session.
+- **Two ways to enter a session.** Switch Client when you already have a terminal attached; Copy Attach Command (shell-quoted) when you don't.
+- **Drill into running processes.** From any session, jump to a per-pane view with PID, command, current working directory, and dimensions — grouped by window. Kill individual panes from there.
 
-Everything works against any prefix key (default `Ctrl+b` or remapped, like `Ctrl+a`). The cheatsheet uses the abstract label `prefix`.
+Everything works against any prefix key (default `Ctrl+b`, or remapped like `Ctrl+a`). The extension itself never assumes a prefix.
 
-## Commands
+## Tmux Sessions — full inventory
 
-### Tmux Cheatsheet (`view`)
+### Per-row data
+- Session name and current window name
+- Attached indicator: green filled circle = an attached client exists, hollow grey circle = detached
+- Window count badge (`3w`)
+- Last activity timestamp (live-updating tooltip with full datetime)
 
-Searchable reference for stock tmux key bindings and commands. **~60 entries across 9 sections:**
+### Top-level actions
 
-- **Core** — detach, attach, list, new named session, kill by name, kill server.
-- **Window** — create, next/previous/last, jump-to-N, picker (`prefix w`), rename, kill, move to index.
-- **Pane** — split horizontally/vertically, cycle, navigate by arrow, zoom (`prefix z`), show numbers (`prefix q`), kill, swap with `{` / `}`, resize, break to new window, cycle layouts.
-- **Session** — picker (`prefix s`), previous/next, rename.
-- **Copy mode** — enter, begin selection (vi mode), yank to clipboard (with the `set -s copy-command 'pbcopy'` recipe), exit, search forward/backward.
-- **Misc** — list keybindings (`prefix ?`), command mode (`prefix :`), reload config, clock.
-- **Command mode** — `clear-history`, `kill-session`, `kill-session -a`, rename, move-window, swap-window, mouse toggle, status toggle, find-window, respawn-pane, display-panes, list-keys, cross-session window move.
-- **Resurrect** — overview of `tmux-resurrect`, default save/restore key bindings, and the equivalent `run-shell` commands.
-- **Files** — `~/.tmux.conf` and the TPM plugin directory.
+| Action | Shortcut | What it does |
+|--------|----------|--------------|
+| Switch Client to Session | Enter | `tmux switch-client -t <name>` against the focused terminal client. Pre-checks `list-clients` so you get a clear toast if no client is attached. |
+| Copy Attach Command | Cmd+C | Shell-quoted `tmux attach -t <name>` on the clipboard — for when you want to paste into a new terminal. |
+| Rename Session | Cmd+R | Form with live validation: rejects names containing spaces, colons, or dots (tmux's real target-syntax constraints). |
+| New Session | Cmd+N | Form with **native macOS folder picker** for the start directory. Created detached (`-d`) so you can decide how to enter it. |
+| Show Panes & Processes | Cmd+B | Drill into every pane in the session (see below). |
+| Kill Session | Ctrl+X | Destructive, gated by confirm alert. |
+| Kill All Other Sessions | Ctrl+Shift+X | `tmux kill-session -a -t <keep>`. Useful end-of-week cleanup. |
+| Refresh | Cmd+Shift+R | Force a re-list. |
 
-Every entry exposes copy-to-clipboard actions for any of its shortcut, command, or shell payload, plus a detail view with markdown rendering.
+### Panes & Processes view
 
-### Tmux Sessions (`view`)
+Per-pane: command being run, current working directory, PID, dimensions (`80×40`), pane id (`%17`), active marker.
+Grouped by window, sorted by pane index. Each pane is killable individually (with confirm).
 
-Live view of `tmux list-sessions` parsed structurally:
+## Supporting commands
 
-- **Per-row info** — name, current window, attached indicator (green dot vs hollow circle), window count, last-activity timestamp.
-- **Switch Client to Session** — invokes `tmux switch-client -t <name>` against the attached client, with a pre-check via `list-clients` so the action is suppressed gracefully when no terminal client is attached.
-- **Copy Attach Command** — produces a shell-safe `tmux attach -t <name>` (with quoting) for pasting into a new terminal.
-- **Rename Session** — form with live validation (names cannot contain spaces, colons, or dots — tmux's actual target syntax).
-- **New Session** — form with **native macOS folder picker** for the start directory (or use the configured default). Sessions are created detached (`-d`), then you Switch / Copy Attach to enter.
-- **Show Panes & Processes** — drill into every pane in the session, grouped by window, showing PID, current command, working directory, dimensions, and active-pane marker. Each pane is killable individually.
-- **Kill Session / Kill All Other Sessions** — destructive actions are gated by `confirmAlert`.
+### Tmux Cheatsheet
 
-### Run Tmux Command (`view`)
+A searchable reference of stock tmux defaults — about **60 entries across 9 sections** (Core, Window, Pane, Session, Copy mode, Misc, Command mode, Resurrect, Files). Every entry has copy-to-clipboard actions for its shortcut, command-mode payload, or shell snippet, plus a detail view with markdown.
 
-Form for arbitrary tmux input, mirroring `prefix :`:
+Highlights worth knowing about:
+- **Pane** section covers split, zoom (`prefix z`), arrow navigation, resize (`prefix Ctrl+arrow`), `break-pane` (`prefix !`), layout cycling.
+- **Command mode** has the long-tail commands people forget: `respawn-pane -k`, `move-window -s src:N -t dst:`, `swap-window -s X -t Y`, `find-window`, `display-panes`.
+- **Resurrect** documents both the plugin's default key bindings (`prefix Ctrl+s` / `prefix Ctrl+r`) and the equivalent `run-shell` commands, so the extension's dedicated save/restore commands feel consistent with the plugin.
 
-- Submit runs `tmux <input>` via `/bin/sh -c` so quoting and variable expansion follow shell semantics — same as typing from your shell.
-- Result is rendered in a Detail view with separate stdout and stderr code blocks, plus copy actions for each.
-- **Quick presets** — 10 common commands (`list-sessions`, `list-windows`, `list-clients`, `kill-session -a`, `show-options -g`, `clear-history`, mouse on/off, status on/off, `find-window`, `display-message '#{pane_current_path}'`).
-- **Per-user history** — last 20 commands persisted via `LocalStorage`, accessible via a sub-menu and a one-tap clear action.
+### Run Tmux Command
 
-### Tmux Resurrect Save (`no-view`) / Tmux Resurrect Restore (`no-view`)
+Form for arbitrary tmux input, the launcher equivalent of `prefix :`:
 
-One-shot wrappers around `~/.tmux/plugins/tmux-resurrect/scripts/save.sh` and `restore.sh`. Show a HUD on success, a toast with the underlying error on failure (helps if the plugin isn't installed at the expected path).
+- Submit runs `tmux <input>` via `/bin/sh -c`, preserving shell quoting and variable expansion.
+- Result rendered in a Detail view with separate stdout and stderr code blocks, each with copy actions.
+- **10 quick presets** (`list-sessions`, `list-windows`, `list-clients`, `kill-session -a`, `show-options -g`, `clear-history`, mouse on/off, status on/off, `find-window`, `display-message '#{pane_current_path}'`).
+- **Per-user history** — last 20 commands, persisted via `LocalStorage`, accessible via submenu, one-tap clear.
+
+### Tmux Resurrect Save / Tmux Resurrect Restore
+
+One-shot no-view commands wrapping `~/.tmux/plugins/tmux-resurrect/scripts/save.sh` and `restore.sh`. HUD on success, toast with the underlying stderr on failure (helpful if the plugin isn't installed at the expected path).
+
+## Common workflows
+
+**Switch into a project session.**
+Raycast → "Tmux Sessions" → start typing the name → Enter. The focused terminal client is now in that session.
+
+**Start a fresh session for a new project.**
+"Tmux Sessions" → `Cmd+N` → type a name → click the folder picker → browse to the project directory in Finder → Create. Then `Enter` on the new row to Switch Client into it.
+
+**Quick housekeeping.**
+"Tmux Sessions" → find the survivor → `Ctrl+Shift+X` to nuke everything else around it.
+
+**Audit what's actually running.**
+"Tmux Sessions" → pick a session → `Cmd+B` (Show Panes & Processes). See every pane's command, PID, and cwd at a glance. Kill rogue panes individually.
+
+**Send a one-off tmux command.**
+Raycast → "Run Tmux Command" → type or pick a preset → see stdout/stderr inline. Recent commands are one keystroke away via the history submenu.
 
 ## Design highlights
 
-- **No personal preset leakage.** Every label, default, and example was scrubbed for general use. The cheatsheet covers only stock tmux defaults, not the author's `~/.zshrc` shortcuts.
-- **Resilient to a missing tmux server.** `listSessions` recognizes "no server running" stderr and returns an empty list (with a clear empty-state action to create the first session), rather than treating it as an error.
-- **Argument-safe.** All tmux calls go through `execFile` with explicit positional arguments — no shell interpolation, no injection surface, including for arbitrary session/pane names. The single intentional exception is "Run Tmux Command," which goes through `/bin/sh -c` precisely to preserve `prefix :` quoting semantics.
-- **Robust delimiter.** Session and pane data are parsed from a `||SEP||` multi-character delimiter rather than tab, because tab and single-byte control characters get normalized by the Raycast runtime layer. Documented in `src/lib/tmux.ts`.
+- **Argument-safe.** All tmux calls use `execFile` with explicit positional args — no shell interpolation, no injection. The single intentional exception is "Run Tmux Command," which uses `/bin/sh -c` precisely to preserve `prefix :` quoting semantics.
+- **Resilient to a missing tmux server.** `listSessions` recognizes the "no server running" stderr and returns an empty list with a "Create New Session" empty-state, rather than surfacing it as an error.
+- **Robust delimiter.** Session and pane data are parsed using a `||SEP||` multi-character delimiter rather than tab. Tabs and single-byte control characters get normalized by the Raycast runtime layer, so a printable multi-char sequence is the only safe choice. Documented in `src/lib/tmux.ts`.
 - **Reserved-shortcut compliant.** Cmd+P is left to Raycast's "Print" reservation; all extension shortcuts use other keys (Cmd+B for "Show Panes & Processes", Cmd+I for "Copy PID", etc.).
-- **Bilingual-free.** All user-facing strings are English. The cheatsheet was rewritten from the original bilingual draft for Store reach.
+- **No personal preset leakage.** Every label, default, and example was scrubbed for general use. The cheatsheet covers only stock tmux defaults, not the author's `~/.zshrc` shortcuts.
+- **English-only UI.** All user-facing strings are English. The cheatsheet was rewritten from the original bilingual draft for Store reach.
 
 ## Preferences
 
