@@ -61,7 +61,7 @@ function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
 
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch(
-    `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
+    `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`,
   );
   const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", false);
@@ -213,7 +213,7 @@ export default function Command() {
                         icon={Icon.SoccerBall}
                         onAction={() =>
                           open(
-                            `https://www.fifa.com/fifaplus/${LANG}/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`
+                            `https://www.fifa.com/fifaplus/${LANG}/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`,
                           )
                         }
                       />
