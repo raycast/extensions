@@ -12,12 +12,14 @@ export function useStream(preferences: Preferences) {
   const [text, setText] = useState("");
   const [status, setStatus] = useState<StreamStatus>("idle");
   const abortRef = useRef<AbortController | null>(null);
+  const rejectRef = useRef<((reason: Error) => void) | null>(null);
 
   const submit = useCallback(
     (question: string): Promise<string> => {
       return new Promise((resolve, reject) => {
         const controller = new AbortController();
         abortRef.current = controller;
+        rejectRef.current = reject;
         setText("");
         setStatus("streaming");
 
@@ -30,11 +32,13 @@ export function useStream(preferences: Preferences) {
           onComplete: (fullText) => {
             setStatus("done");
             abortRef.current = null;
+            rejectRef.current = null;
             resolve(fullText);
           },
           onError: (error) => {
             setStatus("error");
             abortRef.current = null;
+            rejectRef.current = null;
             reject(error);
           },
         }).catch(() => {});
@@ -46,6 +50,8 @@ export function useStream(preferences: Preferences) {
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    rejectRef.current?.(new Error("Cancelled"));
+    rejectRef.current = null;
     setStatus("idle");
   }, []);
 
