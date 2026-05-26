@@ -52,7 +52,7 @@ export default function MenuBar() {
     return (
       <MenuBarExtra icon={MENU_ICON}>
         <MenuBarExtra.Item
-          title="No todo.txt found"
+          title="No todo.txt Found"
           subtitle="Open Show Tasks to create it"
           icon={Icon.ExclamationMark}
           onAction={() => void launchCommand({ name: "tasks", type: LaunchType.UserInitiated })}
@@ -65,7 +65,7 @@ export default function MenuBar() {
     return (
       <MenuBarExtra icon={MENU_ICON}>
         <MenuBarExtra.Item
-          title="Couldn't read todo.txt"
+          title="Couldn't Read todo.txt"
           subtitle={state.message}
           icon={Icon.ExclamationMark}
           onAction={() => void launchCommand({ name: "tasks", type: LaunchType.UserInitiated })}
@@ -99,7 +99,7 @@ export default function MenuBar() {
 
   return (
     <MenuBarExtra icon={MENU_ICON} title={title}>
-      {isAllClear && <MenuBarExtra.Item title="All clear" icon={Icon.CheckCircle} />}
+      {isAllClear && <MenuBarExtra.Item title="All Clear" icon={Icon.CheckCircle} />}
       {sections.overdue.length > 0 && (
         <MenuBarExtra.Section title={sectionTitle("Overdue", sections.overdue.length)}>
           {sections.overdue.map(renderItem)}
@@ -111,7 +111,7 @@ export default function MenuBar() {
         </MenuBarExtra.Section>
       )}
       {sections.upNext.length > 0 && (
-        <MenuBarExtra.Section title={sectionTitle("Up next", sections.upNext.length)}>
+        <MenuBarExtra.Section title={sectionTitle("Up Next", sections.upNext.length)}>
           {upNextVisible.map(renderItem)}
           {upNextOverflow > 0 && (
             <MenuBarExtra.Item

@@ -133,7 +133,7 @@ export function TaskForm({ mode, initialTask, knownProjects, knownContexts, onSu
       </Form.TagPicker>
       <Form.DatePicker
         id="due"
-        title="Due date"
+        title="Due Date"
         defaultValue={defaults.due}
         type={Form.DatePicker.Type.Date}
       />

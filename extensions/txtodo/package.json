@@ -22,7 +22,7 @@
           "required": false,
           "data": [
             {
-              "title": "All",
+              "title": "Active",
               "value": "all"
             },
             {
@@ -30,7 +30,7 @@
               "value": "today"
             },
             {
-              "title": "This week",
+              "title": "This Week",
               "value": "this-week"
             },
             {
@@ -192,7 +192,7 @@
               "value": "tomorrow"
             },
             {
-              "title": "End of week",
+              "title": "End of Week",
               "value": "end-of-week"
             },
             {
@@ -200,11 +200,11 @@
               "value": "next-monday"
             },
             {
-              "title": "In 2 weeks",
+              "title": "In 2 Weeks",
               "value": "in-2-weeks"
             },
             {
-              "title": "End of month",
+              "title": "End of Month",
               "value": "end-of-month"
             }
           ]
@@ -240,7 +240,7 @@
   "preferences": [
     {
       "name": "todoPath",
-      "title": "Todo file",
+      "title": "Todo File",
       "description": "Path to your todo.txt file",
       "type": "textfield",
       "required": false,
@@ -248,7 +248,7 @@
     },
     {
       "name": "donePath",
-      "title": "Done file",
+      "title": "Done File",
       "description": "Path to your done.txt file (archived completed tasks)",
       "type": "textfield",
       "required": false,
@@ -256,7 +256,7 @@
     },
     {
       "name": "archiveOnComplete",
-      "title": "Archive behavior",
+      "title": "Archive Behavior",
       "description": "Move tasks to done.txt the moment they're marked complete",
       "label": "Auto-archive on complete",
       "type": "checkbox",
@@ -265,7 +265,7 @@
     },
     {
       "name": "autoStampCreationDate",
-      "title": "Creation date",
+      "title": "Creation Date",
       "description": "Automatically prepend today's date to new tasks",
       "label": "Auto-stamp creation date on new tasks",
       "type": "checkbox",

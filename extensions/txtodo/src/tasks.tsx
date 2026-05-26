@@ -367,7 +367,7 @@ export function TasksView({
       return (
         <List searchBarPlaceholder="Search archived tasks">
           <List.EmptyView
-            title="Couldn't read done.txt"
+            title="Couldn't Read done.txt"
             description={archiveStatus.message}
             icon={Icon.ExclamationMark}
             actions={
@@ -388,7 +388,7 @@ export function TasksView({
       return (
         <List searchBarPlaceholder="Search archived tasks">
           <List.EmptyView
-            title="No archived tasks"
+            title="No Archived Tasks"
             description="Completed tasks land here when you run Archive Completed."
             icon={Icon.Box}
           />
@@ -404,7 +404,7 @@ export function TasksView({
       <List searchBarPlaceholder="Search archived tasks">
         {archivedVisible.length === 0 ? (
           <List.EmptyView
-            title="No archived tasks match"
+            title="No Archived Tasks Match"
             description="Clear tag filters to see all archived tasks."
             icon={Icon.MagnifyingGlass}
             actions={
@@ -438,7 +438,7 @@ export function TasksView({
     return (
       <List searchBarPlaceholder="todo.txt not found">
         <List.EmptyView
-          title="No todo.txt found"
+          title="No todo.txt Found"
           description={`Expected at ${prefs.todoPath}`}
           icon={Icon.Document}
           actions={
@@ -545,7 +545,7 @@ export function TasksView({
     return (
       <List searchBarPlaceholder="No tasks yet">
         <List.EmptyView
-          title="No tasks yet"
+          title="No Tasks Yet"
           description="Press ⌘N to add one"
           icon={Icon.CheckCircle}
           actions={
@@ -580,16 +580,16 @@ export function TasksView({
               setPreset(v as ViewPreset);
             }}
           >
-            <List.Dropdown.Item title="All" value="all" />
+            <List.Dropdown.Item title="Active" value="all" />
             <List.Dropdown.Item title="Today" value="today" />
-            <List.Dropdown.Item title="This week" value="this-week" />
+            <List.Dropdown.Item title="This Week" value="this-week" />
             <List.Dropdown.Item title="Overdue" value="overdue" />
           </List.Dropdown>
         )
       }
     >
       {tagFilters.length > 0 && (
-        <List.Section title="Active filters" subtitle={`${tagFilters.length} active`}>
+        <List.Section title="Active Filters" subtitle={`${tagFilters.length} active`}>
           {tagFilters.map((f) => {
             const label = f.kind === "project" ? `+${f.name}` : `@${f.name}`;
             return (
@@ -634,11 +634,11 @@ export function TasksView({
       {visible.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title={`No tasks in ${presetLabel(preset)}`}
+          title={`No Tasks in ${presetLabel(preset)}`}
           description="Switch presets or clear filters."
           actions={
             <ActionPanel>
-              <Action title="Show All" icon={Icon.List} onAction={() => setPreset("all")} />
+              <Action title="Show Active" icon={Icon.List} onAction={() => setPreset("all")} />
               {tagFilters.length > 0 && (
                 <Action title="Clear Tag Filters" icon={Icon.Trash} onAction={clearTagFilters} />
               )}
@@ -806,7 +806,7 @@ function TaskItem({
                   onAction={() => onSetPriority(letter as Priority)}
                 />
               ))}
-              <Action title="Clear priority" onAction={() => onSetPriority(undefined)} />
+              <Action title="Clear Priority" onAction={() => onSetPriority(undefined)} />
             </ActionPanel.Submenu>
             <Action
               title="Archive Completed"
@@ -1019,9 +1019,9 @@ function TaskDetail({ task }: { task: Task }) {
 }
 
 const PRESET_LABELS: Record<ViewPreset, string> = {
-  all: "All",
+  all: "Active",
   today: "Today",
-  "this-week": "This week",
+  "this-week": "This Week",
   overdue: "Overdue",
   completed: "Completed",
 };
