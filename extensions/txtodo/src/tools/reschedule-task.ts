@@ -23,24 +23,26 @@ export default async function tool(input: Input): Promise<string> {
     return `todo.txt not found at ${prefs.todoPath} — create it via the Show Tasks command first.`;
   }
 
+  const active = current.tasks.filter((t) => !t.completed);
+  const match = bestMatch(active, input.query);
+  if (!match) return `No active task matched '${input.query}'.`;
+
+  if (match.metadata.due === input.due) {
+    return `'${match.description}' is already due ${input.due}.`;
+  }
+
+  const rescheduled = setDue(match, input.due);
+  const previous = match.metadata.due ?? "no date";
+
   for (let attempt = 0; attempt < 3; attempt++) {
-    const active = current.tasks.filter((t) => !t.completed);
-    const match = bestMatch(active, input.query);
-    if (!match) return `No active task matched '${input.query}'.`;
-
     const idx = current.tasks.findIndex((t) => t.raw === match.raw && t.lineNumber === match.lineNumber);
-    if (idx === -1) return `Couldn't locate the matched task in the file — please retry.`;
-
-    if (match.metadata.due === input.due) {
-      return `'${match.description}' is already due ${input.due}.`;
+    if (idx === -1) {
+      return `The matched task is no longer in todo.txt — it may have changed externally. Re-run the command to match against the current file.`;
     }
 
-    const rescheduled = setDue(match, input.due);
     const next: Task[] = [...current.tasks.slice(0, idx), rescheduled, ...current.tasks.slice(idx + 1)];
-
     const result = await writeAtomic(current, next);
     if (result.kind === "ok") {
-      const previous = match.metadata.due ?? "no date";
       return `Rescheduled '${match.description}' from ${previous} to ${input.due}.`;
     }
     current = result.fresh;
