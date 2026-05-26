@@ -132,7 +132,7 @@ async function persistWorkOsTokensToStoredAccount(
   }
 
   accounts[accountIndex].tokens = JSON.stringify(newTokens);
-  jsonData.accounts = accounts;
+  jsonData.accounts = typeof accountsValue === "string" ? JSON.stringify(accounts) : accounts;
   await fs.writeFile(getStoredAccountsPath(), JSON.stringify(jsonData));
 }
 
