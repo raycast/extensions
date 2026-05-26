@@ -1,7 +1,7 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import getAccessToken from "./getAccessToken";
-import { isAbortError, toError, toErrorMessage } from "./errorUtils";
+import { isAbortError, logGranolaError, toError, toErrorMessage } from "./errorUtils";
 import {
   GetDocumentsResponse,
   TranscriptSegment,
@@ -48,7 +48,9 @@ export function fetchGranolaData(route: string) {
       })
       .catch((err) => {
         if (mounted) {
-          setError(new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err }));
+          const tokenError = new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err });
+          logGranolaError("fetchGranolaData.getAccessToken", tokenError, { route });
+          setError(tokenError);
         }
       });
     return () => {
@@ -136,7 +138,9 @@ export function fetchGranolaData(route: string) {
   }
 
   if (fetchError) {
-    throw toError(fetchError);
+    const normalizedFetchError = toError(fetchError);
+    logGranolaError("fetchGranolaData.useFetch", normalizedFetchError, { route, url });
+    throw normalizedFetchError;
   }
 
   // Return transformed data (or original if transformation not needed)
