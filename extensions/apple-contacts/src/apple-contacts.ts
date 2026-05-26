@@ -38,10 +38,7 @@ export function normalizeKey(name: string): string {
     .toLowerCase();
 }
 
-export function mergeContacts(
-  a: UnifiedContact,
-  b: UnifiedContact,
-): UnifiedContact {
+export function mergeContacts(a: UnifiedContact, b: UnifiedContact): UnifiedContact {
   return {
     ...a,
     firstName: a.firstName || b.firstName,
@@ -55,9 +52,7 @@ export function mergeContacts(
   };
 }
 
-export function deduplicateContacts(
-  contacts: UnifiedContact[],
-): UnifiedContact[] {
+export function deduplicateContacts(contacts: UnifiedContact[]): UnifiedContact[] {
   const result: UnifiedContact[] = [];
 
   for (const contact of contacts) {
@@ -70,21 +65,13 @@ export function deduplicateContacts(
     }
 
     const key = normalizeKey(raw);
-    const contactPhones = new Set(
-      contact.phones.map((p) => p.value.replace(/\D/g, "")),
-    );
-    const contactEmails = new Set(
-      contact.emails.map((e) => e.value.toLowerCase()),
-    );
+    const contactPhones = new Set(contact.phones.map((p) => p.value.replace(/\D/g, "")));
+    const contactEmails = new Set(contact.emails.map((e) => e.value.toLowerCase()));
 
     const existingIdx = result.findIndex((r) => {
       if (normalizeKey(r.displayName) !== key) return false;
-      const sharedPhone = r.phones.some((p) =>
-        contactPhones.has(p.value.replace(/\D/g, "")),
-      );
-      const sharedEmail = r.emails.some((e) =>
-        contactEmails.has(e.value.toLowerCase()),
-      );
+      const sharedPhone = r.phones.some((p) => contactPhones.has(p.value.replace(/\D/g, "")));
+      const sharedEmail = r.emails.some((e) => contactEmails.has(e.value.toLowerCase()));
       return sharedPhone || sharedEmail;
     });
 
@@ -150,9 +137,7 @@ function formatLabel(type: string): string | undefined {
   return clean || undefined;
 }
 
-export async function fetchContactDetail(
-  contact: UnifiedContact,
-): Promise<UnifiedContact> {
+export async function fetchContactDetail(contact: UnifiedContact): Promise<UnifiedContact> {
   const appleId = contact.id.replace("apple:", "");
   const json = await runHelper("detail", appleId);
   const raw: RawDetail = JSON.parse(json || "{}");
@@ -174,24 +159,8 @@ export async function fetchContactDetail(
     jobTitle: raw.jobTitle || undefined,
     notes: raw.notes || undefined,
     birthday: raw.birthday || undefined,
-    photoUrl: raw.photoBase64
-      ? `data:image/jpeg;base64,${raw.photoBase64}`
-      : undefined,
+    photoUrl: raw.photoBase64 ? `data:image/jpeg;base64,${raw.photoBase64}` : undefined,
   };
-}
-
-// ─── Bulk photo fetch ─────────────────────────────────────────────────────────
-// Returns a map of contact id (e.g. "apple:<uuid>") → data URL for all contacts
-// that have image data. Uses a single native binary call for efficiency.
-
-export async function fetchAllContactPhotos(): Promise<Record<string, string>> {
-  const json = await runHelper("photos");
-  const raw: { id: string; photoBase64: string }[] = JSON.parse(json || "[]");
-  return Object.fromEntries(
-    raw
-      .filter((r) => r.id && r.photoBase64)
-      .map((r) => [`apple:${r.id}`, `data:image/jpeg;base64,${r.photoBase64}`]),
-  );
 }
 
 // ─── Delete a contact ─────────────────────────────────────────────────────────
@@ -202,17 +171,12 @@ export async function deleteAppleContact(appleId: string): Promise<void> {
 
 // ─── Create a new contact ─────────────────────────────────────────────────────
 
-export async function createAppleContact(
-  values: ContactFormValues,
-): Promise<void> {
+export async function createAppleContact(values: ContactFormValues): Promise<void> {
   await runHelper("create", JSON.stringify(values));
 }
 
 // ─── Update an existing contact ───────────────────────────────────────────────
 
-export async function updateAppleContact(
-  appleId: string,
-  values: ContactFormValues,
-): Promise<void> {
+export async function updateAppleContact(appleId: string, values: ContactFormValues): Promise<void> {
   await runHelper("update", appleId, JSON.stringify(values));
 }

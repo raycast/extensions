@@ -265,35 +265,6 @@ func cmdUpdate(store: CNContactStore, args: [String]) {
     }
 }
 
-// ─── photos ───────────────────────────────────────────────────────────────────
-// Returns: [{id, photoBase64}] — only contacts that have image data
-
-func cmdPhotos(store: CNContactStore) {
-    let keys: [CNKeyDescriptor] = [
-        CNContactIdentifierKey as CNKeyDescriptor,
-        CNContactImageDataAvailableKey as CNKeyDescriptor,
-        CNContactImageDataKey as CNKeyDescriptor,
-    ]
-    let request = CNContactFetchRequest(keysToFetch: keys)
-
-    var results: [[String: String]] = []
-    do {
-        try store.enumerateContacts(with: request) { contact, _ in
-            guard contact.imageDataAvailable,
-                  let imageData = contact.imageData,
-                  !imageData.isEmpty
-            else { return }
-            results.append([
-                "id":          cleanId(contact.identifier),
-                "photoBase64": imageData.base64EncodedString(),
-            ])
-        }
-    } catch {
-        fail("Failed to enumerate contacts: \(error.localizedDescription)")
-    }
-    outputJSON(results)
-}
-
 // ─── delete ───────────────────────────────────────────────────────────────────
 
 func cmdDelete(store: CNContactStore, args: [String]) {
@@ -350,7 +321,6 @@ Task {
         switch cliArgs[1] {
         case "list":   cmdList(store: store)
         case "detail": cmdDetail(store: store, args: cliArgs)
-        case "photos": cmdPhotos(store: store)
         case "create": cmdCreate(store: store, args: cliArgs)
         case "update": cmdUpdate(store: store, args: cliArgs)
         case "delete": cmdDelete(store: store, args: cliArgs)
