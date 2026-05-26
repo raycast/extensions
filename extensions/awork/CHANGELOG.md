@@ -1,5 +1,9 @@
 # awork Changelog
 
+## [Improve stability] - {PR_MERGE_DATE}
+
+- Improve reload logic
+
 ## [Improve stability] - 2026-03-25
 
 - Improve error handling of http requests
