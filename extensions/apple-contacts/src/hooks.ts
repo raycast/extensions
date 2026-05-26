@@ -1,11 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import { fetchAllContactPhotos, fetchAppleContacts } from "./apple-contacts";
-import { t } from "./i18n";
 
 export function useContacts() {
   return useCachedPromise(fetchAppleContacts, [], {
     keepPreviousData: true,
-    failureToastOptions: { title: t("toast_failed_load_contacts") },
+    failureToastOptions: { title: "Failed to load Apple Contacts" },
   });
 }
 

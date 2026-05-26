@@ -58,21 +58,44 @@ export function mergeContacts(
 export function deduplicateContacts(
   contacts: UnifiedContact[],
 ): UnifiedContact[] {
-  const seen = new Map<string, UnifiedContact>();
+  const result: UnifiedContact[] = [];
+
   for (const contact of contacts) {
     const raw = contact.displayName;
-    if (!raw || !raw.trim() || raw === "Unnamed Contact") {
-      seen.set(contact.id, contact);
+    const isUnnamed = !raw || !raw.trim() || raw === "Unnamed Contact";
+
+    if (isUnnamed) {
+      result.push(contact);
       continue;
     }
+
     const key = normalizeKey(raw);
-    if (!seen.has(key)) {
-      seen.set(key, contact);
+    const contactPhones = new Set(
+      contact.phones.map((p) => p.value.replace(/\D/g, "")),
+    );
+    const contactEmails = new Set(
+      contact.emails.map((e) => e.value.toLowerCase()),
+    );
+
+    const existingIdx = result.findIndex((r) => {
+      if (normalizeKey(r.displayName) !== key) return false;
+      const sharedPhone = r.phones.some((p) =>
+        contactPhones.has(p.value.replace(/\D/g, "")),
+      );
+      const sharedEmail = r.emails.some((e) =>
+        contactEmails.has(e.value.toLowerCase()),
+      );
+      return sharedPhone || sharedEmail;
+    });
+
+    if (existingIdx === -1) {
+      result.push(contact);
     } else {
-      seen.set(key, mergeContacts(seen.get(key)!, contact));
+      result[existingIdx] = mergeContacts(result[existingIdx], contact);
     }
   }
-  return Array.from(seen.values());
+
+  return result;
 }
 
 // ─── Fast list fetch ──────────────────────────────────────────────────────────

@@ -90,20 +90,68 @@ describe("mergeContacts", () => {
 // ─── deduplicateContacts ──────────────────────────────────────────────────────
 
 describe("deduplicateContacts", () => {
-  it("deduplicates exact-name contacts into one", () => {
+  it("merges same-name contacts that share a phone number", () => {
     const contacts = [
-      makeContact({ id: "1", displayName: "Alice" }),
-      makeContact({ id: "2", displayName: "Alice" }),
+      makeContact({
+        id: "1",
+        displayName: "Alice",
+        phones: [{ value: "+15550001" }],
+      }),
+      makeContact({
+        id: "2",
+        displayName: "Alice",
+        phones: [{ value: "+15550001" }],
+      }),
     ];
     expect(deduplicateContacts(contacts)).toHaveLength(1);
   });
 
-  it("deduplicates accented vs non-accented names into one result", () => {
+  it("merges same-name contacts that share an email address", () => {
     const contacts = [
-      makeContact({ id: "1", displayName: "Éric" }),
-      makeContact({ id: "2", displayName: "Eric" }),
+      makeContact({
+        id: "1",
+        displayName: "Alice",
+        emails: [{ value: "alice@example.com" }],
+      }),
+      makeContact({
+        id: "2",
+        displayName: "Alice",
+        emails: [{ value: "alice@example.com" }],
+      }),
     ];
     expect(deduplicateContacts(contacts)).toHaveLength(1);
+  });
+
+  it("merges accented vs non-accented names when they share a phone", () => {
+    const contacts = [
+      makeContact({
+        id: "1",
+        displayName: "Éric",
+        phones: [{ value: "+15550002" }],
+      }),
+      makeContact({
+        id: "2",
+        displayName: "Eric",
+        phones: [{ value: "+15550002" }],
+      }),
+    ];
+    expect(deduplicateContacts(contacts)).toHaveLength(1);
+  });
+
+  it("keeps same-name contacts with no shared contact info separate", () => {
+    const contacts = [
+      makeContact({
+        id: "1",
+        displayName: "John Smith",
+        phones: [{ value: "+15550011" }],
+      }),
+      makeContact({
+        id: "2",
+        displayName: "John Smith",
+        phones: [{ value: "+15550022" }],
+      }),
+    ];
+    expect(deduplicateContacts(contacts)).toHaveLength(2);
   });
 
   it("keeps contacts with different names separate", () => {
@@ -114,23 +162,23 @@ describe("deduplicateContacts", () => {
     expect(deduplicateContacts(contacts)).toHaveLength(2);
   });
 
-  it("merges fields across duplicate entries", () => {
+  it("merges fields across duplicate entries that share a phone", () => {
     const contacts = [
       makeContact({
         id: "1",
         displayName: "Alice",
-        phones: [{ value: "+1 555 0001" }],
+        phones: [{ value: "+15550001" }],
         emails: [],
       }),
       makeContact({
         id: "2",
         displayName: "Alice",
-        phones: [],
+        phones: [{ value: "+15550001" }],
         emails: [{ value: "alice@example.com" }],
       }),
     ];
     const [merged] = deduplicateContacts(contacts);
-    expect(merged.phones).toEqual([{ value: "+1 555 0001" }]);
+    expect(merged.phones).toEqual([{ value: "+15550001" }]);
     expect(merged.emails).toEqual([{ value: "alice@example.com" }]);
   });
 

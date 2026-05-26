@@ -12,7 +12,6 @@ import {
   updateAppleContact,
   ContactFormValues,
 } from "../apple-contacts";
-import { t } from "../i18n";
 import { UnifiedContact } from "../types";
 
 interface ContactFormProps {
@@ -24,22 +23,24 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!contact;
 
+  const extraPhones = (contact?.phones.length ?? 0) > 1;
+  const extraEmails = (contact?.emails.length ?? 0) > 1;
+  const hasMultipleValues = extraPhones || extraEmails;
+
   const { handleSubmit, itemProps } = useForm<ContactFormValues>({
     async onSubmit(values) {
       if (!values.firstName.trim() && !values.lastName.trim()) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t("toast_name_required"),
-          message: t("toast_name_required_message"),
+          title: "Name required",
+          message: "Please enter at least a first or last name.",
         });
         return;
       }
 
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: isEditing
-          ? t("toast_saving_contact")
-          : t("toast_creating_contact"),
+        title: isEditing ? "Saving contact…" : "Creating contact…",
       });
 
       try {
@@ -50,16 +51,14 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
           await createAppleContact(values);
         }
         toast.style = Toast.Style.Success;
-        toast.title = isEditing
-          ? t("toast_contact_updated")
-          : t("toast_contact_created");
+        toast.title = isEditing ? "Contact updated" : "Contact created";
         onSaved();
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = isEditing
-          ? t("toast_failed_update_contact")
-          : t("toast_failed_create_contact");
+          ? "Failed to update contact"
+          : "Failed to create contact";
         toast.message = String(error);
       }
     },
@@ -77,61 +76,65 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
   return (
     <Form
       navigationTitle={
-        isEditing
-          ? t("form_title_edit", {
-              name: contact?.displayName ?? t("contact_singular"),
-            })
-          : t("form_title_new")
+        isEditing ? `Edit ${contact?.displayName ?? "Contact"}` : "New Contact"
       }
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={
-              isEditing ? t("action_save_contact") : t("action_create_contact")
-            }
+            title={isEditing ? "Save Contact" : "Create Contact"}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
+      {isEditing && hasMultipleValues && (
+        <Form.Description
+          title="⚠️ Multiple values"
+          text={[
+            extraPhones &&
+              `This contact has ${contact!.phones.length} phone numbers — only the first is shown below.`,
+            extraEmails &&
+              `This contact has ${contact!.emails.length} email addresses — only the first is shown below.`,
+            "Saving will keep only the values entered here. Edit additional entries in the Contacts app.",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        />
+      )}
       <Form.TextField
-        title={t("field_first_name")}
-        placeholder={t("placeholder_first_name")}
+        title="First Name"
+        placeholder="First"
         {...itemProps.firstName}
       />
       <Form.TextField
-        title={t("field_last_name")}
-        placeholder={t("placeholder_last_name")}
+        title="Last Name"
+        placeholder="Last"
         {...itemProps.lastName}
       />
       <Form.Separator />
       <Form.TextField
-        title={t("field_company")}
-        placeholder={t("placeholder_company")}
+        title="Company"
+        placeholder="Acme Corp"
         {...itemProps.company}
       />
       <Form.TextField
-        title={t("field_job_title")}
-        placeholder={t("placeholder_job_title")}
+        title="Job Title"
+        placeholder="Engineer"
         {...itemProps.jobTitle}
       />
       <Form.Separator />
       <Form.TextField
-        title={t("field_phone")}
-        placeholder={t("placeholder_phone")}
+        title="Phone"
+        placeholder="+1 (555) 000-0000"
         {...itemProps.phone}
       />
       <Form.TextField
-        title={t("field_email")}
-        placeholder={t("placeholder_email")}
+        title="Email"
+        placeholder="name@example.com"
         {...itemProps.email}
       />
       <Form.Separator />
-      <Form.TextArea
-        title={t("field_notes")}
-        placeholder={t("placeholder_notes")}
-        {...itemProps.notes}
-      />
+      <Form.TextArea title="Notes" placeholder="Notes…" {...itemProps.notes} />
     </Form>
   );
 }

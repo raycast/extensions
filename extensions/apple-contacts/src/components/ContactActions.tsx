@@ -9,7 +9,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { deleteAppleContact } from "../apple-contacts";
-import { t } from "../i18n";
 import { UnifiedContact } from "../types";
 import ContactForm from "./ContactForm";
 
@@ -34,14 +33,14 @@ export default function ContactActions({
         {/* Primary action priority: Compose Email > Call > Open in Contacts */}
         {primaryEmail && (
           <Action.Open
-            title={t("action_compose_email")}
+            title="Compose Email"
             icon={Icon.Envelope}
             target={`mailto:${primaryEmail}`}
           />
         )}
         {primaryPhone && (
           <Action.Open
-            title={t("action_call")}
+            title="Call"
             icon={Icon.Phone}
             target={`tel:${primaryPhone}`}
             shortcut={
@@ -52,7 +51,7 @@ export default function ContactActions({
           />
         )}
         <Action.Open
-          title={t("action_open_in_contacts")}
+          title="Open in Contacts"
           icon={Icon.TwoPeople}
           target="addressbook://"
           shortcut={
@@ -63,7 +62,7 @@ export default function ContactActions({
         />
         {contact.addresses && contact.addresses.length > 0 && (
           <Action.OpenInBrowser
-            title={t("action_open_in_maps")}
+            title="Open in Maps"
             icon={Icon.Map}
             url={`https://maps.apple.com/?q=${encodeURIComponent(contact.addresses[0].formattedValue.replace(/\n/g, ", "))}`}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
@@ -71,7 +70,7 @@ export default function ContactActions({
         )}
       </ActionPanel.Section>
 
-      <ActionPanel.Section title={t("section_copy")}>
+      <ActionPanel.Section title="Copy">
         {contact.phones.map((p, i) => (
           <Action.CopyToClipboard
             key={p.value}
@@ -90,7 +89,7 @@ export default function ContactActions({
           />
         ))}
         <Action.CopyToClipboard
-          title={t("action_copy_name")}
+          title="Copy Name"
           content={contact.displayName}
           shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
         />
@@ -98,7 +97,7 @@ export default function ContactActions({
 
       <ActionPanel.Section>
         <Action
-          title={t("action_edit_contact")}
+          title="Edit Contact"
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           onAction={() =>
@@ -106,7 +105,7 @@ export default function ContactActions({
           }
         />
         <Action
-          title={t("action_new_contact")}
+          title="New Contact"
           icon={Icon.PersonCircle}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
           onAction={() => push(<ContactForm onSaved={onRefresh} />)}
@@ -115,7 +114,7 @@ export default function ContactActions({
 
       <ActionPanel.Section>
         <Action
-          title={t("action_refresh_contacts")}
+          title="Refresh Contacts"
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={onRefresh}
@@ -124,18 +123,16 @@ export default function ContactActions({
 
       <ActionPanel.Section>
         <Action
-          title={t("action_delete_contact")}
+          title="Delete Contact"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             const confirmed = await confirmAlert({
-              title: t("confirm_delete_title"),
-              message: t("confirm_delete_message", {
-                name: contact.displayName,
-              }),
+              title: "Delete Contact",
+              message: `Are you sure you want to delete "${contact.displayName}"? This cannot be undone.`,
               primaryAction: {
-                title: t("confirm_delete_button"),
+                title: "Delete",
                 style: Alert.ActionStyle.Destructive,
               },
             });
@@ -145,13 +142,13 @@ export default function ContactActions({
               await deleteAppleContact(appleId);
               await showToast({
                 style: Toast.Style.Success,
-                title: t("toast_contact_deleted"),
+                title: "Contact deleted",
               });
               onContactDeleted();
             } catch (err) {
               await showToast({
                 style: Toast.Style.Failure,
-                title: t("toast_failed_delete_contact"),
+                title: "Failed to delete contact",
                 message: err instanceof Error ? err.message : String(err),
               });
             }
@@ -171,7 +168,7 @@ function formatType(type: string | undefined): string {
 function copyTitle(type: string | undefined, field: "phone" | "email"): string {
   const label = formatType(type);
   if (field === "phone") {
-    return label ? t("copy_phone_labeled", { label }) : t("copy_phone");
+    return label ? `Copy ${label} Phone` : "Copy Phone";
   }
-  return label ? t("copy_email_labeled", { label }) : t("copy_email");
+  return label ? `Copy ${label} Email` : "Copy Email";
 }
