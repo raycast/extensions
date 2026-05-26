@@ -40,11 +40,15 @@ export function toMarkdown(module: (typeof ALL_MODULES)[number]) {
         break;
 
       case "removal":
-        lines.push("This package is no longer necessary. " + replacement.description);
+        lines.push(
+          "This package is no longer necessary." + (replacement.description ? " " + replacement.description : ""),
+        );
         break;
 
       case "simple":
-        lines.push("This package is no longer necessary. " + replacement.description);
+        lines.push(
+          "This package is no longer necessary." + (replacement.description ? " " + replacement.description : ""),
+        );
         if (replacement.example) {
           lines.push("```js");
           lines.push(replacement.example);

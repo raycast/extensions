@@ -12,12 +12,12 @@ Browse and search the [e18e](https://e18e.dev) community's curated list of moder
 
 ## Replacement types
 
-| Type | Meaning |
-|------|---------|
-| 🟢 Native | Built into the platform — no package needed |
-| 🔵 Simple | A one-liner or small snippet replaces it |
-| 🟡 Community choice | A well-known, more performant alternative |
-| 🔴 Removal | The package can simply be removed |
+| Type                | Meaning                                     |
+| ------------------- | ------------------------------------------- |
+| 🟢 Native           | Built into the platform — no package needed |
+| 🔵 Simple           | A one-liner or small snippet replaces it    |
+| 🟡 Community choice | A well-known, more performant alternative   |
+| 🔴 Removal          | The package can simply be removed           |
 
 ## Data source
 

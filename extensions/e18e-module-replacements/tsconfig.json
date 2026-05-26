@@ -4,6 +4,7 @@
   "compilerOptions": {
     "lib": ["ES2023"],
     "module": "commonjs",
+    "customConditions": ["import"],
     "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
@@ -11,6 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
+    "noEmit": true,
     "resolveJsonModule": true
   }
 }
