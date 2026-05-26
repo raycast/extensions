@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Worktree grouping and detection rewrite] - {PR_MERGE_DATE}
+## [Worktree grouping and detection rewrite] - 2026-05-26
 
 3x faster, windows port preparation, support for git branches & worktrees, search by project and branch.
 
