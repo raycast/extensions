@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2026-05-25
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -14,9 +14,6 @@
 - **Open in Mach Triage** — deep link to focus the desktop app on a specific ticket
 - **Workspace Picker** — filter all commands by workspace, defaults to active workspace
 - Pro enforcement on bridge — requires active Mach Triage Pro subscription
-
-## [0.1.0] - 2026-05-24
-
 - Initial extension scaffold with Mach Triage Status command
 - Localhost bridge client (`/health`) with Bearer auth
 - Preferences for bridge URL and token

@@ -5,6 +5,7 @@ import { BridgeClientError, searchTickets } from "./lib/bridge";
 import { useWorkspacePicker } from "./lib/use-workspace-picker";
 import { AddCommentAction, ChangeStatusAction, LogWorkAction, OpenInMachTriageAction } from "./lib/ticket-actions";
 import type { SearchResultItem } from "./lib/types";
+import { IssueDetail } from "./view-detail";
 
 const PROVIDER_ICONS: Record<string, Icon> = {
   jira: Icon.Globe,
@@ -101,7 +102,5 @@ function TicketListItem({ item }: { item: SearchResultItem }) {
 }
 
 function IssueDetailView({ issueId }: { issueId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { IssueDetail } = require("./view-detail");
   return <IssueDetail issueId={issueId} />;
 }

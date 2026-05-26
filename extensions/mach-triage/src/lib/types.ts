@@ -14,11 +14,6 @@ export type BridgeErrorBody = {
   error: string;
 };
 
-export type BridgePreferences = {
-  bridgeUrl: string;
-  bridgeToken: string;
-};
-
 export type SearchResultItem = {
   id: string;
   workspaceId: string;

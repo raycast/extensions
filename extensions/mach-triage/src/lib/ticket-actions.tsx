@@ -23,7 +23,7 @@ export function OpenInMachTriageAction({ ticket }: { ticket: TicketRef }) {
       icon={Icon.AppWindowSidebarRight}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       onAction={async () => {
-        await open(`machtriage://open?ticket_id=${ticket.id}`);
+        await open(`machtriage://open?ticket_id=${encodeURIComponent(ticket.id)}`);
       }}
     />
   );

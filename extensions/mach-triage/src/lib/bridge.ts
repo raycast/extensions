@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import type {
   BridgeAuthedHealth,
   BridgeErrorBody,
-  BridgePreferences,
   BridgePublicHealth,
   IssueDetailResponse,
   SearchResultItem,
@@ -14,8 +13,8 @@ function normalizeBaseUrl(raw: string): string {
   return raw.trim().replace(/\/+$/, "");
 }
 
-export function getBridgePreferences(): BridgePreferences {
-  const prefs = getPreferenceValues<BridgePreferences>();
+export function getBridgePreferences(): { bridgeUrl: string; bridgeToken: string } {
+  const prefs = getPreferenceValues<Preferences>();
   return {
     bridgeUrl: normalizeBaseUrl(prefs.bridgeUrl || "http://127.0.0.1:17847"),
     bridgeToken: prefs.bridgeToken?.trim() ?? "",

@@ -4,6 +4,7 @@ import { BridgeClientError, fetchTodayBoard } from "./lib/bridge";
 import { useWorkspacePicker } from "./lib/use-workspace-picker";
 import { AddCommentAction, ChangeStatusAction, LogWorkAction, OpenInMachTriageAction } from "./lib/ticket-actions";
 import type { TodayTicketItem } from "./lib/types";
+import { IssueDetail } from "./view-detail";
 
 const SECTION_META: Record<string, { title: string; icon: Icon; color: Color }> = {
   active: { title: "Active", icon: Icon.Play, color: Color.Blue },
@@ -102,7 +103,5 @@ function TodayItem({ item, track, onRefresh }: { item: TodayTicketItem; track: s
 }
 
 function IssueDetailView({ issueId }: { issueId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { IssueDetail } = require("./view-detail");
   return <IssueDetail issueId={issueId} />;
 }
