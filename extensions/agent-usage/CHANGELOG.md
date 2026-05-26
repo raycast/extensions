@@ -1,5 +1,13 @@
 # Agent Usage Changelog
 
+## [Add Kimi CLI Support] - 2026-05-26
+
+### New Features
+
+- **Kimi CLI Auto-Detection** — Automatically detect and use credentials from the official `kimi` CLI (`~/.kimi/credentials/kimi-code.json`)
+- **Automatic Token Refresh** — When a Kimi CLI token expires, the extension automatically refreshes it using Moonshot's OAuth refresh endpoint and persists the new token back to the credentials file
+- Kimi CLI credentials appear as "Auto-detected (Kimi CLI)" in multi-account view alongside OpenCode and manual accounts
+
 ## [Add OpenCode Go Provider] - 2026-05-15
 
 - Add OpenCode Go plan usage display
