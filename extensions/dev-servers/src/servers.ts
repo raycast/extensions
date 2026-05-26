@@ -239,9 +239,10 @@ export async function fetchServers(): Promise<DevServer[]> {
   const cwdByPid = await listCwds(finalPids);
 
   // Look up git info per unique cwd, in parallel. Worktrees of the same repo
-  // share a git common-dir, so we use that (well, its parent's basename) as
-  // the project key — collapses sibling worktrees into one group while still
-  // letting us show the branch on each row.
+  // share a git common-dir, so we use that path as the project key — collapses
+  // sibling worktrees into one group while still letting us show the branch on
+  // each row. The project's display name is the basename of the common-dir's
+  // parent (the repo root).
   const uniqueCwds = [...new Set([...cwdByPid.values()])];
   const gitByCwd = new Map<string, GitInfo | undefined>();
   await Promise.all(
@@ -255,8 +256,9 @@ export async function fetchServers(): Promise<DevServer[]> {
     const cwd = cwdByPid.get(proc.pid);
     if (!cwd) continue; // shouldn't happen for live processes, but be safe
     const git = gitByCwd.get(cwd);
-    // For git projects: project name & key come from the directory holding
-    // the shared .git dir. For non-git: fall back to the worktree basename.
+    // For git projects: key is the shared .git dir path (stable across all
+    // worktrees of the repo), name is the basename of its parent (the repo
+    // root). For non-git: both fall back to the worktree itself.
     const projectName = git
       ? path.basename(path.dirname(git.commonDir))
       : path.basename(cwd) || cwd;
