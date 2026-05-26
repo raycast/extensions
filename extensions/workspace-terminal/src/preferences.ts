@@ -1,18 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import type { ExtensionPreferences } from "./types";
+export type AppPreferences = Preferences;
 
-export function getExtensionPreferences(): ExtensionPreferences {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export function getExtensionPreferences(): AppPreferences {
+  const preferences = getPreferenceValues<Preferences>();
 
   return {
     ...preferences,
-    terminalType: preferences.terminalType ?? "ghostty",
-    commandMode: preferences.commandMode ?? "keepShell",
-    shellPath: preferences.shellPath?.trim() || "/bin/zsh",
-    groupProjectsByTag: preferences.groupProjectsByTag ?? true,
-    hideProjectsWithoutTag: preferences.hideProjectsWithoutTag ?? false,
-    hideProjectsNotEnabled: preferences.hideProjectsNotEnabled ?? false,
-    reuseWindow: preferences.reuseWindow ?? false,
+    shellPath: preferences.shellPath.trim() || "/bin/zsh",
   };
 }

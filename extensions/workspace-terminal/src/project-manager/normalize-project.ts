@@ -2,11 +2,8 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 import { dirname, normalize } from "path";
 
-import type {
-  ExtensionPreferences,
-  NormalizedProject,
-  ProjectEntry,
-} from "../types";
+import type { AppPreferences } from "../preferences";
+import type { NormalizedProject, ProjectEntry } from "../types";
 
 const REMOTE_PREFIXES = ["vscode-remote://", "vscode-vfs://"];
 
@@ -47,7 +44,7 @@ function getProjectPath(entry: ProjectEntry): string | undefined {
 
 export function normalizeProject(
   entry: ProjectEntry,
-  preferences: ExtensionPreferences,
+  preferences: AppPreferences,
 ): NormalizedProject | undefined {
   const name = entry.name?.trim();
   const projectPath = getProjectPath(entry);

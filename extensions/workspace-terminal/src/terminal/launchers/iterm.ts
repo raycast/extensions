@@ -16,7 +16,7 @@ function buildFallbackCommand(request: LaunchRequest): string {
 export const itermLauncher: TerminalLauncher = {
   type: "iterm",
   title: "iTerm",
-  reuseSupport: "supported",
+  reuseSupport: "none",
   checkInstalled(): Promise<TerminalDetection> {
     return detectCliOrApp("iterm2", "iTerm.app");
   },

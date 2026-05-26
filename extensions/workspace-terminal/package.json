@@ -6,8 +6,13 @@
   "icon": "extension-icon.png",
   "author": "07JP27",
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
-  "platforms": ["macOS"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "open-workspace",
@@ -41,13 +46,34 @@
       "required": true,
       "default": "ghostty",
       "data": [
-        { "title": "Ghostty", "value": "ghostty" },
-        { "title": "iTerm", "value": "iterm" },
-        { "title": "Terminal", "value": "terminal" },
-        { "title": "Warp", "value": "warp" },
-        { "title": "kitty", "value": "kitty" },
-        { "title": "Alacritty", "value": "alacritty" },
-        { "title": "WezTerm", "value": "wezterm" }
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
+        }
       ]
     },
     {
@@ -65,9 +91,18 @@
       "required": false,
       "default": "keepShell",
       "data": [
-        { "title": "Keep Shell After Command", "value": "keepShell" },
-        { "title": "Command Only", "value": "commandOnly" },
-        { "title": "Open Only", "value": "none" }
+        {
+          "title": "Keep Shell After Command",
+          "value": "keepShell"
+        },
+        {
+          "title": "Command Only",
+          "value": "commandOnly"
+        },
+        {
+          "title": "Open Only",
+          "value": "none"
+        }
       ]
     },
     {
@@ -124,7 +159,6 @@
   },
   "dependencies": {
     "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^1.17.0",
     "js-yaml": "^4.1.0",
     "tildify": "^2.0.0"
   },

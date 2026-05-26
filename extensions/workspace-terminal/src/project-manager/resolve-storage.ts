@@ -2,16 +2,17 @@ import { existsSync, lstatSync } from "fs";
 import { homedir } from "os";
 import { dirname, join } from "path";
 
-import type { ExtensionPreferences, StorageResolution } from "../types";
+import type { AppPreferences } from "../preferences";
+import type { StorageResolution } from "../types";
 
 const PROJECTS_FILE = "projects.json";
 const PROJECT_MANAGER_STORAGE = "alefragnani.project-manager";
 
-function getVSCodeAppName(preferences: ExtensionPreferences): string {
+function getVSCodeAppName(preferences: AppPreferences): string {
   return preferences.vscodeApp?.name || "Visual Studio Code";
 }
 
-function getDefaultStoragePath(preferences: ExtensionPreferences): string {
+function getDefaultStoragePath(preferences: AppPreferences): string {
   const shortName = getVSCodeAppName(preferences).replace(
     /^Visual Studio /,
     "",
@@ -28,7 +29,7 @@ function getDefaultStoragePath(preferences: ExtensionPreferences): string {
 }
 
 export function resolveProjectManagerStorage(
-  preferences: ExtensionPreferences,
+  preferences: AppPreferences,
 ): StorageResolution {
   const overridePath = preferences.projectManagerDataPath?.trim();
 

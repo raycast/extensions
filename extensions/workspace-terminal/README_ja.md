@@ -2,6 +2,8 @@
 
 [English](README.md) | [日本語](README_ja.md)
 
+![Workspace Terminal のスクリーンショット](metadata/workspace-terminal-1.png)
+
 Raycast から VS Code Project Manager に保存済みのワークスペースを選び、好みのターミナルで開きます。必要に応じて `claude`、`gh copilot`、開発サーバー起動コマンドなども同時に実行できます。
 
 Workspace Terminal は、VS Code Project Manager 拡張で既に保存したプロジェクトを読み込みます。ディレクトリの自動スキャンや、別のプロジェクト一覧の管理は不要です。

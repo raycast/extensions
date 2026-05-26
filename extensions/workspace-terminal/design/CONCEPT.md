@@ -6,7 +6,7 @@
 - リポジトリ名（案）: `workspace-terminal`
 - バージョン: Draft v0.2
 - 対象 OS: macOS（Raycast / 各ターミナルが macOS 前提）
-- 言語/SDK: TypeScript + React（`@raycast/api`, `@raycast/utils`）
+- 言語/SDK: TypeScript + React（`@raycast/api`）
 
 ---
 
@@ -344,7 +344,8 @@ workspace-terminal/
 
 ### 8.1 主要 npm 依存
 - `@raycast/api`（List/Action/preferences/LocalStorage/open/showHUD）
-- `@raycast/utils`（`runAppleScript`, `usePromise`/`useCachedPromise` など）
+- `js-yaml`（Warp Launch Configuration の生成）
+- `tildify`（表示用パスの短縮）
 
 ---
 

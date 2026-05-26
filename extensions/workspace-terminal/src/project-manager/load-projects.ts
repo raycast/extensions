@@ -1,11 +1,8 @@
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 
-import type {
-  ExtensionPreferences,
-  NormalizedProject,
-  ProjectEntry,
-} from "../types";
+import type { AppPreferences } from "../preferences";
+import type { NormalizedProject, ProjectEntry } from "../types";
 import { normalizeProject } from "./normalize-project";
 
 export interface LoadProjectsResult {
@@ -19,7 +16,7 @@ function isProjectEntryArray(value: unknown): value is ProjectEntry[] {
 
 export async function loadProjects(
   projectsJsonPath: string,
-  preferences: ExtensionPreferences,
+  preferences: AppPreferences,
 ): Promise<LoadProjectsResult> {
   if (!existsSync(projectsJsonPath)) {
     return {

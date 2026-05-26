@@ -2,6 +2,8 @@
 
 [English](README.md) | [日本語](README_ja.md)
 
+![Workspace Terminal screenshot](metadata/workspace-terminal-1.png)
+
 Open your VS Code Project Manager workspaces from Raycast in your preferred terminal, with an optional startup command such as `claude`, `gh copilot`, or a dev server.
 
 Workspace Terminal reads the projects you already saved with the VS Code Project Manager extension. It does not scan directories or require a separate project list.

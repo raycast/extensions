@@ -516,7 +516,6 @@ src/
 {
   "dependencies": {
     "@raycast/api": "latest",
-    "@raycast/utils": "latest",
     "js-yaml": "^4.1.0",
     "tildify": "^2.0.0"
   },

@@ -10,7 +10,7 @@ import { toAppleScriptString } from "../shell-quote";
 export const ghosttyLauncher: TerminalLauncher = {
   type: "ghostty",
   title: "Ghostty",
-  reuseSupport: "bestEffort",
+  reuseSupport: "none",
   checkInstalled(): Promise<TerminalDetection> {
     return detectCliOrApp("ghostty", "Ghostty.app");
   },

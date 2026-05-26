@@ -1,5 +1,3 @@
-import type { Application } from "@raycast/api";
-
 export type TerminalType =
   | "ghostty"
   | "iterm"
@@ -16,19 +14,6 @@ export type ReuseSupport =
   | "bestEffort"
   | "requiresUserSetup"
   | "supported";
-
-export interface ExtensionPreferences {
-  vscodeApp?: Application;
-  projectManagerDataPath?: string;
-  terminalType: TerminalType;
-  defaultCommand?: string;
-  commandMode?: CommandMode;
-  reuseWindow?: boolean;
-  shellPath?: string;
-  groupProjectsByTag?: boolean;
-  hideProjectsWithoutTag?: boolean;
-  hideProjectsNotEnabled?: boolean;
-}
 
 export interface ProjectEntry {
   id?: string;

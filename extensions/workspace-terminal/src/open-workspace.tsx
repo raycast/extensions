@@ -12,7 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import tildify from "tildify";
 
-import { getExtensionPreferences } from "./preferences";
+import { getExtensionPreferences, type AppPreferences } from "./preferences";
 import { loadProjects } from "./project-manager/load-projects";
 import { resolveProjectManagerStorage } from "./project-manager/resolve-storage";
 import {
@@ -26,7 +26,6 @@ import { execFileAsync } from "./terminal/exec";
 import { getTerminalLauncher, launchInTerminal } from "./terminal";
 import type {
   CommandMode,
-  ExtensionPreferences,
   NormalizedProject,
   StorageResolution,
 } from "./types";
@@ -47,7 +46,7 @@ interface CommandFormValues {
 const NO_TAG = "[no tags]";
 
 async function loadState(
-  preferences: ExtensionPreferences,
+  preferences: AppPreferences,
 ): Promise<Omit<LoadedState, "isLoading">> {
   const storage = resolveProjectManagerStorage(preferences);
   if (storage.error) {
@@ -127,7 +126,7 @@ function groupProjects(
 
 async function openInVSCode(
   project: NormalizedProject,
-  preferences: ExtensionPreferences,
+  preferences: AppPreferences,
 ): Promise<void> {
   const appName = preferences.vscodeApp?.name || "Visual Studio Code";
   await execFileAsync("open", ["-a", appName, project.rootPath]);
@@ -179,7 +178,7 @@ function ProjectActions({
   updateOverrides,
 }: {
   project: NormalizedProject;
-  preferences: ExtensionPreferences;
+  preferences: AppPreferences;
   overrides: ProjectCommandOverrides;
   updateOverrides(overrides: ProjectCommandOverrides): void;
 }) {
@@ -346,7 +345,7 @@ function ProjectItem({
   updateOverrides,
 }: {
   project: NormalizedProject;
-  preferences: ExtensionPreferences;
+  preferences: AppPreferences;
   overrides: ProjectCommandOverrides;
   updateOverrides(overrides: ProjectCommandOverrides): void;
 }) {
