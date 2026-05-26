@@ -9,17 +9,11 @@ import {
 import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { fetchContactDetail } from "../apple-contacts";
-import { formatBirthday, groupByLetter } from "../helpers";
+import { formatBirthday, formatType, groupByLetter } from "../helpers";
 import { useContactPhotos } from "../hooks";
 import { ContactAddress, UnifiedContact } from "../types";
 import ContactActions from "./ContactActions";
 import ContactForm from "./ContactForm";
-
-function formatType(type: string | undefined): string {
-  if (!type) return "";
-  const clean = type.replace(/^_\$!<(.+)>!\$_$/, "$1");
-  return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
-}
 
 function formatAddress(a: ContactAddress): string {
   return a.formattedValue.replace(/\n/g, ", ");

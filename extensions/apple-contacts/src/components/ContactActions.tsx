@@ -9,6 +9,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { deleteAppleContact } from "../apple-contacts";
+import { formatType } from "../helpers";
 import { UnifiedContact } from "../types";
 import ContactForm from "./ContactForm";
 
@@ -157,12 +158,6 @@ export default function ContactActions({
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-function formatType(type: string | undefined): string {
-  if (!type) return "";
-  const clean = type.replace(/^_\$!<(.+)>!\$_$/, "$1");
-  return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
 }
 
 function copyTitle(type: string | undefined, field: "phone" | "email"): string {
