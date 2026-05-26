@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.1.4] - {PR_MERGE_DATE}
+## [2.1.4] - 2026-05-26
 
 ### Bug Fixes
 
