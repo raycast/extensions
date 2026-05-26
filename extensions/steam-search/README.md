@@ -25,8 +25,6 @@ See your last 10 played games with total playtime, live player counts, 24h peak,
 
 See which games on your Steam wishlist are currently on sale, sorted by discount percentage. Shows original and sale price and GG.deals keyshop price.
 
-> **Requires public wishlist:** Steam → Edit Profile → Privacy Settings → set **Game Details** to Public. If your wishlist is private, the extension will show a message explaining this.
-
 ### Friends Online *(requires Steam API Key + Steam ID)*
 
 See which Steam friends are online or in-game, split into three sections: **In-Game**, **Online**, and **Away**. In-game friends show what they're playing with the game icon. Press Enter to open a chat window directly in Steam.

@@ -144,10 +144,13 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
 
       setData({
         name: appData?.name ?? name,
-        shortDescription: (appData?.short_description ?? "").replace(
-          /<[^>]*>/g,
-          "",
-        ),
+        shortDescription: (appData?.short_description ?? "")
+          .replace(/<[^>]*>/g, "")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'"),
         headerImage: appData?.header_image ?? "",
         releaseDate: appData?.release_date?.date ?? "",
         developers: appData?.developers ?? [],

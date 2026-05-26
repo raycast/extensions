@@ -11,7 +11,7 @@
 - Owned game detection via Steam API — owned games show playtime in a green badge
 - Wishlisted games tagged in search results
 - Recently Played view — last 10 played games with playtime, live player counts, review scores, and achievement progress
-- Wishlist Discounts view — wishlisted games on sale sorted by discount, with original price in gray, sale price in green, and GG.deals keyshop prices
+- Wishlist Discounts view — wishlisted games on sale sorted by discount, with original price in gray, sale price in green, and GG.deals keyshop prices; uses the authenticated Steam API (works regardless of wishlist privacy settings)
 - Friends Online view — friends split into In-Game / Online / Away sections, with game icons and one-press chat
 - Open in Steam client, GG.deals, SteamDB actions
 - Cross-platform keyboard shortcuts (Ctrl on Windows, Cmd on macOS)
@@ -21,3 +21,4 @@
 - Local cache with 1-hour TTL, region-aware to prevent stale prices
 - Onboarding screen on first launch with links to get API keys
 - All credentials optional — extension works without any setup
+- HTML entities in game descriptions decoded correctly (e.g. `&amp;` → `&`)

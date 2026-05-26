@@ -1,9 +1,9 @@
 export const CACHE_TTL = 60 * 60 * 1000; // 1 hour
-export const WISHLIST_CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours — wishlist pagination is slow; long TTL reduces re-fetches
+export const WISHLIST_CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours — sales don't change frequently; long TTL reduces API calls
 
 export const STEAM_HEADERS = {
   "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
   Accept: "text/html",
   Referer: "https://store.steampowered.com/",
   Cookie:

@@ -89,7 +89,12 @@ export default function Command() {
       });
     }
     if (!getCachedSubtitle("wishlist", WISHLIST_CACHE_TTL)) {
-      fetchDiscountedWishlistGames(steamId ?? "", ggDealsApiKey ?? "", region)
+      fetchDiscountedWishlistGames(
+        steamApiKey ?? "",
+        steamId ?? "",
+        ggDealsApiKey ?? "",
+        region,
+      )
         .then(({ games, unavailable }) => {
           if (unavailable !== null) return;
           const subtitle =

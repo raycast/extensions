@@ -12,13 +12,9 @@ import {
 } from "@raycast/api";
 import { GameDetail } from "./GameDetail";
 import { useEffect, useRef, useState } from "react";
-import { fetchAppIcon } from "../api/steam";
+import { fetchAppIcon, fetchWishlist } from "../api/steam";
 import { batchFetchGGDeals, ggDealsCache } from "../api/ggdeals";
-import {
-  WISHLIST_CACHE_TTL,
-  CURRENCY_SYMBOLS,
-  CURRENCY_SUFFIX_REGIONS,
-} from "../constants";
+import { WISHLIST_CACHE_TTL } from "../constants";
 import { getIconUrl, setIconUrl, setCachedSubtitle } from "../cache";
 
 interface WishlistGame {
@@ -31,93 +27,109 @@ interface WishlistGame {
   ggPrice: string | null;
 }
 
-interface WishlistDataEntry {
+interface PriceEntry {
   name: string;
-  capsule: string;
-  subs: { discount_pct: number; price?: number; original_price?: number }[];
-  is_free_game: boolean;
+  discountPct: number;
+  steamPrice: string | null;
+  steamOriginalPrice: string | null;
 }
 
 interface WishlistResult {
   games: WishlistGame[];
-  unavailable: "private" | "rate-limited" | null;
+  unavailable: "rate-limited" | null;
 }
 
 const discountedGamesCacheMap = new Map<string, WishlistResult>();
 const discountedGamesFetchPromises = new Map<string, Promise<WishlistResult>>();
 
-function formatWishlistPrice(cents: number, region: string): string {
-  const symbol = CURRENCY_SYMBOLS[region] ?? "$";
-  const value = (cents / 100).toFixed(2);
-  return CURRENCY_SUFFIX_REGIONS.has(region)
-    ? `${value}${symbol}`
-    : `${symbol}${value}`;
-}
-
-async function fetchAllWishlistData(
-  steamId: string,
+async function fetchWishlistPrices(
+  appIds: number[],
   region: string,
   signal?: AbortSignal,
 ): Promise<{
-  entries: Map<number, WishlistDataEntry>;
-  unavailable: "private" | "rate-limited" | null;
+  entries: Map<number, PriceEntry>;
+  unavailable: "rate-limited" | null;
 }> {
-  const result = new Map<number, WishlistDataEntry>();
-  for (let page = 0; page < 30; page++) {
-    if (signal?.aborted) break;
-    // 1500ms between pages keeps us at ~1 req/1.5s — the community-confirmed safe floor for store.steampowered.com scraping
-    if (page > 0) await new Promise((resolve) => setTimeout(resolve, 1500));
-    if (signal?.aborted) break;
-    const res = await fetch(
-      `https://store.steampowered.com/wishlist/profiles/${steamId}/wishlistdata/?p=${page}&cc=${region}&l=english`,
-      { signal },
-    ).catch(() => null);
-    if (!res) break;
-    // 429 = explicit rate limit response
-    if (res.status === 429)
-      return { entries: result, unavailable: "rate-limited" };
-    if (res.status !== 200) break;
+  const entries = new Map<number, PriceEntry>();
+  // IStoreBrowseService/GetItems/v1 is a batch endpoint on api.steampowered.com
+  // that is NOT subject to the per-IP store endpoint limit (~200 req/5 min).
+  // The endpoint is public (no key required); use GET with input_json in the
+  // query string — the same method used by known working implementations.
+  // 100 IDs per request; a 200-game wishlist is just 2 requests total.
+  const BATCH_SIZE = 100;
 
-    let text: string;
+  for (let i = 0; i < appIds.length; i += BATCH_SIZE) {
+    if (signal?.aborted) break;
+    const batch = appIds.slice(i, i + BATCH_SIZE);
+    const inputJson = JSON.stringify({
+      ids: batch.map((appid) => ({ appid })),
+      context: {
+        language: "english",
+        country_code: region.toUpperCase(),
+        steam_realm: "1",
+      },
+      data_request: {
+        include_all_purchase_options: true,
+      },
+    });
+
     try {
-      text = await res.text();
-    } catch {
-      if (page === 0) return { entries: result, unavailable: "rate-limited" };
-      break;
-    }
+      const res = await fetch(
+        `https://api.steampowered.com/IStoreBrowseService/GetItems/v1/?input_json=${encodeURIComponent(inputJson)}`,
+        { signal },
+      );
+      if (res.status === 429) return { entries, unavailable: "rate-limited" };
+      if (!res.ok) continue;
 
-    // Non-JSON response on page 0 = Steam returned an error page
-    if (!text.trimStart().startsWith("{")) {
-      if (page === 0) {
-        const lower = text.toLowerCase();
-        // Only mark as private if the page explicitly says so;
-        // default to rate-limited for any other unexpected HTML
-        const unavailable =
-          lower.includes("private") ||
-          lower.includes("not authorized") ||
-          lower.includes("forbidden")
-            ? "private"
-            : "rate-limited";
-        return { entries: result, unavailable };
+      const data = (await res.json()) as {
+        response?: {
+          store_items?: {
+            appid: number;
+            name?: string;
+            purchase_options?: {
+              bundleid?: number;
+              discount_pct?: number;
+              final_price?: number;
+              formatted_final_price?: string;
+              formatted_original_price?: string;
+            }[];
+          }[];
+        };
+      };
+
+      for (const item of data.response?.store_items ?? []) {
+        const options = item.purchase_options ?? [];
+        const standalone = options.find((o) => !o.bundleid);
+
+        // Prefer a directly discounted standalone game. Only fall back to a
+        // bundle if its price is strictly less than the standalone's current
+        // price — a bundle that costs MORE than buying the game alone is not
+        // a deal worth surfacing (e.g. a multi-game bundle at 44€ when the
+        // standalone is 39€).
+        const option =
+          options.find((o) => !o.bundleid && (o.discount_pct ?? 0) > 0) ??
+          options.find(
+            (o) =>
+              !!o.bundleid &&
+              (o.discount_pct ?? 0) > 0 &&
+              standalone?.final_price != null &&
+              (o.final_price ?? Infinity) < standalone.final_price,
+          );
+
+        if (!option) continue;
+        entries.set(item.appid, {
+          name: item.name ?? `App ${item.appid}`,
+          discountPct: option.discount_pct!,
+          steamPrice: option.formatted_final_price ?? null,
+          steamOriginalPrice: option.formatted_original_price ?? null,
+        });
       }
-      // Later pages returning non-JSON just means end of data
-      break;
-    }
-
-    let data: Record<string, WishlistDataEntry> | null = null;
-    try {
-      data = JSON.parse(text) as Record<string, WishlistDataEntry>;
     } catch {
-      if (page === 0) return { entries: result, unavailable: "rate-limited" };
-      break;
-    }
-
-    if (!data || !Object.keys(data).length) break;
-    for (const [appidStr, entry] of Object.entries(data)) {
-      result.set(parseInt(appidStr, 10), entry);
+      // Ignore batch failures
     }
   }
-  return { entries: result, unavailable: null };
+
+  return { entries, unavailable: null };
 }
 
 async function loadCachedGames(
@@ -127,7 +139,7 @@ async function loadCachedGames(
 ): Promise<WishlistResult | null> {
   try {
     const raw = await LocalStorage.getItem<string>(
-      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey}`,
+      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey.slice(-8)}`,
     );
     if (!raw) return null;
     const { games, timestamp }: { games: WishlistGame[]; timestamp: number } =
@@ -147,7 +159,7 @@ async function saveCachedGames(
 ): Promise<void> {
   try {
     await LocalStorage.setItem(
-      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey}`,
+      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey.slice(-8)}`,
       JSON.stringify({ games, timestamp: Date.now() }),
     );
   } catch {
@@ -156,6 +168,7 @@ async function saveCachedGames(
 }
 
 export function fetchDiscountedWishlistGames(
+  steamApiKey: string,
   steamId: string,
   ggDealsApiKey: string,
   region: string,
@@ -175,8 +188,20 @@ export function fetchDiscountedWishlistGames(
       return cached;
     }
 
-    const { entries: wishlistData, unavailable } = await fetchAllWishlistData(
-      steamId,
+    // Use the authenticated IWishlistService API for IDs — avoids the
+    // unauthenticated wishlistdata scraping endpoint that Steam rate-limits.
+    const wishlistIds = await fetchWishlist(steamApiKey, steamId);
+    if (!wishlistIds.size) {
+      discountedGamesFetchPromises.delete(cacheKey);
+      return { games: [], unavailable: null };
+    }
+    if (signal?.aborted) {
+      discountedGamesFetchPromises.delete(cacheKey);
+      return { games: [], unavailable: null };
+    }
+
+    const { entries: priceData, unavailable } = await fetchWishlistPrices(
+      Array.from(wishlistIds),
       region,
       signal,
     );
@@ -186,18 +211,18 @@ export function fetchDiscountedWishlistGames(
     }
     if (unavailable !== null) {
       // Cache error results in memory only — not in LocalStorage — so the next
-      // session retries once the rate limit clears or privacy settings are fixed.
+      // session retries once the rate limit clears.
       const errorResult: WishlistResult = { games: [], unavailable };
       discountedGamesCacheMap.set(cacheKey, errorResult);
       discountedGamesFetchPromises.delete(cacheKey);
       return errorResult;
     }
-    if (!wishlistData.size) {
+    if (!priceData.size) {
       discountedGamesFetchPromises.delete(cacheKey);
       return { games: [], unavailable: null };
     }
 
-    const allIds = Array.from(wishlistData.keys());
+    const allIds = Array.from(priceData.keys());
     if (ggDealsApiKey) {
       for (let i = 0; i < allIds.length; i += 50) {
         await batchFetchGGDeals(allIds.slice(i, i + 50), ggDealsApiKey, region);
@@ -205,24 +230,14 @@ export function fetchDiscountedWishlistGames(
     }
 
     const games: WishlistGame[] = [];
-    for (const [appid, entry] of wishlistData.entries()) {
-      if (entry.is_free_game) continue;
-      const sub = entry.subs?.[0];
-      if (!sub || sub.discount_pct === 0) continue;
-
+    for (const [appid, entry] of priceData.entries()) {
       games.push({
         appid,
         name: entry.name,
-        iconUrl:
-          entry.capsule ||
-          `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_sm_120.jpg`,
-        steamPrice:
-          sub.price != null ? formatWishlistPrice(sub.price, region) : null,
-        steamOriginalPrice:
-          sub.original_price != null
-            ? formatWishlistPrice(sub.original_price, region)
-            : null,
-        discountPercent: sub.discount_pct,
+        iconUrl: `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_sm_120.jpg`,
+        steamPrice: entry.steamPrice,
+        steamOriginalPrice: entry.steamOriginalPrice,
+        discountPercent: entry.discountPct,
         ggPrice: ggDealsCache.get(`${appid}-${region}`) ?? null,
       });
     }
@@ -361,9 +376,7 @@ export function WishlistDiscounts() {
     getPreferenceValues<Preferences>();
   const [games, setGames] = useState<WishlistGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [unavailable, setUnavailable] = useState<
-    "private" | "rate-limited" | null
-  >(null);
+  const [unavailable, setUnavailable] = useState<"rate-limited" | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -377,6 +390,7 @@ export function WishlistDiscounts() {
     });
 
     fetchDiscountedWishlistGames(
+      steamApiKey ?? "",
       steamId ?? "",
       ggDealsApiKey ?? "",
       region,
@@ -392,13 +406,6 @@ export function WishlistDiscounts() {
             title: "Steam rate limit reached",
             message:
               "Too many requests. Wait a few minutes, then press Cmd/Ctrl+R to refresh.",
-          });
-        } else if (u === "private") {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Wishlist unavailable",
-            message:
-              "Go to Steam → Edit Profile → Privacy Settings → set Game Details to Public",
           });
         } else {
           showToast({
@@ -442,12 +449,13 @@ export function WishlistDiscounts() {
                 `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );
               await LocalStorage.removeItem(
-                `wishlist-discounts-${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
+                `wishlist-discounts-${steamId ?? ""}-${region}-${(ggDealsApiKey ?? "").slice(-8)}`,
               );
               setIsLoading(true);
               setGames([]);
               setUnavailable(null);
               fetchDiscountedWishlistGames(
+                steamApiKey ?? "",
                 steamId ?? "",
                 ggDealsApiKey ?? "",
                 region,
@@ -482,12 +490,6 @@ export function WishlistDiscounts() {
           icon={Icon.Clock}
           title="Steam rate limit reached"
           description="Too many requests were made recently. Wait a few minutes, then press Cmd/Ctrl+R to refresh."
-        />
-      ) : !isLoading && unavailable === "private" ? (
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Wishlist unavailable"
-          description="Go to Steam → Edit Profile → Privacy Settings → set Game Details to Public"
         />
       ) : !isLoading && games.length === 0 ? (
         <List.EmptyView
