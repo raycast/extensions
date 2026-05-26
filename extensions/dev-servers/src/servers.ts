@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
+import { fetchAliases } from "./aliases";
 import { DevServer } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -13,11 +14,13 @@ const execFileAsync = promisify(execFile);
 //
 // Everything below the next section divider is pure TypeScript and runs
 // unchanged on any OS. To port the extension to a new platform (e.g.
-// Windows), swap the three helpers in this section for equivalents that
-// return the same shapes. Suggested mapping:
+// Windows), swap the helpers in this section, plus fetchAliases in
+// [aliases.ts], for equivalents that return the same shapes. Suggested
+// mapping:
 //   listProcesses  → Get-CimInstance Win32_Process     (or PowerShell)
 //   listListeners  → Get-NetTCPConnection -State Listen
 //   listCwds       → Win32_Process.ExecutablePath / CWD via WMI
+//   fetchAliases   → powershell -c "portless list"     (see aliases.ts)
 
 interface RawProcess {
   pid: number;
@@ -225,9 +228,10 @@ function lowestPortPerPid(listeners: RawListener[]): Map<number, number> {
 // ---------------------------------------------------------------------------
 
 export async function fetchServers(): Promise<DevServer[]> {
-  const [procs, listeners] = await Promise.all([
+  const [procs, listeners, aliasesByPort] = await Promise.all([
     listProcesses(),
     listListeners(),
+    fetchAliases(),
   ]);
   const candidates = procs.filter(isCandidate);
   const portByPid = lowestPortPerPid(listeners);
@@ -255,6 +259,13 @@ export async function fetchServers(): Promise<DevServer[]> {
     if (port === undefined) continue;
     const cwd = cwdByPid.get(proc.pid);
     if (!cwd) continue; // shouldn't happen for live processes, but be safe
+    const tool = detectTool(proc.command, cwd);
+    // Drop the portless proxy daemon itself — it's a node process out of
+    // node_modules/portless/ that binds 80/443/1355, and would otherwise
+    // appear as a phantom "dev server" row. Child processes spawned by
+    // portless run their own framework binary (next, vite, …) so they
+    // resolve to that tool, not "portless".
+    if (tool === "portless") continue;
     const git = gitByCwd.get(cwd);
     // For git projects: key is the shared .git dir path (stable across all
     // worktrees of the repo), name is the basename of its parent (the repo
@@ -263,11 +274,15 @@ export async function fetchServers(): Promise<DevServer[]> {
       ? path.basename(path.dirname(git.commonDir))
       : path.basename(cwd) || cwd;
     const projectKey = git ? git.commonDir : cwd;
+    const customUrls = aliasesByPort.get(port);
+    const localUrl = `http://localhost:${port}`;
     servers.push({
       pid: proc.pid,
       port: String(port),
-      url: `http://localhost:${port}`,
-      tool: detectTool(proc.command, cwd),
+      url: customUrls?.[0] ?? localUrl,
+      localUrl,
+      customUrls,
+      tool,
       runtime: detectRuntime(proc.command),
       cwd,
       projectKey,

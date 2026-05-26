@@ -26,6 +26,13 @@ const DEFAULT_TERMINAL: Application = {
   bundleId: "com.apple.Terminal",
 };
 
+// Strip scheme and trailing slash so a primary URL renders cleanly as the row
+// title: "https://myapp.localhost/" → "myapp.localhost",
+// "http://localhost:4321" → "localhost:4321".
+function displayHost(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+}
+
 function formatUptime(startedAt: Date): string {
   const seconds = Math.floor((Date.now() - startedAt.getTime()) / 1000);
   if (isNaN(seconds) || seconds < 0) return "?";
@@ -167,6 +174,7 @@ interface RowVisibility {
   branch: boolean;
   uptime: boolean;
   tool: boolean;
+  localUrl: boolean;
 }
 
 interface ServerItemProps {
@@ -205,8 +213,8 @@ function ServerItem({
     ? { source: faviconUrl, fallback: Icon.Globe }
     : { source: Icon.Globe, tintColor: toolColor(server.tool) };
 
-  // Branch goes in the left-rail subtitle (right next to the title), not in
-  // the accessories on the right. Raycast dims subtitles automatically.
+  // Branch goes in the left-rail subtitle (right next to the title). Raycast
+  // dims subtitles automatically.
   const subtitle =
     show.branch && server.branch
       ? {
@@ -215,14 +223,29 @@ function ServerItem({
         }
       : undefined;
 
+  // When a custom domain (e.g. via portless) points at this port, promote
+  // the domain to the title and demote `localhost:PORT` to a pill accessory.
+  // The pill lives in accessories (right-aligned) because Raycast subtitles
+  // are plain text — there's no inline-pill primitive. The port stays
+  // visible because it's still useful for env files, OAuth allowlists, CORS
+  // rules, and tools that don't trust the local CA.
+  const hasAlias = !!server.customUrls?.length;
+  const titleHost = displayHost(server.url);
+  const localBadgeTag =
+    hasAlias && show.localUrl
+      ? { tag: { value: `localhost:${server.port}` } }
+      : undefined;
+
   return (
     <List.Item
       icon={icon}
-      title={`localhost:${server.port}`}
+      title={titleHost}
       subtitle={subtitle}
-      keywords={[server.projectName, server.branch].filter((v): v is string =>
-        Boolean(v),
-      )}
+      keywords={[
+        server.projectName,
+        server.branch,
+        ...(server.customUrls ?? []).map(displayHost),
+      ].filter((v): v is string => Boolean(v))}
       accessories={[
         ...(show.uptime
           ? [
@@ -232,6 +255,7 @@ function ServerItem({
               },
             ]
           : []),
+        ...(localBadgeTag ? [localBadgeTag] : []),
         // Runtime tag is suppressed when it duplicates the tool tag (e.g.
         // tool is already "bun"), and rendered only when the user has the
         // tool tag visible — otherwise standalone "bun" would look orphaned.
@@ -256,22 +280,53 @@ function ServerItem({
       ]}
       actions={
         <ActionPanel>
+          {/*
+           * Action order is deliberate. Raycast auto-binds `↵` and `⌘↵` to
+           * positions 1 and 2 — they can't be overridden — so we keep both
+           * slots filled with benign "open" actions.
+           *
+           * Restart sits above Kill: restarting is the common iterate-on-
+           * change action, while Kill is mostly end-of-session cleanup.
+           * This also keeps `⌘↵` from auto-firing Kill when there's no
+           * alias — it falls through to Restart (reversible by design).
+           *
+           * Kill stays high in the panel rather than at the conventional
+           * "destructive at the bottom", because it's frequent and Raycast
+           * paints it red as the visual safety signal. The bulk kill
+           * actions further down keep convention — they're genuinely
+           * high-blast-radius.
+           */}
           <Action.OpenInBrowser url={server.url} title="Open in Browser" />
-          <Action
-            title="Kill Server"
-            icon={Icon.Stop}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={onKill}
-          />
-          {/* CopyToClipboard already uses Cmd+C by default */}
-          <Action.CopyToClipboard title="Copy URL" content={server.url} />
+          {hasAlias && (
+            <Action.OpenInBrowser
+              url={server.localUrl}
+              title="Open Localhost URL"
+            />
+          )}
           <Action
             title="Restart Server"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={onRestart}
           />
+          <Action
+            title="Kill Server"
+            icon={Icon.Stop}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={onKill}
+          />
+          <ActionPanel.Section>
+            {/* CopyToClipboard already uses Cmd+C by default */}
+            <Action.CopyToClipboard title="Copy URL" content={server.url} />
+            {hasAlias && (
+              <Action.CopyToClipboard
+                title="Copy Localhost URL"
+                content={server.localUrl}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Open
               title={`Open in ${terminalApp.name}`}
@@ -296,14 +351,14 @@ function ServerItem({
               title="Kill All for Project"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
               onAction={onKillProject}
             />
             <Action
               title="Kill All Servers"
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+              shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
               onAction={onKillAll}
             />
           </ActionPanel.Section>
@@ -465,11 +520,12 @@ export default function Command() {
     branch: prefs.showBranch ?? true,
     uptime: prefs.showUptime ?? true,
     tool: prefs.showTool ?? true,
+    localUrl: prefs.showLocalUrl ?? true,
   };
 
-  // Manual refresh: useExec's revalidate is silent because keepPreviousData
-  // keeps the list rendered. Show a brief animated toast so the user knows
-  // their ⌘R actually did something.
+  // Manual refresh: useCachedPromise's revalidate is silent because
+  // keepPreviousData keeps the list rendered. Show a brief animated toast so
+  // the user knows their ⌘R actually did something.
   async function refresh() {
     const toast = await showToast({
       style: Toast.Style.Animated,

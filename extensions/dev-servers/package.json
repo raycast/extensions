@@ -14,6 +14,7 @@
     "localhost",
     "port",
     "ports",
+    "portless",
     "kill",
     "restart",
     "process",
@@ -37,15 +38,6 @@
           "title": "Terminal App",
           "type": "appPicker",
           "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
-          "required": false
-        },
-        {
-          "name": "showFullPath",
-          "title": "Project Display",
-          "type": "checkbox",
-          "label": "Show full directory path",
-          "description": "Show the full path instead of the project name",
-          "default": false,
           "required": false
         },
         {
@@ -75,6 +67,15 @@
           ]
         },
         {
+          "name": "showFullPath",
+          "title": "Project Display",
+          "type": "checkbox",
+          "label": "Show full directory path",
+          "description": "Show the full path instead of the project name",
+          "default": false,
+          "required": false
+        },
+        {
           "name": "showUptime",
           "title": "Row Accessories",
           "type": "checkbox",
@@ -96,6 +97,14 @@
           "type": "checkbox",
           "label": "Show framework tag",
           "description": "Show the framework / tool tag (Vite, SvelteKit, Astro, etc.) on each row",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showLocalUrl",
+          "type": "checkbox",
+          "label": "Show localhost URL with custom domain",
+          "description": "When a custom domain (e.g. via portless) points at a dev server, also show the localhost:PORT pill alongside it",
           "default": true,
           "required": false
         }
