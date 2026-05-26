@@ -240,22 +240,26 @@ function useMenuMergeRequests(): {
   const assignedLabelsFilter = useMemo(() => getAssignedLabelsPreference(), []);
   const reviewLabelsFilter = useMemo(() => getReviewLabelsPreference(), []);
   const createdLabelsFilter = useMemo(() => getCreatedLabelsPreference(), []);
+  const hideArchived = useMemo(() => {
+    const prefs = getPreferenceValues();
+    return prefs.hideArchived as boolean;
+  }, []);
 
   const {
     mrs: mrsAssigned,
     isLoading: isLoadingAssigned,
     error: errorAssigned,
-  } = useMyMergeRequests(MRScope.assigned_to_me, MRState.opened, undefined, assignedLabelsFilter);
+  } = useMyMergeRequests(MRScope.assigned_to_me, MRState.opened, undefined, assignedLabelsFilter, hideArchived);
   const {
     mrs: mrsReview,
     isLoading: isLoadingReview,
     error: errorReview,
-  } = useMyReviews(undefined, reviewLabelsFilter);
+  } = useMyReviews(undefined, reviewLabelsFilter, hideArchived);
   const {
     mrs: mrsCreated,
     isLoading: isLoadingCreated,
     error: errorCreated,
-  } = useMyMergeRequests(MRScope.created_by_me, MRState.opened, undefined, createdLabelsFilter);
+  } = useMyMergeRequests(MRScope.created_by_me, MRState.opened, undefined, createdLabelsFilter, hideArchived);
   const isLoading = isLoadingAssigned || isLoadingReview || isLoadingCreated;
 
   return {

@@ -93,12 +93,12 @@
   ],
   "preferences": [
     {
-    "name": "binaryPath",
-    "required": false,
-    "type": "textfield",
-    "title": "Binary Path",
-    "default": "git",
-    "description": "The path to the git binary to use for git commands"
+      "name": "binaryPath",
+      "required": false,
+      "type": "textfield",
+      "title": "Binary Path",
+      "default": "git",
+      "description": "The path to the git binary to use for git commands"
     },
     {
       "name": "defaultTerminal",
@@ -223,7 +223,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/utils": "^2.2.5",
     "fast-fuzzy": "^1.12.0",
     "file-type": "^21.0.0",
     "nanoid": "^5.1.5",

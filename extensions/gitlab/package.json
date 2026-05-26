@@ -267,6 +267,15 @@
           "required": false,
           "title": "Reviews Labels",
           "placeholder": "e.g. Human Review Required,Ready for Review"
+        },
+        {
+          "name": "hideArchived",
+          "description": "Hide merge requests from archived projects",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide Archived Projects",
+          "title": "Filtering",
+          "default": false
         }
       ]
     },
@@ -309,6 +318,15 @@
           "required": false,
           "title": "Exclude Labels",
           "placeholder": "e.g. WIP,blocked"
+        },
+        {
+          "name": "hideArchived",
+          "description": "Hide issues from archived projects",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide Archived Projects",
+          "title": "Filtering",
+          "default": false
         }
       ]
     },

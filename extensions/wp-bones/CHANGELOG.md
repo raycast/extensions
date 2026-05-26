@@ -1,5 +1,13 @@
 # WP Bones Changelog
 
+## [Fixes] - 2026-05-26
+
+- Hardened menu-bar storage reads/writes against filesystem failures (e.g. `ENOSPC`) so the command no longer crashes when the Raycast cache journal can't be written
+- Fixed a faulty migration of the legacy version-storage format that could trigger a false "new version available" notification on every menu-bar launch; stale values are now discarded silently
+- Hardened documentation API response handling in both the search list and the **Ask WP Bones AI** prompt builder against malformed entries (`null`/non-object/missing `items` array)
+- Added an explicit error state to the **Ask WP Bones AI** command when the documentation lookup fails, so the UI no longer hangs on "Searching documentation..."
+- URL-encoded the embedded blueprint URL in the boilerplate preview's Playground action
+
 ## [New Features & Improvements] - 2026-04-12
 
 ### New Commands

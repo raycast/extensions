@@ -1,4 +1,5 @@
 import { AI, Color, Icon, Image } from '@raycast/api';
+import dayjs from 'dayjs';
 import { List, Todo } from './types';
 
 export const listItems = {
@@ -47,6 +48,14 @@ export function getTypeIcon(type: 'area' | 'project' | 'todo'): Image.ImageLike 
     case 'todo':
       return Icon.Circle;
   }
+}
+
+export function getDeadlineColor(dueDate: string): Color | undefined {
+  const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
+  const diff = dayjs(dueDate).diff(today, 'day');
+  if (Math.abs(diff) >= 15) return undefined;
+  if (diff <= 0) return Color.Red;
+  return Color.Orange;
 }
 
 export function getChecklistItemsWithAI(name: string, notes: string) {
