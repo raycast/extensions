@@ -1,6 +1,6 @@
 # UTC Workbench Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-26
 
 Initial release.
 
