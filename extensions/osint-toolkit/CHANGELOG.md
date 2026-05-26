@@ -58,4 +58,3 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Follows Raycast extension guidelines
 - ESLint and Prettier code quality checks
 - Cross-platform compatible code with no OS-specific dependencies
-
