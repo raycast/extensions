@@ -6,7 +6,7 @@ import { isWindows } from "./utils";
 const BUNDLE_ID_TO_CONFIG_DIR: Record<string, string> = {
   "com.raycast-x.macos.internal": "raycast-x-internal",
   "com.raycast-x.macos.development": "raycast-x-development",
-  "com.raycast-x.macos.debug": "raycast-debug",
+  "com.raycast-x.macos.debug": "raycast-x-debug",
   "com.raycast-x.macos": "raycast-x",
   "com.raycast.macos.internal": "raycast-internal",
   "com.raycast.macos.debug": "raycast-debug",
