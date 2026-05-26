@@ -186,7 +186,16 @@ export function TasksView({
       });
       return;
     }
-    await appendToDone(prefs.donePath, completedTasks);
+    try {
+      await appendToDone(prefs.donePath, completedTasks);
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't archive to done.txt",
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
     await applyMutation(
       (tasks) => tasks.filter((t) => !t.completed),
       `Archived ${completedTasks.length} task${completedTasks.length === 1 ? "" : "s"}`,
