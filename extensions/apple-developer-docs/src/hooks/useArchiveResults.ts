@@ -92,6 +92,9 @@ export default function useArchiveResults(
           return;
         }
 
+        if (results.length > 0) {
+          hasCompleteTocIndexRef.current = false;
+        }
         setDocumentResults(results);
         setIsLoadingDocuments(false);
       })
