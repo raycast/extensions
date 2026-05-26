@@ -229,6 +229,7 @@ export default function ContactList({
                 actions={
                   <ContactActions
                     contact={displayContact}
+                    isLoadingDetail={isSelected && isLoadingDetail}
                     onRefresh={onRefresh}
                     onContactDeleted={onRefresh}
                   />

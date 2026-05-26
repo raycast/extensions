@@ -40,33 +40,6 @@ export function formatBirthday(
   }
 }
 
-export function isUpcomingBirthday(
-  birthday: string | undefined,
-  withinDays = 30,
-): boolean {
-  if (!birthday) return false;
-  const parts = birthday.split("-").map(Number);
-  if (parts.some(isNaN)) return false;
-
-  let month: number;
-  let day: number;
-
-  if (parts.length === 3) {
-    [, month, day] = parts;
-  } else if (parts.length === 2) {
-    [month, day] = parts;
-  } else {
-    return false;
-  }
-
-  const today = new Date();
-  const thisYear = today.getFullYear();
-  const bday = new Date(thisYear, month - 1, day);
-  if (bday < today) bday.setFullYear(thisYear + 1);
-  const diff = (bday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-  return diff >= 0 && diff <= withinDays;
-}
-
 export function formatType(type: string | undefined): string {
   if (!type) return "";
   const clean = type.replace(/^_\$!<(.+)>!\$_$/, "$1");

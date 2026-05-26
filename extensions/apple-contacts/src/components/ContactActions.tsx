@@ -15,12 +15,14 @@ import ContactForm from "./ContactForm";
 
 interface ContactActionsProps {
   contact: UnifiedContact;
+  isLoadingDetail?: boolean;
   onRefresh: () => void;
   onContactDeleted: () => void;
 }
 
 export default function ContactActions({
   contact,
+  isLoadingDetail = false,
   onRefresh,
   onContactDeleted,
 }: ContactActionsProps) {
@@ -101,9 +103,17 @@ export default function ContactActions({
           title="Edit Contact"
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
-          onAction={() =>
-            push(<ContactForm contact={contact} onSaved={onRefresh} />)
-          }
+          onAction={async () => {
+            if (isLoadingDetail) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Contact details still loading",
+                message: "Please wait a moment, then try again.",
+              });
+              return;
+            }
+            push(<ContactForm contact={contact} onSaved={onRefresh} />);
+          }}
         />
         <Action
           title="New Contact"

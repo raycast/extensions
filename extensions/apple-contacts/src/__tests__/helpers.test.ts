@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { groupByLetter, formatBirthday, isUpcomingBirthday } from "../helpers";
+import { describe, it, expect } from "vitest";
+import { groupByLetter, formatBirthday } from "../helpers";
 import { UnifiedContact } from "../types";
 
 function makeContact(displayName: string, id = displayName): UnifiedContact {
@@ -98,56 +98,5 @@ describe("formatBirthday", () => {
 
   it("returns the original string if format is unrecognised", () => {
     expect(formatBirthday("not-a-date")).toBe("not-a-date");
-  });
-});
-
-describe("isUpcomingBirthday", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("returns true for a birthday within 30 days", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    // June 10 is 15 days away
-    expect(isUpcomingBirthday("2000-6-10")).toBe(true);
-  });
-
-  it("returns true for a birthday exactly today", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    expect(isUpcomingBirthday("2000-5-26")).toBe(true);
-  });
-
-  it("returns false for a birthday more than 30 days away", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    // July 1 is 36 days away
-    expect(isUpcomingBirthday("2000-7-1")).toBe(false);
-  });
-
-  it("returns false for a birthday that just passed (wraps to next year)", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    // May 1 just passed — next occurrence is May 1, 2027 (340+ days away)
-    expect(isUpcomingBirthday("2000-5-1")).toBe(false);
-  });
-
-  it("returns false for undefined", () => {
-    expect(isUpcomingBirthday(undefined)).toBe(false);
-  });
-
-  it("respects custom withinDays parameter", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    // June 10 is 15 days away — within 20, not within 10
-    expect(isUpcomingBirthday("2000-6-10", 20)).toBe(true);
-    expect(isUpcomingBirthday("2000-6-10", 10)).toBe(false);
-  });
-
-  it("handles two-part birthday format (month-day only)", () => {
-    const today = new Date(2026, 4, 26); // May 26, 2026
-    vi.setSystemTime(today);
-    expect(isUpcomingBirthday("6-5")).toBe(true);
   });
 });
