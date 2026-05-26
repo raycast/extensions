@@ -3,3 +3,4 @@ dist/
 *.js.map
 .DS_Store
 .omc/
+.omx/

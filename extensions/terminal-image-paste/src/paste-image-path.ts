@@ -1,10 +1,6 @@
 import { Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { execSync, spawn } from "child_process";
 
-interface Preferences {
-  remoteHosts: string;
-}
-
 function makeClipPath(): string {
   const ts = new Date()
     .toISOString()
@@ -14,7 +10,7 @@ function makeClipPath(): string {
 }
 
 export default async function main() {
-  const { remoteHosts } = getPreferenceValues<Preferences>();
+  const { remoteHosts } = getPreferenceValues<Preferences.PasteImagePath>();
   const clipPath = makeClipPath();
 
   const saveScript = `
