@@ -1,0 +1,68 @@
+{
+  "name": "thursdai-search",
+  "title": "ThursdAI Search",
+  "version": "1.0.0",
+  "description": "Search ThursdAI episodes, Substack posts, and transcripts from Raycast.",
+  "icon": "icon.png",
+  "author": "altryne",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Media", "News"],
+  "keywords": ["thursdai", "ai", "podcast", "substack", "transcripts", "search"],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Episodes",
+      "subtitle": "ThursdAI",
+      "description": "Search ThursdAI episode text, Substack posts, and transcripts.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Search API Key",
+      "description": "Bearer token for the ThursdAI search API.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste SEARCH_API_KEY from the website repo .env"
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "Search API URL",
+      "description": "Endpoint for the ThursdAI Cloudflare Worker search API.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://thursdai.news/api/search"
+    },
+    {
+      "name": "resultLimit",
+      "title": "Result Limit",
+      "description": "Maximum number of results to fetch per search.",
+      "type": "dropdown",
+      "required": true,
+      "default": "8",
+      "data": [
+        { "title": "5", "value": "5" },
+        { "title": "8", "value": "8" },
+        { "title": "12", "value": "12" },
+        { "title": "20", "value": "20" }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "typescript": "^6.0.3"
+  }
+}
