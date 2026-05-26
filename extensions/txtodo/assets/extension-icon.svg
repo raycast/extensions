@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="dusk" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#B59CFF" />
+      <stop offset="0.32" stop-color="#7C5BE6" />
+      <stop offset="0.62" stop-color="#4744C9" />
+      <stop offset="1" stop-color="#1E3DA3" />
+    </linearGradient>
+
+    <radialGradient id="dawnGlow" cx="0.22" cy="0.18" r="0.65">
+      <stop offset="0" stop-color="#FFD7C2" stop-opacity="0.35" />
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="mark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#E3E0FF" />
+    </linearGradient>
+
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" />
+      <feOffset dx="0" dy="8" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.35" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#dusk)" />
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#dawnGlow)" />
+
+  <g filter="url(#softShadow)">
+    <path d="M118 268 L222 372 L398 142"
+          stroke="url(#mark)"
+          stroke-width="58"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none" />
+  </g>
+
+  <rect x="0.75" y="0.75" width="510.5" height="510.5" rx="111.5"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="1.5" />
+</svg>

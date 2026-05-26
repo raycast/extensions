@@ -1,0 +1,18 @@
+(A) 2026-05-13 Submit expense report @work +admin due:2026-05-13
+(A) 2026-05-15 Finalize Q2 review deck @work +deliverables due:2026-05-15
+(A) 2026-05-14 Call dentist about Monday appointment @phone due:2026-05-15
+(B) 2026-04-28 Prep slides for design review @work +website-redesign due:2026-05-18
+(B) 2026-05-12 Review PR #142 from sara @work +backend due:2026-05-16
+(B) 2026-05-10 Buy mom's birthday gift @errands +family due:2026-05-19
+(B) 2026-05-08 Renew car registration @errands due:2026-05-25
+(C) 2026-05-09 Schedule annual checkup @phone +health due:2026-05-22
+(C) 2026-05-01 Read "Designing Data-Intensive Apps" ch.4 @home +reading
+(C) 2026-05-06 Refactor auth middleware tests @work +backend due:2026-05-20
+(C) 2026-05-14 Update LinkedIn headline @computer
+2026-05-13 Plan weekend hike with james @home +leisure due:2026-05-17
+2026-05-14 Try out new coffee place on Mulberry @errands
+2026-05-12 Write thank-you note for the speaking gig @home +personal
+2026-05-10 Brainstorm side project ideas
+2026-05-08 Pick a new podcast
+x 2026-05-14 (B) 2026-05-07 Send weekly status update @work +admin
+x 2026-05-13 2026-05-12 Book table at Lupa for Saturday @errands +personal
