@@ -1000,7 +1000,11 @@ function CustomDateRangeForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Sync Date Range" onSubmit={onSubmit} icon={Icon.Upload} />
+          <Action.SubmitForm
+            title="Sync Date Range"
+            onSubmit={onSubmit}
+            icon={Icon.Upload}
+          />
           <Action title="Cancel" onAction={onCancel} icon={Icon.XMarkCircle} />
         </ActionPanel>
       }
