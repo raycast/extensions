@@ -1,3 +1,7 @@
+> [!WARNING]
+> Raycast 2.0 now has the same functionality, without using 3rd party uninstallers, thus making this extension obsolete.
+
+
 # App Cleaner
 
 Uninstall applications with AppCleaner, Pearcleaner, TrashMe 3 or App Cleaner & Uninstaller.
