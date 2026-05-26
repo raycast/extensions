@@ -1,6 +1,6 @@
 # World Cup Changelog
 
-## [Update for FIFA World Cup 2026] - {PR_MERGE_DATE}
+## [Update for FIFA World Cup 2026] - 2026-05-26
 
 - Updated season and match count for the 2026 World Cup (48 teams, 104 matches)
 - Updated flags dictionary with all 48 qualified countries
