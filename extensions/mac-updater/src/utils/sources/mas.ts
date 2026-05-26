@@ -12,7 +12,7 @@ import { hasUpdate } from "../version";
 // mas's binary path mirrors brew's prefix.
 const MAS_CANDIDATES = ["/opt/homebrew/bin/mas", "/usr/local/bin/mas"];
 
-function findMas(): string | null {
+export function findMas(): string | null {
   for (const p of MAS_CANDIDATES) {
     if (fs.existsSync(p)) return p;
   }

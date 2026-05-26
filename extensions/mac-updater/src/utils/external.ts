@@ -1,3 +1,4 @@
+import { open } from "@raycast/api";
 import { runShell } from "./shell";
 
 function escapeAS(s: string): string {
@@ -17,14 +18,22 @@ export async function openInTerminal(command: string): Promise<void> {
   );
 }
 
-/** Open the Mac App Store directly to a specific app's page. */
+/**
+ * Open the Mac App Store directly to a specific app's page.
+ * Uses Raycast's `open` (which calls macOS launch services) instead of
+ * shelling out — no shell metacharacters get the chance to be interpreted.
+ */
 export async function openInAppStore(appId: number): Promise<void> {
-  await runShell(`open "macappstore://apps.apple.com/app/id${appId}"`);
+  await open(`macappstore://apps.apple.com/app/id${appId}`);
 }
 
-/** Open an http(s) URL in the user's default browser. */
+/**
+ * Open an http(s) URL in the user's default browser.
+ * Uses Raycast's `open` API so URL contents (e.g. a cask.homepage value that
+ * might contain backticks or `$()`) can never be interpreted by a shell.
+ */
 export async function openHomepage(url: string): Promise<void> {
-  await runShell(`open "${url.replace(/"/g, "%22")}"`);
+  await open(url);
 }
 
 /**

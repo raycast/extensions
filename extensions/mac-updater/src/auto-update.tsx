@@ -1,16 +1,9 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
 import { BREW, runShell } from "./utils/shell";
-import { isMasInstalled } from "./utils/sources/mas";
+import { findMas, isMasInstalled } from "./utils/sources/mas";
 import { scanAll } from "./utils/coordinator";
 import { saveScanCache } from "./utils/scan-cache";
 import { recordHistory } from "./utils/update-history";
-
-interface Prefs {
-  enableBrew: boolean;
-  enableMas: boolean;
-  quietHours: boolean;
-  notifyOnSuccess: boolean;
-}
 
 /**
  * Scheduled background command. Raycast runs this every `interval` (12h) as
@@ -18,10 +11,11 @@ interface Prefs {
  * log to history and optionally show a HUD.
  *
  * Configuration lives in command preferences (right-click the command in
- * Raycast → Configure Command → Preferences).
+ * Raycast → Configure Command → Preferences). The `Preferences.AutoUpdate`
+ * type is generated from package.json by `ray build`.
  */
 export default async function AutoUpdate() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences.AutoUpdate>();
 
   // Respect quiet hours (00:00–07:00 local)
   if (prefs.quietHours) {
@@ -79,7 +73,8 @@ export default async function AutoUpdate() {
 
   if (prefs.enableMas && (await isMasInstalled())) {
     try {
-      await runShell(`/opt/homebrew/bin/mas upgrade`);
+      const mas = findMas() ?? "mas";
+      await runShell(`${mas} upgrade`);
       const beforeMas =
         preScan?.apps.filter((a) => a.hasUpdate && a.source === "mas") ?? [];
       masUpdated = beforeMas.length;

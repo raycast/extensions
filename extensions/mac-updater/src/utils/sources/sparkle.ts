@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { open } from "@raycast/api";
 import { runShell } from "../shell";
 import { InstalledApp, UpdateInfo } from "../types";
 import { hasUpdate } from "../version";
@@ -157,6 +158,8 @@ export async function checkSparkle(
 }
 
 export async function openAppForSparkleUpdate(appPath: string): Promise<void> {
-  // Triggers the app to run, where Sparkle auto-checks on launch for most apps
-  await runShell(`open "${appPath}"`);
+  // Triggers the app to run, where Sparkle auto-checks on launch for most apps.
+  // Uses Raycast's `open` (launch services) instead of shelling out — no shell
+  // metacharacters in `appPath` get the chance to be interpreted.
+  await open(appPath);
 }
