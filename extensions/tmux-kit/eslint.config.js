@@ -1,10 +1,11 @@
+const { defineConfig } = require("eslint/config");
 const js = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const raycast = require("@raycast/eslint-plugin");
 const prettier = require("eslint-config-prettier/flat");
 const globals = require("globals");
 
-module.exports = [
+module.exports = defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -15,4 +16,4 @@ module.exports = [
   },
   ...raycast.configs.recommended,
   prettier,
-];
+]);

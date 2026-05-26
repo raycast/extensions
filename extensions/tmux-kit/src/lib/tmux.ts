@@ -5,11 +5,9 @@ import { getPreferenceValues } from "@raycast/api";
 
 const execFileP = promisify(execFile);
 
-type Preferences = { tmuxBinary?: string };
-
 export function tmuxBin(): string {
-  const p = getPreferenceValues<Preferences>().tmuxBinary?.trim();
-  return p && p.length > 0 ? p : "/opt/homebrew/bin/tmux";
+  const p = getPreferenceValues<Preferences>().tmuxBinary.trim();
+  return p.length > 0 ? p : "/opt/homebrew/bin/tmux";
 }
 
 export class TmuxError extends Error {

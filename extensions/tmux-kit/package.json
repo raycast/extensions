@@ -56,7 +56,7 @@
   "categories": ["Productivity", "Developer Tools"],
   "preferences": [
     {
-      "title": "Tmux binary path",
+      "title": "Tmux Binary Path",
       "name": "tmuxBinary",
       "type": "textfield",
       "required": false,
@@ -64,7 +64,7 @@
       "default": "/opt/homebrew/bin/tmux"
     },
     {
-      "title": "Default start directory",
+      "title": "Default Start Directory",
       "name": "defaultStartDir",
       "type": "textfield",
       "required": false,

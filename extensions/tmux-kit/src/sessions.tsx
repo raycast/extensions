@@ -29,10 +29,8 @@ import {
 import { PanesView } from "./panes";
 
 function defaultStartDir(): string {
-  const p = getPreferenceValues<{
-    defaultStartDir?: string;
-  }>().defaultStartDir?.trim();
-  return p && p.length > 0 ? p : homedir();
+  const p = getPreferenceValues<Preferences>().defaultStartDir.trim();
+  return p.length > 0 ? p : homedir();
 }
 
 export default function SessionsCommand() {
