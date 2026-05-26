@@ -14,10 +14,16 @@ const execFileAsync = promisify(execFile);
 // Raycast's subprocess PATH doesn't include user-installed CLIs (same reason
 // the restart flow in [servers.ts] uses `/bin/zsh -ilc`).
 //
-// Any failure (portless not installed, command-not-found, unexpected output)
-// returns an empty map. Portless is treated as an optional enhancement, not a
-// runtime dependency — when it's absent the UI silently falls back to plain
-// `localhost:PORT` rows, per Raycast's "gracefully degrade" guidance.
+// Hard 3s timeout: this call sits in fetchServers' Promise.all, so a hung
+// portless daemon would otherwise block the entire refresh cycle. On timeout
+// the call rejects and we fall through to the same empty-map fallback as
+// any other failure.
+//
+// Any failure (portless not installed, command-not-found, timeout, unexpected
+// output) returns an empty map. Portless is treated as an optional
+// enhancement, not a runtime dependency — when it's absent the UI silently
+// falls back to plain `localhost:PORT` rows, per Raycast's "gracefully
+// degrade" guidance.
 //
 // Cross-platform note: the zsh login-shell pattern is macOS/Linux. Windows
 // will need its own variant (powershell -c "portless list"), wired up
@@ -26,7 +32,9 @@ export async function fetchAliases(): Promise<Map<number, string[]>> {
   const out = new Map<number, string[]>();
   let stdout: string;
   try {
-    ({ stdout } = await execFileAsync("/bin/zsh", ["-ilc", "portless list"]));
+    ({ stdout } = await execFileAsync("/bin/zsh", ["-ilc", "portless list"], {
+      timeout: 3000,
+    }));
   } catch {
     return out;
   }
