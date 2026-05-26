@@ -60,10 +60,12 @@ export default function SearchSessions() {
 
   if (isSearching) {
     // Search mode: flat results sorted by relevance (already sorted by searchSessions)
-    const searchSessionsWithProjects: SessionWithProject[] = searchResults.map((session) => ({
-      session,
-      project: projectMap.get(session.projectID),
-    }));
+    const searchSessionsWithProjects: SessionWithProject[] = searchResults
+      .map((session) => ({
+        session,
+        project: projectMap.get(session.projectID),
+      }))
+      .filter(({ session }) => validProject === "all" || session.projectID === validProject);
 
     return (
       <List

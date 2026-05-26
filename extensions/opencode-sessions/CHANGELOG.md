@@ -1,8 +1,8 @@
 # OpenCode Sessions Changelog
 
-## [Unreleased] - 2026-05-26
+## [Update] - {PR_MERGE_DATE}
 
-- Added "Search Sessions" command with content search across session titles and message bodies
+- Added content search across session titles and message bodies
 - Added "New Session" command to start fresh OpenCode conversations from Raycast
 - Added terminal integration: resume sessions in iTerm2, Terminal.app, Warp, Ghostty, or Kitty
 - Added liveness detection showing Active/Open status for running sessions

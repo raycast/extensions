@@ -4,6 +4,11 @@ import { createOpencode, OpencodeClient } from "@opencode-ai/sdk/v2";
 let instance: { client: OpencodeClient; server: { url: string; close(): void } } | null = null;
 let initializing: Promise<OpencodeClient> | null = null;
 
+process.on("exit", () => {
+  instance?.server.close();
+  instance = null;
+});
+
 function ensurePath(): void {
   const current = process.env.PATH ?? "";
   const extraPaths = ["/opt/homebrew/bin", "/usr/local/bin"];

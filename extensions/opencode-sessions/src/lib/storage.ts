@@ -301,7 +301,7 @@ export async function deleteAllProjectSessions(projectID: string): Promise<void>
 }
 
 function escLike(str: string): string {
-  return str.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
+  return str.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
 }
 
 async function querySessionRows(sql: string): Promise<Session[]> {
