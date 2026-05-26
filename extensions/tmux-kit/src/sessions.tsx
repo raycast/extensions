@@ -240,7 +240,7 @@ function SessionActions({
       <Action.Push
         title="Show Panes & Processes"
         icon={Icon.AppWindowList}
-        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        shortcut={{ modifiers: ["cmd"], key: "b" }}
         target={<PanesView session={session.name} />}
       />
       <ActionPanel.Section title="Danger">
@@ -338,7 +338,7 @@ function RenameForm({
 function NewSessionForm({ onDone }: { onDone: () => Promise<void> }) {
   const { pop } = useNavigation();
   const [name, setName] = useState("");
-  const [cwd, setCwd] = useState(defaultStartDir());
+  const [cwd, setCwd] = useState<string[]>([defaultStartDir()]);
   const [nameError, setNameError] = useState<string | undefined>();
 
   const submit = async () => {
@@ -352,7 +352,7 @@ function NewSessionForm({ onDone }: { onDone: () => Promise<void> }) {
       return;
     }
     try {
-      await newSession(trimmed, cwd.trim() || undefined);
+      await newSession(trimmed, cwd[0]?.trim() || undefined);
       await showToast({
         style: Toast.Style.Success,
         title: `Created ${trimmed}`,
@@ -391,11 +391,15 @@ function NewSessionForm({ onDone }: { onDone: () => Promise<void> }) {
         error={nameError}
         autoFocus
       />
-      <Form.TextField
+      <Form.FilePicker
         id="cwd"
         title="Start directory"
         value={cwd}
         onChange={setCwd}
+        canChooseFiles={false}
+        canChooseDirectories={true}
+        allowMultipleSelection={false}
+        showHiddenFiles={false}
       />
       <Form.Description text="The new session is created detached (-d). Use Switch or Copy Attach Command afterwards to enter it." />
     </Form>

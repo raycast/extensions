@@ -48,6 +48,14 @@ export type TmuxSession = {
   currentPath: string;
 };
 
+// Use a printable multi-character delimiter. Tab characters get
+// normalized to "_" somewhere between our execFile call and tmux's
+// stdout when running inside Raycast's runtime, and single-byte
+// control characters (\x01) appear to suffer the same fate. Picking
+// a sequence that cannot occur in session names, paths, or window
+// names sidesteps both problems entirely.
+const FIELD_SEP = "||SEP||";
+
 const SESSION_FORMAT = [
   "#{session_name}",
   "#{session_windows}",
@@ -56,7 +64,7 @@ const SESSION_FORMAT = [
   "#{session_activity}",
   "#{session_current_window_name}",
   "#{session_current_path}",
-].join("\t");
+].join(FIELD_SEP);
 
 export async function listSessions(): Promise<TmuxSession[]> {
   try {
@@ -73,7 +81,7 @@ export async function listSessions(): Promise<TmuxSession[]> {
           activity,
           currentWindow,
           currentPath,
-        ] = line.split("\t");
+        ] = line.split(FIELD_SEP);
         return {
           name,
           windows: Number(windows),
@@ -164,7 +172,7 @@ const PANE_FORMAT = [
   "#{pane_active}",
   "#{pane_width}",
   "#{pane_height}",
-].join("\t");
+].join(FIELD_SEP);
 
 export async function listPanes(session: string): Promise<TmuxPane[]> {
   const { stdout } = await run([
@@ -179,7 +187,7 @@ export async function listPanes(session: string): Promise<TmuxPane[]> {
     .split("\n")
     .filter((l) => l.length > 0)
     .map((line) => {
-      const p = line.split("\t");
+      const p = line.split(FIELD_SEP);
       return {
         id: p[0],
         index: Number(p[1]),

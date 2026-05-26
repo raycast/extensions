@@ -117,12 +117,12 @@ function PaneItem({
           <Action.CopyToClipboard
             title="Copy PID"
             content={String(pane.pid)}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
           />
           <Action.CopyToClipboard
             title="Copy Pane ID"
             content={pane.id}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
           <Action.CopyToClipboard title="Copy Command" content={pane.command} />
           <Action
