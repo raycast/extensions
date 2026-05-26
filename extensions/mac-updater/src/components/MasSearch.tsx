@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { InstalledApp } from "../utils/types";
 import { addUserMasMapping } from "../utils/user-known-installs";
 import { openInAppStore } from "../utils/external";
-import { runShell } from "../utils/shell";
+import { run } from "../utils/shell";
 
 interface Props {
   app: InstalledApp;
@@ -52,9 +52,13 @@ export default function MasSearch({ app, onDone }: Props) {
     try {
       const country = "us";
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=macSoftware&country=${country}&limit=15`;
-      const { stdout } = await runShell(
-        `/usr/bin/curl -fsSL --max-time 10 "${url}"`,
-      );
+      // execFile via run() — keeps user-typed search terms out of any shell.
+      const { stdout } = await run("/usr/bin/curl", [
+        "-fsSL",
+        "--max-time",
+        "10",
+        url,
+      ]);
       const data = JSON.parse(stdout || "{}") as { results?: ItunesResult[] };
       setResults(data.results ?? []);
     } catch (e) {

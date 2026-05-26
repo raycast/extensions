@@ -1,11 +1,5 @@
 import * as fs from "fs";
-import {
-  commandExists,
-  extractCmdError,
-  findBrew,
-  run,
-  runShell,
-} from "../shell";
+import { commandExists, extractCmdError, findBrew, run } from "../shell";
 import { InstalledApp, UpdateInfo, UpdateResult } from "../types";
 import { hasUpdate } from "../version";
 
@@ -64,9 +58,15 @@ async function itunesLookup(
   const country = "us";
   const url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(bundleId)}&country=${country}&entity=${entity}&limit=1`;
   try {
-    const { stdout } = await runShell(
-      `/usr/bin/curl -sL --max-time 12 "${url}"`,
-    );
+    // execFile via run() — bundleId comes from a plist we don't control, so
+    // even with encodeURIComponent we route the URL as a separate argv slot
+    // rather than interpolating it into a shell command.
+    const { stdout } = await run("/usr/bin/curl", [
+      "-sL",
+      "--max-time",
+      "12",
+      url,
+    ]);
     const data = JSON.parse(stdout);
     if (data.resultCount > 0) return data.results[0];
     return null;

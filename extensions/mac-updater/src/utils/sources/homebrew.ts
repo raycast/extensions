@@ -98,7 +98,16 @@ function parseAndIndex(raw: string, fetchedAt: number): CaskIndex {
 // immediately discard the raw text/parsed array.
 async function fetchAndIndex(targetPath: string): Promise<CaskIndex> {
   const tmp = targetPath + ".download";
-  await runShell(`/usr/bin/curl -fsSL --max-time 90 -o "${tmp}" "${CASK_API}"`);
+  // execFile via run() — both `tmp` and CASK_API are trusted but routing
+  // through execFile costs nothing and removes any future shell-quoting hazard.
+  await run("/usr/bin/curl", [
+    "-fsSL",
+    "--max-time",
+    "90",
+    "-o",
+    tmp,
+    CASK_API,
+  ]);
   const size = fs.statSync(tmp).size;
   if (size < 1_000_000) {
     try {

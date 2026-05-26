@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { open } from "@raycast/api";
-import { runShell } from "../shell";
+import { run } from "../shell";
 import { InstalledApp, UpdateInfo } from "../types";
 import { hasUpdate } from "../version";
 
@@ -108,9 +108,16 @@ export async function checkSparkle(
   if (!feedUrl) return null;
 
   try {
-    const { stdout } = await runShell(
-      `/usr/bin/curl -sL --max-time 10 -A "Mac Updater/1.0" "${feedUrl}" 2>/dev/null`,
-    );
+    // execFile via run() — no shell, so a malicious SUFeedURL in a .app's
+    // Info.plist can't inject commands. The URL is passed as a separate argv.
+    const { stdout } = await run("/usr/bin/curl", [
+      "-sL",
+      "--max-time",
+      "10",
+      "-A",
+      "Mac Updater/1.0",
+      feedUrl,
+    ]);
     if (!stdout || stdout.length < 20) return null;
 
     const items = parseSparkleFeed(stdout);

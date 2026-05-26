@@ -1,4 +1,4 @@
-import { runShell } from "../shell";
+import { run } from "../shell";
 import { InstalledApp, UpdateInfo } from "../types";
 import { hasUpdate } from "../version";
 
@@ -24,9 +24,16 @@ export async function checkGitHub(
   if (!repo) return null;
 
   try {
-    const { stdout } = await runShell(
-      `/usr/bin/curl -sL --max-time 10 -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest"`,
-    );
+    // execFile via run() — owner/repo are extracted from a plist string we
+    // don't control, so they can't be safely interpolated into a shell command.
+    const { stdout } = await run("/usr/bin/curl", [
+      "-sL",
+      "--max-time",
+      "10",
+      "-H",
+      "Accept: application/vnd.github+json",
+      `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`,
+    ]);
     const data = JSON.parse(stdout);
     if (!data?.tag_name) return null;
     const version = String(data.tag_name).replace(/^v/i, "");

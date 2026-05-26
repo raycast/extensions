@@ -1,6 +1,22 @@
 import * as fs from "fs";
 import * as path from "path";
-import { runShell } from "../shell";
+import { run } from "../shell";
+
+/**
+ * Fetch a URL via curl with execFile (no shell). All URL inputs in this file
+ * come from either a third-party product.json (codeFamily) or hardcoded
+ * endpoints with app-version params — neither is safe to interpolate into a
+ * shell string. run() passes the URL as a separate argv slot.
+ */
+async function fetchJson(url: string): Promise<string> {
+  const { stdout } = await run("/usr/bin/curl", [
+    "-sL",
+    "--max-time",
+    "10",
+    url,
+  ]);
+  return stdout;
+}
 import { InstalledApp, UpdateInfo } from "../types";
 import { hasUpdate } from "../version";
 
@@ -34,9 +50,7 @@ const codeFamily: KnownEndpoint = {
       if (!updateUrl || !commit) return null;
       const arch = process.arch === "arm64" ? "darwin-arm64" : "darwin-x64";
       const url = `${updateUrl}/api/update/${arch}/${quality}/${commit}`;
-      const { stdout } = await runShell(
-        `/usr/bin/curl -sL --max-time 10 "${url}"`,
-      );
+      const stdout = await fetchJson(url);
       if (!stdout || stdout.trim() === "") return null;
       const data = JSON.parse(stdout);
       if (!data?.productVersion) return null;
@@ -56,9 +70,7 @@ const slack: KnownEndpoint = {
   fetch: async (app) => {
     const url = `https://slack.com/desktop/version-check?lversion=${encodeURIComponent(app.version)}&platform=mac`;
     try {
-      const { stdout } = await runShell(
-        `/usr/bin/curl -sL --max-time 10 "${url}"`,
-      );
+      const stdout = await fetchJson(url);
       const data = JSON.parse(stdout);
       if (data?.url && data?.version)
         return { version: data.version, downloadUrl: data.url };
@@ -74,9 +86,7 @@ const discord: KnownEndpoint = {
   fetch: async (app) => {
     const url = `https://discord.com/api/updates/stable?platform=osx&version=${encodeURIComponent(app.version)}`;
     try {
-      const { stdout } = await runShell(
-        `/usr/bin/curl -sL --max-time 10 "${url}"`,
-      );
+      const stdout = await fetchJson(url);
       const data = JSON.parse(stdout);
       if (data?.name && data.name !== app.version) {
         return { version: data.name, downloadUrl: data.url };
