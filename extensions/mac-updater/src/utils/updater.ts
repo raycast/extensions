@@ -284,8 +284,12 @@ async function swapWithAdmin(
     `rm -rf ${shq(backupPath)}`,
   ].join(" && ");
   try {
+    // shq() would wrap `script` in single quotes, which collides with the outer
+    // single-quoted `-e '...'` shell arg and breaks the AppleScript. escapeAS()
+    // emits a properly escaped string literal for AppleScript's double-quoted
+    // form, with no nesting hazard.
     await runShell(
-      `osascript -e 'do shell script ${shq(script)} with administrator privileges with prompt "Mac Updater needs to replace the app in /Applications."'`,
+      `osascript -e 'do shell script "${escapeAS(script)}" with administrator privileges with prompt "Mac Updater needs to replace the app in /Applications."'`,
     );
     return { success: true };
   } catch (e) {
@@ -317,11 +321,15 @@ export async function downloadAndInstall(
     if (!stagedApp) {
       const type = await detectArchive(downloadPath);
       if (type === "pkg") {
-        // Defer to system installer with admin prompt
+        // Defer to system installer with admin prompt.
+        // The inner shell command is built with shq() (single-quote safe), then
+        // the entire thing is escaped via escapeAS() for AppleScript's
+        // double-quoted string literal — avoids quote nesting hazards.
         onProgress?.("Running pkg installer…");
         try {
+          const installCmd = `installer -pkg ${shq(downloadPath)} -target /`;
           await runShell(
-            `osascript -e 'do shell script "installer -pkg ${shq(downloadPath).slice(1, -1)} -target /" with administrator privileges with prompt "Mac Updater needs to run the package installer for ${escapeAS(appName)}."'`,
+            `osascript -e 'do shell script "${escapeAS(installCmd)}" with administrator privileges with prompt "Mac Updater needs to run the package installer for ${escapeAS(appName)}."'`,
           );
           return { success: true };
         } catch (e) {
