@@ -25,6 +25,11 @@ import {
   TransferProgress,
 } from "./utils/process";
 
+// Session ID for stale in_progress record cleanup in transfer-history.tsx.
+// Carried on every record this view writes so cleanup never marks records from
+// the active session as failed (mirrors quick-send.ts and send-file.tsx).
+const SESSION_ID = Math.random().toString(36).slice(2);
+
 type ReceiveState = "input" | "receiving" | "done" | "error";
 
 function extractCrocCode(text: string): string | null {
@@ -133,6 +138,7 @@ export default function ReceiveFile(
           files,
           phrase: trimmed,
           status: "success",
+          sessionId: SESSION_ID,
         });
       },
       async (err) => {
@@ -146,6 +152,7 @@ export default function ReceiveFile(
           files: [],
           phrase: trimmed,
           status: "failed",
+          sessionId: SESSION_ID,
         });
       },
     );
@@ -159,6 +166,7 @@ export default function ReceiveFile(
         files: [],
         phrase: activePhrase,
         status: "cancelled",
+        sessionId: SESSION_ID,
       });
     }
     setState("input");

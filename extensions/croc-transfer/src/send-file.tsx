@@ -27,6 +27,11 @@ import {
   spawnCrocSend,
 } from "./utils/process";
 
+// Session ID for stale in_progress record cleanup in transfer-history.tsx.
+// Records written from this session must carry this ID so the cleanup routine
+// only marks records from *previous* sessions as failed.
+const SESSION_ID = Math.random().toString(36).slice(2);
+
 function buildDeepLink(phrase: string): string {
   return `raycast://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
 }
@@ -117,6 +122,11 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         const result = prepareFilesForSend(filePaths);
         sendPaths = result.sendPaths;
         tempZips = result.tempZips;
+        // Clean up zips left over from any previous attempt in this same view
+        // (e.g. user cancelled while waiting and is now resubmitting). Without
+        // this, the previous batch becomes unreachable when we overwrite the
+        // ref below and would only ever be cleaned up at unmount.
+        cleanupZips(tempZipsRef.current);
         tempZipsRef.current = tempZips;
         toast.hide();
       } catch (err) {
@@ -157,6 +167,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
           phrase: p,
           status: "in_progress",
           size,
+          sessionId: SESSION_ID,
         });
         recordIdRef.current = record.id;
       },

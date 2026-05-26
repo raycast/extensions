@@ -175,6 +175,14 @@ function spawnWithPty(
   let outputLog = "";
   let dead = false;
 
+  const removeScriptDir = () => {
+    try {
+      rmSync(scriptDir, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
+  };
+
   const cleanup = () => {
     if (dead) return;
     dead = true;
@@ -205,21 +213,20 @@ function spawnWithPty(
     proc.on("close", (code) => {
       setTimeout(() => {
         cleanup();
-        try {
-          rmSync(scriptDir, { recursive: true, force: true });
-        } catch {
-          /* ignore */
-        }
+        removeScriptDir();
         onExit(code, cleanOutput(outputLog));
       }, 200);
     });
 
     proc.on("error", (err) => {
       cleanup();
+      removeScriptDir();
       onExit(1, err.message);
     });
   } catch (err) {
+    // Failure before spawn (e.g. Python 3 not found): ensure temp dir is removed.
     cleanup();
+    removeScriptDir();
     onExit(1, String(err));
   }
 
@@ -279,6 +286,7 @@ export function spawnCrocSend(
 ): CrocProcess {
   let phrase = "";
   let completed = false;
+  let cancelled = false;
   const startMs = Date.now();
 
   const kill = spawnWithPty(
@@ -314,19 +322,28 @@ export function spawnCrocSend(
       }
     },
     (code, log) => {
-      if (!completed) {
-        if (code === 0 || phrase) {
-          completed = true;
-          onComplete({ success: true, phrase });
-        } else {
-          const detail = log.trim() ? `\n\n${log.trim().slice(-400)}` : "";
-          onError(new Error(`croc exited with code ${code}${detail}`));
-        }
+      // Suppress callbacks if the consumer already cancelled the transfer —
+      // the caller (e.g. useTransfer.cancel) is responsible for UI state in
+      // that path. Only treat exit code 0 as success: a non-zero exit (e.g.
+      // SIGTERM from Cancel) must not be reported as success even though the
+      // code phrase was already captured.
+      if (completed || cancelled) return;
+      if (code === 0) {
+        completed = true;
+        onComplete({ success: true, phrase });
+      } else {
+        const detail = log.trim() ? `\n\n${log.trim().slice(-400)}` : "";
+        onError(new Error(`croc exited with code ${code}${detail}`));
       }
     },
   );
 
-  return { kill };
+  return {
+    kill: () => {
+      cancelled = true;
+      kill();
+    },
+  };
 }
 
 export function spawnCrocReceive(
@@ -339,6 +356,7 @@ export function spawnCrocReceive(
   onError: ErrorCallback,
 ): CrocProcess {
   let completed = false;
+  let cancelled = false;
   const startMs = Date.now();
 
   mkdirSync(downloadDir, { recursive: true });
@@ -370,25 +388,30 @@ export function spawnCrocReceive(
       }
     },
     (code, log) => {
-      if (!completed) {
-        completed = true;
-        if (code === 0) {
-          // Return files with original names — no renaming
-          const afterFiles = readdirSync(downloadDir).filter(
-            (f) => !f.startsWith("."),
-          );
-          const newFiles = afterFiles.filter((f) => !beforeFiles.has(f));
-          const files = newFiles.map((f) => join(downloadDir, f));
-          onComplete({ success: true, files });
-        } else {
-          const detail = log.trim() ? `\n\n${log.trim().slice(-400)}` : "";
-          onError(new Error(`croc exited with code ${code}${detail}`));
-        }
+      // Suppress callbacks if the consumer already cancelled the receive.
+      if (completed || cancelled) return;
+      completed = true;
+      if (code === 0) {
+        // Return files with original names — no renaming
+        const afterFiles = readdirSync(downloadDir).filter(
+          (f) => !f.startsWith("."),
+        );
+        const newFiles = afterFiles.filter((f) => !beforeFiles.has(f));
+        const files = newFiles.map((f) => join(downloadDir, f));
+        onComplete({ success: true, files });
+      } else {
+        const detail = log.trim() ? `\n\n${log.trim().slice(-400)}` : "";
+        onError(new Error(`croc exited with code ${code}${detail}`));
       }
     },
     downloadDir,
     { CROC_SECRET: codePhrase },
   );
 
-  return { kill };
+  return {
+    kill: () => {
+      cancelled = true;
+      kill();
+    },
+  };
 }

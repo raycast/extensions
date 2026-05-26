@@ -235,6 +235,7 @@ async function reSend(record: TransferRecord) {
         files: existing,
         phrase,
         status: "in_progress",
+        sessionId: SESSION_ID,
       });
       recordId = record.id;
     },
