@@ -467,9 +467,21 @@ export function TasksView({
                 title={`Create ${prefs.todoPath}`}
                 icon={Icon.NewDocument}
                 onAction={async () => {
-                  await fsWriteFile(prefs.todoPath, "", "utf8");
-                  const result = await read(prefs.todoPath);
-                  if (result !== "notfound") setStatus({ kind: "ready", snapshot: result });
+                  try {
+                    await fsWriteFile(prefs.todoPath, "", "utf8");
+                    const result = await read(prefs.todoPath);
+                    if (result !== "notfound") setStatus({ kind: "ready", snapshot: result });
+                  } catch (err) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: `Couldn't create ${prefs.todoPath}`,
+                      message: err instanceof Error ? err.message : String(err),
+                      primaryAction: {
+                        title: "Open Preferences",
+                        onAction: () => openExtensionPreferences(),
+                      },
+                    });
+                  }
                 }}
               />
             </ActionPanel>
