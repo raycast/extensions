@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2026-04-08
 
 - Fix `raycast-tint-color` value
