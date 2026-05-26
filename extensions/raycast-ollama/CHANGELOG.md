@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-05-26
 
 - Command "Chat with Ollama": new system prompt with current date and system information in the context.
 - Command "Chat with Ollama": internet search using Ollama Search API. API Key Requied. Enabled by default.
