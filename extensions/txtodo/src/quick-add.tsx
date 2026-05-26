@@ -1,4 +1,4 @@
-import { type LaunchProps, Toast, showHUD, showToast } from "@raycast/api";
+import { type LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { resolveDueOption } from "./domain/due";
 import type { Priority, Task } from "./domain/parser";
 import { taskFromFields, withCreationDate } from "./domain/task";

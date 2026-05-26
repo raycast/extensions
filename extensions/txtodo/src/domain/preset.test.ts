@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { parseLine } from "./parser";
 import type { Task } from "./parser";
-import { VIEW_PRESETS, applyPreset, isValidPreset } from "./preset";
+import { parseLine } from "./parser";
+import { applyPreset, isValidPreset, VIEW_PRESETS } from "./preset";
 
 describe("VIEW_PRESETS", () => {
   it("contains the five presets in canonical order", () => {

@@ -1,6 +1,6 @@
-import { Icon, LaunchType, LocalStorage, MenuBarExtra, launchCommand } from "@raycast/api";
+import { Icon, LaunchType, LocalStorage, launchCommand, MenuBarExtra } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { type Task, stripMetadataFromDescription } from "./domain/parser";
+import { stripMetadataFromDescription, type Task } from "./domain/parser";
 import { type DateSections, sectionsByDate } from "./domain/sections";
 import type { GroupKey } from "./domain/sort";
 import { type FileSnapshot, read } from "./io/todoFile";

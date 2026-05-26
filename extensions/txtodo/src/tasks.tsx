@@ -7,9 +7,9 @@ import {
   type LaunchProps,
   List,
   LocalStorage,
-  Toast,
   openExtensionPreferences,
   showToast,
+  Toast,
 } from "@raycast/api";
 
 const TAG_PROJECT_COLOR: Color.ColorLike = Color.Green;
@@ -26,14 +26,14 @@ const GROUP_MODE_KEY = "tasks-group-mode";
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { TaskForm } from "./components/TaskForm";
 import { formatRelativeDue, parseDueDate } from "./domain/due";
-import { type Priority, type Task, stripMetadataFromDescription } from "./domain/parser";
-import { type ViewPreset, applyPreset, isValidPreset } from "./domain/preset";
+import { type Priority, stripMetadataFromDescription, type Task } from "./domain/parser";
+import { applyPreset, isValidPreset, type ViewPreset } from "./domain/preset";
 import { type DateSections, sectionsByDate } from "./domain/sections";
-import { type GroupKey, PRIORITY_KEYS, groupByPriority, sortGroup } from "./domain/sort";
-import { type TagFilter, matchesFilters, tagFilterKey } from "./domain/tags";
+import { type GroupKey, groupByPriority, PRIORITY_KEYS, sortGroup } from "./domain/sort";
+import { matchesFilters, type TagFilter, tagFilterKey } from "./domain/tags";
 import { complete, setPriority, uncomplete, withCreationDate } from "./domain/task";
-import { type FileSnapshot, appendToDone, read, watch, writeAtomic } from "./io/todoFile";
-import { type Preferences, getPreferences } from "./preferences";
+import { appendToDone, type FileSnapshot, read, watch, writeAtomic } from "./io/todoFile";
+import { getPreferences, type Preferences } from "./preferences";
 import { priorityLabel, prioritySquircle } from "./priority";
 
 type Status =

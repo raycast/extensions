@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseLine } from "./parser";
-import { PRIORITY_KEYS, groupByPriority, sortGroup } from "./sort";
+import { groupByPriority, PRIORITY_KEYS, sortGroup } from "./sort";
 
 describe("groupByPriority", () => {
   it("buckets tasks by priority including 'none' bucket", () => {

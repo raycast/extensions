@@ -1,10 +1,10 @@
 import {
-  type Priority,
-  type Task,
   extractTags,
+  type Priority,
   serializeTask,
   stripMetadataFromDescription,
   stripTagsFromDescription,
+  type Task,
 } from "./parser";
 
 function rebuild(task: Task): Task {

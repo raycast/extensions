@@ -1,6 +1,6 @@
 import { watch as fsWatch } from "node:fs";
 import { appendFile, writeFile as fsWriteFile, readFile, rename, stat } from "node:fs/promises";
-import { type Task, parseLine, serializeTask } from "../domain/parser";
+import { parseLine, serializeTask, type Task } from "../domain/parser";
 
 export type FileSnapshot = {
   path: string;

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { parseLine } from "../domain/parser";
-import { type FileSnapshot, appendToDone, read, watch, writeAtomic } from "./todoFile";
+import { appendToDone, type FileSnapshot, read, watch, writeAtomic } from "./todoFile";
 
 let dir: string;
 

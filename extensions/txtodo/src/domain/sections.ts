@@ -1,6 +1,6 @@
 import { parseDueDate, startOfDay } from "./due";
 import type { Task } from "./parser";
-import { PRIORITY_KEYS, groupByPriority, sortGroup } from "./sort";
+import { groupByPriority, PRIORITY_KEYS, sortGroup } from "./sort";
 
 export type DateSections = {
   overdue: Task[];

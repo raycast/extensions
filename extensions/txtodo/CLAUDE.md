@@ -66,4 +66,3 @@ Coverage scope is intentionally limited to `src/domain/**` and `src/io/**` — U
 ## Working in this repo
 
 - **Specs and plans** for non-trivial changes live under `docs/superpowers/specs/` and `docs/superpowers/plans/`, date-prefixed. Check there for design rationale before guessing at intent.
-- `npm install` occasionally reflows the `categories` and `platforms` arrays in `package.json` onto multiple lines, which Biome then rejects. Re-collapse them onto one line.

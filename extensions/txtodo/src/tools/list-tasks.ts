@@ -1,8 +1,8 @@
 import { formatRelativeDue } from "../domain/due";
 import type { Task } from "../domain/parser";
 import { stripMetadataFromDescription } from "../domain/parser";
-import { type ViewPreset, applyPreset, isValidPreset } from "../domain/preset";
-import { type TagFilter, matchesFilters } from "../domain/tags";
+import { applyPreset, isValidPreset, type ViewPreset } from "../domain/preset";
+import { matchesFilters, type TagFilter } from "../domain/tags";
 import { read } from "../io/todoFile";
 import { getPreferences } from "../preferences";
 

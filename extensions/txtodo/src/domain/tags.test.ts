@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseLine } from "./parser";
-import { matchesFilters, tagFilterKey } from "./tags";
-import { currentPartialTag, matchingTags } from "./tags";
+import { currentPartialTag, matchesFilters, matchingTags, tagFilterKey } from "./tags";
 
 describe("matchesFilters", () => {
   const a = parseLine("(A) Email Bob +work @phone", 0);
