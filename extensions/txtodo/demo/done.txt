@@ -1,8 +1,0 @@
-x 2026-05-22 (A) 2026-05-15 Ship v1.2 release @work +product
-x 2026-05-20 2026-05-19 Order new headphones @home
-x 2026-05-17 (C) 2026-05-11 Renew gym membership @phone +health
-x 2026-05-14 (B) 2026-05-09 Reply to legal review email @work +contracts
-x 2026-05-11 (B) 2026-05-04 Migrate analytics to Mixpanel @work +product
-x 2026-05-08 2026-05-06 Submit timesheet @work +admin
-x 2026-05-04 (A) 2026-05-03 File taxes @home +finance
-x 2026-05-25 (C) 2026-05-22 Pay credit card bill @phone +finance due:2026-05-22

@@ -33,7 +33,7 @@ import { type GroupKey, groupByPriority, PRIORITY_KEYS, sortGroup } from "./doma
 import { matchesFilters, type TagFilter, tagFilterKey } from "./domain/tags";
 import { complete, setPriority, uncomplete, withCreationDate } from "./domain/task";
 import { appendToDone, type FileSnapshot, read, watch, writeAtomic } from "./io/todoFile";
-import { getPreferences, type Preferences } from "./preferences";
+import { getPreferences } from "./preferences";
 import { priorityLabel, prioritySquircle } from "./priority";
 
 type Status =
@@ -144,6 +144,42 @@ export function TasksView({
     return applyMutation(
       (tasks) => tasks.filter((t) => !(t.raw === task.raw && t.lineNumber === task.lineNumber)),
       "Deleted",
+    );
+  }
+
+  async function toggleComplete(task: Task) {
+    if (status.kind !== "ready") return;
+    const willComplete = !task.completed;
+
+    if (willComplete && prefs.archiveOnComplete) {
+      const toggled = complete(task, today());
+      try {
+        await appendToDone(prefs.donePath, [toggled]);
+      } catch (err) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't archive to done.txt",
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
+      setArchiveStatus({ kind: "idle" });
+      await applyMutation(
+        (tasks) => tasks.filter((t) => !(t.raw === task.raw && t.lineNumber === task.lineNumber)),
+        "Completed and archived",
+      );
+      return;
+    }
+
+    await applyMutation(
+      (tasks) => {
+        const idx = tasks.findIndex((t) => t.raw === task.raw && t.lineNumber === task.lineNumber);
+        if (idx === -1) return tasks;
+        const target = tasks[idx];
+        const toggled = target.completed ? uncomplete(target) : complete(target, today());
+        return [...tasks.slice(0, idx), toggled, ...tasks.slice(idx + 1)];
+      },
+      willComplete ? "Completed" : "Marked incomplete",
     );
   }
 
@@ -489,28 +525,7 @@ export function TasksView({
                 key={`date-${title}-${task.lineNumber}-${task.raw}`}
                 task={task}
                 groupKey={key}
-                onToggle={() =>
-                  applyMutation(
-                    (tasks) => {
-                      const idx = tasks.findIndex(
-                        (t) => t.raw === task.raw && t.lineNumber === task.lineNumber,
-                      );
-                      if (idx === -1) return tasks;
-                      const target = tasks[idx];
-                      const toggled = target.completed
-                        ? uncomplete(target)
-                        : complete(target, today());
-
-                      if (!target.completed && prefs.archiveOnComplete) {
-                        void appendToDone(prefs.donePath, [toggled]);
-                        setArchiveStatus({ kind: "idle" });
-                        return [...tasks.slice(0, idx), ...tasks.slice(idx + 1)];
-                      }
-                      return [...tasks.slice(0, idx), toggled, ...tasks.slice(idx + 1)];
-                    },
-                    task.completed ? "Marked incomplete" : "Completed",
-                  )
-                }
+                onToggle={() => toggleComplete(task)}
                 onEdit={() => openEdit(task)}
                 onSetPriority={(p) =>
                   applyTransformTo(
@@ -663,28 +678,7 @@ export function TasksView({
                   key={`${key}-${task.lineNumber}`}
                   task={task}
                   groupKey={key}
-                  onToggle={() =>
-                    applyMutation(
-                      (tasks) => {
-                        const idx = tasks.findIndex(
-                          (t) => t.raw === task.raw && t.lineNumber === task.lineNumber,
-                        );
-                        if (idx === -1) return tasks;
-                        const target = tasks[idx];
-                        const toggled = target.completed
-                          ? uncomplete(target)
-                          : complete(target, today());
-
-                        if (!target.completed && prefs.archiveOnComplete) {
-                          void appendToDone(prefs.donePath, [toggled]);
-                          setArchiveStatus({ kind: "idle" });
-                          return [...tasks.slice(0, idx), ...tasks.slice(idx + 1)];
-                        }
-                        return [...tasks.slice(0, idx), toggled, ...tasks.slice(idx + 1)];
-                      },
-                      task.completed ? "Marked incomplete" : "Completed",
-                    )
-                  }
+                  onToggle={() => toggleComplete(task)}
                   onEdit={() => openEdit(task)}
                   onSetPriority={(p) =>
                     applyTransformTo(

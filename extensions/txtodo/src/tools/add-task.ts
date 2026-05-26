@@ -3,7 +3,7 @@ import type { Priority, Task } from "../domain/parser";
 import { serializeTask } from "../domain/parser";
 import { taskFromFields, withCreationDate } from "../domain/task";
 import { read, writeAtomic } from "../io/todoFile";
-import { getPreferences, type Preferences } from "../preferences";
+import { getPreferences } from "../preferences";
 
 type Input = {
   description: string;
