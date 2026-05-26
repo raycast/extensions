@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Custom domain detection] - {PR_MERGE_DATE}
+## [Custom domain detection] - 2026-05-26
 
 Surfaces custom local domains from [portless](https://github.com/vercel-labs/portless), and tightens the action panel, shortcuts, and preferences to align with Raycast conventions.
 
