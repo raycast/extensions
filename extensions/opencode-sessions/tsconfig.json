@@ -11,6 +11,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@opencode-ai/sdk/v2": ["./node_modules/@opencode-ai/sdk/dist/v2/index.d.ts"],
+      "@opencode-ai/sdk/v2/client": ["./node_modules/@opencode-ai/sdk/dist/v2/client.d.ts"]
+    }
   }
 }

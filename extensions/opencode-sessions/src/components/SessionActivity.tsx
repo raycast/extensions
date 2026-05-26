@@ -1,5 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 
+import { Todo } from "@opencode-ai/sdk/v2/client";
+
 import { MessageWithParts, useSessionMessages, useSessionTodos } from "../hooks/useSessions";
 import { resumeSession } from "../lib/terminal";
 import { Session } from "../types";
@@ -15,7 +17,7 @@ export function SessionActivity({ session }: SessionActivityProps) {
   const todoSection =
     todos.length > 0
       ? `## Tasks\n\n${todos
-          .map((t) => {
+          .map((t: Todo) => {
             const icon =
               t.status === "completed"
                 ? "✅"
