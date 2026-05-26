@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workspace-terminal",
+  "title": "Workspace Terminal",
+  "description": "Open your VS Code Project Manager workspaces in your favorite terminal and auto-run a startup command.",
+  "icon": "extension-icon.png",
+  "author": "07JP27",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "subtitle": "Workspace Terminal",
+      "description": "Search VS Code Project Manager workspaces and open them in a terminal.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vscodeApp",
+      "title": "VS Code App",
+      "description": "The VS Code-compatible app whose Project Manager data should be used.",
+      "type": "appPicker",
+      "required": false,
+      "default": "/Applications/Visual Studio Code.app"
+    },
+    {
+      "name": "projectManagerDataPath",
+      "title": "Project Manager Data Path",
+      "description": "Optional override for the Project Manager data directory or projects.json file.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "terminalType",
+      "title": "Terminal",
+      "description": "Terminal app used to open workspaces.",
+      "type": "dropdown",
+      "required": true,
+      "default": "ghostty",
+      "data": [
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "iTerm", "value": "iterm" },
+        { "title": "Terminal", "value": "terminal" },
+        { "title": "Warp", "value": "warp" },
+        { "title": "kitty", "value": "kitty" },
+        { "title": "Alacritty", "value": "alacritty" },
+        { "title": "WezTerm", "value": "wezterm" }
+      ]
+    },
+    {
+      "name": "defaultCommand",
+      "title": "Default Command",
+      "description": "Command to run after opening a workspace. Leave empty to only open the terminal.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "commandMode",
+      "title": "Command Mode",
+      "description": "How startup commands should be run.",
+      "type": "dropdown",
+      "required": false,
+      "default": "keepShell",
+      "data": [
+        { "title": "Keep Shell After Command", "value": "keepShell" },
+        { "title": "Command Only", "value": "commandOnly" },
+        { "title": "Open Only", "value": "none" }
+      ]
+    },
+    {
+      "name": "reuseWindow",
+      "title": "Reuse Existing Window",
+      "label": "Open in an existing terminal window when supported",
+      "description": "Best-effort behavior. Some terminals do not support window reuse.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "shellPath",
+      "title": "Shell Path",
+      "description": "Shell used for command execution.",
+      "type": "textfield",
+      "required": false,
+      "default": "/bin/zsh"
+    },
+    {
+      "name": "groupProjectsByTag",
+      "title": "Group Projects by Tag",
+      "description": "Display projects in sections based on Project Manager tags.",
+      "label": "Group projects by Project Manager tags",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "hideProjectsWithoutTag",
+      "title": "Hide Projects Without Tags",
+      "description": "Hide projects that do not have Project Manager tags.",
+      "label": "Hide projects that do not have tags",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "hideProjectsNotEnabled",
+      "title": "Hide Disabled Projects",
+      "description": "Hide Project Manager entries where enabled is false.",
+      "label": "Hide projects where enabled is false",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "js-yaml": "^4.1.0",
+    "tildify": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
