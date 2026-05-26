@@ -94,4 +94,4 @@ This extension uses Zipic's URL scheme to compress images. The URL format follow
    - `Compress Images`: Compress using Zipic's built-in settings
    - `Compress Images with Options`: Compress with custom options
    - `Compress Images with Preset`: Compress using a saved preset
-   - `Manage Compression Presets`: Manage your compression presets.
+   - `Manage Compression Presets`: Manage your compression presets
