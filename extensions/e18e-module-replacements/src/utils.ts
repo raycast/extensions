@@ -47,7 +47,7 @@ export function toMarkdown(module: (typeof ALL_MODULES)[number]) {
 
       case "simple":
         lines.push(
-          "This package is no longer necessary." + (replacement.description ? " " + replacement.description : ""),
+          "This package can be replaced with a simple snippet." + (replacement.description ? " " + replacement.description : ""),
         );
         if (replacement.example) {
           lines.push("```js");
