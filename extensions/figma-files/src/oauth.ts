@@ -23,8 +23,7 @@ export const figma = new OAuthService({
   personalAccessToken: PERSONAL_ACCESS_TOKEN,
   onAuthorize: async ({ token, type }) => {
     try {
-      const headers =
-        type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
+      const headers = type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
       const response = await fetch("https://api.figma.com/v1/me", { headers });
       if (!response.ok) return;
       const user = (await response.json()) as { handle: string; img_url: string };
