@@ -147,6 +147,13 @@ async function loadSample(path: string): Promise<VoiceCloneSample> {
     throw new Error("Only mp3 and wav files are supported.");
   }
 
+  // Early-reject obviously oversized files before loading them into memory.
+  // Base64 inflates by ~33 %, so MAX_SAMPLE_BYTES of raw bytes is a safe
+  // over-estimate; the precise post-encode check below remains authoritative.
+  if (stats.size > MAX_SAMPLE_BYTES) {
+    throw new Error("Sample exceeds the 10 MB limit after base64 encoding.");
+  }
+
   const buffer = readFileSync(path);
   const base64 = buffer.toString("base64");
   if (base64.length > MAX_SAMPLE_BYTES) {
