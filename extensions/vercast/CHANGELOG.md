@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.18] - {PR_MERGE_DATE}
+## [2.18] - 2026-05-27
 
 - Use orange status dot for in-progress deployments (building/initializing) for better contrast with ready (green)
 - Added `Copy URL` action to deployment detail view
