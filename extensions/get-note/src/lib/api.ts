@@ -382,22 +382,26 @@ export async function getImageUploadConfig(): Promise<ImageUploadConfig> {
   return request<ImageUploadConfig>("/open/api/v1/resource/image/config");
 }
 
+function isImageUploadToken(value: ImageUploadToken | { tokens?: ImageUploadToken[] }): value is ImageUploadToken {
+  return "accessid" in value && "host" in value && "policy" in value && "signature" in value;
+}
+
 export async function getImageUploadToken(input: { mimeType: string }): Promise<ImageUploadToken> {
   const data = await request<ImageUploadToken | { tokens?: ImageUploadToken[] }>(
     `/open/api/v1/resource/image/upload_token?mime_type=${encodeURIComponent(input.mimeType)}`,
   );
 
-  if ("tokens" in data) {
-    const token = data.tokens?.[0];
-
-    if (!token) {
-      throw new GetNoteError("No image upload token was returned.");
-    }
-
-    return token;
+  if (isImageUploadToken(data)) {
+    return data;
   }
 
-  return data;
+  const token = data.tokens?.[0];
+
+  if (!token) {
+    throw new GetNoteError("No image upload token was returned.");
+  }
+
+  return token;
 }
 
 export async function uploadImageToOSS(input: {
