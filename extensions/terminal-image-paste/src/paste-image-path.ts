@@ -38,14 +38,10 @@ close access fp
     .filter(Boolean);
 
   for (const host of hosts) {
-    spawn(
-      "scp",
-      ["-q", "-o", "ConnectTimeout=3", clipPath, `${host}:${clipPath}`],
-      {
-        detached: true,
-        stdio: "ignore",
-      },
-    ).unref();
+    spawn("scp", ["-q", "-o", "ConnectTimeout=3", clipPath, `${host}:${clipPath}`], {
+      detached: true,
+      stdio: "ignore",
+    }).unref();
   }
 
   const hostInfo = hosts.length > 0 ? ` → ${hosts.join(", ")}` : "";
