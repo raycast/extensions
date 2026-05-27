@@ -29,24 +29,16 @@ npm install
 
 Select Telex text → press hotkey → transformed in place.
 
-## Docs
-
-| Document | Content |
-|----------|---------|
-| [Raycast Extension](docs/raycast.md) | Installation, usage, skip words, preferences |
-| [Architecture & Engine](docs/architecture.md) | Syllable validator, data constants, modifiers, performance |
-| [Integration Guide](docs/integration.md) | API, Electron, Tauri, browser extension, CLI examples |
-
 ## Known Limitations
 
 English words that form valid Vietnamese syllables need skip-words:
 
-| Input | Output | Fix |
-|-------|--------|-----|
-| `mix` | `mĩ` | `telexTransform(text, ["mix"])` |
-| `core` | `cỏe` | `telexTransform(text, ["core"])` |
+| Input  | Output | Fix                              |
+| ------ | ------ | -------------------------------- |
+| `mix`  | `mĩ`   | `telexTransform(text, ["mix"])`  |
+| `core` | `cỏe`  | `telexTransform(text, ["core"])` |
 
-See [Raycast docs](docs/raycast.md#skip-words) for the skip-word system with prefix matching.
+Pass a skip-word list to `telexTransform(text, ["mix", "core"])`; entries match as prefixes (e.g. `"mix"` skips `mix`, `mixer`).
 
 ## License
 

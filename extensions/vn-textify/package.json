@@ -4,7 +4,7 @@
   "name": "vn-textify",
   "title": "VN Textify",
   "description": "Transform Vietnam's Telex text to Vietnamese text",
-  "icon": "entelex-icon.png",
+  "icon": "extension-icon.png",
   "author": "locnguyen1842",
   "platforms": [
     "macOS",
