@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-27
 
 - Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.
 
