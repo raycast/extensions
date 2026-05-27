@@ -29,8 +29,18 @@ export const KNOWN_INSTALLS: Record<string, KnownInstall> = {
     description: "KDE Connect (nightly via kde-mac tap)",
     caskToken: "kde-mac/kde/kdeconnect",
     homepageUrl: "https://kdeconnect.kde.org/download.html",
+    // Heads up to anyone updating these commands:
+    // - --force-auto-update on `brew tap` is rejected by older brew releases
+    //   (4.4 and below). Leave it off — the tap still works, it just won't
+    //   pre-fetch updates on every `brew update`.
+    // - kde-mac's casks pin a specific nightly build number from KDE's
+    //   Binary Factory. Those builds get pruned on a rolling basis, so the
+    //   download URL routinely 404s for a few days at a time. When that
+    //   happens, humanizeInstallError() catches the curl 56 / 404 pattern
+    //   and the failure toast offers "Open Project Homepage" so the user
+    //   can grab the .dmg directly from kdeconnect.kde.org instead.
     commands: [
-      "/opt/homebrew/bin/brew tap kde-mac/kde https://invent.kde.org/packaging/homebrew-kde.git --force-auto-update",
+      "/opt/homebrew/bin/brew tap kde-mac/kde https://invent.kde.org/packaging/homebrew-kde.git",
       "/opt/homebrew/bin/brew update --quiet",
       // Fixes linking after the homebrew/core migration. Safe to re-run.
       '"$(/opt/homebrew/bin/brew --repo kde-mac/kde)/tools/do-caveats.sh" || true',

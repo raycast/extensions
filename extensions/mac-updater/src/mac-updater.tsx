@@ -60,7 +60,7 @@ import {
   undismissAdoption,
 } from "./utils/adoption";
 import { getKnownInstall } from "./utils/known-installs";
-import { openInAppStore, openInTerminal } from "./utils/external";
+import { openHomepage, openInAppStore, openInTerminal } from "./utils/external";
 import {
   getIgnoreStates,
   ignoreApp,
@@ -463,12 +463,29 @@ export default function MacUpdater() {
       toast.style = Toast.Style.Failure;
       toast.title = `Couldn't adopt ${app.name}`;
       toast.message = r.error;
-      // Offer an in-toast action to bail out to Terminal or App Store
+      // Offer an in-toast action to bail out to Terminal, App Store, or the
+      // project homepage. Homepage takes priority when the failure is a
+      // pulled-CDN 404 — retrying brew won't help, and the homepage almost
+      // always has a working direct download (this is the KDE Connect case).
+      const looksLikeCdn404 = /404|curl.*\(56\)|download failed/i.test(
+        r.error ?? "",
+      );
       if (known?.kind === "mas" && known.masId) {
         toast.primaryAction = {
           title: "Open in App Store",
           shortcut: { modifiers: ["cmd"], key: "o" },
           onAction: () => openInAppStore(known.masId!),
+        };
+        toast.secondaryAction = {
+          title: "Run in Terminal",
+          shortcut: { modifiers: ["cmd"], key: "t" },
+          onAction: () => openInTerminal(known.commands.join(" && ")),
+        };
+      } else if (known?.homepageUrl && looksLikeCdn404) {
+        toast.primaryAction = {
+          title: "Open Project Homepage",
+          shortcut: { modifiers: ["cmd"], key: "o" },
+          onAction: () => openHomepage(known.homepageUrl!),
         };
         toast.secondaryAction = {
           title: "Run in Terminal",
@@ -486,6 +503,13 @@ export default function MacUpdater() {
             openInTerminal(cmd);
           },
         };
+        if (known?.homepageUrl) {
+          toast.secondaryAction = {
+            title: "Open Project Homepage",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => openHomepage(known.homepageUrl!),
+          };
+        }
       }
     }
     setBusyId(null);
