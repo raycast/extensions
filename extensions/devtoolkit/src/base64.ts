@@ -19,7 +19,7 @@ function decodeBase64(input: string): string {
 }
 
 function isBase64Text(value: string): boolean {
-  if (value.length === 0 || value.length % 4 === 1) {
+  if (value.length === 0 || value.length % 4 !== 0) {
     return false;
   }
 
