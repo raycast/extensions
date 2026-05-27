@@ -2,58 +2,87 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "freshrss",
   "title": "FreshRSS",
-  "description": "Browse and manage your FreshRSS articles",
+  "description": "Browse and manage FreshRSS feeds and articles from Raycast",
   "icon": "extension-icon.png",
-  "author": "semyon_surkov",
+  "author": "ebourgess",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "News"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Browse Articles",
-      "description": "Browse, search and manage your FreshRSS reading list",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "name": "list-feeds",
+      "title": "List Feeds",
+      "description": "List all subscribed feeds",
+      "mode": "view"
     },
     {
-      "name": "today",
-      "title": "Today's Articles",
-      "description": "Quickly see today's unread articles",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "name": "add-feed",
+      "title": "Add Feed",
+      "description": "Subscribe to a new RSS/Atom feed",
+      "mode": "view"
     },
     {
-      "name": "starred",
+      "name": "remove-feed",
+      "title": "Remove Feed",
+      "description": "Unsubscribe from a feed",
+      "mode": "view"
+    },
+    {
+      "name": "unread-articles",
+      "title": "Unread Articles",
+      "description": "Browse unread articles",
+      "mode": "view"
+    },
+    {
+      "name": "read-articles",
+      "title": "Read Articles",
+      "description": "Browse read articles",
+      "mode": "view"
+    },
+    {
+      "name": "starred-articles",
       "title": "Starred Articles",
-      "description": "Browse your starred/bookmarked articles",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "description": "Browse starred/favorite articles",
+      "mode": "view"
     },
     {
-      "name": "random",
+      "name": "browse-categories",
+      "title": "Browse by Category",
+      "description": "Browse articles by category/label",
+      "mode": "view"
+    },
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Search articles across all feeds",
+      "mode": "view"
+    },
+    {
+      "name": "random-article",
       "title": "Random Article",
-      "description": "Discover a random unread article",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "description": "Open a random article from your feeds",
+      "mode": "view"
     },
     {
-      "name": "feeds",
-      "title": "Feed List",
-      "description": "Browse your subscriptions and read articles by feed",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "name": "refresh-feeds",
+      "title": "Refresh Feeds",
+      "description": "Force refresh all feeds and clear cache",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "baseUrl",
-      "title": "FreshRSS Base URL",
-      "description": "The base URL of your FreshRSS instance (e.g., https://rss.example.com)",
+      "title": "Base URL",
+      "description": "Your FreshRSS instance URL (e.g. https://feed.ebourgess.dev)",
       "type": "textfield",
       "required": true,
-      "placeholder": "https://rss.example.com"
+      "default": "https://feed.ebourgess.dev",
+      "placeholder": "https://feed.example.com"
     },
     {
       "name": "username",
@@ -66,44 +95,53 @@
     {
       "name": "apiPassword",
       "title": "API Password",
-      "description": "Your FreshRSS API password (configured in FreshRSS account settings)",
+      "description": "Your FreshRSS API password (not your login password)",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "Enter your API password"
     },
     {
-      "name": "debugLogging",
-      "title": "Debug Logging",
-      "description": "Enable verbose FreshRSS request logs in Raycast developer logs for troubleshooting.",
+      "name": "readwiseToken",
+      "title": "Readwise Token",
+      "description": "Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your Readwise access token"
+    },
+    {
+      "name": "autoMarkAsRead",
+      "title": "Auto Mark as Read",
+      "description": "Automatically mark articles as read when you open them",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "label": "Enable Debug Logging"
+      "label": "Auto Mark as Read"
+    },
+    {
+      "name": "markReadOnReadwise",
+      "title": "Mark Read on Readwise Save",
+      "description": "Automatically mark articles as read when saving to Readwise Reader",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Mark Read on Readwise Save"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.12",
-    "bcryptjs": "^3.0.3",
-    "node-html-markdown": "^2.0.0"
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
   },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/bcryptjs": "^3.0.0",
-    "@types/node": "25.6.0",
-    "@types/react": "^19.2.14",
-    "eslint": "^10.2.0",
-    "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+"devDependencies": {
+    "@raycast/api": "^1.83.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.4.0"
   },
   "scripts": {
     "build": "ray build",
+    "build:beta": "ray build --target x",
     "dev": "ray develop",
+    "dev:beta": "ray develop --target x",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and retry publishing again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+    "lint": "ray lint"
+  }
 }
