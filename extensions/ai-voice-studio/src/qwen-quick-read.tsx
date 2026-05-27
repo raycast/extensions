@@ -121,8 +121,21 @@ export async function runQwenQuickRead() {
       await showHUD(`Done · ${voiceName}`);
     }
   } catch (error) {
-    await markError(error instanceof Error ? error.message : String(error));
-    await showTTSFailure(error);
+    // The realtime path surfaces a user-initiated stop as a rejection of the
+    // WebSocket session (signal aborts -> TTSApiError(-7)) rather than a
+    // resolved kind:"stopped" outcome, so reaching here with the player in
+    // stopped state means the user intentionally cancelled. Treat that the
+    // same as the success-path stopped branch instead of an error.
+    if (player.isStopped()) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Stopped";
+      toast.message = `${voiceName} · stopped`;
+      await markIdle();
+      await showHUD("Stopped");
+    } else {
+      await markError(error instanceof Error ? error.message : String(error));
+      await showTTSFailure(error);
+    }
   } finally {
     player.cleanup();
   }
