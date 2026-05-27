@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+} from "@raycast/api";
 import {
   CHEAT_ENTRIES,
   CheatEntry,
@@ -67,6 +74,21 @@ function iconFor(entry: CheatEntry): Icon {
 }
 
 function EntryActions({ entry }: { entry: CheatEntry }) {
+  // The CheatEntry type allows shortcut/command/shell to coexist on a single
+  // entry. Only the first present field gets cmd+c so the keyboard shortcut
+  // never silently shadows a sibling Copy action.
+  const primaryPayload: "shortcut" | "command" | "shell" | null = entry.shortcut
+    ? "shortcut"
+    : entry.command
+      ? "command"
+      : entry.shell
+        ? "shell"
+        : null;
+  const primaryShortcut: Keyboard.Shortcut = {
+    modifiers: ["cmd"],
+    key: "c",
+  };
+
   return (
     <ActionPanel>
       <Action.Push
@@ -78,21 +100,21 @@ function EntryActions({ entry }: { entry: CheatEntry }) {
         <Action.CopyToClipboard
           title="Copy Shortcut"
           content={entry.shortcut}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={primaryPayload === "shortcut" ? primaryShortcut : undefined}
         />
       )}
       {entry.command && (
         <Action.CopyToClipboard
           title="Copy Command"
           content={entry.command}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={primaryPayload === "command" ? primaryShortcut : undefined}
         />
       )}
       {entry.shell && (
         <Action.CopyToClipboard
           title="Copy Shell Command"
           content={entry.shell}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={primaryPayload === "shell" ? primaryShortcut : undefined}
         />
       )}
       {entry.description && (

@@ -283,14 +283,24 @@ export async function newWindow(
 
 // ── Resurrect ──────────────────────────────────────────────────────────────
 
-const RESURRECT_DIR = `${homedir()}/.tmux/plugins/tmux-resurrect/scripts`;
+const DEFAULT_RESURRECT_DIR = `${homedir()}/.tmux/plugins/tmux-resurrect/scripts`;
 
+function resurrectDir(): string {
+  const p =
+    getPreferenceValues<Preferences>().resurrectScriptsDir?.trim() ?? "";
+  return p.length > 0 ? p : DEFAULT_RESURRECT_DIR;
+}
+
+// `tmux run-shell` executes its argument via /bin/sh, so we must shell-quote
+// the path before joining it with the script filename — paths containing
+// spaces (or any character outside [A-Za-z0-9._\-/:=]) would otherwise be
+// word-split by the shell and fail.
 export async function resurrectSave(): Promise<void> {
-  await run(["run-shell", `${RESURRECT_DIR}/save.sh`]);
+  await run(["run-shell", shellQuote(`${resurrectDir()}/save.sh`)]);
 }
 
 export async function resurrectRestore(): Promise<void> {
-  await run(["run-shell", `${RESURRECT_DIR}/restore.sh`]);
+  await run(["run-shell", shellQuote(`${resurrectDir()}/restore.sh`)]);
 }
 
 // ── Arbitrary command via shell (for command palette) ─────────────────────

@@ -92,7 +92,7 @@ Form for arbitrary tmux input, the launcher equivalent of `prefix :`:
 
 ### Tmux Resurrect Save / Tmux Resurrect Restore
 
-One-shot no-view commands wrapping `~/.tmux/plugins/tmux-resurrect/scripts/save.sh` and `restore.sh`. HUD on success, toast with the underlying stderr on failure (helpful if the plugin isn't installed at the expected path).
+One-shot no-view commands wrapping the resurrect plugin's `save.sh` and `restore.sh`. HUD on success, toast with the underlying stderr on failure. The scripts directory defaults to the tpm install location (`~/.tmux/plugins/tmux-resurrect/scripts`); override via the **Tmux Resurrect Scripts Directory** preference for Homebrew installs (e.g. `/opt/homebrew/share/tmux-resurrect/scripts`) or manual clones. The resolved path is shell-quoted before `tmux run-shell`, so directories with spaces work too.
 
 ## Common workflows
 
@@ -137,14 +137,15 @@ Raycast → "Run Tmux Command" → type or pick a preset → see stdout/stderr i
 
 | Name | Type | Default | Purpose |
 |------|------|---------|---------|
-| Tmux binary path | textfield | `/opt/homebrew/bin/tmux` | Path to the `tmux` binary. Intel Macs typically need `/usr/local/bin/tmux`. |
-| Default start directory | textfield | _(empty → `$HOME`)_ | Pre-filled in the new-session folder picker. |
+| Tmux Binary Path | textfield | `/opt/homebrew/bin/tmux` | Path to the `tmux` binary. Intel Macs typically need `/usr/local/bin/tmux`. |
+| Default Start Directory | textfield | _(empty → `$HOME`)_ | Pre-filled in the new-session folder picker. |
+| Tmux Resurrect Scripts Directory | textfield | _(empty → `~/.tmux/plugins/tmux-resurrect/scripts`)_ | Override for users whose tmux-resurrect lives outside the tpm default — Homebrew install, custom `TMUX_PLUGIN_MANAGER_PATH`, or manual clone. Shell-quoted before `tmux run-shell`, so paths with spaces are safe. |
 
 ## Requirements
 
 - macOS (the extension declares `platforms: ["macOS"]`).
 - `tmux` installed and reachable at the configured path.
-- For Resurrect Save / Restore: [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) installed at `~/.tmux/plugins/tmux-resurrect/`.
+- For Resurrect Save / Restore: [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) installed somewhere — defaults to the tpm path `~/.tmux/plugins/tmux-resurrect/`, override via the Tmux Resurrect Scripts Directory preference for other layouts.
 
 ## Compatibility notes
 

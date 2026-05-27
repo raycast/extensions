@@ -177,7 +177,7 @@ function PaneItem({
               title="Copy Pane Content"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              onAction={() => copyContent(pane.id, pane.command, onChange)}
+              onAction={() => copyContent(pane.id, pane.command)}
             />
           </ActionPanel.Section>
 
@@ -514,11 +514,7 @@ function PaneDetail({
   );
 }
 
-async function copyContent(
-  paneId: string,
-  command: string,
-  onChange: () => Promise<void>,
-): Promise<void> {
+async function copyContent(paneId: string, command: string): Promise<void> {
   try {
     const text = await capturePane(paneId);
     await Clipboard.copy(text);
@@ -527,7 +523,6 @@ async function copyContent(
       title: `Copied content of ${paneId}`,
       message: command || undefined,
     });
-    await onChange();
   } catch (e) {
     await toastError("Capture failed", e);
   }

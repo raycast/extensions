@@ -70,6 +70,14 @@
       "required": false,
       "description": "Default working directory pre-filled when creating a new session. Leave blank to use $HOME.",
       "default": ""
+    },
+    {
+      "title": "Tmux Resurrect Scripts Directory",
+      "name": "resurrectScriptsDir",
+      "type": "textfield",
+      "required": false,
+      "description": "Absolute path to the tmux-resurrect scripts directory. Leave blank to use the tpm default (~/.tmux/plugins/tmux-resurrect/scripts). Override for Homebrew installs (e.g. /opt/homebrew/share/tmux-resurrect/scripts) or manual clones.",
+      "default": ""
     }
   ],
   "platforms": ["macOS"],
