@@ -61,6 +61,11 @@ export default function MiMoStudio() {
   const [voiceId, setVoiceId] = useState(availableVoices[0]?.id ?? DEFAULT_VOICE);
   const [speechRate, setSpeechRate] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(false);
+  // Tracked separately from isLoading so the Stop Playback action stays
+  // available after the first chunk plays. onFirstAudioReady clears
+  // isLoading (spinner), but multi-chunk playback continues; gating Stop
+  // on isLoading would remove the action mid-playback.
+  const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(new AudioPlayer());
 
   useEffect(() => {
@@ -104,6 +109,7 @@ export default function MiMoStudio() {
     const player = new AudioPlayer();
     playerRef.current = player;
     setIsLoading(true);
+    setIsPlaying(true);
 
     try {
       const voiceMeta = getVoiceById(values.voiceId);
@@ -176,6 +182,7 @@ export default function MiMoStudio() {
       await showTTSFailure(error);
     } finally {
       setIsLoading(false);
+      setIsPlaying(false);
     }
   }, []);
 
@@ -183,6 +190,7 @@ export default function MiMoStudio() {
     playerRef.current.stopPlayback();
     await requestPlaybackStop();
     setIsLoading(false);
+    setIsPlaying(false);
     await clearNowPlaying();
     await showToast({ style: Toast.Style.Success, title: "Playback stopped" });
   }, []);
@@ -266,7 +274,7 @@ export default function MiMoStudio() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
             onAction={handleSpeedDown}
           />
-          {isLoading ? (
+          {isPlaying ? (
             <Action
               title="Stop Playback"
               icon={Icon.Stop}

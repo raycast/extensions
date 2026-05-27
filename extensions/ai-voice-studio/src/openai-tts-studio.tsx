@@ -83,6 +83,11 @@ export default function OpenAIStudio() {
   const [voiceId, setVoiceId] = useState("cedar");
   const [playbackRate, setPlaybackRate] = useState("1");
   const [isLoading, setIsLoading] = useState(false);
+  // Tracked separately from isLoading so the Stop Playback action stays
+  // available after the first chunk plays. onFirstAudioReady clears
+  // isLoading (spinner), but multi-chunk playback continues; gating Stop
+  // on isLoading would remove the action mid-playback.
+  const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef(new AudioPlayer());
   const voices = useMemo(() => getVoicesForModel(DEFAULT_MODEL), []);
 
@@ -122,6 +127,7 @@ export default function OpenAIStudio() {
     const player = new AudioPlayer();
     playerRef.current = player;
     setIsLoading(true);
+    setIsPlaying(true);
 
     try {
       const voiceMeta = getVoiceById(values.voiceId);
@@ -193,6 +199,7 @@ export default function OpenAIStudio() {
       await showTTSFailure(error);
     } finally {
       setIsLoading(false);
+      setIsPlaying(false);
     }
   }, []);
 
@@ -200,6 +207,7 @@ export default function OpenAIStudio() {
     playerRef.current.stopPlayback();
     await requestPlaybackStop();
     setIsLoading(false);
+    setIsPlaying(false);
     await clearNowPlaying();
     await showToast({ style: Toast.Style.Success, title: "Playback stopped" });
   }, []);
@@ -281,7 +289,7 @@ export default function OpenAIStudio() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
             onAction={handleSpeedDown}
           />
-          {isLoading ? (
+          {isPlaying ? (
             <Action
               title="Stop Playback"
               icon={Icon.Stop}

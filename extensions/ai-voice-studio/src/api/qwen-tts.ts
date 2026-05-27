@@ -232,7 +232,7 @@ function buildOptionsFromSettings(
     );
   }
 
-  if (voiceConfig && !isVoiceAvailableForModel(voiceConfig, model)) {
+  if (!isVoiceAvailableForModel(voiceConfig, model)) {
     throw new TTSApiError(
       `${voiceConfig.name} is not available for ${MODEL_LABELS[model]}. Change the model or choose another voice.`,
       -1,

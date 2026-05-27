@@ -24,11 +24,16 @@ export default function MenuBarStatus() {
   const [override, setOverride] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([getNowPlaying(), getSpeedOverride(), getMimoSettings()]).then(([s, r, settings]) => {
-      setState(s);
-      setOverride(r);
-      setPrefRate(parseRateString(settings.speechRate));
-    });
+    Promise.all([getNowPlaying(), getSpeedOverride(), getMimoSettings()])
+      .then(([s, r, settings]) => {
+        setState(s);
+        setOverride(r);
+        setPrefRate(parseRateString(settings.speechRate));
+      })
+      // Without this catch, a transient LocalStorage / preferences rejection
+      // leaves `state` undefined and isLoading stuck true until the next
+      // refresh interval. Coerce to null so the idle UI renders instead.
+      .catch(() => setState(null));
   }, []);
 
   const isLoading = state === undefined;

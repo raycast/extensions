@@ -24,11 +24,16 @@ export default function QwenTTSMenuBarStatus() {
   const [override, setOverride] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([getNowPlaying(), getSpeedOverride(), getQwenSettings()]).then(([s, r, settings]) => {
-      setState(s);
-      setOverride(r);
-      setPrefRate(parseRateString(settings.playbackRate));
-    });
+    Promise.all([getNowPlaying(), getSpeedOverride(), getQwenSettings()])
+      .then(([s, r, settings]) => {
+        setState(s);
+        setOverride(r);
+        setPrefRate(parseRateString(settings.playbackRate));
+      })
+      // Without this catch, a transient LocalStorage / preferences rejection
+      // leaves `state` undefined and isLoading stuck true until the next
+      // refresh interval. Coerce to null so the idle UI renders instead.
+      .catch(() => setState(null));
   }, []);
 
   const isLoading = state === undefined;
