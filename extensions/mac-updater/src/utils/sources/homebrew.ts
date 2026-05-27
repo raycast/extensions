@@ -541,6 +541,22 @@ export async function brewUpdateIndex(): Promise<void> {
 }
 
 /**
+ * Pick the right "greedy" flag for a token. Most third-party taps that ship
+ * GUI apps with their own auto-updaters need `--greedy` to be considered for
+ * upgrade. The kde-mac tap goes one step further: many of its casks track
+ * nightly builds from KDE's Binary Factory and only show up with
+ * `--greedy-latest`. Same idea for any other "nightly tracking" tap we add
+ * later — extend the prefix list rather than the call sites.
+ *
+ * Detection is by tap prefix in the token (owner/repo/name form) so we don't
+ * need a reverse lookup into the known-installs registry on every call.
+ */
+function greedyFlagFor(token: string): "--greedy" | "--greedy-latest" {
+  if (/^kde-mac\/kde\//i.test(token)) return "--greedy-latest";
+  return "--greedy";
+}
+
+/**
  * Upgrade a single cask, with three resilience layers stacked:
  *   1. Quit the running app first — brew can't replace /Applications/Foo.app
  *      while macOS holds it open, and pkg-based installers often fail silently
@@ -569,11 +585,13 @@ export async function upgradeCask(
     }
   }
 
+  const greedyFlag = greedyFlagFor(token);
+
   // Step 2: try a normal user-perms upgrade with timeout.
   try {
     await runWithTimeout(
       brew,
-      ["upgrade", "--cask", "--greedy", token],
+      ["upgrade", "--cask", greedyFlag, token],
       BREW_UPGRADE_TIMEOUT_MS,
     );
     return { name: token, source: "homebrew-cask", success: true };
@@ -593,7 +611,7 @@ export async function upgradeCask(
     // it defensively to avoid any future surprises.
     try {
       await runShellAsAdmin(
-        `${brew} upgrade --cask --greedy '${token.replace(/'/g, "'\\''")}'`,
+        `${brew} upgrade --cask ${greedyFlag} '${token.replace(/'/g, "'\\''")}'`,
         `Mac Updater needs admin access to upgrade ${appName ?? token}.`,
       );
       return { name: token, source: "homebrew-cask", success: true };

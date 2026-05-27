@@ -11,22 +11,29 @@ export type { KnownInstall, KnownInstallKind } from "./known-install-types";
 import type { KnownInstall } from "./known-install-types";
 
 export const KNOWN_INSTALLS: Record<string, KnownInstall> = {
-  // KDE Connect — third-party Homebrew tap (kde-mac/kde)
-  // The cask points at a CDN URL that 404s when the tap maintainers haven't
-  // refreshed it. As of this writing the tap is broken — `disabled` flips us to
-  // open-the-homepage mode so we don't waste cycles trying to install. Flip back
-  // to false if you want to retry in case upstream got fixed.
+  // KDE Connect — third-party Homebrew tap (kde-mac/kde).
+  //
+  // KDE doesn't ship an official Mac build of KDE Connect; the community
+  // kde-mac tap packages nightly builds from KDE's Binary Factory. This is
+  // an opt-in path — the adoption confirmation dialog already labels it as a
+  // third-party tap, so users see what they're agreeing to before install.
+  //
+  // The tap had a CDN-404 issue in the past; it's been actively maintained
+  // since (see https://invent.kde.org/packaging/homebrew-kde). If install
+  // breaks again, flip `disabled: true` and add a `disabledReason`.
+  //
+  // The do-caveats.sh script is recommended by the tap's README — it fixes
+  // symlinks left over from their in-progress migration to homebrew/core.
   "org.kde.kdeconnect": {
     kind: "brew-tap",
-    description: "KDE Connect (manual install)",
+    description: "KDE Connect (nightly via kde-mac tap)",
     caskToken: "kde-mac/kde/kdeconnect",
     homepageUrl: "https://kdeconnect.kde.org/download.html",
-    disabled: true,
-    disabledReason:
-      "The KDE-Mac tap's cask currently points at a CDN URL that returns 404. The tap maintainers need to refresh it. Download from the official KDE Connect page instead.",
     commands: [
-      "/opt/homebrew/bin/brew tap kde-mac/kde https://invent.kde.org/packaging/homebrew-kde.git",
+      "/opt/homebrew/bin/brew tap kde-mac/kde https://invent.kde.org/packaging/homebrew-kde.git --force-auto-update",
       "/opt/homebrew/bin/brew update --quiet",
+      // Fixes linking after the homebrew/core migration. Safe to re-run.
+      '"$(/opt/homebrew/bin/brew --repo kde-mac/kde)/tools/do-caveats.sh" || true',
       "/opt/homebrew/bin/brew install --cask --force kde-mac/kde/kdeconnect",
     ],
   },
