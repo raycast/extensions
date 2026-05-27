@@ -302,7 +302,8 @@ export default function ReadWithVoice() {
               {stopAction}
               {speedActions}
               <OpenProviderSetupAction provider="mimo" />
-              <Action title="Open Api Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -348,7 +349,8 @@ export default function ReadWithVoice() {
                   />
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
                   <OpenProviderSetupAction provider="mimo" />
-                  <Action title="Open Api Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />

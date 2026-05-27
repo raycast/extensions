@@ -145,7 +145,8 @@ export default function SelectVoice() {
                 <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
               <OpenProviderSetupAction provider="mimo" />
-              <Action title="Open Api Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -174,7 +175,8 @@ export default function SelectVoice() {
                   )}
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
                   <OpenProviderSetupAction provider="mimo" />
-                  <Action title="Open Api Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
