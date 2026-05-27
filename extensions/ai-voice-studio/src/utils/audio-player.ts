@@ -232,6 +232,12 @@ export class AudioPlayer {
     proc.on("error", (err) => {
       if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
       if (this.currentProcess === proc) this.currentProcess = null;
+      // Mirror the close handler: the dead process must release its PID
+      // record before a Stop Reading from another command happens to find
+      // and probe a recycled pid. The non-PCM path already does this; the
+      // PCM error handler was skipping both fields.
+      if (this.currentPid === myPid) this.currentPid = undefined;
+      removePidFileIfMatch(myPid);
       this.cleanupFile(file);
       if (this.pcmCompletePromise) {
         this.pcmCompletePromise.reject(err);
