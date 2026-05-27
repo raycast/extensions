@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devtoolkit",
+  "description": "A focused toolkit of everyday developer utilities for macOS.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "test": "tsc --outDir dist-test --module NodeNext --moduleResolution NodeNext --target ES2023 --lib ES2023 --types node src/*.ts test/*.test.ts && node --test \"dist-test/test/*.test.js\"",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "cronstrue": "^3.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "devtoolkit",
+      "title": "Dev Toolkit",
+      "description": "Open developer utilities for formatting, encoding, hashes, UUIDs, cron, and JSON"
+    }
+  ],
+  "title": "Dev Toolkit",
+  "author": "debopriya_deb_roy",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
