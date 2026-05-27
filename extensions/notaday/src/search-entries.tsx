@@ -31,7 +31,7 @@ function EntriesList({ apiToken }: { apiToken: string }) {
     error,
     isLoading,
     revalidate,
-  } = useFetch<Entry[], Entry[]>(`${API_BASE_URL}/entries?completed=false&backlog=false`, {
+  } = useFetch<Entry[], Entry[]>(`${API_BASE_URL}/entries?completed=false`, {
     headers: apiHeaders(apiToken),
     parseResponse: parseEntriesResponse,
     initialData: [],
