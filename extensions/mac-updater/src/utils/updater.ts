@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { extractCmdError, runShell } from "./shell";
+import { quitAppIfRunning } from "./process-control";
 
 export interface ReplaceResult {
   success: boolean;
@@ -18,19 +19,6 @@ async function mkTempDir(): Promise<string> {
   );
   fs.mkdirSync(dir, { recursive: true });
   return dir;
-}
-
-async function quitApp(appName: string): Promise<void> {
-  try {
-    // Best effort — ignore if not running
-    await runShell(
-      `osascript -e 'tell application "${escapeAS(appName)}" to quit' 2>/dev/null`,
-    );
-    // Give it a moment to actually quit
-    await new Promise((r) => setTimeout(r, 1500));
-  } catch {
-    // ignore
-  }
 }
 
 function escapeAS(s: string): string {
@@ -341,7 +329,7 @@ export async function downloadAndInstall(
 
     // Step 3: quit running app
     onProgress?.("Quitting app…");
-    await quitApp(appName);
+    await quitAppIfRunning(appName);
 
     // Step 4: swap (try user-perms first, fall back to admin)
     onProgress?.("Installing…");

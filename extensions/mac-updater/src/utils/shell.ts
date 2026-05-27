@@ -69,6 +69,125 @@ export async function runShell(
   });
 }
 
+/**
+ * Thrown when a runWithTimeout / runShellWithTimeout call exceeds its budget.
+ * Carries any output captured before the kill, so callers that want to surface
+ * partial progress in error toasts can.
+ */
+export class CommandTimeoutError extends Error {
+  readonly stdout: string;
+  readonly stderr: string;
+  readonly timeoutMs: number;
+  constructor(timeoutMs: number, stdout = "", stderr = "") {
+    super(
+      `Command timed out after ${Math.round(timeoutMs / 1000)}s. ` +
+        `This usually means a sudo/password prompt was needed but no terminal ` +
+        `was attached — retry with administrator privileges.`,
+    );
+    this.name = "CommandTimeoutError";
+    this.stdout = stdout;
+    this.stderr = stderr;
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+/**
+ * Like run() but kills the child if it doesn't finish within `timeoutMs`.
+ * On timeout, throws CommandTimeoutError so callers can distinguish hangs
+ * from regular non-zero-exit failures.
+ *
+ * Why this matters: brew/mas/installer subprocesses can spawn sudo internally
+ * (pkg-based casks like google-drive, microsoft-teams). Without a TTY sudo
+ * either fails fast OR — depending on version and -A askpass config — hangs
+ * waiting forever. We want hangs to surface as errors we can recover from.
+ */
+export async function runWithTimeout(
+  cmd: string,
+  args: string[],
+  timeoutMs: number,
+): Promise<{ stdout: string; stderr: string }> {
+  const child = execFile(cmd, args, {
+    env: { ...process.env, PATH: PATH_ENV },
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  let outBuf = "";
+  let errBuf = "";
+  child.stdout?.on("data", (d) => (outBuf += d.toString()));
+  child.stderr?.on("data", (d) => (errBuf += d.toString()));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        /* ignore */
+      }
+      reject(new CommandTimeoutError(timeoutMs, outBuf, errBuf));
+    }, timeoutMs);
+    child.on("error", (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve({ stdout: outBuf, stderr: errBuf });
+      else {
+        const err = new Error(
+          `Command failed: ${cmd} ${args.join(" ")}\n${errBuf || outBuf}`,
+        ) as Error & { stdout: string; stderr: string; code: number | null };
+        err.stdout = outBuf;
+        err.stderr = errBuf;
+        err.code = code;
+        reject(err);
+      }
+    });
+  });
+}
+
+/**
+ * Shell-string variant of runWithTimeout. Use only when you genuinely need
+ * shell features (pipes, redirects). Prefer runWithTimeout for fixed argv.
+ */
+export async function runShellWithTimeout(
+  cmd: string,
+  timeoutMs: number,
+): Promise<{ stdout: string; stderr: string }> {
+  const child = exec(cmd, {
+    env: { ...process.env, PATH: PATH_ENV },
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  let outBuf = "";
+  let errBuf = "";
+  child.stdout?.on("data", (d) => (outBuf += d.toString()));
+  child.stderr?.on("data", (d) => (errBuf += d.toString()));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        /* ignore */
+      }
+      reject(new CommandTimeoutError(timeoutMs, outBuf, errBuf));
+    }, timeoutMs);
+    child.on("error", (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve({ stdout: outBuf, stderr: errBuf });
+      else {
+        const err = new Error(
+          `Command failed: ${cmd}\n${errBuf || outBuf}`,
+        ) as Error & { stdout: string; stderr: string; code: number | null };
+        err.stdout = outBuf;
+        err.stderr = errBuf;
+        err.code = code;
+        reject(err);
+      }
+    });
+  });
+}
+
 export async function commandExists(cmd: string): Promise<boolean> {
   try {
     await execFileAsync("which", [cmd], {

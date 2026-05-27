@@ -18,6 +18,7 @@ import {
   upgradeAllPip,
 } from "./utils/sources/cli-managers";
 import { commandExists } from "./utils/shell";
+import { quitAppIfRunning } from "./utils/process-control";
 import { downloadAndInstall } from "./utils/updater";
 import { openAppForSparkleUpdate } from "./utils/sources/sparkle";
 import { scanAll, ScanResult } from "./utils/coordinator";
@@ -370,8 +371,21 @@ async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
       title: "Homebrew apps",
       subtitle: `${brewApps.length} app${brewApps.length === 1 ? "" : "s"} via brew upgrade`,
       status: "pending",
-      run: async () => {
+      run: async (onProgress) => {
+        // Quit any running brew-managed apps first — pkg-based casks (Google
+        // Drive, Microsoft Teams, Docker) fail or hang when the target is
+        // open. Sequenced so the user only sees one "quitting…" line at a time.
+        for (const a of brewApps) {
+          onProgress(`Quitting ${a.app.name}…`);
+          try {
+            await quitAppIfRunning(a.app.name);
+          } catch {
+            /* ignore — best effort */
+          }
+        }
+        onProgress("Refreshing Homebrew index…");
         await brewUpdateIndex();
+        onProgress("Running brew upgrade…");
         return upgradeAllBrew();
       },
     });

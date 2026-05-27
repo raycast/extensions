@@ -328,6 +328,7 @@ export default function MacUpdater() {
         case "homebrew-cask":
           result = await upgradeCask(
             info.caskToken ?? info.app.name.toLowerCase(),
+            info.app.name,
           );
           break;
         case "homebrew-formula":
