@@ -62,6 +62,9 @@ const isRetryableRequestError = (error: RequestError) =>
   error.name === "AbortError" ||
   (error.name === "FetchError" && (!error.status || error.status === 429 || error.status >= 500));
 
+const delayBeforeRetry = (error: RequestError) =>
+  error.status === 429 ? new Promise((resolve) => setTimeout(resolve, 1000)) : Promise.resolve();
+
 const normalizeProject = (project: project): project => ({
   id: project.id,
   name: project.name,
@@ -158,8 +161,9 @@ export const getProjects =
             hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
           };
         })
-        .catch((e: RequestError) => {
+        .catch(async (e: RequestError) => {
           if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+            await delayBeforeRetry(e);
             return loadProjects(retryCount + 1);
           }
 
@@ -235,8 +239,9 @@ export const getTasks =
             hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
           };
         })
-        .catch((e: RequestError) => {
+        .catch(async (e: RequestError) => {
           if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+            await delayBeforeRetry(e);
             return loadTasks(retryCount + 1);
           }
 
@@ -285,8 +290,9 @@ export const getTypesOfWork = async (token: string): Promise<string | typeOfWork
         }
         return <Array<typeOfWork>>JSON.parse(result);
       })
-      .catch((e: RequestError) => {
+      .catch(async (e: RequestError) => {
         if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+          await delayBeforeRetry(e);
           return loadTypesOfWork(retryCount + 1);
         }
 
