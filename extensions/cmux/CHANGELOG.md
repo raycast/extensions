@@ -1,6 +1,6 @@
 # cmux
 
-## [Improve workspace search] - {PR_MERGE_DATE}
+## [Improve workspace search] - 2026-05-20
 
 - Include workspace descriptions and open surface details when searching workspaces.
 
