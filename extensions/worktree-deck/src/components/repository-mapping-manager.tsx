@@ -173,35 +173,10 @@ export function RepositoryMappingManager({ autoOpenAddForm = false, onChange }: 
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search repository mappings">
-      <List.Section title="Actions">
-        <List.Item
-          title="Add Repository Mapping"
-          icon={Icon.PlusCircle}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Add Repository Mapping"
-                icon={Icon.PlusCircle}
-                target={
-                  <RepositoryMappingForm
-                    onSave={handleSaveMapping}
-                    returnToRootAfterSave={resolveRepositoryMappingFormReturnToRoot(autoOpenAddForm)}
-                  />
-                }
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      {errorMessage ? (
-        <List.Section title="Status">
-          <List.Item title="Failed to load repository mappings" subtitle={errorMessage} icon={Icon.Warning} />
-        </List.Section>
-      ) : sortedMappings.length === 0 ? (
-        <List.Section title="Status">
+      {sortedMappings.length > 0 ? (
+        <List.Section title="Actions">
           <List.Item
-            title="Add your first repository"
-            subtitle="Register a repository path to start tracking worktrees."
+            title="Add Repository Mapping"
             icon={Icon.PlusCircle}
             actions={
               <ActionPanel>
@@ -219,6 +194,29 @@ export function RepositoryMappingManager({ autoOpenAddForm = false, onChange }: 
             }
           />
         </List.Section>
+      ) : null}
+      {errorMessage ? (
+        <List.EmptyView title="Failed to load repository mappings" description={errorMessage} icon={Icon.Warning} />
+      ) : sortedMappings.length === 0 ? (
+        <List.EmptyView
+          title="Add your first repository"
+          description="Register a repository path to start tracking worktrees."
+          icon={Icon.PlusCircle}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add Repository Mapping"
+                icon={Icon.PlusCircle}
+                target={
+                  <RepositoryMappingForm
+                    onSave={handleSaveMapping}
+                    returnToRootAfterSave={resolveRepositoryMappingFormReturnToRoot(autoOpenAddForm)}
+                  />
+                }
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.Section title="Mappings">
           {sortedMappings.map((entry) => (

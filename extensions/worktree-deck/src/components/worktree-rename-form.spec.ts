@@ -106,6 +106,15 @@ describe("RenameWorktreeForm", () => {
     expect(fieldProps.defaultValue).toBe("feature/test");
   });
 
+  it("新しいブランチ名には入力例を placeholder として表示する", () => {
+    const tree = RenameWorktreeForm({
+      item: buildWorktree(),
+      onRename: vi.fn(),
+    });
+    const fieldProps = findTextFieldProps("newBranch", tree);
+    expect(fieldProps.placeholder).toBe("feature/new-branch");
+  });
+
   it("リモート名変更チェックはデフォルトで外れている", () => {
     const tree = RenameWorktreeForm({
       item: buildWorktree(),

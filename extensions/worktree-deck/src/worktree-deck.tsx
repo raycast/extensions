@@ -1651,33 +1651,31 @@ export default function Command() {
           />
         </List.Section>
       ) : !hasVisibleContent ? (
-        <List.Section title="Status">
-          <List.Item
-            title={
-              searchText.trim()
-                ? "No matching worktrees"
-                : isRepositoryMappingOnboardingEmptyState
-                  ? "Add your first repository"
-                  : "No worktrees"
-            }
-            subtitle={
-              searchText.trim()
-                ? "No worktrees matched your search."
-                : isRepositoryMappingOnboardingEmptyState
-                  ? "Register a repository path to start tracking worktrees."
-                  : basePath
-                    ? `No worktrees were found under ${basePath}.`
-                    : "No worktrees were found."
-            }
-            icon={isRepositoryMappingOnboardingEmptyState ? Icon.PlusCircle : Icon.Folder}
-            actions={
-              <ActionPanel>
-                {isRepositoryMappingOnboardingEmptyState ? renderAddRepositoryMappingAction() : null}
-                {renderGlobalActions({ initialRepoRoot: selectedCreateInitialRepoRoot })}
-              </ActionPanel>
-            }
-          />
-        </List.Section>
+        <List.EmptyView
+          title={
+            searchText.trim()
+              ? "No matching worktrees"
+              : isRepositoryMappingOnboardingEmptyState
+                ? "Add your first repository"
+                : "No worktrees"
+          }
+          description={
+            searchText.trim()
+              ? "No worktrees matched your search."
+              : isRepositoryMappingOnboardingEmptyState
+                ? "Register a repository path to start tracking worktrees."
+                : basePath
+                  ? `No worktrees were found under ${basePath}.`
+                  : "No worktrees were found."
+          }
+          icon={isRepositoryMappingOnboardingEmptyState ? Icon.PlusCircle : Icon.Folder}
+          actions={
+            <ActionPanel>
+              {isRepositoryMappingOnboardingEmptyState ? renderAddRepositoryMappingAction() : null}
+              {renderGlobalActions({ initialRepoRoot: selectedCreateInitialRepoRoot })}
+            </ActionPanel>
+          }
+        />
       ) : (
         visibleSections.map(({ section, entries }) => {
           return (

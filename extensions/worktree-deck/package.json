@@ -59,6 +59,7 @@
       "description": "Number of days to search for Codex sessions.",
       "type": "textfield",
       "required": false,
+      "placeholder": "30",
       "default": "30"
     },
     {
@@ -67,6 +68,7 @@
       "description": "Number of days after which a working session is treated as done.",
       "type": "textfield",
       "required": false,
+      "placeholder": "1",
       "default": "1"
     }
   ],

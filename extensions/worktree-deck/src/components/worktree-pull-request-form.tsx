@@ -215,6 +215,7 @@ export function CreatePullRequestForm({
       <Form.TextField
         id="title"
         title="Title"
+        placeholder="Summarize the changes"
         value={titleValue}
         onChange={(value) => {
           setTitleValue(value);

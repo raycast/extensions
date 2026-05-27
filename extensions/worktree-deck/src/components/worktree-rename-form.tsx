@@ -37,7 +37,12 @@ export function RenameWorktreeForm({
     >
       <Form.Description title="Worktree" text={item.path} />
       <Form.Description title="Current Branch" text={oldBranch ?? "not detected"} />
-      <Form.TextField id="newBranch" title="New Branch Name" defaultValue={oldBranch ?? ""} />
+      <Form.TextField
+        id="newBranch"
+        title="New Branch Name"
+        placeholder="feature/new-branch"
+        defaultValue={oldBranch ?? ""}
+      />
       <Form.Checkbox id="renameRemoteBranch" label="Rename remote branch" defaultValue={false} />
     </Form>
   );
