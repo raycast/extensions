@@ -11,7 +11,13 @@ import {
 import { usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchPRsWithActivity } from "./api";
-import { loadSeen, markItemSeen, markPRSeen, markAllSeen } from "./seen";
+import {
+  loadSeen,
+  saveSeen,
+  markItemSeen,
+  markPRSeen,
+  markAllSeen,
+} from "./seen";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
 import { getDemoPRs } from "./demo-data";
 import {
@@ -106,6 +112,12 @@ export default function UnreadUpdates() {
       fetchPRsWithActivity(),
       loadSeen(),
     ]);
+    // Prune seen entries for PRs no longer in the open set
+    const activePrKeys = new Set(fetchedPrs.map((pr) => prKey(pr)));
+    for (const key of Object.keys(fetchedSeen)) {
+      if (!activePrKeys.has(key)) delete fetchedSeen[key];
+    }
+    await saveSeen(fetchedSeen);
     setSeenMap(fetchedSeen);
     await saveCachedPRs(fetchedPrs);
 
@@ -312,16 +324,16 @@ export default function UnreadUpdates() {
                     onAction={() => toggleCollapse(pr)}
                   />
                   <Action.Push
-                    title="View PR Summary"
+                    title="View Pr Summary"
                     icon={Icon.List}
                     target={<PRSummaryDetail pr={pr} />}
                   />
                   <Action.OpenInBrowser
-                    title="Open PR on GitHub"
+                    title="Open Pr on GitHub"
                     url={pr.html_url}
                   />
                   <Action
-                    title="Mark PR as Caught Up"
+                    title="Mark Pr as Caught Up"
                     icon={Icon.Checkmark}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={() => handleMarkPRSeen(pr)}
@@ -562,7 +574,7 @@ function ActivityListItem({
             onAction={onMarkItemSeen}
           />
           <Action
-            title="Mark Entire PR as Caught Up"
+            title="Mark Entire Pr as Caught Up"
             icon={Icon.Checkmark}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={onMarkPRSeen}
@@ -574,7 +586,7 @@ function ActivityListItem({
             onAction={onMarkAllSeen}
           />
           <Action.Push
-            title="View PR Summary"
+            title="View Pr Summary"
             icon={Icon.List}
             target={<PRSummaryDetail pr={pr} />}
           />
@@ -677,7 +689,7 @@ function PRSummaryDetail({ pr }: { pr: PRWithActivity }) {
       navigationTitle={`#${pr.number} — ${pr.title}`}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open PR on GitHub" url={pr.html_url} />
+          <Action.OpenInBrowser title="Open Pr on GitHub" url={pr.html_url} />
         </ActionPanel>
       }
     />

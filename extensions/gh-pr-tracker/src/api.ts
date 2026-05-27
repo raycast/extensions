@@ -53,6 +53,21 @@ async function fetchAllPages<T>(
   return results;
 }
 
+/** Process items in batches to avoid hitting GitHub secondary rate limits */
+async function processInBatches<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  concurrency = 5,
+): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency);
+    const batchResults = await Promise.all(batch.map(fn));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
 /** Fetch open PRs with all reviews and comments for a single repo */
 async function fetchRepoActivity(
   base: string,
@@ -64,42 +79,40 @@ async function fetchRepoActivity(
     headers,
   );
 
-  return Promise.all(
-    prs.map(async (pr): Promise<PRWithActivity> => {
-      const [reviews, reviewComments, issueComments, events, commits] =
-        await Promise.all([
-          fetchAllPages<GHReview>(
-            `${base}/repos/${repo}/pulls/${pr.number}/reviews`,
-            headers,
-          ),
-          fetchAllPages<GHReviewComment>(
-            `${base}/repos/${repo}/pulls/${pr.number}/comments`,
-            headers,
-          ),
-          fetchAllPages<GHIssueComment>(
-            `${base}/repos/${repo}/issues/${pr.number}/comments`,
-            headers,
-          ),
-          fetchAllPages<GHIssueEvent>(
-            `${base}/repos/${repo}/issues/${pr.number}/events`,
-            headers,
-          ),
-          fetchAllPages<GHCommit>(
-            `${base}/repos/${repo}/pulls/${pr.number}/commits`,
-            headers,
-          ),
-        ]);
-      return {
-        ...pr,
-        repo,
-        reviews,
-        reviewComments,
-        issueComments,
-        events,
-        commits,
-      };
-    }),
-  );
+  return processInBatches(prs, async (pr): Promise<PRWithActivity> => {
+    const [reviews, reviewComments, issueComments, events, commits] =
+      await Promise.all([
+        fetchAllPages<GHReview>(
+          `${base}/repos/${repo}/pulls/${pr.number}/reviews`,
+          headers,
+        ),
+        fetchAllPages<GHReviewComment>(
+          `${base}/repos/${repo}/pulls/${pr.number}/comments`,
+          headers,
+        ),
+        fetchAllPages<GHIssueComment>(
+          `${base}/repos/${repo}/issues/${pr.number}/comments`,
+          headers,
+        ),
+        fetchAllPages<GHIssueEvent>(
+          `${base}/repos/${repo}/issues/${pr.number}/events`,
+          headers,
+        ),
+        fetchAllPages<GHCommit>(
+          `${base}/repos/${repo}/pulls/${pr.number}/commits`,
+          headers,
+        ),
+      ]);
+    return {
+      ...pr,
+      repo,
+      reviews,
+      reviewComments,
+      issueComments,
+      events,
+      commits,
+    };
+  });
 }
 
 /** Fetch open PRs with activity across all configured repositories */

@@ -15,7 +15,17 @@ export async function loadSeen(): Promise<SeenMap> {
   }
 }
 
-export async function saveSeen(map: SeenMap): Promise<void> {
+export async function saveSeen(
+  map: SeenMap,
+  activePrKeys?: Set<string>,
+): Promise<void> {
+  if (activePrKeys) {
+    for (const key of Object.keys(map)) {
+      if (!activePrKeys.has(key)) {
+        delete map[key];
+      }
+    }
+  }
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(map));
 }
 
@@ -51,6 +61,7 @@ export async function markPRSeen(pr: PRWithActivity): Promise<SeenMap> {
 /** Mark all PRs as seen */
 export async function markAllSeen(prs: PRWithActivity[]): Promise<SeenMap> {
   const map = await loadSeen();
+  const activePrKeys = new Set(prs.map((pr) => prKey(pr)));
   for (const pr of prs) {
     const allItems = getAllActivity(pr);
     map[prKey(pr)] = {
@@ -58,6 +69,6 @@ export async function markAllSeen(prs: PRWithActivity[]): Promise<SeenMap> {
       seenItemIds: allItems.map((i) => i.itemKey),
     };
   }
-  await saveSeen(map);
+  await saveSeen(map, activePrKeys);
   return map;
 }
