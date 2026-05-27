@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [Add Edit in iTerm open behavior] - {PR_MERGE_DATE}
+## [Add Edit in iTerm open behavior] - 2026-05-27
 
 - Added a preference to open `Edit in iTerm` in a new window or a new tab.
 
