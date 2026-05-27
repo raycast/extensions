@@ -225,10 +225,6 @@ function normalizeBaseUrl(baseUrl: string | undefined): string {
   return trimmed.replace(/\/+$/, "").replace(/\/chat\/completions$/, "");
 }
 
-export function getActiveModel(): MimoTTSModel {
-  return DEFAULT_MODEL;
-}
-
 export async function getActiveModelAsync(): Promise<MimoTTSModel> {
   const settings = await getMimoSettings();
   return normalizeModel(settings.model);
