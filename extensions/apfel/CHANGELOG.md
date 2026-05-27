@@ -1,6 +1,6 @@
 # Apfel Changelog
 
-## [OCR & Streaming Chat] - {PR_MERGE_DATE}
+## [OCR & Streaming Chat] - 2026-05-27
 
 ### Added
 - **Read Text from File** — extract text from images and PDFs via auge
