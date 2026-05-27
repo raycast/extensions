@@ -1,6 +1,6 @@
 # Terminal Finder Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-27
 
 - Show a helpful recovery message when cmux reports a broken automation socket.
 
