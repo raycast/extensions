@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Windows deep links] - {PR_MERGE_DATE}
+## [Fix Windows deep links] - 2026-05-27
 
 - "Open in Slack" and "Open Channel"/"Open Chat" Quicklinks now open the requested channel or user on Windows. Previously the `application="Slack"` hint caused Raycast to launch Slack.exe without forwarding the `slack://` URI; the hint is now macOS-only so Windows routes the URI through the registered protocol handler.
 
