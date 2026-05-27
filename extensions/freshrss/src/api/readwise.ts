@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type ReadwisePreferences = {
-  readwiseToken?: string;
-};
-
 class ReadwiseError extends Error {
   constructor(message: string) {
     super(message);
@@ -12,7 +8,7 @@ class ReadwiseError extends Error {
 }
 
 export function hasReadwiseToken(): boolean {
-  const prefs = getPreferenceValues<ReadwisePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return !!prefs.readwiseToken?.trim();
 }
 
@@ -22,7 +18,7 @@ export async function saveToReadwise(params: {
   author?: string;
   summary?: string;
 }): Promise<void> {
-  const prefs = getPreferenceValues<ReadwisePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const token = prefs.readwiseToken?.trim();
 
   if (!token) {

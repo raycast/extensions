@@ -1,10 +1,3 @@
-export type FreshRSSPreferences = {
-  baseUrl: string;
-  username: string;
-  apiPassword: string;
-  autoMarkAsRead?: boolean;
-  markReadOnReadwise?: boolean;
-};
 
 export type Feed = {
   id: string;

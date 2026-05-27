@@ -2,6 +2,13 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.1.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Add missing `bcryptjs` and `node-html-markdown` dependencies to `package.json`
+- Add `debugLogging` preference to the preferences schema (referenced in code but previously undefined)
+
 ## [1.1.0] - 2026-05-26
 
 ### Added

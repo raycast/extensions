@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Cache } from "@raycast/api";
 import type {
-  FreshRSSPreferences,
   Feed,
   Article,
   ArticleFetchResult,
@@ -29,8 +28,8 @@ const CACHE_KEYS = {
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
-function getPreferences(): FreshRSSPreferences {
-  return getPreferenceValues<FreshRSSPreferences>();
+function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 function normalizeBaseUrl(url: string): string {

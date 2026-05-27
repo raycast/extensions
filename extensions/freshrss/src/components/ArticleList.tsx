@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { List, Action, ActionPanel, Icon, Color, Detail, getPreferenceValues } from "@raycast/api";
 import { showToast, Toast, openCommandPreferences, open } from "@raycast/api";
-import type { Article, ArticleListMode, FreshRSSPreferences } from "../api/types";
+import type { Article, ArticleListMode } from "../api/types";
 import {
   markArticleRead,
   markArticleUnread,
@@ -93,7 +93,7 @@ async function handleSaveToReadwise(article: Article, callbacks: ArticleActionCa
       author: article.author,
       summary: article.summary,
     });
-    const prefs = getPreferenceValues<FreshRSSPreferences>();
+    const prefs = getPreferenceValues<Preferences>();
     if (prefs.markReadOnReadwise && !article.isRead) {
       try {
         await markArticleRead(article.id);
@@ -131,7 +131,7 @@ type ArticleListProps = {
 export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode, onToggleRead, onToggleStar, onMarkAllAsRead, onSearchTextChange }: ArticleListProps) {
   const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : mode === "starred" ? "Starred Articles" : "Articles";
   const title = `${modeLabel} (${articles.length})` as const;
-  const { autoMarkAsRead } = getPreferenceValues<FreshRSSPreferences>();
+  const { autoMarkAsRead } = getPreferenceValues<Preferences>();
   const markedRef = useRef<Set<string>>(new Set());
 
   const callbacks: ArticleActionCallbacks = {
@@ -340,7 +340,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
 }
 
 function ArticleDetailView({ article, callbacks }: { article: Article; callbacks: ArticleActionCallbacks }) {
-  const { autoMarkAsRead } = getPreferenceValues<FreshRSSPreferences>();
+  const { autoMarkAsRead } = getPreferenceValues<Preferences>();
   const [localIsRead, setLocalIsRead] = useState(article.isRead);
   const hasMarkedRef = useRef(false);
 

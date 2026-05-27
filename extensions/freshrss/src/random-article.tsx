@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Detail, Action, ActionPanel, Icon, getPreferenceValues, showToast, Toast, open, openCommandPreferences } from "@raycast/api";
 import { getAllArticles, markArticleRead, markArticleUnread, starArticle, unstarArticle, FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "./api/readwise";
-import type { Article, FreshRSSPreferences } from "./api/types";
+import type { Article } from "./api/types";
 
 async function handleToggleRead(article: Article, onDone?: () => void) {
   try {
@@ -50,7 +50,7 @@ async function handleSaveToReadwiseAction(article: Article, onDone?: () => void)
       author: article.author,
       summary: article.summary,
     });
-    const prefs = getPreferenceValues<FreshRSSPreferences>();
+    const prefs = getPreferenceValues<Preferences>();
     if (prefs.markReadOnReadwise && !article.isRead) {
       try {
         await markArticleRead(article.id);
@@ -107,7 +107,7 @@ export default function RandomArticleCommand() {
 
   useEffect(() => {
     if (article && !article.isRead && !hasMarkedRef.current) {
-      const prefs = getPreferenceValues<FreshRSSPreferences>();
+      const prefs = getPreferenceValues<Preferences>();
       if (prefs.autoMarkAsRead) {
         hasMarkedRef.current = true;
         markArticleRead(article.id).then(() => {
@@ -168,7 +168,7 @@ export default function RandomArticleCommand() {
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
               onAction={() => handleSaveToReadwiseAction(article, () => {
-                const prefs = getPreferenceValues<FreshRSSPreferences>();
+                const prefs = getPreferenceValues<Preferences>();
                 if (prefs.markReadOnReadwise && !localIsRead) {
                   setLocalIsRead(true);
                 }
