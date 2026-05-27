@@ -3,7 +3,7 @@
   "name": "worktree-deck",
   "version": "0.1.0",
   "title": "Worktree Deck",
-  "description": "Browse git worktrees and Codex session status from Raycast",
+  "description": "Manage git worktrees across repositories with Codex session status and actions",
   "icon": "worktree-deck-icon.png",
   "author": "kazuhide",
   "categories": [
@@ -25,7 +25,8 @@
     {
       "name": "worktree-deck",
       "title": "Worktree Deck",
-      "description": "Browse git worktrees, related Codex sessions, and repository actions",
+      "subtitle": "Git & Codex",
+      "description": "Manage git worktrees, related Codex sessions, and repository actions",
       "mode": "view"
     },
     {
