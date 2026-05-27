@@ -171,7 +171,7 @@ function strengthLabel(bits: number): {
   if (bits >= 120)
     return {
       label: "Paranoid",
-      icon: Icon.ShieldCheck,
+      icon: Icon.Shield,
       color: Color.Purple,
       bar: "█████",
     };
@@ -205,7 +205,7 @@ function strengthLabel(bits: number): {
     };
   return {
     label: "Weak",
-    icon: Icon.ExclamationTriangle,
+    icon: Icon.ExclamationMark,
     color: Color.Red,
     bar: "▓░░░░",
   };

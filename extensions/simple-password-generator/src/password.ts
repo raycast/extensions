@@ -92,7 +92,7 @@ function estimatePinEntropy(options: PinOptions): number {
   return Math.round(options.length * Math.log2(10) * 10) / 10;
 }
 
-function shuffle(arr: string[]) {
+function shuffle<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const rand = new Uint32Array(1);
     crypto.getRandomValues(rand);
@@ -217,10 +217,8 @@ function generatePin(options: PinOptions): string {
   return pin;
 }
 
+export type { PasswordOptions, PassphraseOptions, PinOptions };
 export {
-  PasswordOptions,
-  PassphraseOptions,
-  PinOptions,
   UPPERCASE,
   LOWERCASE,
   DIGITS,
