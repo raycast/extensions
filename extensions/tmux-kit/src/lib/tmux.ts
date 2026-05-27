@@ -157,6 +157,7 @@ export type TmuxPane = {
   active: boolean;
   width: number;
   height: number;
+  marked: boolean;
 };
 
 const PANE_FORMAT = [
@@ -170,6 +171,7 @@ const PANE_FORMAT = [
   "#{pane_active}",
   "#{pane_width}",
   "#{pane_height}",
+  "#{pane_marked}",
 ].join(FIELD_SEP);
 
 export async function listPanes(session: string): Promise<TmuxPane[]> {
@@ -197,12 +199,86 @@ export async function listPanes(session: string): Promise<TmuxPane[]> {
         active: Number(p[7]) > 0,
         width: Number(p[8]),
         height: Number(p[9]),
+        marked: Number(p[10]) > 0,
       };
     });
 }
 
 export async function killPane(paneId: string): Promise<void> {
   await run(["kill-pane", "-t", paneId]);
+}
+
+export async function killOtherPanes(paneId: string): Promise<void> {
+  await run(["kill-pane", "-a", "-t", paneId]);
+}
+
+// Capture visible pane contents. -J joins wrapped lines for cleaner output.
+// The visible screen is padded with empty rows up to pane height, so we trim
+// trailing whitespace to avoid a wall of blank lines in clipboard / Detail.
+export async function capturePane(paneId: string): Promise<string> {
+  const { stdout } = await run(["capture-pane", "-p", "-J", "-t", paneId]);
+  return stdout.replace(/\s+$/, "");
+}
+
+export async function breakPane(paneId: string): Promise<void> {
+  await run(["break-pane", "-s", paneId]);
+}
+
+export async function markPane(paneId: string): Promise<void> {
+  await run(["select-pane", "-m", "-t", paneId]);
+}
+
+// `select-pane -M` clears the marked pane globally (no -t needed).
+export async function clearMarkedPane(): Promise<void> {
+  await run(["select-pane", "-M"]);
+}
+
+// `swap-pane -t <id>` with no -s uses the currently marked pane as source.
+// Caller must verify a marked pane exists before invoking.
+export async function swapWithMarkedPane(paneId: string): Promise<void> {
+  await run(["swap-pane", "-t", paneId]);
+}
+
+export async function clearPaneHistory(paneId: string): Promise<void> {
+  await run(["clear-history", "-t", paneId]);
+}
+
+// ── Windows ────────────────────────────────────────────────────────────────
+
+export async function switchToWindow(
+  session: string,
+  windowIndex: number,
+): Promise<void> {
+  await run(["select-window", "-t", `${session}:${windowIndex}`]);
+}
+
+export async function renameWindow(
+  session: string,
+  windowIndex: number,
+  newName: string,
+): Promise<void> {
+  await run(["rename-window", "-t", `${session}:${windowIndex}`, newName]);
+}
+
+export async function killWindow(
+  session: string,
+  windowIndex: number,
+): Promise<void> {
+  await run(["kill-window", "-t", `${session}:${windowIndex}`]);
+}
+
+// Create a new window in the given session. -d keeps the session's current
+// window unchanged so we don't yank tmux focus out from under any attached
+// client; the user can Switch afterwards if they want to land on it.
+export async function newWindow(
+  session: string,
+  name?: string,
+  cwd?: string,
+): Promise<void> {
+  const args = ["new-window", "-d", "-t", `${session}:`];
+  if (name) args.push("-n", name);
+  if (cwd) args.push("-c", cwd);
+  await run(args);
 }
 
 // ── Resurrect ──────────────────────────────────────────────────────────────
