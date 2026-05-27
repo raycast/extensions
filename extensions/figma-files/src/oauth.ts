@@ -1,4 +1,4 @@
-import { OAuth, getPreferenceValues, setUserInfo } from "@raycast/api";
+import { OAuth, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
 const client = new OAuth.PKCEClient({
@@ -23,12 +23,11 @@ export const figma = new OAuthService({
   personalAccessToken: PERSONAL_ACCESS_TOKEN,
   onAuthorize: async ({ token, type }) => {
     try {
-      const headers =
+      const headers: Record<string, string> =
         type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
       const response = await fetch("https://api.figma.com/v1/me", { headers });
       if (!response.ok) return;
-      const user = (await response.json()) as { handle: string; img_url: string };
-      setUserInfo({ name: user.handle, icon: user.img_url });
+      await response.json();
     } catch {
       // Non-critical: a transient failure here doesn't affect the OAuth handshake
     }

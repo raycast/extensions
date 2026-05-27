@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Fixed Extension Folder] - 2026-05-26
+
+- Detect the correct extensions folder from `environment.supportPath` instead of scanning multiple Raycast config directories.
+
 ## [Fix Beta Extension Folder] - 2026-05-21
 
 - Include the Raycast beta extension folder on macOS when scanning installed extensions.

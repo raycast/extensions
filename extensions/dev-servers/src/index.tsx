@@ -13,14 +13,11 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useExec } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import * as os from "node:os";
+import * as path from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  FETCH_SCRIPT,
-  killProcess,
-  parseServers,
-  restartServer,
-} from "./servers";
+import { fetchServers, killProcess, restartServer } from "./servers";
 import { DevServer } from "./types";
 
 const DEFAULT_TERMINAL: Application = {
@@ -29,12 +26,46 @@ const DEFAULT_TERMINAL: Application = {
   bundleId: "com.apple.Terminal",
 };
 
+// Strip scheme and trailing slash so a primary URL renders cleanly as the row
+// title: "https://myapp.localhost/" → "myapp.localhost",
+// "http://localhost:4321" → "localhost:4321".
+function displayHost(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+}
+
 function formatUptime(startedAt: Date): string {
   const seconds = Math.floor((Date.now() - startedAt.getTime()) / 1000);
   if (isNaN(seconds) || seconds < 0) return "?";
   if (seconds < 60) return `${seconds}s`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+}
+
+// Display label for the tool tag. We keep the internal `tool` field lowercase
+// (used for grouping, color lookup, dropdown filter values) and only stylize
+// on the way to the UI. Anything not in this map renders as-is.
+const TOOL_DISPLAY_NAMES: Record<string, string> = {
+  vite: "Vite",
+  sveltekit: "SvelteKit",
+  svelte: "Svelte",
+  astro: "Astro",
+  next: "Next.js",
+  nuxt: "Nuxt",
+  webpack: "Webpack",
+  parcel: "Parcel",
+  gatsby: "Gatsby",
+  remix: "Remix",
+  turbo: "Turbo",
+  esbuild: "esbuild", // intentionally lowercase per upstream brand
+  bun: "Bun",
+  node: "Node",
+  serve: "Serve",
+  "http-server": "http-server", // intentionally lowercase per package name
+  "live-server": "Live Server",
+};
+
+function toolLabel(tool: string): string {
+  return TOOL_DISPLAY_NAMES[tool.toLowerCase()] ?? tool;
 }
 
 // Theme-adaptive overrides for the few frameworks where the named palette
@@ -139,9 +170,17 @@ async function detectFaviconUrl(port: string): Promise<string | undefined> {
   return fetchFaviconDataUri(`${origin}/favicon.ico`);
 }
 
+interface RowVisibility {
+  branch: boolean;
+  uptime: boolean;
+  tool: boolean;
+  localUrl: boolean;
+}
+
 interface ServerItemProps {
   server: DevServer;
   terminalApp: Application;
+  show: RowVisibility;
   onKill: () => void;
   onKillProject: () => void;
   onKillAll: () => void;
@@ -152,6 +191,7 @@ interface ServerItemProps {
 function ServerItem({
   server,
   terminalApp,
+  show,
   onKill,
   onKillProject,
   onKillAll,
@@ -173,45 +213,120 @@ function ServerItem({
     ? { source: faviconUrl, fallback: Icon.Globe }
     : { source: Icon.Globe, tintColor: toolColor(server.tool) };
 
+  // Branch goes in the left-rail subtitle (right next to the title). Raycast
+  // dims subtitles automatically.
+  const subtitle =
+    show.branch && server.branch
+      ? {
+          value: server.branch,
+          tooltip: `Branch: ${server.branch}\nWorktree: ${server.cwd}`,
+        }
+      : undefined;
+
+  // When a custom domain (e.g. via portless) points at this port, promote
+  // the domain to the title and demote `localhost:PORT` to a pill accessory.
+  // The pill lives in accessories (right-aligned) because Raycast subtitles
+  // are plain text — there's no inline-pill primitive. The port stays
+  // visible because it's still useful for env files, OAuth allowlists, CORS
+  // rules, and tools that don't trust the local CA.
+  const hasAlias = !!server.customUrls?.length;
+  const titleHost = displayHost(server.url);
+  const localBadgeTag =
+    hasAlias && show.localUrl
+      ? { tag: { value: `localhost:${server.port}` } }
+      : undefined;
+
   return (
     <List.Item
       icon={icon}
-      title={`localhost:${server.port}`}
+      title={titleHost}
+      subtitle={subtitle}
+      keywords={[
+        server.projectName,
+        server.branch,
+        ...(server.customUrls ?? []).map(displayHost),
+      ].filter((v): v is string => Boolean(v))}
       accessories={[
-        {
-          text: formatUptime(server.startedAt),
-          tooltip: `Started ${server.startedAt.toLocaleString()}`,
-        },
-        // Show the runtime tag only when it adds new information.
-        // If the framework tag is already "bun", a second "bun" tag is just noise.
-        ...(server.runtime === "bun" && server.tool !== "bun"
+        ...(show.uptime
           ? [
               {
-                tag: { value: "bun", color: Color.Yellow },
+                text: formatUptime(server.startedAt),
+                tooltip: `Started ${server.startedAt.toLocaleString()}`,
+              },
+            ]
+          : []),
+        ...(localBadgeTag ? [localBadgeTag] : []),
+        // Runtime tag is suppressed when it duplicates the tool tag (e.g.
+        // tool is already "bun"), and rendered only when the user has the
+        // tool tag visible — otherwise standalone "bun" would look orphaned.
+        ...(show.tool && server.runtime === "bun" && server.tool !== "bun"
+          ? [
+              {
+                tag: { value: "Bun", color: Color.Yellow },
                 tooltip: "Listening process is running on the Bun runtime",
               },
             ]
           : []),
-        { tag: { value: server.tool, color: toolColor(server.tool) } },
+        ...(show.tool
+          ? [
+              {
+                tag: {
+                  value: toolLabel(server.tool),
+                  color: toolColor(server.tool),
+                },
+              },
+            ]
+          : []),
       ]}
       actions={
         <ActionPanel>
+          {/*
+           * Action order is deliberate. Raycast auto-binds `↵` and `⌘↵` to
+           * positions 1 and 2 — they can't be overridden — so we keep both
+           * slots filled with benign "open" actions.
+           *
+           * Restart sits above Kill: restarting is the common iterate-on-
+           * change action, while Kill is mostly end-of-session cleanup.
+           * This also keeps `⌘↵` from auto-firing Kill when there's no
+           * alias — it falls through to Restart (reversible by design).
+           *
+           * Kill stays high in the panel rather than at the conventional
+           * "destructive at the bottom", because it's frequent and Raycast
+           * paints it red as the visual safety signal. The bulk kill
+           * actions further down keep convention — they're genuinely
+           * high-blast-radius.
+           */}
           <Action.OpenInBrowser url={server.url} title="Open in Browser" />
-          <Action
-            title="Kill Server"
-            icon={Icon.Stop}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={onKill}
-          />
-          {/* CopyToClipboard already uses Cmd+C by default */}
-          <Action.CopyToClipboard title="Copy URL" content={server.url} />
+          {hasAlias && (
+            <Action.OpenInBrowser
+              url={server.localUrl}
+              title="Open Localhost URL"
+            />
+          )}
           <Action
             title="Restart Server"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={onRestart}
           />
+          <Action
+            title="Kill Server"
+            icon={Icon.Stop}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={onKill}
+          />
+          <ActionPanel.Section>
+            {/* CopyToClipboard already uses Cmd+C by default */}
+            <Action.CopyToClipboard title="Copy URL" content={server.url} />
+            {hasAlias && (
+              <Action.CopyToClipboard
+                title="Copy Localhost URL"
+                content={server.localUrl}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Open
               title={`Open in ${terminalApp.name}`}
@@ -236,14 +351,14 @@ function ServerItem({
               title="Kill All for Project"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
               onAction={onKillProject}
             />
             <Action
               title="Kill All Servers"
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+              shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
               onAction={onKillAll}
             />
           </ActionPanel.Section>
@@ -261,8 +376,7 @@ export default function Command() {
     data: servers = [],
     mutate,
     revalidate,
-  } = useExec("/bin/zsh", ["-c", FETCH_SCRIPT], {
-    parseOutput: ({ stdout }) => parseServers(stdout),
+  } = useCachedPromise(fetchServers, [], {
     keepPreviousData: true,
   });
 
@@ -290,8 +404,8 @@ export default function Command() {
     }
   }
 
-  async function killProject(cwd: string) {
-    const targets = servers.filter((s) => s.cwd === cwd);
+  async function killProject(projectKey: string) {
+    const targets = servers.filter((s) => s.projectKey === projectKey);
     if (targets.length === 0) return;
     const projectName = targets[0].projectName;
     const confirmed = await confirmAlert({
@@ -311,7 +425,7 @@ export default function Command() {
         })(),
         {
           optimisticUpdate: (current) =>
-            (current ?? []).filter((s) => s.cwd !== cwd),
+            (current ?? []).filter((s) => s.projectKey !== projectKey),
           rollbackOnError: true,
         },
       );
@@ -388,7 +502,7 @@ export default function Command() {
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Restart timed out";
-        toast.message = "Check /tmp/dev-servers-restart-*.log";
+        toast.message = `Check ${path.join(os.tmpdir(), "dev-servers-restart-*.log")}`;
       }
     } catch (err) {
       await showFailureToast(err, {
@@ -400,9 +514,18 @@ export default function Command() {
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
   const [toolFilter, setToolFilter] = useState<string>("all");
 
-  // Manual refresh: useExec's revalidate is silent because keepPreviousData
-  // keeps the list rendered. Show a brief animated toast so the user knows
-  // their ⌘R actually did something.
+  // Visibility prefs default to true so first-time users see everything.
+  // Raycast returns `undefined` for an unset checkbox on first launch.
+  const show: RowVisibility = {
+    branch: prefs.showBranch ?? true,
+    uptime: prefs.showUptime ?? true,
+    tool: prefs.showTool ?? true,
+    localUrl: prefs.showLocalUrl ?? true,
+  };
+
+  // Manual refresh: useCachedPromise's revalidate is silent because
+  // keepPreviousData keeps the list rendered. Show a brief animated toast so
+  // the user knows their ⌘R actually did something.
   async function refresh() {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -429,10 +552,13 @@ export default function Command() {
       ? servers
       : servers.filter((s) => s.tool === toolFilter);
 
+  // Group by projectKey (git common-dir for git projects, cwd otherwise) so
+  // sibling worktrees of the same repo collapse into one section. Each row
+  // still carries its own cwd/branch so per-row actions stay correct.
   const grouped = Object.entries(
     visible.reduce(
       (acc, s) => {
-        (acc[s.cwd] ??= []).push(s);
+        (acc[s.projectKey] ??= []).push(s);
         return acc;
       },
       {} as Record<string, DevServer[]>,
@@ -453,7 +579,11 @@ export default function Command() {
             <List.Dropdown.Item title="All Tools" value="all" />
             <List.Dropdown.Section>
               {availableTools.map((tool) => (
-                <List.Dropdown.Item key={tool} title={tool} value={tool} />
+                <List.Dropdown.Item
+                  key={tool}
+                  title={toolLabel(tool)}
+                  value={tool}
+                />
               ))}
             </List.Dropdown.Section>
           </List.Dropdown>
@@ -481,10 +611,17 @@ export default function Command() {
           }
         />
       )}
-      {grouped.map(([cwd, projectServers]) => (
+      {grouped.map(([projectKey, projectServers]) => (
         <List.Section
-          key={cwd}
-          title={prefs.showFullPath ? cwd : projectServers[0].projectName}
+          key={projectKey}
+          title={
+            // When showFullPath is on, use the first row's cwd as a concrete
+            // path hint. (For multi-worktree sections the per-row branch tag
+            // and its tooltip distinguish which worktree each row belongs to.)
+            prefs.showFullPath
+              ? projectServers[0].cwd
+              : projectServers[0].projectName
+          }
           subtitle={`${projectServers.length} server${projectServers.length > 1 ? "s" : ""}`}
         >
           {projectServers.map((server) => (
@@ -492,8 +629,9 @@ export default function Command() {
               key={server.pid}
               server={server}
               terminalApp={terminalApp}
+              show={show}
               onKill={() => kill(server.pid)}
-              onKillProject={() => killProject(cwd)}
+              onKillProject={() => killProject(projectKey)}
               onKillAll={killAll}
               onRestart={() => restart(server)}
               onRefresh={refresh}

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [CLI update] - 2026-05-27
+
+- Update CLI to v2026.4.2
+
 ## [Update Contributors] - 2026-05-19
 
 - Update contributors
@@ -10,6 +14,7 @@
 
 ## [CLI update & Fix] - 2026-04-23
 
+- Update CLI to v2026.3.0
 - Logout whenever there is a "Invalid session token" error
 
 ## [Fix] - 2026-04-20

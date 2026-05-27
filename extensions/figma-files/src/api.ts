@@ -191,9 +191,7 @@ export async function resolveAllFiles(): Promise<TeamFiles[]> {
     const refreshedProjectNames = new Set(projectFiles.map((p) => p.name));
     const mergedProjects = [
       ...projectFiles,
-      ...cachedTeam.files.filter((p) =>
-        p.id ? !refreshedProjectIds.has(p.id) : !refreshedProjectNames.has(p.name),
-      ),
+      ...cachedTeam.files.filter((p) => (p.id ? !refreshedProjectIds.has(p.id) : !refreshedProjectNames.has(p.name))),
     ];
 
     return { name: teamName, files: mergedProjects } as TeamFiles;

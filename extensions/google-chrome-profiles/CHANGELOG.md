@@ -1,5 +1,10 @@
 # Google Chrome Profiles Changelog
 
+## [Fix] - 2026-05-26
+
+- Fix silent failure of all profile actions (Bring to Front, New Tab, New Window, Open URL) for users who have not previously granted Raycast `AppleEvents` permission for `System Events.app`. `@raycast/utils.runAppleScript` spawns `osascript` without `detached: true`, so it inherits the extension's Node process group. Raycast tears that group down ~40ms after the action handler returns control to React, which kills `osascript` mid-flight and also cancels the asynchronous TCC permission prompt that macOS tries to render on first run, leaving no path for the user to actually grant the permission. Run AppleScript via a detached `child_process.spawn("/usr/bin/osascript", [...], { detached: true, stdio: "ignore" })` + `child.unref()` so the subprocess survives teardown, the TCC prompt renders, and the script runs to completion.
+- Fix bookmark favicon crash on `chrome://` / `about:` URLs: `new URL(...).origin` is `null` for opaque-origin schemes; passing that to `getFavicon` threw `TypeError: Invalid URL` and broke the bookmarks list. Only resolve favicons for `http(s)` bookmarks; use the globe icon for everything else.
+
 ## [Feature] - 2026-04-08
 
 - Add "New Window" action to open a new Chrome window for a profile
