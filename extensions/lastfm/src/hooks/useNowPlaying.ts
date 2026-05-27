@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import fetch from "node-fetch";
 
 import type { Track, SongResponse } from "@/types/SongResponse";
 
@@ -14,7 +13,7 @@ interface NowPlayingResult {
 const POLL_INTERVAL_MS = 30_000;
 
 export function useNowPlaying(): NowPlayingResult {
-  const { username, apikey } = getPreferenceValues<{ username: string; apikey: string }>();
+  const { username, apikey } = getPreferenceValues<Preferences>();
   const [cachedTrack, setCachedTrack] = useCachedState<Track | null>("now-playing-track", null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

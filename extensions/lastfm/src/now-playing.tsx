@@ -18,11 +18,6 @@ import { useNowPlaying } from "./hooks/useNowPlaying";
 import { useTrackLoved } from "./hooks/useTrackLoved";
 import { ConnectLastFm } from "./components/ConnectLastFm";
 
-interface Prefs {
-  apikey: string;
-  apiSecret?: string;
-}
-
 const AUTH_STATUS: Record<string, string> = {
   none: "Not connected",
   pending: "Waiting for authorization…",
@@ -37,7 +32,7 @@ const AUTH_ICON: Record<string, Icon> = {
 
 export default function NowPlaying(props: { launchContext?: { openConnect?: boolean } }) {
   const openConnect = props.launchContext?.openConnect ?? false;
-  const { apikey, apiSecret } = getPreferenceValues<Prefs>();
+  const { apikey, apiSecret } = getPreferenceValues<Preferences.NowPlaying>();
   const { push } = useNavigation();
   const { track, isPlaying, isLoading } = useNowPlaying();
   const { isLoved, setIsLoved } = useTrackLoved(track?.artist?.["#text"], track?.name);

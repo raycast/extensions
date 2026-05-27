@@ -4,7 +4,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { getTrackLoved } from "../functions/lastfm";
 
 export function useTrackLoved(artist: string | undefined, track: string | undefined) {
-  const { username, apikey } = getPreferenceValues<{ username: string; apikey: string }>();
+  const { username, apikey } = getPreferenceValues<Preferences>();
   const [isLoved, setIsLoved] = useState<boolean | null>(null);
 
   useEffect(() => {

@@ -17,15 +17,6 @@ import { useAuthState } from "./hooks/useAuthState";
 import { useNowPlaying } from "./hooks/useNowPlaying";
 import { useTrackLoved } from "./hooks/useTrackLoved";
 
-interface MenubarPrefs {
-  menubarIcon: "lastfm" | "album";
-  nowPlayingLength: string;
-  hideArtistName: boolean;
-  cleanupSongTitle: boolean;
-  apikey: string;
-  apiSecret?: string;
-}
-
 function cleanTitle(title: string): string {
   return title
     .replace(/\s*[([](feat\.|ft\.|featuring)[^)\]]*[)\]]/gi, "")
@@ -40,7 +31,7 @@ function cleanTitle(title: string): string {
 
 export default function NowPlayingMenuBar() {
   const { menubarIcon, nowPlayingLength, hideArtistName, cleanupSongTitle, apikey, apiSecret } =
-    getPreferenceValues<MenubarPrefs>();
+    getPreferenceValues<Preferences.Menubar>();
   const canLove = !!apiSecret;
   const { track, isPlaying, isLoading } = useNowPlaying();
   const { isLoved, setIsLoved } = useTrackLoved(

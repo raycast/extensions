@@ -1,6 +1,5 @@
 import { createHash } from "crypto";
 import { LocalStorage, open } from "@raycast/api";
-import fetch from "node-fetch";
 
 const BASE_URL = "https://ws.audioscrobbler.com/2.0/";
 const SESSION_KEY_STORAGE = "lastfm-session-key";
