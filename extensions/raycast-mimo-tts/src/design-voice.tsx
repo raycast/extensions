@@ -29,9 +29,10 @@ export default function DesignVoice() {
   const playerRef = useRef(new AudioPlayer());
 
   useEffect(() => {
-    const player = playerRef.current;
+    // handleSubmit swaps playerRef.current to a fresh AudioPlayer on every run,
+    // so cleanup must read the ref at unmount time — not capture the initial player.
     return () => {
-      player.cleanup();
+      playerRef.current.cleanup();
     };
   }, []);
 

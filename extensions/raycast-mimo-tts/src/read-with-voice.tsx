@@ -94,10 +94,11 @@ export default function ReadWithVoice() {
       .catch(() => undefined);
     refreshSelection(true).catch(() => undefined);
     refreshSpeed().catch(() => undefined);
-    const player = playerRef.current;
 
+    // handleRead swaps playerRef.current to a fresh AudioPlayer on every run,
+    // so cleanup must read the ref at unmount time — not capture the initial player.
     return () => {
-      player.cleanup();
+      playerRef.current.cleanup();
     };
   }, [refreshSelection, refreshSpeed]);
 
