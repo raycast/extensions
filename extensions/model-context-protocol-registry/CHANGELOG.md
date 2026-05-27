@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add VC Deal Flow Signal MCP Server] - 2026-05-27
+## [Add VC Deal Flow Signal MCP Server] - {PR_MERGE_DATE}
 
 Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).
 

@@ -915,7 +915,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/kindrat86/vc-deal-flow-signal",
     configuration: {
       command: "npx",
-      args: ["-y", "@gitdealflow/mcp-signal"],
+      args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
 ];
