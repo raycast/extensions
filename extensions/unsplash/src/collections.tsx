@@ -43,7 +43,7 @@ function CollectionGrid() {
 }
 
 function CollectionGridItem({ result }: { result: CollectionResult }) {
-  const title = result.title || result.description;
+  const title = result.title || result.description || "No Name";
   const image = result.cover_photo?.urls?.thumb || result.cover_photo?.urls?.small || result.cover_photo?.urls?.regular;
   return (
     <Grid.Item

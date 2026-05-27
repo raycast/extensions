@@ -8,9 +8,12 @@ export function useSetupAuth() {
   const [connectError, setConnectError] = useState("");
 
   useEffect(() => {
-    client.getTokens().then((tokens) => {
-      setStatus(tokens?.accessToken ? "ready" : "needs-setup");
-    });
+    client
+      .getTokens()
+      .then((tokens) => {
+        setStatus(tokens?.accessToken ? "ready" : "needs-setup");
+      })
+      .catch(() => setStatus("needs-setup"));
   }, []);
 
   const connect = useCallback(async () => {
