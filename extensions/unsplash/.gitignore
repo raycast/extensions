@@ -6,3 +6,6 @@ raycast-env.d.ts
 compiled_raycast_swift
 
 node_modules
+.claude
+.remember
+docs
