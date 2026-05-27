@@ -3,12 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 /**
  * Raycast Preferences で設定する worktree-deck の実行設定
  */
-export type WorktreeDeckPreferenceValues = {
-  GIT_WORKTREE_PATH?: string;
-  CODEX_HOME?: string;
-  WORKTREE_DECK_SEARCH_DAYS?: string;
-  WORKTREE_DECK_DONE_THRESHOLD_DAYS?: string;
-};
+export type WorktreeDeckPreferenceValues = Preferences;
 
 /**
  * Raycast Preferences を process.env 互換の辞書へ変換する

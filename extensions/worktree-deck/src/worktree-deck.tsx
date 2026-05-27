@@ -323,15 +323,18 @@ export default function Command() {
 
   const { push } = useNavigation();
   /**
-   * 計測ログを常に出力するか
+   * 開発中だけ計測ログを出力するか
    */
-  const FORCE_TIMING_LOG = true;
+  const FORCE_TIMING_LOG = environment.isDevelopment;
   /**
    * 計測ログの有効状態を一度だけ通知する
    */
   useEffect(() => {
+    if (!FORCE_TIMING_LOG) {
+      return;
+    }
     console.info(`[worktree-deck][timing] enabled=${FORCE_TIMING_LOG}`);
-  }, []);
+  }, [FORCE_TIMING_LOG]);
   const [hiddenWorktreePaths, setHiddenWorktreePaths] = useState<Set<string>>(new Set());
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [detailScrollOffsetsByItemId, setDetailScrollOffsetsByItemId] = useState<Record<string, number>>({});

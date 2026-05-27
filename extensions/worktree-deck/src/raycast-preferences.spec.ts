@@ -34,6 +34,7 @@ describe("raycast-preferences", () => {
       GIT_WORKTREE_PATH: " ~/.worktree-deck/worktrees ",
       CODEX_HOME: "  ",
       WORKTREE_DECK_SEARCH_DAYS: "30",
+      WORKTREE_DECK_DONE_THRESHOLD_DAYS: "",
     });
 
     expect(result).toEqual({
