@@ -221,7 +221,7 @@ export default function CloneVoiceCommand() {
               <Action.OpenInBrowser title="Open Preview Audio URL" url={result.demoAudioUrl} icon={Icon.Link} />
             )}
             <Action.CopyToClipboard
-              title="Copy Voice Id"
+              title="Copy Voice ID"
               content={result.voiceId}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />

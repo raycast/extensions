@@ -95,18 +95,18 @@ MiniMax notes that Token Plan keys are separate from pay-as-you-go keys and cann
 
 Open the extension preferences in Raycast and set:
 
-| Setting                 | Description                                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| Authentication Mode     | Auto detect, Token Plan, or Open Platform API key                                               |
-| Token Plan Key          | Key created from **Create Token Plan Key**; Token Plan currently supports HD speech models only |
-| Open Platform API Key   | Key created from **Create new secret key**                                                      |
-| Region                  | China or Global API endpoint                                                                    |
-| Model                   | HD models work with Token Plan; Turbo models require Open Platform API Key                      |
-| Default Voice           | Built-in quick-read voice                                                                       |
-| Default Custom Voice ID | Optional cloned/generated voice ID; overrides Default Voice and is tagged `Default` in pickers  |
+| Setting                 | Description                                                                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Authentication Mode     | Auto detect, Token Plan, or Open Platform API key                                                                            |
+| Token Plan Key          | Key created from **Create Token Plan Key**; Token Plan currently supports HD speech models only                              |
+| Open Platform API Key   | Key created from **Create new secret key**                                                                                   |
+| Region                  | China or Global API endpoint                                                                                                 |
+| Model                   | HD models work with Token Plan; Turbo models require Open Platform API Key                                                   |
+| Default Voice           | Built-in quick-read voice                                                                                                    |
+| Default Custom Voice ID | Optional cloned/generated voice ID; overrides Default Voice and is tagged `Default` in pickers                               |
 | Extra Custom Voice IDs  | Comma-separated cloned/generated voice IDs to surface in voice pickers (tagged `Unverified` until MiniMax acknowledges them) |
-| Language Boost          | `auto`, Chinese, English, etc.                                                                  |
-| Speech Rate             | 0.5× to 2.0×                                                                                    |
+| Language Boost          | `auto`, Chinese, English, etc.                                                                                               |
+| Speech Rate             | 0.5× to 2.0×                                                                                                                 |
 
 The voice picked from "Read with Voice Selection" is stored as a local Quick Read override and takes precedence over the static Default Voice preference.
 

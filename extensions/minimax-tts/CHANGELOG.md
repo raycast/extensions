@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 ### Reading
+
 - Quick Read: select text and read aloud with one command (toggle to stop)
 - Clipboard fallback when selected text is unavailable
 - Resume Last Reading and Restart Last Reading commands (always restart/resume; no surprise toggle)
@@ -13,6 +14,7 @@
 - Persistent reading-status menu-bar item showing live `Synth N/M` / `Play N/M` / paused state with Stop / Resume / Restart / Speed Up / Slow Down / Read / Pick Voice controls
 
 ### Voices
+
 - Read with Voice Selection: browse MiniMax system, cloned, generated, and configured custom voice IDs
 - Per-row "Synthesizing N/M" / "Playing N/M" progress while the picker stays browsable
 - Select Quick Read Voice: choose and preview the voice used by Quick Read
@@ -27,6 +29,7 @@
 - Uploaded clone-source files are cached for 24h, so retries skip the re-upload step
 
 ### Models and Auth
+
 - Support for MiniMax Speech 2.8, 2.6, and 02 model versions
 - Token Plan Key and Open Platform API Key authentication modes (auto-detected by default)
 - China and Global MiniMax API regions
@@ -34,6 +37,7 @@
 - Configuration and model-mismatch errors offer Open Preferences as a primary action
 
 ### Commands
+
 - Stop Reading: dedicated command; surfaces "Resume Last Reading" when nothing is active but a paused session exists
 - Speed up Reading: increase the current reading speed by 0.25×, up to 2.0×
 - Slow Down Reading: decrease the current reading speed by 0.25×, down to 0.5×

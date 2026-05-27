@@ -281,7 +281,7 @@ export default function ReadWithVoice() {
                         onAction={handleStop}
                       />
                     )}
-                    <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
+                    <Action.CopyToClipboard title="Copy Voice ID" content={voice.id} />
                     <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                   </ActionPanel>
                 }

@@ -71,6 +71,10 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
       await player.playAudio(audio);
 
+      if (hasExternalStopRequest()) {
+        break;
+      }
+
       if (speedChanged) {
         // Persist the latest speed to the session so Resume Last Reading
         // continues at the user's chosen pace.
@@ -81,10 +85,6 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
         await saveReadingSession(activeSession);
       }
       activeSession = await updateReadingProgress(activeSession, i + 1);
-
-      if (hasExternalStopRequest()) {
-        break;
-      }
     }
 
     if (activeSession.nextChunkIndex >= chunkCount && !player.isStopped() && !hasExternalStopRequest()) {

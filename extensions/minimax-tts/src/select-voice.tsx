@@ -256,7 +256,7 @@ export default function SelectVoice() {
                       onAction={handleResetVoice}
                     />
                   )}
-                  <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
+                  <Action.CopyToClipboard title="Copy Voice ID" content={voice.id} />
                   <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                 </ActionPanel>
               }
