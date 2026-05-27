@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-05-27
 
 - Add support for Raycast beta versions
 - Bump all dependencies to the latest
