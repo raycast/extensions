@@ -324,16 +324,16 @@ export default function UnreadUpdates() {
                     onAction={() => toggleCollapse(pr)}
                   />
                   <Action.Push
-                    title="View Pr Summary"
+                    title="View PR Summary"
                     icon={Icon.List}
                     target={<PRSummaryDetail pr={pr} />}
                   />
                   <Action.OpenInBrowser
-                    title="Open Pr on GitHub"
+                    title="Open PR on GitHub"
                     url={pr.html_url}
                   />
                   <Action
-                    title="Mark Pr as Caught Up"
+                    title="Mark PR as Caught Up"
                     icon={Icon.Checkmark}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={() => handleMarkPRSeen(pr)}
@@ -574,7 +574,7 @@ function ActivityListItem({
             onAction={onMarkItemSeen}
           />
           <Action
-            title="Mark Entire Pr as Caught Up"
+            title="Mark Entire PR as Caught Up"
             icon={Icon.Checkmark}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={onMarkPRSeen}
@@ -586,7 +586,7 @@ function ActivityListItem({
             onAction={onMarkAllSeen}
           />
           <Action.Push
-            title="View Pr Summary"
+            title="View PR Summary"
             icon={Icon.List}
             target={<PRSummaryDetail pr={pr} />}
           />
@@ -689,7 +689,7 @@ function PRSummaryDetail({ pr }: { pr: PRWithActivity }) {
       navigationTitle={`#${pr.number} — ${pr.title}`}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Pr on GitHub" url={pr.html_url} />
+          <Action.OpenInBrowser title="Open PR on GitHub" url={pr.html_url} />
         </ActionPanel>
       }
     />
