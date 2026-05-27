@@ -5,6 +5,14 @@ private let minDurationSeconds = 10
 private let maxDurationSeconds = 600
 private var shouldExit = false
 
+private func isEscapeKey(_ event: NSEvent) -> Bool {
+  event.keyCode == 53 || event.charactersIgnoringModifiers == "\u{1b}"
+}
+
+private func requestExit() {
+  shouldExit = true
+}
+
 private func normalizedDuration() -> Int {
   guard CommandLine.arguments.count > 1,
         let value = Int(CommandLine.arguments[1])
@@ -18,6 +26,19 @@ private func normalizedDuration() -> Int {
 private final class BlackrWindow: NSWindow {
   override var canBecomeKey: Bool { true }
   override var canBecomeMain: Bool { true }
+
+  override func keyDown(with event: NSEvent) {
+    if isEscapeKey(event) {
+      requestExit()
+      return
+    }
+
+    super.keyDown(with: event)
+  }
+
+  override func cancelOperation(_ sender: Any?) {
+    requestExit()
+  }
 }
 
 private final class OverlayView: NSView {
@@ -77,7 +98,7 @@ private final class OverlayView: NSView {
     let location = convert(event.locationInWindow, from: nil)
 
     if exitButtonRect.contains(location) {
-      shouldExit = true
+      requestExit()
       return
     }
 
@@ -85,12 +106,16 @@ private final class OverlayView: NSView {
   }
 
   override func keyDown(with event: NSEvent) {
-    if event.keyCode == 53 {
-      shouldExit = true
+    if isEscapeKey(event) {
+      requestExit()
       return
     }
 
     super.keyDown(with: event)
+  }
+
+  override func cancelOperation(_ sender: Any?) {
+    requestExit()
   }
 }
 
@@ -107,7 +132,7 @@ private func makeEscEventTap() -> CFMachPort? {
          event.getIntegerValueField(.keyboardEventKeycode) == 53
       {
         DispatchQueue.main.async {
-          shouldExit = true
+          requestExit()
         }
       }
 
@@ -153,8 +178,8 @@ window.makeKey()
 window.makeFirstResponder(overlayView)
 
 let keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-  if event.keyCode == 53 {
-    shouldExit = true
+  if isEscapeKey(event) {
+    requestExit()
     return nil
   }
 
