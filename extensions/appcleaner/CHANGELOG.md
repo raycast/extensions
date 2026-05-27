@@ -1,5 +1,10 @@
 # App Cleaner Changelog
 
+## [Updated README] - {PR_MERGE_DATE}
+
+- Noted extension is obsolete as Raycast 2.0 includes the same functionality natively
+- Removed need for 3rd party uninstallers
+
 ## [Allow any app to be an uninstaller] - 2026-03-16
 - Replaced a hardcoded list of supported uninstallers with an app picker dropdown that allows any app to be used as an uninstaller.
 
