@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-27
 - Add snooze actions to Search Tasks.
 
 ## [Update] - 2025-10-30
