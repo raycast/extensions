@@ -389,7 +389,11 @@ export function stopExternalPlayback(): boolean {
 
     requestExternalStop();
     process.kill(pid, "SIGTERM");
-    removePidFile();
+    // Only remove the PID file if it still names the pid we just killed;
+    // a concurrent Quick Read may have started between the kill and here
+    // and written its own PID. Unconditional removal would leave that new
+    // session unstoppable via Stop Reading.
+    removePidFileIfMatch(pid);
     return true;
   } catch {
     removePidFile();
