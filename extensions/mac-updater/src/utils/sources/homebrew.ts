@@ -251,6 +251,7 @@ export function findCaskFor(
 export async function checkHomebrewCask(
   app: InstalledApp,
   index: CaskIndex,
+  outdatedCasks?: Map<string, OutdatedCask>,
 ): Promise<UpdateInfo | null> {
   // Prefer a direct lookup if we already know the token (Caskroom-mapped or fuzzy-matched).
   let cask: CaskEntry | null = null;
@@ -265,12 +266,51 @@ export async function checkHomebrewCask(
   const token = cask?.token ?? app.suggestedCask;
   if (!token) return null;
 
-  const latest = cask?.version?.split(",")[0] ?? app.version;
+  const latestFromCaskApi = cask?.version?.split(",")[0] ?? app.version;
+
+  // Authoritative path: if the app is brew-managed AND we have brew's own
+  // outdated list, trust brew. This eliminates every version-mismatch edge case
+  // (Google Drive's short-vs-build, opaque cask versions like "5.0.0,6",
+  // auto-updating apps that silently bumped past the cask) in one shot —
+  // brew is the entity that would do the upgrade, so its verdict is final.
+  //
+  // If brew is silent on this token, it's NOT outdated as far as brew is
+  // concerned. We deliberately set hasUpdate=false rather than falling through
+  // to the plist heuristic, because that's what produced the sticky-flag bug
+  // we're trying to kill.
+  if (app.managedByBrew && outdatedCasks) {
+    const brewSays = outdatedCasks.get(token);
+    if (brewSays) {
+      return {
+        app,
+        source: "homebrew-cask",
+        latestVersion: brewSays.latestVersion,
+        hasUpdate: true,
+        caskToken: token,
+        releaseNotesUrl: cask?.homepage,
+        checkedAt: Date.now(),
+      };
+    }
+    return {
+      app,
+      source: "homebrew-cask",
+      latestVersion: latestFromCaskApi,
+      hasUpdate: false,
+      caskToken: token,
+      releaseNotesUrl: cask?.homepage,
+      checkedAt: Date.now(),
+    };
+  }
+
+  // Fallback path (unmanaged adoption candidates, or when brew outdated failed):
+  // use the cask API's declared version with the heuristic version compare.
   return {
     app,
     source: "homebrew-cask",
-    latestVersion: latest,
-    hasUpdate: cask ? hasUpdate(app.version, app.buildNumber, latest) : false,
+    latestVersion: latestFromCaskApi,
+    hasUpdate: cask
+      ? hasUpdate(app.version, app.buildNumber, latestFromCaskApi)
+      : false,
     caskToken: token,
     releaseNotesUrl: cask?.homepage,
     checkedAt: Date.now(),
@@ -431,6 +471,62 @@ export async function getOutdatedFormulae(): Promise<CliPackage[]> {
     );
   } catch {
     return [];
+  }
+}
+
+export interface OutdatedCask {
+  /** What brew thinks is currently installed. Useful for the "you're on X" UI. */
+  currentVersion: string;
+  /** The version brew would upgrade you to. */
+  latestVersion: string;
+}
+
+/**
+ * Ask brew directly which casks it considers outdated. This is THE authoritative
+ * source for brew-managed apps — far more reliable than comparing the cask's
+ * declared version against the app's CFBundleShortVersionString, because:
+ *
+ *  - Apps like Google Drive expose "126.0" as the short version but the cask
+ *    tracks "126.0.4" (the build); a naive compare flags it as outdated forever.
+ *  - Some casks use opaque version strings (e.g. "5.0.0,6") that don't appear
+ *    anywhere in the .app's plist — no textual compare can match them.
+ *  - Brew already does the bookkeeping in Caskroom/<token>/.metadata/ and
+ *    knows its own "is this current?" answer.
+ *
+ * `--greedy` makes brew include casks whose `auto_updates` flag is true (most
+ * Mac apps that ship their own updater) — without it brew silently skips them
+ * and we'd never see google-drive in the list.
+ *
+ * Returns an empty map on any failure so callers can transparently fall back
+ * to the plist-vs-cask-version heuristic.
+ */
+export async function getOutdatedCasks(): Promise<Map<string, OutdatedCask>> {
+  const brew = findBrew();
+  if (!brew) return new Map();
+  try {
+    const { stdout } = await runWithTimeout(
+      brew,
+      ["outdated", "--cask", "--greedy", "--json=v2"],
+      45_000, // network-bound (brew may refresh index)
+    );
+    const data = JSON.parse(stdout) as {
+      casks?: Array<{
+        name: string;
+        installed_versions?: string[];
+        current_version?: string;
+      }>;
+    };
+    const map = new Map<string, OutdatedCask>();
+    for (const c of data.casks ?? []) {
+      if (!c.name || !c.current_version) continue;
+      map.set(c.name, {
+        currentVersion: (c.installed_versions ?? []).join(", "),
+        latestVersion: c.current_version,
+      });
+    }
+    return map;
+  } catch {
+    return new Map();
   }
 }
 

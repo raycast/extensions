@@ -8,7 +8,9 @@ import {
   getBrewAppMap,
   getCaskIndex,
   getInstalledCaskTokens,
+  getOutdatedCasks,
   getOutdatedFormulae,
+  type OutdatedCask,
 } from "./sources/homebrew";
 import { checkAppStore } from "./sources/mas";
 import { checkSparkle } from "./sources/sparkle";
@@ -41,10 +43,11 @@ export interface ScanResult {
 async function checkAppAcrossSources(
   app: InstalledApp,
   caskIndex: Awaited<ReturnType<typeof getCaskIndex>>,
+  outdatedCasks: Map<string, OutdatedCask>,
 ): Promise<UpdateInfo | null> {
   // 1. If currently installed via Homebrew, it is the canonical source
   if (app.managedByBrew && app.suggestedCask) {
-    const cask = await checkHomebrewCask(app, caskIndex);
+    const cask = await checkHomebrewCask(app, caskIndex, outdatedCasks);
     if (cask) return cask;
   }
 
@@ -95,6 +98,7 @@ export async function scanAll(): Promise<ScanResult> {
     pip,
     gem,
     outdatedFormulae,
+    outdatedCasks,
     ignoredSet,
   ] = await Promise.all([
     scanInstalledApps(),
@@ -114,6 +118,10 @@ export async function scanAll(): Promise<ScanResult> {
     getOutdatedPip(),
     getOutdatedGems(),
     getOutdatedFormulae(),
+    // Brew's own outdated-cask list — authoritative for brew-managed apps.
+    // One shell call (~1-5s depending on whether the index is fresh) covers
+    // every brew-managed app on disk, vs. one plist-vs-cask comparison per app.
+    getOutdatedCasks(),
     getIgnoredBundles(),
   ]);
 
@@ -177,7 +185,7 @@ export async function scanAll(): Promise<ScanResult> {
     const slice = activeApps.slice(i, i + CONCURRENCY);
     const batch = await Promise.all(
       slice.map((app) =>
-        checkAppAcrossSources(app, caskIndex).catch(() => null),
+        checkAppAcrossSources(app, caskIndex, outdatedCasks).catch(() => null),
       ),
     );
     for (let j = 0; j < batch.length; j++) {
