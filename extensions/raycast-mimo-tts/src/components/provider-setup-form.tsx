@@ -107,7 +107,8 @@ export default function SetupVoiceDefaults() {
           {hasOverrides ? (
             <Action title="Reset to Preferences" icon={Icon.RotateClockwise} onAction={handleReset} />
           ) : null}
-          <Action title="Open Api Key Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
+          <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

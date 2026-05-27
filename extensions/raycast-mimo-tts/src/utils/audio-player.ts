@@ -1,4 +1,4 @@
-import { spawn, execFileSync, execSync, ChildProcess } from "child_process";
+import { spawn, execFileSync, ChildProcess } from "child_process";
 import { writeFileSync, unlinkSync, existsSync, readFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -377,7 +377,7 @@ export function stopExternalPlayback(): boolean {
 
     // Verify the PID belongs to afplay before killing
     try {
-      const comm = execSync(`ps -p ${pid} -o comm=`, { encoding: "utf8" }).trim();
+      const comm = execFileSync("ps", ["-p", String(pid), "-o", "comm="], { encoding: "utf8" }).trim();
       if (!comm.includes("afplay")) {
         removePidFile();
         return false;
