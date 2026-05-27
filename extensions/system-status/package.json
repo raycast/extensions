@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "system-status",
-  "version": "1.0.0",
   "description": "Hide your taskbar once and for all. View your internet connection, volume, battery, time and date directly from Raycast.",
   "license": "MIT",
   "scripts": {
