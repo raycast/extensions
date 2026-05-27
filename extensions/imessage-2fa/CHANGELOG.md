@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Fix Time Sensitive iMessage codes] - {PR_MERGE_DATE}
+## [Fix Time Sensitive iMessage codes] - 2026-05-27
 
 - Fixed iMessage code detection when macOS stores notification labels separately from the message body.
 
