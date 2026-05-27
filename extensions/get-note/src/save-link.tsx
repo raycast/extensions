@@ -6,8 +6,8 @@ import { NoteDetailScreen } from "./components/note-detail";
 import { useKnowledgeBases } from "./hooks/use-knowledge-bases";
 import { addNoteToKnowledgeBase, getNoteDetail, saveLinkNote, waitForTask } from "./lib/api";
 import { normalizeGetNoteError } from "./lib/errors";
-import { normalizeTagInput } from "./lib/format";
-import { NoteDetail as GetNoteDetail, TaskProgress } from "./lib/types";
+import { formatTaskProgress, normalizeTagInput } from "./lib/format";
+import { NoteDetail as GetNoteDetail } from "./lib/types";
 import { useGetNoteCredentials } from "./hooks/use-getnote-credentials";
 
 type FormValues = {
@@ -15,28 +15,6 @@ type FormValues = {
   tags: string;
   topicId: string;
 };
-
-function formatTaskProgress(progress: TaskProgress): string {
-  if (progress.status === "pending") {
-    return "Queued by GetNote";
-  }
-
-  if (progress.status === "processing") {
-    return "Fetching the source and generating a summary";
-  }
-
-  if (progress.status === "success") {
-    return progress.note_id && progress.note_id !== "0"
-      ? `Created note ${progress.note_id}`
-      : "Finishing note creation";
-  }
-
-  if (progress.status === "failed") {
-    return progress.error_msg || "The GetNote task failed";
-  }
-
-  return `Current task status: ${progress.status}`;
-}
 
 function toHttpUrl(raw?: string): string | null {
   if (!raw) {
@@ -130,7 +108,7 @@ Task ID: \`${task.task_id}\``);
 
       const noteId = await waitForTask(task.task_id, {
         onTick(progress) {
-          const progressMessage = formatTaskProgress(progress);
+          const progressMessage = formatTaskProgress(progress, "Fetching the source and generating a summary");
           setStatus(`${progressMessage}
 
 Task ID: \`${task.task_id}\``);

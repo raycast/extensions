@@ -16,8 +16,8 @@ import {
   waitForTask,
 } from "./lib/api";
 import { normalizeGetNoteError } from "./lib/errors";
-import { normalizeTagInput } from "./lib/format";
-import { ImageUploadConfig, NoteDetail as GetNoteDetail, TaskProgress } from "./lib/types";
+import { formatTaskProgress, normalizeTagInput } from "./lib/format";
+import { ImageUploadConfig, NoteDetail as GetNoteDetail } from "./lib/types";
 import { useGetNoteCredentials } from "./hooks/use-getnote-credentials";
 
 const FALLBACK_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp"];
@@ -99,28 +99,6 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function formatTaskProgress(progress: TaskProgress): string {
-  if (progress.status === "pending") {
-    return "Queued by GetNote";
-  }
-
-  if (progress.status === "processing") {
-    return "Analyzing images and generating a note";
-  }
-
-  if (progress.status === "success") {
-    return progress.note_id && progress.note_id !== "0"
-      ? `Created note ${progress.note_id}`
-      : "Finishing note creation";
-  }
-
-  if (progress.status === "failed") {
-    return progress.error_msg || "The GetNote task failed";
-  }
-
-  return `Current task status: ${progress.status}`;
-}
-
 async function selectedFinderImagePaths(): Promise<string[]> {
   try {
     const items = await getSelectedFinderItems();
@@ -190,7 +168,7 @@ async function downloadImageUrl(
 ): Promise<{
   data: Buffer;
   filename: string;
-  mimeType: string;
+  extension: string;
 }> {
   const url = new URL(urlString);
   const response = await fetch(url);
@@ -203,7 +181,7 @@ async function downloadImageUrl(
   const contentLength = Number(response.headers.get("content-length"));
   const contentTypeExtension = extensionFromContentType(contentType);
   const urlExtension = getImageExtension(url.pathname);
-  const mimeType = contentTypeExtension || urlExtension;
+  const extension = contentTypeExtension || urlExtension;
 
   if (!contentType?.toLowerCase().startsWith("image/") && !urlExtension) {
     throw new Error(`URL does not look like an image: ${urlString}`);
@@ -216,11 +194,11 @@ async function downloadImageUrl(
   }
 
   const data = Buffer.from(await response.arrayBuffer());
-  const filename = filenameFromUrl(url, mimeType || "png");
+  const filename = filenameFromUrl(url, extension || "png");
 
   validateImageData({
     name: filename,
-    extension: mimeType,
+    extension,
     size: data.length,
     config,
   });
@@ -228,7 +206,7 @@ async function downloadImageUrl(
   return {
     data,
     filename,
-    mimeType,
+    extension,
   };
 }
 
@@ -265,8 +243,8 @@ export default function SaveImageNoteCommand() {
     };
   }, [credentials, files.length, isAuthLoading, isSubmitting]);
 
-  async function uploadImageData(input: { data: Buffer; filename: string; mimeType: string }): Promise<string> {
-    const token = await getImageUploadToken({ mimeType: input.mimeType });
+  async function uploadImageData(input: { data: Buffer; filename: string; extension: string }): Promise<string> {
+    const token = await getImageUploadToken({ extension: input.extension });
     const upload = await uploadImageToOSS({
       token,
       data: input.data,
@@ -287,14 +265,14 @@ export default function SaveImageNoteCommand() {
 
     for (const [index, path] of paths.entries()) {
       const filename = basename(path);
-      const mimeType = getImageExtension(path);
+      const extension = getImageExtension(path);
       const progressMessage = `Uploading ${index + 1}/${paths.length}: ${filename}`;
       setStatus(progressMessage);
       toast.title = "Uploading Images";
       toast.message = progressMessage;
 
       const data = await readFile(path);
-      uploadedUrls.push(await uploadImageData({ data, filename, mimeType }));
+      uploadedUrls.push(await uploadImageData({ data, filename, extension }));
     }
 
     return uploadedUrls;
@@ -358,7 +336,7 @@ Task ID: \`${task.task_id}\``);
 
           const noteId = await waitForTask(task.task_id, {
             onTick(progress) {
-              const progressMessage = formatTaskProgress(progress);
+              const progressMessage = formatTaskProgress(progress, "Analyzing images and generating a note");
               const taskMessage =
                 created.tasks.length > 1
                   ? `Task ${taskIndex + 1}/${created.tasks.length}`

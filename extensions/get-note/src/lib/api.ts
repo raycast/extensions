@@ -29,6 +29,7 @@ import { GETNOTE_BASE_URL, GETNOTE_DEFAULT_CLIENT_ID, POLL_INTERVAL_MS, POLL_TIM
 const BIGINT_KEYS = ["id", "note_id", "next_cursor", "parent_id", "follow_id", "live_id"];
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10_000;
 const RATE_LIMIT_RETRIES = 1;
+const MAX_KNOWLEDGE_BASE_PAGES = 100;
 
 function rewriteBigIntJson(raw: string): string {
   const pattern = new RegExp(`"(${BIGINT_KEYS.join("|")})"\\s*:\\s*(-?\\d+)`, "g");
@@ -67,9 +68,9 @@ function retryAfterFromEnvelope(payload: unknown): number | undefined {
   };
 
   return (
-    parseRetryAfter(record.retry_after) ||
-    parseRetryAfter(record.rate_limit?.retry_after) ||
-    parseRetryAfter(record.error?.retry_after) ||
+    parseRetryAfter(record.retry_after) ??
+    parseRetryAfter(record.rate_limit?.retry_after) ??
+    parseRetryAfter(record.error?.retry_after) ??
     parseRetryAfter(record.error?.rate_limit?.retry_after)
   );
 }
@@ -98,7 +99,7 @@ async function parseEnvelope<T>(response: Response): Promise<GetNoteEnvelope<T>>
     throw createRequestError(
       new URL(response.url).pathname,
       response.status,
-      retryAfterFromHeaders(response) || retryAfterFromEnvelope(payload),
+      retryAfterFromHeaders(response) ?? retryAfterFromEnvelope(payload),
     );
   }
 
@@ -131,7 +132,7 @@ async function requestWithCredentials<T>(
       payload = await parseEnvelope<T>(response);
     } catch (error) {
       if (error instanceof GetNoteError && error.status === 429 && attempt < RATE_LIMIT_RETRIES) {
-        await wait(error.retryAfterMs || DEFAULT_RATE_LIMIT_RETRY_MS);
+        await wait(error.retryAfterMs ?? DEFAULT_RATE_LIMIT_RETRY_MS);
         continue;
       }
 
@@ -144,7 +145,7 @@ async function requestWithCredentials<T>(
       }
 
       if (payload.error?.code === 10202 && attempt < RATE_LIMIT_RETRIES) {
-        await wait(retryAfterFromEnvelope(payload) || DEFAULT_RATE_LIMIT_RETRY_MS);
+        await wait(retryAfterFromEnvelope(payload) ?? DEFAULT_RATE_LIMIT_RETRY_MS);
         continue;
       }
 
@@ -386,9 +387,9 @@ function isImageUploadToken(value: ImageUploadToken | { tokens?: ImageUploadToke
   return "accessid" in value && "host" in value && "policy" in value && "signature" in value;
 }
 
-export async function getImageUploadToken(input: { mimeType: string }): Promise<ImageUploadToken> {
+export async function getImageUploadToken(input: { extension: string }): Promise<ImageUploadToken> {
   const data = await request<ImageUploadToken | { tokens?: ImageUploadToken[] }>(
-    `/open/api/v1/resource/image/upload_token?mime_type=${encodeURIComponent(input.mimeType)}`,
+    `/open/api/v1/resource/image/upload_token?mime_type=${encodeURIComponent(input.extension)}`,
   );
 
   if (isImageUploadToken(data)) {
@@ -534,7 +535,7 @@ export async function listAllKnowledgeBases(): Promise<KnowledgeBase[]> {
   const topics: KnowledgeBase[] = [];
   let page = 1;
 
-  while (true) {
+  while (page <= MAX_KNOWLEDGE_BASE_PAGES) {
     const data = await listKnowledgeBases(page);
     topics.push(...(data.topics || []));
 
@@ -544,6 +545,8 @@ export async function listAllKnowledgeBases(): Promise<KnowledgeBase[]> {
 
     page += 1;
   }
+
+  throw new GetNoteError(`Stopped loading knowledge bases after ${MAX_KNOWLEDGE_BASE_PAGES} pages.`);
 }
 
 export async function createKnowledgeBase(input: {
