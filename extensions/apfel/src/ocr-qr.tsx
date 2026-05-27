@@ -6,7 +6,7 @@ import { getFinderSelection } from "./utils/finder";
 
 export default function Command() {
   return (
-    <AugeGuard>
+    <AugeGuard checkForFileSystemPermission>
       <OcrQr />
     </AugeGuard>
   );

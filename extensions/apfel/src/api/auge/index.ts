@@ -5,7 +5,7 @@ import { hasFinderPermission } from "../../utils/finder";
 
 const execFileAsync = promisify(execFile);
 
-const ENV = { PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" };
+const ENV = { ...process.env, PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" };
 
 export const getAugePath = () => {
   const candidates = ["/opt/homebrew/bin/auge", "/usr/local/bin/auge", "/usr/bin/auge"];
