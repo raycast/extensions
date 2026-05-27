@@ -97,7 +97,8 @@
     "unused": "knip",
     "test": "vitest",
     "test:run": "vitest run",
-    "check:all": "npm run build && npm run lint && npm run test:run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check:all": "npm run build && npm run lint && npm run typecheck && npm run test:run",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

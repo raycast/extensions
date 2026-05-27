@@ -108,9 +108,8 @@ function normalizeTitleEntries(value: unknown): WorktreeTitle[] | null {
     const entry = rawEntry as Record<string, unknown>;
     const title = typeof entry.title === "string" ? entry.title : null;
     const updatedAt = typeof entry.updatedAt === "number" ? entry.updatedAt : null;
-    const latestMessage =
-      typeof entry.latestMessage === "string" || entry.latestMessage == null ? entry.latestMessage : null;
-    const status = entry.status === "working" || entry.status === "done" || entry.status == null ? entry.status : null;
+    const latestMessage = typeof entry.latestMessage === "string" ? entry.latestMessage : null;
+    const status = entry.status === "working" || entry.status === "done" ? entry.status : null;
     const startedAt = typeof entry.startedAt === "number" || entry.startedAt == null ? entry.startedAt : null;
     const sessionPath = typeof entry.sessionPath === "string" || entry.sessionPath == null ? entry.sessionPath : null;
     const sessionKind = normalizeSessionKind(entry.sessionKind);
@@ -142,17 +141,17 @@ function normalizeDisplayCacheEntry(value: unknown): WorktreeDeckDisplayCacheEnt
     return null;
   }
   const raw = value as Record<string, unknown>;
-  const titleEntries = raw.titleEntries == null ? undefined : normalizeTitleEntries(raw.titleEntries);
-  if (raw.titleEntries != null && titleEntries == null) {
+  const normalizedTitleEntries = raw.titleEntries == null ? undefined : normalizeTitleEntries(raw.titleEntries);
+  if (raw.titleEntries != null && normalizedTitleEntries == null) {
     return null;
   }
+  const titleEntries = normalizedTitleEntries ?? undefined;
   const mergeStatus =
     raw.mergeStatus === "synced" ||
     raw.mergeStatus === "unmerged" ||
     raw.mergeStatus === "dirty" ||
     raw.mergeStatus === "no-commit" ||
-    raw.mergeStatus === "unknown" ||
-    raw.mergeStatus == null
+    raw.mergeStatus === "unknown"
       ? raw.mergeStatus
       : undefined;
   if (raw.mergeStatus != null && mergeStatus === undefined) {

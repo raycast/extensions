@@ -5,7 +5,6 @@ import { expandHomePath, normalizePathValue } from "./path-utils";
  */
 type WorktreeFilterItem = {
   path: string;
-  originPath: string | null | undefined;
 };
 
 /**
@@ -44,7 +43,9 @@ function filterByMappings<TItem extends WorktreeFilterItem>(args: {
     return [];
   }
   return args.worktrees.filter((item) => {
-    const originPath = item.originPath === null || item.originPath === undefined ? "" : item.originPath.trim();
+    const originValue =
+      "originPath" in item ? (item as WorktreeFilterItem & Record<"originPath", unknown>).originPath : null;
+    const originPath = typeof originValue === "string" ? originValue.trim() : "";
     const targetPath = originPath.length > 0 ? originPath : item.path;
     const normalized = normalizePathValue(targetPath);
     return mappedRoots.has(normalized);

@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, Toast, open, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  List,
+  Toast,
+  type Keyboard,
+  open,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { dirname } from "node:path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveWorktreeDeckCompositionRoot, type SessionMessage, type WorktreeTitle } from "../composition-root";
@@ -29,7 +41,7 @@ export const PRIMARY_SESSION_ACTION_TITLE = "Show Session Content";
 /**
  * セッション詳細で使う主アクションのショートカット
  */
-export const PRIMARY_SESSION_ACTION_SHORTCUT = { modifiers: ["cmd"], key: "l" } as const;
+export const PRIMARY_SESSION_ACTION_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
 
 /**
  * セッション詳細で使う副アクションのタイトル

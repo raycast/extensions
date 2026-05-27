@@ -5,6 +5,7 @@ module.exports = defineConfig([
   ...raycastConfig,
   {
     files: ["src/domain/**/*.ts", "src/application/**/*.ts", "src/interface-adapters/**/*.ts"],
+    ignores: ["src/**/*.spec.ts"],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -17,6 +18,7 @@ module.exports = defineConfig([
   },
   {
     files: ["src/domain/**/*.ts"],
+    ignores: ["src/**/*.spec.ts"],
     rules: {
       "no-restricted-syntax": [
         "error",

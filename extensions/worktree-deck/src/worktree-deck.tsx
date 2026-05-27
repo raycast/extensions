@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   Toast,
+  type Keyboard,
   closeMainWindow,
   confirmAlert,
   environment,
@@ -134,7 +135,7 @@ type PinnedListOrder = {
 /**
  * セッション詳細表示アクションのショートカット
  */
-export const SHOW_DETAILS_SHORTCUT = { modifiers: ["cmd", "shift"], key: "enter" } as const;
+export const SHOW_DETAILS_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "enter" };
 
 /**
  * 保存済みアプリと逆側で開くアクションを Raycast の secondary action 位置に置くための添字

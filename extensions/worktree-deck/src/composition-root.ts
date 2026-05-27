@@ -110,14 +110,7 @@ export type WorktreeSection = {
   repo: string;
   items: Worktree[];
 };
-export type {
-  SessionMessage,
-  Worktree,
-  WorktreeMergeStatus,
-  WorktreePullRequestResult,
-  WorktreeSection,
-  WorktreeTitle,
-};
+export type { SessionMessage, Worktree, WorktreePullRequestResult, WorktreeTitle };
 
 /**
  * worktree-deck で利用する依存解決結果

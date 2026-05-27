@@ -68,7 +68,7 @@ function parseFromStorageValue(value: unknown): RepositoryMapping[] {
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
     if ("repoRoot" in record) {
-      return normalize([record]);
+      return normalize([{ repoRoot: record.repoRoot, mapValue: record.mapValue }]);
     }
     const entries = Object.entries(record).map(([repoRoot, mapValue]) => ({ repoRoot, mapValue }));
     return normalize(entries);

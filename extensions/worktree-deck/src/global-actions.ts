@@ -1,3 +1,5 @@
+import type { Keyboard } from "@raycast/api";
+
 /**
  * グローバルで使えるアクションの識別子
  */
@@ -14,7 +16,7 @@ export type GlobalActionId =
 type GlobalActionItem = {
   id: GlobalActionId;
   title: string;
-  shortcut?: { modifiers: ("cmd" | "shift" | "opt" | "ctrl")[]; key: string };
+  shortcut?: Keyboard.Shortcut;
 };
 
 /**

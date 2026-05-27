@@ -79,6 +79,13 @@ function isMainSession(session: WorktreeTitle): boolean {
 }
 
 /**
+ * null を除外して配列要素の型を確定する
+ */
+function isPresent<T>(value: T | null): value is T {
+  return value !== null;
+}
+
+/**
  * Codex App で開けるメインセッション選択肢を作る
  */
 export function buildCodexSessionEntries(
@@ -114,7 +121,7 @@ export function buildCodexSessionEntries(
         isArchived,
       };
     })
-    .filter((entry): entry is CodexSessionEntry => entry !== null)
+    .filter(isPresent)
     .sort((left, right) => {
       if (right.updatedAt !== left.updatedAt) {
         return right.updatedAt - left.updatedAt;
@@ -425,7 +432,7 @@ function CodexSessionListItem({
           ) : (
             <Action
               title="Archive Session"
-              icon={Icon.Archive}
+              icon={Icon.Box}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={() => void onArchiveSession(entry.threadId)}
             />
@@ -466,10 +473,14 @@ function resolveCodexSessionStatus(session: WorktreeTitle): { text: string | nul
  */
 function buildSessionAccessories(entry: CodexSessionEntry): List.Item.Accessory[] {
   const updatedAtText = formatUpdatedAt(entry.updatedAt);
-  return [
-    entry.statusText ? { text: entry.statusText, icon: entry.icon } : null,
-    updatedAtText ? { text: updatedAtText } : null,
-  ].filter((accessory): accessory is List.Item.Accessory => accessory !== null);
+  const accessories: List.Item.Accessory[] = [];
+  if (entry.statusText) {
+    accessories.push({ text: entry.statusText, icon: entry.icon });
+  }
+  if (updatedAtText) {
+    accessories.push({ text: updatedAtText });
+  }
+  return accessories;
 }
 
 /**
