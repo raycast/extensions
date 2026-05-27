@@ -1,6 +1,6 @@
 # cmux
 
-## [Improved workspace search] - {PR_MERGE_DATE}
+## [Improved workspace search] - 2026-05-27
 
 - Added workspace metadata from `cmux tree --all --json` for better matching
 - Search Workspaces now matches workspace descriptions and surface titles
