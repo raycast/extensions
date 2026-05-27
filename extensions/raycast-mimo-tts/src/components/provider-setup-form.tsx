@@ -44,6 +44,11 @@ export default function SetupVoiceDefaults() {
   const [settings, setSettings] = useState<MimoProviderSettings>(DEFAULT_MIMO_SETTINGS);
   const [hasOverrides, setHasOverrides] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // The model Form.Dropdown is uncontrolled (defaultValue only), so settings.model
+  // would never reflect an in-form change. Track the in-progress selection here
+  // so the voice list filters by the model the user just picked, not the model
+  // that was loaded from storage.
+  const [selectedModel, setSelectedModel] = useState<MimoTTSModel>(DEFAULT_MIMO_SETTINGS.model);
 
   useEffect(() => {
     let mounted = true;
@@ -53,6 +58,7 @@ export default function SetupVoiceDefaults() {
         const [resolved, overrides] = await Promise.all([getMimoSettings(), getMimoSettingsOverrides()]);
         if (!mounted) return;
         setSettings(resolved);
+        setSelectedModel(resolved.model);
         setHasOverrides(overrides !== null);
       } finally {
         // Without try/finally, a transient LocalStorage rejection from either
@@ -69,7 +75,7 @@ export default function SetupVoiceDefaults() {
     };
   }, []);
 
-  const voicesForModel = useMemo(() => getVoicesForModel(settings.model), [settings.model]);
+  const voicesForModel = useMemo(() => getVoicesForModel(selectedModel), [selectedModel]);
 
   const handleSubmit = useCallback(async (values: SetupFormValues) => {
     const saved = await saveMimoSettingsOverrides({
@@ -122,14 +128,19 @@ export default function SetupVoiceDefaults() {
         title="MiMo Voice Defaults"
         text="These defaults drive Quick Read, Read with Voice, and TTS Studio when no override is set. Reset clears the saved override and falls back to Raycast Preferences."
       />
-      <Form.Dropdown id="model" title="Model" defaultValue={settings.model}>
+      <Form.Dropdown
+        id="model"
+        title="Model"
+        defaultValue={settings.model}
+        onChange={(value) => setSelectedModel(value as MimoTTSModel)}
+      >
         {MODELS.map((model) => (
           <Form.Dropdown.Item key={model} value={model} title={MODEL_LABELS[model]} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="defaultVoice" title="Default Voice" defaultValue={settings.defaultVoice}>
         {VOICE_CATEGORIES.map((category) => {
-          const voices = getVoicesByCategory(category, settings.model);
+          const voices = getVoicesByCategory(category, selectedModel);
           if (voices.length === 0) return null;
           return (
             <Form.Dropdown.Section key={category} title={category}>
