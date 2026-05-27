@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "procore-xer-fixer",
-  "description": "Fix XER files that come from Oracle Primavera Cloud so that they can be imported into Procore's New Schedule Tool",
+  "description": "Repair Primavera Cloud XER files that fail to import into Procore's Schedule tool",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
@@ -30,9 +30,8 @@
     {
       "name": "xer-fixer",
       "title": "XER Fixer",
-      "description": "Fix selected .xer for Procore (writes to fixed-xer folder next to the file)",
-      "mode": "no-view",
-      "subtitle": "Fix the XER for Procore"
+      "description": "Select a Primavera .xer in Finder, then run this command to repair it for Procore Schedule import",
+      "mode": "no-view"
     }
   ],
   "title": "Procore XER Fixer",
