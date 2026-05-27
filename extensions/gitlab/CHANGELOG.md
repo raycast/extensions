@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Filter archived projects in menu bars] - {PR_MERGE_DATE}
+## [Filter archived projects in menu bars] - 2026-05-27
 
 - Add preferences to hide issues and merge requests from archived projects in the menu bar commands.
 
