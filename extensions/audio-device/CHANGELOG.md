@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-27
 
 - Show a confirmation when manually running the enforce device commands.
 
