@@ -3,14 +3,40 @@ import { useEffect, useState } from "react";
 
 import { AuthenticateView } from "./components/authenticate-view";
 import { NoteDetailScreen } from "./components/note-detail";
-import { getNoteDetail, saveLinkNote, waitForTask } from "./lib/api";
+import { useKnowledgeBases } from "./hooks/use-knowledge-bases";
+import { addNoteToKnowledgeBase, getNoteDetail, saveLinkNote, waitForTask } from "./lib/api";
 import { normalizeGetNoteError } from "./lib/errors";
-import { NoteDetail as GetNoteDetail } from "./lib/types";
+import { normalizeTagInput } from "./lib/format";
+import { NoteDetail as GetNoteDetail, TaskProgress } from "./lib/types";
 import { useGetNoteCredentials } from "./hooks/use-getnote-credentials";
 
 type FormValues = {
   url: string;
+  tags: string;
+  topicId: string;
 };
+
+function formatTaskProgress(progress: TaskProgress): string {
+  if (progress.status === "pending") {
+    return "Queued by GetNote";
+  }
+
+  if (progress.status === "processing") {
+    return "Fetching the source and generating a summary";
+  }
+
+  if (progress.status === "success") {
+    return progress.note_id && progress.note_id !== "0"
+      ? `Created note ${progress.note_id}`
+      : "Finishing note creation";
+  }
+
+  if (progress.status === "failed") {
+    return progress.error_msg || "The GetNote task failed";
+  }
+
+  return `Current task status: ${progress.status}`;
+}
 
 function toHttpUrl(raw?: string): string | null {
   if (!raw) {
@@ -45,6 +71,9 @@ function toHttpUrl(raw?: string): string | null {
 
 export default function SaveLinkCommand() {
   const { credentials, isLoading: isAuthLoading, reload } = useGetNoteCredentials();
+  const { knowledgeBases, isLoading: isKnowledgeBasesLoading } = useKnowledgeBases(
+    Boolean(credentials) && !isAuthLoading,
+  );
   const [result, setResult] = useState<GetNoteDetail | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,15 +117,33 @@ export default function SaveLinkCommand() {
     });
 
     try {
-      const task = await saveLinkNote(values.url.trim());
-      setStatus("The link was submitted. GetNote is fetching the source and generating a summary...");
+      const tags = normalizeTagInput(values.tags);
+      const task = await saveLinkNote({
+        url: values.url.trim(),
+        tags,
+      });
+      setStatus(`The link was submitted. GetNote is fetching the source and generating a summary...
+
+Task ID: \`${task.task_id}\``);
+      toast.title = "GetNote Processing Link";
+      toast.message = `Task ${task.task_id}`;
 
       const noteId = await waitForTask(task.task_id, {
-        onTick(nextStatus) {
-          setStatus(`Current task status: ${nextStatus}`);
-          toast.message = nextStatus;
+        onTick(progress) {
+          const progressMessage = formatTaskProgress(progress);
+          setStatus(`${progressMessage}
+
+Task ID: \`${task.task_id}\``);
+          toast.title = progress.status === "processing" ? "GetNote Processing Link" : "GetNote Link Task";
+          toast.message = progressMessage;
         },
       });
+
+      if (values.topicId) {
+        setStatus("Adding note to the selected knowledge base...");
+        toast.message = "Adding to knowledge base";
+        await addNoteToKnowledgeBase(values.topicId, [noteId]);
+      }
 
       const detail = await getNoteDetail(noteId);
       setResult(detail);
@@ -161,6 +208,13 @@ ${status || "Preparing..."}
         placeholder="https://example.com/article"
         info="Defaults to the current clipboard URL when available. A public URL will be saved as a link note, and GetNote will fetch the source content and generate a summary in the background."
       />
+      <Form.Dropdown id="topicId" title="Knowledge Base" defaultValue="" isLoading={isKnowledgeBasesLoading}>
+        <Form.Dropdown.Item value="" title="None" />
+        {knowledgeBases.map((topic) => (
+          <Form.Dropdown.Item key={topic.topic_id} value={topic.topic_id} title={topic.name || topic.topic_id} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField id="tags" title="Tags" placeholder="Optional. Separate with commas or line breaks" />
     </Form>
   );
 }
