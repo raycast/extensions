@@ -63,7 +63,10 @@ function EntriesList({ apiToken }: { apiToken: string }) {
     );
   }
 
-  const editableEntries = data.filter((entry) => entry.type !== "journal");
+  const editableEntries = data.filter(
+    (entry) => entry.type !== "journal" && !entry.completed && entry.timeClass !== "completed",
+  );
+  const sortedEntries = [...editableEntries].sort((entryA, entryB) => Number(entryA.backlog) - Number(entryB.backlog));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search open entries">
@@ -79,7 +82,7 @@ function EntriesList({ apiToken }: { apiToken: string }) {
         }
       />
 
-      {editableEntries.map((entry) => (
+      {sortedEntries.map((entry) => (
         <List.Item
           key={entry.id}
           icon={iconForEntry(entry)}
@@ -125,7 +128,11 @@ function iconForEntry(entry: Entry) {
 }
 
 function accessoriesForEntry(entry: Entry): List.Item.Accessory[] {
-  const accessories: List.Item.Accessory[] = [{ text: entry.type }];
+  const accessories: List.Item.Accessory[] = [{ text: titleCase(entry.type) }];
+
+  if (entry.backlog) {
+    accessories.push({ text: "Backlog", tooltip: "Backlog Entry" });
+  }
 
   if (entry.dueDate) {
     accessories.push({ date: new Date(entry.dueDate), tooltip: "Due Date" });
@@ -136,4 +143,8 @@ function accessoriesForEntry(entry: Entry): List.Item.Accessory[] {
   }
 
   return accessories;
+}
+
+function titleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

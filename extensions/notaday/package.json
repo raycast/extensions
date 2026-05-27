@@ -18,28 +18,28 @@
       "name": "search-entries",
       "title": "Search Entries",
       "description": "Search current open Notaday entries",
-      "icon": "search-entries.png",
+      "icon": "extension-icon.png",
       "mode": "view"
     },
     {
       "name": "create-entry",
       "title": "Create Entry",
       "description": "Create a new Notaday task or routine",
-      "icon": "create-entry.png",
+      "icon": "extension-icon.png",
       "mode": "view"
     },
     {
       "name": "manage-tags",
       "title": "Manage Tags",
       "description": "Create, edit, and delete Notaday tags",
-      "icon": "manage-tags.png",
+      "icon": "extension-icon.png",
       "mode": "view"
     },
     {
       "name": "manage-channels",
       "title": "Manage Channels",
       "description": "Create, edit, and delete Notaday channels",
-      "icon": "manage-channels.png",
+      "icon": "extension-icon.png",
       "mode": "view"
     }
   ],

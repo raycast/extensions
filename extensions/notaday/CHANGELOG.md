@@ -1,10 +1,18 @@
-# Notaday Changelog
+# Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Store Review Updates] - {PR_MERGE_DATE}
 
-- Add commands to search open Notaday entries and create new tasks or routines.
-- Add entry editing for title, description, type, due date, channel, and tags.
-- Add actions to mark entries as done or move them to and from the backlog.
-- Add tag management with create, edit, archive, and delete support.
-- Add channel management with create, edit, archive, and delete support.
-- Add API token preference and clear error states for missing or invalid tokens.
+- Updated metadata screenshots to use a consistent Raycast Window Capture appearance.
+- Replaced separate command icons with the shared black Notaday.
+- Filtered completed entries from the Search Entries command.
+- Marked backlog entries in Search Entries and sorted them below active entries.
+- Updated entry type labels in Search Entries to use title case, such as `Task` and `Routine`.
+
+## [Initial Release] - {PR_MERGE_DATE}
+
+- Added commands to search open Notaday entries and create new tasks or routines.
+- Added entry editing for title, description, type, due date, channel, and tags.
+- Added actions to mark entries as done or move them to and from the backlog.
+- Added tag management with create, edit, archive, and delete support.
+- Added channel management with create, edit, archive, and delete support.
+- Added API token preference and clear error states for missing or invalid tokens.
