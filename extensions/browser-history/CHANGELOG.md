@@ -1,6 +1,6 @@
 # Browser History Changelog
 
-## [Add Helium browser support] - {PR_MERGE_DATE}
+## [Add Helium browser support] - 2026-05-27
 
 - Added Helium history search support.
 
