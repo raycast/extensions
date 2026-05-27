@@ -60,13 +60,13 @@ export default function CloneVoice() {
     playerRef.current = player;
 
     setIsLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Cloning voice",
-      message: "MiMo-V2.5-TTS-VoiceClone",
-    });
 
     try {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Cloning voice",
+        message: "MiMo-V2.5-TTS-VoiceClone",
+      });
       const options = await buildOptionsForModel("mimo-v2.5-tts-voiceclone", {
         baseStylePrompt: values.stylePrompt?.trim() || undefined,
         voiceCloneSample: sample,

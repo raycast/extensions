@@ -136,30 +136,30 @@ export default function ReadWithVoice() {
       setIsLoading(true);
       setPlayingVoiceId(voice.id);
 
-      const options = await buildOptionsAsync(voice.id);
-      const modelLabel = getModelLabel(options.model);
-      const chunks = chunkText(selectedText);
-      const totalChunks = chunks.length;
-
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Synthesizing${totalChunks > 1 ? ` · ${totalChunks} chunks` : ""}`,
-        message: `${voice.name} · ${modelLabel}`,
-      });
-
-      await setNowPlaying({
-        status: "synthesizing",
-        voiceId: voice.id,
-        voiceName: voice.name,
-        modelLabel,
-        textPreview: previewText(selectedText),
-        totalChunks,
-        currentChunk: -1,
-        startedAt: Date.now(),
-        source: selectionSource === "clipboard" ? "Clipboard" : "Selection",
-      });
-
       try {
+        const options = await buildOptionsAsync(voice.id);
+        const modelLabel = getModelLabel(options.model);
+        const chunks = chunkText(selectedText);
+        const totalChunks = chunks.length;
+
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: `Synthesizing${totalChunks > 1 ? ` · ${totalChunks} chunks` : ""}`,
+          message: `${voice.name} · ${modelLabel}`,
+        });
+
+        await setNowPlaying({
+          status: "synthesizing",
+          voiceId: voice.id,
+          voiceName: voice.name,
+          modelLabel,
+          textPreview: previewText(selectedText),
+          totalChunks,
+          currentChunk: -1,
+          startedAt: Date.now(),
+          source: selectionSource === "clipboard" ? "Clipboard" : "Selection",
+        });
+
         await playChunksWithLookahead(chunks, options, player, {
           onChunkReady: async (index, total) => {
             const label = total > 1 ? `Playing ${index + 1}/${total} · ${voice.name}` : `Playing · ${voice.name}`;

@@ -58,13 +58,13 @@ export default function DesignVoice() {
     playerRef.current = player;
 
     setIsLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Designing voice",
-      message: "MiMo-V2.5-TTS-VoiceDesign",
-    });
 
     try {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Designing voice",
+        message: "MiMo-V2.5-TTS-VoiceDesign",
+      });
       const options = await buildOptionsForModel("mimo-v2.5-tts-voicedesign", {
         baseStylePrompt: trimmedPrompt,
         optimizeTextPreview: values.optimizeText,
