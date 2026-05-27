@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1",
     "cronstrue": "^3.14.0"
   },
   "devDependencies": {
