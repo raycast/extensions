@@ -49,11 +49,17 @@ export default function SetupVoiceDefaults() {
     let mounted = true;
 
     async function load() {
-      const [resolved, overrides] = await Promise.all([getMimoSettings(), getMimoSettingsOverrides()]);
-      if (!mounted) return;
-      setSettings(resolved);
-      setHasOverrides(overrides !== null);
-      setIsLoading(false);
+      try {
+        const [resolved, overrides] = await Promise.all([getMimoSettings(), getMimoSettingsOverrides()]);
+        if (!mounted) return;
+        setSettings(resolved);
+        setHasOverrides(overrides !== null);
+      } finally {
+        // Without try/finally, a transient LocalStorage rejection from either
+        // promise leaves isLoading=true forever, the spinner never clears,
+        // and the form is unusable until the command is relaunched.
+        if (mounted) setIsLoading(false);
+      }
     }
 
     load();
