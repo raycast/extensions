@@ -1,6 +1,12 @@
 export type MimoTTSModel = "mimo-v2.5-tts" | "mimo-v2-tts" | "mimo-v2.5-tts-voicedesign" | "mimo-v2.5-tts-voiceclone";
 
-export type MimoAudioFormat = "wav" | "pcm16";
+// The standalone MiMo TTS extension currently only emits "wav". The PCM
+// streaming infrastructure in AudioPlayer is dormant scaffolding inherited
+// from AI Voice Studio (which uses pcm16 for the Qwen-TTS realtime path);
+// keeping the format type narrowed to "wav" here makes the contract obvious
+// and prevents callers from threading a "pcm16" through code that never
+// produces it.
+export type MimoAudioFormat = "wav";
 
 export interface VoiceCloneSample {
   /** MIME type, e.g. "audio/mpeg" or "audio/wav". */
