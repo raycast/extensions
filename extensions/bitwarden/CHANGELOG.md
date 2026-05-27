@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [CLI update] - {PR_MERGE_DATE}
+## [CLI update] - 2026-05-27
 
 - Update CLI to v2026.4.2
 
