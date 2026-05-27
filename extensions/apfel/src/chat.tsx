@@ -96,7 +96,7 @@ function Chat(props: { conversation?: Conversation }) {
       isLoading={chats.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
-      navigationTitle={"Ask"}
+      navigationTitle={"Chat"}
       actions={
         !question.data ? (
           <ActionPanel>

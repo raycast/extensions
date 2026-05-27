@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Detail, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
-import { cpus, homedir } from "os";
+import { homedir } from "os";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
-const brewPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
+const brewPath = process.arch === "arm64" ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
 
 async function handleInstall() {
   await showToast({ style: Toast.Style.Animated, title: "Installing Apfel…", message: "This may take a minute" });
 
   try {
-    await execFileAsync(brewPath, ["install", "Arthur-Ficial/tap/apfel"], {
+    await execFileAsync(brewPath, ["install", "apfel"], {
       env: {
         HOME: homedir(),
         PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
@@ -41,7 +41,7 @@ export default function NotFoundView() {
 The \`apfel\` binary could not be found on your system. You can try installing it within Raycast or install it yourself:
 
 \`\`\`bash
-brew install Arthur-Ficial/tap/apfel
+brew install apfel
 \`\`\`
 
 ## Requirements
@@ -62,7 +62,7 @@ After installing, reopen this command.
           {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action title="Install via Homebrew" icon={Icon.Download} onAction={handleInstall} />
           <Action.OpenInBrowser title="Open Apfel Website" url="https://apfel.franzai.com" />
-          <Action.CopyToClipboard title="Copy Install Command" content="brew install Arthur-Ficial/tap/apfel" />
+          <Action.CopyToClipboard title="Copy Install Command" content="brew install apfel" />
         </ActionPanel>
       }
     />

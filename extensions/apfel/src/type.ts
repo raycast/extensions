@@ -70,7 +70,6 @@ export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneAr
 
 export type ModelHook = Hook<Model> & {
   update: PromiseFunctionWithOneArg<Model>;
-  availableModels: Array<{ id: string; display_name: string }>;
 };
 
 export interface ChatHook {
