@@ -1,6 +1,6 @@
 # Last.fm Changelog
 
-## [Menu Bar Player, Now Playing & Love/Unlove] - {PR_MERGE_DATE}
+## [Menu Bar Player, Now Playing & Love/Unlove] - 2026-05-27
 
 ### New Commands
 
