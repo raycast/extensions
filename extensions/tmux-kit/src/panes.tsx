@@ -297,7 +297,7 @@ function PaneItem({
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
               onAction={async () => {
                 try {
-                  await switchToWindow(session, pane.windowIndex);
+                  await switchToWindow(pane.sessionId, pane.windowIndex);
                   await showToast({
                     style: Toast.Style.Success,
                     title: `Selected window ${pane.windowIndex}`,
@@ -314,7 +314,8 @@ function PaneItem({
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               target={
                 <RenameWindowForm
-                  session={session}
+                  sessionId={pane.sessionId}
+                  sessionName={session}
                   windowIndex={pane.windowIndex}
                   currentName={pane.windowName}
                   onDone={onChange}
@@ -325,7 +326,13 @@ function PaneItem({
               title="New Window in This Session"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-              target={<NewWindowForm session={session} onDone={onChange} />}
+              target={
+                <NewWindowForm
+                  sessionId={pane.sessionId}
+                  sessionName={session}
+                  onDone={onChange}
+                />
+              }
             />
           </ActionPanel.Section>
 
@@ -403,7 +410,7 @@ function PaneItem({
                 });
                 if (!ok) return;
                 try {
-                  await killWindow(session, pane.windowIndex);
+                  await killWindow(pane.sessionId, pane.windowIndex);
                   await showToast({
                     style: Toast.Style.Success,
                     title: `Killed window ${label}`,
@@ -537,12 +544,14 @@ async function toastError(title: string, e: unknown): Promise<void> {
 }
 
 function RenameWindowForm({
-  session,
+  sessionId,
+  sessionName,
   windowIndex,
   currentName,
   onDone,
 }: {
-  session: string;
+  sessionId: string;
+  sessionName: string;
   windowIndex: number;
   currentName: string;
   onDone: () => Promise<void>;
@@ -558,7 +567,7 @@ function RenameWindowForm({
       return;
     }
     try {
-      await renameWindow(session, windowIndex, trimmed);
+      await renameWindow(sessionId, windowIndex, trimmed);
       await showToast({
         style: Toast.Style.Success,
         title: `Renamed window ${windowIndex} → ${trimmed}`,
@@ -594,17 +603,19 @@ function RenameWindowForm({
         autoFocus
       />
       <Form.Description
-        text={`Renaming window ${windowIndex} in session "${session}"`}
+        text={`Renaming window ${windowIndex} in session "${sessionName}"`}
       />
     </Form>
   );
 }
 
 function NewWindowForm({
-  session,
+  sessionId,
+  sessionName,
   onDone,
 }: {
-  session: string;
+  sessionId: string;
+  sessionName: string;
   onDone: () => Promise<void>;
 }) {
   const { pop } = useNavigation();
@@ -614,7 +625,7 @@ function NewWindowForm({
   const submit = async () => {
     try {
       await newWindow(
-        session,
+        sessionId,
         name.trim() || undefined,
         cwd[0]?.trim() || undefined,
       );
@@ -662,7 +673,7 @@ function NewWindowForm({
         showHiddenFiles={false}
       />
       <Form.Description
-        text={`Creating a new window in session "${session}". The new window is created detached (-d) so the session's current window does not change; use Switch to Window afterwards if you want to land on it.`}
+        text={`Creating a new window in session "${sessionName}". The new window is created detached (-d) so the session's current window does not change; use Switch to Window afterwards if you want to land on it.`}
       />
     </Form>
   );

@@ -158,6 +158,10 @@ export type TmuxPane = {
   width: number;
   height: number;
   marked: boolean;
+  // Session ID (e.g. "$3"). Use this rather than session name when building
+  // window-level tmux targets, because session names may legally contain ":"
+  // and would collide with the "session:window" target syntax.
+  sessionId: string;
 };
 
 const PANE_FORMAT = [
@@ -172,6 +176,7 @@ const PANE_FORMAT = [
   "#{pane_width}",
   "#{pane_height}",
   "#{pane_marked}",
+  "#{session_id}",
 ].join(FIELD_SEP);
 
 export async function listPanes(session: string): Promise<TmuxPane[]> {
@@ -200,6 +205,7 @@ export async function listPanes(session: string): Promise<TmuxPane[]> {
         width: Number(p[8]),
         height: Number(p[9]),
         marked: Number(p[10]) > 0,
+        sessionId: p[11] ?? "",
       };
     });
 }
@@ -245,37 +251,42 @@ export async function clearPaneHistory(paneId: string): Promise<void> {
 
 // ── Windows ────────────────────────────────────────────────────────────────
 
+// Window-level operations build targets as `${sessionId}:${windowIndex}`.
+// We use session_id (e.g. "$3"), not session name, because session names
+// may legally contain ":" and would make the target ambiguous (tmux would
+// parse "my:session:0" as window "session:0" inside session "my").
+
 export async function switchToWindow(
-  session: string,
+  sessionId: string,
   windowIndex: number,
 ): Promise<void> {
-  await run(["select-window", "-t", `${session}:${windowIndex}`]);
+  await run(["select-window", "-t", `${sessionId}:${windowIndex}`]);
 }
 
 export async function renameWindow(
-  session: string,
+  sessionId: string,
   windowIndex: number,
   newName: string,
 ): Promise<void> {
-  await run(["rename-window", "-t", `${session}:${windowIndex}`, newName]);
+  await run(["rename-window", "-t", `${sessionId}:${windowIndex}`, newName]);
 }
 
 export async function killWindow(
-  session: string,
+  sessionId: string,
   windowIndex: number,
 ): Promise<void> {
-  await run(["kill-window", "-t", `${session}:${windowIndex}`]);
+  await run(["kill-window", "-t", `${sessionId}:${windowIndex}`]);
 }
 
 // Create a new window in the given session. -d keeps the session's current
 // window unchanged so we don't yank tmux focus out from under any attached
 // client; the user can Switch afterwards if they want to land on it.
 export async function newWindow(
-  session: string,
+  sessionId: string,
   name?: string,
   cwd?: string,
 ): Promise<void> {
-  const args = ["new-window", "-d", "-t", `${session}:`];
+  const args = ["new-window", "-d", "-t", `${sessionId}:`];
   if (name) args.push("-n", name);
   if (cwd) args.push("-c", cwd);
   await run(args);
@@ -286,9 +297,15 @@ export async function newWindow(
 const DEFAULT_RESURRECT_DIR = `${homedir()}/.tmux/plugins/tmux-resurrect/scripts`;
 
 function resurrectDir(): string {
-  const p =
+  const raw =
     getPreferenceValues<Preferences>().resurrectScriptsDir?.trim() ?? "";
-  return p.length > 0 ? p : DEFAULT_RESURRECT_DIR;
+  if (raw.length === 0) return DEFAULT_RESURRECT_DIR;
+  // Expand leading ~ ourselves: the resolved path will be shell-quoted before
+  // `tmux run-shell` so the shell will treat any ~ inside the quoted literal
+  // as a normal character and the path would never resolve.
+  if (raw === "~") return homedir();
+  if (raw.startsWith("~/")) return `${homedir()}${raw.slice(1)}`;
+  return raw;
 }
 
 // `tmux run-shell` executes its argument via /bin/sh, so we must shell-quote
