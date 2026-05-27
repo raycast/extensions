@@ -48,6 +48,20 @@ test("hasUpdate handles Dia-style 'shortVer (build)' duplication", () => {
   assert.equal(hasUpdate("1.32.0", "81144", "1.32.0", "81144"), false);
 });
 
+test("hasUpdate handles Google-Drive-style build-is-the-real-version", () => {
+  // Real case: Google Drive reports shortVer="126.0" but CFBundleVersion="126.0.4".
+  // The Homebrew cask only exposes version="126.0.4" (no separate build).
+  // Pre-fix this said "update available" forever because lat.version > cur.version.
+  // The build is a refinement of the version, so compare against build instead.
+  assert.equal(hasUpdate("126.0", "126.0.4", "126.0.4"), false);
+  // And it should still flag a real update when the cask moves forward
+  assert.equal(hasUpdate("126.0", "126.0.4", "126.0.5"), true);
+  assert.equal(hasUpdate("126.0", "126.0.4", "127.0.0"), true);
+  // Build that doesn't refine the version (build is unrelated, e.g. 12345) →
+  // compare against version like before, not the build.
+  assert.equal(hasUpdate("5.0", "12345", "5.1"), true);
+});
+
 test("shortenVersion truncates long strings with ellipsis", () => {
   assert.equal(shortenVersion("1.0.0"), "1.0.0");
   assert.equal(shortenVersion("very.long.version.string", 10), "very.long…");

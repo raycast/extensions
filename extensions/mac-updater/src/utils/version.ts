@@ -94,6 +94,26 @@ export function hasUpdate(
     if (r !== 0) return r > 0;
   }
 
+  // Google-Drive-style mismatch: the installed app reports
+  //   CFBundleShortVersionString = "126.0"   (marketing version)
+  //   CFBundleVersion            = "126.0.4" (real version)
+  // but Homebrew's cask only exposes one version field — "126.0.4". Comparing
+  // lat.version ("126.0.4") to cur.version ("126.0") would forever say
+  // "update available" even right after brew finishes upgrading.
+  //
+  // When the latest source has no separate build and the installed build is a
+  // *refinement* of the version (i.e. starts with cur.version), the build is
+  // the more precise installed identifier — compare against it too. If the
+  // build is already >= the latest version, there's nothing to do.
+  if (
+    !lat.build &&
+    cur.build &&
+    cur.build !== cur.version &&
+    cur.build.startsWith(cur.version.split(/[^\d.]/)[0])
+  ) {
+    if (compareVersion(lat.version, cur.build) <= 0) return false;
+  }
+
   // Otherwise compare version strings
   return compareVersion(lat.version, cur.version) > 0;
 }
