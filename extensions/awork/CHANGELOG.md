@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Improve stability] - {PR_MERGE_DATE}
+## [Improve stability] - 2026-05-27
 
 - Improve reload logic
 
