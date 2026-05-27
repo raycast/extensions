@@ -1,6 +1,6 @@
 # GetNote Changelog
 
-## [Add Image Notes and Quota] - {PR_MERGE_DATE}
+## [Add Image Notes and Quota] - 2026-05-27
 
 - Added a Save Image Note command with local image files, Finder selection, and image URL download/upload support
 - Added a GetNote API quota AI tool
