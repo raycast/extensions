@@ -6,15 +6,15 @@
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Menu Bar Player** | Shows the currently playing track in the macOS menu bar. Hides when nothing is playing. |
-| **Now Playing** | Detail view of the current track with album art, metadata, and love/unlove. |
-| **Top Songs** | Your top scrobbled tracks for the selected period. |
-| **Recent Songs** | Your recently scrobbled tracks. |
-| **Top Artists** | Your top artists for the selected period. |
-| **Top Albums** | Your top albums for the selected period. |
-| **Top & Recent Songs** | Combined view of your top and recent tracks. |
+| Command                | Description                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| **Menu Bar Player**    | Shows the currently playing track in the macOS menu bar. Hides when nothing is playing. |
+| **Now Playing**        | Detail view of the current track with album art, metadata, and love/unlove.             |
+| **Top Songs**          | Your top scrobbled tracks for the selected period.                                      |
+| **Recent Songs**       | Your recently scrobbled tracks.                                                         |
+| **Top Artists**        | Your top artists for the selected period.                                               |
+| **Top Albums**         | Your top albums for the selected period.                                                |
+| **Top & Recent Songs** | Combined view of your top and recent tracks.                                            |
 
 ## Setup
 
@@ -32,18 +32,19 @@ The menu bar command shows **Song - Artist** in your menu bar while scrobbling a
 
 **Preferences** (accessible via `⌘,` in the dropdown):
 
-| Preference | Description |
-|------------|-------------|
-| Menubar Icon | Show the Last.fm icon or album art next to the track name |
-| Now Playing Text Length | Truncate the title to N characters (default: 20, 0 = no limit) |
-| Hide Artist's Name | Show only the track name in the menu bar |
-| Cleanup Song Title | Strip annotations like `(feat. ...)`, `(Remastered)`, `(Radio Edit)` |
+| Preference              | Description                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| Menubar Icon            | Show the Last.fm icon or album art next to the track name            |
+| Now Playing Text Length | Truncate the title to N characters (default: 20, 0 = no limit)       |
+| Hide Artist's Name      | Show only the track name in the menu bar                             |
+| Cleanup Song Title      | Strip annotations like `(feat. ...)`, `(Remastered)`, `(Radio Edit)` |
 
 ## Love / Unlove Tracks
 
 Loving and unloving tracks requires a one-time connection to your Last.fm account. No password needed — it uses Last.fm's secure web authorization.
 
 **Setup:**
+
 1. Add your **API Secret** to preferences — go to [last.fm/api/accounts](https://www.last.fm/api/accounts), click your app, and copy the secret shown there
 2. Open the **Now Playing** command — the metadata panel shows your connection status
 3. Open the action panel and click **Step 1: Open Last.fm Auth** — your browser opens Last.fm's authorization page

@@ -68,7 +68,7 @@ export default function NowPlaying(props: { launchContext?: { openConnect?: bool
     track?.image.find((img) => img.size === "large")?.["#text"];
 
   const artistUrl = track?.url.includes("/_/") ? track.url.split("/_/")[0] : undefined;
-  const albumUrl = album && artistUrl ? `${artistUrl}/${album.replace(/ /g, "+")}` : undefined;
+  const albumUrl = album && artistUrl ? `${artistUrl}/${encodeURIComponent(album).replace(/%20/g, "+")}` : undefined;
 
   const markdown = track
     ? [

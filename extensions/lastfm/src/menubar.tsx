@@ -57,7 +57,7 @@ export default function NowPlayingMenuBar() {
   const menubarIconSrc: Image.ImageLike = { source: iconSource, mask: Image.Mask.RoundedRectangle };
 
   const artistUrl = track?.url.includes("/_/") ? track.url.split("/_/")[0] : undefined;
-  const albumUrl = album && artistUrl ? `${artistUrl}/${album.replace(/ /g, "+")}` : undefined;
+  const albumUrl = album && artistUrl ? `${artistUrl}/${encodeURIComponent(album).replace(/%20/g, "+")}` : undefined;
 
   return (
     <MenuBarExtra title={title} icon={menubarIconSrc} isLoading={isLoading && !track}>
