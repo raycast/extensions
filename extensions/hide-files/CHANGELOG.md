@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-27
 
 - Fixed hiding and unhiding files whose paths need shell escaping
 
