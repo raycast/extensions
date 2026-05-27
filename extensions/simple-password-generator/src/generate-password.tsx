@@ -547,18 +547,18 @@ export default function Command() {
       </Form.Dropdown>
       <Form.Separator />
 
-      {values.mode === "password" && <PasswordFields itemProps={itemProps} />}
-      {values.mode === "passphrase" && (
-        <PassphraseFields itemProps={itemProps} />
-      )}
-      {values.mode === "pin" && <PinFields itemProps={itemProps} />}
-
-      <Form.Separator />
       {preview && <Form.Description title="Preview" text={preview} />}
       <Form.Description
         title={`${strength.bar} ${strength.label}`}
         text={`~${entropy} bits of entropy`}
       />
+      <Form.Separator />
+
+      {values.mode === "password" && <PasswordFields itemProps={itemProps} />}
+      {values.mode === "passphrase" && (
+        <PassphraseFields itemProps={itemProps} />
+      )}
+      {values.mode === "pin" && <PinFields itemProps={itemProps} />}
     </Form>
   );
 }
