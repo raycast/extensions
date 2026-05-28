@@ -9,18 +9,31 @@ import {
   Toast,
 } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
-import { userInfo } from "node:os";
+import { accessSync, constants, existsSync } from "node:fs";
+import { homedir, userInfo } from "node:os";
 import { join } from "node:path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const USER = process.env.USER || userInfo().username;
-const COMMAND_PATH = `/Users/${USER}/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`;
+const HOME_DIRECTORY = process.env.HOME || homedir();
+const COMMAND_SEARCH_DIRECTORIES = [
+  join(HOME_DIRECTORY, ".nix-profile/bin"),
+  "/nix/var/nix/profiles/default/bin",
+  "/opt/homebrew/bin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+];
+const COMMAND_PATH = COMMAND_SEARCH_DIRECTORIES.join(":");
 const EXEC_ENV = { ...process.env, PATH: COMMAND_PATH, USER };
+const COMMAND_TIMEOUT_MS = 5000;
+const OPEN_COMMAND = "/usr/bin/open";
 const STARTUP_REFRESH_DELAYS_MS = [400, 900, 1600, 3000];
 const APP_SEARCH_DIRECTORIES = [
   "/Applications",
-  `/Users/${USER}/Applications`,
+  join(HOME_DIRECTORY, "Applications"),
   "/System/Applications",
   "/System/Applications/Utilities",
   "/Applications/Utilities",
@@ -38,16 +51,32 @@ type RefreshOptions = {
 };
 
 type AppIconsByName = Map<string, string>;
+type AppIconFallbacksByName = Map<string, string | undefined>;
 
 class CommandError extends Error {
   code?: string | number;
+  commandName?: string;
+  signal?: NodeJS.Signals | null;
   stderr: string;
+  timedOut: boolean;
 
-  constructor(message: string, options: { code?: string | number; stderr: string }) {
+  constructor(
+    message: string,
+    options: {
+      code?: string | number;
+      commandName?: string;
+      signal?: NodeJS.Signals | null;
+      stderr: string;
+      timedOut?: boolean;
+    },
+  ) {
     super(message);
     this.name = "CommandError";
     this.code = options.code;
+    this.commandName = options.commandName;
+    this.signal = options.signal;
     this.stderr = options.stderr;
+    this.timedOut = options.timedOut ?? false;
   }
 }
 
@@ -64,18 +93,57 @@ type YabaiWindow = {
   "has-focus"?: boolean;
 };
 
-function runCommand(file: string, args: string[]): Promise<ExecResult> {
+let yabaiPath: string | undefined;
+
+function isExecutablePath(path: string): boolean {
+  try {
+    accessSync(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveYabaiPath(): string {
+  if (yabaiPath && isExecutablePath(yabaiPath)) {
+    return yabaiPath;
+  }
+
+  for (const directory of COMMAND_SEARCH_DIRECTORIES) {
+    const candidate = join(directory, "yabai");
+
+    if (isExecutablePath(candidate)) {
+      yabaiPath = candidate;
+      return candidate;
+    }
+  }
+
+  throw new CommandError("yabai was not found in the configured executable locations", {
+    code: "ENOENT",
+    commandName: "yabai",
+    stderr: "",
+  });
+}
+
+function runCommand(file: string, args: string[], commandName: string): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     execFile(
       file,
       args,
-      { env: EXEC_ENV, timeout: 5000, maxBuffer: 1024 * 1024 },
+      { env: EXEC_ENV, timeout: COMMAND_TIMEOUT_MS, maxBuffer: 1024 * 1024 },
       (error, stdout, stderr) => {
         if (error) {
+          const nodeError = error as NodeJS.ErrnoException & {
+            killed?: boolean;
+            signal?: NodeJS.Signals | null;
+          };
           reject(
-            new CommandError(error.message, {
-              code: (error as NodeJS.ErrnoException).code,
+            new CommandError(nodeError.message, {
+              code: nodeError.code,
+              commandName,
+              signal: nodeError.signal,
               stderr,
+              timedOut: nodeError.killed === true && nodeError.signal === "SIGTERM",
             }),
           );
           return;
@@ -85,6 +153,14 @@ function runCommand(file: string, args: string[]): Promise<ExecResult> {
       },
     );
   });
+}
+
+function runYabai(args: string[]): Promise<ExecResult> {
+  return runCommand(resolveYabaiPath(), args, "yabai");
+}
+
+function runOpen(args: string[]): Promise<ExecResult> {
+  return runCommand(OPEN_COMMAND, args, "open");
 }
 
 function asObject(value: unknown): Record<string, unknown> | undefined {
@@ -228,11 +304,22 @@ function compactWindowTitle(window: YabaiWindow): string {
 }
 
 function formatCommandError(error: unknown): string {
-  const nodeError = error as NodeJS.ErrnoException & { stderr?: string };
-  const message = [nodeError.stderr, nodeError.message].filter(Boolean).join("\n").trim();
+  const commandError = error instanceof CommandError ? error : undefined;
+  const message = [commandError?.stderr, formatErrorMessage(error)]
+    .filter(Boolean)
+    .join("\n")
+    .trim();
 
-  if (nodeError.code === "ENOENT") {
-    return "yabai was not found on the configured PATH";
+  if (commandError?.timedOut) {
+    return `${commandError.commandName ?? "Command"} timed out after ${COMMAND_TIMEOUT_MS / 1000}s`;
+  }
+
+  if (commandError?.code === "ENOENT" && commandError.commandName === "yabai") {
+    return `yabai was not found in: ${COMMAND_SEARCH_DIRECTORIES.join(", ")}`;
+  }
+
+  if (commandError?.code === "ENOENT" && commandError.commandName === "open") {
+    return `${OPEN_COMMAND} was not found`;
   }
 
   if (/socket|connection|connect|running/i.test(message)) {
@@ -242,8 +329,20 @@ function formatCommandError(error: unknown): string {
   return message || "Unknown command failure";
 }
 
+function formatErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return "Unknown error";
+}
+
 async function loadWindows(): Promise<YabaiWindow[]> {
-  const { stdout } = await runCommand("yabai", ["-m", "query", "--windows"]);
+  const { stdout } = await runYabai(["-m", "query", "--windows"]);
   return sortWindows(parseYabaiWindows(stdout).filter(isFocusableWindow));
 }
 
@@ -292,13 +391,13 @@ async function focusWindow(window: YabaiWindow): Promise<void> {
   });
 
   try {
-    await runCommand("yabai", ["-m", "window", "--focus", String(window.id)]);
+    await runYabai(["-m", "window", "--focus", String(window.id)]);
     toast.style = Toast.Style.Success;
     toast.title = `Focused ${window.app}`;
     toast.message = window.title || `Window ${window.id}`;
   } catch (focusError) {
     try {
-      await runCommand("open", ["-a", window.app]);
+      await runOpen(["-a", window.app]);
       toast.style = Toast.Style.Success;
       toast.title = `Opened ${window.app}`;
       toast.message = `Yabai focus failed: ${formatCommandError(focusError)}`;
@@ -321,8 +420,10 @@ function accessoriesForWindow(window: YabaiWindow): List.Item.Accessory[] | unde
 function iconForWindow(
   window: YabaiWindow,
   appIconsByName: AppIconsByName,
+  appIconFallbacksByName: AppIconFallbacksByName,
 ): List.Item.Props["icon"] {
-  const appPath = appIconsByName.get(appNameKey(window.app)) ?? findAppBundlePath(window.app);
+  const appKey = appNameKey(window.app);
+  const appPath = appIconsByName.get(appKey) ?? appIconFallbacksByName.get(appKey);
 
   if (!appPath) {
     return Icon.AppWindow;
@@ -336,10 +437,25 @@ export default function Command() {
   const [appIconsByName, setAppIconsByName] = useState<AppIconsByName>(() => new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const isMountedRef = useRef(true);
   const isRefreshingRef = useRef(false);
+  const pendingRefreshRef = useRef<RefreshOptions | undefined>(undefined);
 
-  const refresh = useCallback(async ({ isBackground = false }: RefreshOptions = {}) => {
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const refresh = useCallback(async function refreshWindows({
+    isBackground = false,
+  }: RefreshOptions = {}) {
     if (isRefreshingRef.current) {
+      pendingRefreshRef.current = {
+        isBackground: (pendingRefreshRef.current?.isBackground ?? true) && isBackground,
+      };
       return;
     }
 
@@ -351,6 +467,10 @@ export default function Command() {
 
     try {
       const nextWindows = await loadWindows();
+      if (!isMountedRef.current) {
+        return;
+      }
+
       setWindows(nextWindows);
       setErrorMessage(undefined);
 
@@ -362,11 +482,15 @@ export default function Command() {
         });
       }
     } catch (error) {
+      if (!isMountedRef.current) {
+        return;
+      }
+
       const message = formatCommandError(error);
       setErrorMessage(message);
+      setWindows([]);
 
       if (!isBackground) {
-        setWindows([]);
         await showToast({
           style: Toast.Style.Failure,
           title: "Could not query yabai windows",
@@ -376,8 +500,15 @@ export default function Command() {
     } finally {
       isRefreshingRef.current = false;
 
-      if (!isBackground) {
+      if (isMountedRef.current && !isBackground) {
         setIsLoading(false);
+      }
+
+      const pendingRefresh = pendingRefreshRef.current;
+      pendingRefreshRef.current = undefined;
+
+      if (pendingRefresh && isMountedRef.current) {
+        void refreshWindows(pendingRefresh);
       }
     }
   }, []);
@@ -401,12 +532,20 @@ export default function Command() {
   useEffect(() => {
     async function loadAppIcons() {
       try {
-        setAppIconsByName(await loadAppIconsByName());
+        const nextAppIconsByName = await loadAppIconsByName();
+
+        if (isMountedRef.current) {
+          setAppIconsByName(nextAppIconsByName);
+        }
       } catch (error) {
+        if (!isMountedRef.current) {
+          return;
+        }
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Could not load app icons",
-          message: formatCommandError(error),
+          message: formatErrorMessage(error),
         });
       }
     }
@@ -418,6 +557,19 @@ export default function Command() {
   const emptyDescription = errorMessage ?? "Hidden, minimized, and non-AX windows are ignored.";
 
   const items = useMemo(() => windows, [windows]);
+  const appIconFallbacksByName = useMemo(() => {
+    const fallbackPaths: AppIconFallbacksByName = new Map();
+
+    for (const window of windows) {
+      const appKey = appNameKey(window.app);
+
+      if (!appIconsByName.has(appKey) && !fallbackPaths.has(appKey)) {
+        fallbackPaths.set(appKey, findAppBundlePath(window.app));
+      }
+    }
+
+    return fallbackPaths;
+  }, [appIconsByName, windows]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search yabai windows/apps">
@@ -425,7 +577,7 @@ export default function Command() {
       {items.map((window) => (
         <List.Item
           key={window.id}
-          icon={iconForWindow(window, appIconsByName)}
+          icon={iconForWindow(window, appIconsByName, appIconFallbacksByName)}
           title={window.app}
           subtitle={formatSubtitle(window) || undefined}
           accessories={accessoriesForWindow(window)}
