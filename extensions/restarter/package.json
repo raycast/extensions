@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "restarter",
+  "description": "Restart or force-quit any running macOS app from a fuzzy-searchable list.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "RAY_Target=x ray develop",
+    "lint": "RAY_Target=x ray lint",
+    "fix-lint": "RAY_Target=x ray lint --fix",
+    "build": "RAY_Target=x ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "restarter",
+      "title": "Restarter",
+      "subtitle": "Restarter",
+      "description": "Restart or force-quit a running app from a fuzzy-searchable list.",
+      "keywords": ["restart", "quit", "force", "relaunch", "kill"]
+    },
+    {
+      "mode": "view",
+      "name": "manage-hidden",
+      "title": "Manage Hidden Apps",
+      "subtitle": "Restarter",
+      "description": "Show and unhide apps you've hidden from the Restarter list.",
+      "keywords": ["hidden", "restarter", "manage", "unhide", "restore"]
+    }
+  ],
+  "title": "Restarter",
+  "author": "bishoy_awadallah",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ]
+}
