@@ -53,7 +53,7 @@ All calls send `Authorization: Bearer <token>`:
 
 ## Rate limits
 
-If Wise returns `429 Too Many Requests`, the extension enters a 5‑minute cooldown to avoid making things worse. During the cooldown the dashboard shows the cached snapshot and offers a manual "Clear Cooldown and Retry" action.
+If Wise returns `429 Too Many Requests`, the extension enters a 5‑minute cooldown to avoid making things worse. During the cooldown the dashboard shows the cached snapshot.
 
 ## Community & Support
 

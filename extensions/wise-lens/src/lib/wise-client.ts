@@ -9,6 +9,12 @@ interface WiseGetOptions {
   skipCooldown?: boolean;
 }
 
+// Shared across all concurrent wiseGet callers so a burst of parallel requests
+// (e.g. balances + activities in fetchDashboardSnapshot) cannot each exhaust an
+// independent retry budget before cooldown engages.
+let totalRetries = 0;
+let activeBackoff: Promise<void> | null = null;
+
 export async function wiseGet<T>(
   path: string,
   token: string,
@@ -20,24 +26,33 @@ export async function wiseGet<T>(
 
   if (!skipCooldown) ensureNotCoolingDown();
 
-  let attempt = 0;
-  let lastErr: unknown;
-  while (attempt <= maxRetries) {
+  for (;;) {
     try {
-      return await wiseGetOnce<T>(path, token, signal);
+      const result = await wiseGetOnce<T>(path, token, signal);
+      totalRetries = 0;
+      return result;
     } catch (e) {
-      lastErr = e;
       if (!(e instanceof WiseHttpError) || e.status !== 429) throw e;
-      attempt++;
-      if (attempt > maxRetries) {
+      if (!skipCooldown) ensureNotCoolingDown();
+
+      totalRetries++;
+      if (totalRetries > maxRetries) {
         markRateLimited();
-        break;
+        totalRetries = 0;
+        if (!skipCooldown) ensureNotCoolingDown();
+        throw e;
       }
-      const delayMs = 1000 * Math.pow(2, attempt - 1) + Math.random() * 250;
-      await sleep(delayMs);
+
+      if (!activeBackoff) {
+        const delayMs = 1000 * Math.pow(2, totalRetries - 1) + Math.random() * 250;
+        const backoff = sleep(delayMs).finally(() => {
+          if (activeBackoff === backoff) activeBackoff = null;
+        });
+        activeBackoff = backoff;
+      }
+      await activeBackoff;
     }
   }
-  throw lastErr;
 }
 
 async function wiseGetOnce<T>(path: string, token: string, signal?: AbortSignal): Promise<T> {
