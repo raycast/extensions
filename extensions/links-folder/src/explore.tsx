@@ -15,10 +15,10 @@ import {
   getApplications,
   Application,
 } from "@raycast/api";
-import { execSync } from "child_process";
+import { spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-import { runAppleScript } from "@raycast/utils";
+import { getFavicon, runAppleScript } from "@raycast/utils";
 
 // --- Types ---
 type SavedApp = { name: string; path: string; bundleId?: string };
@@ -35,7 +35,7 @@ function generateId() {
 
 function getPreferencePath(): string | undefined {
   try {
-    const prefs = getPreferenceValues<{ linksPath?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     return prefs.linksPath?.trim() || undefined;
   } catch {
     return undefined;
@@ -231,20 +231,26 @@ function moveFolder(data: LinksData, folderId: string, destinationFolderId: stri
 }
 
 function openUrl(url: string, app?: SavedApp, background = false): void {
-  const escapedUrl = JSON.stringify(url);
-  const bgFlag = background && process.platform === "darwin" ? "-g " : "";
+  function runOpenCommand(command: string, args: string[]) {
+    const result = spawnSync(command, args, { stdio: "ignore", windowsHide: true });
+    if (result.error) throw result.error;
+    if (typeof result.status === "number" && result.status !== 0) {
+      throw new Error(`${command} exited with status ${result.status}`);
+    }
+  }
+
   if (app && process.platform === "darwin") {
-    const targetApp = app.bundleId ? `-b ${JSON.stringify(app.bundleId)}` : `-a ${JSON.stringify(app.path)}`;
-    execSync(`open ${bgFlag}${targetApp} ${escapedUrl}`);
+    const args = [...(background ? ["-g"] : []), app.bundleId ? "-b" : "-a", app.bundleId || app.path, url];
+    runOpenCommand("open", args);
     return;
   }
 
   if (process.platform === "darwin") {
-    execSync(`open ${bgFlag}${escapedUrl}`);
+    runOpenCommand("open", [...(background ? ["-g"] : []), url]);
   } else if (process.platform === "win32") {
-    execSync(`start "" ${escapedUrl}`, { shell: "cmd.exe" });
+    runOpenCommand("rundll32.exe", ["url.dll,FileProtocolHandler", url]);
   } else {
-    execSync(`xdg-open ${escapedUrl}`);
+    runOpenCommand("xdg-open", [url]);
   }
 }
 
@@ -274,11 +280,6 @@ function openAllLinks(folder: FolderItem): void {
     style: Toast.Style.Success,
     title: `Opened ${links.length} link${links.length === 1 ? "" : "s"}`,
   });
-}
-
-function getFavicon(url: string) {
-  const faviconUrl = `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(url)}`;
-  return { source: faviconUrl };
 }
 
 function getDomainOnly(rawUrl: string): string {

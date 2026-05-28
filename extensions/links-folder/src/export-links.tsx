@@ -18,11 +18,22 @@ import * as os from "os";
 
 function getPreferencePath(): string | undefined {
   try {
-    const prefs = getPreferenceValues<{ linksPath?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     return prefs.linksPath?.trim() || undefined;
   } catch {
     return undefined;
   }
+}
+
+function getExportSourcePath(): string | undefined {
+  const prefPath = getPreferencePath();
+  const candidates = [
+    prefPath,
+    path.join(environment.supportPath, "links.json"),
+    path.join(environment.assetsPath, "links.json"),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+
+  return candidates.find((candidate) => fs.existsSync(candidate));
 }
 
 // Helper to format date as YYYY-MM-DDTHH.MM.SS
@@ -70,10 +81,9 @@ export default function ExportCommand() {
       return;
     }
 
-    const prefPath = getPreferencePath();
-    const sourcePath = prefPath || path.join(environment.supportPath, "links.json");
+    const sourcePath = getExportSourcePath();
 
-    if (!fs.existsSync(sourcePath)) {
+    if (!sourcePath) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No links found",

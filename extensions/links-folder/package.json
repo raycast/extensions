@@ -27,6 +27,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "linksPath",
+      "title": "Links JSON Path",
+      "description": "Optional absolute path to a custom links.json file.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^1.17.0"
