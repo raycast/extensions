@@ -50,10 +50,8 @@
     "@raycast/api": "^1.104.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.0",
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.10.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
     "@types/react": "^19.0.10",
     "eslint": "^9.39.0",
     "react": "^19.0.0",
@@ -65,5 +63,9 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": false
   }
 }

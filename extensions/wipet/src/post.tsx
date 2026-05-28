@@ -12,38 +12,20 @@ import {
 } from "@raycast/api";
 import { basename } from "node:path";
 import { useEffect, useMemo, useState } from "react";
-import {
-  createProject,
-  createTodo,
-  listProjects,
-  type Project,
-} from "./lib/api";
-import {
-  MAX_IMAGES,
-  inspectFile,
-  uploadFiles,
-  type LocalImage,
-} from "./lib/upload";
+import { createProject, createTodo, listProjects, type Project } from "./lib/api";
+import { MAX_IMAGES, inspectFile, uploadFiles, type LocalImage } from "./lib/upload";
 
 // Detect a trailing `#word` token at the end of the search bar — that's what
 // the user is "currently typing". Cursor position isn't exposed in List, so we
 // only trigger when the partial extends to the end of the string.
-function detectTailHashtag(
-  text: string,
-): { start: number; query: string } | null {
+function detectTailHashtag(text: string): { start: number; query: string } | null {
   const m = text.match(/(?:^|\s)(#\w*)$/);
   if (!m) return null;
   const tag = m[1];
   return { start: text.length - tag.length, query: tag.slice(1).toLowerCase() };
 }
 
-function AttachForm({
-  slotsRemaining,
-  onPick,
-}: {
-  slotsRemaining: number;
-  onPick: (files: LocalImage[]) => void;
-}) {
+function AttachForm({ slotsRemaining, onPick }: { slotsRemaining: number; onPick: (files: LocalImage[]) => void }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -119,10 +101,7 @@ export default function Command() {
   }, [tail?.query, projects]);
 
   const canCreate =
-    tail !== null &&
-    tail.query.length > 0 &&
-    /^\w+$/.test(tail.query) &&
-    !projects.some((p) => p.slug === tail.query);
+    tail !== null && tail.query.length > 0 && /^\w+$/.test(tail.query) && !projects.some((p) => p.slug === tail.query);
 
   function pickProject(slug: string) {
     if (!tail) return;
@@ -138,9 +117,7 @@ export default function Command() {
     try {
       const proj = await createProject(slug);
       setProjects((prev) =>
-        prev.some((p) => p.slug === proj.slug)
-          ? prev
-          : [...prev, proj].sort((a, b) => a.slug.localeCompare(b.slug)),
+        prev.some((p) => p.slug === proj.slug) ? prev : [...prev, proj].sort((a, b) => a.slug.localeCompare(b.slug)),
       );
       pickProject(proj.slug);
       toast.style = Toast.Style.Success;
@@ -168,12 +145,7 @@ export default function Command() {
     }
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title:
-        images.length > 0
-          ? "Uploading images…"
-          : done
-            ? "Shipping…"
-            : "Adding todo…",
+      title: images.length > 0 ? "Uploading images…" : done ? "Shipping…" : "Adding todo…",
     });
     try {
       const uploaded = await uploadFiles(images);
@@ -184,12 +156,8 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = done ? "Shipped" : "Added";
       const parts: string[] = [];
-      if (result.projectSlugs.length > 0)
-        parts.push(result.projectSlugs.map((s) => `#${s}`).join(" "));
-      if (uploaded.length > 0)
-        parts.push(
-          `${uploaded.length} image${uploaded.length === 1 ? "" : "s"}`,
-        );
+      if (result.projectSlugs.length > 0) parts.push(result.projectSlugs.map((s) => `#${s}`).join(" "));
+      if (uploaded.length > 0) parts.push(`${uploaded.length} image${uploaded.length === 1 ? "" : "s"}`);
       toast.message = parts.join(" · ") || undefined;
       await closeMainWindow();
       await popToRoot();
@@ -212,8 +180,7 @@ export default function Command() {
   );
 
   const trimmed = searchText.trim();
-  const showProjectsSection =
-    tail !== null && (matches.length > 0 || canCreate);
+  const showProjectsSection = tail !== null && (matches.length > 0 || canCreate);
 
   return (
     <List
@@ -229,17 +196,11 @@ export default function Command() {
             <List.Item
               key={p.slug}
               title={`#${p.slug}`}
-              subtitle={
-                p.name && p.name.toLowerCase() !== p.slug ? p.name : undefined
-              }
+              subtitle={p.name && p.name.toLowerCase() !== p.slug ? p.name : undefined}
               icon={p.icon ? { source: p.icon } : Icon.Hashtag}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Insert #${p.slug}`}
-                    icon={Icon.Plus}
-                    onAction={() => pickProject(p.slug)}
-                  />
+                  <Action title={`Insert #${p.slug}`} icon={Icon.Plus} onAction={() => pickProject(p.slug)} />
                   <Action
                     title="Post as Done"
                     icon={Icon.Checkmark}
@@ -323,11 +284,7 @@ export default function Command() {
                 icon={Icon.Checkmark}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Post as Done"
-                      icon={Icon.Checkmark}
-                      onAction={() => submit(true)}
-                    />
+                    <Action title="Post as Done" icon={Icon.Checkmark} onAction={() => submit(true)} />
                     <Action
                       title="Post as Todo"
                       icon={Icon.Circle}
@@ -344,11 +301,7 @@ export default function Command() {
                 icon={Icon.Circle}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Post as Todo"
-                      icon={Icon.Circle}
-                      onAction={() => submit(false)}
-                    />
+                    <Action title="Post as Todo" icon={Icon.Circle} onAction={() => submit(false)} />
                     <Action
                       title="Post as Done"
                       icon={Icon.Checkmark}
@@ -364,11 +317,7 @@ export default function Command() {
             <List.EmptyView
               title="What did you ship?"
               description="Type a message. Use # to tag a project. ⌘I to attach images."
-              actions={
-                attachAction ? (
-                  <ActionPanel>{attachAction}</ActionPanel>
-                ) : undefined
-              }
+              actions={attachAction ? <ActionPanel>{attachAction}</ActionPanel> : undefined}
             />
           ) : null}
         </>

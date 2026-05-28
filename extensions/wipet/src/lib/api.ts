@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  apiUrl: string;
-  apiKey: string;
-};
-
 export type CreateTodoResponse = {
   id: string;
   text: string;
@@ -65,9 +60,7 @@ export type PresignedUpload = {
   sizeBytes: number;
 };
 
-export async function presignUploads(
-  files: { mimeType: string; sizeBytes: number }[],
-): Promise<PresignedUpload[]> {
+export async function presignUploads(files: { mimeType: string; sizeBytes: number }[]): Promise<PresignedUpload[]> {
   const res = await authFetch("/upload/presign", {
     method: "POST",
     headers: { "content-type": "application/json" },
