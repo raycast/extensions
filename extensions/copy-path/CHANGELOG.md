@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Fix VS Code active file copy] - {PR_MERGE_DATE}
+## [Fix VS Code active file copy] - 2026-05-28
 
 - Fixed copying the active file path from VS Code when AppleScript document lookup stalls.
 
