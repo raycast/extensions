@@ -1,5 +1,9 @@
 # Warp Changelog
 
+## [Tab Config Support] - 2026-05-28
+
+- Added Tab Config support to the config launcher, with legacy Launch Configurations as a fallback.
+
 ## [Windows Support] - 2026-05-12
 
 - Added Windows platform support.

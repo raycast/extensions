@@ -28,23 +28,16 @@ export function useConversations(): ConversationsHook {
 
   const add = useCallback(
     async (conversation: Conversation) => {
-      setData([...data, conversation]);
+      setData((prev) => [...prev, conversation]);
     },
-    [setData, data],
+    [setData],
   );
 
   const update = useCallback(
     async (conversation: Conversation) => {
-      setData((prev) => {
-        return prev.map((x) => {
-          if (x.id === conversation.id) {
-            return conversation;
-          }
-          return x;
-        });
-      });
+      setData((prev) => prev.map((x) => (x.id === conversation.id ? conversation : x)));
     },
-    [setData, data],
+    [setData],
   );
 
   const remove = useCallback(
@@ -53,12 +46,11 @@ export function useConversations(): ConversationsHook {
         title: "Removing conversation...",
         style: Toast.Style.Animated,
       });
-      const newConversations: Conversation[] = data.filter((item) => item.id !== conversation.id);
-      setData(newConversations);
+      setData((prev) => prev.filter((item) => item.id !== conversation.id));
       toast.title = "Conversation removed!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data],
+    [setData],
   );
 
   const clear = useCallback(async () => {

@@ -1,81 +1,82 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { useState } from "react";
-import { KNOWN_NANOLEAF_MAC_PREFIXES } from "../constants";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { discoverNanoleafDevices, isValidIPv4 } from "../utils";
+import { DiscoveredDevicesList } from "./DiscoveredDevicesList";
 
 interface Props {
-  currentDeviceAddress?: string;
   onSetDeviceAddress: (address: string) => void;
 }
 
-const NANOLEAF_MAC_REGEX = new RegExp(
-  `at (${KNOWN_NANOLEAF_MAC_PREFIXES.map((prefix) => prefix.replaceAll(":", "\\:")).join("|")})`,
-  "i"
-);
+interface FormValues {
+  deviceAddress: string;
+}
 
-const IP_REGEX = new RegExp("(?:[0-9]{1,3}.){3}[0-9]{1,3}", "g");
+export function SetDeviceAddressForm({ onSetDeviceAddress }: Props) {
+  const { push } = useNavigation();
+  const [isScanning, setIsScanning] = useState(false);
 
-export function SetDeviceAddressForm({ currentDeviceAddress, onSetDeviceAddress }: Props) {
-  const [deviceAddress, setDeviceAddress] = useState<string>(currentDeviceAddress ?? "");
-  const [error, setError] = useState<string>("");
-
-  const networkScan = useExec("arp", ["-an"], {
-    execute: false,
-    async onWillExecute() {
-      await showToast({ style: Toast.Style.Animated, title: "Scanning network for device..." });
+  const { handleSubmit, itemProps, setValue, setValidationError } = useForm<FormValues>({
+    onSubmit({ deviceAddress }) {
+      onSetDeviceAddress(deviceAddress.trim());
     },
-    async onData(data) {
-      const deviceEntry = data?.split("\n").find((line) => {
-        return NANOLEAF_MAC_REGEX.test(line);
-      });
-      if (deviceEntry) {
-        const addressMatches = deviceEntry.match(IP_REGEX);
-
-        if (addressMatches) {
-          setDeviceAddress(addressMatches[0]);
-
-          await showToast({ style: Toast.Style.Success, title: "Potential device found!" });
-        } else {
-          await showToast({ style: Toast.Style.Failure, title: "Unable to extract device address from scan entry." });
-        }
-      } else {
-        await showToast({ style: Toast.Style.Failure, title: "Unable to find a device on the network." });
-      }
+    validation: {
+      deviceAddress: (value) => {
+        if (!value) return FormValidation.Required;
+        if (!isValidIPv4(value)) return "Invalid IPv4 address";
+      },
     },
+    initialValues: { deviceAddress: "" },
   });
 
-  function handleSetDeviceAddress({ deviceAddress }: { deviceAddress: string }) {
-    if (IP_REGEX.test(deviceAddress)) {
-      setError("");
-      onSetDeviceAddress(deviceAddress);
-    } else {
-      setError("Invalid IPv4 address");
-    }
+  function applyAddress(address: string) {
+    setValue("deviceAddress", address);
+    setValidationError("deviceAddress", null);
   }
 
+  useEffect(() => {
+    attemptAutoScan();
+  }, []);
+
   async function attemptAutoScan() {
-    networkScan.revalidate();
+    setIsScanning(true);
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Scanning network for devices…" });
+    try {
+      const devices = await discoverNanoleafDevices();
+      if (devices.length === 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "No devices found on the network.";
+        return;
+      }
+      if (devices.length === 1) {
+        applyAddress(devices[0].address);
+        toast.style = Toast.Style.Success;
+        toast.title = `Found ${devices[0].name}`;
+        return;
+      }
+      await toast.hide();
+      push(<DiscoveredDevicesList devices={devices} onSelect={applyAddress} />);
+    } catch {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Scan failed. Enter the address manually.";
+    } finally {
+      setIsScanning(false);
+    }
   }
 
   return (
     <Form
+      isLoading={isScanning}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSetDeviceAddress} title="Save Device Address" icon={Icon.Checkmark} />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Save Device Address" icon={Icon.Checkmark} />
           <Action onAction={attemptAutoScan} title="Attempt Auto-Scan" icon={Icon.Network} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="deviceAddress"
-        title="Device Address"
-        placeholder="E.g. 192.168.2.13"
-        value={deviceAddress}
-        onChange={setDeviceAddress}
-        error={error}
-      ></Form.TextField>
+      <Form.TextField {...itemProps.deviceAddress} title="Device Address" placeholder="E.g. 192.168.2.13" />
       <Form.Separator />
-      <Form.Description text="If you are unable to locate your device's IPv4 address, Leafcast can attempt to auto-scan your network and add the address for you. Hit ⌘+⇧+⏎ to get started." />
+      <Form.Description text="Leafcast scans your network for Nanoleaf devices automatically when this command opens. If nothing turned up, you can enter the device's IPv4 address manually or re-run the scan with ⌘+⇧+⏎." />
     </Form>
   );
 }

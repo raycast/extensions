@@ -4,6 +4,10 @@
 
 - Ignore unsupported verification link URLs before rendering them in the list.
 
+## [Fix Time Sensitive iMessage codes] - 2026-05-27
+
+- Fixed iMessage code detection when macOS stores notification labels separately from the message body.
+
 ## [Update] - 2025-12-17
 
 - Add support for extracting text from binary data in iMessage messages

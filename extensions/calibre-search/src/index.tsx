@@ -21,8 +21,9 @@ export default function Command(props: { arguments: { searchText?: string } }) {
   const { libraryPath } = getPreferenceValues<Preferences>();
   const dbPath = join(libraryPath, "metadata.db");
   const libraryName = basename(libraryPath).replace(/ /g, "_");
-  const initialArg = props.arguments.searchText?.trim() ?? "";
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(
+    props.arguments.searchText?.trim() ?? "",
+  );
 
   const { data, isLoading, permissionView } = useSQL<BookRow>(
     dbPath,
@@ -37,10 +38,9 @@ export default function Command(props: { arguments: { searchText?: string } }) {
     [data, libraryPath],
   );
 
-  const effectiveSearch = searchText || initialArg;
   const filtered = useMemo(
-    () => filterBooks(books, effectiveSearch),
-    [books, effectiveSearch],
+    () => filterBooks(books, searchText),
+    [books, searchText],
   );
 
   if (permissionView) return permissionView;

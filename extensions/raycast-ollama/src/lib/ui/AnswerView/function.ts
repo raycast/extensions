@@ -128,9 +128,10 @@ async function Inference(
   if (keep_alive) body.keep_alive = keep_alive;
 
   await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
-  model.server.ollama
-    .OllamaApiGenerate(body)
-    .then(async (emiter) => {
+  try {
+    const emiter = await model.server.ollama.OllamaApiGenerate(body);
+
+    const processEmiter = () => {
       // Get Thinking Text
       emiter.on("thinking", async (data) => {
         // showToast when thinking process started
@@ -150,18 +151,23 @@ async function Inference(
         }
         setAnswer((prevState) => prevState + data);
       });
+    };
+    processEmiter();
 
-      // Get Metadata
+    // Get Metadata
+    await new Promise<void>((resolve) => {
       emiter.on("done", async (data) => {
         await showToast({ style: Toast.Style.Success, title: "👍 Done." });
         setAnswerMetadata(data);
         setLoading(false);
+        emiter.removeAllListeners();
+        resolve();
       });
-    })
-    .catch(async (err) => {
-      await showToast({ style: Toast.Style.Failure, title: err });
-      setLoading(false);
     });
+  } catch (err) {
+    if (err instanceof Error) await showToast({ style: Toast.Style.Failure, title: err.message });
+    setLoading(false);
+  }
 }
 
 /**

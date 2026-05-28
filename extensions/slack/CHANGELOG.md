@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix Windows deep links] - 2026-05-27
+
+- "Open in Slack" and "Open Channel"/"Open Chat" Quicklinks now open the requested channel or user on Windows. Previously the `application="Slack"` hint caused Raycast to launch Slack.exe without forwarding the `slack://` URI; the hint is now macOS-only so Windows routes the URI through the registered protocol handler.
+
 ## [Accent-insensitive search] - 2026-05-07
 
 - "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
