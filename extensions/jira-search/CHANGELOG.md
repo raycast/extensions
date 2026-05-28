@@ -1,6 +1,6 @@
 # Jira Search Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-05-28
 
 - Show Jira authentication and authorization failures instead of silently returning empty issue results.
 
