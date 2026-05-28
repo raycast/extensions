@@ -1,6 +1,6 @@
 # Toggle Desktop Visibility Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-28
 - Fixed desktop icon visibility commands on macOS Tahoe
 
 ## [Support Tahoe] - 2025-07-10
