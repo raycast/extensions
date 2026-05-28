@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { homedir } from "node:os";
 import { List, Icon, Color } from "@raycast/api";
+import { usePromise, showFailureToast } from "@raycast/utils";
+import { homedir } from "node:os";
 import { getIndex } from "./lib/cache";
 import { computeHealth } from "./lib/health";
 import { IssueListItem } from "./components/IssueListItem";
-import type { HealthIssue, HealthSeverity } from "./lib/types";
+import type { HealthSeverity } from "./lib/types";
 
 const SECTIONS: { sev: HealthSeverity; title: string }[] = [
   { sev: "error", title: "Errors" },
@@ -13,28 +13,28 @@ const SECTIONS: { sev: HealthSeverity; title: string }[] = [
 ];
 
 export default function Command() {
-  const [isLoading, setLoading] = useState(true);
-  const [issues, setIssues] = useState<HealthIssue[]>([]);
+  const { isLoading, data: issues } = usePromise(
+    async () => {
+      const index = await getIndex();
+      return computeHealth(index.skills, homedir());
+    },
+    [],
+    {
+      onError: (e) => {
+        showFailureToast(e, { title: "Couldn't run Skill Doctor" });
+      },
+    },
+  );
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const index = await getIndex();
-        setIssues(computeHealth(index.skills, homedir()));
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const all = issues ?? [];
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Filter ${issues.length} issue(s)…`}
+      searchBarPlaceholder={`Filter ${all.length} issue(s)…`}
     >
       {SECTIONS.map(({ sev, title }) => {
-        const group = issues.filter((i) => i.severity === sev);
+        const group = all.filter((i) => i.severity === sev);
         if (group.length === 0) return null;
         return (
           <List.Section key={sev} title={`${title} (${group.length})`}>
@@ -44,7 +44,7 @@ export default function Command() {
           </List.Section>
         );
       })}
-      {!isLoading && issues.length === 0 && (
+      {!isLoading && all.length === 0 && (
         <List.EmptyView
           icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
           title="No issues"

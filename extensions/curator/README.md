@@ -1,4 +1,4 @@
-# Curator
+# Skill Curator
 
 **Find, fix, and recall the skills you've installed for Claude Code & Codex — without leaving Raycast.**
 

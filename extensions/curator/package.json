@@ -1,32 +1,58 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "curator",
-  "title": "Curator",
-  "description": "Curate, search, and health-check your installed Claude & Codex skills.",
+  "title": "Skill Curator",
+  "description": "Search, health-check, and AI-recommend your installed Claude & Codex skills.",
   "icon": "icon.png",
   "author": "xianwei_zhang",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-skills",
       "title": "Search Skills",
-      "subtitle": "Curator",
+      "subtitle": "Skill Curator",
       "description": "Search installed Claude & Codex skills and copy their names/triggers.",
+      "keywords": [
+        "claude",
+        "codex",
+        "skill",
+        "skills",
+        "find",
+        "launcher"
+      ],
       "mode": "view"
     },
     {
       "name": "skill-doctor",
       "title": "Skill Doctor",
-      "subtitle": "Curator",
+      "subtitle": "Skill Curator",
       "description": "Health-check installed skills and copy fix commands.",
+      "keywords": [
+        "claude",
+        "codex",
+        "skill",
+        "health",
+        "doctor",
+        "fix"
+      ],
       "mode": "view"
     },
     {
       "name": "recommend-skills",
       "title": "Recommend Skills",
-      "subtitle": "Curator",
+      "subtitle": "Skill Curator",
       "description": "Describe a task; AI ranks the most relevant installed skills.",
+      "keywords": [
+        "claude",
+        "codex",
+        "skill",
+        "ai",
+        "recommend",
+        "suggest"
+      ],
       "mode": "view"
     }
   ],
@@ -39,9 +65,18 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Auto (Raycast AI, fall back to custom)", "value": "auto" },
-        { "title": "Raycast AI", "value": "raycast" },
-        { "title": "Custom (OpenAI-compatible)", "value": "byok" }
+        {
+          "title": "Auto (Raycast AI, fall back to custom)",
+          "value": "auto"
+        },
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "Custom (OpenAI-compatible)",
+          "value": "byok"
+        }
       ]
     },
     {
@@ -68,6 +103,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^2.2.5",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

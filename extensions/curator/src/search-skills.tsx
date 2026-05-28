@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { getIndex } from "./lib/cache";
 import { aggregateSkills } from "./lib/aggregate";
 import { computeHealth } from "./lib/health";
@@ -52,34 +53,30 @@ function accessoriesFor(
 }
 
 export default function Command() {
-  const [isLoading, setLoading] = useState(true);
-  const [items, setItems] = useState<DisplaySkill[]>([]);
-  const [issuesByName, setIssuesByName] = useState<Map<string, HealthIssue[]>>(
-    new Map(),
-  );
   const [showingDetail, setShowingDetail] = useState(false);
 
-  async function load(force = false) {
-    setLoading(true);
-    try {
-      const index = await getIndex({ force });
-      setItems(aggregateSkills(index.skills));
-      const issues = computeHealth(index.skills, homedir());
-      const map = new Map<string, HealthIssue[]>();
-      for (const i of issues) {
-        const arr = map.get(i.skillName) ?? [];
+  const { isLoading, data, revalidate } = usePromise(
+    async () => {
+      const index = await getIndex();
+      const items = aggregateSkills(index.skills);
+      const issuesByName = new Map<string, HealthIssue[]>();
+      for (const i of computeHealth(index.skills, homedir())) {
+        const arr = issuesByName.get(i.skillName) ?? [];
         arr.push(i);
-        map.set(i.skillName, arr);
+        issuesByName.set(i.skillName, arr);
       }
-      setIssuesByName(map);
-    } finally {
-      setLoading(false);
-    }
-  }
+      return { items, issuesByName };
+    },
+    [],
+    {
+      onError: (e) => {
+        showFailureToast(e, { title: "Couldn't load skills" });
+      },
+    },
+  );
 
-  useEffect(() => {
-    void load();
-  }, []);
+  const items = data?.items ?? [];
+  const issuesByName = data?.issuesByName ?? new Map<string, HealthIssue[]>();
 
   const sections = new Map<string, DisplaySkill[]>();
   for (const s of items) {
@@ -173,7 +170,7 @@ export default function Command() {
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      onAction={() => load(true)}
+                      onAction={() => revalidate()}
                     />
                   </ActionPanel>
                 }
