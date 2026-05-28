@@ -22,7 +22,7 @@ const API_KEY = (preferences.itadApiKey || "").trim();
 const COUNTRY = preferences.country;
 
 const cache = new Cache();
-const CACHE_KEY = `itad_saved_prices_v1_${COUNTRY}`;
+const CACHE_KEY = `itad_saved_prices_v22_${COUNTRY}`;
 const CACHE_TTL =
   parseInt(preferences.refreshFrequency || "12") * 60 * 60 * 1000;
 const detailCache = new Cache({ namespace: "search_detail" });
@@ -35,13 +35,11 @@ import type {
   Deal,
   DetailData,
   HistoryPoint,
-  OverviewResponse,
   SavedGame,
   SteamAppDetailsResponse,
   SteamSearchItem,
   SteamSearchResponse,
 } from "./types";
-import { flattenOverviewResponse } from "./types";
 
 const getBundleCount = (
   bundles: BundleInfo[] | { count?: number } | number | undefined,
@@ -65,18 +63,30 @@ export default function SavedGames() {
     Record<string, number>
   >({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
   const [filterMode, setFilterMode] = useState<string>("default");
+  const [seenDrops, setSeenDrops] = useState<Record<string, boolean>>({});
+  const [seenPriceChanges, setSeenPriceChanges] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
       setSelectedStores(s ? JSON.parse(s) : ["all"]),
     );
-    LocalStorage.getItem<string>("saved_itad_games").then((s) =>
-      s ? setSavedGames(JSON.parse(s)) : setIsLoading(false),
-    );
+    LocalStorage.getItem<string>("saved_itad_games").then((s) => {
+      if (s) setSavedGames(JSON.parse(s));
+      setIsStorageLoaded(true);
+    });
     LocalStorage.getItem<string>("last_seen_prices").then(
       (s) => s && setReferencePrices(JSON.parse(s)),
+    );
+    LocalStorage.getItem<string>("seen_drops").then(
+      (s) => s && setSeenDrops(JSON.parse(s)),
+    );
+    LocalStorage.getItem<string>("seen_price_changes").then(
+      (s) => s && setSeenPriceChanges(JSON.parse(s)),
     );
   }, []);
 
@@ -90,7 +100,13 @@ export default function SavedGames() {
       const cachedData = cache.get(CACHE_KEY);
       if (cachedData) {
         const parsed = JSON.parse(cachedData);
-        if (Date.now() - parsed.timestamp < CACHE_TTL) {
+        const cachedRequestedIds = parsed.requestedIds || [];
+        const currentIds = savedGames.map((g) => String(g.id));
+        const isSameRoster =
+          currentIds.length === cachedRequestedIds.length &&
+          currentIds.every((id) => cachedRequestedIds.includes(id));
+
+        if (isSameRoster && Date.now() - parsed.timestamp < CACHE_TTL) {
           setRawPrices(parsed.rawPrices);
           setBundleCounts(parsed.bundleCounts);
           setIsLoading(false);
@@ -120,7 +136,10 @@ export default function SavedGames() {
         ),
       ]);
 
-      const [pJson, oJson] = await Promise.all([pRes.json(), oRes.json()]);
+      const [pJson, oJson] = await Promise.all([
+        pRes.ok ? pRes.json() : Promise.resolve(null),
+        oRes.ok ? oRes.json() : Promise.resolve(null),
+      ]);
 
       const priceMap: Record<string, Deal[]> = {};
       const lastSeenPrices: Record<string, number> = {};
@@ -128,9 +147,14 @@ export default function SavedGames() {
       const priceEntries: Array<{ id?: string | number; deals?: Deal[] }> =
         Array.isArray(pJson)
           ? (pJson as Array<{ id?: string | number; deals?: Deal[] }>)
-          : Object.values(
-              pJson as Record<string, { id?: string | number; deals?: Deal[] }>,
-            );
+          : pJson && typeof pJson === "object"
+            ? Object.values(
+                pJson as Record<
+                  string,
+                  { id?: string | number; deals?: Deal[] }
+                >,
+              )
+            : [];
 
       priceEntries.forEach((it) => {
         if (it.id == null) return;
@@ -152,26 +176,40 @@ export default function SavedGames() {
         }
       });
 
-      const oFlat = flattenOverviewResponse(oJson as OverviewResponse);
-
       const newBundleCounts: Record<string, number> = {};
-      oFlat.forEach((item) => {
-        const count = getBundleCount(item.bundles);
-        if (item?.id && count > 0) {
-          newBundleCounts[String(item.id)] = count;
-        }
-      });
+      const bundlesArray = oJson?.bundles;
+      if (Array.isArray(bundlesArray)) {
+        const now = new Date();
+        for (const bundle of bundlesArray) {
+          const isActive = !bundle.expiry || new Date(bundle.expiry) > now;
+          if (!isActive) continue;
 
+          const games =
+            bundle.tiers?.flatMap(
+              (tier: { games?: { id?: string | number }[] }) =>
+                tier.games || [],
+            ) || [];
+          for (const game of games) {
+            const gameId = game.id;
+            if (gameId) {
+              const idStr = String(gameId);
+              newBundleCounts[idStr] = (newBundleCounts[idStr] || 0) + 1;
+            }
+          }
+        }
+      }
+      const resolvedBundleCounts = oRes.ok ? newBundleCounts : bundleCounts;
+      setBundleCounts(resolvedBundleCounts);
       setRawPrices(priceMap);
-      setBundleCounts(newBundleCounts);
 
       if (Object.keys(priceMap).length > 0) {
         cache.set(
           CACHE_KEY,
           JSON.stringify({
             timestamp: Date.now(),
+            requestedIds: gameIds.map(String),
             rawPrices: priceMap,
-            bundleCounts: newBundleCounts,
+            bundleCounts: resolvedBundleCounts,
           }),
         );
       }
@@ -194,13 +232,15 @@ export default function SavedGames() {
   };
 
   useEffect(() => {
+    if (!isStorageLoaded) return;
+
     const abort = new AbortController();
     fetchPrices(abort.signal);
 
     return () => {
       abort.abort();
     };
-  }, [savedGames, selectedStores]);
+  }, [savedGames, selectedStores, isStorageLoaded]);
 
   const prices = useMemo(() => {
     const map: Record<string, Deal | null> = {};
@@ -233,9 +273,13 @@ export default function SavedGames() {
 
   const sortedAndFilteredGames = useMemo(() => {
     let list = [...savedGames];
-    if (filterMode === "default" || !filterMode) {
+
+    if (filterMode === "az") {
+      list.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (filterMode === "default" || !filterMode) {
       list.reverse(); // most recently saved first
     }
+
     if (filterMode === "deals") {
       list = list.filter((g) => prices[g.id] && (prices[g.id]?.cut || 0) > 0);
     } else if (filterMode === "discount") {
@@ -249,13 +293,104 @@ export default function SavedGames() {
         return pA - pB;
       });
     }
+
     return list;
   }, [savedGames, prices, filterMode]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    const timer = setTimeout(() => {
+      (async () => {
+        let dropsUpdated = false;
+        let priceChangesUpdated = false;
+        const newSeenDrops = { ...seenDrops };
+        const newSeenPriceChanges = { ...seenPriceChanges };
+
+        sortedAndFilteredGames.forEach((game) => {
+          const last = referencePrices[game.id];
+          const current = prices[game.id]?.price?.amount;
+          if (
+            last != null &&
+            current != null &&
+            last !== 0 &&
+            !seenDrops[game.id]
+          ) {
+            const diff = ((current - last) / last) * 100;
+            if (diff <= -10) {
+              newSeenDrops[game.id] = true;
+              dropsUpdated = true;
+            }
+          }
+
+          const deal = prices[game.id];
+          if (deal) {
+            const lastPrice = referencePrices[game.id];
+            const currentPrice = deal.price?.amount;
+            if (
+              lastPrice != null &&
+              currentPrice !== lastPrice &&
+              !seenPriceChanges[game.id]
+            ) {
+              const diffPct =
+                lastPrice === 0
+                  ? currentPrice > 0
+                    ? 100
+                    : 0
+                  : ((currentPrice - lastPrice) / lastPrice) * 100;
+              if (Math.abs(diffPct) >= 3) {
+                newSeenPriceChanges[game.id] = true;
+                priceChangesUpdated = true;
+              }
+            }
+          }
+        });
+
+        if (dropsUpdated) {
+          await LocalStorage.setItem(
+            "seen_drops",
+            JSON.stringify(newSeenDrops),
+          );
+        }
+        if (priceChangesUpdated) {
+          await LocalStorage.setItem(
+            "seen_price_changes",
+            JSON.stringify(newSeenPriceChanges),
+          );
+        }
+      })();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [
+    sortedAndFilteredGames,
+    prices,
+    referencePrices,
+    isLoading,
+    seenDrops,
+    seenPriceChanges,
+  ]);
+
   const removeGame = async (id: string) => {
     const newList = savedGames.filter((g) => g.id !== id);
+    const updatedSeenDrops = Object.fromEntries(
+      Object.entries(seenDrops).filter(([gameId]) => gameId !== id),
+    );
+    const updatedSeenPriceChanges = Object.fromEntries(
+      Object.entries(seenPriceChanges).filter(([gameId]) => gameId !== id),
+    );
+
     setSavedGames(newList);
-    await LocalStorage.setItem("saved_itad_games", JSON.stringify(newList));
+    setSeenDrops(updatedSeenDrops);
+    setSeenPriceChanges(updatedSeenPriceChanges);
+
+    await Promise.all([
+      LocalStorage.setItem("saved_itad_games", JSON.stringify(newList)),
+      LocalStorage.setItem("seen_drops", JSON.stringify(updatedSeenDrops)),
+      LocalStorage.setItem(
+        "seen_price_changes",
+        JSON.stringify(updatedSeenPriceChanges),
+      ),
+    ]);
     cache.remove(CACHE_KEY);
   };
 
@@ -264,7 +399,7 @@ export default function SavedGames() {
     const current = prices[game.id]?.price?.amount;
     if (last == null || current == null || last === 0) return false;
     const diff = ((current - last) / last) * 100;
-    return diff <= -10;
+    return diff <= -10 && !seenDrops[game.id];
   });
 
   return (
@@ -272,12 +407,37 @@ export default function SavedGames() {
       isLoading={isLoading}
       searchBarPlaceholder="Search saved games..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter & Sort" onChange={setFilterMode}>
-          <List.Dropdown.Item title="Recently Saved" value="default" />
-          <List.Dropdown.Item title="Only Deals" value="deals" />
-          <List.Dropdown.Item title="Biggest Discount" value="discount" />
-          <List.Dropdown.Item title="Lowest Price" value="lowest" />
-          <List.Dropdown.Item title="Best Opportunities" value="opportunity" />
+        <List.Dropdown
+          tooltip="Filter & Sort"
+          storeValue={true}
+          onChange={setFilterMode}
+        >
+          <List.Dropdown.Item
+            title="Recently Saved"
+            value="default"
+            icon={Icon.Clock}
+          />
+          <List.Dropdown.Item title="A-Z" value="az" icon={Icon.Text} />
+          <List.Dropdown.Item
+            title="Only Deals"
+            value="deals"
+            icon={Icon.Tag}
+          />
+          <List.Dropdown.Item
+            title="Biggest Discount"
+            value="discount"
+            icon={Icon.Bolt}
+          />
+          <List.Dropdown.Item
+            title="Lowest Price"
+            value="lowest"
+            icon={Icon.Coin}
+          />
+          <List.Dropdown.Item
+            title="Best Opportunities"
+            value="opportunity"
+            icon={Icon.Star}
+          />
         </List.Dropdown>
       }
     >
@@ -294,7 +454,7 @@ export default function SavedGames() {
             </ActionPanel>
           }
         />
-      ) : savedGames.length === 0 && !isLoading ? (
+      ) : savedGames.length === 0 && !isLoading && isStorageLoaded ? (
         <List.EmptyView
           title="No saved games yet"
           description="Search games and save them for tracking."
@@ -302,9 +462,6 @@ export default function SavedGames() {
         />
       ) : (
         <>
-          {majorDrops.length > 0 && filterMode === "default" && (
-            <List.Item title="" subtitle="──────────────" />
-          )}
           {majorDrops.length > 0 && filterMode === "default" && (
             <List.Section title={`🔥 ${majorDrops.length} Price Drops`}>
               {sortedAndFilteredGames
@@ -326,7 +483,7 @@ export default function SavedGames() {
                       icon={Icon.Star}
                       accessories={[
                         {
-                          text: `${formatPrice(deal.regular?.amount, deal.price?.currency)} → ${formatPrice(currentAmount, deal.price?.currency)}`,
+                          text: `${formatPrice(referencePrices[game.id], deal.price?.currency)} → ${formatPrice(currentAmount, deal.price?.currency)}`,
                         },
                         {
                           tag: {
@@ -357,6 +514,9 @@ export default function SavedGames() {
                 })}
             </List.Section>
           )}
+          {majorDrops.length > 0 && filterMode === "default" && (
+            <List.Item title="" subtitle="──────────────" />
+          )}
           <List.Section
             title={
               majorDrops.length > 0 && filterMode === "default"
@@ -374,6 +534,13 @@ export default function SavedGames() {
                 const deal = prices[game.id];
                 const acc = [];
 
+                if (bundleCounts[String(game.id)] > 0) {
+                  acc.push({
+                    icon: { source: Icon.Box, tintColor: Color.Purple },
+                    tooltip: "In an active bundle",
+                  });
+                }
+
                 if (!deal && isLoading) {
                   acc.push({
                     icon: Icon.Clock,
@@ -382,12 +549,6 @@ export default function SavedGames() {
                   });
                 } else if (deal) {
                   const currentPrice = deal.price?.amount;
-                  if (bundleCounts[String(game.id)] > 0) {
-                    acc.push({
-                      icon: { source: Icon.Box, tintColor: Color.Purple },
-                      tooltip: "Available in a Bundle",
-                    });
-                  }
                   const lastPrice = referencePrices[game.id];
 
                   if (lastPrice != null && currentPrice !== lastPrice) {
@@ -399,7 +560,7 @@ export default function SavedGames() {
                           : 0
                         : (diffAbs / lastPrice) * 100;
 
-                    if (Math.abs(diffPct) >= 3) {
+                    if (Math.abs(diffPct) >= 3 && !seenPriceChanges[game.id]) {
                       let label = "";
                       if (diffPct <= -10) label = "🔥 DROP";
                       else if (diffPct < 0) label = "⬇ DOWN";
@@ -436,6 +597,8 @@ export default function SavedGames() {
                       tag: { value: `-${cut}%`, color: Color.Green },
                     });
                   }
+                } else {
+                  acc.push({ text: "NO INFO" });
                 }
                 const isMusic =
                   (!game.type ||
@@ -1112,12 +1275,26 @@ function GameDetail({
                       ? "⏱️"
                       : "";
 
-  const heroSection =
-    currentBest && currentPrice != null
-      ? `<h2 align="center">${signalText !== "INSUFFICIENT DATA" ? `${signalEmoji} ${signalText}` : ""}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${currentBest.cut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`
-      : "";
+  const isUnreleased = (steamData?.release_date as { coming_soon?: boolean })
+    ?.coming_soon;
+  const releaseDateText = steamData?.release_date?.date;
+
+  let heroSection = "";
+  if (currentBest && currentPrice != null) {
+    heroSection = `<h2 align="center">${signalText !== "INSUFFICIENT DATA" ? `${signalEmoji} ${signalText}` : ""}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${currentBest.cut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`;
+  } else if (isUnreleased) {
+    heroSection = `<h2 align="center">⏱️ UNRELEASED</h2>\n<h3 align="center">Expected: ${releaseDateText || "TBA"}</h3>\n\n---\n\n`;
+  } else {
+    heroSection = `<h2 align="center">🤷‍♂️ NO INFO</h2>\n<h3 align="center">No store listings found</h3>\n\n---\n\n`;
+  }
+
+  const hasInsights = !!(signalText || primaryInsight || secondaryInsight);
+  const hasTags = !!(isDiscounted || bundle.activeCount > 0);
+  const hideHistoricalData = isUnreleased && currentPrice == null;
+  const hasHistorical = !hideHistoricalData;
 
   const markdown = `
+  
 ${steamData?.header_image ? `<img src="${steamData.header_image}" width="280" />\n\n` : ""}
 # ${gameTitle}  
 ${
@@ -1138,7 +1315,7 @@ ${heroSection}
 
 | Store | Price | RRP | Discount |
 | :--- | :--- | :--- | :--- |
-${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : "| No data found | - | - | - |"}
+${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : isUnreleased ? `| ${releaseDateText || "TBA"} | - | - | - |` : "| No info | - | - | - |"}
 
 ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
 `;
@@ -1157,7 +1334,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
       navigationTitle={gameTitle}
       metadata={
         <Detail.Metadata>
-          {signalText && (
+          {signalText && signalText !== "INSUFFICIENT DATA" && (
             <Detail.Metadata.Label
               title="Signal"
               text={signalText}
@@ -1190,9 +1367,10 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
               }
             />
           )}
-          {(isDiscounted || bundle.activeCount > 0) && (
+
+          {hasTags && (
             <>
-              <Detail.Metadata.Separator />
+              {hasInsights && <Detail.Metadata.Separator />}
               <Detail.Metadata.TagList title="Tags">
                 {isDiscounted && (
                   <Detail.Metadata.TagList.Item
@@ -1209,63 +1387,69 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
               </Detail.Metadata.TagList>
             </>
           )}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="All-Time Low"
-            text={
-              allTimeLow != null
-                ? formatPrice(allTimeLow, hCurrency)
-                : "No History"
-            }
-            icon={
-              allTimeLow != null
-                ? { source: Icon.Checkmark, tintColor: Color.Green }
-                : Icon.XMarkCircle
-            }
-          />
 
-          {medianSale !== null && (
-            <Detail.Metadata.Label
-              title="Median Price (1Y)"
-              text={formatPrice(medianSale, hCurrency)}
-            />
-          )}
-
-          {bundle.state && (
+          {hasHistorical && (
             <>
-              <Detail.Metadata.Separator />
-              {bundle.icon ? (
+              {(hasInsights || hasTags) && <Detail.Metadata.Separator />}
+              <Detail.Metadata.Label
+                title="All-Time Low"
+                text={
+                  allTimeLow != null
+                    ? formatPrice(allTimeLow, hCurrency)
+                    : "No History"
+                }
+                icon={
+                  allTimeLow != null
+                    ? { source: Icon.Checkmark, tintColor: Color.Green }
+                    : Icon.XMarkCircle
+                }
+              />
+              {medianSale !== null && (
                 <Detail.Metadata.Label
-                  title="Bundle Status"
-                  text={bundle.state}
-                  icon={{
-                    source: bundle.icon as Icon,
-                    tintColor: bundle.color,
-                  }}
+                  title="Median Price (1Y)"
+                  text={formatPrice(medianSale, hCurrency)}
                 />
-              ) : (
-                <Detail.Metadata.Label
-                  title="Bundle Status"
-                  text={bundle.state}
+              )}
+
+              {bundle.state && (
+                <>
+                  <Detail.Metadata.Separator />
+                  {bundle.icon ? (
+                    <Detail.Metadata.Label
+                      title="Bundle Status"
+                      text={bundle.state}
+                      icon={{
+                        source: bundle.icon as Icon,
+                        tintColor: bundle.color,
+                      }}
+                    />
+                  ) : (
+                    <Detail.Metadata.Label
+                      title="Bundle Status"
+                      text={bundle.state}
+                    />
+                  )}
+                </>
+              )}
+              {bundleValue?.tier && bundleValue?.bundle && (
+                <Detail.Metadata.Link
+                  title="Bundle Tier"
+                  target={
+                    bundleValue.bundle.url || bundleValue.bundle.details || ""
+                  }
+                  text={
+                    bundleValue.tier.price
+                      ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
+                      : bundleValue.bundle.page?.name || "View Bundle"
+                  }
                 />
               )}
             </>
           )}
-          {bundleValue?.tier && bundleValue?.bundle && (
-            <Detail.Metadata.Link
-              title="Bundle Tier"
-              target={
-                bundleValue.bundle.url || bundleValue.bundle.details || ""
-              }
-              text={
-                bundleValue.tier.price
-                  ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
-                  : bundleValue.bundle.page?.name || "View Bundle"
-              }
-            />
-          )}
 
-          <Detail.Metadata.Separator />
+          {(hasInsights || hasTags || hasHistorical) && (
+            <Detail.Metadata.Separator />
+          )}
           <Detail.Metadata.Label
             title="Price Sources"
             text={

@@ -1,5 +1,9 @@
 # Mattermost Changelog
 
+## [Fix] - 2026-05-18
+
+- Fix authentication when the Mattermost server preference is entered without a URL scheme.
+
 ## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`

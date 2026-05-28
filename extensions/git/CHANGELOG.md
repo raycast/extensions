@@ -1,5 +1,26 @@
 # Changelog
 
+## [Update] - 2026-05-25
+
+### Added
+- **Manage Repositories**: Add "Clear Cache" action for clearing the extension cache
+
+### Changed
+- **Storage**: Move stable data from `Cache` to `LocalStorage`
+
+### Fixed
+- **Diff**: Show raw Git diff output without stripping leading whitespace from added/removed lines, so indented code changes display correctly
+- **Commit Details**: Load changed files with `--first-parent` when fetching a commit by hash, matching the commits history view for merge commits
+
+## [Update] - 2026-05-11
+
+### Added
+- **Remotes**: Add "Host Provider" dropdown to `RemoteEditorForm` for manually selecting the provider for unknown host URLs
+
+### Fixed
+- **Remote Host Parser**: Fix SSH URL parsing with port (e.g. `git@host:2224/org/repo.git`)
+- **Azure DevOps**: Fix logo icon path
+
 ## [Update] - 2026-04-13
 
 ### Added
