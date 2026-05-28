@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Fix Search Matches memory usage] - {PR_MERGE_DATE}
+## [Fix Search Matches memory usage] - 2026-05-28
 
 - Reduced Search Matches memory usage by loading replacement previews only for the selected match.
 
