@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-28
 
 - Reset stale cached profile selections so history search does not show Chrome as missing.
 
