@@ -32,14 +32,25 @@ async function main() {
 
   await fs.mkdir(assetsDir, { recursive: true });
 
-  const { stdout } = await execFileAsync(
-    "npm",
-    ["pack", packageSpecifier, "--json", "--pack-destination", assetsDir],
-    { cwd: root, maxBuffer: 20 * 1024 * 1024 },
-  );
+  const { stdout } = await execNpm(["pack", packageSpecifier, "--json", "--pack-destination", assetsDir]);
 
   const [{ filename }] = JSON.parse(stdout);
   await fs.rename(path.join(assetsDir, filename), archivePath);
+}
+
+function execNpm(args) {
+  if (process.env.npm_execpath) {
+    return execFileAsync(process.execPath, [process.env.npm_execpath, ...args], {
+      cwd: root,
+      maxBuffer: 20 * 1024 * 1024,
+    });
+  }
+
+  return execFileAsync("npm", args, {
+    cwd: root,
+    maxBuffer: 20 * 1024 * 1024,
+    shell: process.platform === "win32",
+  });
 }
 
 function resolveTargetTriple() {
