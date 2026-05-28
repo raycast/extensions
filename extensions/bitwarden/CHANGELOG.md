@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix sync session handling] - {PR_MERGE_DATE}
+## [Fix sync session handling] - 2026-05-28
 
 - Fixed failed sync attempts immediately clearing the active session before cached vault data can load.
 
