@@ -1,6 +1,6 @@
 # PromptStash Changelog
 
-## [Add Export and Import commands] - {PR_MERGE_DATE}
+## [Add Export and Import commands] - 2026-05-28
 
 - Added `Export Prompts` command that saves your full prompt collection as a JSON file in your Downloads folder
 - Added `Import Prompts` command with a file picker and three conflict strategies (skip, replace, import as new)
