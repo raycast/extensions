@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Modernize & OAuth Setup Guide] - {PR_MERGE_DATE}
+## [Modernize & OAuth Setup Guide] - 2026-05-28
 
 - Added OAuth setup guide shown before login — displays the required redirect URI and a Connect button so users can set up their Unsplash app without confusion
 - Fixed crashes caused by unhandled OAuth errors (`TypeError: Cannot read properties of null (reading 'useState')`)
