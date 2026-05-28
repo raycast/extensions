@@ -3,7 +3,6 @@ export type preferences = {
   apitoken: string;
   username?: string;
   closedboards: boolean;
-  defaultOpenTarget: "web" | "app";
 };
 
 export type postValues = {
