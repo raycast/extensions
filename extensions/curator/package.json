@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "curator",
+  "title": "Curator",
+  "description": "Curate, search, and health-check your installed Claude & Codex skills.",
+  "icon": "icon.png",
+  "author": "xianwei_zhang",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "subtitle": "Curator",
+      "description": "Search installed Claude & Codex skills and copy their names/triggers.",
+      "mode": "view"
+    },
+    {
+      "name": "skill-doctor",
+      "title": "Skill Doctor",
+      "subtitle": "Curator",
+      "description": "Health-check installed skills and copy fix commands.",
+      "mode": "view"
+    },
+    {
+      "name": "recommend-skills",
+      "title": "Recommend Skills",
+      "subtitle": "Curator",
+      "description": "Describe a task; AI ranks the most relevant installed skills.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Which AI powers Recommend Skills.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Auto (Raycast AI, fall back to custom)", "value": "auto" },
+        { "title": "Raycast AI", "value": "raycast" },
+        { "title": "Custom (OpenAI-compatible)", "value": "byok" }
+      ]
+    },
+    {
+      "name": "apiBaseURL",
+      "title": "Custom API Base URL",
+      "description": "Your provider's OpenAI-compatible base URL — the part before /chat/completions (usually ends in /v1).",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiKey",
+      "title": "Custom API Key",
+      "description": "API key for your OpenAI-compatible provider.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "apiModel",
+      "title": "Custom Model",
+      "description": "Model id for your provider, e.g. qwen3.7-max (or gpt-4o-mini, deepseek-chat, a local model name…).",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.30",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
