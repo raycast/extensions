@@ -13,7 +13,7 @@ Yabai Focus is built for macOS users who already use `yabai` for window manageme
 - Deprioritizes the currently focused window so switching targets are easier to reach.
 - Focuses the selected window with `yabai -m window --focus <window-id>`.
 - Falls back to `open -a <app-name>` if `yabai` cannot focus the window.
-- Refreshes shortly after opening so newly launched apps can appear without reopening Raycast.
+- Includes a manual refresh action so newly launched apps can appear without reopening Raycast.
 
 ## Requirements
 

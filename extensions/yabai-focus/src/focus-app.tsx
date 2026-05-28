@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  closeMainWindow,
   getApplications,
   Icon,
   List,
@@ -30,7 +31,6 @@ const COMMAND_PATH = COMMAND_SEARCH_DIRECTORIES.join(":");
 const EXEC_ENV = { ...process.env, PATH: COMMAND_PATH, USER };
 const COMMAND_TIMEOUT_MS = 5000;
 const OPEN_COMMAND = "/usr/bin/open";
-const STARTUP_REFRESH_DELAYS_MS = [400, 900, 1600, 3000];
 const APP_SEARCH_DIRECTORIES = [
   "/Applications",
   join(HOME_DIRECTORY, "Applications"),
@@ -38,7 +38,8 @@ const APP_SEARCH_DIRECTORIES = [
   "/System/Applications/Utilities",
   "/Applications/Utilities",
 ];
-const IGNORED_APP_NAMES = new Set(["raycast"]);
+const RAYCAST_APP_NAME = "raycast";
+const RAYCAST_COMMAND_PALETTE_SUBROLES = new Set(["AXDialog", "AXSystemDialog"]);
 const TITLE_SUFFIX_NOISE_PATTERNS = [/ - Audio playing$/i, / - \d+ new items?$/i];
 
 type ExecResult = {
@@ -91,6 +92,8 @@ type YabaiWindow = {
   "has-ax-reference": boolean;
   "is-visible"?: boolean;
   "has-focus"?: boolean;
+  role?: string;
+  subrole?: string;
 };
 
 let yabaiPath: string | undefined;
@@ -189,9 +192,7 @@ function parseYabaiWindows(stdout: string): YabaiWindow[] {
   try {
     parsed = JSON.parse(stdout);
   } catch (error) {
-    throw new Error(
-      `Invalid JSON returned by yabai: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    throw new Error(`Invalid JSON returned by yabai: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   if (!Array.isArray(parsed)) {
@@ -238,6 +239,8 @@ function parseYabaiWindows(stdout: string): YabaiWindow[] {
       "has-ax-reference": hasAxReference,
       "is-visible": asBoolean(window["is-visible"]),
       "has-focus": asBoolean(window["has-focus"]),
+      role: asString(window.role),
+      subrole: asString(window.subrole),
     });
   }
 
@@ -246,11 +249,20 @@ function parseYabaiWindows(stdout: string): YabaiWindow[] {
 
 function isFocusableWindow(window: YabaiWindow): boolean {
   return (
-    !IGNORED_APP_NAMES.has(appNameKey(window.app)) &&
+    !isRaycastCommandPaletteWindow(window) &&
     !window["is-minimized"] &&
     !window["is-hidden"] &&
     window["has-ax-reference"] === true
   );
+}
+
+function isRaycastCommandPaletteWindow(window: YabaiWindow): boolean {
+  if (appNameKey(window.app) !== RAYCAST_APP_NAME) {
+    return false;
+  }
+
+  const title = window.title.trim();
+  return title === "" || title === "Raycast" || RAYCAST_COMMAND_PALETTE_SUBROLES.has(window.subrole ?? "");
 }
 
 function sortWindows(windows: YabaiWindow[]): YabaiWindow[] {
@@ -259,6 +271,7 @@ function sortWindows(windows: YabaiWindow[]): YabaiWindow[] {
   }
 
   return [...windows].sort((a, b) => {
+    // Keep the current window last, then prefer visible windows, then stable app/title ordering.
     const focusComparison = Number(a["has-focus"] === true) - Number(b["has-focus"] === true);
     if (focusComparison !== 0) {
       return focusComparison;
@@ -282,10 +295,6 @@ function formatCommand(window: YabaiWindow): string {
   return `yabai -m window --focus ${window.id}`;
 }
 
-function formatSubtitle(window: YabaiWindow): string {
-  return compactWindowTitle(window);
-}
-
 function compactWindowTitle(window: YabaiWindow): string {
   let title = window.title.trim();
 
@@ -305,10 +314,7 @@ function compactWindowTitle(window: YabaiWindow): string {
 
 function formatCommandError(error: unknown): string {
   const commandError = error instanceof CommandError ? error : undefined;
-  const message = [commandError?.stderr, formatErrorMessage(error)]
-    .filter(Boolean)
-    .join("\n")
-    .trim();
+  const message = [commandError?.stderr, formatErrorMessage(error)].filter(Boolean).join("\n").trim();
 
   if (commandError?.timedOut) {
     return `${commandError.commandName ?? "Command"} timed out after ${COMMAND_TIMEOUT_MS / 1000}s`;
@@ -392,12 +398,14 @@ async function focusWindow(window: YabaiWindow): Promise<void> {
 
   try {
     await runYabai(["-m", "window", "--focus", String(window.id)]);
+    await closeMainWindow({ clearRootSearch: true });
     toast.style = Toast.Style.Success;
     toast.title = `Focused ${window.app}`;
     toast.message = window.title || `Window ${window.id}`;
   } catch (focusError) {
     try {
       await runOpen(["-a", window.app]);
+      await closeMainWindow({ clearRootSearch: true });
       toast.style = Toast.Style.Success;
       toast.title = `Opened ${window.app}`;
       toast.message = `Yabai focus failed: ${formatCommandError(focusError)}`;
@@ -449,9 +457,7 @@ export default function Command() {
     };
   }, []);
 
-  const refresh = useCallback(async function refreshWindows({
-    isBackground = false,
-  }: RefreshOptions = {}) {
+  const refresh = useCallback(async function refreshWindows({ isBackground = false }: RefreshOptions = {}) {
     if (isRefreshingRef.current) {
       pendingRefreshRef.current = {
         isBackground: (pendingRefreshRef.current?.isBackground ?? true) && isBackground,
@@ -515,18 +521,6 @@ export default function Command() {
 
   useEffect(() => {
     void refresh();
-
-    const timeouts = STARTUP_REFRESH_DELAYS_MS.map((delay) =>
-      setTimeout(() => {
-        void refresh({ isBackground: true });
-      }, delay),
-    );
-
-    return () => {
-      for (const timeout of timeouts) {
-        clearTimeout(timeout);
-      }
-    };
   }, [refresh]);
 
   useEffect(() => {
@@ -556,7 +550,6 @@ export default function Command() {
   const emptyTitle = errorMessage ? "Could not query yabai windows" : "No focusable yabai windows";
   const emptyDescription = errorMessage ?? "Hidden, minimized, and non-AX windows are ignored.";
 
-  const items = useMemo(() => windows, [windows]);
   const appIconFallbacksByName = useMemo(() => {
     const fallbackPaths: AppIconFallbacksByName = new Map();
 
@@ -574,21 +567,17 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search yabai windows/apps">
       <List.EmptyView title={emptyTitle} description={emptyDescription} />
-      {items.map((window) => (
+      {windows.map((window) => (
         <List.Item
           key={window.id}
           icon={iconForWindow(window, appIconsByName, appIconFallbacksByName)}
           title={window.app}
-          subtitle={formatSubtitle(window) || undefined}
+          subtitle={compactWindowTitle(window) || undefined}
           accessories={accessoriesForWindow(window)}
           keywords={[window.app, window.title, String(window.space)]}
           actions={
             <ActionPanel>
-              <Action
-                title="Focus Window"
-                icon={Icon.Window}
-                onAction={() => void focusWindow(window)}
-              />
+              <Action title="Focus Window" icon={Icon.Window} onAction={() => void focusWindow(window)} />
               <Action.CopyToClipboard
                 title="Copy Yabai Focus Command"
                 shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -598,7 +587,7 @@ export default function Command() {
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={refresh}
+                onAction={() => void refresh()}
               />
             </ActionPanel>
           }
