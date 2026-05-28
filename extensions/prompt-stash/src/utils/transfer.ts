@@ -60,8 +60,10 @@ export function parseExportFile(content: string): Prompt[] {
 
 function collectValidPrompts(value: unknown[]): Prompt[] {
   const result: Prompt[] = [];
+  const seenIds = new Set<string>();
   for (const item of value) {
-    if (isValidPrompt(item)) {
+    if (isValidPrompt(item) && !seenIds.has(item.id)) {
+      seenIds.add(item.id);
       result.push({ ...item, createdAt: item.createdAt ?? new Date() });
     }
   }
@@ -79,6 +81,7 @@ function isValidPrompt(value: unknown): value is Omit<Prompt, "createdAt"> & { c
     typeof p.title === "string" &&
     typeof p.content === "string" &&
     Array.isArray(p.tags) &&
+    p.tags.every((tag) => typeof tag === "string") &&
     typeof p.isFavorite === "boolean"
   );
 }
