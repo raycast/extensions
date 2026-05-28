@@ -56,6 +56,7 @@ export async function searchUsers(query: string): Promise<User[]> {
 
   // Some tenants reject complex /users filters. Retry with displayName-only if needed.
   if (response.status === 400) {
+    await response.text();
     response = await get({
       path: "/users",
       queryParams: {
@@ -102,21 +103,10 @@ export async function getUserPhotoDataUrl(userId: string): Promise<string | unde
     return cachedPhoto;
   }
 
-  const storedPhoto = await LocalStorage.getItem<string>(photoCacheKey);
-  if (storedPhoto === "missing") {
-    cache.set(photoCacheKey, "missing");
-    return undefined;
-  }
-  if (storedPhoto) {
-    cache.set(photoCacheKey, storedPhoto);
-    return storedPhoto;
-  }
-
   const response = await get({ path: `/users/${userId}/photo/$value` });
 
   if (response.status === 404) {
     cache.set(photoCacheKey, "missing");
-    await LocalStorage.setItem(photoCacheKey, "missing");
     return undefined;
   }
 
@@ -125,6 +115,5 @@ export async function getUserPhotoDataUrl(userId: string): Promise<string | unde
   const imageBuffer = Buffer.from(await response.arrayBuffer());
   const photoDataUrl = `data:${contentType};base64,${imageBuffer.toString("base64")}`;
   cache.set(photoCacheKey, photoDataUrl);
-  await LocalStorage.setItem(photoCacheKey, photoDataUrl);
   return photoDataUrl;
 }

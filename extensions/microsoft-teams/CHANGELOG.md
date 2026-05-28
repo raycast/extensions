@@ -1,6 +1,6 @@
 # Microsoft Teams Changelog
 
-## [Update] - 2026-05-28
+## [Update] - {PR_MERGE_DATE}
 
 # Features
 
