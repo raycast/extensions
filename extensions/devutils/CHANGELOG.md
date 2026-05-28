@@ -1,6 +1,6 @@
 # DevUtils Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-28
 
 - Show a Raycast error when the DevUtils app is not installed instead of opening the macOS URL handler dialog.
 
