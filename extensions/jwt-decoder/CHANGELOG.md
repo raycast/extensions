@@ -1,6 +1,6 @@
 # JWT-Decoder Changelog
 
-## [Fix] - 2026-05-17
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed runtime React version mismatch by pinning React peer versions
 
