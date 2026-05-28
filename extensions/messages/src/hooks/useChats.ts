@@ -92,7 +92,7 @@ export function useChats(searchText: string = "") {
         chat.chat_identifier
       ORDER BY
         last_message_date DESC
-      LIMIT 1000;
+      LIMIT ${searchText ? "1000" : "50"};
     `;
   };
 

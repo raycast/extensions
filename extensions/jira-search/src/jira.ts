@@ -72,6 +72,7 @@ export async function jiraFetch(
 
 const defaultStatusErrors: StatusErrors = {
   401: ErrorText("Jira Authentication failed", "Check your Jira credentials in the preferences."),
+  403: ErrorText("Jira Authorization failed", "Check that your API token has access to this Jira site."),
 }
 
 function throwIfResponseNotOkay(response: Response, statusErrors?: StatusErrors) {

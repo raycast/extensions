@@ -1071,7 +1071,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.7",
     "@raycast/utils": "^2.2.2",
-    "mathjs": "^14.5.2",
+    "mathjs": "^15.2.0",
     "svgo": "^3.3.2",
     "tar": "^7.5.9"
   },

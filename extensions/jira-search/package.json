@@ -87,5 +87,8 @@
     "lint": "ray lint",
     "lint-fix": "ray lint --fix",
     "publish": "node publish.mjs"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

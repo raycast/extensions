@@ -34,7 +34,13 @@ export const getHistoryQuery = (searchText?: string) => {
 
 const useHistorySearch = (searchText?: string) => {
   const query = getHistoryQuery(searchText);
-  return useSQL<HistoryItem>(HISTORY_DB, query);
+  return useSQL<HistoryItem>(HISTORY_DB, query, {
+    permissionPriming: "This is required to search your Safari history.",
+    failureToastOptions: {
+      title: "Cannot search Safari history",
+      message: "Grant Raycast Full Disk Access, then try again.",
+    },
+  });
 };
 
 export default useHistorySearch;

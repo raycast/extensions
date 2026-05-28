@@ -1,5 +1,9 @@
 # put.io Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Refactor] - 2024-09-19
 
 - Updated file list item actions to use a new utility function that requires less network requests to get the relevant action URLs.

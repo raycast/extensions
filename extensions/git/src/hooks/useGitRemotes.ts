@@ -1,9 +1,9 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { GitManager } from "../utils/git-manager";
-import { Remote } from "../types";
+import { Remote, RemoteProvider } from "../types";
 import { remoteHostParser } from "../utils/remote-host-parser";
 import { RepositoryContext } from "../open-repository";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export type RemotesHosts = Record<string, Remote>;
 
@@ -13,6 +13,23 @@ export type RemotesHosts = Record<string, Remote>;
  * Repository path is included in cache dependencies to ensure separate cache per repository.
  */
 export function useGitRemotes(gitManager: GitManager): RepositoryContext["remotes"] {
+  const [providerOverrides, setProviderOverrides] = useCachedState<Record<string, RemoteProvider>>(
+    `git-remote-provider-overrides:${gitManager.repoPath}`,
+    {},
+  );
+
+  const addProviderOverride = useCallback(
+    (provider: RemoteProvider, url: string) => {
+      setProviderOverrides((prev) => {
+        const next = { ...prev };
+        const key = url.trim();
+        if (key) next[key] = provider;
+        return next;
+      });
+    },
+    [setProviderOverrides],
+  );
+
   const {
     data: remotes,
     isLoading,
@@ -25,7 +42,7 @@ export function useGitRemotes(gitManager: GitManager): RepositoryContext["remote
     () =>
       remotes.reduce<RemotesHosts>((dictionary, remote) => {
         const primaryUrl = remote.fetchUrl || remote.pushUrl || "";
-        const parser = remoteHostParser(primaryUrl);
+        const parser = remoteHostParser(primaryUrl, providerOverrides[primaryUrl]);
 
         const info: Remote = {
           name: remote.name,
@@ -36,6 +53,7 @@ export function useGitRemotes(gitManager: GitManager): RepositoryContext["remote
           displayName: `${parser.organizationName}/${parser.repositoryName}`,
           repositoryName: parser.repositoryName,
           provider: parser.provider,
+          isOverridedProvider: providerOverrides[primaryUrl] !== undefined,
           avatarUrl: parser.avatarUrl,
           webPages: parser.webPages,
         };
@@ -43,13 +61,15 @@ export function useGitRemotes(gitManager: GitManager): RepositoryContext["remote
 
         return dictionary;
       }, {} as RemotesHosts),
-    [remotes],
+    [remotes, providerOverrides],
   );
 
   return {
     data: remotesRecords,
     isLoading,
     revalidate,
+    providerOverrides,
+    addProviderOverride,
   };
 }
 

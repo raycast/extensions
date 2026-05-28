@@ -102,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2026.3.0",
+  version: "2026.4.2",
   get sha256() {
-    if (platform === "windows") return "3f129e6d15ae950b5840d20ce9bcf99c2248ce5330f4d4c70e859512d5992371";
-    if (process.arch === "arm64") return "d935e9885ed215ecb0de9a7e7251487012b007a74fedbaaec6074d299fef3e02";
-    return "015ed86b1f9e23a366e0c7937a5b5cfcd26348505608e5e446890cd83a00b1d2";
+    if (platform === "windows") return "db30a5b7dfb8ab1c657e14c566a77649b1ef66864c1c09c5e5437b5667f9e014";
+    if (process.arch === "arm64") return "885b4b15074452f175ddf03d1315ec1fa8a83912ee3ac9267750a5a038292599";
+    return "1dc091b65494612a2c371e27a4267a6e29f9ebabc7f854f6323fa8f1ac344cb2";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {

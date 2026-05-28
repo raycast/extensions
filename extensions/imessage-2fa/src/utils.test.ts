@@ -318,6 +318,15 @@ describe("Testing binary data extraction from iMessage", () => {
     // Should extract codes that contain digits (even without spaces)
     expect(result).toMatch(/ABC123|DEF456|CodeABC123/);
   });
+
+  test("Extract rich text payload when notification label is prepended", () => {
+    const binaryData =
+      "Time Sensitive \x04\x0Bstreamtyped\x81NSMutableAttributedString\x00Your Example verification code is: 246810\x86NSDictionary";
+    const result = extractTextFromBinaryData(binaryData);
+
+    expect(result).toContain("246810");
+    expect(result).not.toContain("NSMutableAttributedString");
+  });
 });
 
 describe("Testing SQL LIKE pattern escaping", () => {

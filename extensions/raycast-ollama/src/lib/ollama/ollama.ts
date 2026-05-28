@@ -627,12 +627,7 @@ export class Ollama {
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning an object contains all metadata of inference.
    * @private
    */
-  private async _OllamaApiStream<T extends { model: string }>(
-    route: string,
-    body: T,
-    contentExtractor: (json: object) => string | undefined,
-    thinkingExtractor: (json: object) => string | undefined,
-  ): Promise<EventEmitter> {
+  private async _OllamaApiStream<T extends { model: string }>(route: string, body: T): Promise<EventEmitter> {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
@@ -687,30 +682,58 @@ export class Ollama {
                   console.error(err);
                 }
 
-                if (json && typeof json === "object")
-                  if ("done" in json && json.done) {
-                    if (textContentBuffer.length > 0) e.emit("data", textContentBuffer);
-                    e.emit("done", json);
-                  } else if ("done" in json) {
-                    const thinking = thinkingExtractor(json);
-                    if (thinking) textThinkingBuffer += thinking;
-                    const content = contentExtractor(json);
-                    if (content) textContentBuffer += content;
+                /* OllamaErrorResponse */
+                if (Types.isOllamaErrorResponse(json)) {
+                  /* Emit Error Message */
+                  e.emit("error", json.error);
+                  continue;
+                }
 
-                    const now = Date.now();
-                    if (now - lastEmitTime >= THROTTLE_MS) {
-                      if (textThinkingBuffer !== "") {
-                        e.emit("thinking", textThinkingBuffer);
-                        textThinkingBuffer = "";
-                      } else if (textContentBuffer !== "") {
-                        e.emit("data", textContentBuffer);
-                        textContentBuffer = "";
-                      }
-                      lastEmitTime = now;
+                const emitDone = () => {
+                  if (textContentBuffer.length > 0) e.emit("data", textContentBuffer);
+                  e.emit("done", json);
+                };
+
+                const emitBuffer = () => {
+                  const now = Date.now();
+                  if (now - lastEmitTime >= THROTTLE_MS) {
+                    if (textThinkingBuffer !== "") {
+                      e.emit("thinking", textThinkingBuffer);
+                      textThinkingBuffer = "";
+                    } else if (textContentBuffer !== "") {
+                      e.emit("data", textContentBuffer);
+                      textContentBuffer = "";
                     }
-                  } else if ("error" in json && json.error) {
-                    e.emit("error", json.error);
+                    lastEmitTime = now;
                   }
+                };
+
+                /* OllamaApiGenerateResponse */
+                if (Types.isOllamaApiGenerateResponse(json)) {
+                  /* If Done emit last message */
+                  if (json.done) {
+                    emitDone();
+                    continue;
+                  }
+                  if (json.thinking) textThinkingBuffer += json.thinking;
+                  if (json.response) textContentBuffer += json.response;
+                  emitBuffer();
+                  continue;
+                }
+
+                /* OllamaApiChatResponse */
+                if (Types.isOllamaApiChatResponse(json)) {
+                  /* If Done emit last message */
+                  if (json.done) {
+                    emitDone();
+                    continue;
+                  }
+                  if (json.message?.thinking) textThinkingBuffer += json.message.thinking;
+                  if (json.message?.content) textContentBuffer += json.message.content;
+                  if (json.message?.tool_calls) e.emit("tool_calls", json.message.tool_calls);
+                  emitBuffer();
+                  continue;
+                }
               }
             }
           }
@@ -732,38 +755,13 @@ export class Ollama {
     }
   }
 
-  // Extract 'response' text from OllamaApiGenerateResponse Object
-  private _generateContentExtractor(json: object): string | undefined {
-    if (Types.isOllamaApiGenerateResponse(json)) return json.response;
-  }
-
-  // Extract 'thinking' text from OllamaApiGenerateResponse Object
-  private _generateThinkingExtractor(json: object): string | undefined {
-    if (Types.isOllamaApiGenerateResponse(json)) return json.thinking;
-  }
-
-  // Extract 'response' text from OllamaApiChatResponse Object
-  private _chatContentExtractor(json: object): string | undefined {
-    if (Types.isOllamaApiChatResponse(json)) return json.message?.content;
-  }
-
-  // Extract 'thinking' text from OllamaApiChatResponse Object
-  private _chatThinkingExtractor(json: object): string | undefined {
-    if (Types.isOllamaApiChatResponse(json)) return json.message?.thinking;
-  }
-
   /**
    * Perform text generation with the selected model.
    * @param body - Ollama Generate Body Request.
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
    */
   async OllamaApiGenerate(body: Types.OllamaApiGenerateRequestBody): Promise<EventEmitter> {
-    return await this._OllamaApiStream(
-      this._RouteApiGenerate,
-      body,
-      this._generateContentExtractor,
-      this._generateThinkingExtractor,
-    );
+    return await this._OllamaApiStream(this._RouteApiGenerate, body);
   }
 
   /**
@@ -780,12 +778,7 @@ export class Ollama {
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiChatResponse` object contains all metadata of inference.
    */
   async OllamaApiChat(body: Types.OllamaApiChatRequestBody): Promise<EventEmitter> {
-    return await this._OllamaApiStream(
-      this._RouteApiChat,
-      body,
-      this._chatContentExtractor,
-      this._chatThinkingExtractor,
-    );
+    return await this._OllamaApiStream(this._RouteApiChat, body);
   }
 
   /**
