@@ -58,7 +58,6 @@ export default function Command() {
     >
       {CATEGORIES.map((category) => {
         const items = shortcuts.filter((s) => s.category === category);
-        if (items.length === 0) return null;
         return (
           <List.Section key={category} title={category}>
             {items.map((shortcut) => {
