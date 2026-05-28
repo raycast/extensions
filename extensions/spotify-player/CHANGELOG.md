@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Podcast Episode Navigation] - {PR_MERGE_DATE}
+## [Fix Podcast Episode Navigation] - 2026-05-28
 
 - Prevent podcast episode navigation from crashing when Spotify omits show details in search results
 
