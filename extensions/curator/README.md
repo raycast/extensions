@@ -1,40 +1,49 @@
 # Curator
 
-**Your skills, curated.** A Raycast extension that gives you a fast, searchable
-view of every skill installed for Claude Code and Codex, tells you which ones
-are broken, and — when you can't remember what you have — lets an AI recommend
-the right skill for the task you describe.
+**Find, fix, and recall the skills you've installed for Claude Code & Codex — without leaving Raycast.**
 
-You have dozens of skills spread across user directories, plugin marketplaces,
-and version caches, named in a mix of conventions you can never quite remember.
-Curator turns that sprawl into one keystroke.
+If you use Claude Code or Codex with more than a handful of skills, you know the feeling: dozens of them scattered across user folders, plugin marketplaces, and version caches — half of them forgotten, and no idea whether any quietly broke. Then, right when you need one mid-task, you can't remember what it's called.
+
+Curator is a command center for your skills. One keystroke to **search** them, **health-check** them, or let **AI pick** the right one for what you're doing.
 
 ## Commands
 
-### Search Skills
+### Search Skills — _"what do I have, and what's it called?"_
 
-The launcher. Fuzzy-search every installed skill by name, purpose, or trigger
-phrase. `⏎` copy the name · `⌘⏎` copy as `/command` · `⌘⇧T` copy a trigger ·
-`⌘D` preview `SKILL.md` · `⌘O` open in editor · `⌘R` rescan.
+Fuzzy-search every installed skill by **name, purpose, or trigger phrase**, across both Claude Code and Codex. Type _"scrape a webpage"_ and land on the right skill even if you never memorized its name.
 
-### Skill Doctor
+- Preview the full `SKILL.md` in a side panel (`⌘D`)
+- Copy the name (`⏎`), copy it as a `/command` (`⌘⏎`), or copy a trigger phrase (`⌘⇧T`)
+- Open the skill in your editor (`⌘O`) or reveal it in Finder
+- Skills shared across both agents merge into one row with `[claude] [codex]` badges; user and plugin skills are grouped by source
 
-The check-up. Lists health issues — broken symlinks, missing/unparseable
-`SKILL.md`, name ≠ directory, Claude↔Codex drift, stale plugin cache — each with
-a one-keystroke **Copy Fix Command**. Fixes are copied to your clipboard, never
-applied for you.
+### Skill Doctor — _"is anything broken?"_
 
-### Recommend Skills
+Surfaces the failures that happen silently:
 
-Describe a task in plain language and an AI ranks the most relevant installed
-skills, each with a one-line reason. Uses **Raycast AI** by default (requires
-Raycast Pro); or point it at any **OpenAI-compatible** provider with your own
-key via Preferences → Provider → "Custom".
+- broken symlinks
+- missing or unparseable `SKILL.md`
+- a folder name that doesn't match the skill's name
+- skills that have drifted out of sync between Claude and Codex
+- stale plugin-cache versions
 
-#### Recommended providers (custom / bring-your-own-key)
+Each issue comes with a **ready-to-paste fix command**. Curator shows you the command — it never edits or deletes anything itself.
 
-Paste the base URL into **Custom API Base URL**, your key into **Custom API
-Key**, and a model id into **Custom Model**.
+### Recommend Skills — _"which one should I use?"_
+
+Describe a task in plain language and an AI ranks your most relevant skills, each with a one-line reason and a confidence level — catching matches that keyword search misses. Runs on **Raycast AI** out of the box, or any **OpenAI-compatible** provider with your own key.
+
+## Who it's for
+
+Anyone whose Claude Code / Codex setup has outgrown their memory — you install skills from several marketplaces, maintain your own, or run them across more than one agent, and you want them findable and healthy.
+
+## Safe by design
+
+Curator is **read-only on your filesystem.** Every fix is a shell command copied to your clipboard for you to review and run — nothing is changed or deleted behind your back, and the only thing it ever launches is your editor. Recommendations send your task plus a compact skill catalog to your chosen AI provider, and only when you press `⏎`.
+
+## AI recommendations: choosing a provider
+
+The default is **Raycast AI** — no setup, requires Raycast Pro. To use your own key instead, open the extension's preferences, set **Provider** to "Custom", and fill in the base URL, key, and model. Any OpenAI-compatible endpoint works; a few common ones:
 
 | Provider                    | OpenAI-compatible base URL                                           | Get a key                                                  |
 | --------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
@@ -43,32 +52,15 @@ Key**, and a model id into **Custom Model**.
 | MiniMax                     | `https://api.minimaxi.com/v1`                                        | [platform.minimaxi.com](https://platform.minimaxi.com)     |
 | Xiaomi MiMo (token plan)    | `https://token-plan-cn.xiaomimimo.com/v1`                            | [platform.xiaomimimo.com](https://platform.xiaomimimo.com) |
 
-> Verified against each provider's docs (2026); these are the **Token Plan**
-> endpoints where a provider offers one. Alternatives: **Qwen** pay-as-you-go is
-> `https://dashscope.aliyuncs.com/compatible-mode/v1`; **MiniMax** international
-> is `https://api.minimax.io/v1`; **Xiaomi MiMo** is per-cluster (China
-> `token-plan-cn`, Europe `token-plan-ams`), authoritative on its subscription page.
-
-## Safe by design
-
-Curator **never writes to or deletes from your filesystem.** Every fix is a
-shell command copied to your clipboard, for you to review and run yourself. The
-only process it ever launches is your editor (via `execFile`, no shell). Skill
-recommendations send your task text plus a compact skill catalog to your chosen
-AI provider — and only when you press ⏎.
+> Verified against each provider's docs (2026); these are the **Token Plan** endpoints where a provider offers one. Alternatives: **Qwen** pay-as-you-go is `https://dashscope.aliyuncs.com/compatible-mode/v1`; **MiniMax** international is `https://api.minimax.io/v1`; **Xiaomi MiMo** is per-cluster (China `token-plan-cn`, Europe `token-plan-ams`), authoritative on its subscription page. Set the model id (e.g. `qwen3.7-max`, `deepseek-chat`) in **Custom Model**.
 
 ## Development
 
-    npm install
-    npm run dev      # run in Raycast
-    npm test         # run unit tests
-    npm run lint     # lint
+```
+npm install
+npm run dev      # run in Raycast
+npm test         # unit tests
+npm run lint     # lint
+```
 
-The core lives in `src/lib/` as pure, dependency-light modules with a full
-unit-test suite; the Raycast UI is three thin `view` commands on top.
-
-## Status
-
-v1 (Search + Doctor) and v2 (Recommend) are merged. Roadmap (v2.1): multi-skill
-**pipeline** recommendation — describe a goal, get an ordered workflow across
-several skills.
+The core lives in `src/lib/` as small, dependency-light, unit-tested modules (scan → parse → aggregate → health → recommend); the Raycast UI is three thin `view` commands on top.
