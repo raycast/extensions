@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spark-plug",
+  "title": "Spark Plug",
+  "description": "Launch Claude Code sessions in your worktrees — start new named sessions or resume existing ones.",
+  "icon": "extension-icon.png",
+  "author": "kylescudder",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity", "Applications"],
+  "commands": [
+    {
+      "name": "list-worktrees",
+      "title": "List Worktrees",
+      "subtitle": "Spark Plug",
+      "description": "Browse worktrees and start or resume Claude Code sessions",
+      "mode": "view",
+      "keywords": ["claude", "claude code", "worktree", "git", "session", "terminal"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "worktreesRoot",
+      "title": "Worktrees Folder",
+      "description": "Root folder containing your worktrees (supports ~ expansion)",
+      "type": "textfield",
+      "default": "~/worktrees",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3",
+    "react": "^19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "bunx @raycast/api@latest publish"
+  }
+}
