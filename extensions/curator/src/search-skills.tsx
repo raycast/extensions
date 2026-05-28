@@ -9,18 +9,13 @@ import { computeHealth } from "./lib/health";
 import { buildFixCommand } from "./lib/fix-commands";
 import { copyToClipboard, openInEditor } from "./lib/actions";
 import { SkillDetail } from "./components/SkillDetail";
+import { firstSentence } from "./lib/text";
 import type { DisplaySkill, HealthIssue } from "./lib/types";
 
 function iconFor(s: DisplaySkill) {
   return s.source.includes("plugin")
     ? { source: Icon.Plug, tintColor: Color.Purple }
     : { source: Icon.Box, tintColor: Color.Blue };
-}
-
-function firstSentence(text: string): string {
-  const t = text.replace(/\s+/g, " ").trim();
-  const stop = t.search(/[.。!?]/);
-  return stop > 0 ? t.slice(0, stop + 1) : t.slice(0, 80);
 }
 
 function slashCommand(s: DisplaySkill): string {

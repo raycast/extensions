@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
-  firstSentence,
   buildCatalog,
   buildPrompt,
   parseRecommendations,
   resolveRecommendations,
 } from "../src/lib/recommend";
+import { firstSentence } from "../src/lib/text";
 import type { DisplaySkill, ParsedSkill, SourceType } from "../src/lib/types";
 
 function ds(

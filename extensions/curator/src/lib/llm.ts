@@ -2,15 +2,8 @@ import { AI, environment, getPreferenceValues } from "@raycast/api";
 
 export class AIUnavailableError extends Error {}
 
-type Prefs = {
-  provider: "auto" | "raycast" | "byok";
-  apiBaseURL: string;
-  apiKey: string;
-  apiModel: string;
-};
-
 export async function chat(prompt: string): Promise<string> {
-  const p = getPreferenceValues<Prefs>();
+  const p = getPreferenceValues<Preferences>();
   const useRaycast =
     p.provider === "raycast" ||
     (p.provider === "auto" && environment.canAccess(AI));
@@ -21,8 +14,10 @@ export async function chat(prompt: string): Promise<string> {
     return await AI.ask(prompt, { creativity: "low" });
   }
 
-  if (!p.apiBaseURL || !p.apiKey)
-    throw new AIUnavailableError("No custom endpoint or key configured");
+  if (!p.apiBaseURL || !p.apiKey || !p.apiModel)
+    throw new AIUnavailableError(
+      "Custom provider needs a base URL, API key, and model",
+    );
   const res = await fetch(
     `${p.apiBaseURL.replace(/\/$/, "")}/chat/completions`,
     {
