@@ -53,7 +53,7 @@
       "description": "set the default encoding",
       "required": true,
       "type": "dropdown",
-      "default": "cl100k_base",
+      "default": "o200k_base",
       "data": [
         {
           "title": "gpt2",
@@ -74,6 +74,10 @@
         {
           "title": "cl100k_base",
           "value": "cl100k_base"
+        },
+        {
+          "title": "o200k_base",
+          "value": "o200k_base"
         }
       ]
     }
