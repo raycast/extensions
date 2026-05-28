@@ -16,24 +16,35 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      const text = await Clipboard.readText();
-      if (!text) {
+      try {
+        const text = await Clipboard.readText();
+        if (!text) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Clipboard is empty",
+          });
+          return;
+        }
+        setClipText(text);
+        const dataUrl = await QRCode.toDataURL(text, {
+          width: 280,
+          margin: 1,
+        });
+        setQrDataUrl(dataUrl);
+      } catch (e) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Clipboard is empty",
+          title: "Failed to generate QR code",
+          message: e instanceof Error ? e.message : String(e),
         });
+      } finally {
         setIsLoading(false);
-        return;
       }
-      setClipText(text);
-      const dataUrl = await QRCode.toDataURL(text, { width: 280, margin: 1 });
-      setQrDataUrl(dataUrl);
-      setIsLoading(false);
     })();
   }, []);
 
   const markdown = qrDataUrl
-    ? `![QR Code](${qrDataUrl})\n\n---\n\n**Content:**\n\n${clipText}`
+    ? `![QR Code](${qrDataUrl})\n\n---\n\n**Content:**\n\n\`\`\`\n${clipText}\n\`\`\``
     : !isLoading
       ? "No text in clipboard."
       : "";
@@ -46,7 +57,7 @@ export default function Command() {
         qrDataUrl ? (
           <ActionPanel>
             <Action.CopyToClipboard
-              title="Copy Qr Code Content"
+              title="Copy QR Code Content"
               content={clipText}
             />
           </ActionPanel>
