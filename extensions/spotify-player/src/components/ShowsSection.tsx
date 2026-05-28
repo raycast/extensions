@@ -12,7 +12,8 @@ type ShowsSectionProps = {
 export function ShowsSection({ type, shows, columns, limit }: ShowsSectionProps) {
   if (!shows) return null;
 
-  const items = shows.filter((show): show is SimplifiedShowObject => Boolean(show?.id)).slice(0, limit || shows.length);
+  const filtered = shows.filter((show): show is SimplifiedShowObject => Boolean(show?.id));
+  const items = filtered.slice(0, limit || filtered.length);
 
   if (!items.length) return null;
 
