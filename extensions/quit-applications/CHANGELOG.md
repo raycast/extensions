@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-28
 
 - Added timeout handling and fallback app discovery when loading running applications.
 
