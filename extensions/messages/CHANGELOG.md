@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Fix chat list memory usage] - {PR_MERGE_DATE}
+## [Fix chat list memory usage] - 2026-05-28
 
 - Limit the initial chat lookup to the 50 displayed conversations before loading contact details.
 
