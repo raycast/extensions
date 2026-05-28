@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-let units: any[];
-let tens: any[];
-let allDoubles: any[];
+let units: string[];
+let tens: string[];
+let allDoubles: string[];
 let CRORE: string;
 let LAKH: string;
 let THOUSAND: string;
@@ -115,7 +114,7 @@ function initializedConstants(short: boolean, numberShouldNumeric: boolean) {
 }
 
 export function inrToWords(
-  inputCurrencyString: any,
+  inputCurrencyString: string | number,
   short = false,
   numberShouldNumeric = false,
 ): string {
@@ -129,9 +128,6 @@ export function inrToWords(
   inputCurrencyString = inputCurrencyString.toString();
 
   let resultStr = "";
-
-  if (inputCurrencyString === "0") return "Zero";
-
   let isLastPar = false;
   try {
     while (inputCurrencyString.length !== 0) {
@@ -172,20 +168,20 @@ export function inrToWords(
 // lakhs + thousands + hundreds
 function handle7Digits(sevenDigits: string) {
   // 01 23 456
-  let lahkPlace = handle2Digits(sevenDigits.slice(0, 2));
+  let lakhPlace = handle2Digits(sevenDigits.slice(0, 2));
   const remainingPlaces = handle5Digits(sevenDigits.slice(2, 7));
 
-  if (lahkPlace.length !== 0) lahkPlace += " " + LAKH + " ";
-  return lahkPlace + remainingPlaces;
+  if (lakhPlace.length !== 0) lakhPlace += " " + LAKH + " ";
+  return lakhPlace + remainingPlaces;
 }
 
 function handle6Digits(sixDigits: string) {
   // 0 12 345
-  let lahkPlace = handle1Digits(sixDigits.slice(0, 1));
+  let lakhPlace = handle1Digits(sixDigits.slice(0, 1));
   const remainingPlaces = handle5Digits(sixDigits.slice(1, 6));
 
-  if (lahkPlace.length !== 0) lahkPlace += " " + LAKH + " ";
-  return lahkPlace + remainingPlaces;
+  if (lakhPlace.length !== 0) lakhPlace += " " + LAKH + " ";
+  return lakhPlace + remainingPlaces;
 }
 
 function handle5Digits(fiveDigits: string): string {

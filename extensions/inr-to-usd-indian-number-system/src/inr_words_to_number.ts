@@ -8,12 +8,14 @@ export function inrWordsToNumber(currencyWordArray: string[]): string {
 
     const currNumber =
       calcAbsNumberValueForLessThenCroreValue(lessThenCrorePart);
+    if (isNaN(currNumber)) {
+      throw new Error(
+        `Could not parse "${lessThenCrorePart.join(" ")}". Each section needs a number before the unit, e.g. "10 lakh".`,
+      );
+    }
     if (currNumber.toString().length > 7) {
       throw new Error(
-        lessThenCrorePart +
-          " gives " +
-          currNumber +
-          " whose length is greater then 7. which should not be possible as we are calculating the value for less the crore",
+        `Value too large: "${lessThenCrorePart.join(" ")}" equals ${currNumber.toLocaleString()}, which exceeds one crore. Try using crore to break it up, e.g. "2 crore 32 lakh".`,
       );
     }
     if (i === 0) {

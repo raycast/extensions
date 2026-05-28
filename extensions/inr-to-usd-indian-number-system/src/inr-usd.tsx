@@ -1,5 +1,14 @@
 import { ActionPanel, Action, LaunchProps, Detail } from "@raycast/api";
 import { useMemo } from "react";
+import { commaUSStandard, commaINStandard } from "./util";
+import {
+  reformatCurrencyArray,
+  convertToInternationalCurrencySystem,
+} from "./script";
+import { inrWordsToNumber } from "./inr_words_to_number";
+import { inrToWords } from "./inr_to_words";
+import { convertDollarsAndCents } from "./usd_to_words";
+import { useExchangeRate } from "./fetch_exchange_rate";
 
 function timeAgo(date: Date | null): string {
   if (!date) return "";
@@ -14,16 +23,6 @@ function timeAgo(date: Date | null): string {
   return `${days}d ago`;
 }
 
-import { commaUSStandard, commaINStandard, countLastZeros } from "./util";
-import {
-  reformatCurrencyArray,
-  convertToInternationalCurrencySystem,
-} from "./script";
-import { inrWordsToNumber } from "./inr_words_to_number";
-import { inrToWords } from "./inr_to_words";
-import { convertDollarsAndCents } from "./usd_to_words";
-import { useExchangeRate } from "./fetch_exchange_rate";
-
 export default function Command(
   props: LaunchProps<{ arguments: { inrValue: string } }>,
 ) {
@@ -37,27 +36,42 @@ export default function Command(
     if (formattedCurrencyArr.length === 0) return null;
 
     const formattedCurrency = "₹" + formattedCurrencyArr.join(" ");
-    const intINRValue = inrWordsToNumber(formattedCurrencyArr);
-    if (intINRValue === "NaN" || intINRValue === "" || intINRValue === "0")
-      return null;
 
-    const exchangeRate = parseFloat((1 / rate).toFixed(5));
-    const inrNum = parseFloat(intINRValue);
-    if (isNaN(inrNum)) return null;
+    try {
+      const intINRValue = inrWordsToNumber(formattedCurrencyArr);
+      if (intINRValue === "NaN" || intINRValue === "" || intINRValue === "0")
+        return null;
 
-    const outputUSD = inrNum * exchangeRate;
+      const exchangeRate = parseFloat((1 / rate).toFixed(5));
+      const inrNum = parseFloat(intINRValue);
+      if (isNaN(inrNum)) return null;
 
-    return {
-      formattedCurrency,
-      inrWithComma: "₹" + commaINStandard(inrNum),
-      zerosAtLast: countLastZeros(intINRValue),
-      inrShort: inrToWords(intINRValue, true, true),
-      inrWords: inrToWords(intINRValue),
-      absUsd: "$" + commaUSStandard(outputUSD),
-      shortUsd: "$" + convertToInternationalCurrencySystem(outputUSD),
-      usdWords: convertDollarsAndCents(outputUSD),
-    };
+      const outputUSD = inrNum * exchangeRate;
+
+      return {
+        formattedCurrency,
+        inrWithComma: "₹" + commaINStandard(inrNum),
+        inrShort: inrToWords(intINRValue, true, true),
+        inrWords: inrToWords(intINRValue),
+        absUsd: "$" + commaUSStandard(outputUSD),
+        shortUsd: "$" + convertToInternationalCurrencySystem(outputUSD),
+        usdWords: convertDollarsAndCents(outputUSD),
+      };
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Invalid input";
+      return { error: message } as const;
+    }
   }, [input, rate]);
+
+  if (result && "error" in result) {
+    return (
+      <Detail
+        markdown={`## Invalid Input
+
+${result.error}`}
+      />
+    );
+  }
 
   const exchangeInfo = `₹1 = $${(1 / rate).toFixed(5)}`;
 
@@ -65,11 +79,10 @@ export default function Command(
     <Detail
       isLoading={isLoading}
       markdown={[
-        `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`,
         `$$\\color{gray}\\Large\\text{${result.formattedCurrency}} \\;\\rightarrow\\; \\color{white}\\Huge\\text{${result.shortUsd.replace("$", "\\$")}}$$`,
         ``,
         `---`,
-        `$$\\large\\text{Exchange} \\quad \\normalsize\\color{gray}\\text{${rate}} \\quad \\text{${exchangeInfo.replace("$", "\\$")}} \\quad \\scriptsize\\color{darkgray}\\text{Updated ${timeAgo(lastUpdated)}}$$`,
+        `$$\\scriptsize\\text{Exchange} \\quad \\color{gray}\\text{${rate}} \\quad \\text{${exchangeInfo.replace("$", "\\$")}} \\quad \\color{#555555}\\text{Updated ${timeAgo(lastUpdated)}}$$`,
         ``,
         `---`,
         ``,
@@ -109,6 +122,10 @@ export default function Command(
       }
     />
   ) : (
-    <Detail markdown="## Currency Converter\n\nEnter an INR value" />
+    <Detail
+      markdown={`## Invalid Input
+
+Couldn't parse **"${input}"**. Try something like **15 lakh** or **2.5 crore**.`}
+    />
   );
 }

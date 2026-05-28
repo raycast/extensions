@@ -70,12 +70,5 @@ export function reformatCurrencyArray(currency: string): string[] {
 }
 
 function isNumeric(str: string): boolean {
-  if (typeof str != "string") throw new Error("we only process strings!");
-  if (isNaN(Number(str))) return false;
-  return true;
+  return !isNaN(Number(str));
 }
-
-export const hardCodedData = {
-  exchangeRate: 86.64,
-  exchangeRateFetchButtonDisableTimeout: 3600000,
-};

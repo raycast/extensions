@@ -54,11 +54,13 @@ function numberToUSWords(usDollars: number): string {
 export function convertDollarsAndCents(amount: number): string {
   if (isNaN(amount)) return "Invalid Number: " + amount;
   const [dollars, centsPart] = amount.toString().split(".");
-  const cents = centsPart ? parseInt(centsPart.slice(0, 2)) : 0;
+  const cents = centsPart
+    ? parseInt(centsPart.slice(0, 2).padEnd(2, "0"), 10)
+    : 0;
   const extraDecimals = centsPart && centsPart.length > 2;
   let dollarPart = dollars
-    ? numberToUSWords(parseInt(dollars)) +
-      (parseInt(dollars) === 1 ? " Dollar" : " Dollars")
+    ? numberToUSWords(parseInt(dollars, 10)) +
+      (parseInt(dollars, 10) === 1 ? " Dollar" : " Dollars")
     : "";
   const centPart = cents
     ? numberToUSWords(cents) + (cents === 1 ? " Cent" : " Cents")
