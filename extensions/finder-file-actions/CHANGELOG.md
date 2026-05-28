@@ -1,6 +1,6 @@
 # Finder File Actions Changelog
 
-## [Pinned folder custom names] - 2026-05-20
+## [Pinned folder custom names] - {PR_MERGE_DATE}
 
 - Added custom names for pinned folders
 
