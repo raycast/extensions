@@ -1,5 +1,11 @@
 # Logos Search Changelog
 
+## [Unreleased] - {PR_MERGE_DATE}
+
+### Fixed
+- Fixed the verse feature to open directly in Logos Bible Software instead of the browser.
+- Changed default open method to use the `logosres` scheme.
+
 ## [1.2.0] - 2026-01-05
 
 ### Added

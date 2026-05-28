@@ -1,4 +1,5 @@
 import { Clipboard, LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
 
 type Preferences = {
   defaultVersion: string;
@@ -127,15 +128,6 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     return;
   }
 
-  if (preferences.openMethod === "logosres scheme") {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "logosres not supported",
-      message: "Switch Open Method to ref.ly URL until a logosres mapping table is available.",
-    });
-    return;
-  }
-
   const versionAliases = parseVersionAliases(preferences.versionAliases);
   const resolution = resolveVersionAndReference(input, versionAliases, defaultVersion);
 
@@ -154,21 +146,54 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     return;
   }
 
-  const url = `https://ref.ly/${encodeURIComponent(reference)};${resolution.version}`;
+  const encodedRef = encodeURIComponent(reference);
+  const version = resolution.version;
+  const versionUpper = version.toUpperCase();
 
-  try {
-    if (preferences.copyUrlToClipboard) {
-      await Clipboard.copy(url);
-    }
-    await open(url);
-    await showHUD("Opening in Logos");
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Logos",
-      message: `Try this URL in a browser: ${url}`,
-    });
+  const uris: string[] = [];
+
+  if (preferences.openMethod === "logosres scheme") {
+    // Try to target specific translation via logosres
+    uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=Bible.${encodedRef}`);
+    uris.push(`logosres:${version};ref=Bible${versionUpper}.${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=Bible${versionUpper}.${encodedRef}`);
+    uris.push(`logosres:${version};ref=${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=${encodedRef}`);
+    // Try generic logosref (opens prioritized Bible)
+    uris.push(`logosref:Bible.${encodedRef}`);
+    uris.push(`logosref:${encodedRef}`);
+    uris.push(`logosres:Bible;ref=Bible.${encodedRef}`);
+    // Fallback to web link
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
+  } else {
+    // If ref.ly URL method is selected, try that first
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
+    // Direct scheme fallbacks
+    uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
+    uris.push(`logosref:Bible.${encodedRef}`);
   }
+
+  let lastError: unknown;
+  for (const uri of uris) {
+    try {
+      const isHttp = uri.startsWith("http://") || uri.startsWith("https://");
+      if (preferences.copyUrlToClipboard) {
+        await Clipboard.copy(uri);
+      }
+      await open(uri, isHttp ? undefined : LOGOS_BUNDLE_ID);
+      await showHUD("Opening in Logos");
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Could not open Logos",
+    message: lastError instanceof Error ? lastError.message : String(lastError),
+  });
 }
 
 function parseVersionAliases(raw?: string): AliasMap {

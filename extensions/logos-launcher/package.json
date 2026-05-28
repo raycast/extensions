@@ -50,7 +50,7 @@
           "type": "dropdown",
           "title": "Open Method",
           "description": "Choose how Raycast opens the verse in Logos.",
-          "defaultValue": "ref.ly URL",
+          "defaultValue": "logosres scheme",
           "required": true,
           "data": [
             {
