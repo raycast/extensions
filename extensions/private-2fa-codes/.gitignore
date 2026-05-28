@@ -1,0 +1,9 @@
+node_modules
+dist
+.raycast
+*.log
+*.aegis
+*.2fas
+*.json.backup
+*.csv
+*.txt

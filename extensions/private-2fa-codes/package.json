@@ -1,0 +1,43 @@
+{
+  "name": "private-2fa-codes",
+  "title": "Auth",
+  "description": "Compute TOTP codes from local Raycast storage.",
+  "icon": "icon.png",
+  "author": "fractal_",
+  "platforms": ["Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "list-codes",
+      "title": "List 2FA Codes",
+      "description": "Shows current TOTP codes and manages local accounts.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "revealCodes",
+      "title": "Display Codes",
+      "description": "When disabled, codes are hidden in the list but can still be copied.",
+      "type": "checkbox",
+      "label": "Show codes in Raycast",
+      "required": true,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.101.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3"
+  }
+}
