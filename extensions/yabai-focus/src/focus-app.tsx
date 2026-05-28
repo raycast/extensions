@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  clearSearchBar,
   Color,
   closeMainWindow,
   getApplications,
@@ -445,12 +446,14 @@ export default function Command() {
   const [appIconsByName, setAppIconsByName] = useState<AppIconsByName>(() => new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [searchText, setSearchText] = useState("");
   const isMountedRef = useRef(true);
   const isRefreshingRef = useRef(false);
   const pendingRefreshRef = useRef<RefreshOptions | undefined>(undefined);
 
   useEffect(() => {
     isMountedRef.current = true;
+    void clearSearchBar({ forceScrollToTop: true });
 
     return () => {
       isMountedRef.current = false;
@@ -564,8 +567,26 @@ export default function Command() {
     return fallbackPaths;
   }, [appIconsByName, windows]);
 
+  const focusSelectedWindow = useCallback(async (window: YabaiWindow) => {
+    setSearchText("");
+
+    try {
+      await clearSearchBar({ forceScrollToTop: true });
+    } catch {
+      // Keep focusing usable even if Raycast cannot clear the search bar.
+    }
+
+    await focusWindow(window);
+  }, []);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search yabai windows/apps">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search yabai windows/apps"
+      searchText={searchText}
+      filtering
+      onSearchTextChange={setSearchText}
+    >
       <List.EmptyView title={emptyTitle} description={emptyDescription} />
       {windows.map((window) => (
         <List.Item
@@ -577,7 +598,7 @@ export default function Command() {
           keywords={[window.app, window.title, String(window.space)]}
           actions={
             <ActionPanel>
-              <Action title="Focus Window" icon={Icon.Window} onAction={() => void focusWindow(window)} />
+              <Action title="Focus Window" icon={Icon.Window} onAction={() => void focusSelectedWindow(window)} />
               <Action.CopyToClipboard
                 title="Copy Yabai Focus Command"
                 shortcut={{ modifiers: ["cmd"], key: "." }}
