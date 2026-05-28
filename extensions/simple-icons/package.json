@@ -145,25 +145,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3",
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
     "array-shuffle": "^4.1.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.3.0",
     "fast-fuzzy": "^1.12.0",
-    "got": "^15.0.0",
+    "got": "^15.0.5",
     "lodash": "^4.18.1",
     "pacote": "^21.5.0",
     "raycast-cross-extension": "^0.2.3",
-    "semver": "^7.7.4"
+    "semver": "^7.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.24",
     "@types/pacote": "^11.1.8",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/semver": "^7.7.1",
     "eslint": "^9.39.2",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   }
 }

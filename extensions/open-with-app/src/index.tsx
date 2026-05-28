@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting, usePromise, showFailureToast } from "@raycast/utils";
 import { homedir } from "node:os";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PROVIDERS, resolveActiveProvider } from "./file-managers";
 
 /**
@@ -73,10 +73,12 @@ function makeTitle(items: FileSystemItem[]) {
 }
 
 function ApplicationListItem({
+  id,
   app,
   items,
   onAction,
 }: {
+  id: string;
   app: Application;
   items: FileSystemItem[];
   onAction?: (app: Application) => void;
@@ -89,6 +91,7 @@ function ApplicationListItem({
   }
   return (
     <List.Item
+      id={id}
       title={app.name}
       icon={{ fileIcon: app.path }}
       actions={
@@ -162,19 +165,41 @@ export default function Command() {
     filterOtherList(sortedOtherApps.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, isLoading]);
 
+  // Seed the selection to the first Recommended app on initial load and on
+  // search changes. Without this, Raycast 2 auto-selects the first item of
+  // "Other Applications". We don't sync selectedItemId from onSelectionChange
+  // so Raycast handles arrow-key navigation internally without re-applying the
+  // prop on every selection change (which caused a one-row scroll on the first
+  // arrow press).
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
+  const lastDefaultFirstIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const firstId = filteredRecommendedList?.[0]?.path ?? filteredOtherList?.[0]?.path;
+    if (firstId !== lastDefaultFirstIdRef.current) {
+      lastDefaultFirstIdRef.current = firstId;
+      setSelectedItemId(firstId);
+    }
+  }, [filteredRecommendedList, filteredOtherList]);
+
   return (
-    <List filtering={false} onSearchTextChange={setSearchText} isLoading={isLoading} searchBarPlaceholder={placeholder}>
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      searchBarPlaceholder={placeholder}
+      selectedItemId={selectedItemId}
+    >
       {items.length > 0 && !isLoading && filteredRecommendedList.length > 0 && (
         <List.Section title="Recommended Applications">
           {filteredRecommendedList.map((app) => (
-            <ApplicationListItem key={app.path} app={app} items={items} onAction={visitScope} />
+            <ApplicationListItem id={app.path} key={app.path} app={app} items={items} onAction={visitScope} />
           ))}
         </List.Section>
       )}
       {items.length > 0 && !isLoading && filteredOtherList.length > 0 && (
         <List.Section title="Other Applications">
           {filteredOtherList.map((app) => (
-            <ApplicationListItem key={app.path} app={app} items={items} onAction={visitAll} />
+            <ApplicationListItem id={app.path} key={app.path} app={app} items={items} onAction={visitAll} />
           ))}
         </List.Section>
       )}

@@ -1,7 +1,12 @@
 import { Toast, showHUD, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
+import { formatDurationBreakdown } from "./session-time";
 import { AMPHETAMINE_DOWNLOAD_URL, checkIfAmphetamineInstalled } from "./utils";
+
+function durationToTotalMinutes(duration: number, interval: "minutes" | "hours"): number {
+  return interval === "hours" ? duration * 60 : duration;
+}
 
 interface CommandArgs {
   duration: number;
@@ -11,7 +16,6 @@ interface CommandArgs {
 export default async function Command(args?: CommandArgs) {
   const duration = args?.duration;
   const interval = args?.interval;
-  const parsedInterval = duration === 1 ? interval?.substring(0, interval.length - 1) : interval;
 
   const toast = new Toast({
     title: "Starting a new session",
@@ -56,6 +60,10 @@ export default async function Command(args?: CommandArgs) {
     end tell
   `);
 
-  await showHUD(duration ? `New session started with ${duration} ${parsedInterval}` : "New default session started");
+  await showHUD(
+    duration && interval
+      ? `New session started: ${formatDurationBreakdown(durationToTotalMinutes(duration, interval))}`
+      : "New default session started",
+  );
   return true;
 }

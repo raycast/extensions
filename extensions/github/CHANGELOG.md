@@ -4,6 +4,10 @@
 
 - Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Fix starred repositories loading] - 2026-05-20
 
 - Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.

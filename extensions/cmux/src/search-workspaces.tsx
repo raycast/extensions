@@ -22,14 +22,15 @@ interface CmuxTree {
 }
 
 interface CmuxWindow {
-  ref: string;
+  ref?: string;
   current?: boolean;
   workspaces?: CmuxWorkspace[];
 }
 
 interface CmuxWorkspace {
-  ref: string;
-  title: string;
+  ref?: string;
+  title?: string;
+  name?: string;
   description?: string | null;
   selected?: boolean;
   panes?: CmuxPane[];
@@ -40,12 +41,14 @@ interface CmuxPane {
 }
 
 interface CmuxSurface {
-  ref: string;
-  title: string;
+  ref?: string;
+  title?: string | null;
+  name?: string | null;
   selected?: boolean;
   selected_in_pane?: boolean;
   active?: boolean;
   here?: boolean;
+  focused?: boolean;
   type?: string;
   tty?: string | null;
   url?: string | null;
@@ -55,16 +58,26 @@ function compactKeywords(values: Array<string | null | undefined>) {
   return [...new Set(values.map((value) => value?.replace(/\s+/g, " ").trim()).filter(Boolean))] as string[];
 }
 
-function getWorkspaceSurfaces(workspace: CmuxWorkspace): Surface[] {
+function getWorkspaceSurfaces(workspace: CmuxWorkspace, workspaceRef: string, workspaceName: string): Surface[] {
   return (workspace.panes ?? []).flatMap((pane) =>
-    (pane.surfaces ?? []).map((surface) => ({
-      ref: surface.ref,
-      name: surface.title,
-      workspaceRef: workspace.ref,
-      workspaceName: workspace.title,
-      isSelected: Boolean(surface.selected ?? surface.selected_in_pane),
-      isActive: Boolean(surface.active ?? surface.here),
-    })),
+    (pane.surfaces ?? []).flatMap((surface) => {
+      if (!surface.ref) {
+        return [];
+      }
+
+      const name = surface.title ?? surface.name ?? surface.ref;
+      return [
+        {
+          ref: surface.ref,
+          name,
+          workspaceRef,
+          workspaceName,
+          isSelected: Boolean(surface.selected ?? surface.selected_in_pane),
+          isActive: Boolean(surface.active ?? surface.here ?? surface.focused),
+          keywords: compactKeywords([workspace.description, surface.url]),
+        },
+      ];
+    }),
   );
 }
 
@@ -78,29 +91,118 @@ function getWorkspaceKeywords(workspace: CmuxWorkspace, surfaces: Surface[]) {
   ]);
 }
 
-async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }> {
-  const tree = JSON.parse(await execFileAsync("cmux", ["tree", "--all", "--json"])) as CmuxTree;
+function parseJsonTreeData(output: string): { windows: Window[]; surfaces: Surface[] } {
+  const tree = JSON.parse(output) as CmuxTree;
 
   const surfaces: Surface[] = [];
   const windows =
     tree.windows?.map((window) => ({
-      ref: window.ref,
+      ref: window.ref ?? "window",
       isCurrent: Boolean(window.current),
-      workspaces: (window.workspaces ?? []).map((workspace) => {
-        const workspaceSurfaces = getWorkspaceSurfaces(workspace);
+      workspaces: (window.workspaces ?? []).flatMap((workspace) => {
+        const ref = workspace.ref;
+        const name = workspace.title ?? workspace.name;
+
+        if (!ref || !name) {
+          return [];
+        }
+
+        const workspaceSurfaces = getWorkspaceSurfaces(workspace, ref, name);
         surfaces.push(...workspaceSurfaces);
 
-        return {
-          ref: workspace.ref,
-          name: workspace.title,
-          description: workspace.description,
-          isSelected: Boolean(workspace.selected),
-          keywords: getWorkspaceKeywords(workspace, workspaceSurfaces),
-        };
+        return [
+          {
+            ref,
+            name,
+            description: workspace.description,
+            isSelected: Boolean(workspace.selected),
+            keywords: getWorkspaceKeywords(workspace, workspaceSurfaces),
+          },
+        ];
       }),
     })) ?? [];
 
   return { windows, surfaces };
+}
+
+function parseTextTreeData(output: string): { windows: Window[]; surfaces: Surface[] } {
+  const lines = output.split("\n");
+
+  const windows: Window[] = [];
+  const surfaces: Surface[] = [];
+  let currentWindow: Window | null = null;
+  let currentWorkspaceRef = "";
+  let currentWorkspaceName = "";
+
+  for (const line of lines) {
+    const windowMatch = line.match(/^window\s+(window:\d+)(.*)/);
+    if (windowMatch) {
+      currentWindow = {
+        ref: windowMatch[1],
+        isCurrent: windowMatch[2].includes("[current]"),
+        workspaces: [],
+      };
+      windows.push(currentWindow);
+      continue;
+    }
+
+    const workspaceMatch = line.match(/workspace\s+(workspace:\d+)\s+"([^"]+)"(.*)/);
+    if (workspaceMatch && currentWindow) {
+      const ref = workspaceMatch[1];
+      const name = workspaceMatch[2];
+      const meta = workspaceMatch[3];
+      const isSelected = meta.includes("[selected]");
+      currentWorkspaceRef = ref;
+      currentWorkspaceName = name;
+      currentWindow.workspaces.push({ ref, name, isSelected, keywords: [] });
+      continue;
+    }
+
+    const surfaceMatch = line.match(/surface\s+(surface:\d+)\s+\[[^\]]+\]\s+"([^"]+)"/);
+    if (surfaceMatch) {
+      const ref = surfaceMatch[1];
+      const name = surfaceMatch[2];
+      const isSelected = line.includes("[selected]");
+      const isActive = line.includes("◀ active");
+
+      surfaces.push({
+        ref,
+        name,
+        workspaceRef: currentWorkspaceRef,
+        workspaceName: currentWorkspaceName,
+        isSelected,
+        isActive,
+      });
+    }
+  }
+
+  return { windows, surfaces };
+}
+
+function isJsonFlagUnsupported(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return (
+    message.includes("json") &&
+    (message.includes("unknown") ||
+      message.includes("unsupported") ||
+      message.includes("unrecognized") ||
+      message.includes("invalid option") ||
+      message.includes("no such option"))
+  );
+}
+
+async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }> {
+  try {
+    const output = await execFileAsync("cmux", ["tree", "--all", "--json"]);
+    return parseJsonTreeData(output);
+  } catch (error) {
+    if (!isJsonFlagUnsupported(error)) {
+      throw error;
+    }
+
+    const output = await execFileAsync("cmux", ["tree", "--all"]);
+    return parseTextTreeData(output);
+  }
 }
 
 async function selectWorkspace(ref: string) {
