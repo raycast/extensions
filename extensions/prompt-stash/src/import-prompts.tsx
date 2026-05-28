@@ -8,7 +8,7 @@ type Strategy = "skip" | "replace" | "duplicate";
 
 interface ImportFormValues {
   files: string[];
-  strategy: Strategy;
+  strategy: string;
 }
 
 export default function Command() {
@@ -19,7 +19,8 @@ export default function Command() {
     validation: {
       files: FormValidation.Required,
     },
-    async onSubmit({ files, strategy }) {
+    async onSubmit({ files, strategy: strategyValue }) {
+      const strategy = strategyValue as Strategy;
       try {
         const fileContent = await readFile(files[0], "utf-8");
         const imported = parseExportFile(fileContent);
