@@ -54,7 +54,7 @@ Every layer of tmux's `session → window → pane` hierarchy is a first-class c
 
 - _Peek at what an agent just printed_ → **View Pane Content** opens a Detail view of `capture-pane` output, no attach required.
 - _Kill the one that's stuck_ → **Kill Pane** (just one) or **Kill Other Panes in Window** (keep the working one, nuke the rest).
-- _Swap two panes without attaching_ → **Mark Pane** on one, **Swap with Marked Pane** on the other — or just **Ctrl+Opt+Arrow** to swap a pane with an adjacent one in a single step.
+- _Swap two panes without attaching_ → **Mark Pane** on one, **Swap with Marked Pane** on the other — or use **Swap Left / Right / Up / Down** to swap a pane with an adjacent one in a single step.
 - _Promote the build agent into its own window_ → **Break to New Window**.
 - _Free up the layout and start fresh_ → **New Window in This Session** with an optional start directory.
 
@@ -154,7 +154,7 @@ Per-pane data shown in the list: command, current working directory, PID, dimens
 | Copy Command | – | Copy the command currently running in the pane. |
 | Mark Pane / Unmark Pane | Cmd+M | Sets tmux's global marked-pane flag (`select-pane -m`) or clears it (`select-pane -M`). The marked pane gets a `MARKED` tag in the list. |
 | Swap with Marked Pane | Cmd+Shift+S | `swap-pane -t` — shown only when a different pane is currently marked, so you cannot accidentally swap with the wrong source. |
-| Swap Left / Right / Up / Down | Ctrl+Opt+← / → / ↑ / ↓ | `swap-pane -s <pane> -t <neighbor> -d` — swap the selected pane with its nearest neighbor in that direction (same window). Shown only when a neighbor exists in that direction; never changes the active pane. |
+| Swap Left / Right / Up / Down | – | `swap-pane -s <pane> -t <neighbor> -d` — swap the selected pane with its nearest neighbor in that direction (same window). Shown only when a neighbor exists; never changes the active pane. Assign your own shortcut in Raycast. |
 | Clear Pane History | Cmd+Shift+K | `clear-history -t` — release scrollback memory or hide error context. |
 | Kill Pane | Ctrl+X | Destructive, confirm. |
 | Kill Other Panes in Window | Ctrl+Shift+X | Destructive, confirm — keeps the focused pane, kills its window-siblings. |
@@ -197,7 +197,7 @@ Everything works against any prefix key (default `Ctrl+b`, or remapped like `Ctr
 2. Navigate to the **destination** pane.
 3. Press **Cmd+Shift+S** (Swap with Marked Pane). The layout swaps without ever leaving Raycast.
 
-> **Faster for adjacent panes:** skip the mark step — on a pane, press **Ctrl+Opt+Arrow** (or use **Swap Left / Right / Up / Down**) to swap it with its neighbor in that direction in one step.
+> **Faster for adjacent panes:** skip the mark step — use **Swap Left / Right / Up / Down** on a pane to swap it with its neighbor in that direction in one step.
 
 ### 6. Promote a runaway pane into its own window
 1. On the pane that is monopolizing screen real estate → press **Cmd+B** (Break to New Window).

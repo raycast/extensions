@@ -5,7 +5,6 @@ import {
   Clipboard,
   Color,
   Icon,
-  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -30,15 +29,11 @@ import { Direction, findNeighbor } from "../lib/layout";
 import { PaneDetail } from "./pane-detail";
 import { NewWindowForm, RenameWindowForm } from "./window-forms";
 
-const SWAP_DIRECTIONS: {
-  dir: Direction;
-  title: string;
-  key: Keyboard.KeyEquivalent;
-}[] = [
-  { dir: "left", title: "Swap Left", key: "arrowLeft" },
-  { dir: "right", title: "Swap Right", key: "arrowRight" },
-  { dir: "up", title: "Swap Up", key: "arrowUp" },
-  { dir: "down", title: "Swap Down", key: "arrowDown" },
+const SWAP_DIRECTIONS: { dir: Direction; title: string }[] = [
+  { dir: "left", title: "Swap Left" },
+  { dir: "right", title: "Swap Right" },
+  { dir: "up", title: "Swap Up" },
+  { dir: "down", title: "Swap Down" },
 ];
 
 export function PaneItem({
@@ -130,7 +125,7 @@ export function PaneItem({
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Move / Swap">
-            {SWAP_DIRECTIONS.map(({ dir, title, key }) => {
+            {SWAP_DIRECTIONS.map(({ dir, title }) => {
               const neighbor = findNeighbor(windowPanes, pane, dir);
               if (!neighbor) return null;
               return (
@@ -138,7 +133,6 @@ export function PaneItem({
                   key={dir}
                   title={title}
                   icon={Icon.Switch}
-                  shortcut={{ modifiers: ["ctrl", "opt"], key }}
                   onAction={async () => {
                     try {
                       await swapPanes(pane.id, neighbor.id);
