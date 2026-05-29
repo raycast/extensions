@@ -6,14 +6,8 @@ const DEFAULT_CLI_PATH = "delphitools";
 const DEFAULT_DEBOUNCE_DELAY = 250;
 const OUTPUT_NAMESPACE = "delphitools-raycast-extension";
 
-type ExtensionPreferences = {
-  cliPath?: string;
-  defaultOutputDirectory?: string;
-  cliDebounceDelay?: string;
-};
-
-function getPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function getDelphitoolsCliPath(): string {

@@ -1,4 +1,0 @@
-interface:
-  display_name: "delphitools Raycast Command"
-  short_description: "Create Raycast commands for delphitools"
-  default_prompt: "Use $delphitools-raycast-command to create a Raycast command for a delphitools CLI tool."
