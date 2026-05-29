@@ -1,5 +1,9 @@
 # BetterDisplay Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+* Added input source switching via DDC, reading from BetterDisplay's custom input source list.
+
 ## [Feature] - 2025-04-17
 
 * Added the ability to control the displays using Raycast AI (Raycast Pro required).

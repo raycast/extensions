@@ -28,6 +28,7 @@ import {
   availabilityContrast,
 } from "./commands";
 import ResolutionList from "./list-resolutions";
+import InputSourceList from "./list-input-sources";
 import events from "./events";
 
 type FilterOption = "all" | "displays" | "virtualScreens";
@@ -206,6 +207,12 @@ function DisplayItem({ display, status, resolution, isMain, onToggle }: DisplayI
                 icon={Icon.ArrowsExpand}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                 target={<ResolutionList display={{ tagID: display.tagID, name: display.name }} />}
+              />
+              <Action.Push
+                title="Change Input Source"
+                icon={Icon.Switch}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                target={<InputSourceList display={{ tagID: display.tagID, name: display.name }} />}
               />
             </>
           )}

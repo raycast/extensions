@@ -201,6 +201,50 @@ export async function fetchDisplayResolution(tagID: string): Promise<string> {
   }
 }
 
+export type InputSource = {
+  vcpValue: string;
+  label: string;
+  ddc2ab: boolean;
+  enabled: boolean;
+};
+
+export async function fetchInputSources(tagID: string): Promise<InputSource[]> {
+  try {
+    const { stdout } = await execPromise(
+      `defaults read pro.betterdisplay.BetterDisplay ddcCustomInputSources@Display:${tagID}`,
+    );
+    const sources = JSON.parse(stdout.trim()) as {
+      value: number;
+      description: string;
+      ddc2ab: boolean;
+      priority: number;
+    }[];
+
+    const withEnabled = sources.map((s) => ({
+      vcpValue: String(s.value),
+      label: s.description,
+      ddc2ab: s.ddc2ab,
+      enabled: s.priority > 0,
+    }));
+
+    withEnabled.sort((a, b) => {
+      if (a.enabled !== b.enabled) return a.enabled ? -1 : 1;
+      return a.label.localeCompare(b.label);
+    });
+
+    return withEnabled;
+  } catch {
+    return [];
+  }
+}
+
+export async function setInputSource(tagID: string, vcpValue: string, ddc2ab: boolean): Promise<string> {
+  const ddcFlag = ddc2ab ? "ddcAlt" : "ddc";
+  const vcpCode = ddc2ab ? "inputSelectAlt" : "inputSelect";
+  const command = `${cmdPath} set -tagID=${tagID} -${ddcFlag} -vcp=${vcpCode} -value=${vcpValue}`;
+  return runCommand(command, `Error setting input source for tagID ${tagID}`);
+}
+
 export async function fetchMainDisplay(): Promise<Display | null> {
   try {
     const { stdout } = await execPromise(`${cmdPath} get -identifiers -displayWithMainStatus`);
