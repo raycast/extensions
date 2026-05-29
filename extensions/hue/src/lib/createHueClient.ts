@@ -4,8 +4,7 @@ import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import dns from "dns";
 import HueClient from "./HueClient";
 import { getCaCertificate } from "../helpers/hueNetworking";
-
-const CONNECTION_TIMEOUT_MS = 5000;
+import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(
   bridgeConfig: BridgeConfig,

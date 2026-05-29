@@ -1,4 +1,4 @@
-import { APP_NAME } from "./constants";
+import { APP_NAME, CONNECTION_TIMEOUT_MS } from "./constants";
 import * as tls from "tls";
 import { PeerCertificate } from "tls";
 import * as https from "https";
@@ -19,6 +19,7 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
       hostname: "discovery.meethue.com",
       path: "/",
       method: "GET",
+      timeout: CONNECTION_TIMEOUT_MS,
     };
 
     const request = https.request(options, (response) => {
@@ -49,6 +50,11 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
         console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}, ${id}`);
         return resolve({ ipAddress, id });
       });
+    });
+
+    request.on("timeout", () => {
+      request.destroy();
+      return reject("Timed out finding a Hue Bridge using MeetHue's public API");
     });
 
     request.on("error", (error) => {
@@ -96,6 +102,7 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
         hostname: ipAddress,
         port: 443,
         agent: getBridgeHttpsAgent(bridgeId),
+        timeout: CONNECTION_TIMEOUT_MS,
         headers: {
           "Content-Type": "application/json",
         },
@@ -117,6 +124,15 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
         });
       },
     );
+
+    request.on("timeout", () => {
+      request.destroy();
+      reject(new Error("Request to Hue Bridge timed out"));
+    });
+
+    request.on("error", (error) => {
+      return reject(error);
+    });
 
     request.write(
       JSON.stringify({
@@ -151,6 +167,11 @@ export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
         resolve(cert.subject.CN);
       },
     );
+
+    socket.setTimeout(CONNECTION_TIMEOUT_MS, () => {
+      socket.destroy();
+      reject(new Error("Timed out fetching bridge ID from certificate"));
+    });
 
     socket.on("error", (error) => {
       socket.destroy();
