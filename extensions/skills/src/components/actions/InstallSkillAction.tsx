@@ -176,7 +176,7 @@ function AgentPickerInstallForm({
   const selectableAgents = agents.filter((a) => !installedAgents.has(a));
   const defaultAgentNames = getDefaultAgents();
   const [selected, setSelected] = useState<Set<string>>(
-    new Set(selectableAgents.filter((a) => defaultAgentNames.includes(a))),
+    new Set(selectableAgents.filter((a) => defaultAgentNames.some((d) => d.toLowerCase() === a.toLowerCase()))),
   );
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
