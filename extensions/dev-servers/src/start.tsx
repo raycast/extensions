@@ -29,8 +29,13 @@ import * as path from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { promisify } from "node:util";
 import { DEFAULT_TERMINAL } from "./constants";
-import { RecentProject, STORAGE_KEY, recordSeenBatch } from "./recents";
-import { canonicalCwd, fetchServers, findProjectRoot } from "./servers";
+import {
+  RecentProject,
+  STORAGE_KEY,
+  recordSeenBatch,
+  removeRecent,
+} from "./recents";
+import { fetchServers, findProjectRoot } from "./servers";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -345,6 +350,15 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
   // Hide entries that are currently running (the dashboard owns them) or
   // whose folder no longer exists on disk. We keep them in storage so a
   // remounted external drive or stopped server reappears.
+  //
+  // The existence check is intentionally synchronous despite running on the
+  // render path. It's bounded (≤ MAX_RECENTS = 30 stats), runs only when the
+  // recents/running sets change (this view doesn't poll on an interval), and a
+  // local-disk stat is sub-millisecond. Keeping it sync avoids the alternative's
+  // flash: an async check would paint all rows first, then pop out the dead
+  // ones a beat later. Unlike guessFramework (moved off-render because it parses
+  // package.json), this is a single cheap metadata syscall, so the tradeoff
+  // favors no flash over shaving microseconds.
   const visible = useMemo(() => {
     return (recents ?? [])
       .filter((r) => {
@@ -358,14 +372,16 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
       .sort((a, b) => b.lastSeen - a.lastSeen);
   }, [recents, runningByCwd]);
 
-  // Drive deletion through useLocalStorage's setValue so the hook is the
-  // only writer. Earlier versions wrote directly to LocalStorage and then
-  // called setValue([...recents]) to force a re-render, but useLocalStorage
-  // doesn't re-read storage on setValue, so that pattern could overwrite
-  // the deletion with the in-memory (pre-delete) value.
+  // Delete via removeRecent, which reads fresh from storage and drops only
+  // the targeted entry. Filtering the hook's in-memory `recents` instead
+  // would clobber any entries written out-of-band since the hook last read:
+  // the dashboard's recordSeenBatch poll and this command's own mount-time
+  // migration both write directly to LocalStorage, and useLocalStorage does
+  // not re-read on those external writes. We then feed the freshly-written
+  // list back through setRecents so the hook's state matches storage (same
+  // value, so no re-clobber).
   async function handleRemove(targetCwd: string) {
-    const target = canonicalCwd(targetCwd);
-    await setRecents((recents ?? []).filter((r) => r.cwd !== target));
+    await setRecents(await removeRecent(targetCwd));
   }
 
   const isLoading = isLoadingRecents || isLoadingRunning;

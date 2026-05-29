@@ -98,6 +98,20 @@ export async function recordSeen(
   await recordSeenBatch([proj]);
 }
 
+// Remove a single recent by cwd. Reads the current list fresh from storage
+// (rather than filtering a caller-held snapshot) so a concurrent writer —
+// the dashboard's recordSeenBatch poll, or this command's own mount-time
+// migration — isn't clobbered: we only ever drop the one targeted entry and
+// preserve everything else as it stands on disk. Returns the resulting list
+// so a useLocalStorage caller can sync its in-memory state with the same
+// value we just wrote, keeping hook and storage in agreement.
+export async function removeRecent(cwd: string): Promise<RecentProject[]> {
+  const target = canonicalCwd(cwd);
+  const next = (await readAll()).filter((r) => canonicalCwd(r.cwd) !== target);
+  await writeAll(next);
+  return next;
+}
+
 // Attach a favicon to the recent entry matching the given cwd, no-op if
 // no matching entry exists yet (the next recordSeen will add one). Skips
 // the write when the favicon is already up to date so the dashboard's
