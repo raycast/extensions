@@ -1,4 +1,4 @@
-import { setInputSource } from "../commands";
+import { fetchInputSources, setInputSource } from "../commands";
 
 type Input = {
   /**
@@ -9,13 +9,11 @@ type Input = {
    * The VCP value of the input source to switch to (e.g., "208", "144").
    */
   vcpValue: string;
-  /**
-   * Whether to use DDC alternate addressing (LG alt). Set to true for LG displays.
-   */
-  ddc2ab: boolean;
 };
 
 export default async function toolSetInputSource(input: Input) {
-  await setInputSource(input.tagID, input.vcpValue, input.ddc2ab);
-  return `Input source changed to ${input.vcpValue}`;
+  const sources = await fetchInputSources(input.tagID);
+  const source = sources.find((s) => s.vcpValue === input.vcpValue);
+  await setInputSource(input.tagID, input.vcpValue, source?.ddc2ab ?? false);
+  return `Input source changed to ${source?.label ?? input.vcpValue}`;
 }

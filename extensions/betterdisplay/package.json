@@ -147,7 +147,7 @@
     }
   ],
   "ai": {
-    "instructions": "Always execute the 'Get Displays' command first to get a list of all available displays. The 'Get Main Display' command will return information about the main display. Every command that requires a display tagID, first run the 'Get Displays' command to get the tagID of the display you want to interact with. When setting brightness or contrast, the value should always be rounded to 1 decimal place. When changing the resolution, never suggest a resolution that is marked unsafe unless specifically requested by the user. PIP stands for Picture in Picture.",
+    "instructions": "Always execute the 'Get Displays' command first to get a list of all available displays. The 'Get Main Display' command will return information about the main display. Every command that requires a display tagID, first run the 'Get Displays' command to get the tagID of the display you want to interact with. When setting brightness or contrast, the value should always be rounded to 1 decimal place. When changing the resolution, never suggest a resolution that is marked unsafe unless specifically requested by the user. PIP stands for Picture in Picture. When changing the input source, first call 'Get Input Sources' with the display's tagID to retrieve the available sources and their vcpValue, then pass those values to 'Set Input Source'.",
     "evals": [
       {
         "input": "@betterdisplay List all my connected displays?",
