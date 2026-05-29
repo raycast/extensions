@@ -75,7 +75,7 @@ export default function SessionsCommand() {
         <EmptyState onChange={refresh} />
       )}
       {sessions?.map((s) => (
-        <SessionItem key={s.name} session={s} onChange={refresh} />
+        <SessionItem key={s.id} session={s} onChange={refresh} />
       ))}
     </List>
   );
