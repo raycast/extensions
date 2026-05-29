@@ -1,6 +1,6 @@
 # MTG Companion Changelog
 
-## [Bug Fix] - 2026-05-29
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Fixed Card Detail crashing on double-faced cards by reading oracle text, flavor text, mana cost, and artist from `card_faces` when those fields are missing on the parent card
 
