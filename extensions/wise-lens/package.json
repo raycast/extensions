@@ -61,12 +61,18 @@
       "description": "Show conversion from displayCurrency to this currency (e.g. THB). Leave empty to disable."
     },
     {
-      "name": "locale",
-      "type": "textfield",
+      "name": "numberFormat",
+      "type": "dropdown",
       "required": false,
       "default": "en-US",
-      "title": "Locale",
-      "description": "BCP 47 locale for number and date formatting (en-US, es-ES, de-DE...)."
+      "title": "Number Format",
+      "description": "How monetary amounts are displayed (thousands/decimal separators and symbol position).",
+      "data": [
+        { "title": "1,234.56", "value": "en-US" },
+        { "title": "1.234,56", "value": "de-DE" },
+        { "title": "1 234,56", "value": "fr-FR" },
+        { "title": "1'234.56", "value": "de-CH" }
+      ]
     },
     {
       "name": "hideZeroBalances",

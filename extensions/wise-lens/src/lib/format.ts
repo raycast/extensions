@@ -13,10 +13,10 @@ export function formatMoney(value: number, currency: string, locale: string): st
   }
 }
 
-export function formatDate(iso: string, locale: string): string {
+export function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(UI_LOCALE, {
     day: "2-digit",
     month: "short",
     year: "numeric",

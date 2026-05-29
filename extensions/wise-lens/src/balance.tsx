@@ -76,14 +76,14 @@ export default function Balance() {
     if (!snapshot) return "Wise Lens";
     if (snapshot.total) {
       const stalePrefix = snapshot.stale ? "⚠ " : "";
-      return `${stalePrefix}${formatMoney(snapshot.total.value, snapshot.total.currency, prefs.locale)}`;
+      return `${stalePrefix}${formatMoney(snapshot.total.value, snapshot.total.currency, prefs.numberFormat)}`;
     }
     const primary = [...snapshot.balances]
       .filter((b) => b.type !== "SAVINGS" && Math.abs(b.amount.value) > 0.005)
       .sort((a, b) => (b.displayEquiv ?? b.amount.value) - (a.displayEquiv ?? a.amount.value))[0];
     if (primary) {
       const stalePrefix = snapshot.stale ? "⚠ " : "";
-      return `${stalePrefix}${formatMoney(primary.amount.value, primary.currency, prefs.locale)}`;
+      return `${stalePrefix}${formatMoney(primary.amount.value, primary.currency, prefs.numberFormat)}`;
     }
     return "Wise Lens";
   })();
@@ -110,8 +110,10 @@ export default function Balance() {
               <MenuBarExtra.Item
                 icon={{ source: Icon.BankNote, tintColor: Color.Green }}
                 title={`Total${snapshot.total.partial ? " (partial)" : ""}`}
-                subtitle={formatMoney(snapshot.total.value, snapshot.total.currency, prefs.locale)}
-                onAction={() => copyAndHud(formatMoney(snapshot.total!.value, snapshot.total!.currency, prefs.locale))}
+                subtitle={formatMoney(snapshot.total.value, snapshot.total.currency, prefs.numberFormat)}
+                onAction={() =>
+                  copyAndHud(formatMoney(snapshot.total!.value, snapshot.total!.currency, prefs.numberFormat))
+                }
               />
             </MenuBarExtra.Section>
           )}
@@ -123,8 +125,8 @@ export default function Balance() {
                   key={b.id}
                   icon={{ source: Icon.Coins, tintColor: Color.Yellow }}
                   title={b.currency}
-                  subtitle={formatMoney(b.amount.value, b.currency, prefs.locale)}
-                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.locale))}
+                  subtitle={formatMoney(b.amount.value, b.currency, prefs.numberFormat)}
+                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.numberFormat))}
                 />
               ))}
             </MenuBarExtra.Section>
@@ -137,8 +139,8 @@ export default function Balance() {
                   key={b.id}
                   icon={{ source: Icon.SaveDocument, tintColor: Color.Purple }}
                   title={b.name ?? b.currency}
-                  subtitle={formatMoney(b.amount.value, b.currency, prefs.locale)}
-                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.locale))}
+                  subtitle={formatMoney(b.amount.value, b.currency, prefs.numberFormat)}
+                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.numberFormat))}
                 />
               ))}
             </MenuBarExtra.Section>
@@ -148,14 +150,14 @@ export default function Balance() {
             <MenuBarExtra.Item
               icon={{ source: Icon.Calendar, tintColor: Color.Orange }}
               title="This month"
-              subtitle={formatMoney(snapshot.summary.spentMonth, summaryCurrency, prefs.locale)}
-              onAction={() => copyAndHud(formatMoney(snapshot.summary.spentMonth, summaryCurrency, prefs.locale))}
+              subtitle={formatMoney(snapshot.summary.spentMonth, summaryCurrency, prefs.numberFormat)}
+              onAction={() => copyAndHud(formatMoney(snapshot.summary.spentMonth, summaryCurrency, prefs.numberFormat))}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.Calendar, tintColor: Color.Magenta }}
               title="Last 30 days"
-              subtitle={formatMoney(snapshot.summary.spent30, summaryCurrency, prefs.locale)}
-              onAction={() => copyAndHud(formatMoney(snapshot.summary.spent30, summaryCurrency, prefs.locale))}
+              subtitle={formatMoney(snapshot.summary.spent30, summaryCurrency, prefs.numberFormat)}
+              onAction={() => copyAndHud(formatMoney(snapshot.summary.spent30, summaryCurrency, prefs.numberFormat))}
             />
           </MenuBarExtra.Section>
 
@@ -164,8 +166,10 @@ export default function Balance() {
               <MenuBarExtra.Item
                 icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
                 title={`${snapshot.fxRate.source} → ${snapshot.fxRate.target}`}
-                subtitle={`1 ${snapshot.fxRate.source} ≈ ${formatMoney(snapshot.fxRate.rate, snapshot.fxRate.target, prefs.locale)}`}
-                onAction={() => copyAndHud(formatMoney(snapshot.fxRate!.rate, snapshot.fxRate!.target, prefs.locale))}
+                subtitle={`1 ${snapshot.fxRate.source} ≈ ${formatMoney(snapshot.fxRate.rate, snapshot.fxRate.target, prefs.numberFormat)}`}
+                onAction={() =>
+                  copyAndHud(formatMoney(snapshot.fxRate!.rate, snapshot.fxRate!.target, prefs.numberFormat))
+                }
               />
             </MenuBarExtra.Section>
           )}

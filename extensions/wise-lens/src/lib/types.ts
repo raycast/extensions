@@ -63,7 +63,7 @@ export interface Prefs {
   apiToken: string;
   displayCurrency: string;
   fxTargetCurrency: string;
-  locale: string;
+  numberFormat: string;
   hideZeroBalances: boolean;
   hideMenuBarBalance: boolean;
   useSampleData: boolean;

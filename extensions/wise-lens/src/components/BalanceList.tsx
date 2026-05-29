@@ -8,7 +8,7 @@ interface SectionProps {
   icon: Icon;
   iconColor: Color;
   balances: BalanceWithDisplay[];
-  locale: string;
+  numberFormat: string;
   totalCurrency?: string;
   onRefresh: () => void;
 }
@@ -19,7 +19,7 @@ export function BalancesSection({
   icon,
   iconColor,
   balances,
-  locale,
+  numberFormat,
   totalCurrency,
   onRefresh,
 }: SectionProps) {
@@ -35,7 +35,7 @@ export function BalancesSection({
         <BalanceItem
           key={b.id}
           balance={b}
-          locale={locale}
+          numberFormat={numberFormat}
           onRefresh={onRefresh}
           totalCurrency={totalCurrency}
           icon={icon}
@@ -48,14 +48,14 @@ export function BalancesSection({
 
 function BalanceItem({
   balance,
-  locale,
+  numberFormat,
   onRefresh,
   totalCurrency,
   icon,
   iconColor,
 }: {
   balance: BalanceWithDisplay;
-  locale: string;
+  numberFormat: string;
   onRefresh: () => void;
   totalCurrency?: string;
   icon: Icon;
@@ -63,11 +63,11 @@ function BalanceItem({
 }) {
   const accessories: List.Item.Accessory[] = [];
   if (balance.displayEquiv != null && totalCurrency && balance.currency !== totalCurrency) {
-    accessories.push({ text: `≈ ${formatMoney(balance.displayEquiv, totalCurrency, locale)}` });
+    accessories.push({ text: `≈ ${formatMoney(balance.displayEquiv, totalCurrency, numberFormat)}` });
   }
   accessories.push({ tag: { value: balance.currency, color: Color.Blue } });
 
-  const title = formatMoney(balance.amount.value, balance.currency, locale);
+  const title = formatMoney(balance.amount.value, balance.currency, numberFormat);
   const subtitle = balance.name ?? undefined;
 
   return (

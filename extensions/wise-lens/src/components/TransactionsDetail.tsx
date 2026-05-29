@@ -5,11 +5,11 @@ import { DashboardSnapshot } from "../lib/types";
 
 interface Props {
   snapshot: DashboardSnapshot;
-  locale: string;
+  numberFormat: string;
   summaryCurrency: string;
 }
 
-export function TransactionsDetail({ snapshot, locale, summaryCurrency }: Props) {
+export function TransactionsDetail({ snapshot, numberFormat, summaryCurrency }: Props) {
   const { activities, summary } = snapshot;
   const completed = activities.filter((a) => a.status === "COMPLETED").length;
   const pending = activities.filter((a) => a.status === "PENDING").length;
@@ -32,11 +32,11 @@ export function TransactionsDetail({ snapshot, locale, summaryCurrency }: Props)
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Spent this month"
-            text={formatMoney(summary.spentMonth, summaryCurrency, locale)}
+            text={formatMoney(summary.spentMonth, summaryCurrency, numberFormat)}
           />
           <List.Item.Detail.Metadata.Label
             title="Spent in last 30 days"
-            text={formatMoney(summary.spent30, summaryCurrency, locale)}
+            text={formatMoney(summary.spent30, summaryCurrency, numberFormat)}
           />
         </List.Item.Detail.Metadata>
       }

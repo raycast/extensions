@@ -5,7 +5,7 @@ import { WiseActivity } from "../lib/types";
 
 interface Props {
   activity: WiseActivity;
-  locale: string;
+  numberFormat: string;
 }
 
 const STATUS_COLORS: Record<string, Color> = {
@@ -22,7 +22,7 @@ const DIRECTION_COLORS: Record<string, Color> = {
   neutral: Color.SecondaryText,
 };
 
-export function ActivityItemDetail({ activity, locale }: Props) {
+export function ActivityItemDetail({ activity, numberFormat }: Props) {
   const direction = classifyDirection(activity);
   const title = stripHtml(activity.title) || activity.type;
   const description = stripHtml(activity.description);
@@ -51,17 +51,17 @@ export function ActivityItemDetail({ activity, locale }: Props) {
           {primary && (
             <List.Item.Detail.Metadata.Label
               title="Amount"
-              text={formatMoney(primary.value, primary.currency, locale)}
+              text={formatMoney(primary.value, primary.currency, numberFormat)}
             />
           )}
           {secondary && secondary.currency !== primary?.currency && (
             <List.Item.Detail.Metadata.Label
               title="Equivalent"
-              text={formatMoney(secondary.value, secondary.currency, locale)}
+              text={formatMoney(secondary.value, secondary.currency, numberFormat)}
             />
           )}
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Date" text={formatDate(activity.createdOn, locale)} />
+          <List.Item.Detail.Metadata.Label title="Date" text={formatDate(activity.createdOn)} />
           {activity.resource && (
             <List.Item.Detail.Metadata.Label
               title="Resource"

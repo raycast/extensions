@@ -6,7 +6,7 @@ import { ActivityDetail } from "./ActivityDetail";
 
 interface Props {
   activity: WiseActivity;
-  locale: string;
+  numberFormat: string;
   onRefresh?: () => void;
 }
 
@@ -17,20 +17,22 @@ const STATUS_ICONS: Record<string, { source: Icon; tintColor: Color }> = {
   REJECTED: { source: Icon.XMarkCircle, tintColor: Color.Red },
 };
 
-export function ActivityListItem({ activity, locale, onRefresh }: Props) {
+export function ActivityListItem({ activity, numberFormat, onRefresh }: Props) {
   const direction = classifyDirection(activity);
   const primary = parseAmount(activity.primaryAmount);
   const secondary = parseAmount(activity.secondaryAmount);
   const title = stripHtml(activity.title) || activity.type;
 
   const sign = direction === "out" ? "-" : direction === "in" ? "+" : "";
-  const amountStr = primary ? `${sign}${formatMoney(primary.value, primary.currency, locale)}` : activity.primaryAmount;
+  const amountStr = primary
+    ? `${sign}${formatMoney(primary.value, primary.currency, numberFormat)}`
+    : activity.primaryAmount;
 
   const amountColor = direction === "out" ? Color.Red : direction === "in" ? Color.Green : Color.PrimaryText;
 
   const accessories: List.Item.Accessory[] = [];
   if (secondary && secondary.currency !== primary?.currency) {
-    accessories.push({ text: `≈ ${formatMoney(secondary.value, secondary.currency, locale)}` });
+    accessories.push({ text: `≈ ${formatMoney(secondary.value, secondary.currency, numberFormat)}` });
   }
   accessories.push({ tag: { value: amountStr, color: amountColor } });
   accessories.push({
@@ -56,7 +58,7 @@ export function ActivityListItem({ activity, locale, onRefresh }: Props) {
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={<ActivityDetail activity={activity} locale={locale} />}
+            target={<ActivityDetail activity={activity} numberFormat={numberFormat} />}
           />
           <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
           <Action

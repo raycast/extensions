@@ -5,7 +5,7 @@ import { WiseActivity } from "../lib/types";
 
 interface Props {
   activity: WiseActivity;
-  locale: string;
+  numberFormat: string;
 }
 
 const STATUS_COLORS: Record<string, Color> = {
@@ -22,7 +22,7 @@ const DIRECTION_COLORS: Record<string, Color> = {
   neutral: Color.SecondaryText,
 };
 
-export function ActivityDetail({ activity, locale }: Props) {
+export function ActivityDetail({ activity, numberFormat }: Props) {
   const direction = classifyDirection(activity);
   const title = stripHtml(activity.title) || activity.type;
   const description = stripHtml(activity.description);
@@ -30,7 +30,9 @@ export function ActivityDetail({ activity, locale }: Props) {
   const secondary = parseAmount(activity.secondaryAmount);
 
   const sign = direction === "out" ? "-" : direction === "in" ? "+" : "";
-  const amountStr = primary ? `${sign}${formatMoney(primary.value, primary.currency, locale)}` : activity.primaryAmount;
+  const amountStr = primary
+    ? `${sign}${formatMoney(primary.value, primary.currency, numberFormat)}`
+    : activity.primaryAmount;
 
   const markdown = [
     `# ${title}`,
@@ -38,7 +40,7 @@ export function ActivityDetail({ activity, locale }: Props) {
     "",
     `## ${amountStr}`,
     "",
-    `*${formatDate(activity.createdOn, locale)}*`,
+    `*${formatDate(activity.createdOn)}*`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -60,13 +62,16 @@ export function ActivityDetail({ activity, locale }: Props) {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           {primary && (
-            <Detail.Metadata.Label title="Amount" text={formatMoney(primary.value, primary.currency, locale)} />
+            <Detail.Metadata.Label title="Amount" text={formatMoney(primary.value, primary.currency, numberFormat)} />
           )}
           {secondary && secondary.currency !== primary?.currency && (
-            <Detail.Metadata.Label title="Equivalent" text={formatMoney(secondary.value, secondary.currency, locale)} />
+            <Detail.Metadata.Label
+              title="Equivalent"
+              text={formatMoney(secondary.value, secondary.currency, numberFormat)}
+            />
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Date" text={formatDate(activity.createdOn, locale)} />
+          <Detail.Metadata.Label title="Date" text={formatDate(activity.createdOn)} />
           {activity.resource && (
             <Detail.Metadata.Label title="Resource" text={`${activity.resource.type} #${activity.resource.id}`} />
           )}

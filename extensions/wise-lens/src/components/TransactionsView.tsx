@@ -88,7 +88,12 @@ export function TransactionsView() {
       {groups.map((g) => (
         <List.Section key={g.header} title={g.header} subtitle={`${g.items.length}`}>
           {g.items.map((a, i) => (
-            <ActivityListItem key={`${a.createdOn}-${i}`} activity={a} locale={prefs.locale} onRefresh={revalidate} />
+            <ActivityListItem
+              key={`${a.createdOn}-${i}`}
+              activity={a}
+              numberFormat={prefs.numberFormat}
+              onRefresh={revalidate}
+            />
           ))}
         </List.Section>
       ))}

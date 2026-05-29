@@ -6,12 +6,12 @@ const ZERO_EPSILON = 0.005;
 
 interface Props {
   snapshot: DashboardSnapshot;
-  locale: string;
+  numberFormat: string;
   summaryCurrency: string;
   hideZeroBalances: boolean;
 }
 
-export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBalances }: Props) {
+export function DashboardDetail({ snapshot, numberFormat, summaryCurrency, hideZeroBalances }: Props) {
   const { total, fxRate, summary, stale, fetchedAt } = snapshot;
 
   const visible = hideZeroBalances
@@ -23,16 +23,16 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
   const month = currentMonthName();
 
   const totalDisplay = total
-    ? formatMoney(total.value, total.currency, locale)
+    ? formatMoney(total.value, total.currency, numberFormat)
     : standard[0]
-      ? formatMoney(standard[0].amount.value, standard[0].currency, locale)
+      ? formatMoney(standard[0].amount.value, standard[0].currency, numberFormat)
       : "—";
 
   const totalTitle = total ? (total.partial ? "Total Balance (partial)" : "Total Balance") : "Primary Balance";
 
-  const totalFxLine = total && fxRate ? formatMoney(total.value * fxRate.rate, fxRate.target, locale) : undefined;
-  const spentMonthFx = fxRate ? formatMoney(summary.spentMonth * fxRate.rate, fxRate.target, locale) : undefined;
-  const spent30Fx = fxRate ? formatMoney(summary.spent30 * fxRate.rate, fxRate.target, locale) : undefined;
+  const totalFxLine = total && fxRate ? formatMoney(total.value * fxRate.rate, fxRate.target, numberFormat) : undefined;
+  const spentMonthFx = fxRate ? formatMoney(summary.spentMonth * fxRate.rate, fxRate.target, numberFormat) : undefined;
+  const spent30Fx = fxRate ? formatMoney(summary.spent30 * fxRate.rate, fxRate.target, numberFormat) : undefined;
 
   const displayedRates = buildDisplayedRates(snapshot);
 
@@ -47,7 +47,7 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
 
           <List.Item.Detail.Metadata.TagList title={`Spent in ${month}`}>
             <List.Item.Detail.Metadata.TagList.Item
-              text={formatMoney(summary.spentMonth, summaryCurrency, locale)}
+              text={formatMoney(summary.spentMonth, summaryCurrency, numberFormat)}
               color={Color.Orange}
             />
             {spentMonthFx && <List.Item.Detail.Metadata.TagList.Item text={`≈ ${spentMonthFx}`} color={Color.Blue} />}
@@ -55,7 +55,7 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
 
           <List.Item.Detail.Metadata.TagList title="Spent in last 30 days">
             <List.Item.Detail.Metadata.TagList.Item
-              text={formatMoney(summary.spent30, summaryCurrency, locale)}
+              text={formatMoney(summary.spent30, summaryCurrency, numberFormat)}
               color={Color.Magenta}
             />
             {spent30Fx && <List.Item.Detail.Metadata.TagList.Item text={`≈ ${spent30Fx}`} color={Color.Blue} />}
@@ -71,7 +71,7 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
               />
               {standard.map((b) => (
                 <List.Item.Detail.Metadata.TagList key={b.id} title={b.currency}>
-                  {balanceTags(b, total, fxRate, locale, Color.Yellow)}
+                  {balanceTags(b, total, fxRate, numberFormat, Color.Yellow)}
                 </List.Item.Detail.Metadata.TagList>
               ))}
             </>
@@ -87,7 +87,7 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
               />
               {savings.map((b) => (
                 <List.Item.Detail.Metadata.TagList key={b.id} title={b.name ?? b.currency}>
-                  {balanceTags(b, total, fxRate, locale, Color.Purple)}
+                  {balanceTags(b, total, fxRate, numberFormat, Color.Purple)}
                 </List.Item.Detail.Metadata.TagList>
               ))}
             </>
@@ -105,7 +105,7 @@ export function DashboardDetail({ snapshot, locale, summaryCurrency, hideZeroBal
                 <List.Item.Detail.Metadata.Label
                   key={`${r.source}->${r.target}`}
                   title={`${r.source} → ${r.target}`}
-                  text={`1 ${r.source} ≈ ${formatMoney(r.rate, r.target, locale)}`}
+                  text={`1 ${r.source} ≈ ${formatMoney(r.rate, r.target, numberFormat)}`}
                 />
               ))}
             </>
@@ -131,14 +131,14 @@ function balanceTags(
   b: BalanceWithDisplay,
   total: DashboardSnapshot["total"],
   fxRate: DashboardSnapshot["fxRate"],
-  locale: string,
+  numberFormat: string,
   primaryColor: Color,
 ): React.ReactNode[] {
   const tags: React.ReactNode[] = [];
   tags.push(
     <List.Item.Detail.Metadata.TagList.Item
       key="native"
-      text={formatMoney(b.amount.value, b.currency, locale)}
+      text={formatMoney(b.amount.value, b.currency, numberFormat)}
       color={primaryColor}
     />,
   );
@@ -150,7 +150,7 @@ function balanceTags(
       tags.push(
         <List.Item.Detail.Metadata.TagList.Item
           key="display"
-          text={`≈ ${formatMoney(b.displayEquiv, total.currency, locale)}`}
+          text={`≈ ${formatMoney(b.displayEquiv, total.currency, numberFormat)}`}
           color={Color.Blue}
         />,
       );
@@ -163,7 +163,7 @@ function balanceTags(
     tags.push(
       <List.Item.Detail.Metadata.TagList.Item
         key="fx"
-        text={`≈ ${formatMoney(baseValueInDisplay * fxRate.rate, fxRate.target, locale)}`}
+        text={`≈ ${formatMoney(baseValueInDisplay * fxRate.rate, fxRate.target, numberFormat)}`}
         color={Color.Blue}
       />,
     );

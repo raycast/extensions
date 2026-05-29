@@ -5,13 +5,13 @@ interface Props {
   title: string;
   amount: number;
   currency: string;
-  locale: string;
+  numberFormat: string;
   icon: Icon;
   onRefresh: () => void;
 }
 
-export function SummaryItem({ title, amount, currency, locale, icon, onRefresh }: Props) {
-  const amountStr = formatMoney(amount, currency, locale);
+export function SummaryItem({ title, amount, currency, numberFormat, icon, onRefresh }: Props) {
+  const amountStr = formatMoney(amount, currency, numberFormat);
   return (
     <List.Item
       icon={{ source: icon, tintColor: Color.Orange }}

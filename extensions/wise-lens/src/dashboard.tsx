@@ -56,12 +56,14 @@ export default function Dashboard() {
             icon={{ source: Icon.BankNote, tintColor: Color.Green }}
             title="Dashboard"
             subtitle={
-              snapshot.total ? formatMoney(snapshot.total.value, snapshot.total.currency, prefs.locale) : undefined
+              snapshot.total
+                ? formatMoney(snapshot.total.value, snapshot.total.currency, prefs.numberFormat)
+                : undefined
             }
             detail={
               <DashboardDetail
                 snapshot={snapshot}
-                locale={prefs.locale}
+                numberFormat={prefs.numberFormat}
                 summaryCurrency={summaryCurrency}
                 hideZeroBalances={prefs.hideZeroBalances}
               />
@@ -72,7 +74,7 @@ export default function Dashboard() {
                 {snapshot.total && (
                   <Action.CopyToClipboard
                     title="Copy Total"
-                    content={formatMoney(snapshot.total.value, snapshot.total.currency, prefs.locale)}
+                    content={formatMoney(snapshot.total.value, snapshot.total.currency, prefs.numberFormat)}
                   />
                 )}
                 <Action.OpenInBrowser title="Open Wise.com" url="https://wise.com/all-transactions" />
@@ -90,7 +92,13 @@ export default function Dashboard() {
             icon={{ source: Icon.List, tintColor: Color.Blue }}
             title="Transactions"
             subtitle={`${snapshot.activities.length} transactions`}
-            detail={<TransactionsDetail snapshot={snapshot} locale={prefs.locale} summaryCurrency={summaryCurrency} />}
+            detail={
+              <TransactionsDetail
+                snapshot={snapshot}
+                numberFormat={prefs.numberFormat}
+                summaryCurrency={summaryCurrency}
+              />
+            }
             actions={
               <ActionPanel>
                 <Action.Push title="Open Transactions" icon={Icon.List} target={<TransactionsView />} />
@@ -132,12 +140,12 @@ export default function Dashboard() {
               key={`${a.createdOn}-${i}`}
               icon={iconFor(a)}
               title={stripHtml(a.title) || a.type}
-              subtitle={accessoryAmount(a, prefs.locale)}
-              detail={<ActivityItemDetail activity={a} locale={prefs.locale} />}
+              subtitle={accessoryAmount(a, prefs.numberFormat)}
+              detail={<ActivityItemDetail activity={a} numberFormat={prefs.numberFormat} />}
               actions={
                 <ActionPanel>
                   <Action.Push title="Open Transactions" icon={Icon.List} target={<TransactionsView />} />
-                  <Action.CopyToClipboard title="Copy Amount" content={accessoryAmount(a, prefs.locale)} />
+                  <Action.CopyToClipboard title="Copy Amount" content={accessoryAmount(a, prefs.numberFormat)} />
                   {refreshAction}
                 </ActionPanel>
               }
@@ -178,9 +186,12 @@ function iconFor(a: { status: string; type: string }) {
   return { source: Icon.Circle, tintColor: Color.SecondaryText };
 }
 
-function accessoryAmount(a: { primaryAmount: string; description: string; type: string }, locale: string): string {
+function accessoryAmount(
+  a: { primaryAmount: string; description: string; type: string },
+  numberFormat: string,
+): string {
   const dir = classifyDirection(a as Parameters<typeof classifyDirection>[0]);
   const p = parseAmount(a.primaryAmount);
   const sign = dir === "out" ? "-" : dir === "in" ? "+" : "";
-  return p ? `${sign}${formatMoney(p.value, p.currency, locale)}` : a.primaryAmount;
+  return p ? `${sign}${formatMoney(p.value, p.currency, numberFormat)}` : a.primaryAmount;
 }
