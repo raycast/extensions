@@ -37,6 +37,7 @@
   "keywords": [
     "vscode",
     "antigravity",
+    "bob",
     "cursor",
     "codium",
     "kiro",
@@ -102,6 +103,10 @@
         {
           "title": "Cursor",
           "value": "Cursor"
+        },
+        {
+          "title": "IBM Bob",
+          "value": "IBM Bob"
         },
         {
           "title": "Kiro",

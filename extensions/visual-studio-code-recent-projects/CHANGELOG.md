@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2026-05-29
+
+- Added support for IBM Bob.
+
 ## [Fix: Recent Projects on Windows] - 2026-05-25
 
 - Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.
