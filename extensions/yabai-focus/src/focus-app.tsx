@@ -59,7 +59,6 @@ type AppIconFallbacksByName = Map<string, string | undefined>;
 type WindowSnapshot = {
   windows: YabaiWindow[];
   focusedAppKey?: string;
-  focusedAppName?: string;
 };
 type WindowGroups = {
   unfocusedWindows: YabaiWindow[];
@@ -379,12 +378,11 @@ async function loadWindows(): Promise<WindowSnapshot> {
   const { stdout } = await runYabai(["-m", "query", "--windows"]);
   const allWindows = parseYabaiWindows(stdout);
   const focusableWindows = allWindows.filter(isFocusableWindow);
-  const frontmostAppKey = await frontmostAppKeyForWindows(focusableWindows);
-  const focusedAppKey = frontmostAppKey ?? focusedAppKeyForWindows(focusableWindows);
+  const focusedAppKey =
+    focusedAppKeyForWindows(focusableWindows) ?? (await frontmostAppKeyForWindows(focusableWindows));
   const windows = sortWindows(focusableWindows);
-  const focusedAppName = windows.find((window) => isFocusedAppWindow(window, focusedAppKey))?.app;
 
-  return { windows, focusedAppKey, focusedAppName };
+  return { windows, focusedAppKey };
 }
 
 async function frontmostAppKeyForWindows(windows: YabaiWindow[]): Promise<string | undefined> {
@@ -485,7 +483,6 @@ function iconForWindow(
 export default function Command() {
   const [windows, setWindows] = useState<YabaiWindow[]>([]);
   const [focusedAppKey, setFocusedAppKey] = useState<string>();
-  const [focusedAppName, setFocusedAppName] = useState<string>();
   const [appIconsByName, setAppIconsByName] = useState<AppIconsByName>(() => new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -504,8 +501,8 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    void updateCommandMetadata({ subtitle: focusedAppName ?? null });
-  }, [focusedAppName]);
+    void updateCommandMetadata({ subtitle: null });
+  }, []);
 
   const refresh = useCallback(async function refreshWindows({ isBackground = false }: RefreshOptions = {}) {
     if (isRefreshingRef.current) {
@@ -529,7 +526,6 @@ export default function Command() {
 
       setWindows(nextWindowSnapshot.windows);
       setFocusedAppKey(nextWindowSnapshot.focusedAppKey);
-      setFocusedAppName(nextWindowSnapshot.focusedAppName);
       setErrorMessage(undefined);
 
       if (nextWindowSnapshot.windows.length === 0 && !isBackground) {
@@ -548,7 +544,6 @@ export default function Command() {
       setErrorMessage(message);
       setWindows([]);
       setFocusedAppKey(undefined);
-      setFocusedAppName(undefined);
 
       if (!isBackground) {
         await showToast({
@@ -637,7 +632,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={focusedAppName ?? "Focus App"}
+      navigationTitle="Focus App"
       searchBarPlaceholder="Search yabai windows/apps"
       searchText={searchText}
       filtering
