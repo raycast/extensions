@@ -31,15 +31,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.17",
-    "@raycast/utils": "^2.2.4",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5",
     "soaring-symbols": "^0.1.0-alpha.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.7.0",
-    "@types/react": "19.2.14",
-    "eslint": "^9.39.4",
+    "@types/node": "^25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
   },
