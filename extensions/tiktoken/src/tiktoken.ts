@@ -47,7 +47,10 @@ function initTiktoken() {
     return tiktokenInitPromise;
   }
 
-  tiktokenInitPromise = init((imports) => WebAssembly.instantiate(wasm, imports));
+  tiktokenInitPromise = init((imports) => WebAssembly.instantiate(wasm, imports)).catch((error) => {
+    tiktokenInitPromise = undefined;
+    throw error;
+  });
 
   return tiktokenInitPromise;
 }
