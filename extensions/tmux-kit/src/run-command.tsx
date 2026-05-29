@@ -1,16 +1,18 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Detail,
   Form,
   Icon,
   LocalStorage,
   Toast,
+  confirmAlert,
   showToast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TmuxError, runRawCommand } from "./lib/tmux";
+import { TmuxError, listSessions, runRawCommand } from "./lib/tmux";
 
 const HISTORY_KEY = "tmux-command-history";
 const HISTORY_MAX = 20;
@@ -56,6 +58,35 @@ export default function RunCommand() {
       });
       return;
     }
+
+    // Destructive tmux commands (kill-session -a, kill-server, …) run via
+    // /bin/sh with no undo. Confirm first. Match any "kill…" command so tmux
+    // abbreviations and aliases (kill-ses, kill-serv, killp, killw) can't slip
+    // past the guard — every real tmux command starting with "kill" is a kill.
+    if (/^kill/i.test(trimmed)) {
+      let detail = `tmux ${trimmed}`;
+      if (/^kill-s/i.test(trimmed)) {
+        try {
+          const all = await listSessions();
+          if (all.length > 0) {
+            detail +=
+              "\n\nCurrent sessions:\n" +
+              all
+                .map((s) => `• ${s.name}${s.attached ? " (attached)" : ""}`)
+                .join("\n");
+          }
+        } catch {
+          // If listing fails, confirm with the command text alone.
+        }
+      }
+      const ok = await confirmAlert({
+        title: "Run destructive tmux command?",
+        message: `${detail}\n\nThis can terminate sessions/windows/panes and cannot be undone.`,
+        primaryAction: { title: "Run", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+
     const next = [trimmed, ...history.filter((h) => h !== trimmed)].slice(
       0,
       HISTORY_MAX,
