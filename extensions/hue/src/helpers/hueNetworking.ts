@@ -207,7 +207,7 @@ export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
  */
 export function getCommonName(certificate: PeerCertificate): string {
   const commonName = certificate.subject.CN;
-  return Array.isArray(commonName) ? commonName[0] : (commonName ?? "");
+  return Array.isArray(commonName) ? (commonName[0] ?? "") : (commonName ?? "");
 }
 
 /**
