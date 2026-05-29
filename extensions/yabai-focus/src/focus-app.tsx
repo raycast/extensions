@@ -2,9 +2,9 @@ import {
   Action,
   ActionPanel,
   clearSearchBar,
-  Color,
   closeMainWindow,
   getApplications,
+  getFrontmostApplication,
   Icon,
   List,
   showToast,
@@ -32,6 +32,7 @@ const COMMAND_PATH = COMMAND_SEARCH_DIRECTORIES.join(":");
 const EXEC_ENV = { ...process.env, PATH: COMMAND_PATH, USER };
 const COMMAND_TIMEOUT_MS = 5000;
 const OPEN_COMMAND = "/usr/bin/open";
+const FOCUS_SHORTCUT_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] as const;
 const APP_SEARCH_DIRECTORIES = [
   "/Applications",
   join(HOME_DIRECTORY, "Applications"),
@@ -54,6 +55,14 @@ type RefreshOptions = {
 
 type AppIconsByName = Map<string, string>;
 type AppIconFallbacksByName = Map<string, string | undefined>;
+type WindowSnapshot = {
+  windows: YabaiWindow[];
+  focusedAppKey?: string;
+  focusedAppName?: string;
+};
+type WindowGroups = {
+  unfocusedWindows: YabaiWindow[];
+};
 
 class CommandError extends Error {
   code?: string | number;
@@ -272,17 +281,6 @@ function sortWindows(windows: YabaiWindow[]): YabaiWindow[] {
   }
 
   return [...windows].sort((a, b) => {
-    // Keep the current window last, then prefer visible windows, then stable app/title ordering.
-    const focusComparison = Number(a["has-focus"] === true) - Number(b["has-focus"] === true);
-    if (focusComparison !== 0) {
-      return focusComparison;
-    }
-
-    const visibleComparison = Number(b["is-visible"] === true) - Number(a["is-visible"] === true);
-    if (visibleComparison !== 0) {
-      return visibleComparison;
-    }
-
     const appComparison = a.app.localeCompare(b.app);
     if (appComparison !== 0) {
       return appComparison;
@@ -290,6 +288,43 @@ function sortWindows(windows: YabaiWindow[]): YabaiWindow[] {
 
     return a.title.localeCompare(b.title);
   });
+}
+
+function focusedAppKeyForWindows(windows: YabaiWindow[]): string | undefined {
+  const focusedWindow = windows.find(
+    (window) => window["has-focus"] === true && !isRaycastCommandPaletteWindow(window),
+  );
+
+  if (focusedWindow) {
+    return appNameKey(focusedWindow.app);
+  }
+
+  const focusedCommandPaletteIndex = windows.findIndex(
+    (window) => window["has-focus"] === true && isRaycastCommandPaletteWindow(window),
+  );
+  if (focusedCommandPaletteIndex === -1) {
+    return undefined;
+  }
+
+  const previousFocusedWindow = windows.slice(focusedCommandPaletteIndex + 1).find(isFocusableWindow);
+
+  return previousFocusedWindow ? appNameKey(previousFocusedWindow.app) : undefined;
+}
+
+function isFocusedAppWindow(window: YabaiWindow, focusedAppKey: string | undefined): boolean {
+  return focusedAppKey !== undefined && appNameKey(window.app) === focusedAppKey;
+}
+
+function groupWindowsByFocusedApp(windows: YabaiWindow[], focusedAppKey: string | undefined): WindowGroups {
+  return {
+    unfocusedWindows: windows.filter((window) => !isFocusedAppWindow(window, focusedAppKey)),
+  };
+}
+
+function shortcutForUnfocusedWindow(index: number): Action.Props["shortcut"] | undefined {
+  const key = FOCUS_SHORTCUT_KEYS[index];
+
+  return key ? { modifiers: ["cmd"], key } : undefined;
 }
 
 function formatCommand(window: YabaiWindow): string {
@@ -348,9 +383,30 @@ function formatErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
-async function loadWindows(): Promise<YabaiWindow[]> {
+async function loadWindows(): Promise<WindowSnapshot> {
   const { stdout } = await runYabai(["-m", "query", "--windows"]);
-  return sortWindows(parseYabaiWindows(stdout).filter(isFocusableWindow));
+  const allWindows = parseYabaiWindows(stdout);
+  const focusableWindows = allWindows.filter(isFocusableWindow);
+  const focusedAppKey = (await frontmostAppKeyForWindows(focusableWindows)) ?? focusedAppKeyForWindows(allWindows);
+  const windows = sortWindows(focusableWindows);
+  const focusedAppName = windows.find((window) => isFocusedAppWindow(window, focusedAppKey))?.app;
+
+  return { windows, focusedAppKey, focusedAppName };
+}
+
+async function frontmostAppKeyForWindows(windows: YabaiWindow[]): Promise<string | undefined> {
+  try {
+    const frontmostApplication = await getFrontmostApplication();
+    const frontmostAppKey = appNameKey(frontmostApplication.localizedName ?? frontmostApplication.name);
+
+    if (frontmostAppKey === RAYCAST_APP_NAME) {
+      return undefined;
+    }
+
+    return windows.some((window) => isFocusedAppWindow(window, frontmostAppKey)) ? frontmostAppKey : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function appNameKey(name: string): string {
@@ -418,14 +474,6 @@ async function focusWindow(window: YabaiWindow): Promise<void> {
   }
 }
 
-function accessoriesForWindow(window: YabaiWindow): List.Item.Accessory[] | undefined {
-  if (window["has-focus"] !== true) {
-    return undefined;
-  }
-
-  return [{ icon: { source: Icon.Dot, tintColor: Color.Green } }];
-}
-
 function iconForWindow(
   window: YabaiWindow,
   appIconsByName: AppIconsByName,
@@ -443,6 +491,8 @@ function iconForWindow(
 
 export default function Command() {
   const [windows, setWindows] = useState<YabaiWindow[]>([]);
+  const [focusedAppKey, setFocusedAppKey] = useState<string>();
+  const [focusedAppName, setFocusedAppName] = useState<string>();
   const [appIconsByName, setAppIconsByName] = useState<AppIconsByName>(() => new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -475,15 +525,17 @@ export default function Command() {
     }
 
     try {
-      const nextWindows = await loadWindows();
+      const nextWindowSnapshot = await loadWindows();
       if (!isMountedRef.current) {
         return;
       }
 
-      setWindows(nextWindows);
+      setWindows(nextWindowSnapshot.windows);
+      setFocusedAppKey(nextWindowSnapshot.focusedAppKey);
+      setFocusedAppName(nextWindowSnapshot.focusedAppName);
       setErrorMessage(undefined);
 
-      if (nextWindows.length === 0 && !isBackground) {
+      if (nextWindowSnapshot.windows.length === 0 && !isBackground) {
         await showToast({
           style: Toast.Style.Failure,
           title: "No focusable yabai windows",
@@ -498,6 +550,8 @@ export default function Command() {
       const message = formatCommandError(error);
       setErrorMessage(message);
       setWindows([]);
+      setFocusedAppKey(undefined);
+      setFocusedAppName(undefined);
 
       if (!isBackground) {
         await showToast({
@@ -552,6 +606,10 @@ export default function Command() {
 
   const emptyTitle = errorMessage ? "Could not query yabai windows" : "No focusable yabai windows";
   const emptyDescription = errorMessage ?? "Hidden, minimized, and non-AX windows are ignored.";
+  const { unfocusedWindows } = useMemo(
+    () => groupWindowsByFocusedApp(windows, focusedAppKey),
+    [focusedAppKey, windows],
+  );
 
   const appIconFallbacksByName = useMemo(() => {
     const fallbackPaths: AppIconFallbacksByName = new Map();
@@ -582,23 +640,28 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      navigationTitle={focusedAppName ?? "Focus App"}
       searchBarPlaceholder="Search yabai windows/apps"
       searchText={searchText}
       filtering
       onSearchTextChange={setSearchText}
     >
       <List.EmptyView title={emptyTitle} description={emptyDescription} />
-      {windows.map((window) => (
+      {unfocusedWindows.map((window, index) => (
         <List.Item
           key={window.id}
           icon={iconForWindow(window, appIconsByName, appIconFallbacksByName)}
           title={window.app}
           subtitle={compactWindowTitle(window) || undefined}
-          accessories={accessoriesForWindow(window)}
           keywords={[window.app, window.title, String(window.space)]}
           actions={
             <ActionPanel>
-              <Action title="Focus Window" icon={Icon.Window} onAction={() => void focusSelectedWindow(window)} />
+              <Action
+                title="Focus Window"
+                icon={Icon.Window}
+                shortcut={shortcutForUnfocusedWindow(index)}
+                onAction={() => void focusSelectedWindow(window)}
+              />
               <Action.CopyToClipboard
                 title="Copy Yabai Focus Command"
                 shortcut={{ modifiers: ["cmd"], key: "." }}
