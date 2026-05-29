@@ -3,12 +3,12 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import {
   InstallExtensionByIDAction,
+  OpenExtensionByIDInBobAction,
   OpenExtensionByIDInBrowserAction,
-  OpenExtensionByIDInCursorAction,
   UninstallExtensionByIDAction,
 } from "./extension-actions";
 import { useLocalExtensions } from "./extensions";
-import { Extension } from "./lib/cursor";
+import { Extension } from "./lib/bob";
 import { compactNumberFormat } from "./utils";
 
 function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
@@ -32,7 +32,7 @@ export interface GalleryQueryResult {
 
 export interface Result {
   extensions: GalleryExtension[];
-  pagingToken: any;
+  pagingToken: string | null;
   resultMetadata: ResultMetadaum[];
 }
 
@@ -154,7 +154,7 @@ function GalleryExtensionListItem(props: {
             ) : (
               <InstallExtensionAction extension={e} afterInstall={props.reloadLocalExtensions} />
             )}
-            <OpenExtensionByIDInCursorAction extensionID={getFullExtensionID(e)} />
+            <OpenExtensionByIDInBobAction extensionID={getFullExtensionID(e)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />

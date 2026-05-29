@@ -1,8 +1,8 @@
-import { fileExists } from "../utils";
+import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import * as child_process from "child_process";
+import { fileExists } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -65,11 +65,11 @@ function getNLSVariable(text: string | undefined): string | undefined {
   }
 }
 
-export function getCursorCLIFilename(): string {
-  return "/Applications/Cursor.app/Contents/Resources/app/bin/cursor";
+export function getBobCLIFilename(): string {
+  return "/Applications/IBM Bob.app/Contents/Resources/app/bin/bobide";
 }
 
-export class CursorCLI {
+export class BobCLI {
   private cliFilename: string;
   constructor(cliFilename: string) {
     this.cliFilename = cliFilename;
@@ -82,8 +82,8 @@ export class CursorCLI {
   }
 }
 
-export function getCursorCLI(): CursorCLI {
-  return new CursorCLI(getCursorCLIFilename());
+export function getBobCLI(): BobCLI {
+  return new BobCLI(getBobCLIFilename());
 }
 
 async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | undefined> {
@@ -128,7 +128,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
-  const extensionsRootFolder = path.join(os.homedir(), ".cursor/extensions");
+  const extensionsRootFolder = path.join(os.homedir(), ".bobide/extensions");
   const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
   if (await fileExists(extensionsManifrestFilename)) {
     const data = await afs.readFile(extensionsManifrestFilename, {
@@ -141,7 +141,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
         const extFsPath =
           typeof e.location === "string"
             ? path.join(extensionsRootFolder, e.location)
-            : e.location.fsPath ?? e.location.path;
+            : (e.location.fsPath ?? e.location.path);
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({

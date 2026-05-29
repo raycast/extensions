@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { getErrorMessage } from "./utils";
-import type { Extension } from "./lib/cursor";
-import { getLocalExtensions } from "./lib/cursor";
+import { useEffect, useState } from "react";
 import {
+  OpenExtensionByIDInBobAction,
   OpenExtensionByIDInBrowserAction,
-  OpenExtensionByIDInCursorAction,
   UninstallExtensionByIDAction,
 } from "./extension-actions";
+import type { Extension } from "./lib/bob";
+import { getLocalExtensions } from "./lib/bob";
+import { getErrorMessage } from "./utils";
 
-function OpenExtensionInCursorAction(props: { extension: Extension }): JSX.Element {
-  return <OpenExtensionByIDInCursorAction extensionID={props.extension.id} />;
+function OpenExtensionInBobAction(props: { extension: Extension }): JSX.Element {
+  return <OpenExtensionByIDInBobAction extensionID={props.extension.id} />;
 }
 
 function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
@@ -36,7 +36,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenExtensionInCursorAction extension={e} />
+            <OpenExtensionInBobAction extension={e} />
             <OpenExtensionInBrowserAction extension={e} />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -93,11 +93,8 @@ export function useLocalExtensions(): {
   const [isLoading, setIsLoading] = useState(true);
   const [extensions, setExtensions] = useState<Extension[]>();
   const [error, setError] = useState<string>();
-  const [date, setDate] = useState(new Date());
 
-  const refresh = () => {
-    setDate(new Date());
-  };
+  const refresh = () => {};
 
   useEffect(() => {
     let didUnmount = false;

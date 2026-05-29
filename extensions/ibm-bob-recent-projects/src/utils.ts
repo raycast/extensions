@@ -1,17 +1,17 @@
+import { open } from "@raycast/api";
+import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
 import {
-  EntryType,
   EntryLike,
+  EntryType,
   FileEntry,
   FolderEntry,
   RemoteEntry,
-  WorkspaceEntry,
   RemoteWorkspaceEntry,
+  WorkspaceEntry,
 } from "./types";
-import { open } from "@raycast/api";
-import * as fs from "fs";
 
 // Type Guards
 
@@ -150,12 +150,12 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
   return false;
 }
 
-export function raycastForCursorURI(uri: string) {
-  return `cursor://tonka3000.raycast/${uri}`;
+export function raycastForBobURI(uri: string) {
+  return `bobide://tonka3000.raycast/${uri}`;
 }
 
-export async function openURIinCursor(uri: string) {
-  await open(raycastForCursorURI(uri));
+export async function openURIinBob(uri: string) {
+  await open(raycastForBobURI(uri));
 }
 
 export function isValidHexColor(color: string): boolean {

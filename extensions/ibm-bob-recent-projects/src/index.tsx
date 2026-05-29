@@ -1,14 +1,24 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, LaunchProps, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Grid, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { basename, dirname } from "path";
+import { useEffect, useState } from "react";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { useRecentEntries } from "./db";
+import { ProjectProvider, useProject } from "./contexts/ProjectContext";
 import type { RemoveMethods } from "./db";
-import { keepSectionOrder, closeOtherWindows, terminalApp, showGitBranch, gitBranchColor, layout } from "./preferences";
-import { EntryType } from "./types";
-import type { EntryLike, PinMethods } from "./types";
+import { useRecentEntries } from "./db";
+import {
+  ListOrGrid,
+  ListOrGridDropdown,
+  ListOrGridDropdownItem,
+  ListOrGridDropdownSection,
+  ListOrGridItem,
+  ListOrGridSection,
+} from "./grid-or-list";
 import type { LaunchContext } from "./integrations/types";
+import { usePinnedEntries } from "./pinned";
+import { closeOtherWindows, gitBranchColor, keepSectionOrder, layout, showGitBranch, terminalApp } from "./preferences";
+import type { EntryLike, PinMethods } from "./types";
+import { EntryType } from "./types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -19,16 +29,6 @@ import {
   isValidHexColor,
   isWorkspaceEntry,
 } from "./utils";
-import {
-  ListOrGrid,
-  ListOrGridDropdown,
-  ListOrGridDropdownSection,
-  ListOrGridDropdownItem,
-  ListOrGridSection,
-  ListOrGridItem,
-} from "./grid-or-list";
-import { usePinnedEntries } from "./pinned";
-import { ProjectProvider, useProject } from "./contexts/ProjectContext";
 import { getGitBranch } from "./utils/git";
 
 export default function Command(props: LaunchProps<{ launchContext: LaunchContext }>) {
@@ -152,7 +152,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   }, [path, name]);
 
   const getTitle = (revert = false) => {
-    return `Open in Cursor ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
+    return `Open in IBM Bob ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
   const { openProject } = useProject();
@@ -206,7 +206,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() =>
                   open(path, terminalApp).catch(() =>
-                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
                   )
                 }
               />
@@ -235,14 +235,14 @@ function RemoteItem(
     subtitle?: string;
     pinned?: boolean;
   } & PinMethods &
-    RemoveMethods
+    RemoveMethods,
 ) {
   const remotePath = decodeURI(basename(props.uri));
 
-  const uri = props.uri.replace("vscode-remote://", "cursor://vscode-remote/");
+  const uri = props.uri.replace("vscode-remote://", "bobide://vscode-remote/");
 
   const getTitle = (revert = false) => {
-    return `Open in Cursor ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
+    return `Open in IBM Bob ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
   const getUrl = (uri: string, revert = false) => {

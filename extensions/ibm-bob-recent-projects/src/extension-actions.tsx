@@ -1,5 +1,5 @@
-import { showToast, Toast, Action, Icon, Color, confirmAlert, Alert, showHUD, Keyboard } from "@raycast/api";
-import { getCursorCLI } from "./lib/cursor";
+import { Action, Alert, Color, confirmAlert, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
+import { getBobCLI } from "./lib/bob";
 import { getErrorMessage } from "./utils";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }): JSX.Element {
@@ -9,7 +9,7 @@ export function InstallExtensionByIDAction(props: { extensionID: string; afterIn
         style: Toast.Style.Animated,
         title: "Install Extension",
       });
-      const cli = getCursorCLI();
+      const cli = getBobCLI();
       cli.installExtensionByIDSync(props.extensionID);
       await showToast({
         style: Toast.Style.Success,
@@ -46,7 +46,7 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
           style: Toast.Style.Animated,
           title: "Install Extension",
         });
-        const cli = getCursorCLI();
+        const cli = getBobCLI();
         cli.uninstallExtensionByIDSync(props.extensionID);
         await showToast({
           style: Toast.Style.Success,
@@ -74,17 +74,17 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
   );
 }
 
-export function OpenExtensionByIDInCursorAction(props: {
+export function OpenExtensionByIDInBobAction(props: {
   extensionID: string;
   onOpen?: (url: string) => void;
 }): JSX.Element {
   return (
     <Action.OpenInBrowser
-      title="Open in Cursor"
-      url={`cursor:extension/${props.extensionID}`}
+      title="Open in IBM Bob"
+      url={`bobide:extension/${props.extensionID}`}
       icon={"icon.png"}
       onOpen={(url) => {
-        showHUD("Open Cursor Extension");
+        showHUD("Open IBM Bob Extension");
         if (props.onOpen) {
           props.onOpen(url);
         }
@@ -101,7 +101,7 @@ export function OpenExtensionByIDInBrowserAction(props: { extensionID: string })
       url={url}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
       onOpen={() => {
-        showHUD("Open Cursor Extension in Browser");
+        showHUD("Open IBM Bob Extension in Browser");
       }}
     />
   );

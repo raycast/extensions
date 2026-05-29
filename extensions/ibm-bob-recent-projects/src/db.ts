@@ -1,8 +1,8 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
+import fs from "fs";
 import { homedir } from "os";
 import { EntryLike, RecentEntries } from "./types";
-import fs from "fs";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
 
@@ -27,7 +27,7 @@ export function useRecentEntries() {
 
   const { data, isLoading, revalidate } = useSQL<RecentEntries>(
     path,
-    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
+    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
   );
 
   const entries = data && data.length ? data[0].entries : undefined;
@@ -42,7 +42,7 @@ export function useRecentEntries() {
     try {
       await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
       await revalidate();
-      showToast(Toast.Style.Success, "Entry removed", `Restart Cursor to sync the list in Cursor (optional)`);
+      showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to remove entry");
     }
@@ -67,7 +67,7 @@ export function useRecentEntries() {
       ) {
         await saveEntries([]);
         await revalidate();
-        showToast(Toast.Style.Success, "All entries removed", `Restart Cursor to sync the list in Cursor (optional)`);
+        showToast(Toast.Style.Success, "All entries removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
       }
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to remove entries");
@@ -78,7 +78,7 @@ export function useRecentEntries() {
 }
 
 function getPath() {
-  return `${homedir()}/Library/Application Support/Cursor/User/globalStorage/state.vscdb`;
+  return `${homedir()}/Library/Application Support/IBM Bob/User/globalStorage/state.vscdb`;
 }
 
 async function saveEntries(entries: EntryLike[]) {

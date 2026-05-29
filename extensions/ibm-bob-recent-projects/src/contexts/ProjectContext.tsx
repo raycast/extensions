@@ -1,9 +1,8 @@
-import { createContext, useContext, ReactNode } from "react";
 import { open, showHUD } from "@raycast/api";
-import { run } from "../integrations/cursor-directory";
+import { callbackLaunchCommand } from "raycast-cross-extension";
+import { createContext, ReactNode, useContext } from "react";
 import { runAppleScriptSync } from "run-applescript";
 import { LaunchContext } from "../integrations/types";
-import { callbackLaunchCommand } from "raycast-cross-extension";
 
 interface ProjectContextType {
   openProject: (uri: string, closeOtherWindows: boolean) => Promise<void>;
@@ -17,7 +16,7 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
       if (closeOtherWindows) {
         runAppleScriptSync(`
             tell application "System Events"
-              tell process "Cursor"
+              tell process "IBM Bob"
                 repeat while window 1 exists
                   click button 1 of window 1
                 end repeat
@@ -25,16 +24,10 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
             end tell
             `);
       }
-      await open(uri, "Cursor");
+      await open(uri, "IBM Bob");
 
-      const { cursorDirectory, callbackLaunchOptions } = launchContext || {};
+      const { callbackLaunchOptions } = launchContext || {};
 
-      if (cursorDirectory && cursorDirectory.ruleContent) {
-        await run(uri, {
-          ruleContent: cursorDirectory.ruleContent,
-          replace: cursorDirectory.replace,
-        });
-      }
       if (callbackLaunchOptions) {
         callbackLaunchCommand(callbackLaunchOptions, {
           // TODO should be determined what we want to expose

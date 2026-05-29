@@ -3,18 +3,18 @@ import { runAppleScript } from "@raycast/utils";
 
 const makeNewWindow = async () => {
   await runAppleScript(`
-    tell application "Cursor"
-	    activate
+    tell application "IBM Bob"
+     activate
     end tell
     delay(0.5)
-    tell application "Cursor"
-	    activate
+    tell application "IBM Bob"
+     activate
     end tell
 
     tell application "System Events"
-	    tell process "Cursor"
-		    click menu item "New Window" of menu "File" of menu bar 1
-	    end tell
+     tell process "IBM Bob"
+      click menu item "New Window" of menu "File" of menu bar 1
+     end tell
     end tell
   `);
 };

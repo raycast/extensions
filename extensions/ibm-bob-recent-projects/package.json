@@ -1,52 +1,44 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "cursor-recent-projects",
-  "title": "Cursor",
-  "description": "Control Cursor directly from Raycast - Search and open recent projects, handle extensions and commands.",
-  "icon": "cursor-icon.png",
-  "author": "degouville",
-  "contributors": [
-    "pernielsentikaer",
-    "escwxyz",
-    "litomore",
-    "michalzuch",
-    "alexi.build"
-  ],
+  "name": "ibm-bob-recent-projects",
+  "title": "IBM Bob",
+  "description": "Control IBM Bob directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "icon": "bob-icon.png",
+  "author": "fbuetler",
+  "contributors": [],
   "categories": [
     "Applications",
     "Developer Tools",
     "Productivity"
   ],
   "keywords": [
-    "cursor",
+    "bob",
+    "ibm",
     "vscode",
-    "claude",
-    "sonnet",
-    "opus",
-    "o1",
-    "gpt4o"
+    "ide",
+    "editor"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Search Recent Projects",
-      "subtitle": "Cursor",
-      "description": "Search and open recent projects from Cursor.",
+      "subtitle": "IBM Bob",
+      "description": "Search and open recent projects from IBM Bob.",
       "mode": "view"
     },
     {
-      "name": "open-with-cursor",
-      "title": "Open with Cursor",
-      "subtitle": "Cursor",
-      "description": "Opens the currently selected Finder item with Cursor.",
+      "name": "open-with-bob",
+      "title": "Open with IBM Bob",
+      "subtitle": "IBM Bob",
+      "description": "Opens the currently selected Finder item with IBM Bob.",
       "mode": "no-view"
     },
     {
       "name": "open-new-window",
       "title": "Open New Window",
-      "subtitle": "Cursor",
-      "description": "Opens a new Cursor window.",
+      "subtitle": "IBM Bob",
+      "description": "Opens a new IBM Bob window.",
       "mode": "no-view"
     },
     {
@@ -58,7 +50,7 @@
     {
       "name": "install-extension",
       "title": "Install Extension",
-      "description": "Install Extensions from the Cursor Marketplace",
+      "description": "Install Extensions from the IBM Bob Marketplace",
       "mode": "view"
     }
   ],
@@ -95,9 +87,9 @@
       "type": "checkbox",
       "title": "Usability",
       "required": false,
-      "label": "Close Other Cursor Windows",
+      "label": "Close Other IBM Bob Windows",
       "default": false,
-      "description": "Close other Cursor windows when opening a project"
+      "description": "Close other IBM Bob windows when opening a project"
     },
     {
       "name": "terminalApp",
