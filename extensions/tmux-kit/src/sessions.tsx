@@ -148,7 +148,7 @@ function SessionActions({
         });
         return;
       }
-      await switchClient(session.name);
+      await switchClient(session.id);
       await showToast({
         style: Toast.Style.Success,
         title: `Switched to ${session.name}`,
@@ -160,7 +160,7 @@ function SessionActions({
         message: e instanceof TmuxError ? e.stderr || e.message : String(e),
       });
     }
-  }, [session.name]);
+  }, [session.id, session.name]);
 
   const handleKill = useCallback(async () => {
     const ok = await confirmAlert({
@@ -170,7 +170,7 @@ function SessionActions({
     });
     if (!ok) return;
     try {
-      await killSession(session.name);
+      await killSession(session.id);
       await showToast({
         style: Toast.Style.Success,
         title: `Killed ${session.name}`,
@@ -183,7 +183,7 @@ function SessionActions({
         message: e instanceof TmuxError ? e.stderr || e.message : String(e),
       });
     }
-  }, [session.name, onChange]);
+  }, [session.id, session.name, onChange]);
 
   const handleKillOthers = useCallback(async () => {
     const ok = await confirmAlert({
@@ -195,7 +195,7 @@ function SessionActions({
     });
     if (!ok) return;
     try {
-      await killOtherSessions(session.name);
+      await killOtherSessions(session.id);
       await showToast({
         style: Toast.Style.Success,
         title: "Other sessions killed",
@@ -208,7 +208,7 @@ function SessionActions({
         message: e instanceof TmuxError ? e.stderr || e.message : String(e),
       });
     }
-  }, [session.name, onChange]);
+  }, [session.id, session.name, onChange]);
 
   return (
     <ActionPanel>
@@ -289,7 +289,7 @@ function RenameForm({
       return;
     }
     try {
-      await renameSession(session.name, trimmed);
+      await renameSession(session.id, trimmed);
       await showToast({
         style: Toast.Style.Success,
         title: `Renamed → ${trimmed}`,

@@ -104,23 +104,25 @@ export async function listSessions(): Promise<TmuxSession[]> {
   }
 }
 
-export async function killSession(name: string): Promise<void> {
-  await run(["kill-session", "-t", name]);
+// Session-level operations target by session_id ("$N"), not the name: a name
+// containing ":" would be misparsed by `-t` as a "session:window" target.
+export async function killSession(sessionId: string): Promise<void> {
+  await run(["kill-session", "-t", sessionId]);
 }
 
-export async function killOtherSessions(keep: string): Promise<void> {
-  await run(["kill-session", "-a", "-t", keep]);
+export async function killOtherSessions(keepId: string): Promise<void> {
+  await run(["kill-session", "-a", "-t", keepId]);
 }
 
 export async function renameSession(
-  oldName: string,
+  sessionId: string,
   newName: string,
 ): Promise<void> {
-  await run(["rename-session", "-t", oldName, newName]);
+  await run(["rename-session", "-t", sessionId, newName]);
 }
 
-export async function switchClient(target: string): Promise<void> {
-  await run(["switch-client", "-t", target]);
+export async function switchClient(sessionId: string): Promise<void> {
+  await run(["switch-client", "-t", sessionId]);
 }
 
 export async function newSession(
