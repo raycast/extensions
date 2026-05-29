@@ -37,6 +37,9 @@ async function run(
 }
 
 export type TmuxSession = {
+  // Session id (e.g. "$3"). Target windows/panes by this, never the name:
+  // names may legally contain ":" and collide with "session:window" targets.
+  id: string;
   name: string;
   windows: number;
   attached: boolean;
@@ -62,6 +65,7 @@ const SESSION_FORMAT = [
   "#{session_activity}",
   "#{session_current_window_name}",
   "#{session_current_path}",
+  "#{session_id}",
 ].join(FIELD_SEP);
 
 export async function listSessions(): Promise<TmuxSession[]> {
@@ -79,8 +83,10 @@ export async function listSessions(): Promise<TmuxSession[]> {
           activity,
           currentWindow,
           currentPath,
+          id,
         ] = line.split(FIELD_SEP);
         return {
+          id: id ?? "",
           name,
           windows: Number(windows),
           attached: Number(attached) > 0,
@@ -183,11 +189,13 @@ const PANE_FORMAT = [
   "#{session_id}",
 ].join(FIELD_SEP);
 
-export async function listPanes(session: string): Promise<TmuxPane[]> {
+// Target by session_id ("$N"), not the session name: a name containing ":"
+// would be misparsed by `list-panes -t` as a "session:window" target.
+export async function listPanes(sessionId: string): Promise<TmuxPane[]> {
   const { stdout } = await run([
     "list-panes",
     "-t",
-    session,
+    sessionId,
     "-s",
     "-F",
     PANE_FORMAT,

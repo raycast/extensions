@@ -3,7 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import { TmuxError, TmuxPane, listPanes } from "./lib/tmux";
 import { PaneItem } from "./components/pane-item";
 
-export function PanesView({ session }: { session: string }) {
+export function PanesView({
+  sessionName,
+  sessionId,
+}: {
+  sessionName: string;
+  sessionId: string;
+}) {
   const [panes, setPanes] = useState<TmuxPane[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +17,7 @@ export function PanesView({ session }: { session: string }) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await listPanes(session);
+      const data = await listPanes(sessionId);
       setPanes(data);
       setError(null);
     } catch (e) {
@@ -21,7 +27,7 @@ export function PanesView({ session }: { session: string }) {
     } finally {
       setLoading(false);
     }
-  }, [session]);
+  }, [sessionId]);
 
   useEffect(() => {
     void refresh();
@@ -41,7 +47,7 @@ export function PanesView({ session }: { session: string }) {
   return (
     <List
       isLoading={loading}
-      navigationTitle={`Panes · ${session}`}
+      navigationTitle={`Panes · ${sessionName}`}
       searchBarPlaceholder="Search by command, path, PID…"
     >
       {error && (
@@ -55,7 +61,7 @@ export function PanesView({ session }: { session: string }) {
         <List.EmptyView
           icon={Icon.AppWindow}
           title="No panes"
-          description={`Session ${session} has no panes`}
+          description={`Session ${sessionName} has no panes`}
         />
       )}
       {sortedGroups.map(([wi, group]) => (
@@ -70,7 +76,7 @@ export function PanesView({ session }: { session: string }) {
               <PaneItem
                 key={p.id}
                 pane={p}
-                session={session}
+                session={sessionName}
                 windowPanes={group.panes}
                 hasMarkedElsewhere={panes.some(
                   (q) => q.marked && q.id !== p.id,

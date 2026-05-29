@@ -239,7 +239,7 @@ function SessionActions({
         title="Show Panes & Processes"
         icon={Icon.AppWindowList}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
-        target={<PanesView session={session.name} />}
+        target={<PanesView sessionName={session.name} sessionId={session.id} />}
       />
       <ActionPanel.Section title="Danger">
         <Action
