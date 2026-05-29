@@ -70,7 +70,7 @@ export function PanesView({
           title={`window ${wi}${group.name ? `: ${group.name}` : ""}`}
           subtitle={`${group.panes.length} pane${group.panes.length === 1 ? "" : "s"}`}
         >
-          {group.panes
+          {[...group.panes]
             .sort((a, b) => a.index - b.index)
             .map((p) => (
               <PaneItem

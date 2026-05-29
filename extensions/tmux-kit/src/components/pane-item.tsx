@@ -144,7 +144,8 @@ export function PaneItem({
                       await swapPanes(pane.id, neighbor.id);
                       await showToast({
                         style: Toast.Style.Success,
-                        title: `Swapped ${pane.id} ${dir} with ${neighbor.id}`,
+                        title: `Swapped ${dir}`,
+                        message: `${pane.command || pane.id} ↔ ${neighbor.command || neighbor.id}`,
                       });
                       await onChange();
                     } catch (e) {
