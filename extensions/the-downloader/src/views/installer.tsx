@@ -246,7 +246,7 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
               await installationToast.hide();
               onRefresh();
             } catch (error) {
-              installationToast.hide();
+              await installationToast.hide();
               console.error(error);
               const isCommonError = error instanceof Error;
               const isExecaError = error instanceof ExecaError;
@@ -314,7 +314,7 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
               resetWingetPackagesCache();
               onRefresh();
             } catch (error) {
-              installationToast.hide();
+              await installationToast.hide();
               console.error(error);
               const isCommonError = error instanceof Error;
               const isExecaError = error instanceof ExecaError;

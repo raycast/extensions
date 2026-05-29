@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import * as crypto from "node:crypto";
 import { execa } from "execa";
 import { isMac, isWindows } from "./binary.js";
 import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
@@ -7,7 +8,10 @@ import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
 const RELEASE_API = "https://api.github.com/repos/spotDL/spotify-downloader/releases/latest";
 const USER_AGENT = "the-downloader-raycast";
 
-export type ReleaseAsset = { name: string; url: string };
+/** Hosts the spotDL binary may be downloaded from — GitHub and its asset CDN. */
+const ALLOWED_DOWNLOAD_HOSTS = new Set(["github.com", "objects.githubusercontent.com"]);
+
+export type ReleaseAsset = { name: string; url: string; digest?: string };
 export type SpotdlRelease = { version: string; assets: ReleaseAsset[] };
 
 /**
@@ -69,11 +73,13 @@ export async function getLatestRelease(): Promise<SpotdlRelease> {
   }
   const json = (await res.json()) as {
     tag_name: string;
-    assets: { name: string; browser_download_url: string }[];
+    assets: { name: string; browser_download_url: string; digest?: string }[];
   };
   return {
     version: json.tag_name.replace(/^v/, ""),
-    assets: json.assets.map((a) => ({ name: a.name, url: a.browser_download_url })),
+    // GitHub publishes a per-asset `digest` ("sha256:…") on recent releases;
+    // keep it so downloadSpotdl can verify the bytes.
+    assets: json.assets.map((a) => ({ name: a.name, url: a.browser_download_url, digest: a.digest })),
   };
 }
 
@@ -83,8 +89,26 @@ export async function getLatestRelease(): Promise<SpotdlRelease> {
  * leaves a half-written binary at the resolved path. Returns the final path.
  */
 export async function downloadSpotdl(supportDir: string): Promise<string> {
+  // Fail fast on Apple Silicon without Rosetta 2: the prebuilt binary is
+  // x86_64-only and can never run here, so don't download ~40MB just to leave a
+  // broken binary on disk. Previously the Rosetta check ran AFTER the binary was
+  // renamed into place, so every fs.existsSync(getSpotdlPath()) gate then treated
+  // the unrunnable binary as installed — the Installer never reappeared and
+  // Spotify downloads failed forever with a raw "Bad CPU type". Checking up front
+  // means no bytes are written when the binary can't run.
+  if (isAppleSilicon() && !isRosettaInstalled()) {
+    throw new RosettaRequiredError();
+  }
+
   const release = await getLatestRelease();
   const asset = resolveSpotdlAsset(process.platform, release.assets);
+
+  // The asset URL comes from the releases API; pin it to GitHub's own hosts so
+  // a redirected/rewritten URL can't point the download at an attacker host.
+  const host = new URL(asset.url).host;
+  if (!ALLOWED_DOWNLOAD_HOSTS.has(host)) {
+    throw new Error(`Refusing to download spotDL from an unexpected host: ${host}`);
+  }
 
   const res = await fetch(asset.url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) {
@@ -92,11 +116,30 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
   }
   const bytes = Buffer.from(await res.arrayBuffer());
 
+  // Verify the bytes against the SHA-256 GitHub publishes for the asset, when
+  // present. This catches a corrupted/truncated download before the binary is
+  // made executable. It defends against transmission corruption and a wrong
+  // host — NOT against a compromised upstream release (the digest comes from
+  // the same API), which is an accepted limit of the auto-download model.
+  if (asset.digest?.startsWith("sha256:")) {
+    const expected = asset.digest.slice("sha256:".length).toLowerCase();
+    const actual = crypto.createHash("sha256").update(bytes).digest("hex");
+    if (actual !== expected) {
+      throw new Error("spotDL download failed its integrity check (SHA-256 mismatch). Please try again.");
+    }
+  }
+
   const finalPath = path.join(supportDir, isWindows ? "spotdl.exe" : "spotdl");
   const tempPath = `${finalPath}.download`;
   fs.mkdirSync(supportDir, { recursive: true });
-  fs.writeFileSync(tempPath, bytes);
-  fs.renameSync(tempPath, finalPath);
+  try {
+    fs.writeFileSync(tempPath, bytes);
+    fs.renameSync(tempPath, finalPath);
+  } finally {
+    // A successful rename consumes tempPath; on any failure this clears the
+    // partial `.download` file instead of leaving it in the support dir.
+    fs.rmSync(tempPath, { force: true });
+  }
 
   if (!isWindows) {
     fs.chmodSync(finalPath, 0o755);
@@ -108,7 +151,6 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
     } catch {
       // codesign unavailable or signing rejected — the binary may still run.
     }
-    if (!isRosettaInstalled()) throw new RosettaRequiredError();
   }
   return finalPath;
 }

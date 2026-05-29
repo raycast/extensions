@@ -1,5 +1,17 @@
 # The Downloader Changelog
 
+## [Release Readiness] - {PR_MERGE_DATE}
+
+- **Transcript extraction overhauled.** It now uses the same robust yt-dlp metadata path as the rest of the extension — fixing a crash on yt-dlp debug/warning output, passing the Deno JS runtime (without which YouTube transcript extraction silently failed), and running through the hang-prevention watchdog (closed stdin + idle-kill). The Download form's transcript action gained a **Stop** button and is cancelled on dismiss, subtitle language matching now catches regional/auto variants (`en-US`, `en-GB`, `en-orig`), playlist URLs no longer pull every entry's subtitles, and an empty transcript reports a clear failure instead of saving a blank file.
+- **Filenames are sanitized on every platform.** Path separators (`/`, `\`) and leading dots are stripped from titles everywhere — previously a title like "AC/DC" broke transcript saving on macOS and a crafted title could write outside the chosen folder.
+- **Spotify audio-format dropdown now works.** Choosing a format (including FLAC) is applied to the download instead of being silently ignored.
+- **spotDL / Rosetta on Apple Silicon.** The extension now checks for Rosetta 2 before downloading the x86_64 spotDL binary, so a Mac without Rosetta no longer ends up with a binary that looks installed but fails every download with "Bad CPU type"; the friendly install hint is shown instead.
+- **spotDL download integrity.** The auto-downloaded spotDL binary is now verified against the SHA-256 GitHub publishes for the release, the download host is pinned to GitHub, and partial downloads are cleaned up on failure.
+- **Fewer stuck/leaked processes.** The Download form's metadata fetch and the Download Video AI tool now time out and are cancellable, so a wedged yt-dlp no longer hangs or leaks child processes.
+- **gallery-dl counts are accurate.** Already-present (skipped) files are no longer counted as downloaded, and a run that fetches nothing new reports that honestly instead of a green "0 files".
+- **Out-of-box download folder.** A leading `~` in the Download Folder preference (the `~/Downloads` default) is expanded, so first-run downloads land in the right place.
+- Earlier store-prep work now recorded: `--no-playlist` on the Download Video AI tool (a playlist URL no longer dumps every video), Windows binary detection rework + centralized platform paths, new icon, refreshed screenshots, and Media + Productivity categories.
+
 ## [Fix: Hang Prevention] - 2026-05-21
 
 - yt-dlp, gallery-dl, and monolith now run with the same hang-prevention spotDL already had: stdin is closed (so the child cannot block on an interactive 2FA / cookie-passphrase / login prompt) and an idle watchdog kills the child when no output arrives for a configurable window. Extracted the pattern into a shared `runWithWatchdog` helper in `src/lib/run.ts`.

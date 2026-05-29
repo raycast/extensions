@@ -32,6 +32,7 @@ import { fetchVideoInfo, runThumbnailDownload, runVideoDownload } from "../lib/y
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
+import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "../lib/monolith.js";
 import extractTranscript from "../transcript.js";
@@ -50,6 +51,7 @@ import {
   getffprobePath,
   getytdlPath,
   isValidUrl,
+  normalizeUrl,
   sanitizeVideoTitle,
 } from "../utils.js";
 import Installer from "./installer.js";
@@ -99,6 +101,12 @@ function failToast(toast: Toast, error: unknown) {
     toast.primaryAction = undefined;
     return;
   }
+  if (error instanceof RosettaRequiredError) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "spotDL needs Rosetta 2";
+    toast.message = error.message;
+    return;
+  }
   if (error instanceof SpotdlDownloadError) {
     const partial =
       error.tracks > 0 ? `Downloaded ${error.tracks} track${error.tracks === 1 ? "" : "s"} before failure. ` : "";
@@ -140,6 +148,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // does not leave zombie yt-dlp / gallery-dl / monolith / spotdl children
   // attached to the user's Raycast process.
   const activeAbort = useRef<AbortController | null>(null);
+  // Controller for the metadata (--dump-json) fetch. usePromise replaces this on
+  // every re-run and aborts the prior one, so editing the URL or dismissing the
+  // form kills the in-flight yt-dlp metadata child instead of orphaning it.
+  const metaAbortable = useRef<AbortController>(null);
 
   useEffect(() => {
     return () => {
@@ -198,11 +210,15 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         u,
         prefs.forceIpv4,
         fs.existsSync(denoPath) ? denoPath : undefined,
+        {
+          signal: metaAbortable.current?.signal,
+          timeoutMs: getIdleTimeoutMs(),
+        },
       );
       return { ...data, title: sanitizeVideoTitle(data.title) };
     },
     [url, shouldFetchMeta],
-    { onError: () => undefined },
+    { onError: () => undefined, abortable: metaAbortable },
   );
 
   const liveStream = !!video && video.live_status !== undefined && video.live_status !== "not_live";
@@ -231,7 +247,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const urlError =
     url && !validUrl
       ? "Enter a valid URL"
-      : liveStream && (filetype === "video" || filetype === "audio")
+      : liveStream && (filetype === "video" || filetype === "audio" || filetype === "transcript")
         ? "Live streams are not supported"
         : undefined;
 
@@ -243,16 +259,19 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       await showToast({ style: Toast.Style.Failure, title: "A download is already running" });
       return;
     }
-    const submitUrl = String(values.url ?? "").trim();
-    if (!isValidUrl(submitUrl)) {
+    const rawUrl = String(values.url ?? "").trim();
+    if (!isValidUrl(rawUrl)) {
       await showToast({ style: Toast.Style.Failure, title: "Enter a valid URL" });
       return;
     }
+    // Prefix https:// for scheme-less input before any runner sees it (monolith
+    // treats a bare host as a local file path).
+    const submitUrl = normalizeUrl(rawUrl);
     const ft = values.filetype as Filetype;
     const src = detectSource(submitUrl);
     const folder = (values.destination as string[] | undefined)?.[0] ?? downloadPath;
 
-    if (liveStream && (ft === "video" || ft === "audio")) {
+    if (liveStream && (ft === "video" || ft === "audio" || ft === "transcript")) {
       await showToast({ style: Toast.Style.Failure, title: "Live streams are not supported" });
       return;
     }
@@ -298,9 +317,16 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
     if (ft === "transcript") {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Extracting Transcript" });
+      const { signal, done } = startAbortable(toast);
       try {
-        const { transcript, title } = await extractTranscript(submitUrl);
+        const { transcript, title } = await extractTranscript(submitUrl, "en", signal);
         const filePath = path.join(folder, `${title}.txt`);
+        // Defense in depth: sanitizeVideoTitle already strips separators, but
+        // assert the resolved path stays inside the chosen folder before writing
+        // so a pathological title can never escape it.
+        if (path.relative(folder, filePath).startsWith("..")) {
+          throw new Error("Refusing to write the transcript outside the chosen folder.");
+        }
         fs.writeFileSync(filePath, transcript, "utf-8");
         toast.style = Toast.Style.Success;
         toast.title = "Transcript Saved";
@@ -309,6 +335,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = { title: "Copy Transcript", onAction: () => Clipboard.copy(transcript) };
       } catch (error) {
         failToast(toast, error);
+      } finally {
+        done();
       }
       return;
     }
@@ -340,11 +368,21 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             toast.message = `${p.files} files`;
           },
         );
-        toast.style = Toast.Style.Success;
-        toast.title = "Gallery Downloaded";
-        toast.message = `${files} files`;
-        toast.primaryAction = { title: "Open Folder", onAction: () => open(folder) };
-        toast.secondaryAction = undefined;
+        if (files === 0) {
+          // Exit 0 with nothing new is not a real "success" — surface it
+          // honestly instead of a green "0 files" toast.
+          toast.style = Toast.Style.Failure;
+          toast.title = "Nothing downloaded";
+          toast.message = "gallery-dl found no new files — they may already exist, or the gallery needs a login.";
+          toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
+          toast.secondaryAction = undefined;
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = "Gallery Downloaded";
+          toast.message = `${files} files`;
+          toast.primaryAction = { title: "Open Folder", onAction: () => open(folder) };
+          toast.secondaryAction = undefined;
+        }
       } catch (error) {
         if (isLoginRequiredError(error)) {
           toast.style = Toast.Style.Failure;
@@ -421,12 +459,19 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
       const { signal, done } = startAbortable(toast);
       try {
+        // A managed spotDL binary that already exists (e.g. installed before the
+        // Rosetta guard, or copied from another machine) would otherwise fail
+        // with a cryptic "Bad CPU type". Surface the friendly hint instead.
+        if (isAppleSilicon() && !isRosettaInstalled()) throw new RosettaRequiredError();
         const { tracks } = await runSpotdlDownload(
           getSpotdlPath(),
           {
             url: submitUrl,
             destination: folder,
-            format: prefs.spotifyAudioFormat,
+            // Honor the live audioFmt dropdown (the only place FLAC is offered);
+            // fall back to the freshly-read preference. Previously this used the
+            // stale module-level pref and silently ignored the dropdown.
+            format: String(values.audioFmt ?? livePrefs.spotifyAudioFormat),
             ffmpegPath: getffmpegPath(),
             clientId,
             clientSecret,

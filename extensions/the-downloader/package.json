@@ -342,12 +342,7 @@
       {
         "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
         "mocks": {
-          "extract-transcript": {
-            "language": "en",
-            "title": "Nvidia Earnings are the Super Bowl of Business | Prof G Markets",
-            "transcript": "...",
-            "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
-          }
+          "extract-transcript": "Nvidia earnings are the Super Bowl of business..."
         },
         "expected": [
           {

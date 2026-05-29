@@ -7,11 +7,13 @@ Paste a URL (or let it auto-load from your clipboard, selected text, or browser 
 ## Built on
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) — videos and audio
+- [Deno](https://deno.com) — the JavaScript runtime yt-dlp uses for YouTube extraction
 - [gallery-dl](https://github.com/mikf/gallery-dl) — image galleries
+- [spotDL](https://github.com/spotDL/spotify-downloader) — Spotify tracks, albums, and playlists
 - [ffmpeg](https://ffmpeg.org) — audio extraction and format conversion
 - [monolith](https://github.com/Y2Z/monolith) — complete webpages as a single HTML file
 
-The extension installs these for you on first use.
+The extension installs these for you on first use. On macOS most install via Homebrew; spotDL is downloaded as a prebuilt binary (which needs Rosetta 2 on Apple Silicon — or install `spotdl` via Homebrew for a native build).
 
 ## Configuration
 

@@ -19,12 +19,18 @@ export function extractDumpJson(stdout: string): Video {
   return JSON.parse(json) as Video;
 }
 
-/** Fetch yt-dlp metadata for a URL via --dump-json. `denoPath`, when given, points yt-dlp at its JS runtime. */
+/**
+ * Fetch yt-dlp metadata for a URL via --dump-json. `denoPath`, when given,
+ * points yt-dlp at its JS runtime. `opts.signal` cancels the fetch (so a stale
+ * metadata probe is killed when the URL changes or the form unmounts), and
+ * `opts.timeoutMs` caps total runtime so a wedged extractor can't hang forever.
+ */
 export async function fetchVideoInfo(
   ytdlPath: string,
   url: string,
   forceIpv4: boolean,
   denoPath?: string,
+  opts?: { signal?: AbortSignal; timeoutMs?: number },
 ): Promise<Video> {
   const result = await execa(
     ytdlPath,
@@ -39,7 +45,11 @@ export async function fetchVideoInfo(
       "--format-sort=resolution,ext,tbr",
       url,
     ].filter(Boolean),
-    { env: { ...process.env, PYTHONUNBUFFERED: "1" } },
+    {
+      env: { ...process.env, PYTHONUNBUFFERED: "1" },
+      cancelSignal: opts?.signal,
+      timeout: opts?.timeoutMs ?? 0,
+    },
   );
   return extractDumpJson(result.stdout);
 }

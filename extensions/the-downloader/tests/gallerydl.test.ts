@@ -55,6 +55,40 @@ describe("runGalleryDownload", () => {
     expect(onProgress).toHaveBeenCalled();
   });
 
+  it("does not count gallery-dl '# <path>' skip-markers as downloaded files", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const promise = runGalleryDownload(
+      "/usr/local/bin/gallery-dl",
+      { url: "https://imgur.com/a/x", destination: "/tmp" },
+      vi.fn(),
+    );
+
+    // One skipped (already-present) file and one genuinely new file.
+    child.stdout.emit("data", Buffer.from("# /tmp/skipped.jpg\n/tmp/new.jpg\n"));
+    child.emit("close", 0);
+
+    await expect(promise).resolves.toEqual({ files: 1 });
+  });
+
+  it("counts a file path split across two stream chunks exactly once", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const promise = runGalleryDownload(
+      "/usr/local/bin/gallery-dl",
+      { url: "https://imgur.com/a/x", destination: "/tmp" },
+      vi.fn(),
+    );
+
+    child.stdout.emit("data", Buffer.from("/tmp/fi"));
+    child.stdout.emit("data", Buffer.from("le.jpg\n"));
+    child.emit("close", 0);
+
+    await expect(promise).resolves.toEqual({ files: 1 });
+  });
+
   it("rejects with the stderr text when the child exits with a non-zero code", async () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);

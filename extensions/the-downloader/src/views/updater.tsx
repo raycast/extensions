@@ -151,6 +151,18 @@ function errorMessageOf(error: unknown): string {
   return error instanceof Error ? error.message : "An unknown error occurred";
 }
 
+/**
+ * Extract a clean `x.y.z` from a version string, or "" if none is present. Both
+ * sides of the spotDL installed-vs-latest comparison go through this so a
+ * differently-formatted string (banner text, a pre-release suffix, a 4th
+ * component) can't make a current binary look outdated and trigger a spurious
+ * ~40 MB re-download. An unparsable installed version yields "" and is left
+ * alone rather than treated as outdated.
+ */
+function extractSemver(version: string): string {
+  return version.match(/\d+\.\d+\.\d+/)?.[0] ?? "";
+}
+
 async function check(): Promise<CheckResult> {
   const [{ versions, issues: versionIssues }, { outdated, issues: outdatedIssues }] = await Promise.all([
     getVersions(),
@@ -257,8 +269,8 @@ async function getOutdated(): Promise<{ outdated: Record<string, string>; issues
   try {
     const spotdlPath = getSpotdlPath();
     if (fs.existsSync(spotdlPath)) {
-      const installed = await getInstalledVersion(spotdlPath);
-      const latest = (await getLatestRelease()).version;
+      const installed = extractSemver(await getInstalledVersion(spotdlPath));
+      const latest = extractSemver((await getLatestRelease()).version);
       if (installed && latest && installed !== latest) {
         outdated["spotdl"] = latest;
       }
@@ -301,9 +313,9 @@ async function upgrade(): Promise<{ issues: PackageIssue[] }> {
   try {
     const spotdlPath = getSpotdlPath();
     if (fs.existsSync(spotdlPath)) {
-      const installed = await getInstalledVersion(spotdlPath);
-      const latest = (await getLatestRelease()).version;
-      if (installed !== latest) {
+      const installed = extractSemver(await getInstalledVersion(spotdlPath));
+      const latest = extractSemver((await getLatestRelease()).version);
+      if (installed && latest && installed !== latest) {
         await downloadSpotdl(environment.supportPath);
       }
     }

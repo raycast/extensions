@@ -4,6 +4,7 @@ import {
   getFormats,
   downloadPath,
   forceIpv4,
+  getIdleTimeoutMs,
   getytdlPath,
   getffmpegPath,
   getffprobePath,
@@ -50,8 +51,9 @@ export default async function tool(input: Input) {
     throw new Error("ffprobe is not installed");
   }
 
-  // Get video info and available formats
-  const video = await fetchVideoInfo(ytdlPath, input.url, forceIpv4, deno);
+  // Get video info and available formats. Cap the metadata fetch so a wedged
+  // extractor can't hang the agent turn indefinitely.
+  const video = await fetchVideoInfo(ytdlPath, input.url, forceIpv4, deno, { timeoutMs: getIdleTimeoutMs() });
 
   // Check if it's a live stream
   if (video.live_status !== "not_live" && video.live_status !== undefined) {
@@ -91,7 +93,10 @@ export default async function tool(input: Input) {
   // and the raw ExecaError dump isn't useful to it.
   let result;
   try {
-    result = await execa(ytdlPath, [...options, input.url]);
+    // stdin: "ignore" so yt-dlp can't block on an interactive auth prompt, and a
+    // total-runtime timeout so a stalled download (dead mirror, stuck transfer)
+    // is killed instead of hanging the agent turn and leaking yt-dlp + ffmpeg.
+    result = await execa(ytdlPath, [...options, input.url], { stdin: "ignore", timeout: getIdleTimeoutMs() });
   } catch (error) {
     const stderr = error instanceof Error && "stderr" in error ? String(error.stderr) : "";
     throw new Error(

@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as os from "node:os";
 import { getPreferenceValues, environment } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { Format, Video } from "./types.js";
@@ -6,16 +7,17 @@ import { execSync } from "child_process";
 import { findHomebrewPath, resolveBinary, isWindows, isMac } from "./lib/binary.js";
 import { windowsWingetPath } from "./lib/platform-paths.js";
 import { DEFAULT_IDLE_MS } from "./lib/run.js";
-import { isValidUrl } from "./lib/url.js";
+import { isValidUrl, normalizeUrl } from "./lib/url.js";
 
-export { isWindows, isMac, isValidUrl };
+export { isWindows, isMac, isValidUrl, normalizeUrl };
 
 function sanitizeWindowsPath(path: string): string {
   return path.replace(/\r/g, "").replace(/\n/g, "").trim();
 }
 
+const prefs = getPreferenceValues<ExtensionPreferences>();
+
 export const {
-  downloadPath,
   homebrewPath: homebrewPathPreference,
   autoLoadUrlFromClipboard,
   autoLoadUrlFromSelectedText,
@@ -29,7 +31,23 @@ export const {
   spotDlPath: spotDlPathPreference,
   denoPath: denoPathPreference,
   monolithPath: monolithPathPreference,
-} = getPreferenceValues<ExtensionPreferences>();
+} = prefs;
+
+/**
+ * Expand a leading `~` (followed by a path separator or end-of-string) to the
+ * user's home directory. The `downloadPath` preference defaults to the literal
+ * string `~/Downloads`; execa spawns binaries with no shell, so a bare `~` is
+ * never expanded downstream — yt-dlp/monolith would write into a literal `~`
+ * folder relative to the cwd. Expanding here makes the out-of-box default work
+ * on first run without the user touching the directory picker. `~user`-style
+ * specs (no separator after the tilde) are left untouched.
+ */
+export function expandTilde(p: string): string {
+  return p.replace(/^~(?=$|[/\\])/, os.homedir());
+}
+
+/** The configured download folder, with a leading `~` expanded to the home directory. */
+export const downloadPath = expandTilde(prefs.downloadPath);
 
 /**
  * Resolve the watchdog idle window for child-process spawns. Reads
@@ -192,7 +210,12 @@ export const getFormatTitle = (format: Format) =>
 
 export function sanitizeVideoTitle(name: string): string {
   const maxLen = 200;
-  const invalidChars = isWindows ? ["<", ">", ":", '"', "/", "\\", "|", "?", "*"] : [":"];
+  // Path separators (`/`, `\`) are never valid in a single filename component
+  // on ANY platform, so strip them everywhere — not just on Windows. The output
+  // of this function is used directly as a filename (e.g. the transcript write
+  // `${title}.txt`), where a leftover `/` on macOS would turn "AC/DC" into a
+  // bogus subpath (ENOENT) or let a remote-controlled title escape the folder.
+  const invalidChars = isWindows ? ["<", ">", ":", '"', "/", "\\", "|", "?", "*"] : ["/", "\\", ":"];
 
   // Trim and remove invalid characters
   let safe = name.trim();
@@ -204,6 +227,10 @@ export function sanitizeVideoTitle(name: string): string {
   safe = Array.from(safe)
     .filter((char) => char.charCodeAt(0) >= 32)
     .join("");
+
+  // Collapse leading dots so a title like "..foo" can't produce a hidden file
+  // or a `..` path-traversal segment once it becomes a filename.
+  safe = safe.replace(/^\.+/, "");
 
   // Remove trailing dots and spaces on Windows
   if (isWindows) safe = safe.replace(/[. ]+$/, "");

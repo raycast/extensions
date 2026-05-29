@@ -38,17 +38,21 @@ export async function runGalleryDownload(
   onProgress: (p: GalleryProgress) => void,
 ): Promise<GalleryProgress> {
   let files = 0;
-  const handleStdout = (chunk: string) => {
-    // gallery-dl prints one downloaded file path per line, so non-empty lines ≈ files downloaded (progress estimate).
-    const lines = chunk.split("\n").filter((l) => l.trim().length > 0);
-    if (lines.length > 0) {
-      files += lines.length;
+  const handleLine = (line: string) => {
+    const trimmed = line.trim();
+    // gallery-dl prints one path per file. Lines beginning with "#" mark files
+    // it SKIPPED because they already exist on disk — not new downloads — so a
+    // re-run of an already-fetched gallery would otherwise report them as
+    // downloaded. Count only real, non-skip output lines. Newline-buffered
+    // (onStdoutLine) so a path split across two stream chunks counts once.
+    if (trimmed.length > 0 && !trimmed.startsWith("#")) {
+      files += 1;
       onProgress({ files });
     }
   };
   const { code, stderr } = await runWithWatchdog(binaryPath, buildGalleryArgs(options), {
     idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
-    onStdoutChunk: handleStdout,
+    onStdoutLine: handleLine,
     abortSignal: options.abortSignal,
   });
   if (code === 0) return { files };

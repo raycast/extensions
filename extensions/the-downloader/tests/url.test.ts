@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isValidUrl } from "../src/lib/url";
+import { isValidUrl, normalizeUrl } from "../src/lib/url";
 
 describe("isValidUrl", () => {
   it("accepts https URLs", () => {
@@ -11,7 +11,7 @@ describe("isValidUrl", () => {
     expect(isValidUrl("http://example.com/page")).toBe(true);
   });
 
-  it("accepts protocol-less URLs (caller prepends https:// at use sites)", () => {
+  it("accepts protocol-less URLs (caller normalizes them with normalizeUrl)", () => {
     expect(isValidUrl("youtube.com/watch?v=abc")).toBe(true);
     expect(isValidUrl("example.com")).toBe(true);
   });
@@ -37,5 +37,17 @@ describe("isValidUrl", () => {
     expect(isValidUrl("")).toBe(false);
     expect(isValidUrl("   ")).toBe(false);
     expect(isValidUrl("not a url")).toBe(false);
+  });
+});
+
+describe("normalizeUrl", () => {
+  it("prefixes https:// for scheme-less URLs", () => {
+    expect(normalizeUrl("example.com/page")).toBe("https://example.com/page");
+    expect(normalizeUrl("youtube.com/watch?v=abc")).toBe("https://youtube.com/watch?v=abc");
+  });
+
+  it("leaves URLs that already have a scheme untouched", () => {
+    expect(normalizeUrl("https://example.com")).toBe("https://example.com");
+    expect(normalizeUrl("http://example.com")).toBe("http://example.com");
   });
 });
