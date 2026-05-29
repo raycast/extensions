@@ -357,7 +357,7 @@ public static class Native {
       string deviceId;
       if (device.GetId(out deviceId) == 0 && !string.IsNullOrWhiteSpace(deviceId)) {
         try {
-          using (RegistryKey endpointKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\\CurrentControlSet\\Enum\\SWD\\MMDEVAPI\\" + deviceId)) {
+          using (RegistryKey endpointKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Enum\SWD\MMDEVAPI\" + deviceId)) {
             string registryFriendlyName = ReadRegistryString(endpointKey, "FriendlyName");
             string registryDescription = ReadRegistryString(endpointKey, "DeviceDesc");
 
