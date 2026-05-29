@@ -26,12 +26,12 @@
           "type": "checkbox",
           "required": false,
           "title": "macOS Screenshot App",
-          "default": true,
+          "default": false,
           "label": "Use settings from macOS Screenshot app"
         },
         {
           "name": "screenshotFolder",
-          "description": "Location where you save your screenshots",
+          "description": "Location where you save your screenshots. Required when not using the macOS Screenshot app settings.",
           "type": "textfield",
           "required": true,
           "title": "Screenshot Folder",
