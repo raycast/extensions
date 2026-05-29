@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raycast Extension Best Practices"
+  short_description: "Build Raycast extensions with repo conventions"
+  default_prompt: "Use $raycast-extension-best-practices to review or implement a Raycast extension change."
