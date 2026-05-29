@@ -5,6 +5,9 @@
   "description": "Manage favorite display configurations",
   "icon": "displayplacer.png",
   "author": "eluce2",
+  "contributors": [
+    "LBBO"
+  ],
   "license": "MIT",
   "preferences": [
     {
