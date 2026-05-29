@@ -459,6 +459,21 @@ export async function startDevServer(cwd: string): Promise<void> {
     detached: true,
     stdio: ["ignore", out, out],
   });
+  // Close our copy of the log fd once the child owns its own dup, so repeated
+  // starts/restarts in a long-lived dashboard session don't leak descriptors.
+  // We wait for the 'spawn' event rather than closing immediately because
+  // libuv dups the fd into the child asynchronously; closing too early could
+  // truncate the child's stdio. The 'error' listener covers the spawn-failed
+  // path and also keeps a spawn error from throwing as an unhandled event.
+  const closeLog = () => {
+    try {
+      fs.closeSync(out);
+    } catch {
+      // Already closed / invalid fd; nothing to do.
+    }
+  };
+  child.once("spawn", closeLog);
+  child.once("error", closeLog);
   child.unref();
 }
 

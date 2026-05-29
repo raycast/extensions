@@ -718,8 +718,11 @@ export default function Command(
       );
 
       // 5. Spawn every approved target in parallel. The spawn itself
-      //    returns immediately (detached process), so this is fast.
-      await Promise.all(
+      //    returns immediately (detached process), so this is fast. A target
+      //    whose spawn throws (e.g. no recognizable dev script) gets its own
+      //    failure toast here and is dropped from the set we go on to watch —
+      //    see step 6.
+      const spawned = await Promise.all(
         spawn.targets.map(async (t) => {
           try {
             await startDevServer(t.cwd);
@@ -727,20 +730,39 @@ export default function Command(
               cwd: t.cwd,
               projectName: t.name,
             });
+            return t;
           } catch (err) {
             await showFailureToast(err, {
               title: `Failed to start ${t.name}`,
             });
+            return null;
           }
         }),
       );
+      const succeeded = spawned.filter(
+        (t): t is (typeof spawn.targets)[number] => Boolean(t),
+      );
 
-      // 6. Transition to spawning. The watch effect below takes over,
-      //    flipping the toast to Success once every cwd appears in the
-      //    servers state (driven by the normal polling, now at 1s).
+      // 6. Transition to spawning, watching ONLY the targets that actually
+      //    spawned. Failed ones already showed their own failure toast above;
+      //    including them in `expecting` would leave the animated "Starting…"
+      //    toast hanging and let the 15s timeout escalate it into a second,
+      //    duplicate failure for the same non-event. If nothing spawned, the
+      //    per-target toasts have said it all — tear down the "Starting…" toast
+      //    and finish without ever entering the watch/timeout cycle.
+      if (succeeded.length === 0) {
+        await toastRef.current?.hide();
+        toastRef.current = null;
+        setSpawnState({ phase: "done" });
+        return;
+      }
+
+      // The watch effect below takes over, flipping the toast to Success once
+      // every spawned cwd appears in the servers state (driven by the normal
+      // polling, now at 1s).
       setSpawnState({
         phase: "spawning",
-        expecting: new Map(spawn.targets.map((t) => [t.cwd, t.name])),
+        expecting: new Map(succeeded.map((t) => [t.cwd, t.name])),
         autoOpen: spawn.autoOpen,
       });
     })();
