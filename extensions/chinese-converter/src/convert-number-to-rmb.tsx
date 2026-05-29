@@ -61,38 +61,43 @@ export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: 
           actions={
             <ActionPanel>
               {parsed.state === "ok" ? (
-                <Action.CopyToClipboard title="Copy Result" content={parsed.rmbValue} />
+                <>
+                  <Action.CopyToClipboard title="Copy Result" content={parsed.rmbValue} />
+                  <Action
+                    title="Paste Result"
+                    icon={Icon.TextInput}
+                    onAction={() => {
+                      Clipboard.paste(parsed.rmbValue);
+                    }}
+                  />
+                </>
               ) : (
                 <Action
                   title="Copy Result"
                   icon={Icon.Clipboard}
-                  onAction={async () => {
+                  onAction={() => {
+                    if (parsed.state === "idle") {
+                      showFailureToast(parsed.message, { title: "" });
+                      return;
+                    }
+
                     if (parsed.state === "error") {
-                      await showFailureToast(parsed.message, { title: "Invalid Input" });
+                      showFailureToast(parsed.message, { title: "Invalid Input" });
                     }
                   }}
                 />
               )}
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      <List.Section title="Feedback">
-        <List.Item
-          title="Report an issue or contact the author"
-          icon={Icon.Info}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Report Issue"
-                url="https://github.com/tofrankie/raycast-chinese-converter/issues"
-              />
-              <Action
-                title="Send Email"
-                icon={Icon.Envelope}
-                onAction={() => open("mailto:1426203851@qq.com?subject=RMB%20Converter%20Feedback")}
-              />
+              <ActionPanel.Section title="Feedback">
+                <Action.OpenInBrowser
+                  title="Report Issue"
+                  url="https://github.com/tofrankie/raycast-chinese-converter/issues"
+                />
+                <Action
+                  title="Contact Author"
+                  icon={Icon.Envelope}
+                  onAction={() => open("mailto:1426203851@qq.com?subject=RMB%20Converter%20Feedback")}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

@@ -125,7 +125,7 @@ describe("rmb-converter-core", () => {
         moneyOptions: { unOmitYuan: false, forceZheng: true },
         nzh,
       }),
-    ).toEqual({ state: "idle" });
+    ).toEqual({ state: "idle", message: "Please enter a number" });
 
     expect(
       convert2rmb("abc", {

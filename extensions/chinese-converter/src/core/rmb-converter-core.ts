@@ -22,7 +22,7 @@ export type MoneyOptions = {
 };
 
 export type ConvertResult =
-  | { state: "idle" }
+  | { state: "idle"; message: string }
   | { state: "error"; message: string }
   | { state: "ok"; rmbValue: string; rawValue: string; roundedValue: string };
 
@@ -107,7 +107,7 @@ export function convert2rmb(
   },
 ): ConvertResult {
   if (!rawInput) {
-    return { state: "idle" };
+    return { state: "idle", message: "Please enter a number" };
   }
 
   const numeric = Number(rawInput);
