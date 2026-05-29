@@ -9,6 +9,7 @@ import {
   List,
   showToast,
   Toast,
+  updateCommandMetadata,
 } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { accessSync, constants, existsSync } from "node:fs";
@@ -378,7 +379,7 @@ async function loadWindows(): Promise<WindowSnapshot> {
   const { stdout } = await runYabai(["-m", "query", "--windows"]);
   const allWindows = parseYabaiWindows(stdout);
   const focusableWindows = allWindows.filter(isFocusableWindow);
-  const focusedAppKey = (await frontmostAppKeyForWindows(focusableWindows)) ?? focusedAppKeyForWindows(allWindows);
+  const focusedAppKey = focusedAppKeyForWindows(allWindows) ?? (await frontmostAppKeyForWindows(focusableWindows));
   const windows = sortWindows(focusableWindows);
   const focusedAppName = windows.find((window) => isFocusedAppWindow(window, focusedAppKey))?.app;
 
@@ -500,6 +501,10 @@ export default function Command() {
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    void updateCommandMetadata({ subtitle: focusedAppName ?? null });
+  }, [focusedAppName]);
 
   const refresh = useCallback(async function refreshWindows({ isBackground = false }: RefreshOptions = {}) {
     if (isRefreshingRef.current) {
