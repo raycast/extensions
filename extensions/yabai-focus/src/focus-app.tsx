@@ -299,16 +299,7 @@ function focusedAppKeyForWindows(windows: YabaiWindow[]): string | undefined {
     return appNameKey(focusedWindow.app);
   }
 
-  const focusedCommandPaletteIndex = windows.findIndex(
-    (window) => window["has-focus"] === true && isRaycastCommandPaletteWindow(window),
-  );
-  if (focusedCommandPaletteIndex === -1) {
-    return undefined;
-  }
-
-  const previousFocusedWindow = windows.slice(focusedCommandPaletteIndex + 1).find(isFocusableWindow);
-
-  return previousFocusedWindow ? appNameKey(previousFocusedWindow.app) : undefined;
+  return undefined;
 }
 
 function isFocusedAppWindow(window: YabaiWindow, focusedAppKey: string | undefined): boolean {
