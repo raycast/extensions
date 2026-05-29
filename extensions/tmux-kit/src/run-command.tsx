@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TmuxError, listSessions, runRawCommand } from "./lib/tmux";
+import { codeBlock } from "./lib/ui";
 
 const HISTORY_KEY = "tmux-command-history";
 const HISTORY_MAX = 20;
@@ -157,7 +158,7 @@ export default function RunCommand() {
       <Form.TextField
         id="cmd"
         title="Tmux command"
-        placeholder="e.g. kill-session -a"
+        placeholder="e.g. list-windows"
         value={cmd}
         onChange={setCmd}
         autoFocus
@@ -190,12 +191,12 @@ function CommandResult({
     "",
   ];
   if (stdout.trim().length > 0) {
-    parts.push("**stdout**", "```", stdout.trimEnd(), "```", "");
+    parts.push("**stdout**", codeBlock(stdout.trimEnd()), "");
   } else {
     parts.push("_no stdout_", "");
   }
   if (stderr.trim().length > 0) {
-    parts.push("**stderr**", "```", stderr.trimEnd(), "```");
+    parts.push("**stderr**", codeBlock(stderr.trimEnd()));
   }
 
   return (

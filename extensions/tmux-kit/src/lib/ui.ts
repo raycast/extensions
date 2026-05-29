@@ -10,3 +10,15 @@ export async function toastError(title: string, e: unknown): Promise<void> {
     message: e instanceof TmuxError ? e.stderr || e.message : String(e),
   });
 }
+
+// Wrap arbitrary text in a Markdown code fence that can't be broken by backtick
+// runs inside the text (e.g. a pane showing ``` from a README or man page).
+// The fence is one backtick longer than the longest run in the content.
+export function codeBlock(text: string): string {
+  const longestRun = (text.match(/`+/g) ?? []).reduce(
+    (max, run) => Math.max(max, run.length),
+    0,
+  );
+  const fence = "`".repeat(Math.max(3, longestRun + 1));
+  return `${fence}\n${text}\n${fence}`;
+}

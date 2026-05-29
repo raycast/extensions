@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { TmuxError, capturePane, killPane } from "../lib/tmux";
-import { toastError } from "../lib/ui";
+import { codeBlock, toastError } from "../lib/ui";
 
 export function PaneDetail({
   paneId,
@@ -46,8 +46,8 @@ export function PaneDetail({
   }, [load]);
 
   const markdown = error
-    ? `## Failed to capture pane\n\n\`\`\`\n${error}\n\`\`\``
-    : `\`\`\`\n${content ?? ""}\n\`\`\``;
+    ? `## Failed to capture pane\n\n${codeBlock(error)}`
+    : codeBlock(content ?? "");
 
   return (
     <Detail
