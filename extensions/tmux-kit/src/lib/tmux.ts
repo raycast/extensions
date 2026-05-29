@@ -143,8 +143,12 @@ export async function hasAnyClient(): Promise<boolean> {
   }
 }
 
-export function attachCommand(session: string): string {
-  return `tmux attach -t ${shellQuote(session)}`;
+// Prefer the readable session name; fall back to the unambiguous session id
+// ($N) for names tmux would misparse as a target (containing ":", ".", or
+// whitespace — the same names the rename/new forms reject).
+export function attachCommand(name: string, id: string): string {
+  const target = /[\s:.]/.test(name) ? id : name;
+  return `tmux attach -t ${shellQuote(target)}`;
 }
 
 function shellQuote(s: string): string {

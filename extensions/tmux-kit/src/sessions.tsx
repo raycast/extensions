@@ -239,7 +239,7 @@ function SessionActions({
       />
       <Action.CopyToClipboard
         title="Copy Attach Command"
-        content={attachCommand(session.name)}
+        content={attachCommand(session.name, session.id)}
         icon={Icon.Clipboard}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
