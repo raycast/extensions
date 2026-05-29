@@ -26,6 +26,15 @@
     "macOS"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "type": "appPicker",
+      "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -33,13 +42,6 @@
       "description": "List and manage running dev servers",
       "mode": "view",
       "preferences": [
-        {
-          "name": "terminalApp",
-          "title": "Terminal App",
-          "type": "appPicker",
-          "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
-          "required": false
-        },
         {
           "name": "refreshInterval",
           "title": "Refresh Interval",
@@ -105,6 +107,39 @@
           "type": "checkbox",
           "label": "Show localhost URL with custom domain",
           "description": "When a custom domain (e.g. via portless) points at a dev server, also show the localhost:PORT pill alongside it",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "title": "Start Dev Server",
+      "description": "Start a dev server from a Finder selection, a recent project, or any folder you pick",
+      "mode": "view",
+      "keywords": [
+        "spawn",
+        "boot",
+        "launch",
+        "run",
+        "recent"
+      ],
+      "preferences": [
+        {
+          "name": "autoOpenInBrowser",
+          "title": "After Start",
+          "type": "checkbox",
+          "label": "Open in browser when the port binds",
+          "description": "Once the new dev server starts listening, automatically open its URL in your default browser",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "confirmMultiStart",
+          "title": "Confirmations",
+          "type": "checkbox",
+          "label": "Confirm when starting multiple folders at once",
+          "description": "Show a confirmation alert before spawning more than one dev server from a multi-folder Finder selection",
           "default": true,
           "required": false
         }

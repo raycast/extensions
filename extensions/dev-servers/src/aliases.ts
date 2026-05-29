@@ -9,7 +9,7 @@ const execFileAsync = promisify(execFile);
 // exists.
 //
 // Resolution path: shell out to `portless list` via a login shell. portless's
-// text output is its public, human-readable interface — far more stable than
+// text output is its public, human-readable interface, far more stable than
 // its internal ~/.portless/ state files. The login shell is required because
 // Raycast's subprocess PATH doesn't include user-installed CLIs (same reason
 // the restart flow in [servers.ts] uses `/bin/zsh -ilc`).
@@ -21,7 +21,7 @@ const execFileAsync = promisify(execFile);
 //
 // Any failure (portless not installed, command-not-found, timeout, unexpected
 // output) returns an empty map. Portless is treated as an optional
-// enhancement, not a runtime dependency — when it's absent the UI silently
+// enhancement, not a runtime dependency. When it's absent the UI silently
 // falls back to plain `localhost:PORT` rows, per Raycast's "gracefully
 // degrade" guidance.
 //
