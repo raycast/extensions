@@ -157,6 +157,8 @@ export type TmuxPane = {
   active: boolean;
   width: number;
   height: number;
+  left: number;
+  top: number;
   marked: boolean;
   // Session ID (e.g. "$3"). Use this rather than session name when building
   // window-level tmux targets, because session names may legally contain ":"
@@ -175,6 +177,8 @@ const PANE_FORMAT = [
   "#{pane_active}",
   "#{pane_width}",
   "#{pane_height}",
+  "#{pane_left}",
+  "#{pane_top}",
   "#{pane_marked}",
   "#{session_id}",
 ].join(FIELD_SEP);
@@ -204,8 +208,10 @@ export async function listPanes(session: string): Promise<TmuxPane[]> {
         active: Number(p[7]) > 0,
         width: Number(p[8]),
         height: Number(p[9]),
-        marked: Number(p[10]) > 0,
-        sessionId: p[11] ?? "",
+        left: Number(p[10]),
+        top: Number(p[11]),
+        marked: Number(p[12]) > 0,
+        sessionId: p[13] ?? "",
       };
     });
 }
@@ -243,6 +249,13 @@ export async function clearMarkedPane(): Promise<void> {
 // Caller must verify a marked pane exists before invoking.
 export async function swapWithMarkedPane(paneId: string): Promise<void> {
   await run(["swap-pane", "-t", paneId]);
+}
+
+// Swap two panes by id. swap-pane keeps the window layout (the cells) intact
+// and only exchanges the two panes' contents/processes. -d leaves the active
+// pane unchanged so we never yank focus on an attached client.
+export async function swapPanes(srcId: string, dstId: string): Promise<void> {
+  await run(["swap-pane", "-s", srcId, "-t", dstId, "-d"]);
 }
 
 export async function clearPaneHistory(paneId: string): Promise<void> {
