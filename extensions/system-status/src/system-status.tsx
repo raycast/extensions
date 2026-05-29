@@ -285,7 +285,7 @@ public static class Native {
       return string.Empty;
     }
 
-    return value.Replace("\\\\", "\\\\\\\\").Replace("\"", "\\\\\"");
+    return value.Replace("\\\\", "\\\\\\\\").Replace("\"", "\\\"");
   }
 
   static string ReadRegistryString(RegistryKey key, string name) {
