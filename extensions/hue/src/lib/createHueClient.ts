@@ -3,7 +3,7 @@ import React from "react";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import dns from "dns";
 import HueClient from "./HueClient";
-import { getCaCertificate } from "../helpers/hueNetworking";
+import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
 import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(
@@ -25,7 +25,7 @@ export default async function createHueClient(
     const session = connect(`https://${bridgeConfig.id}`, {
       ca: getCaCertificate(),
       checkServerIdentity: (_hostname, peerCertificate) => {
-        if (peerCertificate.subject.CN.toLowerCase() !== bridgeConfig.id.toLowerCase()) {
+        if (getCommonName(peerCertificate).toLowerCase() !== bridgeConfig.id.toLowerCase()) {
           throw new Error(
             "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
           );

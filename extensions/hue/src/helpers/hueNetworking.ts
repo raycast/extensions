@@ -2,7 +2,7 @@ import { APP_NAME, CONNECTION_TIMEOUT_MS } from "./constants";
 import * as tls from "tls";
 import { PeerCertificate } from "tls";
 import * as https from "https";
-import { HueApiService, LinkResponse, MDnsService } from "../lib/types";
+import { HueApiService, LinkResponse } from "../lib/types";
 import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
 import { environment } from "@raycast/api";
@@ -74,9 +74,9 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   return new Promise((resolve, reject) => {
     const browser = new Bonjour().findOne({ type: "hue", protocol: "tcp" });
 
-    browser.on("up", (service: MDnsService) => {
-      const ipAddress = service.addresses.find((address) => isIPv4(address));
-      const id = service.txt.bridgeid;
+    browser.on("up", (service) => {
+      const ipAddress = service.addresses?.find((address) => isIPv4(address));
+      const id = service.txt?.bridgeid;
 
       console.info(`Discovered Hue Bridge using mDNS: ${ipAddress}, ${id}`);
       return ipAddress ? resolve({ ipAddress, id }) : reject("Could not find a Hue Bridge using mDNS");
@@ -164,7 +164,7 @@ export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
       () => {
         const cert = socket.getPeerCertificate();
         socket.destroy();
-        resolve(cert.subject.CN);
+        resolve(getCommonName(cert));
       },
     );
 
@@ -202,6 +202,15 @@ export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
 }
 
 /**
+ * A certificate's Common Name (CN) may be a string, an array of strings, or undefined.
+ * The Hue Bridge certificate always uses a single CN, so it is normalized to a string.
+ */
+export function getCommonName(certificate: PeerCertificate): string {
+  const commonName = certificate.subject.CN;
+  return Array.isArray(commonName) ? commonName[0] : (commonName ?? "");
+}
+
+/**
  * The Hue Bridge uses a certificate signed by a root-bridge certificate, or an intermediate certificate which will
  * be signed by a root-bridge certificate.
  * The CN (common name) of the certificate matches the ID of the Hue Bridge, which is a 16-character hex string.
@@ -210,7 +219,7 @@ export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
  * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
  */
 function validateBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
-  if (peerCertificate.subject.CN.toLowerCase() !== bridgeId.toLowerCase()) {
+  if (getCommonName(peerCertificate).toLowerCase() !== bridgeId.toLowerCase()) {
     throw new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
   }
 
