@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   Form,
+  getPreferenceValues,
   Icon,
   showToast,
   Toast,
@@ -173,7 +174,23 @@ function AgentPickerInstallForm({
   const installedAgents = new Set<string>(installedAgentNames);
   const replacementAgentNames = installedMatch.type === "conflict" ? installedAgentNames : [];
   const selectableAgents = agents.filter((a) => !installedAgents.has(a));
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const agentPrefs: Record<string, boolean> = {};
+  for (const [key, value] of Object.entries(getPreferenceValues<Preferences>())) {
+    if (key.startsWith("agent_") && typeof value === "boolean") {
+      agentPrefs[key] = value;
+    }
+  }
+  const [selected, setSelected] = useState<Set<string>>(
+    new Set(
+      selectableAgents.filter((a) => {
+        const key = `agent_${a
+          .toLowerCase()
+          .replace(/\s+/g, "_")
+          .replace(/[^a-z0-9_]/g, "")}`;
+        return agentPrefs[key] === true;
+      }),
+    ),
+  );
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
   const installedSource = isReplacing ? (installedMatch.source ?? "Unknown source") : "";

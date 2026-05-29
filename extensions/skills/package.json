@@ -28,7 +28,495 @@
       "title": "Search Skills",
       "subtitle": "Skills",
       "description": "Search for agent skills",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "agent_adal",
+          "title": "AdaL",
+          "type": "checkbox",
+          "label": "AdaL",
+          "required": false,
+          "default": false,
+          "description": "Pre-select AdaL in the install agent picker"
+        },
+        {
+          "name": "agent_aiderdesk",
+          "title": "AiderDesk",
+          "type": "checkbox",
+          "label": "AiderDesk",
+          "required": false,
+          "default": false,
+          "description": "Pre-select AiderDesk in the install agent picker"
+        },
+        {
+          "name": "agent_amp",
+          "title": "Amp",
+          "type": "checkbox",
+          "label": "Amp",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Amp in the install agent picker"
+        },
+        {
+          "name": "agent_antigravity",
+          "title": "Antigravity",
+          "type": "checkbox",
+          "label": "Antigravity",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Antigravity in the install agent picker"
+        },
+        {
+          "name": "agent_augment",
+          "title": "Augment",
+          "type": "checkbox",
+          "label": "Augment",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Augment in the install agent picker"
+        },
+        {
+          "name": "agent_claude_code",
+          "title": "Claude Code",
+          "type": "checkbox",
+          "label": "Claude Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Claude Code in the install agent picker"
+        },
+        {
+          "name": "agent_cline",
+          "title": "Cline",
+          "type": "checkbox",
+          "label": "Cline",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Cline in the install agent picker"
+        },
+        {
+          "name": "agent_code_studio",
+          "title": "Code Studio",
+          "type": "checkbox",
+          "label": "Code Studio",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Code Studio in the install agent picker"
+        },
+        {
+          "name": "agent_codearts_agent",
+          "title": "CodeArts Agent",
+          "type": "checkbox",
+          "label": "CodeArts Agent",
+          "required": false,
+          "default": false,
+          "description": "Pre-select CodeArts Agent in the install agent picker"
+        },
+        {
+          "name": "agent_codebuddy",
+          "title": "CodeBuddy",
+          "type": "checkbox",
+          "label": "CodeBuddy",
+          "required": false,
+          "default": false,
+          "description": "Pre-select CodeBuddy in the install agent picker"
+        },
+        {
+          "name": "agent_codemaker",
+          "title": "Codemaker",
+          "type": "checkbox",
+          "label": "Codemaker",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Codemaker in the install agent picker"
+        },
+        {
+          "name": "agent_codex",
+          "title": "Codex",
+          "type": "checkbox",
+          "label": "Codex",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Codex in the install agent picker"
+        },
+        {
+          "name": "agent_command_code",
+          "title": "Command Code",
+          "type": "checkbox",
+          "label": "Command Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Command Code in the install agent picker"
+        },
+        {
+          "name": "agent_continue",
+          "title": "Continue",
+          "type": "checkbox",
+          "label": "Continue",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Continue in the install agent picker"
+        },
+        {
+          "name": "agent_cortex_code",
+          "title": "Cortex Code",
+          "type": "checkbox",
+          "label": "Cortex Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Cortex Code in the install agent picker"
+        },
+        {
+          "name": "agent_crush",
+          "title": "Crush",
+          "type": "checkbox",
+          "label": "Crush",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Crush in the install agent picker"
+        },
+        {
+          "name": "agent_cursor",
+          "title": "Cursor",
+          "type": "checkbox",
+          "label": "Cursor",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Cursor in the install agent picker"
+        },
+        {
+          "name": "agent_deep_agents",
+          "title": "Deep Agents",
+          "type": "checkbox",
+          "label": "Deep Agents",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Deep Agents in the install agent picker"
+        },
+        {
+          "name": "agent_devin_for_terminal",
+          "title": "Devin for Terminal",
+          "type": "checkbox",
+          "label": "Devin for Terminal",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Devin for Terminal in the install agent picker"
+        },
+        {
+          "name": "agent_dexto",
+          "title": "Dexto",
+          "type": "checkbox",
+          "label": "Dexto",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Dexto in the install agent picker"
+        },
+        {
+          "name": "agent_droid",
+          "title": "Droid",
+          "type": "checkbox",
+          "label": "Droid",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Droid in the install agent picker"
+        },
+        {
+          "name": "agent_firebender",
+          "title": "Firebender",
+          "type": "checkbox",
+          "label": "Firebender",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Firebender in the install agent picker"
+        },
+        {
+          "name": "agent_forgecode",
+          "title": "ForgeCode",
+          "type": "checkbox",
+          "label": "ForgeCode",
+          "required": false,
+          "default": false,
+          "description": "Pre-select ForgeCode in the install agent picker"
+        },
+        {
+          "name": "agent_gemini_cli",
+          "title": "Gemini CLI",
+          "type": "checkbox",
+          "label": "Gemini CLI",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Gemini CLI in the install agent picker"
+        },
+        {
+          "name": "agent_github_copilot",
+          "title": "GitHub Copilot",
+          "type": "checkbox",
+          "label": "GitHub Copilot",
+          "required": false,
+          "default": false,
+          "description": "Pre-select GitHub Copilot in the install agent picker"
+        },
+        {
+          "name": "agent_goose",
+          "title": "Goose",
+          "type": "checkbox",
+          "label": "Goose",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Goose in the install agent picker"
+        },
+        {
+          "name": "agent_ibm_bob",
+          "title": "IBM Bob",
+          "type": "checkbox",
+          "label": "IBM Bob",
+          "required": false,
+          "default": false,
+          "description": "Pre-select IBM Bob in the install agent picker"
+        },
+        {
+          "name": "agent_iflow_cli",
+          "title": "iFlow CLI",
+          "type": "checkbox",
+          "label": "iFlow CLI",
+          "required": false,
+          "default": false,
+          "description": "Pre-select iFlow CLI in the install agent picker"
+        },
+        {
+          "name": "agent_junie",
+          "title": "Junie",
+          "type": "checkbox",
+          "label": "Junie",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Junie in the install agent picker"
+        },
+        {
+          "name": "agent_kilo_code",
+          "title": "Kilo Code",
+          "type": "checkbox",
+          "label": "Kilo Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Kilo Code in the install agent picker"
+        },
+        {
+          "name": "agent_kimi_code_cli",
+          "title": "Kimi Code CLI",
+          "type": "checkbox",
+          "label": "Kimi Code CLI",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Kimi Code CLI in the install agent picker"
+        },
+        {
+          "name": "agent_kiro_cli",
+          "title": "Kiro CLI",
+          "type": "checkbox",
+          "label": "Kiro CLI",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Kiro CLI in the install agent picker"
+        },
+        {
+          "name": "agent_kode",
+          "title": "Kode",
+          "type": "checkbox",
+          "label": "Kode",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Kode in the install agent picker"
+        },
+        {
+          "name": "agent_mcpjam",
+          "title": "MCPJam",
+          "type": "checkbox",
+          "label": "MCPJam",
+          "required": false,
+          "default": false,
+          "description": "Pre-select MCPJam in the install agent picker"
+        },
+        {
+          "name": "agent_mistral_vibe",
+          "title": "Mistral Vibe",
+          "type": "checkbox",
+          "label": "Mistral Vibe",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Mistral Vibe in the install agent picker"
+        },
+        {
+          "name": "agent_mux",
+          "title": "Mux",
+          "type": "checkbox",
+          "label": "Mux",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Mux in the install agent picker"
+        },
+        {
+          "name": "agent_neovate",
+          "title": "Neovate",
+          "type": "checkbox",
+          "label": "Neovate",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Neovate in the install agent picker"
+        },
+        {
+          "name": "agent_openclaw",
+          "title": "OpenClaw",
+          "type": "checkbox",
+          "label": "OpenClaw",
+          "required": false,
+          "default": false,
+          "description": "Pre-select OpenClaw in the install agent picker"
+        },
+        {
+          "name": "agent_opencode",
+          "title": "OpenCode",
+          "type": "checkbox",
+          "label": "OpenCode",
+          "required": false,
+          "default": false,
+          "description": "Pre-select OpenCode in the install agent picker"
+        },
+        {
+          "name": "agent_openhands",
+          "title": "OpenHands",
+          "type": "checkbox",
+          "label": "OpenHands",
+          "required": false,
+          "default": false,
+          "description": "Pre-select OpenHands in the install agent picker"
+        },
+        {
+          "name": "agent_pi",
+          "title": "Pi",
+          "type": "checkbox",
+          "label": "Pi",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Pi in the install agent picker"
+        },
+        {
+          "name": "agent_pochi",
+          "title": "Pochi",
+          "type": "checkbox",
+          "label": "Pochi",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Pochi in the install agent picker"
+        },
+        {
+          "name": "agent_qoder",
+          "title": "Qoder",
+          "type": "checkbox",
+          "label": "Qoder",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Qoder in the install agent picker"
+        },
+        {
+          "name": "agent_qwen_code",
+          "title": "Qwen Code",
+          "type": "checkbox",
+          "label": "Qwen Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Qwen Code in the install agent picker"
+        },
+        {
+          "name": "agent_replit",
+          "title": "Replit",
+          "type": "checkbox",
+          "label": "Replit",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Replit in the install agent picker"
+        },
+        {
+          "name": "agent_roo_code",
+          "title": "Roo Code",
+          "type": "checkbox",
+          "label": "Roo Code",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Roo Code in the install agent picker"
+        },
+        {
+          "name": "agent_rovo_dev",
+          "title": "Rovo Dev",
+          "type": "checkbox",
+          "label": "Rovo Dev",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Rovo Dev in the install agent picker"
+        },
+        {
+          "name": "agent_tabnine_cli",
+          "title": "Tabnine CLI",
+          "type": "checkbox",
+          "label": "Tabnine CLI",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Tabnine CLI in the install agent picker"
+        },
+        {
+          "name": "agent_trae",
+          "title": "Trae",
+          "type": "checkbox",
+          "label": "Trae",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Trae in the install agent picker"
+        },
+        {
+          "name": "agent_trae_cn",
+          "title": "Trae CN",
+          "type": "checkbox",
+          "label": "Trae CN",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Trae CN in the install agent picker"
+        },
+        {
+          "name": "agent_universal",
+          "title": "Universal",
+          "type": "checkbox",
+          "label": "Universal",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Universal in the install agent picker"
+        },
+        {
+          "name": "agent_warp",
+          "title": "Warp",
+          "type": "checkbox",
+          "label": "Warp",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Warp in the install agent picker"
+        },
+        {
+          "name": "agent_windsurf",
+          "title": "Windsurf",
+          "type": "checkbox",
+          "label": "Windsurf",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Windsurf in the install agent picker"
+        },
+        {
+          "name": "agent_zencoder",
+          "title": "Zencoder",
+          "type": "checkbox",
+          "label": "Zencoder",
+          "required": false,
+          "default": false,
+          "description": "Pre-select Zencoder in the install agent picker"
+        }
+      ]
     },
     {
       "name": "manage-skills",

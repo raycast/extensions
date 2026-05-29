@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Default Agents Preference] - {PR_MERGE_DATE}
+
+- Adds per-agent checkboxes in extension preferences to pre-select agents in the install picker
+
 ## [Show Installed Skill Audit Details] - 2026-05-20
 
 - Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
