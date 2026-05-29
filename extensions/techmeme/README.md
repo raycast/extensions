@@ -13,14 +13,14 @@ This is an unofficial Techmeme client for Raycast. It uses Techmeme's public web
 
 ## Development
 
-Use Bun for local development:
+Use npm for development:
 
 ```bash
-bun install
-bun run dev
-bun run test
-bun run lint
-bun run build
+npm install
+npm run dev
+npm run test
+npm run lint
+npm run build
 ```
 
 Raycast Store publishing uses npm and `package-lock.json`:
