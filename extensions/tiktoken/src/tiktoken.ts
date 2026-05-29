@@ -1,9 +1,9 @@
 import { getPreferenceValues, PreferenceValues } from "@raycast/api";
-import type { TiktokenEncoding } from "tiktoken";
+import type { Tiktoken, TiktokenEncoding } from "tiktoken";
 import { get_encoding, init } from "tiktoken/init";
 import wasm from "tiktoken/tiktoken_bg.wasm";
 
-const encoders = new Map<TiktokenEncoding, ReturnType<typeof get_encoding>>();
+const encoders = new Map<TiktokenEncoding, Tiktoken>();
 let tiktokenInitPromise: Promise<void> | undefined;
 
 export async function encode(str: string) {
@@ -47,7 +47,7 @@ function initTiktoken() {
     return tiktokenInitPromise;
   }
 
-  tiktokenInitPromise = init((imports) => WebAssembly.instantiate(wasm, imports)).then(() => undefined);
+  tiktokenInitPromise = init((imports) => WebAssembly.instantiate(wasm, imports));
 
   return tiktokenInitPromise;
 }
