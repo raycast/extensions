@@ -8,6 +8,19 @@ The most complete tmux integration for Raycast — **full control over sessions,
 
 ---
 
+## Commands & capabilities
+
+**5 commands, one launcher — the whole `session → window → pane` tree without opening a terminal:** 20+ session/window/pane actions, a searchable ~60-entry cheatsheet, an arbitrary-command runner, and tmux-resurrect save/restore.
+
+| Command | What you get |
+| --- | --- |
+| **Tmux Sessions** | The hub. Sessions: switch / attach (copy command) / rename / new (native folder picker) / kill / kill-others. Drill in with `Cmd+B` for **windows** (new / rename / switch / break-pane / kill) and **panes**: view & copy content, copy PID / ID / command / path, mark, swap-with-marked, **directional Swap ← → ↑ ↓**, clear history, break to window, kill one / kill others. |
+| **Tmux Cheatsheet** | Searchable reference of ~60 stock tmux defaults across 9 sections, copy-to-clipboard on every entry, works with any prefix key. |
+| **Run Tmux Command** | The launcher equivalent of `prefix :` — send arbitrary tmux input with stdout / stderr, 10 quick presets, and per-user history. |
+| **Tmux Resurrect Save / Restore** | One-shot snapshot and restore of your entire tmux layout via tmux-resurrect. |
+
+---
+
 ## Table of contents
 
 1. [Why Tmux Kit](#why-tmux-kit)
