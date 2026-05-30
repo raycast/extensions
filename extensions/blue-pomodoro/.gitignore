@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.direnv/
+.env
+raycast-env.d.ts

@@ -1,0 +1,80 @@
+{
+  "name": "blue-pomodoro",
+  "title": "BluePomodoro",
+  "description": "Integrate BluePomodoro flow into Raycast. Manage your pomodoros, tasks, and productivity stats.",
+  "icon": "icon.png",
+  "author": "joaquin_gonzalez",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "focus-timer",
+      "title": "Focus Timer",
+      "subtitle": "BluePomodoro",
+      "description": "Start, pause, and control your pomodoro sessions.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tasks",
+      "title": "Manage Tasks",
+      "subtitle": "BluePomodoro",
+      "description": "View, create, and focus on active tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "stats",
+      "title": "Productivity Stats",
+      "subtitle": "BluePomodoro",
+      "description": "View your streak, points, and daily/monthly stats.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Timer",
+      "subtitle": "BluePomodoro",
+      "description": "Indicator and control panel in the macOS menu bar.",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Get this token from the Global Settings tab in your BluePomodoro web app."
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Base URL",
+      "description": "The URL of your hosted BluePomodoro app.",
+      "default": "http://localhost:9002"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "omggif": "^1.0.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
