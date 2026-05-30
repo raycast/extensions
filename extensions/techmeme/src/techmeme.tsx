@@ -136,6 +136,9 @@ function StoryActions(props: {
 }) {
   const { story, searchText, revalidate, includeDetailsAction = true } = props;
   const query = searchText.trim();
+  const hasSocialLinks = Boolean(
+    story.social.x || story.social.bluesky || story.social.threads || story.social.mastodon,
+  );
 
   return (
     <ActionPanel title={story.source}>
@@ -188,24 +191,34 @@ function StoryActions(props: {
         </ActionPanel.Section>
       ) : null}
 
-      <ActionPanel.Section title="Social">
-        {story.social.x ? (
-          <Action.OpenInBrowser title="Open Techmeme Post on X" url={story.social.x} icon={Icon.Message} />
-        ) : null}
-        {story.social.bluesky ? (
-          <Action.OpenInBrowser title="Open Techmeme Post on Bluesky" url={story.social.bluesky} icon={Icon.Message} />
-        ) : null}
-        {story.social.threads ? (
-          <Action.OpenInBrowser title="Open Techmeme Post on Threads" url={story.social.threads} icon={Icon.Message} />
-        ) : null}
-        {story.social.mastodon ? (
-          <Action.OpenInBrowser
-            title="Open Techmeme Post on Mastodon"
-            url={story.social.mastodon}
-            icon={Icon.Message}
-          />
-        ) : null}
-      </ActionPanel.Section>
+      {hasSocialLinks ? (
+        <ActionPanel.Section title="Social">
+          {story.social.x ? (
+            <Action.OpenInBrowser title="Open Techmeme Post on X" url={story.social.x} icon={Icon.Message} />
+          ) : null}
+          {story.social.bluesky ? (
+            <Action.OpenInBrowser
+              title="Open Techmeme Post on Bluesky"
+              url={story.social.bluesky}
+              icon={Icon.Message}
+            />
+          ) : null}
+          {story.social.threads ? (
+            <Action.OpenInBrowser
+              title="Open Techmeme Post on Threads"
+              url={story.social.threads}
+              icon={Icon.Message}
+            />
+          ) : null}
+          {story.social.mastodon ? (
+            <Action.OpenInBrowser
+              title="Open Techmeme Post on Mastodon"
+              url={story.social.mastodon}
+              icon={Icon.Message}
+            />
+          ) : null}
+        </ActionPanel.Section>
+      ) : null}
 
       <ActionPanel.Section>
         <Action
