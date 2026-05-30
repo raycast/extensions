@@ -10,7 +10,12 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
-import { fetchProfile, logPomodoroSession, ProfileData } from "./utils/api";
+import {
+  fetchProfile,
+  logPomodoroSession,
+  ProfileData,
+  escapeXml,
+} from "./utils/api";
 
 type TimerState = {
   isActive: boolean;
@@ -401,7 +406,12 @@ export default function Command() {
     const progressColor = isWork ? "#60a5fa" : "#34d399";
     const modeLabel = isWork ? "Focus Time" : "Break Time";
     const statusLabel = state.isActive ? "IN PROGRESS" : "PAUSED";
-    const taskName = state.activeTaskTitle || "General Focus";
+    const rawTaskName = state.activeTaskTitle || "General Focus";
+    const taskName = escapeXml(
+      rawTaskName.length > 30
+        ? rawTaskName.substring(0, 27) + "..."
+        : rawTaskName,
+    );
 
     const svg = `
 <svg width="100%" viewBox="0 0 560 240" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -436,7 +446,7 @@ export default function Command() {
   <rect x="240" y="74" width="288" height="48" rx="14" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
   <text x="256" y="92" fill="#64748b" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="0.5">ACTIVE TASK</text>
   <text x="256" y="110" fill="#cbd5e1" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700">
-    ${taskName.length > 30 ? taskName.substring(0, 27) + "..." : taskName}
+    ${taskName}
   </text>
   
   <rect x="240" y="136" width="105" height="26" rx="13" fill="${state.isActive ? "rgba(59, 130, 246, 0.12)" : "rgba(148, 163, 184, 0.08)"}" stroke="${state.isActive ? accentColor : "#475569"}" stroke-width="1.2" />

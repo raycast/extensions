@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of **BluePomodoro** Raycast integration.
 - **Focus Timer**: watchOS-inspired glowing circular progress ring showing countdown, session mode, active task, and streak stats.

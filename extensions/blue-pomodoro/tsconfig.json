@@ -20,5 +20,5 @@
       "react-dom": ["node_modules/@types/react-dom"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

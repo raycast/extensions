@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blue-pomodoro",
   "title": "BluePomodoro",
   "description": "Integrate BluePomodoro flow into Raycast. Manage your pomodoros, tasks, and productivity stats.",
@@ -57,10 +58,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.0",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2",
-    "omggif": "^1.0.10"
+    "@raycast/api": "^1.88.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -7,7 +7,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
-import { fetchProfile, ProfileData } from "./utils/api";
+import { fetchProfile, ProfileData, escapeXml } from "./utils/api";
 
 export default function Command() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -40,7 +40,8 @@ export default function Command() {
 
     const streak = profile.streak_days;
     const points = profile.puntos_totales.toLocaleString();
-    const displayName = profile.display_name || profile.email || "Guest";
+    const rawDisplayName = profile.display_name || profile.email || "Guest";
+    const displayName = escapeXml(rawDisplayName.toUpperCase());
     const focusMin = profile.stats.focus_minutes;
 
     const svg = `
@@ -66,7 +67,7 @@ export default function Command() {
   <!-- Header Glass -->
   <rect x="1" y="1" width="558" height="60" rx="31" fill="white" fill-opacity="0.02" />
   <text x="32" y="36" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.5">MY DAILY PERFORMANCE</text>
-  <text x="528" y="36" fill="#64748b" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="end">${displayName.toUpperCase()}</text>
+  <text x="528" y="36" fill="#64748b" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="end">${displayName}</text>
 
   <!-- Left Stats: Streak -->
   <text x="32" y="96" fill="#f97316" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="1">FOCUS STREAK</text>
