@@ -9,7 +9,7 @@ import {
   showHUD,
   getPreferenceValues,
 } from "@raycast/api";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   fetchProfile,
   logPomodoroSession,
@@ -51,7 +51,17 @@ export default function Command() {
       try {
         setLoading(true);
         const p = await fetchProfile().catch(() => null);
-        if (p) setProfile(p);
+        if (p) {
+          setProfile(p);
+          await LocalStorage.setItem(
+            "profile-work-minutes",
+            String(p.pomodoro.work_minutes),
+          );
+          await LocalStorage.setItem(
+            "profile-break-minutes",
+            String(p.pomodoro.break_minutes),
+          );
+        }
 
         const keys = [
           "timer-is-active",
@@ -122,15 +132,8 @@ export default function Command() {
     return rem;
   }, [state.isActive, state.targetEndAt, state.pausedRemainingSec, now]);
 
-  // 4. Auto-complete timer session when remaining is 0
-  useEffect(() => {
-    if (state.isActive && remainingSec <= 0 && state.targetEndAt) {
-      handleTimerComplete();
-    }
-  }, [remainingSec, state.isActive]);
-
   // 5. Handle timer completion (triggers sync with serverless function)
-  async function handleTimerComplete() {
+  const handleTimerComplete = useCallback(async () => {
     const prevMode = state.mode;
     const prevTaskId = state.activeTaskId;
     const prevStartedAt = state.startedAt || Date.now() - 25 * 60 * 1000;
@@ -219,7 +222,20 @@ export default function Command() {
         message: error.message,
       });
     }
-  }
+  }, [
+    state.mode,
+    state.activeTaskId,
+    state.startedAt,
+    state.sessionsCompleted,
+    profile,
+  ]);
+
+  // 4. Auto-complete timer session when remaining is 0
+  useEffect(() => {
+    if (state.isActive && remainingSec <= 0 && state.targetEndAt) {
+      handleTimerComplete();
+    }
+  }, [remainingSec, state.isActive, state.targetEndAt, handleTimerComplete]);
 
   // 6. Action Handlers
   async function toggleTimer() {
@@ -339,11 +355,12 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: "Logging...",
       });
-      const started = new Date(Date.now() - 25 * 60 * 1000).toISOString();
+      const workMin = profile?.pomodoro.work_minutes || 40;
+      const started = new Date(Date.now() - workMin * 60 * 1000).toISOString();
       const res = await logPomodoroSession({
         mode: "work",
         started_at: started,
-        duration_sec: 25 * 60,
+        duration_sec: workMin * 60,
         task_id: state.activeTaskId || undefined,
       });
 

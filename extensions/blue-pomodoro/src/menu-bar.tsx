@@ -10,6 +10,8 @@ type TimerState = {
   startedAt: number | null;
   activeTaskId: string | null;
   activeTaskTitle: string | null;
+  workMin: number;
+  breakMin: number;
 };
 
 export default function Command() {
@@ -28,6 +30,8 @@ export default function Command() {
         "timer-started-at",
         "timer-active-task-id",
         "timer-active-task-title",
+        "profile-work-minutes",
+        "profile-break-minutes",
       ];
       const values = await Promise.all(
         keys.map((k) => LocalStorage.getItem<string>(k)),
@@ -36,7 +40,13 @@ export default function Command() {
       const isAct = values[0] === "true";
       const mode = (values[1] as "work" | "break") || "work";
       const targetEnd = values[2] ? parseInt(values[2]) : null;
-      const pausedRemaining = values[3] ? parseInt(values[3]) : 2400;
+      const workMin = values[7] ? parseInt(values[7]) : 40;
+      const breakMin = values[8] ? parseInt(values[8]) : 10;
+      const pausedRemaining = values[3]
+        ? parseInt(values[3])
+        : mode === "work"
+          ? workMin * 60
+          : breakMin * 60;
       const started = values[4] ? parseInt(values[4]) : null;
       const activeTaskId = values[5] || null;
       const activeTaskTitle = values[6] || null;
@@ -49,6 +59,8 @@ export default function Command() {
         startedAt: started,
         activeTaskId,
         activeTaskTitle,
+        workMin,
+        breakMin,
       });
 
       const list = await fetchTasks().catch(() => []);
@@ -79,7 +91,10 @@ export default function Command() {
   // Compute remaining seconds
   const remainingSec = (() => {
     if (!state.isActive || !state.targetEndAt) {
-      return state.pausedRemainingSec ?? 2400;
+      return (
+        state.pausedRemainingSec ??
+        (state.mode === "work" ? state.workMin * 60 : state.breakMin * 60)
+      );
     }
     return Math.max(0, Math.round((state.targetEndAt - now) / 1000));
   })();
@@ -102,7 +117,9 @@ export default function Command() {
     let pausedRemaining = state.pausedRemainingSec;
 
     if (isAct) {
-      const duration = pausedRemaining ?? (state.mode === "work" ? 2400 : 600);
+      const duration =
+        pausedRemaining ??
+        (state.mode === "work" ? state.workMin * 60 : state.breakMin * 60);
       targetEnd = nowTs + duration * 1000;
       started = started ?? nowTs;
       pausedRemaining = null;
@@ -142,7 +159,8 @@ export default function Command() {
   async function skipTimer() {
     if (!state) return;
     const nextMode = state.mode === "work" ? "break" : "work";
-    const nextDuration = nextMode === "work" ? 2400 : 600;
+    const nextDuration =
+      nextMode === "work" ? state.workMin * 60 : state.breakMin * 60;
 
     setState((prev) =>
       prev

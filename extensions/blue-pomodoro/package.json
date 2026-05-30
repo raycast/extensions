@@ -6,8 +6,7 @@
   "icon": "icon.png",
   "author": "joaquin_gonzalez",
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [

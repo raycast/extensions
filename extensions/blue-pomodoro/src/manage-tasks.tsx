@@ -291,7 +291,8 @@ function CreateTaskForm({ onTaskCreated }: { onTaskCreated: () => void }) {
           : values.priority === "Low"
             ? "Baja"
             : "Media";
-      await createTask(values.title, dbPriority, parseInt(values.effort));
+      const effort = parseInt(values.effort) || 1;
+      await createTask(values.title, dbPriority, effort);
       showToast({ style: Toast.Style.Success, title: "Task created" });
       onTaskCreated();
       pop();
