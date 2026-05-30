@@ -1,5 +1,6 @@
 import { Cache } from "@raycast/api";
 import { DASHBOARD_CACHE_KEY, PROFILE_ID_CACHE_KEY, rateCacheKey } from "./cache-keys";
+import { parseAmount } from "./classify";
 import { buildSampleSnapshot } from "./sample-data";
 import { inferPrimaryCurrency, summarizeActivities } from "./summarize";
 import {
@@ -99,7 +100,7 @@ export async function fetchRate(
 
 export async function fetchDashboardSnapshot(prefs: Prefs, signal?: AbortSignal): Promise<DashboardSnapshot> {
   if (prefs.useSampleData) {
-    return buildSampleSnapshot(prefs);
+    return await buildSampleSnapshot(prefs);
   }
 
   const { apiToken: token, displayCurrency, fxTargetCurrency } = prefs;
@@ -128,10 +129,10 @@ export async function fetchDashboardSnapshot(prefs: Prefs, signal?: AbortSignal)
   if (displayCurrency) {
     const activityCurrencies = new Set<string>();
     for (const a of activities) {
-      const m = (a.primaryAmount ?? "").match(/[A-Z]{3}$/);
-      if (m) activityCurrencies.add(m[0]);
-      const m2 = (a.secondaryAmount ?? "").match(/[A-Z]{3}$/);
-      if (m2) activityCurrencies.add(m2[0]);
+      const p = parseAmount(a.primaryAmount);
+      if (p) activityCurrencies.add(p.currency);
+      const s = parseAmount(a.secondaryAmount);
+      if (s) activityCurrencies.add(s.currency);
     }
     const needsRate = (b: WiseBalance) => Math.abs(b.amount.value) > 0.005 || activityCurrencies.has(b.currency);
 
@@ -180,7 +181,12 @@ export async function fetchDashboardSnapshot(prefs: Prefs, signal?: AbortSignal)
   const usedRates = Array.from(ratesByPair.values());
 
   const summaryCurrency = displayCurrency || inferPrimaryCurrency(activities);
-  const summary = summarizeActivities(activities, summaryCurrency, 8);
+  const summary = await summarizeActivities(
+    activities,
+    summaryCurrency,
+    (from, to) => fetchRate(token, from, to, signal),
+    8,
+  );
 
   const snapshot: DashboardSnapshot = {
     profileId,

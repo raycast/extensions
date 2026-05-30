@@ -32,7 +32,12 @@ export async function wiseGet<T>(
       totalRetries = 0;
       return result;
     } catch (e) {
-      if (!(e instanceof WiseHttpError) || e.status !== 429) throw e;
+      if (!(e instanceof WiseHttpError) || e.status !== 429) {
+        // The retry sequence ended abnormally (abort, network drop, 5xx). Clear the
+        // shared budget so the next caller doesn't inherit a stale mid-sequence count.
+        totalRetries = 0;
+        throw e;
+      }
       if (!skipCooldown) ensureNotCoolingDown();
 
       totalRetries++;

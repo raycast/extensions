@@ -347,7 +347,11 @@ const TX_SPECS: SampleTxSpec[] = [
 ];
 
 function formatAmount(value: number, currency: string): string {
-  return `${Math.abs(value).toFixed(2)} ${currency}`;
+  // Mirror Wise's activity format: a <positive>/<negative> tag with a signed amount,
+  // so sample data exercises the same direction/parse path as the real API.
+  const tag = value < 0 ? "negative" : "positive";
+  const sign = value < 0 ? "-" : "+";
+  return `<${tag}>${sign} ${Math.abs(value).toFixed(2)} ${currency}</${tag}>`;
 }
 
 function specToActivity(spec: SampleTxSpec, id: number): WiseActivity {
@@ -366,7 +370,7 @@ function specToActivity(spec: SampleTxSpec, id: number): WiseActivity {
   };
 }
 
-export function buildSampleSnapshot(prefs: Prefs): DashboardSnapshot {
+export async function buildSampleSnapshot(prefs: Prefs): Promise<DashboardSnapshot> {
   const balances = sampleBalances();
   const activities = TX_SPECS.map((s, i) => specToActivity(s, i)).sort(
     (a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime(),
@@ -420,7 +424,7 @@ export function buildSampleSnapshot(prefs: Prefs): DashboardSnapshot {
   }
 
   const summaryCurrency = prefs.displayCurrency || inferPrimaryCurrency(activities);
-  const summary = summarizeActivities(activities, summaryCurrency, 8);
+  const summary = await summarizeActivities(activities, summaryCurrency, (from, to) => rateTo(from, to), 8);
 
   return {
     profileId: 1234567,
