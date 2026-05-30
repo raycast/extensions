@@ -1,6 +1,6 @@
 # tiktoken Changelog
 
-## [Add o200k_base Support] - {PR_MERGE_DATE}
+## [Add o200k_base Support] - 2026-05-30
 
 - Added support for `o200k_base` using the WASM tokenizer to avoid OOM crashes.
 

@@ -84,5 +84,8 @@
         }
       ]
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
