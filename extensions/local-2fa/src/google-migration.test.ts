@@ -79,7 +79,7 @@ test("parseGoogleMigrationUrl defaults missing algorithm field to SHA1", () => {
   assert.equal(accounts[0].algorithm, "SHA1");
 });
 
-test("parseGoogleMigrationUrl rejects SHA384 (enum=3, unsupported)", () => {
+test("parseGoogleMigrationUrl skips SHA384 entries (enum=3, unsupported)", () => {
   const otpParameters = Buffer.concat([
     fieldBytes(1, Buffer.from("12345678901234567890", "ascii")),
     fieldBytes(2, Buffer.from("user@example.com", "utf8")),
@@ -92,7 +92,37 @@ test("parseGoogleMigrationUrl rejects SHA384 (enum=3, unsupported)", () => {
   const migrationPayload = Buffer.concat([fieldBytes(1, otpParameters)]);
   const url = `otpauth-migration://offline?data=${migrationPayload.toString("base64")}`;
 
-  assert.throws(() => parseGoogleMigrationUrl(url), /Unsupported algorithm/);
+  assert.throws(() => parseGoogleMigrationUrl(url), /No TOTP accounts/);
+});
+
+test("parseGoogleMigrationUrl keeps valid accounts when one has unsupported algorithm", () => {
+  const goodEntry = Buffer.concat([
+    fieldBytes(1, Buffer.from("12345678901234567890", "ascii")),
+    fieldBytes(2, Buffer.from("ok@example.com", "utf8")),
+    fieldBytes(3, Buffer.from("GitHub", "utf8")),
+    fieldVarint(4, 1),
+    fieldVarint(5, 1),
+    fieldVarint(6, 2),
+  ]);
+  const badEntry = Buffer.concat([
+    fieldBytes(1, Buffer.from("12345678901234567890", "ascii")),
+    fieldBytes(2, Buffer.from("sha384@example.com", "utf8")),
+    fieldBytes(3, Buffer.from("Other", "utf8")),
+    fieldVarint(4, 3),
+    fieldVarint(5, 1),
+    fieldVarint(6, 2),
+  ]);
+
+  const migrationPayload = Buffer.concat([
+    fieldBytes(1, goodEntry),
+    fieldBytes(1, badEntry),
+  ]);
+  const url = `otpauth-migration://offline?data=${migrationPayload.toString("base64")}`;
+
+  const accounts = parseGoogleMigrationUrl(url);
+  assert.equal(accounts.length, 1);
+  assert.equal(accounts[0].account, "ok@example.com");
+  assert.equal(accounts[0].algorithm, "SHA1");
 });
 
 test("parseGoogleMigrationUrl skips HOTP entries (type=1)", () => {

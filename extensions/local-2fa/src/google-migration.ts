@@ -121,13 +121,23 @@ function parseOtpParameters(message: Buffer): OtpauthPayload | null {
     return null;
   }
 
+  // Si el algoritmo no es soportado (p. ej. SHA384 o ALGORITHM_UNSPECIFIED
+  // codificado explícitamente), omitimos esa cuenta en lugar de abortar
+  // toda la importación y descartar el resto de cuentas válidas.
+  let resolvedAlgorithm: TotpAlgorithm;
+  try {
+    resolvedAlgorithm = algorithmFromEnum(algorithm);
+  } catch {
+    return null;
+  }
+
   return {
     issuer: issuer.trim() || "Unknown",
     account: account.trim(),
     secretBase32: toBase32(secret),
     digits: digitsFromEnum(digits),
     period: 30,
-    algorithm: algorithmFromEnum(algorithm),
+    algorithm: resolvedAlgorithm,
   };
 }
 
