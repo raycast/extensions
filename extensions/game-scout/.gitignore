@@ -6,6 +6,8 @@
 # Raycast specific files
 
 raycast-env.d.ts
+.eslintrc.json
+metadata/8.png
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift

@@ -61,12 +61,17 @@ export default function Command() {
   const [overviewData, setOverviewData] = useState<OverviewResponse | null>(
     null,
   );
+  const [pricesData, setPricesData] = useState<Record<string, Deal[]>>({});
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
+  const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
 
   useEffect(() => {
     LocalStorage.getItem<string>("saved_itad_games").then(
       (stored) => stored && setSavedGames(JSON.parse(stored)),
+    );
+    LocalStorage.getItem<string>("selected_stores").then((s) =>
+      setSelectedStores(s ? JSON.parse(s) : ["all"]),
     );
   }, []);
 
@@ -107,6 +112,7 @@ export default function Command() {
         if (Date.now() - parsed.timestamp < 1000 * 60 * 60) {
           setSearchData(parsed.searchData);
           setOverviewData(parsed.overviewData);
+          setPricesData(parsed.pricesData || {});
           setLoadingSearch(false);
           return;
         }
@@ -140,46 +146,76 @@ export default function Command() {
 
         const gameIds = results.slice(0, MAX_RESULTS).map((g) => g.id);
         let overview = null;
+        let prices: Record<string, Deal[]> = {};
 
         if (gameIds.length > 0) {
           try {
-            const oRes = await fetch(
-              `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(gameIds),
-              },
-            );
+            const [oRes, pRes] = await Promise.all([
+              fetch(
+                `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(gameIds),
+                },
+              ),
+              fetch(
+                `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(gameIds),
+                },
+              ),
+            ]);
 
-            if (oRes.ok) {
-              overview = await oRes.json();
+            if (oRes.ok) overview = await oRes.json();
+            if (pRes.ok) {
+              const pJson = await pRes.json();
+              const pArray = Array.isArray(pJson)
+                ? pJson
+                : Object.values(pJson);
+              pArray.forEach(
+                (item: { id?: string | number; deals?: Deal[] }) => {
+                  if (item.id) prices[String(item.id)] = item.deals || [];
+                },
+              );
             }
           } catch {
-            // Silently catch overview failures to preserve search results
+            // Silently catch overview/prices failures
           }
         }
 
-        if (!overview && gameIds.length > 0 && cached) {
-          overview = JSON.parse(cached).overviewData || null;
+        if (gameIds.length > 0 && cached) {
+          const parsed = JSON.parse(cached);
+          if (!overview) overview = parsed.overviewData || null;
+          if (Object.keys(prices).length === 0)
+            prices = parsed.pricesData || {};
         }
 
         setSearchData(results);
         setOverviewData(overview);
+        setPricesData(prices);
 
-        if (overview || gameIds.length === 0) {
+        if (
+          overview ||
+          Object.keys(prices).length > 0 ||
+          gameIds.length === 0
+        ) {
           searchCache.set(
             cacheKey,
             JSON.stringify({
               timestamp: Date.now(),
               searchData: results,
               overviewData: overview,
+              pricesData: prices,
             }),
           );
         }
       } catch (error) {
         setSearchData([]);
         setOverviewData(null);
+        setPricesData({});
         await showFailureToast(error, {
           title: "Failed to search games",
         });
@@ -294,12 +330,21 @@ export default function Command() {
       ) : (
         filteredData.slice(0, MAX_RESULTS).map((game) => {
           const data = overviewData as {
-            prices?: { id?: string | number; current?: Deal }[];
+            prices?: { id?: string | number }[];
+            bundles?: BundleInfo[];
           } | null;
           const overviewItem = data?.prices?.find(
-            (p: { id?: string | number }) => String(p.id) === game.id,
+            (p) => String(p.id) === game.id,
           );
-          const deal = overviewItem?.current;
+
+          const validDeals = (pricesData[game.id] || []).filter((d: Deal) =>
+            isStoreAllowed(d.shop?.name || "", selectedStores),
+          );
+          const deal = validDeals.reduce<Deal | null>((min, d) => {
+            if (!min) return d;
+            return d.price.amount < min.price.amount ? d : min;
+          }, null);
+
           const isSaved = savedGames.some((g) => g.id === game.id);
 
           const accessories = [];
@@ -393,6 +438,17 @@ export default function Command() {
                             gameType={game.type || "OTHER"}
                             isSaved={isSaved}
                             toggleSave={() => toggleSave(game)}
+                            preloadedDeals={pricesData[game.id] || []}
+                            preloadedOverview={
+                              overviewItem
+                                ? {
+                                    prices: [overviewItem],
+                                    bundles: (
+                                      overviewData as { bundles?: BundleInfo[] }
+                                    )?.bundles,
+                                  }
+                                : undefined
+                            }
                           />
                         }
                         icon={Icon.Sidebar}
@@ -431,6 +487,11 @@ interface GameDetailProps {
   isSaved?: boolean;
   toggleSave?: () => void;
   removeGame?: () => void;
+  preloadedDeals?: Deal[];
+  preloadedOverview?:
+    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
+    | OverviewItem
+    | null;
 }
 
 function GameDetail({
@@ -441,13 +502,15 @@ function GameDetail({
   isSaved,
   toggleSave,
   removeGame,
+  preloadedDeals,
+  preloadedOverview,
 }: GameDetailProps) {
   const [data, setData] = useState<DetailData>({
     steamData: null,
     realBundles: [],
-    deals: [],
+    deals: preloadedDeals || [],
     historyLow: null,
-    overview: null,
+    overview: preloadedOverview || null,
     historyChart: [],
     lastChecked: null,
   });
@@ -530,20 +593,27 @@ function GameDetail({
           steamData = steamJson?.[String(targetItem.id)]?.data || null;
         }
 
+        const mockResponse = (mockData: unknown) =>
+          Promise.resolve({
+            json: () => Promise.resolve(mockData),
+          } as Response);
+
         const fetchPromises = [
           fetch(
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedDeals !== undefined
+            ? mockResponse([{ deals: preloadedDeals }])
+            : fetch(
+                `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
           fetch(
             `https://api.isthereanydeal.com/games/historylow/v1?key=${API_KEY}&country=${COUNTRY}`,
             {
@@ -553,15 +623,17 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedOverview !== undefined
+            ? mockResponse([preloadedOverview])
+            : fetch(
+                `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
         ];
         if (SHOW_CHART) {
           const rawDate = new Date(

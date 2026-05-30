@@ -2,6 +2,19 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+### Performance & Optimization
+
+- **Reduced API Requests**: Passed pre-fetched prices and overview data as props to the GameDetail component from both Search and Saved list views. Redundant API calls inside GameDetail are now successfully skipped using mock responses.
+
+### Bug Fixes & Improvements
+
+- **Fixed Price Drops Section**: Repaired the logic for the "Price Drops" section. It now accurately evaluates price changes and remains persistently visible across all sorting and filter modes (e.g., A-Z, Lowest Price) without prematurely resetting.
+- **Fixed Search Store Filters**: Resolved an issue on the search page where displayed prices ignored active store filters and incorrectly defaulted to the absolute lowest price.
+- **Patched API Leak**: Added strict `!== undefined` checks when passing preloaded props to GameDetail to prevent accidental fallback API calls when a game legitimately has no active deals or bundles.
+- **Removed Legacy State**: Completely stripped deprecated `seenDrops` and `seenPriceChanges` states that were causing unexpected UI resets.
+
+## [Update] - 2026-05-18
+
 ### Added
 
 - **Unreleased Games Support**: Added "⏱️ UNRELEASED" and expected release date (TBA) indicators to the detail view.

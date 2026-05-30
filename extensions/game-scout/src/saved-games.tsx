@@ -35,6 +35,7 @@ import type {
   Deal,
   DetailData,
   HistoryPoint,
+  OverviewItem,
   SavedGame,
   SteamAppDetailsResponse,
   SteamSearchItem,
@@ -59,6 +60,9 @@ export default function SavedGames() {
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [rawPrices, setRawPrices] = useState<Record<string, Deal[]>>({});
   const [bundleCounts, setBundleCounts] = useState<Record<string, number>>({});
+  const [overviewMap, setOverviewMap] = useState<
+    Record<string, { prices?: OverviewItem[]; bundles?: BundleInfo[] }>
+  >({});
   const [referencePrices, setReferencePrices] = useState<
     Record<string, number>
   >({});
@@ -66,10 +70,6 @@ export default function SavedGames() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
   const [filterMode, setFilterMode] = useState<string>("default");
-  const [seenDrops, setSeenDrops] = useState<Record<string, boolean>>({});
-  const [seenPriceChanges, setSeenPriceChanges] = useState<
-    Record<string, boolean>
-  >({});
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
@@ -81,12 +81,6 @@ export default function SavedGames() {
     });
     LocalStorage.getItem<string>("last_seen_prices").then(
       (s) => s && setReferencePrices(JSON.parse(s)),
-    );
-    LocalStorage.getItem<string>("seen_drops").then(
-      (s) => s && setSeenDrops(JSON.parse(s)),
-    );
-    LocalStorage.getItem<string>("seen_price_changes").then(
-      (s) => s && setSeenPriceChanges(JSON.parse(s)),
     );
   }, []);
 
@@ -109,6 +103,7 @@ export default function SavedGames() {
         if (isSameRoster && Date.now() - parsed.timestamp < CACHE_TTL) {
           setRawPrices(parsed.rawPrices);
           setBundleCounts(parsed.bundleCounts);
+          setOverviewMap(parsed.overviewMap || {});
           setIsLoading(false);
           return;
         }
@@ -136,7 +131,10 @@ export default function SavedGames() {
         ),
       ]);
 
-      const [pJson, oJson] = await Promise.all([pRes.json(), oRes.json()]);
+      const [pJson, oJson] = await Promise.all([
+        pRes.ok ? pRes.json() : Promise.resolve(null),
+        oRes.ok ? oRes.json() : Promise.resolve(null),
+      ]);
 
       const priceMap: Record<string, Deal[]> = {};
       const lastSeenPrices: Record<string, number> = {};
@@ -144,9 +142,14 @@ export default function SavedGames() {
       const priceEntries: Array<{ id?: string | number; deals?: Deal[] }> =
         Array.isArray(pJson)
           ? (pJson as Array<{ id?: string | number; deals?: Deal[] }>)
-          : Object.values(
-              pJson as Record<string, { id?: string | number; deals?: Deal[] }>,
-            );
+          : pJson && typeof pJson === "object"
+            ? Object.values(
+                pJson as Record<
+                  string,
+                  { id?: string | number; deals?: Deal[] }
+                >,
+              )
+            : [];
 
       priceEntries.forEach((it) => {
         if (it.id == null) return;
@@ -190,8 +193,27 @@ export default function SavedGames() {
           }
         }
       }
-      setBundleCounts(newBundleCounts);
+      const resolvedBundleCounts = oRes.ok ? newBundleCounts : bundleCounts;
+
+      const newOverviewMap: Record<
+        string,
+        { prices?: OverviewItem[]; bundles?: BundleInfo[] }
+      > = {};
+      if (oJson && Array.isArray(oJson.prices)) {
+        oJson.prices.forEach((item: OverviewItem) => {
+          if (item.id) {
+            newOverviewMap[String(item.id)] = {
+              prices: [item],
+              bundles: oJson.bundles,
+            };
+          }
+        });
+      }
+      const resolvedOverviewMap = oRes.ok ? newOverviewMap : overviewMap;
+
+      setBundleCounts(resolvedBundleCounts);
       setRawPrices(priceMap);
+      setOverviewMap(resolvedOverviewMap);
 
       if (Object.keys(priceMap).length > 0) {
         cache.set(
@@ -200,16 +222,26 @@ export default function SavedGames() {
             timestamp: Date.now(),
             requestedIds: gameIds.map(String),
             rawPrices: priceMap,
-            bundleCounts: newBundleCounts,
+            bundleCounts: resolvedBundleCounts,
+            overviewMap: resolvedOverviewMap,
           }),
         );
       }
 
-      const existing = await LocalStorage.getItem<string>("last_seen_prices");
-      const parsed = existing ? JSON.parse(existing) : {};
-      const merged = { ...parsed, ...lastSeenPrices };
-
-      await LocalStorage.setItem("last_seen_prices", JSON.stringify(merged));
+      setReferencePrices((prev) => {
+        const next = { ...prev };
+        let hasNew = false;
+        for (const [id, price] of Object.entries(lastSeenPrices)) {
+          if (next[id] == null) {
+            next[id] = price;
+            hasNew = true;
+          }
+        }
+        if (hasNew) {
+          LocalStorage.setItem("last_seen_prices", JSON.stringify(next));
+        }
+        return next;
+      });
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         return;
@@ -292,74 +324,29 @@ export default function SavedGames() {
     if (isLoading) return;
     const timer = setTimeout(() => {
       (async () => {
-        let dropsUpdated = false;
-        let priceChangesUpdated = false;
-        const newSeenDrops = { ...seenDrops };
-        const newSeenPriceChanges = { ...seenPriceChanges };
+        let storageUpdated = false;
+        const existing = await LocalStorage.getItem<string>("last_seen_prices");
+        const storedRefs = existing ? JSON.parse(existing) : {};
 
         sortedAndFilteredGames.forEach((game) => {
-          const last = referencePrices[game.id];
           const current = prices[game.id]?.price?.amount;
-          if (
-            last != null &&
-            current != null &&
-            last !== 0 &&
-            !seenDrops[game.id]
-          ) {
-            const diff = ((current - last) / last) * 100;
-            if (diff <= -10) {
-              newSeenDrops[game.id] = true;
-              dropsUpdated = true;
-            }
-          }
-
-          const deal = prices[game.id];
-          if (deal) {
-            const lastPrice = referencePrices[game.id];
-            const currentPrice = deal.price?.amount;
-            if (
-              lastPrice != null &&
-              currentPrice !== lastPrice &&
-              !seenPriceChanges[game.id]
-            ) {
-              const diffPct =
-                lastPrice === 0
-                  ? currentPrice > 0
-                    ? 100
-                    : 0
-                  : ((currentPrice - lastPrice) / lastPrice) * 100;
-              if (Math.abs(diffPct) >= 3) {
-                newSeenPriceChanges[game.id] = true;
-                priceChangesUpdated = true;
-              }
-            }
+          if (current != null && storedRefs[game.id] !== current) {
+            storedRefs[game.id] = current;
+            storageUpdated = true;
           }
         });
 
-        if (dropsUpdated) {
+        if (storageUpdated) {
           await LocalStorage.setItem(
-            "seen_drops",
-            JSON.stringify(newSeenDrops),
-          );
-        }
-        if (priceChangesUpdated) {
-          await LocalStorage.setItem(
-            "seen_price_changes",
-            JSON.stringify(newSeenPriceChanges),
+            "last_seen_prices",
+            JSON.stringify(storedRefs),
           );
         }
       })();
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [
-    sortedAndFilteredGames,
-    prices,
-    referencePrices,
-    isLoading,
-    seenDrops,
-    seenPriceChanges,
-  ]);
+  }, [sortedAndFilteredGames, prices, isLoading]);
 
   const removeGame = async (id: string) => {
     const newList = savedGames.filter((g) => g.id !== id);
@@ -373,7 +360,7 @@ export default function SavedGames() {
     const current = prices[game.id]?.price?.amount;
     if (last == null || current == null || last === 0) return false;
     const diff = ((current - last) / last) * 100;
-    return diff <= -10 && !seenDrops[game.id];
+    return diff <= -10;
   });
 
   return (
@@ -436,8 +423,10 @@ export default function SavedGames() {
         />
       ) : (
         <>
-          {majorDrops.length > 0 && filterMode === "default" && (
-            <List.Section title={`🔥 ${majorDrops.length} Price Drops`}>
+          {majorDrops.length > 0 && (
+            <List.Section
+              title={`🔥 ${majorDrops.length} Price Drops Since Last Check`}
+            >
               {sortedAndFilteredGames
                 .filter((g) => majorDrops.some((d) => d.id === g.id))
                 .map((game) => {
@@ -477,6 +466,8 @@ export default function SavedGames() {
                                 gameSlug={game.slug}
                                 gameType={game.type || "OTHER"}
                                 removeGame={() => removeGame(game.id)}
+                                preloadedDeals={rawPrices[game.id] || []}
+                                preloadedOverview={overviewMap[game.id] || null}
                               />
                             }
                             icon={Icon.Sidebar}
@@ -488,22 +479,14 @@ export default function SavedGames() {
                 })}
             </List.Section>
           )}
-          {majorDrops.length > 0 && filterMode === "default" && (
+          {majorDrops.length > 0 && (
             <List.Item title="" subtitle="──────────────" />
           )}
           <List.Section
-            title={
-              majorDrops.length > 0 && filterMode === "default"
-                ? "Other Saved Games"
-                : undefined
-            }
+            title={majorDrops.length > 0 ? "Other Saved Games" : undefined}
           >
             {sortedAndFilteredGames
-              .filter(
-                (g) =>
-                  filterMode !== "default" ||
-                  !majorDrops.some((d) => d.id === g.id),
-              )
+              .filter((g) => !majorDrops.some((d) => d.id === g.id))
               .map((game) => {
                 const deal = prices[game.id];
                 const acc = [];
@@ -534,7 +517,7 @@ export default function SavedGames() {
                           : 0
                         : (diffAbs / lastPrice) * 100;
 
-                    if (Math.abs(diffPct) >= 3 && !seenPriceChanges[game.id]) {
+                    if (Math.abs(diffPct) >= 3) {
                       let label = "";
                       if (diffPct <= -10) label = "🔥 DROP";
                       else if (diffPct < 0) label = "⬇ DOWN";
@@ -617,6 +600,8 @@ export default function SavedGames() {
                                 gameSlug={game.slug}
                                 gameType={game.type || "OTHER"}
                                 removeGame={() => removeGame(game.id)}
+                                preloadedDeals={rawPrices[game.id] || []}
+                                preloadedOverview={overviewMap[game.id] || null}
                               />
                             }
                             icon={Icon.Sidebar}
@@ -682,6 +667,11 @@ interface GameDetailProps {
   gameSlug: string;
   gameType: string;
   removeGame?: () => void;
+  preloadedDeals?: Deal[];
+  preloadedOverview?:
+    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
+    | OverviewItem
+    | null;
 }
 
 function GameDetail({
@@ -690,13 +680,15 @@ function GameDetail({
   gameSlug,
   gameType,
   removeGame,
+  preloadedDeals,
+  preloadedOverview,
 }: GameDetailProps) {
   const [data, setData] = useState<DetailData>({
     steamData: null,
     realBundles: [],
-    deals: [],
+    deals: preloadedDeals || [],
     historyLow: null,
-    overview: null,
+    overview: preloadedOverview || null,
     historyChart: [],
     lastChecked: null,
   });
@@ -774,20 +766,27 @@ function GameDetail({
           const steamJson = (await detailRes.json()) as SteamAppDetailsResponse;
           steamData = steamJson?.[String(targetItem.id)]?.data || null;
         }
+        const mockResponse = (mockData: unknown) =>
+          Promise.resolve({
+            json: () => Promise.resolve(mockData),
+          } as Response);
+
         const fetchPromises = [
           fetch(
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedDeals !== undefined
+            ? mockResponse([{ deals: preloadedDeals }])
+            : fetch(
+                `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
           fetch(
             `https://api.isthereanydeal.com/games/historylow/v1?key=${API_KEY}&country=${COUNTRY}`,
             {
@@ -797,15 +796,17 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedOverview !== undefined
+            ? mockResponse([preloadedOverview])
+            : fetch(
+                `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
         ];
 
         if (SHOW_CHART) {
