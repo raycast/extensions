@@ -7,7 +7,7 @@ display at once. That's usually not what you want. Most people want HDR on their
 monitor — for games or movies — while their other screens stay normal. HDR Toggle solves
 that: it shows each HDR-capable monitor on its own and lets you flip HDR for just that one.
 
-![HDR Toggle in Raycast](metadata/hdr-toggle-2.png)
+![HDR Toggle in Raycast](media/hdr-toggle.png)
 
 ## Using it
 
