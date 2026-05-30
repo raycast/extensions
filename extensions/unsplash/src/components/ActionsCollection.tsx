@@ -1,23 +1,22 @@
 import { ActionPanel, Icon, Keyboard, Action } from "@raycast/api";
-
-// Components
 import Details from "@/views/DetailsCollections";
 import { CollectionResult } from "@/types";
 
-// Types
-interface BaseProps {
+interface Props {
   item: CollectionResult;
   details?: boolean;
 }
 
-export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
-  <ActionPanel>
-    <Sections details={details} item={item} />
-  </ActionPanel>
-);
+export function Actions({ details = false, item }: Props) {
+  return (
+    <ActionPanel>
+      <ActionsContent details={details} item={item} />
+    </ActionPanel>
+  );
+}
 
-export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
-  const imageUrl =
+function ActionsContent({ details = false, item }: Props) {
+  const coverUrl =
     item.cover_photo?.urls?.raw ||
     item.cover_photo?.urls?.full ||
     item.cover_photo?.urls?.regular ||
@@ -27,7 +26,6 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
     <>
       <ActionPanel.Section>
         {details && <Action.Push title="Show Details" icon={Icon.List} target={<Details result={item} />} />}
-
         {item.links?.html && (
           <Action.OpenInBrowser
             url={item.links.html}
@@ -35,7 +33,6 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             shortcut={Keyboard.Shortcut.Common.Open}
           />
         )}
-
         {item.user?.links?.html && (
           <Action.OpenInBrowser
             url={item.user.links.html}
@@ -44,8 +41,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             title="Open Author"
           />
         )}
-
-        {Boolean(item.id) && (
+        {item.id && (
           <Action.CopyToClipboard
             content={item.id}
             title="Copy Collection ID"
@@ -64,16 +60,14 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
         )}
-
-        {imageUrl && (
+        {coverUrl && (
           <Action.CopyToClipboard
-            content={imageUrl}
+            content={coverUrl}
             title="Copy Cover URL"
             icon={Icon.Clipboard}
             shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         )}
-
         {item.user?.links?.html && (
           <Action.CopyToClipboard
             content={item.user.links.html}
@@ -85,6 +79,6 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
       </ActionPanel.Section>
     </>
   );
-};
+}
 
 export default Actions;

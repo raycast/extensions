@@ -44,7 +44,7 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
       chat.chat_identifier
     ORDER BY
       last_message_date DESC
-    LIMIT 1000;
+    LIMIT ${searchText ? "1000" : "50"};
     `,
   );
 

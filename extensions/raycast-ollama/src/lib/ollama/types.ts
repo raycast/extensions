@@ -6,6 +6,12 @@ export interface OllamaErrorResponse {
   error: string;
 }
 
+/* Type Guard for OllamaErrorResponse */
+export function isOllamaErrorResponse(obj: unknown): obj is OllamaErrorResponse {
+  if (!obj || typeof obj !== "object") return false;
+  return "error" in obj && typeof obj.error === "string";
+}
+
 export interface OllamaServer {
   url: string;
   auth?: OllamaServerAuth;
@@ -89,7 +95,7 @@ export interface OllamaApiGenerateStats {
   done_reason?: string;
 }
 
-// Type Guard for OllamaApiGenerateStats
+/* Type Guard for OllamaApiGenerateStats */
 export function isOllamaApiGenerateStats(obj: unknown): obj is OllamaApiGenerateStats {
   if (!obj || typeof obj !== "object") return false;
 
@@ -103,7 +109,7 @@ export interface OllamaApiGenerateResponse extends OllamaApiGenerateStats {
   context?: number[];
 }
 
-// Type Guard for OllamaApiGenerateResponse
+/* Type Guard for OllamaApiGenerateResponse */
 export function isOllamaApiGenerateResponse(obj: unknown): obj is OllamaApiGenerateResponse {
   return isOllamaApiGenerateStats(obj) && "response" in obj && typeof obj.response === "string";
 }
@@ -112,7 +118,7 @@ export interface OllamaApiChatResponse extends OllamaApiGenerateStats {
   message?: OllamaApiChatMessage;
 }
 
-//Type Guard for OllamaApiChatResponse
+/* Type Guard for OllamaApiChatResponse */
 export function isOllamaApiChatResponse(obj: unknown): obj is OllamaApiChatResponse {
   return isOllamaApiGenerateStats(obj) && "message" in obj && isOllamaApiChatMessage(obj.message);
 }
@@ -219,6 +225,7 @@ export interface OllamaApiChatMessage {
   content: string;
   thinking?: string;
   images?: string[];
+  tool_name?: string;
   tool_calls?: OllamaApiChatMessageToolCall[];
 }
 
@@ -234,12 +241,11 @@ export function isOllamaApiChatMessage(obj: unknown): obj is OllamaApiChatMessag
 }
 
 export interface OllamaApiChatMessageToolCall {
+  id: string;
   function: {
-    index?: number;
+    index: number;
     name: string;
-    arguments: {
-      [key: string]: unknown;
-    };
+    arguments: Record<string, unknown>;
   };
 }
 
@@ -251,15 +257,7 @@ export interface OllamaApiTool {
 export interface OllamaApiToolFunction {
   name: string;
   description: string;
-  parameters: OllamaApiToolFunctionParameters;
-}
-
-export interface OllamaApiToolFunctionParameters {
-  type: "object";
-  required: string[];
-  properties: {
-    [name: string]: OllamaApiToolFunctionParameter;
-  };
+  parameters: Record<string, unknown>;
 }
 
 export interface OllamaApiToolFunctionParameter {

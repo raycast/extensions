@@ -1,5 +1,11 @@
 # Brew Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Improves reliability of index cache
+- Improves toast error message if fetch fails
+- Adds a "Clear Cache & Retry" action to the error toast if fetch fails
+
 ## [Add Keyboard Shortcuts] - 2026-05-12
 
 - Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.

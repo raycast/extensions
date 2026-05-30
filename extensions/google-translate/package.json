@@ -2148,5 +2148,8 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "axios": "0.31.1"
+  }
 }

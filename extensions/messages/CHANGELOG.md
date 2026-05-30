@@ -1,6 +1,7 @@
 # Messages Changelog
 
 ## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+
 - Add `before` pagination cursor to load older messages in AI chat
 - Show contact name and photo when chat uses an email address instead of a phone number
 - Fix missing `await` on async calls (`showFailureToast`, `open`, `launchCommand`, `showToast`)
@@ -8,6 +9,10 @@
 - Remove deprecated AI model
 - Remove unused SQLite dependency from Swift package
 - Update packages
+
+## [Fix chat list memory usage] - 2026-05-28
+
+- Limit the initial chat lookup to the 50 displayed conversations before loading contact details.
 
 ## [Performance Optimizations] - 2025-11-05
 
