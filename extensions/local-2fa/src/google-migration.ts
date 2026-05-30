@@ -46,15 +46,16 @@ function toBase32(bytes: Buffer): string {
 }
 
 function algorithmFromEnum(value: number): TotpAlgorithm {
-  if (value === 1 || value === 2) {
+  if (value === 1) {
     return "SHA1";
   }
-  if (value === 3) {
+  if (value === 2) {
     return "SHA256";
   }
   if (value === 4) {
     return "SHA512";
   }
+  // value === 3 → SHA384 (no soportado por TotpAlgorithm)
   throw new Error(`Unsupported algorithm enum in migration payload: ${value}`);
 }
 
@@ -70,7 +71,7 @@ function parseOtpParameters(message: Buffer): OtpauthPayload | null {
   let secret: Buffer | null = null;
   let account = "";
   let issuer = "";
-  let algorithm = 2;
+  let algorithm = 1;
   let digits = 1;
   let type = 0;
 
