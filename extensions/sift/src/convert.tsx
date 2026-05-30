@@ -253,7 +253,6 @@ export default function Command() {
       env: { ...process.env, Q: RECENT_QUERY },
       execute: !isSearching,
       keepPreviousData: true,
-      shouldRevalidateOnFocus: false,
     },
   );
 
@@ -290,7 +289,7 @@ export default function Command() {
     if (!recentData) return [];
     const seen = new Set<string>();
     const stamped: { path: string; mtime: number }[] = [];
-    for (const line of recentData.split("\n")) {
+    for (const line of recentData.toString().split("\n")) {
       const path = line.trim();
       if (!path || seen.has(path)) continue;
       if (isExcluded(path)) continue;

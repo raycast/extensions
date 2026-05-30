@@ -62,9 +62,18 @@
       "description": "Where to save the converted Markdown.",
       "default": "sibling",
       "data": [
-        { "title": "Sibling to source (same folder)", "value": "sibling" },
-        { "title": "Downloads folder", "value": "downloads" },
-        { "title": "Custom folder", "value": "custom" }
+        {
+          "title": "Sibling to source (same folder)",
+          "value": "sibling"
+        },
+        {
+          "title": "Downloads folder",
+          "value": "downloads"
+        },
+        {
+          "title": "Custom folder",
+          "value": "custom"
+        }
       ]
     },
     {
@@ -96,7 +105,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.99.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
