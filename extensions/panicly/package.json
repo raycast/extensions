@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "panicly",
+  "description": "Monitor Panicly request traffic and open request audits from Raycast.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Panicly Base URL",
+      "description": "The Panicly web app URL to read dashboard data from.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://panicly.vercel.app",
+      "placeholder": "https://panicly.vercel.app"
+    },
+    {
+      "name": "sessionCookie",
+      "title": "Session Cookie",
+      "description": "Your Panicly session cookie. Paste either panicly_session=... or the cookie value.",
+      "type": "password",
+      "required": true,
+      "placeholder": "panicly_session=..."
+    },
+    {
+      "name": "defaultProjectId",
+      "title": "Default Project ID",
+      "description": "Optional project ID to open first. Leave blank to show all projects.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "All projects"
+    },
+    {
+      "name": "requestLimit",
+      "title": "Request Limit",
+      "description": "How many recent requests to load. Panicly caps this at 50.",
+      "type": "dropdown",
+      "required": true,
+      "default": "25",
+      "data": [
+        { "title": "10", "value": "10" },
+        { "title": "25", "value": "25" },
+        { "title": "50", "value": "50" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "mode": "view",
+      "name": "view-requests",
+      "title": "View Requests",
+      "description": "Show recent Panicly gateway requests, decisions, and request audit details.",
+      "keywords": [
+        "logs",
+        "traffic",
+        "gateway",
+        "audit"
+      ]
+    }
+  ],
+  "title": "Panicly Requests",
+  "author": "6crucified",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ]
+}

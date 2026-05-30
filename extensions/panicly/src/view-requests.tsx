@@ -1,0 +1,755 @@
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+const ALL_PROJECTS = "all";
+const DASHBOARD_OVERVIEW_ENDPOINT = "/api/dashboard/overview";
+
+type Preferences = {
+  baseUrl: string;
+  sessionCookie: string;
+  defaultProjectId?: string;
+  requestLimit: string;
+};
+
+type Project = {
+  id: string;
+  name: string;
+  sentry_mode?: boolean;
+  environment?: string;
+  rate_limit_rpm?: number;
+  abuse_threshold?: number;
+  max_tokens?: number;
+  loop_sensitivity?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type DashboardStats = {
+  total?: number;
+  allowed?: number;
+  blocked?: number;
+  costSaved?: number;
+  projects?: Project[];
+};
+
+type RequestLog = {
+  id: string;
+  user_id?: string;
+  organization_id?: string;
+  project_id: string;
+  ip_address?: string;
+  user_agent?: string;
+  route: string;
+  provider: string;
+  model?: string | null;
+  country_code?: string | null;
+  country_name?: string | null;
+  region?: string | null;
+  decision: string;
+  internal_reason?: string;
+  timestamp: string;
+  tokens?: number;
+  cost_estimate?: number;
+  project?: Project | null;
+};
+
+type Organization = {
+  id: string;
+  name?: string;
+  plan_tier?: string;
+  onboarding_complete?: boolean;
+};
+
+type OverviewResponse = {
+  setupRequired?: boolean;
+  error?: string;
+  stats?: DashboardStats | null;
+  logs?: RequestLog[];
+};
+
+type RequestDetailResponse = {
+  setupRequired?: boolean;
+  error?: string;
+  request?: RequestLog | null;
+  organization?: Organization | null;
+};
+
+type RequestState<T> = {
+  data: T | null;
+  error: string | null;
+  isLoading: boolean;
+};
+
+type RuntimeConfig = {
+  baseUrl: string;
+  sessionCookie: string;
+  requestLimit: number;
+  defaultProjectId: string;
+};
+
+export default function Command() {
+  const config = getRuntimeConfig();
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    config.defaultProjectId,
+  );
+  const { data, error, isLoading, reload } = useOverview({
+    config,
+    projectId: selectedProjectId,
+  });
+
+  const projects = data?.stats?.projects ?? [];
+  const projectNames = useMemo(
+    () => new Map(projects.map((project) => [project.id, project.name])),
+    [projects],
+  );
+  const logs = data?.logs ?? [];
+  const title = useMemo(() => {
+    if (selectedProjectId === ALL_PROJECTS) return "Recent Requests";
+    return projectNames.get(selectedProjectId) ?? "Recent Requests";
+  }, [projectNames, selectedProjectId]);
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={title}
+      searchBarPlaceholder="Search by model, route, provider, IP, or reason"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Project"
+          value={selectedProjectId}
+          onChange={setSelectedProjectId}
+        >
+          <List.Dropdown.Item title="All Projects" value={ALL_PROJECTS} />
+          {projects.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              title={project.name || project.id}
+              value={project.id}
+            />
+          ))}
+        </List.Dropdown>
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => reload({ notify: true })}
+          />
+          <Action.OpenInBrowser
+            title="Open Panicly Dashboard"
+            url={dashboardUrl(config.baseUrl)}
+          />
+          <Action
+            title="Open Extension Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+          />
+        </ActionPanel>
+      }
+    >
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Could not load Panicly requests"
+          description={error}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => reload({ notify: true })}
+              />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+              <Action.OpenInBrowser
+                title="Open Panicly Dashboard"
+                url={dashboardUrl(config.baseUrl)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : logs.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={{ source: Icon.Shield, tintColor: Color.SecondaryText }}
+          title="No recent requests"
+          description="Send traffic through Panicly, then refresh this command."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => reload({ notify: true })}
+              />
+              <Action.OpenInBrowser
+                title="Open Panicly Dashboard"
+                url={dashboardUrl(config.baseUrl)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section
+          title={title}
+          subtitle={formatStatsSubtitle(data?.stats, logs.length)}
+        >
+          {logs.map((log) => (
+            <RequestListItem
+              key={log.id}
+              log={log}
+              config={config}
+              projectName={projectNames.get(log.project_id)}
+              onReload={reload}
+            />
+          ))}
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+function RequestListItem({
+  log,
+  config,
+  projectName,
+  onReload,
+}: {
+  log: RequestLog;
+  config: RuntimeConfig;
+  projectName?: string;
+  onReload: (options?: { notify?: boolean }) => void;
+}) {
+  const allowed = isAllowed(log.decision);
+  const title = log.model || log.route || "Unknown request";
+  const subtitle = [
+    projectName ?? "Unknown project",
+    formatProvider(log.provider),
+    log.route,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+  const timestamp = parseDate(log.timestamp);
+  const detailUrl = requestUrl(config.baseUrl, log.id);
+
+  return (
+    <List.Item
+      title={title}
+      subtitle={subtitle}
+      icon={{
+        source: allowed ? Icon.CheckCircle : Icon.XMarkCircle,
+        tintColor: allowed ? Color.Green : Color.Red,
+      }}
+      keywords={[
+        log.id,
+        log.project_id,
+        projectName ?? "",
+        log.route,
+        log.provider,
+        log.model ?? "",
+        log.ip_address ?? "",
+        log.internal_reason ?? "",
+        log.country_name ?? "",
+        log.region ?? "",
+      ]}
+      accessories={[
+        {
+          tag: {
+            value: allowed ? "Allowed" : "Blocked",
+            color: allowed ? Color.Green : Color.Red,
+          },
+        },
+        { text: formatTokens(log.tokens), icon: Icon.Terminal },
+        { text: formatCost(log.cost_estimate) },
+        timestamp ? { date: timestamp, icon: Icon.Clock } : { text: "No time" },
+      ]}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Show Request Details"
+            icon={Icon.Eye}
+            target={<RequestDetail log={log} config={config} />}
+          />
+          <Action.OpenInBrowser
+            title="Open in Panicly"
+            icon={Icon.Globe}
+            url={detailUrl}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => onReload({ notify: true })}
+          />
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Request ID"
+              icon={Icon.Fingerprint}
+              content={log.id}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action.CopyToClipboard
+              title="Copy Request URL"
+              icon={Icon.Globe}
+              content={detailUrl}
+            />
+            <Action.CopyToClipboard
+              title="Copy Request JSON"
+              icon={Icon.Code}
+              content={JSON.stringify(log, null, 2)}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function RequestDetail({
+  log,
+  config,
+}: {
+  log: RequestLog;
+  config: RuntimeConfig;
+}) {
+  const { data, error, isLoading, reload } = useRequestDetail(config, log.id);
+  const request = data?.request ?? log;
+  const organization = data?.organization ?? null;
+  const allowed = isAllowed(request.decision);
+  const detailUrl = requestUrl(config.baseUrl, request.id);
+  const rawJson = JSON.stringify({ request, organization }, null, 2);
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      navigationTitle="Request Details"
+      markdown={requestMarkdown(request, organization, error)}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Decision">
+            <Detail.Metadata.TagList.Item
+              text={allowed ? "Allowed" : "Blocked"}
+              color={allowed ? Color.Green : Color.Red}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label
+            title="Project"
+            text={request.project?.name ?? request.project_id}
+            icon={Icon.Shield}
+          />
+          <Detail.Metadata.Label
+            title="Workspace"
+            text={organization?.name ?? request.organization_id ?? "Unknown"}
+          />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Provider"
+            text={formatProvider(request.provider)}
+          />
+          <Detail.Metadata.Label
+            title="Model"
+            text={request.model ?? "Unknown"}
+          />
+          <Detail.Metadata.Label title="Route" text={request.route} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Tokens"
+            text={formatTokens(request.tokens)}
+            icon={Icon.Terminal}
+          />
+          <Detail.Metadata.Label
+            title="Cost"
+            text={formatCost(request.cost_estimate)}
+          />
+          <Detail.Metadata.Label
+            title="IP"
+            text={request.ip_address ?? "Unknown"}
+            icon={Icon.Globe}
+          />
+          <Detail.Metadata.Label
+            title="Time"
+            text={formatAbsoluteTime(request.timestamp)}
+            icon={Icon.Clock}
+          />
+          <Detail.Metadata.Link
+            title="Dashboard"
+            text="Open in Panicly"
+            target={detailUrl}
+          />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Open in Panicly"
+            icon={Icon.Globe}
+            url={detailUrl}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => reload({ notify: true })}
+          />
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Request ID"
+              icon={Icon.Fingerprint}
+              content={request.id}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action.CopyToClipboard
+              title="Copy Request URL"
+              icon={Icon.Globe}
+              content={detailUrl}
+            />
+            <Action.CopyToClipboard
+              title="Copy Request JSON"
+              icon={Icon.Code}
+              content={rawJson}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function useOverview({
+  config,
+  projectId,
+}: {
+  config: RuntimeConfig;
+  projectId: string;
+}) {
+  const [state, setState] = useState<RequestState<OverviewResponse>>({
+    data: null,
+    error: null,
+    isLoading: true,
+  });
+
+  const load = useCallback(
+    async (options: { notify?: boolean } = {}) => {
+      setState((previous) => ({ ...previous, isLoading: true, error: null }));
+      try {
+        const response = await fetchPaniclyJson<OverviewResponse>(
+          config,
+          DASHBOARD_OVERVIEW_ENDPOINT,
+          {
+            limit: String(config.requestLimit),
+            projectId: projectId === ALL_PROJECTS ? undefined : projectId,
+          },
+        );
+        setState({ data: response, error: null, isLoading: false });
+        if (options.notify) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Requests refreshed",
+          });
+        }
+      } catch (error) {
+        const message = getErrorMessage(error);
+        setState((previous) => ({
+          data: previous.data,
+          error: message,
+          isLoading: false,
+        }));
+        if (options.notify) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Refresh failed",
+            message,
+          });
+        }
+      }
+    },
+    [config, projectId],
+  );
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { ...state, reload: load };
+}
+
+function useRequestDetail(config: RuntimeConfig, requestId: string) {
+  const [state, setState] = useState<RequestState<RequestDetailResponse>>({
+    data: null,
+    error: null,
+    isLoading: true,
+  });
+
+  const load = useCallback(
+    async (options: { notify?: boolean } = {}) => {
+      setState((previous) => ({ ...previous, isLoading: true, error: null }));
+      try {
+        const response = await fetchPaniclyJson<RequestDetailResponse>(
+          config,
+          `/api/dashboard/request/${requestId}`,
+        );
+        setState({ data: response, error: null, isLoading: false });
+        if (options.notify) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Request refreshed",
+          });
+        }
+      } catch (error) {
+        const message = getErrorMessage(error);
+        setState((previous) => ({
+          data: previous.data,
+          error: message,
+          isLoading: false,
+        }));
+        if (options.notify) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Refresh failed",
+            message,
+          });
+        }
+      }
+    },
+    [config, requestId],
+  );
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { ...state, reload: load };
+}
+
+async function fetchPaniclyJson<T>(
+  config: RuntimeConfig,
+  endpoint: string,
+  params: Record<string, string | undefined> = {},
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  const url = dashboardApiUrl(config.baseUrl, endpoint, params);
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        Cookie: cookieHeader(config.sessionCookie),
+      },
+      signal: controller.signal,
+    });
+    const payload = (await response.json().catch(() => ({}))) as
+      | (T & { error?: string; setupRequired?: boolean })
+      | { error?: string; setupRequired?: boolean };
+
+    if (!response.ok || payload.setupRequired) {
+      throw new Error(
+        apiErrorMessage(response.status, payload.error, payload.setupRequired),
+      );
+    }
+
+    return payload as T;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Panicly did not respond within 15 seconds.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function getRuntimeConfig(): RuntimeConfig {
+  const preferences = getPreferenceValues<Preferences>();
+  return {
+    baseUrl: normalizeBaseUrl(
+      preferences.baseUrl || "https://panicly.vercel.app",
+    ),
+    sessionCookie: preferences.sessionCookie.trim(),
+    requestLimit: parseLimit(preferences.requestLimit),
+    defaultProjectId: preferences.defaultProjectId?.trim() || ALL_PROJECTS,
+  };
+}
+
+function dashboardApiUrl(
+  baseUrl: string,
+  endpoint: string,
+  params: Record<string, string | undefined>,
+) {
+  const url = new URL("/api/dashboard", baseUrl);
+  url.searchParams.set("endpoint", endpoint);
+  for (const [key, value] of Object.entries(params)) {
+    if (value) url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
+
+function dashboardUrl(baseUrl: string) {
+  return new URL("/dashboard", baseUrl).toString();
+}
+
+function requestUrl(baseUrl: string, id: string) {
+  return new URL(
+    `/dashboard/request/${encodeURIComponent(id)}`,
+    baseUrl,
+  ).toString();
+}
+
+function normalizeBaseUrl(value: string) {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  return trimmed || "https://panicly.vercel.app";
+}
+
+function cookieHeader(value: string) {
+  const trimmed = value.trim();
+  if (trimmed.includes("=")) return trimmed;
+
+  const looksEncoded = /%[0-9a-f]{2}/i.test(trimmed);
+  const cookieValue = looksEncoded ? trimmed : encodeURIComponent(trimmed);
+  return `panicly_session=${cookieValue}`;
+}
+
+function parseLimit(value: string) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 25;
+  return Math.min(Math.max(Math.floor(parsed), 1), 50);
+}
+
+function isAllowed(decision?: string) {
+  const normalized = decision?.toLowerCase();
+  return normalized === "allow" || normalized === "allowed";
+}
+
+function formatStatsSubtitle(
+  stats: DashboardStats | null | undefined,
+  visible: number,
+) {
+  if (!stats) return `${visible} visible`;
+
+  const total = stats.total ?? visible;
+  const allowed = stats.allowed ?? 0;
+  const blocked = stats.blocked ?? 0;
+  return `${total.toLocaleString()} total - ${allowed.toLocaleString()} allowed - ${blocked.toLocaleString()} blocked`;
+}
+
+function formatProvider(provider?: string) {
+  if (!provider) return "Unknown provider";
+  return provider
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatTokens(value?: number) {
+  const tokens = Number(value ?? 0);
+  if (!Number.isFinite(tokens)) return "0 tokens";
+  return `${tokens.toLocaleString()} tokens`;
+}
+
+function formatCost(value?: number) {
+  const cost = Number(value ?? 0);
+  if (!Number.isFinite(cost)) return "$0.0000";
+  return `$${cost.toFixed(4)}`;
+}
+
+function parseDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatAbsoluteTime(value?: string) {
+  const date = parseDate(value);
+  return date ? date.toLocaleString() : "Unknown";
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  return "Something went wrong while loading Panicly data.";
+}
+
+function apiErrorMessage(
+  status: number,
+  apiMessage?: string,
+  setupRequired?: boolean,
+) {
+  if (setupRequired) {
+    return "This Panicly workspace is not fully set up yet.";
+  }
+  if (status === 401) {
+    return "Panicly rejected the session cookie. Paste a fresh panicly_session cookie in extension preferences.";
+  }
+  if (status === 403) {
+    return (
+      apiMessage ||
+      "Your workspace plan or role cannot access this Panicly data."
+    );
+  }
+  if (status === 404)
+    return apiMessage || "Panicly could not find this resource.";
+  if (status >= 500) return apiMessage || "Panicly returned a server error.";
+  return apiMessage || `Panicly request failed with HTTP ${status}.`;
+}
+
+function requestMarkdown(
+  request: RequestLog,
+  organization: Organization | null,
+  error: string | null,
+) {
+  const allowed = isAllowed(request.decision);
+  const reason = displayPolicyReason(request.internal_reason);
+  const location = [request.country_name, request.region, request.country_code]
+    .filter(Boolean)
+    .join(" - ");
+  const lines = [
+    `# ${request.model || request.route || "Request"}`,
+    "",
+    error ? `> ${error}` : "",
+    "",
+    `**Decision:** ${allowed ? "Allowed" : "Blocked"}`,
+    `**Reason:** ${reason || "No reason recorded"}`,
+    `**Route:** \`${request.route}\``,
+    `**Provider:** ${formatProvider(request.provider)}`,
+    `**Project:** ${request.project?.name ?? request.project_id}`,
+    organization?.name ? `**Workspace:** ${organization.name}` : "",
+    `**Timestamp:** ${formatAbsoluteTime(request.timestamp)}`,
+    "",
+    "## Traffic",
+    "",
+    `- IP: \`${request.ip_address ?? "Unknown"}\``,
+    `- User agent: \`${request.user_agent || "Unknown"}\``,
+    location ? `- Location: ${location}` : "",
+    `- Tokens: ${formatTokens(request.tokens)}`,
+    `- Cost estimate: ${formatCost(request.cost_estimate)}`,
+    "",
+    "## Raw Event",
+    "",
+    "```json",
+    JSON.stringify(request, null, 2),
+    "```",
+  ];
+
+  return lines.filter((line) => line !== "").join("\n");
+}
+
+function displayPolicyReason(reason: string | null | undefined) {
+  return reason ? reason.replace(/\bpanic mode\b/gi, "Sentry Mode") : "";
+}
