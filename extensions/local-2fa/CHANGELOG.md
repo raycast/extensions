@@ -22,7 +22,9 @@ First public release.
 - Unit tests for TOTP vectors, `parseOtpauthUrl` edge cases (protocol, hostname,
   invalid secret, missing issuer, out-of-range digits/period/algorithm, length
   caps) and `parseGoogleMigrationUrl` edge cases (HOTP filtered, missing
-  secret, wrong protocol, missing data, oversize URL). 19 tests total.
+  secret, wrong protocol, missing data, oversize URL, algorithm enum mapping
+  for SHA1/SHA256, default-algorithm fallback, unsupported SHA384 skipped,
+  mixed payload keeps valid accounts). 23 tests total.
 - Security policy and threat model in `SECURITY.md`.
 - Multi-language README (`en`, `es`, `pt-BR`, `de`, `fr`).
 - GitHub Actions CI (lint + test + build on macOS).
@@ -43,6 +45,15 @@ First public release.
 - **Derived-key cache**: PBKDF2 result is cached per `(password, salt, iter)`
   tuple to avoid re-deriving on every storage op (no plaintext password kept
   beyond the existing Raycast preference).
+- **Async PBKDF2**: `deriveKey` runs on the libuv thread pool (via
+  `promisify(pbkdf2)`) instead of the event loop, so 600k-iteration key
+  derivation no longer freezes the Raycast UI during save/delete operations
+  (each write generates a fresh salt, so the cache cannot help the write
+  path on its own).
+- **Resilient Google Authenticator import**: entries with an unsupported
+  algorithm enum (`3` = SHA384, or explicit `ALGORITHM_UNSPECIFIED`) are
+  skipped instead of aborting the whole import, preserving valid accounts
+  in mixed payloads.
 - Input caps to prevent DoS via crafted payloads:
   - `decodeBase32`: 1024-char input cap.
   - `parseOtpauthUrl`: 1024-char raw label cap; 256-char cap on issuer/account.

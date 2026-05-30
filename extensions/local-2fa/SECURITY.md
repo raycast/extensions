@@ -9,7 +9,7 @@
 ## Cryptographic design
 
 - **Cipher:** AES-256-GCM (authenticated encryption).
-- **Key derivation:** PBKDF2-SHA256, **600,000 iterations** (OWASP 2023 recommendation).
+- **Key derivation:** PBKDF2-SHA256, **600,000 iterations** (OWASP 2023 recommendation). Runs asynchronously on the libuv thread pool so the Raycast UI does not block during save/delete operations.
 - **Encryption versioning:** payload includes a `version` field. Current writes use v2 (600k iterations). Vaults written by older versions (v1, 210k iterations) are still decrypted transparently for backward compatibility.
 - **Write safety:** writes to the encrypted vault are serialized through an in-process mutex to prevent concurrent-write races (lost updates). Decryption of an unexpected JSON shape throws explicitly instead of overwriting the vault with empty data.
 - **Salt:** 16 random bytes per encryption, regenerated on every save.

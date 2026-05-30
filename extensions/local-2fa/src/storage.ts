@@ -2,10 +2,13 @@ import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import {
   createCipheriv,
   createDecipheriv,
-  pbkdf2Sync,
+  pbkdf2,
   randomBytes,
 } from "node:crypto";
+import { promisify } from "node:util";
 import type { EncryptedPayload, TotpAccount } from "./types";
+
+const pbkdf2Async = promisify(pbkdf2);
 
 const STORAGE_KEY = "local2fa.accounts.encrypted.v1";
 const KDF_ITERATIONS_V2 = 600_000;
@@ -28,11 +31,11 @@ let keyCache: {
   key: Buffer;
 } | null = null;
 
-function deriveKey(
+async function deriveKey(
   masterPassword: string,
   salt: Buffer,
   iterations: number,
-): Buffer {
+): Promise<Buffer> {
   const saltB64 = salt.toString("base64");
   if (
     keyCache &&
@@ -42,16 +45,22 @@ function deriveKey(
   ) {
     return keyCache.key;
   }
-  const key = pbkdf2Sync(masterPassword, salt, iterations, 32, "sha256");
+  // pbkdf2 asíncrono: corre en el thread pool de libuv en lugar de bloquear
+  // el event loop ~200-500 ms en cada save/delete (UI de Raycast se congela
+  // si usamos pbkdf2Sync, ya que el salt cambia en cada escritura y la
+  // caché nunca acierta para writes).
+  const key = await pbkdf2Async(masterPassword, salt, iterations, 32, "sha256");
   keyCache = { password: masterPassword, saltB64, iterations, key };
   return key;
 }
 
-function encryptAccounts(accounts: TotpAccount[]): EncryptedPayload {
+async function encryptAccounts(
+  accounts: TotpAccount[],
+): Promise<EncryptedPayload> {
   const masterPassword = getMasterPassword();
   const salt = randomBytes(16);
   const iv = randomBytes(12);
-  const key = deriveKey(masterPassword, salt, KDF_ITERATIONS_V2);
+  const key = await deriveKey(masterPassword, salt, KDF_ITERATIONS_V2);
 
   const cipher = createCipheriv("aes-256-gcm", key, iv);
   const plaintext = Buffer.from(JSON.stringify(accounts), "utf8");
@@ -68,7 +77,9 @@ function encryptAccounts(accounts: TotpAccount[]): EncryptedPayload {
   };
 }
 
-function decryptAccounts(payload: EncryptedPayload): TotpAccount[] {
+async function decryptAccounts(
+  payload: EncryptedPayload,
+): Promise<TotpAccount[]> {
   if (payload.version !== 1 && payload.version !== 2) {
     throw new Error("Unsupported encryption version");
   }
@@ -83,7 +94,7 @@ function decryptAccounts(payload: EncryptedPayload): TotpAccount[] {
   const iv = Buffer.from(payload.iv, "base64");
   const ciphertext = Buffer.from(payload.ciphertext, "base64");
   const tag = Buffer.from(payload.tag, "base64");
-  const key = deriveKey(masterPassword, salt, iterations);
+  const key = await deriveKey(masterPassword, salt, iterations);
 
   const decipher = createDecipheriv("aes-256-gcm", key, iv);
   decipher.setAuthTag(tag);
@@ -114,11 +125,11 @@ export async function listAccounts(): Promise<TotpAccount[]> {
     return [];
   }
   const payload = JSON.parse(raw) as EncryptedPayload;
-  return decryptAccounts(payload);
+  return await decryptAccounts(payload);
 }
 
 async function saveAccounts(accounts: TotpAccount[]): Promise<void> {
-  const payload = encryptAccounts(accounts);
+  const payload = await encryptAccounts(accounts);
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
 
