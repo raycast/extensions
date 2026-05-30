@@ -10,9 +10,9 @@ Yabai Focus is built for macOS users who already use `yabai` for window manageme
 - Shows app icons when Raycast can resolve the macOS application bundle.
 - Keeps multiple windows from the same app as separate results.
 - Excludes Raycast's own command palette from results.
-- Keeps unfocused apps sorted alphabetically by app name, then window title.
-- Removes the currently focused app from the result list and shows its name in the command title.
-- Reserves `Cmd-1` through `Cmd-0` focus shortcuts for unfocused apps.
+- Keeps windows sorted alphabetically by app name, then window title.
+- Shows all focusable windows, including the currently focused app.
+- Reserves `Cmd-1` through `Cmd-0` focus shortcuts for listed windows.
 - Focuses the selected window with `yabai -m window --focus <window-id>`.
 - Falls back to `open -a <app-name>` if `yabai` cannot focus the window.
 - Includes a manual refresh action so newly launched apps can appear without reopening Raycast.
