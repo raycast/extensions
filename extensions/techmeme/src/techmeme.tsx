@@ -36,6 +36,7 @@ export function TechmemeBrowser(props: { initialView?: StoryView; lockedView?: b
 
   return (
     <List
+      isShowingDetail
       isLoading={isLoading}
       filtering={false}
       navigationTitle={props.navigationTitle ?? "Techmeme"}
@@ -90,6 +91,7 @@ function StoryItem(props: { story: Story; searchText: string; revalidate: () => 
       title={story.headline}
       subtitle={publicationFromSource(story.source)}
       keywords={[publicationFromSource(story.source), story.source, story.publishedLabel ?? ""].filter(Boolean)}
+      detail={<List.Item.Detail markdown={formatStoryDetailMarkdown(story)} />}
       actions={<StoryActions story={story} searchText={searchText} revalidate={revalidate} />}
     />
   );
