@@ -62,6 +62,8 @@ async function waitForMacShot() {
 
     await sleep(pollIntervalMilliseconds);
   }
+
+  throw new Error("macshot did not start within 2 seconds.");
 }
 
 async function sleep(milliseconds: number) {
