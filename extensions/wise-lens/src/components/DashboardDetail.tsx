@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { ReactNode } from "react";
 import { currentMonthName, formatMoney, relativeTime } from "../lib/format";
 import { BalanceWithDisplay, DashboardSnapshot } from "../lib/types";
 
@@ -133,8 +134,8 @@ function balanceTags(
   fxRate: DashboardSnapshot["fxRate"],
   numberFormat: string,
   primaryColor: Color,
-): React.ReactNode[] {
-  const tags: React.ReactNode[] = [];
+): ReactNode[] {
+  const tags: ReactNode[] = [];
   tags.push(
     <List.Item.Detail.Metadata.TagList.Item
       key="native"

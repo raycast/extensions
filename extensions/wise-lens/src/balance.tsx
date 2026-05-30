@@ -34,6 +34,9 @@ export default function Balance() {
       try {
         return await fetchDashboardSnapshot(prefs, abortable.current?.signal);
       } catch (e) {
+        // Auth/SCA errors need user action — surface them via the error UI
+        // (token/SCA title + Open Preferences) instead of hiding behind stale cache.
+        if (isAuthError(e) || isScaError(e)) throw e;
         const cached = loadCachedSnapshot();
         if (cached) return cached;
         throw e;
