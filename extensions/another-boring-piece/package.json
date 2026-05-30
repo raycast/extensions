@@ -1,0 +1,99 @@
+{
+  "name": "another-boring-piece",
+  "title": "Art Wallpapers",
+  "description": "Another boring piece. Daily.",
+  "icon": "basalt-icon.png",
+  "author": "yevgen_glukhov",
+  "contributors": [
+    "alexi.build"
+  ],
+  "categories": [
+    "Design Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today's Wallpapers",
+      "description": "View and set today's wallpaper",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "random-wallpaper",
+      "title": "Set Random Wallpaper",
+      "description": "Set a random wallpaper",
+      "mode": "no-view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View wallpapers you selected or downloaded",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "auto-switch-wallpaper",
+      "title": "Auto Switch Wallpaper",
+      "description": "Switch wallpapers automatically on a schedule",
+      "mode": "no-view",
+      "interval": "30m",
+      "icon": "basalt-icon.png",
+      "preferences": [
+        {
+          "name": "refreshIntervalSeconds",
+          "type": "dropdown",
+          "title": "Refresh Interval",
+          "description": "How often the wallpaper should change in the background.",
+          "required": false,
+          "default": "3600",
+          "data": [
+            {
+              "title": "30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "1 Day",
+              "value": "86400"
+            }
+          ]
+        },
+        {
+          "name": "notifyOnSwitch",
+          "type": "checkbox",
+          "title": "Notification",
+          "label": "Show HUD when wallpaper changes",
+          "description": "Display a brief on-screen notice with the artwork title each time the wallpaper changes in the background.",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.8.0",
+    "@types/react": "19.2.14",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

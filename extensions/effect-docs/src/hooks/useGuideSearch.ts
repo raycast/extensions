@@ -11,5 +11,5 @@ export function useGuideSearch(): {
 		failureToastOptions: { title: "Failed to load guides" },
 	});
 
-	return { items: data ?? [], isLoading, error };
+	return { items: Array.isArray(data) ? data : [], isLoading, error };
 }

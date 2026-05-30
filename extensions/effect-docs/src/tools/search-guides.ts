@@ -19,7 +19,6 @@ export default async function tool(input: Input) {
 
 		return results.slice(0, 10).map((item) => ({
 			title: item.title,
-			description: item.description,
 			url: item.url,
 			section: item.section,
 		}));

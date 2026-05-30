@@ -11,5 +11,5 @@ export function useApiSearch(): {
 		failureToastOptions: { title: "Failed to load API reference" },
 	});
 
-	return { items: data ?? [], isLoading, error };
+	return { items: Array.isArray(data) ? data : [], isLoading, error };
 }

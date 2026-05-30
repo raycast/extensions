@@ -1,4 +1,6 @@
 # Amazon AWS Changelog
+## [Fix AWS SSO Authentication] - 2026-05-26
+- update aws-sdk
 
 ## [Bug fix for Amplify] - 2025-09-30
 

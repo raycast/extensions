@@ -219,7 +219,7 @@
     }
   ],
   "ai": {
-    "instructions": "Moving a to-do means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the to-do when referring to a date.",
+    "instructions": "You are a Things task manager assistant.\n\nAVOID OVER-FETCHING: Always use the most specific list available. Never fetch all to-dos when a specific list will do.\n\nWRITE OPERATIONS: Use update-todo for multiple fields, set-todo-property for a single field (faster).\n\nLISTS: Built-in lists (inbox, today, anytime, upcoming, someday, logbook) are always available — never call get-lists to check if they exist. Move a to-do between built-in lists by setting 'when' (today, tomorrow, evening, anytime, someday, or YYYY-MM-DD). Use 'list-id' only to move into a user project or area (ID from get-lists).\n\nDATES: Dates are YYYY-MM-DD. dueDate=\"4000-12-31\" means a recurring placeholder — not a fixed deadline. Never infer recurrence from a to-do's name or notes.",
     "evals": [
       {
         "input": "@things what are my to-dos for today?",
@@ -259,8 +259,7 @@
             "callsTool": {
               "name": "add-todo",
               "arguments": {
-                "todoParams.title": "buy milk",
-                "todoParams.when": "inbox"
+                "title": "buy milk"
               }
             }
           }
@@ -315,7 +314,8 @@
               "tags": ""
             }
           ],
-          "update-todo": "Successfully called \"update-todo\""
+          "update-todo": "Successfully called \"update-todo\"",
+          "set-todo-property": "Successfully called \"set-todo-property\""
         },
         "expected": [
           {
@@ -328,10 +328,10 @@
           },
           {
             "callsTool": {
-              "name": "update-todo",
+              "name": "set-todo-property",
               "arguments": {
-                "todoParams.deadline": "2025-02-15",
-                "todoId": "7sGLDpW4qZepHsCcXinGg9"
+                "todoId": "7sGLDpW4qZepHsCcXinGg9",
+                "key": "deadline"
               }
             }
           }
@@ -341,6 +341,8 @@
         "input": "@things move all to-dos from my inbox to today",
         "mocks": {
           "update-todo": "Successfully called \"update-todo\"",
+          "set-todo-property": "Successfully called \"set-todo-property\"",
+          "get-lists": [],
           "get-list-todos": [
             {
               "status": "open",
@@ -368,7 +370,7 @@
             "callsTool": {
               "name": "update-todo",
               "arguments": {
-                "todoParams.list": "today",
+                "todoParams.when": "today",
                 "todoId": "VBAWWiuRj3yx4KuMp45XBm"
               }
             }
@@ -446,22 +448,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.1",
-    "dayjs": "^1.11.18",
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "dayjs": "^1.11.20",
     "query-string": "^9.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^24.9.2",
-    "@types/qs": "^6.14.0",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.38.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^25.9.1",
+    "eslint": "^10.4.0",
+    "typescript": "^6.0.3"
   },
   "version": "1.0.0",
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

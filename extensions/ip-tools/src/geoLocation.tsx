@@ -18,7 +18,7 @@ export default function Command(props: { arguments: { keywork: string } }) {
       try {
         if (!isValid && !isEmpty) return { status: "fail" };
         return (await axios(`http://ip-api.com/json/${ip}?lang=${lang}&&fields=61151`)).data;
-      } catch (error) {
+      } catch {
         return { status: "fail" };
       }
     },
