@@ -716,7 +716,7 @@ function getErrorMessage(error: unknown) {
 }
 
 function getErrorCode(error: unknown) {
-  return error instanceof PaniclyApiError ? error.code : null;
+  return error instanceof PaniclyApiError ? (error.code ?? null) : null;
 }
 
 function apiErrorMessage(
