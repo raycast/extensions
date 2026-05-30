@@ -30,8 +30,8 @@
       "description": "The Panicly web app URL to read request data from.",
       "type": "textfield",
       "required": false,
-      "default": "https://panicly.vercel.app",
-      "placeholder": "https://panicly.vercel.app"
+      "default": "https://panicly.lol",
+      "placeholder": "https://panicly.lol"
     },
     {
       "name": "apiKey",

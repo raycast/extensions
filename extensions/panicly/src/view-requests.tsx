@@ -14,6 +14,11 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const RAYCAST_REQUESTS_PATH = "/api/raycast/requests";
+const DEFAULT_BASE_URL = "https://panicly.lol";
+const LEGACY_BASE_URL_HOST = "panicly.vercel.app";
+const PAID_PLAN_REQUIRED_CODE = "paid_plan_required";
+const PAID_PLAN_REQUIRED_DESCRIPTION =
+  "To use the Panicly Raycast extension, upgrade this workspace to a paid Panicly plan.";
 
 type Project = {
   id: string;
@@ -65,14 +70,18 @@ type Organization = {
 };
 
 type OverviewResponse = {
+  code?: string;
   error?: string;
+  message?: string;
   stats?: DashboardStats | null;
   logs?: RequestLog[];
   organization?: Organization | null;
 };
 
 type RequestDetailResponse = {
+  code?: string;
   error?: string;
+  message?: string;
   request?: RequestLog | null;
   organization?: Organization | null;
 };
@@ -80,6 +89,7 @@ type RequestDetailResponse = {
 type RequestState<T> = {
   data: T | null;
   error: string | null;
+  errorCode: string | null;
   isLoading: boolean;
 };
 
@@ -91,7 +101,7 @@ type RuntimeConfig = {
 
 export default function Command() {
   const config = getRuntimeConfig();
-  const { data, error, isLoading, reload } = useOverview(config);
+  const { data, error, errorCode, isLoading, reload } = useOverview(config);
 
   const projects = data?.stats?.projects ?? [];
   const projectNames = useMemo(
@@ -126,7 +136,33 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {error ? (
+      {errorCode === PAID_PLAN_REQUIRED_CODE ? (
+        <List.EmptyView
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          title="Paid plan required"
+          description={PAID_PLAN_REQUIRED_DESCRIPTION}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Billing"
+                icon={Icon.CreditCard}
+                url={billingUrl(config.baseUrl)}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => reload({ notify: true })}
+              />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : error ? (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could not load Panicly requests"
@@ -401,19 +437,30 @@ function useOverview({ baseUrl, apiKey, requestLimit }: RuntimeConfig) {
   const [state, setState] = useState<RequestState<OverviewResponse>>({
     data: null,
     error: null,
+    errorCode: null,
     isLoading: true,
   });
 
   const load = useCallback(
     async (options: { notify?: boolean } = {}) => {
-      setState((previous) => ({ ...previous, isLoading: true, error: null }));
+      setState((previous) => ({
+        ...previous,
+        isLoading: true,
+        error: null,
+        errorCode: null,
+      }));
       try {
         const response = await fetchPaniclyJson<OverviewResponse>(
           { baseUrl, apiKey, requestLimit },
           RAYCAST_REQUESTS_PATH,
           { limit: String(requestLimit) },
         );
-        setState({ data: response, error: null, isLoading: false });
+        setState({
+          data: response,
+          error: null,
+          errorCode: null,
+          isLoading: false,
+        });
         if (options.notify) {
           await showToast({
             style: Toast.Style.Success,
@@ -422,9 +469,11 @@ function useOverview({ baseUrl, apiKey, requestLimit }: RuntimeConfig) {
         }
       } catch (error) {
         const message = getErrorMessage(error);
+        const code = getErrorCode(error);
         setState((previous) => ({
           data: previous.data,
           error: message,
+          errorCode: code,
           isLoading: false,
         }));
         if (options.notify) {
@@ -450,18 +499,29 @@ function useRequestDetail(config: RuntimeConfig, requestId: string) {
   const [state, setState] = useState<RequestState<RequestDetailResponse>>({
     data: null,
     error: null,
+    errorCode: null,
     isLoading: true,
   });
 
   const load = useCallback(
     async (options: { notify?: boolean } = {}) => {
-      setState((previous) => ({ ...previous, isLoading: true, error: null }));
+      setState((previous) => ({
+        ...previous,
+        isLoading: true,
+        error: null,
+        errorCode: null,
+      }));
       try {
         const response = await fetchPaniclyJson<RequestDetailResponse>(
           config,
           `${RAYCAST_REQUESTS_PATH}/${requestId}`,
         );
-        setState({ data: response, error: null, isLoading: false });
+        setState({
+          data: response,
+          error: null,
+          errorCode: null,
+          isLoading: false,
+        });
         if (options.notify) {
           await showToast({
             style: Toast.Style.Success,
@@ -470,9 +530,11 @@ function useRequestDetail(config: RuntimeConfig, requestId: string) {
         }
       } catch (error) {
         const message = getErrorMessage(error);
+        const code = getErrorCode(error);
         setState((previous) => ({
           data: previous.data,
           error: message,
+          errorCode: code,
           isLoading: false,
         }));
         if (options.notify) {
@@ -512,11 +574,15 @@ async function fetchPaniclyJson<T>(
       signal: controller.signal,
     });
     const payload = (await response.json().catch(() => ({}))) as
-      | (T & { error?: string })
-      | { error?: string };
+      | (T & { code?: string; error?: string; message?: string })
+      | { code?: string; error?: string; message?: string };
 
     if (!response.ok) {
-      throw new Error(apiErrorMessage(response.status, payload.error));
+      throw new PaniclyApiError(
+        apiErrorMessage(response.status, payload),
+        response.status,
+        payload.code,
+      );
     }
 
     return payload as T;
@@ -533,9 +599,7 @@ async function fetchPaniclyJson<T>(
 function getRuntimeConfig(): RuntimeConfig {
   const preferences = getPreferenceValues<Preferences>();
   return {
-    baseUrl: normalizeBaseUrl(
-      preferences.baseUrl || "https://panicly.vercel.app",
-    ),
+    baseUrl: normalizeBaseUrl(preferences.baseUrl || DEFAULT_BASE_URL),
     apiKey: preferences.apiKey.trim(),
     requestLimit: parseLimit(preferences.requestLimit ?? "25"),
   };
@@ -554,19 +618,34 @@ function paniclyApiUrl(
 }
 
 function dashboardUrl(baseUrl: string) {
-  return new URL("/dashboard", baseUrl).toString();
+  return new URL("/dashboard", webBaseUrl(baseUrl)).toString();
+}
+
+function billingUrl(baseUrl: string) {
+  return new URL("/dashboard/settings/billing", webBaseUrl(baseUrl)).toString();
 }
 
 function requestUrl(baseUrl: string, id: string) {
   return new URL(
     `/dashboard/request/${encodeURIComponent(id)}`,
-    baseUrl,
+    webBaseUrl(baseUrl),
   ).toString();
 }
 
 function normalizeBaseUrl(value: string) {
   const trimmed = value.trim().replace(/\/+$/, "");
-  return trimmed || "https://panicly.vercel.app";
+  return trimmed || DEFAULT_BASE_URL;
+}
+
+function webBaseUrl(baseUrl: string) {
+  try {
+    const url = new URL(normalizeBaseUrl(baseUrl));
+    return url.hostname === LEGACY_BASE_URL_HOST
+      ? DEFAULT_BASE_URL
+      : url.toString();
+  } catch {
+    return DEFAULT_BASE_URL;
+  }
 }
 
 function normalizePaniclyApiKey(value: string) {
@@ -636,7 +715,15 @@ function getErrorMessage(error: unknown) {
   return "Something went wrong while loading Panicly data.";
 }
 
-function apiErrorMessage(status: number, apiMessage?: string) {
+function getErrorCode(error: unknown) {
+  return error instanceof PaniclyApiError ? error.code : null;
+}
+
+function apiErrorMessage(
+  status: number,
+  payload: { error?: string; message?: string },
+) {
+  const apiMessage = payload.message || payload.error;
   if (status === 401) {
     return "Panicly rejected the API key. Paste a valid project API key from Panicly Settings.";
   }
@@ -650,6 +737,17 @@ function apiErrorMessage(status: number, apiMessage?: string) {
     return apiMessage || "Panicly could not find this resource.";
   if (status >= 500) return apiMessage || "Panicly returned a server error.";
   return apiMessage || `Panicly request failed with HTTP ${status}.`;
+}
+
+class PaniclyApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "PaniclyApiError";
+  }
 }
 
 function requestMarkdown(
