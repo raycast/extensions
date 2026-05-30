@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sift",
+  "title": "Sift",
+  "description": "Sift any file on your Mac down to clean, LLM-ready Markdown. Filters formatting away from PDFs, Word, PowerPoint, Excel, images, audio, and more. Runs locally — powered by Microsoft MarkItDown and poppler.",
+  "icon": "icon.png",
+  "author": "njoshi",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "sift",
+    "md",
+    "markdown",
+    "markitdown",
+    "convert",
+    "pdf to markdown",
+    "docx to markdown",
+    "pptx to markdown",
+    "file conversion",
+    "llm"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert to Markdown",
+      "subtitle": "Sift",
+      "description": "Search any file on your Mac by name (or its folder) and sift it into clean Markdown.",
+      "mode": "view",
+      "keywords": [
+        "sift",
+        "md",
+        "markdown",
+        "markitdown",
+        "convert",
+        "pdf",
+        "docx",
+        "pptx",
+        "xlsx",
+        "epub",
+        "to markdown"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "markitdownPath",
+      "type": "textfield",
+      "required": false,
+      "title": "MarkItDown Binary Path",
+      "description": "Path to the markitdown executable. Leave blank to auto-detect (~/.local/bin, /opt/homebrew/bin, /usr/local/bin).",
+      "placeholder": "/Users/you/.local/bin/markitdown",
+      "default": ""
+    },
+    {
+      "name": "outputLocation",
+      "type": "dropdown",
+      "required": true,
+      "title": "Output Location",
+      "description": "Where to save the converted Markdown.",
+      "default": "sibling",
+      "data": [
+        { "title": "Sibling to source (same folder)", "value": "sibling" },
+        { "title": "Downloads folder", "value": "downloads" },
+        { "title": "Custom folder", "value": "custom" }
+      ]
+    },
+    {
+      "name": "customOutputFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Custom Output Folder",
+      "description": "Used when Output Location is set to 'Custom folder'.",
+      "default": ""
+    },
+    {
+      "name": "openAfterConvert",
+      "type": "checkbox",
+      "required": false,
+      "title": "After Conversion",
+      "label": "Open the resulting .md file",
+      "description": "When enabled, opens the converted Markdown file in your default app.",
+      "default": false
+    },
+    {
+      "name": "copyToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Clipboard",
+      "label": "Also copy the Markdown to the clipboard",
+      "description": "When enabled, copies the converted Markdown content to your clipboard after each conversion.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
