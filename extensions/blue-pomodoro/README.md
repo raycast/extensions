@@ -1,10 +1,6 @@
 # ⏱️ BluePomodoro Raycast Extension
 
-Supercharge your focus with **BluePomodoro**, a premium, watchOS-inspired pomodoro timer and task manager designed to keep you in the zone. Seamlessly synchronized with your BluePomodoro web application, this extension brings AD/HD-friendly gamified tracking directly to your Raycast command palette.
-
-<div align="center">
-  <img src="metadata/1-focus-timer.png" width="800" alt="Focus Timer Screenshot" />
-</div>
+Supercharge your focus with **BluePomodoro**, a premium, watchOS-inspired pomodoro timer and task manager designed to keep you in the zone. Seamlessly synchronized with your BluePomodoro web application, this extension brings ADHD-friendly, gamified focus timer, tasks, and productivity statistics directly to your Raycast command palette.
 
 ---
 
