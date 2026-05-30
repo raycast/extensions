@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
@@ -51,6 +51,7 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
 }
 
 export default function Command(): JSX.Element {
+  const { showProblemStats } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
@@ -139,10 +140,12 @@ export default function Command(): JSX.Element {
           key={problem.questionFrontendId}
           id={problem.questionFrontendId}
           title={`${problem.questionFrontendId}. ${problem.title}`}
-          subtitle={JSON.parse(problem.stats).acRate}
+          subtitle={showProblemStats ? JSON.parse(problem.stats).acRate : undefined}
           accessories={[
             ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
-            { tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } },
+            ...(showProblemStats
+              ? [{ tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } }]
+              : []),
           ]}
           actions={
             <ActionPanel>

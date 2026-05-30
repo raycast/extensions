@@ -1,4 +1,4 @@
-import { showToast, Toast } from '@raycast/api';
+import { getPreferenceValues, showToast, Toast } from '@raycast/api';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Problem, ProblemStats } from './types';
 
@@ -23,20 +23,27 @@ export function formatProblemMarkdown(problem?: Problem, date?: string) {
     return '';
   }
 
+  const { showProblemStats } = getPreferenceValues<Preferences>();
+
   const title = `# ${problem.questionFrontendId}. ${problem.title}`;
-  const header = `${date ? `**🗓️ Date**: ${date} ` : ''}**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${
-    problem.likes
-  } | **👎 Dislikes**: ${problem.dislikes}
-`;
+  const dateLine = date ? `**🗓️ Date**: ${date}` : '';
+  const statsLine = showProblemStats
+    ? `**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${problem.likes} | **👎 Dislikes**: ${problem.dislikes}`
+    : '';
+  const header = [dateLine, statsLine].filter(Boolean).join(' | ');
+
   let content = 'The problem is paid only, currently preview is not supported.';
   if (problem.isPaidOnly) {
     showToast(Toast.Style.Failure, content);
   } else {
     content = html2markdown.translate(problem.content);
   }
-  const stats: ProblemStats = JSON.parse(problem.stats);
-  const footer = `
-> **Accepted** ${stats.totalAccepted} | **Submissions** ${stats.totalSubmission} | **Accepted Rate** ${stats.acRate}
-`;
-  return `${title}\n\n${header}\n${content}\n${footer}`;
+
+  let footer = '';
+  if (showProblemStats) {
+    const stats: ProblemStats = JSON.parse(problem.stats);
+    footer = `\n> **Accepted** ${stats.totalAccepted} | **Submissions** ${stats.totalSubmission} | **Accepted Rate** ${stats.acRate}\n`;
+  }
+
+  return `${title}\n\n${header}\n\n${content}\n${footer}`;
 }
