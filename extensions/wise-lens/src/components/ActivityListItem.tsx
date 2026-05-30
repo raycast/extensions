@@ -50,7 +50,7 @@ export function ActivityListItem({ activity, numberFormat, onRefresh }: Props) {
         activity.type,
         activity.status,
         stripHtml(activity.description),
-        activity.primaryAmount,
+        stripHtml(activity.primaryAmount),
         primary?.currency ?? "",
       ].filter(Boolean)}
       actions={

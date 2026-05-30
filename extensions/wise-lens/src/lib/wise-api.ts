@@ -1,6 +1,7 @@
 import { Cache } from "@raycast/api";
 import { DASHBOARD_CACHE_KEY, PROFILE_ID_CACHE_KEY, rateCacheKey } from "./cache-keys";
 import { parseAmount } from "./classify";
+import { RateLimitCooldownError } from "./rate-limit";
 import { buildSampleSnapshot } from "./sample-data";
 import { inferPrimaryCurrency, summarizeActivities } from "./summarize";
 import {
@@ -93,7 +94,11 @@ export async function fetchRate(
       // ignore
     }
     return rate;
-  } catch {
+  } catch (e) {
+    // A cooldown means wiseGet exhausted its retry budget and just engaged the
+    // 5-minute block. Surface it so useDashboard shows the toast now, instead of
+    // silently degrading to "(partial)" and only failing on the next refresh.
+    if (e instanceof RateLimitCooldownError) throw e;
     return cachedRate;
   }
 }
