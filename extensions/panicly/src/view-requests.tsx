@@ -13,14 +13,12 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-const ALL_PROJECTS = "all";
-const DASHBOARD_OVERVIEW_ENDPOINT = "/api/dashboard/overview";
+const RAYCAST_REQUESTS_PATH = "/api/raycast/requests";
 
 type Preferences = {
-  baseUrl: string;
-  sessionCookie: string;
-  defaultProjectId?: string;
-  requestLimit: string;
+  baseUrl?: string;
+  apiKey: string;
+  requestLimit?: string;
 };
 
 type Project = {
@@ -73,14 +71,13 @@ type Organization = {
 };
 
 type OverviewResponse = {
-  setupRequired?: boolean;
   error?: string;
   stats?: DashboardStats | null;
   logs?: RequestLog[];
+  organization?: Organization | null;
 };
 
 type RequestDetailResponse = {
-  setupRequired?: boolean;
   error?: string;
   request?: RequestLog | null;
   organization?: Organization | null;
@@ -94,20 +91,13 @@ type RequestState<T> = {
 
 type RuntimeConfig = {
   baseUrl: string;
-  sessionCookie: string;
+  apiKey: string;
   requestLimit: number;
-  defaultProjectId: string;
 };
 
 export default function Command() {
   const config = getRuntimeConfig();
-  const [selectedProjectId, setSelectedProjectId] = useState(
-    config.defaultProjectId,
-  );
-  const { data, error, isLoading, reload } = useOverview({
-    config,
-    projectId: selectedProjectId,
-  });
+  const { data, error, isLoading, reload } = useOverview(config);
 
   const projects = data?.stats?.projects ?? [];
   const projectNames = useMemo(
@@ -115,32 +105,13 @@ export default function Command() {
     [projects],
   );
   const logs = data?.logs ?? [];
-  const title = useMemo(() => {
-    if (selectedProjectId === ALL_PROJECTS) return "Recent Requests";
-    return projectNames.get(selectedProjectId) ?? "Recent Requests";
-  }, [projectNames, selectedProjectId]);
+  const title = projects[0]?.name ?? "Recent Requests";
 
   return (
     <List
       isLoading={isLoading}
       navigationTitle={title}
       searchBarPlaceholder="Search by model, route, provider, IP, or reason"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Project"
-          value={selectedProjectId}
-          onChange={setSelectedProjectId}
-        >
-          <List.Dropdown.Item title="All Projects" value={ALL_PROJECTS} />
-          {projects.map((project) => (
-            <List.Dropdown.Item
-              key={project.id}
-              title={project.name || project.id}
-              value={project.id}
-            />
-          ))}
-        </List.Dropdown>
-      }
       actions={
         <ActionPanel>
           <Action
@@ -432,13 +403,7 @@ function RequestDetail({
   );
 }
 
-function useOverview({
-  config,
-  projectId,
-}: {
-  config: RuntimeConfig;
-  projectId: string;
-}) {
+function useOverview({ baseUrl, apiKey, requestLimit }: RuntimeConfig) {
   const [state, setState] = useState<RequestState<OverviewResponse>>({
     data: null,
     error: null,
@@ -450,12 +415,9 @@ function useOverview({
       setState((previous) => ({ ...previous, isLoading: true, error: null }));
       try {
         const response = await fetchPaniclyJson<OverviewResponse>(
-          config,
-          DASHBOARD_OVERVIEW_ENDPOINT,
-          {
-            limit: String(config.requestLimit),
-            projectId: projectId === ALL_PROJECTS ? undefined : projectId,
-          },
+          { baseUrl, apiKey, requestLimit },
+          RAYCAST_REQUESTS_PATH,
+          { limit: String(requestLimit) },
         );
         setState({ data: response, error: null, isLoading: false });
         if (options.notify) {
@@ -480,7 +442,7 @@ function useOverview({
         }
       }
     },
-    [config, projectId],
+    [apiKey, baseUrl, requestLimit],
   );
 
   useEffect(() => {
@@ -503,7 +465,7 @@ function useRequestDetail(config: RuntimeConfig, requestId: string) {
       try {
         const response = await fetchPaniclyJson<RequestDetailResponse>(
           config,
-          `/api/dashboard/request/${requestId}`,
+          `${RAYCAST_REQUESTS_PATH}/${requestId}`,
         );
         setState({ data: response, error: null, isLoading: false });
         if (options.notify) {
@@ -545,24 +507,22 @@ async function fetchPaniclyJson<T>(
 ): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
-  const url = dashboardApiUrl(config.baseUrl, endpoint, params);
+  const url = paniclyApiUrl(config.baseUrl, endpoint, params);
 
   try {
     const response = await fetch(url, {
       headers: {
         Accept: "application/json",
-        Cookie: cookieHeader(config.sessionCookie),
+        Authorization: `Bearer ${normalizePaniclyApiKey(config.apiKey)}`,
       },
       signal: controller.signal,
     });
     const payload = (await response.json().catch(() => ({}))) as
-      | (T & { error?: string; setupRequired?: boolean })
-      | { error?: string; setupRequired?: boolean };
+      | (T & { error?: string })
+      | { error?: string };
 
-    if (!response.ok || payload.setupRequired) {
-      throw new Error(
-        apiErrorMessage(response.status, payload.error, payload.setupRequired),
-      );
+    if (!response.ok) {
+      throw new Error(apiErrorMessage(response.status, payload.error));
     }
 
     return payload as T;
@@ -582,19 +542,17 @@ function getRuntimeConfig(): RuntimeConfig {
     baseUrl: normalizeBaseUrl(
       preferences.baseUrl || "https://panicly.vercel.app",
     ),
-    sessionCookie: preferences.sessionCookie.trim(),
-    requestLimit: parseLimit(preferences.requestLimit),
-    defaultProjectId: preferences.defaultProjectId?.trim() || ALL_PROJECTS,
+    apiKey: preferences.apiKey.trim(),
+    requestLimit: parseLimit(preferences.requestLimit ?? "25"),
   };
 }
 
-function dashboardApiUrl(
+function paniclyApiUrl(
   baseUrl: string,
-  endpoint: string,
+  path: string,
   params: Record<string, string | undefined>,
 ) {
-  const url = new URL("/api/dashboard", baseUrl);
-  url.searchParams.set("endpoint", endpoint);
+  const url = new URL(path, baseUrl);
   for (const [key, value] of Object.entries(params)) {
     if (value) url.searchParams.set(key, value);
   }
@@ -617,13 +575,11 @@ function normalizeBaseUrl(value: string) {
   return trimmed || "https://panicly.vercel.app";
 }
 
-function cookieHeader(value: string) {
+function normalizePaniclyApiKey(value: string) {
   const trimmed = value.trim();
-  if (trimmed.includes("=")) return trimmed;
-
-  const looksEncoded = /%[0-9a-f]{2}/i.test(trimmed);
-  const cookieValue = looksEncoded ? trimmed : encodeURIComponent(trimmed);
-  return `panicly_session=${cookieValue}`;
+  return trimmed.startsWith("paniclypk_")
+    ? trimmed.slice("panicly".length)
+    : trimmed;
 }
 
 function parseLimit(value: string) {
@@ -686,16 +642,9 @@ function getErrorMessage(error: unknown) {
   return "Something went wrong while loading Panicly data.";
 }
 
-function apiErrorMessage(
-  status: number,
-  apiMessage?: string,
-  setupRequired?: boolean,
-) {
-  if (setupRequired) {
-    return "This Panicly workspace is not fully set up yet.";
-  }
+function apiErrorMessage(status: number, apiMessage?: string) {
   if (status === 401) {
-    return "Panicly rejected the session cookie. Paste a fresh panicly_session cookie in extension preferences.";
+    return "Panicly rejected the API key. Paste a valid project API key from Panicly Settings.";
   }
   if (status === 403) {
     return (

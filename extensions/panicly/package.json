@@ -28,34 +28,26 @@
     {
       "name": "baseUrl",
       "title": "Panicly Base URL",
-      "description": "The Panicly web app URL to read dashboard data from.",
+      "description": "The Panicly web app URL to read request data from.",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "https://panicly.vercel.app",
       "placeholder": "https://panicly.vercel.app"
     },
     {
-      "name": "sessionCookie",
-      "title": "Session Cookie",
-      "description": "Your Panicly session cookie. Paste either panicly_session=... or the cookie value.",
+      "name": "apiKey",
+      "title": "Panicly API Key",
+      "description": "A project API key from Panicly Settings or onboarding.",
       "type": "password",
       "required": true,
-      "placeholder": "panicly_session=..."
-    },
-    {
-      "name": "defaultProjectId",
-      "title": "Default Project ID",
-      "description": "Optional project ID to open first. Leave blank to show all projects.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "All projects"
+      "placeholder": "pk_..."
     },
     {
       "name": "requestLimit",
       "title": "Request Limit",
       "description": "How many recent requests to load. Panicly caps this at 50.",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "25",
       "data": [
         { "title": "10", "value": "10" },
