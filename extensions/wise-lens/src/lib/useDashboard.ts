@@ -1,5 +1,6 @@
 import { openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
 import { isAuthError, isScaError, WiseHttpError } from "./errors";
 import { getPrefs, prefsFingerprint } from "./preferences";
 import { RateLimitCooldownError } from "./rate-limit";
@@ -8,12 +9,13 @@ import { DashboardSnapshot } from "./types";
 
 export function useDashboard() {
   const prefs = getPrefs();
+  const abortable = useRef<AbortController>(undefined);
 
   const result = useCachedPromise(
     async (fp: string): Promise<DashboardSnapshot> => {
       void fp;
       try {
-        return await fetchDashboardSnapshot(prefs);
+        return await fetchDashboardSnapshot(prefs, abortable.current?.signal);
       } catch (e) {
         if (isScaError(e)) {
           await showToast({
@@ -66,7 +68,7 @@ export function useDashboard() {
       }
     },
     [prefsFingerprint(prefs)],
-    { keepPreviousData: true },
+    { keepPreviousData: true, abortable },
   );
 
   return { ...result, prefs };

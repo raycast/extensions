@@ -10,6 +10,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
 import { isAuthError, isScaError } from "./lib/errors";
 import { formatMoney, relativeTime } from "./lib/format";
 import { getPrefs, prefsFingerprint } from "./lib/preferences";
@@ -25,12 +26,13 @@ async function copyAndHud(text: string) {
 export default function Balance() {
   const prefs = getPrefs();
   const fingerprint = prefsFingerprint(prefs);
+  const abortable = useRef<AbortController>(undefined);
 
   const { data, isLoading, revalidate, error } = useCachedPromise(
     async (fp: string): Promise<DashboardSnapshot> => {
       void fp;
       try {
-        return await fetchDashboardSnapshot(prefs);
+        return await fetchDashboardSnapshot(prefs, abortable.current?.signal);
       } catch (e) {
         const cached = loadCachedSnapshot();
         if (cached) return cached;
@@ -38,7 +40,7 @@ export default function Balance() {
       }
     },
     [fingerprint],
-    { keepPreviousData: true },
+    { keepPreviousData: true, abortable },
   );
 
   if (!prefs.apiToken && !prefs.useSampleData) {
