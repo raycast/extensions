@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { listMonitors, Monitor, toggleHdr } from "./lib/hdr";
 import {
   clearSlot,
@@ -35,9 +35,9 @@ export default function Command() {
       toast.message = monitor.name;
       revalidate();
     } catch (error) {
-      await showFailureToast(error, {
-        title: `Failed to toggle HDR on ${monitor.name}`,
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = `Failed to toggle HDR on ${monitor.name}`;
+      toast.message = error instanceof Error ? error.message : String(error);
     }
   }
 

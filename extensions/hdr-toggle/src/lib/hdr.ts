@@ -45,15 +45,17 @@ async function runHelper<T>(args: string[]): Promise<T> {
       windowsHide: true,
     }));
   } catch (err: unknown) {
-    // Non-zero exit still carries the JSON error payload on stdout.
+    // Non-zero exit still carries the JSON error payload on stdout. Parse it
+    // separately so only a JSON.parse failure is swallowed, not the error we throw.
     const out = (err as { stdout?: string })?.stdout?.trim();
     if (out) {
+      let parsed: ErrorShape | undefined;
       try {
-        const parsed = JSON.parse(out) as ErrorShape;
-        if (parsed?.error) throw new Error(parsed.error);
+        parsed = JSON.parse(out) as ErrorShape;
       } catch {
-        // fall through to generic error
+        parsed = undefined; // not JSON; fall through to the generic error below
       }
+      if (parsed?.error) throw new Error(parsed.error);
     }
     throw err instanceof Error ? err : new Error(String(err));
   }
