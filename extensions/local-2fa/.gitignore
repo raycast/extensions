@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.env
+*.log
+*.tsbuildinfo
+coverage/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Local audit notes (not for public repo)
+AUDIT.md
+FIXES.md
+SECURITY_NOTES.md
+
+# Local test artifacts
+test/
+.venv-docs/
