@@ -5,6 +5,7 @@ import yahooFinance, { type Quote } from "./yahoo-finance";
 
 export function useStockSearch(searchText: string) {
   const abortRef = useRef<AbortController>(new AbortController());
+  const prevSymbolsKey = useRef<string>("");
   const [symbols, setSymbols] = useState<string[]>([]);
   const {
     quotes,
@@ -46,8 +47,13 @@ export function useStockSearch(searchText: string) {
           .filter((q) => q.quoteType === "EQUITY" || q.quoteType === "ETF")
           .map((q) => q.symbol)
           .filter((s): s is string => !!s);
+        const nextKey = next.join(",");
         setSymbols(next);
-        if (next.length === 0) setIsLoading(false);
+        if (next.length === 0 || nextKey === prevSymbolsKey.current) {
+          // No re-fetch will occur (empty or identical symbol set) — clear spinner now
+          setIsLoading(false);
+        }
+        prevSymbolsKey.current = nextKey;
       } catch (e) {
         if (e instanceof Error && e.name !== "AbortError") {
           showToast({
