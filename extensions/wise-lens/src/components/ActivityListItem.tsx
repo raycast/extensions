@@ -15,6 +15,7 @@ const STATUS_ICONS: Record<string, { source: Icon; tintColor: Color }> = {
   PENDING: { source: Icon.Clock, tintColor: Color.Yellow },
   CANCELLED: { source: Icon.XMarkCircle, tintColor: Color.Red },
   REJECTED: { source: Icon.XMarkCircle, tintColor: Color.Red },
+  REFUNDED: { source: Icon.ArrowCounterClockwise, tintColor: Color.Blue },
 };
 
 export function ActivityListItem({ activity, numberFormat, onRefresh }: Props) {
