@@ -10,6 +10,11 @@ await verifyProvider("qwen", {
   expectedFormat: "wav",
   expectedRate: 1,
 });
+await verifyProvider("minimax", {
+  expectedAudio: "minimax-audio",
+  expectedFormat: "mp3",
+  expectedRate: 1,
+});
 await verifyProvider("mimo", {
   expectedAudio: "mimo-audio",
   expectedFormat: "wav",
@@ -54,9 +59,11 @@ async function verifyProvider(provider, expected) {
     `${provider} audio should be played with expected format and rate`,
   );
   assert(events.includes("qwen-stop:request"), `${provider} test should request any old Qwen-TTS run to stop`);
+  assert(events.includes("minimax-stop:request"), `${provider} test should request any old MiniMax run to stop`);
   assert(events.includes("mimo-stop:request"), `${provider} test should request any old MiMo run to stop`);
   assert(events.includes("openai-stop:request"), `${provider} test should request any old OpenAI run to stop`);
   assert(events.includes("qwen-state:clear"), `${provider} test should clear stale Qwen-TTS now-playing state`);
+  assert(events.includes("minimax-state:clear"), `${provider} test should clear stale MiniMax now-playing state`);
   assert(events.includes("mimo-state:clear"), `${provider} test should clear stale MiMo now-playing state`);
   assert(events.includes("openai-state:clear"), `${provider} test should clear stale OpenAI now-playing state`);
   assert(
@@ -148,15 +155,19 @@ function loadCommand(provider, events, options = {}) {
   const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
   const providerFile = path.join(root, "src/utils/provider.ts");
   const qwenApiFile = path.join(root, "src/api/qwen-tts.ts");
+  const minimaxApiFile = path.join(root, "src/api/minimax-tts.ts");
   const mimoApiFile = path.join(root, "src/api/mimo-tts.ts");
   const openAIApiFile = path.join(root, "src/api/openai-tts.ts");
   const qwenPrefsFile = path.join(root, "src/utils/qwen-voice-preferences.ts");
+  const minimaxPrefsFile = path.join(root, "src/utils/minimax-voice-preferences.ts");
   const mimoPrefsFile = path.join(root, "src/utils/mimo-voice-preferences.ts");
   const openAIPrefsFile = path.join(root, "src/utils/openai-voice-preferences.ts");
   const qwenVoicesFile = path.join(root, "src/constants/qwen-tts-voices.ts");
+  const minimaxVoicesFile = path.join(root, "src/constants/minimax-voices.ts");
   const mimoVoicesFile = path.join(root, "src/constants/mimo-voices.ts");
   const openAIVoicesFile = path.join(root, "src/constants/openai-voices.ts");
   const qwenPlaybackFile = path.join(root, "src/utils/qwen-playback-state.ts");
+  const minimaxPlaybackFile = path.join(root, "src/utils/minimax-playback-state.ts");
   const mimoPlaybackFile = path.join(root, "src/utils/mimo-playback-state.ts");
   const openAIPlaybackFile = path.join(root, "src/utils/openai-playback-state.ts");
 
@@ -236,6 +247,17 @@ function loadCommand(provider, events, options = {}) {
         return "qwen-audio";
       },
     },
+    [minimaxApiFile]: {
+      getModelLabel: (model) => model,
+      synthesizeSpeech: async () => {
+        events.push("synth:minimax");
+        nowFromOption(options.synthAdvanceMs);
+        if (options.stoppedAfterSynthesis) {
+          currentPlayer?.stopPlayback();
+        }
+        return "minimax-audio";
+      },
+    },
     [mimoApiFile]: {
       getModelLabel: (model) => model,
       synthesizeSpeech: async () => {
@@ -269,6 +291,14 @@ function loadCommand(provider, events, options = {}) {
         playbackRate: 1,
       }),
     },
+    [minimaxPrefsFile]: {
+      buildDefaultOptionsFromPrefs: async () => ({
+        model: "speech-2.8-hd",
+        voice: "Chinese (Mandarin)_Radio_Host",
+        format: "mp3",
+        playbackRate: 1,
+      }),
+    },
     [mimoPrefsFile]: {
       buildDefaultOptionsFromPrefs: async () => ({
         model: "mimo-v2.5-tts",
@@ -288,6 +318,9 @@ function loadCommand(provider, events, options = {}) {
     [qwenVoicesFile]: {
       getVoiceById: (voice) => ({ name: voice }),
     },
+    [minimaxVoicesFile]: {
+      getVoiceById: (voice) => ({ name: voice }),
+    },
     [mimoVoicesFile]: {
       getVoiceById: (voice) => ({ name: voice }),
     },
@@ -297,6 +330,10 @@ function loadCommand(provider, events, options = {}) {
     [qwenPlaybackFile]: {
       clearNowPlaying: async () => events.push("qwen-state:clear"),
       requestPlaybackStop: async () => events.push("qwen-stop:request"),
+    },
+    [minimaxPlaybackFile]: {
+      clearNowPlaying: async () => events.push("minimax-state:clear"),
+      requestPlaybackStop: async () => events.push("minimax-stop:request"),
     },
     [mimoPlaybackFile]: {
       clearNowPlaying: async () => events.push("mimo-state:clear"),
@@ -369,6 +406,7 @@ function resolveTs(candidate) {
 
 function labelProvider(provider) {
   if (provider === "qwen") return "Qwen-TTS";
+  if (provider === "minimax") return "MiniMax";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
   return "Qwen-TTS";

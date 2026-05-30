@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MimoTTSModel } from "../api/mimo-types";
+import type { MinimaxLanguageBoost, MinimaxTTSModel } from "../api/minimax-tts-types";
 import type { QwenTTSLanguageType, QwenTTSModel, QwenTTSRegion } from "../api/qwen-tts-types";
 import type {
   OpenAIResponseFormat,
@@ -38,6 +39,15 @@ import {
   getVoicesForModel as getMimoVoicesForModel,
 } from "../constants/mimo-voices";
 import {
+  LANGUAGE_BOOST_LABELS as MINIMAX_LANGUAGE_BOOST_LABELS,
+  MINIMAX_LANGUAGE_BOOSTS,
+  MINIMAX_MODELS,
+  MODEL_LABELS as MINIMAX_MODEL_LABELS,
+  VOICE_CATEGORIES as MINIMAX_VOICE_CATEGORIES,
+  getVoicesByCategory as getMinimaxVoicesByCategory,
+  getVoicesForModel as getMinimaxVoicesForModel,
+} from "../constants/minimax-voices";
+import {
   VOICE_CATEGORIES as OPENAI_VOICE_CATEGORIES,
   getVoicesByCategory as getOpenAIVoicesByCategory,
   getVoicesForModel as getOpenAIVoicesForModel,
@@ -62,6 +72,10 @@ import {
   setQuickReadVoiceOverride as setQwenQuickReadVoiceOverride,
 } from "../utils/qwen-voice-preferences";
 import {
+  clearQuickReadVoiceOverride as clearMinimaxQuickReadVoiceOverride,
+  setQuickReadVoiceOverride as setMinimaxQuickReadVoiceOverride,
+} from "../utils/minimax-voice-preferences";
+import {
   clearQuickReadVoiceOverride as clearMimoQuickReadVoiceOverride,
   setQuickReadVoiceOverride as setMimoQuickReadVoiceOverride,
 } from "../utils/mimo-voice-preferences";
@@ -70,6 +84,7 @@ import {
   setQuickReadVoiceOverride as setOpenAIQuickReadVoiceOverride,
 } from "../utils/openai-voice-preferences";
 import { clearSpeedOverride as clearMimoSpeedOverride } from "../utils/mimo-playback-state";
+import { clearSpeedOverride as clearMinimaxSpeedOverride } from "../utils/minimax-playback-state";
 import { clearSpeedOverride as clearOpenAISpeedOverride } from "../utils/openai-playback-state";
 import { clearSpeedOverride as clearQwenSpeedOverride } from "../utils/qwen-playback-state";
 
@@ -127,6 +142,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
   }, [reload]);
 
   const mimoVoices = useMemo(() => getMimoVoicesForModel(settings?.mimo.model ?? "mimo-v2.5-tts"), [settings]);
+  const minimaxVoices = useMemo(() => getMinimaxVoicesForModel(settings?.minimax.model ?? "speech-2.8-hd"), [settings]);
   const qwenVoices = useMemo(() => getQwenVoicesForModel(settings?.qwen.model ?? "qwen3-tts-flash"), [settings]);
   const openaiVoices = useMemo(() => getOpenAIVoicesForModel(settings?.openai.model ?? "gpt-4o-mini-tts"), [settings]);
 
@@ -161,6 +177,13 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
     [updateSettings],
   );
 
+  const updateMinimax = useCallback(
+    (patch: Partial<ProviderSettings["minimax"]>) => {
+      updateSettings((current) => ({ ...current, minimax: { ...current.minimax, ...patch } }));
+    },
+    [updateSettings],
+  );
+
   const updateOpenAI = useCallback(
     (patch: Partial<ProviderSettings["openai"]>) => {
       updateSettings((current) => ({ ...current, openai: { ...current.openai, ...patch } }));
@@ -177,6 +200,20 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
           ? current.mimo.defaultVoice
           : (nextVoices[0]?.id ?? "mimo_default");
         return { ...current, mimo: { ...current.mimo, model: nextModel, defaultVoice: nextVoice } };
+      });
+    },
+    [updateSettings],
+  );
+
+  const handleMinimaxModelChange = useCallback(
+    (value: string) => {
+      const nextModel = value as MinimaxTTSModel;
+      updateSettings((current) => {
+        const nextVoices = getMinimaxVoicesForModel(nextModel);
+        const nextVoice = nextVoices.some((voice) => voice.id === current.minimax.voice)
+          ? current.minimax.voice
+          : (nextVoices[0]?.id ?? "Chinese (Mandarin)_Radio_Host");
+        return { ...current, minimax: { ...current.minimax, model: nextModel, voice: nextVoice } };
       });
     },
     [updateSettings],
@@ -219,9 +256,11 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
       const saved = await saveProviderSettingsOverrides(settings);
       await Promise.all([
         setQwenQuickReadVoiceOverride(saved.qwen.voice),
+        setMinimaxQuickReadVoiceOverride(saved.minimax.voice),
         setMimoQuickReadVoiceOverride(saved.mimo.defaultVoice),
         setOpenAIQuickReadVoiceOverride(saved.openai.voice),
         clearQwenSpeedOverride(),
+        clearMinimaxSpeedOverride(),
         clearMimoSpeedOverride(),
         clearOpenAISpeedOverride(),
       ]);
@@ -251,9 +290,11 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
       await Promise.all([
         clearProviderSettingsOverrides(),
         clearQwenQuickReadVoiceOverride(),
+        clearMinimaxQuickReadVoiceOverride(),
         clearMimoQuickReadVoiceOverride(),
         clearOpenAIQuickReadVoiceOverride(),
         clearQwenSpeedOverride(),
+        clearMinimaxSpeedOverride(),
         clearMimoSpeedOverride(),
         clearOpenAISpeedOverride(),
       ]);
@@ -303,6 +344,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         info={hasOverrides ? "Quick Setup overrides are active." : "This is saved as a Quick Setup override."}
       >
         <Form.Dropdown.Item value="qwen" title="Qwen-TTS" />
+        <Form.Dropdown.Item value="minimax" title="MiniMax" />
         <Form.Dropdown.Item value="mimo" title="MiMo" />
         <Form.Dropdown.Item value="openai" title="OpenAI" />
       </Form.Dropdown>
@@ -314,6 +356,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         info={`Only ${labelProvider(activeProvider)} settings are shown below, so the form stays short in the Raycast sidebar.`}
       >
         <Form.Dropdown.Item value="qwen" title="Qwen-TTS Defaults" />
+        <Form.Dropdown.Item value="minimax" title="MiniMax Defaults" />
         <Form.Dropdown.Item value="mimo" title="MiMo Defaults" />
         <Form.Dropdown.Item value="openai" title="OpenAI Defaults" />
       </Form.Dropdown>
@@ -365,6 +408,63 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
             title="Speed"
             value={settings.qwen.playbackRate}
             onChange={(playbackRate) => updateQwen({ playbackRate })}
+          >
+            {PLAYBACK_RATE_OPTIONS.map((option) => (
+              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+            ))}
+          </Form.Dropdown>
+        </>
+      ) : null}
+
+      {activeProvider === "minimax" ? (
+        <>
+          <Form.Description title="MiniMax" text="MiniMax T2A v2 streaming synthesis with multilingual voices." />
+          <Form.Dropdown
+            id="minimaxModel"
+            title="Model"
+            value={settings.minimax.model}
+            onChange={handleMinimaxModelChange}
+          >
+            {MINIMAX_MODELS.map((model) => (
+              <Form.Dropdown.Item key={model} value={model} title={MINIMAX_MODEL_LABELS[model]} />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="minimaxVoice"
+            title="Voice"
+            value={settings.minimax.voice}
+            onChange={(voice) => updateMinimax({ voice })}
+          >
+            {MINIMAX_VOICE_CATEGORIES.map((category) => {
+              const voices = getMinimaxVoicesByCategory(category, settings.minimax.model);
+              if (voices.length === 0) return null;
+              return (
+                <Form.Dropdown.Section key={category} title={category}>
+                  {voices.map((voice) => (
+                    <Form.Dropdown.Item key={voice.id} value={voice.id} title={voice.name} />
+                  ))}
+                </Form.Dropdown.Section>
+              );
+            })}
+            {minimaxVoices.length === 0 ? (
+              <Form.Dropdown.Item value="Chinese (Mandarin)_Radio_Host" title="电台男主播" />
+            ) : null}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="minimaxLanguageBoost"
+            title="Language Boost"
+            value={settings.minimax.languageBoost}
+            onChange={(languageBoost) => updateMinimax({ languageBoost: languageBoost as MinimaxLanguageBoost })}
+          >
+            {MINIMAX_LANGUAGE_BOOSTS.map((boost) => (
+              <Form.Dropdown.Item key={boost} value={boost} title={MINIMAX_LANGUAGE_BOOST_LABELS[boost]} />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="minimaxPlaybackRate"
+            title="Speed"
+            value={settings.minimax.playbackRate}
+            onChange={(playbackRate) => updateMinimax({ playbackRate })}
           >
             {PLAYBACK_RATE_OPTIONS.map((option) => (
               <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
@@ -490,6 +590,38 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
 
       {showAdvanced ? (
         <>
+          {activeProvider === "minimax" ? (
+            <>
+              <Form.Separator />
+              <Form.Description
+                title="MiniMax Advanced"
+                text="Optional emotion tag, English normalization, and custom endpoint."
+              />
+              <Form.TextField
+                id="minimaxEmotion"
+                title="Emotion"
+                value={settings.minimax.emotion ?? ""}
+                placeholder="Optional, e.g. happy, sad, neutral"
+                onChange={(emotion) => updateMinimax({ emotion })}
+              />
+              <Form.Checkbox
+                id="minimaxEnglishNormalization"
+                title="English Normalization"
+                label="Normalize English numerals and abbreviations before synthesis"
+                value={settings.minimax.englishNormalization}
+                onChange={(englishNormalization) => updateMinimax({ englishNormalization })}
+              />
+              <Form.TextField
+                id="minimaxBaseUrl"
+                title="Base URL"
+                value={settings.minimax.baseUrl}
+                placeholder="https://api.minimaxi.com"
+                onChange={(baseUrl) => updateMinimax({ baseUrl })}
+                info="MiniMax T2A v2 API host. Default works for international users; switch to api.minimax.chat for China-only deployments."
+              />
+            </>
+          ) : null}
+
           {activeProvider === "mimo" ? (
             <>
               <Form.Separator />
@@ -594,12 +726,13 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
 }
 
 function toProvider(value: string): TTSProvider {
-  if (value === "qwen" || value === "mimo" || value === "openai") return value;
+  if (value === "qwen" || value === "minimax" || value === "mimo" || value === "openai") return value;
   return "qwen";
 }
 
 function labelProvider(provider: TTSProvider): string {
   if (provider === "qwen") return "Qwen-TTS";
+  if (provider === "minimax") return "MiniMax";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
   return "Qwen-TTS";

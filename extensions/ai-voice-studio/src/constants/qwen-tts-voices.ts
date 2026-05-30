@@ -528,6 +528,60 @@ export const VOICES: VoiceConfig[] = [
 
 export const VOICE_CATEGORIES = ["Recommended", "Narration", "Character", "International", "Dialect"] as const;
 
+export interface VoicePick {
+  readonly voiceId: string;
+  readonly purpose: string;
+}
+
+/**
+ * Curated voices pinned in a "My Picks" section at the top of the Read with Voice command.
+ * Order here is display order; `purpose` is shown as a short accessory tag.
+ * All picks live on qwen3-tts-flash (the default model). Qwen has no dedicated British (英音)
+ * persona, so the 英音 slot uses a general English-capable voice — accent is not guaranteed.
+ * Picks unavailable on the active model are filtered out by getReadWithVoicePicks.
+ */
+export const READ_WITH_VOICE_PICKS: readonly VoicePick[] = [
+  { voiceId: "Cherry", purpose: "普通话" },
+  { voiceId: "Serena", purpose: "普通话" },
+  { voiceId: "Ethan", purpose: "普通话" },
+  { voiceId: "Neil", purpose: "普通话" },
+  { voiceId: "Elias", purpose: "普通话" },
+  { voiceId: "Jennifer", purpose: "美音" },
+  { voiceId: "Aiden", purpose: "美音" },
+  { voiceId: "Andre", purpose: "英音(通用)" },
+  { voiceId: "Lenn", purpose: "德语" },
+  { voiceId: "Rocky", purpose: "粤语" },
+  { voiceId: "Kiki", purpose: "粤语" },
+  { voiceId: "Peter", purpose: "天津" },
+  { voiceId: "Roy", purpose: "闽南" },
+];
+
+export interface ResolvedVoicePick {
+  voice: VoiceConfig;
+  purpose: string;
+}
+
+export function getReadWithVoicePicks(model: QwenTTSModel): ResolvedVoicePick[] {
+  return READ_WITH_VOICE_PICKS.flatMap((pick) => {
+    const voice = getVoiceById(pick.voiceId);
+    if (!voice || !voice.models.includes(model)) return [];
+    return [{ voice, purpose: pick.purpose }];
+  });
+}
+
+/**
+ * Curated picks that exist but are unavailable on the given model (e.g. the Minnan/Tianjin
+ * dialect personas are exclusive to qwen3-tts-flash). Used to surface a hint instead of
+ * letting these voices silently vanish when a less capable model is active.
+ */
+export function getHiddenReadWithVoicePicks(model: QwenTTSModel): ResolvedVoicePick[] {
+  return READ_WITH_VOICE_PICKS.flatMap((pick) => {
+    const voice = getVoiceById(pick.voiceId);
+    if (!voice || voice.models.includes(model)) return [];
+    return [{ voice, purpose: pick.purpose }];
+  });
+}
+
 export function getModelConfig(model: QwenTTSModel): QwenModelConfig {
   return QWEN_MODEL_CONFIGS.find((config) => config.id === model) ?? QWEN_MODEL_CONFIGS[0];
 }

@@ -3,6 +3,7 @@ import { getDefaultProvider } from "./utils/provider";
 
 const PROVIDER_COMMANDS = {
   qwen: "qwen-quick-read",
+  minimax: "minimax-quick-read",
   mimo: "mimo-quick-read",
   openai: "openai-quick-read",
 } as const;

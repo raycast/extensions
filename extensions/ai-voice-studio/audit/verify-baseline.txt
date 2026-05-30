@@ -1,0 +1,166 @@
+
+> ai-voice-studio@1.0.0 verify
+> npm run verify:runtime && npm run verify:provider-settings && npm run verify:provider-env && npm run verify:fast-paths && npm run verify:provider-contracts && npm run verify:test-voice-setup && npm run verify:live-smoke-guardrails && npm run verify:pipeline-lookahead && npm run verify:audio-player && npm run build && npm run lint && tsc --noEmit && npm audit && node scripts/write-verification-evidence.mjs local-verify
+
+
+> ai-voice-studio@1.0.0 verify:runtime
+> node scripts/verify-runtime.mjs
+
+{
+  "commands": 20,
+  "extensionPreferences": 3,
+  "checked": [
+    "manifest entry points",
+    "provider preference split",
+    "one-page setup override",
+    "shared provider routing",
+    "provider API contracts",
+    "provider env safety",
+    "live smoke guardrails",
+    "shared speed command fallback",
+    "Qwen-TTS/MiMo/OpenAI lookahead playback",
+    "chunk size limits"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:provider-settings
+> node scripts/verify-provider-settings.mjs
+
+{
+  "checked": [
+    "invalid provider preferences fall back safely",
+    "legacy command preferences are ignored",
+    "text override fields are trimmed",
+    "quick setup overrides take precedence and can reset to defaults"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:provider-env
+> node scripts/verify-provider-env.mjs
+
+{
+  "checked": [
+    "provider env helper loads allowed .env keys",
+    "provider env helper ignores live flag",
+    "provider env helper sanitizes secrets",
+    "live env verifier does not print key values"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:fast-paths
+> node scripts/verify-fast-paths.mjs
+
+{
+  "checked": [
+    "Qwen-TTS chunk limits",
+    "Qwen-TTS voice language search keywords",
+    "Qwen-TTS default voice model coverage",
+    "MiMo byte chunk limits",
+    "OpenAI chunk limits",
+    "Qwen-TTS speed clamp/storage",
+    "MiMo speed parsing/storage",
+    "OpenAI speed parsing/storage"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:provider-contracts
+> node scripts/verify-provider-contracts.mjs
+
+{
+  "checked": [
+    "Focused setup overrides flow into provider option builders",
+    "Qwen-TTS request/audio-data/audio-url/error/cancel contract",
+    "MiMo request/base64/error/cancel contract",
+    "OpenAI request/binary decode/error/cancel contract"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:test-voice-setup
+> node scripts/verify-test-voice-setup.mjs
+
+{
+  "checked": [
+    "Test Voice Setup routes to the selected default provider",
+    "Test Voice Setup plays returned provider audio with the expected format and rate",
+    "Test Voice Setup reports user stops without a false success",
+    "Test Voice Setup surfaces API-key failures with the API-key preferences action",
+    "Test Voice Setup reports slow provider/playback latency without a false failure"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:live-smoke-guardrails
+> node scripts/verify-live-smoke-guardrails.mjs
+
+{
+  "checked": [
+    "live smoke uses focused setup overrides for Qwen-TTS, MiMo, and OpenAI",
+    "live smoke reports synth and total latency for all providers without playback",
+    "live smoke playback uses shared AudioPlayer rate path",
+    "live smoke reports playback latency when playback is enabled",
+    "live smoke sanitizes provider key output",
+    "live smoke sanitizes provider key output on failures",
+    "live smoke fails when shared AudioPlayer playback exceeds the latency limit",
+    "live smoke cleans temp audio after playback failures",
+    "live smoke sends expected provider API requests"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:pipeline-lookahead
+> node scripts/verify-pipeline-lookahead.mjs
+
+{
+  "checked": [
+    "Qwen-TTS lookahead starts next synthesis before playback",
+    "Qwen-TTS lookahead stops before playing the next chunk",
+    "Qwen-TTS stop requests abort in-flight synthesis",
+    "MiMo lookahead starts next synthesis before playback",
+    "MiMo lookahead stops before playing the next chunk",
+    "MiMo stop requests abort in-flight synthesis",
+    "OpenAI lookahead starts next synthesis before playback",
+    "OpenAI lookahead stops before playing the next chunk",
+    "OpenAI stop requests abort in-flight synthesis",
+    "Shared chunk engine resolves next chunk options before prefetch"
+  ]
+}
+
+> ai-voice-studio@1.0.0 verify:audio-player
+> node scripts/verify-audio-player.mjs
+
+{
+  "checked": [
+    "afplay rate arguments",
+    "temporary audio cleanup",
+    "PID cleanup",
+    "empty audio rejection",
+    "stale stop marker rejection path",
+    "fresh stop marker graceful stop path",
+    "idle player cleanup preserves foreign PID files"
+  ]
+}
+
+> ai-voice-studio@1.0.0 prebuild
+> node scripts/clean-build-output.mjs
+
+
+> ai-voice-studio@1.0.0 build
+> ray build -e dist -o dist
+
+info  - entry points ["src/quick-read.tsx","src/setup-voice-defaults.tsx","src/test-voice-setup.tsx","src/qwen-quick-read.tsx","src/qwen-read-with-voice.tsx","src/qwen-select-voice.tsx","src/tts-studio.tsx","src/mimo-quick-read.tsx","src/mimo-read-with-voice.tsx","src/mimo-select-voice.tsx","src/openai-tts-studio.tsx","src/openai-quick-read.tsx","src/openai-read-with-voice.tsx","src/openai-select-voice.tsx","src/stop-reading.tsx","src/speed-up-reading.tsx","src/slow-down-reading.tsx","src/qwen-status.tsx","src/mimo-status.tsx","src/openai-status.tsx"]
+info  - compiled entry points
+info  - generated extension's TypeScript definitions
+info  - checked TypeScript
+ready  - built extension successfully
+
+> ai-voice-studio@1.0.0 lint
+> ray lint
+
+ready  - validate package.json file
+ready  - validate extension icons
+ready  - validate extension metadata
+ready  - run ESLint
+ready  - run Prettier 3.8.1
+found 0 vulnerabilities
+{
+  "evidence": "/Users/xianweizhang/Projects/raycast-ai-voice-studio/.verify/local-verify.json",
+  "recorded": "local-verify"
+}

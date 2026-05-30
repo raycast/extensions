@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-voice-studio",
   "title": "AI Voice Studio",
-  "description": "Read and generate speech from Raycast with Alibaba Cloud Qwen-TTS, Xiaomi MiMo, and OpenAI voices, speed control, and focused provider defaults.",
+  "description": "Read and generate speech from Raycast with Alibaba Cloud Qwen-TTS, MiniMax, Xiaomi MiMo, and OpenAI voices, speed control, and focused provider defaults.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -60,6 +60,30 @@
       "title": "Set Qwen-TTS Quick Read Voice",
       "subtitle": "Qwen-TTS",
       "description": "Choose and preview the Qwen-TTS voice used by Quick Read when Qwen-TTS is the default provider.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "minimax-quick-read",
+      "title": "Quick Read with MiniMax",
+      "subtitle": "MiniMax",
+      "description": "Read selected or clipboard text with your default MiniMax voice via streaming T2A WebSocket. Run again to stop playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "minimax-read-with-voice",
+      "title": "Read with MiniMax Voice",
+      "subtitle": "MiniMax",
+      "description": "Browse MiniMax voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "minimax-select-voice",
+      "title": "Set MiniMax Quick Read Voice",
+      "subtitle": "MiniMax",
+      "description": "Choose and preview the MiniMax voice used by Quick Read when MiniMax is the default provider.",
       "icon": "command-icon.png",
       "mode": "view"
     },
@@ -161,6 +185,15 @@
       "interval": "1m"
     },
     {
+      "name": "minimax-status",
+      "title": "MiniMax Reading Status",
+      "subtitle": "MiniMax",
+      "description": "Show MiniMax playback status, speed, and controls in the menu bar.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
       "name": "mimo-status",
       "title": "MiMo Reading Status",
       "subtitle": "MiMo",
@@ -187,6 +220,14 @@
       "title": "MiMo Token Plan API Key",
       "description": "MiMo Token Plan key.",
       "placeholder": "tp-..."
+    },
+    {
+      "name": "minimaxApiKey",
+      "type": "password",
+      "required": false,
+      "title": "MiniMax API Key",
+      "description": "MiniMax Open Platform API key for T2A v2 (HTTP + WebSocket).",
+      "placeholder": "Bearer eyJ..."
     },
     {
       "name": "openaiApiKey",
@@ -245,7 +286,8 @@
     "voice",
     "qwen",
     "qwen-tts",
-    "qwen3-tts-flash",
+    "minimax",
+    "speech-02-hd",
     "mimo",
     "openai",
     "gpt-4o-mini-tts",

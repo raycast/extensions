@@ -12,6 +12,13 @@ const PROVIDER_ENV_NAMES = [
   "QWEN_INSTRUCTIONS",
   "QWEN_OPTIMIZE_INSTRUCTIONS",
   "QWEN_BASE_URL",
+  "MINIMAX_API_KEY",
+  "MINIMAX_MODEL",
+  "MINIMAX_VOICE",
+  "MINIMAX_LANGUAGE_BOOST",
+  "MINIMAX_PLAYBACK_RATE",
+  "MINIMAX_EMOTION",
+  "MINIMAX_BASE_URL",
   "MIMO_API_KEY",
   "MIMO_TOKEN_PLAN_BASE_URL",
   "MIMO_MODEL",
@@ -28,6 +35,7 @@ const PROVIDER_ENV_NAMES = [
 
 const SECRET_ENV_NAMES = [
   "DASHSCOPE_API_KEY",
+  "MINIMAX_API_KEY",
   "MIMO_API_KEY",
   "OPENAI_API_KEY",
 ];
@@ -51,6 +59,12 @@ export function summarizeProviderKeyStatus(loaded = {}) {
       status: process.env.DASHSCOPE_API_KEY ? "ready" : "missing",
       keys: {
         apiKey: keyStatus("DASHSCOPE_API_KEY", loaded),
+      },
+    },
+    minimax: {
+      status: process.env.MINIMAX_API_KEY ? "ready" : "missing",
+      keys: {
+        apiKey: keyStatus("MINIMAX_API_KEY", loaded),
       },
     },
     mimo: {

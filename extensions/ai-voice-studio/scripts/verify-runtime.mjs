@@ -36,6 +36,10 @@ for (const name of [
   "qwen-read-with-voice",
   "qwen-select-voice",
   "qwen-status",
+  "minimax-quick-read",
+  "minimax-read-with-voice",
+  "minimax-select-voice",
+  "minimax-status",
   "mimo-quick-read",
   "mimo-read-with-voice",
   "mimo-select-voice",
@@ -82,12 +86,12 @@ for (const scriptName of [
 }
 
 const extensionPrefs = new Set(pkg.preferences.map((pref) => pref.name));
-for (const name of ["mimoApiKey", "openaiApiKey", "dashscopeApiKey"]) {
+for (const name of ["mimoApiKey", "minimaxApiKey", "openaiApiKey", "dashscopeApiKey"]) {
   check(extensionPrefs.has(name), `Missing extension preference ${name}`);
 }
 check(!extensionPrefs.has("defaultProvider"), "Default provider should live in Setup Voice Defaults, not the sidebar");
 check(!extensionPrefs.has("mimoTokenPlanBaseUrl"), "MiMo base URL should live in focused setup, not the sidebar");
-check(pkg.preferences.length <= 3, "Extension-level preferences should stay focused on API keys");
+check(pkg.preferences.length <= 4, "Extension-level preferences should stay focused on API keys");
 
 const providerPreferenceNames = new Set([
   "qwenModel",
@@ -96,6 +100,12 @@ const providerPreferenceNames = new Set([
   "qwenPlaybackRate",
   "qwenInstructions",
   "qwenBaseUrl",
+  "minimaxModel",
+  "minimaxVoice",
+  "minimaxLanguageBoost",
+  "minimaxPlaybackRate",
+  "minimaxEmotion",
+  "minimaxBaseUrl",
   "mimoModel",
   "mimoDefaultVoice",
   "mimoSpeechRate",
@@ -116,6 +126,7 @@ for (const entry of pkg.commands) {
 
 const quickRead = read("src/quick-read.tsx");
 check(quickRead.includes('qwen: "qwen-quick-read"'), "Shared Quick Read should launch Qwen-TTS command");
+check(quickRead.includes('minimax: "minimax-quick-read"'), "Shared Quick Read should launch MiniMax command");
 check(quickRead.includes('mimo: "mimo-quick-read"'), "Shared Quick Read should launch MiMo command");
 check(quickRead.includes('openai: "openai-quick-read"'), "Shared Quick Read should launch OpenAI command");
 
@@ -123,32 +134,38 @@ const providerSettings = read("src/utils/provider-settings.ts");
 check(
   providerSettings.includes('defaultProvider: "qwen"') &&
     providerSettings.includes("getQwenSettings") &&
+    providerSettings.includes("getMinimaxSettings") &&
     providerSettings.includes("getMimoSettings") &&
     providerSettings.includes("getOpenAISettings") &&
     providerSettings.includes("normalizeQwenRegion") &&
-    providerSettings.includes("normalizeQwenLanguageType"),
+    providerSettings.includes("normalizeQwenLanguageType") &&
+    providerSettings.includes("normalizeMinimaxLanguageBoost"),
   "Provider settings should default to Qwen-TTS and expose all current provider setup blocks",
 );
 
 const providerSetupForm = read("src/components/provider-setup-form.tsx");
 check(
-    providerSetupForm.includes("activeProvider === \"qwen\"") &&
+  providerSetupForm.includes('activeProvider === "qwen"') &&
+    providerSetupForm.includes('activeProvider === "minimax"') &&
     providerSetupForm.includes("qwenRegion") &&
     providerSetupForm.includes("qwenLanguageType") &&
     providerSetupForm.includes("qwenInstructions") &&
     providerSetupForm.includes("qwenOptimizeInstructions") &&
-    providerSetupForm.includes("Form.Description title=\"Qwen-TTS\"") &&
-    providerSetupForm.includes("Form.Description title=\"MiMo\"") &&
-    providerSetupForm.includes("Form.Description title=\"OpenAI\"") &&
+    providerSetupForm.includes("minimaxLanguageBoost") &&
+    providerSetupForm.includes("minimaxBaseUrl") &&
+    providerSetupForm.includes('Form.Description title="Qwen-TTS"') &&
+    providerSetupForm.includes('Form.Description title="MiniMax"') &&
+    providerSetupForm.includes('Form.Description title="MiMo"') &&
+    providerSetupForm.includes('Form.Description title="OpenAI"') &&
     providerSetupForm.includes("test-voice-setup"),
-  "Provider setup form should expose focused Qwen-TTS, MiMo, and OpenAI panels",
-);
-check(
-  !providerSetupForm.includes(`<Form.Dropdown.Item value="${["mini", "max"].join("")}"`),
-  "Provider setup dropdowns should only expose active providers",
+  "Provider setup form should expose focused Qwen-TTS, MiniMax, MiMo, and OpenAI panels",
 );
 
 check(read("src/qwen-read-with-voice.tsx").includes('provider="qwen"'), "Qwen command should focus Qwen setup");
+check(
+  read("src/minimax-read-with-voice.tsx").includes('provider="minimax"'),
+  "MiniMax command should focus MiniMax setup",
+);
 check(read("src/tts-studio.tsx").includes('provider="mimo"'), "MiMo command should focus MiMo setup");
 check(read("src/openai-read-with-voice.tsx").includes('provider="openai"'), "OpenAI command should focus OpenAI setup");
 
@@ -156,6 +173,7 @@ const testVoiceSetup = read("src/test-voice-setup.tsx");
 check(testVoiceSetup.includes("getDefaultProvider()"), "Voice setup test should use the current default provider");
 check(
   testVoiceSetup.includes("synthesizeQwen") &&
+    testVoiceSetup.includes("synthesizeMinimax") &&
     testVoiceSetup.includes("synthesizeMimo") &&
     testVoiceSetup.includes("synthesizeOpenAI"),
   "Voice setup test should exercise real provider synthesis paths",
@@ -166,6 +184,8 @@ check(testVoiceSetup.includes("synthMs") && testVoiceSetup.includes("bytes"), "V
 const stopReading = read("src/stop-reading.tsx");
 check(stopReading.includes("requestQwenPlaybackStop"), "Stop Reading should request Qwen-TTS stop");
 check(stopReading.includes("getQwenNowPlaying"), "Stop Reading should inspect Qwen-TTS live playback state");
+check(stopReading.includes("requestMinimaxPlaybackStop"), "Stop Reading should request MiniMax stop");
+check(stopReading.includes("getMinimaxNowPlaying"), "Stop Reading should inspect MiniMax live playback state");
 
 const audioPlayer = read("src/utils/audio-player.ts");
 check(audioPlayer.includes('join(tmpdir(), "ai-voice-studio.pid")'), "PID file should be scoped to ai-voice-studio");
@@ -184,6 +204,27 @@ check(
     qwenApi.includes("signal?.addEventListener(\"abort\""),
   "Qwen-TTS API should use DashScope generation endpoint, language_type, URL fallback, shared key, and cancellation",
 );
+
+const minimaxApi = read("src/api/minimax-tts.ts");
+check(minimaxApi.includes("/v1/t2a_v2"), "MiniMax TTS should call the T2A v2 endpoint");
+check(
+  minimaxApi.includes('Authorization: `Bearer ${apiKey}`'),
+  "MiniMax TTS should send bearer auth",
+);
+check(minimaxApi.includes("minimaxApiKey"), "MiniMax TTS should read its key from focused preferences");
+check(minimaxApi.includes('signal?.addEventListener("abort"'), "MiniMax TTS should support cancellation");
+check(minimaxApi.includes("voice_setting"), "MiniMax TTS should send the voice_setting block");
+check(minimaxApi.includes("audio_setting"), "MiniMax TTS should send the audio_setting block");
+check(minimaxApi.includes("hex"), "MiniMax TTS should decode the hex-encoded audio payload");
+
+const minimaxRealtime = read("src/api/minimax-tts-realtime.ts");
+check(minimaxRealtime.includes("/ws/v1/t2a_v2"), "MiniMax realtime should hit the t2a_v2 WebSocket endpoint");
+check(minimaxRealtime.includes("task_start"), "MiniMax realtime should send task_start");
+check(minimaxRealtime.includes("task_continue"), "MiniMax realtime should send task_continue");
+check(minimaxRealtime.includes("task_finish"), "MiniMax realtime should send task_finish");
+check(minimaxRealtime.includes("connected_success"), "MiniMax realtime should wait for connected_success");
+check(minimaxRealtime.includes("task_continued"), "MiniMax realtime should process audio in task_continued events");
+check(minimaxRealtime.includes('Authorization: `Bearer ${apiKey}`'), "MiniMax realtime should send bearer auth");
 
 const mimoApi = read("src/api/mimo-tts.ts");
 check(mimoApi.includes("/chat/completions"), "MiMo TTS should call chat/completions");
@@ -220,6 +261,12 @@ for (const file of ["src/qwen-speed-up.tsx", "src/qwen-speed-down.tsx"]) {
   check(source.includes("SPEED_NORMAL"), `${file} should use a stable normal-speed fallback`);
 }
 
+for (const file of ["src/minimax-speed-up.tsx", "src/minimax-speed-down.tsx"]) {
+  const source = read(file);
+  check(!source.includes("getMinimaxSettings"), `${file} should not read isolated MiniMax command preferences`);
+  check(source.includes("SPEED_NORMAL"), `${file} should use a stable normal-speed fallback`);
+}
+
 for (const file of ["src/mimo-speed-up.tsx", "src/mimo-speed-down.tsx"]) {
   const source = read(file);
   check(!source.includes("getMimoSettings"), `${file} should not read isolated MiMo command preferences`);
@@ -235,6 +282,10 @@ for (const file of ["src/openai-speed-up.tsx", "src/openai-speed-down.tsx"]) {
 check(
   read("src/utils/qwen-text-chunker.ts").includes("QWEN_TEXT_CHUNK_LIMIT"),
   "Qwen-TTS chunks should respect char budget",
+);
+check(
+  read("src/utils/minimax-text-chunker.ts").includes("MINIMAX_TEXT_CHUNK_LIMIT"),
+  "MiniMax chunks should respect char budget",
 );
 check(read("src/utils/mimo-text-chunker.ts").includes("const MAX_BYTES = 4096"), "MiMo chunks should respect byte budget");
 check(read("src/utils/openai-text-chunker.ts").includes("const MAX_CHARS = 1800"), "OpenAI chunks should respect char budget");

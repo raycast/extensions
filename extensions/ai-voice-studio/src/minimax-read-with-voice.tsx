@@ -11,22 +11,19 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsAsync, getActiveModelAsync, getModelLabel } from "./api/qwen-tts";
-import type { QwenTTSModel, VoiceConfig } from "./api/qwen-tts-types";
+import { buildOptionsAsync, getActiveModelAsync, getModelLabel } from "./api/minimax-tts";
+import type { VoiceConfig } from "./api/minimax-tts-types";
 import {
   DEFAULT_MODEL,
-  LANGUAGE_TYPE_LABELS,
+  LANGUAGE_BOOST_LABELS,
   MODEL_LABELS,
-  QWEN_MODELS,
   VOICE_CATEGORIES,
-  getHiddenReadWithVoicePicks,
-  getReadWithVoicePicks,
   getVoiceSearchKeywords,
   getVoicesByCategory,
-} from "./constants/qwen-tts-voices";
+} from "./constants/minimax-voices";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
 import { AudioPlayer } from "./utils/audio-player";
-import { showTTSFailure } from "./utils/qwen-feedback";
+import { showTTSFailure } from "./utils/minimax-feedback";
 import {
   SPEED_STEP,
   clearNowPlaying,
@@ -40,18 +37,17 @@ import {
   requestPlaybackStop,
   setNowPlaying,
   setSpeedOverride,
-} from "./utils/qwen-playback-state";
-import { playChunksWithLookahead } from "./utils/qwen-pipelined-reading";
-import { chunkText } from "./utils/qwen-text-chunker";
-import { getQwenSettings, setActiveQwenModel } from "./utils/provider-settings";
-import { dropQuickReadVoiceOverrideIfInvalid } from "./utils/qwen-voice-preferences";
+} from "./utils/minimax-playback-state";
+import { playChunksWithLookahead } from "./utils/minimax-pipelined-reading";
+import { chunkText } from "./utils/minimax-text-chunker";
+import { getMinimaxSettings } from "./utils/provider-settings";
 
 type SelectionSource = "selection" | "clipboard" | "none";
 
 export default function ReadWithVoice() {
   const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
   const [defaultPlaybackRate, setDefaultPlaybackRate] = useState("1");
-  const [languageType, setLanguageType] = useState<keyof typeof LANGUAGE_TYPE_LABELS>("Auto");
+  const [languageBoost, setLanguageBoost] = useState<keyof typeof LANGUAGE_BOOST_LABELS>("auto");
   const [selectedText, setSelectedText] = useState("");
   const [selectionSource, setSelectionSource] = useState<SelectionSource>("none");
   const [isLoading, setIsLoading] = useState(false);
@@ -71,45 +67,6 @@ export default function ReadWithVoice() {
       }),
     })).filter((item) => item.voices.length > 0);
   }, [searchText, currentModel]);
-
-  const pinnedPicks = useMemo(() => {
-    const searchLower = searchText.trim().toLowerCase();
-
-    return getReadWithVoicePicks(currentModel).filter(({ voice, purpose }) => {
-      if (!searchLower) return true;
-      if (purpose.toLowerCase().includes(searchLower)) return true;
-      return getVoiceSearchKeywords(voice).some((value) => value.toLowerCase().includes(searchLower));
-    });
-  }, [searchText, currentModel]);
-
-  const hiddenPicks = useMemo(
-    () => (searchText.trim() ? [] : getHiddenReadWithVoicePicks(currentModel)),
-    [searchText, currentModel],
-  );
-  const hiddenPickPurposes = useMemo(
-    () => Array.from(new Set(hiddenPicks.map((pick) => pick.purpose))).join(", "),
-    [hiddenPicks],
-  );
-
-  const handleModelChange = useCallback(
-    async (value: string) => {
-      const nextModel = value as QwenTTSModel;
-      if (nextModel === currentModel) return;
-      try {
-        const qwen = await setActiveQwenModel(nextModel);
-        await dropQuickReadVoiceOverrideIfInvalid(qwen.model);
-        setCurrentModel(qwen.model);
-        await showToast({ style: Toast.Style.Success, title: `Model: ${MODEL_LABELS[qwen.model]}` });
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Could not switch model",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
-    },
-    [currentModel],
-  );
 
   const refreshSelection = useCallback(async (silent = false): Promise<void> => {
     const text = await getSelectedText().catch(() => "");
@@ -138,10 +95,10 @@ export default function ReadWithVoice() {
     getActiveModelAsync()
       .then(setCurrentModel)
       .catch(() => undefined);
-    getQwenSettings()
+    getMinimaxSettings()
       .then((settings) => {
         setDefaultPlaybackRate(settings.playbackRate);
-        setLanguageType(settings.languageType);
+        setLanguageBoost(settings.languageBoost);
       })
       .catch(() => undefined);
     refreshSelection(true).catch(() => undefined);
@@ -284,7 +241,7 @@ export default function ReadWithVoice() {
 
   const effectiveRate = speed ?? parseRateString(defaultPlaybackRate);
   const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (default)" : " (override)"}`;
-  const languageLabel = LANGUAGE_TYPE_LABELS[languageType];
+  const languageLabel = LANGUAGE_BOOST_LABELS[languageBoost];
 
   const stopAction = playingVoiceId ? (
     <Action title="Stop Playback" icon={Icon.Stop} shortcut={{ modifiers: ["cmd"], key: "." }} onAction={handleStop} />
@@ -307,71 +264,18 @@ export default function ReadWithVoice() {
     </>
   );
 
-  const renderVoiceItem = (voice: VoiceConfig, options?: { keyPrefix?: string; purpose?: string }) => (
-    <List.Item
-      key={`${options?.keyPrefix ?? ""}${voice.id}`}
-      title={voice.name}
-      subtitle={voice.description}
-      icon={voiceIcon(voice)}
-      keywords={getVoiceSearchKeywords(voice)}
-      accessories={[
-        ...(options?.purpose ? [{ tag: { value: options.purpose, color: Color.Purple } }] : []),
-        ...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: Color.Blue } }] : []),
-        ...(voice.recommended ? [{ tag: { value: "Recommended", color: Color.Green } }] : []),
-      ]}
-      detail={
-        <VoiceDetail
-          voice={voice}
-          model={MODEL_LABELS[currentModel]}
-          selectedText={selectedText}
-          speedLabel={speedLabel}
-          languageLabel={languageLabel}
-        />
-      }
-      actions={
-        <ActionPanel>
-          <Action title="Read Text" icon={Icon.Play} onAction={() => handleRead(voice)} />
-          {stopAction}
-          {speedActions}
-          <Action
-            title="Refresh Selection"
-            icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => refreshSelection(false)}
-          />
-          <Action
-            title="Paste from Clipboard"
-            icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-            onAction={loadFromClipboard}
-          />
-          <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-          <OpenProviderSetupAction provider="qwen" />
-          <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
-        </ActionPanel>
-      }
-    />
-  );
-
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarPlaceholder="Search Qwen-TTS voices..."
+      searchBarPlaceholder="Search MiniMax voices..."
       onSearchTextChange={setSearchText}
-      navigationTitle="Read with Qwen-TTS Voice"
-      searchBarAccessory={
-        <List.Dropdown tooltip="Qwen Model" value={currentModel} onChange={handleModelChange} storeValue={false}>
-          {QWEN_MODELS.map((model) => (
-            <List.Dropdown.Item key={model} value={model} title={MODEL_LABELS[model]} />
-          ))}
-        </List.Dropdown>
-      }
+      navigationTitle="Read with MiniMax Voice"
     >
       <List.EmptyView
         icon={Icon.SpeakerOff}
         title="No voices found"
-        description={`Try another search term, or switch the model with the dropdown in the top-right. Current model: ${MODEL_LABELS[currentModel]}`}
+        description={`Try another search term or change the model in Setup Voice Defaults. Current model: ${MODEL_LABELS[currentModel]}`}
       />
       <List.Section title="Current Text">
         <List.Item
@@ -407,51 +311,59 @@ export default function ReadWithVoice() {
               />
               {stopAction}
               {speedActions}
-              <OpenProviderSetupAction provider="qwen" />
+              <OpenProviderSetupAction provider="minimax" />
               <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {pinnedPicks.length > 0 ? (
-        <List.Section title="★ My Picks" subtitle={`${pinnedPicks.length} voices`}>
-          {pinnedPicks.map(({ voice, purpose }) => renderVoiceItem(voice, { keyPrefix: "pinned-", purpose }))}
-        </List.Section>
-      ) : null}
-
-      {hiddenPicks.length > 0 ? (
-        <List.Section title="More Picks">
-          <List.Item
-            icon={{ source: Icon.Info, tintColor: Color.Yellow }}
-            title={`${hiddenPicks.length} picks need ${MODEL_LABELS[DEFAULT_MODEL]}`}
-            subtitle={hiddenPickPurposes}
-            accessories={[{ tag: { value: "Switch model", color: Color.Yellow } }]}
-            detail={
-              <List.Item.Detail
-                markdown={`## More voices on ${MODEL_LABELS[DEFAULT_MODEL]}\n\nThese curated picks are not available on **${MODEL_LABELS[currentModel]}**:\n\n${hiddenPicks
-                  .map((pick) => `- ${pick.voice.name} · ${pick.purpose}`)
-                  .join("\n")}\n\nSwitch the model with the top-right dropdown (or the action below) to use them.`}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`Switch to ${MODEL_LABELS[DEFAULT_MODEL]}`}
-                  icon={Icon.Gauge}
-                  onAction={() => handleModelChange(DEFAULT_MODEL)}
-                />
-                <OpenProviderSetupAction provider="qwen" />
-                <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      ) : null}
-
       {filteredCategories.map(({ category, voices }) => (
         <List.Section key={category} title={category}>
-          {voices.map((voice) => renderVoiceItem(voice))}
+          {voices.map((voice) => (
+            <List.Item
+              key={voice.id}
+              title={voice.name}
+              subtitle={voice.description}
+              icon={voiceIcon(voice)}
+              keywords={getVoiceSearchKeywords(voice)}
+              accessories={[
+                ...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: Color.Blue } }] : []),
+                ...(voice.recommended ? [{ tag: { value: "Recommended", color: Color.Green } }] : []),
+              ]}
+              detail={
+                <VoiceDetail
+                  voice={voice}
+                  model={MODEL_LABELS[currentModel]}
+                  selectedText={selectedText}
+                  speedLabel={speedLabel}
+                  languageLabel={languageLabel}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action title="Read Text" icon={Icon.Play} onAction={() => handleRead(voice)} />
+                  {stopAction}
+                  {speedActions}
+                  <Action
+                    title="Refresh Selection"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => refreshSelection(false)}
+                  />
+                  <Action
+                    title="Paste from Clipboard"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    onAction={loadFromClipboard}
+                  />
+                  <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
+                  <OpenProviderSetupAction provider="minimax" />
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+                </ActionPanel>
+              }
+            />
+          ))}
         </List.Section>
       ))}
     </List>
@@ -486,7 +398,7 @@ function SelectionDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
-          <List.Item.Detail.Metadata.Label title="Language" text={languageLabel} />
+          <List.Item.Detail.Metadata.Label title="Language Boost" text={languageLabel} />
           <List.Item.Detail.Metadata.Label title="Source" text={formatSource(source)} />
           <List.Item.Detail.Metadata.Label title="Length" text={text ? `${text.length} characters` : "None"} />
           <List.Item.Detail.Metadata.Label title="Speed" text={speedLabel} />
@@ -511,13 +423,13 @@ function VoiceDetail({
 }) {
   return (
     <List.Item.Detail
-      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nChoose this voice to read the current text with Alibaba Cloud Qwen-TTS.`}
+      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nChoose this voice to read the current text with MiniMax T2A v2.`}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
           <List.Item.Detail.Metadata.Label title="Available On" text={formatVoiceModels(voice)} />
-          <List.Item.Detail.Metadata.Label title="Language" text={languageLabel} />
+          <List.Item.Detail.Metadata.Label title="Language Boost" text={languageLabel} />
           <List.Item.Detail.Metadata.Label title="Speed" text={speedLabel} />
           <List.Item.Detail.Metadata.Label
             title="Selected Text"
