@@ -15,12 +15,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 const RAYCAST_REQUESTS_PATH = "/api/raycast/requests";
 
-type Preferences = {
-  baseUrl?: string;
-  apiKey: string;
-  requestLimit?: string;
-};
-
 type Project = {
   id: string;
   name: string;
