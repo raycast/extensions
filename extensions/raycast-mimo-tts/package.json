@@ -81,7 +81,7 @@
     },
     {
       "name": "speed-up-reading",
-      "title": "Speed up Reading",
+      "title": "Speed Up Reading",
       "subtitle": "MiMo TTS",
       "description": "Increase reading speed by 0.25× for the next playback.",
       "icon": "command-icon.png",
