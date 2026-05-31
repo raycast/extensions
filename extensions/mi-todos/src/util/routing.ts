@@ -33,9 +33,10 @@ export function appendToProject(mitodosDir: string, projectName: string, task: s
   const filepath = path.join(dir, `${projectName}.md`);
 
   if (!fileExists(filepath)) {
-    const content = PROJECT_FILE_TEMPLATE
-      .replace("{{name}}", projectName)
-      .replace("{{date}}", todayDate());
+    const content = PROJECT_FILE_TEMPLATE.replace("{{name}}", projectName).replace(
+      "{{date}}",
+      todayDate(),
+    );
     writeFile(filepath, content);
   }
 

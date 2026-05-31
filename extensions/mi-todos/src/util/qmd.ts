@@ -57,7 +57,10 @@ export function searchMitodos(mitodosDir: string, query: string, limit = 20): Qm
         if (idx >= 0) {
           const start = Math.max(0, idx - 40);
           const end = Math.min(content.length, idx + firstWord.length + 100);
-          snippet = (start > 0 ? "…" : "") + content.slice(start, end).replace(/\n/g, " ").trim() + (end < content.length ? "…" : "");
+          snippet =
+            (start > 0 ? "…" : "") +
+            content.slice(start, end).replace(/\n/g, " ").trim() +
+            (end < content.length ? "…" : "");
         }
       } catch {
         snippet = `(match: ${words[0]})`;
@@ -87,8 +90,7 @@ export function searchWikiWithQmd(wikiPath: string, query: string, limit = 10): 
     if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed
         .filter(
-          (r: QmdResult) =>
-            r.path && (r.path.startsWith(resolved) || r.path.includes("/wiki/")),
+          (r: QmdResult) => r.path && (r.path.startsWith(resolved) || r.path.includes("/wiki/")),
         )
         .slice(0, limit);
     }

@@ -5,10 +5,10 @@ interface Preferences {
   mitodosDir: string;
 }
 
-export default async function Command(props: { arguments: { name: string } }) {
+export default async function Command(props: { arguments?: { name?: string } }) {
   const prefs = getPreferenceValues<Preferences>();
   const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
-  const name = props.arguments.name.trim();
+  const name = (props.arguments?.name ?? "").trim();
 
   if (!name) {
     await showToast({ style: Toast.Style.Failure, title: "Project name cannot be empty" });
@@ -16,7 +16,7 @@ export default async function Command(props: { arguments: { name: string } }) {
   }
 
   try {
-    const filepath = createProjectFile(mitodosDir, name);
+    createProjectFile(mitodosDir, name);
     await showHUD(`✓ Project created: ${name}`);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
@@ -27,7 +27,11 @@ export default async function Command(props: { arguments: { name: string } }) {
         message: `mitodos/${name.toLowerCase().replace(/\s+/g, "-")}.md already exists`,
       });
     } else {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to create project", message: msg });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create project",
+        message: msg,
+      });
     }
   }
 }

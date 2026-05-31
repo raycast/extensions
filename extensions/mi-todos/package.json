@@ -5,7 +5,6 @@
   "description": "Markdown-based todo manager that lives in your wiki. Quick capture, project creation, and semantic search across your knowledge base.",
   "icon": "icon.png",
   "author": "chipoto69",
-  "owner": "chipoto69",
   "categories": [
     "Productivity"
   ],

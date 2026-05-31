@@ -117,7 +117,10 @@ export function createProjectFile(mitodosDir: string, projectName: string): stri
     throw new Error(`Already exists: ${filename}`);
   }
 
-  const content = PROJECT_TEMPLATE.replace("{{name}}", projectName).replace("{{date}}", todayDate());
+  const content = PROJECT_TEMPLATE.replace("{{name}}", projectName).replace(
+    "{{date}}",
+    todayDate(),
+  );
   writeFile(filepath, content);
 
   return filepath;

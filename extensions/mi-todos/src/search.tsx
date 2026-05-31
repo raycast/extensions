@@ -44,48 +44,81 @@ function ContentDetail({ filepath, fileName }: { filepath: string; fileName: str
   );
 }
 
-function SearchResults({ query }: { query: string }) {
+export default function Command(props: { arguments?: { query?: string } }) {
+  const [searchText, setSearchText] = useState(props.arguments?.query ?? "");
   const prefs = getPreferenceValues<Preferences>();
   const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
   const wikiPath = resolvePath(expandHome(prefs.wikiPath));
   const { push } = useNavigation();
 
   const { data, isLoading } = usePromise(
-    async () => {
-      if (!query.trim()) return { todos: [] as QmdResult[], wiki: [] as QmdResult[] };
-
-      const todos = searchMitodos(mitodosDir, query);
-      const wiki = searchWikiWithQmd(wikiPath, query, 10);
-
-      return { todos, wiki };
+    async (q: string) => {
+      if (!q.trim()) return { todos: [] as QmdResult[], wiki: [] as QmdResult[] };
+      return {
+        todos: searchMitodos(mitodosDir, q),
+        wiki: searchWikiWithQmd(wikiPath, q, 10),
+      };
     },
-    [query],
+    [searchText],
   );
 
-  if (!query.trim()) {
+  if (!searchText.trim()) {
     return (
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title="Search your MiToDos"
-        description="Type to search across your tasks and notes"
-      />
+      <List
+        searchBarPlaceholder="Search your tasks..."
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        throttle
+      >
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Search your MiToDos"
+          description="Type to search across your tasks and notes"
+        />
+      </List>
     );
   }
 
   if (isLoading) {
-    return <List.EmptyView icon={Icon.CircleProgress} title="Searching..." />;
+    return (
+      <List
+        searchBarPlaceholder="Search your tasks..."
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        throttle
+      >
+        <List.EmptyView icon={Icon.CircleProgress} title="Searching..." />
+      </List>
+    );
   }
 
   const todos = data?.todos ?? [];
   const wiki = data?.wiki ?? [];
-  const total = todos.length + wiki.length;
 
-  if (total === 0) {
-    return <List.EmptyView icon={Icon.XMarkCircle} title="No results" description={`Nothing matched "${query}"`} />;
+  if (todos.length === 0 && wiki.length === 0) {
+    return (
+      <List
+        searchBarPlaceholder="Search your tasks..."
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        throttle
+      >
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="No results"
+          description={`Nothing matched "${searchText}"`}
+        />
+      </List>
+    );
   }
 
   return (
-    <>
+    <List
+      searchBarPlaceholder="Search your tasks..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      throttle
+    >
       {todos.length > 0 && (
         <List.Section title="MiToDos">
           {todos.map((r, i) => {
@@ -137,22 +170,6 @@ function SearchResults({ query }: { query: string }) {
           })}
         </List.Section>
       )}
-    </>
-  );
-}
-
-export default function Command(props: { arguments: { query?: string } }) {
-  const [searchText, setSearchText] = useState(props.arguments.query || "");
-
-  return (
-    <List
-      searchBarPlaceholder="Search your tasks..."
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      isShowingDetail={false}
-      throttle
-    >
-      <SearchResults query={searchText} />
     </List>
   );
 }

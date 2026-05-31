@@ -18,7 +18,9 @@ export default async function () {
       .filter((f) => f.endsWith(".md"))
       .map((f) => f.replace(".md", ""));
 
-    return files.length > 0 ? files : "No MiToDos files found — use mi add or mi project to get started";
+    return files.length > 0
+      ? files
+      : "No MiToDos files found — use mi add or mi project to get started";
   } catch (error) {
     return `Error listing MiToDos files: ${String(error)}`;
   }
