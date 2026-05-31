@@ -77,7 +77,12 @@ export function ActionOnArcaneWallpaper(props: {
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            const randomImage = arcaneWallpapers[Math.floor(Math.random() * arcaneWallpapers.length)];
+            const includedWallpapers = arcaneWallpapers.filter((wallpaper) => !wallpaper.exclude);
+            if (includedWallpapers.length === 0) {
+              showToast(Toast.Style.Failure, "No included wallpapers");
+              return;
+            }
+            const randomImage = includedWallpapers[Math.floor(Math.random() * includedWallpapers.length)];
             setWallpaper(randomImage, applyTo).then(() => "");
           }}
         />

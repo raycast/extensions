@@ -75,6 +75,7 @@ const parseDriveEntries = (html: string): DriveEntry[] => {
 };
 
 const isImageEntry = (entry: DriveEntry) => IMAGE_FILE_PATTERN.test(entry.title);
+const getImageFileType = (title: string) => title.match(IMAGE_FILE_PATTERN)?.[1].toLowerCase();
 
 async function fetchFolderWallpapers(
   folderId: string,
@@ -98,6 +99,7 @@ async function fetchFolderWallpapers(
     title: entry.title.replace(IMAGE_FILE_PATTERN, ""),
     category,
     url: driveDownloadUrl(entry.id),
+    fileType: getImageFileType(entry.title),
     thumbnailUrl: entry.thumbnailUrl ?? driveThumbnailUrl(entry.id),
   }));
 

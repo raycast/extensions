@@ -12,12 +12,13 @@ const withExcludeInfo = (wallpapers: ArcaneWallpaper[], excludeList: string[]) =
       title: value.title,
       category: value.category,
       url: value.url,
+      fileType: value.fileType,
       thumbnailUrl: value.thumbnailUrl,
       exclude: excludeList.includes(value.url),
     } as ArcaneWallpaperWithInfo;
   });
 
-export const getArcaneWallpaperList = (refresh: number) => {
+export const useArcaneWallpaperList = (refresh: number) => {
   const [arcaneWallpapers, setArcaneWallpapers] = useState<ArcaneWallpaperWithInfo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

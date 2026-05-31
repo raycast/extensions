@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ArcaneWallpaperList } from "./components/arcane-wallpaper-list";
-import { getArcaneWallpaperList } from "./hooks/hooks";
+import { useArcaneWallpaperList } from "./hooks/hooks";
 
 import { ArcaneWallpaperGrid } from "./components/arcane-wallpaper-grid";
 import { getSetArcaneWallpaperPreferences } from "./types/preferences";
@@ -10,7 +10,7 @@ export default function SetArcaneWallpaper() {
   const [refresh, setRefresh] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<string>("0");
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_WALLPAPER_CATEGORIES);
-  const { arcaneWallpapers, isLoading, updateExcludeList } = getArcaneWallpaperList(refresh);
+  const { arcaneWallpapers, isLoading, updateExcludeList } = useArcaneWallpaperList(refresh);
   const preferences = getSetArcaneWallpaperPreferences();
   const layout = preferences.layout ?? "Grid";
   const columns = preferences.columns ?? "4";

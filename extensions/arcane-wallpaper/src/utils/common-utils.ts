@@ -22,7 +22,15 @@ export const getSavedDirectory = (picturesDirectory?: string): string => {
   return picturesDirectory.endsWith("/") ? picturesDirectory.slice(0, -1) : picturesDirectory;
 };
 
-const getFileType = (url: string) => {
+const getFileType = (url: string, titleHint?: string, fileTypeHint?: string) => {
+  if (fileTypeHint && /^(png|jpe?g|webp)$/.test(fileTypeHint)) {
+    return fileTypeHint;
+  }
+  if (titleHint) {
+    const titleExt = titleHint.split(".").pop()?.toLowerCase();
+    if (titleExt && /^(png|jpe?g|webp)$/.test(titleExt)) return titleExt;
+  }
+
   try {
     const extension = new URL(url).pathname.split("/").pop()?.split(".").pop();
     return extension && extension !== "" && extension !== "uc" ? extension : "png";
@@ -48,10 +56,13 @@ const getImageBuffer = async (url: string) => {
   return readFile(url);
 };
 
-export async function downloadPicture(wallpaper: { title: string; url: string }, picturesDirectory?: string) {
+export async function downloadPicture(
+  wallpaper: { title: string; url: string; fileType?: string },
+  picturesDirectory?: string,
+) {
   await showToast(Toast.Style.Animated, "Downloading...");
 
-  const picturePath = `${getSavedDirectory(picturesDirectory)}/${getSafeFileName(wallpaper.title)}.${getFileType(wallpaper.url)}`;
+  const picturePath = `${getSavedDirectory(picturesDirectory)}/${getSafeFileName(wallpaper.title)}.${getFileType(wallpaper.url, wallpaper.title, wallpaper.fileType)}`;
   try {
     await writeFile(picturePath, await getImageBuffer(wallpaper.url));
     const options: Toast.Options = {
@@ -80,7 +91,7 @@ export async function downloadPicture(wallpaper: { title: string; url: string },
 }
 
 export const buildCachePath = (wallpaper: ArcaneWallpaper) => {
-  const fileType = getFileType(wallpaper.url);
+  const fileType = getFileType(wallpaper.url, wallpaper.title, wallpaper.fileType);
   const normalizedCachePath = cachePath.endsWith("/") ? cachePath : `${cachePath}/`;
   return `${normalizedCachePath}${getSafeFileName(wallpaper.title)}.${fileType}`;
 };
