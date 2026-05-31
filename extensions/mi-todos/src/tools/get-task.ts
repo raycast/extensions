@@ -1,6 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
+import { expandHome, resolvePath } from "../util/storage";
 
 type Input = {
   /**
@@ -10,11 +11,12 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  const mitodosDir = path.join(os.homedir(), "MiToDos");
+  const prefs = getPreferenceValues<Preferences>();
+  const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
 
   try {
     if (!fs.existsSync(mitodosDir)) {
-      return "MiToDos directory not found at ~/MiToDos/";
+      return `MiToDos directory not found at ${mitodosDir}`;
     }
 
     const filepath = path.join(mitodosDir, `${input.name}.md`);
