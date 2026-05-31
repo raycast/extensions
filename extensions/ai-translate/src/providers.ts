@@ -46,6 +46,7 @@ interface AnthropicCompatibleResponse {
 export interface GenerationOptions {
   responseMimeType?: string;
   responseJsonSchema?: Record<string, unknown>;
+  temperature?: number;
 }
 
 export async function translateWithProvider(config: ProviderConfig, request: TranslationRequest): Promise<string> {
@@ -99,7 +100,7 @@ async function generateWithGeminiProtocol(
   maxOutputTokens: number,
   options: GenerationOptions = {},
 ): Promise<string> {
-  const generationConfig: Record<string, unknown> = { temperature: 0.3, maxOutputTokens };
+  const generationConfig: Record<string, unknown> = { temperature: options.temperature ?? 0.3, maxOutputTokens };
   applyGeminiResponseFormat(generationConfig, options);
 
   const response = await postJson<GeminiResponse>(
@@ -144,7 +145,7 @@ async function generateWithAnthropicProtocol(
       system: structuredPrompt.system,
       messages: [{ role: "user", content: structuredPrompt.user }],
       max_tokens: maxOutputTokens,
-      temperature: 0.3,
+      temperature: options.temperature ?? 0.3,
       stream: false,
     }),
   );
@@ -176,7 +177,7 @@ async function generateWithOpenAIProtocol(
     ],
     stream: false,
   };
-  applyOpenAIGenerationParams(body, config.model, maxOutputTokens, 0.3);
+  applyOpenAIGenerationParams(body, config.model, maxOutputTokens, options.temperature ?? 0.3);
   applyOpenAIResponseFormat(body, options);
 
   const response = await postJson<OpenAICompatibleResponse>(

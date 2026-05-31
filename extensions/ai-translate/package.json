@@ -868,6 +868,8 @@
   "scripts": {
     "generate-icons": "node scripts/generate-icons.mjs",
     "build-swift": "bash scripts/build-swift.sh",
+    "eval:rewrite-prompt": "node scripts/rewrite-prompt-eval.mjs",
+    "test": "node --test tests/*.test.mjs",
     "predev": "npm run build-swift",
     "prebuild": "npm run build-swift",
     "dev": "ray develop",
