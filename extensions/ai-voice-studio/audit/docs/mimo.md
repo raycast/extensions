@@ -14,7 +14,7 @@
 - Official non-streaming example uses `POST https://api.xiaomimimo.com/v1/chat/completions`.
 - Auth header in examples is `api-key: $MIMO_API_KEY`.
 - The target text for synthesis must be in an `assistant` role message. Optional `user` role messages can carry style/instruction context.
-- Built-in voices include `mimo_default`, `冰糖`, `茉莉`, `苏打`, `白桦`, `Mia`, `Chloe`, `Milo`, and `Dean`.
+- Built-in voices include Chinese presets (`冰糖`, `茉莉`, `苏打`, `白桦`) and English presets (`Mia`, `Chloe`, `Milo`, `Dean`). Treat `mimo_default` as a legacy/region-dependent value and avoid it for English defaults because the China cluster can default to a Chinese voice.
 - Non-streaming examples use `audio.format: "wav"` and `audio.voice`.
 - Streaming examples specify `audio.format: "pcm16"`, and the Python examples label the stream as 24 kHz PCM16LE mono.
 - The docs say low-latency streaming for MiMo-V2.5-TTS is not yet available; current streaming compatibility returns the result after inference completes.
