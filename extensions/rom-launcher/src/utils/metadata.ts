@@ -551,39 +551,45 @@ export async function getMetadata(
       urlObj.searchParams.append("t", now.toString());
 
       const response = await fetch(urlObj.toString());
-      if (response.ok) {
-        const json = await response.json();
 
-        if (json.arcade_names) {
-          arcadeDict = json.arcade_names;
-          thumbsDict = json.arcade_thumbs || {};
-          dosThumbsDict = json.dos_thumbs || {};
-          raidsDict = json.raids || {};
-        } else if (typeof json === "object" && !json.systems) {
-          arcadeDict = json;
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
 
-        const combined = {
-          names: arcadeDict,
-          thumbs: thumbsDict,
+      const json = await response.json();
+
+      if (json.arcade_names) {
+        arcadeDict = json.arcade_names;
+        thumbsDict = json.arcade_thumbs || {};
+        dosThumbsDict = json.dos_thumbs || {};
+        raidsDict = json.raids || {};
+      } else if (typeof json === "object" && !json.systems) {
+        arcadeDict = json;
+      }
+
+      const combined = {
+        names: arcadeDict,
+        thumbs: thumbsDict,
+        dos_thumbs: dosThumbsDict,
+        raids: raidsDict,
+      };
+      await LocalStorage.setItem(CACHE_KEY, JSON.stringify(combined));
+      await LocalStorage.setItem(TIME_KEY, now);
+      return {
+        data: {
+          systems: LOCAL_SYSTEMS,
+          arcade_names: arcadeDict,
+          arcade_thumbs: thumbsDict,
           dos_thumbs: dosThumbsDict,
           raids: raidsDict,
-        };
-        await LocalStorage.setItem(CACHE_KEY, JSON.stringify(combined));
-        await LocalStorage.setItem(TIME_KEY, now);
-        return {
-          data: {
-            systems: LOCAL_SYSTEMS,
-            arcade_names: arcadeDict,
-            arcade_thumbs: thumbsDict,
-            dos_thumbs: dosThumbsDict,
-            raids: raidsDict,
-          },
-          lastUpdate: now,
-        };
-      }
+        },
+        lastUpdate: now,
+      };
     } catch (e) {
       console.error("Fetch failed:", e);
+      if (force) {
+        throw new Error("Failed to download database. Check network or URL.");
+      }
     }
   }
 
