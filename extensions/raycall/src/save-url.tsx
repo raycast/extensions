@@ -8,14 +8,9 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import fetch from "node-fetch";
 import { useRef, useState } from "react";
 import { API_URL } from "./config";
 import { Welcome, isConfigured } from "./welcome";
-
-interface Preferences {
-  apiToken: string;
-}
 
 function normalizeUrl(input: string): string | null {
   const trimmed = input.trim();
@@ -31,7 +26,7 @@ function normalizeUrl(input: string): string | null {
 }
 
 export default function SaveUrl() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.SaveUrl>();
   if (!isConfigured(prefs)) return <Welcome reason="missing-token" />;
   return <SaveUrlForm apiToken={prefs.apiToken} />;
 }

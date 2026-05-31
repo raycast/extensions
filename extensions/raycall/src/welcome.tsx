@@ -68,12 +68,6 @@ That's it. **Save URL** and **Search Bookmarks** will start working immediately.
             icon={Icon.CreditCard}
             shortcut={{ modifiers: ["cmd"], key: "b" }}
           />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
-            onAction={openExtensionPreferences}
-          />
         </ActionPanel>
       }
     />

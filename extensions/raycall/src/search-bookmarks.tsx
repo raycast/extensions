@@ -12,7 +12,6 @@ import {
   showToast,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "node-fetch";
 import { useEffect, useMemo, useState } from "react";
 import { API_URL } from "./config";
 import { Welcome, isConfigured } from "./welcome";
@@ -24,10 +23,6 @@ function useDebounced<T>(value: T, delayMs: number): T {
     return () => clearTimeout(t);
   }, [value, delayMs]);
   return debounced;
-}
-
-interface Preferences {
-  apiToken: string;
 }
 
 interface SearchHit {
@@ -58,7 +53,7 @@ interface PendingItem {
 }
 
 export default function SearchBookmarks() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.SearchBookmarks>();
   if (!isConfigured(prefs)) return <Welcome reason="missing-token" />;
   return <SearchBookmarksList apiToken={prefs.apiToken} />;
 }
