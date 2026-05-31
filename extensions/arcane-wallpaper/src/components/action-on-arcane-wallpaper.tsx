@@ -104,7 +104,10 @@ export function ActionOnArcaneWallpaper(props: {
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
-              _excludeList.splice(_excludeList.indexOf(wallpaper.url), 1);
+              const index = _excludeList.indexOf(wallpaper.url);
+              if (index !== -1) {
+                _excludeList.splice(index, 1);
+              }
               cache.set(CacheKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
               setRefresh(Date.now());
             }}

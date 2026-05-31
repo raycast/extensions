@@ -66,13 +66,6 @@ fn set_wallpaper(image_path: String, mode: String) -> Result<String, String> {
         .collect();
     let image_pcwstr = PCWSTR(widestr.as_ptr());
 
-    // Determine target device based on mode
-    let target_device_id = if mode == "current" {
-        get_device_id_under_cursor()
-    } else {
-        None // For "every" mode, set on all monitors
-    };
-
     unsafe {
         CoInitializeEx(None, COINIT_APARTMENTTHREADED)
             .ok()
@@ -87,34 +80,36 @@ fn set_wallpaper(image_path: String, mode: String) -> Result<String, String> {
                 .map_err(|e| e.to_string())?;
         } else if mode == "current" {
             // For "current" mode, set only on the monitor under cursor
-            if let Some(target_id) = target_device_id {
-                let count = wallpaper
-                    .GetMonitorDevicePathCount()
+            let target_id = get_device_id_under_cursor()
+                .ok_or_else(|| "Unable to identify current monitor".to_string())?;
+            let count = wallpaper
+                .GetMonitorDevicePathCount()
+                .map_err(|e| e.to_string())?;
+
+            for i in 0..count {
+                let monitor_id: PWSTR = wallpaper
+                    .GetMonitorDevicePathAt(i)
                     .map_err(|e| e.to_string())?;
 
-                for i in 0..count {
-                    let monitor_id: PWSTR = wallpaper
-                        .GetMonitorDevicePathAt(i)
-                        .map_err(|e| e.to_string())?;
-
-                    let id_str = match monitor_id.to_string() {
-                        Ok(id) => id,
-                        Err(e) => {
-                            CoTaskMemFree(Some(monitor_id.0 as *const _));
-                            return Err(e.to_string());
-                        }
-                    };
-
-                    if id_str == target_id {
-                        let result = wallpaper.SetWallpaper(PCWSTR(monitor_id.0), image_pcwstr);
+                let id_str = match monitor_id.to_string() {
+                    Ok(id) => id,
+                    Err(e) => {
                         CoTaskMemFree(Some(monitor_id.0 as *const _));
-                        result.map_err(|e| e.to_string())?;
-                        break;
+                        return Err(e.to_string());
                     }
+                };
 
+                if id_str == target_id {
+                    let result = wallpaper.SetWallpaper(PCWSTR(monitor_id.0), image_pcwstr);
                     CoTaskMemFree(Some(monitor_id.0 as *const _));
+                    result.map_err(|e| e.to_string())?;
+                    return Ok("ok".to_string());
                 }
+
+                CoTaskMemFree(Some(monitor_id.0 as *const _));
             }
+
+            return Err("Unable to match current monitor".to_string());
         }
     }
 
