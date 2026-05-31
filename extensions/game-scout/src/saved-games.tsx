@@ -246,18 +246,15 @@ export default function SavedGames() {
       setOverviewMap((prev) => (oRes.ok ? newOverviewMap : prev));
 
       if (Object.keys(priceMap).length > 0) {
-        setOverviewMap((latestOverview) => {
-          cache.set(
-            CACHE_KEY,
-            JSON.stringify({
-              timestamp: Date.now(),
-              requestedIds: gameIds.map(String),
-              rawPrices: priceMap,
-              overviewMap: oRes.ok ? newOverviewMap : latestOverview,
-            }),
-          );
-          return latestOverview;
-        });
+        cache.set(
+          CACHE_KEY,
+          JSON.stringify({
+            timestamp: Date.now(),
+            requestedIds: gameIds.map(String),
+            rawPrices: priceMap,
+            overviewMap: oRes.ok ? newOverviewMap : overviewMap,
+          }),
+        );
       }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") return;
@@ -714,7 +711,7 @@ function GameDetail({
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(s ? JSON.parse(s) : ["all"]),
+      setSelectedStores(safeParse(s, ["all"])),
     );
     LocalStorage.getItem<string>("preferred_chart_range").then((saved) => {
       if (saved === "3m" || saved === "6m" || saved === "1y") {
