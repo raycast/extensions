@@ -1,6 +1,6 @@
 # Bouncer Email Verifier Changelog
 
-## [Initial Version] - 2026-05-31
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Verify email deliverability with the Bouncer API.
 - Show verdict, score, provider, domain, reason, and mailbox signals.

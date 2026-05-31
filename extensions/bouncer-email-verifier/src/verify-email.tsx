@@ -3,10 +3,6 @@ import { useMemo, useState } from "react";
 
 const API_URL = "https://api.usebouncer.com/v1.1/email/verify";
 
-type Preferences = {
-  apiKey: string;
-};
-
 type BouncerResponse = {
   status?: string;
   reason?: string;
