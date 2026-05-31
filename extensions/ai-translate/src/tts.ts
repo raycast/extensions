@@ -165,12 +165,10 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
         clearTimeout(timeout);
       }
 
-      toast.hide();
       if (!wav) return;
       await playWav(wav, controller.signal);
     }
   } catch (error) {
-    toast.hide();
     if (error instanceof Error && error.name === "AbortError") {
       if (activeController !== controller) return;
       await showToast({ style: Toast.Style.Failure, title: "TTS Timeout", message: "Request took too long" });
@@ -179,6 +177,7 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
     const msg = error instanceof Error ? error.message : String(error);
     await showToast({ style: Toast.Style.Failure, title: "TTS Failed", message: msg.slice(0, 100) });
   } finally {
+    toast.hide();
     if (activeController === controller) {
       activeController = undefined;
     }
