@@ -3,7 +3,7 @@ import { CacheKey } from "../utils/constants";
 import { ArcaneWallpaper, ArcaneWallpaperWithInfo } from "../types/types";
 import { captureException, showToast, Toast } from "@raycast/api";
 import { cache } from "../utils/common-utils";
-import { getArcaneWallpapersFromDrive } from "../wallpapers";
+import { getArcaneWallpapersFromDrive, getLastDriveLoadWarning } from "../wallpapers";
 import Style = Toast.Style;
 
 const withExcludeInfo = (wallpapers: ArcaneWallpaper[], excludeList: string[]) =>
@@ -44,6 +44,10 @@ export const useArcaneWallpaperList = (refresh: number) => {
 
       setArcaneWallpapers(withExcludeInfo(wallpaperCatalog, _excludeList));
       cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(wallpaperCatalog));
+      const driveLoadWarning = getLastDriveLoadWarning();
+      if (driveLoadWarning) {
+        await showToast(Style.Failure, driveLoadWarning);
+      }
     } catch (e) {
       captureException(e);
       if (cachedCatalog.length > 0) {

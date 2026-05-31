@@ -18,6 +18,8 @@ const selectedDriveFolders: SelectedDriveFolder[] = [
   { id: "1pzqEzn7-Ii1B5vLsRRGfJpWF5EttXKs4", title: "Welcome to Noxus Trailer" },
 ];
 
+let lastDriveLoadWarning: string | undefined;
+
 type DriveEntry = {
   id: string;
   title: string;
@@ -77,6 +79,8 @@ const parseDriveEntries = (html: string): DriveEntry[] => {
 const isImageEntry = (entry: DriveEntry) => IMAGE_FILE_PATTERN.test(entry.title);
 const getImageFileType = (title: string) => title.match(IMAGE_FILE_PATTERN)?.[1].toLowerCase();
 
+export const getLastDriveLoadWarning = () => lastDriveLoadWarning;
+
 async function fetchFolderWallpapers(
   folderId: string,
   pathParts: string[],
@@ -111,6 +115,8 @@ async function fetchFolderWallpapers(
 }
 
 export async function getArcaneWallpapersFromDrive(): Promise<ArcaneWallpaper[]> {
+  lastDriveLoadWarning = undefined;
+
   if (selectedDriveFolders.length === 0) {
     return [];
   }
@@ -120,6 +126,12 @@ export async function getArcaneWallpapersFromDrive(): Promise<ArcaneWallpaper[]>
       fetchFolderWallpapers(folder.id, [folder.title], new Set<string>([ARCANE_DRIVE_FOLDER_ID])),
     ),
   );
+
+  const failedFolders = results.filter((result) => result.status === "rejected");
+  if (failedFolders.length > 0) {
+    lastDriveLoadWarning = `Some Google Drive folders were unavailable. Showing ${selectedDriveFolders.length - failedFolders.length} of ${selectedDriveFolders.length} wallpaper groups.`;
+    console.warn(lastDriveLoadWarning, failedFolders);
+  }
 
   const wallpaperCatalog = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
   if (wallpaperCatalog.length === 0) {
