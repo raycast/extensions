@@ -34,6 +34,7 @@ All notable changes to the DNS Quick Change extension will be documented in this
 ### Code Quality
 - Using auto-generated `Preferences` type from Raycast's `raycast-env.d.ts` for type safety
 - Removed unused `@raycast/utils` dependency
-- Proper Title Case for acronyms ("DNS Quick Change")
+- Proper Title Case for acronyms (\"DNS Quick Change\", \"DHCP\")
 - Full linting and build compliance for Raycast Store
 - Comprehensive error handling with user-friendly toast notifications
+- Consistent acronym casing throughout UI ("DHCP" not "Dhcp")

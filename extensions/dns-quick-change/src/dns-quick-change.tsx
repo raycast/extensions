@@ -875,7 +875,7 @@ export default function Command() {
                 onAction={refresh}
               />
               <Action
-                title="Reset to Dhcp"
+                title="Reset to DHCP"
                 icon={Icon.XMarkCircle}
                 onAction={handleReset}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -908,7 +908,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Reset to Dhcp"
+                title="Reset to DHCP"
                 icon={Icon.XMarkCircle}
                 onAction={handleReset}
               />
@@ -965,7 +965,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                   <Action
-                    title="Reset to Dhcp"
+                    title="Reset to DHCP"
                     icon={Icon.XMarkCircle}
                     onAction={handleReset}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
