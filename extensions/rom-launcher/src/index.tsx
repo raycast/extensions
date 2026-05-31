@@ -956,7 +956,7 @@ ${isInitialLoading ? `_Loading cover image..._` : imgMarkdown}
           )}
           {meta && (
             <>
-              {meta.rating > 0 && (
+              {meta.rating && meta.rating > 0 && (
                 <List.Item.Detail.Metadata.Label
                   title="IGDB Rating"
                   text={`⭐ ${meta.rating} / 100`}
@@ -965,7 +965,7 @@ ${isInitialLoading ? `_Loading cover image..._` : imgMarkdown}
               {meta.release_year && (
                 <List.Item.Detail.Metadata.Label
                   title="Release Year"
-                  text={meta.release_year}
+                  text={String(meta.release_year)}
                   icon={Icon.Calendar}
                 />
               )}

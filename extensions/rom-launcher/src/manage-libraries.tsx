@@ -154,7 +154,7 @@ export default function ManageLibraries({
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search libraries...">
       <List.EmptyView
-        icon={Icon.FolderPlus}
+        icon={Icon.Plus}
         title="No Libraries Installed"
         description="Press Enter to add your first ROM folder."
         actions={

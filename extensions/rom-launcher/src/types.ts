@@ -25,6 +25,7 @@ export interface Achievement {
   points: number;
   numAwarded: number;
   numAwardedHardcore: number;
+  gameId?: number;
 }
 
 export interface AchievementData {
@@ -127,7 +128,7 @@ export const PLATFORMS = {
   CANNONBALL: "CANNONBALL",
 } as const;
 
-export const ARCADE_SYSTEMS = [
+export const ARCADE_SYSTEMS: readonly string[] = [
   PLATFORMS.ARCADE,
   PLATFORMS.FBNEO,
   PLATFORMS.MAME,
