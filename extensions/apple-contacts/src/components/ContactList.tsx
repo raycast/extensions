@@ -116,13 +116,6 @@ export default function ContactList({ contacts, isLoading, onRefresh }: ContactL
                 id={contact.id}
                 title={contact.displayName}
                 icon={icon}
-                keywords={[
-                  contact.firstName ?? "",
-                  contact.lastName ?? "",
-                  contact.company ?? "",
-                  ...contact.phones.map((p) => p.value),
-                  ...contact.emails.map((e) => e.value),
-                ]}
                 detail={(() => {
                   const phones = displayContact.phones ?? [];
                   const emails = displayContact.emails ?? [];
@@ -185,6 +178,7 @@ export default function ContactList({ contacts, isLoading, onRefresh }: ContactL
                   <ContactActions
                     contact={displayContact}
                     isLoadingDetail={isSelected && isLoadingDetail}
+                    detailUnavailable={isSelected && !isLoadingDetail && !detailContact}
                     onRefresh={onRefresh}
                     onContactDeleted={onRefresh}
                   />
