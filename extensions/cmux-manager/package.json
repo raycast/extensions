@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cmux-manager",
+  "title": "Cmux Manager",
+  "description": "Manage cmux workspaces: create, switch to, and rename.",
+  "icon": "command-icon.png",
+  "author": "chetan_conikee",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-workspace",
+      "title": "New Workspace",
+      "subtitle": "cmux",
+      "description": "Create a new cmux workspace with a name.",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-workspace",
+      "title": "Go to Workspace",
+      "subtitle": "cmux",
+      "description": "Switch to an existing cmux workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "rename-workspace",
+      "title": "Rename Workspace",
+      "subtitle": "cmux",
+      "description": "Rename an existing cmux workspace.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cmuxPath",
+      "type": "textfield",
+      "required": false,
+      "title": "cmux CLI Path",
+      "description": "Path to the cmux CLI binary. Leave blank to auto-detect.",
+      "default": "",
+      "placeholder": "/Applications/cmux.app/Contents/Resources/bin/cmux"
+    },
+    {
+      "name": "socketPath",
+      "type": "textfield",
+      "required": false,
+      "title": "cmux Socket Path",
+      "description": "Path to the cmux control socket. Leave blank to auto-detect.",
+      "default": "",
+      "placeholder": "~/Library/Application Support/cmux/cmux.sock"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.19.41",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
