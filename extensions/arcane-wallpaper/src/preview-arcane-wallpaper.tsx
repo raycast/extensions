@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { downloadPicture } from "./utils/common-utils";
+import { downloadPicture, getWallpaperPreviewUrl } from "./utils/common-utils";
 import { ArcaneWallpaperWithInfo } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { setWallpaper } from "./utils/platform-utils";
@@ -18,7 +18,7 @@ export default function PreviewArcaneWallpaper(props: {
   return (
     <Detail
       navigationTitle={arcaneWallpapers[pageIndex].title}
-      markdown={`<img src="${arcaneWallpapers[pageIndex].url}" alt="" height="355" />`}
+      markdown={`<img src="${getWallpaperPreviewUrl(arcaneWallpapers[pageIndex])}" alt="" height="355" />`}
       actions={
         <ActionPanel>
           <Action
