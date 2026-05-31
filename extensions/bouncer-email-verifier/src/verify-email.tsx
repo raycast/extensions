@@ -80,7 +80,7 @@ export default function VerifyEmailCommand() {
       searchText={email}
       onSearchTextChange={setEmail}
       searchBarPlaceholder="Email address"
-      throttle
+      filtering={false}
     >
       <List.Section title="Bouncer Email Verification">
         <List.Item
