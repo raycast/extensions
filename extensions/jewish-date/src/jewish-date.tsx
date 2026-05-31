@@ -3,16 +3,29 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { getHebrewDate, getHebrewDateAfterShkia } from "./format-hebrew-date";
 
 export default function Command() {
-  const dates = [
-    {
-      title: "Before Shkia-Sunset",
-      subtitle: getHebrewDate(),
-    },
-    {
-      title: "After Shkia-Sunset",
-      subtitle: getHebrewDateAfterShkia(),
-    },
-  ];
+  let dates: { title: string; subtitle: string }[];
+
+  try {
+    dates = [
+      {
+        title: "Before Shkia-Sunset",
+        subtitle: getHebrewDate(),
+      },
+      {
+        title: "After Shkia-Sunset",
+        subtitle: getHebrewDateAfterShkia(),
+      },
+    ];
+  } catch (error) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Unable to Format Jewish Date"
+          description={error instanceof Error ? error.message : "Please try again later."}
+        />
+      </List>
+    );
+  }
 
   return (
     <List>

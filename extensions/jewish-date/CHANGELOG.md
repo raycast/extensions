@@ -1,6 +1,6 @@
 # Jewish Date Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Show today's Jewish date in Hebrew.
 - Offer before and after Shkia-Sunset options.
