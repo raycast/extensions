@@ -74,7 +74,7 @@
           "value": "raycast"
         },
         {
-          "title": "Custom (OpenAI-compatible)",
+          "title": "Custom (OpenAI or Anthropic-compatible)",
           "value": "byok"
         }
       ]
@@ -82,21 +82,21 @@
     {
       "name": "apiBaseURL",
       "title": "Custom API Base URL",
-      "description": "Your provider's OpenAI-compatible base URL — the part before /chat/completions (usually ends in /v1).",
+      "description": "Your provider's base URL. OpenAI-compatible URLs usually end in /v1; Anthropic-compatible URLs may end in /anthropic.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "apiKey",
       "title": "Custom API Key",
-      "description": "API key for your OpenAI-compatible provider.",
+      "description": "API key for your custom provider.",
       "type": "password",
       "required": false
     },
     {
       "name": "apiModel",
       "title": "Custom Model",
-      "description": "Model id for your provider, e.g. qwen3.7-max (or gpt-4o-mini, deepseek-chat, a local model name…).",
+      "description": "Model id for your provider, e.g. qwen3.6-plus or qwen3.6-flash (or gpt-4o-mini, deepseek-chat, a local model name…).",
       "type": "textfield",
       "required": false
     }

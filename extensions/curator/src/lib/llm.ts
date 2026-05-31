@@ -1,4 +1,5 @@
 import { AI, environment, getPreferenceValues } from "@raycast/api";
+import { buildCustomChatRequest, extractCustomChatText } from "./custom-llm";
 
 export class AIUnavailableError extends Error {}
 
@@ -18,26 +19,18 @@ export async function chat(prompt: string): Promise<string> {
     throw new AIUnavailableError(
       "Custom provider needs a base URL, API key, and model",
     );
-  const res = await fetch(
-    `${p.apiBaseURL.replace(/\/$/, "")}/chat/completions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${p.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: p.apiModel,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-      }),
-      signal: AbortSignal.timeout(20000),
-    },
+
+  const request = buildCustomChatRequest(
+    p.apiBaseURL,
+    p.apiKey,
+    p.apiModel,
+    prompt,
   );
+  const res = await fetch(request.url, {
+    ...request.init,
+    signal: AbortSignal.timeout(20000),
+  });
   if (!res.ok)
     throw new Error(`LLM ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  return json.choices?.[0]?.message?.content ?? "";
+  return extractCustomChatText(await res.json(), request.protocol);
 }
