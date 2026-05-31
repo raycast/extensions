@@ -29,9 +29,10 @@ export function useStockSearch(searchText: string) {
   }, [isLoading, quotes, symbols]);
 
   useEffect(() => {
-    resetQuotes();
     if (searchText.length === 0) {
+      resetQuotes();
       setSymbols([]);
+      prevSymbolsKey.current = "";
       return;
     }
 
@@ -50,7 +51,8 @@ export function useStockSearch(searchText: string) {
         const nextKey = next.join(",");
         setSymbols(next);
         if (next.length === 0 || nextKey === prevSymbolsKey.current) {
-          // No re-fetch will occur (empty or identical symbol set) — clear spinner now
+          // Same symbol set or empty — useStockInfo won't re-fetch, clear spinner now.
+          // Quotes are still cached so searchResults will populate correctly.
           setIsLoading(false);
         }
         prevSymbolsKey.current = nextKey;
@@ -67,7 +69,7 @@ export function useStockSearch(searchText: string) {
     })();
 
     return () => abortRef.current?.abort();
-  }, [searchText]);
+  }, [searchText, resetQuotes]);
 
   return { searchResults, isLoading, lastUpdated };
 }

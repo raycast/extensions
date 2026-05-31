@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import yahooFinance, { type Quote } from "./yahoo-finance";
 
 export function useStockInfo(symbols: string[]): {
@@ -53,5 +53,6 @@ export function useStockInfo(symbols: string[]): {
     return () => abortRef.current?.abort();
   }, [symbolsKey]);
 
-  return { quotes, isLoading, lastUpdated, resetQuotes: () => setQuotes({}) };
+  const resetQuotes = useCallback(() => setQuotes({}), []);
+  return { quotes, isLoading, lastUpdated, resetQuotes };
 }
