@@ -548,7 +548,9 @@ export async function getMetadata(
           ? prefs.customDatabaseUrl.trim()
           : FALLBACK_DATA_URL;
 
-      const response = await fetch(`${fetchUrl}?t=${now}`);
+      const response = await fetch(
+        `${fetchUrl}${fetchUrl.includes("?") ? "&" : "?"}t=${now}`,
+      );
       if (response.ok) {
         const json = await response.json();
 
