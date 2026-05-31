@@ -2,11 +2,11 @@
 
 <img src="assets/logo-big.png" alt="Plexus Logo" width="128" height="128">
 
-A powerful Raycast extension that helps you discover and manage all running Node.js development servers on your localhost.
+A powerful Raycast extension that helps you discover and manage all running web servers on your localhost (Node, PHP, Python, and more).
 
 ## ✨ Features
 
-- 🔍 **Smart Discovery**: Automatically finds all running Node.js servers on your machine
+- 🔍 **Smart Discovery**: Automatically finds all running localhost web servers (any process answering HTTP), including those inside WSL
 - 🏷️ **Intelligent Naming**: Detects project names from website titles or package.json files
 - 🛠️ **Framework Detection**: Identifies popular frameworks (Next.js, Vite, Express, React, etc.)
 - 🎨 **Favicon Support**: Shows website favicons for easy visual identification

@@ -2,13 +2,24 @@ import { readFileSync } from "fs";
 import { join, dirname, basename } from "path";
 
 export function detectFramework(cmdResult: string): string {
+  // Order matters: more specific markers (e.g. artisan) win over generic ones (php).
   const frameworks = [
+    { pattern: "artisan", name: "Laravel" },
     { pattern: "vite", name: "Vite" },
     { pattern: "next", name: "Next.js" },
+    { pattern: "nuxt", name: "Nuxt" },
     { pattern: "react-scripts", name: "Create React App" },
     { pattern: "webpack", name: "Webpack Dev Server" },
     { pattern: "express", name: "Express" },
     { pattern: "nodemon", name: "Nodemon" },
+    { pattern: "manage.py", name: "Django" },
+    { pattern: "flask", name: "Flask" },
+    { pattern: "uvicorn", name: "Uvicorn" },
+    { pattern: "gunicorn", name: "Gunicorn" },
+    { pattern: "rails", name: "Rails" },
+    { pattern: "php-cgi", name: "PHP" },
+    { pattern: "php", name: "PHP" },
+    { pattern: "nginx", name: "Nginx" },
   ];
 
   for (const framework of frameworks) {
@@ -21,7 +32,10 @@ export function detectFramework(cmdResult: string): string {
 }
 
 export function getProjectName(projectPath: string): string {
-  if (!projectPath) return "Node.js";
+  // Only trust absolute paths (Unix "/", Windows "C:\", or "\\wsl.localhost\..." UNC).
+  // A relative value like "." would make readFileSync pick up the current dir's package.json.
+  const isAbsolute = /^([a-zA-Z]:[\\/]|\\\\|\/)/.test(projectPath);
+  if (!projectPath || !isAbsolute) return "Localhost";
 
   try {
     const packageJsonPath = join(projectPath, "package.json");
@@ -33,9 +47,16 @@ export function getProjectName(projectPath: string): string {
     // If package.json reading fails, use directory name
   }
 
-  // Fallback to directory name (OS-aware: handles both / and \ separators)
-  const dirName = basename(projectPath);
-  return dirName && dirName !== "" && dirName !== "." ? dirName : "Node.js";
+  // Fallback to directory name (OS-aware: handles both / and \ separators).
+  // If the server is served from a common web root (e.g. Laravel's public/), use the
+  // parent folder so we show the project name ("knaker-api") rather than "public".
+  const webRoots = new Set(["public", "public_html", "web", "dist", "build", "html", "wwwroot"]);
+  let dirName = basename(projectPath);
+  if (webRoots.has(dirName.toLowerCase())) {
+    const parent = basename(dirname(projectPath));
+    if (parent && parent !== ".") dirName = parent;
+  }
+  return dirName && dirName !== "" && dirName !== "." ? dirName : "Localhost";
 }
 
 // Extract the script-path argument from a command line. The node executable may be
@@ -75,7 +96,8 @@ export function getProjectPath(cmdResult: string): string {
   }
 
   // Otherwise, use the directory of the script being run (OS-aware).
-  return dirname(scriptPath);
+  const dir = dirname(scriptPath);
+  return dir === "." ? "" : dir;
 }
 
 export function createDisplayName(projectName: string, framework: string): string {

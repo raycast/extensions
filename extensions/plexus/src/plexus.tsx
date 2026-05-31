@@ -38,7 +38,7 @@ export default function Command() {
   return (
     <List isLoading={loading} searchBarPlaceholder="Search local servers...">
       {items.length === 0 && !loading ? (
-        <List.EmptyView title="No local Node.js servers found" />
+        <List.EmptyView title="No local web servers found" />
       ) : (
         items.map((item: LocalhostItem) => (
           <LocalhostListItem key={item.id} item={item} onActionComplete={() => setRefresh((r) => r + 1)} />

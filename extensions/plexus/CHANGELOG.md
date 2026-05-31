@@ -1,5 +1,13 @@
 # Plexus Changelog
 
+## [Localhost Web Servers] - {PR_MERGE_DATE}
+
+### Changed
+- Detection is no longer limited to Node.js: Plexus now lists any localhost server that answers an HTTP request (Node, PHP/Laravel, Python, nginx/Herd, …), and hides non-web services like databases. Works for native and WSL-hosted servers.
+
+### Note
+- HTTPS-only dev servers are not detected yet.
+
 ## [Windows Support] - {PR_MERGE_DATE}
 
 ### Added

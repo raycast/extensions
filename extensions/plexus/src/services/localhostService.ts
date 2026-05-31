@@ -1,30 +1,36 @@
 import { LocalhostItem } from "../types/LocalhostItem";
-import { findNodeProcesses } from "../utils/processUtils";
+import { findListeningServers } from "../utils/processUtils";
 import { detectFramework, getProjectPath } from "../utils/projectUtils";
+import { respondsToHttp } from "../utils/probe";
 
 export async function getLocalhostItems(): Promise<LocalhostItem[]> {
-  const processes = await findNodeProcesses();
-  const items: LocalhostItem[] = [];
+  const servers = await findListeningServers();
 
-  for (const proc of processes) {
-    // Skip non-Node.js processes
-    if (!proc.command.includes("node")) continue;
-
-    // Prefer the real working directory; fall back to parsing the command line.
-    const projectPath = proc.workingDir || getProjectPath(proc.command);
-    const framework = detectFramework(proc.command);
-
-    items.push({
-      id: `${proc.source}:${proc.pid}:${proc.port}`,
-      projectPath,
-      framework,
-      port: proc.port,
-      pid: proc.pid,
-      url: `http://localhost:${proc.port}`,
-      source: proc.source,
-      distro: proc.distro,
-    });
+  // One row per port. Prefer the WSL entry on a collision since it carries command + cwd.
+  const byPort = new Map<string, (typeof servers)[number]>();
+  for (const server of servers) {
+    const existing = byPort.get(server.port);
+    if (!existing || (server.source === "wsl" && existing.source !== "wsl")) {
+      byPort.set(server.port, server);
+    }
   }
+  const candidates = [...byPort.values()];
 
-  return items;
+  // Keep only the ports that actually answer an HTTP request (i.e. open in a browser).
+  const reachable = await Promise.all(candidates.map((server) => respondsToHttp(server.port)));
+  const webServers = candidates.filter((_, index) => reachable[index]);
+
+  return webServers.map((server) => {
+    const projectPath = server.workingDir || getProjectPath(server.command);
+    return {
+      id: `${server.source}:${server.pid}:${server.port}`,
+      projectPath,
+      framework: detectFramework(server.command),
+      port: server.port,
+      pid: server.pid,
+      url: `http://localhost:${server.port}`,
+      source: server.source,
+      distro: server.distro,
+    };
+  });
 }

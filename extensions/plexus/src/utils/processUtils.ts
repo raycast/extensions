@@ -6,7 +6,7 @@ const execFileAsync = promisify(execFile);
 
 const isWindows = process.platform === "win32";
 
-export type NodeProcess = {
+export type ListeningServer = {
   pid: string;
   port: string;
   source: "host" | "wsl";
@@ -21,26 +21,27 @@ async function runPowerShell(script: string): Promise<string> {
   return stdout;
 }
 
-export async function findNodeProcesses(): Promise<NodeProcess[]> {
-  let procs: NodeProcess[];
+// Find every listening TCP server. The HTTP probe in the service decides which of these are
+// actually web pages worth showing; here we just enumerate and attach process info for naming.
+export async function findListeningServers(): Promise<ListeningServer[]> {
+  let servers: ListeningServer[];
 
   if (isWindows) {
-    // On Windows, find native node servers AND node servers running inside WSL.
-    // The latter are reachable on localhost but owned by wslrelay on the Windows side,
-    // so they need a separate lookup through wsl.exe.
+    // Native Windows listeners + listeners inside WSL (forwarded to localhost but owned by
+    // wslrelay on the Windows side, so they need a separate lookup through wsl.exe).
     const [host, wsl] = await Promise.all([
-      findWindowsHostNodeProcesses().catch(() => [] as NodeProcess[]),
-      findWslNodeProcesses().catch(() => [] as NodeProcess[]),
+      findWindowsHostServers().catch(() => [] as ListeningServer[]),
+      findWslServers().catch(() => [] as ListeningServer[]),
     ]);
-    procs = [...host, ...wsl];
+    servers = [...host, ...wsl];
   } else {
-    procs = await findUnixNodeProcesses().catch(() => [] as NodeProcess[]);
+    servers = await findUnixServers().catch(() => [] as ListeningServer[]);
   }
 
   // A server listening on both IPv4 and IPv6 yields duplicate entries; dedupe them.
   const seen = new Set<string>();
-  return procs.filter((p) => {
-    const key = `${p.source}:${p.pid}:${p.port}`;
+  return servers.filter((s) => {
+    const key = `${s.source}:${s.pid}:${s.port}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -48,11 +49,12 @@ export async function findNodeProcesses(): Promise<NodeProcess[]> {
 }
 
 // --- macOS / Unix: lsof for discovery, ps for command, lsof for cwd ---
-async function findUnixNodeProcesses(): Promise<NodeProcess[]> {
-  const { stdout } = await execAsync("/usr/sbin/lsof -nP -iTCP -sTCP:LISTEN | grep node");
+async function findUnixServers(): Promise<ListeningServer[]> {
+  const { stdout } = await execAsync("/usr/sbin/lsof -nP -iTCP -sTCP:LISTEN");
   const pairs = stdout
     .trim()
     .split("\n")
+    .slice(1) // skip lsof header
     .map((line) => {
       const parts = line.split(/\s+/);
       const pid = parts[1];
@@ -62,12 +64,16 @@ async function findUnixNodeProcesses(): Promise<NodeProcess[]> {
     })
     .filter((pair): pair is string => Boolean(pair));
 
-  const procs: NodeProcess[] = [];
-  for (const pair of pairs) {
+  const servers: ListeningServer[] = [];
+  for (const pair of [...new Set(pairs)]) {
     const [pid, port] = pair.split(":");
     if (!pid || !port) continue;
-    const command = (await execAsync(`ps -p ${pid} -o command=`)).stdout.trim();
-    if (!command.includes("node")) continue;
+    let command = "";
+    try {
+      command = (await execAsync(`ps -p ${pid} -o command=`)).stdout.trim();
+    } catch {
+      command = "";
+    }
     let workingDir: string | null = null;
     try {
       const { stdout: cwd } = await execAsync(`lsof -p ${pid} | awk '$4=="cwd" {print $9}' | head -1`);
@@ -75,44 +81,38 @@ async function findUnixNodeProcesses(): Promise<NodeProcess[]> {
     } catch {
       workingDir = null;
     }
-    procs.push({ pid, port, source: "host", command, workingDir });
+    servers.push({ pid, port, source: "host", command, workingDir });
   }
-  return procs;
+  return servers;
 }
 
-// --- Windows host: PowerShell for discovery + command line (no cwd available) ---
-async function findWindowsHostNodeProcesses(): Promise<NodeProcess[]> {
-  const listScript =
+// --- Windows host: one CIM query for all command lines, then map listeners to them ---
+async function findWindowsHostServers(): Promise<ListeningServer[]> {
+  const script =
+    "$cmds=@{}; Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | ForEach-Object { $cmds[[string]$_.ProcessId]=$_.CommandLine }; " +
     "Get-NetTCPConnection -State Listen | ForEach-Object { " +
-    "$p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; " +
-    "if ($p -and $p.ProcessName -match 'node') { \"$($_.OwningProcess):$($_.LocalPort)\" } }";
-  const stdout = await runPowerShell(listScript);
-  const pairs = [
-    ...new Set(
-      stdout
-        .trim()
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter(Boolean),
-    ),
-  ];
+    "$proc=Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; " +
+    "if ($proc -and $proc.ProcessName -ne 'wslrelay') { " +
+    '"$($_.OwningProcess)|$($_.LocalPort)|$($cmds[[string]$_.OwningProcess])" } }';
+  const stdout = await runPowerShell(script);
 
-  const procs: NodeProcess[] = [];
-  for (const pair of pairs) {
-    const [pid, port] = pair.split(":");
+  const servers: ListeningServer[] = [];
+  for (const line of stdout.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const [pid, port, ...rest] = line.split("|");
     if (!pid || !port) continue;
-    let command = "";
-    try {
-      command = (await runPowerShell(`(Get-CimInstance Win32_Process -Filter "ProcessId=${pid}").CommandLine`)).trim();
-    } catch {
-      command = "node";
-    }
-    procs.push({ pid, port, source: "host", command: command || "node", workingDir: null });
+    servers.push({
+      pid: pid.trim(),
+      port: port.trim(),
+      source: "host",
+      command: rest.join("|").trim(),
+      workingDir: null,
+    });
   }
-  return procs;
+  return servers;
 }
 
-// --- WSL: enumerate node listeners inside each running distro via wsl.exe ---
+// --- WSL: enumerate listeners inside each running distro via wsl.exe ---
 // Listen ports are reachable from Windows on http://localhost:<port> (WSL localhost
 // forwarding); paths are translated to \\wsl.localhost\<distro>\... so Windows can read them.
 const WSL_ENUMERATOR =
@@ -123,7 +123,7 @@ const WSL_ENUMERATOR =
   "pid=$(echo \"$line\" | grep -oE 'pid=[0-9]+' | head -1 | cut -d= -f2); " +
   '[ -z "$pid" ] && continue; ' +
   "cmd=$(tr '\\0' ' ' < /proc/$pid/cmdline 2>/dev/null); " +
-  'case "$cmd" in *node*) ;; *) continue ;; esac; ' +
+  '[ -z "$cmd" ] && continue; ' +
   "cwd=$(readlink /proc/$pid/cwd 2>/dev/null); " +
   'echo "$port|$pid|$cwd|$cmd"; ' +
   "done";
@@ -132,7 +132,7 @@ function wslToUnc(distro: string, linuxPath: string): string {
   return `\\\\wsl.localhost\\${distro}${linuxPath.replace(/\//g, "\\")}`;
 }
 
-async function findWslNodeProcesses(): Promise<NodeProcess[]> {
+async function findWslServers(): Promise<ListeningServer[]> {
   // `wsl --list` output encoding varies (UTF-16LE on older builds); read raw bytes and
   // drop NUL bytes so ASCII distro names survive regardless of encoding.
   let distros: string[];
@@ -149,7 +149,7 @@ async function findWslNodeProcesses(): Promise<NodeProcess[]> {
     return [];
   }
 
-  const all: NodeProcess[] = [];
+  const all: ListeningServer[] = [];
   for (const distro of distros) {
     try {
       const { stdout } = await execFileAsync("wsl.exe", ["-d", distro, "-e", "bash", "-c", WSL_ENUMERATOR]);
