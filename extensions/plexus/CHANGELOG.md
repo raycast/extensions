@@ -1,5 +1,10 @@
 # Plexus Changelog
 
+## [Faster Discovery] - {PR_MERGE_DATE}
+
+### Changed
+- Much faster on Windows (~3s -> <1s): use `netstat` instead of spinning up PowerShell for port discovery, fetch command lines only for servers that pass the probe, and shorten the HTTP probe timeout. Results are now cached so reopening is instant.
+
 ## [Localhost Web Servers] - {PR_MERGE_DATE}
 
 ### Changed

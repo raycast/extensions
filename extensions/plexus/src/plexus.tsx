@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, closeMainWindow } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { LocalhostItem } from "./types/LocalhostItem";
 import { getLocalhostItems } from "./services/localhostService";
 import { useServiceIcon, usePageTitle } from "./utils/webHooks";
@@ -9,39 +9,23 @@ import { execFile } from "child_process";
 const isWindows = process.platform === "win32";
 
 export default function Command() {
-  const [items, setItems] = useState<LocalhostItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refresh, setRefresh] = useState(0);
-
-  useEffect(() => {
-    async function loadLocalhostProcesses() {
-      setLoading(true);
-
-      try {
-        const localhostItems = await getLocalhostItems();
-        const sortedItems = localhostItems.sort((a, b) => parseInt(a.port) - parseInt(b.port));
-        setItems(sortedItems);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: error instanceof Error ? error.message : "Failed to get localhost processes",
-        });
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadLocalhostProcesses();
-  }, [refresh]);
+  // useCachedPromise shows the previous result instantly on reopen, then revalidates.
+  const {
+    data: items = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(getLocalhostItems, [], {
+    onError: (error) =>
+      showToast({ style: Toast.Style.Failure, title: error.message || "Failed to get localhost servers" }),
+  });
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search local servers...">
-      {items.length === 0 && !loading ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search local servers...">
+      {items.length === 0 && !isLoading ? (
         <List.EmptyView title="No local web servers found" />
       ) : (
         items.map((item: LocalhostItem) => (
-          <LocalhostListItem key={item.id} item={item} onActionComplete={() => setRefresh((r) => r + 1)} />
+          <LocalhostListItem key={item.id} item={item} onActionComplete={revalidate} />
         ))
       )}
     </List>

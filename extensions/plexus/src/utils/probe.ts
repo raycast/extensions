@@ -1,5 +1,7 @@
 import { connect } from "net";
 
+const PROBE_TIMEOUT_MS = 400;
+
 // Decides whether a listening port is a real web page you can open in a browser.
 // We use a raw socket (not fetch): probing non-HTTP services like Postgres/Redis/MySQL can
 // make Node's HTTP parser throw uncaught errors. We send a minimal request and keep the port
@@ -29,7 +31,7 @@ export function respondsToHttp(port: string): Promise<boolean> {
       finish(status >= 200 && status < 400 && isHtml);
     };
 
-    socket.setTimeout(1500);
+    socket.setTimeout(PROBE_TIMEOUT_MS);
     socket.on("connect", () => {
       socket.write("GET / HTTP/1.0\r\nHost: localhost\r\nConnection: close\r\n\r\n");
     });

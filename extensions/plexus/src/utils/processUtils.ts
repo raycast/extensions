@@ -22,13 +22,12 @@ async function runPowerShell(script: string): Promise<string> {
 }
 
 // Find every listening TCP server. The HTTP probe in the service decides which of these are
-// actually web pages worth showing; here we just enumerate and attach process info for naming.
+// actually web pages worth showing; here we just enumerate (cheaply) and, where it's free,
+// attach process info for naming. Native-Windows command lines are fetched lazily afterwards.
 export async function findListeningServers(): Promise<ListeningServer[]> {
   let servers: ListeningServer[];
 
   if (isWindows) {
-    // Native Windows listeners + listeners inside WSL (forwarded to localhost but owned by
-    // wslrelay on the Windows side, so they need a separate lookup through wsl.exe).
     const [host, wsl] = await Promise.all([
       findWindowsHostServers().catch(() => [] as ListeningServer[]),
       findWslServers().catch(() => [] as ListeningServer[]),
@@ -86,30 +85,44 @@ async function findUnixServers(): Promise<ListeningServer[]> {
   return servers;
 }
 
-// --- Windows host: one CIM query for all command lines, then map listeners to them ---
+// --- Windows host: netstat is ~25x faster than spinning up PowerShell. Command lines are
+// fetched lazily (getHostCommandLines) only for the few ports that pass the HTTP probe. ---
 async function findWindowsHostServers(): Promise<ListeningServer[]> {
-  const script =
-    "$cmds=@{}; Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | ForEach-Object { $cmds[[string]$_.ProcessId]=$_.CommandLine }; " +
-    "Get-NetTCPConnection -State Listen | ForEach-Object { " +
-    "$proc=Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; " +
-    "if ($proc -and $proc.ProcessName -ne 'wslrelay') { " +
-    '"$($_.OwningProcess)|$($_.LocalPort)|$($cmds[[string]$_.OwningProcess])" } }';
-  const stdout = await runPowerShell(script);
-
+  const { stdout } = await execFileAsync("netstat", ["-ano", "-p", "TCP"]);
   const servers: ListeningServer[] = [];
   for (const line of stdout.split(/\r?\n/)) {
-    if (!line.trim()) continue;
-    const [pid, port, ...rest] = line.split("|");
-    if (!pid || !port) continue;
-    servers.push({
-      pid: pid.trim(),
-      port: port.trim(),
-      source: "host",
-      command: rest.join("|").trim(),
-      workingDir: null,
-    });
+    if (!/\bLISTENING\b/.test(line)) continue;
+    const parts = line.trim().split(/\s+/);
+    // Proto  Local Address  Foreign Address  State  PID
+    const local = parts[1] ?? "";
+    const pid = parts[parts.length - 1];
+    const port = local.slice(local.lastIndexOf(":") + 1);
+    if (!pid || !/^\d+$/.test(port)) continue;
+    servers.push({ pid, port, source: "host", command: "", workingDir: null });
   }
   return servers;
+}
+
+// Fetch command lines for specific Windows PIDs in one CIM query (only used for survivors).
+export async function getHostCommandLines(pids: string[]): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  const unique = [...new Set(pids)].filter((p) => /^\d+$/.test(p));
+  if (unique.length === 0) return result;
+
+  const filter = unique.map((p) => `ProcessId=${p}`).join(" or ");
+  try {
+    const stdout = await runPowerShell(
+      `Get-CimInstance Win32_Process -Filter "${filter}" -ErrorAction SilentlyContinue | ForEach-Object { "$($_.ProcessId)|$($_.CommandLine)" }`,
+    );
+    for (const line of stdout.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      const [pid, ...rest] = line.split("|");
+      if (pid) result.set(pid.trim(), rest.join("|").trim());
+    }
+  } catch {
+    // leave commands empty; names fall back to the page title
+  }
+  return result;
 }
 
 // --- WSL: enumerate listeners inside each running distro via wsl.exe ---
