@@ -84,10 +84,6 @@ export default function SavedGames() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
   const [filterMode, setFilterMode] = useState<string>("default");
-  const [seenDrops, setSeenDrops] = useState<Record<string, boolean>>({});
-  const [seenPriceChanges, setSeenPriceChanges] = useState<
-    Record<string, boolean>
-  >({});
 
   const bundleCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -114,12 +110,6 @@ export default function SavedGames() {
     });
     LocalStorage.getItem<string>("last_seen_prices").then((s) =>
       setReferencePrices(safeParse(s, {})),
-    );
-    LocalStorage.getItem<string>("seen_drops").then(
-      (s) => s && setSeenDrops(JSON.parse(s)),
-    );
-    LocalStorage.getItem<string>("seen_price_changes").then(
-      (s) => s && setSeenPriceChanges(JSON.parse(s)),
     );
   }, []);
 
@@ -385,25 +375,8 @@ export default function SavedGames() {
 
   const removeGame = async (id: string) => {
     const newList = savedGames.filter((g) => g.id !== id);
-    const updatedSeenDrops = Object.fromEntries(
-      Object.entries(seenDrops).filter(([gameId]) => gameId !== id),
-    );
-    const updatedSeenPriceChanges = Object.fromEntries(
-      Object.entries(seenPriceChanges).filter(([gameId]) => gameId !== id),
-    );
-
     setSavedGames(newList);
-    setSeenDrops(updatedSeenDrops);
-    setSeenPriceChanges(updatedSeenPriceChanges);
-
-    await Promise.all([
-      LocalStorage.setItem("saved_itad_games", JSON.stringify(newList)),
-      LocalStorage.setItem("seen_drops", JSON.stringify(updatedSeenDrops)),
-      LocalStorage.setItem(
-        "seen_price_changes",
-        JSON.stringify(updatedSeenPriceChanges),
-      ),
-    ]);
+    await LocalStorage.setItem("saved_itad_games", JSON.stringify(newList));
     cache.remove(CACHE_KEY);
   };
 
@@ -412,7 +385,7 @@ export default function SavedGames() {
     const current = prices[game.id]?.price?.amount;
     if (!last || last <= 0 || current == null) return false;
     const diff = ((current - last) / last) * 100;
-    return diff <= -10 && !seenDrops[game.id];
+    return diff <= -10;
   });
 
   return (
@@ -568,7 +541,7 @@ export default function SavedGames() {
                     const diffAbs = currentPrice - lastPrice;
                     const diffPct = (diffAbs / lastPrice) * 100;
 
-                    if (Math.abs(diffPct) >= 3 && !seenPriceChanges[game.id]) {
+                    if (Math.abs(diffPct) >= 3) {
                       let label = "";
                       if (diffPct <= -10) label = "🔥 DROP";
                       else if (diffPct < 0) label = "⬇ DOWN";
@@ -1300,21 +1273,21 @@ function GameDetail({
   const isDiscounted = effectiveCut > 0;
   let saleTagText = "";
   let saleTagColor = Color.Green;
-  if (isDiscounted) {
-    if (currentBest.cut >= 70) {
+if (isDiscounted) {
+    if (effectiveCut >= 70) {
       saleTagText = "MEGA SALE";
       saleTagColor = Color.Green;
-    } else if (currentBest.cut >= 40) {
+    } else if (effectiveCut >= 40) {
       saleTagText = "ON SALE";
       saleTagColor = Color.Green;
-    } else if (currentBest.cut >= 20) {
+    } else if (effectiveCut >= 20) {
       saleTagText = "DISCOUNT";
       saleTagColor = Color.SecondaryText;
     } else {
       saleTagText = "LOW DISCOUNT";
       saleTagColor = Color.SecondaryText;
     }
-  }
+}
 
   const signalEmoji =
     signalText === "STRONG OPPORTUNITY"
