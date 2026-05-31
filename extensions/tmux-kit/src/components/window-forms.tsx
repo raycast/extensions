@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { newWindow, renameWindow } from "../lib/tmux";
 import { toastError } from "../lib/ui";
@@ -51,11 +43,7 @@ export function RenameWindowForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Rename"
-            icon={Icon.Pencil}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Rename" icon={Icon.Pencil} onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -70,9 +58,7 @@ export function RenameWindowForm({
         error={error}
         autoFocus
       />
-      <Form.Description
-        text={`Renaming window ${windowIndex} in session "${sessionName}"`}
-      />
+      <Form.Description text={`Renaming window ${windowIndex} in session "${sessionName}"`} />
     </Form>
   );
 }
@@ -92,16 +78,10 @@ export function NewWindowForm({
 
   const submit = async () => {
     try {
-      await newWindow(
-        sessionId,
-        name.trim() || undefined,
-        cwd[0]?.trim() || undefined,
-      );
+      await newWindow(sessionId, name.trim() || undefined, cwd[0]?.trim() || undefined);
       await showToast({
         style: Toast.Style.Success,
-        title: name.trim()
-          ? `Created window "${name.trim()}"`
-          : "Created window",
+        title: name.trim() ? `Created window "${name.trim()}"` : "Created window",
       });
       await onDone();
       pop();
@@ -114,11 +94,7 @@ export function NewWindowForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create"
-            icon={Icon.Plus}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Create" icon={Icon.Plus} onSubmit={submit} />
         </ActionPanel>
       }
     >

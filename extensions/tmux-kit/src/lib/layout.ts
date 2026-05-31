@@ -9,22 +9,14 @@ export type Direction = "left" | "right" | "up" | "down";
 // nearest perpendicular position so the result is deterministic regardless of
 // list order. Returns null when there is no such neighbor (pane at that edge,
 // or alone).
-export function findNeighbor(
-  panes: TmuxPane[],
-  pane: TmuxPane,
-  dir: Direction,
-): TmuxPane | null {
+export function findNeighbor(panes: TmuxPane[], pane: TmuxPane, dir: Direction): TmuxPane | null {
   const right = (p: TmuxPane) => p.left + p.width - 1;
   const bottom = (p: TmuxPane) => p.top + p.height - 1;
 
-  const vOverlap = (q: TmuxPane) =>
-    q.top <= bottom(pane) && bottom(q) >= pane.top;
-  const hOverlap = (q: TmuxPane) =>
-    q.left <= right(pane) && right(q) >= pane.left;
+  const vOverlap = (q: TmuxPane) => q.top <= bottom(pane) && bottom(q) >= pane.top;
+  const hOverlap = (q: TmuxPane) => q.left <= right(pane) && right(q) >= pane.left;
 
-  const candidates = panes.filter(
-    (q) => q.windowIndex === pane.windowIndex && q.id !== pane.id,
-  );
+  const candidates = panes.filter((q) => q.windowIndex === pane.windowIndex && q.id !== pane.id);
 
   let best: TmuxPane | null = null;
   for (const q of candidates) {
@@ -34,8 +26,7 @@ export function findNeighbor(
           if (
             !best ||
             right(q) > right(best) ||
-            (right(q) === right(best) &&
-              Math.abs(q.top - pane.top) < Math.abs(best.top - pane.top))
+            (right(q) === right(best) && Math.abs(q.top - pane.top) < Math.abs(best.top - pane.top))
           )
             best = q;
         }
@@ -45,8 +36,7 @@ export function findNeighbor(
           if (
             !best ||
             q.left < best.left ||
-            (q.left === best.left &&
-              Math.abs(q.top - pane.top) < Math.abs(best.top - pane.top))
+            (q.left === best.left && Math.abs(q.top - pane.top) < Math.abs(best.top - pane.top))
           )
             best = q;
         }
@@ -56,8 +46,7 @@ export function findNeighbor(
           if (
             !best ||
             bottom(q) > bottom(best) ||
-            (bottom(q) === bottom(best) &&
-              Math.abs(q.left - pane.left) < Math.abs(best.left - pane.left))
+            (bottom(q) === bottom(best) && Math.abs(q.left - pane.left) < Math.abs(best.left - pane.left))
           )
             best = q;
         }
@@ -67,8 +56,7 @@ export function findNeighbor(
           if (
             !best ||
             q.top < best.top ||
-            (q.top === best.top &&
-              Math.abs(q.left - pane.left) < Math.abs(best.left - pane.left))
+            (q.top === best.top && Math.abs(q.left - pane.left) < Math.abs(best.left - pane.left))
           )
             best = q;
         }

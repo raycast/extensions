@@ -45,12 +45,7 @@ export default function SessionsCommand() {
       setSessions(data);
       setError(null);
     } catch (e) {
-      const msg =
-        e instanceof TmuxError
-          ? e.stderr || e.message
-          : e instanceof Error
-            ? e.message
-            : String(e);
+      const msg = e instanceof TmuxError ? e.stderr || e.message : e instanceof Error ? e.message : String(e);
       setError(msg);
       setSessions([]);
     } finally {
@@ -64,16 +59,8 @@ export default function SessionsCommand() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search tmux sessions…">
-      {error && (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Failed to read tmux sessions"
-          description={error}
-        />
-      )}
-      {!error && sessions && sessions.length === 0 && (
-        <EmptyState onChange={refresh} />
-      )}
+      {error && <List.EmptyView icon={Icon.ExclamationMark} title="Failed to read tmux sessions" description={error} />}
+      {!error && sessions && sessions.length === 0 && <EmptyState onChange={refresh} />}
       {sessions?.map((s) => (
         <SessionItem key={s.id} session={s} onChange={refresh} />
       ))}
@@ -89,24 +76,14 @@ function EmptyState({ onChange }: { onChange: () => Promise<void> }) {
       description="The tmux server is not running."
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Create New Session"
-            icon={Icon.Plus}
-            target={<NewSessionForm onDone={onChange} />}
-          />
+          <Action.Push title="Create New Session" icon={Icon.Plus} target={<NewSessionForm onDone={onChange} />} />
         </ActionPanel>
       }
     />
   );
 }
 
-function SessionItem({
-  session,
-  onChange,
-}: {
-  session: TmuxSession;
-  onChange: () => Promise<void>;
-}) {
+function SessionItem({ session, onChange }: { session: TmuxSession; onChange: () => Promise<void> }) {
   return (
     <List.Item
       title={session.name}
@@ -131,13 +108,7 @@ function SessionItem({
   );
 }
 
-function SessionActions({
-  session,
-  onChange,
-}: {
-  session: TmuxSession;
-  onChange: () => Promise<void>;
-}) {
+function SessionActions({ session, onChange }: { session: TmuxSession; onChange: () => Promise<void> }) {
   const handleSwitch = useCallback(async () => {
     try {
       if (!(await hasAnyClient())) {
@@ -188,9 +159,7 @@ function SessionActions({
   const handleKillOthers = useCallback(async () => {
     let others: string[] | null = null;
     try {
-      others = (await listSessions())
-        .map((s) => s.name)
-        .filter((n) => n !== session.name);
+      others = (await listSessions()).map((s) => s.name).filter((n) => n !== session.name);
     } catch {
       // Listing failed — fall through to a generic confirmation below.
     }
@@ -204,9 +173,7 @@ function SessionActions({
     const ok = await confirmAlert({
       title: `Kill all sessions except "${session.name}"?`,
       message: others
-        ? `Will kill ${others.length} other session(s):\n${others
-            .map((n) => `• ${n}`)
-            .join("\n")}`
+        ? `Will kill ${others.length} other session(s):\n${others.map((n) => `• ${n}`).join("\n")}`
         : "All other sessions will be terminated. This cannot be undone.",
       primaryAction: {
         title: "Kill Others",
@@ -232,11 +199,7 @@ function SessionActions({
 
   return (
     <ActionPanel>
-      <Action
-        title="Switch Client to Session"
-        icon={Icon.ArrowRight}
-        onAction={handleSwitch}
-      />
+      <Action title="Switch Client to Session" icon={Icon.ArrowRight} onAction={handleSwitch} />
       <Action.CopyToClipboard
         title="Copy Attach Command"
         content={attachCommand(session.name, session.id)}
@@ -287,13 +250,7 @@ function SessionActions({
   );
 }
 
-function RenameForm({
-  session,
-  onDone,
-}: {
-  session: TmuxSession;
-  onDone: () => Promise<void>;
-}) {
+function RenameForm({ session, onDone }: { session: TmuxSession; onDone: () => Promise<void> }) {
   const { pop } = useNavigation();
   const [name, setName] = useState(session.name);
   const [error, setError] = useState<string | undefined>();
@@ -329,11 +286,7 @@ function RenameForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Rename"
-            icon={Icon.Pencil}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Rename" icon={Icon.Pencil} onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -390,11 +343,7 @@ function NewSessionForm({ onDone }: { onDone: () => Promise<void> }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create"
-            icon={Icon.Plus}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Create" icon={Icon.Plus} onSubmit={submit} />
         </ActionPanel>
       }
     >

@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Detail,
-  Icon,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Detail, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { TmuxError, capturePane, killPane } from "../lib/tmux";
 import { codeBlock, toastError } from "../lib/ui";
@@ -45,9 +35,7 @@ export function PaneDetail({
     void load();
   }, [load]);
 
-  const markdown = error
-    ? `## Failed to capture pane\n\n${codeBlock(error)}`
-    : codeBlock(content ?? "");
+  const markdown = error ? `## Failed to capture pane\n\n${codeBlock(error)}` : codeBlock(content ?? "");
 
   return (
     <Detail
@@ -56,9 +44,7 @@ export function PaneDetail({
       markdown={markdown}
       actions={
         <ActionPanel>
-          {content != null && !error && (
-            <Action.CopyToClipboard title="Copy Content" content={content} />
-          )}
+          {content != null && !error && <Action.CopyToClipboard title="Copy Content" content={content} />}
           <Action
             title="Reload Capture"
             icon={Icon.ArrowClockwise}

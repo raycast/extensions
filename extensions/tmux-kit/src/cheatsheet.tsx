@@ -1,16 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  Keyboard,
-  List,
-} from "@raycast/api";
-import {
-  CHEAT_ENTRIES,
-  CheatEntry,
-  SECTIONS_IN_ORDER,
-} from "./data/cheatsheet";
+import { Action, ActionPanel, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { CHEAT_ENTRIES, CheatEntry, SECTIONS_IN_ORDER } from "./data/cheatsheet";
 
 export default function CheatsheetCommand() {
   const grouped = SECTIONS_IN_ORDER.map((section) => ({
@@ -19,10 +8,7 @@ export default function CheatsheetCommand() {
   })).filter((g) => g.items.length > 0);
 
   return (
-    <List
-      searchBarPlaceholder="Search prefix / command / keyword…"
-      isShowingDetail={false}
-    >
+    <List searchBarPlaceholder="Search prefix / command / keyword…" isShowingDetail={false}>
       {grouped.map(({ section, items }) => (
         <List.Section key={section} title={section}>
           {items.map((entry) => (
@@ -48,9 +34,7 @@ function EntryItem({ entry }: { entry: CheatEntry }) {
     .flatMap((k) => k.split(/[\s/]+/))
     .filter((s) => s.length > 0);
 
-  const accessories = entry.description
-    ? [{ text: entry.description }]
-    : undefined;
+  const accessories = entry.description ? [{ text: entry.description }] : undefined;
 
   return (
     <List.Item
@@ -91,11 +75,7 @@ function EntryActions({ entry }: { entry: CheatEntry }) {
 
   return (
     <ActionPanel>
-      <Action.Push
-        title="Show Detail"
-        target={<EntryDetail entry={entry} />}
-        icon={Icon.Book}
-      />
+      <Action.Push title="Show Detail" target={<EntryDetail entry={entry} />} icon={Icon.Book} />
       {entry.shortcut && (
         <Action.CopyToClipboard
           title="Copy Shortcut"
@@ -137,18 +117,9 @@ function EntryDetail({ entry }: { entry: CheatEntry }) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Section" text={entry.section} />
-          {entry.shortcut && (
-            <Detail.Metadata.Label title="Shortcut" text={entry.shortcut} />
-          )}
-          {entry.command && (
-            <Detail.Metadata.Label
-              title="Command mode"
-              text={`prefix : ${entry.command}`}
-            />
-          )}
-          {entry.shell && (
-            <Detail.Metadata.Label title="Shell" text={entry.shell} />
-          )}
+          {entry.shortcut && <Detail.Metadata.Label title="Shortcut" text={entry.shortcut} />}
+          {entry.command && <Detail.Metadata.Label title="Command mode" text={`prefix : ${entry.command}`} />}
+          {entry.shell && <Detail.Metadata.Label title="Shell" text={entry.shell} />}
         </Detail.Metadata>
       }
       actions={<EntryActions entry={entry} />}
@@ -159,8 +130,7 @@ function EntryDetail({ entry }: { entry: CheatEntry }) {
 function buildMarkdown(e: CheatEntry): string {
   const lines: string[] = [`# ${e.title}`, ""];
   if (e.shortcut) lines.push(`**Shortcut:** \`${e.shortcut}\``, "");
-  if (e.command)
-    lines.push(`**Command mode:** \`prefix :\` → \`${e.command}\``, "");
+  if (e.command) lines.push(`**Command mode:** \`prefix :\` → \`${e.command}\``, "");
   if (e.shell) lines.push(`**Shell:** \`${e.shell}\``, "");
   if (e.description) lines.push(e.description);
   if (e.details) lines.push("", "---", "", e.details);

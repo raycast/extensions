@@ -3,13 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { TmuxError, TmuxPane, listPanes } from "./lib/tmux";
 import { PaneItem } from "./components/pane-item";
 
-export function PanesView({
-  sessionName,
-  sessionId,
-}: {
-  sessionName: string;
-  sessionId: string;
-}) {
+export function PanesView({ sessionName, sessionId }: { sessionName: string; sessionId: string }) {
   const [panes, setPanes] = useState<TmuxPane[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,19 +44,9 @@ export function PanesView({
       navigationTitle={`Panes · ${sessionName}`}
       searchBarPlaceholder="Search by command, path, PID…"
     >
-      {error && (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Failed to list panes"
-          description={error}
-        />
-      )}
+      {error && <List.EmptyView icon={Icon.ExclamationMark} title="Failed to list panes" description={error} />}
       {!error && !loading && panes.length === 0 && (
-        <List.EmptyView
-          icon={Icon.AppWindow}
-          title="No panes"
-          description={`Session ${sessionName} has no panes`}
-        />
+        <List.EmptyView icon={Icon.AppWindow} title="No panes" description={`Session ${sessionName} has no panes`} />
       )}
       {sortedGroups.map(([wi, group]) => (
         <List.Section
@@ -78,9 +62,7 @@ export function PanesView({
                 pane={p}
                 session={sessionName}
                 windowPanes={group.panes}
-                hasMarkedElsewhere={panes.some(
-                  (q) => q.marked && q.id !== p.id,
-                )}
+                hasMarkedElsewhere={panes.some((q) => q.marked && q.id !== p.id)}
                 onChange={refresh}
               />
             ))}

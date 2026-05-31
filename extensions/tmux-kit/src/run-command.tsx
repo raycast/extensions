@@ -71,10 +71,7 @@ export default function RunCommand() {
           const all = await listSessions();
           if (all.length > 0) {
             detail +=
-              "\n\nCurrent sessions:\n" +
-              all
-                .map((s) => `• ${s.name}${s.attached ? " (attached)" : ""}`)
-                .join("\n");
+              "\n\nCurrent sessions:\n" + all.map((s) => `• ${s.name}${s.attached ? " (attached)" : ""}`).join("\n");
           }
         } catch {
           // If listing fails, confirm with the command text alone.
@@ -88,27 +85,16 @@ export default function RunCommand() {
       if (!ok) return;
     }
 
-    const next = [trimmed, ...history.filter((h) => h !== trimmed)].slice(
-      0,
-      HISTORY_MAX,
-    );
+    const next = [trimmed, ...history.filter((h) => h !== trimmed)].slice(0, HISTORY_MAX);
     setHistory(next);
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(next));
 
     try {
       const out = await runRawCommand(trimmed);
-      push(
-        <CommandResult
-          command={trimmed}
-          stdout={out.stdout}
-          stderr={out.stderr}
-        />,
-      );
+      push(<CommandResult command={trimmed} stdout={out.stdout} stderr={out.stderr} />);
     } catch (e) {
       const stderr = e instanceof TmuxError ? e.stderr : String(e);
-      push(
-        <CommandResult command={trimmed} stdout="" stderr={stderr} failed />,
-      );
+      push(<CommandResult command={trimmed} stdout="" stderr={stderr} failed />);
     }
   };
 
@@ -117,11 +103,7 @@ export default function RunCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Run" icon={Icon.Play} onSubmit={submit} />
-          <ActionPanel.Submenu
-            title="Insert Preset"
-            icon={Icon.List}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-          >
+          <ActionPanel.Submenu title="Insert Preset" icon={Icon.List} shortcut={{ modifiers: ["cmd"], key: "i" }}>
             {QUICK_PRESETS.map((p) => (
               <Action key={p} title={p} onAction={() => setCmd(p)} />
             ))}
@@ -164,11 +146,7 @@ export default function RunCommand() {
         autoFocus
       />
       <Form.Description text="Input runs as `tmux <input>` via /bin/sh -c, so quotes and variables are parsed by the shell." />
-      {history.length > 0 && (
-        <Form.Description
-          text={`Recent: ${history.slice(0, 5).join("  ·  ")}`}
-        />
-      )}
+      {history.length > 0 && <Form.Description text={`Recent: ${history.slice(0, 5).join("  ·  ")}`} />}
     </Form>
   );
 }
@@ -184,12 +162,7 @@ function CommandResult({
   stderr: string;
   failed?: boolean;
 }) {
-  const parts: string[] = [
-    `# tmux ${command}`,
-    "",
-    failed ? "> **Failed**" : "> **Success**",
-    "",
-  ];
+  const parts: string[] = [`# tmux ${command}`, "", failed ? "> **Failed**" : "> **Success**", ""];
   if (stdout.trim().length > 0) {
     parts.push("**stdout**", codeBlock(stdout.trimEnd()), "");
   } else {
@@ -205,12 +178,8 @@ function CommandResult({
       navigationTitle={`tmux ${command}`}
       actions={
         <ActionPanel>
-          {stdout.length > 0 && (
-            <Action.CopyToClipboard title="Copy Stdout" content={stdout} />
-          )}
-          {stderr.length > 0 && (
-            <Action.CopyToClipboard title="Copy Stderr" content={stderr} />
-          )}
+          {stdout.length > 0 && <Action.CopyToClipboard title="Copy Stdout" content={stdout} />}
+          {stderr.length > 0 && <Action.CopyToClipboard title="Copy Stderr" content={stderr} />}
           <Action.CopyToClipboard
             title="Copy Command"
             content={`tmux ${command}`}

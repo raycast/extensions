@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import {
   TmuxPane,
   breakPane,
@@ -75,13 +64,7 @@ export function PaneItem({
           ? { source: Icon.Star, tintColor: Color.Yellow }
           : { source: Icon.AppWindow, tintColor: Color.SecondaryText }
       }
-      keywords={[
-        pane.command,
-        pane.path,
-        String(pane.pid),
-        pane.id,
-        ...(pane.marked ? ["marked"] : []),
-      ]}
+      keywords={[pane.command, pane.path, String(pane.pid), pane.id, ...(pane.marked ? ["marked"] : [])]}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -91,13 +74,7 @@ export function PaneItem({
               title="View Pane Content"
               icon={Icon.Eye}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
-              target={
-                <PaneDetail
-                  paneId={pane.id}
-                  command={pane.command}
-                  onChange={onChange}
-                />
-              }
+              target={<PaneDetail paneId={pane.id} command={pane.command} onChange={onChange} />}
             />
             <Action
               title="Copy Pane Content"
@@ -118,10 +95,7 @@ export function PaneItem({
               content={pane.id}
               shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             />
-            <Action.CopyToClipboard
-              title="Copy Command"
-              content={pane.command}
-            />
+            <Action.CopyToClipboard title="Copy Command" content={pane.command} />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Move / Swap">
@@ -279,13 +253,7 @@ export function PaneItem({
               title="New Window in This Session"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-              target={
-                <NewWindowForm
-                  sessionId={pane.sessionId}
-                  sessionName={session}
-                  onDone={onChange}
-                />
-              }
+              target={<NewWindowForm sessionId={pane.sessionId} sessionName={session} onDone={onChange} />}
             />
           </ActionPanel.Section>
 
@@ -350,9 +318,7 @@ export function PaneItem({
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "w" }}
               onAction={async () => {
-                const label = pane.windowName
-                  ? `${pane.windowIndex}: ${pane.windowName}`
-                  : `${pane.windowIndex}`;
+                const label = pane.windowName ? `${pane.windowIndex}: ${pane.windowName}` : `${pane.windowIndex}`;
                 const ok = await confirmAlert({
                   title: `Kill window ${label}?`,
                   message: `All panes in this window will be terminated.`,

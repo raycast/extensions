@@ -21,9 +21,7 @@ export class TmuxError extends Error {
   }
 }
 
-async function run(
-  args: string[],
-): Promise<{ stdout: string; stderr: string }> {
+async function run(args: string[]): Promise<{ stdout: string; stderr: string }> {
   try {
     return await execFileP(tmuxBin(), args, { encoding: "utf8" });
   } catch (e) {
@@ -75,16 +73,7 @@ export async function listSessions(): Promise<TmuxSession[]> {
       .split("\n")
       .filter((l) => l.length > 0)
       .map((line) => {
-        const [
-          name,
-          windows,
-          attached,
-          created,
-          activity,
-          currentWindow,
-          currentPath,
-          id,
-        ] = line.split(FIELD_SEP);
+        const [name, windows, attached, created, activity, currentWindow, currentPath, id] = line.split(FIELD_SEP);
         return {
           id: id ?? "",
           name,
@@ -114,10 +103,7 @@ export async function killOtherSessions(keepId: string): Promise<void> {
   await run(["kill-session", "-a", "-t", keepId]);
 }
 
-export async function renameSession(
-  sessionId: string,
-  newName: string,
-): Promise<void> {
+export async function renameSession(sessionId: string, newName: string): Promise<void> {
   await run(["rename-session", "-t", sessionId, newName]);
 }
 
@@ -125,10 +111,7 @@ export async function switchClient(sessionId: string): Promise<void> {
   await run(["switch-client", "-t", sessionId]);
 }
 
-export async function newSession(
-  name: string,
-  startDir?: string,
-): Promise<void> {
+export async function newSession(name: string, startDir?: string): Promise<void> {
   const args = ["new-session", "-d", "-s", name];
   if (startDir) args.push("-c", startDir);
   await run(args);
@@ -198,14 +181,7 @@ const PANE_FORMAT = [
 // Target by session_id ("$N"), not the session name: a name containing ":"
 // would be misparsed by `list-panes -t` as a "session:window" target.
 export async function listPanes(sessionId: string): Promise<TmuxPane[]> {
-  const { stdout } = await run([
-    "list-panes",
-    "-t",
-    sessionId,
-    "-s",
-    "-F",
-    PANE_FORMAT,
-  ]);
+  const { stdout } = await run(["list-panes", "-t", sessionId, "-s", "-F", PANE_FORMAT]);
   return stdout
     .split("\n")
     .filter((l) => l.length > 0)
@@ -283,36 +259,22 @@ export async function clearPaneHistory(paneId: string): Promise<void> {
 // may legally contain ":" and would make the target ambiguous (tmux would
 // parse "my:session:0" as window "session:0" inside session "my").
 
-export async function switchToWindow(
-  sessionId: string,
-  windowIndex: number,
-): Promise<void> {
+export async function switchToWindow(sessionId: string, windowIndex: number): Promise<void> {
   await run(["select-window", "-t", `${sessionId}:${windowIndex}`]);
 }
 
-export async function renameWindow(
-  sessionId: string,
-  windowIndex: number,
-  newName: string,
-): Promise<void> {
+export async function renameWindow(sessionId: string, windowIndex: number, newName: string): Promise<void> {
   await run(["rename-window", "-t", `${sessionId}:${windowIndex}`, newName]);
 }
 
-export async function killWindow(
-  sessionId: string,
-  windowIndex: number,
-): Promise<void> {
+export async function killWindow(sessionId: string, windowIndex: number): Promise<void> {
   await run(["kill-window", "-t", `${sessionId}:${windowIndex}`]);
 }
 
 // Create a new window in the given session. -d keeps the session's current
 // window unchanged so we don't yank tmux focus out from under any attached
 // client; the user can Switch afterwards if they want to land on it.
-export async function newWindow(
-  sessionId: string,
-  name?: string,
-  cwd?: string,
-): Promise<void> {
+export async function newWindow(sessionId: string, name?: string, cwd?: string): Promise<void> {
   const args = ["new-window", "-d", "-t", `${sessionId}:`];
   if (name) args.push("-n", name);
   if (cwd) args.push("-c", cwd);
@@ -324,8 +286,7 @@ export async function newWindow(
 const DEFAULT_RESURRECT_DIR = `${homedir()}/.tmux/plugins/tmux-resurrect/scripts`;
 
 function resurrectDir(): string {
-  const raw =
-    getPreferenceValues<Preferences>().resurrectScriptsDir?.trim() ?? "";
+  const raw = getPreferenceValues<Preferences>().resurrectScriptsDir?.trim() ?? "";
   if (raw.length === 0) return DEFAULT_RESURRECT_DIR;
   // Expand leading ~ ourselves: the resolved path will be shell-quoted before
   // `tmux run-shell` so the shell will treat any ~ inside the quoted literal
@@ -355,9 +316,7 @@ export async function resurrectRestore(): Promise<void> {
  * Returns stdout/stderr; throws TmuxError on non-zero exit (also returns
  * captured stderr inside the error).
  */
-export async function runRawCommand(
-  input: string,
-): Promise<{ stdout: string; stderr: string }> {
+export async function runRawCommand(input: string): Promise<{ stdout: string; stderr: string }> {
   const cmd = `${shellQuote(tmuxBin())} ${input}`;
   try {
     return await execFileP("/bin/sh", ["-c", cmd], { encoding: "utf8" });

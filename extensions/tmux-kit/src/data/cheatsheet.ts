@@ -39,8 +39,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Core",
     title: "Detach",
     shortcut: "prefix d",
-    description:
-      "Detach the current client; the session keeps running in the background.",
+    description: "Detach the current client; the session keeps running in the background.",
     keywords: ["detach", "background"],
   }),
   E({
@@ -48,8 +47,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Core",
     title: "Attach to a session",
     shell: "tmux attach -t <name>",
-    description:
-      "Attach to a named session. `tmux a` reattaches the most recent one.",
+    description: "Attach to a named session. `tmux a` reattaches the most recent one.",
     keywords: ["attach"],
   }),
   E({
@@ -65,8 +63,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Core",
     title: "New named session",
     shell: "tmux new -s <name>",
-    description:
-      "Create and attach to a named session. Add `-d` to create detached.",
+    description: "Create and attach to a named session. Add `-d` to create detached.",
     keywords: ["new", "create"],
   }),
   E({
@@ -193,8 +190,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Pane",
     title: "Toggle pane zoom",
     shortcut: "prefix z",
-    description:
-      "Temporarily maximize the current pane (press again to restore).",
+    description: "Temporarily maximize the current pane (press again to restore).",
     keywords: ["zoom", "fullscreen", "maximize"],
   }),
   E({
@@ -241,8 +237,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Pane",
     title: "Cycle layouts",
     shortcut: "prefix Space",
-    description:
-      "Cycle through preset layouts (even-h / even-v / main-h / main-v / tiled).",
+    description: "Cycle through preset layouts (even-h / even-v / main-h / main-v / tiled).",
     keywords: ["layout"],
   }),
 
@@ -287,8 +282,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Copy mode",
     title: "Begin selection (vi mode)",
     shortcut: "v",
-    description:
-      "In vi mode, press v to start visual selection. Use Space in emacs mode.",
+    description: "In vi mode, press v to start visual selection. Use Space in emacs mode.",
   }),
   E({
     id: "copy-yank-vi",
@@ -331,8 +325,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Misc",
     title: "Enter command mode",
     shortcut: "prefix :",
-    description:
-      "Open the tmux command line. Tab-completes, history with ↑↓, chain with `;`.",
+    description: "Open the tmux command line. Tab-completes, history with ↑↓, chain with `;`.",
   }),
   E({
     id: "misc-reload",
@@ -404,16 +397,14 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     section: "Command mode",
     title: "Toggle mouse mode",
     command: "set -g mouse on",
-    description:
-      "Enable mouse support (scroll, click-focus, drag-resize); use `off` to disable.",
+    description: "Enable mouse support (scroll, click-focus, drag-resize); use `off` to disable.",
   }),
   E({
     id: "cmd-toggle-status",
     section: "Command mode",
     title: "Toggle status bar",
     command: "set -g status off",
-    description:
-      "Hide the status bar (handy for screenshots/recording); `on` to restore.",
+    description: "Hide the status bar (handy for screenshots/recording); `on` to restore.",
   }),
   E({
     id: "cmd-find-window",
@@ -497,8 +488,7 @@ export const CHEAT_ENTRIES: CheatEntry[] = [
     id: "file-tmux-conf",
     section: "Files",
     title: "~/.tmux.conf",
-    description:
-      "Main tmux configuration: prefix key, bindings, appearance, plugin loader.",
+    description: "Main tmux configuration: prefix key, bindings, appearance, plugin loader.",
     keywords: ["config"],
   }),
   E({
