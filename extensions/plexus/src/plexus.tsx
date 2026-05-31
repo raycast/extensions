@@ -68,9 +68,19 @@ function LocalhostListItem({ item, onActionComplete }: { item: LocalhostItem; on
         title: `Terminating process ${item.pid}...`,
       });
 
-      // taskkill terminates the process tree (/T) and forces it (/F) on Windows; kill on macOS.
-      const command = isWindows ? "taskkill" : "kill";
-      const args = isWindows ? ["/PID", item.pid, "/F", "/T"] : [item.pid];
+      // WSL servers must be killed inside their distro; Windows uses taskkill, macOS uses kill.
+      let command: string;
+      let args: string[];
+      if (item.source === "wsl") {
+        command = "wsl.exe";
+        args = item.distro ? ["-d", item.distro, "-e", "kill", item.pid] : ["-e", "kill", item.pid];
+      } else if (isWindows) {
+        command = "taskkill";
+        args = ["/PID", item.pid, "/F", "/T"];
+      } else {
+        command = "kill";
+        args = [item.pid];
+      }
 
       execFile(command, args, (error) => {
         if (error) {
@@ -89,13 +99,18 @@ function LocalhostListItem({ item, onActionComplete }: { item: LocalhostItem; on
     }
   }
 
+  const accessories =
+    item.source === "wsl"
+      ? [{ tag: item.distro ? `WSL: ${item.distro}` : "WSL" }, { tag: item.port }]
+      : [{ tag: item.port }];
+
   return (
     <List.Item
       key={item.id}
       icon={favicon ? { source: favicon } : Icon.Globe}
       title={createDisplayName(title || getProjectName(item.projectPath), item.framework)}
       subtitle={item.url}
-      accessories={[{ tag: item.port }]}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

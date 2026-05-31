@@ -4,6 +4,7 @@
 
 ### Added
 - Windows support: server discovery, process command/working-directory detection, and kill-process now work on Windows via PowerShell (`Get-NetTCPConnection`, `Win32_Process`) and `taskkill`.
+- On Windows, also detects Node.js servers running inside WSL (via `wsl.exe` + `/proc`), shown with a WSL tag and reachable on `localhost`; project names read over `\\wsl.localhost`, and kill routes through `wsl kill`.
 
 ### Fixed
 - Cross-platform path handling so project names resolve correctly on Windows.

@@ -6,4 +6,6 @@ export type LocalhostItem = {
   pid: string;
   url: string;
   favicon?: string;
+  source: "host" | "wsl";
+  distro?: string;
 };

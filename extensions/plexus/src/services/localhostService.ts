@@ -1,53 +1,28 @@
 import { LocalhostItem } from "../types/LocalhostItem";
-import { findNodeProcesses, getProcessCommand, getWorkingDirectory } from "../utils/processUtils";
+import { findNodeProcesses } from "../utils/processUtils";
 import { detectFramework, getProjectPath } from "../utils/projectUtils";
 
-async function getProcessDetails(pid: string, cmdResult: string) {
-  try {
-    // Get project information
-    const workingDir = await getWorkingDirectory(pid);
-    const projectPath = workingDir || getProjectPath(cmdResult);
-    const framework = detectFramework(cmdResult);
-
-    return {
-      workingDir,
-      projectPath,
-      framework,
-    };
-  } catch {
-    return undefined;
-  }
-}
-
 export async function getLocalhostItems(): Promise<LocalhostItem[]> {
-  const output = await findNodeProcesses();
-  const lines = output.split("\n").filter(Boolean);
+  const processes = await findNodeProcesses();
   const items: LocalhostItem[] = [];
 
-  for (const line of lines) {
-    const [pid, port] = line.split(":");
-    if (!pid || !port) continue;
-
-    // Get the command for this process
-    const cmdResult = await getProcessCommand(pid);
-
+  for (const proc of processes) {
     // Skip non-Node.js processes
-    if (!cmdResult.includes("node")) continue;
+    if (!proc.command.includes("node")) continue;
 
-    const details = await getProcessDetails(pid, cmdResult);
-
-    if (!details) continue;
-
-    const { projectPath, framework } = details;
-    const url = `http://localhost:${port}`;
+    // Prefer the real working directory; fall back to parsing the command line.
+    const projectPath = proc.workingDir || getProjectPath(proc.command);
+    const framework = detectFramework(proc.command);
 
     items.push({
-      id: pid,
+      id: `${proc.source}:${proc.pid}:${proc.port}`,
       projectPath,
       framework,
-      port,
-      pid,
-      url,
+      port: proc.port,
+      pid: proc.pid,
+      url: `http://localhost:${proc.port}`,
+      source: proc.source,
+      distro: proc.distro,
     });
   }
 
