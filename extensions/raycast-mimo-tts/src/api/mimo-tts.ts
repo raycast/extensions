@@ -5,6 +5,7 @@ import {
   MODEL_LABELS,
   getVoiceById,
   isVoiceAvailableForModel,
+  normalizeVoiceForModel,
 } from "../constants/mimo-voices";
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/mimo-playback-state";
 import { getMimoSettings, type MimoProviderSettings } from "../utils/provider-settings";
@@ -225,6 +226,10 @@ function normalizeBaseUrl(baseUrl: string | undefined): string {
   return trimmed.replace(/\/+$/, "").replace(/\/chat\/completions$/, "");
 }
 
+export function getActiveModel(): MimoTTSModel {
+  return DEFAULT_MODEL;
+}
+
 export async function getActiveModelAsync(): Promise<MimoTTSModel> {
   const settings = await getMimoSettings();
   return normalizeModel(settings.model);
@@ -250,7 +255,7 @@ function buildOptionsFromSettings(
   speedOverrideRate?: number | null,
 ): TTSOptions {
   const model = normalizeModel(settings.model);
-  const voice = voiceOverride || settings.defaultVoice || DEFAULT_VOICE;
+  const voice = normalizeVoiceForModel(voiceOverride || settings.defaultVoice || DEFAULT_VOICE, model);
 
   if (isPresetModel(model)) {
     const voiceConfig = getVoiceById(voice);
@@ -317,7 +322,7 @@ export async function buildOptionsForModel(
   const rate = (await getSpeedOverride()) ?? parseRateString(settings.speechRate);
   return {
     model,
-    voice: settings.defaultVoice || DEFAULT_VOICE,
+    voice: normalizeVoiceForModel(settings.defaultVoice || DEFAULT_VOICE, model),
     stylePrompt: buildStylePrompt(
       overrides.baseStylePrompt ?? settings.stylePrompt,
       rate,

@@ -1,6 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import type { MimoTTSModel } from "../api/mimo-types";
-import { DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/mimo-voices";
+import { DEFAULT_MODEL, DEFAULT_VOICE, normalizeVoiceForModel } from "../constants/mimo-voices";
 
 export interface MimoProviderSettings {
   model: MimoTTSModel;
@@ -80,9 +80,10 @@ function readPreferencesAsInput(): MimoProviderSettingsInput {
 }
 
 function normalizeMimoSettings(settings: MimoProviderSettingsInput | undefined): MimoProviderSettings {
+  const model = settings?.model === "mimo-v2-tts" ? "mimo-v2-tts" : DEFAULT_MODEL;
   return {
-    model: settings?.model === "mimo-v2-tts" ? "mimo-v2-tts" : DEFAULT_MODEL,
-    defaultVoice: settings?.defaultVoice?.trim() || DEFAULT_VOICE,
+    model,
+    defaultVoice: normalizeVoiceForModel(settings?.defaultVoice || DEFAULT_VOICE, model),
     speechRate: normalizeSpeechRate(settings?.speechRate),
     stylePrompt: settings?.stylePrompt?.trim() || "",
     tokenPlanBaseUrl:

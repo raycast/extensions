@@ -1,7 +1,8 @@
 import type { AudioPlayer } from "./audio-player";
 
-// Shared chunk playback loop. The provider supplies hooks for its own stop and
-// playback policies while reusing the same prefetch/cancel sequencing.
+// Shared chunk playback loop for Qwen-TTS, MiMo, and OpenAI. Each provider
+// supplies hooks for its own stop and playback policies while reusing the same
+// prefetch/cancel sequencing.
 
 export type ChunkOutcome = { kind: "audio"; audio: string } | { kind: "stopped" } | { kind: "error"; cause: unknown };
 

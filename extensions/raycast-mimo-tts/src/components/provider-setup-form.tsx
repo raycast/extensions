@@ -12,9 +12,9 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MimoTTSModel } from "../api/mimo-types";
 import {
-  DEFAULT_VOICE,
   MODEL_LABELS,
   VOICE_CATEGORIES,
+  getDefaultVoiceForModel,
   getVoicesByCategory,
   getVoicesForModel,
 } from "../constants/mimo-voices";
@@ -152,7 +152,7 @@ export default function SetupVoiceDefaults() {
         })}
         {/* Ensure currently selected voice always renders as an option even if filtered out by model. */}
         {voicesForModel.some((voice) => voice.id === settings.defaultVoice) ? null : (
-          <Form.Dropdown.Item value={settings.defaultVoice} title={settings.defaultVoice || DEFAULT_VOICE} />
+          <Form.Dropdown.Item value={getDefaultVoiceForModel(selectedModel)} title="Default English Voice" />
         )}
       </Form.Dropdown>
       <Form.Dropdown id="speechRate" title="Default Speech Rate" defaultValue={settings.speechRate}>

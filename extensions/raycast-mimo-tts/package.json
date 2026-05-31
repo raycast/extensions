@@ -146,12 +146,24 @@
       "type": "dropdown",
       "required": false,
       "title": "Default Voice",
-      "description": "Default voice for Quick Read and other commands.",
-      "default": "mimo_default",
+      "description": "Default voice for Quick Read and other commands. Uses an explicit voice because MiMo Default is region-dependent.",
+      "default": "Chloe",
       "data": [
         {
-          "title": "MiMo Default",
-          "value": "mimo_default"
+          "title": "Mia (English Female, Natural)",
+          "value": "Mia"
+        },
+        {
+          "title": "Chloe (English Female, Expressive)",
+          "value": "Chloe"
+        },
+        {
+          "title": "Milo (English Male, Warm)",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean (English Male, Grounded)",
+          "value": "Dean"
         },
         {
           "title": "Bingtang (Chinese Female, Clear)",
@@ -168,22 +180,6 @@
         {
           "title": "Baihua (Chinese Male, Steady)",
           "value": "白桦"
-        },
-        {
-          "title": "Mia (English Female, Natural)",
-          "value": "Mia"
-        },
-        {
-          "title": "Chloe (English Female, Expressive)",
-          "value": "Chloe"
-        },
-        {
-          "title": "Milo (English Male, Warm)",
-          "value": "Milo"
-        },
-        {
-          "title": "Dean (English Male, Grounded)",
-          "value": "Dean"
         }
       ]
     },
