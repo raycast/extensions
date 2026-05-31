@@ -24,6 +24,9 @@ beforeAll(async () => {
   // claude user: broken symlink
   await symlink(join(srcRepo, "does-not-exist"), join(home, ".claude/skills/ghost"));
 
+  // claude user: malformed skill directory, kept so health can report H2.
+  await mkdir(join(home, ".claude/skills/nomd"));
+
   // codex user: same source (shared) → drift-free
   await mkdir(join(home, ".codex/skills"), { recursive: true });
   await symlink(fc, join(home, ".codex/skills/firecrawl"));
@@ -50,6 +53,10 @@ describe("scanSkills", () => {
     const ghost = entries.find((e) => e.entryPath.endsWith("/ghost"));
     expect(ghost?.isBroken).toBe(true);
     expect(ghost?.skillMdExists).toBe(false);
+
+    const nomd = entries.find((e) => e.entryPath.endsWith("/nomd"));
+    expect(nomd?.isBroken).toBe(false);
+    expect(nomd?.skillMdExists).toBe(false);
 
     const fc = entries.find((e) => e.source === "claude-user" && e.entryPath.endsWith("/firecrawl"));
     expect(fc?.isSymlink).toBe(true);

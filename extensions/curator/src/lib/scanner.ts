@@ -79,8 +79,8 @@ async function scanDir(
   const out: RawSkillEntry[] = [];
   for (const name of await listDirs(dir)) {
     const e = await inspectEntry(join(dir, name), surface, source, extra);
-    // Keep dirs that look like skills (have SKILL.md) or are broken symlinks worth flagging.
-    if (e && (e.skillMdExists || e.isBroken)) out.push(e);
+    // Keep candidate skill directories even when SKILL.md is missing so health checks can report H2.
+    if (e) out.push(e);
   }
   return out;
 }
