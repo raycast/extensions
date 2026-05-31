@@ -2,7 +2,7 @@
 
 > **Markdown-based task manager for Raycast.** No database. No API. Just `.md` files.
 
-Capture tasks instantly from anywhere in Raycast, route them into projects, and search across them with ripgrep. Your tasks live in `~/MiToDos/` — plain markdown, version-controllable, AI-readable.
+Capture tasks instantly from anywhere in Raycast, route them into projects, and search across them with ripgrep. Your tasks live in your configured MiToDos directory (default: `~/MiToDos/`) — plain markdown, version-controllable, AI-readable.
 
 ## Commands
 
@@ -13,6 +13,8 @@ Capture tasks instantly from anywhere in Raycast, route them into projects, and 
 | **Search MiToDos** | Search across all MiToDos files with ripgrep (fast, respects `.gitignore`). Falls back to grep. QMD semantic search augments results when available. |
 
 ## File Layout
+
+Default layout:
 
 ```
 ~/MiToDos/
@@ -29,7 +31,7 @@ Files are named by purpose. No prefixes — the directory already scopes the nam
 ### Install (manual)
 
 1. Open Raycast → **Import Extension**
-2. Select `~/awesome-raycast-extensions/mi-todos/`
+2. Select `~/awesome-raycast-extensions/extensions/mi-todos/`
 3. The three commands appear in your root search
 
 ### Preferences (optional)
@@ -48,7 +50,7 @@ brew install ripgrep          # fast search (recommended)
 
 ## Task Routing
 
-When you run **Add Task**, a dropdown lets you choose where the task lands:
+When you run **Add Task**, a dropdown lets you choose where the task lands. The examples below assume the default `~/MiToDos/` directory:
 
 | Selection | Writes to |
 |---|---|
@@ -61,7 +63,7 @@ Selecting a project that doesn't have a file yet auto-creates it with the full t
 ## Why Markdown?
 
 - **Portable**: Open with any text editor. View in Obsidian. Grep from the terminal.
-- **Versionable**: Drop `~/MiToDos/` into any git repo. Track task history.
+- **Versionable**: Drop your configured MiToDos directory into any git repo. Track task history.
 - **Agent-friendly**: LLMs can read and write the format natively — no API needed.
 - **Fast**: ripgrep searches hundreds of files in milliseconds.
 
@@ -69,7 +71,7 @@ Selecting a project that doesn't have a file yet auto-creates it with the full t
 
 ```bash
 git clone https://github.com/chipoto69/awesome-raycast-extensions
-cd awesome-raycast-extensions/mi-todos
+cd awesome-raycast-extensions/extensions/mi-todos
 npm install
 npm run dev
 ```
