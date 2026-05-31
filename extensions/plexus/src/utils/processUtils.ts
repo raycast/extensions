@@ -21,9 +21,10 @@ async function runPowerShell(script: string): Promise<string> {
   return stdout;
 }
 
-// Find every listening TCP server. The HTTP probe in the service decides which of these are
-// actually web pages worth showing; here we just enumerate (cheaply) and, where it's free,
-// attach process info for naming. Native-Windows command lines are fetched lazily afterwards.
+// Find every listening TCP server, cheaply. Discovery only collects pid/port; command lines
+// and working dirs for native-host servers are filled in afterwards (enrichHostServers) for
+// just the few ports that pass the HTTP probe, so we never run per-process lookups for the
+// dozens of system ports that aren't web servers. WSL listeners already come fully populated.
 export async function findListeningServers(): Promise<ListeningServer[]> {
   let servers: ListeningServer[];
 
@@ -47,7 +48,38 @@ export async function findListeningServers(): Promise<ListeningServer[]> {
   });
 }
 
-// --- macOS / Unix: lsof for discovery, ps for command, lsof for cwd ---
+// Fill in command line (+ working dir on macOS) for native-host servers. Called only for the
+// handful of ports that answered the HTTP probe, and runs the lookups in parallel.
+export async function enrichHostServers(servers: ListeningServer[]): Promise<void> {
+  const hosts = servers.filter((s) => s.source === "host" && !s.command);
+  if (hosts.length === 0) return;
+
+  if (isWindows) {
+    const commands = await getWindowsCommandLines(hosts.map((s) => s.pid));
+    for (const server of hosts) {
+      server.command = commands.get(server.pid) ?? "";
+    }
+    return;
+  }
+
+  await Promise.all(
+    hosts.map(async (server) => {
+      try {
+        server.command = (await execAsync(`ps -p ${server.pid} -o command=`)).stdout.trim();
+      } catch {
+        server.command = "";
+      }
+      try {
+        const { stdout } = await execAsync(`lsof -p ${server.pid} | awk '$4=="cwd" {print $9}' | head -1`);
+        server.workingDir = stdout.trim().startsWith("/") ? stdout.trim() : null;
+      } catch {
+        server.workingDir = null;
+      }
+    }),
+  );
+}
+
+// --- macOS / Unix: one lsof call lists every listener; enrichment is deferred to survivors ---
 async function findUnixServers(): Promise<ListeningServer[]> {
   const { stdout } = await execAsync("/usr/sbin/lsof -nP -iTCP -sTCP:LISTEN");
   const pairs = stdout
@@ -63,30 +95,14 @@ async function findUnixServers(): Promise<ListeningServer[]> {
     })
     .filter((pair): pair is string => Boolean(pair));
 
-  const servers: ListeningServer[] = [];
-  for (const pair of [...new Set(pairs)]) {
+  return [...new Set(pairs)].map((pair) => {
     const [pid, port] = pair.split(":");
-    if (!pid || !port) continue;
-    let command = "";
-    try {
-      command = (await execAsync(`ps -p ${pid} -o command=`)).stdout.trim();
-    } catch {
-      command = "";
-    }
-    let workingDir: string | null = null;
-    try {
-      const { stdout: cwd } = await execAsync(`lsof -p ${pid} | awk '$4=="cwd" {print $9}' | head -1`);
-      workingDir = cwd.trim().startsWith("/") ? cwd.trim() : null;
-    } catch {
-      workingDir = null;
-    }
-    servers.push({ pid, port, source: "host", command, workingDir });
-  }
-  return servers;
+    return { pid, port, source: "host" as const, command: "", workingDir: null };
+  });
 }
 
 // --- Windows host: netstat is ~25x faster than spinning up PowerShell. Command lines are
-// fetched lazily (getHostCommandLines) only for the few ports that pass the HTTP probe. ---
+// fetched lazily (enrichHostServers) only for the few ports that pass the HTTP probe. ---
 async function findWindowsHostServers(): Promise<ListeningServer[]> {
   const { stdout } = await execFileAsync("netstat", ["-ano", "-p", "TCP"]);
   const servers: ListeningServer[] = [];
@@ -104,7 +120,7 @@ async function findWindowsHostServers(): Promise<ListeningServer[]> {
 }
 
 // Fetch command lines for specific Windows PIDs in one CIM query (only used for survivors).
-export async function getHostCommandLines(pids: string[]): Promise<Map<string, string>> {
+async function getWindowsCommandLines(pids: string[]): Promise<Map<string, string>> {
   const result = new Map<string, string>();
   const unique = [...new Set(pids)].filter((p) => /^\d+$/.test(p));
   if (unique.length === 0) return result;
