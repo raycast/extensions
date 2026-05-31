@@ -49,7 +49,27 @@
       "name": "edit-in-iterm",
       "title": "Edit in iTerm",
       "description": "Edit the selected file(s) in iTerm using $EDITOR",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "windowOrTab",
+          "type": "dropdown",
+          "required": false,
+          "title": "Open Behavior",
+          "description": "Choose whether to open in a new window or a new tab",
+          "default": "new-window",
+          "data": [
+            {
+              "title": "New Window",
+              "value": "new-window"
+            },
+            {
+              "title": "New Tab",
+              "value": "new-tab"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "open-iterm-here",

@@ -74,3 +74,43 @@ export const toError = (error: unknown, fallbackMessage = "Unknown error"): Erro
   const message = toErrorMessage(error);
   return new Error(message || fallbackMessage);
 };
+
+const LOG_PREFIX = "[Granola]";
+
+export type GranolaLogContext = Record<string, unknown>;
+
+function getErrorDetails(error: unknown): GranolaLogContext {
+  const details: GranolaLogContext = { message: toErrorMessage(error) };
+
+  if (error instanceof Error) {
+    if (error.name) details.name = error.name;
+    if (error.stack) details.stack = error.stack;
+
+    const err = error as Error & { status?: number; statusText?: string; cause?: unknown };
+    if (typeof err.status === "number") details.status = err.status;
+    if (err.statusText) details.statusText = err.statusText;
+    if (err.cause !== undefined) details.cause = toErrorMessage(err.cause);
+  } else if (error && typeof error === "object") {
+    const err = error as ErrorLike;
+    if (typeof err.status === "number") details.status = err.status;
+    if (err.statusText) details.statusText = err.statusText;
+  }
+
+  return details;
+}
+
+/** Logs structured errors to the Raycast dev console (visible in `npm run dev`). */
+export function logGranolaError(context: string, error: unknown, extra?: GranolaLogContext): void {
+  console.error(`${LOG_PREFIX} ${context}`, {
+    ...getErrorDetails(error),
+    ...extra,
+  });
+}
+
+export function logGranolaWarn(context: string, extra?: GranolaLogContext): void {
+  console.warn(`${LOG_PREFIX} ${context}`, extra ?? {});
+}
+
+export function logGranolaInfo(context: string, extra?: GranolaLogContext): void {
+  console.log(`${LOG_PREFIX} ${context}`, extra ?? {});
+}

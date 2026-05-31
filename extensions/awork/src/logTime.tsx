@@ -10,10 +10,11 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
 import { fetchWithTimeout } from "./composables/HttpClient";
 import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
-import { baseURI, getTokens } from "./composables/WebClient";
+import { baseURI, getTokens, onTokenChange } from "./composables/WebClient";
 
 interface FormValues {
   note: string;
@@ -74,13 +75,11 @@ export const logTime = async (token: string, values: FormValues, tasks: task[] |
 };
 
 export default function Command(props: LaunchProps) {
-  const { data: token, revalidate } = usePromise(getTokens, [], {
-    onData: (data) => {
-      if (!data || data.isExpired()) {
-        revalidate();
-      }
-    },
-  });
+  const { data: token, revalidate: revalidateToken } = usePromise(getTokens);
+
+  useEffect(() => {
+    return onTokenChange(revalidateToken);
+  }, [revalidateToken]);
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps, setValidationError, setValue, values } = useForm<FormValues>({
@@ -122,40 +121,27 @@ export default function Command(props: LaunchProps) {
       },
     },
   });
-  const {
-    data: projects,
-    isLoading: isLoadingProjects,
-    revalidate: revalidateProjects,
-  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!data || data.length === 0) {
-        revalidateProjects();
-      }
-      if (props.launchContext?.projectId) {
-        setValue("projectId", props.launchContext.projectId);
-      }
-      if (props.draftValues?.projectId) {
-        setValue("projectId", props.draftValues.projectId);
-      }
+  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+    getProjects,
+    [token?.accessToken as string, "", 1000],
+    {
+      execute: !!token?.accessToken && !token.isExpired(),
+      onData: () => {
+        if (props.launchContext?.projectId) {
+          setValue("projectId", props.launchContext.projectId);
+        }
+        if (props.draftValues?.projectId) {
+          setValue("projectId", props.draftValues.projectId);
+        }
+      },
     },
-    onError: () => {
-      revalidateProjects();
-    },
-  });
-  const {
-    data: tasks,
-    isLoading: isLoadingTasks,
-    revalidate: revalidateTasks,
-  } = useCachedPromise(
+  );
+  const { data: tasks, isLoading: isLoadingTasks } = useCachedPromise(
     getTasks,
     [token?.accessToken as string, "", 1000, values.projectId === "none" ? undefined : values.projectId],
     {
       execute: !!token?.accessToken && !token.isExpired(),
-      onData: (data) => {
-        if (!data || data.length === 0) {
-          revalidateTasks();
-        }
+      onData: () => {
         if (props.launchContext?.taskId) {
           setValue("taskId", props.launchContext.taskId);
         }
@@ -163,32 +149,23 @@ export default function Command(props: LaunchProps) {
           setValue("taskId", props.draftValues.taskId);
         }
       },
-      onError: () => {
-        revalidateTasks();
+    },
+  );
+  const { data: typesOfWork, isLoading: isLoadingTypesOwWork } = useCachedPromise(
+    getTypesOfWork,
+    [token?.accessToken as string],
+    {
+      execute: !!token?.accessToken && !token.isExpired(),
+      onData: () => {
+        if (props.launchContext?.typeOfWorkId) {
+          setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
+        }
+        if (props.draftValues?.typeOfWorkId) {
+          setValue("typeOfWorkId", props.draftValues.typeOfWorkId);
+        }
       },
     },
   );
-  const {
-    data: typesOfWork,
-    isLoading: isLoadingTypesOwWork,
-    revalidate: revalidateTypesOfWork,
-  } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!Array.isArray(data)) {
-        revalidateTypesOfWork();
-      }
-      if (props.launchContext?.typeOfWorkId) {
-        setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
-      }
-      if (props.draftValues?.typeOfWorkId) {
-        setValue("typeOfWorkId", props.draftValues.typeOfWorkId);
-      }
-    },
-    onError: () => {
-      revalidateTypesOfWork();
-    },
-  });
 
   return (
     <Form

@@ -22,9 +22,11 @@ export default function CreateArticle({ article, onEdit }: { article: Article | 
       setIsLoading(true);
       const { title, body_markdown, tags } = values;
       const published = values.published === "true" ? true : false;
-      isEdit
-        ? await createArticle(isEdit, title, published, body_markdown, tags, article.id)
-        : await createArticle(isEdit, title, published, body_markdown, tags);
+      if (isEdit) {
+        await createArticle(isEdit, title, published, body_markdown, tags, article.id);
+      } else {
+        await createArticle(isEdit, title, published, body_markdown, tags);
+      }
 
       setIsLoading(false);
       if (isEdit) {

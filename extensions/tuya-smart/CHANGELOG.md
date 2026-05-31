@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Fix] - 2026-05-15
 
 Fixed a bug that caused the extension to crash when no older devices were listed

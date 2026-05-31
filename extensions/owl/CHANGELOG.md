@@ -1,5 +1,9 @@
 # OWL Changelog
 
+## [Basic handling for missing keyboard layouts] - 2026-05-19
+
+- Added basic handling for missing keyboard layouts.
+
 ## [Filter Keyboards] - 2026-04-23
 
 - Added filter for keyboards to show only those that match the languages.

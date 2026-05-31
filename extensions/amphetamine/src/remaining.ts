@@ -1,6 +1,7 @@
 import { Toast, showHUD, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
+import { formatRemainingSeconds } from "./session-time";
 import { AMPHETAMINE_DOWNLOAD_URL, checkIfAmphetamineInstalled } from "./utils";
 
 const RemainingTimeResults = {
@@ -11,9 +12,6 @@ const RemainingTimeResults = {
 };
 
 export default async function Command() {
-  const ONE_HOUR_IN_SECONDS = 3600;
-  const ONE_MINUTE_IN_SECONDS = 60;
-
   const toast = new Toast({
     title: "Getting remaining time",
     style: Toast.Style.Animated,
@@ -44,18 +42,10 @@ export default async function Command() {
   `);
 
   if (Number(remainingTime) > 0) {
-    const hours = ~~(Number(remainingTime) / ONE_HOUR_IN_SECONDS);
-    const minutes = ~~((Number(remainingTime) % ONE_HOUR_IN_SECONDS) / ONE_MINUTE_IN_SECONDS);
-
-    if (hours > 0) {
-      remainingTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}h`;
-    } else {
-      const seconds = ~~(Number(remainingTime) % ONE_MINUTE_IN_SECONDS);
-      remainingTime = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}min`;
-    }
+    remainingTime = formatRemainingSeconds(Number(remainingTime));
   }
 
   await showHUD(
-    RemainingTimeResults[remainingTime as keyof typeof RemainingTimeResults] ?? `Remaining time: ${remainingTime}`
+    RemainingTimeResults[remainingTime as keyof typeof RemainingTimeResults] ?? `Remaining time: ${remainingTime}`,
   );
 }

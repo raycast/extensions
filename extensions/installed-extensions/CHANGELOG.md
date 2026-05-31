@@ -1,5 +1,17 @@
 # Installed Extensions Changelog
 
+## [Fixed Extension Folder] - 2026-05-26
+
+- Detect the correct extensions folder from `environment.supportPath` instead of scanning multiple Raycast config directories.
+
+## [Fix Beta Extension Folder] - 2026-05-21
+
+- Include the Raycast beta extension folder on macOS when scanning installed extensions.
+
+## [Fix Fresh Install Crash] - 2026-05-17
+
+- Treat a missing extensions directory (`~/.config/raycast/extensions` on macOS, `~/.config/raycast-x/extensions` on Windows) as an empty list instead of throwing `ENOENT` on fresh Raycast installs with no extensions yet
+
 ## [Sort by Recently Updated] - 2026-04-24
 
 - Add `Sort By` preference with `Title (A–Z)` (default) and `Recently Updated` options to quickly spot extensions refreshed by "Check for Updates"

@@ -1,9 +1,20 @@
-import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { useState } from "react";
 import { ManageScheduledCommand } from "./ManageScheduledCommand";
 import { ViewLogs } from "./view-logs";
 import { useScheduledCommands } from "./hooks/useScheduledCommands";
 import { getScheduleDescription, getScheduleIcon } from "./utils";
+
+function CreateNewScheduleAction({ shortcut }: { shortcut?: Keyboard.Shortcut }) {
+  return (
+    <Action
+      title="Create New Schedule"
+      icon={Icon.Plus}
+      shortcut={shortcut}
+      onAction={() => launchCommand({ name: "create-new-scheduled", type: LaunchType.UserInitiated })}
+    />
+  );
+}
 
 export default function ScheduledCommandsList() {
   const { commands, isLoading, deleteCommand, toggleCommand, loadCommands } = useScheduledCommands();
@@ -38,11 +49,7 @@ export default function ScheduledCommandsList() {
           description="Create your first scheduled command to get started"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Create New Command"
-                icon={Icon.Plus}
-                target={<ManageScheduledCommand onSave={loadCommands} />}
-              />
+              <CreateNewScheduleAction />
             </ActionPanel>
           }
         />
@@ -83,12 +90,7 @@ export default function ScheduledCommandsList() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="Create New Schedule"
-                    icon={Icon.Plus}
-                    target={<ManageScheduledCommand onSave={loadCommands} />}
-                    shortcut={Keyboard.Shortcut.Common.New}
-                  />
+                  <CreateNewScheduleAction shortcut={Keyboard.Shortcut.Common.New} />
                   <Action.Push title="View Execution Logs" icon={Icon.Document} target={<ViewLogs />} />
                 </ActionPanel.Section>
               </ActionPanel>

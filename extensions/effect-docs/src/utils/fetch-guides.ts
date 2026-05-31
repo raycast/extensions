@@ -1,15 +1,13 @@
 import type { DocItem } from "../types";
-import { fetchTextWithCache } from "./fetch-with-cache";
-import { parseLlmsTxt } from "./parse-guide";
+import { fetchWithCache, ONE_HOUR_MS } from "./fetch-with-cache";
+import { parseDocsSidebar } from "./parse-guide";
 import { scoreSearch } from "./search";
 
-const LLMS_TXT_URL = "https://effect.website/llms.txt";
-const CACHE_KEY = "effect-llms-v2";
-const CACHE_TTL = 3600000; // 1 hour
+const DOCS_INDEX_URL = "https://effect.website/docs/getting-started/introduction/";
+const CACHE_KEY = "effect-docs-sidebar-v2";
 
-export async function fetchGuideIndex(): Promise<DocItem[]> {
-	const data = await fetchTextWithCache(LLMS_TXT_URL, CACHE_KEY, CACHE_TTL);
-	return parseLlmsTxt(data);
+export function fetchGuideIndex(): Promise<DocItem[]> {
+	return fetchWithCache(DOCS_INDEX_URL, CACHE_KEY, ONE_HOUR_MS, parseDocsSidebar);
 }
 
 export function searchGuideItems(items: DocItem[], query: string): DocItem[] {
