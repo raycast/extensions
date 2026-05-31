@@ -113,9 +113,10 @@ export async function getArcaneWallpapersFromDrive(): Promise<ArcaneWallpaper[]>
     return [];
   }
 
-  const seenFolderIds = new Set<string>([ARCANE_DRIVE_FOLDER_ID]);
   const wallpapers = await Promise.all(
-    selectedDriveFolders.map((folder) => fetchFolderWallpapers(folder.id, [folder.title], seenFolderIds)),
+    selectedDriveFolders.map((folder) =>
+      fetchFolderWallpapers(folder.id, [folder.title], new Set<string>([ARCANE_DRIVE_FOLDER_ID])),
+    ),
   );
 
   const wallpaperCatalog = wallpapers.flat();

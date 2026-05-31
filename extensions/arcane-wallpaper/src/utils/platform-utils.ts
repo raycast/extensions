@@ -6,6 +6,7 @@ import { buildCachePath, cachePicture } from "./common-utils";
 import { set_wallpaper as setWallpaperWindowsRust } from "rust:../../rust";
 
 async function setWallpaperMacOS(path: string, applyTo: string) {
+  const desktopTarget = applyTo === "current" ? "desktop 1" : "every desktop";
   const script = `
       set temp_folder to (POSIX path of "${path}")
       
@@ -13,7 +14,7 @@ async function setWallpaperMacOS(path: string, applyTo: string) {
 
       try
         tell application "System Events"
-          tell ${applyTo} desktop
+          tell ${desktopTarget}
             set picture to (x as text)
             return "ok"
           end tell
