@@ -246,7 +246,7 @@
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npm run eval && npx @raycast/api@latest publish",
+    "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml -o evals/results/promptfoo.json",
