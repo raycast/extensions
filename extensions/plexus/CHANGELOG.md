@@ -1,5 +1,13 @@
 # Plexus Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+### Added
+- Windows support: server discovery, process command/working-directory detection, and kill-process now work on Windows via PowerShell (`Get-NetTCPConnection`, `Win32_Process`) and `taskkill`.
+
+### Fixed
+- Cross-platform path handling so project names resolve correctly on Windows.
+
 ## [1.1.0] - 2025-10-01
 
 ### Added

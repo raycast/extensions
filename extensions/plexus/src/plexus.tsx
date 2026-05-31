@@ -6,6 +6,8 @@ import { useServiceIcon, usePageTitle } from "./utils/webHooks";
 import { createDisplayName, getProjectName } from "./utils/projectUtils";
 import { execFile } from "child_process";
 
+const isWindows = process.platform === "win32";
+
 export default function Command() {
   const [items, setItems] = useState<LocalhostItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,11 @@ function LocalhostListItem({ item, onActionComplete }: { item: LocalhostItem; on
         title: `Terminating process ${item.pid}...`,
       });
 
-      execFile(`kill`, [item.pid], (error) => {
+      // taskkill terminates the process tree (/T) and forces it (/F) on Windows; kill on macOS.
+      const command = isWindows ? "taskkill" : "kill";
+      const args = isWindows ? ["/PID", item.pid, "/F", "/T"] : [item.pid];
+
+      execFile(command, args, (error) => {
         if (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to kill process ${item.pid}`;

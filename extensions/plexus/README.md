@@ -26,14 +26,16 @@ A powerful Raycast extension that helps you discover and manage all running Node
 ## 🛠️ How It Works
 
 Plexus uses advanced process detection to:
-1. Scan for Node.js processes listening on TCP ports
+1. Scan for Node.js processes listening on TCP ports (via `lsof`/`ps` on macOS, PowerShell on Windows)
 2. Extract project information from the file system
 3. Fetch website titles and favicons from running servers
 4. Intelligently combine this data for the best user experience
 
 ## 🔧 Requirements
 
-- macOS (uses system commands like `lsof` and `ps`)
+- macOS or Windows
+  - macOS uses system commands like `lsof` and `ps`
+  - Windows uses PowerShell (`Get-NetTCPConnection`, `Win32_Process`)
 - Running Node.js development servers
 - Raycast app
 
