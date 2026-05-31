@@ -8,6 +8,7 @@ export interface Preferences {
   geminiApiKey: string;
   geminiModelName: string;
   qwenApiKey: string;
+  qwenBaseURL: string;
   qwenModelName: string;
   vocabularyBaseDir: string;
   gitEnabled: boolean;
@@ -108,7 +109,9 @@ export function createEnvironmentFromPreferences(): NodeJS.ProcessEnv {
     WORD4YOU_GEMINI_API_KEY: preferences.geminiApiKey || "",
     WORD4YOU_GEMINI_MODEL_NAME: preferences.geminiModelName || "gemini-2.5-flash-lite",
     WORD4YOU_QWEN_API_KEY: preferences.qwenApiKey || "",
-    WORD4YOU_QWEN_MODEL_NAME: preferences.qwenModelName || "qwen-flash",
+    WORD4YOU_QWEN_BASE_URL:
+      preferences.qwenBaseURL || "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+    WORD4YOU_QWEN_MODEL_NAME: preferences.qwenModelName || "qwen3.6-flash",
     WORD4YOU_VOCABULARY_BASE_DIR: preferences.vocabularyBaseDir || "~",
     WORD4YOU_GIT_ENABLED: preferences.gitEnabled ? "true" : "false",
     WORD4YOU_GIT_REMOTE_URL: preferences.gitRemoteUrl || "",

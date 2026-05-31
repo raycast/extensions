@@ -50,8 +50,17 @@
       "type": "password",
       "required": false,
       "title": "QWEN API Key",
-      "description": "Your QWEN API key (get one at https://dashscope.console.aliyun.com/)",
+      "description": "Your Qwen Token Plan API key for text explanations",
       "placeholder": "Enter your QWEN API key"
+    },
+    {
+      "name": "qwenBaseURL",
+      "type": "textfield",
+      "required": false,
+      "title": "QWEN Base URL",
+      "description": "Qwen Token Plan OpenAI-compatible base URL",
+      "default": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "placeholder": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
     },
     {
       "name": "qwenModelName",
@@ -59,8 +68,8 @@
       "required": false,
       "title": "QWEN Model Name",
       "description": "The QWEN model to use for text explanations",
-      "default": "qwen-flash",
-      "placeholder": "qwen-flash"
+      "default": "qwen3.6-flash",
+      "placeholder": "qwen3.6-flash"
     },
     {
       "name": "vocabularyBaseDir",

@@ -18,7 +18,7 @@ export function ProviderSetupView() {
   if (provider === "gemini" && !hasGeminiKey) {
     message = "Please enter your Gemini API key in the extension preferences.";
   } else if (provider === "qwen" && !hasQwenKey) {
-    message = "Please enter your Qwen API key in the extension preferences.";
+    message = "Please enter your Qwen Token Plan API key in the extension preferences.";
   }
 
   return (
