@@ -41,6 +41,8 @@ export function respondsToHttp(port: string): Promise<boolean> {
     });
     socket.on("timeout", () => finish(false));
     socket.on("error", () => finish(false));
-    socket.on("close", () => evaluate());
+    socket.on("close", () => {
+      if (!settled) evaluate();
+    });
   });
 }

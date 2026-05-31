@@ -1,26 +1,18 @@
 # Plexus Changelog
 
-## [Faster Discovery] - {PR_MERGE_DATE}
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+- Windows support: server discovery, process info, and kill-process now work on Windows (`netstat` for the port list, a lazy `Win32_Process` query for command lines, `taskkill` for killing).
+- Detects servers running inside WSL (enumerated via `wsl.exe` + `/proc`), shown with a `WSL: <distro>` tag and reachable on `localhost`; project names are read over `\\wsl.localhost`, and kill routes through `wsl kill`.
+- Detection is no longer limited to Node.js: Plexus lists any localhost server that answers an HTTP request with an HTML page (Node, PHP/Laravel, Python, etc.) and hides non-web services such as databases.
 
 ### Changed
-- Much faster on Windows (~3s -> <1s): use `netstat` instead of spinning up PowerShell for port discovery, fetch command lines only for servers that pass the probe, and shorten the HTTP probe timeout. Results are now cached so reopening is instant.
-
-## [Localhost Web Servers] - {PR_MERGE_DATE}
-
-### Changed
-- Detection is no longer limited to Node.js: Plexus now lists any localhost server that answers an HTTP request (Node, PHP/Laravel, Python, nginx/Herd, …), and hides non-web services like databases. Works for native and WSL-hosted servers.
+- Faster discovery and instant reopen: per-process lookups are deferred to the few ports that pass the HTTP probe, and results are cached.
+- Cross-platform path handling so project names resolve correctly on Windows and WSL.
 
 ### Note
 - HTTPS-only dev servers are not detected yet.
-
-## [Windows Support] - {PR_MERGE_DATE}
-
-### Added
-- Windows support: server discovery, process command/working-directory detection, and kill-process now work on Windows via PowerShell (`Get-NetTCPConnection`, `Win32_Process`) and `taskkill`.
-- On Windows, also detects Node.js servers running inside WSL (via `wsl.exe` + `/proc`), shown with a WSL tag and reachable on `localhost`; project names read over `\\wsl.localhost`, and kill routes through `wsl kill`.
-
-### Fixed
-- Cross-platform path handling so project names resolve correctly on Windows.
 
 ## [1.1.0] - 2025-10-01
 

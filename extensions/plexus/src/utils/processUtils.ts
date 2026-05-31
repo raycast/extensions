@@ -64,6 +64,8 @@ export async function enrichHostServers(servers: ListeningServer[]): Promise<voi
 
   await Promise.all(
     hosts.map(async (server) => {
+      // Guard before interpolating the pid into a shell command (mirrors the Windows path).
+      if (!/^\d+$/.test(server.pid)) return;
       try {
         server.command = (await execAsync(`ps -p ${server.pid} -o command=`)).stdout.trim();
       } catch {
