@@ -40,14 +40,14 @@ Default cycle: 37 minutes work, 3 minutes short break, 15 minutes long break aft
 ## 必要なもの
 
 - **Raycast**（macOS）
-- **Notion** アカウント（無料プランで可）
-- 作業ログ用 Notion データベース（**推奨:** Notion で配布している Minimal テンプレートを Duplicate）
+- **Notion** アカウント（**作業ログ保存は無料プランで可**。Dashboard の複数 chart 表示は **Notion Plus 以上を推奨** — 下記参照）
+- 作業ログ用 Notion データベース（**推奨:** [Minimal テンプレート](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)を Duplicate）
 
 ## クイックスタート
 
 インストール後、次の 3 ステップで使い始められます。
 
-1. Notion で **Minimal テンプレート**（`Raycast Pomodoro Notion Dashboard（Minimal）`）を Duplicate するか、同等の **作業ログ** データベースを手動で用意する
+1. Notion で [**Minimal テンプレート**](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)（`Raycast Pomodoro Notion Dashboard（Minimal）`）を **Duplicate** するか、同等の **作業ログ** データベースを手動で用意する
 2. Raycast で **`Configure Notion`** を開き、`Notion Token`（コネクトのアクセストークン）と `Notion Database ID` を設定して接続を確認する
 3. **`Start Pomodoro`** または **`Pomodoro Status`** からセッションを開始する
 
@@ -72,7 +72,7 @@ Default cycle: 37 minutes work, 3 minutes short break, 15 minutes long break aft
 5. **短休憩** または **長休憩** へ自動で進む
 6. 休憩後、次の **作業種類** を選んで再開
 
-**振り返り:** Notion の Dashboard（今週のチャート）や **作業ログ** DB の **今日** / **今週** ビューで確認できます。休憩は Notion に記録されません。
+**振り返り:** Notion の Dashboard（今週のチャート）や **作業ログ** DB の **今日** / **今週** ビューで確認できます。休憩は Notion に記録されません。Dashboard の chart が無料プランで表示されない場合は、**作業ログ** DB のビューを使ってください（**Notion 無料プランと Dashboard** 参照）。
 
 ## 使えるコマンド
 
@@ -105,7 +105,9 @@ Raycast → 拡張 **Preferences** の `Work Sound File` / `Break Sound File` / 
 ## Notion セットアップ
 
 作業ログの保存先として、Notion データベース **1 つ** が必要です。  
-**推奨** は、Notion 上で公開している Minimal テンプレート `Raycast Pomodoro Notion Dashboard（Minimal）` を Duplicate する方法です（Dashboard・作業ログ DB・セットアップガイド「はじめに」が含まれます）。Raycast 拡張本体には Notion テンプレートは含まれません。
+**推奨** は、Notion 上で公開している Minimal テンプレート [**Raycast Pomodoro Notion Dashboard（Minimal）**](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829) を Duplicate する方法です（Dashboard・作業ログ DB・セットアップガイド「はじめに」が含まれます）。Raycast 拡張本体には Notion テンプレートは含まれません。
+
+**Duplicate リンク:** https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829
 
 ### テンプレートに含まれるもの（Minimal）
 
@@ -115,9 +117,14 @@ Raycast → 拡張 **Preferences** の `Work Sound File` / `Break Sound File` / 
 | **作業ログ** DB | 拡張連携先。ビュー（すべて / 今日 / 今週）とチャート 2 枚 |
 | **はじめに** | Notion 上のセットアップガイド |
 
+> **Notion 無料プランと Dashboard**  
+> Raycast 拡張による **作業ログの保存**（`Configure Notion`・DB への書き込み）は、Notion **無料プラン** でも利用できます。  
+> 一方、Minimal テンプレの **Dashboard（トップ）** は **chart ビューを 3 枚並べた構成** です。Notion **無料プラン** では **1 ページに表示できる chart の数に制限** があり、Dashboard 上の chart が **すべて表示されない** ことがあります（テンプレ全体では Dashboard 3 枚＋作業ログ DB 内 chart 2 枚）。  
+> **無料プラン** では **作業ログ** DB の **今日** / **今週** テーブルビューで振り返る運用を想定してください。Dashboard をフルに使う場合は **Notion Plus（有料）以上** を推奨します。
+
 テンプレート利用時の流れ:
 
-1. テンプレートを **Duplicate** して自分のワークスペースにコピーする
+1. [Minimal テンプレート](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)を開き **Duplicate** して自分のワークスペースにコピーする
 2. 下記 **1〜5** の手順（コネクト作成 → DB 接続 → データベース ID 取得 → Raycast 設定）を行う  
    ※ 詳細は Duplicate 先の **「はじめに」** を参照
 3. `Configure Notion` で接続確認が成功することを確認する
@@ -236,6 +243,7 @@ Notion のチャートや Dashboard の集計にそのまま使えます。
 - スリープ復帰時の自動一時停止は無効です。復帰後は **Pomodoro Status** で状態を確認してください
 - 満了処理は Raycast / macOS の状態に依存するため、アラームや通知のタイミングがずれる場合があります
 - 満了処理用の内部コマンド **Internal: Timer Elapsed** が検索結果に表示されることがあります（通常の操作では使いません）
+- **Notion 無料プラン** では、Minimal テンプレの **Dashboard（chart 3 枚）** が制限により **すべて表示されない** 場合があります（拡張によるログ保存自体は可能）。詳細は **Notion セットアップ** の「Notion 無料プランと Dashboard」を参照
 
 ## 作者・ライセンス
 
