@@ -124,9 +124,7 @@ function ResultDetail(props: { result: VerificationResult; onBack: () => void; o
           <Detail.Metadata.Label title="Domain" text={result.domain} />
           <Detail.Metadata.Label title="Provider" text={result.provider} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Disposable" text={result.disposable} />
-          <Detail.Metadata.Label title="Free Mail" text={result.free} />
-          <Detail.Metadata.Label title="Accept-All" text={result.acceptAll} />
+          <Detail.Metadata.Label title="Signals" text={getSignalSummary(result)} />
         </Detail.Metadata>
       }
       actions={
@@ -147,27 +145,19 @@ function getResultMarkdown(result: VerificationResult): string {
     "",
     `\`${result.email}\``,
     "",
-    "## Summary",
-    "",
-    "| Field | Value |",
-    "| --- | --- |",
-    `| Score | ${escapeMarkdownTableValue(result.score)} |`,
-    `| Status | ${escapeMarkdownTableValue(result.status)} |`,
-    `| Reason | ${escapeMarkdownTableValue(result.reason)} |`,
-    "",
-    "## Mailbox",
-    "",
-    "| Field | Value |",
-    "| --- | --- |",
-    `| Domain | ${escapeMarkdownTableValue(result.domain)} |`,
-    `| Provider | ${escapeMarkdownTableValue(result.provider)} |`,
-    `| Disposable | ${escapeMarkdownTableValue(formatBooleanSignal(result.disposable))} |`,
-    `| Free Mail | ${escapeMarkdownTableValue(formatBooleanSignal(result.free))} |`,
-    `| Accept-All | ${escapeMarkdownTableValue(formatBooleanSignal(result.acceptAll))} |`,
-    "",
-    "## Decision",
-    "",
     getDecisionCopy(result),
+    "",
+    `**Score:** ${result.score}`,
+    "",
+    `**Reason:** ${result.reason}`,
+    "",
+    "---",
+    "",
+    `**Domain:** ${result.domain}`,
+    "",
+    `**Provider:** ${result.provider}`,
+    "",
+    `**Signals:** ${getSignalSummary(result)}`,
   ].join("\n");
 }
 
@@ -192,11 +182,15 @@ function getVerdictIcon(verdict: string): Icon {
 function formatBooleanSignal(value: string): string {
   if (value === "true") return "Yes";
   if (value === "false") return "No";
-  return "n/a";
+  return "Not reported";
 }
 
-function escapeMarkdownTableValue(value: string): string {
-  return value.replace(/\|/g, "\\|");
+function getSignalSummary(result: VerificationResult): string {
+  return [
+    `Disposable ${formatBooleanSignal(result.disposable)}`,
+    `Free ${formatBooleanSignal(result.free)}`,
+    `Accept-All ${formatBooleanSignal(result.acceptAll)}`,
+  ].join(" · ");
 }
 
 async function fetchVerification(email: string, apiKey: string): Promise<VerificationResult> {
