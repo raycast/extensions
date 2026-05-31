@@ -15,7 +15,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import * as fs from "fs";
 import * as path from "path";
-import { Library, Preferences, PLATFORMS } from "./types";
+import { Library, Preferences, PLATFORMS, Game } from "./types";
 import { getMetadata, Metadata } from "./utils/metadata";
 import { scanLibraries } from "./utils/scanner";
 
@@ -380,7 +380,7 @@ function LibraryForm({
 
   const availableSystems = Object.entries(metadata.systems)
     .filter(([key, sys]) => {
-      if (key === PLATFORMS.ARCADE || key === PLATFORMS.MAME) {
+      if (key === PLATFORMS.ARCADE || key === "MAME") {
         const hasCore =
           preferences.retroarchPath &&
           getInstalledCores(sys.cores, availableCoresSet).length > 0;

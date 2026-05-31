@@ -406,7 +406,7 @@ function AchievementList({
             <ActionPanel>
               <Action.Push
                 title="View Achievement Details"
-                target={<AchievementDetail achievement={a} />}
+                target={<AchievementDetail achievement={a} gameId={gameId} />}
                 icon={a.badgeUrl}
               />
               {gameId && (
@@ -429,7 +429,13 @@ function AchievementList({
   );
 }
 
-function AchievementDetail({ achievement }: { achievement: Achievement }) {
+function AchievementDetail({
+  achievement,
+  gameId,
+}: {
+  achievement: Achievement;
+  gameId?: number;
+}) {
   const markdown = `
 # ${achievement.name}
 ${achievement.description}
@@ -477,12 +483,10 @@ ${achievement.description}
           <Detail.Metadata.Label
             title="Total Unlocks"
             text={`👥 ${achievement.numAwarded || 0}`}
-            tooltip="Total players who earned this"
           />
           <Detail.Metadata.Label
             title="Hardcore Unlocks"
             text={`👥 ${achievement.numAwardedHardcore || 0}`}
-            tooltip="Players who earned this in Hardcore mode"
           />
         </Detail.Metadata>
       }
@@ -498,11 +502,11 @@ ${achievement.description}
                 : { modifiers: ["ctrl", "shift"], key: "r" }
             }
           />
-          {achievement.gameId && (
+          {gameId && (
             <Action.OpenInBrowser
               title="Open Game on Retroachievements"
               icon={Icon.Globe}
-              url={`https://retroachievements.org/game/${achievement.gameId}`}
+              url={`https://retroachievements.org/game/${gameId}`}
             />
           )}
         </ActionPanel>
@@ -720,7 +724,7 @@ const GameDetail = ({
 
         if (!isMounted) return;
 
-        setAchievementData(data);
+        setAchievementData(data ? { ...data, gameId } : null);
 
         // 🔥 SINGLE SOURCE OF TRUTH SYNC
         if (data && onAchievementsLoaded) {
@@ -924,7 +928,6 @@ ${isInitialLoading ? `_Loading cover image..._` : imgMarkdown}
                                     source: a.badgeUrl,
                                     mask: Image.Mask.RoundedRectangle,
                                   }}
-                                  tooltip={a.name}
                                 />
                               ))}
                           </List.Item.Detail.Metadata.TagList>

@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
+import { Preferences } from "../types";
 
 const FALLBACK_DATA_URL =
   "https://cdn.jsdelivr.net/gh/Glct26/rom-launcher-db@main/rom-launcher-db.json";
@@ -514,7 +514,7 @@ export async function getMetadata(
   force = false,
 ): Promise<{ data: Metadata; lastUpdate: number | null }> {
   const cachedDict = await LocalStorage.getItem<string>(CACHE_KEY);
-  const lastUpdate = await LocalStorage.getItem<number>(TIME_KEY);
+  const lastUpdate = (await LocalStorage.getItem<number>(TIME_KEY)) ?? null;
   const now = Date.now();
 
   const prefs = getPreferenceValues<{ updateInterval: string }>();

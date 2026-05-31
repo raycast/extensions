@@ -121,7 +121,7 @@ export async function getAchievements(
         JSON.stringify({ timestamp: Date.now(), data: result }),
       );
     } catch (e) {
-      cache.clear({ keepCapacity: false });
+      cache.clear();
       cache.set(
         cacheKey,
         JSON.stringify({ timestamp: Date.now(), data: result }),
