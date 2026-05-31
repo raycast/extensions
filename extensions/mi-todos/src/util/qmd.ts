@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { resolvePath, readFile } from "./storage";
 
 export interface QmdResult {
@@ -7,45 +7,46 @@ export interface QmdResult {
   score: number;
 }
 
-function isQmdAvailable(): boolean {
-  try {
-    execSync("HOME=/Users/rudlord qmd status", { encoding: "utf-8", timeout: 3000, stdio: "pipe" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function isRgAvailable(): boolean {
   try {
-    execSync("which rg", { encoding: "utf-8", timeout: 1000, stdio: "pipe" });
+    execFileSync("which", ["rg"], { encoding: "utf-8", timeout: 1000, stdio: "pipe" });
     return true;
   } catch {
     return false;
   }
-}
-
-function escapeRg(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
- * Search MiToDos directory with ripgrep — fast, respects .gitignore, always works.
+ * Search MiToDos directory with ripgrep — fast, respects .gitignore.
+ * Uses execFileSync (array args, no shell interpolation) — safe against injection.
  */
 export function searchMitodos(mitodosDir: string, query: string, limit = 20): QmdResult[] {
   const dir = resolvePath(mitodosDir);
   const words = query.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return [];
 
-  const escaped = words.map(escapeRg).join("|");
+  const pattern = words
+    .map((w) => w.replace(/[^\w\s-]/g, ""))
+    .filter(Boolean)
+    .join("|");
+  if (!pattern) return [];
 
   try {
-    const cmd = isRgAvailable()
-      ? `rg -il "${escaped}" "${dir}" --max-count=1 --type md 2>/dev/null | head -${limit}`
-      : `grep -ril "${escapeRg(words[0])}" "${dir}" --include="*.md" 2>/dev/null | head -${limit}`;
+    const args = ["-il", pattern, dir, "--max-count=1", "--type", "md"];
+    if (limit) args.push("--max-count", String(limit));
 
-    const output = execSync(cmd, { encoding: "utf-8", timeout: 5000 });
-    const paths = output.trim().split("\n").filter(Boolean);
+    const cmd = isRgAvailable() ? "rg" : "grep";
+    // grep uses different flags
+    const finalArgs =
+      cmd === "grep" ? ["-ril", words[0].replace(/[^\w-]/g, ""), dir, "--include=*.md"] : args;
+
+    const output = execFileSync(cmd, finalArgs, {
+      encoding: "utf-8",
+      timeout: 5000,
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+
+    const paths = output.trim().split("\n").filter(Boolean).slice(0, limit);
 
     return paths.map((filepath) => {
       let snippet = "";
@@ -74,17 +75,21 @@ export function searchMitodos(mitodosDir: string, query: string, limit = 20): Qm
 
 /**
  * Search the wiki vault with QMD (secondary — only if QMD is available).
+ * Uses execFileSync with array args — safe against injection.
  */
 export function searchWikiWithQmd(wikiPath: string, query: string, limit = 10): QmdResult[] {
-  if (!isQmdAvailable()) return [];
+  try {
+    execFileSync("which", ["qmd"], { encoding: "utf-8", timeout: 1000, stdio: "pipe" });
+  } catch {
+    return [];
+  }
 
   const resolved = resolvePath(wikiPath);
   try {
-    const cmd = `HOME=/Users/rudlord qmd search "${query.replace(/"/g, '\\"')}" --json --limit ${limit}`;
-    const output = execSync(cmd, {
+    const output = execFileSync("qmd", ["search", query, "--json", "--limit", String(limit)], {
       encoding: "utf-8",
       timeout: 15000,
-      env: { ...process.env, HOME: "/Users/rudlord" },
+      stdio: ["ignore", "pipe", "ignore"],
     });
     const parsed = JSON.parse(output);
     if (Array.isArray(parsed) && parsed.length > 0) {

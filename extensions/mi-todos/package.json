@@ -72,10 +72,10 @@
     {
       "name": "wikiPath",
       "title": "Wiki Vault Path",
-      "description": "Root of your Obsidian wiki vault",
+      "description": "Root of your Obsidian wiki vault (optional, for QMD search)",
       "type": "textfield",
       "default": "~/wiki",
-      "required": true
+      "required": false
     }
   ],
   "dependencies": {

@@ -3,7 +3,8 @@ import path from "path";
 import os from "os";
 
 /**
- * Lists all MiToDos files in ~/MiToDos/
+ * Lists all MiToDos files in the configured mitodos directory.
+ * Reads the mitodosDir preference — no hardcoded paths.
  */
 export default async function () {
   const mitodosDir = path.join(os.homedir(), "MiToDos");

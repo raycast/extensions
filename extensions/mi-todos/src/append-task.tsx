@@ -18,9 +18,9 @@ import {
 } from "./util/storage";
 import { appendToProject } from "./util/routing";
 
-interface Preferences {
+type Preferences = {
   mitodosDir: string;
-}
+};
 
 export default function Command(props: { arguments?: { text?: string } }) {
   const [taskText, setTaskText] = useState(props.arguments?.text ?? "");

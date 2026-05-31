@@ -12,12 +12,12 @@ import { useState } from "react";
 import { expandHome, resolvePath, readFile } from "./util/storage";
 import { searchMitodos, searchWikiWithQmd } from "./util/qmd";
 
-interface Preferences {
+type Preferences = {
   mitodosDir: string;
   wikiPath: string;
-}
+};
 
-interface QmdResult {
+interface SearchResult {
   path: string;
   snippet: string;
   score: number;
@@ -48,15 +48,15 @@ export default function Command(props: { arguments?: { query?: string } }) {
   const [searchText, setSearchText] = useState(props.arguments?.query ?? "");
   const prefs = getPreferenceValues<Preferences>();
   const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
-  const wikiPath = resolvePath(expandHome(prefs.wikiPath));
+  const wikiPath = prefs.wikiPath ? resolvePath(expandHome(prefs.wikiPath)) : "";
   const { push } = useNavigation();
 
   const { data, isLoading } = usePromise(
     async (q: string) => {
-      if (!q.trim()) return { todos: [] as QmdResult[], wiki: [] as QmdResult[] };
+      if (!q.trim()) return { todos: [] as SearchResult[], wiki: [] as SearchResult[] };
       return {
         todos: searchMitodos(mitodosDir, q),
-        wiki: searchWikiWithQmd(wikiPath, q, 10),
+        wiki: wikiPath ? searchWikiWithQmd(wikiPath, q, 10) : [],
       };
     },
     [searchText],
@@ -94,8 +94,9 @@ export default function Command(props: { arguments?: { query?: string } }) {
 
   const todos = data?.todos ?? [];
   const wiki = data?.wiki ?? [];
+  const total = todos.length + wiki.length;
 
-  if (todos.length === 0 && wiki.length === 0) {
+  if (total === 0) {
     return (
       <List
         searchBarPlaceholder="Search your tasks..."
