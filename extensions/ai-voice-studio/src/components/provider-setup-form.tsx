@@ -35,6 +35,7 @@ import {
 import {
   MODEL_LABELS as MIMO_MODEL_LABELS,
   VOICE_CATEGORIES as MIMO_VOICE_CATEGORIES,
+  getDefaultVoiceForModel,
   getVoicesByCategory as getMimoVoicesByCategory,
   getVoicesForModel as getMimoVoicesForModel,
 } from "../constants/mimo-voices";
@@ -198,7 +199,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         const nextVoices = getMimoVoicesForModel(nextModel);
         const nextVoice = nextVoices.some((voice) => voice.id === current.mimo.defaultVoice)
           ? current.mimo.defaultVoice
-          : (nextVoices[0]?.id ?? "mimo_default");
+          : getDefaultVoiceForModel(nextModel);
         return { ...current, mimo: { ...current.mimo, model: nextModel, defaultVoice: nextVoice } };
       });
     },
@@ -498,7 +499,9 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
                 </Form.Dropdown.Section>
               );
             })}
-            {mimoVoices.length === 0 ? <Form.Dropdown.Item value="mimo_default" title="MiMo Default" /> : null}
+            {mimoVoices.length === 0 ? (
+              <Form.Dropdown.Item value={getDefaultVoiceForModel(settings.mimo.model)} title="Default English Voice" />
+            ) : null}
           </Form.Dropdown>
           <Form.Dropdown
             id="mimoSpeechRate"

@@ -78,12 +78,9 @@ async function verifyInvalidFallbacks() {
   assert(result.qwen.playbackRate === "1", "Invalid Qwen-TTS playback rate should fall back");
   assert(result.qwen.instructions === "", "Blank Qwen-TTS instructions should clear");
   assert(result.qwen.optimizeInstructions === false, "Invalid Qwen-TTS optimize flag should fall back");
-  assert(
-    result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
-    "Blank Qwen-TTS base URL should fall back",
-  );
+  assert(result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1", "Blank Qwen-TTS base URL should fall back");
   assert(result.mimo.model === "mimo-v2.5-tts", "Invalid MiMo model should fall back");
-  assert(result.mimo.defaultVoice === "mimo_default", "Blank MiMo voice should fall back");
+  assert(result.mimo.defaultVoice === "Chloe", "Blank MiMo voice should fall back");
   assert(result.mimo.speechRate === "0", "Invalid MiMo speed should fall back");
   assert(result.mimo.stylePrompt === "", "Blank MiMo style prompt should clear");
   assert(
@@ -132,7 +129,7 @@ async function verifyLegacyPreferencesIgnored() {
     "Legacy preference Qwen-TTS base URL should be ignored",
   );
   assert(result.mimo.model === "mimo-v2.5-tts", "Legacy preference MiMo model should be ignored");
-  assert(result.mimo.defaultVoice === "mimo_default", "Legacy preference MiMo voice should be ignored");
+  assert(result.mimo.defaultVoice === "Chloe", "Legacy preference MiMo voice should be ignored");
   assert(result.mimo.speechRate === "0", "Legacy preference MiMo speed should be ignored");
   assert(result.mimo.stylePrompt === "", "Legacy preference MiMo style prompt should be ignored");
   assert(

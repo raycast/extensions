@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, Toast, getSelectedText, showToast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { buildOptionsFromPrefs, getActiveModelAsync, getModelLabel } from "./api/mimo-tts";
 import { showTTSFailure } from "./utils/mimo-feedback";
 import {
@@ -12,9 +12,9 @@ import {
   VOICE_FEATURE_TAGS,
 } from "./constants/mimo-controls";
 import {
-  DEFAULT_VOICE,
   DEFAULT_MODEL,
   VOICE_CATEGORIES,
+  getDefaultVoiceForModel,
   getVoiceById,
   getVoicesByCategory,
   getVoicesForModel,
@@ -56,9 +56,8 @@ interface ControlFormValues extends Form.Values {
 
 export default function MiMoStudio() {
   const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
-  const availableVoices = useMemo(() => getVoicesForModel(currentModel), [currentModel]);
   const [text, setText] = useState("");
-  const [voiceId, setVoiceId] = useState(availableVoices[0]?.id ?? DEFAULT_VOICE);
+  const [voiceId, setVoiceId] = useState(getDefaultVoiceForModel(DEFAULT_MODEL));
   const [speechRate, setSpeechRate] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(false);
   // Tracked separately from isLoading so the Stop Playback action stays
@@ -74,7 +73,10 @@ export default function MiMoStudio() {
     async function loadDefaults() {
       const [initialText, activeVoice, override] = await Promise.all([
         loadInitialText(),
-        getActiveQuickReadVoiceId().catch(() => ({ voiceId: DEFAULT_VOICE, isOverride: false })),
+        getActiveQuickReadVoiceId().catch(() => ({
+          voiceId: getDefaultVoiceForModel(DEFAULT_MODEL),
+          isOverride: false,
+        })),
         getSpeedOverride(),
       ]);
       const [model, settings] = await Promise.all([getActiveModelAsync(), getMimoSettings()]);
@@ -83,7 +85,7 @@ export default function MiMoStudio() {
       if (!mounted) return;
       setCurrentModel(model);
       setText(initialText);
-      const fallbackVoice = modelVoices[0]?.id ?? DEFAULT_VOICE;
+      const fallbackVoice = getDefaultVoiceForModel(model);
       setVoiceId(modelVoices.some((voice) => voice.id === activeVoice.voiceId) ? activeVoice.voiceId : fallbackVoice);
       const initialRate = override ?? parseRateString(settings.speechRate);
       setSpeechRate(matchRateOptionValue(initialRate));

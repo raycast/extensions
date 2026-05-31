@@ -5,6 +5,7 @@ import {
   MODEL_LABELS,
   getVoiceById,
   isVoiceAvailableForModel,
+  normalizeVoiceForModel,
 } from "../constants/mimo-voices";
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/mimo-playback-state";
 import { getMimoSettings, type MimoProviderSettings } from "../utils/provider-settings";
@@ -202,7 +203,7 @@ function buildOptionsFromSettings(
   speedOverrideRate?: number | null,
 ): TTSOptions {
   const model = normalizeModel(settings.model);
-  const voice = voiceOverride || settings.defaultVoice || DEFAULT_VOICE;
+  const voice = normalizeVoiceForModel(voiceOverride || settings.defaultVoice || DEFAULT_VOICE, model);
   const voiceConfig = getVoiceById(voice);
 
   if (!voiceConfig) {

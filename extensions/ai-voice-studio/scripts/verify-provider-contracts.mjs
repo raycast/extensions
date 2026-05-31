@@ -209,7 +209,10 @@ async function verifyFocusedSetupOptionBuilders() {
   assert(openAIOptions.voice === "coral", "OpenAI options should use focused setup voice");
   assert(openAIOptions.format === "wav", "OpenAI options should use focused setup format");
   assert(openAIOptions.playbackRate === 1.5, "OpenAI options should parse focused setup playback rate");
-  assert(openAIOptions.instructions?.includes("Clear base"), "OpenAI options should include focused setup instructions");
+  assert(
+    openAIOptions.instructions?.includes("Clear base"),
+    "OpenAI options should include focused setup instructions",
+  );
 }
 
 async function verifyQwen() {
@@ -315,13 +318,13 @@ async function verifyMiMo() {
     assert(call.init.headers["api-key"] === "tp-mimo-test", "MiMo should send api-key header");
     assert(call.body.model === "mimo-v2.5-tts", "MiMo should send model");
     assert(call.body.audio.format === "wav", "MiMo should request wav audio");
-    assert(call.body.audio.voice === "mimo_default", "MiMo should send voice");
+    assert(call.body.audio.voice === "Chloe", "MiMo should send voice");
     return jsonResponse({ choices: [{ message: { audio: { data: "bWltby1hdWRpbw==" } } }] });
   });
 
   const mimoAudio = await mimo.synthesizeSpeech("Hello MiMo", {
     model: "mimo-v2.5-tts",
-    voice: "mimo_default",
+    voice: "Chloe",
     format: "wav",
     playbackRate: 1,
     tokenPlanBaseUrl: "https://custom.mimo/v1",
@@ -333,7 +336,7 @@ async function verifyMiMo() {
     () =>
       mimo.synthesizeSpeech("Hello MiMo", {
         model: "mimo-v2.5-tts",
-        voice: "mimo_default",
+        voice: "Chloe",
         format: "wav",
         playbackRate: 1,
       }),
@@ -349,7 +352,7 @@ async function verifyMiMo() {
         "Hello MiMo",
         {
           model: "mimo-v2.5-tts",
-          voice: "mimo_default",
+          voice: "Chloe",
           format: "wav",
           playbackRate: 1,
         },

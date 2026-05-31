@@ -118,7 +118,7 @@ try {
   assert(mimoFetch.url === "https://guardrail.mimo/v1/chat/completions", "MiMo should use setup base URL");
   assert(mimoFetch.apiKey === fakeKeys.mimo, "MiMo should send configured API key");
   assert(mimoFetch.body.model === "mimo-v2.5-tts", "MiMo live smoke should use setup model");
-  assert(mimoFetch.body.audio.voice === "mimo_default", "MiMo should use setup voice");
+  assert(mimoFetch.body.audio.voice === "Chloe", "MiMo should use setup voice");
   assert(openaiFetch.authorization === `Bearer ${fakeKeys.openai}`, "OpenAI should send the configured API key");
   assert(openaiFetch.body.model === "gpt-4o-mini-tts", "OpenAI live smoke should use setup model");
   assert(openaiFetch.body.voice === "cedar", "OpenAI live smoke should use setup voice");
@@ -230,7 +230,7 @@ function runLiveSmoke({ providers, play, forceError = "", maxMs = "30000", afpla
       MIMO_API_KEY: fakeKeys.mimo,
       MIMO_TOKEN_PLAN_BASE_URL: "https://guardrail.mimo/v1",
       MIMO_MODEL: "mimo-v2.5-tts",
-      MIMO_VOICE: "mimo_default",
+      MIMO_VOICE: "Chloe",
       MIMO_SPEECH_RATE: "0",
       MIMO_STYLE_PROMPT: "Guardrail MiMo style.",
       OPENAI_API_KEY: fakeKeys.openai,

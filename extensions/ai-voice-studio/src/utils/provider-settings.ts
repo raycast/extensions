@@ -14,7 +14,11 @@ import {
   inferQwenRegion,
   normalizeQwenBaseUrl,
 } from "../constants/qwen-tts-voices";
-import { DEFAULT_MODEL as DEFAULT_MIMO_MODEL, DEFAULT_VOICE as DEFAULT_MIMO_VOICE } from "../constants/mimo-voices";
+import {
+  DEFAULT_MODEL as DEFAULT_MIMO_MODEL,
+  DEFAULT_VOICE as DEFAULT_MIMO_VOICE,
+  normalizeVoiceForModel,
+} from "../constants/mimo-voices";
 import {
   DEFAULT_BASE_URL as DEFAULT_MINIMAX_BASE_URL,
   DEFAULT_ENGLISH_NORMALIZATION as DEFAULT_MINIMAX_ENGLISH_NORMALIZATION,
@@ -264,9 +268,10 @@ function normalizeMinimaxLanguageBoost(value: string | undefined): MinimaxLangua
 }
 
 function normalizeMimoSettings(settings: Partial<MimoProviderSettings> | undefined): MimoProviderSettings {
+  const model = settings?.model === "mimo-v2-tts" ? "mimo-v2-tts" : DEFAULT_MIMO_MODEL;
   return {
-    model: settings?.model === "mimo-v2-tts" ? "mimo-v2-tts" : DEFAULT_MIMO_MODEL,
-    defaultVoice: settings?.defaultVoice?.trim() || DEFAULT_MIMO_VOICE,
+    model,
+    defaultVoice: normalizeVoiceForModel(settings?.defaultVoice || DEFAULT_MIMO_VOICE, model),
     speechRate: normalizeMimoSpeechRate(settings?.speechRate),
     stylePrompt: settings?.stylePrompt?.trim() || "",
     tokenPlanBaseUrl:

@@ -1,7 +1,8 @@
 import type { MimoTTSModel, VoiceConfig } from "../api/mimo-types";
 
 export const DEFAULT_MODEL: MimoTTSModel = "mimo-v2.5-tts";
-export const DEFAULT_VOICE = "mimo_default";
+export const DEFAULT_VOICE = "Chloe";
+export const LEGACY_DEFAULT_VOICE = "default_en";
 
 export const MODEL_LABELS: Record<MimoTTSModel, string> = {
   "mimo-v2.5-tts": "MiMo-V2.5-TTS",
@@ -9,53 +10,6 @@ export const MODEL_LABELS: Record<MimoTTSModel, string> = {
 };
 
 export const VOICES: VoiceConfig[] = [
-  {
-    id: "mimo_default",
-    name: "MiMo Default",
-    gender: "neutral",
-    category: "Default",
-    language: "Auto",
-    description: "Uses the platform default voice for the active region.",
-    models: ["mimo-v2.5-tts", "mimo-v2-tts"],
-    recommended: true,
-  },
-  {
-    id: "冰糖",
-    name: "Bingtang",
-    gender: "female",
-    category: "Chinese",
-    language: "Chinese",
-    description: "Clear Chinese female voice for daily reading and narration.",
-    models: ["mimo-v2.5-tts"],
-    recommended: true,
-  },
-  {
-    id: "茉莉",
-    name: "Moli",
-    gender: "female",
-    category: "Chinese",
-    language: "Chinese",
-    description: "Soft Chinese female voice with a calm, polished tone.",
-    models: ["mimo-v2.5-tts"],
-  },
-  {
-    id: "苏打",
-    name: "Soda",
-    gender: "male",
-    category: "Chinese",
-    language: "Chinese",
-    description: "Bright Chinese male voice for explanations and short-form reading.",
-    models: ["mimo-v2.5-tts"],
-  },
-  {
-    id: "白桦",
-    name: "Baihua",
-    gender: "male",
-    category: "Chinese",
-    language: "Chinese",
-    description: "Steady Chinese male voice suited to longer text.",
-    models: ["mimo-v2.5-tts"],
-  },
   {
     id: "Mia",
     name: "Mia",
@@ -94,13 +48,40 @@ export const VOICES: VoiceConfig[] = [
     models: ["mimo-v2.5-tts"],
   },
   {
-    id: "default_zh",
-    name: "MiMo Chinese Female",
+    id: "冰糖",
+    name: "Bingtang",
     gender: "female",
-    category: "Legacy",
+    category: "Chinese",
     language: "Chinese",
-    description: "Legacy MiMo-V2 Chinese female voice.",
-    models: ["mimo-v2-tts"],
+    description: "Clear Chinese female voice for daily reading and narration.",
+    models: ["mimo-v2.5-tts"],
+  },
+  {
+    id: "茉莉",
+    name: "Moli",
+    gender: "female",
+    category: "Chinese",
+    language: "Chinese",
+    description: "Soft Chinese female voice with a calm, polished tone.",
+    models: ["mimo-v2.5-tts"],
+  },
+  {
+    id: "苏打",
+    name: "Soda",
+    gender: "male",
+    category: "Chinese",
+    language: "Chinese",
+    description: "Bright Chinese male voice for explanations and short-form reading.",
+    models: ["mimo-v2.5-tts"],
+  },
+  {
+    id: "白桦",
+    name: "Baihua",
+    gender: "male",
+    category: "Chinese",
+    language: "Chinese",
+    description: "Steady Chinese male voice suited to longer text.",
+    models: ["mimo-v2.5-tts"],
   },
   {
     id: "default_en",
@@ -111,9 +92,18 @@ export const VOICES: VoiceConfig[] = [
     description: "Legacy MiMo-V2 English female voice.",
     models: ["mimo-v2-tts"],
   },
+  {
+    id: "default_zh",
+    name: "MiMo Chinese Female",
+    gender: "female",
+    category: "Legacy",
+    language: "Chinese",
+    description: "Legacy MiMo-V2 Chinese female voice.",
+    models: ["mimo-v2-tts"],
+  },
 ];
 
-export const VOICE_CATEGORIES = ["Default", "Chinese", "English", "Legacy"] as const;
+export const VOICE_CATEGORIES = ["English", "Chinese", "Legacy"] as const;
 
 export function getVoicesByCategory(category: string, model?: MimoTTSModel): VoiceConfig[] {
   return VOICES.filter((voice) => voice.category === category && (!model || voice.models.includes(model)));
@@ -129,4 +119,17 @@ export function getVoiceById(id: string): VoiceConfig | undefined {
 
 export function isVoiceAvailableForModel(voice: VoiceConfig, model: MimoTTSModel): boolean {
   return voice.models.includes(model);
+}
+
+export function getDefaultVoiceForModel(model: MimoTTSModel): string {
+  return model === "mimo-v2-tts" ? LEGACY_DEFAULT_VOICE : DEFAULT_VOICE;
+}
+
+export function normalizeVoiceForModel(value: string | undefined, model: MimoTTSModel): string {
+  const id = value?.trim();
+  if (id) {
+    const voice = getVoiceById(id);
+    if (voice && isVoiceAvailableForModel(voice, model)) return voice.id;
+  }
+  return getDefaultVoiceForModel(model);
 }

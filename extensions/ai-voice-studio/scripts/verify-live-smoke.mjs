@@ -279,7 +279,7 @@ async function verifyQwen() {
 async function verifyMiMo() {
   const mimo = loadTs("src/api/mimo-tts.ts");
   const model = process.env.MIMO_MODEL || "mimo-v2.5-tts";
-  const voice = process.env.MIMO_VOICE || "mimo_default";
+  const voice = process.env.MIMO_VOICE || "Chloe";
   const tokenPlanBaseUrl = process.env.MIMO_TOKEN_PLAN_BASE_URL || "https://token-plan-cn.xiaomimimo.com/v1";
   setPreferences({
     mimoApiKey: process.env.MIMO_API_KEY,

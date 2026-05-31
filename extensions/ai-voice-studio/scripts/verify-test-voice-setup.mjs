@@ -302,7 +302,7 @@ function loadCommand(provider, events, options = {}) {
     [mimoPrefsFile]: {
       buildDefaultOptionsFromPrefs: async () => ({
         model: "mimo-v2.5-tts",
-        voice: "mimo_default",
+        voice: "Chloe",
         format: "wav",
         playbackRate: 1.25,
       }),
