@@ -18,7 +18,7 @@ function isRgAvailable(): boolean {
 
 /**
  * Search MiToDos directory with ripgrep — fast, respects .gitignore.
- * Uses execFileSync (array args, no shell interpolation) — safe against injection.
+ * Uses execFileSync (array args, no shell injection).
  */
 export function searchMitodos(mitodosDir: string, query: string, limit = 20): QmdResult[] {
   const dir = resolvePath(mitodosDir);
@@ -32,15 +32,13 @@ export function searchMitodos(mitodosDir: string, query: string, limit = 20): Qm
   if (!pattern) return [];
 
   try {
-    const args = ["-il", pattern, dir, "--max-count=1", "--type", "md"];
-    if (limit) args.push("--max-count", String(limit));
-
     const cmd = isRgAvailable() ? "rg" : "grep";
-    // grep uses different flags
-    const finalArgs =
-      cmd === "grep" ? ["-ril", words[0].replace(/[^\w-]/g, ""), dir, "--include=*.md"] : args;
+    const args =
+      cmd === "grep"
+        ? ["-ril", words[0].replace(/[^\w-]/g, ""), dir, "--include=*.md"]
+        : ["-il", pattern, dir, "--type", "md", "--max-count", String(limit)];
 
-    const output = execFileSync(cmd, finalArgs, {
+    const output = execFileSync(cmd, args, {
       encoding: "utf-8",
       timeout: 5000,
       stdio: ["ignore", "pipe", "ignore"],
@@ -76,6 +74,7 @@ export function searchMitodos(mitodosDir: string, query: string, limit = 20): Qm
 /**
  * Search the wiki vault with QMD (secondary — only if QMD is available).
  * Uses execFileSync with array args — safe against injection.
+ * Scoped to the configured wikiPath via qmd's --path flag.
  */
 export function searchWikiWithQmd(wikiPath: string, query: string, limit = 10): QmdResult[] {
   try {
@@ -86,18 +85,14 @@ export function searchWikiWithQmd(wikiPath: string, query: string, limit = 10): 
 
   const resolved = resolvePath(wikiPath);
   try {
-    const output = execFileSync("qmd", ["search", query, "--json", "--limit", String(limit)], {
-      encoding: "utf-8",
-      timeout: 15000,
-      stdio: ["ignore", "pipe", "ignore"],
-    });
+    const output = execFileSync(
+      "qmd",
+      ["search", query, "--path", resolved, "--json", "--limit", String(limit)],
+      { encoding: "utf-8", timeout: 15000, stdio: ["ignore", "pipe", "ignore"] },
+    );
     const parsed = JSON.parse(output);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed
-        .filter(
-          (r: QmdResult) => r.path && (r.path.startsWith(resolved) || r.path.includes("/wiki/")),
-        )
-        .slice(0, limit);
+      return parsed.filter((r: QmdResult) => r.path && r.path.startsWith(resolved)).slice(0, limit);
     }
     return [];
   } catch {

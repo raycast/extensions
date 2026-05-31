@@ -1,5 +1,5 @@
 import path from "path";
-import { resolvePath, readFile, writeFile, appendFile, fileExists } from "./storage";
+import { resolvePath, readFile, writeFile, appendFile, fileExists, todayDate } from "./storage";
 
 const INBOX_HEADING = "## 📋 Inbox";
 
@@ -19,10 +19,6 @@ ${INBOX_HEADING}
 
 ## 📊 Notes
 `;
-
-function todayDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 /**
  * Append a task to a project file's inbox section.
@@ -46,12 +42,10 @@ export function appendToProject(mitodosDir: string, projectName: string, task: s
   if (content.includes(INBOX_HEADING)) {
     const lines = content.split("\n");
     const inboxIndex = lines.findIndex((l) => l.trim() === INBOX_HEADING);
-
     let insertIndex = inboxIndex + 1;
     while (insertIndex < lines.length && lines[insertIndex].startsWith("- [")) {
       insertIndex++;
     }
-
     lines.splice(insertIndex, 0, taskLine.trimEnd());
     writeFile(filepath, lines.join("\n"));
   } else {

@@ -12,11 +12,6 @@ import { useState } from "react";
 import { expandHome, resolvePath, readFile } from "./util/storage";
 import { searchMitodos, searchWikiWithQmd } from "./util/qmd";
 
-type Preferences = {
-  mitodosDir: string;
-  wikiPath: string;
-};
-
 interface SearchResult {
   path: string;
   snippet: string;
@@ -94,9 +89,8 @@ export default function Command(props: { arguments?: { query?: string } }) {
 
   const todos = data?.todos ?? [];
   const wiki = data?.wiki ?? [];
-  const total = todos.length + wiki.length;
 
-  if (total === 0) {
+  if (todos.length === 0 && wiki.length === 0) {
     return (
       <List
         searchBarPlaceholder="Search your tasks..."

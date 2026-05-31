@@ -3,15 +3,18 @@ import path from "path";
 import os from "os";
 
 /**
- * Lists all MiToDos files in the configured mitodos directory.
- * Reads the mitodosDir preference — no hardcoded paths.
+ * Lists all MiToDos files in ~/MiToDos/.
+ *
+ * Note: Raycast AI tools cannot access user preferences, so this tool
+ * uses the default directory. The extension commands (Add Task, Create
+ * Project, Search) respect the user-configured mitodosDir preference.
  */
 export default async function () {
   const mitodosDir = path.join(os.homedir(), "MiToDos");
 
   try {
     if (!fs.existsSync(mitodosDir)) {
-      return "MiToDos directory not found at ~/MiToDos/";
+      return "MiToDos directory not found at ~/MiToDos/ — run Add Task or Create Project first to create it.";
     }
 
     const files = fs

@@ -1,10 +1,6 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { expandHome, resolvePath, createProjectFile } from "./util/storage";
 
-interface Preferences {
-  mitodosDir: string;
-}
-
 export default async function Command(props: { arguments?: { name?: string } }) {
   const prefs = getPreferenceValues<Preferences>();
   const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
