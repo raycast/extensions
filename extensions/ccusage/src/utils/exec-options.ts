@@ -40,9 +40,12 @@ export const getExecOptions = () => {
     env,
     timeout: 30000,
     cwd: home || process.cwd(),
-    // On Windows, `npx`/`ccusage` are `.cmd` shims that Node's spawn cannot
-    // execute directly (ENOENT). Running through a shell lets cmd.exe resolve
-    // them via PATHEXT. Our args are simple tokens, so shell quoting is safe.
-    ...(isWindows ? { shell: true } : {}),
+    // On Windows, `npx`/`ccusage` are `.cmd` shims. `child_process.exec`
+    // (used by the no-view tools) already runs via cmd.exe, but `useExec`'s
+    // spawn does not and would throw ENOENT. Point both at cmd.exe so the
+    // shims resolve via PATHEXT. Using the shell *path* (a string) rather
+    // than `true` keeps the type compatible with exec's ExecOptions, which
+    // only accepts `shell?: string`.
+    shell: isWindows ? process.env.ComSpec || "cmd.exe" : undefined,
   };
 };
