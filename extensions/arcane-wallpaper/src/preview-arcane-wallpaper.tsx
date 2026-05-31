@@ -15,6 +15,7 @@ export default function PreviewArcaneWallpaper(props: {
   const { index, arcaneWallpapers, setSelectedItem, applyTo, picturesDirectory } = props;
   const imagesLength = arcaneWallpapers.length;
   const [pageIndex, setPageIndex] = useState<number>(index);
+  const { pop } = useNavigation();
   return (
     <Detail
       navigationTitle={arcaneWallpapers[pageIndex].title}
@@ -70,7 +71,7 @@ export default function PreviewArcaneWallpaper(props: {
             icon={Icon.Minimize}
             title={"Quit Preview"}
             shortcut={{ modifiers: ["cmd"], key: "y" }}
-            onAction={useNavigation().pop}
+            onAction={pop}
           />
           <ActionOpenPreferences />
         </ActionPanel>

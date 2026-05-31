@@ -115,13 +115,13 @@ export async function getArcaneWallpapersFromDrive(): Promise<ArcaneWallpaper[]>
     return [];
   }
 
-  const wallpapers = await Promise.all(
+  const results = await Promise.allSettled(
     selectedDriveFolders.map((folder) =>
       fetchFolderWallpapers(folder.id, [folder.title], new Set<string>([ARCANE_DRIVE_FOLDER_ID])),
     ),
   );
 
-  const wallpaperCatalog = wallpapers.flat();
+  const wallpaperCatalog = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
   if (wallpaperCatalog.length === 0) {
     throw new Error("No wallpapers found in the selected Google Drive folders.");
   }

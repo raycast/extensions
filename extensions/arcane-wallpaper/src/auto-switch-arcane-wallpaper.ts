@@ -58,6 +58,7 @@ async function setRandomWallpaper(arcaneWallpaperList: ArcaneWallpaper[], exclud
       title: value.title,
       category: value.category,
       url: value.url,
+      fileType: value.fileType,
       thumbnailUrl: value.thumbnailUrl,
       exclude: excludeList.includes(value.url),
     } as ArcaneWallpaperWithInfo;
