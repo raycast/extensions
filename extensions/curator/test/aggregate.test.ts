@@ -27,8 +27,16 @@ function skill(over: Partial<ParsedSkill>): ParsedSkill {
 describe("aggregateSkills", () => {
   it("merges identical realPath across surfaces into one row with both surfaces", () => {
     const out = aggregateSkills([
-      skill({ name: "firecrawl", realPath: "/repo/firecrawl", surface: "claude" }),
-      skill({ name: "firecrawl", realPath: "/repo/firecrawl", surface: "codex" }),
+      skill({
+        name: "firecrawl",
+        realPath: "/repo/firecrawl",
+        surface: "claude",
+      }),
+      skill({
+        name: "firecrawl",
+        realPath: "/repo/firecrawl",
+        surface: "codex",
+      }),
     ]);
     expect(out).toHaveLength(1);
     expect(out[0].surfaces.sort()).toEqual(["claude", "codex"]);
@@ -44,24 +52,71 @@ describe("aggregateSkills", () => {
 
   it("collapses cache versions to the latest", () => {
     const out = aggregateSkills([
-      skill({ name: "tighten", realPath: "/c/1.0", source: "claude-plugin-cache", marketplace: "rw", pluginVersion: "1.0.0" }),
-      skill({ name: "tighten", realPath: "/c/2.0", source: "claude-plugin-cache", marketplace: "rw", pluginVersion: "2.0.0" }),
+      skill({
+        name: "tighten",
+        realPath: "/c/1.0",
+        source: "claude-plugin-cache",
+        marketplace: "rw",
+        pluginVersion: "1.0.0",
+      }),
+      skill({
+        name: "tighten",
+        realPath: "/c/2.0",
+        source: "claude-plugin-cache",
+        marketplace: "rw",
+        pluginVersion: "2.0.0",
+      }),
     ]);
     expect(out).toHaveLength(1);
     expect(out[0].primary.pluginVersion).toBe("2.0.0");
   });
 
+  it("compares cache versions numerically", () => {
+    const out = aggregateSkills([
+      skill({
+        name: "tighten",
+        realPath: "/c/1.9",
+        source: "claude-plugin-cache",
+        marketplace: "rw",
+        pluginVersion: "1.9.0",
+      }),
+      skill({
+        name: "tighten",
+        realPath: "/c/1.10",
+        source: "claude-plugin-cache",
+        marketplace: "rw",
+        pluginVersion: "1.10.0",
+      }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0].primary.pluginVersion).toBe("1.10.0");
+  });
+
   it("drops cache entry when a non-cache entry of same name exists", () => {
     const out = aggregateSkills([
-      skill({ name: "brainstorming", realPath: "/mp", source: "claude-plugin-marketplace", marketplace: "sp" }),
-      skill({ name: "brainstorming", realPath: "/cache", source: "claude-plugin-cache", marketplace: "sp", pluginVersion: "5.0.0" }),
+      skill({
+        name: "brainstorming",
+        realPath: "/mp",
+        source: "claude-plugin-marketplace",
+        marketplace: "sp",
+      }),
+      skill({
+        name: "brainstorming",
+        realPath: "/cache",
+        source: "claude-plugin-cache",
+        marketplace: "sp",
+        pluginVersion: "5.0.0",
+      }),
     ]);
     expect(out).toHaveLength(1);
     expect(out[0].source).toBe("claude-plugin-marketplace");
   });
 
   it("sorts by name", () => {
-    const out = aggregateSkills([skill({ name: "zeta", realPath: "/z" }), skill({ name: "alpha", realPath: "/a" })]);
+    const out = aggregateSkills([
+      skill({ name: "zeta", realPath: "/z" }),
+      skill({ name: "alpha", realPath: "/a" }),
+    ]);
     expect(out.map((s) => s.name)).toEqual(["alpha", "zeta"]);
   });
 });

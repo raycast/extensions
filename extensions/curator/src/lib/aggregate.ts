@@ -1,4 +1,5 @@
 import type { DisplaySkill, ParsedSkill, Surface } from "./types";
+import { compareVersions } from "./version";
 
 function isCache(s: ParsedSkill): boolean {
   return (
@@ -16,7 +17,7 @@ export function aggregateSkills(skills: ParsedSkill[]): DisplaySkill[] {
       const prev = latestCache.get(key);
       if (
         !prev ||
-        (s.pluginVersion ?? "").localeCompare(prev.pluginVersion ?? "") > 0
+        compareVersions(s.pluginVersion ?? "", prev.pluginVersion ?? "") > 0
       ) {
         latestCache.set(key, s);
       }

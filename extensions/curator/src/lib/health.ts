@@ -1,5 +1,6 @@
 import { basename, join } from "node:path";
 import type { HealthIssue, ParsedSkill, Surface } from "./types";
+import { compareVersions } from "./version";
 
 const USER_SOURCES = new Set<string>(["claude-user", "codex-user"]);
 
@@ -155,7 +156,7 @@ function staleCache(skills: ParsedSkill[]): HealthIssue[] {
   for (const [key, list] of byKey) {
     if (list.length > 1) {
       const sorted = [...list].sort((a, b) =>
-        (b.pluginVersion ?? "").localeCompare(a.pluginVersion ?? ""),
+        compareVersions(b.pluginVersion ?? "", a.pluginVersion ?? ""),
       );
       const old = sorted.slice(1);
       out.push({

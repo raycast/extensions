@@ -6,6 +6,7 @@ import { usePromise, showFailureToast } from "@raycast/utils";
 import { getIndex } from "./lib/cache";
 import { aggregateSkills } from "./lib/aggregate";
 import { computeHealth } from "./lib/health";
+import { issuesForSkill } from "./lib/issue-scope";
 import { buildFixCommand } from "./lib/fix-commands";
 import { copyToClipboard, openInEditor } from "./lib/actions";
 import { SkillDetail } from "./components/SkillDetail";
@@ -54,13 +55,8 @@ export default function Command() {
     async () => {
       const index = await getIndex();
       const items = aggregateSkills(index.skills);
-      const issuesByName = new Map<string, HealthIssue[]>();
-      for (const i of computeHealth(index.skills, homedir())) {
-        const arr = issuesByName.get(i.skillName) ?? [];
-        arr.push(i);
-        issuesByName.set(i.skillName, arr);
-      }
-      return { items, issuesByName };
+      const issues = computeHealth(index.skills, homedir());
+      return { items, issues };
     },
     [],
     {
@@ -71,7 +67,7 @@ export default function Command() {
   );
 
   const items = data?.items ?? [];
-  const issuesByName = data?.issuesByName ?? new Map<string, HealthIssue[]>();
+  const allIssues = data?.issues ?? [];
 
   const sections = new Map<string, DisplaySkill[]>();
   for (const s of items) {
@@ -97,7 +93,7 @@ export default function Command() {
       {orderedSections.map(([title, group]) => (
         <List.Section key={title} title={title}>
           {group.map((s) => {
-            const issues = issuesByName.get(s.name) ?? [];
+            const issues = issuesForSkill(s, allIssues);
             return (
               <List.Item
                 key={s.key}

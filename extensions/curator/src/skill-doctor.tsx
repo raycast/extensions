@@ -31,7 +31,9 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Filter ${all.length} issue(s)…`}
+      searchBarPlaceholder={
+        isLoading ? "Loading…" : `Filter ${all.length} issue(s)…`
+      }
     >
       {SECTIONS.map(({ sev, title }) => {
         const group = all.filter((i) => i.severity === sev);
