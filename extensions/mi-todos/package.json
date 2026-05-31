@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mi-todos",
+  "title": "MiToDos",
+  "description": "Markdown-based todo manager that lives in your wiki. Quick capture, project creation, and semantic search across your knowledge base.",
+  "icon": "icon.png",
+  "author": "chipoto69",
+  "owner": "chipoto69",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "append-task",
+      "title": "Add Task",
+      "description": "Append a task to mitodos.md inbox",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task description...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new MiToDos project file in wiki",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Project name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search MiToDos",
+      "description": "Search todos across wiki with QMD semantic search",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search your tasks and knowledge base...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-mitodos",
+      "title": "List MiToDos",
+      "description": "List all available MiToDos files in the wiki"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mitodosDir",
+      "title": "MiToDos Directory",
+      "description": "Directory for MiToDos markdown files (default: ~/MiToDos/)",
+      "type": "textfield",
+      "default": "~/MiToDos",
+      "required": true
+    },
+    {
+      "name": "wikiPath",
+      "title": "Wiki Vault Path",
+      "description": "Root of your Obsidian wiki vault",
+      "type": "textfield",
+      "default": "~/wiki",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
