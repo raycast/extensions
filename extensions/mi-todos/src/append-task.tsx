@@ -24,7 +24,10 @@ export default function Command(props: { arguments?: { text?: string } }) {
   const prefs = getPreferenceValues<Preferences>();
   const mitodosDir = resolvePath(expandHome(prefs.mitodosDir));
 
-  const { data: projects = [] } = usePromise(() => listProjectFiles(mitodosDir), []);
+  const { data: projects = [] } = usePromise(
+    async (dir: string) => listProjectFiles(dir),
+    [mitodosDir],
+  );
 
   async function handleSubmit() {
     const trimmed = taskText.trim();
