@@ -30,6 +30,9 @@ interface NetworkInfo {
 
 const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
 
+// Module-level placeholder; will be updated in useEffect to avoid blocking UI
+let NETWORK_SERVICE = "Wi-Fi";
+
 /**
  * Get the active network service (e.g., "Wi-Fi", "Ethernet").
  * Detects the default interface via route and maps it to the macOS hardware port name.
@@ -37,28 +40,22 @@ const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
  */
 function getActiveNetworkService(): string {
   try {
-    // Find the default interface (en0, en1, etc.)
     const iface = execSync(
       "route get default 2>/dev/null | awk '/interface: /{print $2}'",
       { encoding: "utf-8" },
     ).trim();
     if (!iface) return "Wi-Fi";
 
-    // Map device -> hardware port (e.g. en0 -> Wi-Fi)
     const hwports = execSync("networksetup -listallhardwareports", {
       encoding: "utf-8",
     });
 
-    // Parse blocks like:
-    // Hardware Port: Wi-Fi
-    // Device: en0
     const lines = hwports.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line.startsWith("Device:")) {
         const dev = line.split("Device:")[1].trim();
         if (dev === iface) {
-          // Hardware port is typically the previous "Hardware Port:" line
           const prev = (lines[i - 1] || "").trim();
           if (prev.startsWith("Hardware Port:")) {
             return prev.split("Hardware Port:")[1].trim();
@@ -67,28 +64,10 @@ function getActiveNetworkService(): string {
       }
     }
   } catch {
-    // Silently fall back if detection fails
+    // Silently fall back
   }
   return "Wi-Fi";
 }
-
-/**
- * Get the network service to use, respecting user preference if set.
- */
-function getNetworkService(): string {
-  try {
-    type Prefs = { networkService?: string };
-    const prefs = getPreferenceValues<Prefs>();
-    if (prefs.networkService && prefs.networkService.trim() !== "") {
-      return prefs.networkService.trim();
-    }
-  } catch {
-    // Silently fall back to auto-detect
-  }
-  return getActiveNetworkService();
-}
-
-const NETWORK_SERVICE = getNetworkService();
 
 // Default descriptions for known presets — used to migrate old files
 const DEFAULT_DESCRIPTIONS: { [key: string]: string } = {
@@ -420,8 +399,24 @@ function resetDNS(): void {
  * List view showing all network interface info — press Enter on any row to copy.
  */
 function NetworkDetailsView() {
-  const details = getNetworkInterfaceDetails();
-  const networkInfo = getNetworkInfo();
+  const [details, setDetails] = useState<{ [key: string]: string }>({});
+  const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      const fetchedDetails = getNetworkInterfaceDetails();
+      const fetchedNetworkInfo = getNetworkInfo();
+      setDetails(fetchedDetails);
+      setNetworkInfo(fetchedNetworkInfo);
+    } catch (error) {
+      // Silently handle errors
+      console.error("Failed to fetch network details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Helper to safely pull a value from the networksetup -getinfo output
   const get = (key: string): string | undefined => {
@@ -457,7 +452,13 @@ function NetworkDetailsView() {
     );
   }
 
-  const activeDNS = networkInfo.activeDNS.join(", ");
+  const activeDNS = networkInfo?.activeDNS.join(", ") || "";
+
+  if (isLoading) {
+    return (
+      <List navigationTitle={`${NETWORK_SERVICE} Details`} isLoading={true} />
+    );
+  }
 
   return (
     <List
@@ -467,13 +468,13 @@ function NetworkDetailsView() {
       {/* DNS Section */}
       <List.Section title="DNS">
         <List.Item
-          icon={networkInfo.isDHCP ? Icon.Globe : Icon.Lock}
+          icon={networkInfo?.isDHCP ? Icon.Globe : Icon.Lock}
           title="DNS Source"
           accessories={[
             {
               tag: {
-                value: networkInfo.isDHCP ? "DHCP" : "Manual",
-                color: networkInfo.isDHCP ? "#3b82f6" : "#f59e0b",
+                value: networkInfo?.isDHCP ? "DHCP" : "Manual",
+                color: networkInfo?.isDHCP ? "#3b82f6" : "#f59e0b",
               },
             },
           ]}
@@ -725,6 +726,18 @@ export default function Command() {
   }
 
   useEffect(() => {
+    // Update network service asynchronously (avoiding blocking startup)
+    try {
+      const prefs = getPreferenceValues<Preferences>();
+      if (prefs.networkService && prefs.networkService.trim() !== "") {
+        NETWORK_SERVICE = prefs.networkService.trim();
+      } else {
+        NETWORK_SERVICE = getActiveNetworkService();
+      }
+    } catch {
+      // Keep the default "Wi-Fi" if detection fails
+    }
+
     refresh();
   }, []);
 
