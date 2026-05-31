@@ -1273,7 +1273,7 @@ function GameDetail({
   const isDiscounted = effectiveCut > 0;
   let saleTagText = "";
   let saleTagColor = Color.Green;
-if (isDiscounted) {
+  if (isDiscounted) {
     if (effectiveCut >= 70) {
       saleTagText = "MEGA SALE";
       saleTagColor = Color.Green;
@@ -1287,7 +1287,7 @@ if (isDiscounted) {
       saleTagText = "LOW DISCOUNT";
       saleTagColor = Color.SecondaryText;
     }
-}
+  }
 
   const signalEmoji =
     signalText === "STRONG OPPORTUNITY"

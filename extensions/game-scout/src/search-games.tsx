@@ -1114,21 +1114,21 @@ function GameDetail({
   const isDiscounted = effectiveCut > 0;
   let saleTagText = "";
   let saleTagColor = Color.Green;
-if (isDiscounted) {
-  if (effectiveCut >= 70) {
-    saleTagText = "MEGA SALE";
-    saleTagColor = Color.Green;
-  } else if (effectiveCut >= 40) {
-    saleTagText = "ON SALE";
-    saleTagColor = Color.Green;
-  } else if (effectiveCut >= 20) {
-    saleTagText = "DISCOUNT";
-    saleTagColor = Color.SecondaryText;
-  } else {
-    saleTagText = "LOW DISCOUNT";
-    saleTagColor = Color.SecondaryText;
+  if (isDiscounted) {
+    if (effectiveCut >= 70) {
+      saleTagText = "MEGA SALE";
+      saleTagColor = Color.Green;
+    } else if (effectiveCut >= 40) {
+      saleTagText = "ON SALE";
+      saleTagColor = Color.Green;
+    } else if (effectiveCut >= 20) {
+      saleTagText = "DISCOUNT";
+      saleTagColor = Color.SecondaryText;
+    } else {
+      saleTagText = "LOW DISCOUNT";
+      saleTagColor = Color.SecondaryText;
+    }
   }
-}
 
   const signalEmoji =
     signalText === "STRONG OPPORTUNITY"
