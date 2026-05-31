@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1] - 2026-05-31
+
+- Default the China endpoint to the MiniMax Token Plan Anthropic-compatible API.
+- Add Anthropic Messages request handling while preserving the legacy International endpoint.
+- Make MiniMax M2.7-highspeed the recommended default model.
+
 ## [1.2.0] - 2026-05-10
 
 Thanks to [@tolshao](https://github.com/tolshao) for contributing this release.
