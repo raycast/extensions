@@ -34,7 +34,7 @@ scripts/
 metadata/_all_trimmed/
 metadata/new*.png
 
-# アイコン源ファイル・ルート冗長コピー（Store は assets/icon.png）
-icon.svg
-icon.png
-assets/icon.svg
+# アイコン源ファイル・ルート冗長コピー（Store は assets/icon.png をコミットする）
+/icon.svg
+/icon.png
+/assets/icon.svg
