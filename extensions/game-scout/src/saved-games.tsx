@@ -29,7 +29,12 @@ const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
+import {
+  formatPrice,
+  isStoreAllowed,
+  computeGameInsight,
+  safeParse,
+} from "./utils";
 import type {
   BundleInfo,
   BundleTier,
@@ -58,15 +63,6 @@ const getBundleCount = (
 type OverviewMapValue = {
   prices?: OverviewItem[];
   bundles?: BundleInfo[];
-};
-
-const safeParse = <T,>(str: string | undefined | null, fallback: T): T => {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return fallback;
-  }
 };
 
 export default function SavedGames() {
@@ -206,13 +202,10 @@ export default function SavedGames() {
         if (it.id != null) priceMap[String(it.id)] = it.deals || [];
       });
 
-      const newBundleCounts: Record<string, number> = {};
       const bundleMapByGame: Record<string, BundleInfo[]> = {};
 
       if (oJson && Array.isArray(oJson.bundles)) {
-        const now = new Date();
         for (const bundle of oJson.bundles) {
-          const isActive = !bundle.expiry || new Date(bundle.expiry) > now;
           const games =
             bundle.tiers?.flatMap((tier: BundleTier) => tier.games || []) || [];
           const uniqueGameIds = new Set(
@@ -222,9 +215,6 @@ export default function SavedGames() {
           for (const gid of uniqueGameIds) {
             const gidStr = String(gid);
             if (gidStr && gidStr !== "undefined") {
-              if (isActive) {
-                newBundleCounts[gidStr] = (newBundleCounts[gidStr] || 0) + 1;
-              }
               if (!bundleMapByGame[gidStr]) bundleMapByGame[gidStr] = [];
               bundleMapByGame[gidStr].push(bundle);
             }

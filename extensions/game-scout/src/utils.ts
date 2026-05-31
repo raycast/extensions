@@ -39,6 +39,18 @@ for (const [id, names] of Object.entries(STORE_MAP)) {
   });
 }
 
+export const safeParse = <T>(
+  str: string | undefined | null,
+  fallback: T,
+): T => {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export function formatPrice(
   amount: number | undefined,
   currency: string | undefined,

@@ -26,15 +26,6 @@ const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 const searchCache = new Cache({ namespace: "search_queries" });
 const CACHE_KEY = `itad_saved_prices_v22_${COUNTRY}`;
 
-const safeParse = <T,>(str: string | undefined | null, fallback: T): T => {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return fallback;
-  }
-};
-
 const getBundleCount = (bundles: OverviewItem["bundles"] | undefined) => {
   if (typeof bundles === "number") {
     return bundles;
@@ -45,7 +36,12 @@ const getBundleCount = (bundles: OverviewItem["bundles"] | undefined) => {
   return bundles?.count || 0;
 };
 
-import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
+import {
+  formatPrice,
+  isStoreAllowed,
+  computeGameInsight,
+  safeParse,
+} from "./utils";
 import type {
   BundleInfo,
   Deal,
