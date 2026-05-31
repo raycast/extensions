@@ -1,12 +1,6 @@
-import fs from "fs";
-import path from "path";
-import os from "os";
-
-// ─── MiToDos — home is ~/MiToDos/ ───
-//
-// ~/MiToDos/
-//   inbox.md              ← default quick-capture target
-//   <project>.md          ← project-scoped files
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 export function expandHome(filepath: string): string {
   if (filepath.startsWith("~")) {
@@ -90,13 +84,11 @@ export function appendToInbox(mitodosDir: string, task: string): string {
 
   if (content.includes(INBOX_HEADING)) {
     const lines = content.split("\n");
-    const inboxIndex = lines.findIndex((l) => l.trim() === INBOX_HEADING);
-
+    const inboxIndex = lines.findIndex((l: string) => l.trim() === INBOX_HEADING);
     let insertIndex = inboxIndex + 1;
     while (insertIndex < lines.length && lines[insertIndex].startsWith("- [")) {
       insertIndex++;
     }
-
     lines.splice(insertIndex, 0, taskLine.trimEnd());
     writeFile(inboxPath, lines.join("\n"));
   } else {
@@ -132,6 +124,6 @@ export function listProjectFiles(mitodosDir: string): string[] {
 
   return fs
     .readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => f.replace(".md", ""));
+    .filter((f: string) => f.endsWith(".md"))
+    .map((f: string) => f.replace(".md", ""));
 }

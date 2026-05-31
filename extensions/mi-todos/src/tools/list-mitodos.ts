@@ -1,14 +1,7 @@
-import fs from "fs";
-import path from "path";
-import os from "os";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
-/**
- * Lists all MiToDos files in ~/MiToDos/.
- *
- * Note: Raycast AI tools cannot access user preferences, so this tool
- * uses the default directory. The extension commands (Add Task, Create
- * Project, Search) respect the user-configured mitodosDir preference.
- */
 export default async function () {
   const mitodosDir = path.join(os.homedir(), "MiToDos");
 
@@ -19,8 +12,8 @@ export default async function () {
 
     const files = fs
       .readdirSync(mitodosDir)
-      .filter((f) => f.endsWith(".md"))
-      .map((f) => f.replace(".md", ""));
+      .filter((f: string) => f.endsWith(".md"))
+      .map((f: string) => f.replace(".md", ""));
 
     return files.length > 0
       ? files

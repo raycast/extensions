@@ -1,4 +1,4 @@
-import path from "path";
+import * as path from "path";
 import { resolvePath, readFile, writeFile, appendFile, fileExists, todayDate } from "./storage";
 
 const INBOX_HEADING = "## 📋 Inbox";
@@ -20,10 +20,6 @@ ${INBOX_HEADING}
 ## 📊 Notes
 `;
 
-/**
- * Append a task to a project file's inbox section.
- * Creates the file with a template if it doesn't exist.
- */
 export function appendToProject(mitodosDir: string, projectName: string, task: string): string {
   const dir = resolvePath(mitodosDir);
   const filepath = path.join(dir, `${projectName}.md`);
@@ -41,7 +37,7 @@ export function appendToProject(mitodosDir: string, projectName: string, task: s
 
   if (content.includes(INBOX_HEADING)) {
     const lines = content.split("\n");
-    const inboxIndex = lines.findIndex((l) => l.trim() === INBOX_HEADING);
+    const inboxIndex = lines.findIndex((l: string) => l.trim() === INBOX_HEADING);
     let insertIndex = inboxIndex + 1;
     while (insertIndex < lines.length && lines[insertIndex].startsWith("- [")) {
       insertIndex++;
