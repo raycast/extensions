@@ -112,8 +112,18 @@ export async function runMinimaxQuickRead() {
       await showHUD(`Done · ${voiceName}`);
     }
   } catch (error) {
-    await markError(error instanceof Error ? error.message : String(error));
-    await showTTSFailure(error);
+    // The realtime path surfaces a user-initiated stop as a rejected WebSocket
+    // session, so mirror Qwen's stopped branch instead of showing an error.
+    if (player.isStopped()) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Stopped";
+      toast.message = `${voiceName} · stopped`;
+      await markIdle();
+      await showHUD("Stopped");
+    } else {
+      await markError(error instanceof Error ? error.message : String(error));
+      await showTTSFailure(error);
+    }
   } finally {
     player.cleanup();
   }
