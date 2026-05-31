@@ -2,7 +2,7 @@ import { Detail, Color, showToast, Toast, open } from "@raycast/api";
 import { Product } from "../types";
 import { generateTopicUrl } from "../util/topicUtils";
 import { useState, useEffect } from "react";
-import { enhanceProductWithMetadata } from "../api/scraper";
+import { enhanceProductWithMetadata } from "../api";
 import { HOST_URL } from "../constants";
 import { ProductActions, ViewContext } from "./ProductActions";
 import { cleanText } from "../util/textUtils";
@@ -87,8 +87,10 @@ export function ProductDetailView({
       metadata={
         <Detail.Metadata>
           {/* Product Stats */}
-          <Detail.Metadata.Label title="Votes" text={product.votesCount.toString()} />
-          <Detail.Metadata.Label title="Comments" text={product.commentsCount.toString()} />
+          {!product.isFeedFallback && <Detail.Metadata.Label title="Votes" text={product.votesCount.toString()} />}
+          {!product.isFeedFallback && (
+            <Detail.Metadata.Label title="Comments" text={product.commentsCount.toString()} />
+          )}
           <Detail.Metadata.Label title="Launch Date" text={formattedDate} />
 
           {/* Ranking Information */}

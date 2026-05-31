@@ -1,4 +1,4 @@
-import { getFrontpageProducts } from "../api/scraper";
+import { getFrontpageProducts } from "../api";
 import { Product } from "../types";
 
 /**

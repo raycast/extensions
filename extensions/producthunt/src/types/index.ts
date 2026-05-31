@@ -20,6 +20,10 @@ export interface Product {
   dailyRank?: number;
   productHubUrl?: string;
   previousLaunches?: number;
+  // True when this product came from the token-free Atom feed (limited data: no real votes,
+  // comments, makers, or thumbnails). UI uses this to suppress empty stats and prefer opening
+  // the launch in the browser over the (thin) in-app detail view.
+  isFeedFallback?: boolean;
 }
 
 export interface Topic {
