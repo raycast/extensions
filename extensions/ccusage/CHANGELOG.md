@@ -1,5 +1,17 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+### Added
+
+- **Windows support**: the extension now runs on the Raycast for Windows beta. Added `Windows` to the supported platforms.
+
+### Fixed
+
+- Commands are run through a shell on Windows so `cmd.exe` resolves the `npx.cmd` / `ccusage.cmd` shims via `PATHEXT` (Node's bare `spawn` threw `ENOENT` otherwise)
+- PATH construction is now cross-platform: uses `path.delimiter` and `os.homedir()` instead of a hard-coded `:` separator and `$HOME`, with a Windows branch that includes `%APPDATA%\npm`
+- Unix-only version-manager (nvm/fnm/n/volta) probing and env vars are skipped on Windows
+
 ## [ccusage v20] - 2026-05-25
 
 ### Added

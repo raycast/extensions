@@ -450,6 +450,7 @@
     "test": "jest"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

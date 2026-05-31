@@ -1,11 +1,13 @@
 import { readdirSync, existsSync } from "fs";
-import { join } from "path";
-import { cpus } from "os";
+import { join, delimiter } from "path";
+import { cpus, homedir } from "os";
 import semver from "semver";
 
 // Performance optimization: Cache expensive operations
 let cachedPaths: string | null = null;
 let cachedIsAppleSilicon: boolean | null = null;
+
+const isWindows = process.platform === "win32";
 
 const getAppleSiliconStatus = (): boolean => {
   if (cachedIsAppleSilicon !== null) return cachedIsAppleSilicon;
@@ -25,7 +27,7 @@ const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): st
   return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
 };
 
-export const resolveFnmBaseDir = (home = process.env.HOME): string | null => {
+export const resolveFnmBaseDir = (home = homedir()): string | null => {
   if (!home) return null;
 
   const legacyFnmPath = join(home, ".fnm");
@@ -38,9 +40,14 @@ export const resolveFnmBaseDir = (home = process.env.HOME): string | null => {
 };
 
 export const resolveVersionManagerPaths = (): string[] => {
+  // nvm/fnm/n/volta use a Unix directory layout. The Windows equivalents
+  // (nvm-windows etc.) register their active version on PATH directly, so
+  // there is nothing extra to resolve here.
+  if (isWindows) return [];
+
   const versionedPaths: Array<{ path: string; version: string }> = [];
   const staticPaths: string[] = [];
-  const home = process.env.HOME;
+  const home = homedir();
 
   if (!home) return [];
 
@@ -86,12 +93,34 @@ export const resolveVersionManagerPaths = (): string[] => {
   return [...sortedVersionedPaths, ...staticPaths];
 };
 
+// Windows: the inherited PATH already contains the active Node/npm install.
+// We only add the global npm prefix (%APPDATA%\npm) where global .cmd shims
+// such as npx/ccusage live.
+const getWindowsNodePaths = (): string[] => {
+  const paths: string[] = [];
+  const appData = process.env.APPDATA;
+  if (appData) {
+    paths.push(join(appData, "npm"));
+  }
+  const programFiles = process.env.ProgramFiles;
+  if (programFiles) {
+    paths.push(join(programFiles, "nodejs"));
+  }
+  return paths;
+};
+
 /**
  * Runtime workaround: Ensures npx availability across diverse Node.js installation scenarios
  * Performance optimized with caching to avoid repeated filesystem operations
  */
 export const getEnhancedNodePaths = (): string => {
   if (cachedPaths !== null) return cachedPaths;
+
+  if (isWindows) {
+    const allPaths = [process.env.PATH || "", ...getWindowsNodePaths()];
+    cachedPaths = allPaths.filter((path) => path).join(delimiter);
+    return cachedPaths;
+  }
 
   const isAppleSilicon = getAppleSiliconStatus();
 
@@ -103,13 +132,14 @@ export const getEnhancedNodePaths = (): string => {
 
   const systemPaths = ["/usr/bin", "/bin"];
 
-  if (process.env.HOME) {
-    systemPaths.push(`${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`);
+  const home = homedir();
+  if (home) {
+    systemPaths.push(`${home}/.npm/bin`, `${home}/.yarn/bin`);
   }
 
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
-  cachedPaths = allPaths.filter((path) => path).join(":");
+  cachedPaths = allPaths.filter((path) => path).join(delimiter);
   return cachedPaths;
 };
 
