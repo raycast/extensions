@@ -12,8 +12,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -28,12 +27,23 @@
     {
       "mode": "view",
       "name": "dns-quick-change",
-      "title": "Dns Quick Change",
+      "title": "DNS Quick Change",
       "description": "It's always DNS, take control: switch DNS with presets, create your own, or revert to DHCP-provided DNS.",
       "subtitle": "DNS"
     }
   ],
-  "title": "Dns Quick Change",
+  "preferences": [
+    {
+      "name": "networkService",
+      "type": "textfield",
+      "title": "Network Service",
+      "description": "Leave blank to auto-detect (Wi-Fi, Ethernet, etc.). Set manually if auto-detect fails.",
+      "placeholder": "Auto-detect",
+      "default": "",
+      "required": false
+    }
+  ],
+  "title": "DNS Quick Change",
   "author": "natew",
   "platforms": [
     "macOS"

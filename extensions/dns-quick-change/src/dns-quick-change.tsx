@@ -8,6 +8,7 @@ import {
   confirmAlert,
   Alert,
   Form,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { execSync, execFileSync } from "child_process";
@@ -28,7 +29,66 @@ interface NetworkInfo {
 }
 
 const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
-const NETWORK_SERVICE = "Wi-Fi";
+
+/**
+ * Get the active network service (e.g., "Wi-Fi", "Ethernet").
+ * Detects the default interface via route and maps it to the macOS hardware port name.
+ * Falls back to "Wi-Fi" if detection fails.
+ */
+function getActiveNetworkService(): string {
+  try {
+    // Find the default interface (en0, en1, etc.)
+    const iface = execSync(
+      "route get default 2>/dev/null | awk '/interface: /{print $2}'",
+      { encoding: "utf-8" },
+    ).trim();
+    if (!iface) return "Wi-Fi";
+
+    // Map device -> hardware port (e.g. en0 -> Wi-Fi)
+    const hwports = execSync("networksetup -listallhardwareports", {
+      encoding: "utf-8",
+    });
+
+    // Parse blocks like:
+    // Hardware Port: Wi-Fi
+    // Device: en0
+    const lines = hwports.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.startsWith("Device:")) {
+        const dev = line.split("Device:")[1].trim();
+        if (dev === iface) {
+          // Hardware port is typically the previous "Hardware Port:" line
+          const prev = (lines[i - 1] || "").trim();
+          if (prev.startsWith("Hardware Port:")) {
+            return prev.split("Hardware Port:")[1].trim();
+          }
+        }
+      }
+    }
+  } catch {
+    // Silently fall back if detection fails
+  }
+  return "Wi-Fi";
+}
+
+/**
+ * Get the network service to use, respecting user preference if set.
+ */
+function getNetworkService(): string {
+  try {
+    type Prefs = { networkService?: string };
+    const prefs = getPreferenceValues<Prefs>();
+    if (prefs.networkService && prefs.networkService.trim() !== "") {
+      return prefs.networkService.trim();
+    }
+  } catch {
+    // Silently fall back to auto-detect
+  }
+  return getActiveNetworkService();
+}
+
+const NETWORK_SERVICE = getNetworkService();
 
 // Default descriptions for known presets — used to migrate old files
 const DEFAULT_DESCRIPTIONS: { [key: string]: string } = {
@@ -307,6 +367,22 @@ function runWithAdmin(command: string): void {
  * Set DNS to specific servers
  */
 function setDNS(servers: string[]): void {
+  // Validate all IPs before execution (defense in depth - prevents shell injection)
+  const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  for (const ip of servers) {
+    if (!ipRegex.test(ip)) {
+      throw new Error(
+        `Invalid IP address: "${ip}". Preset file may have been tampered with.`,
+      );
+    }
+    const parts = ip.split(".").map(Number);
+    if (parts.some((p) => p < 0 || p > 255)) {
+      throw new Error(
+        `Invalid IP address: "${ip}". Preset file may have been tampered with.`,
+      );
+    }
+  }
+
   // Use the absolute path to networksetup since `do shell script` has a minimal PATH
   const networksetup = "/usr/sbin/networksetup";
   if (servers.length === 0) {
