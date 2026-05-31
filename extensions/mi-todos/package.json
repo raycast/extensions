@@ -58,6 +58,11 @@
       "name": "list-mitodos",
       "title": "List MiToDos",
       "description": "List all available MiToDos files in the wiki"
+    },
+    {
+      "name": "get-task",
+      "title": "Get Task File",
+      "description": "Read the content of a MiToDos markdown file"
     }
   ],
   "preferences": [
