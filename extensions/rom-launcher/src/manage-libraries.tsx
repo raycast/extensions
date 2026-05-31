@@ -15,7 +15,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import * as fs from "fs";
 import * as path from "path";
-import { Library, Preferences, PLATFORMS, Game } from "./types";
+import { Library, PLATFORMS, Game } from "./types";
 import { getMetadata, Metadata } from "./utils/metadata";
 import { scanLibraries } from "./utils/scanner";
 
@@ -334,7 +334,7 @@ function LibraryForm({
   onSave: (updatedLibs: Library[]) => void;
 }) {
   const { pop } = useNavigation();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const cleanRAPath =
     preferences.retroarchPath?.replace(/^"|"$/g, "").trim() ?? "";

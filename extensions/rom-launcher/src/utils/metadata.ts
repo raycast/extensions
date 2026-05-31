@@ -516,7 +516,7 @@ export async function getMetadata(
   const lastUpdate = (await LocalStorage.getItem<number>(TIME_KEY)) ?? null;
   const now = Date.now();
 
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
 
   const intervals: Record<string, number> = {
     daily: 24 * 60 * 60 * 1000,
@@ -542,7 +542,7 @@ export async function getMetadata(
 
   if (needsUpdate) {
     try {
-      const prefs = getPreferenceValues<Preferences>();
+      const prefs = getPreferenceValues();
       const fetchUrl =
         prefs.customDatabaseUrl && prefs.customDatabaseUrl.trim() !== ""
           ? prefs.customDatabaseUrl.trim()

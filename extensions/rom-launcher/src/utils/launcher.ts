@@ -7,10 +7,10 @@ import {
   getPreferenceValues,
   LocalStorage,
 } from "@raycast/api";
-import { Game, Preferences } from "../types";
+import { Game } from "../types";
 
 export async function launchGame(game: Game) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
 
   if (!fs.existsSync(game.path)) {
     showToast({

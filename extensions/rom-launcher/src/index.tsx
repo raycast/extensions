@@ -12,13 +12,7 @@ import {
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import * as path from "path";
 import { launchGame } from "./utils/launcher";
-import {
-  Game,
-  Preferences,
-  Achievement,
-  PLATFORMS,
-  ARCADE_SYSTEMS,
-} from "./types";
+import { Game, Achievement, PLATFORMS, ARCADE_SYSTEMS } from "./types";
 interface GameMeta {
   release_year?: number;
   genres?: string[];
@@ -180,8 +174,7 @@ function generateCandidates(name: string): string[] {
 }
 
 function getBoxartUrls(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  systemDef: any,
+  systemDef: Metadata["systems"][string],
   game: Game,
   db: Metadata | null,
 ): string[] {
@@ -575,7 +568,7 @@ const GameDetail = ({
     [systemDef, game.path, game.console, db],
   );
 
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
 
   const [achievementData, setAchievementData] = useState<{
     total: number;
@@ -1075,15 +1068,14 @@ export default function Command() {
         console.error("Games cache file read error:", e);
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let tempMeta: Record<string, any> = {};
+      let tempMeta: Record<string, GameMeta> = {};
       try {
         const metaPath = path.join(
           environment.assetsPath,
           "game_metadata.json",
         );
         const metaRaw = await fs.readFile(metaPath, "utf8");
-        tempMeta = JSON.parse(metaRaw);
+        tempMeta = JSON.parse(metaRaw) as Record<string, GameMeta>;
       } catch (error) {
         console.error("Metadata JSON parse error:", error);
       }

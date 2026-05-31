@@ -109,22 +109,10 @@
       "default": "monthly",
       "required": false,
       "data": [
-        {
-          "title": "Daily",
-          "value": "daily"
-        },
-        {
-          "title": "Weekly",
-          "value": "weekly"
-        },
-        {
-          "title": "Monthly",
-          "value": "monthly"
-        },
-        {
-          "title": "Never (Manual Only)",
-          "value": "never"
-        }
+        { "title": "Daily", "value": "daily" },
+        { "title": "Weekly", "value": "weekly" },
+        { "title": "Monthly", "value": "monthly" },
+        { "title": "Never (Manual Only)", "value": "never" }
       ]
     },
     {
@@ -140,15 +128,27 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.2.79",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.79",
     "eslint": "^8.57.1",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "dev": "ray dev",
-    "build": "ray build",
-    "lint": "ray lint"
-  }
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    { "path": "metadata/1.png", "title": "Manage Libraries" },
+    { "path": "metadata/2.png", "title": "Game Details" },
+    { "path": "metadata/3.png", "title": "Filters" },
+    { "path": "metadata/4.png", "title": "Achievement Details" },
+    { "path": "metadata/5.png", "title": "Add Library" },
+    { "path": "metadata/6.png", "title": "Searching" },
+    { "path": "metadata/7.png", "title": "Achievements List" }
+  ],
+  "platforms": ["macOS", "Windows"]
 }

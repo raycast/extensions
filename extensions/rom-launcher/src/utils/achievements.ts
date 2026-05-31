@@ -1,5 +1,5 @@
 import { Cache } from "@raycast/api";
-import { Achievement, Preferences } from "../types";
+import { Achievement } from "../types";
 
 const BASE_URL = "https://retroachievements.org/API/";
 const CACHE_EXPIRATION_MS = 60 * 60 * 1000;
@@ -25,7 +25,8 @@ async function fetchRA(
 
 export async function getAchievements(
   gamePath: string,
-  prefs: Preferences,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prefs: any,
   gameId: number,
   signal?: AbortSignal,
 ): Promise<{
