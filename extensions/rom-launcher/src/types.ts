@@ -39,25 +39,10 @@ export interface AchievementData {
   gameId: number;
 }
 
-export interface Preferences {
-  retroarchPath?: string;
-  mamePath?: string;
-  coresPath?: string;
-  openEmuPath?: string;
-  duckstationPath?: string;
-  dolphinPath?: string;
-  pcsx2Path?: string;
-  ppssppPath?: string;
-  retroAchievementsUsername?: string;
-  retroAchievementsApiKey?: string;
-  showDetails?: boolean;
-  updateInterval?: string;
-  customDatabaseUrl?: string;
-}
-
 export const PLATFORMS = {
   // ARCADE & SNK
   ARCADE: "ARCADE",
+  MAME: "MAME",
   FBNEO: "FBNEO",
   CPS1: "CPS1",
   CPS2: "CPS2",

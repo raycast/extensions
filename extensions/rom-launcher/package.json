@@ -1,6 +1,8 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rom-launcher",
   "title": "ROM Launcher",
+  "categories": ["Applications"],
   "description": "Launch your retro game collection with cover art, achievements, and play stats - supports RetroArch, MAME, DuckStation, and more.",
   "icon": "rllogo.png",
   "author": "glct26",
@@ -134,7 +136,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -95,7 +95,12 @@ export default function ManageLibraries({
 
       if (force && data) {
         const scannedGames = await scanLibraries(parsedLibraries, data);
-        await LocalStorage.setItem("gamesCache", JSON.stringify(scannedGames));
+        const cachePath = path.join(environment.supportPath, "gamesCache.json");
+        await fs.promises.writeFile(
+          cachePath,
+          JSON.stringify(scannedGames),
+          "utf8",
+        );
       }
 
       if (force) {

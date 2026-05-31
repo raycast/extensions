@@ -1,5 +1,4 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types";
 
 const FALLBACK_DATA_URL =
   "https://cdn.jsdelivr.net/gh/Glct26/rom-launcher-db@main/rom-launcher-db.json";
@@ -517,7 +516,7 @@ export async function getMetadata(
   const lastUpdate = (await LocalStorage.getItem<number>(TIME_KEY)) ?? null;
   const now = Date.now();
 
-  const prefs = getPreferenceValues<{ updateInterval: string }>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const intervals: Record<string, number> = {
     daily: 24 * 60 * 60 * 1000,
