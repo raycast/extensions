@@ -1,11 +1,14 @@
-import { Detail, Color, showToast, Toast, open } from "@raycast/api";
+import { Detail, Color, showToast, Toast, open, ActionPanel, Action, Icon } from "@raycast/api";
 import { Product } from "../types";
 import { generateTopicUrl } from "../util/topicUtils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { enhanceProductWithMetadata } from "../api";
 import { HOST_URL } from "../constants";
 import { ProductActions, ViewContext } from "./ProductActions";
 import { cleanText } from "../util/textUtils";
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[ProductHuntDetail]");
 
 interface ProductDetailViewProps {
   product: Product;
@@ -22,24 +25,27 @@ export function ProductDetailView({
 }: ProductDetailViewProps) {
   const [product, setProduct] = useState<Product>(initialProduct);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | undefined>();
+
+  const loadDetail = useCallback(async () => {
+    setIsLoading(true);
+    setError(undefined);
+    try {
+      const enhancedProduct = await enhanceProductWithMetadata(initialProduct);
+      setProduct(enhancedProduct);
+    } catch (e) {
+      // enhanceProductWithMetadata throws only on a real enrichment failure (not on
+      // no-creds/no-slug/not-found). Surface it visibly rather than showing thin data as complete.
+      log.error("detail enrichment failed", e);
+      setError(e instanceof Error ? e.message : "Failed to load product details.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [initialProduct]);
 
   useEffect(() => {
-    const fetchEnhancedProduct = async () => {
-      setIsLoading(true);
-      try {
-        const enhancedProduct = await enhanceProductWithMetadata(initialProduct);
-        setProduct(enhancedProduct);
-      } catch (error) {
-        console.error("Error enhancing product:", error);
-        // If enhancement fails, use the initial product
-        setProduct(initialProduct);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEnhancedProduct();
-  }, [initialProduct.id]);
+    loadDetail();
+  }, [loadDetail]);
 
   const formattedDate = new Date(product.createdAt).toLocaleDateString();
 
@@ -52,10 +58,27 @@ export function ProductDetailView({
         // Check if it's a valid URL or base64 data URL
         return img && (img.startsWith("http") || img.startsWith("data:"));
       } catch (e) {
-        console.error("Invalid gallery image URL:", img, e);
+        log.error("invalid gallery image URL", { img, error: e });
         return false;
       }
     }) || [];
+
+  // Detail enrichment errored — show a visible error with retry / open-in-browser, NOT a
+  // thin page masquerading as complete (per review: detail must not silently degrade).
+  if (error) {
+    return (
+      <Detail
+        navigationTitle={cleanText(initialProduct.name)}
+        markdown={`# Couldn't load details\n\n${cleanText(initialProduct.name)} couldn't be loaded from the Product Hunt API.\n\n\`\`\`\n${error}\n\`\`\``}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadDetail} />
+            <Action.OpenInBrowser title="Open in Browser" url={initialProduct.url} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   // Create markdown content for the product details
   const markdown = `
@@ -164,6 +187,30 @@ export function ProductDetailView({
           ) : product.maker && product.hunter && product.maker.name !== product.hunter.name ? (
             // Only show maker if it's not the same person as the hunter
             <Detail.Metadata.Label title="Maker" text={product.maker.name} />
+          ) : null}
+
+          {/* Posted By Section - the submitter (Post.user); the one identity available on a public
+              token. Labeled honestly as "Posted by", not maker/hunter. */}
+          {product.submittedBy ? (
+            <Detail.Metadata.TagList title="Posted by">
+              <Detail.Metadata.TagList.Item
+                key={product.submittedBy.id || "submitter"}
+                text={product.submittedBy.name}
+                color={Color.Blue}
+                onAction={() => {
+                  const url =
+                    product.submittedBy?.profileUrl ??
+                    (product.submittedBy?.username ? `${HOST_URL}@${product.submittedBy.username}` : undefined);
+                  if (url) {
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: `Opening profile: ${product.submittedBy?.name}`,
+                    });
+                    open(url);
+                  }
+                }}
+              />
+            </Detail.Metadata.TagList>
           ) : null}
 
           {/* Topics Section */}

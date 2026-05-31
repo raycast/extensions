@@ -38,7 +38,7 @@ export function hasCredentials(c: Credentials): boolean {
 }
 
 export function getCredentials(): Credentials {
-  const prefs = getPreferenceValues<{ apiKey?: string; apiSecret?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const apiKey = (prefs.apiKey ?? "").trim();
   const apiSecret = (prefs.apiSecret ?? "").trim();
   // One present, one missing is a config error, not silent fallback.
@@ -145,7 +145,12 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
     await LocalStorage.removeItem(TOKEN_CACHE_KEY);
     apiLog.debug("auth rejected (cleared token cache); retrying once");
     token = await getAccessToken(true);
-    res = await postGraphql(query, variables, token);
+    try {
+      res = await postGraphql(query, variables, token);
+    } catch (error) {
+      apiLog.error("GraphQL network error (retry)", error);
+      throw new ApiError("network", error instanceof Error ? error.message : "Network error.");
+    }
   }
 
   done({

@@ -45,13 +45,16 @@ export function ProductListItem({
 
   let baseAccessories: List.Item.Accessory[] = [];
 
+  // The submitter (Post.user / feed author) — a documented role, shown as a bare name (not "by",
+  // which would imply making/authorship we can't verify on a public token).
+  const submitter = product.submittedBy ?? product.maker;
   if (featured) {
     baseAccessories = product.isFeedFallback
-      ? [...(product.maker ? [{ text: product.maker.name }] : [])]
+      ? [...(submitter ? [{ text: submitter.name }] : [])]
       : [
           { text: product.commentsCount ? `${product.commentsCount}` : undefined, icon: { source: Icon.Bubble } },
           { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
-          ...(product.maker ? [{ text: `by ${product.maker.name}` }] : []),
+          ...(submitter ? [{ text: submitter.name }] : []),
         ];
   } else {
     baseAccessories = [

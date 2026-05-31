@@ -85,7 +85,9 @@ export function parseAtomFeed(xml: string): Product[] {
       // Prefer `updated`, falling back to `published`.
       createdAt: entry.updated ?? entry.published ?? "1970-01-01T00:00:00.000Z",
       topics: [],
-      maker: entry.author?.name
+      // The feed's <author> is the post submitter (same role as the API's Post.user), not a
+      // verified maker — model it as submittedBy.
+      submittedBy: entry.author?.name
         ? { id: `feed-${id}`, name: cleanText(entry.author.name), username: "", avatarUrl: "" }
         : undefined,
       isFeedFallback: true,

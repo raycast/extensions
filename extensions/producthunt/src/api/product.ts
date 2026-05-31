@@ -49,10 +49,16 @@ function baseMap(node: ApiPostNode): Product {
     votesCount: node.votesCount ?? 0,
     commentsCount: node.commentsCount ?? 0,
     createdAt: node.featuredAt ?? node.createdAt,
-    maker: makers ? makers[0] : node.user && !isRedactedUser(node.user) ? apiUserToUser(node.user) : undefined,
+    // maker/makers come ONLY from the API's `makers` (the documented maker role). On a public token
+    // these are redacted and filtered out, leaving these undefined — that's correct: we cannot see
+    // real makers, so we do not invent them from `user`.
+    maker: makers ? makers[0] : undefined,
     makers,
     // Do NOT infer hunter from `user`; the public API has no verified hunter field (spec Locked Decision).
     hunter: undefined,
+    // `Post.user` is "User who created the Post" — the submitter, a distinct documented role.
+    // Modeled separately and labeled "Posted by"; never relabeled as maker or hunter.
+    submittedBy: node.user && !isRedactedUser(node.user) ? apiUserToUser(node.user) : undefined,
     topics: apiTopicsToTopics(node),
   };
 }

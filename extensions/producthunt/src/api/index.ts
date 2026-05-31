@@ -164,7 +164,15 @@ export async function getFrontpageProducts(options?: { forceRefresh?: boolean })
 }
 
 // API-detail-backed replacement for the old scraper enrichment. Never fetches PH HTML.
-// If no credentials or the detail query fails, returns the product unchanged (feed/list data stands).
+//
+// Two distinct outcomes, deliberately handled differently (per review: detail views must not
+// silently fall back to thin data the way list views may):
+//   - Enrichment NOT APPLICABLE (no credentials, no slug, or the post genuinely isn't found):
+//     return the product unchanged. The detail view renders the list-level data it already has;
+//     this is expected, not a failure.
+//   - Enrichment ERRORED (GraphQL/network failure while we were able and trying to enrich):
+//     THROW, so the detail view shows a visible error with retry / open-in-browser actions rather
+//     than a broken-looking page presented as if it were complete.
 export async function enhanceProductWithMetadata(product: Product): Promise<Product> {
   let credsComplete = false;
   try {
@@ -199,14 +207,20 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
   try {
     log.debug("enriching product detail via API", { slug });
     const data = await graphql<PostDetailResponse>(POST_DETAIL_QUERY, { slug });
-    if (!data.post) return product;
+    // Post genuinely not found: not an error — return what we have.
+    if (!data.post) {
+      log.debug("detail enrichment: post not found", { slug });
+      return product;
+    }
     const detailed = postDetailToProduct(data.post);
     await writeCache(detailCacheKey, detailed);
     log.debug("detail enrichment ok", { slug });
     // Preserve any list-level fields not present on detail.
     return { ...product, ...detailed };
   } catch (error) {
-    log.warn("detail enrichment failed; using list-level product", error);
-    return product;
+    // A real failure (GraphQL/network) while enriching: surface it so the detail view can show an
+    // error + retry/open-in-browser, instead of rendering thin list data as if it were complete.
+    log.error("detail enrichment failed", error);
+    throw error instanceof Error ? error : new Error("Failed to load product details.");
   }
 }
