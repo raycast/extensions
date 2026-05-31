@@ -6,10 +6,14 @@
 
 - **Windows support**: the extension now runs on the Raycast for Windows beta. Added `Windows` to the supported platforms.
 
+### Changed
+
+- The AI tools and `claude-code-stats` now invoke the ccusage CLI through `execa` (the same library `useExec` uses) instead of `child_process.exec`. `execa`/`cross-spawn` resolves Windows `.cmd` shims via `PATHEXT` and reads `PATH` case-insensitively, so the two exec paths now behave identically across platforms.
+
 ### Fixed
 
-- Commands are run through a shell on Windows so `cmd.exe` resolves the `npx.cmd` / `ccusage.cmd` shims via `PATHEXT` (Node's bare `spawn` threw `ENOENT` otherwise)
-- PATH construction is now cross-platform: uses `path.delimiter` and `os.homedir()` instead of a hard-coded `:` separator and `$HOME`, with a Windows branch that includes `%APPDATA%\npm`
+- `PATH` is written to its real, case-correct environment key via `path-key` rather than spreading `process.env` and appending a second `PATH` entry, which on Windows (where the variable is conventionally `Path`) created two ambiguous entries
+- PATH construction uses `path.delimiter` and `os.homedir()` instead of a hard-coded `:` separator and `$HOME`; on Windows only the npm global prefix (`%APPDATA%\npm`) is added, since the user PATH is already inherited
 - Unix-only version-manager (nvm/fnm/n/volta) probing and env vars are skipped on Windows
 
 ## [ccusage v20] - 2026-05-25

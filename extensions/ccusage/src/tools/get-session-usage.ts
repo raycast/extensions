@@ -1,7 +1,5 @@
 import { SessionUsageCommandResponseSchema } from "../types/usage-types";
-import { getCustomNpxPath } from "../preferences";
-import { execAsync } from "../utils/exec-async";
-import { getExecOptions } from "../utils/exec-options";
+import { runCcusage } from "../utils/run-ccusage";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { validateDateFormat } from "../utils/date-validator";
 
@@ -36,37 +34,34 @@ export default async function getSessionUsage(input?: Input): Promise<{
   }>;
   sessionCount: number;
 }> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
-  const execOptions = getExecOptions();
-
-  // Build command with optional parameters
-  let command = `${npxCommand} ccusage@latest session --json`;
+  // Build command args with optional parameters
+  const args = ["session", "--json"];
 
   if (input?.since) {
     validateDateFormat(input.since, "Since");
-    command += ` --since ${input.since}`;
+    args.push("--since", input.since);
   }
 
   if (input?.until) {
     validateDateFormat(input.until, "Until");
-    command += ` --until ${input.until}`;
+    args.push("--until", input.until);
   }
 
   if (input?.order) {
-    command += ` --order ${input.order}`;
+    args.push("--order", input.order);
   }
 
   if (input?.breakdown) {
-    command += ` --breakdown`;
+    args.push("--breakdown");
   }
 
-  const { stdout } = await execAsync(command, execOptions);
+  const stdout = await runCcusage(args);
 
   if (!stdout) {
     throw new Error("No output received from ccusage session command");
   }
 
-  const parseResult = stringToJSON.pipe(SessionUsageCommandResponseSchema).safeParse(stdout.toString());
+  const parseResult = stringToJSON.pipe(SessionUsageCommandResponseSchema).safeParse(stdout);
 
   if (!parseResult.success) {
     throw new Error(`Invalid session usage data: ${parseResult.error.message}`);

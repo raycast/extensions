@@ -1,7 +1,5 @@
 import { TotalUsageResponseSchema } from "../types/usage-types";
-import { getCustomNpxPath } from "../preferences";
-import { execAsync } from "../utils/exec-async";
-import { getExecOptions } from "../utils/exec-options";
+import { runCcusage } from "../utils/run-ccusage";
 import { stringToJSON } from "../utils/string-to-json-schema";
 
 /**
@@ -25,16 +23,13 @@ export default async function getTotalUsage(): Promise<{
     totalCost: number;
   }>;
 }> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
-  const execOptions = getExecOptions();
-
-  const { stdout } = await execAsync(`${npxCommand} ccusage@latest --json`, execOptions);
+  const stdout = await runCcusage(["--json"]);
 
   if (!stdout) {
     throw new Error("No output received from ccusage command");
   }
 
-  const parseResult = stringToJSON.pipe(TotalUsageResponseSchema).safeParse(stdout.toString());
+  const parseResult = stringToJSON.pipe(TotalUsageResponseSchema).safeParse(stdout);
 
   if (!parseResult.success) {
     throw new Error(`Invalid total usage data: ${parseResult.error.message}`);

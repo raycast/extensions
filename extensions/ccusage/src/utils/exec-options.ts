@@ -1,25 +1,30 @@
 import { getEnhancedNodePaths, resolveFnmBaseDir } from "./node-path-resolver";
 import { delimiter, dirname } from "path";
 import { homedir } from "os";
+import pathKey from "path-key";
 import { getCustomNpxPath } from "../preferences";
 
 const isWindows = process.platform === "win32";
 
 export const getExecOptions = () => {
-  const env: Record<string, string> = {
-    ...process.env,
-    PATH: getEnhancedNodePaths(),
-  };
+  const env: NodeJS.ProcessEnv = { ...process.env };
 
-  // Prepend custom npx directory to PATH for proper binary resolution
+  // PATH is case-insensitive on Windows and conventionally spelled `Path`.
+  // Resolve the real key so we overwrite the existing variable instead of
+  // adding a second, ambiguous `PATH` entry. cross-spawn (used by execa and
+  // useExec) reads the same key when resolving the command.
+  const key = pathKey({ env });
+  let path = getEnhancedNodePaths(env[key] ?? "");
+
+  // Prepend a custom npx directory if the user configured one.
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
-    const customDir = dirname(customNpxPath);
-    env.PATH = `${customDir}${delimiter}${env.PATH}`;
+    path = `${dirname(customNpxPath)}${delimiter}${path}`;
   }
+  env[key] = path;
 
-  // Version-manager env vars (nvm/fnm/npm-global) only apply to the
-  // Unix layout. Windows uses %APPDATA%\npm and PATH directly.
+  // Version-manager env vars (nvm/fnm/npm-global) only apply to the Unix
+  // layout. On Windows binaries are resolved from PATH directly.
   const home = homedir();
   if (!isWindows && home) {
     if (!process.env.NVM_DIR) {
@@ -40,12 +45,5 @@ export const getExecOptions = () => {
     env,
     timeout: 30000,
     cwd: home || process.cwd(),
-    // On Windows, `npx`/`ccusage` are `.cmd` shims. `child_process.exec`
-    // (used by the no-view tools) already runs via cmd.exe, but `useExec`'s
-    // spawn does not and would throw ENOENT. Point both at cmd.exe so the
-    // shims resolve via PATHEXT. Using the shell *path* (a string) rather
-    // than `true` keeps the type compatible with exec's ExecOptions, which
-    // only accepts `shell?: string`.
-    shell: isWindows ? process.env.ComSpec || "cmd.exe" : undefined,
   };
 };

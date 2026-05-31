@@ -1,8 +1,6 @@
 import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
 import { DailyUsageCommandResponseSchema, MonthlyUsageCommandResponseSchema } from "./types/usage-types";
-import { getCustomNpxPath, preferences } from "./preferences";
-import { execAsync } from "./utils/exec-async";
-import { getExecOptions } from "./utils/exec-options";
+import { runCcusage } from "./utils/run-ccusage";
 import { stringToJSON } from "./utils/string-to-json-schema";
 import { formatCost, formatTokensAsMTok, getTokenEfficiency } from "./utils/data-formatter";
 import { getCurrentLocalDate, getCurrentLocalMonth } from "./utils/date-formatter";
@@ -19,24 +17,13 @@ const DAILY_PLACEHOLDERS = [
 const MONTHLY_PLACEHOLDERS = ["{monthlyCost}", "{monthlyTokens}", "{monthlyRatio}"] as const;
 const LIMIT_PLACEHOLDERS = ["{usageLimit}"] as const;
 
-const buildCommand = (subcommand: string): { command: string; args: string } => {
-  const useDirectCommand = preferences.useDirectCcusageCommand;
-  const npxCommand = getCustomNpxPath() ?? "npx";
-
-  if (useDirectCommand) {
-    return { command: "ccusage", args: `${subcommand} --json` };
-  }
-  return { command: npxCommand, args: `ccusage@latest ${subcommand} --json` };
-};
-
 const fetchDailyData = async () => {
   try {
-    const { command, args } = buildCommand("daily");
-    const { stdout } = await execAsync(`${command} ${args}`, getExecOptions());
+    const stdout = await runCcusage(["daily", "--json"]);
 
     if (!stdout) return null;
 
-    const result = stringToJSON.pipe(DailyUsageCommandResponseSchema).safeParse(stdout.toString());
+    const result = stringToJSON.pipe(DailyUsageCommandResponseSchema).safeParse(stdout);
     if (!result.success) return null;
 
     const today = getCurrentLocalDate();
@@ -57,12 +44,11 @@ const fetchDailyData = async () => {
 
 const fetchMonthlyData = async () => {
   try {
-    const { command, args } = buildCommand("monthly");
-    const { stdout } = await execAsync(`${command} ${args}`, getExecOptions());
+    const stdout = await runCcusage(["monthly", "--json"]);
 
     if (!stdout) return null;
 
-    const result = stringToJSON.pipe(MonthlyUsageCommandResponseSchema).safeParse(stdout.toString());
+    const result = stringToJSON.pipe(MonthlyUsageCommandResponseSchema).safeParse(stdout);
     if (!result.success) return null;
 
     const currentMonth = getCurrentLocalMonth();

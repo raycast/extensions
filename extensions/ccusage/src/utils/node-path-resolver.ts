@@ -40,11 +40,6 @@ export const resolveFnmBaseDir = (home = homedir()): string | null => {
 };
 
 export const resolveVersionManagerPaths = (): string[] => {
-  // nvm/fnm/n/volta use a Unix directory layout. The Windows equivalents
-  // (nvm-windows etc.) register their active version on PATH directly, so
-  // there is nothing extra to resolve here.
-  if (isWindows) return [];
-
   const versionedPaths: Array<{ path: string; version: string }> = [];
   const staticPaths: string[] = [];
   const home = homedir();
@@ -93,32 +88,24 @@ export const resolveVersionManagerPaths = (): string[] => {
   return [...sortedVersionedPaths, ...staticPaths];
 };
 
-// Windows: the inherited PATH already contains the active Node/npm install.
-// We only add the global npm prefix (%APPDATA%\npm) where global .cmd shims
-// such as npx/ccusage live.
-const getWindowsNodePaths = (): string[] => {
-  const paths: string[] = [];
-  const appData = process.env.APPDATA;
-  if (appData) {
-    paths.push(join(appData, "npm"));
-  }
-  const programFiles = process.env.ProgramFiles;
-  if (programFiles) {
-    paths.push(join(programFiles, "nodejs"));
-  }
-  return paths;
-};
-
 /**
- * Runtime workaround: Ensures npx availability across diverse Node.js installation scenarios
- * Performance optimized with caching to avoid repeated filesystem operations
+ * Augments the inherited PATH so the ccusage CLI is resolvable across diverse
+ * Node.js installation scenarios. `basePath` is the PATH already present in the
+ * environment (read via its real, case-correct key by the caller).
+ *
+ * On macOS, Raycast launches without the user's shell PATH, so Homebrew, the
+ * Node version managers, and system locations are added explicitly. On Windows
+ * the user PATH is inherited and cross-spawn resolves `.cmd` shims, so only the
+ * npm global prefix (%APPDATA%\npm) — where globally installed shims such as a
+ * direct `ccusage` live — may need adding.
  */
-export const getEnhancedNodePaths = (): string => {
+export const getEnhancedNodePaths = (basePath: string): string => {
   if (cachedPaths !== null) return cachedPaths;
 
   if (isWindows) {
-    const allPaths = [process.env.PATH || "", ...getWindowsNodePaths()];
-    cachedPaths = allPaths.filter((path) => path).join(delimiter);
+    const appData = process.env.APPDATA;
+    const npmGlobalPrefix = appData ? [join(appData, "npm")] : [];
+    cachedPaths = [basePath, ...npmGlobalPrefix].filter(Boolean).join(delimiter);
     return cachedPaths;
   }
 
@@ -137,7 +124,7 @@ export const getEnhancedNodePaths = (): string => {
     systemPaths.push(`${home}/.npm/bin`, `${home}/.yarn/bin`);
   }
 
-  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
+  const allPaths = [basePath, ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
   cachedPaths = allPaths.filter((path) => path).join(delimiter);
   return cachedPaths;
