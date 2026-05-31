@@ -72,7 +72,11 @@ export default function ShortenUrl() {
       const result = await shortenUrl(service.id, activeUrl, apiKey);
 
       await Clipboard.copy(result.shortUrl);
-      addToHistory(result).catch(() => undefined);
+      try {
+        await addToHistory(result);
+      } catch {
+        // history errors are non-fatal; shortening already succeeded
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = "URL shortened";
