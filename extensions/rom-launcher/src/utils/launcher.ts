@@ -245,16 +245,6 @@ export async function launchGame(game: Game) {
     return;
   }
 
-  const proc = spawn(executable, args, { detached: true, stdio: "ignore" });
-  proc.on("error", (err) =>
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Launch failed",
-      message: err.message,
-    }),
-  );
-  proc.unref();
-
   const statsRaw = await LocalStorage.getItem<string>("playStats");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let stats: Record<string, any> = {};
@@ -272,6 +262,37 @@ export async function launchGame(game: Game) {
   const statKey = `${parentFolder}_${game.console}_${rawFileName}`;
 
   const currentCount = stats[statKey]?.playCount || 0;
+  const previousLastPlayed = stats[statKey]?.lastPlayed;
+
+  const proc = spawn(executable, args, { detached: true, stdio: "ignore" });
+
+  proc.on("error", async (err) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Launch failed",
+      message: err.message,
+    });
+
+    try {
+      const freshStatsRaw = await LocalStorage.getItem<string>("playStats");
+      if (freshStatsRaw) {
+        const freshStats = JSON.parse(freshStatsRaw);
+        if (currentCount === 0) {
+          delete freshStats[statKey];
+        } else {
+          freshStats[statKey] = {
+            lastPlayed: previousLastPlayed,
+            playCount: currentCount,
+          };
+        }
+        await LocalStorage.setItem("playStats", JSON.stringify(freshStats));
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  });
+
+  proc.unref();
 
   stats[statKey] = {
     lastPlayed: new Date().toISOString(),

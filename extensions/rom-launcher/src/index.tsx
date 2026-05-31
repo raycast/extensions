@@ -459,12 +459,12 @@ ${achievement.description}
             }
           />
 
-          {achievement.dateEarned && (
+          {achievement.dateEarned ? (
             <Detail.Metadata.Label
               title="Date Earned"
               text={achievement.dateEarned}
             />
-          )}
+          ) : null}
 
           <Detail.Metadata.Separator />
 
@@ -956,38 +956,38 @@ ${isInitialLoading ? `_Loading cover image..._` : imgMarkdown}
           )}
           {meta && (
             <>
-              {meta.rating && meta.rating > 0 && (
+              {meta.rating && meta.rating > 0 ? (
                 <List.Item.Detail.Metadata.Label
                   title="IGDB Rating"
                   text={`⭐ ${meta.rating} / 100`}
                 />
-              )}
-              {meta.release_year && (
+              ) : null}
+              {meta.release_year ? (
                 <List.Item.Detail.Metadata.Label
                   title="Release Year"
                   text={String(meta.release_year)}
                   icon={Icon.Calendar}
                 />
-              )}
-              {meta.developer && (
+              ) : null}
+              {meta.developer ? (
                 <List.Item.Detail.Metadata.Label
                   title="Developer"
                   text={meta.developer}
                 />
-              )}
-              {meta.publisher && (
+              ) : null}
+              {meta.publisher ? (
                 <List.Item.Detail.Metadata.Label
                   title="Publisher"
                   text={meta.publisher}
                 />
-              )}
-              {meta.genres && meta.genres.length > 0 && (
+              ) : null}
+              {meta.genres && meta.genres.length > 0 ? (
                 <List.Item.Detail.Metadata.TagList title="Genres">
                   {meta.genres.map((g: string) => (
                     <List.Item.Detail.Metadata.TagList.Item key={g} text={g} />
                   ))}
                 </List.Item.Detail.Metadata.TagList>
-              )}
+              ) : null}
               <List.Item.Detail.Metadata.Separator />
             </>
           )}
