@@ -8,7 +8,6 @@ import { set_wallpaper as setWallpaperWindowsRust } from "rust:../../rust";
 async function setWallpaperMacOS(path: string, applyTo: string) {
   const script = `
       set temp_folder to (POSIX path of "${path}")
-      set q_temp_folder to quoted form of temp_folder
       
       set x to alias (POSIX file temp_folder)
 

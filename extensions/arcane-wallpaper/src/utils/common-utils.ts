@@ -33,7 +33,7 @@ const getFileType = (url: string) => {
 
 const isRemoteUrl = (url: string) => /^https?:\/\//i.test(url);
 
-const getSafeFileName = (title: string) => title.replace(/[/:]/g, "-");
+const getSafeFileName = (title: string) => title.replace(/[/:"]/g, "-");
 
 const getImageBuffer = async (url: string) => {
   if (isRemoteUrl(url)) {
