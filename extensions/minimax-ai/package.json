@@ -51,15 +51,15 @@
       "type": "dropdown",
       "required": false,
       "title": "API Endpoint",
-      "description": "Select the API endpoint based on your account region",
-      "default": "international",
+      "description": "Select the MiniMax endpoint. China uses the Token Plan Anthropic-compatible endpoint.",
+      "default": "china",
       "data": [
         {
-          "title": "China (api.minimaxi.com)",
+          "title": "China Token Plan (api.minimaxi.com/anthropic)",
           "value": "china"
         },
         {
-          "title": "International (api.minimax.io)",
+          "title": "International Legacy (api.minimax.io)",
           "value": "international"
         }
       ]
@@ -70,14 +70,14 @@
       "required": false,
       "title": "Model",
       "description": "MiniMax model to use for AI responses",
-      "default": "MiniMax-M2.7",
+      "default": "MiniMax-M2.7-highspeed",
       "data": [
         {
-          "title": "MiniMax M2.7 (Recommended)",
+          "title": "MiniMax M2.7",
           "value": "MiniMax-M2.7"
         },
         {
-          "title": "MiniMax M2.7-highspeed",
+          "title": "MiniMax M2.7-highspeed (Recommended)",
           "value": "MiniMax-M2.7-highspeed"
         },
         {

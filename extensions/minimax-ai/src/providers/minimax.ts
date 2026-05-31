@@ -2,10 +2,11 @@ import { AIProvider, ChatRequest, ChatResponse, StreamCallbacks, ProviderConfig,
 
 export const API_ENDPOINTS = {
   international: "https://api.minimax.io/v1/chat/completions",
-  china: "https://api.minimaxi.com/v1/chat/completions",
+  china: "https://api.minimaxi.com/anthropic",
 };
 
 const REQUEST_TIMEOUT_MS = 60000; // 60 seconds timeout
+const ANTHROPIC_VERSION = "2023-06-01";
 
 interface MiniMaxChatResponse {
   choices?: Array<{
@@ -14,9 +15,18 @@ interface MiniMaxChatResponse {
   }>;
 }
 
+interface MiniMaxAnthropicResponse {
+  content?: Array<{ type?: string; text?: string }>;
+  stop_reason?: string;
+}
+
 interface MiniMaxErrorResponse {
   error?: { message?: string };
   message?: string;
+}
+
+function isChatCompletionResponse(data: MiniMaxChatResponse | MiniMaxAnthropicResponse): data is MiniMaxChatResponse {
+  return Array.isArray((data as MiniMaxChatResponse).choices);
 }
 
 export class MiniMaxProvider implements AIProvider {
@@ -30,26 +40,39 @@ export class MiniMaxProvider implements AIProvider {
 
   constructor(config: ProviderConfig & { apiEndpoint?: string }) {
     this.apiKey = config.apiKey;
-    this.model = config.model || "MiniMax-M2.7";
+    this.model = config.model || "MiniMax-M2.7-highspeed";
     this.defaultTemperature = config.temperature ?? 0.7;
     this.defaultMaxTokens = config.maxTokens ?? 4096;
     this.systemPrompt = config.systemPrompt;
-    this.apiEndpoint = config.apiEndpoint || API_ENDPOINTS.international;
+    this.apiEndpoint = config.apiEndpoint || API_ENDPOINTS.china;
   }
 
   static async validateApiKey(apiKey: string, apiEndpoint: string): Promise<{ valid: boolean | null; error?: string }> {
     try {
-      const response = await fetch(apiEndpoint, {
+      const anthropic = MiniMaxProvider.isAnthropicEndpoint(apiEndpoint);
+      const response = await fetch(MiniMaxProvider.requestUrlForEndpoint(apiEndpoint), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
+          ...(anthropic
+            ? {
+                "x-api-key": apiKey,
+                "api-key": apiKey,
+                "anthropic-version": ANTHROPIC_VERSION,
+              }
+            : {}),
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model: "MiniMax-M2.5",
-          messages: [{ role: "user", content: "Hi" }],
-          max_tokens: 10,
-        }),
+        body: JSON.stringify(
+          MiniMaxProvider.buildRequestBody(
+            "MiniMax-M2.7-highspeed",
+            [{ role: "user", content: "Hi" }],
+            0.7,
+            10,
+            false,
+            anthropic,
+          ),
+        ),
       });
 
       if (response.ok) {
@@ -75,9 +98,99 @@ export class MiniMaxProvider implements AIProvider {
     return messages;
   }
 
+  private static isAnthropicEndpoint(apiEndpoint: string): boolean {
+    return apiEndpoint.replace(/\/+$/, "").toLowerCase().includes("/anthropic");
+  }
+
+  private get isAnthropicEndpoint(): boolean {
+    return MiniMaxProvider.isAnthropicEndpoint(this.apiEndpoint);
+  }
+
+  private static requestUrlForEndpoint(apiEndpoint: string): string {
+    const trimmed = apiEndpoint.replace(/\/+$/, "");
+    if (MiniMaxProvider.isAnthropicEndpoint(apiEndpoint)) {
+      if (trimmed.endsWith("/v1/messages")) return trimmed;
+      if (trimmed.endsWith("/v1")) return `${trimmed}/messages`;
+      return `${trimmed}/v1/messages`;
+    }
+    return trimmed.endsWith("/chat/completions") ? trimmed : `${trimmed}/chat/completions`;
+  }
+
+  private endpointUrl(): string {
+    return MiniMaxProvider.requestUrlForEndpoint(this.apiEndpoint);
+  }
+
+  private static buildRequestBody(
+    model: string,
+    messages: Message[],
+    temperature: number,
+    maxTokens: number,
+    stream: boolean,
+    anthropic: boolean,
+  ): Record<string, unknown> {
+    if (!anthropic) {
+      return {
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        stream,
+      };
+    }
+
+    const system = messages
+      .filter((message) => message.role === "system")
+      .map((message) => message.content)
+      .join("\n\n");
+    const chatMessages = messages.filter((message) => message.role !== "system");
+
+    return {
+      model,
+      ...(system ? { system } : {}),
+      messages: chatMessages.length ? chatMessages : [{ role: "user", content: "Hi" }],
+      temperature,
+      max_tokens: maxTokens,
+      stream,
+      thinking: { type: "disabled" },
+    };
+  }
+
+  private requestHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.apiKey}`,
+      "Content-Type": "application/json",
+    };
+    if (this.isAnthropicEndpoint) {
+      headers["x-api-key"] = this.apiKey;
+      headers["api-key"] = this.apiKey;
+      headers["anthropic-version"] = ANTHROPIC_VERSION;
+    }
+    return headers;
+  }
+
   private removeThinking(content: string): string {
     // Remove <think>...</think> blocks (including multiline)
     return content.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  }
+
+  private contentFromResponse(data: MiniMaxChatResponse | MiniMaxAnthropicResponse): ChatResponse {
+    if (isChatCompletionResponse(data)) {
+      const rawContent = data.choices?.[0]?.message?.content ?? "";
+      return {
+        content: this.removeThinking(rawContent),
+        finishReason: data.choices?.[0]?.finish_reason,
+      };
+    }
+
+    const rawContent =
+      data.content
+        ?.filter((part) => part.type === "text" || typeof part.text === "string")
+        .map((part) => part.text ?? "")
+        .join("") ?? "";
+    return {
+      content: this.removeThinking(rawContent),
+      finishReason: data.stop_reason,
+    };
   }
 
   async chat(request: ChatRequest): Promise<ChatResponse> {
@@ -85,19 +198,19 @@ export class MiniMaxProvider implements AIProvider {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      const response = await fetch(this.apiEndpoint, {
+      const response = await fetch(this.endpointUrl(), {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: this.buildMessages(request.messages),
-          temperature: request.temperature ?? this.defaultTemperature,
-          max_tokens: request.maxTokens ?? this.defaultMaxTokens,
-          stream: false,
-        }),
+        headers: this.requestHeaders(),
+        body: JSON.stringify(
+          MiniMaxProvider.buildRequestBody(
+            this.model,
+            this.buildMessages(request.messages),
+            request.temperature ?? this.defaultTemperature,
+            request.maxTokens ?? this.defaultMaxTokens,
+            false,
+            this.isAnthropicEndpoint,
+          ),
+        ),
         signal: controller.signal,
       });
 
@@ -108,12 +221,8 @@ export class MiniMaxProvider implements AIProvider {
         throw error;
       }
 
-      const data = (await response.json()) as MiniMaxChatResponse;
-      const rawContent = data.choices?.[0]?.message?.content ?? "";
-      return {
-        content: this.removeThinking(rawContent),
-        finishReason: data.choices?.[0]?.finish_reason,
-      };
+      const data = (await response.json()) as MiniMaxChatResponse | MiniMaxAnthropicResponse;
+      return this.contentFromResponse(data);
     } catch (error) {
       clearTimeout(timeoutId);
       if (error instanceof Error && error.name === "AbortError") {
@@ -129,19 +238,19 @@ export class MiniMaxProvider implements AIProvider {
 
     let response: Response;
     try {
-      response = await fetch(this.apiEndpoint, {
+      response = await fetch(this.endpointUrl(), {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: this.buildMessages(request.messages),
-          temperature: request.temperature ?? this.defaultTemperature,
-          max_tokens: request.maxTokens ?? this.defaultMaxTokens,
-          stream: true,
-        }),
+        headers: this.requestHeaders(),
+        body: JSON.stringify(
+          MiniMaxProvider.buildRequestBody(
+            this.model,
+            this.buildMessages(request.messages),
+            request.temperature ?? this.defaultTemperature,
+            request.maxTokens ?? this.defaultMaxTokens,
+            true,
+            this.isAnthropicEndpoint,
+          ),
+        ),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -192,7 +301,7 @@ export class MiniMaxProvider implements AIProvider {
 
           try {
             const json = JSON.parse(trimmed.slice(6));
-            const content = json.choices?.[0]?.delta?.content;
+            const content = json.choices?.[0]?.delta?.content ?? json.delta?.text;
             if (content) {
               // Filter out <think>...</think> content during streaming
               let processedContent = "";

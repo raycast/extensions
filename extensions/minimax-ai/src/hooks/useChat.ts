@@ -22,11 +22,12 @@ export function useChat(): UseChatReturn {
   // Validate API key on mount and re-validate when key changes
   useEffect(() => {
     const prefs = getPreferenceValues<Preferences>();
-    if (prefs.minimaxApiKey === validatedKeyRef.current) return;
+    const apiEndpoint = prefs.apiEndpoint === "international" ? API_ENDPOINTS.international : API_ENDPOINTS.china;
+    const validationTarget = `${prefs.minimaxApiKey}:${apiEndpoint}`;
+    if (validationTarget === validatedKeyRef.current) return;
 
     const validateApiKey = async () => {
-      validatedKeyRef.current = prefs.minimaxApiKey;
-      const apiEndpoint = prefs.apiEndpoint === "international" ? API_ENDPOINTS.international : API_ENDPOINTS.china;
+      validatedKeyRef.current = validationTarget;
 
       const result = await MiniMaxProvider.validateApiKey(prefs.minimaxApiKey, apiEndpoint);
       setIsApiKeyValid(result.valid);
