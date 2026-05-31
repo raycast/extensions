@@ -385,16 +385,30 @@ function LibraryForm({
 
   const availableSystems = Object.entries(metadata.systems)
     .filter(([key, sys]) => {
+      const hasRetroArchCore =
+        !!preferences.retroarchPath &&
+        getInstalledCores(sys.cores, availableCoresSet).length > 0;
+
+      let hasStandalone = false;
+
       if (key === PLATFORMS.ARCADE || key === "MAME") {
-        const hasCore =
-          preferences.retroarchPath &&
-          getInstalledCores(sys.cores, availableCoresSet).length > 0;
-        return hasCore || hasMameGlobal;
+        hasStandalone = hasMameGlobal;
+      } else if (key === "PS1" && preferences.duckstationPath) {
+        hasStandalone = true;
+      } else if (
+        (key === "GAMECUBE" || key === "WII") &&
+        preferences.dolphinPath
+      ) {
+        hasStandalone = true;
+      } else if (key === "PS2" && preferences.pcsx2Path) {
+        hasStandalone = true;
+      } else if (key === "PSP" && preferences.ppssppPath) {
+        hasStandalone = true;
+      } else if (process.platform === "darwin" && preferences.openEmuPath) {
+        hasStandalone = true;
       }
-      return (
-        preferences.retroarchPath &&
-        getInstalledCores(sys.cores, availableCoresSet).length > 0
-      );
+
+      return hasRetroArchCore || hasStandalone;
     })
     .sort(([, a], [, b]) => a.name.localeCompare(b.name));
 

@@ -24,7 +24,6 @@ async function fetchRA(
 }
 
 export async function getAchievements(
-  gamePath: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prefs: any,
   gameId: number,

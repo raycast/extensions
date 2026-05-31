@@ -709,7 +709,6 @@ const GameDetail = ({
         if (!gameId) return;
 
         const data = await getAchievements(
-          game.path,
           prefs,
           gameId,
           abortController.signal,

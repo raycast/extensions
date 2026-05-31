@@ -542,7 +542,6 @@ export async function getMetadata(
 
   if (needsUpdate) {
     try {
-      const prefs = getPreferenceValues();
       const fetchUrl =
         prefs.customDatabaseUrl && prefs.customDatabaseUrl.trim() !== ""
           ? prefs.customDatabaseUrl.trim()
