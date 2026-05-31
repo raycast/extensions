@@ -2,7 +2,14 @@ import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List } f
 import { useCachedState, useFetch } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
-import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
+import {
+  GetProblemResponse,
+  Problem,
+  ProblemDifficulty,
+  ProblemPreview,
+  ProblemStats,
+  SearchProblemResponse,
+} from './types';
 import { formatProblemMarkdown } from './utils';
 import { useProblemTemplateActions } from './useProblemTemplateActions';
 
@@ -140,7 +147,7 @@ export default function Command(): JSX.Element {
           key={problem.questionFrontendId}
           id={problem.questionFrontendId}
           title={`${problem.questionFrontendId}. ${problem.title}`}
-          subtitle={showProblemStats ? JSON.parse(problem.stats).acRate : undefined}
+          subtitle={showProblemStats ? (JSON.parse(problem.stats) as ProblemStats).acRate : undefined}
           accessories={[
             ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
             ...(showProblemStats
