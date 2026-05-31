@@ -14,6 +14,7 @@ function iconFor(sev: HealthIssue["severity"]) {
 
 export function IssueListItem({ issue }: { issue: HealthIssue }) {
   const primaryPath = issue.affectedPaths[0];
+  const canOpenSkillMd = primaryPath && issue.check !== "H1";
   return (
     <List.Item
       icon={iconFor(issue.severity)}
@@ -29,7 +30,7 @@ export function IssueListItem({ issue }: { issue: HealthIssue }) {
               copyToClipboard(buildFixCommand(issue), "Fix command copied")
             }
           />
-          {primaryPath && (
+          {canOpenSkillMd && (
             <Action
               title="Open in Editor"
               icon={Icon.Code}
