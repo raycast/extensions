@@ -1,5 +1,5 @@
 import { Icon, Color } from "@raycast/api";
-import type { BundleValue, Deal } from "./types";
+import type { BundleValue, Deal, HistoryPoint } from "./types";
 
 export const STORE_MAP: Record<string, string[]> = {
   steam: ["Steam"],
@@ -112,6 +112,7 @@ export function computeGameInsight(params: {
   bundleValue: BundleValue | null;
   dataMonths: number;
   range: "1y" | "6m" | "3m";
+  allowedHistory?: HistoryPoint[];
   isLoading: boolean;
 }) {
   const {
@@ -164,6 +165,10 @@ export function computeGameInsight(params: {
         medianSale = maxPrice;
         isAlwaysFullPrice = true;
       }
+    }
+
+    if (currentBest && currentBest.cut > 0) {
+      isAlwaysFullPrice = false;
     }
 
     // percentile
