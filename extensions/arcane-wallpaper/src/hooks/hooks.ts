@@ -19,8 +19,19 @@ const withExcludeInfo = (wallpapers: ArcaneWallpaper[], excludeList: string[]) =
 
 export const getArcaneWallpaperList = (refresh: number) => {
   const [arcaneWallpapers, setArcaneWallpapers] = useState<ArcaneWallpaperWithInfo[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const updateExcludeList = useCallback((excludeList: string[]) => {
+    setArcaneWallpapers((wallpapers) =>
+      wallpapers.map((wallpaper) => ({
+        ...wallpaper,
+        exclude: excludeList.includes(wallpaper.url),
+      })),
+    );
+  }, []);
 
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
     const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
     const cachedWallpapers = cache.get(CacheKey.WALLPAPER_LIST_CACHE);
@@ -29,10 +40,9 @@ export const getArcaneWallpaperList = (refresh: number) => {
 
     try {
       const wallpaperCatalog = await getArcaneWallpapersFromDrive();
-      const sourceCatalog = wallpaperCatalog.length > 0 ? wallpaperCatalog : cachedCatalog;
 
-      setArcaneWallpapers(withExcludeInfo(sourceCatalog, _excludeList));
-      cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(sourceCatalog));
+      setArcaneWallpapers(withExcludeInfo(wallpaperCatalog, _excludeList));
+      cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(wallpaperCatalog));
     } catch (e) {
       captureException(e);
       if (cachedCatalog.length > 0) {
@@ -40,7 +50,10 @@ export const getArcaneWallpaperList = (refresh: number) => {
         await showToast(Style.Failure, "Could not refresh Google Drive wallpapers. Showing cached wallpapers.");
       } else {
         await showToast(Style.Failure, String(e));
+        setArcaneWallpapers([]);
       }
+    } finally {
+      setIsLoading(false);
     }
   }, [refresh]);
 
@@ -48,5 +61,5 @@ export const getArcaneWallpaperList = (refresh: number) => {
     void fetchData();
   }, [fetchData]);
 
-  return { arcaneWallpapers: arcaneWallpapers };
+  return { arcaneWallpapers, isLoading, updateExcludeList };
 };

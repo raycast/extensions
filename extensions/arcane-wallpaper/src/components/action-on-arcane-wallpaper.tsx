@@ -11,12 +11,12 @@ import ActionStyle = Alert.ActionStyle;
 export function ActionOnArcaneWallpaper(props: {
   index: number;
   arcaneWallpapers: ArcaneWallpaperWithInfo[];
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  updateExcludeList: (excludeList: string[]) => void;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
   applyTo: string;
   picturesDirectory?: string;
 }) {
-  const { index, arcaneWallpapers, setRefresh, setSelectedItem, applyTo, picturesDirectory } = props;
+  const { index, arcaneWallpapers, updateExcludeList, setSelectedItem, applyTo, picturesDirectory } = props;
   const wallpaper = arcaneWallpapers[index];
 
   return (
@@ -90,9 +90,11 @@ export function ActionOnArcaneWallpaper(props: {
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
-              _excludeList.push(wallpaper.url);
+              if (!_excludeList.includes(wallpaper.url)) {
+                _excludeList.push(wallpaper.url);
+              }
               cache.set(CacheKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
-              setRefresh(Date.now());
+              updateExcludeList(_excludeList);
             }}
           />
         )}
@@ -109,7 +111,7 @@ export function ActionOnArcaneWallpaper(props: {
                 _excludeList.splice(index, 1);
               }
               cache.set(CacheKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
-              setRefresh(Date.now());
+              updateExcludeList(_excludeList);
             }}
           />
         )}

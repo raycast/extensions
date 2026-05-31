@@ -9,9 +9,11 @@ import { ALL_WALLPAPER_CATEGORIES } from "../utils/constants";
 export function ArcaneWallpaperList(props: {
   arcaneWallpapers: ArcaneWallpaperWithInfo[];
   categories: string[];
+  isLoading: boolean;
   selectedCategory: string;
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  refreshCatalog: () => void;
+  updateExcludeList: (excludeList: string[]) => void;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
   layout: string;
@@ -21,9 +23,11 @@ export function ArcaneWallpaperList(props: {
   const {
     arcaneWallpapers,
     categories,
+    isLoading,
     selectedCategory,
     setSelectedCategory,
-    setRefresh,
+    refreshCatalog,
+    updateExcludeList,
     selectedItem,
     setSelectedItem,
     layout,
@@ -34,7 +38,7 @@ export function ArcaneWallpaperList(props: {
   return (
     <List
       isShowingDetail={arcaneWallpapers.length !== 0}
-      isLoading={arcaneWallpapers.length === 0}
+      isLoading={isLoading}
       selectedItemId={selectedItem}
       onSelectionChange={(selected) => {
         if (selected) {
@@ -51,7 +55,7 @@ export function ArcaneWallpaperList(props: {
         </List.Dropdown>
       }
     >
-      <ArcaneWallpaperEmptyView layout={layout} />
+      <ArcaneWallpaperEmptyView layout={layout} onRefresh={refreshCatalog} />
       {arcaneWallpapers.map((value, index) => {
         return (
           <List.Item
@@ -68,7 +72,7 @@ export function ArcaneWallpaperList(props: {
               <ActionOnArcaneWallpaper
                 index={index}
                 arcaneWallpapers={arcaneWallpapers}
-                setRefresh={setRefresh}
+                updateExcludeList={updateExcludeList}
                 setSelectedItem={setSelectedItem}
                 applyTo={applyTo}
                 picturesDirectory={picturesDirectory}

@@ -10,7 +10,7 @@ export default function SetArcaneWallpaper() {
   const [refresh, setRefresh] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<string>("0");
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_WALLPAPER_CATEGORIES);
-  const { arcaneWallpapers } = getArcaneWallpaperList(refresh);
+  const { arcaneWallpapers, isLoading, updateExcludeList } = getArcaneWallpaperList(refresh);
   const preferences = getSetArcaneWallpaperPreferences();
   const layout = preferences.layout ?? "Grid";
   const columns = preferences.columns ?? "4";
@@ -26,9 +26,11 @@ export default function SetArcaneWallpaper() {
     <ArcaneWallpaperList
       arcaneWallpapers={filteredWallpapers}
       categories={categories}
+      isLoading={isLoading}
       selectedCategory={selectedCategory}
       setSelectedCategory={setSelectedCategory}
-      setRefresh={setRefresh}
+      refreshCatalog={() => setRefresh(Date.now())}
+      updateExcludeList={updateExcludeList}
       selectedItem={selectedItem}
       setSelectedItem={setSelectedItem}
       layout={layout}
@@ -39,9 +41,11 @@ export default function SetArcaneWallpaper() {
     <ArcaneWallpaperGrid
       arcaneWallpapers={filteredWallpapers}
       categories={categories}
+      isLoading={isLoading}
       selectedCategory={selectedCategory}
       setSelectedCategory={setSelectedCategory}
-      setRefresh={setRefresh}
+      refreshCatalog={() => setRefresh(Date.now())}
+      updateExcludeList={updateExcludeList}
       selectedItem={selectedItem}
       setSelectedItem={setSelectedItem}
       layout={layout}

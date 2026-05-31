@@ -9,9 +9,11 @@ import { ALL_WALLPAPER_CATEGORIES } from "../utils/constants";
 export function ArcaneWallpaperGrid(props: {
   arcaneWallpapers: ArcaneWallpaperWithInfo[];
   categories: string[];
+  isLoading: boolean;
   selectedCategory: string;
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  refreshCatalog: () => void;
+  updateExcludeList: (excludeList: string[]) => void;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
   layout: string;
@@ -22,9 +24,11 @@ export function ArcaneWallpaperGrid(props: {
   const {
     arcaneWallpapers,
     categories,
+    isLoading,
     selectedCategory,
     setSelectedCategory,
-    setRefresh,
+    refreshCatalog,
+    updateExcludeList,
     selectedItem,
     setSelectedItem,
     layout,
@@ -35,7 +39,7 @@ export function ArcaneWallpaperGrid(props: {
 
   return (
     <Grid
-      isLoading={arcaneWallpapers.length === 0}
+      isLoading={isLoading}
       columns={parseInt(columns ?? "4")}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
@@ -55,7 +59,7 @@ export function ArcaneWallpaperGrid(props: {
         </Grid.Dropdown>
       }
     >
-      <ArcaneWallpaperEmptyView layout={layout} />
+      <ArcaneWallpaperEmptyView layout={layout} onRefresh={refreshCatalog} />
       {arcaneWallpapers.map((value, index) => {
         return (
           <Grid.Item
@@ -68,7 +72,7 @@ export function ArcaneWallpaperGrid(props: {
               <ActionOnArcaneWallpaper
                 index={index}
                 arcaneWallpapers={arcaneWallpapers}
-                setRefresh={setRefresh}
+                updateExcludeList={updateExcludeList}
                 setSelectedItem={setSelectedItem}
                 applyTo={applyTo}
                 picturesDirectory={picturesDirectory}
