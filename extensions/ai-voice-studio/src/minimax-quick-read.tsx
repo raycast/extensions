@@ -112,8 +112,18 @@ export async function runMinimaxQuickRead() {
       await showHUD(`Done · ${voiceName}`);
     }
   } catch (error) {
-    await markError(error instanceof Error ? error.message : String(error));
-    await showTTSFailure(error);
+    // Realtime aborts surface as TTSApiError(-7); if the player is already
+    // stopped, this was a user cancellation and should not be shown as a failure.
+    if (player.isStopped()) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Stopped";
+      toast.message = `${voiceName} · stopped`;
+      await markIdle();
+      await showHUD("Stopped");
+    } else {
+      await markError(error instanceof Error ? error.message : String(error));
+      await showTTSFailure(error);
+    }
   } finally {
     player.cleanup();
   }
