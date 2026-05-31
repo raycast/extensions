@@ -4,8 +4,6 @@
   "title": "Bouncer Email Verifier",
   "description": "Verify email deliverability with Bouncer from Raycast",
   "icon": "icon.png",
-  "owner": "shifteq",
-  "access": "public",
   "author": "eKamran",
   "platforms": ["macOS"],
   "categories": ["Developer Tools", "Productivity"],
