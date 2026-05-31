@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, open, showToast, Toast } from "@raycast/api";
-import { cache, deleteCache, downloadPicture } from "../utils/common-utils";
+import { cache, deleteCache, downloadPicture, getSavedDirectory } from "../utils/common-utils";
 import PreviewArcaneWallpaper from "../preview-arcane-wallpaper";
 import { CacheKey, ARCANE_WALLPAPER_HOME } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
 import { ArcaneWallpaperWithInfo } from "../types/types";
 import { setWallpaper } from "../utils/platform-utils";
-import { picturesDirectory } from "../types/preferences";
 import ActionStyle = Alert.ActionStyle;
 
 export function ActionOnArcaneWallpaper(props: {
@@ -14,8 +13,10 @@ export function ActionOnArcaneWallpaper(props: {
   arcaneWallpapers: ArcaneWallpaperWithInfo[];
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
+  applyTo: string;
+  picturesDirectory?: string;
 }) {
-  const { index, arcaneWallpapers, setRefresh, setSelectedItem } = props;
+  const { index, arcaneWallpapers, setRefresh, setSelectedItem, applyTo, picturesDirectory } = props;
   const wallpaper = arcaneWallpapers[index];
 
   return (
@@ -24,14 +25,14 @@ export function ActionOnArcaneWallpaper(props: {
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(wallpaper).then(() => "");
+          setWallpaper(wallpaper, applyTo).then(() => "");
         }}
       />
       <Action
         icon={Icon.Download}
         title={"Download Wallpaper"}
         onAction={async () => {
-          await downloadPicture(wallpaper);
+          await downloadPicture(wallpaper, picturesDirectory);
         }}
       />
       <Action
@@ -39,7 +40,7 @@ export function ActionOnArcaneWallpaper(props: {
         title={"Open Wallpaper Folder"}
         shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
         onAction={async () => {
-          await open(picturesDirectory);
+          await open(getSavedDirectory(picturesDirectory));
         }}
       />
 
@@ -62,6 +63,8 @@ export function ActionOnArcaneWallpaper(props: {
               index={index}
               arcaneWallpapers={arcaneWallpapers}
               setSelectedItem={setSelectedItem}
+              applyTo={applyTo}
+              picturesDirectory={picturesDirectory}
             />
           }
           onPush={() => setSelectedItem(index.toString())}
@@ -75,7 +78,7 @@ export function ActionOnArcaneWallpaper(props: {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
             const randomImage = arcaneWallpapers[Math.floor(Math.random() * arcaneWallpapers.length)];
-            setWallpaper(randomImage).then(() => "");
+            setWallpaper(randomImage, applyTo).then(() => "");
           }}
         />
 

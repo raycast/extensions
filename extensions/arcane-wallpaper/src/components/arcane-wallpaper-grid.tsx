@@ -4,7 +4,6 @@ import { ArcaneWallpaperWithInfo } from "../types/types";
 import { ArcaneWallpaperEmptyView } from "./arcane-wallpaper-empty-view";
 import { ActionOnArcaneWallpaper } from "./action-on-arcane-wallpaper";
 import { getWallpaperPreviewUrl } from "../utils/common-utils";
-import { columns, layout } from "../types/preferences";
 import { ALL_WALLPAPER_CATEGORIES } from "../utils/constants";
 
 export function ArcaneWallpaperGrid(props: {
@@ -15,6 +14,10 @@ export function ArcaneWallpaperGrid(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
+  layout: string;
+  columns: string;
+  applyTo: string;
+  picturesDirectory?: string;
 }) {
   const {
     arcaneWallpapers,
@@ -24,12 +27,16 @@ export function ArcaneWallpaperGrid(props: {
     setRefresh,
     selectedItem,
     setSelectedItem,
+    layout,
+    columns,
+    applyTo,
+    picturesDirectory,
   } = props;
 
   return (
     <Grid
       isLoading={arcaneWallpapers.length === 0}
-      columns={parseInt(columns)}
+      columns={parseInt(columns ?? "4")}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
       selectedItemId={selectedItem}
@@ -63,6 +70,8 @@ export function ArcaneWallpaperGrid(props: {
                 arcaneWallpapers={arcaneWallpapers}
                 setRefresh={setRefresh}
                 setSelectedItem={setSelectedItem}
+                applyTo={applyTo}
+                picturesDirectory={picturesDirectory}
               />
             }
             accessory={

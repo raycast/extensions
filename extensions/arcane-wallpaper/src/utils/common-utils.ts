@@ -3,7 +3,6 @@ import { existsSync, readdirSync, rmSync } from "fs";
 import { readFile, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { ArcaneWallpaper } from "../types/types";
-import { picturesDirectory } from "../types/preferences";
 
 export const cache = new Cache();
 export const cachePath = environment.supportPath;
@@ -16,12 +15,12 @@ export const getWallpaperPreviewUrl = (wallpaper: { url: string; thumbnailUrl?: 
   return wallpaper.thumbnailUrl ?? wallpaper.url;
 };
 
-export const getSavedDirectory = () => {
+export const getSavedDirectory = (picturesDirectory?: string) => {
   const actualDirectory = picturesDirectory;
   if (isEmpty(actualDirectory) || !existsSync(actualDirectory)) {
     return homedir() + "/Downloads";
   }
-  return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
+  return actualDirectory.endsWith("/") ? actualDirectory.slice(0, -1) : actualDirectory;
 };
 
 const getFileType = (url: string) => {
@@ -50,10 +49,10 @@ const getImageBuffer = async (url: string) => {
   return readFile(url);
 };
 
-export async function downloadPicture(wallpaper: { title: string; url: string }) {
+export async function downloadPicture(wallpaper: { title: string; url: string }, picturesDirectory?: string) {
   await showToast(Toast.Style.Animated, "Downloading...");
 
-  const picturePath = `${getSavedDirectory()}/${getSafeFileName(wallpaper.title)}.${getFileType(wallpaper.url)}`;
+  const picturePath = `${getSavedDirectory(picturesDirectory)}/${getSafeFileName(wallpaper.title)}.${getFileType(wallpaper.url)}`;
   try {
     await writeFile(picturePath, await getImageBuffer(wallpaper.url));
     const options: Toast.Options = {

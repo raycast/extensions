@@ -4,7 +4,6 @@ import { ArcaneWallpaperWithInfo } from "../types/types";
 import { ArcaneWallpaperEmptyView } from "./arcane-wallpaper-empty-view";
 import { ActionOnArcaneWallpaper } from "./action-on-arcane-wallpaper";
 import { getWallpaperPreviewUrl } from "../utils/common-utils";
-import { layout } from "../types/preferences";
 import { ALL_WALLPAPER_CATEGORIES } from "../utils/constants";
 
 export function ArcaneWallpaperList(props: {
@@ -15,6 +14,9 @@ export function ArcaneWallpaperList(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
+  layout: string;
+  applyTo: string;
+  picturesDirectory?: string;
 }) {
   const {
     arcaneWallpapers,
@@ -24,6 +26,9 @@ export function ArcaneWallpaperList(props: {
     setRefresh,
     selectedItem,
     setSelectedItem,
+    layout,
+    applyTo,
+    picturesDirectory,
   } = props;
 
   return (
@@ -65,6 +70,8 @@ export function ArcaneWallpaperList(props: {
                 arcaneWallpapers={arcaneWallpapers}
                 setRefresh={setRefresh}
                 setSelectedItem={setSelectedItem}
+                applyTo={applyTo}
+                picturesDirectory={picturesDirectory}
               />
             }
           />

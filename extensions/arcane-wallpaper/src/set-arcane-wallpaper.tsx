@@ -3,7 +3,7 @@ import { ArcaneWallpaperList } from "./components/arcane-wallpaper-list";
 import { getArcaneWallpaperList } from "./hooks/hooks";
 
 import { ArcaneWallpaperGrid } from "./components/arcane-wallpaper-grid";
-import { layout } from "./types/preferences";
+import { getSetArcaneWallpaperPreferences } from "./types/preferences";
 import { ALL_WALLPAPER_CATEGORIES } from "./utils/constants";
 
 export default function SetArcaneWallpaper() {
@@ -11,6 +11,11 @@ export default function SetArcaneWallpaper() {
   const [selectedItem, setSelectedItem] = useState<string>("0");
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_WALLPAPER_CATEGORIES);
   const { arcaneWallpapers } = getArcaneWallpaperList(refresh);
+  const preferences = getSetArcaneWallpaperPreferences();
+  const layout = preferences.layout ?? "Grid";
+  const columns = preferences.columns ?? "4";
+  const applyTo = preferences.applyTo ?? "every";
+  const picturesDirectory = preferences.picturesDirectory;
   const categories = Array.from(new Set(arcaneWallpapers.map((wallpaper) => wallpaper.category))).sort();
   const filteredWallpapers =
     selectedCategory === ALL_WALLPAPER_CATEGORIES
@@ -26,6 +31,9 @@ export default function SetArcaneWallpaper() {
       setRefresh={setRefresh}
       selectedItem={selectedItem}
       setSelectedItem={setSelectedItem}
+      layout={layout}
+      applyTo={applyTo}
+      picturesDirectory={picturesDirectory}
     />
   ) : (
     <ArcaneWallpaperGrid
@@ -36,6 +44,10 @@ export default function SetArcaneWallpaper() {
       setRefresh={setRefresh}
       selectedItem={selectedItem}
       setSelectedItem={setSelectedItem}
+      layout={layout}
+      columns={columns}
+      applyTo={applyTo}
+      picturesDirectory={picturesDirectory}
     />
   );
 }

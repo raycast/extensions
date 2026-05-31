@@ -9,8 +9,10 @@ export default function PreviewArcaneWallpaper(props: {
   index: number;
   arcaneWallpapers: ArcaneWallpaperWithInfo[];
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
+  applyTo: string;
+  picturesDirectory?: string;
 }) {
-  const { index, arcaneWallpapers, setSelectedItem } = props;
+  const { index, arcaneWallpapers, setSelectedItem, applyTo, picturesDirectory } = props;
   const imagesLength = arcaneWallpapers.length;
   const [pageIndex, setPageIndex] = useState<number>(index);
   return (
@@ -51,7 +53,7 @@ export default function PreviewArcaneWallpaper(props: {
               title={"Set Desktop Wallpaper"}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => {
-                setWallpaper(arcaneWallpapers[pageIndex]).then(() => "");
+                setWallpaper(arcaneWallpapers[pageIndex], applyTo).then(() => "");
               }}
             />
 
@@ -60,7 +62,7 @@ export default function PreviewArcaneWallpaper(props: {
               title={"Download Wallpaper"}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={async () => {
-                await downloadPicture(arcaneWallpapers[pageIndex]);
+                await downloadPicture(arcaneWallpapers[pageIndex], picturesDirectory);
               }}
             />
           </ActionPanel.Section>

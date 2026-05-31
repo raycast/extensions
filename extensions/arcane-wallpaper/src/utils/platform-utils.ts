@@ -3,7 +3,6 @@ import { showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs";
 import { runAppleScript } from "@raycast/utils";
 import { buildCachePath, cachePicture } from "./common-utils";
-import { applyTo } from "../types/preferences";
 import { set_wallpaper as setWallpaperWindowsRust } from "rust:../../rust";
 
 async function setWallpaperMacOS(path: string, applyTo: string) {
@@ -34,7 +33,7 @@ async function setWallpaperWindows(path: string, applyTo: string) {
   return await setWallpaperWindowsRust(escapedPath, applyTo);
 }
 
-export const setWallpaper = async (wallpaper: ArcaneWallpaperWithInfo) => {
+export const setWallpaper = async (wallpaper: ArcaneWallpaperWithInfo, applyTo: string) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
   const fixedPathName = buildCachePath(wallpaper);
@@ -66,7 +65,7 @@ export const setWallpaper = async (wallpaper: ArcaneWallpaperWithInfo) => {
   }
 };
 
-export const autoSetWallpaper = async (wallpaper: ArcaneWallpaper) => {
+export const autoSetWallpaper = async (wallpaper: ArcaneWallpaper, applyTo: string) => {
   const fixedPathName = buildCachePath(wallpaper);
 
   try {
