@@ -15,12 +15,11 @@ export const getWallpaperPreviewUrl = (wallpaper: { url: string; thumbnailUrl?: 
   return wallpaper.thumbnailUrl ?? wallpaper.url;
 };
 
-export const getSavedDirectory = (picturesDirectory?: string) => {
-  const actualDirectory = picturesDirectory;
-  if (isEmpty(actualDirectory) || !existsSync(actualDirectory)) {
+export const getSavedDirectory = (picturesDirectory?: string): string => {
+  if (!picturesDirectory || !existsSync(picturesDirectory)) {
     return homedir() + "/Downloads";
   }
-  return actualDirectory.endsWith("/") ? actualDirectory.slice(0, -1) : actualDirectory;
+  return picturesDirectory.endsWith("/") ? picturesDirectory.slice(0, -1) : picturesDirectory;
 };
 
 const getFileType = (url: string) => {
