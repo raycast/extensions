@@ -8,12 +8,13 @@
 
 ### Changed
 
-- The AI tools and `claude-code-stats` now invoke the ccusage CLI through `execa` (the same library `useExec` uses) instead of `child_process.exec`. `execa`/`cross-spawn` resolves Windows `.cmd` shims via `PATHEXT` and reads `PATH` case-insensitively, so the two exec paths now behave identically across platforms.
+- The AI tools and `claude-code-stats` now invoke the ccusage CLI through `execa` (with an args array) instead of `child_process.exec` with a hand-built command string, so command construction is consistent across the codebase.
 
 ### Fixed
 
+- On Windows the views spawn the CLI via `useExec`, which uses `child_process.spawn` and throws `ENOENT` for the `npx.cmd` / `ccusage.cmd` shims unless run through a shell. The exec options now enable the shell on Windows so the shims resolve via `PATHEXT`
 - `PATH` is written to its real, case-correct environment key via `path-key` rather than spreading `process.env` and appending a second `PATH` entry, which on Windows (where the variable is conventionally `Path`) created two ambiguous entries
-- PATH construction uses `path.delimiter` and `os.homedir()` instead of a hard-coded `:` separator and `$HOME`; on Windows only the npm global prefix (`%APPDATA%\npm`) is added, since the user PATH is already inherited
+- PATH construction uses `path.delimiter` and `os.homedir()` instead of a hard-coded `:` separator and `$HOME`; on Windows the npm global prefix (`%APPDATA%\npm`) is added
 - Unix-only version-manager (nvm/fnm/n/volta) probing and env vars are skipped on Windows
 
 ## [ccusage v20] - 2026-05-25

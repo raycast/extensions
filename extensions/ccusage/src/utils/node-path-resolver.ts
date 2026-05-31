@@ -95,9 +95,8 @@ export const resolveVersionManagerPaths = (): string[] => {
  *
  * On macOS, Raycast launches without the user's shell PATH, so Homebrew, the
  * Node version managers, and system locations are added explicitly. On Windows
- * the user PATH is inherited and cross-spawn resolves `.cmd` shims, so only the
- * npm global prefix (%APPDATA%\npm) — where globally installed shims such as a
- * direct `ccusage` live — may need adding.
+ * the user PATH is inherited, so only the npm global prefix (%APPDATA%\npm) —
+ * where globally installed shims such as a direct `ccusage` live — is added.
  */
 export const getEnhancedNodePaths = (basePath: string): string => {
   if (cachedPaths !== null) return cachedPaths;

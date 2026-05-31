@@ -11,8 +11,7 @@ export const getExecOptions = () => {
 
   // PATH is case-insensitive on Windows and conventionally spelled `Path`.
   // Resolve the real key so we overwrite the existing variable instead of
-  // adding a second, ambiguous `PATH` entry. cross-spawn (used by execa and
-  // useExec) reads the same key when resolving the command.
+  // adding a second, ambiguous `PATH` entry.
   const key = pathKey({ env });
   let path = getEnhancedNodePaths(env[key] ?? "");
 
@@ -45,5 +44,11 @@ export const getExecOptions = () => {
     env,
     timeout: 30000,
     cwd: home || process.cwd(),
+    // `useExec` (the views) spawns via raw `child_process.spawn`, which on
+    // Windows throws ENOENT for the `npx.cmd` / `ccusage.cmd` shims unless run
+    // through a shell that honours PATHEXT. Enabling the shell on Windows fixes
+    // the views; execa (the AI tools) tolerates it. Our args are fixed tokens
+    // and validated dates, so there is no shell-quoting risk.
+    shell: isWindows,
   };
 };
