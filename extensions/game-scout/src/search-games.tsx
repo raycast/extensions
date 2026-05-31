@@ -661,7 +661,7 @@ function GameDetail({
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          preloadedDeals !== undefined
+          preloadedDeals != null
             ? mockResponse([{ deals: preloadedDeals }])
             : fetch(
                 `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
@@ -681,7 +681,7 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          preloadedOverview !== undefined
+          preloadedOverview != null
             ? mockResponse([preloadedOverview])
             : fetch(
                 `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
