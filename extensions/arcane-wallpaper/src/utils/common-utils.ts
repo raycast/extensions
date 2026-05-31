@@ -43,6 +43,10 @@ const isRemoteUrl = (url: string) => /^https?:\/\//i.test(url);
 
 const getSafeFileName = (title: string) => title.replace(/[/:"]/g, "-");
 
+const getSafeWallpaperFileName = (wallpaper: { title: string; category?: string }) => {
+  return getSafeFileName([wallpaper.category, wallpaper.title].filter(Boolean).join(" - "));
+};
+
 const getImageBuffer = async (url: string) => {
   if (isRemoteUrl(url)) {
     const res = await fetch(url);
@@ -57,12 +61,12 @@ const getImageBuffer = async (url: string) => {
 };
 
 export async function downloadPicture(
-  wallpaper: { title: string; url: string; fileType?: string },
+  wallpaper: { title: string; category?: string; url: string; fileType?: string },
   picturesDirectory?: string,
 ) {
   await showToast(Toast.Style.Animated, "Downloading...");
 
-  const picturePath = `${getSavedDirectory(picturesDirectory)}/${getSafeFileName(wallpaper.title)}.${getFileType(wallpaper.url, wallpaper.title, wallpaper.fileType)}`;
+  const picturePath = `${getSavedDirectory(picturesDirectory)}/${getSafeWallpaperFileName(wallpaper)}.${getFileType(wallpaper.url, wallpaper.title, wallpaper.fileType)}`;
   try {
     await writeFile(picturePath, await getImageBuffer(wallpaper.url));
     const options: Toast.Options = {
@@ -93,7 +97,7 @@ export async function downloadPicture(
 export const buildCachePath = (wallpaper: ArcaneWallpaper) => {
   const fileType = getFileType(wallpaper.url, wallpaper.title, wallpaper.fileType);
   const normalizedCachePath = cachePath.endsWith("/") ? cachePath : `${cachePath}/`;
-  return `${normalizedCachePath}${getSafeFileName(wallpaper.title)}.${fileType}`;
+  return `${normalizedCachePath}${getSafeWallpaperFileName(wallpaper)}.${fileType}`;
 };
 
 export async function cachePicture(wallpaper: ArcaneWallpaper) {
