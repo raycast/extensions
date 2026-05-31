@@ -47,7 +47,7 @@ describe("GeminiTtsResponseSchema", () => {
   it("accepts empty audio payloads at the schema boundary so tts.ts can route them as empty-response", () => {
     expect(
       GeminiTtsResponseSchema.safeParse({
-        candidates: [{ content: { parts: [{ inlineData: { data: "" } }] } }],
+        candidates: [{ content: { parts: [{ inlineData: { mimeType: "audio/L16;rate=24000", data: "" } }] } }],
       }).success,
     ).toBe(true);
   });

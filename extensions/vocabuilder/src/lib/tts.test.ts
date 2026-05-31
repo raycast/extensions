@@ -19,18 +19,18 @@ vi.mock("fs", async (importOriginal) => {
   };
 });
 
-import { existsSync, readdirSync, statSync, unlinkSync } from "fs";
+import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import { pronounce, pronounceFallback } from "./tts";
 
 const API_KEY = "test-key";
 const TEST_MODEL = "test-tts-model";
 
-function ttsResponseBody(base64Audio: string): object {
+function ttsResponseBody(base64Audio: string, mimeType = "audio/L16;rate=24000"): object {
   return {
     candidates: [
       {
         content: {
-          parts: [{ inlineData: { data: base64Audio } }],
+          parts: [{ inlineData: { mimeType, data: base64Audio } }],
         },
       },
     ],
@@ -38,6 +38,7 @@ function ttsResponseBody(base64Audio: string): object {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   vi.stubGlobal("fetch", vi.fn());
   vi.mocked(existsSync).mockReturnValue(false);
 });
@@ -160,7 +161,7 @@ describe("pronounce", () => {
 
   it("throws empty-response when no audio data", async () => {
     const emptyResponse = {
-      candidates: [{ content: { parts: [{ inlineData: { data: "" } }] } }],
+      candidates: [{ content: { parts: [{ inlineData: { mimeType: "audio/L16;rate=24000", data: "" } }] } }],
     };
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify(emptyResponse), {
@@ -169,6 +170,35 @@ describe("pronounce", () => {
       }),
     );
     await expect(pronounce("hello", API_KEY, "en", undefined, TEST_MODEL)).rejects.toThrow("empty-response");
+  });
+
+  it("throws invalid-response before caching when Gemini returns non-PCM audio", async () => {
+    const compressedAudio = Buffer.from("not raw pcm").toString("base64");
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(ttsResponseBody(compressedAudio, "audio/ogg;codec=opus")), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(pronounce("hello", API_KEY, "en", undefined, TEST_MODEL)).rejects.toMatchObject({
+      message: "invalid-response",
+      cause: expect.objectContaining({ kind: "invalid-response", surface: "tts" }),
+    });
+    expect(writeFileSync).not.toHaveBeenCalled();
+  });
+
+  it("accepts L16 PCM responses with explicit codec parameter", async () => {
+    const fakePcm = Buffer.alloc(48).toString("base64");
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(ttsResponseBody(fakePcm, "audio/L16;codec=pcm;rate=24000")), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(pronounce("hello", API_KEY, "en", undefined, TEST_MODEL)).resolves.toEqual({ cached: false });
+    expect(writeFileSync).toHaveBeenCalledOnce();
   });
 
   it("evicts oldest files when cache exceeds MAX_CACHE_FILES", async () => {

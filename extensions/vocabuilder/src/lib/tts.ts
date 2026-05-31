@@ -88,6 +88,26 @@ function prependWavHeader(pcm: Buffer, sampleRate: number, numChannels: number, 
   return Buffer.concat([header, pcm]);
 }
 
+function isExpectedTtsPcmMimeType(mimeType: string): boolean {
+  const [rawType, ...rawParams] = mimeType.split(";");
+  if (rawType.trim().toLowerCase() !== "audio/l16") {
+    return false;
+  }
+
+  const params = new Map<string, string>();
+  for (const rawParam of rawParams) {
+    const [rawKey, ...rawValueParts] = rawParam.split("=");
+    const key = rawKey?.trim().toLowerCase();
+    const value = rawValueParts.join("=").trim().toLowerCase();
+    if (key) {
+      params.set(key, value);
+    }
+  }
+
+  const codec = params.get("codec");
+  return params.get("rate") === String(TTS_SAMPLE_RATE) && (codec === undefined || codec === "pcm");
+}
+
 function getCacheDir(): string {
   const dir = path.join(environment.supportPath, "tts-cache");
   if (!existsSync(dir)) {
@@ -210,10 +230,20 @@ async function generateSpeechGemini(
   // Schema guarantees structural shape; `data` is allowed to be empty string,
   // which we surface separately as `empty-response` rather than rolling it
   // into invalid-response.
-  const base64Audio = apiData.candidates[0].content.parts[0].inlineData.data;
+  const inlineData = apiData.candidates[0].content.parts[0].inlineData;
+  const base64Audio = inlineData.data;
 
   if (!base64Audio) {
     throw geminiError({ domain: "infrastructure", kind: "empty-response", surface: "tts" });
+  }
+
+  if (!isExpectedTtsPcmMimeType(inlineData.mimeType)) {
+    throw geminiError({
+      domain: "infrastructure",
+      kind: "invalid-response",
+      surface: "tts",
+      body: rawJson.slice(0, 500),
+    });
   }
 
   const pcm = Buffer.from(base64Audio, "base64");
@@ -370,6 +400,21 @@ if (import.meta.vitest) {
       const pcm = Buffer.alloc(200);
       const wav = prependWavHeader(pcm, 24000, 1, 16);
       expect(wav.readUInt32LE(4)).toBe(200 + 44 - 8); // dataSize + headerSize - 8
+    });
+  });
+
+  describe("isExpectedTtsPcmMimeType", () => {
+    it("accepts documented Gemini raw PCM MIME variants", () => {
+      expect(isExpectedTtsPcmMimeType("audio/L16;rate=24000")).toBe(true);
+      expect(isExpectedTtsPcmMimeType("audio/L16;codec=pcm;rate=24000")).toBe(true);
+      expect(isExpectedTtsPcmMimeType("audio/l16; rate=24000; codec=PCM")).toBe(true);
+    });
+
+    it("rejects compressed or incompatible audio MIME variants before WAV wrapping", () => {
+      expect(isExpectedTtsPcmMimeType("audio/ogg;codec=opus")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16;rate=44100")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16;codec=opus;rate=24000")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16")).toBe(false);
     });
   });
 }

@@ -53,10 +53,10 @@ English, Ukrainian, Polish, German, French, Spanish, Italian, Portuguese, Dutch,
 
 ## Development
 
-Use the Node version pinned in [`.nvmrc`](.nvmrc) — **Node 20.15.1**, which bundles **npm 10.7.0** and matches the Raycast store's CI. Then run the extension in Raycast dev mode:
+Use the Node version pinned in [`.nvmrc`](.nvmrc) — **Node 22.22.2**, which bundles **npm 10.9.7** and matches the current Raycast extension toolchain. Then run the extension in Raycast dev mode:
 
 ```bash
-nvm use        # Node 20.15.1 / npm 10.7.0
+nvm use        # Node 22.22.2 / npm 10.9.7
 npm install
 npm run dev
 ```
