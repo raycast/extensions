@@ -1,4 +1,4 @@
-export const PROVIDER_IDS = ["deepseek", "mimo", "gemini", "kimi", "openai"] as const;
+export const PROVIDER_IDS = ["deepseek", "mimo", "gemini", "openai"] as const;
 
 export type ProviderId = (typeof PROVIDER_IDS)[number];
 
@@ -18,12 +18,18 @@ export type ProviderAPIProtocol = "openai" | "anthropic";
 
 export type TTSProvider = "qwen" | "gemini";
 
+export type ProviderSelectionMode = "enabled" | "single";
+
 export interface RuntimeSettings {
   modelTier: ModelTier;
+  providerMode: ProviderSelectionMode;
+  selectedProviderId?: ProviderId;
+  modelOverrides: Partial<Record<ProviderId, string>>;
   promptProfile: PromptProfile;
   translationStyle: TranslationStyle;
   customPromptInstructions: string;
   ttsProvider: TTSProvider;
+  ttsModel?: string;
 }
 
 /**

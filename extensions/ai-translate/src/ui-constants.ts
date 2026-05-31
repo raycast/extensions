@@ -5,7 +5,6 @@ export const PROVIDER_ICONS: Record<ProviderId, Icon> = {
   deepseek: Icon.Waveform,
   mimo: Icon.AppWindowGrid2x2,
   gemini: Icon.Stars,
-  kimi: Icon.Moon,
   openai: Icon.Message,
 };
 

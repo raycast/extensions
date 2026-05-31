@@ -4,11 +4,13 @@ import {
   getMaxOutputTokens,
   getOrderedProviderIds,
   getProviderConfig,
+  getRuntimeProviderIds,
   getTimeoutMs,
   readPreferences,
 } from "./preferences";
 import { MissingAPIKeyError } from "./providers";
 import { runRewrite } from "./rewrite";
+import { loadRuntimeSettings } from "./runtime-settings";
 
 export default async function Command() {
   let source = "";
@@ -24,13 +26,14 @@ export default async function Command() {
   }
 
   const preferences = readPreferences();
-  const providerId = getOrderedProviderIds(preferences)[0];
+  const runtimeSettings = await loadRuntimeSettings();
+  const providerId = getRuntimeProviderIds(preferences, runtimeSettings)[0] ?? getOrderedProviderIds(preferences)[0];
   // Pro tier is intentional: Rewrite & Replace must produce consistent
   // English-rewrite quality regardless of the translation Model Tier the
   // user picked (see Rewrite & Coach for the same lock). If your provider
   // key only covers the fast tier, set the Custom tier model in
   // Extension Preferences to override.
-  const config = getProviderConfig(providerId, preferences, "pro");
+  const config = getProviderConfig(providerId, preferences, "pro", runtimeSettings.modelOverrides[providerId]);
 
   try {
     await showHUD(`Rewriting with ${config.title}...`);

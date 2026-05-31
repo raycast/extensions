@@ -5,6 +5,7 @@ import {
   getMaxOutputTokens,
   getOrderedProviderIds,
   getProviderConfig,
+  getRuntimeProviderIds,
   getTimeoutMs,
   readPreferences,
 } from "./preferences";
@@ -27,8 +28,13 @@ export default async function Command() {
 
   const preferences = readPreferences();
   const runtimeSettings = await loadRuntimeSettings();
-  const providerId = getOrderedProviderIds(preferences)[0];
-  const config = getProviderConfig(providerId, preferences, runtimeSettings.modelTier);
+  const providerId = getRuntimeProviderIds(preferences, runtimeSettings)[0] ?? getOrderedProviderIds(preferences)[0];
+  const config = getProviderConfig(
+    providerId,
+    preferences,
+    runtimeSettings.modelTier,
+    runtimeSettings.modelOverrides[providerId],
+  );
   const resolved = resolveTargetLanguage(preferences.targetLanguage, source);
 
   const request: TranslationRequest = {

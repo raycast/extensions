@@ -7,13 +7,13 @@ import {
   ProviderAPIProtocol,
   ProviderConfig,
   ProviderId,
+  RuntimeSettings,
 } from "./types";
 
 export const PROVIDER_TITLES: Record<ProviderId, string> = {
   deepseek: "DeepSeek",
   mimo: "Xiaomi MiMo",
   gemini: "Gemini",
-  kimi: "Kimi",
   openai: "OpenAI / ChatGPT",
 };
 
@@ -44,12 +44,6 @@ const providerPreferenceKeys: Record<
     baseURL: "geminiBaseURL",
     model: "geminiModel",
   },
-  kimi: {
-    enabled: "enableKimi",
-    apiKey: "kimiAPIKey",
-    baseURL: "kimiBaseURL",
-    model: "kimiModel",
-  },
   openai: {
     enabled: "enableOpenAI",
     apiKey: "openAIAPIKey",
@@ -78,14 +72,32 @@ export function getOrderedProviderIds(preferences: ExtensionPreferences): Provid
   return isProviderId(preferences.defaultProvider) ? [preferences.defaultProvider] : ["deepseek"];
 }
 
+export function getRuntimeProviderIds(
+  preferences: ExtensionPreferences,
+  settings: Pick<RuntimeSettings, "providerMode" | "selectedProviderId">,
+): ProviderId[] {
+  const orderedIds = getOrderedProviderIds(preferences);
+  if (
+    settings.providerMode === "single" &&
+    settings.selectedProviderId &&
+    orderedIds.includes(settings.selectedProviderId)
+  ) {
+    return [settings.selectedProviderId];
+  }
+  return orderedIds;
+}
+
 export function getProviderConfig(
   id: ProviderId,
   preferences: ExtensionPreferences,
   modelTier?: ModelTier,
+  modelOverride?: string,
 ): ProviderConfig {
   const keys = providerPreferenceKeys[id];
   const customModel = stringValue(preferences[keys.model]);
-  const model = modelTier ? resolveModel(id, modelTier, customModel) : customModel;
+  const model = modelTier
+    ? resolveModel(id, modelTier, customModel, modelOverride)
+    : modelOverride?.trim() || customModel;
   const baseURL = stringValue(preferences[keys.baseURL]);
   return {
     id,
@@ -119,17 +131,17 @@ function isProviderId(value: string): value is ProviderId {
  * endpoints without a separate preference. The heuristic:
  *   1. Gemini and OpenAI always use their own routes.
  *   2. URLs that explicitly carry an Anthropic-shaped path segment
- *      (`/anthropic` or Kimi Code's `/coding`) are Anthropic Messages.
+ *      (`/anthropic`) are Anthropic Messages.
  *   3. URLs that look like a generic OpenAI Chat Completions endpoint
- *      (Moonshot host, `…/v1`, `…/v1/chat/completions`) are OpenAI.
+ *      (`…/v1`, `…/v1/chat/completions`) are OpenAI.
  *   4. Anything else falls back to Anthropic — the documented default for
- *      DeepSeek, MiMo, and Kimi.
+ *      DeepSeek and MiMo.
  */
 function detectProtocol(id: ProviderId, baseURL: string): ProviderAPIProtocol {
   if (id === "gemini" || id === "openai") return "openai";
   const lower = baseURL.toLowerCase();
-  if (lower.includes("/anthropic") || lower.includes("/coding")) return "anthropic";
-  if (lower.includes("moonshot.") || /\/v1(\/chat\/completions)?\/?$/.test(lower)) return "openai";
+  if (lower.includes("/anthropic")) return "anthropic";
+  if (/\/v1(\/chat\/completions)?\/?$/.test(lower)) return "openai";
   return "anthropic";
 }
 

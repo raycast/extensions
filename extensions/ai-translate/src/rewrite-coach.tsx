@@ -24,15 +24,12 @@ import {
 } from "./preferences";
 import { MissingAPIKeyError } from "./providers";
 import { REWRITE_TONE_LABELS, RewriteResult, runRewrite } from "./rewrite";
-import { loadRuntimeSettings, updateRuntimeSetting } from "./runtime-settings";
+import { getDefaultRuntimeSettings, loadRuntimeSettings, updateRuntimeSettings } from "./runtime-settings";
 import { speakText } from "./tts";
-import { ExtensionPreferences, ProviderId, RewriteTone, TTSProvider } from "./types";
+import { getModelOptions, getModelTitle } from "./models";
+import { getDefaultTTSModel, getTTSModelOptions, getTTSModelTitle, TTS_PROVIDER_LABELS } from "./tts-models";
+import { ExtensionPreferences, ProviderId, RewriteTone, RuntimeSettings, TTSProvider } from "./types";
 import { normalizeInputText, quoted } from "./ui-constants";
-
-const TTS_PROVIDER_LABELS: Record<TTSProvider, string> = {
-  qwen: "Qwen-TTS",
-  gemini: "Gemini TTS",
-};
 
 const TONE_ORDER: RewriteTone[] = ["natural", "casual", "formal", "concise"];
 
@@ -40,6 +37,7 @@ export default function Command(props: LaunchProps) {
   const preferences = useMemo(() => readPreferences(), []);
   const providerIds = useMemo(() => getOrderedProviderIds(preferences), [preferences]);
   const [seed, setSeed] = useState<string>();
+  const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>();
 
   useEffect(() => {
     let isMounted = true;
@@ -72,16 +70,46 @@ export default function Command(props: LaunchProps) {
     };
   }, [props.fallbackText]);
 
-  if (seed === undefined) {
+  useEffect(() => {
+    let isMounted = true;
+    void loadRuntimeSettings().then((settings) => {
+      if (isMounted) setRuntimeSettings(settings);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (seed === undefined || !runtimeSettings) {
     return <Detail isLoading navigationTitle="Rewrite & Coach" markdown="Reading selected text…" />;
   }
 
+  const initialProviderId =
+    runtimeSettings.providerMode === "single" &&
+    runtimeSettings.selectedProviderId &&
+    providerIds.includes(runtimeSettings.selectedProviderId)
+      ? runtimeSettings.selectedProviderId
+      : providerIds[0];
+
   if (!seed) {
-    return <CoachForm preferences={preferences} providerIds={providerIds} initialText="" />;
+    return (
+      <CoachForm
+        preferences={preferences}
+        providerIds={providerIds}
+        initialText=""
+        initialProviderId={initialProviderId}
+      />
+    );
   }
 
   return (
-    <CoachResult preferences={preferences} providerIds={providerIds} text={seed} initialProviderId={providerIds[0]} />
+    <CoachResult
+      preferences={preferences}
+      providerIds={providerIds}
+      text={seed}
+      initialProviderId={initialProviderId}
+      initialRuntimeSettings={runtimeSettings}
+    />
   );
 }
 
@@ -153,17 +181,21 @@ function CoachResult({
   text,
   initialTone = "natural",
   initialProviderId,
+  initialRuntimeSettings,
 }: {
   preferences: ExtensionPreferences;
   providerIds: ProviderId[];
   text: string;
   initialTone?: RewriteTone;
   initialProviderId?: ProviderId;
+  initialRuntimeSettings?: RuntimeSettings;
 }) {
   const { push } = useNavigation();
   const [tone, setTone] = useState<RewriteTone>(initialTone);
   const [providerId, setProviderId] = useState<ProviderId>(initialProviderId ?? providerIds[0]);
-  const [ttsProvider, setTtsProvider] = useState<TTSProvider>("qwen");
+  const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>(
+    initialRuntimeSettings ?? getDefaultRuntimeSettings(),
+  );
   const [result, setResult] = useState<RewriteResult>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -173,7 +205,7 @@ function CoachResult({
   useEffect(() => {
     let isMounted = true;
     void loadRuntimeSettings().then((settings) => {
-      if (isMounted) setTtsProvider(settings.ttsProvider);
+      if (isMounted) setRuntimeSettings(settings);
     });
     return () => {
       isMounted = false;
@@ -181,9 +213,42 @@ function CoachResult({
   }, []);
 
   async function switchTtsProvider(next: TTSProvider) {
-    const updated = await updateRuntimeSetting("ttsProvider", next);
-    setTtsProvider(updated.ttsProvider);
+    const updated = await updateRuntimeSettings({ ttsProvider: next, ttsModel: getDefaultTTSModel(next, preferences) });
+    setRuntimeSettings(updated);
     await showToast({ style: Toast.Style.Success, title: `Read Aloud: ${TTS_PROVIDER_LABELS[next]}` });
+  }
+
+  async function switchTtsModel(model: string) {
+    const updated = await updateRuntimeSettings({ ttsModel: model });
+    setRuntimeSettings(updated);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Voice model selected",
+      message: getTTSModelTitle(updated.ttsProvider, model),
+    });
+  }
+
+  async function switchRewriteProvider(id: ProviderId) {
+    const updated = await updateRuntimeSettings({ providerMode: "single", selectedProviderId: id });
+    setRuntimeSettings(updated);
+    setProviderId(id);
+    await showToast({ style: Toast.Style.Success, title: `Rewrite Provider: ${PROVIDER_TITLES[id]}` });
+  }
+
+  async function switchRewriteModel(model: string | undefined) {
+    const overrides = { ...runtimeSettings.modelOverrides };
+    if (model) {
+      overrides[providerId] = model;
+    } else {
+      delete overrides[providerId];
+    }
+    const updated = await updateRuntimeSettings({ modelOverrides: overrides });
+    setRuntimeSettings(updated);
+    await showToast({
+      style: Toast.Style.Success,
+      title: model ? `${PROVIDER_TITLES[providerId]} model selected` : `${PROVIDER_TITLES[providerId]} uses Pro`,
+      message: model ? getModelTitle(providerId, model) : undefined,
+    });
   }
 
   useEffect(() => {
@@ -196,7 +261,7 @@ function CoachResult({
       // rewrite-replace) so rewrite quality stays consistent regardless of
       // the translation Model Tier the user picked. Free-tier keys should
       // override the Pro model via the Custom tier in Extension Preferences.
-      const config = getProviderConfig(providerId, preferences, "pro");
+      const config = getProviderConfig(providerId, preferences, "pro", runtimeSettings.modelOverrides[providerId]);
       try {
         const rewrite = await runRewrite(
           config,
@@ -224,14 +289,17 @@ function CoachResult({
     }
 
     void run();
-  }, [text, tone, providerId, runId, preferences]);
+  }, [text, tone, providerId, runId, preferences, runtimeSettings.modelOverrides]);
 
   const rewritten = result?.rewritten ?? "";
   const providerTitle = PROVIDER_TITLES[providerId];
+  const providerModelOverride = runtimeSettings.modelOverrides[providerId];
+  const ttsProvider = runtimeSettings.ttsProvider;
+  const ttsModel = runtimeSettings.ttsModel ?? getDefaultTTSModel(ttsProvider, preferences);
 
   function recordHistory() {
     if (!rewritten) return;
-    const model = getProviderConfig(providerId, preferences, "pro").model;
+    const model = getProviderConfig(providerId, preferences, "pro", runtimeSettings.modelOverrides[providerId]).model;
     void addHistoryEntry({ kind: "rewrite", source: text, output: rewritten, provider: providerTitle, model });
   }
 
@@ -324,7 +392,27 @@ function CoachResult({
                 key={id}
                 icon={id === providerId ? Icon.Checkmark : Icon.Circle}
                 title={PROVIDER_TITLES[id]}
-                onAction={() => setProviderId(id)}
+                onAction={() => void switchRewriteProvider(id)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+          <ActionPanel.Submenu
+            icon={Icon.MemoryChip}
+            title={`Rewrite Model: ${
+              providerModelOverride ? getModelTitle(providerId, providerModelOverride) : "Pro Tier Default"
+            }`}
+          >
+            <Action
+              icon={!providerModelOverride ? Icon.Checkmark : Icon.Circle}
+              title="Use Pro Tier Default"
+              onAction={() => void switchRewriteModel(undefined)}
+            />
+            {getModelOptions(providerId).map((model) => (
+              <Action
+                key={model.id}
+                icon={providerModelOverride === model.id ? Icon.Checkmark : Icon.Circle}
+                title={model.title}
+                onAction={() => void switchRewriteModel(model.id)}
               />
             ))}
           </ActionPanel.Submenu>
@@ -339,6 +427,16 @@ function CoachResult({
                 icon={option === ttsProvider ? Icon.Checkmark : Icon.Circle}
                 title={TTS_PROVIDER_LABELS[option]}
                 onAction={() => void switchTtsProvider(option)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+          <ActionPanel.Submenu icon={Icon.Waveform} title={`Voice Model: ${getTTSModelTitle(ttsProvider, ttsModel)}`}>
+            {getTTSModelOptions(ttsProvider).map((model) => (
+              <Action
+                key={model.id}
+                icon={model.id === ttsModel ? Icon.Checkmark : Icon.Circle}
+                title={model.title}
+                onAction={() => void switchTtsModel(model.id)}
               />
             ))}
           </ActionPanel.Submenu>

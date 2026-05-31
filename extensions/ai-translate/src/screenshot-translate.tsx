@@ -15,7 +15,7 @@ import { execFile } from "node:child_process";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { addHistoryEntry } from "./history-store";
 import { LANGUAGE_CHOICES, getLanguageTitle, resolveTargetLanguage } from "./languages";
-import { getTierLabel } from "./models";
+import { getModelOptions, getModelTitle, getTierLabel } from "./models";
 import { recognizeScreenshotText } from "./ocr-engines";
 import { openScreenRecordingSettings, reportOcrError } from "./ocr-errors";
 import {
@@ -23,19 +23,24 @@ import {
   getMaxOutputTokens,
   getOrderedProviderIds,
   getProviderConfig,
+  getRuntimeProviderIds,
   getTimeoutMs,
   readPreferences,
 } from "./preferences";
 import { MissingAPIKeyError, translateWithProvider } from "./providers";
-import { loadRuntimeSettings, updateRuntimeSetting } from "./runtime-settings";
+import { loadRuntimeSettings, updateRuntimeSetting, updateRuntimeSettings } from "./runtime-settings";
 import { speakText } from "./tts";
+import { getDefaultTTSModel, getTTSModelOptions, getTTSModelTitle, TTS_PROVIDER_LABELS } from "./tts-models";
 import {
   ModelTier,
+  ProviderId,
+  ProviderSelectionMode,
   PromptProfile,
   RuntimeSettings,
   TranslationRequest,
   TranslationResult,
   TranslationStyle,
+  TTSProvider,
 } from "./types";
 import { PROMPT_PROFILE_LABELS, PROVIDER_ICONS, STYLE_LABELS, quoted } from "./ui-constants";
 
@@ -133,7 +138,7 @@ export default function Command() {
   async function runTranslations(text: string, sequence: number) {
     if (!runtimeSettings) return;
 
-    const providerIds = getOrderedProviderIds(preferences);
+    const providerIds = getRuntimeProviderIds(preferences, runtimeSettings);
     setResults(
       providerIds.map((id) => ({ providerId: id, providerTitle: PROVIDER_TITLES[id], status: "pending" as const })),
     );
@@ -152,7 +157,12 @@ export default function Command() {
 
     await Promise.all(
       providerIds.map(async (providerId) => {
-        const config = getProviderConfig(providerId, preferences, runtimeSettings.modelTier);
+        const config = getProviderConfig(
+          providerId,
+          preferences,
+          runtimeSettings.modelTier,
+          runtimeSettings.modelOverrides[providerId],
+        );
         const t0 = Date.now();
         try {
           const translation = await translateWithProvider(config, request);
@@ -190,8 +200,37 @@ export default function Command() {
   }
 
   async function switchTier(tier: ModelTier) {
-    setRuntimeSettings(await updateRuntimeSetting("modelTier", tier));
+    setRuntimeSettings(await updateRuntimeSettings({ modelTier: tier, modelOverrides: {} }));
     await showToast({ style: Toast.Style.Success, title: `Model: ${getTierLabel(tier)}` });
+  }
+  async function switchProviderMode(mode: ProviderSelectionMode, selectedProviderId?: ProviderId) {
+    const updated = await updateRuntimeSettings({
+      providerMode: mode,
+      selectedProviderId: selectedProviderId ?? runtimeSettings?.selectedProviderId,
+    });
+    setRuntimeSettings(updated);
+    await showToast({
+      style: Toast.Style.Success,
+      title:
+        mode === "enabled" ? "Providers: All Enabled" : `Provider: ${PROVIDER_TITLES[updated.selectedProviderId!]}`,
+    });
+  }
+  async function switchProviderModel(providerId: ProviderId, model: string | undefined) {
+    const overrides = { ...(runtimeSettings?.modelOverrides ?? {}) };
+    if (model) {
+      overrides[providerId] = model;
+    } else {
+      delete overrides[providerId];
+    }
+    const updated = await updateRuntimeSettings({ modelOverrides: overrides });
+    setRuntimeSettings(updated);
+    await showToast({
+      style: Toast.Style.Success,
+      title: model
+        ? `${PROVIDER_TITLES[providerId]} model selected`
+        : `${PROVIDER_TITLES[providerId]} uses ${getTierLabel(updated.modelTier)}`,
+      message: model ? getModelTitle(providerId, model) : undefined,
+    });
   }
   async function switchProfile(profile: PromptProfile) {
     setRuntimeSettings(await updateRuntimeSetting("promptProfile", profile));
@@ -201,10 +240,31 @@ export default function Command() {
     setRuntimeSettings(await updateRuntimeSetting("translationStyle", style));
     await showToast({ style: Toast.Style.Success, title: `Style: ${STYLE_LABELS[style]}` });
   }
+  async function switchTtsProvider(provider: TTSProvider) {
+    setRuntimeSettings(
+      await updateRuntimeSettings({ ttsProvider: provider, ttsModel: getDefaultTTSModel(provider, preferences) }),
+    );
+    await showToast({ style: Toast.Style.Success, title: `Voice: ${TTS_PROVIDER_LABELS[provider]}` });
+  }
+  async function switchTtsModel(model: string) {
+    const provider = runtimeSettings?.ttsProvider ?? "qwen";
+    setRuntimeSettings(await updateRuntimeSettings({ ttsModel: model }));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Voice model selected",
+      message: getTTSModelTitle(provider, model),
+    });
+  }
 
   const currentTier = runtimeSettings?.modelTier ?? "fast";
   const currentProfile = runtimeSettings?.promptProfile ?? "screenshot";
   const currentStyle = runtimeSettings?.translationStyle ?? "balanced";
+  const allProviderIds = getOrderedProviderIds(preferences);
+  const selectedProviderId = runtimeSettings?.selectedProviderId;
+  const providerScopeTitle =
+    runtimeSettings?.providerMode === "single" && selectedProviderId && allProviderIds.includes(selectedProviderId)
+      ? PROVIDER_TITLES[selectedProviderId]
+      : "All Providers";
   const targetLangTitle = getLanguageTitle(resolveTargetLanguage(targetLanguage, sourceText));
 
   return (
@@ -212,7 +272,7 @@ export default function Command() {
       filtering={false}
       isLoading={isLoading}
       isShowingDetail={ocrDone && results.length > 0}
-      navigationTitle={`Screenshot Translate · ${getTierLabel(currentTier)}`}
+      navigationTitle={`Screenshot Translate · ${providerScopeTitle} · ${getTierLabel(currentTier)}`}
       searchBarAccessory={
         <List.Dropdown tooltip="Target Language" value={targetLanguage} onChange={setTargetLanguage}>
           {LANGUAGE_CHOICES.map((l) => (
@@ -305,13 +365,19 @@ export default function Command() {
                   result={r}
                   sourceText={sourceText}
                   tier={currentTier}
+                  runtimeSettings={runtimeSettings}
+                  allProviderIds={allProviderIds}
                   profile={currentProfile}
                   style={currentStyle}
                   onRetry={() => setManualRunId((v) => v + 1)}
                   onRetake={() => void retake()}
                   onTier={switchTier}
+                  onProviderMode={switchProviderMode}
+                  onProviderModel={switchProviderModel}
                   onProfile={switchProfile}
                   onStyle={switchStyle}
+                  onTtsProvider={switchTtsProvider}
+                  onTtsModel={switchTtsModel}
                 />
               }
             />
@@ -326,15 +392,25 @@ function ItemActions(p: {
   result: TranslationResult;
   sourceText: string;
   tier: ModelTier;
+  runtimeSettings: RuntimeSettings | undefined;
+  allProviderIds: ProviderId[];
   profile: PromptProfile;
   style: TranslationStyle;
   onRetry: () => void;
   onRetake: () => void;
   onTier: (t: ModelTier) => void;
+  onProviderMode: (mode: ProviderSelectionMode, providerId?: ProviderId) => void;
+  onProviderModel: (providerId: ProviderId, model: string | undefined) => void;
   onProfile: (p: PromptProfile) => void;
   onStyle: (s: TranslationStyle) => void;
+  onTtsProvider: (provider: TTSProvider) => void;
+  onTtsModel: (model: string) => void;
 }) {
   const ok = p.result.status === "success" && Boolean(p.result.translation);
+  const ttsProvider = p.runtimeSettings?.ttsProvider ?? "qwen";
+  const ttsModel = p.runtimeSettings?.ttsModel ?? getDefaultTTSModel(ttsProvider);
+  const modelOverride = p.runtimeSettings?.modelOverrides[p.result.providerId];
+  const providerMode = p.runtimeSettings?.providerMode ?? "enabled";
 
   function recordHistory() {
     if (!ok) return;
@@ -404,6 +480,27 @@ function ItemActions(p: {
         />
       </ActionPanel.Section>
       <ActionPanel.Submenu
+        icon={Icon.Dot}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        title={providerMode === "single" ? `Provider: ${p.result.providerTitle}` : "Providers: All Enabled"}
+      >
+        <Action
+          icon={providerMode === "enabled" ? Icon.Checkmark : Icon.Circle}
+          title="All Enabled Providers"
+          onAction={() => p.onProviderMode("enabled")}
+        />
+        {p.allProviderIds.map((id) => (
+          <Action
+            key={id}
+            icon={
+              providerMode === "single" && p.runtimeSettings?.selectedProviderId === id ? Icon.Checkmark : Icon.Circle
+            }
+            title={PROVIDER_TITLES[id]}
+            onAction={() => p.onProviderMode("single", id)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu
         icon={Icon.Bolt}
         shortcut={{ modifiers: ["cmd"], key: "m" }}
         title={`Model: ${getTierLabel(p.tier)}`}
@@ -418,6 +515,24 @@ function ItemActions(p: {
         ))}
       </ActionPanel.Submenu>
       <ActionPanel.Submenu
+        icon={Icon.MemoryChip}
+        title={`Provider Model: ${p.result.modelName ?? getTierLabel(p.tier)}`}
+      >
+        <Action
+          icon={!modelOverride ? Icon.Checkmark : Icon.Circle}
+          title={`Use ${getTierLabel(p.tier)} Tier Default`}
+          onAction={() => p.onProviderModel(p.result.providerId, undefined)}
+        />
+        {getModelOptions(p.result.providerId).map((model) => (
+          <Action
+            key={model.id}
+            icon={modelOverride === model.id ? Icon.Checkmark : Icon.Circle}
+            title={model.title}
+            onAction={() => p.onProviderModel(p.result.providerId, model.id)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu
         icon={Icon.Document}
         shortcut={{ modifiers: ["cmd"], key: "p" }}
         title={`Profile: ${PROMPT_PROFILE_LABELS[p.profile]}`}
@@ -428,6 +543,26 @@ function ItemActions(p: {
             icon={pr === p.profile ? Icon.Checkmark : Icon.Circle}
             title={PROMPT_PROFILE_LABELS[pr]}
             onAction={() => p.onProfile(pr)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu icon={Icon.SpeakerOn} title={`Voice Provider: ${TTS_PROVIDER_LABELS[ttsProvider]}`}>
+        {(["qwen", "gemini"] as TTSProvider[]).map((provider) => (
+          <Action
+            key={provider}
+            icon={provider === ttsProvider ? Icon.Checkmark : Icon.Circle}
+            title={TTS_PROVIDER_LABELS[provider]}
+            onAction={() => p.onTtsProvider(provider)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu icon={Icon.Waveform} title={`Voice Model: ${getTTSModelTitle(ttsProvider, ttsModel)}`}>
+        {getTTSModelOptions(ttsProvider).map((model) => (
+          <Action
+            key={model.id}
+            icon={model.id === ttsModel ? Icon.Checkmark : Icon.Circle}
+            title={model.title}
+            onAction={() => p.onTtsModel(model.id)}
           />
         ))}
       </ActionPanel.Submenu>

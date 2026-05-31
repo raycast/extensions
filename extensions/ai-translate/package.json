@@ -21,7 +21,6 @@
         "deepseek",
         "mimo",
         "gemini",
-        "kimi",
         "openai"
       ]
     },
@@ -148,7 +147,7 @@
       "name": "translation-settings",
       "title": "Translation Settings",
       "subtitle": "AI Translate",
-      "description": "Configure model tier, prompt profile, translation style, and custom instructions.",
+      "description": "Configure provider scope, model tier, prompt profile, translation style, voice provider/model, and custom instructions.",
       "mode": "view",
       "icon": "ai-translate-icon.png",
       "keywords": [
@@ -170,12 +169,12 @@
   ],
   "preferences": [
     {
-      "title": "Default Provider",
+      "title": "Fallback Provider",
       "name": "defaultProvider",
       "type": "dropdown",
       "required": true,
       "default": "deepseek",
-      "description": "Provider shown first and used when no provider checkbox is enabled.",
+      "description": "Provider shown first when no runtime provider is selected, and used when no provider checkbox is enabled.",
       "data": [
         {
           "title": "DeepSeek",
@@ -188,10 +187,6 @@
         {
           "title": "Gemini",
           "value": "gemini"
-        },
-        {
-          "title": "Kimi",
-          "value": "kimi"
         },
         {
           "title": "OpenAI / ChatGPT",
@@ -493,17 +488,50 @@
       "description": "Language hint for Baidu OCR. Auto Detect only works with accurate_basic.",
       "default": "CHN_ENG",
       "data": [
-        { "title": "Auto Detect", "value": "auto_detect" },
-        { "title": "Chinese + English", "value": "CHN_ENG" },
-        { "title": "English", "value": "ENG" },
-        { "title": "Japanese", "value": "JAP" },
-        { "title": "Korean", "value": "KOR" },
-        { "title": "French", "value": "FRE" },
-        { "title": "German", "value": "GER" },
-        { "title": "Spanish", "value": "SPA" },
-        { "title": "Portuguese", "value": "POR" },
-        { "title": "Italian", "value": "ITA" },
-        { "title": "Russian", "value": "RUS" }
+        {
+          "title": "Auto Detect",
+          "value": "auto_detect"
+        },
+        {
+          "title": "Chinese + English",
+          "value": "CHN_ENG"
+        },
+        {
+          "title": "English",
+          "value": "ENG"
+        },
+        {
+          "title": "Japanese",
+          "value": "JAP"
+        },
+        {
+          "title": "Korean",
+          "value": "KOR"
+        },
+        {
+          "title": "French",
+          "value": "FRE"
+        },
+        {
+          "title": "German",
+          "value": "GER"
+        },
+        {
+          "title": "Spanish",
+          "value": "SPA"
+        },
+        {
+          "title": "Portuguese",
+          "value": "POR"
+        },
+        {
+          "title": "Italian",
+          "value": "ITA"
+        },
+        {
+          "title": "Russian",
+          "value": "RUS"
+        }
       ]
     },
     {
@@ -541,14 +569,6 @@
       "default": false
     },
     {
-      "name": "enableKimi",
-      "type": "checkbox",
-      "label": "Kimi",
-      "required": false,
-      "description": "Show Kimi translation result.",
-      "default": false
-    },
-    {
       "name": "enableOpenAI",
       "type": "checkbox",
       "label": "OpenAI / ChatGPT",
@@ -561,9 +581,9 @@
       "name": "providerOrder",
       "type": "textfield",
       "required": false,
-      "description": "Comma separated provider ids: deepseek,mimo,gemini,kimi,openai.",
-      "default": "deepseek,mimo,gemini,kimi,openai",
-      "placeholder": "deepseek,mimo,gemini,kimi,openai"
+      "description": "Comma separated provider ids: deepseek,mimo,gemini,openai.",
+      "default": "deepseek,mimo,gemini,openai",
+      "placeholder": "deepseek,mimo,gemini,openai"
     },
     {
       "title": "Request Timeout Seconds",
@@ -598,11 +618,11 @@
       "default": "https://api.deepseek.com/anthropic"
     },
     {
-      "title": "DeepSeek Model",
+      "title": "Custom DeepSeek Model",
       "name": "deepseekModel",
       "type": "textfield",
       "required": false,
-      "description": "DeepSeek model name. Current options are deepseek-v4-flash (Fast) and deepseek-v4-pro (Pro). Thinking mode is disabled per request so translations stay low-latency and honor temperature.",
+      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in deepseek-v4-flash/deepseek-v4-pro catalog unless you pick a model from the action panel. Thinking mode is disabled per request so translations stay low-latency and honor temperature.",
       "default": "deepseek-v4-flash"
     },
     {
@@ -622,11 +642,11 @@
       "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
     },
     {
-      "title": "Xiaomi MiMo Model",
+      "title": "Custom Xiaomi MiMo Model",
       "name": "mimoModel",
       "type": "textfield",
       "required": false,
-      "description": "Xiaomi MiMo model name. Text options include mimo-v2.5-pro, mimo-v2.5, mimo-v2-pro, mimo-v2-flash, and mimo-v2-omni.",
+      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in MiMo catalog unless you pick a model from the action panel.",
       "default": "mimo-v2.5-pro"
     },
     {
@@ -646,11 +666,11 @@
       "default": "https://generativelanguage.googleapis.com/v1beta"
     },
     {
-      "title": "Gemini Model",
+      "title": "Custom Gemini Model",
       "name": "geminiModel",
       "type": "textfield",
       "required": false,
-      "description": "Gemini model name. Stable options include gemini-3.5-flash, gemini-3.1-flash-lite, gemini-2.5-flash, gemini-2.5-pro; preview options include gemini-3.1-pro-preview and gemini-3.1-flash-lite-preview.",
+      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in Gemini catalog unless you pick a model from the action panel.",
       "default": "gemini-3.5-flash"
     },
     {
@@ -720,11 +740,11 @@
       "default": "https://dashscope.aliyuncs.com/api/v1"
     },
     {
-      "title": "Qwen-TTS Model",
+      "title": "Default Qwen-TTS Model",
       "name": "qwenTTSModel",
       "type": "dropdown",
       "required": false,
-      "description": "Qwen-TTS model for Read Aloud. Instructions are sent only with Qwen3 TTS Instruct Flash.",
+      "description": "Default Qwen-TTS model for Read Aloud. You can change the active voice model from Translation Settings or the action panel. Instructions are sent only with Qwen3 TTS Instruct Flash.",
       "default": "qwen3-tts-flash",
       "data": [
         {
@@ -771,17 +791,50 @@
       "description": "Sent as language_type. Auto is useful for mixed or uncertain text; a fixed language usually improves quality.",
       "default": "Auto",
       "data": [
-        { "title": "Auto", "value": "Auto" },
-        { "title": "Chinese", "value": "Chinese" },
-        { "title": "English", "value": "English" },
-        { "title": "French", "value": "French" },
-        { "title": "German", "value": "German" },
-        { "title": "Italian", "value": "Italian" },
-        { "title": "Japanese", "value": "Japanese" },
-        { "title": "Korean", "value": "Korean" },
-        { "title": "Portuguese", "value": "Portuguese" },
-        { "title": "Russian", "value": "Russian" },
-        { "title": "Spanish", "value": "Spanish" }
+        {
+          "title": "Auto",
+          "value": "Auto"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        }
       ]
     },
     {
@@ -791,30 +844,6 @@
       "required": false,
       "description": "Optional speaking style instructions. Sent only when Qwen-TTS Model is Qwen3 TTS Instruct Flash.",
       "default": ""
-    },
-    {
-      "title": "Kimi API Key",
-      "name": "kimiAPIKey",
-      "type": "password",
-      "required": false,
-      "description": "Your Kimi/Moonshot API key.",
-      "default": ""
-    },
-    {
-      "title": "Kimi Base URL",
-      "name": "kimiBaseURL",
-      "type": "textfield",
-      "required": false,
-      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages (a trailing /v1 is also tolerated). Switch to https://api.moonshot.ai/v1 (or https://api.moonshot.cn/v1) and an OpenAI-compatible protocol to use Moonshot pay-as-you-go.",
-      "default": "https://api.kimi.com/coding"
-    },
-    {
-      "title": "Kimi Model",
-      "name": "kimiModel",
-      "type": "textfield",
-      "required": false,
-      "description": "Kimi Code model name. kimi-for-coding is the Kimi Code Plan alias to the current K2 model. To call Moonshot pay-as-you-go directly, switch the base URL and use moonshot-v1-8k, moonshot-v1-32k, kimi-k2.6, or kimi-k2.5.",
-      "default": "kimi-for-coding"
     },
     {
       "title": "OpenAI API Key",
@@ -833,11 +862,11 @@
       "default": "https://api.openai.com/v1"
     },
     {
-      "title": "OpenAI Model",
+      "title": "Custom OpenAI Model",
       "name": "openAIModel",
       "type": "textfield",
       "required": false,
-      "description": "OpenAI model name. Latency-tuned defaults are gpt-4.1-mini/gpt-4.1. GPT-5.x reasoning models (gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano) are sent with reasoning_effort=minimal for translation latency.",
+      "description": "Used when Model Tier is Custom. Fast/Pro use gpt-4.1-mini/gpt-4.1 unless you pick a model from the action panel. GPT-5.x reasoning models are sent with reasoning_effort=minimal for translation latency.",
       "default": "gpt-4.1-mini"
     },
     {

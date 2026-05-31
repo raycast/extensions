@@ -5,8 +5,8 @@
 - Initial local Raycast extension with selected-text translation, screenshot OCR translation, and configurable AI providers.
 - Split screenshot OCR into an interactive extraction command and a screenshot translation command.
 - Removed MinerU OCR and kept API OCR focused on Baidu OCR, with local Vision and Tesseract options.
-- Added Xiaomi MiMo provider and refreshed DeepSeek and Kimi defaults from provider docs.
-- Collapsed DeepSeek, Xiaomi MiMo, and Kimi to a single Anthropic-compatible API key/base URL/model entry each.
+- Added Xiaomi MiMo provider and refreshed DeepSeek defaults from provider docs.
+- Collapsed DeepSeek and Xiaomi MiMo to a single Anthropic-compatible API key/base URL/model entry each.
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
 - Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
@@ -18,7 +18,7 @@
 - Defaulted the Gemini model and Fast/Pro tiers to Gemini 3.1.
 - Addressed review feedback for auto language detection, OCR API error parsing, provider cleanup, and search debounce latency.
 - Hardened OCR retry state, auto-paragraph formatting, TTS playback, and provider configuration error handling.
-- Fixed Kimi Code defaults, OCR helper build portability, screenshot capture error reporting, and numeric preference fallbacks.
+- Fixed OCR helper build portability, screenshot capture error reporting, and numeric preference fallbacks.
 - Added a Google Gemini multimodal OCR engine that reuses the configured Gemini key, with automatic fallback to local Vision.
 - Added an OpenAI Vision OCR engine that reuses the configured OpenAI key, with an optional OCR-specific model override.
 - Added Auto-Copy: the Screenshot OCR result is copied to the clipboard automatically, with a copied/word-count confirmation (toggle in preferences).
@@ -43,11 +43,12 @@
 - Read Aloud labels the toast when a slow read request is dropped because the active Qwen model is not the Instruct variant, instead of silently reading at normal speed.
 - Defaulted the Read Aloud engine to Gemini when only the Gemini API key is configured, so first-time Read Aloud doesn't fail with a missing DashScope key for Gemini-only setups.
 - Cleared the "Auto-copied on capture" hint in Screenshot OCR after edits or reformatting, so the clipboard status no longer claims a stale copy.
-- Refreshed the model catalog against official provider docs (DeepSeek, Xiaomi MiMo, Gemini, Kimi, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
+- Added runtime provider/model pickers: Translate and Screenshot Translate can now switch between all enabled providers and a single provider from the action panel, per-provider model choices are remembered, no-window commands follow the same runtime choice, and Translation Settings now exposes voice provider/model instead of hiding TTS model selection in Preferences.
+- Refreshed the model catalog against official provider docs (DeepSeek, Xiaomi MiMo, Gemini, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
   - Disabled DeepSeek and Xiaomi MiMo thinking mode on translation and Rewrite & Coach requests so temperature is honored and first-token latency drops on `deepseek-v4-*` and `mimo-v2.5-*` models.
   - Switched the Gemini structured-output payload to the current `generationConfig.responseFormat.text.{mimeType,schema}` shape; promoted the new stable `gemini-3.5-flash` as the Gemini Fast tier and dropped the retired `gemini-3-pro-preview` entry while adding stable `gemini-3.1-flash-lite`.
   - Upgraded OpenAI structured outputs to `response_format.type: "json_schema"` with `strict: true` (scrubbing Gemini-only schema keys) and sent `reasoning_effort: "minimal"` to GPT-5.x reasoning models so translation latency stays low.
-  - Kept the Kimi base URL default at `https://api.kimi.com/coding` so the Anthropic URL builder produces `.../coding/v1/messages` without a doubled `/v1`; hardened `anthropicMessagesUrl` to tolerate custom base URLs that already include a trailing `/v1`; and made the Anthropic / OpenAI wire protocol auto-detect from the base URL host (a Moonshot host, or any custom `…/v1` endpoint for DeepSeek/MiMo, now routes through OpenAI Chat Completions) so the documented OpenAI-compatible fallbacks actually work.
+  - Hardened `anthropicMessagesUrl` to tolerate custom base URLs that already include a trailing `/v1`; and made the Anthropic / OpenAI wire protocol auto-detect from generic custom `…/v1` endpoints for DeepSeek/MiMo so documented OpenAI-compatible fallbacks work.
   - Dropped the `DASHSCOPE_API_KEY` environment-variable fallback for Qwen-TTS: env vars are visible to every process in the same session and bypass Raycast's encrypted password preference. The DashScope key now must live in the password preference, which is stored encrypted.
   - Added `mimo-v2-flash` to the Xiaomi MiMo catalog and surfaced `gpt-5.5`, `gpt-5.5-pro`, and the GPT-5.4 family in the OpenAI catalog.
   - Expanded Qwen-TTS Read Aloud to all 11 supported `language_type` values (added French / Italian / Japanese / Korean / Portuguese / Russian / Spanish) and added the multilingual Chelsie voice.

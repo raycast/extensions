@@ -359,8 +359,7 @@ function anthropicMessagesUrl(baseURL: string): string {
   const trimmed = baseURL.replace(/\/+$/, "");
   if (trimmed.endsWith("/v1/messages")) return trimmed;
   // Tolerate base URLs that already include the Anthropic version segment
-  // (e.g. https://api.kimi.com/coding/v1) so we don't accidentally produce
-  // a doubled .../v1/v1/messages path.
+  // so we don't accidentally produce a doubled .../v1/v1/messages path.
   if (trimmed.endsWith("/v1")) return `${trimmed}/messages`;
   return `${trimmed}/v1/messages`;
 }
