@@ -34,6 +34,15 @@ const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
 let NETWORK_SERVICE = "Wi-Fi";
 
 /**
+ * Validate network service name against a safe pattern.
+ * Prevents shell injection via service names with special characters.
+ * Allows word characters, hyphens, and spaces (valid in macOS service names).
+ */
+function validateNetworkServiceName(serviceName: string): boolean {
+  return /^[\w\- ]+$/.test(serviceName);
+}
+
+/**
  * Get the active network service (e.g., "Wi-Fi", "Ethernet").
  * Detects the default interface via route and maps it to the macOS hardware port name.
  * Falls back to "Wi-Fi" if detection fails.
@@ -58,7 +67,11 @@ function getActiveNetworkService(): string {
         if (dev === iface) {
           const prev = (lines[i - 1] || "").trim();
           if (prev.startsWith("Hardware Port:")) {
-            return prev.split("Hardware Port:")[1].trim();
+            const serviceName = prev.split("Hardware Port:")[1].trim();
+            // Validate before returning to prevent injection
+            if (validateNetworkServiceName(serviceName)) {
+              return serviceName;
+            }
           }
         }
       }
@@ -106,6 +119,11 @@ function parsePresetLine(line: string): DNSPreset | null {
 
   const name = line.substring(0, eqIndex);
   const rest = line.substring(eqIndex + 1);
+
+  // Validate preset name (no spaces or equals signs allowed)
+  if (!/^[^\s=]+$/.test(name)) {
+    return null; // Skip invalid preset names
+  }
 
   const colonIndex = rest.indexOf(":");
   let servers: string;
@@ -346,6 +364,13 @@ function runWithAdmin(command: string): void {
  * Set DNS to specific servers
  */
 function setDNS(servers: string[]): void {
+  // Validate network service name (prevents shell injection via preferences)
+  if (!validateNetworkServiceName(NETWORK_SERVICE)) {
+    throw new Error(
+      `Invalid network service name: "${NETWORK_SERVICE}". Service name may have been tampered with.`,
+    );
+  }
+
   // Validate all IPs before execution (defense in depth - prevents shell injection)
   const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
   for (const ip of servers) {
@@ -510,10 +535,14 @@ function NetworkDetailsView() {
             title="Router"
             value={get("Router")!}
             extraActions={
-              <Action.OpenInBrowser
-                title="Open Router in Browser"
-                url={`http://${get("Router")}`}
-              />
+              /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(
+                get("Router")!,
+              ) ? (
+                <Action.OpenInBrowser
+                  title="Open Router in Browser"
+                  url={`http://${get("Router")}`}
+                />
+              ) : undefined
             }
           />
         )}
@@ -730,12 +759,22 @@ export default function Command() {
     try {
       const prefs = getPreferenceValues<Preferences>();
       if (prefs.networkService && prefs.networkService.trim() !== "") {
-        NETWORK_SERVICE = prefs.networkService.trim();
+        const trimmedService = prefs.networkService.trim();
+        // Validate service name before using it
+        if (validateNetworkServiceName(trimmedService)) {
+          NETWORK_SERVICE = trimmedService;
+        } else {
+          throw new Error(
+            `Invalid network service name in preferences: "${trimmedService}". Falling back to Wi-Fi.`,
+          );
+        }
       } else {
         NETWORK_SERVICE = getActiveNetworkService();
       }
-    } catch {
-      // Keep the default "Wi-Fi" if detection fails
+    } catch (error) {
+      // Keep the default "Wi-Fi" if detection or validation fails
+      console.error("Network service detection error:", error);
+      NETWORK_SERVICE = "Wi-Fi";
     }
 
     refresh();

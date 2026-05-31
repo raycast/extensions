@@ -21,7 +21,10 @@ All notable changes to the DNS Quick Change extension will be documented in this
 ### Security
 - Re-validation of all IP addresses at runtime to prevent shell injection from manually-edited preset files
 - Strict IP regex and range validation (0-255) before any shell command execution
-- Defense-in-depth approach: validation at both write-time (form) and apply-time (execution)
+- Validate preset names at parse-time to reject malformed or malicious names in `~/.dns_presets`
+- Validate `NETWORK_SERVICE` (both user preference and auto-detected value) against a safe pattern before use in any shell command
+- Validate Router IP before exposing the "Open Router in Browser" action to prevent URL/protocol injection
+- Defense-in-depth approach: validation at write-time (form), parse-time (loading presets), and apply-time (execution)
 
 ### Performance
 - Asynchronous network service detection deferred to `useEffect` to prevent startup blocking
