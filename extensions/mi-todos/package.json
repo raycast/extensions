@@ -8,6 +8,10 @@
   "categories": [
     "Productivity"
   ],
+  "screenshots": [
+    "metadata/mi-todos-1.png",
+    "metadata/mi-todos-2.png"
+  ],
   "license": "MIT",
   "commands": [
     {
