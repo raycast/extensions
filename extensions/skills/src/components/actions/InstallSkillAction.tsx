@@ -174,10 +174,10 @@ function AgentPickerInstallForm({
   const installedAgents = new Set<string>(installedAgentNames);
   const replacementAgentNames = installedMatch.type === "conflict" ? installedAgentNames : [];
   const selectableAgents = agents.filter((a) => !installedAgents.has(a));
-  const defaultAgentNames = getDefaultAgents();
-  const [selected, setSelected] = useState<Set<string>>(
-    new Set(selectableAgents.filter((a) => defaultAgentNames.some((d) => d.toLowerCase() === a.toLowerCase()))),
-  );
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const defaultAgentNames = getDefaultAgents().map((d) => d.toLowerCase());
+    return new Set(selectableAgents.filter((a) => defaultAgentNames.includes(a.toLowerCase())));
+  });
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
   const installedSource = isReplacing ? (installedMatch.source ?? "Unknown source") : "";
