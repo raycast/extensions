@@ -14,7 +14,8 @@ function iconFor(sev: HealthIssue["severity"]) {
 
 export function IssueListItem({ issue }: { issue: HealthIssue }) {
   const primaryPath = issue.affectedPaths[0];
-  const canOpenSkillMd = primaryPath && issue.check !== "H1";
+  const canOpenSkillMd =
+    primaryPath && issue.check !== "H1" && issue.message !== "SKILL.md missing";
   return (
     <List.Item
       icon={iconFor(issue.severity)}
