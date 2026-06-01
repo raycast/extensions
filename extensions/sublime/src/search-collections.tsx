@@ -35,7 +35,7 @@ function SearchCollections() {
                 <List.Item
                     key={item.uuid}
                     title={item.name!}
-                    subtitle={`${item.number_of_cards || item.number_of_connections || ""}`}
+                    subtitle={`${item.number_of_cards ?? item.number_of_connections ?? ""}`}
                     icon={getEntityIcon(item)}
                     actions={
                         <ActionPanel title={item.name}>
