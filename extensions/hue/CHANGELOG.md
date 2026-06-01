@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-01
 
 - Fix crash when setting a scene with certain light colors
 - Fix manual bridge IP setup failing when no bridge was previously discovered
