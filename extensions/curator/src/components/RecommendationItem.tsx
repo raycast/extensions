@@ -42,6 +42,7 @@ export function RecommendationItem({
     s.source.includes("plugin") && s.marketplace
       ? `/${s.marketplace}:${s.name}`
       : `/${s.name}`;
+  const canOpenSkillMd = !s.primary.isBroken && s.primary.skillMdExists;
   return (
     <List.Item
       icon={iconFor(rec)}
@@ -77,12 +78,16 @@ export function RecommendationItem({
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={() => copyToClipboard(slash)}
           />
-          <Action
-            title="Open in Editor"
-            icon={Icon.Code}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={() => openInEditor(join(s.primary.realPath, "SKILL.md"))}
-          />
+          {canOpenSkillMd && (
+            <Action
+              title="Open in Editor"
+              icon={Icon.Code}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() =>
+                openInEditor(join(s.primary.realPath, "SKILL.md"))
+              }
+            />
+          )}
           <Action.ShowInFinder
             path={s.primary.realPath}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}

@@ -94,6 +94,8 @@ export default function Command() {
         <List.Section key={title} title={title}>
           {group.map((s) => {
             const issues = issuesForSkill(s, allIssues);
+            const canOpenSkillMd =
+              !s.primary.isBroken && s.primary.skillMdExists;
             return (
               <List.Item
                 key={s.key}
@@ -132,14 +134,16 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "d" }}
                       onAction={() => setShowingDetail((v) => !v)}
                     />
-                    <Action
-                      title="Open in Editor"
-                      icon={Icon.Code}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
-                      onAction={() =>
-                        openInEditor(join(s.primary.realPath, "SKILL.md"))
-                      }
-                    />
+                    {canOpenSkillMd && (
+                      <Action
+                        title="Open in Editor"
+                        icon={Icon.Code}
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        onAction={() =>
+                          openInEditor(join(s.primary.realPath, "SKILL.md"))
+                        }
+                      />
+                    )}
                     <Action.ShowInFinder
                       path={s.primary.realPath}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
