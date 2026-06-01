@@ -49,7 +49,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
     throw new TTSApiError("TTS synthesis cancelled", -7);
   }
 
-  const apiKey = getPreferenceValues<Preferences>().minimaxApiKey?.trim();
+  const apiKey = getMinimaxApiKey();
   if (!apiKey) {
     throw new TTSApiError("MiniMax API key is required. Add it in extension preferences.", -1);
   }
@@ -65,6 +65,12 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
     throw new TTSApiError(`No audio data returned from MiniMax (${options.voice}).`, -4);
   }
   return Buffer.from(hex, "hex").toString("base64");
+}
+
+export function getMinimaxApiKey(): string | undefined {
+  const apiKey = getPreferenceValues<Preferences>().minimaxApiKey?.trim();
+  if (!apiKey) return undefined;
+  return apiKey.replace(/^Bearer\s+/i, "").trim();
 }
 
 function buildRequest(text: string, options: TTSOptions): Record<string, unknown> {

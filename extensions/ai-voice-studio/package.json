@@ -227,7 +227,7 @@
       "required": false,
       "title": "MiniMax API Key",
       "description": "MiniMax Open Platform API key for T2A v2 (HTTP + WebSocket).",
-      "placeholder": "Bearer eyJ..."
+      "placeholder": "eyJ..."
     },
     {
       "name": "openaiApiKey",

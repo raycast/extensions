@@ -1,5 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
-import { TTSApiError } from "./minimax-tts";
+import { getMinimaxApiKey, TTSApiError } from "./minimax-tts";
 import type { TTSOptions } from "./minimax-tts-types";
 
 export interface RealtimeStreamCallbacks {
@@ -26,7 +25,7 @@ export async function streamRealtimeSpeech(
   const trimmed = text.trim();
   if (!trimmed) throw new TTSApiError("Text cannot be empty", -1);
 
-  const apiKey = getPreferenceValues<Preferences>().minimaxApiKey?.trim();
+  const apiKey = getMinimaxApiKey();
   if (!apiKey) {
     throw new TTSApiError("MiniMax API key is required. Add it in extension preferences.", -1);
   }
