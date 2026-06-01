@@ -5,9 +5,14 @@
   "description": "Bulk-change the default macOS app for many file extensions at once.",
   "icon": "command-icon.png",
   "author": "codythatsmee",
-  "categories": ["System", "Productivity"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
   "commands": [
     {
       "name": "pivot-apps",
