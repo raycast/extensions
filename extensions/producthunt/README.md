@@ -19,6 +19,8 @@ By default the extension shows a **limited public feed** (product names, tagline
 
 The extension uses these credentials to request a public, read-only token via OAuth client-credentials — no personal login or write access is involved. Maker identity is redacted by Product Hunt for public-scope tokens, so makers are not shown; the launch's submitter ("hunter") is.
 
+> **Updating credentials:** Raycast reads preferences once when a command launches, so after you add or change your API Key/Secret, use the **Reload Extension** action (in the command's action menu) to apply them — a plain refresh keeps using the keys from when the command opened. If only one of the two fields is filled, the extension shows the basic feed and a "Missing credentials" notice rather than failing.
+
 ## Commands
 
 - **View Today's Featured Products** — Browse the products featured on Product Hunt today
@@ -32,7 +34,7 @@ The extension uses these credentials to request a public, read-only token via OA
 1. Launch Raycast and select **View Today's Featured Products**
 2. Browse today's featured launches
 3. Press `Return` to view details (with API credentials) or open the launch in your browser (feed mode)
-4. Use the action menu to open in browser, copy the link, view the gallery, explore topics, or refresh
+4. Use the action menu to open in browser, copy the link, view the gallery, explore topics, refresh, or reload the extension to apply updated credentials
 
 ## Keyboard Shortcuts
 

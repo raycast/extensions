@@ -15,6 +15,7 @@ import { ProductDetailView } from "./ProductDetailView";
 import { ProductGalleryView } from "./ProductGalleryView";
 import { FrontpageWrapper } from "./FrontpageWrapper";
 import { TopicsAction } from "./TopicsAction";
+import { RELOAD_EXTENSIONS_DEEPLINK } from "../constants";
 
 type SubmenuType = React.ComponentType<{
   title: string;
@@ -211,6 +212,13 @@ export function ProductActions({
       {/* Settings Section - always available so users can add/update API credentials */}
       <ActionPanel.Section title="Settings">
         <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        {/* Reload is the only way to apply just-edited API keys: prefs are snapshotted at launch, so a
+            running command (and its Refresh) keeps using the old credentials until the process restarts. */}
+        <Action
+          title="Reload Extension"
+          icon={Icon.RotateClockwise}
+          onAction={() => open(RELOAD_EXTENSIONS_DEEPLINK)}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

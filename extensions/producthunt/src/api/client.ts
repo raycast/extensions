@@ -94,7 +94,12 @@ async function getAccessToken(forceRefresh = false): Promise<string> {
   if (!hasCredentials(creds)) {
     throw new ApiError("missingCredentials", "No Product Hunt API credentials configured.");
   }
-  if (!forceRefresh) {
+  if (forceRefresh) {
+    // A forced refresh (e.g. user updated their keys and hit Refresh) means "re-authenticate from
+    // scratch." Drop any cached token first so a token minted from now-stale credentials can never be
+    // reused, and so a failed re-auth doesn't leave the old entry behind for the next call to pick up.
+    await LocalStorage.removeItem(TOKEN_CACHE_KEY);
+  } else {
     const raw = await LocalStorage.getItem<string>(TOKEN_CACHE_KEY);
     if (raw) {
       try {
@@ -127,11 +132,17 @@ async function postGraphql(query: string, variables: Record<string, unknown>, to
   });
 }
 
-export async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+export async function graphql<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  options?: { forceRefresh?: boolean },
+): Promise<T> {
   const done = apiLog.time("GraphQL request");
   apiLog.debug("request", { operation: operationNameOf(query), variables });
 
-  let token = await getAccessToken();
+  // forceRefresh re-authenticates from scratch (clears + re-fetches the OAuth token) before the
+  // request, so a Refresh after the user fixes rejected credentials doesn't reuse a stale token.
+  let token = await getAccessToken(options?.forceRefresh ?? false);
   let res: Response;
   try {
     res = await postGraphql(query, variables, token);

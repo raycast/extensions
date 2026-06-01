@@ -1,8 +1,28 @@
-import { List, showToast, Toast, Action, ActionPanel, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  openExtensionPreferences,
+  open,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { Product } from "../types";
 import { ProductListItem } from "./ProductListItem";
-import { getFrontpageProducts } from "../api";
+import { getFrontpageProducts, FeedReason } from "../api";
+import { RELOAD_EXTENSIONS_DEEPLINK } from "../constants";
+
+// Single source of truth for the basic-feed banner copy, so the persistent section subtitle and the
+// transient toast tell the same story for each fallback reason.
+const FEED_SUBTITLE: Record<FeedReason, string> = {
+  "no-credentials": "Basic feed — add API credentials for votes, comments & makers in Preferences",
+  "incomplete-credentials": "Missing credentials — showing basic feed. Add both Key & Secret in Preferences",
+  "invalid-credentials": "Invalid credentials — showing basic feed. Update your Key & Secret in Preferences",
+  "api-error": "Basic feed — the Product Hunt API is unavailable right now",
+};
 
 /**
  * Shared component for displaying the frontpage content
@@ -13,6 +33,7 @@ export function FrontpageContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | undefined>();
   const [usingFeed, setUsingFeed] = useState(false);
+  const [feedReason, setFeedReason] = useState<FeedReason | undefined>();
 
   const fetchProducts = useCallback(async (forceRefresh = false) => {
     try {
@@ -30,11 +51,24 @@ export function FrontpageContent() {
       } else {
         setProducts(products);
         setUsingFeed(Boolean(usingFeed));
+        setFeedReason(feedReason);
         if (feedReason === "invalid-credentials") {
           await showToast({
             style: Toast.Style.Failure,
             title: "Invalid Product Hunt API credentials",
             message: "Showing the limited public feed. Update your API Key/Secret in Preferences.",
+            primaryAction: {
+              title: "Open Extension Preferences",
+              onAction: () => {
+                openExtensionPreferences();
+              },
+            },
+          });
+        } else if (feedReason === "incomplete-credentials") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Missing credentials. Showing basic feed.",
+            message: "Fill in both API Key and Secret, or clear both, in Preferences.",
             primaryAction: {
               title: "Open Extension Preferences",
               onAction: () => {
@@ -77,6 +111,12 @@ export function FrontpageContent() {
                 onAction={() => fetchProducts(true)}
               />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              {/* Apply just-edited API keys: prefs are read once at launch, so reload to pick them up. */}
+              <Action
+                title="Reload Extension"
+                icon={Icon.RotateClockwise}
+                onAction={() => open(RELOAD_EXTENSIONS_DEEPLINK)}
+              />
               <Action.OpenInBrowser
                 title="Create a Product Hunt API App"
                 url="https://www.producthunt.com/v2/oauth/applications"
@@ -98,15 +138,19 @@ export function FrontpageContent() {
                 onAction={() => fetchProducts(true)}
               />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              {/* Apply just-edited API keys: prefs are read once at launch, so reload to pick them up. */}
+              <Action
+                title="Reload Extension"
+                icon={Icon.RotateClockwise}
+                onAction={() => open(RELOAD_EXTENSIONS_DEEPLINK)}
+              />
             </ActionPanel>
           }
         />
       ) : (
         <List.Section
           title="Today's Featured Launches"
-          subtitle={
-            usingFeed ? "Basic feed — add API credentials for votes, comments & makers in Preferences" : undefined
-          }
+          subtitle={usingFeed ? FEED_SUBTITLE[feedReason ?? "no-credentials"] : undefined}
         >
           {products.map((product, index) => (
             <ProductListItem
