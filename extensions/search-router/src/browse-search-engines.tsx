@@ -15,8 +15,6 @@ export default function BrowseSearchEngines() {
   const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines());
   const { push } = useNavigation();
 
-  const allSearchEngines = [...customSearchEngines, ...builtinSearchEngines];
-
   const filteredByType = useMemo(() => {
     switch (filter) {
       case "custom":
@@ -24,9 +22,9 @@ export default function BrowseSearchEngines() {
       case "builtin":
         return builtinSearchEngines;
       default:
-        return allSearchEngines;
+        return [...customSearchEngines, ...builtinSearchEngines];
     }
-  }, [filter, customSearchEngines, builtinSearchEngines, allSearchEngines]);
+  }, [filter, customSearchEngines]);
 
   const fuse = new Fuse(filteredByType, {
     keys: [
@@ -65,7 +63,7 @@ export default function BrowseSearchEngines() {
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
     setDefaultSearchEngine(searchEngine);
-    showToast({
+    await showToast({
       title: `Default search engine set to ${searchEngine.s}`,
       message: `!${searchEngine.t}`,
     });
@@ -203,8 +201,8 @@ export default function BrowseSearchEngines() {
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
                       shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "x" },
-                        Windows: { modifiers: ["ctrl"], key: "x" },
+                        modifiers: ["ctrl"],
+                        key: "x",
                       }}
                     />
                   </>

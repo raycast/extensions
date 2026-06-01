@@ -18,7 +18,7 @@ async function downloadBangs(): Promise<void> {
 import type { SearchEngine } from "../types";
 
 // @ts-expect-error: TS2590 - Union type is too complex to represent
-export const searchEngines: SearchEngine[] = ${JSON.stringify(filteredBangs, null, 2)};
+export const builtinSearchEngines: SearchEngine[] = ${JSON.stringify(filteredBangs, null, 2)};
 `;
 
     fs.writeFileSync(
