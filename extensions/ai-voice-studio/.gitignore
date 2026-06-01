@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 .verify/
+audit/
 
 # Raycast generated
 raycast-env.d.ts
