@@ -3,6 +3,7 @@ const HEBREW_MONTHS: Record<string, string> = {
   Iyar: "אייר",
   Sivan: "סיון",
   Tamuz: "תמוז",
+  Tammuz: "תמוז",
   Av: "אב",
   Elul: "אלול",
   Tishri: "תשרי",

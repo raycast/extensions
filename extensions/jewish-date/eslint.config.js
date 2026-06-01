@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import raycastConfig from "@raycast/eslint-config";
 
-export default [{ ignores: ["raycast-env.d.ts"] }, ...raycastConfig.flat()];
+export default defineConfig([{ ignores: ["raycast-env.d.ts"] }, ...raycastConfig.flat()]);
