@@ -1,6 +1,6 @@
 # Gist Rocket Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-01
 
 - Publish HTML or Markdown from the clipboard as a live web page.
 - Publish from a file or folder, with automatic inlining of local scripts and stylesheets.
