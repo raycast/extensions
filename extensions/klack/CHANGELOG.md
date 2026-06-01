@@ -1,6 +1,6 @@
 # Klack Changelog
 
-## [Polish] - {PR_MERGE_DATE}
+## [Polish] - 2026-06-01
 
 - Revised wording in the Stats view
 
