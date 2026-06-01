@@ -105,6 +105,18 @@ describe("parseDomain", () => {
     expect(parseDomain("sub.person.id.au").input).toBe("person.id.au");
     // Direct au domain (should keep 2 parts)
     expect(parseDomain("sub.company.au").input).toBe("company.au");
+
+    // US cases
+    expect(parseDomain("sub.agency.gov.us").input).toBe("agency.gov.us");
+    expect(parseDomain("sub.school.edu.us").input).toBe("school.edu.us");
+
+    // CA cases
+    expect(parseDomain("sub.government.gc.ca").input).toBe("government.gc.ca");
+    expect(parseDomain("sub.site.on.ca").input).toBe("site.on.ca");
+
+    // PL cases
+    expect(parseDomain("sub.company.com.pl").input).toBe("company.com.pl");
+    expect(parseDomain("sub.city.waw.pl").input).toBe("city.waw.pl");
   });
 
   it("leaves IP addresses intact", () => {
@@ -121,5 +133,11 @@ describe("parseDomain", () => {
     expect(parseDomain("sub.google.com").input).toBe("google.com");
     // nic is not in commonSecondLevels, so sub.nic.google becomes nic.google
     expect(parseDomain("sub.nic.google").input).toBe("nic.google");
+
+    // Test cases for false triggers on two-letter TLDs that are not registered for those second levels
+    expect(parseDomain("sub.blog.io").input).toBe("blog.io");
+    expect(parseDomain("sub.id.me").input).toBe("id.me");
+    expect(parseDomain("sub.art.is").input).toBe("art.is");
+    expect(parseDomain("sub.tv.li").input).toBe("tv.li");
   });
 });

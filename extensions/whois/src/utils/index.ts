@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+import { ccSLDs } from "./ccslds";
 
 const getFrontmostApp = () => {
   return runAppleScript(`
@@ -57,40 +58,6 @@ export interface ParsedInput {
   input?: string;
 }
 
-const commonSecondLevels = new Set([
-  "com",
-  "co",
-  "org",
-  "net",
-  "edu",
-  "gob",
-  "gov",
-  "mil",
-  "nom",
-  "ac",
-  "sch",
-  "or",
-  "gv",
-  "asn",
-  "id",
-  "biz",
-  "info",
-  "web",
-  "me",
-  "tv",
-  "ltd",
-  "plc",
-  "adv",
-  "eng",
-  "art",
-  "blog",
-  "eco",
-  "law",
-  "school",
-  "ne",
-  "ed",
-]);
-
 export const getBaseDomain = (hostname: string): string => {
   if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname) || hostname.includes(":")) {
     return hostname;
@@ -104,7 +71,7 @@ export const getBaseDomain = (hostname: string): string => {
   const last = parts[parts.length - 1].toLowerCase();
   const penultimate = parts[parts.length - 2].toLowerCase();
 
-  if (last.length === 2 && commonSecondLevels.has(penultimate)) {
+  if (last.length === 2 && ccSLDs[last]?.has(penultimate)) {
     return parts.slice(-3).join(".");
   }
 
