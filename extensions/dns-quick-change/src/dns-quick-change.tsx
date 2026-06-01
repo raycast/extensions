@@ -15,9 +15,7 @@ import { execSync, execFileSync } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 
-interface Preferences {
-  networkService?: string;
-}
+// Preferences type is auto-generated in raycast-env.d.ts — no manual interface needed.
 
 interface DNSPreset {
   name: string;
