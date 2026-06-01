@@ -25,6 +25,7 @@ The current Raycast extension toolchain runs on **npm 10.x / Node 22.x** (see `.
 ## Publish to the Raycast Store
 
 Run `npm run publish` to publish. This command:
+
 1. Squashes commits and pushes them to the `lavrovpy/raycast-extensions` fork
 2. Opens (or updates) a PR on `raycast/extensions`
 3. Authenticates via GitHub
@@ -85,15 +86,15 @@ The compiler enforces the split: you cannot construct an outcome cause with `sur
 
 ## Retry policy
 
-`RETRYABLE_ERROR_CODES` in `translate.tsx` lists the codes for which the UI offers a Retry button: every transport kind that *might* succeed on retry, plus `UNKNOWN_ERROR`. Excludes `invalid-api-key` and `model-not-found` — those need a preferences change first. Outcomes are never present in the set.
+`RETRYABLE_ERROR_CODES` in `translate.tsx` lists the codes for which the UI offers a Retry button: every transport kind that _might_ succeed on retry, plus `UNKNOWN_ERROR`. Excludes `invalid-api-key` and `model-not-found` — those need a preferences change first. Outcomes are never present in the set.
 
-`isTransient(err)` is a *separate* predicate used by the retry loops inside `translateWord`/`pronounce`. It returns `true` for `network-offline` and for `request-failed` with status ≥ 500 or status in `{429, 408}`.
+`isTransient(err)` is a _separate_ predicate used by the retry loops inside `translateWord`/`pronounce`. It returns `true` for `network-offline` and for `request-failed` with status ≥ 500 or status in `{429, 408}`.
 
 ## Pronounce fallback orchestrator
 
 `runPronounceWithFallback` is a pure async function returning a `PronounceOutcome` verdict: `primary | aborted | fallback-ok | failed`. The component owns the UI; this function owns the decision sequence.
 
-Key invariant: **the failure toast must not flash when the system-voice fallback succeeds.** The orchestrator runs the fallback *before* deciding between `fallback-ok` and `failed`, and the component switches on the verdict to render exactly one toast.
+Key invariant: **the failure toast must not flash when the system-voice fallback succeeds.** The orchestrator runs the fallback _before_ deciding between `fallback-ok` and `failed`, and the component switches on the verdict to render exactly one toast.
 
 ## Eval provider mapping
 
@@ -131,7 +132,7 @@ A Promptfoo-driven end-to-end harness over the production `translateWord` path. 
 **Suite configuration**
 
 - **Suite-wide settings live in `evals/promptfooconfig.yaml`, not in `package.json` scripts or `.env`.** Promptfoo `PROMPTFOO_*` env vars belong in the top-level `env:` block (currently `PROMPTFOO_PASS_RATE_THRESHOLD` and `PROMPTFOO_REQUEST_BACKOFF_MS`); CLI-flag defaults belong under `commandLineOptions:` (`maxConcurrency`, `delay`, `share: false`). One source of truth so CI, the IDE plugin, and ad-hoc `promptfoo eval -c …` runs all behave the same.
-- **Precedence: CLI flags > YAML `env:` block > `process.env` (loaded from `.env`) > built-in defaults.** A CLI flag like `--max-concurrency 4` overrides the YAML for one-off tuning, but a `.env` value cannot override anything pinned in the YAML `env:` block — to change a pinned var, edit the YAML. `.env` only takes effect for `PROMPTFOO_*` vars *not* set in the YAML.
+- **Precedence: CLI flags > YAML `env:` block > `process.env` (loaded from `.env`) > built-in defaults.** A CLI flag like `--max-concurrency 4` overrides the YAML for one-off tuning, but a `.env` value cannot override anything pinned in the YAML `env:` block — to change a pinned var, edit the YAML. `.env` only takes effect for `PROMPTFOO_*` vars _not_ set in the YAML.
 - **Pass-rate threshold sits at 75%** because the model-graded judge can return transient service errors under load and one flake should not fail the whole run. The built-in promptfoo default is `100`, so removing the YAML entry silently breaks this guarantee. Tighten back toward 100% once the judge layer is reliable.
 - **Do not write tests that assert literal strings appear in config files** (`package.json`, YAML, etc.). They have no oracle: editing the config means editing the test, no bug ever caught. Promptfoo's loader catches broken file references when the eval actually runs.
 
@@ -162,6 +163,7 @@ A Promptfoo-driven end-to-end harness over the production `translateWord` path. 
 When assigning `shortcut` props to `<Action>` components, avoid these reserved shortcuts — Raycast intercepts them before they reach extensions (silently ignored in production, warning in dev):
 
 **Hard-reserved by Raycast:**
+
 - `Cmd+K` — Opens Action Panel
 - `Cmd+W` — Closes Raycast window
 - `Cmd+Esc` — Returns to root search
@@ -172,6 +174,7 @@ When assigning `shortcut` props to `<Action>` components, avoid these reserved s
 - `Esc` — Navigate back
 
 **`Keyboard.Shortcut.Common` conventions** (not reserved, but use for their intended purpose for ecosystem consistency):
+
 - `Cmd+O` → Open, `Cmd+Shift+O` → Open With
 - `Cmd+Shift+C` → Copy, `Cmd+D` → Duplicate, `Cmd+E` → Edit
 - `Cmd+S` → Save, `Cmd+N` → New, `Cmd+R` → Refresh
