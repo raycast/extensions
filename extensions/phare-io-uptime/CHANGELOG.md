@@ -1,6 +1,6 @@
 # Phare Changelog
 
-## [Updated Phare.io logo] - {PR_MERGE_DATE}
+## [Updated Phare.io logo] - 2026-06-01
 
 - Updated the Phare.io extension logo asset
 
