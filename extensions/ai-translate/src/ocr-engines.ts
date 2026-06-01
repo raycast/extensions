@@ -55,6 +55,7 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
           if (formatted) {
             return formatted;
           }
+          return undefined;
         } catch (fallbackError) {
           throw combineOcrFallbackErrors(error, fallbackError);
         }
