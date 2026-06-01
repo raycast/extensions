@@ -21,7 +21,7 @@ const TOTAL_ROWS = [
 ];
 
 function formatTrackingSince(d: Date): string {
-  return `Tracking since ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+  return `Since ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
 function StatsActions({ stats, revalidate }: { stats: Stats; revalidate: () => void }) {
