@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Default Agents Preference] - {PR_MERGE_DATE}
+## [Default Agents Preference] - 2026-06-01
 
 - Add a "Default Agents" preference to pre-select agents when installing a skill, so frequently-used agents (e.g. Claude Code) are checked automatically without manual selection each time
 
