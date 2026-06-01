@@ -26,12 +26,17 @@ jobs:
           ' | sort)
 
           if [[ -z "$metadata_paths" ]]; then
-            echo "Workflow triggered without changed metadata images in the PR." >&2
-            exit 1
+            echo "No changed metadata images in this PR — skipping validation." >&2
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
           {
+            echo "skip=false"
             echo "metadata_count=$(printf '%s\n' "$metadata_paths" | sed '/^$/d' | wc -l | tr -d ' ')"
+            echo "metadata_paths<<EOF"
+            printf '%s\n' "$metadata_paths"
+            echo "EOF"
             echo "sparse_paths<<EOF"
             echo "scripts"
             printf '%s\n' "$metadata_paths"
@@ -39,6 +44,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout
+        if: steps.sparse_paths.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -46,14 +52,18 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Set up Python
+        if: steps.sparse_paths.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install validator dependencies
+        if: steps.sparse_paths.outputs.skip != 'true'
         run: python3 -m pip install --disable-pip-version-check numpy pillow
 
       - name: Validate metadata images
+        if: steps.sparse_paths.outputs.skip != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          METADATA_IMAGE_PATHS: ${{ steps.sparse_paths.outputs.metadata_paths }}
         run: python3 scripts/check_metadata_images.py

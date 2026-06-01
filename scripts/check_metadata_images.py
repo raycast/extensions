@@ -37,6 +37,19 @@ def is_metadata_image(path: Path) -> bool:
     )
 
 
+def get_metadata_images_from_env(repo_root: Path) -> list[Path] | None:
+    raw = os.environ.get("METADATA_IMAGE_PATHS", "").strip()
+    if not raw:
+        return None
+
+    images: list[Path] = []
+    for rel_path in raw.splitlines():
+        path = repo_root / rel_path.strip()
+        if path.is_file() and is_metadata_image(path):
+            images.append(path)
+    return sorted(images)
+
+
 def get_pr_changed_metadata_images(repo_root: Path) -> list[Path] | None:
     event_path = os.environ.get("GITHUB_EVENT_PATH")
     event_name = os.environ.get("GITHUB_EVENT_NAME")
@@ -106,7 +119,9 @@ def main() -> int:
         print(f"Missing validator script: {validator}", file=sys.stderr)
         return 1
 
-    images = get_pr_changed_metadata_images(repo_root)
+    images = get_metadata_images_from_env(repo_root)
+    if images is None:
+        images = get_pr_changed_metadata_images(repo_root)
     if images is None:
         images = find_metadata_images(repo_root)
         scope_label = "repository"

@@ -43,9 +43,12 @@ def load_image(path_or_url: str) -> Image.Image:
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(data)
             tmp_path = tmp.name
-        img = Image.open(tmp_path)
-    else:
-        img = Image.open(path_or_url)
+        try:
+            img = Image.open(tmp_path)
+            return img.convert("RGB")
+        finally:
+            os.unlink(tmp_path)
+    img = Image.open(path_or_url)
     return img.convert("RGB")
 
 
@@ -97,8 +100,8 @@ def find_window_bbox(
 ) -> tuple[int, int, int, int] | None:
     h, w = arr.shape[:2]
     n = 25
-    grad_high = 70
-    grad_low = 40
+    grad_high = max(30, min(90, 105 - tol))
+    grad_low = max(15, grad_high - 30)
 
     col_positions = np.linspace(int(w * 0.05), int(w * 0.95), n).astype(int)
     row_positions = np.linspace(int(h * 0.05), int(h * 0.95), n).astype(int)
@@ -227,7 +230,9 @@ def find_window_bbox(
 
     if verbose:
         print("       Primary scan inconclusive — trying variance fallback")
-    result = _find_bbox_variance(arr, verbose=verbose)
+    result = _find_bbox_variance(
+        arr, std_threshold=max(10.0, 55.0 - tol), verbose=verbose
+    )
     if result and _bbox_is_sane(*result, h, w):
         if verbose:
             print("       Detection method: variance")
