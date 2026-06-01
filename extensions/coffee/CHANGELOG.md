@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added a Toggle shortcut for pausing and resuming caffeination schedules.
