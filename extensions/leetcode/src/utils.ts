@@ -1,4 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from '@raycast/api';
+import type { HTMLElement as ParserHTMLElement } from 'node-html-parser';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Problem, ProblemStats } from './types';
 
@@ -13,7 +14,7 @@ const html2markdown = new NodeHtmlMarkdown(
     pre: {
       spaceIfRepeatingChar: true,
       postprocess: ({ node, options: { codeFence } }) =>
-        `${codeFence}\n${(node.textContent || '').trim()}\n${codeFence}`,
+        `${codeFence}\n${((node as ParserHTMLElement).textContent || '').trim()}\n${codeFence}`,
     },
   },
 );

@@ -26,7 +26,7 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   }
 }
 
-function ProblemDetail(props: { titleSlug: string }): JSX.Element {
+function ProblemDetail(props: { titleSlug: string }) {
   const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
@@ -38,7 +38,7 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: GetProblemResponse) {
       return {
         data: result.data.problem,
       };
@@ -57,7 +57,7 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
   return <Detail isLoading={isProblemLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const { showProblemStats } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
@@ -79,12 +79,12 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: SearchProblemResponse) {
       return {
         data: result.data.problemsetQuestionList?.data || [],
       };
     },
-    onData: (data) => {
+    onData: (data: ProblemPreview[]) => {
       setProblems(data);
     },
     execute: searchText !== '' || problems.length === 0,
