@@ -1,6 +1,6 @@
 # Game Scout Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-01
 
 ### Performance & Optimization
 - **Prevented Runtime Crashes**: Implemented safe JSON parsing (safeParse) for all LocalStorage and Cache reads, eliminating silent failures and extension crashes caused by corrupted or incomplete storage data.
