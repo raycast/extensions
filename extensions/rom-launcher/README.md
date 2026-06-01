@@ -53,3 +53,9 @@ To use the full capabilities of the extension, especially the **RetroAchievement
 - **Achievements stuck on "Loading..." or "Credentials Missing"?** Double-check that you entered your RetroAchievements Web API Key (not your account password) and Username correctly in the extension preferences.
 - **Boxarts not loading?** The extension relies on standard Libretro/No-Intro naming conventions. Ensure your ROM file names closely match the official game titles.
 - **Missing "View All Achievements" action?** This action only appears if the game is associated with a supported RetroAchievements core (e.g., `snes9x_libretro`, `fbneo_libretro`) and actually has an active achievement set on the server.
+
+## Support
+
+If you find this extension useful, consider buying me a coffee.
+
+<a href="https://buymeacoffee.com/glct26" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
