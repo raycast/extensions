@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [2.4] - {PR_MERGE_DATE}
+## [2.4] - 2026-06-01
 
 - Fix 403 errors by migrating data fetching to the official Product Hunt GraphQL API v2 (#28424)
 - Add optional "API Key" and "API Secret" preferences (your Product Hunt OAuth app credentials from producthunt.com/v2/oauth/applications); the extension exchanges them for a public, read-only client-credentials token
