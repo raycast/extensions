@@ -78,11 +78,28 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
+async function getCliPathFromPath(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/which", [DEFAULT_CLI_COMMAND], {
+      env: createExecEnv(),
+      timeout: 5_000,
+    });
+    return trimOrUndefined(stdout);
+  } catch {
+    return undefined;
+  }
+}
+
 async function getCliPathAsync(): Promise<string> {
   // Check if user configured a custom path
   const configured = getConfiguredCliPath();
   if (configured) {
     return configured;
+  }
+
+  const cliPath = await getCliPathFromPath();
+  if (cliPath) {
+    return cliPath;
   }
 
   // This extension is macOS-only, but keeping a non-throwing fallback here

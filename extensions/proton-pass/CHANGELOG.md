@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Improvements] - 2026-06-01
+
+- Prefer a user-installed `pass-cli` from PATH before falling back to the bundled CLI
+
 ## [Improvements] - 2026-05-01
 
 - Fix: Search Items command could show results from only one vault when "All Vaults" was selected (vault share_id now used as fallback during item normalization)
