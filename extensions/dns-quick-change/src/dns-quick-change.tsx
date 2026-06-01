@@ -15,6 +15,10 @@ import { execSync, execFileSync } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 
+interface Preferences {
+  networkService?: string;
+}
+
 interface DNSPreset {
   name: string;
   servers: string;
@@ -649,19 +653,22 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   function refresh() {
-    setIsLoading(true);
-    try {
-      setPresets(getPresets());
-      setNetworkInfo(getNetworkInfo());
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load DNS info",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Defer I/O operations to next event loop tick to allow React to render loading state first
+    setTimeout(() => {
+      setIsLoading(true);
+      try {
+        setPresets(getPresets());
+        setNetworkInfo(getNetworkInfo());
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load DNS info",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }, 0);
   }
 
   useEffect(() => {
