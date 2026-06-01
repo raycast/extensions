@@ -31,7 +31,7 @@ Each issue comes with a **ready-to-paste fix command**. Curator shows you the co
 
 ### Recommend Skills — _"which one should I use?"_
 
-Describe a task in plain language and an AI ranks your most relevant skills, each with a one-line reason and a confidence level — catching matches that keyword search misses. Runs on **Raycast AI** out of the box, or any **OpenAI-compatible** provider with your own key.
+Describe a task in plain language and an AI ranks your most relevant skills, each with a one-line reason and a confidence level — catching matches that keyword search misses. Runs on **Raycast AI** out of the box, or any **OpenAI- or Anthropic-compatible** provider with your own key.
 
 ## Who it's for
 
@@ -43,16 +43,16 @@ Curator is **read-only on your filesystem.** Every fix is a shell command copied
 
 ## AI recommendations: choosing a provider
 
-The default is **Raycast AI** — no setup, requires Raycast Pro. To use your own key instead, open the extension's preferences, set **Provider** to "Custom", and fill in the base URL, key, and model. OpenAI-compatible endpoints work; Anthropic-compatible endpoints are auto-detected when the base URL contains `/anthropic`. A few common ones:
+The default is **Raycast AI** — no setup, requires Raycast Pro. To use your own key instead, open the extension's preferences, set **Provider** to "Custom", and fill in the base URL, key, and model. Anthropic-compatible endpoints are preferred when the provider supports them, and are auto-detected when the base URL contains `/anthropic`. OpenAI-compatible `/v1` endpoints still work. A few common ones:
 
 | Provider                    | Base URL                                                             | Protocol             | Get a key                                                  |
 | --------------------------- | -------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
-| 通义千问 (Qwen, Token Plan) | `https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1` | OpenAI-compatible    | [百炼 / Model Studio](https://bailian.console.aliyun.com)  |
-| DeepSeek                    | `https://api.deepseek.com`                                           | OpenAI-compatible    | [platform.deepseek.com](https://platform.deepseek.com)     |
+| 通义千问 (Qwen, Token Plan) | `https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic`     | Anthropic-compatible | [百炼 / Model Studio](https://bailian.console.aliyun.com)  |
+| DeepSeek                    | `https://api.deepseek.com/anthropic`                                 | Anthropic-compatible | [platform.deepseek.com](https://platform.deepseek.com)     |
 | MiniMax Token Plan          | `https://api.minimaxi.com/anthropic`                                 | Anthropic-compatible | [platform.minimaxi.com](https://platform.minimaxi.com)     |
-| Xiaomi MiMo (token plan)    | `https://token-plan-cn.xiaomimimo.com/v1`                            | OpenAI-compatible    | [platform.xiaomimimo.com](https://platform.xiaomimimo.com) |
+| Xiaomi MiMo (Token Plan)    | `https://token-plan-cn.xiaomimimo.com/anthropic`                     | Anthropic-compatible | [platform.xiaomimimo.com](https://platform.xiaomimimo.com) |
 
-> Verified against each provider's docs (2026); these are the **Token Plan** endpoints where a provider offers one. For Qwen text models, use Token Plan here; keep DashScope reserved for Qwen-TTS projects. MiniMax international legacy is `https://api.minimax.io/v1`; Xiaomi MiMo is per-cluster (China `token-plan-cn`, Europe `token-plan-ams`), authoritative on its subscription page. Set the model id (e.g. `qwen3.6-plus`, `qwen3.6-flash`, `MiniMax-M2.7-highspeed`, `deepseek-chat`) in **Custom Model**.
+> Verified against each provider's docs (2026); these are the **Token Plan** endpoints where a provider offers one. For Qwen text models, use Token Plan here; keep DashScope reserved for Qwen-TTS projects. MiniMax international legacy is `https://api.minimax.io/anthropic`; Xiaomi MiMo is per-cluster (China `token-plan-cn`, Singapore `token-plan-sgp`, Europe `token-plan-ams`), authoritative on its subscription page. Set the model id (e.g. `qwen3.6-plus`, `qwen3.6-flash`, `MiniMax-M3`, `deepseek-v4-flash`, `mimo-v2.5`) in **Custom Model**.
 
 ## Development
 

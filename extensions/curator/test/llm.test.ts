@@ -7,14 +7,16 @@ import {
 describe("custom LLM requests", () => {
   it("uses Anthropic Messages when the base URL contains /anthropic", () => {
     const { protocol, url, init } = buildCustomChatRequest(
-      "https://api.minimaxi.com/anthropic",
+      "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic",
       "test-key",
-      "MiniMax-M2.7-highspeed",
+      "qwen3.6-flash",
       "recommend",
     );
 
     expect(protocol).toBe("anthropic");
-    expect(url).toBe("https://api.minimaxi.com/anthropic/v1/messages");
+    expect(url).toBe(
+      "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic/v1/messages",
+    );
     expect((init.headers as Record<string, string>)["anthropic-version"]).toBe(
       "2023-06-01",
     );
@@ -22,7 +24,7 @@ describe("custom LLM requests", () => {
       "Bearer test-key",
     );
     expect(JSON.parse(String(init.body))).toMatchObject({
-      model: "MiniMax-M2.7-highspeed",
+      model: "qwen3.6-flash",
       messages: [{ role: "user", content: "recommend" }],
       thinking: { type: "disabled" },
     });
@@ -36,16 +38,16 @@ describe("custom LLM requests", () => {
 
   it("keeps OpenAI-compatible URLs on chat/completions", () => {
     const { protocol, url, init } = buildCustomChatRequest(
-      "https://api.deepseek.com",
+      "https://api.openai.test/v1",
       "test-key",
-      "MiniMax-M2.7-highspeed",
+      "gpt-4o-mini",
       "recommend",
     );
 
     expect(protocol).toBe("openai");
-    expect(url).toBe("https://api.deepseek.com/chat/completions");
+    expect(url).toBe("https://api.openai.test/v1/chat/completions");
     expect(JSON.parse(String(init.body))).toMatchObject({
-      model: "MiniMax-M2.7-highspeed",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: "recommend" }],
     });
     expect(
