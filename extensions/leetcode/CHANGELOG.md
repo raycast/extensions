@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [Show Problem Stats Preference] - {PR_MERGE_DATE}
+## [Show Problem Stats Preference] - 2026-06-01
 
 - Add `Show Problem Stats` preference to toggle difficulty, likes, dislikes, and acceptance rate visibility in both the daily challenge and problem search views
 
