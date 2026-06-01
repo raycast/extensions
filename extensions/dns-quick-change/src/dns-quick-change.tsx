@@ -38,10 +38,11 @@ let NETWORK_SERVICE = "Wi-Fi";
 /**
  * Validate network service name against a safe pattern.
  * Prevents shell injection via service names with special characters.
- * Allows word characters, hyphens, and spaces (valid in macOS service names).
+ * Allows word characters, hyphens, spaces, and forward slashes (valid in macOS service names).
+ * Blocks shell-sensitive characters: ', ", `, $, \
  */
 function validateNetworkServiceName(serviceName: string): boolean {
-  return /^[\w\- ]+$/.test(serviceName);
+  return /^[\w\- /]+$/.test(serviceName);
 }
 
 /**
