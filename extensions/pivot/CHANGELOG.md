@@ -1,6 +1,6 @@
 # Pivot Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-01
 
 - Pivot Apps — bulk-rebind the default macOS app for any set of file extensions in one confirmation.
 - Manage Presets — create, edit, duplicate, and delete reusable extension groups. Ships with a built-in "Code & text" preset.
