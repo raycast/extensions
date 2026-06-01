@@ -1,6 +1,6 @@
 # MyIP Changelog
 
-## [Update] - 2026-05-29
+## [Update] - {PR_MERGE_DATE}
 
 - Add "IP in Menu Bar" command to display your IP address in the macOS menu bar
 
