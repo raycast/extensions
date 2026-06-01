@@ -50,7 +50,11 @@ export function useCardsSearch(
         }
         isLoadingMore.current = true;
 
-        const { results: newCards, nextCursor: newNextCursor } = await search(searchQuery, restrictToLibrary, nextCursor);
+        const { results: newCards, nextCursor: newNextCursor } = await search(
+            searchQuery,
+            restrictToLibrary,
+            nextCursor,
+        );
         setCards([...cards!, ...newCards.map(populateCardMarkdown)]);
         setNextCursor(newNextCursor);
         isLoadingMore.current = false;

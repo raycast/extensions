@@ -1,5 +1,9 @@
 # Sublime Changelog
 
+## [Migrate to v3 API] - {PR_MERGE_DATE}
+
+Migrated the extension to Sublime's new v3 endpoints. No changes to functionality.
+
 ## [Fix Tweet Texts] - 2024-10-09
 
 The text of Tweet cards now turns up correctly when searching!

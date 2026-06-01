@@ -383,9 +383,7 @@ export async function searchCollections(query: string): Promise<Collection[]> {
 // Browse the current user's collections. v3 feed/library scopes to collections
 // only via `collections=true`; its default queryset excludes collection types,
 // so an entity_type filter alone returns nothing.
-export async function browseMyCollections(
-    cursor?: string,
-): Promise<{ results: SublimeCard[]; nextCursor?: string }> {
+export async function browseMyCollections(cursor?: string): Promise<{ results: SublimeCard[]; nextCursor?: string }> {
     const data = await fetchApi("GET", `v3/feed/library/`, {
         searchParams: cursor
             ? Object.fromEntries(new URLSearchParams(cursor))
