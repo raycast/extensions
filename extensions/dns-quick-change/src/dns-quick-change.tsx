@@ -310,7 +310,7 @@ function getNetworkInterfaceDetails(): { [key: string]: string } {
     // Get hardware (MAC) address
     try {
       const mac = execSync(
-        `ifconfig $(networksetup -listnetworkserviceorder | grep "${NETWORK_SERVICE}" | grep -oE "en[0-9]") | grep ether | awk '{print $2}'`,
+        `ifconfig $(networksetup -listnetworkserviceorder | grep "${NETWORK_SERVICE}" | grep -oE "en[0-9]+") | grep ether | awk '{print $2}'`,
         { encoding: "utf-8" },
       ).trim();
       if (mac) details["MAC Address"] = mac;
@@ -815,12 +815,11 @@ export default function Command() {
       {/* Presets Section */}
       <List.Section title="DNS Presets">
         {presets.map((preset) => {
+          const serverArray = preset.servers.split(",").map((s) => s.trim());
           const isActive =
             !networkInfo?.isDHCP &&
-            preset.servers
-              .split(",")
-              .map((s) => s.trim())
-              .every((ip) => networkInfo?.manualDNS.includes(ip));
+            serverArray.length === networkInfo?.manualDNS.length &&
+            serverArray.every((ip) => networkInfo?.manualDNS.includes(ip));
 
           const accessories: List.Item.Accessory[] = [];
           if (preset.description) {
