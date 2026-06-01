@@ -1,6 +1,6 @@
 # Plexus Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-06-01
 
 ### Added
 
