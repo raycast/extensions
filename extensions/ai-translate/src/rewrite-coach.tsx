@@ -251,6 +251,12 @@ function CoachResult({
     });
   }
 
+  const rewritten = result?.rewritten ?? "";
+  const providerTitle = PROVIDER_TITLES[providerId];
+  const providerModelOverride = runtimeSettings.modelOverrides[providerId];
+  const ttsProvider = runtimeSettings.ttsProvider;
+  const ttsModel = runtimeSettings.ttsModel ?? getDefaultTTSModel(ttsProvider, preferences);
+
   useEffect(() => {
     const sequence = ++requestSequence.current;
     setIsLoading(true);
@@ -261,7 +267,7 @@ function CoachResult({
       // rewrite-replace) so rewrite quality stays consistent regardless of
       // the translation Model Tier the user picked. Free-tier keys should
       // override the Pro model via the Custom tier in Extension Preferences.
-      const config = getProviderConfig(providerId, preferences, "pro", runtimeSettings.modelOverrides[providerId]);
+      const config = getProviderConfig(providerId, preferences, "pro", providerModelOverride);
       try {
         const rewrite = await runRewrite(
           config,
@@ -289,17 +295,11 @@ function CoachResult({
     }
 
     void run();
-  }, [text, tone, providerId, runId, preferences, runtimeSettings.modelOverrides]);
-
-  const rewritten = result?.rewritten ?? "";
-  const providerTitle = PROVIDER_TITLES[providerId];
-  const providerModelOverride = runtimeSettings.modelOverrides[providerId];
-  const ttsProvider = runtimeSettings.ttsProvider;
-  const ttsModel = runtimeSettings.ttsModel ?? getDefaultTTSModel(ttsProvider, preferences);
+  }, [text, tone, providerId, runId, preferences, providerModelOverride]);
 
   function recordHistory() {
     if (!rewritten) return;
-    const model = getProviderConfig(providerId, preferences, "pro", runtimeSettings.modelOverrides[providerId]).model;
+    const model = getProviderConfig(providerId, preferences, "pro", providerModelOverride).model;
     void addHistoryEntry({ kind: "rewrite", source: text, output: rewritten, provider: providerTitle, model });
   }
 
