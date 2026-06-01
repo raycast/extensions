@@ -1,5 +1,9 @@
 # Klack Changelog
 
+## [Polish] - {PR_MERGE_DATE}
+
+- Revised wording in the Stats view
+
 ## [Fix README Link] - 2026-05-20
 
 - Fixed broken contributor GitHub link in the README
