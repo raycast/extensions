@@ -171,6 +171,7 @@ async function findWslServers(): Promise<ListeningServer[]> {
     const { stdout } = await execFileAsync("wsl.exe", ["--list", "--running", "--quiet"], { encoding: "buffer" });
     distros = stdout
       .toString("latin1")
+      .replace(/^\xff\xfe/, "") // strip UTF-16LE BOM (FF FE) if present
       .split("\u0000")
       .join("")
       .split(/\r?\n/)

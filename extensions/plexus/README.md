@@ -26,6 +26,7 @@ A powerful Raycast extension that helps you discover and manage all running web 
 ## 🛠️ How It Works
 
 Plexus uses advanced process detection to:
+
 1. Scan for Node.js processes listening on TCP ports (via `lsof`/`ps` on macOS, PowerShell on Windows)
 2. Extract project information from the file system
 3. Fetch website titles and favicons from running servers
