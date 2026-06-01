@@ -29,12 +29,16 @@ export default function Command() {
   const [unavailable, setUnavailable] = useState(false);
   const [showingDetail, setShowingDetail] = useState(false);
   const cache = useRef(new Map<string, Recommendation[]>());
+  const requestSequence = useRef(0);
 
   async function run(force = false) {
     const q = query.trim();
     if (!q) return;
+    const sequence = ++requestSequence.current;
     const cached = cache.current.get(q);
     if (cached && !force) {
+      setLoading(false);
+      setUnavailable(false);
       setRecs(cached);
       return;
     }
@@ -43,6 +47,7 @@ export default function Command() {
     try {
       const skills = aggregateSkills((await getIndex()).skills);
       if (skills.length === 0) {
+        if (sequence !== requestSequence.current) return;
         setRecs([]);
         return;
       }
@@ -52,8 +57,10 @@ export default function Command() {
         skills,
       );
       cache.current.set(q, result);
+      if (sequence !== requestSequence.current) return;
       setRecs(result);
     } catch (e) {
+      if (sequence !== requestSequence.current) return;
       if (e instanceof AIUnavailableError) {
         setUnavailable(true);
       } else {
@@ -70,7 +77,7 @@ export default function Command() {
         });
       }
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
   }
 
