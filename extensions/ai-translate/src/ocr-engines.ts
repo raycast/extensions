@@ -308,6 +308,7 @@ async function recognizeWithOpenAI(imagePath: string, preferences: ExtensionPref
 
   if (/^(o\d|gpt-5)/i.test(model.trim())) {
     body.max_completion_tokens = 4096;
+    body.reasoning_effort = "minimal";
   } else {
     body.max_tokens = 4096;
     body.temperature = 0;
