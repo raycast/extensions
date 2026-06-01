@@ -12,7 +12,7 @@ async function safeOpenUrl(url: string): Promise<void> {
   return open(url);
 }
 
-export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
+export default async function search(props: LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>) {
   try {
     const rawQuery = (props.arguments.query || props.fallbackText) as string;
 
