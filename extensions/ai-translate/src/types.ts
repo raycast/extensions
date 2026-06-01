@@ -1,4 +1,4 @@
-export const PROVIDER_IDS = ["deepseek", "mimo", "gemini", "openai"] as const;
+export const PROVIDER_IDS = ["deepseek", "minimax", "mimo", "gemini", "openai"] as const;
 
 export type ProviderId = (typeof PROVIDER_IDS)[number];
 

@@ -3,6 +3,7 @@ import { PromptProfile, ProviderId, TranslationStyle } from "./types";
 
 export const PROVIDER_ICONS: Record<ProviderId, Icon> = {
   deepseek: Icon.Waveform,
+  minimax: Icon.Bolt,
   mimo: Icon.AppWindowGrid2x2,
   gemini: Icon.Stars,
   openai: Icon.Message,

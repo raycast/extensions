@@ -19,6 +19,7 @@
         "ai",
         "selection",
         "deepseek",
+        "minimax",
         "mimo",
         "gemini",
         "openai"
@@ -157,6 +158,7 @@
         "profile",
         "style",
         "configure",
+        "minimax",
         "tts",
         "qwen",
         "dashscope"
@@ -179,6 +181,10 @@
         {
           "title": "DeepSeek",
           "value": "deepseek"
+        },
+        {
+          "title": "MiniMax",
+          "value": "minimax"
         },
         {
           "title": "Xiaomi MiMo",
@@ -553,6 +559,14 @@
       "default": true
     },
     {
+      "name": "enableMiniMax",
+      "type": "checkbox",
+      "label": "MiniMax",
+      "required": false,
+      "description": "Show MiniMax translation result.",
+      "default": false
+    },
+    {
       "name": "enableMiMo",
       "type": "checkbox",
       "label": "Xiaomi MiMo",
@@ -581,9 +595,9 @@
       "name": "providerOrder",
       "type": "textfield",
       "required": false,
-      "description": "Comma separated provider ids: deepseek,mimo,gemini,openai.",
-      "default": "deepseek,mimo,gemini,openai",
-      "placeholder": "deepseek,mimo,gemini,openai"
+      "description": "Comma separated provider ids: deepseek,minimax,mimo,gemini,openai.",
+      "default": "deepseek,minimax,mimo,gemini,openai",
+      "placeholder": "deepseek,minimax,mimo,gemini,openai"
     },
     {
       "title": "Request Timeout Seconds",
@@ -624,6 +638,30 @@
       "required": false,
       "description": "Used when Model Tier is Custom. Fast/Pro use the built-in deepseek-v4-flash/deepseek-v4-pro catalog unless you pick a model from the action panel. Thinking mode is disabled per request so translations stay low-latency and honor temperature.",
       "default": "deepseek-v4-flash"
+    },
+    {
+      "title": "MiniMax API Key",
+      "name": "minimaxAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your MiniMax API key. Stored encrypted in Raycast's secure preference storage.",
+      "default": ""
+    },
+    {
+      "title": "MiniMax Base URL",
+      "name": "minimaxBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Anthropic-compatible MiniMax base URL.",
+      "default": "https://api.minimaxi.com/anthropic"
+    },
+    {
+      "title": "Custom MiniMax Model",
+      "name": "minimaxModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in MiniMax-M3 catalog unless you pick a model from the action panel.",
+      "default": "MiniMax-M3"
     },
     {
       "title": "Xiaomi MiMo API Key",

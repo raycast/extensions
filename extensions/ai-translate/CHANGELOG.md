@@ -44,7 +44,8 @@
 - Defaulted the Read Aloud engine to Gemini when only the Gemini API key is configured, so first-time Read Aloud doesn't fail with a missing DashScope key for Gemini-only setups.
 - Cleared the "Auto-copied on capture" hint in Screenshot OCR after edits or reformatting, so the clipboard status no longer claims a stale copy.
 - Added runtime provider/model pickers: Translate and Screenshot Translate can now switch between all enabled providers and a single provider from the action panel, per-provider model choices are remembered, no-window commands follow the same runtime choice, and Translation Settings now exposes voice provider/model instead of hiding TTS model selection in Preferences.
-- Refreshed the model catalog against official provider docs (DeepSeek, Xiaomi MiMo, Gemini, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
+- Added MiniMax as a translation/rewrite provider using the Anthropic-compatible `https://api.minimaxi.com/anthropic` endpoint and `MiniMax-M3` as the built-in default model.
+- Refreshed the model catalog against official provider docs (DeepSeek, MiniMax, Xiaomi MiMo, Gemini, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
   - Disabled DeepSeek and Xiaomi MiMo thinking mode on translation and Rewrite & Coach requests so temperature is honored and first-token latency drops on `deepseek-v4-*` and `mimo-v2.5-*` models.
   - Switched the Gemini structured-output payload to the current `generationConfig.responseFormat.text.{mimeType,schema}` shape; promoted the new stable `gemini-3.5-flash` as the Gemini Fast tier and dropped the retired `gemini-3-pro-preview` entry while adding stable `gemini-3.1-flash-lite`.
   - Upgraded OpenAI structured outputs to `response_format.type: "json_schema"` with `strict: true` (scrubbing Gemini-only schema keys) and sent `reasoning_effort: "minimal"` to GPT-5.x reasoning models so translation latency stays low.

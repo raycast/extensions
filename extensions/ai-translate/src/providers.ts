@@ -140,7 +140,7 @@ async function generateWithAnthropicProtocol(
     anthropicMessagesUrl(config.baseURL),
     timeoutMs,
     anthropicCompatibleHeaders(config.apiKey),
-    withDisabledThinking({
+    withProviderRequestExtras(config, {
       model: config.model,
       system: structuredPrompt.system,
       messages: [{ role: "user", content: structuredPrompt.user }],
@@ -241,7 +241,7 @@ async function translateWithAnthropicCompatible(config: ProviderConfig, request:
     anthropicMessagesUrl(config.baseURL),
     request.timeoutMs,
     anthropicCompatibleHeaders(config.apiKey),
-    withDisabledThinking({
+    withProviderRequestExtras(config, {
       model: config.model,
       system: prompt.system,
       messages: [{ role: "user", content: prompt.user }],
@@ -501,11 +501,15 @@ function anthropicCompatibleHeaders(apiKey: string): Record<string, string> {
  * DeepSeek v4 and MiMo v2.5 default to `thinking: enabled`, which adds
  * first-token latency and silently ignores `temperature`. Translation is
  * latency-sensitive and benefits from temperature control, so we explicitly
- * disable thinking for every Anthropic-compatible request. Providers that
- * don't recognize the key (vanilla Anthropic) ignore it.
+ * disable thinking for those providers. MiniMax follows the official
+ * Anthropic-compatible Messages shape and does not need this extra field.
  */
-function withDisabledThinking<T extends Record<string, unknown>>(body: T): T & { thinking: { type: "disabled" } } {
-  return { ...body, thinking: { type: "disabled" } };
+function withProviderRequestExtras<T extends Record<string, unknown>>(config: ProviderConfig, body: T): T {
+  if (config.id === "deepseek" || config.id === "mimo") {
+    return { ...body, thinking: { type: "disabled" } };
+  }
+
+  return body;
 }
 
 function applyStructuredPromptOptions(
