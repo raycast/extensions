@@ -1,6 +1,6 @@
 VocaBuilder Changelog
 
-## [Switch language pairs, pronunciation, and configurable models] - {PR_MERGE_DATE}
+## [Switch language pairs, pronunciation, and configurable models] - 2026-06-01
 
 - Added an in-command language pair selector: switch the source and target language straight from a dropdown in the `Translate`, `Translation History`, and `View Flashcards` commands, without opening preferences. The selection persists across commands.
 - Renamed the `Source Language` / `Target Language` preferences to `Default Source Language` / `Default Target Language` — they now apply until you pick a pair from the dropdown.
