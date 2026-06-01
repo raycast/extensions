@@ -15,8 +15,9 @@ export default function Command() {
     isLoading,
     revalidate,
   } = useCachedPromise(getLocalhostItems, [], {
-    onError: (error) =>
-      showToast({ style: Toast.Style.Failure, title: error.message || "Failed to get localhost servers" }),
+    onError: (error) => {
+      showToast({ style: Toast.Style.Failure, title: error.message || "Failed to get localhost servers" });
+    },
   });
 
   return (
