@@ -49,10 +49,9 @@ function validateNetworkServiceName(serviceName: string): boolean {
  */
 function getActiveNetworkService(): string {
   try {
-    const iface = execSync(
-      "route get default 2>/dev/null | awk '/interface: /{print $2}'",
-      { encoding: "utf-8" },
-    ).trim();
+    const iface = execSync("route get default 2>/dev/null | awk '/interface: /{print $2}'", {
+      encoding: "utf-8",
+    }).trim();
     if (!iface) return "Wi-Fi";
 
     const hwports = execSync("networksetup -listallhardwareports", {
@@ -204,9 +203,7 @@ function addPreset(name: string, servers: string, description?: string): void {
   const lines = content.split("\n");
 
   // Format the preset line
-  const presetLine = description
-    ? `${name}=${servers}:${description}`
-    : `${name}=${servers}`;
+  const presetLine = description ? `${name}=${servers}:${description}` : `${name}=${servers}`;
 
   // Find and replace if exists
   let found = false;
@@ -249,12 +246,9 @@ function deletePreset(name: string): void {
  */
 function getManualDNS(): string[] {
   try {
-    const output = execSync(
-      `networksetup -getdnsservers "${NETWORK_SERVICE}"`,
-      {
-        encoding: "utf-8",
-      },
-    );
+    const output = execSync(`networksetup -getdnsservers "${NETWORK_SERVICE}"`, {
+      encoding: "utf-8",
+    });
 
     if (output.includes("aren't any DNS Servers set") || output.trim() === "") {
       return [];
@@ -300,10 +294,7 @@ function getNetworkInterfaceDetails(): { [key: string]: string } {
     const details: { [key: string]: string } = {};
 
     // Get IPv4 address and subnet
-    const ipinfo = execSync(
-      `networksetup -getinfo "${NETWORK_SERVICE}" 2>/dev/null || echo ""`,
-      { encoding: "utf-8" },
-    );
+    const ipinfo = execSync(`networksetup -getinfo "${NETWORK_SERVICE}" 2>/dev/null || echo ""`, { encoding: "utf-8" });
     ipinfo.split("\n").forEach((line) => {
       const match = line.match(/^([^:]+):\s*(.*)$/);
       if (match) {
@@ -366,24 +357,18 @@ function runWithAdmin(command: string): void {
 function setDNS(servers: string[]): void {
   // Validate network service name (prevents shell injection via preferences)
   if (!validateNetworkServiceName(NETWORK_SERVICE)) {
-    throw new Error(
-      `Invalid network service name: "${NETWORK_SERVICE}". Service name may have been tampered with.`,
-    );
+    throw new Error(`Invalid network service name: "${NETWORK_SERVICE}". Service name may have been tampered with.`);
   }
 
   // Validate all IPs before execution (defense in depth - prevents shell injection)
   const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
   for (const ip of servers) {
     if (!ipRegex.test(ip)) {
-      throw new Error(
-        `Invalid IP address: "${ip}". Preset file may have been tampered with.`,
-      );
+      throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
     }
     const parts = ip.split(".").map(Number);
     if (parts.some((p) => p < 0 || p > 255)) {
-      throw new Error(
-        `Invalid IP address: "${ip}". Preset file may have been tampered with.`,
-      );
+      throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
     }
   }
 
@@ -394,9 +379,7 @@ function setDNS(servers: string[]): void {
     runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' empty`);
   } else {
     const dnsArgs = servers.map((s) => `'${s}'`).join(" ");
-    runWithAdmin(
-      `${networksetup} -setdnsservers '${NETWORK_SERVICE}' ${dnsArgs}`,
-    );
+    runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' ${dnsArgs}`);
   }
 }
 
@@ -480,16 +463,11 @@ function NetworkDetailsView() {
   const activeDNS = networkInfo?.activeDNS.join(", ") || "";
 
   if (isLoading) {
-    return (
-      <List navigationTitle={`${NETWORK_SERVICE} Details`} isLoading={true} />
-    );
+    return <List navigationTitle={`${NETWORK_SERVICE} Details`} isLoading={true} />;
   }
 
   return (
-    <List
-      navigationTitle={`${NETWORK_SERVICE} Details`}
-      searchBarPlaceholder="Search network info..."
-    >
+    <List navigationTitle={`${NETWORK_SERVICE} Details`} searchBarPlaceholder="Search network info...">
       {/* DNS Section */}
       <List.Section title="DNS">
         <List.Item
@@ -504,44 +482,21 @@ function NetworkDetailsView() {
             },
           ]}
         />
-        {activeDNS && (
-          <InfoItem
-            icon={Icon.Network}
-            title="Active DNS Servers"
-            value={activeDNS}
-          />
-        )}
+        {activeDNS && <InfoItem icon={Icon.Network} title="Active DNS Servers" value={activeDNS} />}
       </List.Section>
 
       {/* IPv4 Section */}
       <List.Section title="IPv4">
-        {get("IP address") && (
-          <InfoItem
-            icon={Icon.Pin}
-            title="IP Address"
-            value={get("IP address")!}
-          />
-        )}
-        {get("Subnet mask") && (
-          <InfoItem
-            icon={Icon.Filter}
-            title="Subnet Mask"
-            value={get("Subnet mask")!}
-          />
-        )}
+        {get("IP address") && <InfoItem icon={Icon.Pin} title="IP Address" value={get("IP address")!} />}
+        {get("Subnet mask") && <InfoItem icon={Icon.Filter} title="Subnet Mask" value={get("Subnet mask")!} />}
         {get("Router") && (
           <InfoItem
             icon={Icon.House}
             title="Router"
             value={get("Router")!}
             extraActions={
-              /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(
-                get("Router")!,
-              ) ? (
-                <Action.OpenInBrowser
-                  title="Open Router in Browser"
-                  url={`http://${get("Router")}`}
-                />
+              /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(get("Router")!) ? (
+                <Action.OpenInBrowser title="Open Router in Browser" url={`http://${get("Router")}`} />
               ) : undefined
             }
           />
@@ -550,49 +505,19 @@ function NetworkDetailsView() {
 
       {/* Hardware Section */}
       <List.Section title="Hardware">
-        {get("Wi-Fi ID") && (
-          <InfoItem
-            icon={Icon.Wifi}
-            title="Wi-Fi ID"
-            value={get("Wi-Fi ID")!}
-          />
-        )}
-        {get("MAC Address") && (
-          <InfoItem
-            icon={Icon.Link}
-            title="MAC Address"
-            value={get("MAC Address")!}
-          />
-        )}
+        {get("Wi-Fi ID") && <InfoItem icon={Icon.Wifi} title="Wi-Fi ID" value={get("Wi-Fi ID")!} />}
+        {get("MAC Address") && <InfoItem icon={Icon.Link} title="MAC Address" value={get("MAC Address")!} />}
         {get("Ethernet Address") && (
-          <InfoItem
-            icon={Icon.Link}
-            title="Ethernet Address"
-            value={get("Ethernet Address")!}
-          />
+          <InfoItem icon={Icon.Link} title="Ethernet Address" value={get("Ethernet Address")!} />
         )}
       </List.Section>
 
       {/* IPv6 Section */}
       {(get("IPv6") || get("IPv6 IP address") || get("IPv6 Router")) && (
         <List.Section title="IPv6">
-          {get("IPv6") && (
-            <InfoItem icon={Icon.Globe} title="IPv6" value={get("IPv6")!} />
-          )}
-          {get("IPv6 IP address") && (
-            <InfoItem
-              icon={Icon.Pin}
-              title="IPv6 Address"
-              value={get("IPv6 IP address")!}
-            />
-          )}
-          {get("IPv6 Router") && (
-            <InfoItem
-              icon={Icon.House}
-              title="IPv6 Router"
-              value={get("IPv6 Router")!}
-            />
-          )}
+          {get("IPv6") && <InfoItem icon={Icon.Globe} title="IPv6" value={get("IPv6")!} />}
+          {get("IPv6 IP address") && <InfoItem icon={Icon.Pin} title="IPv6 Address" value={get("IPv6 IP address")!} />}
+          {get("IPv6 Router") && <InfoItem icon={Icon.House} title="IPv6 Router" value={get("IPv6 Router")!} />}
         </List.Section>
       )}
     </List>
@@ -602,13 +527,7 @@ function NetworkDetailsView() {
 /**
  * Form to add or edit a DNS preset
  */
-function AddEditPresetForm({
-  existing,
-  onSaved,
-}: {
-  existing?: DNSPreset;
-  onSaved: () => void;
-}) {
+function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSaved: () => void }) {
   const [nameError, setNameError] = useState<string | undefined>();
   const [serversError, setServersError] = useState<string | undefined>();
   const isEditing = !!existing;
@@ -624,8 +543,7 @@ function AddEditPresetForm({
   }
 
   function validateServers(value: string | undefined): string | undefined {
-    if (!value || value.trim().length === 0)
-      return "At least one DNS server is required";
+    if (!value || value.trim().length === 0) return "At least one DNS server is required";
     const servers = value
       .split(",")
       .map((s) => s.trim())
@@ -643,11 +561,7 @@ function AddEditPresetForm({
     return undefined;
   }
 
-  async function handleSubmit(values: {
-    name: string;
-    servers: string;
-    description?: string;
-  }) {
+  async function handleSubmit(values: { name: string; servers: string; description?: string }) {
     const trimmedName = values.name.trim();
     const trimmedServers = values.servers
       .split(",")
@@ -673,9 +587,7 @@ function AddEditPresetForm({
       addPreset(trimmedName, trimmedServers, trimmedDescription);
       await showToast({
         style: Toast.Style.Success,
-        title: isEditing
-          ? `Updated "${trimmedName}"`
-          : `Added "${trimmedName}"`,
+        title: isEditing ? `Updated "${trimmedName}"` : `Added "${trimmedName}"`,
         message: trimmedServers,
       });
       onSaved();
@@ -690,9 +602,7 @@ function AddEditPresetForm({
 
   return (
     <Form
-      navigationTitle={
-        isEditing ? `Edit "${existing!.name}"` : "Add DNS Preset"
-      }
+      navigationTitle={isEditing ? `Edit "${existing!.name}"` : "Add DNS Preset"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -764,9 +674,7 @@ export default function Command() {
         if (validateNetworkServiceName(trimmedService)) {
           NETWORK_SERVICE = trimmedService;
         } else {
-          throw new Error(
-            `Invalid network service name in preferences: "${trimmedService}". Falling back to Wi-Fi.`,
-          );
+          throw new Error(`Invalid network service name in preferences: "${trimmedService}". Falling back to Wi-Fi.`);
         }
       } else {
         NETWORK_SERVICE = getActiveNetworkService();
@@ -848,9 +756,7 @@ export default function Command() {
     }
   }
 
-  const activeDNSText = networkInfo?.activeDNS.length
-    ? networkInfo.activeDNS.join(", ")
-    : "None detected";
+  const activeDNSText = networkInfo?.activeDNS.length ? networkInfo.activeDNS.join(", ") : "None detected";
   const dnsSourceTag = networkInfo?.isDHCP ? "DHCP" : "Manual";
 
   return (
@@ -864,16 +770,8 @@ export default function Command() {
           accessories={[{ text: activeDNSText }, { tag: dnsSourceTag }]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Show Network Details"
-                icon={Icon.Info}
-                target={<NetworkDetailsView />}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-              />
+              <Action.Push title="Show Network Details" icon={Icon.Info} target={<NetworkDetailsView />} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
               <Action
                 title="Reset to DHCP"
                 icon={Icon.XMarkCircle}
@@ -893,11 +791,7 @@ export default function Command() {
           subtitle="Create a new preset to quickly switch to"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Add Preset"
-                icon={Icon.Plus}
-                target={<AddEditPresetForm onSaved={refresh} />}
-              />
+              <Action.Push title="Add Preset" icon={Icon.Plus} target={<AddEditPresetForm onSaved={refresh} />} />
             </ActionPanel>
           }
         />
@@ -907,11 +801,7 @@ export default function Command() {
           subtitle="Remove manual DNS and use automatic settings"
           actions={
             <ActionPanel>
-              <Action
-                title="Reset to DHCP"
-                icon={Icon.XMarkCircle}
-                onAction={handleReset}
-              />
+              <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />
             </ActionPanel>
           }
         />
@@ -953,9 +843,7 @@ export default function Command() {
                   <Action.Push
                     title="Edit Preset"
                     icon={Icon.Pencil}
-                    target={
-                      <AddEditPresetForm existing={preset} onSaved={refresh} />
-                    }
+                    target={<AddEditPresetForm existing={preset} onSaved={refresh} />}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                   <Action.Push
