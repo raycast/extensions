@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Start Dev Server] - {PR_MERGE_DATE}
+## [Start Dev Server] - 2026-06-01
 
 Adds a `Start Dev Server` command for spinning up dev servers without leaving Raycast. Works from a Finder selection, from a list of recently-seen projects, or from a native folder picker.
 
