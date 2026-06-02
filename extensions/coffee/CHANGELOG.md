@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-02
 
 - Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
 
