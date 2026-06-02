@@ -251,6 +251,7 @@ function EditPresetView({
     () => [...new Set([...discoveredExts, ...customs, ...selected])].sort(),
     [discoveredExts, customs, selected],
   );
+  const allExtsSet = useMemo(() => new Set(allExts), [allExts]);
   const customSet = useMemo(() => new Set(customs), [customs]);
 
   const candidateExt = normalizeExt(searchText);
@@ -340,7 +341,7 @@ function EditPresetView({
             title="Add Custom Extension…"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<InlineAddCustom existing={new Set(allExts)} onAdded={addCustom} />}
+            target={<InlineAddCustom existing={allExtsSet} onAdded={addCustom} />}
           />
         </ActionPanel>
       }
@@ -396,7 +397,7 @@ function EditPresetView({
                     title="Add Custom Extension…"
                     icon={Icon.Plus}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    target={<InlineAddCustom existing={new Set(allExts)} onAdded={addCustom} />}
+                    target={<InlineAddCustom existing={allExtsSet} onAdded={addCustom} />}
                   />
                 </ActionPanel>
               }
@@ -462,6 +463,7 @@ function NewPresetExtensionsView({
     () => [...new Set([...discoveredExts, ...customs, ...selected])].sort(),
     [discoveredExts, customs, selected],
   );
+  const allExtsSet = useMemo(() => new Set(allExts), [allExts]);
   const customSet = useMemo(() => new Set(customs), [customs]);
 
   const candidateExt = normalizeExt(searchText);
@@ -573,7 +575,7 @@ function NewPresetExtensionsView({
                     title="Add Custom Extension…"
                     icon={Icon.Plus}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    target={<InlineAddCustom existing={new Set(allExts)} onAdded={addCustom} />}
+                    target={<InlineAddCustom existing={allExtsSet} onAdded={addCustom} />}
                   />
                 </ActionPanel>
               }
