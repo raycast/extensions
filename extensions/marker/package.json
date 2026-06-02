@@ -1,0 +1,254 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "marker",
+  "description": "Create, browse, and edit Marker timeline records from Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "icon.png",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Marker API Token",
+      "description": "Marker-issued API token. Need help? Visit getmarker.app/contact.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "mark",
+      "title": "Add Marker",
+      "description": "Adds a marker with destination, tags, description, and offset controls",
+      "mode": "view",
+      "subtitle": "Marker",
+      "icon": "icon.png",
+      "keywords": [
+        "details",
+        "session",
+        "subsession",
+        "tags",
+        "marker"
+      ]
+    },
+    {
+      "name": "quick-add-marker",
+      "title": "Add Marker to Latest",
+      "description": "Adds a marker to the active or newest sub-session",
+      "mode": "no-view",
+      "subtitle": "Marker",
+      "icon": "icon.png",
+      "keywords": [
+        "latest",
+        "active",
+        "quick",
+        "marker"
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "offset",
+          "placeholder": "Offset",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Now",
+              "value": ""
+            },
+            {
+              "title": "-10 seconds",
+              "value": "-10s"
+            },
+            {
+              "title": "-30 seconds",
+              "value": "-30s"
+            },
+            {
+              "title": "-1 minute",
+              "value": "-1m"
+            },
+            {
+              "title": "-5 minutes",
+              "value": "-5m"
+            },
+            {
+              "title": "+10 seconds",
+              "value": "+10s"
+            },
+            {
+              "title": "+30 seconds",
+              "value": "+30s"
+            },
+            {
+              "title": "+1 minute",
+              "value": "+1m"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create-chapter-marker",
+      "title": "Add Chapter Marker",
+      "description": "Adds a chapter marker with destination, tags, and offset controls",
+      "mode": "view",
+      "subtitle": "Marker",
+      "icon": "icon.png",
+      "keywords": [
+        "details",
+        "chapter",
+        "session",
+        "subsession",
+        "tags",
+        "marker"
+      ]
+    },
+    {
+      "name": "quick-add-chapter-marker",
+      "title": "Add Chapter Marker to Latest",
+      "description": "Adds a chapter marker to the active or newest sub-session",
+      "mode": "no-view",
+      "subtitle": "Marker",
+      "icon": "icon.png",
+      "keywords": [
+        "latest",
+        "active",
+        "quick",
+        "chapter",
+        "marker"
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "offset",
+          "placeholder": "Offset",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Now",
+              "value": ""
+            },
+            {
+              "title": "-10 seconds",
+              "value": "-10s"
+            },
+            {
+              "title": "-30 seconds",
+              "value": "-30s"
+            },
+            {
+              "title": "-1 minute",
+              "value": "-1m"
+            },
+            {
+              "title": "-5 minutes",
+              "value": "-5m"
+            },
+            {
+              "title": "+10 seconds",
+              "value": "+10s"
+            },
+            {
+              "title": "+30 seconds",
+              "value": "+30s"
+            },
+            {
+              "title": "+1 minute",
+              "value": "+1m"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "recent-markers",
+      "title": "Marker History",
+      "description": "Browse markers and chapters by sub-session",
+      "mode": "view",
+      "subtitle": "Marker",
+      "icon": "icon.png",
+      "keywords": [
+        "history",
+        "recent",
+        "timeline",
+        "chapter",
+        "marker"
+      ]
+    },
+    {
+      "name": "twitch-stream-marker",
+      "title": "Twitch Marker",
+      "description": "Add markers to linked live Twitch channels",
+      "mode": "view",
+      "subtitle": "Twitch",
+      "icon": "icon.png",
+      "keywords": [
+        "twitch",
+        "stream",
+        "live",
+        "channel",
+        "marker"
+      ]
+    },
+    {
+      "name": "create-session",
+      "title": "Create Session",
+      "description": "Creates a Marker session",
+      "mode": "view",
+      "subtitle": "Marker",
+      "icon": "icon.png"
+    },
+    {
+      "name": "create-subsession",
+      "title": "Create Sub-Session",
+      "description": "Creates a Marker sub-session inside a session",
+      "mode": "view",
+      "subtitle": "Marker",
+      "icon": "icon.png"
+    }
+  ],
+  "title": "Marker",
+  "author": "SENTINELITE",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
