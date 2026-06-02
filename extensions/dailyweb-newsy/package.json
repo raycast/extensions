@@ -1,0 +1,173 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dailyweb-newsy",
+  "title": "Dailyweb.pl Newsy",
+  "description": "Przeglądaj najnowsze wpisy z Dailyweb.pl",
+  "icon": "icon.png",
+  "author": "lczulak",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Dailyweb.pl Newsy",
+      "description": "Przeglądaj najnowsze wpisy z Dailyweb.pl",
+      "mode": "view"
+    },
+    {
+      "name": "background",
+      "title": "Dailyweb.pl — Sprawdź Nowe Wpisy",
+      "description": "Sprawdza nowe wpisy w tle i pokazuje powiadomienie",
+      "mode": "no-view",
+      "interval": "30m",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableNotifications",
+      "title": "Powiadomienia w tle",
+      "description": "Pokazuj powiadomienie gdy pojawi się nowy wpis",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Włącz powiadomienia"
+    },
+    {
+      "name": "notificationInterval",
+      "title": "Częstotliwość sprawdzania",
+      "description": "Co ile godzin sprawdzać nowe wpisy",
+      "type": "dropdown",
+      "default": "1",
+      "required": false,
+      "data": [
+        {
+          "title": "Co godzinę",
+          "value": "1"
+        },
+        {
+          "title": "Co 3 godziny",
+          "value": "3"
+        },
+        {
+          "title": "Co 6 godzin",
+          "value": "6"
+        }
+      ]
+    },
+    {
+      "name": "notificationCategory",
+      "title": "Kategoria powiadomień",
+      "description": "Powiadamiaj tylko o wpisach z tej kategorii",
+      "type": "dropdown",
+      "default": "0",
+      "required": false,
+      "data": [
+        {
+          "title": "All",
+          "value": "0"
+        },
+        {
+          "title": "Aktualności",
+          "value": "9169"
+        },
+        {
+          "title": "Mobile",
+          "value": "12429"
+        },
+        {
+          "title": "Rozrywka",
+          "value": "10516"
+        },
+        {
+          "title": "Gry",
+          "value": "12184"
+        }
+      ]
+    },
+    {
+      "name": "layout",
+      "title": "Układ",
+      "description": "Lista — okładka i tytuł; Siatka — karty z okładką, tytułem i autorem",
+      "type": "dropdown",
+      "default": "grid",
+      "required": false,
+      "data": [
+        {
+          "title": "Lista",
+          "value": "list"
+        },
+        {
+          "title": "Siatka",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "title": "Kolumny siatki",
+      "description": "Ile kart w jednym rzędzie (układ Siatka)",
+      "type": "dropdown",
+      "default": "2",
+      "required": false,
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "postsPerPage",
+      "title": "Liczba wpisów",
+      "description": "Ile wpisów wczytać naraz",
+      "type": "dropdown",
+      "default": "5",
+      "required": false,
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "30",
+          "value": "30"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.19",
+    "@raycast/utils": "2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
