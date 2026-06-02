@@ -1,0 +1,6 @@
+.firecrawl/
+.superpowers/
+node_modules/
+.DS_Store
+dist/
+*.log

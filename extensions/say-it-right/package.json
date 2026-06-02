@@ -1,0 +1,623 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "say-it-right",
+  "title": "Say It Right",
+  "description": "Turn English text or Chinese intent into spoken-English practice with prosody, model audio, and shadowing.",
+  "icon": "extension-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "analyze-selection",
+      "title": "Analyze Selected English",
+      "subtitle": "Say It Right",
+      "description": "Analyze selected English text for stress, intonation, rhythm, linking, and model pronunciation.",
+      "mode": "view"
+    },
+    {
+      "name": "practice-sentence",
+      "title": "Practice English",
+      "subtitle": "Say It Right",
+      "description": "Type or paste English and turn it into a pronunciation lesson.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-selection",
+      "title": "Say Selection in English",
+      "subtitle": "Say It Right",
+      "description": "Turn selected Chinese intent or rough wording into natural English you can practice aloud.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-clipboard",
+      "title": "Say Clipboard in English",
+      "subtitle": "Say It Right",
+      "description": "Turn clipboard text into natural English you can practice aloud.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-intent",
+      "title": "Say What I Mean",
+      "subtitle": "Say It Right",
+      "description": "Type what you mean in Chinese and get natural English wording ready for pronunciation practice.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAnalysisProvider",
+      "title": "Default Coach Provider",
+      "description": "Initial provider for pronunciation analysis and natural-English expression. You can change provider and model per run from the Action Panel.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwen",
+      "data": [
+        {
+          "title": "Qwen",
+          "value": "qwen"
+        },
+        {
+          "title": "MiniMax",
+          "value": "minimax"
+        },
+        {
+          "title": "MiMo",
+          "value": "mimo"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        }
+      ]
+    },
+    {
+      "name": "ttsProvider",
+      "title": "Default Voice Provider",
+      "description": "Initial provider for model audio. Follow Analysis Provider uses the analysis provider when its TTS key is set, otherwise the first configured TTS provider.",
+      "type": "dropdown",
+      "required": false,
+      "default": "follow-analysis",
+      "data": [
+        {
+          "title": "Follow Analysis Provider",
+          "value": "follow-analysis"
+        },
+        {
+          "title": "Qwen",
+          "value": "qwen"
+        },
+        {
+          "title": "MiniMax",
+          "value": "minimax"
+        },
+        {
+          "title": "MiMo",
+          "value": "mimo"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        }
+      ]
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Used for OpenAI analysis and TTS.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "openaiTtsVoice",
+      "title": "OpenAI TTS Voice",
+      "description": "Voice for OpenAI TTS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "marin",
+      "data": [
+        {
+          "title": "Marin",
+          "value": "marin"
+        },
+        {
+          "title": "Cedar",
+          "value": "cedar"
+        },
+        {
+          "title": "Coral",
+          "value": "coral"
+        },
+        {
+          "title": "Alloy",
+          "value": "alloy"
+        },
+        {
+          "title": "Ash",
+          "value": "ash"
+        },
+        {
+          "title": "Ballad",
+          "value": "ballad"
+        },
+        {
+          "title": "Echo",
+          "value": "echo"
+        },
+        {
+          "title": "Fable",
+          "value": "fable"
+        },
+        {
+          "title": "Nova",
+          "value": "nova"
+        },
+        {
+          "title": "Onyx",
+          "value": "onyx"
+        },
+        {
+          "title": "Sage",
+          "value": "sage"
+        },
+        {
+          "title": "Shimmer",
+          "value": "shimmer"
+        },
+        {
+          "title": "Verse",
+          "value": "verse"
+        }
+      ]
+    },
+    {
+      "name": "qwenApiKey",
+      "title": "DashScope API Key",
+      "description": "Used only for Qwen-TTS. Qwen analysis uses the Token Plan key below.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "qwenRegion",
+      "title": "Qwen-TTS Region",
+      "description": "DashScope TTS region (affects Qwen-TTS base URL).",
+      "type": "dropdown",
+      "required": false,
+      "default": "beijing",
+      "data": [
+        {
+          "title": "Beijing (cn)",
+          "value": "beijing"
+        },
+        {
+          "title": "International (Singapore)",
+          "value": "intl"
+        }
+      ]
+    },
+    {
+      "name": "qwenAnalysisModel",
+      "title": "Qwen Analysis Model",
+      "description": "Qwen chat model used for analysis.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwen3.6-flash",
+      "data": [
+        {
+          "title": "qwen3.6-flash — fast & low-cost (recommended)",
+          "value": "qwen3.6-flash"
+        },
+        {
+          "title": "qwen3.6-plus — balanced quality",
+          "value": "qwen3.6-plus"
+        }
+      ]
+    },
+    {
+      "name": "qwenAnalysisBaseURL",
+      "title": "Qwen Analysis Base URL",
+      "description": "Qwen Token Plan base URL for analysis. Default is Anthropic-compatible; OpenAI-compatible /compatible-mode/v1 is also supported. TTS uses DashScope separately.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic"
+    },
+    {
+      "name": "qwenAnalysisApiKey",
+      "title": "Qwen Token Plan API Key",
+      "description": "Used only for Qwen analysis. Does not affect Qwen-TTS.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "qwenTtsModel",
+      "title": "Qwen TTS Model",
+      "description": "Qwen TTS model used for read-aloud.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwen3-tts-flash",
+      "data": [
+        {
+          "title": "Qwen3 TTS Flash",
+          "value": "qwen3-tts-flash"
+        },
+        {
+          "title": "Qwen3 TTS Instruct Flash",
+          "value": "qwen3-tts-instruct-flash"
+        }
+      ]
+    },
+    {
+      "name": "qwenTtsVoice",
+      "title": "Qwen TTS Voice",
+      "description": "Voice for Qwen TTS (all support English).",
+      "type": "dropdown",
+      "required": false,
+      "default": "Jennifer",
+      "data": [
+        {
+          "title": "Jennifer — expressive female",
+          "value": "Jennifer"
+        },
+        {
+          "title": "Aiden — clear male",
+          "value": "Aiden"
+        },
+        {
+          "title": "Neil — natural male",
+          "value": "Neil"
+        },
+        {
+          "title": "Elias — clear, explanatory male",
+          "value": "Elias"
+        },
+        {
+          "title": "Cherry — warm, bright female",
+          "value": "Cherry"
+        },
+        {
+          "title": "Katerina — relaxed, conversational female",
+          "value": "Katerina"
+        },
+        {
+          "title": "Ethan — natural, friendly male",
+          "value": "Ethan"
+        },
+        {
+          "title": "Ryan — energetic male",
+          "value": "Ryan"
+        },
+        {
+          "title": "Nofish — lively, youthful",
+          "value": "Nofish"
+        }
+      ]
+    },
+    {
+      "name": "minimaxApiKey",
+      "title": "MiniMax API Key",
+      "description": "Used for MiniMax analysis and TTS.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "minimaxBaseURL",
+      "title": "MiniMax Analysis Base URL",
+      "description": "MiniMax Token Plan Anthropic-compatible endpoint (ANTHROPIC_BASE_URL).",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.minimaxi.com/anthropic"
+    },
+    {
+      "name": "minimaxAnalysisModel",
+      "title": "MiniMax Analysis Model",
+      "description": "MiniMax text model used for analysis and translation. TTS uses the separate speech model below.",
+      "type": "dropdown",
+      "required": false,
+      "default": "MiniMax-M3",
+      "data": [
+        {
+          "title": "MiniMax-M3 — recommended",
+          "value": "MiniMax-M3"
+        },
+        {
+          "title": "MiniMax-M2.7-highspeed — previous fast model",
+          "value": "MiniMax-M2.7-highspeed"
+        }
+      ]
+    },
+    {
+      "name": "minimaxTtsBaseURL",
+      "title": "MiniMax TTS Base URL",
+      "description": "MiniMax TTS base URL.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.minimaxi.com/v1"
+    },
+    {
+      "name": "minimaxTtsModel",
+      "title": "MiniMax TTS Model",
+      "description": "MiniMax TTS model used for read-aloud.",
+      "type": "dropdown",
+      "required": false,
+      "default": "speech-2.8-hd",
+      "data": [
+        {
+          "title": "Speech 2.8 HD",
+          "value": "speech-2.8-hd"
+        },
+        {
+          "title": "Speech 2.8 Turbo",
+          "value": "speech-2.8-turbo"
+        }
+      ]
+    },
+    {
+      "name": "minimaxTtsVoiceId",
+      "title": "MiniMax TTS Voice",
+      "description": "Voice ID for MiniMax TTS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "English_expressive_narrator",
+      "data": [
+        {
+          "title": "English Expressive Narrator",
+          "value": "English_expressive_narrator"
+        },
+        {
+          "title": "English Captivating Storyteller",
+          "value": "English_CaptivatingStoryteller"
+        },
+        {
+          "title": "English Trustworthy Man",
+          "value": "English_Trustworth_Man"
+        },
+        {
+          "title": "English Serene Woman",
+          "value": "English_SereneWoman"
+        },
+        {
+          "title": "English Wise Scholar",
+          "value": "English_WiseScholar"
+        }
+      ]
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Google AI Studio key for Gemini analysis and TTS.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiTtsVoice",
+      "title": "Gemini TTS Voice",
+      "description": "Voice for Gemini TTS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Charon",
+      "data": [
+        {
+          "title": "Charon",
+          "value": "Charon"
+        },
+        {
+          "title": "Iapetus",
+          "value": "Iapetus"
+        },
+        {
+          "title": "Sulafat",
+          "value": "Sulafat"
+        },
+        {
+          "title": "Puck",
+          "value": "Puck"
+        }
+      ]
+    },
+    {
+      "name": "mimoApiKey",
+      "title": "MiMo (Xiaomi) API Key",
+      "description": "Xiaomi MiMo Token Plan key (tp-…). Used for MiMo analysis and TTS.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "mimoBaseURL",
+      "title": "MiMo Base URL",
+      "description": "MiMo Token Plan Anthropic-compatible base URL for text generation. TTS uses the matching Token Plan /v1 endpoint because the Anthropic messages endpoint does not return audio.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
+    },
+    {
+      "name": "mimoAnalysisModel",
+      "title": "MiMo Analysis Model",
+      "description": "MiMo chat model for analysis (thinking is disabled for speed/determinism).",
+      "type": "dropdown",
+      "required": false,
+      "default": "mimo-v2.5",
+      "data": [
+        {
+          "title": "mimo-v2.5 — standard (recommended)",
+          "value": "mimo-v2.5"
+        },
+        {
+          "title": "mimo-v2.5-pro — stronger reasoning",
+          "value": "mimo-v2.5-pro"
+        }
+      ]
+    },
+    {
+      "name": "mimoTtsVoice",
+      "title": "MiMo TTS Voice",
+      "description": "Voice for MiMo TTS (English voices).",
+      "type": "dropdown",
+      "required": false,
+      "default": "Chloe",
+      "data": [
+        {
+          "title": "Chloe — English female",
+          "value": "Chloe"
+        },
+        {
+          "title": "Mia — English female",
+          "value": "Mia"
+        },
+        {
+          "title": "Milo — English male",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean — English male",
+          "value": "Dean"
+        }
+      ]
+    },
+    {
+      "name": "translationTargetLanguage",
+      "title": "Practice Translation Target",
+      "description": "Target language for Translate Sentence/Page inside the practice view. Standalone Say ... in English commands always target English.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        }
+      ]
+    },
+    {
+      "name": "sentencesPerPage",
+      "title": "Sentences Per Page",
+      "description": "How many sentences are shown and analyzed together for long passages.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "loopCount",
+      "title": "Shadowing Loop Count",
+      "description": "How many times the Shadowing Loop repeats the sentence.",
+      "type": "textfield",
+      "required": false,
+      "default": "3"
+    },
+    {
+      "name": "loopGap",
+      "title": "Shadowing Loop Gap (seconds)",
+      "description": "Pause between repeats in the Shadowing Loop.",
+      "type": "textfield",
+      "required": false,
+      "default": "1.0"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}
