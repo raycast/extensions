@@ -93,8 +93,9 @@ export function useLocalExtensions(): {
   const [isLoading, setIsLoading] = useState(true);
   const [extensions, setExtensions] = useState<Extension[]>();
   const [error, setError] = useState<string>();
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const refresh = () => {};
+  const refresh = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
     let didUnmount = false;
@@ -123,7 +124,7 @@ export function useLocalExtensions(): {
     return () => {
       didUnmount = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   return { extensions: extensions, isLoading, error, refresh };
 }

@@ -44,7 +44,7 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
       ) {
         await showToast({
           style: Toast.Style.Animated,
-          title: "Install Extension",
+          title: "Uninstall Extension",
         });
         const cli = getBobCLI();
         cli.uninstallExtensionByIDSync(props.extensionID);
@@ -77,7 +77,7 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
 export function OpenExtensionByIDInBobAction(props: { extensionID: string; onOpen?: (url: string) => void }) {
   return (
     <Action.OpenInBrowser
-      title="Open in Ibm Bob"
+      title="Open in IBM Bob"
       url={`bobide:extension/${props.extensionID}`}
       icon={"icon.png"}
       onOpen={(url) => {

@@ -83,6 +83,7 @@ function getPath() {
 
 async function saveEntries(entries: EntryLike[]) {
   const data = JSON.stringify({ entries });
-  const query = `INSERT INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${data}');`;
+  const escapedData = data.replace(/'/g, "''");
+  const query = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${escapedData}');`;
   await execFilePromise("sqlite3", [getPath(), query]);
 }
