@@ -4,6 +4,8 @@ import { useExec } from "@raycast/utils";
 import { WeeklyUsageCommandResponse, WeeklyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
 const cache = new Cache();
@@ -31,7 +33,14 @@ export const useCCUsageWeeklyCli = () => {
       const parseResult = stringToJSON.pipe(WeeklyUsageCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid weekly usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid weekly usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
       cache.set(CACHE_KEY, JSON.stringify(parseResult.data));

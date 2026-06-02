@@ -22,6 +22,12 @@ const liftLastActivity = (raw: unknown): unknown => {
   return typeof lastActivity === "string" ? { ...obj, lastActivity } : raw;
 };
 
+// Some ccusage sessions carry no usable activity date: a non-Claude agent row,
+// or a session whose entries lack timestamps, arrives with neither a top-level
+// `lastActivity` nor a `metadata.lastActivity` string. Keep `lastActivity`
+// optional so one dateless session degrades to "unknown" instead of failing the
+// entire session list. See raycast/extensions#28423.
+
 const modelBreakdownSchema = z.object({
   modelName: z.string(),
   inputTokens: z.number(),
@@ -65,7 +71,7 @@ export const MonthlyUsageResponseSchema = z.preprocess(
 
 export const SessionResponseSchema = z.preprocess(
   (raw) => liftLastActivity(alias("period", "sessionId")(raw)),
-  z.object({ sessionId: z.string(), lastActivity: z.string(), ...usageRowBase }),
+  z.object({ sessionId: z.string(), lastActivity: z.string().optional(), ...usageRowBase }),
 );
 
 export const ModelUsageSchema = z.object({
