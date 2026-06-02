@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adb-qr-pair",
+  "title": "ADB QR Pair",
+  "description": "Pair and connect Android devices over wireless debugging by scanning a QR code.",
+  "icon": "extension-icon.png",
+  "author": "scisaif",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "adb-qr-pair",
+      "title": "Pair with QR Code",
+      "description": "Pair and connect an Android device over wireless debugging by scanning a QR code.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "adbPath",
+      "title": "ADB Path",
+      "description": "Full path to adb (leave empty to auto-detect). macOS: /opt/homebrew/bin/adb — Windows: %LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "/opt/homebrew/bin/adb"
+    },
+    {
+      "name": "pairingTimeout",
+      "title": "Pairing Timeout",
+      "description": "Seconds to wait for the phone to scan the QR code",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "placeholder": "60"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
