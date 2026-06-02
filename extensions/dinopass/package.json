@@ -4,7 +4,7 @@
   "title": "DinoPass",
   "description": "Generate passwords from dinopass.com",
   "icon": "command-icon.png",
-  "author": "Joe Campo",
+  "author": "campo",
   "categories": [
     "Security",
     "Developer Tools"
