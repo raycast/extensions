@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { extractCmdError, runShell } from "./shell";
+import { extractCmdError, run, runShell } from "./shell";
 import { quitAppIfRunning } from "./process-control";
 
 export interface ReplaceResult {
@@ -272,13 +272,14 @@ async function swapWithAdmin(
     `rm -rf ${shq(backupPath)}`,
   ].join(" && ");
   try {
-    // shq() would wrap `script` in single quotes, which collides with the outer
-    // single-quoted `-e '...'` shell arg and breaks the AppleScript. escapeAS()
-    // emits a properly escaped string literal for AppleScript's double-quoted
-    // form, with no nesting hazard.
-    await runShell(
-      `osascript -e 'do shell script "${escapeAS(script)}" with administrator privileges with prompt "Mac Updater needs to replace the app in /Applications."'`,
-    );
+    // execFile (run) — the whole AppleScript is one -e argument, no shell.
+    // escapeAS() handles the AppleScript string-literal escaping for the inner
+    // shell script (which itself contains shq()-quoted paths). No outer shell
+    // single-quote to collide with, so app names/paths with apostrophes are safe.
+    await run("/usr/bin/osascript", [
+      "-e",
+      `do shell script "${escapeAS(script)}" with administrator privileges with prompt "Mac Updater needs to replace the app in /Applications."`,
+    ]);
     return { success: true };
   } catch (e) {
     return { success: false, error: extractCmdError(e) };
@@ -316,9 +317,13 @@ export async function downloadAndInstall(
         onProgress?.("Running pkg installer…");
         try {
           const installCmd = `installer -pkg ${shq(downloadPath)} -target /`;
-          await runShell(
-            `osascript -e 'do shell script "${escapeAS(installCmd)}" with administrator privileges with prompt "Mac Updater needs to run the package installer for ${escapeAS(appName)}."'`,
-          );
+          // execFile (run) — single -e argument, no surrounding shell. appName
+          // flows only into the AppleScript prompt string (escapeAS), so an
+          // apostrophe in it can't break the command.
+          await run("/usr/bin/osascript", [
+            "-e",
+            `do shell script "${escapeAS(installCmd)}" with administrator privileges with prompt "Mac Updater needs to run the package installer for ${escapeAS(appName)}."`,
+          ]);
           return { success: true };
         } catch (e) {
           return { success: false, error: extractCmdError(e) };

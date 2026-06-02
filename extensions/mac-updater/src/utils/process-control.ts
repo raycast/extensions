@@ -1,4 +1,4 @@
-import { run, runShell } from "./shell";
+import { run } from "./shell";
 
 function escapeAS(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -36,9 +36,12 @@ export async function quitAppIfRunning(appName: string): Promise<boolean> {
   const wasRunning = await isAppRunning(appName);
   if (!wasRunning) return false;
   try {
-    await runShell(
-      `osascript -e 'tell application "${escapeAS(appName)}" to quit' 2>/dev/null`,
-    );
+    // execFile (run) — app name goes only into the AppleScript string literal
+    // (escapeAS); no shell, so an apostrophe in the name can't break anything.
+    await run("/usr/bin/osascript", [
+      "-e",
+      `tell application "${escapeAS(appName)}" to quit`,
+    ]);
   } catch {
     // ignore — app may have already quit or refused; we'll still wait briefly
   }
