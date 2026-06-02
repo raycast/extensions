@@ -136,7 +136,7 @@ const WebSearchActionPanel = React.memo((props: WebSearchActionPanelProps) => {
           showToast({
             style: Toast.Style.Success,
             title: "Opened in Popup",
-            message: item.title || item.url,
+            message: item.query || item.url,
           });
         }}
       />
