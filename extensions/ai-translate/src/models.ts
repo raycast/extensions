@@ -20,14 +20,6 @@ const MODEL_CATALOG: Record<ProviderId, ProviderModels> = {
       { id: "deepseek-v4-pro", title: "V4 Pro" },
     ],
   },
-  minimax: {
-    fast: { id: "MiniMax-M3", title: "M3" },
-    pro: { id: "MiniMax-M3", title: "M3" },
-    all: [
-      { id: "MiniMax-M3", title: "M3" },
-      { id: "MiniMax-M2.7-highspeed", title: "M2.7 Highspeed" },
-    ],
-  },
   mimo: {
     fast: { id: "mimo-v2.5", title: "V2.5" },
     pro: { id: "mimo-v2.5-pro", title: "V2.5 Pro" },

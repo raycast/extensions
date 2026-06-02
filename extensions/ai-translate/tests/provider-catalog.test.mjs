@@ -13,15 +13,12 @@ function preference(name) {
   return found;
 }
 
-test("manifest exposes MiniMax as a translation provider", () => {
+test("manifest exposes the active translation providers", () => {
   assert.deepEqual(
     preference("defaultProvider").data.map((entry) => entry.value),
-    ["deepseek", "minimax", "mimo", "gemini", "openai"],
+    ["deepseek", "mimo", "gemini", "openai"],
   );
-  assert.equal(preference("enableMiniMax").default, false);
-  assert.equal(preference("providerOrder").default, "deepseek,minimax,mimo,gemini,openai");
-  assert.equal(preference("minimaxBaseURL").default, "https://api.minimaxi.com/anthropic");
-  assert.equal(preference("minimaxModel").default, "MiniMax-M3");
+  assert.equal(preference("providerOrder").default, "deepseek,mimo,gemini,openai");
 });
 
 test("manifest exposes one default model setting for prompt commands", () => {
@@ -46,11 +43,11 @@ test("manifest keeps AI Translate focused on translation and capture commands", 
   ]);
 });
 
-test("MiniMax catalog defaults to M3 and keeps M2.7 as an explicit text-model choice", () => {
-  assert.equal(resolveModel("minimax", "fast", ""), "MiniMax-M3");
-  assert.equal(resolveModel("minimax", "pro", ""), "MiniMax-M3");
+test("MiMo catalog keeps fast and best model choices distinct", () => {
+  assert.equal(resolveModel("mimo", "fast", ""), "mimo-v2.5");
+  assert.equal(resolveModel("mimo", "pro", ""), "mimo-v2.5-pro");
   assert.deepEqual(
-    getModelOptions("minimax").map((entry) => entry.id),
-    ["MiniMax-M3", "MiniMax-M2.7-highspeed"],
+    getModelOptions("mimo").map((entry) => entry.id),
+    ["mimo-v2.5-pro", "mimo-v2.5", "mimo-v2-pro", "mimo-v2-flash", "mimo-v2-omni"],
   );
 });

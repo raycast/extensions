@@ -21,7 +21,7 @@ const profileInstructions: Record<TranslationRequest["promptProfile"], string> =
   legal:
     "Use precise legal or policy language. Preserve defined terms, obligations, conditions, citations, article numbers, and modal verbs such as shall, may, and must.",
   subtitle:
-    "Use natural spoken phrasing suitable for subtitles or dialogue. Keep sentences readable and avoid overly formal wording unless the source requires it.",
+    "Use natural spoken phrasing suitable for subtitles, dialogue, or text-to-speech. The output may be read aloud by a TTS model, so prefer plain text, shorter sentences, and a smooth human rhythm. Avoid document-style symbols or formatting unless the source meaning requires them.",
   custom:
     "Use the custom instructions as the primary translation frame while preserving the source meaning and target language.",
 };

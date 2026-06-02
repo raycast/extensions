@@ -501,8 +501,7 @@ function anthropicCompatibleHeaders(apiKey: string): Record<string, string> {
  * DeepSeek v4 and MiMo v2.5 default to `thinking: enabled`, which adds
  * first-token latency and silently ignores `temperature`. Translation is
  * latency-sensitive and benefits from temperature control, so we explicitly
- * disable thinking for those providers. MiniMax follows the official
- * Anthropic-compatible Messages shape and does not need this extra field.
+ * disable thinking for those providers.
  */
 function withProviderRequestExtras<T extends Record<string, unknown>>(config: ProviderConfig, body: T): T {
   if (config.id === "deepseek" || config.id === "mimo") {

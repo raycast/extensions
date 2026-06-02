@@ -19,7 +19,6 @@
         "ai",
         "selection",
         "deepseek",
-        "minimax",
         "mimo",
         "gemini",
         "openai"
@@ -118,7 +117,6 @@
         "profile",
         "style",
         "configure",
-        "minimax",
         "tts",
         "qwen",
         "dashscope"
@@ -141,10 +139,6 @@
         {
           "title": "DeepSeek",
           "value": "deepseek"
-        },
-        {
-          "title": "MiniMax",
-          "value": "minimax"
         },
         {
           "title": "Xiaomi MiMo",
@@ -541,15 +535,6 @@
       "default": true
     },
     {
-      "name": "enableMiniMax",
-      "type": "checkbox",
-      "title": "Enable MiniMax",
-      "label": "MiniMax",
-      "required": false,
-      "description": "Allow MiniMax in provider lists and no-window command fallback order.",
-      "default": false
-    },
-    {
       "name": "enableMiMo",
       "type": "checkbox",
       "title": "Enable Xiaomi MiMo",
@@ -582,8 +567,8 @@
       "type": "textfield",
       "required": false,
       "description": "Advanced: comma-separated provider ids used after Default Provider.",
-      "default": "deepseek,minimax,mimo,gemini,openai",
-      "placeholder": "deepseek,minimax,mimo,gemini,openai"
+      "default": "deepseek,mimo,gemini,openai",
+      "placeholder": "deepseek,mimo,gemini,openai"
     },
     {
       "title": "Provider Request Timeout",
@@ -624,30 +609,6 @@
       "required": false,
       "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in DeepSeek catalog unless you pick a model from the action panel. Thinking mode is disabled per request so prompts stay low-latency and honor temperature.",
       "default": "deepseek-v4-flash"
-    },
-    {
-      "title": "MiniMax API Key",
-      "name": "minimaxAPIKey",
-      "type": "password",
-      "required": false,
-      "description": "Your MiniMax API key. Stored encrypted in Raycast's secure preference storage.",
-      "default": ""
-    },
-    {
-      "title": "MiniMax Base URL",
-      "name": "minimaxBaseURL",
-      "type": "textfield",
-      "required": false,
-      "description": "Anthropic-compatible MiniMax base URL.",
-      "default": "https://api.minimaxi.com/anthropic"
-    },
-    {
-      "title": "MiniMax Custom Model",
-      "name": "minimaxModel",
-      "type": "textfield",
-      "required": false,
-      "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in MiniMax-M3 catalog unless you pick a model from the action panel.",
-      "default": "MiniMax-M3"
     },
     {
       "title": "Xiaomi MiMo API Key",

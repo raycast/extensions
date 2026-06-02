@@ -12,7 +12,6 @@ import {
 
 export const PROVIDER_TITLES: Record<ProviderId, string> = {
   deepseek: "DeepSeek",
-  minimax: "MiniMax",
   mimo: "Xiaomi MiMo",
   gemini: "Gemini",
   openai: "OpenAI / ChatGPT",
@@ -32,12 +31,6 @@ const providerPreferenceKeys: Record<
     apiKey: "deepseekAPIKey",
     baseURL: "deepseekBaseURL",
     model: "deepseekModel",
-  },
-  minimax: {
-    enabled: "enableMiniMax",
-    apiKey: "minimaxAPIKey",
-    baseURL: "minimaxBaseURL",
-    model: "minimaxModel",
   },
   mimo: {
     enabled: "enableMiMo",

@@ -40,7 +40,6 @@ AI Translate is a bring-your-own-key extension. You decide which providers to en
 | Provider         | Default Fast        | Default Best             | Endpoint                                                                                                                                                                                                 |
 | ---------------- | ------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | DeepSeek         | `deepseek-v4-flash` | `deepseek-v4-pro`        | Anthropic-compatible `https://api.deepseek.com/anthropic`                                                                                                                                                |
-| MiniMax          | `MiniMax-M3`        | `MiniMax-M3`             | Anthropic-compatible `https://api.minimaxi.com/anthropic`                                                                                                                                                |
 | Xiaomi MiMo      | `mimo-v2.5`         | `mimo-v2.5-pro`          | Anthropic-compatible `https://token-plan-cn.xiaomimimo.com/anthropic` (Token Plan)                                                                                                                       |
 | Gemini           | `gemini-3.5-flash`  | `gemini-3.1-pro-preview` | Google `https://generativelanguage.googleapis.com/v1beta`                                                                                                                                                |
 | OpenAI / ChatGPT | `gpt-4.1-mini`      | `gpt-4.1`                | OpenAI Chat Completions `https://api.openai.com/v1`; GPT-5.x reasoning models (`gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`) are sent with `reasoning_effort: "minimal"` for translation latency |
@@ -93,7 +92,7 @@ AI Translate 是一个比较轻量的 Raycast 扩展，主要服务三个日常�
 
 - **以意译和自然表达为默认方向**：默认提示词更重视目标语言里的自然说法，而不是逐词对应。
 - **适合不可复制文本**：截图后可以先 OCR，再检查识别结果，最后翻译。
-- **支持多个模型服务商**：可以按自己的 API key 启用 DeepSeek（`deepseek-v4-flash`/`deepseek-v4-pro`，Anthropic-compatible 路径并默认关闭 thinking）、MiniMax（默认 `MiniMax-M3`，Anthropic-compatible 路径）、小米 MiMo（`mimo-v2.5`/`mimo-v2.5-pro`，同上）、Gemini（默认 `gemini-3.5-flash`/`gemini-3.1-pro-preview`）、OpenAI / ChatGPT（默认 `gpt-4.1-mini`/`gpt-4.1`，GPT-5.x 推理模型自动加 `reasoning_effort=minimal`）。
+- **支持多个模型服务商**：可以按自己的 API key 启用 DeepSeek（`deepseek-v4-flash`/`deepseek-v4-pro`，Anthropic-compatible 路径并默认关闭 thinking）、小米 MiMo（`mimo-v2.5`/`mimo-v2.5-pro`，同上）、Gemini（默认 `gemini-3.5-flash`/`gemini-3.1-pro-preview`）、OpenAI / ChatGPT（默认 `gpt-4.1-mini`/`gpt-4.1`，GPT-5.x 推理模型自动加 `reasoning_effort=minimal`）。
 - **可比较多个 provider 的输出**：开启多个 provider 后，可以在同一个列表里看不同模型的结果、耗时和状态。
 - **支持快速替换工作流**：`Translate & Paste` 适合绑定全局快捷键，直接把结果粘回原位置。
 - **保留本地历史**：复制或粘贴过的翻译结果会进入本地历史，方便回看；旧版本留下的改写记录仍可显示。
