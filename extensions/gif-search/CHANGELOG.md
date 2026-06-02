@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add square GIF actions] - {PR_MERGE_DATE}
+## [Add square GIF actions] - 2026-06-02
 
 - Added new actions to copy and paste center-cropped square GIFs on macOS
 
