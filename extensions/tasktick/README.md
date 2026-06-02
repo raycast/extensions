@@ -13,7 +13,7 @@ Search, run, and monitor your [TaskTick](https://www.lifedever.com/TaskTick/) sc
 ## Requirements
 
 - macOS 14 or later
-- [TaskTick.app](https://www.lifedever.com/TaskTick/) 1.5.0 or later installed
+- [TaskTick.app](https://www.lifedever.com/TaskTick/) 1.9.2 or later installed
 - The `tasktick` CLI symlink enabled in **TaskTick → Settings → Advanced → Enable CLI**
   - Default symlink target: `/usr/local/bin/tasktick`
   - The extension also probes `~/.local/bin`, `/opt/homebrew/bin`, and the app's embedded binary as fallbacks
@@ -80,7 +80,7 @@ TaskTick.app needs to be running for scheduled-task execution. The CLI talks to 
 The events stream uses `tasktick events --json` as a long-lived subprocess. If you see stale statuses:
 
 1. Press `⌘ ⇧ R` to force-refresh
-2. Make sure your `tasktick` CLI version supports the `events` subcommand (TaskTick.app 1.5.0+)
+2. Make sure your `tasktick` CLI version supports the `events` subcommand (TaskTick.app 1.9.2+)
 3. Check Raycast's developer console (`⌘ ⇧ D` while the extension is active) for stream errors
 
 ## Links
