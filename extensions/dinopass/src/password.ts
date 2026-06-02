@@ -1,0 +1,16 @@
+import { Clipboard, showHUD } from "@raycast/api";
+
+export async function fetchPassword(type: "simple" | "strong") {
+  showHUD("⏳ Generating password...");
+
+  try {
+    const response = await fetch(`https://dinopass.com/password/${type}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const password = (await response.text()).trim();
+
+    await Clipboard.copy(password);
+    await showHUD("✅ Password copied to clipboard");
+  } catch {
+    await showHUD("❌ Failed to fetch password");
+  }
+}

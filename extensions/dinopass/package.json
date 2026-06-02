@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dinopass",
+  "title": "DinoPass",
+  "description": "Generate passwords from dinopass.com",
+  "icon": "command-icon.png",
+  "author": "Joe Campo",
+  "categories": [
+    "Security",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "simple-password",
+      "title": "Generate Simple Password",
+      "description": "Generate a simple, easy-to-remember password from dinopass.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "strong-password",
+      "title": "Generate Strong Password",
+      "description": "Generate a strong password from dinopass.com",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "eslint": "^8.51.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
