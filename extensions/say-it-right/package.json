@@ -138,8 +138,12 @@
           "value": "qwen3.6-flash"
         },
         {
-          "title": "qwen3.6-plus — balanced quality",
-          "value": "qwen3.6-plus"
+          "title": "qwen3.7-plus — balanced multimodal quality",
+          "value": "qwen3.7-plus"
+        },
+        {
+          "title": "qwen3.7-max — strongest reasoning",
+          "value": "qwen3.7-max"
         }
       ]
     },

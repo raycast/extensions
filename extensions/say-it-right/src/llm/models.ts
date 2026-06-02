@@ -42,7 +42,8 @@ export const DEFAULT_ANALYSIS_MODELS: Record<ProviderName, string> = {
 export const ANALYSIS_MODELS: Record<ProviderName, readonly ModelOption[]> = {
   qwen: [
     { id: "qwen3.6-flash", title: "Qwen 3.6 Flash" },
-    { id: "qwen3.6-plus", title: "Qwen 3.6 Plus" },
+    { id: "qwen3.7-plus", title: "Qwen 3.7 Plus" },
+    { id: "qwen3.7-max", title: "Qwen 3.7 Max" },
   ],
   minimax: [
     { id: "MiniMax-M3", title: "M3" },
