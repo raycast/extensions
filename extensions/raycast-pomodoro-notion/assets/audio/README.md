@@ -1,6 +1,6 @@
 # 同梱音源の配置
 
-このフォルダに以下の名前で音源を置くと、RaycastPomodoroNotion が自動で検出して使います。
+このフォルダに以下の名前で音源を置くと、PomoNotion Raycast Extension が自動で検出して使います。
 
 ## 推奨ファイル名
 

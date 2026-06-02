@@ -1,4 +1,4 @@
-# Raycast Pomodoro Notion
+# PomoNotion Raycast Extension
 
 Raycast 上でポモドーロタイマーを動かし、作業ログを Notion に残す拡張です。  
 作業 BGM・休憩 BGM・アラーム、作業メモ、集中度の記録、途中終了、一時停止・再開までを 1 つにまとめています。
@@ -20,7 +20,7 @@ Raycast 上でポモドーロタイマーを動かし、作業ログを Notion �
 
 ## English Summary
 
-Raycast Pomodoro Notion is a **macOS-only** Raycast extension that combines a Pomodoro timer with Notion logging.  
+PomoNotion Raycast Extension is a **macOS-only** Raycast extension that combines a Pomodoro timer with Notion logging.  
 Created by [こひなだまこと](https://x.com/pgp_workstyle).
 
 After installation, set up a Notion database and extension preferences, then start from **Start Pomodoro** or **Pomodoro Status**.  
@@ -41,13 +41,13 @@ Default cycle: 37 minutes work, 3 minutes short break, 15 minutes long break aft
 
 - **Raycast**（macOS）
 - **Notion** アカウント（**作業ログ保存は無料プランで可**。Dashboard の複数 chart 表示は **Notion Plus 以上を推奨** — 下記参照）
-- 作業ログ用 Notion データベース（**推奨:** [Minimal テンプレート](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)を Duplicate）
+- 作業ログ用 Notion データベース（**推奨:** [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link)を Duplicate）
 
 ## クイックスタート
 
 インストール後、次の 3 ステップで使い始められます。
 
-1. Notion で [**Minimal テンプレート**](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)（`Raycast Pomodoro Notion Dashboard（Minimal）`）を **Duplicate** するか、同等の **作業ログ** データベースを手動で用意する
+1. Notion で [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) を **Duplicate** するか、同等の **作業ログ** データベースを手動で用意する
 2. Raycast で **`Configure Notion`** を開き、`Notion Token`（コネクトのアクセストークン）と `Notion Database ID` を設定して接続を確認する
 3. **`Start Pomodoro`** または **`Pomodoro Status`** からセッションを開始する
 
@@ -105,11 +105,11 @@ Raycast → 拡張 **Preferences** の `Work Sound File` / `Break Sound File` / 
 ## Notion セットアップ
 
 作業ログの保存先として、Notion データベース **1 つ** が必要です。  
-**推奨** は、Notion 上で公開している Minimal テンプレート [**Raycast Pomodoro Notion Dashboard（Minimal）**](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829) を Duplicate する方法です（Dashboard・作業ログ DB・セットアップガイド「はじめに」が含まれます）。Raycast 拡張本体には Notion テンプレートは含まれません。
+**推奨** は、Notion 上で公開している [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) を Duplicate する方法です（Dashboard・作業ログ DB・セットアップガイド「はじめに」が含まれます）。Raycast 拡張本体には Notion テンプレートは含まれません。
 
-**Duplicate リンク:** https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829
+**Duplicate リンク:** https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link
 
-### テンプレートに含まれるもの（Minimal）
+### PomoNotion Dashboard (Minimal) に含まれるもの
 
 | 要素 | 内容 |
 |---|---|
@@ -124,7 +124,7 @@ Raycast → 拡張 **Preferences** の `Work Sound File` / `Break Sound File` / 
 
 テンプレート利用時の流れ:
 
-1. [Minimal テンプレート](https://steady-lighter-6fe.notion.site/Raycast-Pomodoro-Notion-Dashboard-Minimal-adbcd1874cd583ff8e8b815edee6f829)を開き **Duplicate** して自分のワークスペースにコピーする
+1. [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link)を開き **Duplicate** して自分のワークスペースにコピーする
 2. 下記 **1〜5** の手順（コネクト作成 → DB 接続 → データベース ID 取得 → Raycast 設定）を行う  
    ※ 詳細は Duplicate 先の **「はじめに」** を参照
 3. `Configure Notion` で接続確認が成功することを確認する
@@ -137,7 +137,7 @@ Notion の **コネクト** から **アクセストークン**（多くは `sec
 
 1. [コネクト管理画面](https://app.notion.com/developers/connections) を開く
 2. **+ 新規コネクト** をクリック
-3. **名前**（例: `Raycast Pomodoro`）を入力し、**アクセストークン** と **ワークスペース** を選び、**コネクトを作成** をクリック
+3. **名前**（例: `PomoNotion`）を入力し、**アクセストークン** と **ワークスペース** を選び、**コネクトを作成** をクリック
 4. 表示された **アクセストークン** をコピー
 
 **Notion アプリから行く場合**

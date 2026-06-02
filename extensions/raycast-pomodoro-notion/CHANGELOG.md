@@ -1,4 +1,4 @@
-# Raycast Pomodoro Notion Changelog
+# PomoNotion Raycast Extension Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

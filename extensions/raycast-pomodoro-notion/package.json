@@ -1,6 +1,6 @@
 {
   "name": "raycast-pomodoro-notion",
-  "title": "Raycast Pomodoro Notion",
+  "title": "PomoNotion Raycast Extension",
   "description": "A Raycast Pomodoro timer with Notion logging, ambient audio, and active-minute tracking.",
   "icon": "icon.png",
   "author": "hk_raycast",
@@ -12,6 +12,7 @@
     "Productivity"
   ],
   "keywords": [
+    "pomonotion",
     "pomodoro",
     "timer",
     "notion",
