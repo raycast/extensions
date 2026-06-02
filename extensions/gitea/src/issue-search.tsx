@@ -41,7 +41,7 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter issues"
-          storeValue={true}
+          value={`state:${state}`}
           onChange={(value) => {
             setState(value.replace("state:", "") as IssueSearchState);
           }}

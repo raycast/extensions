@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Form, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LabelPicker } from "./components/issues";
 import { useCreateIssueMetadata } from "./hooks/useCreateIssueMetadata";
 import { useCreateIssueMutation } from "./hooks/useCreateIssueMutation";
@@ -8,14 +8,18 @@ import { useUserRepositories } from "./hooks/useUserRepositories";
 import type { Repository } from "./types/api";
 import { buildCreateIssueParams, parseRepo, type CreateIssueFormValues } from "./utils/create-issue";
 
+const MAX_REPOSITORY_PREFETCH_PAGES = 2;
+
 export default function Command(props: { initialRepo?: Repository }) {
   const { items: repositories, isLoading, pagination } = useUserRepositories();
   const { createIssue, isSubmitting } = useCreateIssueMutation();
   const [selectedRepo, setSelectedRepo] = useState<string>(props.initialRepo?.full_name ?? "");
   const [formKey, setFormKey] = useState(0);
+  const prefetchedRepositoryPages = useRef(1);
 
   useEffect(() => {
-    if (!isLoading && pagination.hasMore) {
+    if (!isLoading && pagination.hasMore && prefetchedRepositoryPages.current < MAX_REPOSITORY_PREFETCH_PAGES) {
+      prefetchedRepositoryPages.current += 1;
       pagination.onLoadMore();
     }
   }, [isLoading, pagination]);

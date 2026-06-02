@@ -27,7 +27,6 @@ export default function NotificationList({ items, mutate }: NotificationListProp
               color: Color.SecondaryText,
             },
           },
-          //{ text: `[${item.id}]` },
         ]}
         actions={<NotificationActions item={item} mutate={mutate} />}
       />

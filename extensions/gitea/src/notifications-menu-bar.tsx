@@ -1,8 +1,12 @@
 import { MenuBarExtra, Icon, Color, open, launchCommand, LaunchType } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { NotificationStatus } from "./domain/notification";
-import { getUnreadNotificationCount, readAllNotifications, updateNotificationStatus } from "./services/notifications";
-import { listUnreadNotifications } from "./services/notifications";
+import {
+  getUnreadNotificationCount,
+  listUnreadNotifications,
+  readAllNotifications,
+  updateNotificationStatus,
+} from "./services/notifications";
 import { NotificationThread } from "./types/api";
 import { getNotificationIcon } from "./utils/icons";
 import { CacheKey } from "./constants";
