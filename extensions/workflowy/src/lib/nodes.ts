@@ -105,6 +105,19 @@ export function extractTags(input: string): string[] {
   return [...new Set(matches.map((tag) => tag.toLowerCase()))];
 }
 
+export function sanitizeShortcutLabel(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function truncate(text: string | null | undefined, length = 80): string {
   if (!text) return "";
   if (text.length <= length) return text;

@@ -16,12 +16,7 @@ export function getDatabasePath(): string {
 }
 
 export function getWorkerPath(): string {
-  const candidates = [
-    path.join(environment.assetsPath, "sync-worker.js"),
-    path.resolve(environment.assetsPath, "..", "scripts", "sync-worker.js"),
-    path.resolve(process.cwd(), "assets", "sync-worker.js"),
-    path.resolve(process.cwd(), "scripts", "sync-worker.js"),
-  ];
+  const candidates = [path.join(environment.assetsPath, "sync-worker.js"), path.resolve(process.cwd(), "assets", "sync-worker.js")];
 
   const found = candidates.find((candidate) => fs.existsSync(candidate));
   if (!found) {

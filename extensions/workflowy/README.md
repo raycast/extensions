@@ -65,8 +65,6 @@ npm run lint
 npm run dev
 ```
 
-## Project docs
+## Architecture reference
 
-- Product spec: `plan.md`
-- Working task list: `TASKS.md`
-- Architecture reference: https://github.com/rodolfo-terriquez/workflowy-local-mcp
+- https://github.com/rodolfo-terriquez/workflowy-local-mcp

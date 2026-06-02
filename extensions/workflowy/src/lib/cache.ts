@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { getDatabasePath } from "./paths";
-import type { Bookmark, TagCount, WorkflowyNodeRecord, WorkflowyShortcut } from "./nodes";
+import { sanitizeShortcutLabel, type Bookmark, type TagCount, type WorkflowyNodeRecord, type WorkflowyShortcut } from "./nodes";
 
 let database: DatabaseSync | null = null;
 
@@ -279,19 +279,6 @@ export function getChildren(parentId: string, limit = 5): WorkflowyNodeRecord[] 
 export function getChildCount(parentId: string): number {
   const row = getDb().prepare("SELECT COUNT(*) as count FROM nodes WHERE parent_id = ?").get(parentId) as { count: number } | undefined;
   return row?.count ?? 0;
-}
-
-function sanitizeShortcutLabel(value: string): string {
-  return value
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 export function getAllShortcuts(): WorkflowyShortcut[] {

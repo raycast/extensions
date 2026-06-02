@@ -1,37 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { CapturePosition, CaptureType } from "./nodes";
 
-export type OpenWorkflowyLocationTarget = "app" | "web";
-
-export interface ExtensionPreferences {
-  apiKey: string;
-  cacheStaleMinutes?: string;
-  capturePosition?: CapturePosition;
-  quickCaptureDefaultTarget?: string;
-  quickCaptureDefaultType?: CaptureType;
-  viewDefaultTarget?: string;
-  openWorkflowyLocationTarget?: OpenWorkflowyLocationTarget;
-}
-
-export interface NormalizedPreferences {
-  apiKey: string;
-  cacheStaleMinutes: number;
-  capturePosition: CapturePosition;
-  quickCaptureDefaultTarget: string;
-  quickCaptureDefaultType: CaptureType;
-  viewDefaultTarget: string;
-  openWorkflowyLocationTarget: OpenWorkflowyLocationTarget;
-}
-
-export function getPreferences(): NormalizedPreferences {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export function getPreferences() {
+  const preferences = getPreferenceValues<Preferences>();
   const apiKey = preferences.apiKey?.trim();
   const staleMinutes = Number.parseInt(preferences.cacheStaleMinutes?.trim() || "60", 10);
-  const capturePosition = preferences.capturePosition === "bottom" ? "bottom" : "top";
+  const capturePosition: NonNullable<Preferences["capturePosition"]> = preferences.capturePosition === "bottom" ? "bottom" : "top";
   const quickCaptureDefaultTarget = preferences.quickCaptureDefaultTarget?.trim() || "inbox";
-  const quickCaptureDefaultType = preferences.quickCaptureDefaultType === "bullet" ? "bullet" : "todo";
+  const quickCaptureDefaultType: NonNullable<Preferences["quickCaptureDefaultType"]> = preferences.quickCaptureDefaultType === "bullet" ? "bullet" : "todo";
   const viewDefaultTarget = preferences.viewDefaultTarget?.trim() || "inbox";
-  const openWorkflowyLocationTarget = preferences.openWorkflowyLocationTarget === "web" ? "web" : "app";
+  const openWorkflowyLocationTarget: NonNullable<Preferences["openWorkflowyLocationTarget"]> = preferences.openWorkflowyLocationTarget === "web" ? "web" : "app";
 
   return {
     apiKey: apiKey ?? "",

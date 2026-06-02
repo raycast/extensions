@@ -4,11 +4,7 @@ import { insertNodeOptimistically } from "./lib/cache";
 import { resolveDefaultCaptureDestination } from "./lib/capture-options";
 import { getPreferences } from "./lib/preferences";
 
-interface Arguments {
-  text?: string;
-}
-
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: { arguments: Arguments.QuickCapture }) {
   const preferences = getPreferences();
   if (!preferences.apiKey) {
     await showToast({ style: Toast.Style.Failure, title: "Missing Workflowy API Key", message: "Open preferences to add it." });
@@ -16,7 +12,7 @@ export default async function Command(props: { arguments: Arguments }) {
     return;
   }
 
-  let text = props.arguments.text?.trim();
+  let text: string | undefined = props.arguments.text?.trim();
   if (!text) {
     try {
       text = (await getSelectedText()).trim();

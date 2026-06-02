@@ -1,4 +1,4 @@
-import { isFullUuid, SYSTEM_TARGETS, type CapturePosition, type CaptureType, type WorkflowyApiNode, type WorkflowyExportNode, type WorkflowyShortcut } from "./nodes";
+import { isFullUuid, sanitizeShortcutLabel, SYSTEM_TARGETS, type CapturePosition, type CaptureType, type WorkflowyApiNode, type WorkflowyExportNode, type WorkflowyShortcut } from "./nodes";
 
 const API_BASE = "https://workflowy.com";
 
@@ -57,19 +57,6 @@ export async function listTargets(apiKey: string): Promise<WorkflowyShortcut[]> 
     if (a.isSystem !== b.isSystem) return a.isSystem ? -1 : 1;
     return a.label.localeCompare(b.label);
   });
-}
-
-function sanitizeShortcutLabel(value: string): string {
-  return value
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function normalizeShortcut(value: unknown): WorkflowyShortcut | null {

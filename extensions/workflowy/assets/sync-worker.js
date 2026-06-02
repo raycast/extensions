@@ -134,6 +134,19 @@ function toLabel(value) {
     .join(" ");
 }
 
+function sanitizeShortcutLabel(value) {
+  return String(value)
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function normalizeShortcut(value) {
   if (!value || typeof value !== "object") return null;
   const target = value;
@@ -143,7 +156,8 @@ function normalizeShortcut(value) {
   const maybeId = [target.node_id, target.nodeId, target.id, target.uuid].find((candidate) => typeof candidate === "string");
   const nodeId = typeof maybeId === "string" && /^[0-9a-f-]{36}$/i.test(maybeId) ? maybeId : null;
   const isSystem = String(target.type ?? "").toLowerCase() === "system" || Boolean(target.is_system ?? target.isSystem) || SYSTEM_TARGETS.includes(key.toLowerCase());
-  const label = String(target.label ?? target.title ?? target.display_name ?? target.displayName ?? target.name ?? toLabel(key));
+  const rawLabel = String(target.label ?? target.title ?? target.display_name ?? target.displayName ?? target.name ?? toLabel(key));
+  const label = sanitizeShortcutLabel(rawLabel) || toLabel(key);
 
   return { name: key, nodeId, isSystem, label };
 }
@@ -400,8 +414,6 @@ async function main() {
   if (force) {
     // force bypasses stale checks, not server rate limits
   }
-
-  setMeta(db, "last_export_at", now);
 
   emit({ type: "progress", step: "export", message: "Downloading Workflowy account…" });
   const items = await fetchNodesExport(apiKey);
