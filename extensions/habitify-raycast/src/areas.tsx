@@ -390,6 +390,10 @@ export default function Command() {
     void loadAreas();
   }, [loadAreas, refreshCounter]);
 
+  const handleRefresh = useCallback(() => {
+    setRefreshCounter((v) => v + 1);
+  }, []);
+
   const emptyView = useMemo(() => {
     if (error) {
       return (
@@ -414,12 +418,12 @@ export default function Command() {
         description="Create areas in Habitify to organize your habits."
         actions={
           <ActionPanel>
-            <Action title="Refresh" onAction={() => setRefreshCounter((value) => value + 1)} />
+            <Action title="Refresh" onAction={handleRefresh} />
           </ActionPanel>
         }
       />
     );
-  }, [error]);
+  }, [error, handleRefresh]);
 
   return (
     <List
@@ -442,7 +446,7 @@ export default function Command() {
                     icon={Icon.ArrowRight}
                     target={<AreaHabitsView area={area} apiKey={apiKey} rowColorMode={rowColorMode} />}
                   />
-                <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => setRefreshCounter((value) => value + 1)} />
+                <Action title="Refresh" icon={Icon.RotateClockwise} onAction={handleRefresh} />
                 <Action.CopyToClipboard title="Copy Area ID" content={area.id} />
               </ActionPanel>
             }
