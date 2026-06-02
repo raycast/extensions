@@ -132,6 +132,8 @@ export default function Command() {
       if (usedCache) {
         const cachedAt = latestCacheTimestamp(cachedJournal?.savedAt, cachedHabits?.savedAt);
         setCacheNotice(cachedAt ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}` : "Showing cached data");
+      } else {
+        setCacheNotice(null);
       }
 
       const weekDates = getDatesForWeek().filter((d) => d !== today);

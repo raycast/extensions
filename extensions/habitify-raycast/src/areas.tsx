@@ -110,6 +110,8 @@ function AreaHabitsView({
         if (usedCache) {
           const cachedAt = latestCacheTimestamp(cachedJournal?.savedAt, cachedHabits?.savedAt);
           setCacheNotice(cachedAt ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}` : "Showing cached data");
+        } else {
+          setCacheNotice(null);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unable to load area habits.");
