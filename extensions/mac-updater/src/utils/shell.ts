@@ -105,9 +105,10 @@ export async function runWithTimeout(
   cmd: string,
   args: string[],
   timeoutMs: number,
+  extraEnv?: Record<string, string>,
 ): Promise<{ stdout: string; stderr: string }> {
   const child = execFile(cmd, args, {
-    env: { ...process.env, PATH: PATH_ENV },
+    env: { ...process.env, PATH: PATH_ENV, ...extraEnv },
     maxBuffer: 10 * 1024 * 1024,
   });
   let outBuf = "";
@@ -150,9 +151,10 @@ export async function runWithTimeout(
 export async function runShellWithTimeout(
   cmd: string,
   timeoutMs: number,
+  extraEnv?: Record<string, string>,
 ): Promise<{ stdout: string; stderr: string }> {
   const child = exec(cmd, {
-    env: { ...process.env, PATH: PATH_ENV },
+    env: { ...process.env, PATH: PATH_ENV, ...extraEnv },
     maxBuffer: 10 * 1024 * 1024,
   });
   let outBuf = "";

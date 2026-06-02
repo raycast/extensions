@@ -6,35 +6,42 @@ import {
   extractCmdError,
   findBrew,
   run,
-  runShell,
   runShellWithTimeout,
   runWithTimeout,
 } from "../shell";
-import { runShellAsAdmin } from "../external";
 import { quitAppIfRunning } from "../process-control";
+import { getAskpassScript } from "../sudo-askpass";
 import { InstalledApp, UpdateInfo, UpdateResult, CliPackage } from "../types";
 import { hasUpdate } from "../version";
 
 // Most updates finish in <60s; pkg-based casks like google-drive sometimes take
-// 2-3 minutes because the .pkg installer itself is slow. 5 minutes is generous
-// without leaving Raycast hanging forever on a wedged sudo prompt.
+// 2-3 minutes because the .pkg installer itself is slow, plus time for the user
+// to answer the password dialog. 5 minutes is generous without leaving Raycast
+// hanging forever on a wedged sudo prompt.
 const BREW_UPGRADE_TIMEOUT_MS = 5 * 60 * 1000;
-// Index updates are network-bound and usually <30s, but slow networks happen.
+// Bulk upgrades can touch many casks (each possibly a .pkg). Give plenty of room.
 const BREW_BULK_TIMEOUT_MS = 15 * 60 * 1000;
 
 /**
- * True if the captured error suggests brew needed sudo and didn't get a usable
- * TTY/askpass. We retry these via a macOS admin prompt instead of failing.
- *
- * The CommandTimeoutError case covers pkg-based casks (google-drive,
- * microsoft-teams, etc.) where brew internally invokes sudo and just hangs
- * forever waiting on a password — no helpful error text, just silence.
+ * Turn a raw brew failure into something a human can act on. Covers the two
+ * pkg-cask failure modes that aren't obvious from brew's own text:
+ *   - CommandTimeoutError → we killed a hung run (most often the password
+ *     dialog went unanswered).
+ *   - "Broken pipe" / sudo-auth text → the admin password was needed for a
+ *     .pkg installer but wasn't provided (user hit Cancel, or auth failed).
  */
-function looksLikeSudoFailure(err: unknown, raw: string): boolean {
-  if (err instanceof CommandTimeoutError) return true;
-  return /sudo.*terminal.*required|sudo.*password is required|sudo.*no askpass|permission denied|operation not permitted|requires.*administrator|requires sudo|needs sudo/i.test(
-    raw,
-  );
+function humanizeBrewError(err: unknown, raw: string): string {
+  if (err instanceof CommandTimeoutError) {
+    return "The update timed out. If a password dialog appeared, run it again and enter your password promptly.";
+  }
+  if (
+    /broken pipe|a password is required|sorry, try again|incorrect password|authentication (failure|error)|with administrator/i.test(
+      raw,
+    )
+  ) {
+    return "This app installs via a macOS .pkg and needs your administrator password. Run the update again and enter your password when the dialog appears.";
+  }
+  return raw;
 }
 
 const CASK_API = "https://formulae.brew.sh/api/cask.json";
@@ -561,12 +568,15 @@ function greedyFlagFor(token: string): "--greedy" | "--greedy-latest" {
  *   1. Quit the running app first — brew can't replace /Applications/Foo.app
  *      while macOS holds it open, and pkg-based installers often fail silently
  *      mid-install when the target is in use.
- *   2. 5-minute hard timeout — pkg casks like google-drive spawn sudo
- *      internally; without a TTY that prompt can hang forever. Better to kill
- *      and retry via the macOS admin dialog than spin a Raycast toast all day.
- *   3. Admin-dialog retry — if brew failed with a sudo error OR timed out, we
- *      re-run the upgrade through `osascript ... with administrator privileges`
- *      which surfaces a real password prompt the user can answer.
+ *   2. SUDO_ASKPASS — .pkg casks (google-drive, microsoft-teams, docker…) make
+ *      brew run `sudo` to (un)install the package. With no TTY that normally
+ *      dies with "Broken pipe". Pointing SUDO_ASKPASS at our helper makes brew
+ *      use `sudo -A`, which pops a native password dialog. brew still runs as
+ *      the user (running brew itself as root is unsupported). The helper is
+ *      only ever invoked when sudo is actually needed, so plain drag-to-Apps
+ *      casks never trigger a prompt.
+ *   3. 5-minute hard timeout — so a dialog the user never answers can't wedge
+ *      the toast forever.
  */
 export async function upgradeCask(
   token: string,
@@ -587,42 +597,21 @@ export async function upgradeCask(
 
   const greedyFlag = greedyFlagFor(token);
 
-  // Step 2: try a normal user-perms upgrade with timeout.
   try {
     await runWithTimeout(
       brew,
       ["upgrade", "--cask", greedyFlag, token],
       BREW_UPGRADE_TIMEOUT_MS,
+      { SUDO_ASKPASS: getAskpassScript() },
     );
     return { name: token, source: "homebrew-cask", success: true };
   } catch (e) {
-    const raw = extractCmdError(e);
-    if (!looksLikeSudoFailure(e, raw)) {
-      return {
-        name: token,
-        source: "homebrew-cask",
-        success: false,
-        error: raw,
-      };
-    }
-    // Step 3: retry via admin dialog. We build the command as a shell string
-    // because osascript's `do shell script` only accepts a single command line.
-    // The token comes from brew's own cask index (trusted) but we still quote
-    // it defensively to avoid any future surprises.
-    try {
-      await runShellAsAdmin(
-        `${brew} upgrade --cask ${greedyFlag} '${token.replace(/'/g, "'\\''")}'`,
-        `Mac Updater needs admin access to upgrade ${appName ?? token}.`,
-      );
-      return { name: token, source: "homebrew-cask", success: true };
-    } catch (e2) {
-      return {
-        name: token,
-        source: "homebrew-cask",
-        success: false,
-        error: extractCmdError(e2),
-      };
-    }
+    return {
+      name: token,
+      source: "homebrew-cask",
+      success: false,
+      error: humanizeBrewError(e, extractCmdError(e)),
+    };
   }
 }
 
@@ -643,11 +632,18 @@ export async function installCask(
   let lastError = "Unknown error";
   for (const flags of strategies) {
     try {
-      const argstr = flags.length ? flags.join(" ") + " " : "";
-      await runShell(`${brew} install --cask ${argstr}"${token}"`);
+      // execFile arg-array (no shell) + SUDO_ASKPASS so .pkg casks that need
+      // root on first install get a native password dialog instead of dying
+      // with "Broken pipe" in Raycast's non-interactive process.
+      await runWithTimeout(
+        brew,
+        ["install", "--cask", ...flags, token],
+        BREW_UPGRADE_TIMEOUT_MS,
+        { SUDO_ASKPASS: getAskpassScript() },
+      );
       return { name: token, source: "homebrew-cask", success: true };
     } catch (e) {
-      lastError = extractCmdError(e);
+      lastError = humanizeBrewError(e, extractCmdError(e));
       // If --adopt isn't supported on this brew version, fall through to --force only
       if (/unknown option.*--adopt|invalid option.*--adopt/i.test(lastError))
         continue;
@@ -689,38 +685,22 @@ export async function upgradeAllBrew(): Promise<UpdateResult> {
   if (!brew) return noBrewResult("Homebrew (all)", "homebrew-cask");
   try {
     // 2>&1 so any pkg-installer warnings on stderr land in our captured output
-    // for the error-message extractor.
+    // for the error-message extractor. SUDO_ASKPASS lets brew authenticate the
+    // .pkg casks in the batch via a native password dialog (sudo -A) — one
+    // prompt covers the whole run since sudo caches the credential.
     await runShellWithTimeout(
       `${brew} upgrade --greedy 2>&1`,
       BREW_BULK_TIMEOUT_MS,
+      { SUDO_ASKPASS: getAskpassScript() },
     );
     return { name: "Homebrew (all)", source: "homebrew-cask", success: true };
   } catch (e) {
-    const raw = extractCmdError(e);
-    if (!looksLikeSudoFailure(e, raw)) {
-      return {
-        name: "Homebrew (all)",
-        source: "homebrew-cask",
-        success: false,
-        error: raw,
-      };
-    }
-    // Bulk-upgrade admin retry. One password prompt covers every cask in the
-    // batch — much better UX than hitting "please update X" failures one by one.
-    try {
-      await runShellAsAdmin(
-        `${brew} upgrade --greedy`,
-        `Mac Updater needs admin access to finish upgrading your Homebrew packages.`,
-      );
-      return { name: "Homebrew (all)", source: "homebrew-cask", success: true };
-    } catch (e2) {
-      return {
-        name: "Homebrew (all)",
-        source: "homebrew-cask",
-        success: false,
-        error: extractCmdError(e2),
-      };
-    }
+    return {
+      name: "Homebrew (all)",
+      source: "homebrew-cask",
+      success: false,
+      error: humanizeBrewError(e, extractCmdError(e)),
+    };
   }
 }
 
