@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Fix Concurrent Git Operations] - {PR_MERGE_DATE}
+## [Fix Concurrent Git Operations] - 2026-06-02
 
 - Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running.
 
