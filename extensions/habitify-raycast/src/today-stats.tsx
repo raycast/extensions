@@ -29,6 +29,8 @@ type Summary = {
   failed: number;
 };
 
+type TodayJournalResponse = Awaited<ReturnType<typeof getTodayJournal>>;
+
 function computeSummary(habits: TodayHabit[]): Summary {
   return habits.reduce<Summary>(
     (acc, habit) => {
@@ -66,9 +68,25 @@ function getDatesForMonth(): string[] {
   return dates;
 }
 
+async function getJournalForDate(apiKey: string, date: string): Promise<TodayJournalResponse | null> {
+  const cacheKey = habitifyCacheKeys.todayJournal(date);
+  const cachedJournal = await readCache<TodayJournalResponse>(cacheKey);
+  if (cachedJournal) {
+    return cachedJournal.data;
+  }
+
+  try {
+    const freshJournal = await getTodayJournal(apiKey, date);
+    await writeCache(cacheKey, freshJournal);
+    return freshJournal;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchMultipleJournals(apiKey: string, dates: string[], habitCatalog: Habit[]): Promise<TodayHabit[]> {
-  const results = await Promise.allSettled(dates.map((d) => getTodayJournal(apiKey, d)));
-  return results.flatMap((r) => (r.status === "fulfilled" ? mergeJournalWithHabits(r.value.data, habitCatalog) : []));
+  const results = await Promise.all(dates.map((date) => getJournalForDate(apiKey, date)));
+  return results.flatMap((journal) => (journal ? mergeJournalWithHabits(journal.data, habitCatalog) : []));
 }
 
 export default function Command() {
