@@ -2,7 +2,7 @@ export interface DevServer {
   pid: number;
   port: string;
   url: string; // primary URL: first customUrl when present, else http://localhost:PORT
-  localUrl: string; // always http://localhost:PORT — for actions that must target loopback
+  localUrl: string; // always http://localhost:PORT, for actions that must target loopback
   customUrls?: string[]; // custom domains pointing at this port (e.g. https://myapp.localhost)
   tool: string; // vite | next | webpack | etc.
   runtime: "node" | "bun"; // the actual listening process's runtime

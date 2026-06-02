@@ -8,7 +8,7 @@ import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
 import { useWorkingTime } from "./hooks/useWorkingTime";
 import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from "./utils/data-formatter";
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
-import { showRemainingUsage, getMenuBarTitle, getProgressBarStyle } from "./preferences";
+import { showRemainingUsage, getMenuBarTitle, getProgressBarStyle, getMenuBarIcon } from "./preferences";
 import { TotalUsageData } from "./types/usage-types";
 
 const MOCK_LIMITS_ENABLED = false;
@@ -137,7 +137,7 @@ export default function MenuBarccusage() {
   })();
 
   return (
-    <MenuBarExtra icon={{ source: "extension-icon.png" }} title={menuBarTitle} tooltip={getTooltip()}>
+    <MenuBarExtra icon={{ source: getMenuBarIcon() }} title={menuBarTitle} tooltip={getTooltip()}>
       {hasError && (
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item

@@ -1,6 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { sep } from "path";
+import type { Image } from "@raycast/api";
+import { Icon } from "@raycast/api";
 import type { ProgressBarStyle } from "./utils/usage-limits-formatter";
 
 export const preferences = getPreferenceValues<Preferences>();
@@ -25,6 +27,9 @@ export const getMenuBarTitle = (): MenuBarTitleMode =>
 
 export const getProgressBarStyle = (): ProgressBarStyle =>
   (menuBarPreferences.progressBarStyle as ProgressBarStyle) ?? "solid";
+
+export const getMenuBarIcon = (): Image.Source =>
+  menuBarPreferences.menuBarIconStyle === "monochrome" ? Icon.BarChart : "extension-icon.png";
 
 export const getCustomNpxPath = (): string | undefined => {
   const customPath = preferences.customNpxPath?.trim();

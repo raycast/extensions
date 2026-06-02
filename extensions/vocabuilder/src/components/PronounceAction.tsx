@@ -1,6 +1,9 @@
-import { Action, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { hasMacOsFallback, isTtsSupported, pronounce, pronounceFallback } from "../lib/tts";
+import { runPronounceWithFallback } from "../lib/pronounceFlow";
+import { getTtsPreferences } from "../lib/ttsPreferences";
+import { routeTtsError } from "../lib/ttsErrorRouter";
 
 interface PronounceActionProps {
   word: string;
@@ -26,29 +29,31 @@ export default function PronounceAction({ word, languageCode, title, shortcut }:
     abortRef.current = controller;
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Playing pronunciation…" });
-    try {
-      const { geminiApiKey } = getPreferenceValues<Preferences.Translate>();
-      const { cached } = await pronounce(word, geminiApiKey, languageCode, controller.signal);
-      if (!cached) toast.title = "Generated pronunciation";
-      toast.hide();
-    } catch (err) {
-      if (controller.signal.aborted) return;
-      const reason = err instanceof Error ? err.message : String(err);
-      if (!hasMacOsFallback(languageCode)) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Pronunciation failed";
-        toast.message = reason === "NETWORK_OFFLINE" ? "No internet connection" : "Could not generate audio";
+    const { geminiApiKey, model } = getTtsPreferences();
+
+    const outcome = await runPronounceWithFallback({
+      signal: controller.signal,
+      attemptPrimary: () => pronounce(word, geminiApiKey, languageCode, controller.signal, model),
+      attemptFallback: hasMacOsFallback(languageCode) ? () => pronounceFallback(word, languageCode) : null,
+      routeError: (err) => routeTtsError(err, languageCode),
+    });
+
+    switch (outcome.kind) {
+      case "primary":
+        if (!outcome.cached) toast.title = "Generated pronunciation";
+        await toast.hide();
         return;
-      }
-      toast.title = "Using system voice…";
-      try {
-        await pronounceFallback(word, languageCode);
-        toast.hide();
-      } catch {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Pronunciation failed";
-        toast.message = "Could not play audio";
-      }
+      case "aborted":
+        await toast.hide();
+        return;
+      case "fallback-ok":
+        await toast.hide();
+        await showToast({ style: Toast.Style.Success, title: "Using system voice", message: outcome.message });
+        return;
+      case "failed":
+        await toast.hide();
+        await showToast({ style: Toast.Style.Failure, title: outcome.title, message: outcome.message });
+        return;
     }
   }
 
