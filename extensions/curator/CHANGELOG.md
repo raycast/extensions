@@ -6,5 +6,6 @@
 - **Skill Doctor** — health checks (broken symlinks, missing/unparseable `SKILL.md`, name ≠ directory, Claude↔Codex drift, stale plugin cache), each with a copy-to-clipboard fix command. Never writes to the filesystem.
 - **Recommend Skills** — describe a task in natural language and an AI ranks the most relevant installed skills with reasons. Uses Raycast AI by default, or any OpenAI-compatible provider via your own key.
 - **Custom LLM defaults** — updated the built-in MiniMax example to `MiniMax-M3` on the Anthropic-compatible endpoint.
+- **Custom LLM examples** — updated Qwen Token Plan examples from `qwen3.6-plus` to `qwen3.7-plus`, with `qwen3.7-max` documented alongside it.
 - Added a SkillOpt-style recommendation gate so AI recommendations self-check exact catalog names, task relevance, duplicate avoidance, and strict JSON output before responding.
 - Hardened Skill Doctor actions so broken or missing `SKILL.md` entries do not offer invalid editor targets, and copied shell fix commands escape quotes/backslashes inside paths.

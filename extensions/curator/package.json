@@ -96,7 +96,7 @@
     {
       "name": "apiModel",
       "title": "Custom Model",
-      "description": "Model id for your provider, e.g. qwen3.6-plus, qwen3.6-flash, MiniMax-M3, deepseek-v4-flash, mimo-v2.5, or a local model name.",
+      "description": "Model id for your provider, e.g. qwen3.7-plus, qwen3.7-max, qwen3.6-flash, MiniMax-M3, deepseek-v4-flash, mimo-v2.5, or a local model name.",
       "type": "textfield",
       "required": false
     }
