@@ -8,7 +8,7 @@ export async function fetchPassword(type: "simple" | "strong") {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const password = (await response.text()).trim();
 
-    await Clipboard.copy(password);
+    await Clipboard.copy(password, { concealed: true });
     await showHUD("✅ Password copied to clipboard");
   } catch {
     await showHUD("❌ Failed to fetch password");
