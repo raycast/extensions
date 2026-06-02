@@ -272,8 +272,8 @@ export function mergeTabs(
       if (!domain)
         domain = getHostnameFast(nextObj.url.replace(/^read:[/]*/, ""));
       if (domain)
-        nextObj.favIconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-    }
+        if (domain) nextObj.favIconUrl = `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`;
+     }
 
     // V1605: Apply the Enrichment Engine (Sets displaySubtitle and cachedAccessories)
     enrichTab(nextObj, extensionData, idx);
