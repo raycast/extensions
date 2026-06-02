@@ -262,7 +262,17 @@ async function swapWithAdmin(
   stagedAppPath: string,
   targetPath: string,
 ): Promise<ReplaceResult> {
-  // Single admin prompt: backup → install → verify → cleanup
+  // Verify the downloaded bundle's code signature BEFORE escalating. The admin
+  // script below moves the app into a system-protected location and deletes the
+  // backup, so a post-install rollback would need a second password prompt.
+  // Verifying the staged bundle up front gives the same guarantee the non-admin
+  // path gets — a corrupted or tampered download never reaches /Applications —
+  // while keeping the flow to a single admin prompt.
+  if (!(await verifySignature(stagedAppPath))) {
+    return { success: false, error: "Code signature verification failed" };
+  }
+
+  // Single admin prompt: backup → install → strip quarantine → cleanup
   const backupPath = targetPath + ".mac-updater-backup";
   const script = [
     `rm -rf ${shq(backupPath)}`,
