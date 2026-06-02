@@ -26,26 +26,30 @@ export default function BrowseSearchEngines() {
     }
   }, [filter, customSearchEngines]);
 
-  const fuse = new Fuse(filteredByType, {
-    keys: [
-      {
-        name: "t",
-        weight: 1,
-      },
-      {
-        name: "s",
-        weight: 0.7,
-      },
-      {
-        name: "ad",
-        weight: 0.5,
-      },
-      {
-        name: "d",
-        weight: 0.3,
-      },
-    ],
-  });
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredByType, {
+        keys: [
+          {
+            name: "t",
+            weight: 1,
+          },
+          {
+            name: "s",
+            weight: 0.7,
+          },
+          {
+            name: "ad",
+            weight: 0.5,
+          },
+          {
+            name: "d",
+            weight: 0.3,
+          },
+        ],
+      }),
+    [filteredByType],
+  );
 
   const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
 
