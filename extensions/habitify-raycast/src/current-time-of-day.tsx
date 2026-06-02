@@ -21,11 +21,6 @@ import {
 } from "./lib/habitify";
 import { useTodayHabits } from "./hooks/useTodayHabits";
 
-interface Preferences {
-  apiKey: string;
-  rowColorMode: "off" | "status" | "habit" | "area";
-}
-
 export default function Command() {
   const { apiKey, rowColorMode } = getPreferenceValues<Preferences>();
   const { habits: allHabits, isLoading, error, cacheNotice, mutateHabit, refresh } = useTodayHabits(apiKey);

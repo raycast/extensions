@@ -35,12 +35,6 @@ import {
   undoHabit,
 } from "./lib/habitify";
 
-interface Preferences {
-  apiKey: string;
-  rowColorMode: "off" | "status" | "habit" | "area";
-}
-
-
 function AreaHabitsView({
   area,
   apiKey,

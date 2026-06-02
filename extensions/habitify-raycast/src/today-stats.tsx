@@ -7,7 +7,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { formatLocalDate } from "./lib/date";
+import { formatUTCDate } from "./lib/date";
 import { formatCacheTimestamp, habitifyCacheKeys, latestCacheTimestamp, readCache, writeCache } from "./lib/cache";
 import {
   getHabits,
@@ -20,10 +20,6 @@ import {
   streakIcon,
   TodayHabit,
 } from "./lib/habitify";
-
-interface Preferences {
-  apiKey: string;
-}
 
 type Summary = {
   total: number;
@@ -52,7 +48,7 @@ function getDatesForWeek(): string[] {
   const dates: string[] = [];
   const current = new Date(monday);
   while (current <= today) {
-    dates.push(formatLocalDate(current));
+    dates.push(formatUTCDate(current));
     current.setDate(current.getDate() + 1);
   }
   return dates;
@@ -64,7 +60,7 @@ function getDatesForMonth(): string[] {
   const dates: string[] = [];
   const current = new Date(first);
   while (current <= today) {
-    dates.push(formatLocalDate(current));
+    dates.push(formatUTCDate(current));
     current.setDate(current.getDate() + 1);
   }
   return dates;
@@ -91,7 +87,7 @@ export default function Command() {
     setCacheNotice(null);
 
     try {
-      const today = formatLocalDate(new Date());
+      const today = formatUTCDate(new Date());
       const journalCacheKey = habitifyCacheKeys.todayJournal(today);
       const habitsCacheKey = habitifyCacheKeys.activeHabits;
 

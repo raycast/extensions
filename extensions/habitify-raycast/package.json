@@ -78,13 +78,11 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
     "typescript": "^5.8.3"
   }
 }
