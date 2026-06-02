@@ -10,6 +10,9 @@ describe("buildPrompt", () => {
     });
     expect(system).toContain("Role:");
     expect(system).toContain("Task:");
+    expect(system).toContain("Output use:");
+    expect(system).toContain("text-to-speech shadowing flow");
+    expect(system).toContain("short, natural thought groups");
     expect(system).toContain("Accuracy requirements:");
     expect(system).toContain("SkillOpt-style validation gate:");
     expect(system).toContain("Schema gate:");

@@ -52,7 +52,12 @@ export const ANALYSIS_MODELS: Record<ProviderName, readonly ModelOption[]> = {
     { id: "mimo-v2.5", title: "V2.5" },
     { id: "mimo-v2.5-pro", title: "V2.5 Pro" },
   ],
-  gemini: [{ id: "gemini-3.5-flash", title: "Gemini 3.5 Flash" }],
+  gemini: [
+    { id: "gemini-3.5-flash", title: "Gemini 3.5 Flash" },
+    { id: "gemini-3.1-pro-preview", title: "Gemini 3.1 Pro Preview" },
+    { id: "gemini-3.1-flash-lite", title: "Gemini 3.1 Flash-Lite" },
+    { id: "gemini-3-flash-preview", title: "Gemini 3 Flash Preview" },
+  ],
   openai: [{ id: "gpt-5.5", title: "GPT-5.5" }],
 };
 

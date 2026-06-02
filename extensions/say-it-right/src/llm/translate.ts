@@ -69,7 +69,7 @@ const DIRECT_OUTPUT_RULE =
   "Return only the final output. Do not explain, annotate, quote the source, or wrap the answer in Markdown fences.";
 
 const EXPRESSION_OUTPUT_RULE =
-  'Return ONLY a JSON object with this exact shape: {"expression": string, "why": string}. No Markdown fences. "expression" is the final English wording only. "why" is a Simplified Chinese coaching note formatted as 2-5 Markdown bullets, each starting with "- ".';
+  'Return ONLY a JSON object with this exact shape: {"expression": string, "why": string}. No Markdown fences. "expression" is the final English wording only: plain text, no bullets, no headings, no quotation marks around the whole expression, no emoji. "why" is not read aloud; make it a Simplified Chinese coaching note formatted as 2-4 short Markdown bullets, each starting with "- ".';
 
 const expressionToneInstructions: Record<ExpressionTone, string> = {
   natural:
@@ -255,9 +255,10 @@ function validationGateInstruction(mode: TranslationPromptMode): string {
 function outputUseInstruction(mode: TranslationPromptMode): string {
   if (mode === "express-intent") {
     return [
-      "The result may be pasted into a message or read aloud by a text-to-speech model.",
-      "Use plain text, avoid document-style symbols, and keep sentences short enough to sound natural when spoken.",
+      "The expression field may be pasted into a message or read aloud by a text-to-speech model.",
+      "Use plain text for the expression, avoid document-style symbols, and keep sentences short enough to sound natural when spoken.",
       "Remove stiff, generic AI-sounding polish; keep the human intent concrete and direct.",
+      "The why field is coaching metadata for the Raycast view and is not part of the spoken expression.",
     ].join(" ");
   }
   return [

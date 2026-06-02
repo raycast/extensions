@@ -86,6 +86,21 @@ describe("resolveAnalysisConfig", () => {
       geminiAnalysisModel: "unknown-gemini",
     });
     expect(override.model).toBe("gemini-3.5-flash");
+    const pro = resolveAnalysisConfig("gemini", {
+      geminiApiKey: "sk",
+      geminiAnalysisModel: "gemini-3.1-pro-preview",
+    });
+    expect(pro.model).toBe("gemini-3.1-pro-preview");
+    const flashLite = resolveAnalysisConfig("gemini", {
+      geminiApiKey: "sk",
+      geminiAnalysisModel: "gemini-3.1-flash-lite",
+    });
+    expect(flashLite.model).toBe("gemini-3.1-flash-lite");
+    const flash = resolveAnalysisConfig("gemini", {
+      geminiApiKey: "sk",
+      geminiAnalysisModel: "gemini-3-flash-preview",
+    });
+    expect(flash.model).toBe("gemini-3-flash-preview");
   });
   it("builds MiniMax config: Anthropic-compatible, M3 default, thinking off", () => {
     const c = resolveAnalysisConfig("minimax", { minimaxApiKey: "sk-mm" });

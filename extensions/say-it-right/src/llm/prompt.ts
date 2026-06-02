@@ -12,7 +12,7 @@ Return ONLY a JSON object (no markdown fences) with this exact shape:
   "isGeneratedExample": boolean,
   "sourceWord"?: string,
   "ipa": string,                  // whole-sentence IPA, General American, wrapped in / /
-  "thoughtGroups": [              // split at clause/comma boundaries
+  "thoughtGroups": [              // short, natural speech groups for shadowing practice
     { "tone": "fall"|"rise"|"fall-rise"|"rise-fall"|"level",
       "words": [
         { "text": string,
@@ -45,6 +45,10 @@ Treat this prompt as a reusable skill artifact. Before final output, internally 
 - Stress gate: stressed=true requires a non-null valid stressIndex; reduced function words may use null.
 - Speakability gate: notes give one concrete coaching tip a learner can apply while speaking.`;
 
+const OUTPUT_USE = `Output use:
+The JSON drives a pronunciation-practice UI and text-to-speech shadowing flow.
+Use short, natural thought groups that a learner can repeat aloud; do not split mechanically or create document-style labels in learner-facing notes.`;
+
 const EXAMPLE_OUTPUT = `Example:
 For input "I'll call you.", return exactly:
 {"text":"I'll call you.","isGeneratedExample":false,"ipa":"/aɪl ˈkɔl ju/","thoughtGroups":[{"tone":"fall","words":[{"text":"I'll","syllables":["I'll"],"stressIndex":null,"stressed":false,"nuclear":false},{"text":"call","syllables":["call"],"stressIndex":0,"stressed":true,"nuclear":true},{"text":"you","syllables":["you"],"stressIndex":null,"stressed":false,"nuclear":false}]}]}`;
@@ -55,17 +59,19 @@ export function buildPrompt(
 ): { system: string; user: string } {
   const system = [
     "Role:\nYou are an expert English pronunciation coach specializing in General American prosody.",
-    "Task:\nAnalyze the given English text for word stress, sentence stress, intonation (rising/falling tones per thought group), rhythm, and connected-speech linking.",
+    "Task:\nAnalyze the given English text for word stress, sentence stress, intonation (rising/falling tones per thought group), rhythm, and connected-speech linking so the learner can practice it aloud.",
     [
       "Prosody rules:",
       "- Content words (nouns, main verbs, adjectives, adverbs, wh-words) are usually stressed.",
       "- Function words (articles, prepositions, auxiliaries, pronouns) are usually reduced.",
+      "- Use short, natural thought groups at real speech or breath boundaries.",
       "- Each thought group has exactly one nuclear word, normally its last content word.",
       "- The nuclear word must be marked stressed.",
       "- stressIndex must be a valid index into that word's syllables array.",
       "- Use General American IPA.",
     ].join("\n"),
     FIDELITY_RULES,
+    OUTPUT_USE,
     VALIDATION_GATE,
     SCHEMA_HINT,
     EXAMPLE_OUTPUT,

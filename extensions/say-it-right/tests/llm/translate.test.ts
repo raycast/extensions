@@ -55,12 +55,15 @@ describe("translation prompt", () => {
     expect(prompt.system).toContain("Do not add unsupported concessions");
     expect(prompt.system).toContain("Do not preserve Chinese word order");
     expect(prompt.system).toContain(
-      "The result may be pasted into a message or read aloud by a text-to-speech model.",
+      "The expression field may be pasted into a message or read aloud by a text-to-speech model.",
     );
     expect(prompt.system).toContain(
-      "avoid document-style symbols, and keep sentences short enough",
+      "Use plain text for the expression, avoid document-style symbols, and keep sentences short enough",
     );
     expect(prompt.system).toContain("Remove stiff, generic AI-sounding polish");
+    expect(prompt.system).toContain("why field is coaching metadata");
+    expect(prompt.system).toContain("no bullets, no headings");
+    expect(prompt.system).toContain("why\" is not read aloud");
     expect(prompt.system).toContain("Expression tone:");
     expect(prompt.system).toContain("more formal and professional");
     expect(prompt.system).toContain("SkillOpt-style validation gate:");

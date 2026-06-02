@@ -6,7 +6,11 @@ const manifest = JSON.parse(
   readFileSync(join(process.cwd(), "package.json"), "utf8"),
 ) as {
   commands: Array<{ name: string; title: string }>;
-  preferences: Array<{ name: string; title: string }>;
+  preferences: Array<{
+    name: string;
+    title: string;
+    data?: Array<{ value: string }>;
+  }>;
 };
 
 function command(name: string) {
@@ -29,8 +33,47 @@ describe("manifest product boundaries", () => {
   });
 
   it("keeps durable preferences aligned with coaching and voice defaults", () => {
-    expect(preference("defaultAnalysisProvider").title).toBe("Default Coach Provider");
-    expect(preference("ttsProvider").title).toBe("Default Voice Provider");
-    expect(preference("translationTargetLanguage").title).toBe("Practice Translation Target");
+    expect(preference("defaultAnalysisProvider").title).toBe("Defaults: Coach Provider");
+    expect(preference("ttsProvider").title).toBe("Defaults: Voice Provider");
+    expect(preference("geminiAnalysisModel").data?.map((entry) => entry.value)).toEqual([
+      "gemini-3.5-flash",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-3-flash-preview",
+    ]);
+    expect(preference("translationTargetLanguage").title).toBe("Practice: Translation Target");
+  });
+
+  it("keeps provider settings ordered by the runtime provider catalog", () => {
+    expect(manifest.preferences.map((entry) => entry.name)).toEqual([
+      "defaultAnalysisProvider",
+      "ttsProvider",
+      "qwenAnalysisApiKey",
+      "qwenAnalysisModel",
+      "qwenApiKey",
+      "qwenRegion",
+      "qwenTtsModel",
+      "qwenTtsVoice",
+      "minimaxApiKey",
+      "minimaxAnalysisModel",
+      "minimaxTtsModel",
+      "minimaxTtsVoiceId",
+      "mimoApiKey",
+      "mimoAnalysisModel",
+      "mimoTtsVoice",
+      "geminiApiKey",
+      "geminiAnalysisModel",
+      "geminiTtsVoice",
+      "openaiApiKey",
+      "openaiTtsVoice",
+      "translationTargetLanguage",
+      "sentencesPerPage",
+      "loopCount",
+      "loopGap",
+      "qwenAnalysisBaseURL",
+      "minimaxBaseURL",
+      "minimaxTtsBaseURL",
+      "mimoBaseURL",
+    ]);
   });
 });

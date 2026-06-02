@@ -49,7 +49,7 @@
   "preferences": [
     {
       "name": "defaultAnalysisProvider",
-      "title": "Default Coach Provider",
+      "title": "Defaults: Coach Provider",
       "description": "Initial provider for pronunciation analysis and natural-English expression. You can change provider and model per run from the Action Panel.",
       "type": "dropdown",
       "required": false,
@@ -79,14 +79,14 @@
     },
     {
       "name": "ttsProvider",
-      "title": "Default Voice Provider",
-      "description": "Initial provider for model audio. Follow Analysis Provider uses the analysis provider when its TTS key is set, otherwise the first configured TTS provider.",
+      "title": "Defaults: Voice Provider",
+      "description": "Initial provider for model audio. Follow Coach Provider uses the coach provider when its voice key is set, otherwise the first configured voice provider.",
       "type": "dropdown",
       "required": false,
       "default": "follow-analysis",
       "data": [
         {
-          "title": "Follow Analysis Provider",
+          "title": "Follow Coach Provider",
           "value": "follow-analysis"
         },
         {
@@ -112,15 +112,312 @@
       ]
     },
     {
+      "name": "qwenAnalysisApiKey",
+      "title": "Qwen Coach: Token Plan API Key",
+      "description": "Used only for Qwen coaching, expression, and pronunciation analysis. Qwen Voice uses the separate DashScope key below.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "qwenAnalysisModel",
+      "title": "Qwen Coach: Model",
+      "description": "Qwen text model used for pronunciation analysis and natural-English expression.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwen3.6-flash",
+      "data": [
+        {
+          "title": "qwen3.6-flash — fast & low-cost (recommended)",
+          "value": "qwen3.6-flash"
+        },
+        {
+          "title": "qwen3.6-plus — balanced quality",
+          "value": "qwen3.6-plus"
+        }
+      ]
+    },
+    {
+      "name": "qwenApiKey",
+      "title": "Qwen Voice: DashScope API Key",
+      "description": "Used only for Qwen voice playback. Qwen Coach uses the Token Plan key above.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "qwenRegion",
+      "title": "Qwen Voice: DashScope Region",
+      "description": "DashScope region for Qwen voice playback.",
+      "type": "dropdown",
+      "required": false,
+      "default": "beijing",
+      "data": [
+        {
+          "title": "Beijing (cn)",
+          "value": "beijing"
+        },
+        {
+          "title": "International (Singapore)",
+          "value": "intl"
+        }
+      ]
+    },
+    {
+      "name": "qwenTtsModel",
+      "title": "Qwen Voice: Model",
+      "description": "Qwen TTS model used for read-aloud.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwen3-tts-flash",
+      "data": [
+        {
+          "title": "Qwen3 TTS Flash",
+          "value": "qwen3-tts-flash"
+        },
+        {
+          "title": "Qwen3 TTS Instruct Flash",
+          "value": "qwen3-tts-instruct-flash"
+        }
+      ]
+    },
+    {
+      "name": "qwenTtsVoice",
+      "title": "Qwen Voice: Voice",
+      "description": "Voice for Qwen TTS (all support English).",
+      "type": "dropdown",
+      "required": false,
+      "default": "Jennifer",
+      "data": [
+        {
+          "title": "Jennifer — expressive female",
+          "value": "Jennifer"
+        },
+        {
+          "title": "Aiden — clear male",
+          "value": "Aiden"
+        },
+        {
+          "title": "Neil — natural male",
+          "value": "Neil"
+        },
+        {
+          "title": "Elias — clear, explanatory male",
+          "value": "Elias"
+        },
+        {
+          "title": "Cherry — warm, bright female",
+          "value": "Cherry"
+        },
+        {
+          "title": "Katerina — relaxed, conversational female",
+          "value": "Katerina"
+        },
+        {
+          "title": "Ethan — natural, friendly male",
+          "value": "Ethan"
+        },
+        {
+          "title": "Ryan — energetic male",
+          "value": "Ryan"
+        },
+        {
+          "title": "Nofish — lively, youthful",
+          "value": "Nofish"
+        }
+      ]
+    },
+    {
+      "name": "minimaxApiKey",
+      "title": "MiniMax: API Key",
+      "description": "Used for both MiniMax Coach and MiniMax Voice.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "minimaxAnalysisModel",
+      "title": "MiniMax Coach: Model",
+      "description": "MiniMax text model used for pronunciation analysis and natural-English expression. Voice uses the separate speech model below.",
+      "type": "dropdown",
+      "required": false,
+      "default": "MiniMax-M3",
+      "data": [
+        {
+          "title": "MiniMax-M3 — recommended",
+          "value": "MiniMax-M3"
+        },
+        {
+          "title": "MiniMax-M2.7-highspeed — previous fast model",
+          "value": "MiniMax-M2.7-highspeed"
+        }
+      ]
+    },
+    {
+      "name": "minimaxTtsModel",
+      "title": "MiniMax Voice: Model",
+      "description": "MiniMax TTS model used for read-aloud.",
+      "type": "dropdown",
+      "required": false,
+      "default": "speech-2.8-hd",
+      "data": [
+        {
+          "title": "Speech 2.8 HD",
+          "value": "speech-2.8-hd"
+        },
+        {
+          "title": "Speech 2.8 Turbo",
+          "value": "speech-2.8-turbo"
+        }
+      ]
+    },
+    {
+      "name": "minimaxTtsVoiceId",
+      "title": "MiniMax Voice: Voice",
+      "description": "Voice ID for MiniMax TTS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "English_expressive_narrator",
+      "data": [
+        {
+          "title": "English Expressive Narrator",
+          "value": "English_expressive_narrator"
+        },
+        {
+          "title": "English Captivating Storyteller",
+          "value": "English_CaptivatingStoryteller"
+        },
+        {
+          "title": "English Trustworthy Man",
+          "value": "English_Trustworth_Man"
+        },
+        {
+          "title": "English Serene Woman",
+          "value": "English_SereneWoman"
+        },
+        {
+          "title": "English Wise Scholar",
+          "value": "English_WiseScholar"
+        }
+      ]
+    },
+    {
+      "name": "mimoApiKey",
+      "title": "MiMo: Token Plan API Key",
+      "description": "Xiaomi MiMo Token Plan key (tp-...). Used for both MiMo Coach and MiMo Voice.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "mimoAnalysisModel",
+      "title": "MiMo Coach: Model",
+      "description": "MiMo text model used for pronunciation analysis and natural-English expression.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mimo-v2.5",
+      "data": [
+        {
+          "title": "mimo-v2.5 — standard (recommended)",
+          "value": "mimo-v2.5"
+        },
+        {
+          "title": "mimo-v2.5-pro — stronger reasoning",
+          "value": "mimo-v2.5-pro"
+        }
+      ]
+    },
+    {
+      "name": "mimoTtsVoice",
+      "title": "MiMo Voice: Voice",
+      "description": "Voice for MiMo TTS (English voices).",
+      "type": "dropdown",
+      "required": false,
+      "default": "Chloe",
+      "data": [
+        {
+          "title": "Chloe — English female",
+          "value": "Chloe"
+        },
+        {
+          "title": "Mia — English female",
+          "value": "Mia"
+        },
+        {
+          "title": "Milo — English male",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean — English male",
+          "value": "Dean"
+        }
+      ]
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini: API Key",
+      "description": "Google AI Studio key for both Gemini Coach and Gemini Voice.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiAnalysisModel",
+      "title": "Gemini Coach: Model",
+      "description": "Gemini text model used for pronunciation analysis and natural-English expression.",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-3.5-flash",
+      "data": [
+        {
+          "title": "gemini-3.5-flash — stable default",
+          "value": "gemini-3.5-flash"
+        },
+        {
+          "title": "gemini-3.1-pro-preview — stronger reasoning",
+          "value": "gemini-3.1-pro-preview"
+        },
+        {
+          "title": "gemini-3.1-flash-lite — fastest/lowest-cost",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "gemini-3-flash-preview — preview fallback",
+          "value": "gemini-3-flash-preview"
+        }
+      ]
+    },
+    {
+      "name": "geminiTtsVoice",
+      "title": "Gemini Voice: Voice",
+      "description": "Voice for Gemini TTS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Charon",
+      "data": [
+        {
+          "title": "Charon",
+          "value": "Charon"
+        },
+        {
+          "title": "Iapetus",
+          "value": "Iapetus"
+        },
+        {
+          "title": "Sulafat",
+          "value": "Sulafat"
+        },
+        {
+          "title": "Puck",
+          "value": "Puck"
+        }
+      ]
+    },
+    {
       "name": "openaiApiKey",
-      "title": "OpenAI API Key",
-      "description": "Used for OpenAI analysis and TTS.",
+      "title": "OpenAI: API Key",
+      "description": "Used for both OpenAI Coach and OpenAI Voice.",
       "type": "password",
       "required": false
     },
     {
       "name": "openaiTtsVoice",
-      "title": "OpenAI TTS Voice",
+      "title": "OpenAI Voice: Voice",
       "description": "Voice for OpenAI TTS.",
       "type": "dropdown",
       "required": false,
@@ -181,311 +478,8 @@
       ]
     },
     {
-      "name": "qwenApiKey",
-      "title": "DashScope API Key",
-      "description": "Used only for Qwen-TTS. Qwen analysis uses the Token Plan key below.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "qwenRegion",
-      "title": "Qwen-TTS Region",
-      "description": "DashScope TTS region (affects Qwen-TTS base URL).",
-      "type": "dropdown",
-      "required": false,
-      "default": "beijing",
-      "data": [
-        {
-          "title": "Beijing (cn)",
-          "value": "beijing"
-        },
-        {
-          "title": "International (Singapore)",
-          "value": "intl"
-        }
-      ]
-    },
-    {
-      "name": "qwenAnalysisModel",
-      "title": "Qwen Analysis Model",
-      "description": "Qwen chat model used for analysis.",
-      "type": "dropdown",
-      "required": false,
-      "default": "qwen3.6-flash",
-      "data": [
-        {
-          "title": "qwen3.6-flash — fast & low-cost (recommended)",
-          "value": "qwen3.6-flash"
-        },
-        {
-          "title": "qwen3.6-plus — balanced quality",
-          "value": "qwen3.6-plus"
-        }
-      ]
-    },
-    {
-      "name": "qwenAnalysisBaseURL",
-      "title": "Qwen Analysis Base URL",
-      "description": "Qwen Token Plan base URL for analysis. Default is Anthropic-compatible; OpenAI-compatible /compatible-mode/v1 is also supported. TTS uses DashScope separately.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic"
-    },
-    {
-      "name": "qwenAnalysisApiKey",
-      "title": "Qwen Token Plan API Key",
-      "description": "Used only for Qwen analysis. Does not affect Qwen-TTS.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "qwenTtsModel",
-      "title": "Qwen TTS Model",
-      "description": "Qwen TTS model used for read-aloud.",
-      "type": "dropdown",
-      "required": false,
-      "default": "qwen3-tts-flash",
-      "data": [
-        {
-          "title": "Qwen3 TTS Flash",
-          "value": "qwen3-tts-flash"
-        },
-        {
-          "title": "Qwen3 TTS Instruct Flash",
-          "value": "qwen3-tts-instruct-flash"
-        }
-      ]
-    },
-    {
-      "name": "qwenTtsVoice",
-      "title": "Qwen TTS Voice",
-      "description": "Voice for Qwen TTS (all support English).",
-      "type": "dropdown",
-      "required": false,
-      "default": "Jennifer",
-      "data": [
-        {
-          "title": "Jennifer — expressive female",
-          "value": "Jennifer"
-        },
-        {
-          "title": "Aiden — clear male",
-          "value": "Aiden"
-        },
-        {
-          "title": "Neil — natural male",
-          "value": "Neil"
-        },
-        {
-          "title": "Elias — clear, explanatory male",
-          "value": "Elias"
-        },
-        {
-          "title": "Cherry — warm, bright female",
-          "value": "Cherry"
-        },
-        {
-          "title": "Katerina — relaxed, conversational female",
-          "value": "Katerina"
-        },
-        {
-          "title": "Ethan — natural, friendly male",
-          "value": "Ethan"
-        },
-        {
-          "title": "Ryan — energetic male",
-          "value": "Ryan"
-        },
-        {
-          "title": "Nofish — lively, youthful",
-          "value": "Nofish"
-        }
-      ]
-    },
-    {
-      "name": "minimaxApiKey",
-      "title": "MiniMax API Key",
-      "description": "Used for MiniMax analysis and TTS.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "minimaxBaseURL",
-      "title": "MiniMax Analysis Base URL",
-      "description": "MiniMax Token Plan Anthropic-compatible endpoint (ANTHROPIC_BASE_URL).",
-      "type": "textfield",
-      "required": false,
-      "default": "https://api.minimaxi.com/anthropic"
-    },
-    {
-      "name": "minimaxAnalysisModel",
-      "title": "MiniMax Analysis Model",
-      "description": "MiniMax text model used for analysis and translation. TTS uses the separate speech model below.",
-      "type": "dropdown",
-      "required": false,
-      "default": "MiniMax-M3",
-      "data": [
-        {
-          "title": "MiniMax-M3 — recommended",
-          "value": "MiniMax-M3"
-        },
-        {
-          "title": "MiniMax-M2.7-highspeed — previous fast model",
-          "value": "MiniMax-M2.7-highspeed"
-        }
-      ]
-    },
-    {
-      "name": "minimaxTtsBaseURL",
-      "title": "MiniMax TTS Base URL",
-      "description": "MiniMax TTS base URL.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://api.minimaxi.com/v1"
-    },
-    {
-      "name": "minimaxTtsModel",
-      "title": "MiniMax TTS Model",
-      "description": "MiniMax TTS model used for read-aloud.",
-      "type": "dropdown",
-      "required": false,
-      "default": "speech-2.8-hd",
-      "data": [
-        {
-          "title": "Speech 2.8 HD",
-          "value": "speech-2.8-hd"
-        },
-        {
-          "title": "Speech 2.8 Turbo",
-          "value": "speech-2.8-turbo"
-        }
-      ]
-    },
-    {
-      "name": "minimaxTtsVoiceId",
-      "title": "MiniMax TTS Voice",
-      "description": "Voice ID for MiniMax TTS.",
-      "type": "dropdown",
-      "required": false,
-      "default": "English_expressive_narrator",
-      "data": [
-        {
-          "title": "English Expressive Narrator",
-          "value": "English_expressive_narrator"
-        },
-        {
-          "title": "English Captivating Storyteller",
-          "value": "English_CaptivatingStoryteller"
-        },
-        {
-          "title": "English Trustworthy Man",
-          "value": "English_Trustworth_Man"
-        },
-        {
-          "title": "English Serene Woman",
-          "value": "English_SereneWoman"
-        },
-        {
-          "title": "English Wise Scholar",
-          "value": "English_WiseScholar"
-        }
-      ]
-    },
-    {
-      "name": "geminiApiKey",
-      "title": "Gemini API Key",
-      "description": "Google AI Studio key for Gemini analysis and TTS.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "geminiTtsVoice",
-      "title": "Gemini TTS Voice",
-      "description": "Voice for Gemini TTS.",
-      "type": "dropdown",
-      "required": false,
-      "default": "Charon",
-      "data": [
-        {
-          "title": "Charon",
-          "value": "Charon"
-        },
-        {
-          "title": "Iapetus",
-          "value": "Iapetus"
-        },
-        {
-          "title": "Sulafat",
-          "value": "Sulafat"
-        },
-        {
-          "title": "Puck",
-          "value": "Puck"
-        }
-      ]
-    },
-    {
-      "name": "mimoApiKey",
-      "title": "MiMo (Xiaomi) API Key",
-      "description": "Xiaomi MiMo Token Plan key (tp-…). Used for MiMo analysis and TTS.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "mimoBaseURL",
-      "title": "MiMo Base URL",
-      "description": "MiMo Token Plan Anthropic-compatible base URL for text generation. TTS uses the matching Token Plan /v1 endpoint because the Anthropic messages endpoint does not return audio.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
-    },
-    {
-      "name": "mimoAnalysisModel",
-      "title": "MiMo Analysis Model",
-      "description": "MiMo chat model for analysis (thinking is disabled for speed/determinism).",
-      "type": "dropdown",
-      "required": false,
-      "default": "mimo-v2.5",
-      "data": [
-        {
-          "title": "mimo-v2.5 — standard (recommended)",
-          "value": "mimo-v2.5"
-        },
-        {
-          "title": "mimo-v2.5-pro — stronger reasoning",
-          "value": "mimo-v2.5-pro"
-        }
-      ]
-    },
-    {
-      "name": "mimoTtsVoice",
-      "title": "MiMo TTS Voice",
-      "description": "Voice for MiMo TTS (English voices).",
-      "type": "dropdown",
-      "required": false,
-      "default": "Chloe",
-      "data": [
-        {
-          "title": "Chloe — English female",
-          "value": "Chloe"
-        },
-        {
-          "title": "Mia — English female",
-          "value": "Mia"
-        },
-        {
-          "title": "Milo — English male",
-          "value": "Milo"
-        },
-        {
-          "title": "Dean — English male",
-          "value": "Dean"
-        }
-      ]
-    },
-    {
       "name": "translationTargetLanguage",
-      "title": "Practice Translation Target",
+      "title": "Practice: Translation Target",
       "description": "Target language for Translate Sentence/Page inside the practice view. Standalone Say ... in English commands always target English.",
       "type": "dropdown",
       "required": false,
@@ -575,7 +569,7 @@
     },
     {
       "name": "sentencesPerPage",
-      "title": "Sentences Per Page",
+      "title": "Practice: Sentences Per Page",
       "description": "How many sentences are shown and analyzed together for long passages.",
       "type": "textfield",
       "required": false,
@@ -583,7 +577,7 @@
     },
     {
       "name": "loopCount",
-      "title": "Shadowing Loop Count",
+      "title": "Practice: Shadowing Loop Count",
       "description": "How many times the Shadowing Loop repeats the sentence.",
       "type": "textfield",
       "required": false,
@@ -591,11 +585,43 @@
     },
     {
       "name": "loopGap",
-      "title": "Shadowing Loop Gap (seconds)",
+      "title": "Practice: Shadowing Loop Gap",
       "description": "Pause between repeats in the Shadowing Loop.",
       "type": "textfield",
       "required": false,
       "default": "1.0"
+    },
+    {
+      "name": "qwenAnalysisBaseURL",
+      "title": "Advanced: Qwen Coach Base URL",
+      "description": "Token Plan base URL for Qwen coaching. The default is Anthropic-compatible; OpenAI-compatible /compatible-mode/v1 is also supported.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic"
+    },
+    {
+      "name": "minimaxBaseURL",
+      "title": "Advanced: MiniMax Coach Base URL",
+      "description": "Anthropic-compatible endpoint for MiniMax coaching and expression.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.minimaxi.com/anthropic"
+    },
+    {
+      "name": "minimaxTtsBaseURL",
+      "title": "Advanced: MiniMax Voice Base URL",
+      "description": "MiniMax TTS base URL for model audio.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.minimaxi.com/v1"
+    },
+    {
+      "name": "mimoBaseURL",
+      "title": "Advanced: MiMo Coach Base URL",
+      "description": "Anthropic-compatible base URL for MiMo coaching. MiMo Voice uses the matching Token Plan /v1 endpoint because the Anthropic messages endpoint does not return audio.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
     }
   ],
   "dependencies": {
