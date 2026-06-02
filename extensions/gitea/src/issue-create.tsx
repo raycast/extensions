@@ -122,7 +122,7 @@ export default function Command(props: { initialRepo?: Repository }) {
 
 function getRepositoryIcon(repo: Repository) {
   const avatarUrl = repo.avatar_url || repo.owner?.avatar_url;
-  return avatarUrl ? { source: avatarUrl } : { source: "icons/repo.svg", tintColor: Color.PrimaryText };
+  return avatarUrl ? { source: avatarUrl } : { source: "icon/repo.svg", tintColor: Color.PrimaryText };
 }
 
 async function handleSubmit(

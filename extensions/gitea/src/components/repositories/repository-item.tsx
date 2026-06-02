@@ -19,7 +19,7 @@ export default function RepositoryItem(props: {
 
   return (
     <List.Item
-      icon={item.avatar_url ? { source: item.avatar_url } : { source: "icons/repo.svg", tintColor: Color.PrimaryText }}
+      icon={item.avatar_url ? { source: item.avatar_url } : { source: "icon/repo.svg", tintColor: Color.PrimaryText }}
       title={item.full_name || "[No Name]"}
       subtitle={item.description || ""}
       detail={<RepositoryDetails repo={item} />}

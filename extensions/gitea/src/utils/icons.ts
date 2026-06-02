@@ -6,8 +6,8 @@ type IconResult = { source: string | Icon; tintColor?: Color };
 
 const fallback: IconResult = { source: Icon.Dot, tintColor: Color.SecondaryText };
 
-const issue_open: IconResult = { source: "icons/issue-open.svg", tintColor: Color.Green };
-const issue_closed: IconResult = { source: "icons/issue-closed.svg", tintColor: Color.Red };
+const issue_open: IconResult = { source: "icon/issue-open.svg", tintColor: Color.Green };
+const issue_closed: IconResult = { source: "icon/issue-closed.svg", tintColor: Color.Red };
 export function getIssueIcon(state?: string): IconResult {
   const normalized = state?.toLowerCase();
   switch (normalized) {
@@ -20,10 +20,10 @@ export function getIssueIcon(state?: string): IconResult {
   }
 }
 
-const pr_open: IconResult = { source: "icons/pr-open.svg", tintColor: Color.Green };
-const pr_closed: IconResult = { source: "icons/pr-closed.svg", tintColor: Color.Red };
-const pr_draft: IconResult = { source: "icons/pr-draft.svg", tintColor: Color.SecondaryText };
-const pr_merged: IconResult = { source: "icons/pr-merged.svg", tintColor: Color.Purple };
+const pr_open: IconResult = { source: "icon/pr-open.svg", tintColor: Color.Green };
+const pr_closed: IconResult = { source: "icon/pr-closed.svg", tintColor: Color.Red };
+const pr_draft: IconResult = { source: "icon/pr-draft.svg", tintColor: Color.SecondaryText };
+const pr_merged: IconResult = { source: "icon/pr-merged.svg", tintColor: Color.Purple };
 export function getPullRequestIcon(state?: string, meta?: PullRequestMeta): IconResult {
   const normalized = state?.toLowerCase();
 
