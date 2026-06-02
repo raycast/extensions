@@ -231,6 +231,23 @@ export function normalizeTagColor(color: unknown): TagColorValue | undefined {
   return undefined;
 }
 
+export function normalizeTagColorFormValues(
+  values: Record<string, string>,
+  tags: string[],
+): TagColorsByTag {
+  return Object.fromEntries(
+    tags.flatMap((tag, index) => {
+      const color = normalizeTagColor(values[tagColorFieldId(index)]);
+
+      return color ? [[tag, color]] : [];
+    }),
+  );
+}
+
+export function tagColorFieldId(index: number): string {
+  return `color-${index}`;
+}
+
 function isRgbColor(color: string): boolean {
   const match = color.match(/^rgba?\(\s*([^)]+)\s*\)$/i);
   if (!match) {

@@ -3,7 +3,9 @@ import {
   copyFile,
   mkdir,
   mkdtemp,
+  readdir,
   rm,
+  unlink,
   writeFile,
 } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -24,6 +26,8 @@ import {
   toDefaultsWriteValue,
 } from "./system-replacements";
 import type { SystemReplacementItem, TextReplacement } from "./types";
+
+const MAX_KEYBOARD_SERVICES_BACKUPS = 10;
 
 interface SystemReplacementStoreOptions {
   supportPath: string;
@@ -152,6 +156,12 @@ export class SystemReplacementStore {
     }
 
     await this.createKeyboardServicesBackup();
+    await this.applyKeyboardServicesSync(items);
+  }
+
+  private async applyKeyboardServicesSync(
+    items: SystemReplacementItem[],
+  ): Promise<void> {
     await this.executor("sqlite3", [
       this.keyboardServicesDatabasePath,
       toKeyboardServicesSyncSql(items),
@@ -172,19 +182,50 @@ export class SystemReplacementStore {
         );
       }
     }
+
+    await this.pruneKeyboardServicesBackups(backupsPath);
+  }
+
+  private async pruneKeyboardServicesBackups(
+    backupsPath: string,
+  ): Promise<void> {
+    try {
+      const dbBackups = (await readdir(backupsPath, { withFileTypes: true }))
+        .filter(
+          (entry) =>
+            entry.isFile() && entry.name.endsWith(".TextReplacements.db"),
+        )
+        .map((entry) => entry.name)
+        .sort((a, b) => a.localeCompare(b));
+      const backupsToDelete = dbBackups.slice(
+        0,
+        Math.max(0, dbBackups.length - MAX_KEYBOARD_SERVICES_BACKUPS),
+      );
+
+      await Promise.all(
+        backupsToDelete.flatMap((fileName) => {
+          const baseName = fileName.replace(/\.TextReplacements\.db$/, "");
+          return ["", "-wal", "-shm"].map((suffix) =>
+            removeFileIfExists(
+              join(backupsPath, `${baseName}.TextReplacements.db${suffix}`),
+            ),
+          );
+        }),
+      );
+    } catch {
+      // Cleanup should never block the backup or sync path.
+    }
   }
 
   private async refreshTextServices(): Promise<void> {
-    await Promise.all(
-      ["AppleSpell", "TextInputMenuAgent"].map(async (processName) => {
-        try {
-          await this.executor("killall", [processName]);
-        } catch {
-          // Best effort: a successful defaults write should not fail because
-          // a text service process was not running or could not be restarted.
-        }
-      }),
-    );
+    for (const processName of ["AppleSpell", "TextInputMenuAgent"]) {
+      try {
+        await this.executor("killall", [processName]);
+      } catch {
+        // Best effort: a successful defaults write should not fail because
+        // a text service process was not running or could not be restarted.
+      }
+    }
   }
 }
 
@@ -197,30 +238,56 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
+async function removeFileIfExists(path: string): Promise<void> {
+  try {
+    await unlink(path);
+  } catch {
+    // Best effort: another process may already have removed the file.
+  }
+}
+
 function toKeyboardServicesSyncSql(items: SystemReplacementItem[]): string {
-  const timestamp = Date.now() / 1000 - 978307200;
-  const activeShortcuts = items.map((item) => sqlString(item.replace));
-  const deleteMissing =
-    activeShortcuts.length > 0
-      ? `UPDATE ZTEXTREPLACEMENTENTRY SET ZNEEDSSAVETOCLOUD = 1, ZWASDELETED = 1, ZTIMESTAMP = ${timestamp} WHERE COALESCE(ZWASDELETED, 0) = 0 AND ZSHORTCUT NOT IN (${activeShortcuts.join(", ")});`
-      : `UPDATE ZTEXTREPLACEMENTENTRY SET ZNEEDSSAVETOCLOUD = 1, ZWASDELETED = 1, ZTIMESTAMP = ${timestamp} WHERE COALESCE(ZWASDELETED, 0) = 0;`;
+  const timestamp = toKeyboardServicesTimestamp(Date.now());
+  const activeShortcuts = items.map((item) => sqlLiteral(item.replace));
 
   return [
     "BEGIN IMMEDIATE;",
-    ...items.flatMap((item) => upsertKeyboardServicesItemSql(item, timestamp)),
-    deleteMissing,
-    "UPDATE Z_PRIMARYKEY SET Z_MAX = (SELECT COALESCE(MAX(Z_PK), 0) FROM ZTEXTREPLACEMENTENTRY) WHERE Z_NAME = 'TextReplacementEntry';",
+    ...items.flatMap((item) =>
+      buildUpsertKeyboardServicesItemSql(item, timestamp),
+    ),
+    buildDeleteMissingKeyboardServicesSql(activeShortcuts, timestamp),
+    buildPrimaryKeyRefreshSql(),
     "COMMIT;",
   ].join("\n");
 }
 
-function upsertKeyboardServicesItemSql(
+function toKeyboardServicesTimestamp(milliseconds: number): number {
+  return milliseconds / 1000 - 978307200;
+}
+
+function buildDeleteMissingKeyboardServicesSql(
+  activeShortcuts: string[],
+  timestamp: number,
+): string {
+  const baseSql = `UPDATE ZTEXTREPLACEMENTENTRY SET ZNEEDSSAVETOCLOUD = 1, ZWASDELETED = 1, ZTIMESTAMP = ${timestamp} WHERE COALESCE(ZWASDELETED, 0) = 0`;
+  if (activeShortcuts.length === 0) {
+    return `${baseSql};`;
+  }
+
+  return `${baseSql} AND ZSHORTCUT NOT IN (${activeShortcuts.join(", ")});`;
+}
+
+function buildPrimaryKeyRefreshSql(): string {
+  return "UPDATE Z_PRIMARYKEY SET Z_MAX = (SELECT COALESCE(MAX(Z_PK), 0) FROM ZTEXTREPLACEMENTENTRY) WHERE Z_NAME = 'TextReplacementEntry';";
+}
+
+function buildUpsertKeyboardServicesItemSql(
   item: SystemReplacementItem,
   timestamp: number,
 ): string[] {
-  const shortcut = sqlString(item.replace);
-  const phrase = sqlString(item.with);
-  const uniqueName = sqlString(randomUUID().toUpperCase());
+  const shortcut = sqlLiteral(item.replace);
+  const phrase = sqlLiteral(item.with);
+  const uniqueName = sqlLiteral(randomUUID().toUpperCase());
 
   return [
     `UPDATE ZTEXTREPLACEMENTENTRY SET Z_OPT = COALESCE(Z_OPT, 0) + 1, ZNEEDSSAVETOCLOUD = 1, ZWASDELETED = ${item.on ? 0 : 1}, ZTIMESTAMP = ${timestamp}, ZPHRASE = ${phrase} WHERE COALESCE(ZWASDELETED, 0) = 0 AND ZSHORTCUT = ${shortcut};`,
@@ -228,7 +295,7 @@ function upsertKeyboardServicesItemSql(
   ];
 }
 
-function sqlString(value: string): string {
+function sqlLiteral(value: string): string {
   return `'${value.replaceAll("'", "''")}'`;
 }
 

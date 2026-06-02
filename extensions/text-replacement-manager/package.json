@@ -16,13 +16,50 @@
     {
       "name": "manage-replacements",
       "title": "Manage Text Replacements",
-      "description": "View, create, edit, clone, delete, import, and export macOS Text Replacements.",
-      "mode": "view"
+      "description": "View, edit, clone, delete, tag, and search macOS Text Replacements.",
+      "mode": "view",
+      "keywords": ["text", "replacement", "snippet", "shortcut", "macos"]
+    },
+    {
+      "name": "create-replacement",
+      "title": "Create Text Replacement",
+      "description": "Create a new macOS Text Replacement.",
+      "mode": "view",
+      "keywords": ["text", "replacement", "snippet", "shortcut", "create"]
+    },
+    {
+      "name": "import-replacements",
+      "title": "Import Text Replacements",
+      "description": "Import macOS Text Replacements from a JSON file.",
+      "mode": "view",
+      "keywords": ["text", "replacement", "snippet", "json", "import"]
+    },
+    {
+      "name": "export-replacements",
+      "title": "Export Text Replacements",
+      "description": "Export macOS Text Replacements to a JSON file.",
+      "mode": "view",
+      "keywords": ["text", "replacement", "snippet", "json", "export"]
+    },
+    {
+      "name": "set-tag-colors",
+      "title": "Set Tag Colors",
+      "description": "Assign colors to Text Replacement tags.",
+      "mode": "view",
+      "keywords": ["text", "replacement", "tag", "color", "label"]
+    },
+    {
+      "name": "open-text-replacement-settings",
+      "title": "Open Text Replacement Settings",
+      "description": "Open macOS Text Replacement settings.",
+      "mode": "no-view",
+      "keywords": ["text", "replacement", "settings", "keyboard", "macos"]
     }
   ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",

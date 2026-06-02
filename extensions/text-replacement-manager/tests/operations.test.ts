@@ -1,42 +1,154 @@
 import { describe, expect, it } from "vitest";
 
-import { cloneReplacement, createReplacement, deleteReplacement, updateReplacement } from "../src/lib/operations";
+import {
+  addTagsToReplacements,
+  cloneReplacement,
+  createReplacement,
+  deleteReplacement,
+  updateReplacement,
+} from "../src/lib/operations";
 import type { TextReplacement } from "../src/lib/types";
 
 const existing: TextReplacement[] = [
-  { uuid: "uuid-omw", trigger: "omw", replacementText: "On my way!", tags: ["chat"], enabled: true },
+  {
+    uuid: "uuid-omw",
+    trigger: "omw",
+    replacementText: "On my way!",
+    tags: ["chat"],
+    enabled: true,
+  },
 ];
 
 describe("replacement operations", () => {
   it("creates and updates replacements with normalized values", () => {
-    const created = createReplacement(existing, { trigger: " brb ", replacementText: "Be right back", tags: "chat, quick replies" });
+    const created = createReplacement(existing, {
+      trigger: " brb ",
+      replacementText: "Be right back",
+      tags: "chat, quick replies",
+    });
     expect(created).toEqual([
       existing[0],
-      { uuid: expect.any(String), trigger: "brb", replacementText: "Be right back", tags: ["chat", "quick replies"], enabled: true },
+      {
+        uuid: expect.any(String),
+        trigger: "brb",
+        replacementText: "Be right back",
+        tags: ["chat", "quick replies"],
+        enabled: true,
+      },
     ]);
 
-    expect(updateReplacement(created, "uuid-omw", { trigger: "omw2", replacementText: "On my way soon", tags: [] })).toEqual([
-      { uuid: "uuid-omw", trigger: "omw2", replacementText: "On my way soon", tags: [], enabled: true },
+    expect(
+      updateReplacement(created, "uuid-omw", {
+        trigger: "omw2",
+        replacementText: "On my way soon",
+        tags: [],
+      }),
+    ).toEqual([
+      {
+        uuid: "uuid-omw",
+        trigger: "omw2",
+        replacementText: "On my way soon",
+        tags: [],
+        enabled: true,
+      },
       created[1],
     ]);
   });
 
   it("preserves intentional leading and trailing replacement text whitespace", () => {
-    const created = createReplacement(existing, { trigger: "sig", replacementText: "  Max  ", tags: [] });
+    const created = createReplacement(existing, {
+      trigger: "sig",
+      replacementText: "  Max  ",
+      tags: [],
+    });
 
     expect(created[1].replacementText).toBe("  Max  ");
-    expect(updateReplacement(created, "uuid-omw", { trigger: "omw", replacementText: "\nOn my way!\n", tags: [] })[0].replacementText).toBe(
-      "\nOn my way!\n",
-    );
+    expect(
+      updateReplacement(created, "uuid-omw", {
+        trigger: "omw",
+        replacementText: "\nOn my way!\n",
+        tags: [],
+      })[0].replacementText,
+    ).toBe("\nOn my way!\n");
   });
 
   it("merges tags when creating an already existing replacement with matching text", () => {
     expect(
       createReplacement(
-        [{ uuid: "uuid-max", trigger: "_max", replacementText: "maxludden", tags: [], enabled: true }],
+        [
+          {
+            uuid: "uuid-max",
+            trigger: "_max",
+            replacementText: "maxludden",
+            tags: [],
+            enabled: true,
+          },
+        ],
         { trigger: "_max", replacementText: "maxludden", tags: "personal" },
       ),
-    ).toEqual([{ uuid: "uuid-max", trigger: "_max", replacementText: "maxludden", tags: ["personal"], enabled: true }]);
+    ).toEqual([
+      {
+        uuid: "uuid-max",
+        trigger: "_max",
+        replacementText: "maxludden",
+        tags: ["personal"],
+        enabled: true,
+      },
+    ]);
+  });
+
+  it("merges and deduplicates tags when an existing replacement already has tags", () => {
+    expect(
+      createReplacement(
+        [
+          {
+            uuid: "uuid-max",
+            trigger: "_max",
+            replacementText: "maxludden",
+            tags: ["personal", "team"],
+            enabled: true,
+          },
+        ],
+        {
+          trigger: "_max",
+          replacementText: "maxludden",
+          tags: "personal, urgent",
+        },
+      ),
+    ).toEqual([
+      {
+        uuid: "uuid-max",
+        trigger: "_max",
+        replacementText: "maxludden",
+        tags: ["personal", "team", "urgent"],
+        enabled: true,
+      },
+    ]);
+  });
+
+  it("trims trigger whitespace and merges with an existing matching replacement", () => {
+    expect(
+      createReplacement(
+        [
+          {
+            uuid: "uuid-max",
+            trigger: "_max",
+            replacementText: "maxludden",
+            tags: ["personal"],
+            enabled: true,
+          },
+        ],
+        { trigger: "  _max  ", replacementText: "maxludden", tags: "work" },
+      ),
+    ).toEqual([
+      {
+        uuid: "uuid-max",
+        trigger: "_max",
+        replacementText: "maxludden",
+        tags: ["personal", "work"],
+        enabled: true,
+      },
+    ]);
   });
 
   it("clones with a new trigger and deletes by uuid", () => {
@@ -47,9 +159,58 @@ describe("replacement operations", () => {
     });
 
     expect(cloned).toHaveLength(2);
-    expect(cloned[1]).toMatchObject({ trigger: "omw2", replacementText: "On my way!", tags: ["chat"], enabled: true });
+    expect(cloned[1]).toMatchObject({
+      trigger: "omw2",
+      replacementText: "On my way!",
+      tags: ["chat"],
+      enabled: true,
+    });
     expect(cloned[1].uuid).not.toBe("uuid-omw");
 
     expect(deleteReplacement(cloned, "uuid-omw")).toEqual([cloned[1]]);
+  });
+
+  it("adds normalized tags to selected replacements without duplicating existing tags", () => {
+    const replacements: TextReplacement[] = [
+      existing[0],
+      {
+        uuid: "uuid-brb",
+        trigger: "brb",
+        replacementText: "Be right back",
+        tags: [],
+        enabled: true,
+      },
+      {
+        uuid: "uuid-ty",
+        trigger: "ty",
+        replacementText: "Thank you",
+        tags: ["polite"],
+        enabled: true,
+      },
+    ];
+
+    expect(
+      addTagsToReplacements(
+        replacements,
+        ["uuid-omw", "uuid-brb"],
+        " chat, urgent ",
+      ),
+    ).toEqual([
+      { ...existing[0], tags: ["chat", "urgent"] },
+      {
+        uuid: "uuid-brb",
+        trigger: "brb",
+        replacementText: "Be right back",
+        tags: ["chat", "urgent"],
+        enabled: true,
+      },
+      {
+        uuid: "uuid-ty",
+        trigger: "ty",
+        replacementText: "Thank you",
+        tags: ["polite"],
+        enabled: true,
+      },
+    ]);
   });
 });

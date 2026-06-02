@@ -62,6 +62,21 @@ export function deleteReplacement(
   return existing.filter((item) => item.uuid !== uuid);
 }
 
+export function addTagsToReplacements(
+  existing: TextReplacement[],
+  uuids: string[],
+  tags: string[] | string,
+): TextReplacement[] {
+  const selectedUuids = new Set(uuids);
+  const incomingTags = normalizeTags(tags);
+
+  return existing.map((item) =>
+    selectedUuids.has(item.uuid)
+      ? { ...item, tags: mergeTags(item.tags, incomingTags) }
+      : item,
+  );
+}
+
 function toReplacement(input: ReplacementInput): TextReplacement {
   return {
     uuid: createReplacementId(),

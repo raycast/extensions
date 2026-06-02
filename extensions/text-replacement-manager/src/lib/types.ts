@@ -1,3 +1,5 @@
+import type { TagColorsByTag } from "./tag-colors";
+
 export interface TextReplacement {
   uuid: string;
   trigger: string;
@@ -28,6 +30,7 @@ export interface SystemReplacementItem {
 export interface ImportResult {
   accepted: TextReplacement[];
   skipped: string[];
+  tagColors: TagColorsByTag;
 }
 
 export class ReplacementImportError extends Error {

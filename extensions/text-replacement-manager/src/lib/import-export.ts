@@ -6,6 +6,7 @@ import {
 } from "./validation";
 import type { ImportResult, TextReplacement } from "./types";
 import { ReplacementImportError } from "./types";
+import { normalizeTagColors, type TagColorsByTag } from "./tag-colors";
 
 interface RawImportItem {
   uuid?: unknown;
@@ -16,19 +17,35 @@ interface RawImportItem {
 
 export function exportReplacementsToJson(
   replacements: TextReplacement[],
+  tagColors?: TagColorsByTag,
 ): string {
-  return `${JSON.stringify(
-    {
-      "Text Replacements": replacements.map((item) => ({
-        uuid: item.uuid,
-        trigger: item.trigger,
-        "replacement-text": item.replacementText,
-        tags: item.tags,
-      })),
-    },
-    null,
-    2,
-  )}\n`;
+  const exportPayload: Record<string, unknown> = {
+    "Text Replacements": replacements.map((item) => ({
+      uuid: item.uuid,
+      trigger: item.trigger,
+      "replacement-text": item.replacementText,
+      tags: item.tags,
+    })),
+  };
+  if (tagColors) {
+    exportPayload["Tag Colors"] = tagColorsForReplacements(
+      replacements,
+      tagColors,
+    );
+  }
+
+  return `${JSON.stringify(exportPayload, null, 2)}\n`;
+}
+
+function tagColorsForReplacements(
+  replacements: TextReplacement[],
+  tagColors: TagColorsByTag,
+): TagColorsByTag {
+  const exportedTags = new Set(replacements.flatMap((item) => item.tags));
+
+  return Object.fromEntries(
+    Object.entries(tagColors).filter(([tag]) => exportedTags.has(tag)),
+  );
 }
 
 export function parseImportedReplacements(
@@ -52,9 +69,8 @@ export function parseImportedReplacements(
     );
   }
 
-  const rawItems = (parsed as { "Text Replacements": RawImportItem[] })[
-    "Text Replacements"
-  ];
+  const parsedImport = parsed as Record<string, unknown>;
+  const rawItems = parsedImport["Text Replacements"] as RawImportItem[];
   const accepted: TextReplacement[] = [];
   const skipped: string[] = [];
   const seenTriggers = new Set<string>();
@@ -101,7 +117,18 @@ export function parseImportedReplacements(
     });
   }
 
-  return { accepted, skipped };
+  return {
+    accepted,
+    skipped,
+    tagColors: normalizeTagColors(
+      parsedImport["Tag Colors"],
+      uniqueTags([...existing, ...accepted]),
+    ),
+  };
+}
+
+function uniqueTags(replacements: TextReplacement[]): string[] {
+  return [...new Set(replacements.flatMap((item) => item.tags))];
 }
 
 function normalizeImportItem(raw: RawImportItem): TextReplacement {

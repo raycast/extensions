@@ -21,7 +21,8 @@ export function mergeSystemWithMetadata(
         tags: stored?.tags ?? [],
         enabled: isEnabledSystemValue(item.on),
       };
-    });
+    })
+    .sort(compareTextReplacementsByTrigger);
 }
 
 export function serializeSystemItems(
@@ -84,6 +85,16 @@ function isEnabledSystemValue(value: SystemReplacementItem["on"]): boolean {
   }
 
   return value === true || value === 1 || value === "1";
+}
+
+function compareTextReplacementsByTrigger(
+  left: TextReplacement,
+  right: TextReplacement,
+): number {
+  return left.trigger.localeCompare(right.trigger, undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 }
 
 export function toDefaultsWriteValue(items: SystemReplacementItem[]): string {
