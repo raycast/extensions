@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Monochrome menu bar icon] - {PR_MERGE_DATE}
+## [Monochrome menu bar icon] - 2026-06-02
 
 ### Added
 
