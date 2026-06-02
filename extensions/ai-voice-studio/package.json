@@ -200,8 +200,8 @@
       "name": "dashscopeApiKey",
       "type": "password",
       "required": false,
-      "title": "DashScope API Key",
-      "description": "Alibaba Cloud Model Studio / DashScope API key for Qwen-TTS.",
+      "title": "Qwen DashScope API Key",
+      "description": "Qwen DashScope API key (Alibaba Cloud Model Studio) for Qwen-TTS.",
       "placeholder": "sk-..."
     }
   ],

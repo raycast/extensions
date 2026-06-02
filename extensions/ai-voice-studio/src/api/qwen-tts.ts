@@ -48,7 +48,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
   const prefs = getPreferenceValues<Preferences>();
   const apiKey = prefs.dashscopeApiKey?.trim();
   if (!apiKey) {
-    throw new TTSApiError("DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);
+    throw new TTSApiError("Qwen DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);
   }
 
   const response = await postWithTimeout(

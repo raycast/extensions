@@ -322,7 +322,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
       <Form.Separator />
       {activeProvider === "qwen" ? (
         <>
-          <Form.Description title="Qwen-TTS" text="Alibaba Cloud Model Studio / DashScope Qwen-TTS synthesis." />
+          <Form.Description title="Qwen-TTS" text="Qwen DashScope (Alibaba Cloud Model Studio) Qwen-TTS synthesis." />
           <Form.Dropdown id="qwenModel" title="Model" value={settings.qwen.model} onChange={handleQwenModelChange}>
             {QWEN_MODELS.map((model) => (
               <Form.Dropdown.Item key={model} value={model} title={QWEN_MODEL_LABELS[model]} />

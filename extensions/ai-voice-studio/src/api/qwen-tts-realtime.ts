@@ -42,7 +42,7 @@ export async function streamRealtimeSpeech(
 
   const apiKey = getPreferenceValues<Preferences>().dashscopeApiKey?.trim();
   if (!apiKey) {
-    throw new TTSApiError("DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);
+    throw new TTSApiError("Qwen DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);
   }
 
   if (signal?.aborted) throw new TTSApiError("TTS synthesis cancelled", -7);
