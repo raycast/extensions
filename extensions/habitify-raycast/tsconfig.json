@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "types": ["node", "react"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
