@@ -25,7 +25,6 @@ async function getStoredModels(): Promise<Model[]> {
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState(false);
-  const [availableModels] = useState<Array<{ id: string; display_name: string }>>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -106,7 +105,7 @@ export function useModel(): ModelHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, availableModels, add, update, remove, clear }),
-    [data, isLoading, availableModels, add, update, remove, clear],
+    () => ({ data, isLoading, add, update, remove, clear }),
+    [data, isLoading, add, update, remove, clear],
   );
 }

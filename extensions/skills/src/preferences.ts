@@ -25,3 +25,12 @@ export const getGithubToken = (): string | undefined => {
 };
 
 export const shouldDisableSkillsCliTelemetry = (): boolean => preferences.disableSkillsCliTelemetry === true;
+
+export const getDefaultAgents = (): string[] => {
+  const raw = preferences.defaultAgents?.trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+};

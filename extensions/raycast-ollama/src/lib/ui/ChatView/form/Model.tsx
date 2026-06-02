@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage, usePromise } from "@raycast/utils";
 import * as React from "react";
-import { McpServerConfig } from "../../../mcp/types";
+import { McpServerConfig } from "../../types";
 import { OllamaApiModelCapability } from "../../../ollama/enum";
 import { OllamaServer } from "../../../ollama/types";
 import {

@@ -54,16 +54,14 @@
       "title": "Access Key",
       "description": "Get your API key from https://unsplash.com/oauth/applications",
       "type": "password",
-      "required": true,
-      "placeholder": "XXX...XX"
+      "required": true
     },
     {
       "name": "secretKey",
       "title": "Secret Key",
       "description": "Get your secret key from https://unsplash.com/oauth/applications",
       "type": "password",
-      "required": true,
-      "placeholder": "XXX...XX"
+      "required": true
     },
     {
       "name": "gridItemSize",
@@ -169,23 +167,23 @@
           "value": "none"
         },
         {
-          "title": "10 minute",
+          "title": "10 minutes",
           "value": "10 minute"
         },
         {
-          "title": "20 minute",
+          "title": "20 minutes",
           "value": "20 minute"
         },
         {
-          "title": "30 minute",
+          "title": "30 minutes",
           "value": "30 minute"
         },
         {
-          "title": "40 minute",
+          "title": "40 minutes",
           "value": "40 minute"
         },
         {
-          "title": "50 minute",
+          "title": "50 minutes",
           "value": "50 minute"
         },
         {
@@ -193,91 +191,91 @@
           "value": "1 hour"
         },
         {
-          "title": "2 hour",
+          "title": "2 hours",
           "value": "2 hour"
         },
         {
-          "title": "3 hour",
+          "title": "3 hours",
           "value": "3 hour"
         },
         {
-          "title": "4 hour",
+          "title": "4 hours",
           "value": "4 hour"
         },
         {
-          "title": "5 hour",
+          "title": "5 hours",
           "value": "5 hour"
         },
         {
-          "title": "6 hour",
+          "title": "6 hours",
           "value": "6 hour"
         },
         {
-          "title": "7 hour",
+          "title": "7 hours",
           "value": "7 hour"
         },
         {
-          "title": "8 hour",
+          "title": "8 hours",
           "value": "8 hour"
         },
         {
-          "title": "9 hour",
+          "title": "9 hours",
           "value": "9 hour"
         },
         {
-          "title": "10 hour",
+          "title": "10 hours",
           "value": "10 hour"
         },
         {
-          "title": "11 hour",
+          "title": "11 hours",
           "value": "11 hour"
         },
         {
-          "title": "12 hour",
+          "title": "12 hours",
           "value": "12 hour"
         },
         {
-          "title": "13 hour",
+          "title": "13 hours",
           "value": "13 hour"
         },
         {
-          "title": "14 hour",
+          "title": "14 hours",
           "value": "14 hour"
         },
         {
-          "title": "15 hour",
+          "title": "15 hours",
           "value": "15 hour"
         },
         {
-          "title": "16 hour",
+          "title": "16 hours",
           "value": "16 hour"
         },
         {
-          "title": "17 hour",
+          "title": "17 hours",
           "value": "17 hour"
         },
         {
-          "title": "18 hour",
+          "title": "18 hours",
           "value": "18 hour"
         },
         {
-          "title": "19 hour",
+          "title": "19 hours",
           "value": "19 hour"
         },
         {
-          "title": "20 hour",
+          "title": "20 hours",
           "value": "20 hour"
         },
         {
-          "title": "21 hour",
+          "title": "21 hours",
           "value": "21 hour"
         },
         {
-          "title": "22 hour",
+          "title": "22 hours",
           "value": "22 hour"
         },
         {
-          "title": "23 hour",
+          "title": "23 hours",
           "value": "23 hour"
         },
         {
@@ -285,54 +283,53 @@
           "value": "1 day"
         },
         {
-          "title": "2 day",
+          "title": "2 days",
           "value": "2 day"
         },
         {
-          "title": "3 day",
+          "title": "3 days",
           "value": "3 day"
         },
         {
-          "title": "4 day",
+          "title": "4 days",
           "value": "4 day"
         },
         {
-          "title": "5 day",
+          "title": "5 days",
           "value": "5 day"
         },
         {
-          "title": "6 day",
+          "title": "6 days",
           "value": "6 day"
         },
         {
-          "title": "7 day",
+          "title": "7 days",
           "value": "7 day"
         },
         {
-          "title": "14 day",
+          "title": "14 days",
           "value": "14 day"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.16",
-    "@raycast/utils": "^2.2.4"
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [

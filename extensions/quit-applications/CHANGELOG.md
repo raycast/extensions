@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Bugfix] - 2026-05-28
+
+- Added timeout handling and fallback app discovery when loading running applications.
+
 ## [Bug fix] - 2026-04-04
 
 - Fixed error when a foreground process has no file property (error -1728)

@@ -1,6 +1,7 @@
 import { MenuBarExtra, Icon, open, openCommandPreferences } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { useDailyUsage } from "./hooks/useDailyUsage";
+import { useWeeklyUsage } from "./hooks/useWeeklyUsage";
 import { useMonthlyUsage } from "./hooks/useMonthlyUsage";
 import { useTotalUsage } from "./hooks/useTotalUsage";
 import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
@@ -24,6 +25,7 @@ const MOCK_LIMITS_DATA = {
 export default function MenuBarccusage() {
   const [, forceRender] = useState(0);
   const { data: todayUsage, previousDayData, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
+  const { data: weeklyUsage, previousWeekData, isLoading: weeklyLoading, error: weeklyError } = useWeeklyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
   const {
@@ -46,8 +48,8 @@ export default function MenuBarccusage() {
 
   const effectiveLimitsData = MOCK_LIMITS_ENABLED ? MOCK_LIMITS_DATA : limitsData;
 
-  const hasData = todayUsage || monthlyUsage || totalUsage;
-  const hasError = !hasData && (dailyError || monthlyError || totalError);
+  const hasData = todayUsage || weeklyUsage || monthlyUsage || totalUsage;
+  const hasError = !hasData && (dailyError || weeklyError || monthlyError || totalError);
   const isLoading = dailyLoading || monthlyLoading || totalLoading;
 
   if (isLoading) {
@@ -110,6 +112,7 @@ export default function MenuBarccusage() {
         ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
         : undefined;
     if (menuBarTitlePref === "todayCost") return todayUsage ? formatCost(todayUsage.totalCost) : undefined;
+    if (menuBarTitlePref === "weeklyCost") return weeklyUsage ? formatCost(weeklyUsage.totalCost) : undefined;
     if (menuBarTitlePref === "monthlyCost") return monthlyUsage ? formatCost(monthlyUsage.totalCost) : undefined;
     if (menuBarTitlePref === "todayTokens") return todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
     if (menuBarTitlePref === "fiveHour")
@@ -124,6 +127,10 @@ export default function MenuBarccusage() {
       return highestUtilization !== null
         ? `${(preferRemaining ? 100 - highestUtilization : highestUtilization).toFixed(0)}%`
         : undefined;
+    if (menuBarTitlePref === "blockProjection") {
+      const block = workingTime.activeBlock;
+      return block ? formatCost(block.projection?.totalCost ?? block.costUSD) : undefined;
+    }
     return todayUsage
       ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
       : undefined;
@@ -246,6 +253,19 @@ export default function MenuBarccusage() {
             />
           </MenuBarExtra.Section>
 
+          <MenuBarExtra.Section title="This Week">
+            <MenuBarExtra.Item
+              title={formatUsageTitle(weeklyLoading, weeklyUsage, "No usage data available")}
+              subtitle={
+                weeklyUsage && previousWeekData
+                  ? `vs last week: ${formatCostDelta(weeklyUsage.totalCost, previousWeekData.totalCost)}`
+                  : undefined
+              }
+              icon={Icon.Calendar}
+              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+            />
+          </MenuBarExtra.Section>
+
           <MenuBarExtra.Section title="Monthly Usage">
             <MenuBarExtra.Item
               title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
@@ -261,6 +281,31 @@ export default function MenuBarccusage() {
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
           </MenuBarExtra.Section>
+
+          {workingTime.activeBlock && (
+            <MenuBarExtra.Section title="Current Block">
+              <MenuBarExtra.Item
+                title={
+                  workingTime.activeBlock.projection
+                    ? `${formatCost(workingTime.activeBlock.projection.totalCost)} projected`
+                    : formatCost(workingTime.activeBlock.costUSD)
+                }
+                subtitle={[
+                  workingTime.activeBlock.burnRate
+                    ? `${formatCost(workingTime.activeBlock.burnRate.costPerHour)}/hr`
+                    : null,
+                  `${formatCost(workingTime.activeBlock.costUSD)} so far`,
+                  workingTime.activeBlock.projection
+                    ? `${formatDuration(workingTime.activeBlock.projection.remainingMinutes * 60 * 1000)} left`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                icon={Icon.Gauge}
+                onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              />
+            </MenuBarExtra.Section>
+          )}
 
           <MenuBarExtra.Section title="Working Time">
             <MenuBarExtra.Item

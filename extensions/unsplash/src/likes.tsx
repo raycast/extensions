@@ -1,58 +1,57 @@
-import { getGridItemSize, showImageTitle, toTitleCase } from "@/functions/utils";
 import { useMemo, useState } from "react";
 import { Grid } from "@raycast/api";
-
-// Hooks
+import { getGridColumns, showImageTitle, toTitleCase } from "@/functions/utils";
 import { useLikes } from "@/hooks/useLikes";
-
-// Components
+import { useSetupAuth } from "@/hooks/useSetupAuth";
 import Actions from "@/components/Actions";
-import { LikesResult, SearchResult } from "@/types";
+import OAuthSetupGuide from "@/components/OAuthSetupGuide";
+import { SearchResult } from "@/types";
 
-// Types
-interface SearchListItemProps {
-  item: LikesResult;
-  unlike: React.Dispatch<React.SetStateAction<string[]>>;
+export default function UnsplashLikes() {
+  const auth = useSetupAuth();
+
+  if (auth.status === "loading") return <Grid isLoading />;
+  if (auth.status === "needs-setup")
+    return <OAuthSetupGuide onConnect={auth.connect} connectError={auth.connectError} />;
+
+  return <LikesGrid />;
 }
 
-const UnsplashLikes = () => {
+function LikesGrid() {
   const { loading, likes } = useLikes();
-  const itemSize = getGridItemSize();
   const [unliked, setUnliked] = useState<string[]>([]);
 
-  const filteredLikes = useMemo(() => {
-    return likes?.filter((like) => !unliked.includes(String(like.id))) || [];
-  }, [unliked, likes]);
+  const filteredLikes = useMemo(
+    () => likes?.filter((like) => !unliked.includes(String(like.id))) ?? [],
+    [unliked, likes],
+  );
 
   return (
-    <Grid isLoading={loading} itemSize={itemSize} searchBarPlaceholder="Search your likes...">
+    <Grid isLoading={loading} columns={getGridColumns()} searchBarPlaceholder="Search your likes...">
       <Grid.EmptyView icon="empty-states-photos.png" />
-      <Grid.Section title="Results" subtitle={String(filteredLikes?.length)}>
-        {filteredLikes?.map((like) => (
-          <SearchListItem key={like.id} item={like} unlike={setUnliked} />
+      <Grid.Section title="Results" subtitle={String(filteredLikes.length)}>
+        {filteredLikes.map((like) => (
+          <LikeGridItem key={like.id} item={like} unlike={setUnliked} />
         ))}
       </Grid.Section>
     </Grid>
   );
-};
+}
 
-const SearchListItem = ({ item, unlike }: SearchListItemProps) => {
-  const [title, image] = [
-    item.title || item.description || item.user.name || "No Name",
-    item.urls?.thumb || item.urls?.small || item.urls?.regular,
-  ];
-
-  const mimicItem: SearchResult = {
-    ...item,
-    title,
-    alt_description: "",
-  };
-
-  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
-
+function LikeGridItem({
+  item,
+  unlike,
+}: {
+  item: SearchResult;
+  unlike: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
+  const title = item.description || item.alt_description || item.user.name || "No Name";
+  const image = item.urls.thumb || item.urls.small || item.urls.regular;
   return (
-    <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={mimicItem} unlike={unlike} details />} />
+    <Grid.Item
+      content={image}
+      title={showImageTitle() ? toTitleCase(title) : ""}
+      actions={<Actions item={item} unlike={unlike} details />}
+    />
   );
-};
-
-export default UnsplashLikes;
+}

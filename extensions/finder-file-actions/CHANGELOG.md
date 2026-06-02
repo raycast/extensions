@@ -1,5 +1,9 @@
 # Finder File Actions Changelog
 
+## [Pinned folder custom names] - 2026-05-28
+
+- Added custom names for pinned folders
+
 ## [New commands, search fix, icon refresh] - 2026-04-12
 
 - Added "Create Folder" command that creates a new folder in the current Finder directory

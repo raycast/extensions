@@ -36,6 +36,7 @@ export type SkillLockEntry = {
   source: string;
   sourceType: string;
   sourceUrl?: string;
+  ref?: string;
   skillPath: string;
   skillFolderHash: string;
   installedAt: string;
@@ -49,7 +50,9 @@ export type InstalledSkill = {
   agentCount: number;
   hasUpdate?: boolean;
   source?: string;
+  sourceType?: string;
   sourceUrl?: string;
+  ref?: string;
   installedAt?: string;
   updatedAt?: string;
 };
@@ -167,12 +170,18 @@ export function stripGitSuffix(url: string): string {
   return url.endsWith(".git") ? url.slice(0, -4) : url;
 }
 
+export function buildSkillUrl({ source, skillId }: Skill): string {
+  return `${SKILLS_BASE_URL}/${source}/${skillId}`;
+}
+
 export function buildInstallCommand(skill: Skill): string {
   return `npx skills add ${skill.source}@${skill.skillId}`;
 }
 
-export function buildSkillUrl(source: string, skillId: string): string {
-  return `${SKILLS_BASE_URL}/${source}/${skillId}`;
+export function isGithubBackedInstalledSkill(
+  installedSkill: InstalledSkill,
+): installedSkill is InstalledSkill & { source: string } {
+  return Boolean(installedSkill.source && installedSkill.sourceType === "github" && !installedSkill.ref);
 }
 
 export function deduplicateSkills(skills: Skill[]): Skill[] {

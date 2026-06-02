@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Windows Support] - 2025-10-30
 
 - Added Windows support for the Docker extension
