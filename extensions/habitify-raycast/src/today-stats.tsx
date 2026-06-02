@@ -7,7 +7,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { formatLocalDate, formatUTCDate } from "./lib/date";
+import { formatLocalDate } from "./lib/date";
 import { formatCacheTimestamp, habitifyCacheKeys, latestCacheTimestamp, readCache, writeCache } from "./lib/cache";
 import {
   getHabits,
@@ -87,7 +87,7 @@ export default function Command() {
     setCacheNotice(null);
 
     try {
-      const today = formatUTCDate(new Date());
+      const today = formatLocalDate(new Date());
       const journalCacheKey = habitifyCacheKeys.todayJournal(today);
       const habitsCacheKey = habitifyCacheKeys.activeHabits;
 
