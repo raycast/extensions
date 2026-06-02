@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "habitify-raycast",
   "title": "Habitify",
   "description": "Manage Habitify habits from Raycast.",
@@ -26,15 +27,15 @@
       "default": "status",
       "data": [
         {
-          "title": "Status colors",
+          "title": "Status Colors",
           "value": "status"
         },
         {
-          "title": "Habit colors",
+          "title": "Habit Colors",
           "value": "habit"
         },
         {
-          "title": "Area colors",
+          "title": "Area Colors",
           "value": "area"
         },
         {

@@ -7,7 +7,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { formatUTCDate } from "./lib/date";
+import { formatLocalDate, formatUTCDate } from "./lib/date";
 import { formatCacheTimestamp, habitifyCacheKeys, latestCacheTimestamp, readCache, writeCache } from "./lib/cache";
 import {
   getHabits,
@@ -48,7 +48,7 @@ function getDatesForWeek(): string[] {
   const dates: string[] = [];
   const current = new Date(monday);
   while (current <= today) {
-    dates.push(formatUTCDate(current));
+    dates.push(formatLocalDate(current));
     current.setDate(current.getDate() + 1);
   }
   return dates;
@@ -60,7 +60,7 @@ function getDatesForMonth(): string[] {
   const dates: string[] = [];
   const current = new Date(first);
   while (current <= today) {
-    dates.push(formatUTCDate(current));
+    dates.push(formatLocalDate(current));
     current.setDate(current.getDate() + 1);
   }
   return dates;
