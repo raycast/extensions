@@ -44,6 +44,13 @@
       "subtitle": "Say It Right",
       "description": "Type what you mean in Chinese and get natural English wording ready for pronunciation practice.",
       "mode": "view"
+    },
+    {
+      "name": "saved-results",
+      "title": "Saved Results",
+      "subtitle": "Say It Right",
+      "description": "Review expressions and pronunciation analyses saved from Say It Right.",
+      "mode": "view"
     }
   ],
   "preferences": [

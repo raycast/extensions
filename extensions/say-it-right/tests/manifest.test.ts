@@ -27,21 +27,32 @@ function preference(name: string) {
 
 describe("manifest product boundaries", () => {
   it("names standalone expression commands as spoken-English tasks", () => {
-    expect(command("translate-selection").title).toBe("Say Selection in English");
-    expect(command("translate-clipboard").title).toBe("Say Clipboard in English");
+    expect(command("translate-selection").title).toBe(
+      "Say Selection in English",
+    );
+    expect(command("translate-clipboard").title).toBe(
+      "Say Clipboard in English",
+    );
     expect(command("translate-intent").title).toBe("Say What I Mean");
+    expect(command("saved-results").title).toBe("Saved Results");
   });
 
   it("keeps durable preferences aligned with coaching and voice defaults", () => {
-    expect(preference("defaultAnalysisProvider").title).toBe("Defaults: Coach Provider");
+    expect(preference("defaultAnalysisProvider").title).toBe(
+      "Defaults: Coach Provider",
+    );
     expect(preference("ttsProvider").title).toBe("Defaults: Voice Provider");
-    expect(preference("geminiAnalysisModel").data?.map((entry) => entry.value)).toEqual([
+    expect(
+      preference("geminiAnalysisModel").data?.map((entry) => entry.value),
+    ).toEqual([
       "gemini-3.5-flash",
       "gemini-3.1-pro-preview",
       "gemini-3.1-flash-lite",
       "gemini-3-flash-preview",
     ]);
-    expect(preference("translationTargetLanguage").title).toBe("Practice: Translation Target");
+    expect(preference("translationTargetLanguage").title).toBe(
+      "Practice: Translation Target",
+    );
   });
 
   it("keeps provider settings ordered by the runtime provider catalog", () => {

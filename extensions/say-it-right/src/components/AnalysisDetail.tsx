@@ -60,6 +60,8 @@ export interface AnalysisDetailProps {
   onLoop: () => void;
   onRepeat: () => void;
   onSave: () => void;
+  onOpenReferenceWindow: () => void;
+  onSaveResult: () => void;
   onSwitchProvider: () => void;
   /** Label of the next provider in the cycle; omit to hide the switch action. */
   switchToLabel?: string;
@@ -318,6 +320,22 @@ export function AnalysisDetail(props: AnalysisDetailProps) {
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section title="Tools">
+            {activeItem?.analysis ? (
+              <Action
+                title="Open Reference Window"
+                icon={Icon.AppWindowSidebarLeft}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                onAction={props.onOpenReferenceWindow}
+              />
+            ) : null}
+            {activeItem?.analysis ? (
+              <Action
+                title="Save Current Result"
+                icon={Icon.Pin}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                onAction={props.onSaveResult}
+              />
+            ) : null}
             <Action
               title="Save Model Audio"
               icon={Icon.Download}

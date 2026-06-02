@@ -27,6 +27,8 @@ import {
   translationCacheKey,
   writeTranslationCache,
 } from "./lib/translation-cache";
+import { saveResult } from "./lib/saved-results";
+import { openReferenceCard } from "./lib/reference-card";
 import { splitSentences, resolveSentencesPerPage } from "./lib/sentences";
 import { resolveLoop } from "./lib/loop";
 import { getPrefs } from "./lib/preferences";
@@ -55,6 +57,7 @@ import {
 } from "./components/AnalysisDetail";
 import { getAvailableTtsProviders, resolveTtsProvider } from "./tts/index";
 import { speak, speakLoop, exportAudio, repeatLast } from "./tts/speak";
+import { renderAnalysis } from "./render/markdown";
 
 interface AnalysisRecord {
   analysis?: ProsodyAnalysis;
@@ -439,6 +442,98 @@ function AnalyzeViewInner({
     })();
   }, [activePrefs, current, provider]);
 
+  const onSaveResult = useCallback(() => {
+    void (async () => {
+      const analysis = records[activeIndex]?.analysis;
+      if (!analysis) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to save yet",
+        });
+        return;
+      }
+      const translation = translations[activeIndex];
+      const saved = await saveResult({
+        kind: "analysis",
+        sourceText: current,
+        outputText: analysis.ipa,
+        analysis,
+        markdown: renderSavedAnalysisMarkdown(
+          analysis,
+          translation?.translation,
+          translation?.targetLanguageTitle,
+        ),
+        provider,
+        providerTitle: PROVIDER_LABELS[provider],
+        model: analysisModel,
+        targetLanguageTitle: translation?.targetLanguageTitle,
+        ttsProvider,
+        ttsProviderTitle: PROVIDER_LABELS[ttsProvider],
+        ttsModel,
+        ttsVoice,
+      });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Saved Result",
+        message: saved.title,
+      });
+    })().catch((err) => void reportError(err));
+  }, [
+    activeIndex,
+    analysisModel,
+    current,
+    provider,
+    records,
+    translations,
+    ttsModel,
+    ttsProvider,
+    ttsVoice,
+  ]);
+
+  const onOpenReferenceWindow = useCallback(() => {
+    void (async () => {
+      const analysis = records[activeIndex]?.analysis;
+      if (!analysis) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to open yet",
+        });
+        return;
+      }
+      const translation = translations[activeIndex];
+      await openReferenceCard({
+        title: "Pronunciation Reference",
+        eyebrow: "Say It Right",
+        sourceTitle: "Sentence",
+        sourceText: current,
+        outputTitle: "IPA",
+        outputText: analysis.ipa,
+        markdown: renderSavedAnalysisMarkdown(
+          analysis,
+          translation?.translation,
+          translation?.targetLanguageTitle,
+        ),
+        metadata: [
+          { title: "Analysis", text: PROVIDER_LABELS[provider] },
+          { title: "Model", text: analysisModel },
+          { title: "Voice", text: PROVIDER_LABELS[ttsProvider] },
+          { title: "Voice Model", text: ttsModel },
+          { title: "Voice Name", text: ttsVoice },
+        ],
+      });
+    })().catch((err) => void reportError(err));
+  }, [
+    activeIndex,
+    analysisModel,
+    current,
+    provider,
+    records,
+    translations,
+    ttsModel,
+    ttsProvider,
+    ttsVoice,
+  ]);
+
   const goToIndex = useCallback(
     (target: number) => {
       const next = Math.min(Math.max(target, 0), sentences.length - 1);
@@ -581,6 +676,8 @@ function AnalyzeViewInner({
       onLoop={onLoop}
       onRepeat={onRepeat}
       onSave={onSave}
+      onOpenReferenceWindow={onOpenReferenceWindow}
+      onSaveResult={onSaveResult}
       onSwitchProvider={onSwitchProvider}
       switchToLabel={nextProvider ? PROVIDER_LABELS[nextProvider] : undefined}
       analysisProviderOptions={availableProviders.map((value) => ({
@@ -636,4 +733,27 @@ function AnalyzeViewInner({
       onPrevPage={pageStart > 0 ? onPrevPage : undefined}
     />
   );
+}
+
+function renderSavedAnalysisMarkdown(
+  analysis: ProsodyAnalysis,
+  translation?: string,
+  targetLanguageTitle?: string,
+): string {
+  const lines = [
+    "# Saved Analysis",
+    "",
+    renderAnalysis(analysis, { includeTitle: false }),
+  ];
+  if (translation) {
+    lines.push("");
+    lines.push("## Translation");
+    lines.push("");
+    if (targetLanguageTitle) {
+      lines.push(`_${targetLanguageTitle}_`);
+      lines.push("");
+    }
+    lines.push(`> ${translation}`);
+  }
+  return lines.join("\n");
 }

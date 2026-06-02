@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getAvailableAnalysisProviders,
@@ -32,6 +39,8 @@ import {
   type AnalysisModelMap,
   type RuntimeSelection,
 } from "./lib/runtime-selection";
+import { saveResult } from "./lib/saved-results";
+import { openReferenceCard } from "./lib/reference-card";
 
 interface TranslationState {
   translation?: string;
@@ -307,6 +316,101 @@ function TranslateViewInner({
         ? "Could not express this intent. Use Refresh Expression to try again."
         : undefined,
   });
+  const onSaveResult = useCallback(() => {
+    void (async () => {
+      if (!state.translation) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to save yet",
+        });
+        return;
+      }
+      const saved = await saveResult({
+        kind: mode === "express-intent" ? "expression" : "translation",
+        sourceText: source,
+        outputText: state.translation,
+        coaching: state.coaching,
+        markdown,
+        provider,
+        providerTitle: PROVIDER_LABELS[provider],
+        model: analysisModel,
+        targetLanguageTitle: state.targetLanguageTitle,
+        tone:
+          mode === "express-intent"
+            ? EXPRESSION_TONE_LABELS[expressionTone]
+            : undefined,
+      });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Saved Result",
+        message: saved.title,
+      });
+    })().catch((err) => void reportError(err));
+  }, [
+    analysisModel,
+    expressionTone,
+    markdown,
+    mode,
+    provider,
+    source,
+    state.coaching,
+    state.targetLanguageTitle,
+    state.translation,
+  ]);
+  const onOpenReferenceWindow = useCallback(() => {
+    void (async () => {
+      if (!state.translation) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to open yet",
+        });
+        return;
+      }
+      await openReferenceCard({
+        title:
+          mode === "express-intent"
+            ? "Expression Reference"
+            : "Translation Reference",
+        eyebrow: "Say It Right",
+        sourceTitle:
+          sourceTitle ??
+          (mode === "express-intent" ? "What You Mean" : "Source"),
+        sourceText: source,
+        outputTitle:
+          state.targetLanguageTitle ??
+          (mode === "express-intent" ? "English" : "Result"),
+        outputText: state.translation,
+        coaching: state.coaching,
+        metadata: [
+          {
+            title: mode === "express-intent" ? "Coach" : "Provider",
+            text: PROVIDER_LABELS[provider],
+          },
+          {
+            title: mode === "express-intent" ? "Coach Model" : "Model",
+            text: analysisModel,
+          },
+          {
+            title: "Tone",
+            text:
+              mode === "express-intent"
+                ? EXPRESSION_TONE_LABELS[expressionTone]
+                : undefined,
+          },
+        ],
+      });
+    })().catch((err) => void reportError(err));
+  }, [
+    analysisModel,
+    expressionTone,
+    mode,
+    provider,
+    source,
+    sourceTitle,
+    state.coaching,
+    state.targetLanguageTitle,
+    state.translation,
+  ]);
 
   return (
     <Detail
@@ -341,6 +445,22 @@ function TranslateViewInner({
               mode === "express-intent" ? "Expression Coach" : "Translation"
             }
           >
+            {state.translation ? (
+              <Action
+                title="Open Reference Window"
+                icon={Icon.AppWindowSidebarLeft}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                onAction={onOpenReferenceWindow}
+              />
+            ) : null}
+            {state.translation ? (
+              <Action
+                title="Save Current Result"
+                icon={Icon.Pin}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                onAction={onSaveResult}
+              />
+            ) : null}
             <Action.CopyToClipboard
               title={
                 mode === "express-intent"
@@ -355,6 +475,19 @@ function TranslateViewInner({
               content={source}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
+            {state.translation ? (
+              <Action.CreateSnippet
+                title="Create Raycast Snippet"
+                icon={Icon.Text}
+                snippet={{
+                  name:
+                    mode === "express-intent"
+                      ? "Say It Right Expression"
+                      : "Say It Right Translation",
+                  text: state.translation,
+                }}
+              />
+            ) : null}
             <Action
               title={
                 mode === "express-intent"
