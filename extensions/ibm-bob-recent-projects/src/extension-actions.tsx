@@ -2,7 +2,7 @@ import { Action, Alert, Color, confirmAlert, Icon, Keyboard, showHUD, showToast,
 import { getBobCLI } from "./lib/bob";
 import { getErrorMessage } from "./utils";
 
-export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }): JSX.Element {
+export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }) {
   const handle = async () => {
     try {
       await showToast({
@@ -29,7 +29,7 @@ export function InstallExtensionByIDAction(props: { extensionID: string; afterIn
   return <Action onAction={handle} title="Install Extension" icon={{ source: Icon.Plus }} />;
 }
 
-export function UninstallExtensionByIDAction(props: { extensionID: string; afterUninstall?: () => void }): JSX.Element {
+export function UninstallExtensionByIDAction(props: { extensionID: string; afterUninstall?: () => void }) {
   const handle = async () => {
     try {
       if (
@@ -74,13 +74,10 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
   );
 }
 
-export function OpenExtensionByIDInBobAction(props: {
-  extensionID: string;
-  onOpen?: (url: string) => void;
-}): JSX.Element {
+export function OpenExtensionByIDInBobAction(props: { extensionID: string; onOpen?: (url: string) => void }) {
   return (
     <Action.OpenInBrowser
-      title="Open in IBM Bob"
+      title="Open in Ibm Bob"
       url={`bobide:extension/${props.extensionID}`}
       icon={"icon.png"}
       onOpen={(url) => {
@@ -93,7 +90,7 @@ export function OpenExtensionByIDInBobAction(props: {
   );
 }
 
-export function OpenExtensionByIDInBrowserAction(props: { extensionID: string }): JSX.Element {
+export function OpenExtensionByIDInBrowserAction(props: { extensionID: string }) {
   const url = `https://marketplace.visualstudio.com/items?itemName=${props.extensionID}`;
   return (
     <Action.OpenInBrowser

@@ -43,7 +43,7 @@ export function useRecentEntries() {
       await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
-    } catch (error) {
+    } catch {
       showToast(Toast.Style.Failure, "Failed to remove entry");
     }
   }
@@ -69,7 +69,7 @@ export function useRecentEntries() {
         await revalidate();
         showToast(Toast.Style.Success, "All entries removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
       }
-    } catch (error) {
+    } catch {
       showToast(Toast.Style.Failure, "Failed to remove entries");
     }
   }

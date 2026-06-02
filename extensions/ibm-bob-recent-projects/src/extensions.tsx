@@ -9,15 +9,15 @@ import type { Extension } from "./lib/bob";
 import { getLocalExtensions } from "./lib/bob";
 import { getErrorMessage } from "./utils";
 
-function OpenExtensionInBobAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInBobAction(props: { extension: Extension }) {
   return <OpenExtensionByIDInBobAction extensionID={props.extension.id} />;
 }
 
-function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInBrowserAction(props: { extension: Extension }) {
   return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
 }
 
-function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }) {
   const e = props.extension;
   return (
     <List.Item
@@ -42,7 +42,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               content={e.id}
-              title="Copy Extension Id"
+              title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
             {e.publisherDisplayName && (
@@ -67,7 +67,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
   );
 }
 
-export default function ExtensionsRootCommand(): JSX.Element {
+export default function ExtensionsRootCommand() {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

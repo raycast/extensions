@@ -140,7 +140,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
         if (mounted) {
           setGitBranch(branch);
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - they're already handled in getGitBranch
       }
     }

@@ -25,7 +25,7 @@ export function isFileEntry(entry: EntryLike): entry is FileEntry {
   try {
     const fileUrl = new URL(fileUri);
     return existsSync(fileUrl) && fileUri.indexOf(".code-workspace") === -1;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -40,7 +40,7 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
   try {
     const folderUrl = new URL(folderUri);
     return existsSync(folderUrl);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -55,7 +55,7 @@ export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   try {
     const configUrl = new URL(workspace.configPath);
     return existsSync(configUrl) && workspace.configPath.indexOf(".code-workspace") !== -1;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

@@ -110,7 +110,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
               displayName = displayNameNLS;
             }
           }
-        } catch (error) {
+        } catch {
           // ignore
         }
       }
@@ -122,7 +122,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
         preview,
       };
     }
-  } catch (error) {
+  } catch {
     //
   }
 }
