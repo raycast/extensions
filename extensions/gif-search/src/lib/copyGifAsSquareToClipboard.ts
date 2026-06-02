@@ -1,7 +1,7 @@
 import path from "path";
 import { execFile } from "child_process";
 import { existsSync, mkdirSync } from "fs";
-import { writeFile, unlink } from "fs/promises";
+import { readFile, writeFile, unlink } from "fs/promises";
 import { promisify } from "util";
 import { Clipboard, environment } from "@raycast/api";
 import tempy from "tempy";
@@ -147,7 +147,7 @@ async function ensureScriptFile() {
     mkdirSync(environment.supportPath, { recursive: true });
   }
 
-  if (!existsSync(scriptFile)) {
+  if (!existsSync(scriptFile) || (await readFile(scriptFile, "utf8")) !== MACOS_SQUARE_GIF_SCRIPT) {
     await writeFile(scriptFile, MACOS_SQUARE_GIF_SCRIPT);
   }
 }
