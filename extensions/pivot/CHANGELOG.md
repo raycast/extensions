@@ -1,6 +1,6 @@
 # Pivot Changelog
 
-## [Fix Preset Editor Memory Usage] - {PR_MERGE_DATE}
+## [Fix Preset Editor Memory Usage] - 2026-06-02
 
 - Fixed a memory spike that could crash Raycast when editing presets with many discovered extensions.
 
