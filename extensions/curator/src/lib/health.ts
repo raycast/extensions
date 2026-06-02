@@ -34,7 +34,7 @@ function perSkillIssues(s: ParsedSkill): HealthIssue[] {
         skillName: s.name,
         message: "SKILL.md missing",
         affectedPaths: [s.realPath],
-        meta: { realPath: s.realPath },
+        meta: { realPath: s.realPath, skillMdExists: "false" },
       },
     ];
   }
@@ -48,7 +48,7 @@ function perSkillIssues(s: ParsedSkill): HealthIssue[] {
       skillName: s.name,
       message: `SKILL.md unparseable: ${s.parseError}`,
       affectedPaths: [s.realPath],
-      meta: { realPath: s.realPath },
+      meta: { realPath: s.realPath, skillMdExists: "true" },
     });
   }
   // H3: name != dir

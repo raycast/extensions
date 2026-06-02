@@ -39,7 +39,9 @@ describe("computeHealth", () => {
       [skill({ name: "nomd", skillMdExists: false })],
       HOME,
     );
-    expect(issues.find((i) => i.check === "H2")).toBeDefined();
+    expect(issues.find((i) => i.check === "H2")?.meta.skillMdExists).toBe(
+      "false",
+    );
   });
 
   it("H2: flags parse error", () => {
@@ -47,9 +49,9 @@ describe("computeHealth", () => {
       [skill({ name: "bad", parseError: "yaml error: boom" })],
       HOME,
     );
-    expect(issues.find((i) => i.check === "H2")?.message).toMatch(
-      /unparseable/i,
-    );
+    const h2 = issues.find((i) => i.check === "H2");
+    expect(h2?.message).toMatch(/unparseable/i);
+    expect(h2?.meta.skillMdExists).toBe("true");
   });
 
   it("H3: flags name != directory", () => {

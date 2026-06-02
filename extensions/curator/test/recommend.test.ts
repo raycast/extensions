@@ -77,6 +77,8 @@ describe("buildPrompt", () => {
     expect(p).toContain("alpha");
     expect(p).toContain("beta");
     expect(p).toContain('"confidence"');
+    expect(p).toContain("SkillOpt-style validation gate");
+    expect(p).toContain("catalog-name gate");
   });
 });
 

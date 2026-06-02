@@ -47,4 +47,14 @@ describe("buildFixCommand", () => {
     expect(cmd).toContain('rm -rf "/c/1"');
     expect(cmd).toContain('rm -rf "/c/2"');
   });
+
+  it("escapes quotes and backslashes inside copied shell commands", () => {
+    const cmd = buildFixCommand(
+      issue({
+        check: "H1",
+        meta: { entryPath: '/h/.codex/skills/name"with\\chars' },
+      }),
+    );
+    expect(cmd).toContain('rm "/h/.codex/skills/name\\"with\\\\chars"');
+  });
 });

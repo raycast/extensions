@@ -33,6 +33,7 @@ export function buildPrompt(query: string, catalog: CatalogEntry[]): string {
     "",
     "Return ONLY a JSON array of up to 5 skills, most relevant first:",
     '[{"name":"<exact catalog name>","confidence":"high|medium|low","why":"<=15 words"}]',
+    "SkillOpt-style validation gate before final answer: catalog-name gate = every name must be copied verbatim from the catalog; relevance gate = each selected skill must match a task verb, object, or trigger hint from the user task; diversity gate = avoid near-duplicates unless both are clearly needed; schema gate = valid JSON array only.",
     "Rules: use only names that appear verbatim in the catalog; if nothing fits, return [].",
   ].join("\n");
 }

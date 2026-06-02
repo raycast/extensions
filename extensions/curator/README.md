@@ -33,6 +33,8 @@ Each issue comes with a **ready-to-paste fix command**. Curator shows you the co
 
 Describe a task in plain language and an AI ranks your most relevant skills, each with a one-line reason and a confidence level — catching matches that keyword search misses. Runs on **Raycast AI** out of the box, or any **OpenAI- or Anthropic-compatible** provider with your own key.
 
+Recommendations are grounded in the installed catalog. The prompt uses SkillOpt-style validation gates: every returned name must match a real skill exactly, the reason must connect to your task, near-duplicates are avoided, and malformed or invented recommendations are dropped before display.
+
 ## Who it's for
 
 Anyone whose Claude Code / Codex setup has outgrown their memory — you install skills from several marketplaces, maintain your own, or run them across more than one agent, and you want them findable and healthy.
@@ -43,7 +45,7 @@ Curator is **read-only on your filesystem.** Every fix is a shell command copied
 
 ## AI recommendations: choosing a provider
 
-The default is **Raycast AI** — no setup, requires Raycast Pro. To use your own key instead, open the extension's preferences, set **Provider** to "Custom", and fill in the base URL, key, and model. Anthropic-compatible endpoints are preferred when the provider supports them, and are auto-detected when the base URL contains `/anthropic`. OpenAI-compatible `/v1` endpoints still work. A few common ones:
+The default is **Raycast AI** — no setup, requires Raycast Pro. To use your own key instead, open the extension's preferences, set **Provider** to "Custom", and fill in the base URL, key, and model. Anthropic-compatible endpoints are preferred when the provider supports them, and are auto-detected when the base URL contains `/anthropic`. OpenAI-compatible `/v1` endpoints still work. The custom model field is required for custom providers so Curator never sends an empty `model` value. A few common ones:
 
 | Provider                    | Base URL                                                             | Protocol             | Get a key                                                  |
 | --------------------------- | -------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
