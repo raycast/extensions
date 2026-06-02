@@ -333,7 +333,7 @@ async function postJson<T>(url: string, timeoutMs: number, headers: Record<strin
 
 function validateProviderConfig(config: ProviderConfig): void {
   if (!config.model) {
-    throw new Error(`${config.title} model is not configured. Choose Fast/Pro or set a custom model in Preferences.`);
+    throw new Error(`${config.title} model is not configured. Choose Fast/Best or set a custom model in Preferences.`);
   }
 
   if (!config.baseURL) {
@@ -533,7 +533,7 @@ function applyStructuredPromptOptions(
 
 /**
  * Turn an opaque provider rejection into an actionable message. The default
- * Fast/Pro model catalog can drift ahead of what a provider/key actually
+ * Fast/Best model catalog can drift ahead of what a provider/key actually
  * serves; when that happens the user needs a clear next step instead of a
  * raw `model_not_found` 400.
  */

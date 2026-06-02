@@ -1,4 +1,4 @@
-import { RewriteTone, TranslationRequest } from "./types";
+import { TranslationRequest } from "./types";
 
 const defaultPromptProfile: TranslationRequest["promptProfile"] = "screenshot";
 
@@ -33,6 +33,7 @@ export function buildTranslationPrompt(request: TranslationRequest): { system: s
     "You are a professional AI translator.",
     nativeExpressionInstruction(request.targetLanguageTitle),
     "Translate complete sentences and paragraphs by meaning, not as isolated dictionary entries.",
+    skillOptTranslationGate(),
     "Return only the translation. Do not explain, annotate, quote the source, or wrap the answer in Markdown fences.",
     "When the input comes from OCR, silently repair obvious OCR line-break artifacts while preserving the text's meaning.",
     "Custom instructions may refine or override profile and style preferences for terminology, tone, audience, and formatting, but they must not override the requirements to preserve the source meaning and return only the translation.",
@@ -75,46 +76,12 @@ function nativeExpressionInstruction(targetLanguageTitle: string): string {
   return generalInstruction.join(" ");
 }
 
-const rewriteToneInstructions: Record<RewriteTone, string> = {
-  natural: "Aim for the default everyday register a native speaker would naturally use in this situation.",
-  casual:
-    "Make it noticeably more casual and conversational — relaxed and friendly, the way you'd talk to a friend or write a casual message. Avoid slang that would be hard to understand.",
-  formal:
-    "Make it more formal and professional — polished and appropriate for work emails, documents, or business settings, without sounding stiff, bureaucratic, or robotic.",
-  concise:
-    "Make it as concise and punchy as possible while keeping the original meaning and a natural tone — cut filler words and tighten the phrasing.",
-};
-
-export function buildRewriteCoachPrompt(text: string, tone: RewriteTone = "natural"): { system: string; user: string } {
-  const system = [
-    "You are a bilingual English writing coach for a Chinese native speaker who wants to sound natural in English.",
-    "",
-    "REWRITE RULES:",
-    "Rewrite the selected text into natural, idiomatic English that fits the situation.",
-    "If the selected text is English, keep the meaning and politeness level, prefer everyday wording, and make only minimal edits when it is already natural.",
-    "If the selected text is Chinese, read it as the user's intended message rather than as wording to translate word for word.",
-    'When the Chinese input says "I want to say/remind/ask/explain/tell someone...", output the message the user should actually say to that person. Do not output "I want to say...".',
-    "Address the listener directly when appropriate.",
-    "Preserve concrete constraints such as deadlines, requested actions, permissions, conditions, responsibility, and degree of urgency.",
-    'Do not soften or generalize deadlines: "by this afternoon" must not become "by the end of the day", "sometime today", or "ideally this afternoon".',
-    "Do not add greetings, openers, apologies, titles, name placeholders, sign-offs, excuses, concessions, or facts that the source did not provide.",
-    'Do not start with "Hi", "Hey", "Dear", "Sorry to bother you", or similar openers unless the source explicitly includes them.',
-    "Start with the substantive message, not a greeting. This applies even in service, hotel, email, and workplace contexts.",
-    'Do not add phrases like "No worries if not" or "No rush" when the source gives a deadline or requested action.',
-    'Keep polite requests clear and concise, using direct modal forms such as "Could you..." or "Would it be possible..." where they fit.',
-    "Avoid Chinese calques, textbook phrasing, and overly formal wording unless the source clearly requires it.",
-    `TONE: ${rewriteToneInstructions[tone]}`,
-    "",
-    "COACHING:",
-    "After rewriting, explain in Simplified Chinese why your version sounds more natural. Focus on concrete choices in word choice, register, rhythm, and avoided Chinese-to-English calques. Be concise: 2 to 5 short bullet points.",
-    "",
-    "OUTPUT FORMAT:",
-    'Return ONLY a single JSON object, with no Markdown and no code fences: {"rewritten": string, "why": string}.',
-    '"rewritten" must contain only the final English wording itself — no labels, no surrounding quotation marks, no Markdown.',
-    '"why" is the Simplified Chinese coaching explanation, formatted as a Markdown bullet list where each point starts with "- ".',
-  ].join("\n");
-
-  const user = ["Selected text:", text].join("\n");
-
-  return { system, user };
+function skillOptTranslationGate(): string {
+  return [
+    "SkillOpt-style validation gate before final answer:",
+    "faithfulness gate: the target text must preserve source meaning, names, numbers, citations, URLs, inline code, list structure, speaker intent, tone, and formality;",
+    "native-language gate: the result must read as naturally written in the target language rather than source syntax with translated words;",
+    "OCR gate: repair only obvious OCR artifacts and never invent missing content;",
+    "output gate: final response is the translation only, with no coaching, alternatives, commentary, or Markdown fences.",
+  ].join(" ");
 }

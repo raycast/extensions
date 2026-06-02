@@ -10,43 +10,43 @@
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
 - Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
-- Added the Rewrite & Coach command: rewrite selected text into natural, idiomatic English, compare it with the original, read a Simplified Chinese explanation of why it sounds more natural, and hear either version aloud with Gemini TTS.
-- Made Rewrite & Coach editable with an inline form, tone presets (Natural / Casual / Formal / Concise via ⌘Y), and on-the-fly provider switching (⌘M).
-- Added the Translate Selection & Paste and Rewrite & Replace no-view commands that act on the selected text with the default provider and paste in place, ideal for global hotkeys.
-- Added the History command: locally stored recent translations and rewrites you copied or pasted, with replay copy, paste, and read aloud.
+- Added the Translate & Paste no-view command that acts on the selected text with the default provider/model and pastes in place, ideal for a global hotkey.
+- Added the History command: locally stored recent translations you copied or pasted, with replay copy, paste, and read aloud. Older rewrite entries remain visible for compatibility.
 - Added a Read Aloud Voice preference (eight Gemini voices), a read-slowly action (⌘⌥S) for language practice, and stopped overlapping TTS playback so a new read cancels the previous one.
-- Defaulted the Gemini model and Fast/Pro tiers to Gemini 3.1.
+- Defaulted the Gemini model and Fast/Best tiers to Gemini 3.1.
 - Addressed review feedback for auto language detection, OCR API error parsing, provider cleanup, and search debounce latency.
 - Hardened OCR retry state, auto-paragraph formatting, TTS playback, and provider configuration error handling.
 - Fixed OCR helper build portability, screenshot capture error reporting, and numeric preference fallbacks.
 - Added a Google Gemini multimodal OCR engine that reuses the configured Gemini key, with automatic fallback to local Vision.
 - Added an OpenAI Vision OCR engine that reuses the configured OpenAI key, with an optional OCR-specific model override.
-- Added Auto-Copy: the Screenshot OCR result is copied to the clipboard automatically, with a copied/word-count confirmation (toggle in preferences).
-- Added a Clear Text action to Screenshot OCR for discarding a result without further steps.
+- Added Auto-Copy: the Capture Text result is copied to the clipboard automatically, with a copied/word-count confirmation (toggle in preferences).
+- Added a Clear Text action to Capture Text for discarding a result without further steps.
 - Rebuilt Auto Paragraph so wrapped OCR lines reflow into real paragraphs instead of one paragraph per line, with CJK-aware joining and de-hyphenation.
 - Replaced empty "OCR Failed" alerts with classified, self-describing messages: silent on a cancelled capture, actionable on an unreadable one, with a one-click Screen Recording shortcut and diagnostic detail.
 - Made model errors actionable across providers: an unavailable model now explains how to switch tier or set a custom model instead of a raw 400.
 - Stopped reasoning models (o-series, GPT-5 family) from failing translation by sending the correct token and temperature parameters.
-- Fell back to clipboard text when nothing is selected in Translate and Rewrite & Coach, and clarified the no-selection guidance for the paste-in-place commands.
+- Fell back to clipboard text when nothing is selected in Translate and clarified the no-selection guidance for the paste-in-place command.
 - Expanded the target language list (Arabic, Hindi, Vietnamese, Thai, Indonesian, Turkish, Dutch, Polish).
 - Serialized history writes so rapid copies no longer drop entries, and cleaned up leftover TTS audio files.
-- Refreshed Store screenshots for the current Screenshot OCR, Translate, and Translation Settings commands.
-- Added Qwen-TTS as the default Read Aloud engine through DashScope, switchable per session in Rewrite & Coach (⌘⌥M), with model, voice, language_type, and instruct-only style instruction preferences.
-- Locked Rewrite & Coach to the Pro tier so rewrite quality stays consistent regardless of the translation Model Tier setting.
+- Refreshed Store screenshots for the current Capture Text, Translate Text, and Settings commands.
+- Added Qwen-TTS as the default Read Aloud engine through DashScope, with model, voice, language_type, and instruct-only style instruction preferences.
+- Added a global Default Model preference and made Translate, Capture Text & Translate, and paste-in-place commands share the same active model default.
+- Renamed user-facing commands and preference labels around Translate, Capture Text, Settings, providers, voice, and advanced request controls so Raycast settings read in a clearer task-first order.
+- Moved English intent-expression and rewrite coaching out of AI Translate's active command surface; Say It Right is now the home for natural English expression, pronunciation, TTS practice, and shadowing.
+- Added SkillOpt-style validation gates to the translation and Vision OCR prompts so they self-check faithfulness, native target-language wording, OCR repair boundaries, and translation-only output.
 - Refreshed the Xiaomi MiMo model catalog: removed the deprecated mimo-v2-flash, kept mimo-v2.5 as Fast, and promoted mimo-v2.5-pro as Pro.
-- Hardened the Rewrite & Coach JSON parser with balanced-brace extraction and a more informative error message when a provider returns malformed JSON.
-- Switched Screenshot OCR Copy cancellation detection to use `instanceof OcrCancelledError` so unrelated errors aren't silently swallowed.
+- Switched Capture Text & Copy cancellation detection to use `instanceof OcrCancelledError` so unrelated errors aren't silently swallowed.
 - Restored the missing titles for the Fallback OCR and Baidu OCR Paragraphs preferences so they show up labelled in the Raycast preferences pane.
 - Surfaced combined diagnostics when both primary OCR and the local fallback fail, instead of masking the secondary error.
 - Routed an empty Tesseract result through the same "no text detected" path as the other engines instead of an error notice.
 - Translate now skips the 350 ms typing debounce on target language, prompt profile, translation style, and model tier switches, as well as the initial selection or clipboard auto-fill, so non-typing changes fire immediately.
 - Read Aloud labels the toast when a slow read request is dropped because the active Qwen model is not the Instruct variant, instead of silently reading at normal speed.
 - Defaulted the Read Aloud engine to Gemini when only the Gemini API key is configured, so first-time Read Aloud doesn't fail with a missing DashScope key for Gemini-only setups.
-- Cleared the "Auto-copied on capture" hint in Screenshot OCR after edits or reformatting, so the clipboard status no longer claims a stale copy.
-- Added runtime provider/model pickers: Translate and Screenshot Translate can now switch between all enabled providers and a single provider from the action panel, per-provider model choices are remembered, no-window commands follow the same runtime choice, and Translation Settings now exposes voice provider/model instead of hiding TTS model selection in Preferences.
-- Added MiniMax as a translation/rewrite provider using the Anthropic-compatible `https://api.minimaxi.com/anthropic` endpoint and `MiniMax-M3` as the built-in default model.
+- Cleared the "Auto-copied on capture" hint in Capture Text after edits or reformatting, so the clipboard status no longer claims a stale copy.
+- Added runtime provider/model pickers: Translate Text and Capture Text & Translate can now switch between all enabled providers and a single provider from the action panel, per-provider model choices are remembered, no-window commands follow the same runtime choice, and Settings now exposes voice provider/model instead of hiding TTS model selection in Preferences.
+- Added MiniMax as a translation provider using the Anthropic-compatible `https://api.minimaxi.com/anthropic` endpoint and `MiniMax-M3` as the built-in default model.
 - Refreshed the model catalog against official provider docs (DeepSeek, MiniMax, Xiaomi MiMo, Gemini, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
-  - Disabled DeepSeek and Xiaomi MiMo thinking mode on translation and Rewrite & Coach requests so temperature is honored and first-token latency drops on `deepseek-v4-*` and `mimo-v2.5-*` models.
+  - Disabled DeepSeek and Xiaomi MiMo thinking mode on translation requests so temperature is honored and first-token latency drops on `deepseek-v4-*` and `mimo-v2.5-*` models.
   - Switched the Gemini structured-output payload to the current `generationConfig.responseFormat.text.{mimeType,schema}` shape; promoted the new stable `gemini-3.5-flash` as the Gemini Fast tier and dropped the retired `gemini-3-pro-preview` entry while adding stable `gemini-3.1-flash-lite`.
   - Upgraded OpenAI structured outputs to `response_format.type: "json_schema"` with `strict: true` (scrubbing Gemini-only schema keys) and sent `reasoning_effort: "minimal"` to GPT-5.x reasoning models so translation latency stays low.
   - Hardened `anthropicMessagesUrl` to tolerate custom base URLs that already include a trailing `/v1`; and made the Anthropic / OpenAI wire protocol auto-detect from generic custom `…/v1` endpoints for DeepSeek/MiMo so documented OpenAI-compatible fallbacks work.

@@ -24,6 +24,28 @@ test("manifest exposes MiniMax as a translation provider", () => {
   assert.equal(preference("minimaxModel").default, "MiniMax-M3");
 });
 
+test("manifest exposes one default model setting for prompt commands", () => {
+  assert.equal(preference("defaultModelTier").title, "Default Model");
+  assert.equal(preference("defaultModelTier").default, "fast");
+  assert.deepEqual(
+    preference("defaultModelTier").data.map((entry) => entry.value),
+    ["fast", "pro", "custom"],
+  );
+});
+
+test("manifest keeps AI Translate focused on translation and capture commands", () => {
+  const commandNames = manifest.commands.map((command) => command.name);
+  assert.deepEqual(commandNames, [
+    "translate",
+    "translate-paste",
+    "screenshot-translate",
+    "screenshot-ocr-copy",
+    "screenshot-ocr",
+    "history",
+    "translation-settings",
+  ]);
+});
+
 test("MiniMax catalog defaults to M3 and keeps M2.7 as an explicit text-model choice", () => {
   assert.equal(resolveModel("minimax", "fast", ""), "MiniMax-M3");
   assert.equal(resolveModel("minimax", "pro", ""), "MiniMax-M3");

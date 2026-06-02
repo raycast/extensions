@@ -19,7 +19,7 @@ function getDefaults(): RuntimeSettings {
     const prefs = getPreferenceValues<ExtensionPreferences>();
     const ttsProvider = pickDefaultTTSProvider(prefs);
     return {
-      modelTier: "fast",
+      modelTier: pickDefaultModelTier(prefs),
       providerMode: "enabled",
       selectedProviderId: isProviderId(prefs.defaultProvider) ? prefs.defaultProvider : "deepseek",
       modelOverrides: {},
@@ -47,7 +47,7 @@ function getDefaults(): RuntimeSettings {
 /**
  * Pick a TTS provider the user can actually use on first Read Aloud, so a
  * Gemini-only setup doesn't hit a "DashScope key required" failure before
- * they've ever opened Translation Settings. Falls back to Qwen when both or
+ * they've ever opened Settings. Falls back to Qwen when both or
  * neither key is set (Qwen is the documented default).
  */
 function pickDefaultTTSProvider(prefs: ExtensionPreferences): TTSProvider {
@@ -55,6 +55,10 @@ function pickDefaultTTSProvider(prefs: ExtensionPreferences): TTSProvider {
   const hasGeminiKey = Boolean(prefs.geminiAPIKey?.trim());
   if (!hasQwenKey && hasGeminiKey) return "gemini";
   return "qwen";
+}
+
+function pickDefaultModelTier(prefs: ExtensionPreferences): ModelTier {
+  return isModelTier(prefs.defaultModelTier) ? prefs.defaultModelTier : "fast";
 }
 
 export async function loadRuntimeSettings(): Promise<RuntimeSettings> {

@@ -74,7 +74,7 @@ export default function Command() {
     <Form
       key={formKey}
       isLoading={isLoading}
-      navigationTitle="Translation Settings"
+      navigationTitle="AI Translate Settings"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Save" onSubmit={handleSubmit} />
@@ -89,25 +89,25 @@ export default function Command() {
     >
       <Form.Dropdown
         id="modelTier"
-        title="Default Model Tier"
+        title="Active Model"
         defaultValue={settings.modelTier}
-        info="Fast/Pro use built-in model catalogs. Provider-specific model picks in the action panel override this tier."
+        info="Applies to Translate, Capture Text & Translate, and paste-in-place commands. Provider-specific model picks in the action panel override this default."
       >
-        <Form.Dropdown.Item value="fast" title="Fast — Flash / Mini models, speed priority" icon={Icon.Bolt} />
-        <Form.Dropdown.Item value="pro" title="Pro — Best models, quality priority" icon={Icon.Star} />
-        <Form.Dropdown.Item value="custom" title="Custom — Use models set in Preferences" icon={Icon.Gear} />
+        <Form.Dropdown.Item value="fast" title="Fast — Speed priority" icon={Icon.Bolt} />
+        <Form.Dropdown.Item value="pro" title="Best — Quality priority" icon={Icon.Star} />
+        <Form.Dropdown.Item value="custom" title="Custom — Use provider custom models" icon={Icon.Gear} />
       </Form.Dropdown>
 
-      <Form.Dropdown id="providerMode" title="Translation Providers" defaultValue={settings.providerMode}>
+      <Form.Dropdown id="providerMode" title="Active Providers" defaultValue={settings.providerMode}>
         <Form.Dropdown.Item value="enabled" title="All Enabled Providers" icon={Icon.List} />
         <Form.Dropdown.Item value="single" title="Single Provider" icon={Icon.Dot} />
       </Form.Dropdown>
 
       <Form.Dropdown
         id="selectedProviderId"
-        title="Single Provider"
+        title="Default Single Provider"
         defaultValue={settings.selectedProviderId ?? providerIds[0]}
-        info="Used by no-window commands and by Translate/Screenshot Translate when Translation Providers is Single Provider."
+        info="Used by no-window commands and by Translate/Capture Text & Translate when Active Providers is Single Provider."
       >
         {providerIds.map((id) => (
           <Form.Dropdown.Item key={id} value={id} title={PROVIDER_TITLES[id]} />
@@ -118,7 +118,7 @@ export default function Command() {
 
       <Form.Dropdown id="promptProfile" title="Prompt Profile" defaultValue={settings.promptProfile}>
         <Form.Dropdown.Item value="general" title="General Translation" />
-        <Form.Dropdown.Item value="screenshot" title="Screenshot OCR" />
+        <Form.Dropdown.Item value="screenshot" title="Capture Text" />
         <Form.Dropdown.Item value="technical" title="Technical / Developer" />
         <Form.Dropdown.Item value="academic" title="Academic Writing" />
         <Form.Dropdown.Item value="legal" title="Legal / Policy" />
@@ -140,7 +140,7 @@ export default function Command() {
         title="Custom Instructions"
         placeholder="Optional: terminology, tone, audience, formatting..."
         defaultValue={settings.customPromptInstructions}
-        info="Appended to every translation request. Max 4000 characters."
+        info="Appended to translation requests. Max 4000 characters."
       />
 
       <Form.Separator />

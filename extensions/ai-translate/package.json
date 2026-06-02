@@ -9,9 +9,9 @@
   "commands": [
     {
       "name": "translate",
-      "title": "Translate",
+      "title": "Translate Text",
       "subtitle": "AI Translate",
-      "description": "Translate selected text or type text to translate. Switch models, prompt profiles, and styles on the fly.",
+      "description": "Translate selected text, clipboard text, or typed text. Compare providers and adjust model, style, and prompt profile.",
       "mode": "view",
       "icon": "ai-translate-icon.png",
       "keywords": [
@@ -27,9 +27,9 @@
     },
     {
       "name": "translate-paste",
-      "title": "Translate Selection & Paste",
+      "title": "Translate & Paste",
       "subtitle": "AI Translate",
-      "description": "Translate the selected text with your default provider and paste the result in place — no window.",
+      "description": "Translate the selected text with the active default provider/model and paste the result in place.",
       "mode": "no-view",
       "icon": "ai-translate-icon.png",
       "keywords": [
@@ -42,49 +42,10 @@
       ]
     },
     {
-      "name": "rewrite-coach",
-      "title": "Rewrite & Coach",
-      "subtitle": "AI Translate",
-      "description": "Rewrite selected text into natural, idiomatic English, learn why it sounds more natural, and hear it spoken aloud.",
-      "mode": "view",
-      "icon": "ai-translate-icon.png",
-      "keywords": [
-        "rewrite",
-        "coach",
-        "english",
-        "natural",
-        "idiomatic",
-        "polish",
-        "tts",
-        "pronunciation",
-        "qwen",
-        "dashscope",
-        "gemini"
-      ]
-    },
-    {
-      "name": "rewrite-replace",
-      "title": "Rewrite & Replace",
-      "subtitle": "AI Translate",
-      "description": "Rewrite the selected text into natural English with your default provider and paste it in place — no window.",
-      "mode": "no-view",
-      "icon": "ai-translate-icon.png",
-      "keywords": [
-        "rewrite",
-        "replace",
-        "paste",
-        "english",
-        "natural",
-        "polish",
-        "quick",
-        "inline"
-      ]
-    },
-    {
       "name": "screenshot-translate",
-      "title": "Screenshot Translate",
+      "title": "Capture Text & Translate",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR the text, review it, and translate with multiple providers. Switch models to compare.",
+      "description": "Capture a screen region, extract text, review it, and translate with the active provider/model settings.",
       "mode": "view",
       "icon": "screenshot-translate-icon.png",
       "keywords": [
@@ -97,9 +58,9 @@
     },
     {
       "name": "screenshot-ocr-copy",
-      "title": "Screenshot OCR Copy",
+      "title": "Capture Text & Copy",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR the text, and copy it to the clipboard.",
+      "description": "Capture a screen region, extract text, and copy it to the clipboard.",
       "mode": "no-view",
       "icon": "screenshot-translate-icon.png",
       "keywords": [
@@ -113,9 +74,9 @@
     },
     {
       "name": "screenshot-ocr",
-      "title": "Screenshot OCR",
+      "title": "Capture Text",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region and extract text with OCR. Review, copy, or send to translate.",
+      "description": "Capture a screen region and extract text. Review, clean up, copy, or send it to translation.",
       "mode": "view",
       "icon": "screenshot-translate-icon.png",
       "keywords": [
@@ -132,7 +93,7 @@
       "name": "history",
       "title": "History",
       "subtitle": "AI Translate",
-      "description": "Browse recent translations and rewrites you copied or pasted. Replay copy, paste, or read aloud.",
+      "description": "Browse recent translations you copied or pasted. Older rewrite entries remain visible.",
       "mode": "view",
       "icon": "ai-translate-icon.png",
       "keywords": [
@@ -140,15 +101,14 @@
         "recent",
         "log",
         "translate",
-        "rewrite",
         "replay"
       ]
     },
     {
       "name": "translation-settings",
-      "title": "Translation Settings",
+      "title": "Settings",
       "subtitle": "AI Translate",
-      "description": "Configure provider scope, model tier, prompt profile, translation style, voice provider/model, and custom instructions.",
+      "description": "Set active defaults for provider, model, prompt, style, OCR, voice, and custom instructions.",
       "mode": "view",
       "icon": "ai-translate-icon.png",
       "keywords": [
@@ -171,12 +131,12 @@
   ],
   "preferences": [
     {
-      "title": "Fallback Provider",
+      "title": "Default Provider",
       "name": "defaultProvider",
       "type": "dropdown",
       "required": true,
       "default": "deepseek",
-      "description": "Provider shown first when no runtime provider is selected, and used when no provider checkbox is enabled.",
+      "description": "Primary provider for all commands. Multi-provider views show it first; no-window commands use it first.",
       "data": [
         {
           "title": "DeepSeek",
@@ -197,6 +157,28 @@
         {
           "title": "OpenAI / ChatGPT",
           "value": "openai"
+        }
+      ]
+    },
+    {
+      "title": "Default Model",
+      "name": "defaultModelTier",
+      "type": "dropdown",
+      "required": true,
+      "default": "fast",
+      "description": "Default model quality/speed choice for Translate, Capture Text & Translate, and paste-in-place commands.",
+      "data": [
+        {
+          "title": "Fast",
+          "value": "fast"
+        },
+        {
+          "title": "Best",
+          "value": "pro"
+        },
+        {
+          "title": "Custom Provider Models",
+          "value": "custom"
         }
       ]
     },
@@ -291,12 +273,12 @@
       ]
     },
     {
-      "title": "Translation Style",
+      "title": "Default Translation Style",
       "name": "translationStyle",
       "type": "dropdown",
       "required": true,
       "default": "balanced",
-      "description": "Controls how literal or polished the sentence translation should be.",
+      "description": "Default tone for translation prompts. You can still change it from the action panel.",
       "data": [
         {
           "title": "Balanced",
@@ -317,15 +299,15 @@
       ]
     },
     {
-      "title": "Prompt Profile",
+      "title": "Default Prompt Profile",
       "name": "promptProfile",
       "type": "dropdown",
       "required": true,
       "default": "screenshot",
-      "description": "Built-in prompt frame appended to every translation request.",
+      "description": "Default prompt frame appended to translation requests.",
       "data": [
         {
-          "title": "Screenshot OCR",
+          "title": "Capture Text",
           "value": "screenshot"
         },
         {
@@ -355,20 +337,20 @@
       ]
     },
     {
-      "title": "Custom Prompt Instructions",
+      "title": "Global Custom Instructions",
       "name": "customPromptInstructions",
       "type": "textfield",
       "required": false,
-      "description": "Optional prompt instructions sent with every translation, for terminology, audience, tone, or formatting preferences.",
+      "description": "Optional instructions sent with translation prompts, such as terminology, audience, tone, or formatting preferences.",
       "default": ""
     },
     {
-      "title": "OCR Engine",
+      "title": "Default OCR Engine",
       "name": "ocrEngine",
       "type": "dropdown",
       "required": true,
       "default": "local",
-      "description": "Engine used by Screenshot Translate.",
+      "description": "Engine used by Capture Text and Capture Text & Translate.",
       "data": [
         {
           "title": "Local macOS Vision",
@@ -393,7 +375,7 @@
       ]
     },
     {
-      "title": "OCR Text Layout",
+      "title": "Default OCR Text Layout",
       "name": "ocrTextLayout",
       "type": "dropdown",
       "required": true,
@@ -414,13 +396,13 @@
       "name": "autoCopyOcr",
       "type": "checkbox",
       "label": "Auto-copy recognized text",
-      "title": "Auto-Copy OCR Result",
+      "title": "Capture Text Auto-Copy",
       "required": false,
       "description": "Copy the recognized text to the clipboard automatically after a successful capture.",
       "default": true
     },
     {
-      "title": "Fallback OCR",
+      "title": "OCR Local Fallback",
       "name": "ocrFallbackToLocal",
       "type": "checkbox",
       "label": "Fallback to local OCR",
@@ -429,7 +411,7 @@
       "default": true
     },
     {
-      "title": "OCR Timeout Seconds",
+      "title": "OCR Timeout",
       "name": "ocrTimeoutSeconds",
       "type": "textfield",
       "required": false,
@@ -550,44 +532,48 @@
       "default": false
     },
     {
-      "title": "Provider Switches",
+      "title": "Enable DeepSeek",
       "name": "enableDeepSeek",
       "type": "checkbox",
       "label": "DeepSeek",
       "required": false,
-      "description": "Show DeepSeek translation result.",
+      "description": "Allow DeepSeek in provider lists and no-window command fallback order.",
       "default": true
     },
     {
       "name": "enableMiniMax",
       "type": "checkbox",
+      "title": "Enable MiniMax",
       "label": "MiniMax",
       "required": false,
-      "description": "Show MiniMax translation result.",
+      "description": "Allow MiniMax in provider lists and no-window command fallback order.",
       "default": false
     },
     {
       "name": "enableMiMo",
       "type": "checkbox",
+      "title": "Enable Xiaomi MiMo",
       "label": "Xiaomi MiMo",
       "required": false,
-      "description": "Show Xiaomi MiMo translation result.",
+      "description": "Allow Xiaomi MiMo in provider lists and no-window command fallback order.",
       "default": false
     },
     {
       "name": "enableGemini",
       "type": "checkbox",
+      "title": "Enable Gemini",
       "label": "Gemini",
       "required": false,
-      "description": "Show Gemini translation result.",
+      "description": "Allow Gemini in provider lists and no-window command fallback order.",
       "default": false
     },
     {
       "name": "enableOpenAI",
       "type": "checkbox",
+      "title": "Enable OpenAI",
       "label": "OpenAI / ChatGPT",
       "required": false,
-      "description": "Show OpenAI translation result.",
+      "description": "Allow OpenAI in provider lists and no-window command fallback order.",
       "default": false
     },
     {
@@ -595,24 +581,24 @@
       "name": "providerOrder",
       "type": "textfield",
       "required": false,
-      "description": "Comma separated provider ids: deepseek,minimax,mimo,gemini,openai.",
+      "description": "Advanced: comma-separated provider ids used after Default Provider.",
       "default": "deepseek,minimax,mimo,gemini,openai",
       "placeholder": "deepseek,minimax,mimo,gemini,openai"
     },
     {
-      "title": "Request Timeout Seconds",
+      "title": "Provider Request Timeout",
       "name": "requestTimeoutSeconds",
       "type": "textfield",
       "required": false,
-      "description": "Per-provider request timeout.",
+      "description": "Advanced: per-provider request timeout in seconds.",
       "default": "45"
     },
     {
-      "title": "Max Output Tokens",
+      "title": "Provider Max Output Tokens",
       "name": "maxOutputTokens",
       "type": "textfield",
       "required": false,
-      "description": "Maximum generated tokens for chat-compatible providers.",
+      "description": "Advanced: maximum generated tokens for chat-compatible providers.",
       "default": "4096"
     },
     {
@@ -632,11 +618,11 @@
       "default": "https://api.deepseek.com/anthropic"
     },
     {
-      "title": "Custom DeepSeek Model",
+      "title": "DeepSeek Custom Model",
       "name": "deepseekModel",
       "type": "textfield",
       "required": false,
-      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in deepseek-v4-flash/deepseek-v4-pro catalog unless you pick a model from the action panel. Thinking mode is disabled per request so translations stay low-latency and honor temperature.",
+      "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in DeepSeek catalog unless you pick a model from the action panel. Thinking mode is disabled per request so prompts stay low-latency and honor temperature.",
       "default": "deepseek-v4-flash"
     },
     {
@@ -656,11 +642,11 @@
       "default": "https://api.minimaxi.com/anthropic"
     },
     {
-      "title": "Custom MiniMax Model",
+      "title": "MiniMax Custom Model",
       "name": "minimaxModel",
       "type": "textfield",
       "required": false,
-      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in MiniMax-M3 catalog unless you pick a model from the action panel.",
+      "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in MiniMax-M3 catalog unless you pick a model from the action panel.",
       "default": "MiniMax-M3"
     },
     {
@@ -680,11 +666,11 @@
       "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
     },
     {
-      "title": "Custom Xiaomi MiMo Model",
+      "title": "Xiaomi MiMo Custom Model",
       "name": "mimoModel",
       "type": "textfield",
       "required": false,
-      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in MiMo catalog unless you pick a model from the action panel.",
+      "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in MiMo catalog unless you pick a model from the action panel.",
       "default": "mimo-v2.5-pro"
     },
     {
@@ -704,11 +690,11 @@
       "default": "https://generativelanguage.googleapis.com/v1beta"
     },
     {
-      "title": "Custom Gemini Model",
+      "title": "Gemini Custom Model",
       "name": "geminiModel",
       "type": "textfield",
       "required": false,
-      "description": "Used when Model Tier is Custom. Fast/Pro use the built-in Gemini catalog unless you pick a model from the action panel.",
+      "description": "Used when Default Model is Custom Provider Models. Fast/Best use the built-in Gemini catalog unless you pick a model from the action panel.",
       "default": "gemini-3.5-flash"
     },
     {
@@ -720,11 +706,11 @@
       "default": ""
     },
     {
-      "title": "Read Aloud Voice",
+      "title": "Gemini Voice",
       "name": "geminiTTSVoice",
       "type": "dropdown",
       "required": false,
-      "description": "Gemini voice used for Read Aloud (text-to-speech).",
+      "description": "Voice used when Read Aloud uses Gemini.",
       "default": "Kore",
       "data": [
         {
@@ -778,11 +764,11 @@
       "default": "https://dashscope.aliyuncs.com/api/v1"
     },
     {
-      "title": "Default Qwen-TTS Model",
+      "title": "Qwen-TTS Default Model",
       "name": "qwenTTSModel",
       "type": "dropdown",
       "required": false,
-      "description": "Default Qwen-TTS model for Read Aloud. You can change the active voice model from Translation Settings or the action panel. Instructions are sent only with Qwen3 TTS Instruct Flash.",
+      "description": "Default Qwen-TTS model for Read Aloud. You can change the active voice model from Settings or the action panel. Instructions are sent only with Qwen3 TTS Instruct Flash.",
       "default": "qwen3-tts-flash",
       "data": [
         {
@@ -900,11 +886,11 @@
       "default": "https://api.openai.com/v1"
     },
     {
-      "title": "Custom OpenAI Model",
+      "title": "OpenAI Custom Model",
       "name": "openAIModel",
       "type": "textfield",
       "required": false,
-      "description": "Used when Model Tier is Custom. Fast/Pro use gpt-4.1-mini/gpt-4.1 unless you pick a model from the action panel. GPT-5.x reasoning models are sent with reasoning_effort=minimal for translation latency.",
+      "description": "Used when Default Model is Custom Provider Models. Fast/Best use gpt-4.1-mini/gpt-4.1 unless you pick a model from the action panel. GPT-5.x reasoning models are sent with reasoning_effort=minimal for prompt latency.",
       "default": "gpt-4.1-mini"
     },
     {
@@ -935,7 +921,6 @@
   "scripts": {
     "generate-icons": "node scripts/generate-icons.mjs",
     "build-swift": "bash scripts/build-swift.sh",
-    "eval:rewrite-prompt": "node scripts/rewrite-prompt-eval.mjs",
     "test": "node --test tests/*.test.mjs",
     "predev": "npm run build-swift",
     "prebuild": "npm run build-swift",

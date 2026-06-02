@@ -30,7 +30,7 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.Clock}
         title={isLoading ? "Loading history..." : "No history yet"}
-        description="Translations and rewrites you copy or paste are saved here."
+        description="Translations you copy or paste are saved here. Older rewrite entries remain visible."
       />
       {(entries ?? []).map((entry) => (
         <List.Item

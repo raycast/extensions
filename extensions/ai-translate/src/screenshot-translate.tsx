@@ -272,7 +272,7 @@ export default function Command() {
       filtering={false}
       isLoading={isLoading}
       isShowingDetail={ocrDone && results.length > 0}
-      navigationTitle={`Screenshot Translate · ${providerScopeTitle} · ${getTierLabel(currentTier)}`}
+      navigationTitle={`Capture Text & Translate · ${providerScopeTitle} · ${getTierLabel(currentTier)}`}
       searchBarAccessory={
         <List.Dropdown tooltip="Target Language" value={targetLanguage} onChange={setTargetLanguage}>
           {LANGUAGE_CHOICES.map((l) => (
@@ -583,7 +583,7 @@ function ItemActions(p: {
       <ActionPanel.Section title="Settings">
         <Action
           icon={Icon.Gear}
-          title="Translation Settings"
+          title="AI Translate Settings"
           onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
         />
         <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />

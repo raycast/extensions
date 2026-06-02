@@ -323,12 +323,12 @@ export default function Command(props: LaunchProps) {
           <ActionPanel>
             <Action
               icon={Icon.Camera}
-              title="Screenshot Translate"
+              title="Capture Text & Translate"
               onAction={() => launchCommand({ name: "screenshot-translate", type: LaunchType.UserInitiated })}
             />
             <Action
               icon={Icon.Gear}
-              title="Translation Settings"
+              title="AI Translate Settings"
               onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
             />
             <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
@@ -424,7 +424,7 @@ function ResultActions({
         <Action
           icon={Icon.Camera}
           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          title="Screenshot Translate"
+          title="Capture Text & Translate"
           onAction={() => launchCommand({ name: "screenshot-translate", type: LaunchType.UserInitiated })}
         />
         <Action.CopyToClipboard
@@ -537,7 +537,7 @@ function ResultActions({
       <ActionPanel.Section title="Settings">
         <Action
           icon={Icon.Gear}
-          title="Translation Settings"
+          title="AI Translate Settings"
           onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
         />
         <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />

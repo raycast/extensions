@@ -76,7 +76,7 @@ export function getTierLabel(tier: string): string {
     case "fast":
       return "Fast";
     case "pro":
-      return "Pro";
+      return "Best";
     case "custom":
       return "Custom";
     default:

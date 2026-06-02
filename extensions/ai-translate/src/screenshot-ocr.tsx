@@ -95,7 +95,7 @@ export default function Command() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={text.length > 0 ? `Screenshot OCR · ${text.length} chars` : "Screenshot OCR"}
+      navigationTitle={text.length > 0 ? `Capture Text · ${text.length} chars` : "Capture Text"}
       actions={
         <ActionPanel>
           {hasText && !isLoading && (
@@ -122,7 +122,7 @@ export default function Command() {
               <Action
                 icon={Icon.Camera}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                title="Screenshot Translate"
+                title="Capture Text & Translate"
                 onAction={() => launchCommand({ name: "screenshot-translate", type: LaunchType.UserInitiated })}
               />
             </ActionPanel.Section>

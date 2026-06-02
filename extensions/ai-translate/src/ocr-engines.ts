@@ -209,7 +209,10 @@ async function recognizeImageWithEngine(
 const VISION_OCR_PROMPT =
   "Extract all text from this image exactly as it appears. Preserve the original reading " +
   "order and line breaks. Output only the extracted text — no commentary, no explanations, " +
-  "and no Markdown code fences. If the image contains no text, output nothing.";
+  "and no Markdown code fences. SkillOpt-style validation gate: before answering, check that " +
+  "every visible text region is represented once, reading order is preserved, no inferred or " +
+  "translated content was added, and an empty image returns empty output. If the image contains " +
+  "no text, output nothing.";
 
 interface GeminiOCRResponse {
   candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;

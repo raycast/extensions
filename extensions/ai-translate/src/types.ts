@@ -8,8 +8,6 @@ export type PromptProfile = "screenshot" | "general" | "technical" | "academic" 
 
 export type ModelTier = "fast" | "pro" | "custom";
 
-export type RewriteTone = "natural" | "casual" | "formal" | "concise";
-
 export type OCREngine = "local" | "tesseract" | "baidu" | "gemini" | "openai";
 
 export type OCRTextLayout = "formatted" | "compact";

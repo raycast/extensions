@@ -10,7 +10,7 @@ export const PROVIDER_ICONS: Record<ProviderId, Icon> = {
 };
 
 export const PROMPT_PROFILE_LABELS: Record<PromptProfile, string> = {
-  screenshot: "Screenshot OCR",
+  screenshot: "Capture Text",
   general: "General",
   technical: "Technical",
   academic: "Academic",
