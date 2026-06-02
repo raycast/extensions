@@ -2,6 +2,7 @@ import { extractCmdError, run } from "../shell";
 import { CliPackage, UpdateResult } from "../types";
 
 import * as fs from "fs";
+import * as path from "path";
 
 // Filesystem-based binary lookup for each package manager. Lets the extension
 // work on Intel Macs (/usr/local/bin) and Apple Silicon (/opt/homebrew/bin)
@@ -43,6 +44,75 @@ function findGem(): string | null {
 export function isGemAvailable(): boolean {
   return findGem() !== null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PEP 668 — "externally managed" Python detection
+//
+// Homebrew (and Debian/Ubuntu) drop an EXTERNALLY-MANAGED marker into the
+// interpreter's stdlib dir. When present, pip refuses to install/upgrade into
+// that environment because its packages are owned by the OS package manager
+// (brew). Force-overriding with --break-system-packages would clobber brew's
+// Python and can break it — exactly what PEP 668 protects against.
+//
+// For us this means: outdated packages in a brew-managed Python aren't
+// independently upgradable via pip. They get bumped when the user runs
+// `brew upgrade` (which updates the python@3.x formula). So we treat them as
+// brew-managed: exclude them from the actionable pip-updates list, and if
+// anything tries to upgrade one directly, return a clear message instead of
+// pip's cryptic error.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Best-effort: derive the python interpreter that backs a given pip binary. */
+function findPipPython(pip: string): string | null {
+  const dir = path.dirname(pip);
+  const base = path.basename(pip); // "pip3" or "pip"
+  // pip3 → python3, pip → python (same bin dir as the pip we found)
+  const derived = path.join(dir, base.replace(/^pip/, "python"));
+  for (const c of [
+    derived,
+    path.join(dir, "python3"),
+    path.join(dir, "python"),
+  ]) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
+}
+
+// Cached per session — the marker doesn't appear/disappear while Raycast runs.
+// Keyed by pip path so a theoretical change in which pip we find is still correct.
+const externallyManagedCache = new Map<string, boolean>();
+
+export async function isPipExternallyManaged(pip: string): Promise<boolean> {
+  const cached = externallyManagedCache.get(pip);
+  if (cached !== undefined) return cached;
+  const py = findPipPython(pip);
+  if (!py) {
+    externallyManagedCache.set(pip, false);
+    return false;
+  }
+  try {
+    const { stdout } = await run(py, [
+      "-c",
+      "import sysconfig,os;print(1 if os.path.exists(os.path.join(sysconfig.get_path('stdlib'),'EXTERNALLY-MANAGED')) else 0)",
+    ]);
+    const managed = stdout.trim() === "1";
+    externallyManagedCache.set(pip, managed);
+    return managed;
+  } catch {
+    externallyManagedCache.set(pip, false);
+    return false;
+  }
+}
+
+/** True if a pip error is the PEP 668 externally-managed refusal. */
+export function isExternallyManagedError(raw: string): boolean {
+  return /externally[-\s]managed[-\s]environment|externally managed/i.test(raw);
+}
+
+const PIP_BREW_MANAGED_MSG =
+  "Managed by Homebrew's Python — it updates when you run `brew upgrade`, " +
+  "not via pip (PEP 668). To manage your own Python packages independently, " +
+  "use a virtualenv or pipx.";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // All-installed lists (used by the Sources · Packages views)
@@ -181,6 +251,12 @@ export async function upgradeAllNpm(): Promise<UpdateResult> {
 export async function getOutdatedPip(): Promise<CliPackage[]> {
   const PIP = findPip();
   if (!PIP) return [];
+  // If pip's Python is externally managed (Homebrew), its packages are
+  // brew-owned and can't be safely pip-upgraded. They update via `brew upgrade`,
+  // so don't surface them as actionable pip updates — that just leads to a
+  // PEP 668 failure when the user clicks Update. (They still appear in the
+  // full inventory via getAllInstalledPip.)
+  if (await isPipExternallyManaged(PIP)) return [];
   try {
     const { stdout } = await run(PIP, ["list", "--outdated", "--format=json"]);
     const data: { name: string; version: string; latest_version: string }[] =
@@ -207,11 +283,25 @@ export async function upgradePip(name: string): Promise<UpdateResult> {
       error: "pip not found. Install Python (brew install python).",
     };
   }
+  // Brew-managed Python: don't attempt — the upgrade would fail PEP 668 (or
+  // worse, need --break-system-packages and clobber brew's Python). Tell the
+  // user it's handled by brew. This guards direct calls from the inventory view.
+  if (await isPipExternallyManaged(PIP)) {
+    return { name, source: "pip", success: false, error: PIP_BREW_MANAGED_MSG };
+  }
   try {
     await run(PIP, ["install", "--upgrade", name]);
     return { name, source: "pip", success: true };
   } catch (e) {
-    return { name, source: "pip", success: false, error: extractCmdError(e) };
+    // Belt-and-suspenders: if detection somehow missed it, translate the raw
+    // PEP 668 error into the friendly message instead of leaking pip's noise.
+    const raw = extractCmdError(e);
+    return {
+      name,
+      source: "pip",
+      success: false,
+      error: isExternallyManagedError(raw) ? PIP_BREW_MANAGED_MSG : raw,
+    };
   }
 }
 
@@ -225,16 +315,27 @@ export async function upgradeAllPip(): Promise<UpdateResult> {
       error: "pip not found. Install Python (brew install python).",
     };
   }
+  if (await isPipExternallyManaged(PIP)) {
+    // Nothing to do — brew-managed packages update via `brew upgrade`.
+    // Report success with the explanatory note so the bulk queue doesn't show
+    // a scary red failure for something that's working as intended.
+    return {
+      name: "pip packages",
+      source: "pip",
+      success: true,
+    };
+  }
   try {
     const pkgs = await getOutdatedPip();
     for (const p of pkgs) await run(PIP, ["install", "--upgrade", p.name]);
     return { name: "pip packages", source: "pip", success: true };
   } catch (e) {
+    const raw = extractCmdError(e);
     return {
       name: "pip packages",
       source: "pip",
       success: false,
-      error: extractCmdError(e),
+      error: isExternallyManagedError(raw) ? PIP_BREW_MANAGED_MSG : raw,
     };
   }
 }
