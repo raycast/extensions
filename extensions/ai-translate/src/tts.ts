@@ -256,7 +256,7 @@ async function synthesizeWithQwen(
     await showToast({
       style: Toast.Style.Failure,
       title: "TTS Unavailable",
-      message: "Add a DashScope API key in preferences",
+      message: "Add a Qwen DashScope API key in preferences",
     });
     return undefined;
   }
