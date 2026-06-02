@@ -11,9 +11,3 @@ export function formatUTCDate(date = new Date()): string {
   const day = String(date.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-
-export function shiftDays(date: Date, amount: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + amount);
-  return next;
-}
