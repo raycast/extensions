@@ -3,15 +3,15 @@ import { execFile } from "child_process";
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import path from "path";
+import { z } from "zod";
+import { BASE_URL, TTS_BITS_PER_SAMPLE, TTS_DEFAULT_VOICE, TTS_NUM_CHANNELS, TTS_SAMPLE_RATE } from "./gemini-config";
+import { geminiError, geminiErrorLogFields } from "./geminiError";
+import { throwForHttpError } from "./geminiHttp";
+import { createLogger } from "./logger";
 import { GeminiTtsResponseSchema } from "./types";
 
-const TTS_MODEL = "gemini-2.5-flash-preview-tts";
-const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_VOICE = "Kore";
-const SAMPLE_RATE = 24000;
-const NUM_CHANNELS = 1;
-const BITS_PER_SAMPLE = 16;
 const MAX_CACHE_FILES = 50;
+const log = createLogger("tts");
 
 const GEMINI_SUPPORTED_LANGS = new Set([
   "en",
@@ -88,6 +88,26 @@ function prependWavHeader(pcm: Buffer, sampleRate: number, numChannels: number, 
   return Buffer.concat([header, pcm]);
 }
 
+function isExpectedTtsPcmMimeType(mimeType: string): boolean {
+  const [rawType, ...rawParams] = mimeType.split(";");
+  if (rawType.trim().toLowerCase() !== "audio/l16") {
+    return false;
+  }
+
+  const params = new Map<string, string>();
+  for (const rawParam of rawParams) {
+    const [rawKey, ...rawValueParts] = rawParam.split("=");
+    const key = rawKey?.trim().toLowerCase();
+    const value = rawValueParts.join("=").trim().toLowerCase();
+    if (key) {
+      params.set(key, value);
+    }
+  }
+
+  const codec = params.get("codec");
+  return params.get("rate") === String(TTS_SAMPLE_RATE) && (codec === undefined || codec === "pcm");
+}
+
 function getCacheDir(): string {
   const dir = path.join(environment.supportPath, "tts-cache");
   if (!existsSync(dir)) {
@@ -96,9 +116,10 @@ function getCacheDir(): string {
   return dir;
 }
 
-function cacheKey(word: string, langCode: string): string {
-  const hash = createHash("sha256").update(word.toLowerCase()).digest("hex").slice(0, 32);
-  return `${langCode}-${hash}.wav`;
+function cacheKey(word: string, langCode: string, model: string): string {
+  const modelHash = createHash("sha256").update(model).digest("hex").slice(0, 8);
+  const wordHash = createHash("sha256").update(word.toLowerCase()).digest("hex").slice(0, 32);
+  return `${langCode}-${modelHash}-${wordHash}.wav`;
 }
 
 function evictOldestCacheFiles(dir: string, maxFiles: number): void {
@@ -130,8 +151,15 @@ function playAudio(filePath: string): Promise<void> {
   });
 }
 
-async function generateSpeechGemini(text: string, apiKey: string, signal?: AbortSignal): Promise<Buffer> {
-  const url = `${BASE_URL}/${TTS_MODEL}:generateContent`;
+async function generateSpeechGemini(
+  text: string,
+  apiKey: string,
+  signal: AbortSignal | undefined,
+  model: string,
+): Promise<Buffer> {
+  const url = `${BASE_URL}/${model}:generateContent`;
+  const requestMs = log.timer();
+  log.debug("gemini tts request started", { model, textChars: text.length });
 
   let response: Response;
   try {
@@ -147,7 +175,7 @@ async function generateSpeechGemini(text: string, apiKey: string, signal?: Abort
           responseModalities: ["AUDIO"],
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: DEFAULT_VOICE },
+              prebuiltVoiceConfig: { voiceName: TTS_DEFAULT_VOICE },
             },
           },
         },
@@ -156,38 +184,81 @@ async function generateSpeechGemini(text: string, apiKey: string, signal?: Abort
     });
   } catch (err) {
     if (err instanceof TypeError) {
-      throw new Error("NETWORK_OFFLINE");
+      log.warn("gemini tts request failed", {
+        model,
+        requestMs: requestMs(),
+        error: "network-offline",
+      });
+      throw geminiError({ domain: "infrastructure", kind: "network-offline", surface: "tts" });
     }
+    log.warn("gemini tts request failed", {
+      model,
+      requestMs: requestMs(),
+      error: err instanceof Error ? err.name : "unknown",
+    });
     throw err;
   }
 
-  if (response.status === 401 || response.status === 403) {
-    throw new Error("INVALID_API_KEY");
+  try {
+    await throwForHttpError(response, "tts", model);
+  } catch (err) {
+    log.warn("gemini tts request failed", {
+      model,
+      requestMs: requestMs(),
+      ...geminiErrorLogFields(err),
+    });
+    throw err;
   }
 
-  if (!response.ok) {
-    throw new Error("TTS_REQUEST_FAILED");
+  const rawJson = await response.text();
+  log.debug("gemini tts request completed", {
+    model,
+    requestMs: requestMs(),
+    responseChars: rawJson.length,
+  });
+  let apiData: z.infer<typeof GeminiTtsResponseSchema>;
+  try {
+    apiData = GeminiTtsResponseSchema.parse(JSON.parse(rawJson));
+  } catch {
+    throw geminiError({
+      domain: "infrastructure",
+      kind: "invalid-response",
+      surface: "tts",
+      body: rawJson.slice(0, 500),
+    });
   }
-
-  const apiData = GeminiTtsResponseSchema.parse(await response.json());
-  const base64Audio = apiData.candidates[0]?.content.parts[0]?.inlineData.data;
+  // Schema guarantees structural shape; `data` is allowed to be empty string,
+  // which we surface separately as `empty-response` rather than rolling it
+  // into invalid-response.
+  const inlineData = apiData.candidates[0].content.parts[0].inlineData;
+  const base64Audio = inlineData.data;
 
   if (!base64Audio) {
-    throw new Error("TTS_EMPTY_RESPONSE");
+    throw geminiError({ domain: "infrastructure", kind: "empty-response", surface: "tts" });
+  }
+
+  if (!isExpectedTtsPcmMimeType(inlineData.mimeType)) {
+    throw geminiError({
+      domain: "infrastructure",
+      kind: "invalid-response",
+      surface: "tts",
+      body: rawJson.slice(0, 500),
+    });
   }
 
   const pcm = Buffer.from(base64Audio, "base64");
-  return prependWavHeader(pcm, SAMPLE_RATE, NUM_CHANNELS, BITS_PER_SAMPLE);
+  return prependWavHeader(pcm, TTS_SAMPLE_RATE, TTS_NUM_CHANNELS, TTS_BITS_PER_SAMPLE);
 }
 
 export async function pronounce(
   word: string,
   apiKey: string,
   langCode: string,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  model: string,
 ): Promise<{ cached: boolean }> {
   const dir = getCacheDir();
-  const fileName = cacheKey(word, langCode);
+  const fileName = cacheKey(word, langCode, model);
   const filePath = path.join(dir, fileName);
 
   signal?.throwIfAborted();
@@ -195,21 +266,36 @@ export async function pronounce(
   let cached = true;
   if (!existsSync(filePath)) {
     cached = false;
-    const wavBuffer = await generateSpeechGemini(word, apiKey, signal);
+    const wavBuffer = await generateSpeechGemini(word, apiKey, signal, model);
     writeFileSync(filePath, wavBuffer);
     evictOldestCacheFiles(dir, MAX_CACHE_FILES);
   }
 
+  const playbackMs = log.timer();
   await playAudio(filePath);
+  log.debug("tts playback completed", { model, langCode, cached, playbackMs: playbackMs() });
   return { cached };
 }
 
 export async function pronounceFallback(word: string, langCode: string): Promise<void> {
   const voice = macosVoiceForLanguage(langCode);
+  const fallbackMs = log.timer();
+  log.debug("system voice fallback started", { langCode, voice, wordChars: word.length });
   return new Promise((resolve, reject) => {
     execFile("/usr/bin/say", ["-v", voice, word], (err) => {
-      if (err) reject(err);
-      else resolve();
+      if (err) {
+        log.warn("system voice fallback failed", {
+          langCode,
+          voice,
+          fallbackMs: fallbackMs(),
+          error: err.name,
+          code: (err as NodeJS.ErrnoException).code,
+        });
+        reject(err);
+      } else {
+        log.debug("system voice fallback completed", { langCode, voice, fallbackMs: fallbackMs() });
+        resolve();
+      }
     });
   });
 }
@@ -256,26 +342,34 @@ if (import.meta.vitest) {
   });
 
   describe("cacheKey", () => {
+    const MODEL = "gemini-3.1-flash-tts-preview";
+
     it("produces deterministic filesystem-safe names with fixed length", () => {
-      const key = cacheKey("hello", "en");
-      // lang(2) + dash(1) + sha256-prefix(32) + .wav(4) = 39 chars
-      expect(key).toMatch(/^en-[0-9a-f]{32}\.wav$/);
-      expect(key.length).toBe(39);
+      const key = cacheKey("hello", "en", MODEL);
+      // lang(2) + dash(1) + model-prefix(8) + dash(1) + word-prefix(32) + .wav(4) = 48 chars
+      expect(key).toMatch(/^en-[0-9a-f]{8}-[0-9a-f]{32}\.wav$/);
+      expect(key.length).toBe(48);
     });
 
-    it("is case-insensitive", () => {
-      expect(cacheKey("Hello", "en")).toBe(cacheKey("hello", "en"));
+    it("is case-insensitive on the word", () => {
+      expect(cacheKey("Hello", "en", MODEL)).toBe(cacheKey("hello", "en", MODEL));
     });
 
     it("handles unicode words", () => {
-      const key = cacheKey("привіт", "uk");
-      expect(key).toMatch(/^uk-[0-9a-f]{32}\.wav$/);
+      const key = cacheKey("привіт", "uk", MODEL);
+      expect(key).toMatch(/^uk-[0-9a-f]{8}-[0-9a-f]{32}\.wav$/);
     });
 
     it("keeps filenames short even for long text", () => {
       const longText = "a".repeat(1000);
-      const key = cacheKey(longText, "en");
-      expect(key.length).toBe(39);
+      const key = cacheKey(longText, "en", MODEL);
+      expect(key.length).toBe(48);
+    });
+
+    it("changes when the model changes — switching models invalidates cache", () => {
+      const a = cacheKey("hello", "en", "gemini-2.5-flash-preview-tts");
+      const b = cacheKey("hello", "en", "gemini-3.1-flash-tts-preview");
+      expect(a).not.toBe(b);
     });
   });
 
@@ -306,6 +400,21 @@ if (import.meta.vitest) {
       const pcm = Buffer.alloc(200);
       const wav = prependWavHeader(pcm, 24000, 1, 16);
       expect(wav.readUInt32LE(4)).toBe(200 + 44 - 8); // dataSize + headerSize - 8
+    });
+  });
+
+  describe("isExpectedTtsPcmMimeType", () => {
+    it("accepts documented Gemini raw PCM MIME variants", () => {
+      expect(isExpectedTtsPcmMimeType("audio/L16;rate=24000")).toBe(true);
+      expect(isExpectedTtsPcmMimeType("audio/L16;codec=pcm;rate=24000")).toBe(true);
+      expect(isExpectedTtsPcmMimeType("audio/l16; rate=24000; codec=PCM")).toBe(true);
+    });
+
+    it("rejects compressed or incompatible audio MIME variants before WAV wrapping", () => {
+      expect(isExpectedTtsPcmMimeType("audio/ogg;codec=opus")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16;rate=44100")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16;codec=opus;rate=24000")).toBe(false);
+      expect(isExpectedTtsPcmMimeType("audio/L16")).toBe(false);
     });
   });
 }

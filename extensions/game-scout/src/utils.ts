@@ -1,5 +1,5 @@
 import { Icon, Color } from "@raycast/api";
-import type { BundleValue, Deal } from "./types";
+import type { BundleValue, Deal, HistoryPoint } from "./types";
 
 export const STORE_MAP: Record<string, string[]> = {
   steam: ["Steam"],
@@ -38,6 +38,18 @@ for (const [id, names] of Object.entries(STORE_MAP)) {
     STORE_LOOKUP[name] = id;
   });
 }
+
+export const safeParse = <T>(
+  str: string | undefined | null,
+  fallback: T,
+): T => {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+};
 
 export function formatPrice(
   amount: number | undefined,
@@ -112,6 +124,7 @@ export function computeGameInsight(params: {
   bundleValue: BundleValue | null;
   dataMonths: number;
   range: "1y" | "6m" | "3m";
+  allowedHistory?: HistoryPoint[];
   isLoading: boolean;
 }) {
   const {
@@ -164,6 +177,10 @@ export function computeGameInsight(params: {
         medianSale = maxPrice;
         isAlwaysFullPrice = true;
       }
+    }
+
+    if (currentBest && currentBest.cut > 0) {
+      isAlwaysFullPrice = false;
     }
 
     // percentile

@@ -1,5 +1,11 @@
 # Clip - URL Shortener Changelog
 
+## [Fix] - 2026-05-31
+
+### 🐛 Bug Fix
+
+- Fixed an issue where a history save failure (e.g. "Could not create extension support directory") would incorrectly report the URL shortening as failed, even though the URL was already shortened and copied to the clipboard
+
 ## [Initial Version] - 2026-04-13
 
 ### ✨ URL Shortening Functionality
