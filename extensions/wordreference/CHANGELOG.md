@@ -2,7 +2,7 @@
 
 All notable changes to "Raycast WordReference Extension" will be documented in this file.
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2026-06-02
 
 ### Fixed
 
