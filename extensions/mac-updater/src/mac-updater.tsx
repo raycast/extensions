@@ -56,6 +56,7 @@ import {
   Adoptable,
   dismissAdoption,
   getAdoptableApps,
+  resolveBinaries,
   runKnownInstall,
   undismissAdoption,
 } from "./utils/adoption";
@@ -479,7 +480,8 @@ export default function MacUpdater() {
         toast.secondaryAction = {
           title: "Run in Terminal",
           shortcut: { modifiers: ["cmd"], key: "t" },
-          onAction: () => openInTerminal(known.commands.join(" && ")),
+          onAction: () =>
+            openInTerminal(resolveBinaries(known.commands.join(" && "))),
         };
       } else if (known?.homepageUrl && looksLikeCdn404) {
         toast.primaryAction = {
@@ -490,7 +492,8 @@ export default function MacUpdater() {
         toast.secondaryAction = {
           title: "Run in Terminal",
           shortcut: { modifiers: ["cmd"], key: "t" },
-          onAction: () => openInTerminal(known.commands.join(" && ")),
+          onAction: () =>
+            openInTerminal(resolveBinaries(known.commands.join(" && "))),
         };
       } else {
         toast.primaryAction = {
@@ -500,7 +503,9 @@ export default function MacUpdater() {
             const cmd = known
               ? known.commands.join(" && ")
               : `/opt/homebrew/bin/brew install --cask --force "${caskToken}"`;
-            openInTerminal(cmd);
+            // resolveBinaries rewrites the /opt/homebrew vs /usr/local brew path
+            // to whichever this Mac actually has (Intel vs Apple Silicon).
+            openInTerminal(resolveBinaries(cmd));
           },
         };
         if (known?.homepageUrl) {

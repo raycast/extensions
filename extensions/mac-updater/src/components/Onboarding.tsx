@@ -9,8 +9,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { markOnboarded } from "../utils/onboarding-store";
-import { commandExists } from "../utils/shell";
-import { installMas } from "../utils/sources/mas";
+import { installMas, isMasInstalled } from "../utils/sources/mas";
 
 interface OnboardingProps {
   onDone: () => void;
@@ -26,7 +25,9 @@ export default function Onboarding({ onDone }: OnboardingProps) {
   const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
-    commandExists("/opt/homebrew/bin/mas").then(setMasInstalled);
+    // isMasInstalled checks both the Apple-Silicon and Intel brew prefixes
+    // (plus PATH), so onboarding detects mas correctly on either architecture.
+    isMasInstalled().then(setMasInstalled);
   }, []);
 
   async function finish() {

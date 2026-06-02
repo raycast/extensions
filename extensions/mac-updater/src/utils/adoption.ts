@@ -2,9 +2,26 @@ import { LocalStorage } from "@raycast/api";
 import { InstalledApp, UpdateResult } from "./types";
 import { ScanResult } from "./coordinator";
 import { getKnownInstall, KnownInstall } from "./known-installs";
-import { extractCmdError, runShell } from "./shell";
-import { isMasInstalled, installMas } from "./sources/mas";
+import { extractCmdError, findBrew, runShell } from "./shell";
+import { isMasInstalled, installMas, findMas } from "./sources/mas";
 import { openInAppStore, runShellAsAdmin } from "./external";
+
+/**
+ * Curated install commands are written with the Apple-Silicon brew/mas paths
+ * (/opt/homebrew/bin/...) for readability, but on Intel Macs brew lives at
+ * /usr/local/bin. Rewrite those prefixes to the binary we actually detected so
+ * the commands work on both architectures — including the admin-retry path,
+ * where osascript's `do shell script` runs with a restricted PATH that wouldn't
+ * resolve a bare `brew`/`mas` token at all. Falls back to the bare token when
+ * the binary isn't found (then PATH resolution in runShell still has a chance).
+ */
+export function resolveBinaries(cmd: string): string {
+  const brew = findBrew() ?? "brew";
+  const mas = findMas() ?? "mas";
+  return cmd
+    .replace(/\/(?:opt\/homebrew|usr\/local)\/bin\/brew\b/g, brew)
+    .replace(/\/(?:opt\/homebrew|usr\/local)\/bin\/mas\b/g, mas);
+}
 
 const DISMISS_KEY = "mac-updater-adoption-dismissed-v1";
 
@@ -190,7 +207,8 @@ export async function runKnownInstall(
         return { name: appName, source: "mas", success: false, error: r.error };
     }
   }
-  for (const cmd of install.commands) {
+  for (const rawCmd of install.commands) {
+    const cmd = resolveBinaries(rawCmd);
     try {
       await runShell(cmd);
     } catch (e) {

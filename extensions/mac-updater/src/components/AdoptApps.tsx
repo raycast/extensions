@@ -11,7 +11,12 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useRef, useState } from "react";
-import { Adoptable, dismissAdoption, runKnownInstall } from "../utils/adoption";
+import {
+  Adoptable,
+  dismissAdoption,
+  resolveBinaries,
+  runKnownInstall,
+} from "../utils/adoption";
 import { installCask } from "../utils/sources/homebrew";
 import { getKnownInstall } from "../utils/known-installs";
 import { openInAppStore, openInTerminal } from "../utils/external";
@@ -355,7 +360,8 @@ export default function AdoptApps({ adoptable, onDone }: Props) {
                           const cmd = known
                             ? known.commands.join(" && ")
                             : `/opt/homebrew/bin/brew install --cask --force "${r.caskToken}"`;
-                          openInTerminal(cmd);
+                          // Rewrite the brew path for Intel vs Apple Silicon.
+                          openInTerminal(resolveBinaries(cmd));
                         }}
                       />
                       {getKnownInstall(r.app.bundleId)?.homepageUrl && (
