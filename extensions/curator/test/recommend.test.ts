@@ -77,8 +77,11 @@ describe("buildPrompt", () => {
     expect(p).toContain("alpha");
     expect(p).toContain("beta");
     expect(p).toContain('"confidence"');
+    expect(p).toContain("Task: Select the most relevant catalog skills");
+    expect(p).toContain("catalog as the only source of truth");
     expect(p).toContain("SkillOpt-style validation gate");
     expect(p).toContain("catalog-name gate");
+    expect(p).toContain("source gate");
   });
 });
 
