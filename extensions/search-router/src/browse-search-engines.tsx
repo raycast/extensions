@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, List, showToast, useNavigation, Alert, confirmAlert, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines, removeCustomSearchEngine } from "./data/custom-search-engines";
@@ -204,10 +215,7 @@ export default function BrowseSearchEngines() {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "x" },
-                        Windows: { modifiers: ["ctrl"], key: "x" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   </>
                 )}
