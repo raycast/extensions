@@ -51,10 +51,9 @@ The default is **Raycast AI** — no setup, requires Raycast Pro. To use your ow
 | --------------------------- | -------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------- |
 | 通义千问 (Qwen, Token Plan) | `https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic`     | Anthropic-compatible | [百炼 / Model Studio](https://bailian.console.aliyun.com)  |
 | DeepSeek                    | `https://api.deepseek.com/anthropic`                                 | Anthropic-compatible | [platform.deepseek.com](https://platform.deepseek.com)     |
-| MiniMax Token Plan          | `https://api.minimaxi.com/anthropic`                                 | Anthropic-compatible | [platform.minimaxi.com](https://platform.minimaxi.com)     |
 | Xiaomi MiMo (Token Plan)    | `https://token-plan-cn.xiaomimimo.com/anthropic`                     | Anthropic-compatible | [platform.xiaomimimo.com](https://platform.xiaomimimo.com) |
 
-> Verified against each provider's docs (2026); these are the **Token Plan** endpoints where a provider offers one. For Qwen text models, use Token Plan here; keep DashScope reserved for Qwen-TTS projects. MiniMax international legacy is `https://api.minimax.io/anthropic`; Xiaomi MiMo is per-cluster (China `token-plan-cn`, Singapore `token-plan-sgp`, Europe `token-plan-ams`), authoritative on its subscription page. Set the model id (e.g. `qwen3.7-plus`, `qwen3.7-max`, `qwen3.6-flash`, `MiniMax-M3`, `deepseek-v4-flash`, `mimo-v2.5`) in **Custom Model**.
+> Verified against each provider's docs (2026); these are the **Token Plan** endpoints where a provider offers one. For Qwen text models, use Token Plan here; keep DashScope reserved for Qwen-TTS projects. Xiaomi MiMo is per-cluster (China `token-plan-cn`, Singapore `token-plan-sgp`, Europe `token-plan-ams`), authoritative on its subscription page. Set the model id (e.g. `qwen3.7-plus`, `qwen3.7-max`, `qwen3.6-flash`, `deepseek-v4-flash`, `mimo-v2.5`) in **Custom Model**.
 
 ## Development
 
