@@ -29,7 +29,7 @@ export const Editors = [
     icon: "logo/vscode.png",
     prefKey: "editorVSCode",
     namePatterns: [/^visual studio code$/i, /^code$/i, /^vscode$/i],
-    windowsPathPatterns: [/visual studio code\.lnk$/i, /visual studio code\.lnk$/i],
+    windowsPathPatterns: [/visual studio code\.lnk$/i, /code\.lnk$/i],
   },
   {
     id: EditorId.Cursor,
