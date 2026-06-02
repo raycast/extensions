@@ -21,7 +21,7 @@ export interface RawPrefs {
   qwenApiKey?: string;
   qwenAnalysisModel?: string;
   qwenRegion?: "beijing" | "intl";
-  // qwenApiKey is the DashScope key for Qwen-TTS only.
+  // qwenApiKey is the Qwen DashScope key for Qwen-TTS only.
   // Qwen analysis uses Token Plan through qwenAnalysisApiKey/baseURL.
   qwenAnalysisBaseURL?: string;
   qwenAnalysisApiKey?: string;

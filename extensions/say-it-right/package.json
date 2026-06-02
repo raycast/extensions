@@ -113,7 +113,7 @@
     {
       "name": "qwenAnalysisApiKey",
       "title": "Qwen Coach: Token Plan API Key",
-      "description": "Used only for Qwen coaching, expression, and pronunciation analysis. Qwen Voice uses the separate DashScope key below.",
+      "description": "Used only for Qwen coaching, expression, and pronunciation analysis. Qwen Voice uses the separate Qwen DashScope key below.",
       "type": "password",
       "required": false
     },
@@ -141,15 +141,15 @@
     },
     {
       "name": "qwenApiKey",
-      "title": "Qwen Voice: DashScope API Key",
+      "title": "Qwen DashScope API Key (Voice)",
       "description": "Used only for Qwen voice playback. Qwen Coach uses the Token Plan key above.",
       "type": "password",
       "required": false
     },
     {
       "name": "qwenRegion",
-      "title": "Qwen Voice: DashScope Region",
-      "description": "DashScope region for Qwen voice playback.",
+      "title": "Qwen DashScope Region (Voice)",
+      "description": "Qwen DashScope region for Qwen voice playback.",
       "type": "dropdown",
       "required": false,
       "default": "beijing",
