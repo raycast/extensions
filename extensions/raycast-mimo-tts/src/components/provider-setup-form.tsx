@@ -151,8 +151,13 @@ export default function SetupVoiceDefaults() {
           );
         })}
         {/* Ensure currently selected voice always renders as an option even if filtered out by model. */}
-        {voicesForModel.some((voice) => voice.id === settings.defaultVoice) ? null : (
-          <Form.Dropdown.Item value={getDefaultVoiceForModel(selectedModel)} title="Default English Voice" />
+        {voicesForModel.some((voice) => voice.id === settings.defaultVoice) ||
+        voicesForModel.some((voice) => voice.id === getDefaultVoiceForModel(selectedModel)) ? null : (
+          <Form.Dropdown.Item
+            key={getDefaultVoiceForModel(selectedModel)}
+            value={getDefaultVoiceForModel(selectedModel)}
+            title="Default English Voice"
+          />
         )}
       </Form.Dropdown>
       <Form.Dropdown id="speechRate" title="Default Speech Rate" defaultValue={settings.speechRate}>
