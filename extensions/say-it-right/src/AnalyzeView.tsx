@@ -28,7 +28,6 @@ import {
   writeTranslationCache,
 } from "./lib/translation-cache";
 import { saveResult } from "./lib/saved-results";
-import { openReferenceCard } from "./lib/reference-card";
 import { splitSentences, resolveSentencesPerPage } from "./lib/sentences";
 import { resolveLoop } from "./lib/loop";
 import { getPrefs } from "./lib/preferences";
@@ -490,50 +489,6 @@ function AnalyzeViewInner({
     ttsVoice,
   ]);
 
-  const onOpenReferenceWindow = useCallback(() => {
-    void (async () => {
-      const analysis = records[activeIndex]?.analysis;
-      if (!analysis) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Nothing to open yet",
-        });
-        return;
-      }
-      const translation = translations[activeIndex];
-      await openReferenceCard({
-        title: "Pronunciation Reference",
-        eyebrow: "Say It Right",
-        sourceTitle: "Sentence",
-        sourceText: current,
-        outputTitle: "IPA",
-        outputText: analysis.ipa,
-        markdown: renderSavedAnalysisMarkdown(
-          analysis,
-          translation?.translation,
-          translation?.targetLanguageTitle,
-        ),
-        metadata: [
-          { title: "Analysis", text: PROVIDER_LABELS[provider] },
-          { title: "Model", text: analysisModel },
-          { title: "Voice", text: PROVIDER_LABELS[ttsProvider] },
-          { title: "Voice Model", text: ttsModel },
-          { title: "Voice Name", text: ttsVoice },
-        ],
-      });
-    })().catch((err) => void reportError(err));
-  }, [
-    activeIndex,
-    analysisModel,
-    current,
-    provider,
-    records,
-    translations,
-    ttsModel,
-    ttsProvider,
-    ttsVoice,
-  ]);
-
   const goToIndex = useCallback(
     (target: number) => {
       const next = Math.min(Math.max(target, 0), sentences.length - 1);
@@ -676,7 +631,6 @@ function AnalyzeViewInner({
       onLoop={onLoop}
       onRepeat={onRepeat}
       onSave={onSave}
-      onOpenReferenceWindow={onOpenReferenceWindow}
       onSaveResult={onSaveResult}
       onSwitchProvider={onSwitchProvider}
       switchToLabel={nextProvider ? PROVIDER_LABELS[nextProvider] : undefined}

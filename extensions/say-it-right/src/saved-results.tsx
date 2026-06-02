@@ -17,8 +17,6 @@ import {
   savedResultPrimaryText,
   type SavedResult,
 } from "./lib/saved-results";
-import { openReferenceCard } from "./lib/reference-card";
-import { reportError } from "./lib/errors";
 
 export default function Command() {
   const [items, setItems] = useState<SavedResult[]>([]);
@@ -93,35 +91,6 @@ function SavedResultItem({
     }
     return item.outputText ?? item.sourceText;
   }, [item]);
-  const openReferenceWindow = useCallback(() => {
-    void openReferenceCard({
-      title:
-        item.kind === "analysis"
-          ? "Pronunciation Reference"
-          : item.kind === "expression"
-            ? "Expression Reference"
-            : "Translation Reference",
-      eyebrow: "Say It Right",
-      sourceTitle: item.kind === "analysis" ? "Sentence" : "Source",
-      sourceText: item.sourceText,
-      outputTitle:
-        item.kind === "analysis"
-          ? "IPA"
-          : (item.targetLanguageTitle ?? "Result"),
-      outputText: item.outputText,
-      coaching: item.coaching,
-      markdown: item.kind === "analysis" ? item.markdown : undefined,
-      metadata: [
-        { title: "Provider", text: item.providerTitle ?? item.provider },
-        { title: "Model", text: item.model },
-        { title: "Target", text: item.targetLanguageTitle },
-        { title: "Tone", text: item.tone },
-        { title: "Voice", text: item.ttsProviderTitle ?? item.ttsProvider },
-        { title: "Voice Model", text: item.ttsModel },
-        { title: "Voice Name", text: item.ttsVoice },
-      ],
-    }).catch((err) => void reportError(err));
-  }, [item]);
 
   return (
     <List.Item
@@ -194,12 +163,6 @@ function SavedResultItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Saved Result">
-            <Action
-              title="Open Reference Window"
-              icon={Icon.AppWindowSidebarLeft}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-              onAction={openReferenceWindow}
-            />
             {practiceText ? (
               <Action.Push
                 title="Practice This English"
