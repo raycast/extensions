@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "types": ["node", "react", "react-dom"]
+    "types": ["node", "react"]
   },
   "include": ["src/**/*"]
 }
