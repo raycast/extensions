@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [3.0] - {PR_MERGE_DATE}
+## [3.0] - 2026-06-02
 
 - Remove the legacy HTML scraper and the `cheerio` dependency; all data now comes from the official Product Hunt API or the public Atom feed
 - Unify logging on a single logger with automatic credential redaction
