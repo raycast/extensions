@@ -28,7 +28,6 @@ import {
 } from "./utils/nepali-date";
 import { getCurrentTithi } from "./utils/holidays";
 import { generateCalendarSvg } from "./utils/calendar-renderer";
-import { useNepseStocks, StockData } from "./utils/use-nepse";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -249,137 +248,14 @@ function ReminderForm({ initialDate }: { initialDate?: Date }) {
   );
 }
 
-function StockListItem({
-  stock,
-  toggleFavorite,
-}: {
-  stock: StockData;
-  toggleFavorite: (symbol: string) => void;
-}) {
-  const price = parseFloat(stock.ltp.replace(/,/g, "")) || 0;
-  const change = parseFloat(stock.pointChange.replace(/,/g, "")) || 0;
-  const percentChange =
-    parseFloat(stock.percentageChange.replace(/,/g, "")) || 0;
-  const openPrice = parseFloat(stock.open.replace(/,/g, "")) || 0;
-  const previousClose = price - change;
-  const qty = parseFloat(stock.qty.replace(/,/g, "")) || 0;
-
-  const isUp = change >= 0;
-
-  return (
-    <List.Item
-      title={stock.symbol}
-      subtitle={stock.name}
-      keywords={[stock.symbol, stock.name]}
-      icon={{
-        source: isUp ? Icon.ArrowUpCircle : Icon.ArrowDownCircle,
-        tintColor: isUp ? Color.Green : Color.Red,
-      }}
-      accessories={[
-        {
-          text: {
-            value: `Rs ${price.toLocaleString()}`,
-            color: isUp ? Color.Green : Color.Red,
-          },
-        },
-      ]}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Name" text={stock.name} />
-              <List.Item.Detail.Metadata.Label
-                title="Ticker Symbol"
-                text={stock.symbol}
-              />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Exchange" text="NEPSE" />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title="Price"
-                text={`Rs ${price.toLocaleString()}`}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Previous Close"
-                text={`Rs ${previousClose.toLocaleString()}`}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Open"
-                text={`Rs ${openPrice.toLocaleString()}`}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Change"
-                text={{
-                  value: `${isUp ? "↑" : "↓"} Rs ${Math.abs(change).toFixed(2)} (${percentChange.toFixed(2)}%)`,
-                  color: isUp ? Color.Green : Color.Red,
-                }}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Volume"
-                text={qty.toLocaleString()}
-              />
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="View on Nepse"
-            url={`https://www.nepalstock.com.np/company/detail/${stock.symbol}`}
-          />
-          <Action
-            title={
-              stock.isFavorite ? "Remove from Favorites" : "Add to Favorites"
-            }
-            icon={stock.isFavorite ? Icon.StarDisabled : Icon.Star}
-            onAction={() => toggleFavorite(stock.symbol)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
 // ─── Main Dashboard ─────────────────────────────────────────────────────────
-
-type ViewTab = "dashboard" | "market";
 
 export default function Dashboard() {
   const [searchText, setSearchText] = useState("");
-  const [selectedTab, setSelectedTab] = useState<ViewTab>("dashboard");
-  const {
-    data: stocks,
-    toggleFavorite,
-    isLoading: stocksLoading,
-  } = useNepseStocks();
 
   // Calendar view state
   const today = useMemo(() => getTodayBs(), []);
   const [viewDate, setViewDate] = useState<BsDate>(today);
-
-  const openNepseMarket = () => {
-    setSelectedTab("market");
-    setSearchText("");
-  };
-
-  const favoriteStocks = useMemo(
-    () => stocks.filter((s) => s.isFavorite),
-    [stocks],
-  );
-
-  const marketListStocks = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
-    if (query) {
-      return stocks.filter(
-        (s) =>
-          s.symbol.toLowerCase().includes(query) ||
-          s.name.toLowerCase().includes(query),
-      );
-    }
-    return stocks.filter((s) => !s.isFavorite);
-  }, [stocks, searchText]);
 
   const tithi = getCurrentTithi();
   const adDate = bsToAd(today.year, today.month, today.day);
@@ -422,66 +298,35 @@ export default function Dashboard() {
   return (
     <List
       isShowingDetail
-      isLoading={selectedTab === "market" && stocksLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={
-        selectedTab === "market"
-          ? "Search NEPSE stocks by symbol or name..."
-          : "Type a date (e.g. 15) to jump to a day..."
-      }
-      throttle={selectedTab === "market"}
-      searchBarAccessory={
-        <List.Dropdown
-          id="miti-view"
-          tooltip="Dashboard or NEPSE Market"
-          storeValue={true}
-          value={selectedTab}
-          onChange={(newValue) => setSelectedTab(newValue as ViewTab)}
-        >
-          <List.Dropdown.Item
-            title="Dashboard"
-            value="dashboard"
-            icon={Icon.AppWindow}
-          />
-          <List.Dropdown.Item
-            title="NEPSE Market"
-            value="market"
-            icon={Icon.LineChart}
-          />
-        </List.Dropdown>
-      }
+      searchBarPlaceholder="Type a date (e.g. 15) to jump to a day..."
     >
       {/* ── Interactive Day Browser (Top Priority on Numeric Search) ── */}
-      {selectedTab === "dashboard" &&
-        searchText &&
-        /^\d+$/.test(searchText) && (
-          <List.Section title={`Jump to ${BS_MONTH_NAMES[viewDate.month - 1]}`}>
-            {Array.from({ length: 32 }, (_, i) => i + 1)
-              .filter((d) => {
-                const daysInMonth = getBsMonthDays(
-                  viewDate.year,
-                  viewDate.month,
-                );
-                return d <= daysInMonth && d === parseInt(searchText);
-              })
-              .map((d) => {
-                try {
-                  const date = {
-                    year: viewDate.year,
-                    month: viewDate.month,
-                    day: d,
-                  };
-                  const dow = getBsDayOfWeek(date.year, date.month, date.day);
-                  const ad = bsToAd(date.year, date.month, date.day);
-                  return (
-                    <List.Item
-                      key={`jump-day-${d}`}
-                      title={`${d} ${BS_MONTH_NAMES[viewDate.month - 1]} (${WEEKDAY_NAMES_NP[dow]})`}
-                      icon={{ source: Icon.BullsEye, tintColor: Color.Green }}
-                      detail={
-                        <List.Item.Detail
-                          markdown={`${generateCalendarSvg(viewDate.year, viewDate.month, today, d)}
+      {searchText && /^\d+$/.test(searchText) && (
+        <List.Section title={`Jump to ${BS_MONTH_NAMES[viewDate.month - 1]}`}>
+          {Array.from({ length: 32 }, (_, i) => i + 1)
+            .filter((d) => {
+              const daysInMonth = getBsMonthDays(viewDate.year, viewDate.month);
+              return d <= daysInMonth && d === parseInt(searchText);
+            })
+            .map((d) => {
+              try {
+                const date = {
+                  year: viewDate.year,
+                  month: viewDate.month,
+                  day: d,
+                };
+                const dow = getBsDayOfWeek(date.year, date.month, date.day);
+                const ad = bsToAd(date.year, date.month, date.day);
+                return (
+                  <List.Item
+                    key={`jump-day-${d}`}
+                    title={`${d} ${BS_MONTH_NAMES[viewDate.month - 1]} (${WEEKDAY_NAMES_NP[dow]})`}
+                    icon={{ source: Icon.BullsEye, tintColor: Color.Green }}
+                    detail={
+                      <List.Item.Detail
+                        markdown={`${generateCalendarSvg(viewDate.year, viewDate.month, today, d)}
 
 ---
 
@@ -491,65 +336,65 @@ export default function Dashboard() {
 | **English Date** | ${formatAdDate(ad)} |
 | **Lunar Tithi** | ${tithi.paksha} ${tithi.name} |
 `}
+                      />
+                    }
+                    accessories={[
+                      {
+                        icon: Icon.Bell,
+                        tooltip: "Press Cmd + Enter to set a reminder",
+                      },
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard
+                          title="Copy Nepali Date"
+                          content={formatBsDateNp(date)}
                         />
-                      }
-                      accessories={[
-                        {
-                          icon: Icon.Bell,
-                          tooltip: "Press Cmd + Enter to set a reminder",
-                        },
-                      ]}
-                      actions={
-                        <ActionPanel>
-                          <Action.CopyToClipboard
-                            title="Copy Nepali Date"
-                            content={formatBsDateNp(date)}
+                        <Action.Push
+                          title="Set Reminder"
+                          target={<ReminderForm initialDate={ad} />}
+                          icon={Icon.Bell}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                        />
+                        <ActionPanel.Section title="Navigation">
+                          <Action
+                            title="Next Month"
+                            icon={Icon.ArrowRight}
+                            shortcut={{
+                              modifiers: ["cmd"],
+                              key: "arrowRight",
+                            }}
+                            onAction={nextMonth}
                           />
-                          <Action.Push
-                            title="Set Reminder"
-                            target={<ReminderForm initialDate={ad} />}
-                            icon={Icon.Bell}
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                          <Action
+                            title="Previous Month"
+                            icon={Icon.ArrowLeft}
+                            shortcut={{
+                              modifiers: ["cmd"],
+                              key: "arrowLeft",
+                            }}
+                            onAction={prevMonth}
                           />
-                          <ActionPanel.Section title="Navigation">
-                            <Action
-                              title="Next Month"
-                              icon={Icon.ArrowRight}
-                              shortcut={{
-                                modifiers: ["cmd"],
-                                key: "arrowRight",
-                              }}
-                              onAction={nextMonth}
-                            />
-                            <Action
-                              title="Previous Month"
-                              icon={Icon.ArrowLeft}
-                              shortcut={{
-                                modifiers: ["cmd"],
-                                key: "arrowLeft",
-                              }}
-                              onAction={prevMonth}
-                            />
-                            <Action
-                              title="Back to Today"
-                              icon={Icon.BullsEye}
-                              shortcut={{ modifiers: ["cmd"], key: "t" }}
-                              onAction={() => setViewDate(today)}
-                            />
-                          </ActionPanel.Section>
-                        </ActionPanel>
-                      }
-                    />
-                  );
-                } catch {
-                  return null;
-                }
-              })}
-          </List.Section>
-        )}
+                          <Action
+                            title="Back to Today"
+                            icon={Icon.BullsEye}
+                            shortcut={{ modifiers: ["cmd"], key: "t" }}
+                            onAction={() => setViewDate(today)}
+                          />
+                        </ActionPanel.Section>
+                      </ActionPanel>
+                    }
+                  />
+                );
+              } catch {
+                return null;
+              }
+            })}
+        </List.Section>
+      )}
 
       {/* ── Tab: Dashboard ── */}
-      {selectedTab === "dashboard" && (
+      {
         <List.Section title="Main">
           <List.Item
             title={`Today: ${WEEKDAY_NAMES_NP[getBsDayOfWeek(today.year, today.month, today.day)]}, ${formatBsDateNp(today)}`}
@@ -680,66 +525,8 @@ export default function Dashboard() {
               </ActionPanel>
             }
           />
-          <List.Item
-            title="NEPSE Market"
-            subtitle="Search stocks, favorites, and live prices"
-            icon={{ source: Icon.LineChart, tintColor: Color.Blue }}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Open NEPSE Market"
-                  icon={Icon.LineChart}
-                  onAction={openNepseMarket}
-                />
-              </ActionPanel>
-            }
-          />
         </List.Section>
-      )}
-
-      {selectedTab === "market" && (
-        <>
-          {!searchText && (
-            <List.Section title="Favorites">
-              {favoriteStocks.length > 0 ? (
-                favoriteStocks.map((stock) => (
-                  <StockListItem
-                    key={`fav-${stock.symbol}`}
-                    stock={stock}
-                    toggleFavorite={toggleFavorite}
-                  />
-                ))
-              ) : (
-                <List.Item
-                  title="No favorites yet"
-                  subtitle="Open a stock below and press ⌘ ⇧ F to favorite it"
-                  icon={Icon.Star}
-                />
-              )}
-            </List.Section>
-          )}
-
-          <List.Section
-            title={searchText.trim() ? "Search Results" : "All Stocks"}
-          >
-            {marketListStocks.map((stock) => (
-              <StockListItem
-                key={`market-${stock.symbol}`}
-                stock={stock}
-                toggleFavorite={toggleFavorite}
-              />
-            ))}
-          </List.Section>
-
-          {searchText.trim() && marketListStocks.length === 0 && (
-            <List.EmptyView
-              title="No matching stocks"
-              description="Try another symbol or company name"
-              icon={Icon.MagnifyingGlass}
-            />
-          )}
-        </>
-      )}
+      }
     </List>
   );
 }

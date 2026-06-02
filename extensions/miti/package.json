@@ -9,33 +9,21 @@
     "macOS"
   ],
   "categories": [
-    "Productivity",
-    "Finance"
+    "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "proApiKey",
-      "title": "Pro License Key",
-      "description": "Optional. Buy Miti Pro, then paste your license key. See README for what is free vs paid.",
-      "type": "password",
-      "required": false,
-      "placeholder": "PATRO-PRO-XXXX"
-    }
-  ],
   "commands": [
     {
       "name": "index",
       "title": "Miti",
       "subtitle": "Bikram Sambat Calendar",
-      "description": "Premium Bikram Sambat Calendar with integrated date conversion, Tithi, and live market rates",
+      "description": "Premium Bikram Sambat Calendar with integrated date conversion and Tithi",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^2.2.5",
-    "cheerio": "^1.2.0"
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
