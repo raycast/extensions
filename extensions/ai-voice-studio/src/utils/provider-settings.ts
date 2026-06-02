@@ -19,16 +19,6 @@ import {
   DEFAULT_VOICE as DEFAULT_MIMO_VOICE,
   normalizeVoiceForModel,
 } from "../constants/mimo-voices";
-import {
-  DEFAULT_BASE_URL as DEFAULT_MINIMAX_BASE_URL,
-  DEFAULT_ENGLISH_NORMALIZATION as DEFAULT_MINIMAX_ENGLISH_NORMALIZATION,
-  DEFAULT_LANGUAGE_BOOST as DEFAULT_MINIMAX_LANGUAGE_BOOST,
-  DEFAULT_MODEL as DEFAULT_MINIMAX_MODEL,
-  DEFAULT_VOICE as DEFAULT_MINIMAX_VOICE,
-  MINIMAX_LANGUAGE_BOOSTS,
-  MINIMAX_MODELS,
-  normalizeMinimaxBaseUrl,
-} from "../constants/minimax-voices";
 import { DEFAULT_FORMAT, DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/openai-voices";
 import {
   DEFAULT_TONE,
@@ -41,7 +31,6 @@ import {
   normalizeAccentFocus,
 } from "../constants/openai-style";
 import type { MimoTTSModel } from "../api/mimo-types";
-import type { MinimaxLanguageBoost, MinimaxTTSModel } from "../api/minimax-tts-types";
 import type {
   OpenAITTSModel,
   OpenAIResponseFormat,
@@ -73,16 +62,6 @@ export interface MimoProviderSettings {
   tokenPlanBaseUrl: string;
 }
 
-export interface MinimaxProviderSettings {
-  model: MinimaxTTSModel;
-  voice: string;
-  languageBoost: MinimaxLanguageBoost;
-  playbackRate: string;
-  englishNormalization: boolean;
-  emotion?: string;
-  baseUrl: string;
-}
-
 export interface QwenProviderSettings {
   model: QwenTTSModel;
   voice: string;
@@ -97,7 +76,6 @@ export interface QwenProviderSettings {
 export interface ProviderSettings {
   defaultProvider: TTSProvider;
   qwen: QwenProviderSettings;
-  minimax: MinimaxProviderSettings;
   mimo: MimoProviderSettings;
   openai: OpenAIProviderSettings;
 }
@@ -105,7 +83,6 @@ export interface ProviderSettings {
 export interface ProviderSettingsInput {
   defaultProvider?: string;
   qwen?: Partial<QwenProviderSettings>;
-  minimax?: Partial<MinimaxProviderSettings>;
   mimo?: Partial<MimoProviderSettings>;
   openai?: Partial<OpenAIProviderSettings>;
 }
@@ -123,15 +100,6 @@ export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
     instructions: "",
     optimizeInstructions: DEFAULT_QWEN_OPTIMIZE_INSTRUCTIONS,
     baseUrl: DEFAULT_QWEN_BASE_URL,
-  },
-  minimax: {
-    model: DEFAULT_MINIMAX_MODEL,
-    voice: DEFAULT_MINIMAX_VOICE,
-    languageBoost: DEFAULT_MINIMAX_LANGUAGE_BOOST,
-    playbackRate: "1",
-    englishNormalization: DEFAULT_MINIMAX_ENGLISH_NORMALIZATION,
-    emotion: "",
-    baseUrl: DEFAULT_MINIMAX_BASE_URL,
   },
   mimo: {
     model: DEFAULT_MIMO_MODEL,
@@ -168,10 +136,6 @@ export async function getQwenSettings(): Promise<QwenProviderSettings> {
 
 export async function getMimoSettings(): Promise<MimoProviderSettings> {
   return (await getProviderSettings()).mimo;
-}
-
-export async function getMinimaxSettings(): Promise<MinimaxProviderSettings> {
-  return (await getProviderSettings()).minimax;
 }
 
 export async function getOpenAISettings(): Promise<OpenAIProviderSettings> {
@@ -224,7 +188,6 @@ function mergeSettings(base: ProviderSettings, overrides: ProviderSettingsInput)
   return {
     defaultProvider: overrides.defaultProvider ?? base.defaultProvider,
     qwen: { ...base.qwen, ...overrides.qwen },
-    minimax: { ...base.minimax, ...overrides.minimax },
     mimo: { ...base.mimo, ...overrides.mimo },
     openai: { ...base.openai, ...overrides.openai },
   };
@@ -234,37 +197,14 @@ function normalizeSettings(settings: ProviderSettingsInput): ProviderSettings {
   return {
     defaultProvider: normalizeProvider(settings.defaultProvider),
     qwen: normalizeQwenSettings(settings.qwen),
-    minimax: normalizeMinimaxSettings(settings.minimax),
     mimo: normalizeMimoSettings(settings.mimo),
     openai: normalizeOpenAISettings(settings.openai),
   };
 }
 
 function normalizeProvider(provider: string | undefined): TTSProvider {
-  if (provider === "qwen" || provider === "minimax" || provider === "mimo" || provider === "openai") return provider;
+  if (provider === "qwen" || provider === "mimo" || provider === "openai") return provider;
   return "qwen";
-}
-
-function normalizeMinimaxSettings(settings: Partial<MinimaxProviderSettings> | undefined): MinimaxProviderSettings {
-  return {
-    model: normalizeMinimaxModel(settings?.model),
-    voice: settings?.voice?.trim() || DEFAULT_MINIMAX_VOICE,
-    languageBoost: normalizeMinimaxLanguageBoost(settings?.languageBoost),
-    playbackRate: normalizePlaybackRate(settings?.playbackRate),
-    englishNormalization: normalizeBoolean(settings?.englishNormalization, DEFAULT_MINIMAX_ENGLISH_NORMALIZATION),
-    emotion: settings?.emotion?.trim() || "",
-    baseUrl: normalizeMinimaxBaseUrl(settings?.baseUrl),
-  };
-}
-
-function normalizeMinimaxModel(model: string | undefined): MinimaxTTSModel {
-  return MINIMAX_MODELS.includes(model as MinimaxTTSModel) ? (model as MinimaxTTSModel) : DEFAULT_MINIMAX_MODEL;
-}
-
-function normalizeMinimaxLanguageBoost(value: string | undefined): MinimaxLanguageBoost {
-  return MINIMAX_LANGUAGE_BOOSTS.includes(value as MinimaxLanguageBoost)
-    ? (value as MinimaxLanguageBoost)
-    : DEFAULT_MINIMAX_LANGUAGE_BOOST;
 }
 
 function normalizeMimoSettings(settings: Partial<MimoProviderSettings> | undefined): MimoProviderSettings {

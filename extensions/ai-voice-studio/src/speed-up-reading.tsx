@@ -1,5 +1,4 @@
 import { runMimoSpeedUp } from "./mimo-speed-up";
-import { runMinimaxSpeedUp } from "./minimax-speed-up";
 import { runOpenAISpeedUp } from "./openai-speed-up";
 import { runQwenSpeedUp } from "./qwen-speed-up";
 import { getDefaultProvider } from "./utils/provider";
@@ -8,10 +7,6 @@ export default async function SpeedUpReading() {
   const provider = await getDefaultProvider();
   if (provider === "openai") {
     await runOpenAISpeedUp();
-    return;
-  }
-  if (provider === "minimax") {
-    await runMinimaxSpeedUp();
     return;
   }
   if (provider === "mimo") {

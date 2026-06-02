@@ -6,11 +6,6 @@ import {
   requestPlaybackStop as requestQwenPlaybackStop,
 } from "./utils/qwen-playback-state";
 import {
-  clearNowPlaying as clearMinimaxNowPlaying,
-  getNowPlaying as getMinimaxNowPlaying,
-  requestPlaybackStop as requestMinimaxPlaybackStop,
-} from "./utils/minimax-playback-state";
-import {
   clearNowPlaying as clearMimoNowPlaying,
   getNowPlaying as getMimoNowPlaying,
   requestPlaybackStop as requestMimoPlaybackStop,
@@ -22,18 +17,12 @@ import {
 } from "./utils/openai-playback-state";
 
 export default async function StopReading() {
-  const [qwenState, minimaxState, mimoState, openAIState] = await Promise.all([
+  const [qwenState, mimoState, openAIState] = await Promise.all([
     getQwenNowPlaying(),
-    getMinimaxNowPlaying(),
     getMimoNowPlaying(),
     getOpenAINowPlaying(),
   ]);
-  await Promise.all([
-    requestQwenPlaybackStop(),
-    requestMinimaxPlaybackStop(),
-    requestMimoPlaybackStop(),
-    requestOpenAIPlaybackStop(),
-  ]);
+  await Promise.all([requestQwenPlaybackStop(), requestMimoPlaybackStop(), requestOpenAIPlaybackStop()]);
 
   const stopped = stopExternalPlayback();
   if (stopped) {
@@ -44,7 +33,6 @@ export default async function StopReading() {
 
   for (const [state, clear] of [
     [qwenState, clearQwenNowPlaying],
-    [minimaxState, clearMinimaxNowPlaying],
     [mimoState, clearMimoNowPlaying],
     [openAIState, clearOpenAINowPlaying],
   ] as const) {
@@ -59,5 +47,5 @@ export default async function StopReading() {
 }
 
 async function clearAllProviderStates(): Promise<void> {
-  await Promise.all([clearQwenNowPlaying(), clearMinimaxNowPlaying(), clearMimoNowPlaying(), clearOpenAINowPlaying()]);
+  await Promise.all([clearQwenNowPlaying(), clearMimoNowPlaying(), clearOpenAINowPlaying()]);
 }
