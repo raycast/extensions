@@ -2,8 +2,8 @@
 
 A [Raycast](https://raycast.com) extension for Windows that gives you instant keyboard-driven control over every open tab across all your Chromium browsers — switch, search, group, pin, close, control media, manage bookmarks, browse history, track downloads, and more.
 
-> **Requires the companion server + browser extension.**
-> Download and set up from the companion repo first: [switch-tabs-companion](https://github.com/ferrocyante/Manage-Server)
+> **Requires the companion browser extension.**
+> Install it from the companion repo: [switch-tabs-companion](https://github.com/ferrocyante/Manage-Server)
 
 ---
 
@@ -15,25 +15,25 @@ Raycast Extension  ←──WebSocket──→  Bridge Server (.exe)  ←──W
 
 The bridge server (`raycast-bridge-server.exe`) is a standalone background process that runs independently of any browser or Raycast session. It listens on port `19222` and relays messages between Raycast and your browser extension. The server runs until you explicitly stop it — it does not shut down when you close your browser or Raycast.
 
+The server is downloaded automatically the first time you open **Manage Server**. No manual setup required.
+
 ---
 
 ## Setup
 
-### 1. Get the server folder + browser extension
+### 1. Install the Browser Extension
 
-Go to [switch-tabs-companion](https://github.com/ferrocyante/Manage-Server) and follow the full setup guide there.
+Go to [switch-tabs-companion](https://github.com/ferrocyante/Manage-Server) and follow the browser extension setup guide.
 
-### 2. Configure extension preferences
+### 2. Open Manage Server
 
-The first time you open **Switch Tabs** or **Manage Server**, Raycast will ask you to configure the extension. Set:
+Open Raycast → type **Manage Server** → press Enter.
 
-| Preference | What to do |
-|------------|------------|
-| **Server Directory Path** | Point this to the `server` folder you downloaded from the companion repo (e.g. `C:\Tools\switch-tabs-server`) |
+On first open, the extension downloads the bridge server automatically. A progress screen appears while this happens — it only takes a few seconds and only happens once.
 
-### 3. Start the server
+### 3. Start the Server
 
-Open Raycast → type **Manage Server** → press Enter → select **Start Server**.
+Once setup is complete, press Enter on **Server Status** → select **Start Server**.
 
 The server starts silently in the background. Enable **Start at Login** to have it start automatically every time Windows boots.
 
@@ -234,13 +234,21 @@ Domains added here will have all frames scanned for tab content (useful for site
 
 ---
 
+## Manage Server Command
+
+The **Manage Server** command gives you full control over the bridge server:
+
+| Item | What it does |
+|------|-------------|
+| **Server Status** | Shows Running/Stopped, number of connected browsers, and uptime. Actions: Start, Stop, Kill, Refresh |
+| **Start at Login** | Enables/disables automatic server startup at Windows login via Registry run key |
+| **Watch Bridge Logs** | Opens a terminal window with live color-coded WebSocket logs |
+| **Import Edge Workspaces** | Imports Edge workspace tab configurations |
+| **Clean Up Extension Data** | Removes all server files, workspace data, and Raycast cache. Requires confirmation. Returns to Raycast root when complete. |
+
+---
+
 ## Preferences
-
-### Server
-
-| Preference | Description |
-|------------|-------------|
-| Server Directory Path | Path to the `server` folder containing the bridge server exe and scripts |
 
 ### Search
 
