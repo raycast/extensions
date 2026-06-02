@@ -24,7 +24,7 @@ export async function requestDaemon(config: RaytermConfig, request: DaemonReques
       void showToast({ style: Toast.Style.Failure, title: "RayTerm daemon error", message: response.error });
     }
 
-    return { tabs: [], ...response };
+    return { ...response, tabs: response.tabs ?? [] };
   } catch (error) {
     const message = formatError(error);
     void showToast({ style: Toast.Style.Failure, title: "RayTerm daemon error", message });

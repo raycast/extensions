@@ -33,9 +33,9 @@ export default function Command() {
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME_ID);
   const [showScaleIndicator, setShowScaleIndicator] = useState(false);
   const revisionRef = useRef(0);
-  const lastAppliedRevisionRef = useRef<number>();
+  const lastAppliedRevisionRef = useRef<number | undefined>(undefined);
   const lastForcedStatusRefreshAtRef = useRef(0);
-  const scaleIndicatorTimeoutRef = useRef<NodeJS.Timeout>();
+  const scaleIndicatorTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const terminalSize = useMemo(
     () => getSvgTerminalSize(scale, config.terminalColumns),
     [config.terminalColumns, scale],
