@@ -1,7 +1,7 @@
 import { Clipboard, showHUD } from "@raycast/api";
 
 export async function fetchPassword(type: "simple" | "strong") {
-  showHUD("⏳ Generating password...");
+  await showHUD("⏳ Generating password...");
 
   try {
     const response = await fetch(`https://dinopass.com/password/${type}`);
