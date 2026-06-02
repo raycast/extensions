@@ -1,5 +1,14 @@
 # Product Hunt Changelog
 
+## [3.0] - 2026-06-02
+
+- Remove the legacy HTML scraper and the `cheerio` dependency; all data now comes from the official Product Hunt API or the public Atom feed
+- Unify logging on a single logger with automatic credential redaction
+- Fall back to the basic feed (instead of a blocking error) when credentials are invalid
+- Add a "Reload Extension" action so updated API credentials take effect without quitting
+- Improved changelog heading formatting
+- Updated dependencies
+
 ## [2.4] - 2026-06-01
 
 - Fix 403 errors by migrating data fetching to the official Product Hunt GraphQL API v2 (#28424)
@@ -24,10 +33,12 @@
 ## [2.2] - 2025-09-12
 
 ### Added
+
 - Raycast-only structured logger with optional toasts (controlled by new "Verbose Logging" preference)
 - Lightweight session-start instrumentation on the frontpage command
 
 ### Changed
+
 - Scraper now prefers Apollo push(rehydrate) parsing, with DOM fallbacks and last-resort RSS fallback
 - Added short-lived LocalStorage cache to reduce repeated network fetches
 - Improved error handling and logging in image utilities and imgix helpers
@@ -36,23 +47,25 @@
 ## [2.1] - 2025-04-09
 
 ### Added
+
 - Added scraper tests to help with stale or incorrect counts
 
 ### Changed
+
 - Improved handling of vote count scraping
 - Swapped vote count and comments in List Item to match Product Hunt leaderboard
-
-
 
 ## [2.0] - 2025-04-07
 
 ### Added
+
 - Enhanced image gallery with improved navigation
 - "View Previous Launch(es)" action for products with multiple launches
 - Dedicated gallery view with grid layout for product images
 - Improved navigation with "Back to Featured Products" functionality
 
 ### Changed
+
 - Refactored frontpage implementation to eliminate code duplication
 - Consolidated product actions into a reusable component
 - Created reusable TopicsAction component for consistent UI

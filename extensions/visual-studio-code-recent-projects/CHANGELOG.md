@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Search Recent Projects empty on macOS] - 2026-06-02
+
+- Fixed `Search Recent Projects` showing no results on macOS with VS Code 1.118+. The shared storage database (`.vscode-shared/sharedStorage/state.vscdb`) is placed in the home directory on all platforms, not inside `~/Library/Application Support`. Also removed a spurious `User/` path segment from the Windows shared storage path. Fixes [#28311](https://github.com/raycast/extensions/issues/28311).
+
 ## [Fix: Recent Projects on Windows] - 2026-05-25
 
 - Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.

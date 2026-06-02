@@ -236,26 +236,6 @@ export function ProductDetailView({
               ))}
             </Detail.Metadata.TagList>
           )}
-
-          {/* Built With Section */}
-          {product.shoutouts && product.shoutouts.length > 0 && (
-            <Detail.Metadata.TagList title="Built With">
-              {product.shoutouts.map((shoutout) => (
-                <Detail.Metadata.TagList.Item
-                  key={shoutout.id}
-                  text={shoutout.name}
-                  color={Color.Green}
-                  onAction={() => {
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: `Opening: ${shoutout.name}`,
-                    });
-                    open(shoutout.url);
-                  }}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
         </Detail.Metadata>
       }
     />

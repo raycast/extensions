@@ -19,7 +19,6 @@ export interface Product {
   // modeled and labeled separately ("Posted by") rather than conflated with maker/hunter.
   submittedBy?: User;
   galleryImages?: string[];
-  shoutouts?: Shoutout[];
   weeklyRank?: number;
   dailyRank?: number;
   productHubUrl?: string;
@@ -105,11 +104,3 @@ export interface LaunchArchiveResponse {
 }
 
 export type TimeRange = "daily" | "weekly" | "monthly" | "yearly";
-
-export interface Shoutout {
-  id: string;
-  name: string;
-  tagline?: string;
-  url: string;
-  thumbnail?: string;
-}
