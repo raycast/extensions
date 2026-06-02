@@ -201,8 +201,8 @@ export default function BrowseSearchEngines() {
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
                       shortcut={{
-                        modifiers: ["ctrl"],
-                        key: "x",
+                        macOS: { modifiers: ["cmd"], key: "x" },
+                        Windows: { modifiers: ["ctrl"], key: "x" },
                       }}
                     />
                   </>

@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import type { SearchEngine } from '../src/types';
-import { isValidUrl } from '../src/utils';
+import fs from "fs";
+import path from "path";
+import type { SearchEngine } from "../src/types";
+import { isValidUrl } from "../src/utils";
 
-const BANGS_URL = 'https://raw.githubusercontent.com/kagisearch/bangs/refs/heads/main/data/bangs.json';
+const BANGS_URL = "https://raw.githubusercontent.com/kagisearch/bangs/refs/heads/main/data/bangs.json";
 
 async function downloadBangs(): Promise<void> {
   try {
@@ -21,16 +21,13 @@ import type { SearchEngine } from "../types";
 export const builtinSearchEngines: SearchEngine[] = ${JSON.stringify(filteredBangs, null, 2)};
 `;
 
-    fs.writeFileSync(
-      path.join(__dirname, '../src/data/builtin-search-engines.ts'),
-      tsContent
-    );
+    fs.writeFileSync(path.join(__dirname, "../src/data/builtin-search-engines.ts"), tsContent);
 
-    console.log('Successfully downloaded and generated search engines data');
+    console.log("Successfully downloaded and generated search engines data");
   } catch (error) {
-    console.error('Error downloading bangs:', error);
+    console.error("Error downloading bangs:", error);
     process.exit(1);
   }
 }
 
-downloadBangs(); 
+downloadBangs();
