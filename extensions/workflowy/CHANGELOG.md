@@ -1,12 +1,10 @@
 # Changelog
 
-## [1.0.0] - 2026-06-01
+## [Initial Release] - {PR_MERGE_DATE}
 
-### Added
-
-- Local SQLite-backed Workflowy search with recent items when no query is entered
-- Fast capture flows for default capture, advanced capture, and Today capture
-- Browsing for Workflowy shortcuts, local bookmarks, and tags
-- Task completion, append-child actions, and bookmark saving from Raycast lists
-- View Workflowy navigation for opening a location and drilling into child nodes
-- Manual cache sync plus background refresh when the local cache becomes stale
+- Add local SQLite-backed Workflowy search with recent items when no query is entered
+- Add Quick Capture, Capture Item, and Add to Today
+- Add Workflowy shortcuts, bookmarks, tags, and task completion
+- Add View Workflowy for browsing locations and child items
+- Add manual cache sync and background refresh for stale cache data
+- Add support for opening Workflowy links in the desktop app or web app
