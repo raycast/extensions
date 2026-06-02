@@ -22,14 +22,14 @@ describe("resolveTtsProvider", () => {
   it("lets gemini speak when following the analysis provider", () => {
     expect(resolveTtsProvider("gemini", { geminiApiKey: "sk" })).toBe("gemini");
   });
-  it("lets minimax speak when following the analysis provider", () => {
-    expect(resolveTtsProvider("minimax", { minimaxApiKey: "sk-mm" })).toBe(
-      "minimax",
-    );
-  });
   it("falls back to a configured TTS provider when follow-analysis lacks a TTS key", () => {
     expect(resolveTtsProvider("qwen", { openaiApiKey: "sk-openai" })).toBe(
       "openai",
+    );
+  });
+  it("ignores stale MiniMax TTS overrides", () => {
+    expect(resolveTtsProvider("qwen", { ttsProvider: "minimax" } as any)).toBe(
+      "qwen",
     );
   });
 });
@@ -59,15 +59,6 @@ describe("resolveTtsConfig", () => {
     expect(c.model).toBe("gemini-3.1-flash-tts-preview");
     expect(c.voice).toBe("Puck");
     expect(c.baseURL).toBe("https://generativelanguage.googleapis.com/v1beta");
-  });
-  it("builds MiniMax TTS config", () => {
-    const c = resolveTtsConfig("minimax", {
-      minimaxApiKey: "sk-mm",
-      minimaxTtsVoiceId: "English_WiseScholar",
-    });
-    expect(c.model).toBe("speech-2.8-hd");
-    expect(c.voice).toBe("English_WiseScholar");
-    expect(c.baseURL).toBe("https://api.minimaxi.com/v1");
   });
   it("builds MiMo TTS config (mimo-v2.5-tts, default Chloe voice)", () => {
     const c = resolveTtsConfig("mimo", {

@@ -72,7 +72,7 @@ describe("chatJSON", () => {
     const out = await chatJSON(
       {
         ...cfg,
-        baseURL: "https://api.minimaxi.com/anthropic",
+        baseURL: "https://api.deepseek.com/anthropic",
         apiProtocol: "anthropic",
         extraBody: { thinking: { type: "disabled" } },
       },
@@ -84,7 +84,7 @@ describe("chatJSON", () => {
     const [url, init] = (
       f as unknown as { mock: { calls: [string, RequestInit][] } }
     ).mock.calls[0];
-    expect(url).toBe("https://api.minimaxi.com/anthropic/v1/messages");
+    expect(url).toBe("https://api.deepseek.com/anthropic/v1/messages");
     const headers = init.headers as Record<string, string>;
     expect(headers["anthropic-version"]).toBe("2023-06-01");
     expect(headers["x-api-key"]).toBe("sk-x");

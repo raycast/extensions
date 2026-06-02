@@ -4,6 +4,7 @@ import {
   DEFAULT_ANALYSIS_MODELS,
   DEFAULT_ANALYSIS_PROVIDER,
   PROVIDER_IDS,
+  isProviderName,
   knownModelOrDefault,
   type ProviderName,
 } from "./models";
@@ -26,9 +27,6 @@ export interface RawPrefs {
   qwenAnalysisApiKey?: string;
   geminiApiKey?: string;
   geminiAnalysisModel?: string;
-  minimaxApiKey?: string;
-  minimaxAnalysisModel?: string;
-  minimaxBaseURL?: string;
   mimoApiKey?: string;
   mimoAnalysisModel?: string;
   mimoBaseURL?: string;
@@ -48,9 +46,6 @@ export const GEMINI_BASE =
 /** MiMo (Xiaomi) Token Plan Anthropic-compatible base. */
 export const MIMO_BASE = "https://token-plan-cn.xiaomimimo.com/anthropic";
 
-/** MiniMax Token Plan's Anthropic-compatible endpoint. */
-export const MINIMAX_BASE = "https://api.minimaxi.com/anthropic";
-
 export class MissingKeyError extends Error {
   constructor(public provider: ProviderName) {
     super(`Missing API key for ${provider}`);
@@ -63,13 +58,11 @@ export function getAvailableAnalysisProviders(prefs: {
   qwenAnalysisApiKey?: string;
   geminiApiKey?: string;
   mimoApiKey?: string;
-  minimaxApiKey?: string;
 }): ProviderName[] {
   return PROVIDER_IDS.filter((provider) => {
     if (provider === "qwen") {
       return Boolean(prefs.qwenAnalysisApiKey?.trim());
     }
-    if (provider === "minimax") return Boolean(prefs.minimaxApiKey?.trim());
     if (provider === "mimo") return Boolean(prefs.mimoApiKey?.trim());
     if (provider === "gemini") return Boolean(prefs.geminiApiKey?.trim());
     return Boolean(prefs.openaiApiKey?.trim());
@@ -82,15 +75,15 @@ export function pickInitialProvider(prefs: {
   qwenAnalysisApiKey?: string;
   geminiApiKey?: string;
   mimoApiKey?: string;
-  minimaxApiKey?: string;
   defaultAnalysisProvider?: ProviderName;
 }): ProviderName {
   const available = getAvailableAnalysisProviders(prefs);
   if (available.length === 1) return available[0];
   // Several (or none) configured → honor the preferred provider, else default.
   const preferred = prefs.defaultAnalysisProvider;
-  if (preferred && available.includes(preferred)) return preferred;
-  return available[0] ?? preferred ?? DEFAULT_ANALYSIS_PROVIDER;
+  if (preferred && isProviderName(preferred) && available.includes(preferred))
+    return preferred;
+  return available[0] ?? DEFAULT_ANALYSIS_PROVIDER;
 }
 
 export function resolveAnalysisModel(
@@ -109,13 +102,6 @@ export function resolveAnalysisModel(
       prefs.geminiAnalysisModel,
       ANALYSIS_MODELS.gemini,
       DEFAULT_ANALYSIS_MODELS.gemini,
-    );
-  }
-  if (provider === "minimax") {
-    return knownModelOrDefault(
-      prefs.minimaxAnalysisModel,
-      ANALYSIS_MODELS.minimax,
-      DEFAULT_ANALYSIS_MODELS.minimax,
     );
   }
   if (provider === "mimo") {
@@ -152,17 +138,6 @@ export function resolveAnalysisConfig(
       baseURL: GEMINI_BASE,
       apiKey: key,
       model: resolveAnalysisModel("gemini", prefs),
-    };
-  }
-  if (provider === "minimax") {
-    const key = prefs.minimaxApiKey?.trim();
-    if (!key) throw new MissingKeyError("minimax");
-    return {
-      baseURL: prefs.minimaxBaseURL?.trim() || MINIMAX_BASE,
-      apiKey: key,
-      model: resolveAnalysisModel("minimax", prefs),
-      apiProtocol: "anthropic",
-      extraBody: { thinking: { type: "disabled" } },
     };
   }
   if (provider === "mimo") {

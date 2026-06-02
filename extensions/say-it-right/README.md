@@ -11,7 +11,7 @@ Most tools either read text aloud flatly or drill isolated words. Say It Right t
 ## Features
 
 - **Prosody, visualized.** A monospace "stave" places the marks right above the words: stressed syllables (`●`), reduced syllables (`·`), the rising/falling tone (`↗` `↘`) on each thought group, pauses (`‖`), and connected‑speech links (`‿`) — with General American IPA.
-- **Model reading via neural TTS** — a clear, natural voice from Qwen, MiniMax, MiMo, Gemini, or OpenAI.
+- **Model reading via neural TTS** — a clear, natural voice from Qwen, MiMo, Gemini, or OpenAI.
 - **Practice controls built for how you actually learn:**
   - Play at normal, **0.75×**, or **0.5×** — slowed without the chipmunk/pitch shift.
   - **Shadowing Loop** auto‑repeats the line N times with a gap, so you can speak along.
@@ -23,7 +23,7 @@ Most tools either read text aloud flatly or drill isolated words. Say It Right t
 - **Validation-gated prompts** — built-in expression and prosody prompts include SkillOpt-style self-check gates for schema, fidelity, naturalness, speakability, and coaching usefulness.
 - **Translate inside practice** — translate the active sentence or current page for comprehension while studying English text.
 - **Select one word → get an example.** It writes a natural sentence using that word and coaches it.
-- **Bring your own provider.** Add a Qwen, MiniMax, MiMo, Gemini, or OpenAI key; whichever you have is used automatically. Switch on the fly to compare voices and analyses.
+- **Bring your own provider.** Add a Qwen, MiMo, Gemini, or OpenAI key; whichever you have is used automatically. Switch on the fly to compare voices and analyses.
 
 ## Commands
 
@@ -67,7 +67,6 @@ In practice: AI Translate answers "what does this text mean in another language?
 Open the extension's preferences and add **at least one** API key:
 
 - **Qwen Token Plan + DashScope** — analysis (`qwen3.6-flash`, `qwen3.7-plus`, `qwen3.7-max`) uses the Token Plan Anthropic base URL (`https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic` by default). Speech (`qwen3-tts-flash`, `qwen3-tts-instruct-flash`) uses a separate DashScope key and region.
-- **MiniMax** — analysis (`MiniMax-M3` or `MiniMax-M2.7-highspeed`) through the recommended Anthropic-compatible endpoint (`https://api.minimaxi.com/anthropic`) and speech (`speech-2.8-hd` by default, with `speech-2.8-turbo` still selectable).
 - **MiMo / Xiaomi** — analysis (`mimo-v2.5`, `mimo-v2.5-pro`) uses the Token Plan Anthropic endpoint (`https://token-plan-cn.xiaomimimo.com/anthropic` by default). Speech (`mimo-v2.5-tts`) maps the same cluster to its OpenAI-compatible `/v1` endpoint.
 - **Gemini** — analysis (`gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`) and speech (`gemini-3.1-flash-tts-preview`).
 - **OpenAI** — analysis (`gpt-5.5`) and speech (`gpt-4o-mini-tts`).

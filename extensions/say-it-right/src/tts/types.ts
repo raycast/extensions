@@ -18,9 +18,6 @@ export interface TtsPrefs extends RawPrefs {
   openaiTtsVoice?: string;
   qwenTtsModel?: string;
   qwenTtsVoice?: string;
-  minimaxTtsBaseURL?: string;
-  minimaxTtsModel?: string;
-  minimaxTtsVoiceId?: string;
   geminiTtsModel?: string;
   geminiTtsVoice?: string;
   mimoTtsModel?: string;

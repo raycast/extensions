@@ -42,6 +42,8 @@ describe("manifest product boundaries", () => {
       "Defaults: Coach Provider",
     );
     expect(preference("ttsProvider").title).toBe("Defaults: Voice Provider");
+    expect(preference("defaultAnalysisProvider").data?.map((entry) => entry.value)).not.toContain("minimax");
+    expect(preference("ttsProvider").data?.map((entry) => entry.value)).not.toContain("minimax");
     expect(
       preference("geminiAnalysisModel").data?.map((entry) => entry.value),
     ).toEqual([
@@ -65,10 +67,6 @@ describe("manifest product boundaries", () => {
       "qwenRegion",
       "qwenTtsModel",
       "qwenTtsVoice",
-      "minimaxApiKey",
-      "minimaxAnalysisModel",
-      "minimaxTtsModel",
-      "minimaxTtsVoiceId",
       "mimoApiKey",
       "mimoAnalysisModel",
       "mimoTtsVoice",
@@ -82,8 +80,6 @@ describe("manifest product boundaries", () => {
       "loopCount",
       "loopGap",
       "qwenAnalysisBaseURL",
-      "minimaxBaseURL",
-      "minimaxTtsBaseURL",
       "mimoBaseURL",
     ]);
   });

@@ -13,7 +13,6 @@ import type { TtsConfig, TtsPrefs } from "./types";
 
 export const GEMINI_TTS_BASE =
   "https://generativelanguage.googleapis.com/v1beta";
-export const MINIMAX_TTS_BASE = "https://api.minimaxi.com/v1";
 export const QWEN_TTS_BASE = {
   beijing: "https://dashscope.aliyuncs.com/api/v1",
   intl: "https://dashscope-intl.aliyuncs.com/api/v1",
@@ -24,7 +23,11 @@ export function resolveTtsProvider(
   prefs: TtsPrefs,
 ): TtsProviderName {
   const choice = prefs.ttsProvider || "follow-analysis";
-  if (choice !== "follow-analysis") return choice;
+  if (
+    choice !== "follow-analysis" &&
+    (TTS_PROVIDER_IDS as readonly string[]).includes(choice)
+  )
+    return choice;
   const available = getAvailableTtsProviders(prefs);
   if (
     (TTS_PROVIDER_IDS as readonly string[]).includes(analysisProvider) &&
@@ -39,7 +42,6 @@ export function resolveTtsProvider(
 export function getAvailableTtsProviders(prefs: TtsPrefs): TtsProviderName[] {
   return TTS_PROVIDER_IDS.filter((provider) => {
     if (provider === "qwen") return Boolean(prefs.qwenApiKey?.trim());
-    if (provider === "minimax") return Boolean(prefs.minimaxApiKey?.trim());
     if (provider === "mimo") return Boolean(prefs.mimoApiKey?.trim());
     if (provider === "gemini") return Boolean(prefs.geminiApiKey?.trim());
     return Boolean(prefs.openaiApiKey?.trim());
@@ -83,24 +85,6 @@ export function resolveTtsConfig(
         DEFAULT_TTS_MODELS.gemini,
       ),
       baseURL: GEMINI_TTS_BASE,
-    };
-  }
-  if (provider === "minimax") {
-    if (!prefs.minimaxApiKey) throw new MissingKeyError("minimax");
-    return {
-      provider,
-      apiKey: prefs.minimaxApiKey,
-      voice: knownVoiceOrDefault(
-        prefs.minimaxTtsVoiceId,
-        TTS_VOICES.minimax,
-        DEFAULT_TTS_VOICES.minimax,
-      ),
-      model: knownModelOrDefault(
-        prefs.minimaxTtsModel,
-        TTS_MODELS.minimax,
-        DEFAULT_TTS_MODELS.minimax,
-      ),
-      baseURL: prefs.minimaxTtsBaseURL?.trim() || MINIMAX_TTS_BASE,
     };
   }
   if (provider === "mimo") {

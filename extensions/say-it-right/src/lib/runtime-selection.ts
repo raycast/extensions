@@ -87,7 +87,14 @@ export function initialTtsProviderChoice(
   prefs: TtsPrefs,
   stored: RuntimeSelection,
 ): TtsProviderChoice {
-  return stored.ttsProvider ?? prefs.ttsProvider ?? "follow-analysis";
+  const prefChoice = prefs.ttsProvider;
+  if (stored.ttsProvider) return stored.ttsProvider;
+  if (
+    prefChoice === "follow-analysis" ||
+    (prefChoice && isTtsProviderName(prefChoice))
+  )
+    return prefChoice;
+  return "follow-analysis";
 }
 
 export function initialTtsModels(
@@ -131,7 +138,6 @@ export function applyAnalysisModel(
   if (provider === "openai") next.openaiAnalysisModel = model;
   if (provider === "qwen") next.qwenAnalysisModel = model;
   if (provider === "gemini") next.geminiAnalysisModel = model;
-  if (provider === "minimax") next.minimaxAnalysisModel = model;
   if (provider === "mimo") next.mimoAnalysisModel = model;
   return next;
 }
@@ -149,8 +155,6 @@ export function applyTtsSelection(
     openaiTtsVoice: voices.openai ?? prefs.openaiTtsVoice,
     qwenTtsModel: models.qwen ?? prefs.qwenTtsModel,
     qwenTtsVoice: voices.qwen ?? prefs.qwenTtsVoice,
-    minimaxTtsModel: models.minimax ?? prefs.minimaxTtsModel,
-    minimaxTtsVoiceId: voices.minimax ?? prefs.minimaxTtsVoiceId,
     geminiTtsModel: models.gemini ?? prefs.geminiTtsModel,
     geminiTtsVoice: voices.gemini ?? prefs.geminiTtsVoice,
     mimoTtsModel: models.mimo ?? prefs.mimoTtsModel,
@@ -171,13 +175,6 @@ function defaultTtsModel(provider: TtsProviderName, prefs: TtsPrefs): string {
       prefs.qwenTtsModel,
       TTS_MODELS.qwen,
       DEFAULT_TTS_MODELS.qwen,
-    );
-  }
-  if (provider === "minimax") {
-    return knownModelOrDefault(
-      prefs.minimaxTtsModel,
-      TTS_MODELS.minimax,
-      DEFAULT_TTS_MODELS.minimax,
     );
   }
   if (provider === "gemini") {
@@ -210,13 +207,6 @@ export function defaultTtsVoice(
       prefs.qwenTtsVoice,
       TTS_VOICES.qwen,
       DEFAULT_TTS_VOICES.qwen,
-    );
-  }
-  if (provider === "minimax") {
-    return knownVoiceOrDefault(
-      prefs.minimaxTtsVoiceId,
-      TTS_VOICES.minimax,
-      DEFAULT_TTS_VOICES.minimax,
     );
   }
   if (provider === "gemini") {

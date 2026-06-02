@@ -67,10 +67,6 @@
           "value": "qwen"
         },
         {
-          "title": "MiniMax",
-          "value": "minimax"
-        },
-        {
           "title": "MiMo",
           "value": "mimo"
         },
@@ -99,10 +95,6 @@
         {
           "title": "Qwen",
           "value": "qwen"
-        },
-        {
-          "title": "MiniMax",
-          "value": "minimax"
         },
         {
           "title": "MiMo",
@@ -233,79 +225,6 @@
         {
           "title": "Nofish — lively, youthful",
           "value": "Nofish"
-        }
-      ]
-    },
-    {
-      "name": "minimaxApiKey",
-      "title": "MiniMax: API Key",
-      "description": "Used for both MiniMax Coach and MiniMax Voice.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "minimaxAnalysisModel",
-      "title": "MiniMax Coach: Model",
-      "description": "MiniMax text model used for pronunciation analysis and natural-English expression. Voice uses the separate speech model below.",
-      "type": "dropdown",
-      "required": false,
-      "default": "MiniMax-M3",
-      "data": [
-        {
-          "title": "MiniMax-M3 — recommended",
-          "value": "MiniMax-M3"
-        },
-        {
-          "title": "MiniMax-M2.7-highspeed — previous fast model",
-          "value": "MiniMax-M2.7-highspeed"
-        }
-      ]
-    },
-    {
-      "name": "minimaxTtsModel",
-      "title": "MiniMax Voice: Model",
-      "description": "MiniMax TTS model used for read-aloud.",
-      "type": "dropdown",
-      "required": false,
-      "default": "speech-2.8-hd",
-      "data": [
-        {
-          "title": "Speech 2.8 HD",
-          "value": "speech-2.8-hd"
-        },
-        {
-          "title": "Speech 2.8 Turbo",
-          "value": "speech-2.8-turbo"
-        }
-      ]
-    },
-    {
-      "name": "minimaxTtsVoiceId",
-      "title": "MiniMax Voice: Voice",
-      "description": "Voice ID for MiniMax TTS.",
-      "type": "dropdown",
-      "required": false,
-      "default": "English_expressive_narrator",
-      "data": [
-        {
-          "title": "English Expressive Narrator",
-          "value": "English_expressive_narrator"
-        },
-        {
-          "title": "English Captivating Storyteller",
-          "value": "English_CaptivatingStoryteller"
-        },
-        {
-          "title": "English Trustworthy Man",
-          "value": "English_Trustworth_Man"
-        },
-        {
-          "title": "English Serene Woman",
-          "value": "English_SereneWoman"
-        },
-        {
-          "title": "English Wise Scholar",
-          "value": "English_WiseScholar"
         }
       ]
     },
@@ -609,22 +528,6 @@
       "type": "textfield",
       "required": false,
       "default": "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic"
-    },
-    {
-      "name": "minimaxBaseURL",
-      "title": "Advanced: MiniMax Coach Base URL",
-      "description": "Anthropic-compatible endpoint for MiniMax coaching and expression.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://api.minimaxi.com/anthropic"
-    },
-    {
-      "name": "minimaxTtsBaseURL",
-      "title": "Advanced: MiniMax Voice Base URL",
-      "description": "MiniMax TTS base URL for model audio.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://api.minimaxi.com/v1"
     },
     {
       "name": "mimoBaseURL",

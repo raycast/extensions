@@ -10,7 +10,6 @@ import { synthesizeOpenAI } from "./openai";
 import { synthesizeQwen } from "./qwen";
 import { synthesizeMimo } from "./mimo";
 import { synthesizeGemini } from "./gemini";
-import { synthesizeMinimax } from "./minimax";
 import {
   audioCacheKey,
   cachedAudioPath,
@@ -47,9 +46,7 @@ async function synthCached(
           ? await synthesizeMimo(text, opts, cfg)
           : provider === "gemini"
             ? await synthesizeGemini(text, opts, cfg)
-            : provider === "minimax"
-              ? await synthesizeMinimax(text, opts, cfg)
-              : await synthesizeQwen(text, opts, cfg);
+            : await synthesizeQwen(text, opts, cfg);
     path = await writeAudioCache(key, result.ext, result.bytes);
   }
   return path;

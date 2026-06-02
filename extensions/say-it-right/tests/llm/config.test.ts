@@ -5,7 +5,6 @@ import {
   QWEN_BASE,
   GEMINI_BASE,
   MIMO_BASE,
-  MINIMAX_BASE,
   pickInitialProvider,
 } from "../../src/llm/config";
 
@@ -70,9 +69,6 @@ describe("resolveAnalysisConfig", () => {
       resolveAnalysisConfig("mimo", { mimoApiKey: " tp-mimo " }).apiKey,
     ).toBe("tp-mimo");
     expect(
-      resolveAnalysisConfig("minimax", { minimaxApiKey: " sk-mm " }).apiKey,
-    ).toBe("sk-mm");
-    expect(
       resolveAnalysisConfig("qwen", { qwenAnalysisApiKey: " sk-sp " }).apiKey,
     ).toBe("sk-sp");
   });
@@ -101,20 +97,6 @@ describe("resolveAnalysisConfig", () => {
       geminiAnalysisModel: "gemini-3-flash-preview",
     });
     expect(flash.model).toBe("gemini-3-flash-preview");
-  });
-  it("builds MiniMax config: Anthropic-compatible, M3 default, thinking off", () => {
-    const c = resolveAnalysisConfig("minimax", { minimaxApiKey: "sk-mm" });
-    expect(c.baseURL).toBe(MINIMAX_BASE);
-    expect(c.model).toBe("MiniMax-M3");
-    expect(c.apiProtocol).toBe("anthropic");
-    expect(c.extraBody).toEqual({ thinking: { type: "disabled" } });
-  });
-  it("allows MiniMax M2.7 highspeed as an analysis model override", () => {
-    const c = resolveAnalysisConfig("minimax", {
-      minimaxApiKey: "sk-mm",
-      minimaxAnalysisModel: "MiniMax-M2.7-highspeed",
-    });
-    expect(c.model).toBe("MiniMax-M2.7-highspeed");
   });
   it("builds MiMo config on the Anthropic Token Plan base URL", () => {
     const c = resolveAnalysisConfig("mimo", { mimoApiKey: "tp-x" });
@@ -149,7 +131,6 @@ describe("resolveAnalysisConfig", () => {
     expect(() => resolveAnalysisConfig("openai", {})).toThrow(MissingKeyError);
     expect(() => resolveAnalysisConfig("qwen", {})).toThrow(MissingKeyError);
     expect(() => resolveAnalysisConfig("gemini", {})).toThrow(MissingKeyError);
-    expect(() => resolveAnalysisConfig("minimax", {})).toThrow(MissingKeyError);
     expect(() => resolveAnalysisConfig("mimo", {})).toThrow(MissingKeyError);
   });
   it("throws MissingKeyError for whitespace-only keys", () => {
@@ -163,9 +144,6 @@ describe("resolveAnalysisConfig", () => {
     ).toThrow(MissingKeyError);
     expect(() =>
       resolveAnalysisConfig("gemini", { geminiApiKey: "  " }),
-    ).toThrow(MissingKeyError);
-    expect(() =>
-      resolveAnalysisConfig("minimax", { minimaxApiKey: "  " }),
     ).toThrow(MissingKeyError);
     expect(() => resolveAnalysisConfig("mimo", { mimoApiKey: "  " })).toThrow(
       MissingKeyError,
@@ -224,15 +202,15 @@ describe("pickInitialProvider", () => {
       }),
     ).toBe("mimo");
   });
-  it("supports minimax as the sole or preferred provider", () => {
-    expect(pickInitialProvider({ minimaxApiKey: "sk-mm" })).toBe("minimax");
+  it("falls back to Qwen when stale MiniMax preferences are present", () => {
+    expect(pickInitialProvider({ minimaxApiKey: "sk-mm" } as any)).toBe("qwen");
     expect(
       pickInitialProvider({
         qwenApiKey: "a",
         qwenAnalysisApiKey: "a-sp",
         minimaxApiKey: "b",
         defaultAnalysisProvider: "minimax",
-      }),
-    ).toBe("minimax");
+      } as any),
+    ).toBe("qwen");
   });
 });
