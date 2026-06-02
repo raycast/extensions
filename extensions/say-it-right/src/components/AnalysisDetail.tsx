@@ -60,6 +60,7 @@ export interface AnalysisDetailProps {
   onLoop: () => void;
   onRepeat: () => void;
   onSave: () => void;
+  onOpenReferenceWindow: () => void;
   onSaveResult: () => void;
   onSwitchProvider: () => void;
   /** Label of the next provider in the cycle; omit to hide the switch action. */
@@ -319,6 +320,18 @@ export function AnalysisDetail(props: AnalysisDetailProps) {
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section title="Tools">
+            {activeItem?.analysis ? (
+              <ActionPanel.Submenu
+                title="Analysis Reference"
+                icon={Icon.AppWindowSidebarLeft}
+              >
+                <Action
+                  title="Open Window"
+                  icon={Icon.AppWindowSidebarLeft}
+                  onAction={props.onOpenReferenceWindow}
+                />
+              </ActionPanel.Submenu>
+            ) : null}
             {activeItem?.analysis ? (
               <Action
                 title="Save Current Result"
