@@ -1,6 +1,6 @@
 # Memo Changelog
 
-## [Update] - 2023-02-06
+## [Update] - 2025-06-03
 
 -   Override axios version to 0.32.0
 
