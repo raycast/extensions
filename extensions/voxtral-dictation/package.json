@@ -30,6 +30,15 @@
       "required": true
     },
     {
+      "name": "autoReformulate",
+      "title": "Auto-Reformulate",
+      "description": "Automatically reformulate transcriptions before pasting",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Reformulate before pasting"
+    },
+    {
       "name": "reformulatePrompt",
       "title": "Reformulation Prompt",
       "description": "Custom system prompt for reformulating transcriptions. Leave empty for the default.",
