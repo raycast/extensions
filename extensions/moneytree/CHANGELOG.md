@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Categorize Transactions] - {PR_MERGE_DATE}
+## [Categorize Transactions] - 2026-06-03
 
 - Add an action and AI tools to update transaction descriptions/categories and create custom subcategories
 - Improved authentication error handling for auto re-login failures
