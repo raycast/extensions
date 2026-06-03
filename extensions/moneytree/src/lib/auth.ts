@@ -67,7 +67,7 @@ interface Preferences {
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Moneytree",
-  providerIcon: "moneytree-icon.png",
+  providerIcon: "extension-icon.png",
   description: "Connect your Moneytree account to view your financial data",
 });
 
