@@ -1,14 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
-import { existsSync } from "fs";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
 const MAX_NAME_LENGTH = 60;
-
-interface Preferences {
-  defaultFolder?: string;
-}
 
 /** Resolve the configured default folder, falling back to ~/Desktop. */
 export function getDefaultFolder(): string {
@@ -49,6 +44,10 @@ export function sanitizeName(name: string): string {
  * Write `content` as a .md file named `name` into `folder`.
  * On name collision, appends " 2", " 3", … (Finder-style). Never overwrites.
  * Returns the absolute path actually written.
+ *
+ * Uses an exclusive-create write (`flag: "wx"`) and retries on `EEXIST`, so the
+ * collision check and the write are atomic — no TOCTOU window where a file
+ * created between the check and the write could be clobbered.
  */
 export async function saveMarkdown(
   folder: string,
@@ -56,12 +55,14 @@ export async function saveMarkdown(
   content: string,
 ): Promise<string> {
   const base = sanitizeName(name);
-  let candidate = join(folder, `${base}.md`);
-  let n = 2;
-  while (existsSync(candidate)) {
-    candidate = join(folder, `${base} ${n}.md`);
-    n += 1;
+  for (let n = 1; ; n += 1) {
+    const candidate = join(folder, n === 1 ? `${base}.md` : `${base} ${n}.md`);
+    try {
+      await writeFile(candidate, content, { encoding: "utf8", flag: "wx" });
+      return candidate;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") continue;
+      throw error;
+    }
   }
-  await writeFile(candidate, content, "utf8");
-  return candidate;
 }
