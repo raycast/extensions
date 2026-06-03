@@ -1,6 +1,6 @@
 # Anna's Archive Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-03
 
 - Add EPUB slow-download and member fast-download actions.
 - Add an EPUB search filter with persisted selection and improved result ranking.
