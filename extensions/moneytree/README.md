@@ -1,8 +1,8 @@
 # Moneytree
 
-View your financial data from
+View and manage your financial data from
 [Moneytree](https://getmoneytree.com/jp/home) directly in Raycast.
-Quick access to credentials, accounts, balances, and transactions
+Quick access to credentials, accounts, balances, transactions, and categories
 without leaving your workflow.
 
 ## Features
@@ -31,6 +31,20 @@ and amount (color-coded for income/expense).
 - **Filter**: Use the account dropdown to filter by account
 - **Launch Argument**: Pre-fill a search query before opening
 - **Pagination**: Scroll down to automatically load more
+- **Edit**: Update a transaction's custom description or category
+
+### Ask Moneytree
+
+Ask Raycast AI about your Moneytree data using the extension's tools:
+
+- Search transactions by merchant, date range, account, or description
+- Inspect credentials, account balances, and connection status
+- Browse Moneytree categories and custom subcategories
+- Update specific transactions' descriptions or categories
+- Create custom subcategories under existing Moneytree categories
+
+AI tools that update transactions or create categories mutate your
+Moneytree data. They should be used only for explicit edit requests.
 
 ## Setup
 
@@ -47,8 +61,8 @@ and amount (color-coded for income/expense).
   secure storage
 - **Direct communication**: All API calls go directly to
   Moneytree servers — no third-party services involved
-- **Read-only**: The extension only views data — no transfers,
-  payments, or modifications
+- **Limited writes**: The extension can update transaction
+  descriptions/categories and create custom subcategories
 - **Local caching**: Data is cached locally and expires after
   a few minutes
 - **No data collection**: Nothing is collected or shared — your

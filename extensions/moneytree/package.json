@@ -84,10 +84,25 @@
       "name": "search-transactions",
       "title": "Search Transactions",
       "description": "Search Moneytree transactions by date range, account, or description and return signed amounts with account context."
+    },
+    {
+      "name": "get-categories",
+      "title": "Get Categories",
+      "description": "Get Moneytree transaction categories with ids, parent relationships, category types, and custom category flags."
+    },
+    {
+      "name": "update-transaction",
+      "title": "Update Transaction",
+      "description": "Update a Moneytree transaction's custom description and category. This mutates Moneytree data and should only be used when the user explicitly asks to edit a specific transaction."
+    },
+    {
+      "name": "create-category",
+      "title": "Create Category",
+      "description": "Create a custom Moneytree subcategory under an existing parent category. This mutates Moneytree data and should only be used when the user explicitly asks to create a category."
     }
   ],
   "ai": {
-    "instructions": "Moneytree stores financial credentials/institutions, accounts, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
+    "instructions": "Moneytree stores financial credentials/institutions, accounts, categories, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, get-categories for transaction category ids, and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. To update a transaction, first use search-transactions to identify the exact transaction and get its original date, amount, claimId, and expenseType, then use get-categories to find the target category id, then call update-transaction only when the user explicitly asks to edit that specific transaction. To create a category, use get-categories to find the required parent category id, then call create-category only when the user explicitly asks to create a subcategory. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
     "evals": [
       {
         "input": "@moneytree which accounts have the highest balances?",

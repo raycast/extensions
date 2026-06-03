@@ -1,12 +1,16 @@
 # Moneytree Changelog
 
+## [Categorize Transactions] - {PR_MERGE_DATE}
+
+- Add an action and AI tools to update transaction descriptions/categories and create custom subcategories
+- Improved authentication error handling for auto re-login failures
+- Update extension icon to not use the official Moneytree logo
+
 ## [Ask Moneytree] - 2026-06-03
 
 - Added AI tools for asking Raycast AI about Moneytree credentials, accounts, and transactions
 - Reused shared Moneytree fetch and cache helpers across AI tools and existing list commands
 - Added AI instructions and evals for account balances, transaction searches, and credential health questions
-- Improved authentication error handling for auto re-login failures
-- Update extension icon to not use the official Moneytree logo
 
 ## [Various Improvements] - 2026-04-12
 

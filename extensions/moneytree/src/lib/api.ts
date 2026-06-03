@@ -1,5 +1,12 @@
 import { getAccessToken, ensureValidToken } from "./auth";
-import { DataSnapshot, TransactionsResponse, CredentialWithAccounts } from "./types";
+import {
+  CategoriesResponse,
+  Category,
+  DataSnapshot,
+  Transaction,
+  TransactionsResponse,
+  CredentialWithAccounts,
+} from "./types";
 import { API_BASE_URL, SDK_PLATFORM, SDK_VERSION, CLIENT_ID, API_VERSION, APP_BASE_URL } from "./constants";
 
 /**
@@ -122,6 +129,35 @@ export async function getCredentials(): Promise<CredentialWithAccounts[]> {
 }
 
 /**
+ * Get Moneytree transaction categories.
+ */
+export async function getCategories(): Promise<Category[]> {
+  const response = await apiRequest<CategoriesResponse>("/presenter/categories.json?locale=en", { method: "GET" });
+  return response.categories;
+}
+
+/**
+ * Create a custom Moneytree subcategory.
+ */
+export async function createCategory(options: { parentId: number; name: string; iconKey?: string }): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>("/command/categories.json?locale=en", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      category: {
+        parent_id: String(options.parentId),
+        name: options.name,
+        icon_key: options.iconKey || "uncategorized",
+      },
+    }),
+  });
+
+  return response.category;
+}
+
+/**
  * Get transactions for a date range
  */
 /**
@@ -177,4 +213,43 @@ export async function getTransactionPage(options: {
     `[API] getTransactionPage() - Page ${page}: ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_count})`,
   );
   return response;
+}
+
+/**
+ * Update editable transaction fields.
+ */
+export async function updateTransaction(options: {
+  transaction: Transaction;
+  descriptionGuest: string | null;
+  categoryId: number;
+}): Promise<Transaction> {
+  const { transaction, descriptionGuest, categoryId } = options;
+  const response = await apiRequest<{
+    transaction: Transaction & {
+      account?: { id: number };
+      category?: { id: number };
+    };
+  }>(`/command/transactions/${transaction.id}.json?locale=en`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      transaction: {
+        date: transaction.date,
+        amount: transaction.amount,
+        category_id: categoryId,
+        description_guest: descriptionGuest,
+        claim_id: transaction.claim_id,
+        expense_type: transaction.expense_type,
+      },
+      upload_ids: [],
+    }),
+  });
+
+  return {
+    ...response.transaction,
+    account_id: response.transaction.account_id ?? response.transaction.account?.id ?? transaction.account_id,
+    category_id: response.transaction.category_id ?? response.transaction.category?.id ?? categoryId,
+  };
 }

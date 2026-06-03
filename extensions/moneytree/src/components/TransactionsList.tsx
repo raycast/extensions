@@ -5,6 +5,7 @@ import { Account, Transaction } from "../lib/types";
 import { formatCurrency } from "../lib/format";
 import { LogoutAction } from "./logout-action";
 import { fetchTransactionPage, getCachedAccounts } from "../lib/moneytree";
+import { EditTransactionForm } from "./EditTransactionForm";
 
 // Category icon_key → Raycast Icon mapping (parent categories only)
 const CATEGORY_ICONS: Record<string, Icon> = {
@@ -238,7 +239,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
 
   const effectiveAccountId = accountFilter || accountId || "";
 
-  const { isLoading, data, pagination } = useCachedPromise(
+  const { isLoading, data, pagination, revalidate } = useCachedPromise(
     (query: string, acctId: string) =>
       async ({ page }: { page: number }) => {
         const response = await fetchTransactionPage({
@@ -326,6 +327,11 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
                   ]}
                   actions={
                     <ActionPanel>
+                      <Action.Push
+                        title="Edit Transaction"
+                        icon={Icon.Pencil}
+                        target={<EditTransactionForm transaction={transaction} onUpdated={revalidate} />}
+                      />
                       <Action.CopyToClipboard
                         title="Copy Transaction Details"
                         icon={Icon.Clipboard}

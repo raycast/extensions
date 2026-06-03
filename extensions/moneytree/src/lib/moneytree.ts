@@ -1,8 +1,15 @@
-import { getAllAccounts, getCredentials, getTransactionPage } from "./api";
+import {
+  createCategory,
+  getAllAccounts,
+  getCategories,
+  getCredentials,
+  getTransactionPage,
+  updateTransaction,
+} from "./api";
 import { getAccessToken } from "./auth";
-import { CACHE_KEYS, getCached, removeCached, setCached } from "./cache";
+import { CACHE_KEYS, clearCache, getCached, removeCached, setCached } from "./cache";
 import { CACHE_TTL } from "./constants";
-import { Account, CredentialWithAccounts, Transaction, TransactionsResponse } from "./types";
+import { Account, Category, CredentialWithAccounts, Transaction, TransactionsResponse } from "./types";
 
 export type AccountWithCredential = Account & { credentialName: string; credentialStatus: string };
 
@@ -92,6 +99,28 @@ export async function refreshCachedCredentials(): Promise<CredentialWithAccounts
   return credentials;
 }
 
+export async function getCachedCategories(): Promise<Category[]> {
+  const cached = getCached<Category[]>(CACHE_KEYS.categories());
+  if (cached && cached.length > 0) {
+    return cached;
+  }
+
+  await getAccessToken();
+  const categories = await getCategories();
+  setCached(CACHE_KEYS.categories(), categories, CACHE_TTL.ACCOUNTS);
+  return categories;
+}
+
+export async function createCustomCategory(options: {
+  parentId: number;
+  name: string;
+  iconKey?: string;
+}): Promise<Category> {
+  const category = await createCategory(options);
+  removeCached(CACHE_KEYS.categories());
+  return category;
+}
+
 export function clearCachedCredentials(): void {
   removeCached(CACHE_KEYS.dataSnapshot());
 }
@@ -145,6 +174,16 @@ export async function fetchTransactions(options: TransactionQueryOptions & { max
   }
 
   return { transactions, details };
+}
+
+export async function updateTransactionDetails(options: {
+  transaction: Transaction;
+  descriptionGuest: string | null;
+  categoryId: number;
+}): Promise<Transaction> {
+  const transaction = await updateTransaction(options);
+  clearCache();
+  return transaction;
 }
 
 function parseISODate(value: string, fieldName: string): Date {
