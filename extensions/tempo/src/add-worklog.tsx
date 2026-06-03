@@ -306,7 +306,6 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         }
 
         const derivedDurationSeconds = parseTimeRangeToSeconds(values.startTime, values.endTime);
-        const formattedStartTime = formatTimeWithSeconds(values.startTime);
         if (derivedDurationSeconds === null) {
           await showToast({
             style: Toast.Style.Failure,
@@ -316,14 +315,8 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
           return;
         }
 
-        if (!formattedStartTime) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid start time",
-            message: "Use 8:00, 08:00, 8h, or 8h30",
-          });
-          return;
-        }
+        // Safe to assert: parseTimeRangeToSeconds succeeded, so normalizeTimeInput(startTime) is non-null
+        const formattedStartTime = formatTimeWithSeconds(values.startTime) as string;
 
         timeSpentSeconds = derivedDurationSeconds;
         startTime = formattedStartTime;
