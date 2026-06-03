@@ -6,15 +6,15 @@ import {
   LocalStorage,
   closeMainWindow,
   environment,
-  getPreferenceValues,
   Grid,
   Icon,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
+import fetch from "cross-fetch";
 import Fuse from "fuse.js";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -28,13 +28,24 @@ type Wojak = {
   sourcePageUrl?: string;
 };
 
+type ManifestWojak = {
+  id?: string;
+  name?: string;
+  category?: string;
+  filename?: string;
+  thumbUrl?: string;
+  fullUrl?: string;
+  sourcePageUrl?: string;
+};
+
 const allCategoriesLabel = "All Categories";
 const pageSize = 100;
 const searchDebounceMs = 150;
 const resultCache = new Cache({ namespace: "search-wojaks" });
 const metadataTtlMs = 24 * 60 * 60 * 1000;
-const metadataCacheKey = "wojak-picker.supabase-metadata.v1";
+const metadataCacheKey = "wojak-picker.metadata.v1";
 const imageCacheDirectory = join(environment.supportPath, "image-cache");
+const manifestPath = join(environment.assetsPath, "wojaks.json");
 
 function createFuse(items: Wojak[]) {
   return new Fuse(items, {
@@ -92,14 +103,27 @@ function getCachedSearchResults(cacheKey: string, wojaksById: Map<string, Wojak>
   }
 }
 
-function getConfiguredPreferences() {
-  const preferences = getPreferenceValues<Preferences.SearchWojaks>();
-
+function mapManifestWojak(item: ManifestWojak): Wojak {
   return {
-    supabaseUrl: preferences.supabaseUrl?.trim().replace(/\/$/, "") || "",
-    supabaseAnonKey: preferences.supabaseAnonKey?.trim() || "",
-    supabaseBucket: preferences.supabaseBucket?.trim() || "wojaks",
+    id: item.id || "",
+    name: item.name || "",
+    category: item.category || "",
+    filename: item.filename || "",
+    thumbUrl: item.thumbUrl || item.fullUrl || "",
+    fullUrl: item.fullUrl || "",
+    sourcePageUrl: item.sourcePageUrl || "",
   };
+}
+
+function loadWojaksFromManifest() {
+  if (!existsSync(manifestPath)) {
+    throw new Error('Missing assets/wojaks.json. Run "npm run scrape" in the extension folder, then restart dev.');
+  }
+
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as ManifestWojak[];
+  return manifest
+    .map((item) => mapManifestWojak(item))
+    .filter((item) => item.id && item.name && item.filename && item.fullUrl);
 }
 
 function getCachePayload(rawValue?: string | null) {
@@ -108,77 +132,54 @@ function getCachePayload(rawValue?: string | null) {
   }
 
   try {
-    return JSON.parse(rawValue);
+    return JSON.parse(rawValue) as { expiresAt?: number; data?: Wojak[] };
   } catch {
     return undefined;
   }
 }
 
-type RemoteWojak = {
-  id?: string;
-  name?: string;
-  category?: string;
-  filename?: string;
-  thumb_url?: string;
-  thumbUrl?: string;
-  full_url?: string;
-  fullUrl?: string;
-  source_page_url?: string;
-  sourcePageUrl?: string;
-};
-
-function mapRemoteWojak(item: RemoteWojak): Wojak {
-  const fullUrl = item.full_url || item.fullUrl || "";
-  const thumbUrl = item.thumb_url || item.thumbUrl || buildThumbnailUrl(fullUrl);
-  return {
-    id: item.id || "",
-    name: item.name || "",
-    category: item.category || "",
-    filename: item.filename || "",
-    thumbUrl,
-    fullUrl,
-    sourcePageUrl: item.source_page_url || item.sourcePageUrl || "",
-  };
-}
-
-function buildThumbnailUrl(fullUrl?: string) {
-  if (!fullUrl) {
-    return "";
+async function request(url: string, context: string) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`${context} (HTTP ${response.status})`);
   }
 
-  const marker = "/storage/v1/object/public/";
-  const markerIndex = fullUrl.indexOf(marker);
-
-  if (markerIndex === -1) {
-    return fullUrl;
-  }
-
-  const prefix = fullUrl.slice(0, markerIndex);
-  const objectPath = fullUrl.slice(markerIndex + marker.length);
-  return `${prefix}/storage/v1/render/image/public/${objectPath}?width=320&height=320&resize=contain&quality=80`;
+  return response;
 }
 
-async function fetchWojaksFromSupabase() {
-  const { supabaseUrl, supabaseAnonKey } = getConfiguredPreferences();
+async function loadWojaks() {
+  const cachedValue = getCachePayload(await LocalStorage.getItem<string>(metadataCacheKey));
+  const isFresh = cachedValue?.expiresAt && cachedValue.expiresAt > Date.now();
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/wojaks?select=id,name,category,filename,thumb_url,full_url,source_page_url&order=name.asc`,
-    {
-    headers: {
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
-    },
-    },
+  if (isFresh && cachedValue?.data?.length) {
+    return { data: cachedValue.data, stale: false };
+  }
+
+  const data = loadWojaksFromManifest();
+  await LocalStorage.setItem(
+    metadataCacheKey,
+    JSON.stringify({
+      expiresAt: Date.now() + metadataTtlMs,
+      data,
+    }),
   );
 
-  if (!response.ok) {
-    throw new Error(`Supabase metadata fetch failed with HTTP ${response.status}`);
+  return { data, stale: false };
+}
+
+async function ensureCachedImage(wojak: Wojak) {
+  mkdirSync(imageCacheDirectory, { recursive: true });
+  const assetPath = join(imageCacheDirectory, wojak.filename);
+
+  if (existsSync(assetPath)) {
+    return { assetPath, fromCache: true };
   }
 
-  const data = (await response.json()) as RemoteWojak[];
-  return data
-    .map((item: RemoteWojak) => mapRemoteWojak(item))
-    .filter((item: Wojak) => item.id && item.name && item.filename && item.fullUrl);
+  const response = await request(wojak.fullUrl, "Image download failed");
+  const arrayBuffer = await response.arrayBuffer();
+  writeFileSync(assetPath, Buffer.from(arrayBuffer));
+
+  return { assetPath, fromCache: false };
 }
 
 function useStoredCategory() {
@@ -213,71 +214,20 @@ function useStoredCategory() {
   return { value, setValue: setStoredValue, isLoading };
 }
 
-async function loadWojaks() {
-  const cachedValue = getCachePayload(await LocalStorage.getItem<string>(metadataCacheKey));
-  const cachedData = cachedValue?.data?.map?.(mapRemoteWojak).filter((item: Wojak) => item.id && item.fullUrl) ?? [];
-  const isFresh = cachedValue?.expiresAt && Number(cachedValue.expiresAt) > Date.now();
-
-  if (isFresh && cachedData.length > 0) {
-    return { data: cachedData, source: "cache", stale: false };
-  }
-
-  try {
-    const remoteData = await fetchWojaksFromSupabase();
-    await LocalStorage.setItem(
-      metadataCacheKey,
-      JSON.stringify({
-        expiresAt: Date.now() + metadataTtlMs,
-        data: remoteData,
-      }),
-    );
-    return { data: remoteData, source: "remote", stale: false };
-  } catch (error) {
-    if (cachedData.length > 0) {
-      return { data: cachedData, source: "cache", stale: true };
-    }
-
-    throw error;
-  }
-}
-
-async function ensureCachedImage(wojak: Wojak) {
-  mkdirSync(imageCacheDirectory, { recursive: true });
-  const assetPath = join(imageCacheDirectory, wojak.filename);
-
-  if (existsSync(assetPath)) {
-    return { assetPath, fromCache: true };
-  }
-
-  const response = await fetch(wojak.fullUrl);
-  if (!response.ok) {
-    throw new Error(`Image download failed with HTTP ${response.status}`);
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-  writeFileSync(assetPath, Buffer.from(arrayBuffer));
-
-  return { assetPath, fromCache: false };
-}
-
 export default function Command() {
-  const preferences = getConfiguredPreferences();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [visibleCount, setVisibleCount] = useState(pageSize);
   const [isCopying, setIsCopying] = useState(false);
-  const [isLoadingRemoteData, setIsLoadingRemoteData] = useState(true);
-  const [remoteError, setRemoteError] = useState<string | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [wojaks, setWojaks] = useState<Wojak[]>([]);
-  const {
-    value: storedCategory,
-    setValue: setStoredCategory,
-    isLoading: isCategoryLoading,
-  } = useStoredCategory();
+  const { value: storedCategory, setValue: setStoredCategory, isLoading: isCategoryLoading } = useStoredCategory();
 
-  const isConfigured = Boolean(preferences.supabaseUrl && preferences.supabaseAnonKey);
   const { categories, categoryPools, getFuse, wojaksById } = useMemo(() => createSearchHelpers(wojaks), [wojaks]);
-  const selectedCategory = categories.includes(storedCategory ?? "") ? storedCategory ?? allCategoriesLabel : allCategoriesLabel;
+  const selectedCategory = categories.includes(storedCategory ?? "")
+    ? (storedCategory ?? allCategoriesLabel)
+    : allCategoriesLabel;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -295,30 +245,22 @@ export default function Command() {
     let cancelled = false;
 
     async function run() {
-      if (!isConfigured) {
-        setRemoteError("Set your Supabase preferences in Raycast to load the Wojak library.");
-        setWojaks([]);
-        setIsLoadingRemoteData(false);
-        return;
-      }
-
-      setIsLoadingRemoteData(true);
-      setRemoteError(null);
+      setIsLoadingData(true);
+      setLoadError(null);
 
       try {
         const result = await loadWojaks();
         if (!cancelled) {
           setWojaks(result.data);
-          setRemoteError(result.stale ? "Offline mode: showing cached metadata from the last successful sync." : null);
         }
       } catch (error) {
         if (!cancelled) {
-          setRemoteError(error instanceof Error ? error.message : String(error));
+          setLoadError(error instanceof Error ? error.message : String(error));
           setWojaks([]);
         }
       } finally {
         if (!cancelled) {
-          setIsLoadingRemoteData(false);
+          setIsLoadingData(false);
         }
       }
     }
@@ -328,7 +270,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [isConfigured, preferences.supabaseUrl, preferences.supabaseAnonKey, preferences.supabaseBucket]);
+  }, []);
 
   const filteredWojaks = useMemo(() => {
     const pool = categoryPools.get(selectedCategory) ?? wojaks;
@@ -367,14 +309,14 @@ export default function Command() {
     resultCache.set(fallbackCacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
     resultCache.set(cacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
     return fallbackResults;
-  }, [debouncedSearchText, selectedCategory]);
+  }, [debouncedSearchText, selectedCategory, categoryPools, getFuse, wojaks, wojaksById]);
 
   const visibleWojaks = useMemo(() => {
     return filteredWojaks.slice(0, visibleCount);
   }, [filteredWojaks, visibleCount]);
 
   const hasMore = visibleWojaks.length < filteredWojaks.length;
-  const isFiltering = searchText !== debouncedSearchText || isCategoryLoading || isLoadingRemoteData;
+  const isFiltering = searchText !== debouncedSearchText || isCategoryLoading || isLoadingData;
 
   async function handleCopy(wojak: Wojak) {
     setIsCopying(true);
@@ -421,19 +363,13 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {!isConfigured ? (
-        <Grid.EmptyView
-          icon={Icon.Gear}
-          title="Supabase setup required"
-          description="Set Supabase URL and anon key in this extension's preferences."
-        />
-      ) : remoteError && visibleWojaks.length === 0 ? (
-        <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={remoteError} />
+      {loadError && visibleWojaks.length === 0 ? (
+        <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={loadError} />
       ) : visibleWojaks.length === 0 ? (
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No wojaks found"
-          description={remoteError || "Try a different search term or category."}
+          description="Try a different search term or category."
         />
       ) : (
         visibleWojaks.map((wojak: Wojak) => (
@@ -446,11 +382,7 @@ export default function Command() {
             keywords={[wojak.name, wojak.category, wojak.filename]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy Image to Clipboard"
-                  icon={Icon.Clipboard}
-                  onAction={() => handleCopy(wojak)}
-                />
+                <Action title="Copy Image to Clipboard" icon={Icon.Clipboard} onAction={() => handleCopy(wojak)} />
                 <Action.CopyToClipboard
                   title="Copy Source URL"
                   content={wojak.fullUrl}

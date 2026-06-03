@@ -1,50 +1,17 @@
-### Dependencies ###
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-### Build output ###
-dist/
-coverage/
-.nyc_output/
+# dependencies
+/node_modules
 
-### Logs ###
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
 
-### Environment ###
-.env
-.env.local
-.env.local.*
-!.env.local.example
-
-### Generated assets ###
-assets/wojaks.json
-assets/wojaks/
-
-### macOS ###
+# misc
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.Trashes
-.TemporaryItems
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
 
-### VS Code ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
+# downloaded image files from npm run scrape (manifest is committed)
+/assets/wojaks/
