@@ -6,10 +6,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  databasePath?: string;
-};
-
 type SqliteJsonValue = string | number | null;
 
 export type TypelessModeKind =
