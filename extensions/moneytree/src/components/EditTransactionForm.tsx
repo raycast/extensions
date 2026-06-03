@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
+import { getCategoryDisplayIcon } from "../lib/category-utils";
 import { getCachedCategories, updateTransactionDetails } from "../lib/moneytree";
 import { Category, Transaction } from "../lib/types";
 
@@ -66,6 +67,7 @@ export function EditTransactionForm({ transaction, onUpdated }: { transaction: T
   }, []);
 
   const categorySections = useMemo(() => getCategorySections(categories), [categories]);
+  const categoriesById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
 
   async function handleSubmit(values: FormValues) {
     const categoryId = Number(values.categoryId);
@@ -116,7 +118,7 @@ export function EditTransactionForm({ transaction, onUpdated }: { transaction: T
                 key={category.id}
                 value={String(category.id)}
                 title={category.name}
-                icon={category.guest_id ? Icon.Person : undefined}
+                icon={getCategoryDisplayIcon(category, categoriesById)}
               />
             ))}
           </Form.Dropdown.Section>

@@ -1,4 +1,4 @@
-import { createCustomCategory } from "../lib/moneytree";
+import { createCustomCategory, getCachedCategories } from "../lib/moneytree";
 
 type Input = {
   /**
@@ -26,6 +26,15 @@ export default async function tool(input: Input) {
   const name = input.name?.trim();
   if (!name) {
     throw new Error("name is required to create a Moneytree subcategory");
+  }
+
+  const categories = await getCachedCategories();
+  const parent = categories.find((category) => category.id === input.parentId);
+  if (!parent) {
+    throw new Error(`Parent category #${input.parentId} was not found`);
+  }
+  if (parent.parent_id !== null) {
+    throw new Error("parentId must be a top-level Moneytree category; child categories cannot be parent categories");
   }
 
   const category = await createCustomCategory({

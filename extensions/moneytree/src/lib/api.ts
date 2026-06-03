@@ -158,6 +158,35 @@ export async function createCategory(options: { parentId: number; name: string; 
 }
 
 /**
+ * Update a custom Moneytree category.
+ */
+export async function updateCategory(options: {
+  categoryId: number;
+  parentId: number;
+  name: string;
+  iconKey?: string;
+}): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>(
+    `/command/categories/${options.categoryId}.json?locale=en`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+      body: JSON.stringify({
+        category: {
+          parent_id: String(options.parentId),
+          name: options.name,
+          icon_key: options.iconKey || "uncategorized",
+        },
+      }),
+    },
+  );
+
+  return response.category;
+}
+
+/**
  * Get transactions for a date range
  */
 /**

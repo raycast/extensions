@@ -33,6 +33,14 @@ and amount (color-coded for income/expense).
 - **Pagination**: Scroll down to automatically load more
 - **Edit**: Update a transaction's custom description or category
 
+### List Categories
+
+Browse Moneytree categories grouped by parent category. The filter
+defaults to **Custom** and can switch between Custom, All, and
+Built-in categories. Create a custom child category from any parent
+category, or from an existing child category under the same parent.
+Edit custom category names, parent categories, and icons.
+
 ### Ask Moneytree
 
 Ask Raycast AI about your Moneytree data using the extension's tools:
@@ -62,7 +70,7 @@ Moneytree data. They should be used only for explicit edit requests.
 - **Direct communication**: All API calls go directly to
   Moneytree servers — no third-party services involved
 - **Limited writes**: The extension can update transaction
-  descriptions/categories and create custom subcategories
+  descriptions/categories and create or edit custom subcategories
 - **Local caching**: Data is cached locally and expires after
   a few minutes
 - **No data collection**: Nothing is collected or shared — your

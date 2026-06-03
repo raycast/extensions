@@ -4,6 +4,7 @@ import {
   getCategories,
   getCredentials,
   getTransactionPage,
+  updateCategory,
   updateTransaction,
 } from "./api";
 import { getAccessToken } from "./auth";
@@ -117,6 +118,17 @@ export async function createCustomCategory(options: {
   iconKey?: string;
 }): Promise<Category> {
   const category = await createCategory(options);
+  removeCached(CACHE_KEYS.categories());
+  return category;
+}
+
+export async function updateCustomCategory(options: {
+  categoryId: number;
+  parentId: number;
+  name: string;
+  iconKey?: string;
+}): Promise<Category> {
+  const category = await updateCategory(options);
   removeCached(CACHE_KEYS.categories());
   return category;
 }
