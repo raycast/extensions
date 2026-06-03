@@ -2,7 +2,7 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, forceIpv4, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "./utils.js";
+import { downloadPath, getffmpegPath, getytdlPath, getCommonArgs, sanitizeVideoTitle } from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
@@ -18,7 +18,7 @@ export default async function extractTranscript(url: string, language: string = 
   }
 
   // First get video info to get the title
-  const videoInfo = await execa(ytdlPath, [forceIpv4 ? "--force-ipv4" : "", "--dump-json", url].filter(Boolean));
+  const videoInfo = await execa(ytdlPath, [...getCommonArgs({ throttle: true }), "--dump-json", url]);
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
@@ -36,6 +36,7 @@ export default async function extractTranscript(url: string, language: string = 
   try {
     // Download subtitles using yt-dlp
     const subtitleResult = await execa(ytdlPath, [
+      ...getCommonArgs({ throttle: true }),
       "--write-sub", // Write subtitle file
       "--write-auto-sub", // Write automatically generated subtitles
       "--skip-download", // Don't download the video
@@ -54,12 +55,28 @@ export default async function extractTranscript(url: string, language: string = 
       throw new Error("Failed to download subtitles");
     }
 
-    // Find the downloaded subtitle file
-    const files = fs.readdirSync(tmpDir);
-    const subtitleFile = files.find((f) => f.endsWith(".srt"));
+    // Find the downloaded subtitle file. yt-dlp names files `<id>.<lang>.srt`
+    // (e.g. `abc.en.srt`, `abc.en-US.srt`, `abc.en-orig.srt`). Match the
+    // requested language (and its regional/auto variants) so we don't return a
+    // fallback-language track as if it were the requested transcript.
+    const files = fs.readdirSync(tmpDir).filter((f) => f.endsWith(".srt"));
+    const wanted = language.toLowerCase();
+    const subtitleFile = files.find((f) => {
+      const lang = f.slice(0, -".srt".length).split(".").pop()?.toLowerCase() ?? "";
+      return lang === wanted || lang.startsWith(`${wanted}-`);
+    });
 
     if (!subtitleFile) {
-      throw new Error(`No ${language} subtitles found for this video`);
+      // Surface the languages we did get, to make the failure actionable.
+      const available = files
+        .map((f) => f.slice(0, -".srt".length).split(".").pop())
+        .filter(Boolean)
+        .join(", ");
+      throw new Error(
+        available
+          ? `No ${language} subtitles found for this video (available: ${available})`
+          : `No ${language} subtitles found for this video`,
+      );
     }
 
     // Read and parse the subtitle file
