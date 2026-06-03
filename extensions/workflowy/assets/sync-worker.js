@@ -77,19 +77,16 @@ function emit(event) {
 
 function parseArgs(argv) {
   let dbPath = null;
-  let force = false;
 
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--db") {
       dbPath = argv[index + 1] || null;
       index += 1;
-    } else if (value === "--force") {
-      force = true;
     }
   }
 
-  return { dbPath, force };
+  return { dbPath };
 }
 
 function ensureDir(filePath) {
@@ -378,7 +375,7 @@ function replaceCache(db, nodes, tagPairs, shortcuts) {
 }
 
 async function main() {
-  const { dbPath, force } = parseArgs(process.argv.slice(2));
+  const { dbPath } = parseArgs(process.argv.slice(2));
   const apiKey = process.env.WORKFLOWY_API_KEY;
 
   if (!apiKey) {
@@ -409,10 +406,6 @@ async function main() {
     db.close();
     process.exit(0);
     return;
-  }
-
-  if (force) {
-    // force bypasses stale checks, not server rate limits
   }
 
   emit({ type: "progress", step: "export", message: "Downloading Workflowy account…" });

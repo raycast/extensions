@@ -13,7 +13,7 @@ export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Syncing Workflowy…" });
 
   try {
-    const result = await syncCache(true, (event) => {
+    const result = await syncCache((event) => {
       if (event.type === "progress" && event.message) {
         toast.message = event.message;
       }

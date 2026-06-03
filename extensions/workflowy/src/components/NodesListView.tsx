@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getCachedNodeCount, listRecentNodes, searchIncompleteNodes, searchNodes } from "../lib/cache";
 import { maybeStartBackgroundSync } from "../lib/sync";
 import { truncate, type WorkflowyNodeRecord } from "../lib/nodes";
@@ -15,7 +15,7 @@ export function NodesListView({ onlyIncomplete = false }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  const loadResults = () => {
+  const loadResults = useCallback(() => {
     const query = searchText.trim();
     const nextResults = onlyIncomplete
       ? searchIncompleteNodes(query)
@@ -23,26 +23,32 @@ export function NodesListView({ onlyIncomplete = false }: Props) {
         ? searchNodes(query)
         : listRecentNodes();
     setResults(nextResults);
-  };
+  }, [onlyIncomplete, searchText]);
+
+  const latestLoadResults = useRef(loadResults);
+
+  useEffect(() => {
+    latestLoadResults.current = loadResults;
+  }, [loadResults]);
 
   useEffect(() => {
     loadResults();
     setIsLoading(false);
-  }, [searchText, onlyIncomplete]);
+  }, [loadResults]);
 
   useEffect(() => {
     const syncPromise = maybeStartBackgroundSync((event) => {
       if (event.type === "progress" && event.message) setSyncMessage(event.message);
       if (event.type === "done") {
         setSyncMessage(`Synced ${event.nodeCount ?? 0} items`);
-        loadResults();
+        latestLoadResults.current();
       }
     });
 
     if (syncPromise) {
       setIsLoading(getCachedNodeCount() === 0);
       syncPromise
-        .then(() => loadResults())
+        .then(() => latestLoadResults.current())
         .catch((error) => setSyncMessage(error instanceof Error ? error.message : String(error)))
         .finally(() => setIsLoading(false));
     }

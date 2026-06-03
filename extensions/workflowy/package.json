@@ -189,8 +189,7 @@
     "format": "prettier --check ."
   },
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5"
+    "@raycast/api": "^1.104.19"
   },
   "devDependencies": {
     "@types/node": "22.19.17",

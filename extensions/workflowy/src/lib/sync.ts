@@ -14,10 +14,10 @@ export function maybeStartBackgroundSync(onEvent?: (event: SyncProgressEvent) =>
   const preferences = getPreferences();
   const needsSync = getCachedNodeCount() === 0 || isCacheStale(preferences.cacheStaleMinutes);
   if (!needsSync) return null;
-  return syncCache(false, onEvent);
+  return syncCache(onEvent);
 }
 
-export function syncCache(force = false, onEvent?: (event: SyncProgressEvent) => void): Promise<SyncResult> {
+export function syncCache(onEvent?: (event: SyncProgressEvent) => void): Promise<SyncResult> {
   if (activeSync) return activeSync;
 
   const { apiKey } = getPreferences();
@@ -26,7 +26,7 @@ export function syncCache(force = false, onEvent?: (event: SyncProgressEvent) =>
   }
 
   activeSync = new Promise<SyncResult>((resolve, reject) => {
-    const child = spawn(process.execPath, [getWorkerPath(), "--db", getDatabasePath(), ...(force ? ["--force"] : [])], {
+    const child = spawn(process.execPath, [getWorkerPath(), "--db", getDatabasePath()], {
       env: {
         ...process.env,
         WORKFLOWY_API_KEY: apiKey,
