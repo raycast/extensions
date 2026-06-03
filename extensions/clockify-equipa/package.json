@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clockify-equipa",
+  "title": "Clockify Team",
+  "description": "Track your team's Clockify activity and daily leaderboard from the menu bar.",
+  "author": "pmfonseca1972",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token do Clockify",
+      "description": "Clockify API key from your profile settings."
+    },
+    {
+      "name": "apiRegion",
+      "type": "dropdown",
+      "required": true,
+      "title": "Clockify Region",
+      "description": "Data region where your Clockify workspace is hosted.",
+      "default": "eu",
+      "data": [
+        {
+          "title": "EU",
+          "value": "eu"
+        },
+        {
+          "title": "Global",
+          "value": "global"
+        },
+        {
+          "title": "USA",
+          "value": "usa"
+        },
+        {
+          "title": "UK",
+          "value": "uk"
+        },
+        {
+          "title": "AU",
+          "value": "au"
+        }
+      ]
+    },
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "required": true,
+      "title": "Refresh Every",
+      "description": "Automatic refresh interval.",
+      "default": "300",
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "60"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "mode": "menu-bar",
+      "name": "placard",
+      "title": "Team Board",
+      "description": "Show the team's current Clockify activity and today's ranking.",
+      "subtitle": "Clockify"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
