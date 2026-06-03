@@ -1,5 +1,5 @@
 # Soaring Symbols Changelog
 
-## [Departure] - {PR_MERGE_DATE}
+## [Departure] - 2026-06-03
 
 - Initial release of Soaring Symbols.
