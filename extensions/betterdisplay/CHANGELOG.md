@@ -1,6 +1,6 @@
 # BetterDisplay Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-06-03
 
 - Added input source switching via DDC, reading from BetterDisplay's custom input source list.
 
