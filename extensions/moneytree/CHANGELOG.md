@@ -5,6 +5,7 @@
 - Added AI tools for asking Raycast AI about Moneytree credentials, accounts, and transactions
 - Reused shared Moneytree fetch and cache helpers across AI tools and existing list commands
 - Added AI instructions and evals for account balances, transaction searches, and credential health questions
+- Update extension icon to not use the official Moneytree logo
 
 ## [Various Improvements] - 2026-04-12
 

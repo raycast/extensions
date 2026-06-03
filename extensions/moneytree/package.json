@@ -3,7 +3,7 @@
   "name": "moneytree",
   "title": "Moneytree",
   "description": "View and manage your finances from Moneytree via Raycast",
-  "icon": "moneytree-icon.png",
+  "icon": "extension-icon.png",
   "author": "clins1994",
   "platforms": [
     "macOS",
