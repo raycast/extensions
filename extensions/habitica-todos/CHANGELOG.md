@@ -1,6 +1,6 @@
 # Habitica Todos Changelog
 
-## [Add checklists, item usage, and skills] - {PR_MERGE_DATE}
+## [Add checklists, item usage, and skills] - 2026-06-03
 
 - Add checklist (sub-task) support to To-Dos and Dailies — add, score, edit, delete items, with progress accessory
 - Make inventory items usable: hatch eggs with potions, feed pets, equip pets/mounts, sell eggs/potions/food
