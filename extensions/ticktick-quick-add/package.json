@@ -10,14 +10,12 @@
   "version": "1.0.0",
   "commands": [
     {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
       "name": "quick-add",
       "title": "Add Task",
       "description": "Add a task to TickTick. Syntax: task title [date/time] [high|medium|low|!1|!2|!3] [#tag] [@list]",
       "mode": "no-view",
       "arguments": [
         {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
           "name": "text",
           "placeholder": "Buy groceries tomorrow 5pm high #personal @Shopping",
           "type": "text",
@@ -27,11 +25,9 @@
     }
   ],
   "dependencies": {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
     "@raycast/api": "^1.70.0"
   },
   "devDependencies": {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
@@ -40,7 +36,6 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

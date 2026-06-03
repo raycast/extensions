@@ -25,7 +25,7 @@ export default async function QuickAdd(props: LaunchProps<{ arguments: Arguments
     const parts: string[] = [parsed.title];
     if (parsed.dueDate) {
       const d = new Date(parsed.dueDate);
-      parts.push(d.toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short" }));
+      parts.push(d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }));
     }
     if (parsed.priority) { const l: Record<number,string> = {5:"High",3:"Medium",1:"Low"}; parts.push(l[parsed.priority]); }
     if (parsed.tags.length) parts.push(parsed.tags.map((t) => `#${t}`).join(" "));

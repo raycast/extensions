@@ -94,15 +94,27 @@ function isMonthName(token: string): boolean {
 }
 
 function parseTime(token: string, baseDateISO?: string): string | null {
-  const match = token.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/i);
+  // Require either am/pm suffix OR a colon to avoid eating bare numbers like "3" from titles
+  const match = token.match(/^(\d{1,2})(?::(\d{2}))(am|pm)?$/i) || token.match(/^(\d{1,2})(am|pm)$/i);
   if (!match) return null;
-  let hours = parseInt(match[1]);
-  const minutes = match[2] ? parseInt(match[2]) : 0;
-  const meridiem = match[3]?.toLowerCase();
+
+  let hours: number;
+  let minutes = 0;
+  let meridiem: string | undefined;
+
+  if (match[0].includes(":")) {
+    hours = parseInt(match[1]);
+    minutes = parseInt(match[2]);
+    meridiem = match[3]?.toLowerCase();
+  } else {
+    hours = parseInt(match[1]);
+    meridiem = match[2]?.toLowerCase();
+  }
+
   if (meridiem === "pm" && hours < 12) hours += 12;
   if (meridiem === "am" && hours === 12) hours = 0;
-  if (!meridiem && hours < 8) hours += 12;
   if (hours > 23) return null;
+
   const base = baseDateISO ? new Date(baseDateISO) : new Date();
   base.setHours(hours, minutes, 0, 0);
   return base.toISOString();
