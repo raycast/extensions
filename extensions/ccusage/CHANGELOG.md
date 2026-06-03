@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Tolerate dateless sessions] - {PR_MERGE_DATE}
+## [Tolerate dateless sessions] - 2026-06-03
 
 ### Fixed
 
