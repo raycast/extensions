@@ -51,21 +51,6 @@ export async function getSigningKey(ctx: SigningKeyContext): Promise<string> {
   return fetched;
 }
 
-/**
- * Legacy alias for callers that haven't migrated to the new `getSigningKey`
- * shape yet. Wraps the new function with the old (accountId, apiToken)
- * positional signature; does NOT support the manual override (use
- * `getSigningKey` directly for that).
- *
- * @deprecated Prefer `getSigningKey(ctx)` so the manual override is honoured.
- */
-export async function getCachedOrFetchSigningKey(
-  accountId: string,
-  apiToken: string,
-): Promise<string> {
-  return getSigningKey({ accountId, apiToken });
-}
-
 export async function clearCachedSigningKey(accountId: string): Promise<void> {
   await LocalStorage.removeItem(KEY_PREFIX + accountId);
 }

@@ -98,19 +98,3 @@ export async function addImageToCache(
   };
   await LocalStorage.setItem(CACHE_KEY_PREFIX + hash, JSON.stringify(entry));
 }
-
-/**
- * Clears the entire dedupe cache. Useful when switching CF accounts or
- * after a signing-key rotation invalidates previously-built URLs.
- */
-export async function clearImageCache(): Promise<number> {
-  const all = await LocalStorage.allItems();
-  let removed = 0;
-  for (const key of Object.keys(all)) {
-    if (key.startsWith(CACHE_KEY_PREFIX)) {
-      await LocalStorage.removeItem(key);
-      removed++;
-    }
-  }
-  return removed;
-}
