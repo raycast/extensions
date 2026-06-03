@@ -47,7 +47,10 @@ export default function InputSourceList({ display }: InputSourceListProps) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select an input source">
       {sources.length === 0 && !isLoading ? (
-        <List.EmptyView title="No Input Sources" description="This display does not support DDC input switching." />
+        <List.EmptyView
+          title="No Input Sources"
+          description="No custom input sources configured. Set them up in BetterDisplay Settings > Displays > Customize input source list."
+        />
       ) : (
         sources.map((source) => (
           <List.Item
