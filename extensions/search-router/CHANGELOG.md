@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+## [Bug Fixes & Improvements] - 2026-06-03
 
 - Fix fallback search support — `query` argument is no longer required, so the command works when launched as a Raycast fallback search
 - Fix missing `await` on `showToast` in `setAsDefault`
