@@ -95,7 +95,7 @@ test("formatOccurrence formats fallback date strings", () => {
     }),
   );
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(startDate);
@@ -107,7 +107,7 @@ test("formatAvailabilityDateTime renders local user-facing time instead of raw I
   const slotDate = new Date(Date.UTC(2026, 2, 19, 16, 49, 51));
   const formatted = formatAvailabilityDateTime(slotDate.toISOString());
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(slotDate);
@@ -125,7 +125,7 @@ test("formatOccurrence preserves the BusyCal day for all-day fallback dates", ()
     }),
   );
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(new Date(2026, 2, 19));
 
@@ -144,7 +144,7 @@ test("formatOccurrence shows the time for timed tasks", () => {
     }),
   );
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(dueDate);
@@ -163,7 +163,7 @@ test("formatOccurrence shows the time for timed task fallback dates", () => {
     }),
   );
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(dueDate);
@@ -189,7 +189,7 @@ test("formatOccurrence preserves all-day task dates in negative time zones", asy
         '  dueDate: "2026-03-19",',
         "  isFloating: false,",
         "};",
-        "const expected = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(2026, 2, 19));",
+        "const expected = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(2026, 2, 19));",
         'console.log(JSON.stringify({ actual: mod.formatOccurrence(item) ?? "", expected }));',
       ].join(" "),
     ],
@@ -232,7 +232,7 @@ test("formatOccurrence preserves floating wall-clock time in Dubai", async () =>
         "  occurrenceSeconds,",
         "  isFloating: true,",
         "};",
-        "const expected = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(2026, 2, 20, 15, 0, 0));",
+        "const expected = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(2026, 2, 20, 15, 0, 0));",
         'console.log(JSON.stringify({ actual: mod.formatOccurrence(item) ?? "", expected }));',
       ].join(" "),
     ],
@@ -269,7 +269,7 @@ test("formatOccurrence prefers the task due date over mixed-query start dates", 
     }),
   );
 
-  const expected = new Intl.DateTimeFormat(undefined, {
+  const expected = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(displayedDueDate);
