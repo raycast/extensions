@@ -1,0 +1,210 @@
+import { getPreferenceValues, showToast, Toast, WindowManagement } from "@raycast/api";
+
+type LayoutGrid = number[][];
+
+const MAX_WINDOWS = 10;
+
+function layoutFor(count: number): LayoutGrid {
+  switch (count) {
+    case 1:
+      return [[1]];
+    case 2:
+      return [[1, 2]];
+    case 3:
+      return [
+        [1, 3],
+        [2, 3],
+      ];
+    case 4:
+      return [
+        [1, 2],
+        [3, 4],
+      ];
+    case 5:
+      return [
+        [1, 2, 5],
+        [3, 4, 5],
+      ];
+    case 6:
+      return [
+        [1, 2, 3],
+        [4, 5, 6],
+      ];
+    case 7:
+      return [
+        [1, 2, 3, 4],
+        [5, 6, 7, 7],
+      ];
+    case 8:
+      return [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+      ];
+    case 9:
+      return [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+      ];
+    default:
+      return [
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10],
+      ];
+  }
+}
+
+interface Frame {
+  windowIndex: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function computeFrames(grid: LayoutGrid, screen: { width: number; height: number }, gap: number): Frame[] {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const cellW = (screen.width - gap * (cols + 1)) / cols;
+  const cellH = (screen.height - gap * (rows + 1)) / rows;
+
+  const extents: Record<number, { minC: number; maxC: number; minR: number; maxR: number }> = {};
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const n = grid[r][c];
+      if (n === 0) continue;
+      const e = extents[n];
+      if (!e) {
+        extents[n] = { minC: c, maxC: c, minR: r, maxR: r };
+      } else {
+        if (c < e.minC) e.minC = c;
+        if (c > e.maxC) e.maxC = c;
+        if (r < e.minR) e.minR = r;
+        if (r > e.maxR) e.maxR = r;
+      }
+    }
+  }
+
+  return Object.entries(extents).map(([n, e]) => {
+    const colSpan = e.maxC - e.minC + 1;
+    const rowSpan = e.maxR - e.minR + 1;
+    return {
+      windowIndex: Number(n) - 1,
+      x: Math.round(gap + e.minC * (cellW + gap)),
+      y: Math.round(gap + e.minR * (cellH + gap)),
+      width: Math.round(colSpan * cellW + (colSpan - 1) * gap),
+      height: Math.round(rowSpan * cellH + (rowSpan - 1) * gap),
+    };
+  });
+}
+
+type PositionedBounds = { position: { x: number; y: number }; size: { width: number; height: number } };
+
+function isPositioned(bounds: WindowManagement.Window["bounds"]): bounds is PositionedBounds {
+  return bounds !== "fullscreen";
+}
+
+// 从当前桌面的所有窗口位置推断屏幕可用区域的左上角坐标
+function inferScreenOrigin(windows: WindowManagement.Window[]): { x: number; y: number } {
+  const positioned = windows.filter((w) => isPositioned(w.bounds)).map((w) => w.bounds as PositionedBounds);
+  if (positioned.length === 0) return { x: 0, y: 25 };
+  return {
+    x: Math.min(...positioned.map((b) => b.position.x)),
+    y: Math.min(...positioned.map((b) => b.position.y)),
+  };
+}
+
+export default async function Command() {
+  const prefs = getPreferenceValues<Preferences.Tile>();
+  const appNames = (prefs.appName || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const gap = Math.max(0, Number.parseInt(prefs.gap || "0", 10) || 0);
+
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Tiling windows…",
+  });
+
+  try {
+    const [windows, desktops] = await Promise.all([
+      WindowManagement.getWindowsOnActiveDesktop(),
+      WindowManagement.getDesktops(),
+    ]);
+
+    const activeDesktop = desktops.find((d) => d.active);
+    if (!activeDesktop) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not detect active desktop";
+      return;
+    }
+
+    // 确定目标 app
+    let targetAppName: string | undefined;
+    if (appNames.length > 0) {
+      for (const candidate of appNames) {
+        const lower = candidate.toLowerCase();
+        if (
+          windows.some((w) => w.application?.name?.toLowerCase() === lower && w.positionable && isPositioned(w.bounds))
+        ) {
+          targetAppName = candidate;
+          break;
+        }
+      }
+    } else {
+      try {
+        const active = await WindowManagement.getActiveWindow();
+        targetAppName = active.application?.name;
+      } catch {
+        // 无活跃窗口
+      }
+    }
+
+    if (!targetAppName) {
+      toast.style = Toast.Style.Failure;
+      toast.title =
+        appNames.length > 0
+          ? `No tileable windows found (looked for: ${appNames.join(", ")})`
+          : "No focused window to detect target app";
+      return;
+    }
+
+    // 筛选目标窗口
+    const targetLower = targetAppName.toLowerCase();
+    const targetWindows = windows
+      .filter((w) => w.application?.name?.toLowerCase() === targetLower && w.positionable && isPositioned(w.bounds))
+      .slice(0, MAX_WINDOWS);
+
+    if (targetWindows.length === 0) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `No tileable windows for ${targetAppName}`;
+      return;
+    }
+
+    const count = targetWindows.length;
+    const grid = layoutFor(count);
+    const origin = inferScreenOrigin(windows);
+    const frames = computeFrames(grid, activeDesktop.size, gap).filter((f) => f.windowIndex < count);
+
+    await Promise.all(
+      frames.map((f) => {
+        const win = targetWindows[f.windowIndex];
+        return WindowManagement.setWindowBounds({
+          id: win.id,
+          bounds: {
+            position: { x: f.x + origin.x, y: f.y + origin.y },
+            size: { width: f.width, height: f.height },
+          },
+        });
+      }),
+    );
+
+    toast.style = Toast.Style.Success;
+    toast.title = `Tiled ${count} ${targetAppName} window${count === 1 ? "" : "s"}`;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to tile windows";
+    toast.message = error instanceof Error ? error.message : String(error);
+  }
+}
