@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Bug Fixes] - 2026-06-03
+## [Bug Fixes] - {PR_MERGE_DATE}
 
 - Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
 
