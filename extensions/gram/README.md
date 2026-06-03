@@ -1,14 +1,14 @@
 # Gram
 
-A Raycast extension that allows you to quickly access, pin and open your recent projects in the [Gram editor](https://gram-editor.com).
+Supercharge the [Gram editor](https://gram-editor.com) from within Raycast: manage Gram extensions, configure auto-updates, and quickly search, pin, or open your recent projects.
 
 ## Features
 
-- **Search Recent Projects:** View your recently opened projects in Gram.
+- **Search & Open Recent Projects:** Access your recently opened projects in Gram.
 - **Pin Favorites:** Pin your most frequently used workspaces to the top of the list for instant access.
-- **Quick Open:** Open projects directly from Raycast.
+- **Quick Open in Gram:** Open files or projects directly from Raycast.
 - **Manage Extensions:** Search for, install, uninstall and update or downgrade extensions.
-- **Background Updates:** Update extensions in the background automatically (or manually).
+- **Background Updates:** Choose between automatic background updates or manual updates for your installed extensions.
 
 ## Credits & Acknowledgements
 
