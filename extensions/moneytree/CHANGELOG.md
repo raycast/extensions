@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Improved Category Management & Metadata Updates] - {PR_MERGE_DATE}
+## [Improved Category Management & Metadata Updates] - 2026-06-03
 
 - Add a category browser command with custom/built-in filters and custom category create/edit actions
 - Remake metadata screenshots so that the old logo is replaced with the new extension icon
