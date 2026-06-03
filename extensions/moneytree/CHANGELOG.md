@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Ask Moneytree] - {PR_MERGE_DATE}
+## [Ask Moneytree] - 2026-06-03
 
 - Added AI tools for asking Raycast AI about Moneytree credentials, accounts, and transactions
 - Reused shared Moneytree fetch and cache helpers across AI tools and existing list commands
