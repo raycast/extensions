@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "todo-txt",
+  "title": "Todo.txt",
+  "description": "Manage tasks in todo.txt format with priorities, projects, contexts, and due dates.",
+  "icon": "extension-icon.png",
+  "author": "jeksn",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "list-todos",
+      "title": "List Todos",
+      "description": "List, filter, and manage tasks in your todo.txt file",
+      "mode": "view",
+      "keywords": ["todo", "task", "list", "search"]
+    },
+    {
+      "name": "add-todo",
+      "title": "Add Todo",
+      "description": "Add a new task with priority, project, context, and due date",
+      "mode": "view",
+      "keywords": ["todo", "task", "add", "new", "create"]
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Todo",
+      "description": "Add a task using raw todo.txt syntax in a single text field",
+      "mode": "view",
+      "keywords": ["todo", "task", "quick", "add", "create"]
+    },
+    {
+      "name": "list-done",
+      "title": "List Completed Todos",
+      "description": "List completed tasks in done.txt and restore or delete them",
+      "mode": "view",
+      "keywords": ["todo", "done", "completed", "archive"]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Todo Count",
+      "description": "Show pending task count in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "todoFilePath",
+      "type": "file",
+      "required": true,
+      "title": "todo.txt File",
+      "description": "Path to your todo.txt file",
+      "placeholder": "~/todo.txt"
+    },
+    {
+      "name": "doneFilePath",
+      "type": "file",
+      "required": false,
+      "title": "done.txt File",
+      "description": "Path to your done.txt file (for archiving completed tasks). Leave empty to use same directory as todo.txt.",
+      "placeholder": "~/done.txt"
+    },
+    {
+      "name": "archiveDone",
+      "type": "checkbox",
+      "required": false,
+      "title": "Archive Completed Tasks",
+      "description": "Move completed tasks to done.txt instead of keeping them in todo.txt",
+      "default": false,
+      "label": "Archive to done.txt"
+    },
+    {
+      "name": "defaultSort",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort Order",
+      "description": "How to sort tasks in the list view",
+      "default": "priority",
+      "data": [
+        { "title": "Priority", "value": "priority" },
+        { "title": "Creation Date (newest first)", "value": "creation-date-desc" },
+        { "title": "Creation Date (oldest first)", "value": "creation-date-asc" },
+        { "title": "Due Date", "value": "due-date" },
+        { "title": "Alphabetical", "value": "alpha" }
+      ]
+    },
+    {
+      "name": "showCompleted",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Completed Tasks",
+      "description": "Include completed tasks in the list view",
+      "default": false,
+      "label": "Show completed tasks"
+    },
+    {
+      "name": "groupBy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Group By",
+      "description": "How to group tasks in the list view",
+      "default": "priority",
+      "data": [
+        { "title": "Priority", "value": "priority" },
+        { "title": "Project", "value": "project" },
+        { "title": "Context", "value": "context" },
+        { "title": "None", "value": "none" }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
