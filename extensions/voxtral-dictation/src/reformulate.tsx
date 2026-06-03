@@ -12,39 +12,10 @@ import { readFile, writeFile } from "fs/promises";
 import {
   LAST_TRANSCRIPTION_FILE,
   REFORMULATED_FILE,
-  checkMistralResponse,
+  DEFAULT_SYSTEM_PROMPT,
+  callReformulate,
   type Preferences,
 } from "./shared";
-
-const DEFAULT_SYSTEM_PROMPT =
-  "You are a text reformulator. The user gives you a raw speech-to-text transcription. It may contain filler words, repetitions, grammatical errors, or unclear phrasing. Rewrite it as a clear, well-structured text. Be concise and direct. Preserve the original meaning and intent. Only output the reformulated text, nothing else. Keep the same language as the input.";
-
-async function callReformulate(
-  text: string,
-  apiKey: string,
-  systemPrompt: string,
-): Promise<string> {
-  const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "mistral-small-latest",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: text },
-      ],
-    }),
-  });
-
-  await checkMistralResponse(response);
-  const result = (await response.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
-  return result.choices[0].message.content;
-}
 
 export default function Command() {
   const [rawText, setRawText] = useState("");
