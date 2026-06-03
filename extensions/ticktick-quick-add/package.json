@@ -1,0 +1,44 @@
+{
+  "name": "ticktick-quick-add",
+  "title": "TickTick Quick Add",
+  "description": "Quickly add tasks to TickTick from Raycast using natural language syntax",
+  "icon": "icon.png",
+  "author": "Colin Begemann",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "quick-add",
+      "title": "Add Task",
+      "description": "Add a task to TickTick. Syntax: task title [date/time] [high|medium|low|!1|!2|!3] [#tag] [@list]",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Buy groceries tomorrow 5pm high #personal @Shopping",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
