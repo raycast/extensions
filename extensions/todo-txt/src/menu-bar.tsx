@@ -46,7 +46,11 @@ export default function MenuBar() {
   });
 
   const sorted = sortTodos(pending, "priority");
-  const topItems = sorted.slice(0, MAX_ITEMS);
+  const nonOverdue = sorted.filter((t) => {
+    const due = t.tags["due"];
+    return !(due && due < today);
+  });
+  const topItems = nonOverdue.slice(0, MAX_ITEMS);
 
   async function handleComplete(item: TodoItem) {
     // Optimistically update local state immediately

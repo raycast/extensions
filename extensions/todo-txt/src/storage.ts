@@ -323,9 +323,9 @@ export async function completeTodo(
   completedItem.raw = serializeItem(completedItem);
 
   const allItems = await readTodos(todoFilePath);
-  // Match by lineNumber — id is regenerated on every file read so it can't be
-  // used to correlate items across reads.
-  const remaining = allItems.filter((t) => t.lineNumber !== item.lineNumber);
+  // Match by raw line content — lineNumber can be stale if another write has
+  // shifted lines since the caller last read the file.
+  const remaining = allItems.filter((t) => t.raw !== item.raw);
 
   if (archive) {
     // Remove from todo.txt
@@ -348,9 +348,9 @@ export async function completeTodo(
     cacheTodos(remaining);
     return remaining;
   } else {
-    // Replace the item in place with the completed version, matched by lineNumber
+    // Replace the item in place with the completed version, matched by raw content
     const updated = allItems.map((t) =>
-      t.lineNumber === item.lineNumber ? completedItem : t,
+      t.raw === item.raw ? completedItem : t,
     );
     await writeTodos(todoFilePath, updated);
     cacheTodos(updated);
@@ -366,7 +366,7 @@ export async function deleteTodo(
   item: TodoItem,
 ): Promise<TodoItem[]> {
   const allItems = await readTodos(todoFilePath);
-  const remaining = allItems.filter((t) => t.lineNumber !== item.lineNumber);
+  const remaining = allItems.filter((t) => t.raw !== item.raw);
   await writeTodos(todoFilePath, remaining);
   cacheTodos(remaining);
   return remaining;
@@ -380,9 +380,7 @@ export async function updateTodo(
   updated: TodoItem,
 ): Promise<TodoItem[]> {
   const allItems = await readTodos(todoFilePath);
-  const newItems = allItems.map((t) =>
-    t.lineNumber === updated.lineNumber ? updated : t,
-  );
+  const newItems = allItems.map((t) => (t.raw === updated.raw ? updated : t));
   await writeTodos(todoFilePath, newItems);
   cacheTodos(newItems);
   return newItems;
@@ -445,7 +443,7 @@ export async function deleteDoneTodo(
     : join(dirname(expandPath(todoFilePath)), "done.txt");
 
   const doneItems = await readDoneTodos(todoFilePath, doneFilePath);
-  const remaining = doneItems.filter((t) => t.lineNumber !== item.lineNumber);
+  const remaining = doneItems.filter((t) => t.raw !== item.raw);
   const doneLines = remaining.map(serializeItem);
   await writeFile(
     resolvedDone,
@@ -470,9 +468,7 @@ export async function restoreTodo(
 
   // Remove from done.txt
   const doneItems = await readDoneTodos(todoFilePath, doneFilePath);
-  const remainingDone = doneItems.filter(
-    (t) => t.lineNumber !== item.lineNumber,
-  );
+  const remainingDone = doneItems.filter((t) => t.raw !== item.raw);
   const doneLines = remainingDone.map(serializeItem);
   await writeFile(
     resolvedDone,

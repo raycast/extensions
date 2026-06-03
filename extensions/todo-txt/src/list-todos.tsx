@@ -141,7 +141,10 @@ function groupItems(items: TodoItem[], groupBy: GroupBy): Sections {
     }
     return Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([title, items]) => ({ title: `+${title}`, items }));
+      .map(([title, items]) => ({
+        title: title === "No Project" ? title : `+${title}`,
+        items,
+      }));
   }
 
   if (groupBy === "context") {
@@ -155,7 +158,10 @@ function groupItems(items: TodoItem[], groupBy: GroupBy): Sections {
     }
     return Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([title, items]) => ({ title: `@${title}`, items }));
+      .map(([title, items]) => ({
+        title: title === "No Context" ? title : `@${title}`,
+        items,
+      }));
   }
 
   return [{ title: "All Tasks", items }];
@@ -424,7 +430,7 @@ export default function ListTodos() {
       try {
         await mutate(updateTodo(prefs.todoFilePath, itemWithRaw), {
           optimisticUpdate: (current) =>
-            current?.map((t) => (t.id === itemWithRaw.id ? itemWithRaw : t)),
+            current?.map((t) => (t.raw === updated.raw ? itemWithRaw : t)),
         });
         toast.style = Toast.Style.Success;
         toast.title = "Task updated";
