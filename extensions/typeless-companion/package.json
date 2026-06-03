@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typeless-companion",
+  "title": "Typeless Companion",
+  "description": "Browse and copy local Typeless history.",
+  "icon": "typeless-icon.png",
+  "author": "arjan.flac",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "view-history",
+      "title": "View Typeless History",
+      "description": "Browse local Typeless history and retry-needed recordings.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Last Typeless Transcript",
+      "description": "Copy the newest saved dictation transcript.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "databasePath",
+      "title": "Database Path",
+      "description": "Optional override for Typeless's SQLite history database.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Library/Application Support/Typeless/typeless.db"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.15.29",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
