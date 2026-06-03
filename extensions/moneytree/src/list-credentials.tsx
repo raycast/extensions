@@ -1,13 +1,16 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { getCredentials } from "./lib/api";
-import { getAccessToken } from "./lib/auth";
-import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
-import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts } from "./lib/types";
 import { AccountsList } from "./components/AccountsList";
 import { LogoutAction } from "./components/logout-action";
 import { formatCurrency } from "./lib/format";
+import {
+  clearCachedCredentials,
+  getCachedCredentials,
+  getCredentialName,
+  getCredentialTotalBalance,
+  refreshCachedCredentials,
+} from "./lib/moneytree";
 
 const GROUP_ORDER = ["bank", "credit_card", "investment", "stored_value", "point", "other"] as const;
 
@@ -28,15 +31,6 @@ const GROUP_ICONS: Record<string, Icon> = {
   point: Icon.Star,
   other: Icon.Dot,
 };
-
-function getCredentialName(credential: CredentialWithAccounts): string {
-  if (credential.status === "manual") return "Cash Tracking";
-  return credential.institution_name || `Credential #${credential.id}`;
-}
-
-function getCredentialTotalBalance(credential: CredentialWithAccounts): number {
-  return credential.accounts.reduce((sum, acc) => sum + acc.current_balance_in_base, 0);
-}
 
 /** Determine the primary group for a credential based on its accounts */
 function getPrimaryGroup(credential: CredentialWithAccounts): string {
@@ -92,37 +86,27 @@ export default function Command() {
         setIsLoading(true);
         setError(null);
 
-        const cached = getCached<CredentialWithAccounts[]>(CACHE_KEYS.dataSnapshot());
-        if (cached && cached.length > 0) {
-          setCredentials(cached);
-          setIsLoading(false);
-          try {
-            await getAccessToken();
-            const data = await getCredentials();
-            setCredentials(data);
-            setCached(CACHE_KEYS.dataSnapshot(), data, CACHE_TTL.ACCOUNTS);
-          } catch (refreshError) {
-            if (
-              refreshError instanceof Error &&
-              (refreshError.message.includes("authentication") || refreshError.message.includes("preferences"))
-            ) {
-              removeCached(CACHE_KEYS.dataSnapshot());
-              setCredentials([]);
-              setError(refreshError.message);
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Authentication required",
-                message: "Please check your credentials in extension preferences",
-              });
-            }
-          }
-          return;
-        }
-
-        await getAccessToken();
-        const data = await getCredentials();
+        const data = await getCachedCredentials();
         setCredentials(data);
-        setCached(CACHE_KEYS.dataSnapshot(), data, CACHE_TTL.ACCOUNTS);
+        setIsLoading(false);
+
+        try {
+          setCredentials(await refreshCachedCredentials());
+        } catch (refreshError) {
+          if (
+            refreshError instanceof Error &&
+            (refreshError.message.includes("authentication") || refreshError.message.includes("preferences"))
+          ) {
+            clearCachedCredentials();
+            setCredentials([]);
+            setError(refreshError.message);
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Authentication required",
+              message: "Please check your credentials in extension preferences",
+            });
+          }
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch credentials";
         setError(errorMessage);
