@@ -74,9 +74,9 @@ class ViewerDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
         case "copyImage":
             let pb = NSPasteboard.general
             pb.clearContents()
-            pb.setData(data, forType: .png)
+            let copied = pb.setData(data, forType: .png)
             DispatchQueue.main.async {
-                self.webView.evaluateJavaScript("window._onCopyResult(true)", completionHandler: nil)
+                self.webView.evaluateJavaScript("window._onCopyResult(\(copied))", completionHandler: nil)
             }
 
         case "saveImage":
