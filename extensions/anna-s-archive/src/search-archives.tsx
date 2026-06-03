@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { type ArchiveFilter, isArchiveFilter, useArchive } from "@/hooks/use-archive";
 import { useMirrorDomain } from "@/hooks/use-mirror-domain";
 import { isEmpty } from "@/utils";
@@ -14,7 +15,7 @@ const FILTER_STORAGE_KEY = "anna-s-archive-search-filter";
 const Command = () => {
   const { push } = useNavigation();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<ArchiveFilter>("all");
+  const [filter, setFilter] = useCachedState<ArchiveFilter>(FILTER_STORAGE_KEY, "all");
 
   const usedMirror = useMirrorDomain();
 
@@ -22,19 +23,12 @@ const Command = () => {
     push(<TestMirrors />);
   }, [push]);
 
-  useEffect(() => {
-    LocalStorage.getItem<string>(FILTER_STORAGE_KEY).then((value) => {
-      if (value && isArchiveFilter(value)) {
-        setFilter(value);
-      }
-    });
-  }, []);
-
-  const handleFilterChange = useCallback((value: string) => {
-    const nextFilter: ArchiveFilter = isArchiveFilter(value) ? value : "all";
-    setFilter(nextFilter);
-    LocalStorage.setItem(FILTER_STORAGE_KEY, nextFilter);
-  }, []);
+  const handleFilterChange = useCallback(
+    (value: string) => {
+      setFilter(isArchiveFilter(value) ? value : "all");
+    },
+    [setFilter],
+  );
 
   const { data, error, isLoading } = useArchive(usedMirror.url, onErrorPrimaryAction, search, filter);
 

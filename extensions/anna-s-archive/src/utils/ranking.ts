@@ -36,8 +36,8 @@ const scoreArchiveItem = (item: ArchiveItem, normalizedQuery: string, filter: Ar
     score += 10;
   }
 
-  if (item.ext.toLowerCase() === "epub") {
-    score += filter === "epub" ? 45 : 16;
+  if (filter !== "epub" && item.ext.toLowerCase() === "epub") {
+    score += 16;
   }
 
   if (normalizedLanguage === "en" || normalizedLanguage.includes("english")) {
