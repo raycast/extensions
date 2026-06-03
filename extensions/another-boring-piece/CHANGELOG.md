@@ -1,6 +1,6 @@
 # Changelog
 
-## [Metadata Screenshot Cleanup] - {PR_MERGE_DATE}
+## [Metadata Screenshot Cleanup] - 2026-06-03
 
 - Converted metadata screenshots from JPG to PNG format.
 - Renamed metadata screenshots to `another-boring-piece-1.png`, `another-boring-piece-2.png`, and `another-boring-piece-3.png`.
