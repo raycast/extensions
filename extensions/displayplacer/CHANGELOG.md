@@ -1,6 +1,6 @@
 # DisplayPlacer Changelog
 
-## [Fix auto-closing] - {PR_MERGE_DATE}
+## [Fix auto-closing] - 2026-06-03
 
 - Fixed raycast not closing correctly after preset was loaded
 
