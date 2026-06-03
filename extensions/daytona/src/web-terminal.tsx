@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Clipboard, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
-import { Daytona, DaytonaError, Sandbox } from "@daytona/sdk";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Clipboard, Form, Toast, open, showToast } from "@raycast/api";
+import { getDaytonaErrorMessage } from "./daytona-client";
+import { useDaytonaClient, useSandboxList } from "./use-sandbox-list";
 
 type FormValues = {
   sandboxId: string;
@@ -9,65 +9,10 @@ type FormValues = {
 };
 
 const WEB_TERMINAL_PORT = 22222;
-const SANDBOXES_PAGE_SIZE = 100;
-const MAX_SANDBOX_LIST_PAGES = 20;
 
 export default function WebTerminalCommand() {
-  const [sandboxes, setSandboxes] = useState<Sandbox[]>([]);
-  const [isLoadingSandboxes, setIsLoadingSandboxes] = useState<boolean>(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  const preferences = getPreferenceValues<Preferences>();
-  const target = preferences.target && preferences.target !== "auto" ? preferences.target : undefined;
-  const apiUrl = preferences.apiUrl?.trim() || undefined;
-
-  const daytona = useMemo(
-    () =>
-      new Daytona({
-        apiKey: preferences.apiKey,
-        apiUrl,
-        target,
-      }),
-    [preferences.apiKey, apiUrl, target],
-  );
-
-  const loadSandboxes = useCallback(async () => {
-    setIsLoadingSandboxes(true);
-    setLoadingError(null);
-
-    try {
-      const allSandboxes: Sandbox[] = [];
-
-      for (let page = 1; page <= MAX_SANDBOX_LIST_PAGES; page++) {
-        const response = await daytona.list(undefined, page, SANDBOXES_PAGE_SIZE);
-        allSandboxes.push(...response.items);
-
-        if (response.items.length < SANDBOXES_PAGE_SIZE) {
-          break;
-        }
-
-        if (page === MAX_SANDBOX_LIST_PAGES) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Sandbox list may be incomplete",
-            message: `Showing first ${allSandboxes.length} sandboxes. Refine pagination if needed.`,
-          });
-        }
-      }
-
-      setSandboxes(allSandboxes);
-    } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
-      setLoadingError(message);
-      setSandboxes([]);
-    } finally {
-      setIsLoadingSandboxes(false);
-    }
-  }, [daytona]);
-
-  useEffect(() => {
-    loadSandboxes();
-  }, [loadSandboxes]);
+  const daytona = useDaytonaClient();
+  const { sandboxes, isLoading: isLoadingSandboxes, loadingError, loadSandboxes } = useSandboxList();
 
   function parseExpiresInSeconds(rawValue: string | undefined): number {
     const trimmed = rawValue?.trim();
@@ -128,10 +73,9 @@ export default function WebTerminalCommand() {
         onAction: () => Clipboard.copy(signedPreview.url),
       };
     } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to open web terminal";
-      toast.message = message;
+      toast.message = getDaytonaErrorMessage(error);
     }
   }
 

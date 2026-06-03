@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
-import { Daytona, DaytonaError } from "@daytona/sdk";
+import { Action, ActionPanel, Form, Toast, open, showToast } from "@raycast/api";
 import { getDashboardUrl } from "./dashboard-url";
+import { setToastFailure, startDaytonaAnimatedToast } from "./daytona-toast";
 
 type FormValues = {
   name?: string;
@@ -41,7 +41,6 @@ export default function CreateSnapshotCommand() {
   }
 
   async function handleSubmit(values: FormValues) {
-    const snapshotName = values.name?.trim() || generateSnapshotName();
     const imageName = values.image.trim();
 
     if (!imageName) {
@@ -52,22 +51,10 @@ export default function CreateSnapshotCommand() {
       return;
     }
 
-    const preferences = getPreferenceValues<Preferences>();
-    const target = preferences.target && preferences.target !== "auto" ? preferences.target : undefined;
-    const apiUrl = preferences.apiUrl?.trim() || undefined;
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating snapshot",
-    });
+    const snapshotName = values.name?.trim() || generateSnapshotName();
+    const { preferences, daytona, toast } = await startDaytonaAnimatedToast("Creating snapshot");
 
     try {
-      const daytona = new Daytona({
-        apiKey: preferences.apiKey,
-        apiUrl,
-        target,
-      });
-
       const cpu = parseOptionalInteger(values.cpu, "CPU");
       const memory = parseOptionalInteger(values.memory, "Memory");
       const disk = parseOptionalInteger(values.disk, "Disk");
@@ -87,10 +74,7 @@ export default function CreateSnapshotCommand() {
         onAction: () => open(getDashboardUrl(preferences.apiUrl, `snapshots?snapshotId=${snapshot.id}`)),
       };
     } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create snapshot";
-      toast.message = message;
+      setToastFailure(toast, "Failed to create snapshot", error);
     }
   }
 

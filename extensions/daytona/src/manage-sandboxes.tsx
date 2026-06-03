@@ -1,81 +1,18 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  getPreferenceValues,
-  Icon,
-  List,
-  Toast,
-  open,
-  showToast,
-} from "@raycast/api";
-import { Daytona, DaytonaError, Sandbox } from "@daytona/sdk";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, Toast, open, showToast } from "@raycast/api";
+import { Sandbox } from "@daytona/sdk";
+import { useMemo } from "react";
+import { getDaytonaErrorMessage } from "./daytona-client";
 import { getDashboardUrl } from "./dashboard-url";
+import { getDaytonaPreferences } from "./daytona-preferences";
+import { useDaytonaClient, useSandboxList } from "./use-sandbox-list";
 
 const WEB_TERMINAL_PORT = 22222;
 const WEB_TERMINAL_SIGNED_TTL_SECONDS = 3600;
-const SANDBOXES_PAGE_SIZE = 100;
-const MAX_SANDBOX_LIST_PAGES = 20;
 
 export default function ManageSandboxesCommand() {
-  const [sandboxes, setSandboxes] = useState<Sandbox[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  const preferences = getPreferenceValues<Preferences>();
-  const target = preferences.target && preferences.target !== "auto" ? preferences.target : undefined;
-  const apiUrl = preferences.apiUrl?.trim() || undefined;
-
-  const daytona = useMemo(
-    () =>
-      new Daytona({
-        apiKey: preferences.apiKey,
-        apiUrl,
-        target,
-      }),
-    [preferences.apiKey, apiUrl, target],
-  );
-
-  const loadSandboxes = useCallback(async () => {
-    setIsLoading(true);
-    setLoadingError(null);
-
-    try {
-      const allSandboxes: Sandbox[] = [];
-
-      for (let page = 1; page <= MAX_SANDBOX_LIST_PAGES; page++) {
-        const response = await daytona.list(undefined, page, SANDBOXES_PAGE_SIZE);
-        allSandboxes.push(...response.items);
-
-        if (response.items.length < SANDBOXES_PAGE_SIZE) {
-          break;
-        }
-
-        if (page === MAX_SANDBOX_LIST_PAGES) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Sandbox list may be incomplete",
-            message: `Showing first ${allSandboxes.length} sandboxes. Refine pagination if needed.`,
-          });
-        }
-      }
-
-      setSandboxes(allSandboxes);
-    } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
-      setLoadingError(message);
-      setSandboxes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [daytona]);
-
-  useEffect(() => {
-    loadSandboxes();
-  }, [loadSandboxes]);
+  const preferences = getDaytonaPreferences();
+  const daytona = useDaytonaClient();
+  const { sandboxes, isLoading, loadingError, loadSandboxes } = useSandboxList();
 
   function getStateValue(sandbox: Sandbox): string {
     return sandbox.state?.toString().toLowerCase() || "unknown";
@@ -123,10 +60,9 @@ export default function ManageSandboxesCommand() {
       toast.message = refreshedSandbox.name || refreshedSandbox.id;
       await loadSandboxes();
     } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Operation failed";
-      toast.message = message;
+      toast.message = getDaytonaErrorMessage(error);
     }
   }
 
@@ -204,10 +140,9 @@ export default function ManageSandboxesCommand() {
       toast.title = "Web terminal opened";
       toast.message = current.name || current.id;
     } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to open web terminal";
-      toast.message = message;
+      toast.message = getDaytonaErrorMessage(error);
     }
   }
 
@@ -289,7 +224,7 @@ export default function ManageSandboxesCommand() {
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Sandbox Id"
+                  title="Copy Sandbox ID"
                   content={sandbox.id}
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                 />

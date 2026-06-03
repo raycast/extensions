@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Detail, Form, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
-import { CodeLanguage, Daytona, DaytonaError } from "@daytona/sdk";
+import { Action, ActionPanel, Detail, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { CodeLanguage } from "@daytona/sdk";
 import { useState } from "react";
+import { setToastFailure, startDaytonaAnimatedToast } from "./daytona-toast";
 
 type FormValues = {
   code: string;
@@ -90,22 +91,9 @@ export default function RunCodeCommand() {
       return;
     }
 
-    const preferences = getPreferenceValues<Preferences>();
-    const target = preferences.target && preferences.target !== "auto" ? preferences.target : undefined;
-    const apiUrl = preferences.apiUrl?.trim() || undefined;
+    const { daytona, toast } = await startDaytonaAnimatedToast("Running code in sandbox");
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Running code in sandbox",
-    });
-
-    const daytona = new Daytona({
-      apiKey: preferences.apiKey,
-      apiUrl,
-      target,
-    });
-
-    let sandbox: Awaited<ReturnType<Daytona["create"]>> | undefined;
+    let sandbox: Awaited<ReturnType<typeof daytona.create>> | undefined;
 
     try {
       sandbox = await daytona.create({
@@ -127,10 +115,7 @@ export default function RunCodeCommand() {
         />,
       );
     } catch (error) {
-      const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Execution failed";
-      toast.message = message;
+      setToastFailure(toast, "Execution failed", error);
     } finally {
       if (sandbox) {
         try {
