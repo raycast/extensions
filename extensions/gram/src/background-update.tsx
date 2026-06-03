@@ -8,14 +8,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { processBackgroundUpdates } from "./lib/updater";
-import { GramBuild } from "./lib/gram";
 
 const cache = new Cache({ namespace: "gram-extensions-bg" });
-
-interface Preferences {
-  build: GramBuild;
-  autoUpdateInterval: string;
-}
 
 function getScheduleLabel(interval: string): string {
   switch (interval) {

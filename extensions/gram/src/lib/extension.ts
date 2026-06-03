@@ -229,7 +229,7 @@ export async function getExtensionVersions(extensionId: string): Promise<Extensi
     const data = json.data || [];
     return data
       .map((item) => ({
-        published_at: new Date(item.published_at).toLocaleDateString(),
+        published_at: item.published_at,
         version: item.version,
         schema_version: item.schema_version,
         wasm_api_version: item.wasm_api_version,

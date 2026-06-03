@@ -24,7 +24,6 @@ export async function processBackgroundUpdates(gramBuild: GramBuild): Promise<nu
   const url = new URL("https://api.zed.dev/extensions");
   url.searchParams.append("max_schema_version", "1");
   const response = await apiFetch(url.toString());
-  if (!response.ok) throw new Error("Failed to fetch Zed registry");
 
   const json = (await response.json()) as ZedResponse;
   const allExtensions = json.data || [];

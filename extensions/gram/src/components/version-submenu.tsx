@@ -16,13 +16,9 @@ export function VersionSubmenu({ extension, installedVersion, onInstall }: Versi
     async function loadData() {
       try {
         const fetchedVersions = await getExtensionVersions(extension.id);
-        const sortedVersions = [...fetchedVersions].sort((a, b) => {
-          return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-        });
-
-        setVersions(sortedVersions);
+        setVersions(fetchedVersions);
       } catch (error) {
-        console.error("Failed to load or sort extension versions:", error);
+        console.error("Failed to load extension versions:", error);
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +63,7 @@ export function VersionSubmenu({ extension, installedVersion, onInstall }: Versi
         return (
           <Action
             key={v.version}
-            title={`${v.version}${statusBadge} • ${v.published_at}`}
+            title={`${v.version}${statusBadge} • ${new Date(v.published_at).toLocaleDateString()}`}
             icon={versionIcon}
             onAction={() => onInstall(extension, v.version)}
           />
