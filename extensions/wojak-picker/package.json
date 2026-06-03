@@ -19,7 +19,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "cross-fetch": "^4.1.0",
     "fuse.js": "^7.4.1"
   },
   "devDependencies": {

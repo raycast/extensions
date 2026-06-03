@@ -12,7 +12,6 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import fetch from "cross-fetch";
 import Fuse from "fuse.js";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
