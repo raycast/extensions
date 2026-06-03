@@ -80,10 +80,10 @@ function getMessageText(message: HistoryMessage) {
   const attachmentText = message.attachments
     ?.map(
       (attachment) =>
-        attachment.fallback ?? [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n"),
+        [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n") || attachment.fallback,
     )
     .filter(Boolean)
-    .join("\n");
+    .join("\n\n");
   if (attachmentText) {
     return attachmentText;
   }
