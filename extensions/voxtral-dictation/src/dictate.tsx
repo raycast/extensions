@@ -7,11 +7,9 @@ import { existsSync } from "fs";
 import {
   LAST_TRANSCRIPTION_FILE,
   REFORMULATED_FILE,
-  DEFAULT_SYSTEM_PROMPT,
   checkMistralResponse,
   callReformulate,
   showErrorHUD,
-  type Preferences,
 } from "./shared";
 
 const SOX_PATHS = [
@@ -101,7 +99,7 @@ export default async function Command() {
 
     try {
       const { apiKey, autoReformulate, reformulatePrompt } =
-        getPreferenceValues<Preferences>();
+        getPreferenceValues<Preferences.Dictate>();
       const text = await transcribe(AUDIO_FILE, apiKey);
 
       if (!text || text.trim().length === 0) {
@@ -113,7 +111,7 @@ export default async function Command() {
 
       if (autoReformulate) {
         await showHUD("Reformulating...");
-        const systemPrompt = reformulatePrompt?.trim() || DEFAULT_SYSTEM_PROMPT;
+        const systemPrompt = reformulatePrompt;
         const reformulated = await callReformulate(text, apiKey, systemPrompt);
         textToPaste = reformulated;
         await Promise.all([
