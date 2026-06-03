@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import { chatJSON, ChatError, type ChatConfig } from "../../src/llm/client";
+import {
+  chatJSON,
+  chatText,
+  ChatError,
+  type ChatConfig,
+} from "../../src/llm/client";
 
 const cfg: ChatConfig = {
   baseURL: "https://api.test/v1",
@@ -58,6 +63,62 @@ describe("chatJSON", () => {
     // second call body must NOT contain response_format
     const secondBody = ((f as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[1][1].body) as string;
     expect(secondBody).not.toContain("response_format");
+  });
+  it("retries without temperature when the model rejects a non-default temperature", async () => {
+    let call = 0;
+    const f = vi.fn(async () => {
+      call += 1;
+      if (call === 1)
+        return {
+          ok: false,
+          status: 400,
+          json: async () => ({}),
+          text: async () =>
+            JSON.stringify({
+              error: {
+                message:
+                  "Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.",
+                param: "temperature",
+              },
+            }),
+        } as any;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ choices: [{ message: { content: "{\"ok\":true}" } }] }),
+        text: async () => "",
+      } as any;
+    }) as unknown as typeof fetch;
+    const out = await chatJSON(cfg, "s", "u", f);
+    expect(out).toBe("{\"ok\":true}");
+    const calls = (f as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls;
+    expect(calls.length).toBe(2);
+    expect(calls[1][1].body as string).not.toContain("temperature");
+  });
+  it("retries the TEXT path on a temperature 400 (expression coaching path)", async () => {
+    let call = 0;
+    const f = vi.fn(async () => {
+      call += 1;
+      if (call === 1)
+        return {
+          ok: false,
+          status: 400,
+          json: async () => ({}),
+          text: async () =>
+            "error: 'temperature' does not support 0 with this model. Only the default (1) value is supported.",
+        } as any;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ choices: [{ message: { content: "Hello." } }] }),
+        text: async () => "",
+      } as any;
+    }) as unknown as typeof fetch;
+    const out = await chatText(cfg, "s", "u", f);
+    expect(out).toBe("Hello.");
+    const calls = (f as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls;
+    expect(calls.length).toBe(2);
+    expect(calls[1][1].body as string).not.toContain("temperature");
   });
   it("merges extraBody (e.g. enable_thinking) into the request body", async () => {
     const f = mockFetch(200, { choices: [{ message: { content: "{}" } }] });

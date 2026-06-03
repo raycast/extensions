@@ -51,6 +51,13 @@
       "subtitle": "Say It Right",
       "description": "Review expressions and pronunciation analyses saved from Say It Right.",
       "mode": "view"
+    },
+    {
+      "name": "pinned-expressions",
+      "title": "Pinned Expressions",
+      "subtitle": "Say It Right",
+      "description": "Keep your saved expressions one click away in the menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [

@@ -49,14 +49,16 @@ async function chatOpenAICompatible(
   const authHeaders: Record<string, string> = cfg.authHeader
     ? { [cfg.authHeader]: cfg.apiKey }
     : { Authorization: `Bearer ${cfg.apiKey}` };
-  const request = (useJsonFormat: boolean) => {
+  const request = (useJsonFormat: boolean, includeTemperature: boolean) => {
     const body: Record<string, unknown> = {
       model: cfg.model,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      temperature: 0, // analysis is not creative — keep it deterministic across runs
+      // Keep analysis deterministic. Omitted on retry for models that only
+      // accept the default temperature (GPT-5 / o-series reasoning models).
+      ...(includeTemperature ? { temperature: 0 } : {}),
       ...(cfg.extraBody ?? {}),
     };
     if (options.jsonFormat && useJsonFormat) {
@@ -72,9 +74,18 @@ async function chatOpenAICompatible(
 
   let res: Awaited<ReturnType<typeof fetch>>;
   try {
-    res = await request(options.jsonFormat);
-    // Some models/endpoints reject response_format json_object → retry without it.
-    if (options.jsonFormat && res.status === 400) res = await request(false);
+    res = await request(options.jsonFormat, true);
+    if (res.status === 400) {
+      // Retry once. Some models/endpoints reject response_format json_object;
+      // GPT-5 / o-series reasoning models reject a non-default temperature
+      // (OpenAI's guidance is to omit it). Drop temperature only when the error
+      // names it, so Qwen/MiMo/Gemini keep temperature: 0.
+      const errBody = await res.text().catch(() => "");
+      const temperatureRejected =
+        /temperature/i.test(errBody) &&
+        /(does not support|only the default|unsupported value)/i.test(errBody);
+      res = await request(false, !temperatureRejected);
+    }
   } catch (err) {
     const name = err instanceof Error ? err.name : "";
     if (name === "TimeoutError" || name === "AbortError") {

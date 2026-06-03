@@ -17,6 +17,7 @@ import {
   savedResultPrimaryText,
   type SavedResult,
 } from "./lib/saved-results";
+import { saveToFloatingNote } from "./lib/floating-note";
 
 export default function Command() {
   const [items, setItems] = useState<SavedResult[]>([]);
@@ -180,10 +181,17 @@ function SavedResultItem({
               content={item.markdown}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-            <Action.CreateSnippet
-              title="Create Raycast Snippet"
-              icon={Icon.Text}
-              snippet={{ name: item.title, text: primary }}
+            <Action
+              title="Save to Floating Note"
+              icon={Icon.Window}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={() =>
+                void saveToFloatingNote({
+                  expression: primary,
+                  source: item.sourceText,
+                  coaching: item.coaching,
+                })
+              }
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Manage">

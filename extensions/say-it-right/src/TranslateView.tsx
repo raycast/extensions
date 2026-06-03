@@ -40,6 +40,7 @@ import {
   type RuntimeSelection,
 } from "./lib/runtime-selection";
 import { saveResult } from "./lib/saved-results";
+import { saveToFloatingNote } from "./lib/floating-note";
 
 interface TranslationState {
   translation?: string;
@@ -389,6 +390,14 @@ function TranslateViewInner({
               mode === "express-intent" ? "Expression Coach" : "Translation"
             }
           >
+            {mode === "express-intent" && state.translation ? (
+              <Action.Push
+                title="Practice This English"
+                icon={Icon.Microphone}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={<AnalyzeView text={state.translation} />}
+              />
+            ) : null}
             <Action.CopyToClipboard
               title={
                 mode === "express-intent"
@@ -412,16 +421,17 @@ function TranslateViewInner({
               />
             ) : null}
             {state.translation ? (
-              <Action.CreateSnippet
-                title="Create Raycast Snippet"
-                icon={Icon.Text}
-                snippet={{
-                  name:
-                    mode === "express-intent"
-                      ? "Say It Right Expression"
-                      : "Say It Right Translation",
-                  text: state.translation,
-                }}
+              <Action
+                title="Save to Floating Note"
+                icon={Icon.Window}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                onAction={() =>
+                  void saveToFloatingNote({
+                    expression: state.translation ?? "",
+                    source,
+                    coaching: state.coaching,
+                  })
+                }
               />
             ) : null}
             <Action
@@ -434,14 +444,6 @@ function TranslateViewInner({
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => void runTranslation(true)}
             />
-            {mode === "express-intent" && state.translation ? (
-              <Action.Push
-                title="Practice This English"
-                icon={Icon.Microphone}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-                target={<AnalyzeView text={state.translation} />}
-              />
-            ) : null}
             {mode === "express-intent" ? (
               <ActionPanel.Submenu
                 title={`Tone: ${EXPRESSION_TONE_LABELS[expressionTone]}`}

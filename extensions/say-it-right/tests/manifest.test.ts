@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const manifest = JSON.parse(
   readFileSync(join(process.cwd(), "package.json"), "utf8"),
 ) as {
-  commands: Array<{ name: string; title: string }>;
+  commands: Array<{ name: string; title: string; mode: string }>;
   preferences: Array<{
     name: string;
     title: string;
@@ -35,6 +35,12 @@ describe("manifest product boundaries", () => {
     );
     expect(command("translate-intent").title).toBe("Say What I Mean");
     expect(command("saved-results").title).toBe("Saved Results");
+  });
+
+  it("exposes saved expressions as a menu-bar command", () => {
+    const pinned = command("pinned-expressions");
+    expect(pinned.title).toBe("Pinned Expressions");
+    expect(pinned.mode).toBe("menu-bar");
   });
 
   it("keeps durable preferences aligned with coaching and voice defaults", () => {
