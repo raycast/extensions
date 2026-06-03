@@ -44,7 +44,8 @@ export const getContainingDirectory = (filePath: string) => dirname(filePath);
 
 export const buildCleanFileBaseName = (item: ArchiveItem): string => {
   const fallback = item.id;
-  const rawName = item.title || item.fileName || fallback;
+  const fileNameWithoutExt = item.fileName?.replace(/\.epub$/i, "") ?? null;
+  const rawName = item.title || fileNameWithoutExt || fallback;
   const withoutMetadata = rawName
     .replace(/\s+\[[^\]]+\]\s*$/g, "")
     .replace(/\s+\([^)]*(?:epub|retail|z-?lib|anna|archive|converted|calibre)[^)]*\)\s*$/gi, "")
