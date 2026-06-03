@@ -1,5 +1,10 @@
 # MeTube Changelog
 
+## [Add to Raycast on Windows] - {PR_MERGE_DATE}
+
+- Updated raycast dependencies for cross platform clipboard support
+- Add Windows as a target platform in manifest
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
