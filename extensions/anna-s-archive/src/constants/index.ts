@@ -93,6 +93,7 @@ export const FILE_TYPES = [
   "pptx",
   "exe",
   "ai",
+  "fb2.zip",
 ] as const;
 
 export type FileType = (typeof FILE_TYPES)[number];
