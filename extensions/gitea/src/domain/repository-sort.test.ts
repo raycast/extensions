@@ -76,4 +76,15 @@ describe("repository sort domain", () => {
   ] as const)("maps %s to Gitea query params", (sort, expected) => {
     expect(mapRepositorySortToGitea(sort)).toEqual(expected);
   });
+
+  it("maps unknown persisted sort values to the default Gitea query params", () => {
+    expect(mapRepositorySortToGitea("unknown cached value")).toEqual({
+      sort: "stars",
+      order: SortOrder.Descending,
+    });
+    expect(mapRepositorySortToGitea(undefined)).toEqual({
+      sort: "stars",
+      order: SortOrder.Descending,
+    });
+  });
 });

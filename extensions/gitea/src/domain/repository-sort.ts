@@ -42,11 +42,19 @@ const giteaRepositorySort = {
 } as const satisfies Record<RepositorySort, GiteaRepositorySort>;
 
 export function sortRepositories(list: Repository[], sort: RepositorySort): Repository[] {
-  return list.toSorted(repositoryComparators[sort]);
+  return list.toSorted(repositoryComparators[normalizeRepositorySort(sort)]);
 }
 
-export function mapRepositorySortToGitea(sort: RepositorySort): GiteaRepositorySort {
-  return giteaRepositorySort[sort];
+export function mapRepositorySortToGitea(sort: RepositorySort | string | undefined): GiteaRepositorySort {
+  return giteaRepositorySort[normalizeRepositorySort(sort)];
+}
+
+function normalizeRepositorySort(sort: RepositorySort | string | undefined): RepositorySort {
+  return isRepositorySort(sort) ? sort : RepositorySort.MostStars;
+}
+
+function isRepositorySort(sort: RepositorySort | string | undefined): sort is RepositorySort {
+  return typeof sort === "string" && sort in giteaRepositorySort;
 }
 
 function numberValue(value?: number): number {

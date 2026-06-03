@@ -96,7 +96,7 @@ export async function searchIssues(params: SearchIssuesParams): Promise<Paginate
 
   return {
     items,
-    hasMore: params.limit != null && data.length === params.limit,
+    hasMore: params.limit != null && items.length === params.limit,
   };
 }
 
