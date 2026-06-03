@@ -2,9 +2,7 @@ import { showHUD, showToast, Toast, LaunchProps } from "@raycast/api";
 import { getAccessToken, getProjects, createTask } from "./api";
 import { parseTaskInput } from "./parser";
 
-interface Arguments { text: string; }
-
-export default async function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function QuickAdd(props: LaunchProps<{ arguments: Arguments.QuickAdd }>) {
   const input = props.arguments.text?.trim();
   if (!input) { await showToast({ style: Toast.Style.Failure, title: "No input provided" }); return; }
 

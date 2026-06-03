@@ -20,12 +20,16 @@ const DAYS_SHORT = ["sun","mon","tue","wed","thu","fri","sat"];
 function getAppropriateYear(month: number, day: number): number {
   const now = new Date();
   const year = now.getFullYear();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const candidate = new Date(year, month, day);
-  return candidate < now ? year + 1 : year;
+  return candidate < today ? year + 1 : year;
 }
 
 function toISO(date: Date): string {
-  return date.toISOString().split("T")[0] + "T00:00:00+00:00";
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T00:00:00+00:00`;
 }
 
 function parseDate(token: string): string | null {
