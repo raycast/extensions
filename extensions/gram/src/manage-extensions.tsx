@@ -1,5 +1,4 @@
-import { List, getPreferenceValues, ActionPanel, Action, Icon, showToast, Toast, Cache } from "@raycast/api";
-import fs from "fs/promises";
+import { List, getPreferenceValues, ActionPanel, Action, Icon, showToast, Toast, Cache, trash } from "@raycast/api";
 import path from "path";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { usePromise } from "@raycast/utils";
@@ -403,7 +402,7 @@ export default function Command() {
       try {
         const targetDir = path.join(targetInstallDir, ext.id);
 
-        await fs.rm(targetDir, { recursive: true, force: true });
+        await trash(targetDir);
 
         if (ext.id in ignoredMap) {
           const newMap = await removeExtensionIgnore(ext.id);

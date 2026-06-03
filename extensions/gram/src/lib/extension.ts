@@ -127,7 +127,6 @@ export async function installExtension({
   try {
     const response = await apiFetch(downloadUrl);
 
-    if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
     if (!response.body) throw new Error("Response body is empty");
 
     await pipeline(
@@ -222,8 +221,6 @@ async function getExtensionVersionFromDisk(extensionDir: string): Promise<string
 export async function getExtensionVersions(extensionId: string): Promise<ExtensionVersionInfo[]> {
   try {
     const response = await apiFetch(`https://api.zed.dev/extensions/${extensionId}`);
-
-    if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
 
     const json = (await response.json()) as ZedResponse;
     const data = json.data || [];
