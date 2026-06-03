@@ -7,7 +7,9 @@ import { existsSync } from "fs";
 import {
   LAST_TRANSCRIPTION_FILE,
   REFORMULATED_FILE,
+  DEFAULT_SYSTEM_PROMPT,
   checkMistralResponse,
+  callReformulate,
   showErrorHUD,
   type Preferences,
 } from "./shared";
@@ -98,7 +100,8 @@ export default async function Command() {
     await showHUD("Transcribing...");
 
     try {
-      const { apiKey } = getPreferenceValues<Preferences>();
+      const { apiKey, autoReformulate, reformulatePrompt } =
+        getPreferenceValues<Preferences>();
       const text = await transcribe(AUDIO_FILE, apiKey);
 
       if (!text || text.trim().length === 0) {
@@ -106,11 +109,25 @@ export default async function Command() {
         return;
       }
 
-      await Promise.all([
-        writeFile(LAST_TRANSCRIPTION_FILE, text, "utf-8"),
-        unlink(REFORMULATED_FILE).catch(() => {}),
-      ]);
-      await Clipboard.paste(text);
+      let textToPaste = text;
+
+      if (autoReformulate) {
+        await showHUD("Reformulating...");
+        const systemPrompt = reformulatePrompt?.trim() || DEFAULT_SYSTEM_PROMPT;
+        const reformulated = await callReformulate(text, apiKey, systemPrompt);
+        textToPaste = reformulated;
+        await Promise.all([
+          writeFile(LAST_TRANSCRIPTION_FILE, text, "utf-8"),
+          writeFile(REFORMULATED_FILE, reformulated, "utf-8"),
+        ]);
+      } else {
+        await Promise.all([
+          writeFile(LAST_TRANSCRIPTION_FILE, text, "utf-8"),
+          unlink(REFORMULATED_FILE).catch(() => {}),
+        ]);
+      }
+
+      await Clipboard.paste(textToPaste);
       await showHUD("Pasted!");
     } catch (e) {
       await showErrorHUD(e);
