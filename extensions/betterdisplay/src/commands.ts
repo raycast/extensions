@@ -85,7 +85,11 @@ export async function setBrightness(tagID: string, brightnessIntensity?: number)
   }
 }
 
-export async function increaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
+async function adjustBrightness(
+  tagID: string,
+  direction: "increase" | "decrease",
+  brightnessIncrement?: number,
+): Promise<string> {
   if (typeof brightnessIncrement !== "number") {
     const { brightnessIncrement: prefIncrement } = getPreferenceValues<{ brightnessIncrement: string }>();
     brightnessIncrement = Number(prefIncrement) || 0.05;
@@ -97,7 +101,10 @@ export async function increaseBrightness(tagID: string, brightnessIncrement?: nu
     console.error(`Failed to set brightness for tagID ${tagID}, the current value is not a number`);
     return "";
   }
-  const newValue = Math.min(1, currentValue + brightnessIncrement);
+  const newValue =
+    direction === "increase"
+      ? Math.min(1, currentValue + brightnessIncrement)
+      : Math.max(0, currentValue - brightnessIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
   try {
     return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
@@ -107,21 +114,12 @@ export async function increaseBrightness(tagID: string, brightnessIncrement?: nu
   }
 }
 
+export async function increaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
+  return adjustBrightness(tagID, "increase", brightnessIncrement);
+}
+
 export async function decreaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
-  if (typeof brightnessIncrement !== "number") {
-    const { brightnessIncrement: prefIncrement } = getPreferenceValues<{ brightnessIncrement: string }>();
-    brightnessIncrement = Number(prefIncrement) || 0.05;
-  }
-  const getCmd = `${cmdPath} get -tagID=${tagID} -feature=brightness`;
-  const currStr = await runCommand(getCmd, `Error getting current brightness for tagID ${tagID}`);
-  const currentValue = parseFloat(currStr);
-  const newValue = Math.max(0, currentValue - brightnessIncrement);
-  const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
-  try {
-    return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
-  } catch (error) {
-    return "";
-  }
+  return adjustBrightness(tagID, "decrease", brightnessIncrement);
 }
 
 export async function setContrast(tagID: string, contrastIntensity?: number): Promise<string> {
@@ -134,7 +132,11 @@ export async function setContrast(tagID: string, contrastIntensity?: number): Pr
   }
 }
 
-export async function increaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
+async function adjustContrast(
+  tagID: string,
+  direction: "increase" | "decrease",
+  contrastIncrement?: number,
+): Promise<string> {
   if (typeof contrastIncrement !== "number") {
     const { contrastIncrement: prefIncrement } = getPreferenceValues<{ contrastIncrement: string }>();
     contrastIncrement = Number(prefIncrement) || 0.05;
@@ -142,30 +144,24 @@ export async function increaseContrast(tagID: string, contrastIncrement?: number
   const getCmd = `${cmdPath} get -tagID=${tagID} -feature=contrast`;
   const currStr = await runCommand(getCmd, `Error getting current contrast for tagID ${tagID}`);
   const currentValue = parseFloat(currStr);
-  const newValue = Math.min(0.9, currentValue + contrastIncrement);
+  const newValue =
+    direction === "increase"
+      ? Math.min(0.9, currentValue + contrastIncrement)
+      : Math.max(-0.9, currentValue - contrastIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
   try {
     return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
-  } catch (error) {
+  } catch {
     return "";
   }
 }
 
+export async function increaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
+  return adjustContrast(tagID, "increase", contrastIncrement);
+}
+
 export async function decreaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
-  if (typeof contrastIncrement !== "number") {
-    const { contrastIncrement: prefIncrement } = getPreferenceValues<{ contrastIncrement: string }>();
-    contrastIncrement = Number(prefIncrement) || 0.05;
-  }
-  const getCmd = `${cmdPath} get -tagID=${tagID} -feature=contrast`;
-  const currStr = await runCommand(getCmd, `Error getting current contrast for tagID ${tagID}`);
-  const currentValue = parseFloat(currStr);
-  const newValue = Math.max(-0.9, currentValue - contrastIncrement);
-  const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
-  try {
-    return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
-  } catch (error) {
-    return "";
-  }
+  return adjustContrast(tagID, "decrease", contrastIncrement);
 }
 
 export async function fetchDisplays(): Promise<string> {
