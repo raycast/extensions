@@ -51,7 +51,11 @@ export async function urlToMarkdown(rawUrl: string): Promise<Article> {
   const html = await res.text();
 
   const { document } = parseHTML(html);
-  // Readability needs a base URI to resolve relative links/images.
+  // Readability resolves relative links/images against `document.baseURI`, which
+  // parseHTML leaves null. Inject a <base> so relative src/href become absolute.
+  const base = document.createElement("base");
+  base.setAttribute("href", url);
+  document.head.appendChild(base);
   const article = new Readability(document as unknown as Document).parse();
   if (!article || !article.content) {
     throw new Error("Could not extract article content");
