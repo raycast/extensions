@@ -2,5 +2,6 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Initial release of Simple Draw extension
-- Open clipboard images in a drawing canvas for annotation
+- Annotate clipboard images with draw and text tools
+- Use Raycast's Swift bridge for macOS pasteboard and viewer integration
+- Store session HTML under `environment.supportPath`

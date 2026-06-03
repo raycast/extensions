@@ -1,53 +1,23 @@
-import { showToast, Toast, environment } from "@raycast/api";
-import { execSync, spawn } from "child_process";
-import { writeFileSync, existsSync } from "fs";
+import { environment, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { writeFileSync } from "fs";
 import { join } from "path";
+import { readClipboardImageBase64 } from "./clipboard-image";
 import { generateDrawingPage } from "./drawing-page";
 
-const SWIFT_CLIPBOARD_SCRIPT = `
-import Cocoa
-let pb = NSPasteboard.general
-if let data = pb.data(forType: .png) {
-    print(data.base64EncodedString())
-} else if let data = pb.data(forType: .tiff) {
-    if let bitmap = NSBitmapImageRep(data: data),
-       let pngData = bitmap.representation(using: .png, properties: [:]) {
-        print(pngData.base64EncodedString())
-    } else { exit(1) }
-} else { exit(1) }
-`;
-
-const VIEWER_BINARY = "/tmp/simple-draw-viewer";
-const HTML_PATH = "/tmp/raycast-simple-draw.html";
-
-function ensureViewerCompiled() {
-  if (existsSync(VIEWER_BINARY)) return;
-
-  const swiftSource = join(environment.assetsPath, "viewer.swift");
-  execSync(
-    `swiftc -framework Cocoa -framework WebKit -framework UniformTypeIdentifiers -O -o "${VIEWER_BINARY}" "${swiftSource}"`,
-    { timeout: 60000 },
-  );
+function getHtmlPath(): string {
+  return join(environment.supportPath, "raycast-simple-draw.html");
 }
 
 export default async function Command() {
-  let base64Image: string;
+  let base64Image: string | undefined;
 
   try {
-    base64Image = execSync(
-      `/usr/bin/swift -e '${SWIFT_CLIPBOARD_SCRIPT.replace(/'/g, "'\\''")}'`,
-      {
-        timeout: 10000,
-        maxBuffer: 50 * 1024 * 1024,
-      },
-    )
-      .toString()
-      .trim();
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No image in clipboard",
-      message: "Copy an image first, then try again",
+    base64Image = await readClipboardImageBase64();
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Could Not Read Clipboard",
+      message: "Copy an image, then try again.",
     });
     return;
   }
@@ -55,37 +25,35 @@ export default async function Command() {
   if (!base64Image) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "No image in clipboard",
-      message: "Copy an image first, then try again",
+      title: "No Image in Clipboard",
+      message:
+        "Copy an image (screenshot or Copy Image), not just a file path or link.",
+    });
+    return;
+  }
+
+  const htmlPath = getHtmlPath();
+  try {
+    writeFileSync(htmlPath, generateDrawingPage(base64Image));
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Could Not Prepare Canvas",
     });
     return;
   }
 
   try {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Compiling viewer...",
-    });
-    ensureViewerCompiled();
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to compile viewer",
-      message: "Make sure Xcode Command Line Tools are installed",
+    const { openViewer } = await import("swift:../swift/simple-draw");
+    await openViewer(htmlPath);
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Could Not Open Simple Draw",
     });
     return;
   }
 
-  writeFileSync(HTML_PATH, generateDrawingPage(base64Image));
-
-  const child = spawn(VIEWER_BINARY, [HTML_PATH], {
-    detached: true,
-    stdio: "ignore",
-  });
-  child.unref();
-
   await showToast({
     style: Toast.Style.Success,
-    title: "Simple Draw opened",
+    title: "Simple Draw Opened",
   });
 }

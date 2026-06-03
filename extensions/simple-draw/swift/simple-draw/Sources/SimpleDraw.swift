@@ -1,8 +1,9 @@
-import Cocoa
-import WebKit
+import AppKit
+import RaycastSwiftMacros
 import UniformTypeIdentifiers
+import WebKit
 
-class Delegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
+class ViewerDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
     var window: NSWindow!
     var webView: WKWebView!
     let htmlPath: String
@@ -49,7 +50,7 @@ class Delegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
+        true
     }
 
     func setupMenu() {
@@ -97,13 +98,29 @@ class Delegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
     }
 }
 
-guard CommandLine.arguments.count > 1 else {
-    fputs("Usage: simple-draw-viewer <html-path>\n", stderr)
-    exit(1)
+@raycast func readClipboardImage() -> String? {
+    let pb = NSPasteboard.general
+
+    if let data = pb.data(forType: .png) {
+        return data.base64EncodedString()
+    }
+
+    if let data = pb.data(forType: .tiff),
+       let bitmap = NSBitmapImageRep(data: data),
+       let pngData = bitmap.representation(using: .png, properties: [:]) {
+        return pngData.base64EncodedString()
+    }
+
+    return nil
 }
 
-let app = NSApplication.shared
-app.setActivationPolicy(.regular)
-let delegate = Delegate(htmlPath: CommandLine.arguments[1])
-app.delegate = delegate
-app.run()
+@raycast func openViewer(htmlPath: String) -> Bool {
+    let app = NSApplication.shared
+    app.setActivationPolicy(.regular)
+
+    let delegate = ViewerDelegate(htmlPath: htmlPath)
+    app.delegate = delegate
+    app.run()
+
+    return true
+}

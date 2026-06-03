@@ -729,14 +729,6 @@ export function generateDrawingPage(base64Image: string): string {
     createTextBadge(cssX, cssY);
   });
 
-  // Also handle scroll on the overlay for scaling when hovering the badge
-  textOverlay.addEventListener("wheel", (e) => {
-    if (activeTextBadge) {
-      // Badge's own handler will catch it if over the badge
-      // This is a fallback for the overlay area
-    }
-  }, { passive: false });
-
   // Color swatches
   document.querySelectorAll(".color-swatch").forEach(el => {
     el.addEventListener("click", () => {
