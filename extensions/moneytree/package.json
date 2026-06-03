@@ -153,6 +153,19 @@
       {
         "input": "@moneytree how much did I spend at Starbucks in May 2026?",
         "mocks": {
+          "get-credentials": {
+            "count": 1,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": 120000,
+                "error": null
+              }
+            ]
+          },
           "get-accounts": {
             "count": 1,
             "accounts": [

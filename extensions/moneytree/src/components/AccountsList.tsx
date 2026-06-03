@@ -6,7 +6,7 @@ import { LogoutAction } from "./logout-action";
 import { TransactionsList } from "./TransactionsList";
 import {
   clearCachedCredentials,
-  getCachedCredentials,
+  getCredentialsWithCacheStatus,
   getCredentialName,
   refreshCachedCredentials,
 } from "../lib/moneytree";
@@ -56,25 +56,27 @@ export function AccountsList({ credentialId }: { credentialId?: string }) {
         setIsLoading(true);
         setError(null);
 
-        const data = await getCachedCredentials();
+        const { credentials: data, wasCached } = await getCredentialsWithCacheStatus();
         setCredentials(data);
         setIsLoading(false);
 
-        try {
-          setCredentials(await refreshCachedCredentials());
-        } catch (refreshError) {
-          if (
-            refreshError instanceof Error &&
-            (refreshError.message.includes("authentication") || refreshError.message.includes("preferences"))
-          ) {
-            clearCachedCredentials();
-            setCredentials([]);
-            setError(refreshError.message);
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Authentication required",
-              message: "Please check your credentials in extension preferences",
-            });
+        if (wasCached) {
+          try {
+            setCredentials(await refreshCachedCredentials());
+          } catch (refreshError) {
+            if (
+              refreshError instanceof Error &&
+              (refreshError.message.includes("authentication") || refreshError.message.includes("preferences"))
+            ) {
+              clearCachedCredentials();
+              setCredentials([]);
+              setError(refreshError.message);
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Authentication required",
+                message: "Please check your credentials in extension preferences",
+              });
+            }
           }
         }
       } catch (err) {

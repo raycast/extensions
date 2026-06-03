@@ -70,6 +70,21 @@ export async function getCachedCredentials(): Promise<CredentialWithAccounts[]> 
   return credentials;
 }
 
+export async function getCredentialsWithCacheStatus(): Promise<{
+  credentials: CredentialWithAccounts[];
+  wasCached: boolean;
+}> {
+  const cached = getCached<CredentialWithAccounts[]>(CACHE_KEYS.dataSnapshot());
+  if (cached && cached.length > 0) {
+    return { credentials: cached, wasCached: true };
+  }
+
+  await getAccessToken();
+  const credentials = await getCredentials();
+  setCached(CACHE_KEYS.dataSnapshot(), credentials, CACHE_TTL.ACCOUNTS);
+  return { credentials, wasCached: false };
+}
+
 export async function refreshCachedCredentials(): Promise<CredentialWithAccounts[]> {
   await getAccessToken();
   const credentials = await getAllAccounts();
