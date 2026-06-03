@@ -1,5 +1,9 @@
 # Stripe Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [V2 Overhaul] - 2025-12-07
 
 Major update introducing multi-account management, enhanced coupon workflows, and significantly improved user experience. This release maintains full backward compatibility with existing setups.

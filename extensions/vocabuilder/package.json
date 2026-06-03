@@ -44,8 +44,8 @@
       "name": "sourceLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Source Language",
-      "description": "The language you want to translate from",
+      "title": "Default Source Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "en",
       "data": [
         {
@@ -122,8 +122,8 @@
       "name": "targetLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Target Language",
-      "description": "The language you want to translate to",
+      "title": "Default Target Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "uk",
       "data": [
         {
@@ -203,21 +203,42 @@
       "title": "Read Clipboard on Open",
       "label": "Enable",
       "description": "If enabled, prefill a suggestion only when clipboard content is a safe single word"
+    },
+    {
+      "name": "translationModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Translation Model",
+      "description": "Gemini model ID for translation (e.g. gemini-2.5-flash, gemini-3-flash-preview). Leave blank to use the default. Override if your model is deprecated.",
+      "default": "gemini-3-flash-preview",
+      "placeholder": "gemini-3-flash-preview"
+    },
+    {
+      "name": "ttsModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Text-to-Speech Model",
+      "description": "Gemini TTS model ID for word pronunciation. Leave blank to use the default. Override if your model is deprecated.",
+      "default": "gemini-3.1-flash-tts-preview",
+      "placeholder": "gemini-3.1-flash-tts-preview"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.7",
-    "zod": "^4.3.6"
+    "@raycast/api": "^1.104.19",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^9.36.0",
     "husky": "^9.1.7",
-    "prettier": "^3.8.1",
-    "typescript": "^5.8.2",
-    "vitest": "^4.0.18"
+    "prettier": "^3.8.3",
+    "typescript-eslint": "8.58.0",
+    "promptfoo": "^0.121.13",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "scripts": {
     "build": "ray build",
@@ -229,9 +250,16 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest",
+    "eval": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml -o evals/results/promptfoo.json",
+    "eval:smoke": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml --filter-sample 10 -o evals/results/promptfoo-smoke.json",
+    "eval:validate": "promptfoo validate -c evals/promptfooconfig.yaml",
+    "eval:results": "promptfoo view",
     "prepare": "husky"
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "global-agent": "4.1.3"
+  }
 }

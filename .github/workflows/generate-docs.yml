@@ -30,10 +30,10 @@ jobs:
 
       - name: Fetch the latest types
         run: |
-          configJson=`cat ./docs/.config.json`
-          version=`echo $(jq -r '.version' <<< "$configJson")`
+          configJson=$(cat ./docs/.config.json)
+          version=$(jq -r '.version' <<< "$configJson")
           http_response=$(curl -s -o types.d.ts -w "%{http_code}" "https://unpkg.com/@raycast/api@$version/types/index.d.ts")
-          if [ $http_response != "200" ]; then
+          if [ "$http_response" != "200" ]; then
             echo "Couldn't fetch the types"
             exit 1
           fi
@@ -46,14 +46,14 @@ jobs:
           rm types.d.ts
 
       - name: Deploy the generated docs to the gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           publish_dir: ./generated-docs
 
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
 
       - name: Notify Failure to Slack
         if: failure()

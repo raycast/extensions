@@ -1,5 +1,14 @@
 # GitLab Changelog
 
+## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
+
+- Add "Hide Archived Projects" option to Issues Menu Bar settings
+- Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
+
+## [Updates] - 2026-05-20
+
+- Contributor updates
+
 ## [OAuth authentication] - 2026-05-18
 
 - Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.

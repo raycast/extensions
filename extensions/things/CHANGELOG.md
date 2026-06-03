@@ -1,5 +1,23 @@
 # Things Changelog
 
+## [Detail View for To-Dos] - 2026-05-25
+
+- Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).
+- "Open in Things" remains the secondary action (⌘O) on list rows and becomes the primary action inside the Detail view.
+- Added the to-do's creation date to the data model so it can be shown in the Detail sidebar.
+- Switched date formatting in list-row accessories to US English per the Raycast extension guidelines.
+
+## [Bug Fixes] - 2026-05-20
+
+- Fix due date accessory not showing for to-dos due in 8–14 days
+- Fix moving a project using the wrong URL scheme parameter (`list-id` instead of `area-id`)
+- Fix "Move To" submenu showing projects when moving a project (only areas should appear)
+- Fix missing `await` on async calls (`showToast`, `toast.hide`, `refreshTodos`, `handleError`)
+- Fix success toast showing no message when adding a to-do via AI in Quick Add
+- Fix duplicate `capitalize` function — now imported from shared `utils`
+- Unify type icons across todo list, Quick Find, and Move To menu
+- Update packages
+
 ## [Quick Find] - 2026-03-17
 
 - Added a new command "Quick Find" to search across all areas, projects, and to-dos.

@@ -1,5 +1,9 @@
 # MyIP Changelog
 
+## [Update] - 2026-06-01
+
+- Add "IP in Menu Bar" command to display your IP address in the macOS menu bar
+
 ## [Update] - 2025-09-15
 
 - Add Windows support

@@ -45,6 +45,9 @@ export interface typeOfWork {
 const useMockData = false;
 
 const preferences = getPreferenceValues<Preferences>();
+const MAX_REQUEST_RETRIES = 1;
+
+type RequestError = Error & { status?: number };
 
 const getRequestOptions = (token: string) => ({
   method: "GET",
@@ -52,6 +55,45 @@ const getRequestOptions = (token: string) => ({
     Authorization: `Bearer ${token}`,
   },
   redirect: "follow" as const,
+});
+
+const isRetryableRequestError = (error: RequestError) =>
+  error.name === "TimeoutError" ||
+  error.name === "AbortError" ||
+  (error.name === "FetchError" && (!error.status || error.status === 429 || error.status >= 500));
+
+const delayBeforeRetry = (error: RequestError) =>
+  error.status === 429 ? new Promise((resolve) => setTimeout(resolve, 1000)) : Promise.resolve();
+
+const normalizeProject = (project: project): project => ({
+  id: project.id,
+  name: project.name,
+  isBillableByDefault: project.isBillableByDefault,
+  projectKey: project.projectKey,
+  company: project.company ? { id: project.company.id, name: project.company.name } : undefined,
+  projectStatus: {
+    type: project.projectStatus?.type ?? "",
+  },
+});
+
+const normalizeTask = (task: task): task => ({
+  id: task.id,
+  name: task.name,
+  projectId: task.projectId,
+  project: task.project
+    ? normalizeProject(task.project)
+    : {
+        id: task.projectId,
+        name: "",
+        isBillableByDefault: false,
+        projectStatus: { type: "" },
+      },
+  typeOfWorkId: task.typeOfWorkId,
+  taskIdentifier: task.taskIdentifier,
+  taskStatus: {
+    type: task.taskStatus?.type ?? "",
+    icon: task.taskStatus?.icon ?? "",
+  },
 });
 
 export const getProjects =
@@ -81,50 +123,59 @@ export const getProjects =
       }
     }
 
-    return fetchWithTimeout(
-      new URL(
-        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${filterBy ? "&filterby=" + filterBy : ""}`,
-      ),
-      getRequestOptions(token),
-    )
-      .then(async (response) => {
-        if (!response.ok) {
-          if (response.status === 401) {
-            const bodyText = await response.text();
-            if (bodyText.match(/token expired/i)) {
-              const newTokens = await refreshToken();
-              if (newTokens) {
-                return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+    const loadProjects = async (retryCount = 0): Promise<{ data: project[]; hasMore: boolean }> =>
+      fetchWithTimeout(
+        new URL(
+          `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${filterBy ? "&filterby=" + filterBy : ""}`,
+        ),
+        getRequestOptions(token),
+      )
+        .then(async (response) => {
+          if (!response.ok) {
+            if (response.status === 401) {
+              const bodyText = await response.text();
+              if (bodyText.match(/token expired/i)) {
+                const newTokens = await refreshToken();
+                if (newTokens) {
+                  return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+                }
               }
             }
+            const error: RequestError = new Error(`HTTP error! status: ${response.status}`);
+            error.name = "FetchError";
+            error.status = response.status;
+            throw error;
           }
-          const error = new Error(`HTTP error! status: ${response.status}`);
-          error.name = "FetchError";
-          throw error;
-        }
 
-        const data = await response.text();
-        if (data.match(/token expired/i)) {
-          const newTokens = await refreshToken();
-          if (newTokens) {
-            return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+          const data = await response.text();
+          if (data.match(/token expired/i)) {
+            const newTokens = await refreshToken();
+            if (newTokens) {
+              return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+            }
+            return { data: [], hasMore: false };
           }
-          return { data: [], hasMore: false };
-        }
 
-        return {
-          data: <Array<project>>JSON.parse(data),
-          hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
-        };
-      })
-      .catch((e: Error) => {
-        showFailureToast(e, {
-          title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Projects" : e.name,
-          message: `${e.name}: ${e.message}`,
+          return {
+            data: (JSON.parse(data) as project[]).map(normalizeProject),
+            hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
+          };
+        })
+        .catch(async (e: RequestError) => {
+          if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+            await delayBeforeRetry(e);
+            return loadProjects(retryCount + 1);
+          }
+
+          showFailureToast(e, {
+            title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Projects" : e.name,
+            message: `${e.name}: ${e.message}`,
+          });
+          console.error(e);
+          return { data: [] as project[], hasMore: false };
         });
-        console.error(e);
-        return { data: [] as project[], hasMore: false };
-      });
+
+    return loadProjects();
   };
 
 export const getTasks =
@@ -152,10 +203,65 @@ export const getTasks =
       }
     }
 
-    return fetchWithTimeout(
-      new URL(`${baseURI}/${route}?${pagination}${filterBy ? `&filterby=${filterBy}` : ""}`),
-      getRequestOptions(token),
-    )
+    const loadTasks = async (retryCount = 0): Promise<{ data: task[]; hasMore: boolean }> =>
+      fetchWithTimeout(
+        new URL(`${baseURI}/${route}?${pagination}${filterBy ? `&filterby=${filterBy}` : ""}`),
+        getRequestOptions(token),
+      )
+        .then(async (response) => {
+          if (!response.ok) {
+            if (response.status === 401) {
+              const bodyText = await response.text();
+              if (bodyText.match(/token expired/i)) {
+                const newTokens = await refreshToken();
+                if (newTokens) {
+                  return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+                }
+              }
+            }
+            const error: RequestError = new Error(`HTTP error! status: ${response.status}`);
+            error.name = "FetchError";
+            error.status = response.status;
+            throw error;
+          }
+
+          const data = await response.text();
+          if (data.match(/token expired/i)) {
+            const newTokens = await refreshToken();
+            if (newTokens) {
+              return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+            }
+            return { data: [], hasMore: false };
+          }
+
+          return {
+            data: (JSON.parse(data) as task[]).map(normalizeTask),
+            hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
+          };
+        })
+        .catch(async (e: RequestError) => {
+          if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+            await delayBeforeRetry(e);
+            return loadTasks(retryCount + 1);
+          }
+
+          showFailureToast(e, {
+            title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Tasks" : e.name,
+            message: `${e.name}: ${e.message}`,
+          });
+          console.error(e);
+          return { data: [], hasMore: false };
+        });
+
+    return loadTasks();
+  };
+
+export const getTypesOfWork = async (token: string): Promise<string | typeOfWork[]> => {
+  if (useMockData) {
+    return mockTypeOfWork;
+  }
+  const loadTypesOfWork = async (retryCount = 0): Promise<string | typeOfWork[]> =>
+    fetchWithTimeout(`${baseURI}/typeofwork?OrderBy=name`, getRequestOptions(token))
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -163,77 +269,40 @@ export const getTasks =
             if (bodyText.match(/token expired/i)) {
               const newTokens = await refreshToken();
               if (newTokens) {
-                return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+                return getTypesOfWork(newTokens.accessToken);
               }
+              return "Invalid Token";
             }
           }
-          const error = new Error(`HTTP error! status: ${response.status}`);
+          const error: RequestError = new Error(`HTTP error! status: ${response.status}`);
           error.name = "FetchError";
+          error.status = response.status;
           throw error;
         }
 
-        const data = await response.text();
-        if (data.match(/token expired/i)) {
+        const result = await response.text();
+        if (result.match(/token expired/i)) {
           const newTokens = await refreshToken();
           if (newTokens) {
-            return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+            return getTypesOfWork(newTokens.accessToken);
           }
-          return { data: [], hasMore: false };
+          return "Invalid Token";
+        }
+        return <Array<typeOfWork>>JSON.parse(result);
+      })
+      .catch(async (e: RequestError) => {
+        if (retryCount < MAX_REQUEST_RETRIES && isRetryableRequestError(e)) {
+          await delayBeforeRetry(e);
+          return loadTypesOfWork(retryCount + 1);
         }
 
-        return {
-          data: <Array<task>>JSON.parse(data),
-          hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
-        };
-      })
-      .catch((e: Error) => {
         showFailureToast(e, {
-          title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Tasks" : e.name,
+          title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Types of work" : e.name,
           message: `${e.name}: ${e.message}`,
         });
         console.error(e);
-        return { data: [], hasMore: false };
+        return "error";
       });
-  };
 
-export const getTypesOfWork = async (token: string): Promise<string | typeOfWork[]> => {
-  if (useMockData) {
-    return mockTypeOfWork;
-  }
-  return fetchWithTimeout(`${baseURI}/typeofwork?OrderBy=name`, getRequestOptions(token))
-    .then(async (response) => {
-      if (!response.ok) {
-        if (response.status === 401) {
-          const bodyText = await response.text();
-          if (bodyText.match(/token expired/i)) {
-            const newTokens = await refreshToken();
-            if (newTokens) {
-              return getTypesOfWork(newTokens.accessToken);
-            }
-            return "Invalid Token";
-          }
-        }
-        const error = new Error(`HTTP error! status: ${response.status}`);
-        error.name = "FetchError";
-        throw error;
-      }
-
-      const result = await response.text();
-      if (result.match(/token expired/i)) {
-        const newTokens = await refreshToken();
-        if (newTokens) {
-          return getTypesOfWork(newTokens.accessToken);
-        }
-        return "Invalid Token";
-      }
-      return <Array<typeOfWork>>JSON.parse(result);
-    })
-    .catch((e: Error) => {
-      showFailureToast(e, {
-        title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Types of work" : e.name,
-        message: `${e.name}: ${e.message}`,
-      });
-      console.error(e);
-      return "error";
-    });
+  return loadTypesOfWork();
 };

@@ -1,5 +1,9 @@
 # Cloudflare Changelog
 
+## [Improve View Workers Command] - 2026-05-25
+
+- Improve `View Workers` command to show more fields in the detail view
+
 ## [Custom Cache Purge & Favorite Sites] - 2026-04-27
 
 - Added support for purging cache by Hostname, Cache-Tag, and Prefix in addition to URL
