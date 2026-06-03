@@ -134,6 +134,38 @@ describe("usePaginatedResource", () => {
     expect(result.pagination.hasMore).toBe(false);
   });
 
+  it("skips duplicate keyed items when appending subsequent pages", async () => {
+    let result = renderPaginatedHook({
+      params: { filter: "open" },
+      fetchPage: pageFetcher(),
+      getItemKey: (item) => item,
+    });
+
+    publishPage({ page: 1, paramsKey: '{"filter":"open"}', items: ["issue-1", "issue-2"], hasMore: true });
+    result = renderPaginatedHook({
+      params: { filter: "open" },
+      fetchPage: pageFetcher(),
+      getItemKey: (item) => item,
+    });
+    expect(result.items).toEqual(["issue-1", "issue-2"]);
+
+    result.pagination.onLoadMore();
+    result = renderPaginatedHook({
+      params: { filter: "open" },
+      fetchPage: pageFetcher(),
+      getItemKey: (item) => item,
+    });
+    expect(cachedPromise.args).toEqual(["issues", 2, '{"filter":"open"}']);
+
+    publishPage({ page: 2, paramsKey: '{"filter":"open"}', items: ["issue-2", "issue-3"], hasMore: false });
+    result = renderPaginatedHook({
+      params: { filter: "open" },
+      fetchPage: pageFetcher(),
+      getItemKey: (item) => item,
+    });
+    expect(result.items).toEqual(["issue-1", "issue-2", "issue-3"]);
+  });
+
   it("uses stable params keys independent of object key order", () => {
     renderPaginatedHook({
       params: { filter: "open", owner: "alice" },
@@ -182,9 +214,10 @@ type StringParams = Record<string, string>;
 type RenderOptions<Params extends StringParams> = {
   params: Params;
   fetchPage: (params: Params & { page: number; limit: number }) => Promise<PaginatedResult<string>>;
+  getItemKey?: (item: string) => string | number | undefined;
 };
 
-function renderPaginatedHook<Params extends StringParams>({ params, fetchPage }: RenderOptions<Params>) {
+function renderPaginatedHook<Params extends StringParams>({ params, fetchPage, getItemKey }: RenderOptions<Params>) {
   reactState.stateIndex = 0;
   reactState.refIndex = 0;
 
@@ -194,6 +227,7 @@ function renderPaginatedHook<Params extends StringParams>({ params, fetchPage }:
     pageSize: 10,
     params,
     fetchPage,
+    getItemKey,
   });
 }
 

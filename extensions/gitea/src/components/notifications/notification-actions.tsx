@@ -41,7 +41,7 @@ export default function NotificationActions(props: {
   const markAllAsRead = async () => {
     await runWithToast(
       (async () => {
-        const updatePromise = readAll();
+        const updatePromise = readAll(NotificationStatus.Unread);
         if (props.mutate) {
           await props.mutate(updatePromise, { shouldRevalidateAfter: true });
         } else {

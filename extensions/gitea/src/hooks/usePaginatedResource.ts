@@ -20,6 +20,7 @@ type UsePaginatedResourceOptions<T, Params extends SerializableRecord> = {
   pageSize: number;
   params: Params;
   fetchPage: (params: Params & { page: number; limit: number }) => Promise<PaginatedResult<T>>;
+  getItemKey?: (item: T) => string | number | undefined;
 };
 
 export function usePaginatedResource<T, Params extends SerializableRecord>({
@@ -28,6 +29,7 @@ export function usePaginatedResource<T, Params extends SerializableRecord>({
   pageSize,
   fetchPage,
   params,
+  getItemKey,
 }: UsePaginatedResourceOptions<T, Params>) {
   const paramsKey = stableStringify(params);
   const latestParamsKey = useRef(paramsKey);
@@ -74,7 +76,10 @@ export function usePaginatedResource<T, Params extends SerializableRecord>({
           const previousItems = previous.key === data.paramsKey ? previous.items : [];
           return {
             key: data.paramsKey,
-            items: data.page === 1 ? data.result.items : [...previousItems, ...data.result.items],
+            items:
+              data.page === 1
+                ? dedupeItems(data.result.items, getItemKey)
+                : appendUniqueItems(previousItems, data.result.items, getItemKey),
           };
         });
       },
@@ -103,6 +108,44 @@ export function usePaginatedResource<T, Params extends SerializableRecord>({
       [hasMore, pageSize, paramsKey],
     ),
   } as const;
+}
+
+function appendUniqueItems<T>(
+  previousItems: T[],
+  nextItems: T[],
+  getItemKey?: (item: T) => string | number | undefined,
+): T[] {
+  if (!getItemKey) {
+    return [...previousItems, ...nextItems];
+  }
+
+  const seenKeys = new Set(previousItems.map(getItemKey).filter((key) => key !== undefined));
+  const uniqueNextItems: T[] = [];
+
+  for (const item of nextItems) {
+    const key = getItemKey(item);
+    if (key === undefined) {
+      uniqueNextItems.push(item);
+      continue;
+    }
+
+    if (seenKeys.has(key)) {
+      continue;
+    }
+
+    seenKeys.add(key);
+    uniqueNextItems.push(item);
+  }
+
+  return [...previousItems, ...uniqueNextItems];
+}
+
+function dedupeItems<T>(items: T[], getItemKey?: (item: T) => string | number | undefined): T[] {
+  if (!getItemKey) {
+    return items;
+  }
+
+  return appendUniqueItems([], items, getItemKey);
 }
 
 function stableStringify(value: Serializable): string {

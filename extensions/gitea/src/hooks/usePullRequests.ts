@@ -21,5 +21,6 @@ export function usePullRequests(options: UsePullRequestsOptions) {
     pageSize: DEFAULT_PAGE_SIZE,
     params: options,
     fetchPage: getMyPullRequests,
+    getItemKey: (pullRequest) => pullRequest.id,
   });
 }

@@ -18,5 +18,6 @@ export function useIssues(options: UseIssuesOptions) {
     pageSize: DEFAULT_PAGE_SIZE,
     params: options,
     fetchPage: getMyIssues,
+    getItemKey: (issue) => issue.id,
   });
 }
