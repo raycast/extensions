@@ -199,7 +199,9 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        {!fromDetail && (
+        {fromDetail ? (
+          <OpenInThings id={todo.id} title="Open in Things" />
+        ) : (
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
@@ -223,7 +225,6 @@ New title:
             }
           />
         )}
-        <OpenInThings id={todo.id} title="Open in Things" />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
@@ -244,6 +245,8 @@ New title:
             }
           />
         )}
+
+        {!fromDetail && <OpenInThings id={todo.id} title="Open in Things" />}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
