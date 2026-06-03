@@ -12,9 +12,7 @@ import { readFile, writeFile } from "fs/promises";
 import {
   LAST_TRANSCRIPTION_FILE,
   REFORMULATED_FILE,
-  DEFAULT_SYSTEM_PROMPT,
   callReformulate,
-  type Preferences,
 } from "./shared";
 
 export default function Command() {
@@ -45,9 +43,8 @@ export default function Command() {
         }
 
         const { apiKey, reformulatePrompt } =
-          getPreferenceValues<Preferences>();
-        const systemPrompt = reformulatePrompt?.trim() || DEFAULT_SYSTEM_PROMPT;
-        const result = await callReformulate(raw, apiKey, systemPrompt);
+          getPreferenceValues<Preferences.Reformulate>();
+        const result = await callReformulate(raw, apiKey, reformulatePrompt);
         await writeFile(REFORMULATED_FILE, result, "utf-8");
         setReformulatedText(result);
       } catch (e) {
