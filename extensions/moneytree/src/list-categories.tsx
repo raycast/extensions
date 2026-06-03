@@ -19,25 +19,48 @@ function filterCategories(categories: Category[], filter: CategoryFilter): Categ
   return categories;
 }
 
-function groupCategories(allCategories: Category[], visibleCategories: Category[]): [Category, Category[]][] {
+function groupCategories(allCategories: Category[], visibleCategories: Category[]): [string, Category[]][] {
   const categoriesById = new Map(allCategories.map((category) => [category.id, category]));
-  const groups = new Map<number, { parent: Category; children: Category[] }>();
+  const parentCategories: Category[] = [];
+  const childGroups = new Map<number, { title: string; children: Category[] }>();
 
   for (const category of visibleCategories) {
-    const parent = category.parent_id ? categoriesById.get(category.parent_id) : category;
+    if (!category.parent_id) {
+      parentCategories.push(category);
+      continue;
+    }
+
+    const parent = categoriesById.get(category.parent_id);
     if (!parent) continue;
 
-    const group = groups.get(parent.id) || { parent, children: [] };
+    const group = childGroups.get(parent.id) || { title: parent.name, children: [] };
     group.children.push(category);
-    groups.set(parent.id, group);
+    childGroups.set(parent.id, group);
   }
 
-  return Array.from(groups.values())
-    .map(
-      ({ parent, children }) =>
-        [parent, children.sort((a, b) => a.name.localeCompare(b.name))] as [Category, Category[]],
-    )
-    .sort(([parentA], [parentB]) => parentA.name.localeCompare(parentB.name));
+  return [
+    ...(parentCategories.length > 0
+      ? ([["Parent Categories", parentCategories.sort((a, b) => a.name.localeCompare(b.name))]] as [
+          string,
+          Category[],
+        ][])
+      : []),
+    ...Array.from(childGroups.values())
+      .map(
+        ({ title, children }) => [title, children.sort((a, b) => a.name.localeCompare(b.name))] as [string, Category[]],
+      )
+      .sort(([titleA], [titleB]) => titleA.localeCompare(titleB)),
+  ];
+}
+
+function getDefaultParentId(parentOptions: Category[]): number {
+  return parentOptions[0]?.id ?? 0;
+}
+
+function getGroupedCategories(allCategories: Category[], visibleCategories: Category[]): [string, Category[]][] {
+  return groupCategories(allCategories, visibleCategories)
+    .map(([title, children]) => [title, children.sort((a, b) => a.name.localeCompare(b.name))] as [string, Category[]])
+    .filter(([, children]) => children.length > 0);
 }
 
 function CategoryTypeDropdown(props: { value: CategoryFilter; onChange: (value: CategoryFilter) => void }) {
@@ -81,7 +104,7 @@ export default function Command() {
   const categoriesById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
   const filteredCategories = useMemo(() => filterCategories(categories, filter), [categories, filter]);
   const groupedCategories = useMemo(
-    () => groupCategories(categories, filteredCategories),
+    () => getGroupedCategories(categories, filteredCategories),
     [categories, filteredCategories],
   );
   const createParentOptions = useMemo(
@@ -112,24 +135,26 @@ export default function Command() {
           title="No Categories"
           description="No categories match the selected filter."
           actions={
-            <ActionPanel>
-              <Action.Push
-                title="Create Category"
-                icon={Icon.PlusCircle}
-                target={
-                  <CreateCategoryForm
-                    categories={createParentOptions}
-                    defaultParentId={createParentOptions[0]?.id}
-                    onSaved={loadCategories}
-                  />
-                }
-              />
-            </ActionPanel>
+            getDefaultParentId(createParentOptions) ? (
+              <ActionPanel>
+                <Action.Push
+                  title="Create Category"
+                  icon={Icon.PlusCircle}
+                  target={
+                    <CreateCategoryForm
+                      categories={createParentOptions}
+                      defaultParentId={getDefaultParentId(createParentOptions)}
+                      onSaved={loadCategories}
+                    />
+                  }
+                />
+              </ActionPanel>
+            ) : undefined
           }
         />
       ) : (
-        groupedCategories.map(([parent, children]) => (
-          <List.Section key={parent.id} title={parent.name}>
+        groupedCategories.map(([sectionTitle, children]) => (
+          <List.Section key={sectionTitle} title={sectionTitle}>
             {children.map((category) => {
               const parentId = getCategoryParentId(category, categoriesById);
               const parentCategory = categoriesById.get(parentId) || category;

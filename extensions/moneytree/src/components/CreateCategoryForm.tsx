@@ -38,6 +38,12 @@ export function CreateCategoryForm({
       return false;
     }
 
+    const selectedParentId = Number(values.parentId);
+    if (!selectedParentId) {
+      await showToast({ style: Toast.Style.Failure, title: "Parent is required" });
+      return false;
+    }
+
     setIsSubmitting(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -46,7 +52,7 @@ export function CreateCategoryForm({
 
     try {
       const payload = {
-        parentId: Number(values.parentId),
+        parentId: selectedParentId,
         name,
         iconKey: values.iconKey || "uncategorized",
       };
@@ -87,12 +93,12 @@ export function CreateCategoryForm({
     >
       <Form.TextField id="name" title="Name" placeholder="Category name" defaultValue={category?.name} />
       <Form.Dropdown id="parentId" title="Parent" value={parentId} onChange={setParentId}>
-        {parentOptions.map((category) => (
+        {parentOptions.map((parentOption) => (
           <Form.Dropdown.Item
-            key={category.id}
-            value={String(category.id)}
-            title={category.name}
-            icon={getCategoryIcon(category.icon_key)}
+            key={parentOption.id}
+            value={String(parentOption.id)}
+            title={parentOption.name}
+            icon={getCategoryIcon(parentOption.icon_key)}
           />
         ))}
       </Form.Dropdown>
