@@ -28,7 +28,7 @@
     },
     {
       "name": "search",
-      "title": "Search Recent Projects",
+      "title": "Search & Open Recent Projects",
       "description": "Search and open recent projects in Gram",
       "mode": "view"
     },
