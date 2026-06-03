@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voxtral-dictation",
+  "title": "Voxtral Dictation",
+  "description": "Speech-to-text dictation powered by Mistral's Voxtral. Record your voice and paste the transcription at your cursor.",
+  "icon": "icon.png",
+  "author": "chloe_daems",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dictate",
+      "title": "Dictate",
+      "description": "Toggle dictation: start recording, or stop and paste transcription",
+      "mode": "no-view"
+    },
+    {
+      "name": "reformulate",
+      "title": "Reformulate Last Dictation",
+      "description": "Compare raw and reformulated transcription, then choose which to paste",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Mistral API Key",
+      "description": "Your Mistral AI API key for Voxtral transcription",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "reformulatePrompt",
+      "title": "Reformulation Prompt",
+      "description": "Custom system prompt for reformulating transcriptions. Leave empty for the default.",
+      "type": "textfield",
+      "required": false,
+      "default": "You are a text reformulator. The user gives you a raw speech-to-text transcription. It may contain filler words, repetitions, grammatical errors, or unclear phrasing. Rewrite it as a clear, well-structured text using bullet points or numbered lists when appropriate. Be concise and direct. Preserve the original meaning and intent. Only output the reformulated text, nothing else. Keep the same language as the input."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.15.17",
+    "@types/react": "19.1.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
