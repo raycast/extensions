@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix AI Tool for Channel History Failing] - {PR_MERGE_DATE}
+## [Fix AI Tool for Channel History Failing] - 2026-06-03
 
 - Add fallback to attachment text for the Channel History AI tool.
 
