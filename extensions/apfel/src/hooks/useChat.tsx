@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
 import { useHistory } from "./useHistory";
-import { askApfel } from "../api/apfel/ask";
+import { askApfelStreaming } from "../api/apfel/ask";
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
@@ -28,15 +28,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       created_at: new Date().toISOString(),
     };
 
-    setData((prev) => {
-      return [...prev, chat];
-    });
+    setData((prev) => [...prev, chat]);
+    setSelectedChatId(chat.id);
 
     try {
-      const answer = await askApfel(question, model);
-
-      setData((prev) => prev.map((c) => (c.id === chat.id ? { ...c, answer } : c)));
-      setSelectedChatId(chat.id);
+      const answer = await askApfelStreaming(question, model, (partial) => {
+        setData((prev) => prev.map((c) => (c.id === chat.id ? { ...c, answer: partial } : c)));
+      });
 
       history.add({ ...chat, answer });
 
@@ -44,6 +42,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       toast.style = Toast.Style.Success;
     } catch (err) {
       setData((prev) => prev.filter((c) => c.id !== chat.id));
+      setSelectedChatId(null);
 
       toast.title = "Failed to get answer";
       toast.message = err instanceof Error ? err.message : String(err);

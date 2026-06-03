@@ -13,5 +13,5 @@ para before
 para after
 
 - list item
-    continuation under the bullet (4 spaces)
+  continuation under the bullet (4 spaces)
 - next item

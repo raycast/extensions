@@ -11,6 +11,7 @@ import { mailTweaks } from "./mail";
 import { securityTweaks } from "./security";
 import { menubarTweaks } from "./menubar";
 import { appsTweaks } from "./apps";
+import { soundTweaks } from "./sound";
 import { miscTweaks } from "./misc";
 
 export const ALL_TWEAKS: TweakDefinition[] = [
@@ -26,5 +27,6 @@ export const ALL_TWEAKS: TweakDefinition[] = [
   ...securityTweaks,
   ...menubarTweaks,
   ...appsTweaks,
+  ...soundTweaks,
   ...miscTweaks,
 ];

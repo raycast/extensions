@@ -69,6 +69,176 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-credentials",
+      "title": "Get Credentials",
+      "description": "Get Moneytree credentials and linked institutions, including connection status, account counts, refresh metadata, errors, and total balances."
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get Moneytree accounts with balances, currencies, types, statuses, and linked credential or institution names."
+    },
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "description": "Search Moneytree transactions by date range, account, or description and return signed amounts with account context."
+    }
+  ],
+  "ai": {
+    "instructions": "Moneytree stores financial credentials/institutions, accounts, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
+    "evals": [
+      {
+        "input": "@moneytree which accounts have the highest balances?",
+        "mocks": {
+          "get-credentials": {
+            "count": 2,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": 120000,
+                "error": null
+              },
+              {
+                "id": 101,
+                "name": "Example Card",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": -45000,
+                "error": null
+              }
+            ]
+          },
+          "get-accounts": {
+            "count": 2,
+            "accounts": [
+              {
+                "id": 1,
+                "name": "Main Checking",
+                "accountType": "bank",
+                "currency": "JPY",
+                "currentBalance": 120000,
+                "currentBalanceInBase": 120000,
+                "credentialName": "Example Bank"
+              },
+              {
+                "id": 2,
+                "name": "Credit Card",
+                "accountType": "credit_card",
+                "currency": "JPY",
+                "currentBalance": -45000,
+                "currentBalanceInBase": -45000,
+                "credentialName": "Example Card"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "or": [
+              {
+                "callsTool": "get-accounts"
+              },
+              {
+                "callsTool": "get-credentials"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "input": "@moneytree how much did I spend at Starbucks in May 2026?",
+        "mocks": {
+          "get-credentials": {
+            "count": 1,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": 120000,
+                "error": null
+              }
+            ]
+          },
+          "get-accounts": {
+            "count": 1,
+            "accounts": [
+              {
+                "id": 1,
+                "name": "Main Checking",
+                "accountType": "bank",
+                "currency": "JPY",
+                "currentBalance": 120000,
+                "currentBalanceInBase": 120000,
+                "credentialName": "Example Bank"
+              }
+            ]
+          },
+          "search-transactions": {
+            "totalCount": 2,
+            "transactions": [
+              {
+                "id": 10,
+                "date": "2026-05-04",
+                "amount": -520,
+                "description": "Starbucks",
+                "accountName": "Main Checking"
+              },
+              {
+                "id": 11,
+                "date": "2026-05-18",
+                "amount": -610,
+                "description": "Starbucks",
+                "accountName": "Main Checking"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-transactions",
+              "arguments": {
+                "query": {
+                  "includes": "Starbucks"
+                },
+                "startDate": "2026-05-01",
+                "endDate": "2026-05-31"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree are any of my bank connections broken?",
+        "mocks": {
+          "get-credentials": {
+            "count": 1,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "error": null
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-credentials"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.12",
     "@raycast/utils": "^2.2.3"

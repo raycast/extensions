@@ -1,5 +1,9 @@
 # Days 2 - Google Calendar Countdown
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [1.0.1] - 2026-03-25
 
 - Updated README with user-facing description

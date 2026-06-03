@@ -64,7 +64,7 @@ export function wrap(text: string, opts: WrapOptions): string {
     Number.isFinite(opts.width) && opts.width > 0 ? opts.width : 80;
   const width = Math.max(MIN_WIDTH, widthRaw);
 
-  const records = classify(text);
+  const records = classify(text, { recognizeDashBullets: false });
   const out: string[] = [];
 
   let i = 0;

@@ -2,7 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { unwrap } from "../src/lib/unwrap.js";
 
-const dflt = { hyphenation: true, keepBlankLines: false };
+const dflt = {
+  hyphenation: true,
+  keepBlankLines: false,
+  flattenBullets: false,
+};
 
 test("unwrap joins consecutive prose lines with a single space", () => {
   const input = "alpha\nbeta\ngamma";
@@ -21,7 +25,10 @@ test("unwrap collapses multiple blank lines by default", () => {
 
 test("unwrap preserves blank-line runs when keepBlankLines is on", () => {
   const input = "alpha\n\n\nbeta";
-  assert.equal(unwrap(input, { ...dflt, keepBlankLines: true }), "alpha\n\n\nbeta");
+  assert.equal(
+    unwrap(input, { ...dflt, keepBlankLines: true }),
+    "alpha\n\n\nbeta",
+  );
 });
 
 test("unwrap leaves fenced code untouched", () => {
@@ -51,30 +58,45 @@ test("unwrap merges list-item continuation lines", () => {
 
 test("unwrap strips soft hyphens when enabled", () => {
   const input = "an inter-\nesting word";
-  assert.equal(unwrap(input, { ...dflt, hyphenation: true }), "an interesting word");
+  assert.equal(
+    unwrap(input, { ...dflt, hyphenation: true }),
+    "an interesting word",
+  );
 });
 
 test("unwrap leaves single-line compounds alone (not split, no hyphenation runs)", () => {
   const input = "state-of-the-art";
-  assert.equal(unwrap(input, { ...dflt, hyphenation: true }), "state-of-the-art");
+  assert.equal(
+    unwrap(input, { ...dflt, hyphenation: true }),
+    "state-of-the-art",
+  );
 });
 
 test("unwrap preserves capital-led split words (no strip, but joined with space)", () => {
   // The hyphen rule excludes capital-led runs. The hyphen stays; lines join with a space.
   const input = "A State-\nwide policy";
-  assert.equal(unwrap(input, { ...dflt, hyphenation: true }), "A State- wide policy");
+  assert.equal(
+    unwrap(input, { ...dflt, hyphenation: true }),
+    "A State- wide policy",
+  );
 });
 
 test("unwrap mid-compound break — known v1 limitation: gains a space", () => {
   // The hyphen rule excludes mid-compound breaks (lowercase run preceded by `-`).
   // The hyphen stays; lines join with a space. Documented limitation.
   const input = "the state-of-the-\nart";
-  assert.equal(unwrap(input, { ...dflt, hyphenation: true }), "the state-of-the- art");
+  assert.equal(
+    unwrap(input, { ...dflt, hyphenation: true }),
+    "the state-of-the- art",
+  );
 });
 
 test("unwrap with hyphenation off keeps the hyphen verbatim", () => {
   const input = "an inter-\nesting word";
-  assert.equal(unwrap(input, { ...dflt, hyphenation: false }), "an inter- esting word");
+  assert.equal(
+    unwrap(input, { ...dflt, hyphenation: false }),
+    "an inter- esting word",
+  );
 });
 
 test("unwrap protects inline code from joins", () => {
@@ -84,7 +106,10 @@ test("unwrap protects inline code from joins", () => {
 
 test("unwrap protects inline links", () => {
   const input = "go to [the docs](https://x.test/a b)\nplease";
-  assert.equal(unwrap(input, dflt), "go to [the docs](https://x.test/a b) please");
+  assert.equal(
+    unwrap(input, dflt),
+    "go to [the docs](https://x.test/a b) please",
+  );
 });
 
 test("unwrap preserves hard-break-terminated lines", () => {
@@ -111,4 +136,63 @@ test("unwrap preserves multi-space gap after list marker", () => {
   // A 3-space gap between marker and content is intentional alignment.
   const input = "-   item one\n-   item two";
   assert.equal(unwrap(input, dflt), "-   item one\n-   item two");
+});
+
+test("flattenBullets normalizes leading-space bullets to a 2-space step", () => {
+  // The Harvest-email case: top-level ordered items at col 0, sub-bullets
+  // pasted with 3 leading spaces. Without the option they round-trip
+  // verbatim; with it the sub-bullets normalize to depth 1 (2 spaces).
+  const input = "1. ITC details\n   - cost basis?\n   - pass-through?";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "1. ITC details\n  - cost basis?\n  - pass-through?",
+  );
+});
+
+test("flattenBullets is off by default (indentation preserved)", () => {
+  const input = "1. ITC details\n   - cost basis?";
+  assert.equal(unwrap(input, dflt), "1. ITC details\n   - cost basis?");
+});
+
+test("flattenBullets maps three indent levels to 0/2/4 spaces", () => {
+  const input = "- a\n   - b\n      - c";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- a\n  - b\n    - c",
+  );
+});
+
+test("flattenBullets recomputes depth per contiguous list block", () => {
+  // Two blocks separated by a blank line; the second uses different raw
+  // indentation but its shallowest item must still land at column 0.
+  const input = "- a\n   - b\n\n     - c\n        - d";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- a\n  - b\n\n- c\n  - d",
+  );
+});
+
+test("flattenBullets handles Unicode bullet markers", () => {
+  const input = "  • alpha\n  • beta";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "• alpha\n• beta",
+  );
+});
+
+test("flattenBullets flattens an over-indented single-level list to col 0", () => {
+  const input = "     - only\n     - level";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- only\n- level",
+  );
+});
+
+test("em-dash lines stay prose unless flattenBullets is enabled", () => {
+  const input = "— first\n— second";
+  assert.equal(unwrap(input, dflt), "— first — second");
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "— first\n— second",
+  );
 });

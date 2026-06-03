@@ -18,6 +18,7 @@ import { type InstalledSkillMatch } from "../../hooks/useInstalledSkillMatches";
 import { type SkillAuditsResult, fetchSkillAudits } from "../../utils/skill-audits";
 import { installSkill } from "../../utils/skills-cli";
 import { withSkillAction } from "../../utils/with-skill-action";
+import { getDefaultAgents } from "../../preferences";
 
 interface InstallSkillActionProps {
   skill: Skill;
@@ -173,7 +174,10 @@ function AgentPickerInstallForm({
   const installedAgents = new Set<string>(installedAgentNames);
   const replacementAgentNames = installedMatch.type === "conflict" ? installedAgentNames : [];
   const selectableAgents = agents.filter((a) => !installedAgents.has(a));
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const defaultAgentNames = getDefaultAgents().map((d) => d.toLowerCase());
+    return new Set(selectableAgents.filter((a) => defaultAgentNames.includes(a.toLowerCase())));
+  });
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
   const installedSource = isReplacing ? (installedMatch.source ?? "Unknown source") : "";

@@ -58,6 +58,8 @@ export function hexToXy(color: string): { xy: Xy; brightness: number } {
  * @param brightness Brightness of the light (0 – 100)
  */
 export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
+  if (y === 0) return { r: 0, g: 0, b: 0 };
+
   function applyReverseGammaCorrection(value: number) {
     return value <= 0.0031308 ? 12.92 * value : (1.0 + 0.055) * Math.pow(value, 1.0 / 2.4) - 0.055;
   }
@@ -116,9 +118,9 @@ export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
 
 export function xyToRgbHexString(xy: Xy, brightness = 100) {
   const { r, g, b } = xyBriToRgb(xy, brightness);
-  const redHex = r.toString(16).padStart(2, "0");
-  const greenHex = g.toString(16).padStart(2, "0");
-  const blueHex = b.toString(16).padStart(2, "0");
+  const redHex = (r || 0).toString(16).padStart(2, "0");
+  const greenHex = (g || 0).toString(16).padStart(2, "0");
+  const blueHex = (b || 0).toString(16).padStart(2, "0");
   return `#${redHex}${greenHex}${blueHex}`;
 }
 
@@ -160,9 +162,9 @@ export function miredToRgbString(mireds: number, brightness = 100) {
  */
 export function miredToHexString(mireds: number, brightness = 100) {
   const { r, g, b } = miredToRgb(mireds, brightness);
-  const redHex = r.toString(16).padStart(2, "0");
-  const greenHex = g.toString(16).padStart(2, "0");
-  const blueHex = b.toString(16).padStart(2, "0");
+  const redHex = (r || 0).toString(16).padStart(2, "0");
+  const greenHex = (g || 0).toString(16).padStart(2, "0");
+  const blueHex = (b || 0).toString(16).padStart(2, "0");
   return `#${redHex}${greenHex}${blueHex}`;
 }
 

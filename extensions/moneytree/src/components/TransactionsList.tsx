@@ -1,12 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { getTransactionPage, getAllAccounts } from "../lib/api";
-import { getAccessToken } from "../lib/auth";
-import { CACHE_KEYS, getCached } from "../lib/cache";
-import { Account, CredentialWithAccounts, Transaction } from "../lib/types";
+import { Account, Transaction } from "../lib/types";
 import { formatCurrency } from "../lib/format";
 import { LogoutAction } from "./logout-action";
+import { fetchTransactionPage, getCachedAccounts } from "../lib/moneytree";
 
 // Category icon_key → Raycast Icon mapping (parent categories only)
 const CATEGORY_ICONS: Record<string, Icon> = {
@@ -221,20 +219,6 @@ function getTransactionDetails(transaction: Transaction): string {
   return `${formatDate(transaction.date)} - ${description}: ${isExpense ? "-" : "+"}${formatCurrency(Math.abs(transaction.amount))}`;
 }
 
-function getDateRange(search: boolean): { startDate: Date; endDate: Date } {
-  const endDate = new Date();
-  endDate.setHours(23, 59, 59, 999);
-  const startDate = new Date();
-  if (search) {
-    startDate.setMonth(startDate.getMonth() - 6);
-    startDate.setDate(1);
-  } else {
-    startDate.setDate(startDate.getDate() - 30);
-  }
-  startDate.setHours(0, 0, 0, 0);
-  return { startDate, endDate };
-}
-
 export function TransactionsList({ accountId, initialQuery }: { accountId?: string; initialQuery?: string }) {
   const [searchText, setSearchText] = useState(initialQuery || "");
   const [accountFilter, setAccountFilter] = useState(accountId || "");
@@ -244,15 +228,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
   useEffect(() => {
     async function loadAccounts() {
       try {
-        await getAccessToken();
-        const cachedAccounts = getCached<CredentialWithAccounts[]>(CACHE_KEYS.dataSnapshot());
-        const creds = cachedAccounts && cachedAccounts.length > 0 ? cachedAccounts : await getAllAccounts();
-        const flat = creds.flatMap((c) =>
-          c.accounts
-            .filter((a) => !["manual", "cash_wallet"].includes(a.account_type))
-            .map((a) => ({ ...a, credentialName: c.institution_name || "Unknown" })),
-        );
-        setAccounts(flat);
+        setAccounts(await getCachedAccounts());
       } catch {
         // Accounts will load when transactions fetch succeeds
       }
@@ -265,14 +241,9 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
   const { isLoading, data, pagination } = useCachedPromise(
     (query: string, acctId: string) =>
       async ({ page }: { page: number }) => {
-        await getAccessToken();
-
-        const { startDate, endDate } = getDateRange(!!query || !!acctId);
-        const response = await getTransactionPage({
-          startDate,
-          endDate,
+        const response = await fetchTransactionPage({
           page: page + 1,
-          search: query || undefined,
+          query: query || undefined,
           accountId: acctId ? Number(acctId) : undefined,
         });
 

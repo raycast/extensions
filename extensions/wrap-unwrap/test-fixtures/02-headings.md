@@ -11,12 +11,10 @@ Some prose under the heading that may need to be reflowed depending on width.
 
 ## Another ATX heading
 
-A Setext H1
-===========
+# A Setext H1
 
 Body of setext h1.
 
-A Setext H2
------------
+## A Setext H2
 
 Body of setext h2.

@@ -5,7 +5,16 @@ import { HYPHEN_BREAK_END } from "./regex.js";
 export type UnwrapOptions = {
   hyphenation: boolean;
   keepBlankLines: boolean;
+  /**
+   * Re-indent list items to a fixed 2-space-per-level step, deriving each
+   * item's level from the rank of its original indent width within its
+   * contiguous list block. Strips the leading spaces that pasted terminal
+   * or rich-text content carries in front of bullet markers.
+   */
+  flattenBullets: boolean;
 };
+
+const INDENT_STEP = "  ";
 
 const REFLOWABLE_ROLES = new Set<Classified["role"]>(["prose", "list-item"]);
 
@@ -54,7 +63,9 @@ function emitGroup(g: Group): string {
 
 export function unwrap(text: string, opts: UnwrapOptions): string {
   if (text === "") return "";
-  const records = classify(text);
+  const records = classify(text, {
+    recognizeDashBullets: opts.flattenBullets,
+  });
 
   type Output =
     | { kind: "group"; group: Group }
@@ -132,6 +143,44 @@ export function unwrap(text: string, opts: UnwrapOptions): string {
     }
   }
   flush();
+
+  // Normalize bullet indentation per contiguous list block. A block breaks on
+  // a blank, a passthrough, or a non-list-item group. Within a block, the
+  // distinct original indent widths are ranked ascending and each list item is
+  // re-indented to rank * INDENT_STEP.
+  if (opts.flattenBullets) {
+    let blockStart = 0;
+    const reindentBlock = (start: number, end: number) => {
+      const headers: Classified[] = [];
+      for (let k = start; k < end; k++) {
+        const item = output[k];
+        if (item.kind === "group" && item.group.header.role === "list-item") {
+          headers.push(item.group.header);
+        }
+      }
+      if (headers.length === 0) return;
+      const widths = [
+        ...new Set(headers.map((h) => (h.listIndent ?? "").length)),
+      ].sort((a, b) => a - b);
+      const rankOf = new Map(widths.map((w, rank) => [w, rank]));
+      for (const h of headers) {
+        const rank = rankOf.get((h.listIndent ?? "").length) ?? 0;
+        h.listIndent = INDENT_STEP.repeat(rank);
+      }
+    };
+    for (let i = 0; i < output.length; i++) {
+      const o = output[i];
+      const isListGroup =
+        o.kind === "group" &&
+        !o.group.passthrough &&
+        o.group.header.role === "list-item";
+      if (!isListGroup) {
+        reindentBlock(blockStart, i);
+        blockStart = i + 1;
+      }
+    }
+    reindentBlock(blockStart, output.length);
+  }
 
   // Render output.
   const lines: string[] = [];
