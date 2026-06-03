@@ -53,6 +53,13 @@
       "subtitle": "Whisper Dictation",
       "description": "Configure AI powered speech refinement",
       "mode": "view"
+    },
+    {
+      "name": "dictate-with-prompt",
+      "title": "Dictate with AI Prompt",
+      "subtitle": "Whisper Dictation",
+      "description": "Choose a specific AI prompt for dictation",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -186,6 +193,14 @@
       "required": false,
       "placeholder": "llama3.2:latest",
       "default": "llama3.2:latest"
+    },
+    {
+      "name": "scriptCommandsPath",
+      "title": "Script Commands Path",
+      "description": "Path to your Raycast script commands directory. Required to create standalone commands for prompts.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/raycast-scripts"
     }
   ],
   "dependencies": {
