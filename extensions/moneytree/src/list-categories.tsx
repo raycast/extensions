@@ -58,9 +58,7 @@ function getDefaultParentId(parentOptions: Category[]): number {
 }
 
 function getGroupedCategories(allCategories: Category[], visibleCategories: Category[]): [string, Category[]][] {
-  return groupCategories(allCategories, visibleCategories)
-    .map(([title, children]) => [title, children.sort((a, b) => a.name.localeCompare(b.name))] as [string, Category[]])
-    .filter(([, children]) => children.length > 0);
+  return groupCategories(allCategories, visibleCategories).filter(([, children]) => children.length > 0);
 }
 
 function CategoryTypeDropdown(props: { value: CategoryFilter; onChange: (value: CategoryFilter) => void }) {
