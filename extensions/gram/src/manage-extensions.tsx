@@ -350,6 +350,7 @@ export default function Command() {
           downloadUrl: getLatestExtensionDownloadUrl(ext),
           extensionId: ext.id,
           targetInstallDir,
+          silent: true,
         });
 
         successCount++;
@@ -390,6 +391,7 @@ export default function Command() {
           downloadUrl,
           extensionId: ext.id,
           targetInstallDir,
+          silent: true,
         });
 
         toast.style = Toast.Style.Success;

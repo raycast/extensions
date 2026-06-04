@@ -22,39 +22,32 @@ export async function apiFetch(url: string | URL, options: ApiFetchOptions = {})
     const response = await fetch(url.toString(), { ...updatedOptions });
 
     if (!response.ok) {
-      if (!silent) {
-        if (response.status === 429) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Rate Limited",
-            message: "Too many requests to the API. Please try again later.",
-          });
-        } else if (response.status === 404) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Not Found",
-            message: "The requested extension or data could not be found.",
-          });
-        } else if (response.status >= 500) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Server Error",
-            message: "The API is currently experiencing downtime. Try again later.",
-          });
-        }
+      let errorMessage = `HTTP Error ${response.status}: ${response.statusText}`;
+
+      if (response.status === 429) {
+        errorMessage = "Rate Limited: Too many requests to the API. Please try again later.";
+        if (!silent) await showToast({ style: Toast.Style.Failure, title: "Rate Limited", message: errorMessage });
+      } else if (response.status === 404) {
+        errorMessage = "Not Found: The requested extension or data could not be found.";
+        if (!silent) await showToast({ style: Toast.Style.Failure, title: "Not Found", message: errorMessage });
+      } else if (response.status >= 500) {
+        errorMessage = "Server Error: The API is currently experiencing downtime. Try again later.";
+        if (!silent) await showToast({ style: Toast.Style.Failure, title: "Server Error", message: errorMessage });
+      } else if (!silent) {
+        await showToast({ style: Toast.Style.Failure, title: "Request Failed", message: errorMessage });
       }
 
-      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+      throw new Error(errorMessage);
     }
 
     return response;
   } catch (error) {
-    if (error instanceof TypeError && !silent) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Network Error",
-        message: "Failed to connect. Please check your internet connection.",
-      });
+    if (error instanceof TypeError) {
+      const networkError = "Failed to connect. Please check your internet connection.";
+      if (!silent) {
+        await showToast({ style: Toast.Style.Failure, title: "Network Error", message: networkError });
+      }
+      throw new Error(networkError);
     }
 
     console.error("Global API Fetch Error:", error);
