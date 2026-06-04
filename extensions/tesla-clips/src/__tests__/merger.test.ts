@@ -19,7 +19,7 @@ vi.mock("../lib/exec", () => ({
 
 import { trash } from "@raycast/api";
 import { execFileAsync } from "../lib/exec";
-import { mergeCameraSegments, mergeEvent } from "../lib/merger";
+import { escapeConcatFilePath, mergeCameraSegments, mergeEvent } from "../lib/merger";
 
 const baseOptions: MergeOptions = {
   ffmpegPath: "/usr/bin/ffmpeg",
@@ -68,6 +68,14 @@ function mockMergedOutputStatBehavior(behavior: "missing" | "valid" | "corrupt")
   });
 }
 
+describe("escapeConcatFilePath", () => {
+  it("backslash-escapes apostrophes, spaces, and backslashes for ffmpeg concat", () => {
+    expect(escapeConcatFilePath("/Users/foo's/clips/a.mp4")).toBe("/Users/foo\\'s/clips/a.mp4");
+    expect(escapeConcatFilePath("/Users/foo bar/a.mp4")).toBe("/Users/foo\\ bar/a.mp4");
+    expect(escapeConcatFilePath(String.raw`C:\clips\a.mp4`)).toBe(String.raw`C:\\clips\\a.mp4`);
+  });
+});
+
 describe("merger", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -106,6 +114,29 @@ describe("merger", () => {
     expect(result.status).toBe("merged");
     expect(execFileAsync).toHaveBeenCalled();
     expect(fsMocks.utimes).toHaveBeenCalled();
+  });
+
+  it("writes ffmpeg-safe concat lines for paths with apostrophes", async () => {
+    const apostropheSegments: ClipSegment[] = [
+      {
+        timestamp: "2024-01-15_12-30-00",
+        camera: "front",
+        filePath: "/Volumes/O'Brien/TeslaCam/front-a.mp4",
+      },
+      {
+        timestamp: "2024-01-15_12-31-00",
+        camera: "front",
+        filePath: "/Volumes/O'Brien/TeslaCam/front-b.mp4",
+      },
+    ];
+
+    const result = await mergeCameraSegments("front", apostropheSegments, "/event/merged/front.mp4", baseOptions);
+    expect(result.status).toBe("merged");
+
+    const concatContent = String(fsMocks.writeFile.mock.calls[0]?.[1]);
+    expect(concatContent).toContain("file /Volumes/O\\'Brien/TeslaCam/front-a.mp4");
+    expect(concatContent).toContain("file /Volumes/O\\'Brien/TeslaCam/front-b.mp4");
+    expect(concatContent).not.toContain("'\\''");
   });
 
   it("returns failed status when output validation fails", async () => {

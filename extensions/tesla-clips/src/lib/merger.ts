@@ -13,8 +13,20 @@ import { logger } from "./logger";
 import { isValidMergedOutput, isValidMergedOutputSize, shouldOverwriteOutput } from "./merge-readiness";
 import { resolveEventOutputDir, resolveMergedOutputFilename } from "./paths";
 
-function escapeConcatFilePath(filePath: string): string {
-  return `'${filePath.replaceAll("'", `'\\''`)}'`;
+/**
+ * Escapes a path for ffmpeg concat demuxer `file` lines.
+ *
+ * ffmpeg reads the concat list directly (not via a shell). Backslash-escape
+ * special characters per the concat demuxer rules.
+ *
+ * @see https://ffmpeg.org/ffmpeg-formats.html#concat-1
+ */
+export function escapeConcatFilePath(filePath: string): string {
+  return filePath.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll(" ", "\\ ");
+}
+
+function formatConcatFileLine(filePath: string): string {
+  return `file ${escapeConcatFilePath(filePath)}`;
 }
 
 async function preserveOutputTimesFromFirstSegment(segments: ClipSegment[], outputPath: string): Promise<void> {
@@ -99,7 +111,7 @@ export async function mergeCameraSegments(
   try {
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     const concatFileContent = segments
-      .map((segment) => `file ${escapeConcatFilePath(path.resolve(segment.filePath))}`)
+      .map((segment) => formatConcatFileLine(path.resolve(segment.filePath)))
       .join("\n");
 
     await fs.writeFile(concatFilePath, `${concatFileContent}\n`, "utf8");
