@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Global Skill Updates] - {PR_MERGE_DATE}
+## [Fix Global Skill Updates] - 2026-06-04
 
 - Run skill update actions against global installs, matching the global skill list shown in Manage Skills
 
