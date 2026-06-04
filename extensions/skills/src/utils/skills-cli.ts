@@ -362,13 +362,13 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
  * Update all installed skills.
  */
 export async function updateAllSkills(): Promise<void> {
-  await runSkillsCli(["update", "-y"]);
+  await runSkillsCli(["update", "-g", "-y"]);
 }
 
 /**
  * Update a single installed skill by name.
- * Runs `skills update <skill-name> -y` via the resolved package runner (bunx with npx fallback).
+ * Runs `skills update <skill-name> -g -y` via the resolved package runner (bunx with npx fallback).
  */
 export async function updateSkill(skillName: string): Promise<void> {
-  await runSkillsCli(["update", skillName, "-y"]);
+  await runSkillsCli(["update", skillName, "-g", "-y"]);
 }
