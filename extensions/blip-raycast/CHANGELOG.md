@@ -1,6 +1,6 @@
 # Blip Changelog
 
-## [Added Windows support] - {PR_MERGE_DATE}
+## [Added Windows support] - 2026-06-04
 
 - Added cross-platform support for Windows via PowerShell automation
 - File Explorer selection detection on Windows using Shell.Application COM automation
