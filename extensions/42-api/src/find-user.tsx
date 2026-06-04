@@ -9,7 +9,7 @@ import {
   LocalStorage,
   Color,
 } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useUsers, usePinnedUsers, useLocationStats, useUser, SearchMode } from "./hooks";
 import { User } from "./lib/types";
 
@@ -63,17 +63,22 @@ export default function Command() {
   }
 
   // Cache a user's data
-  async function cacheUser(user: User) {
-    try {
-      const newCache = { ...pinnedUsersCache, [user.login]: user };
-      await LocalStorage.setItem(PINNED_USERS_CACHE_KEY, JSON.stringify(newCache));
-      setPinnedUsersCache(newCache);
-    } catch (error) {
-      if (debugMode) {
-        console.error("Failed to cache user:", error);
+  const cacheUser = useCallback(
+    async (user: User) => {
+      if (pinnedUsersCache[user.login] === user) return;
+
+      try {
+        const newCache = { ...pinnedUsersCache, [user.login]: user };
+        await LocalStorage.setItem(PINNED_USERS_CACHE_KEY, JSON.stringify(newCache));
+        setPinnedUsersCache(newCache);
+      } catch (error) {
+        if (debugMode) {
+          console.error("Failed to cache user:", error);
+        }
       }
-    }
-  }
+    },
+    [debugMode, pinnedUsersCache],
+  );
 
   // Remove user from cache
   async function removeCachedUser(login: string) {
@@ -299,9 +304,7 @@ interface UserDetailProps {
   onUserUpdate?: (user: User) => void;
 }
 
-function UserDetail({ user, isPinned: initialIsPinned, onTogglePin, onUserUpdate }: UserDetailProps) {
-  const [isPinned, setIsPinned] = useState(initialIsPinned);
-
+function UserDetail({ user, isPinned, onTogglePin, onUserUpdate }: UserDetailProps) {
   // Fetch latest user data for pinned users to ensure location and evaluation points are up-to-date
   const {
     user: latestUser,
@@ -330,10 +333,10 @@ function UserDetail({ user, isPinned: initialIsPinned, onTogglePin, onUserUpdate
     if (latestUser && isPinned && onUserUpdate) {
       onUserUpdate(latestUser);
     }
-  }, [latestUser, isPinned]);
+  }, [latestUser, isPinned, onUserUpdate]);
 
-  const displayUser = isPinned && latestUser ? latestUser : user;
-  const isLoading = isLoadingStats || (isPinned && isLoadingUser);
+  const displayUser = latestUser ?? user;
+  const isLoading = isLoadingStats || isLoadingUser;
 
   // Calculate today's logtime
   const todayLogtime = useMemo(() => {
@@ -351,13 +354,12 @@ function UserDetail({ user, isPinned: initialIsPinned, onTogglePin, onUserUpdate
   }, [stats]);
 
   const handleTogglePin = () => {
-    onTogglePin(user);
-    setIsPinned(!isPinned);
+    onTogglePin(displayUser);
   };
 
   const handleRefresh = async () => {
     // Refresh both user data and location stats
-    await Promise.all([isPinned ? revalidateUser() : Promise.resolve(), revalidateStats()]);
+    await Promise.all([revalidateUser(), revalidateStats()]);
   };
 
   // Build markdown content
