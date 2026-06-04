@@ -138,7 +138,7 @@ function getExtensionSearchBlob(ext: ZedExtension): string {
     ext.version,
     ext.repository,
     ext.authors.join(" "),
-    ext.provides?.join(" ") || "",
+    ext.provides.join(" ") || "",
     `schema ${ext.schema_version}`,
     ext.wasm_api_version || "",
   ].join(" ");
@@ -168,7 +168,7 @@ function shouldIncludeExtension({
   if (selectedStatus === "outdated" && !isOutdated) return false;
   if (selectedStatus === "ignored" && !isIgnored) return false;
 
-  if (selectedProvides !== "all" && !ext.provides?.includes(selectedProvides)) return false;
+  if (selectedProvides !== "all" && !ext.provides.includes(selectedProvides)) return false;
 
   const matchesFilters = activeFilters.every(({ validator, val }) => validator(ext, val));
   if (!matchesFilters) return false;
@@ -689,9 +689,8 @@ function ExtensionActions({
         )}
         {isOutdated && <Action title="Update Extension" icon={Icon.ArrowDownCircle} onAction={() => onInstall(ext)} />}
         <VersionSubmenu extension={ext} installedVersion={installedVersion} onInstall={onInstall} />
-        {ext.repository && (
-          <Action.OpenInBrowser title={`Open ${getDomainLabel(ext.repository)}`} url={ext.repository} />
-        )}
+
+        <Action.OpenInBrowser title={`Open ${getDomainLabel(ext.repository)}`} url={ext.repository} />
       </ActionPanel.Section>
 
       {currentlyInstalled && (

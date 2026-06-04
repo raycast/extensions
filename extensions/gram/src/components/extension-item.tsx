@@ -115,23 +115,19 @@ export function ExtensionItem({
 
               <List.Item.Detail.Metadata.Separator />
 
-              {extension.repository && (
-                <List.Item.Detail.Metadata.Link
-                  title="Repository"
-                  text={getDomainLabel(extension.repository)}
-                  target={extension.repository}
-                />
-              )}
+              <List.Item.Detail.Metadata.Link
+                title="Repository"
+                text={getDomainLabel(extension.repository)}
+                target={extension.repository}
+              />
 
               <List.Item.Detail.Metadata.Separator />
 
-              {!!extension.provides?.length && (
-                <List.Item.Detail.Metadata.TagList title="Provides">
-                  {extension.provides.map((capability) => (
-                    <List.Item.Detail.Metadata.TagList.Item key={capability} text={capability} color={Color.Magenta} />
-                  ))}
-                </List.Item.Detail.Metadata.TagList>
-              )}
+              <List.Item.Detail.Metadata.TagList title="Provides">
+                {extension.provides.map((capability) => (
+                  <List.Item.Detail.Metadata.TagList.Item key={capability} text={capability} color={Color.Magenta} />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
 
               <List.Item.Detail.Metadata.Separator />
 
