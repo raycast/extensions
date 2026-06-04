@@ -16,7 +16,8 @@
   "title": "Blip",
   "icon": "blip-icon.png",
   "dependencies": {
-    "@raycast/api": "^1.99.3"
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.8",
@@ -38,12 +39,16 @@
     },
     {
       "name": "send-selected-finder-item",
-      "title": "Send Selected Finder Item to Blip",
-      "description": "Send the current Finder selection to Blip. Requires Raycast Accessibility permission.",
+      "title": "Send Selected File to Blip",
+      "description": "Send the current file manager selection to Blip. Requires Raycast Accessibility permission.",
       "mode": "no-view"
     }
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "brunocbreis"
   ]
 }

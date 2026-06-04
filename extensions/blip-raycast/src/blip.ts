@@ -1,8 +1,11 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
+import { runPowerShellScript } from "@raycast/utils";
+import { isMac } from "./platform";
 
 const execFileAsync = promisify(execFile);
+
 const ACCESSIBILITY_SETTINGS_PATH = "System Settings > Privacy & Security > Accessibility";
 const ACCESSIBILITY_ERROR_PREFIX = "Raycast needs Accessibility permission to trigger Blip via Finder Services.";
 const SERVICES_SETTINGS_PATH = "System Settings > Keyboard > Keyboard Shortcuts > Services";
@@ -18,6 +21,14 @@ export async function sendPathToBlip(path: string) {
     throw new Error(`Path does not exist: ${path}`);
   }
 
+  if (isMac) {
+    await sendPathToBlipMac(path);
+  } else {
+    await sendPathToBlipWindows(path);
+  }
+}
+
+async function sendPathToBlipMac(path: string) {
   const script = buildBlipFinderServiceScript(path);
 
   try {
@@ -29,6 +40,50 @@ export async function sendPathToBlip(path: string) {
     const details = error instanceof Error ? error.message : "Unknown AppleScript failure.";
     throw new Error(buildAppleScriptError(details));
   }
+}
+
+async function sendPathToBlipWindows(path: string) {
+  // Invoke the "Blip" context menu verb via PowerShell Shell.Application COM automation.
+  // This mirrors the macOS Services approach: find the registered Blip shell verb and execute it.
+  const escapedPath = path.replace(/'/g, "''");
+  const script = `
+try {
+  $filePath = '${escapedPath}'
+  $folder = Split-Path $filePath -Parent
+  $file = Split-Path $filePath -Leaf
+  $shell = New-Object -ComObject Shell.Application
+  $shellFolder = $shell.NameSpace($folder)
+  if ($null -eq $shellFolder) { throw 'folder_not_found' }
+  $shellFile = $shellFolder.ParseName($file)
+  if ($null -eq $shellFile) { throw 'file_not_found' }
+  $blipVerb = @($shellFile.Verbs() | Where-Object { $_.Name -match 'Blip' })
+  if ($blipVerb.Count -eq 0) { throw 'blip_not_found' }
+  $blipVerb[0].DoIt()
+} catch {
+  Write-Error $_.Exception.Message
+  exit 1
+}`;
+
+  try {
+    await runPowerShellScript(script);
+  } catch (error) {
+    const details = error instanceof Error ? error.message : "Unknown error.";
+    throw new Error(buildWindowsError(details));
+  }
+}
+
+function buildWindowsError(details: string): string {
+  const normalized = details.toLowerCase();
+
+  if (normalized.includes("blip_not_found")) {
+    return "Blip's Windows context menu was not found. Make sure Blip is installed and its shell extension is enabled.";
+  }
+
+  if (normalized.includes("folder_not_found") || normalized.includes("file_not_found")) {
+    return "Could not access the selected file. Make sure it exists and you have permission to read it.";
+  }
+
+  return `Blip could not be triggered. ${details}`;
 }
 
 function buildBlipFinderServiceScript(path: string) {
