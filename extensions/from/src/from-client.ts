@@ -1,0 +1,130 @@
+import { getPreferenceValues } from "@raycast/api";
+
+interface Prefs {
+  apiToken: string;
+  baseUrl?: string;
+}
+
+export interface FromNode {
+  id: string;
+  text: string;
+  body?: string | null;
+  parentId?: string | null;
+  types?: string[];
+  status?: string | null;
+  due?: string | null;
+  isEvent?: boolean;
+}
+
+function prefs(): Prefs {
+  return getPreferenceValues<Prefs>();
+}
+
+function base(): string {
+  const b = (
+    prefs().baseUrl || "https://from-server-production.up.railway.app"
+  ).trim();
+  return b.replace(/\/$/, "");
+}
+
+function authHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${prefs().apiToken.trim()}`,
+  };
+}
+
+// ── MCP (JSON-RPC) ──────────────────────────────────────────────────────────
+let rpcId = 0;
+
+async function mcpCall<T>(
+  name: string,
+  args: Record<string, unknown>,
+): Promise<T> {
+  const res = await fetch(`${base()}/mcp`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: String(++rpcId),
+      method: "tools/call",
+      params: { name, arguments: args },
+    }),
+  });
+  if (!res.ok) {
+    if (res.status === 401)
+      throw new Error(
+        "Invalid token. Check your API token in the extension preferences.",
+      );
+    throw new Error(`Server error (${res.status}).`);
+  }
+  const data = (await res.json()) as {
+    error?: { message?: string };
+    result?: { content?: { type: string; text?: string }[] };
+  };
+  if (data.error) throw new Error(data.error.message || "Error MCP");
+  const text = data.result?.content?.find((c) => c.type === "text")?.text ?? "";
+  if (!text) return {} as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // Algunos tools devuelven texto plano (p.ej. solo el id).
+    return text as unknown as T;
+  }
+}
+
+// ── API pública ─────────────────────────────────────────────────────────────
+
+/** Devuelve el id de la nota diaria de hoy (la crea si no existe). */
+export async function getTodayNoteId(): Promise<string> {
+  const r = await mcpCall<string | { id?: string; nodeId?: string }>(
+    "from_get_today_note",
+    {},
+  );
+  if (typeof r === "string") return r.trim();
+  return (r.id || r.nodeId || "").trim();
+}
+
+/** Crea un nodo en la nota de hoy. */
+export async function createInToday(opts: {
+  text: string;
+  isTask?: boolean;
+  due?: string | null;
+}): Promise<FromNode> {
+  const parentId = await getTodayNoteId();
+  return mcpCall<FromNode>("from_create_node", {
+    text: opts.text,
+    isTask: !!opts.isTask,
+    ...(opts.due ? { due: opts.due } : {}),
+    parentId,
+  });
+}
+
+/** Busca nodos por texto (server-side full-text). */
+export async function searchNodes(q: string, limit = 25): Promise<FromNode[]> {
+  const res = await fetch(
+    `${base()}/search/nodes?q=${encodeURIComponent(q)}&limit=${limit}`,
+    {
+      headers: authHeaders(),
+    },
+  );
+  if (!res.ok) {
+    if (res.status === 401)
+      throw new Error(
+        "Invalid token. Check your API token in the extension preferences.",
+      );
+    throw new Error(`Server error (${res.status}).`);
+  }
+  const data = (await res.json()) as { nodes?: FromNode[] };
+  return data.nodes ?? [];
+}
+
+/** URL profunda para abrir un nodo en la app de From (Mac). */
+export function nodeDeepLink(id: string): string {
+  return `from://node/${id}`;
+}
+
+/** URL web de la app para abrir un nodo (fallback si no hay app Mac). */
+export function nodeWebUrl(id: string): string {
+  return `https://getfrom.app/app/node/${id}`;
+}
