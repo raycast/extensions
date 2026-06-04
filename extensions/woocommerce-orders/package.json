@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "woocommerce-orders",
+  "title": "WooCommerce Orders",
+  "description": "Search WooCommerce orders and view sales metrics from Raycast.",
+  "author": "pmfonseca1972",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "keywords": [
+    "woocommerce",
+    "orders",
+    "ecommerce",
+    "dashboard",
+    "sales"
+  ],
+  "icon": "icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-orders",
+      "title": "Search Orders",
+      "description": "Search recent WooCommerce orders.",
+      "mode": "view"
+    },
+    {
+      "name": "search-failed-orders",
+      "title": "Search Failed Orders",
+      "description": "Search failed WooCommerce orders.",
+      "mode": "view"
+    },
+    {
+      "name": "search-pending-payment-orders",
+      "title": "Search Pending Payment Orders",
+      "description": "Search WooCommerce orders waiting for payment.",
+      "mode": "view"
+    },
+    {
+      "name": "search-abandoned-carts",
+      "title": "Search Abandoned Carts",
+      "description": "Search WooCommerce checkout drafts.",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Sales Dashboard",
+      "description": "View WooCommerce sales totals for today or this week.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "storeUrl",
+      "title": "Store URL",
+      "description": "The WooCommerce store URL, for example https://example.com.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://example.com"
+    },
+    {
+      "name": "wordpressUrl",
+      "title": "WordPress URL",
+      "description": "Optional. Use when WordPress is installed in a subfolder, for example https://example.com/wpsite.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://example.com/wpsite"
+    },
+    {
+      "name": "consumerKey",
+      "title": "Consumer Key",
+      "description": "WooCommerce REST API consumer key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "consumerSecret",
+      "title": "Consumer Secret",
+      "description": "WooCommerce REST API consumer secret.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "ordersPerPage",
+      "title": "Orders to Fetch",
+      "description": "How many recent orders to load.",
+      "type": "dropdown",
+      "required": true,
+      "default": "20",
+      "data": [
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.15.30",
+    "typescript": "^6.0.3"
+  }
+}
