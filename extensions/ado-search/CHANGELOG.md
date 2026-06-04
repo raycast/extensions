@@ -1,6 +1,6 @@
 # Azure DevOps Repository Search
 
-## [Add My Work Items command] - {PR_MERGE_DATE}
+## [Add My Work Items command] - 2026-06-04
 Added a "My Work Items" command: browse work items assigned to you across projects, filter and group by state/type/project, change state on single or multiple items, view descriptions with inline images plus acceptance criteria, repro steps, comments and attachments, create new work items, and create branches linked to a work item.
 
 ## [Add PBI Copy Work Item Id] - 2025-09-01
