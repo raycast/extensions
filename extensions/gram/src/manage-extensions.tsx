@@ -19,7 +19,7 @@ import { ExtensionItem } from "./components/extension-item";
 import { VersionSubmenu } from "./components/version-submenu";
 import { apiFetch } from "./lib/api";
 
-const raycastCache = new Cache({ namespace: "zed-extensions" });
+const raycastCache = new Cache({ namespace: "extension-versions" });
 
 type FilterCriterion = {
   regex: RegExp;
