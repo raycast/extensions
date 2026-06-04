@@ -10,7 +10,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { useUsers, usePinnedUsers, useLocationStats, SearchMode } from "./hooks";
+import { useUsers, usePinnedUsers, useLocationStats, useUser, SearchMode } from "./hooks";
 import { User } from "./lib/types";
 
 const PINNED_USERS_KEY = "pinned-users";
@@ -262,7 +262,14 @@ export default function Command() {
                   <Action.Push
                     title="View Details"
                     icon={Icon.Eye}
-                    target={<UserDetail user={user} isPinned={isPinned(user.login)} onTogglePin={togglePin} />}
+                    target={
+                      <UserDetail
+                        user={user}
+                        isPinned={isPinned(user.login)}
+                        onTogglePin={togglePin}
+                        onUserUpdate={cacheUser}
+                      />
+                    }
                   />
                   <Action.OpenInBrowser
                     url={`https://profile.intra.42.fr/users/${user.login}`}
@@ -289,18 +296,44 @@ interface UserDetailProps {
   user: User;
   isPinned: boolean;
   onTogglePin: (user: User) => void;
+  onUserUpdate?: (user: User) => void;
 }
 
-function UserDetail({ user, isPinned, onTogglePin }: UserDetailProps) {
-  // Get today's date range
+function UserDetail({ user, isPinned: initialIsPinned, onTogglePin, onUserUpdate }: UserDetailProps) {
+  const [isPinned, setIsPinned] = useState(initialIsPinned);
+
+  // Fetch latest user data for pinned users to ensure location and evaluation points are up-to-date
+  const {
+    user: latestUser,
+    isLoading: isLoadingUser,
+    revalidate: revalidateUser,
+  } = useUser(user.login, {
+    execute: isPinned,
+  });
+
+  // Today's date range for logtime
   const today = new Date();
   const beginAt = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
   const endAt = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
 
-  const { stats, isLoading } = useLocationStats(user.id, {
+  const {
+    stats,
+    isLoading: isLoadingStats,
+    revalidate: revalidateStats,
+  } = useLocationStats(user.id, {
     dateRange: { beginAt, endAt },
     execute: true,
   });
+
+  // Update parent cache when fresh data is fetched
+  useEffect(() => {
+    if (latestUser && isPinned && onUserUpdate) {
+      onUserUpdate(latestUser);
+    }
+  }, [latestUser, isPinned]);
+
+  const displayUser = isPinned && latestUser ? latestUser : user;
+  const isLoading = isLoadingStats || (isPinned && isLoadingUser);
 
   // Calculate today's logtime
   const todayLogtime = useMemo(() => {
@@ -317,64 +350,86 @@ function UserDetail({ user, isPinned, onTogglePin }: UserDetailProps) {
     return `${hours}h ${minutes}m`;
   }, [stats]);
 
+  const handleTogglePin = () => {
+    onTogglePin(user);
+    setIsPinned(!isPinned);
+  };
+
+  const handleRefresh = async () => {
+    // Refresh both user data and location stats
+    await Promise.all([isPinned ? revalidateUser() : Promise.resolve(), revalidateStats()]);
+  };
+
   // Build markdown content
   const markdown = `
-![Profile Picture](${user.image.versions?.medium || user.image.link})
+![Profile Picture](${displayUser.image.versions?.medium || displayUser.image.link})
 `;
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={user.login}
+      navigationTitle={displayUser.login}
       metadata={
         <Detail.Metadata>
-          {user.first_name && user.last_name && (
-            <Detail.Metadata.Label title="Full Name" text={`${user.first_name} ${user.last_name} (${user.login})`} />
+          {isPinned && (
+            <Detail.Metadata.TagList title="">
+              <Detail.Metadata.TagList.Item text={"Pinned"} color={"#FFD700"} />
+            </Detail.Metadata.TagList>
+          )}
+          {displayUser.first_name && displayUser.last_name && (
+            <Detail.Metadata.Label
+              title="Full Name"
+              text={`${displayUser.first_name} ${displayUser.last_name} (${displayUser.login})`}
+            />
           )}
           <Detail.Metadata.Label
             title="Location"
             text={{
-              value: user.location || "Offline",
-              color: user.location ? Color.Green : Color.PrimaryText,
+              value: displayUser.location || "Offline",
+              color: displayUser.location ? Color.Green : Color.PrimaryText,
             }}
-            icon={user.location ? Icon.Pin : Icon.Logout}
+            icon={displayUser.location ? Icon.Pin : Icon.Logout}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Logtime Today" text={todayLogtime} icon={Icon.Clock} />
-          {user.correction_point !== undefined && (
+          {displayUser.correction_point !== undefined && (
             <Detail.Metadata.Label
-              title="Correction Points"
-              text={user.correction_point.toString()}
+              title="Evaluation Points"
+              text={displayUser.correction_point.toString()}
               icon={Icon.Coins}
             />
           )}
           <Detail.Metadata.Separator />
-          {user.pool_year && user.pool_month && (
-            <Detail.Metadata.Label title="Pool" text={`${user.pool_month} ${user.pool_year}`} icon={Icon.Calendar} />
+          {displayUser.pool_year && displayUser.pool_month && (
+            <Detail.Metadata.Label
+              title="Pool"
+              text={`${displayUser.pool_month} ${displayUser.pool_year}`}
+              icon={Icon.Calendar}
+            />
           )}
           <Detail.Metadata.Separator />
-          {user.email && <Detail.Metadata.Label title="Email" text={user.email} />}
+          {displayUser.email && <Detail.Metadata.Label title="Email" text={displayUser.email} />}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={isPinned ? "Pinned" : "Not Pinned"}
-              color={isPinned ? "#FFD700" : undefined}
-            />
-          </Detail.Metadata.TagList>
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            url={`https://profile.intra.42.fr/users/${user.login}`}
+            url={`https://profile.intra.42.fr/users/${displayUser.login}`}
             title="Open Profile"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
           <Action
+            title="Refresh Profile"
+            icon={Icon.RotateClockwise}
+            onAction={handleRefresh}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
             title={isPinned ? "Unpin User" : "Pin User"}
             icon={isPinned ? Icon.StarDisabled : Icon.Star}
-            onAction={() => onTogglePin(user)}
+            onAction={handleTogglePin}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
         </ActionPanel>
