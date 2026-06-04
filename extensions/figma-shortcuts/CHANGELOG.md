@@ -4,11 +4,13 @@
 
 ### Changed
 
-- Remove Linux platform option (Figma has no native Linux client; shortcuts were identical to Windows)
+- Remove Linux platform option (Figma has no native Linux client)
 - Expand shortcut coverage to 140+ entries across 12 categories
 - Add 4 new categories: Shape, Selection, Cursor, Transform
 - Fix duplicate "Crop image" / "Ignore constraints" entries — merged into one
-- Fix duplicate "Minimize UI" / "Show/Hide left panel" entries — removed redundant one
+- Fix duplicate "Show Assets Panel" / "Assets Panel" entries — removed redundant one
+- Fix duplicate "Show/Hide left panel" entry — removed redundant one
+- Consolidate all opacity shortcuts (0–100%) into Transform category
 - Add metadata screenshots
 
 ## [1.0.0] - 2024-03-20

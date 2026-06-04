@@ -29,7 +29,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 ## Shortcuts Reference
 
 ### Tools
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Move | `V` | `V` |
 | Scale | `K` | `K` |
@@ -49,7 +49,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Quick Actions | `Cmd+/` | `Ctrl+P` |
 
 ### View
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Show/Hide UI | `Cmd+\` | `Ctrl+\` |
 | Rulers | `Shift+R` | `Shift+R` |
@@ -64,7 +64,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Keyboard Shortcuts | `Cmd+Shift+?` | `Ctrl+Shift+?` |
 
 ### Zoom
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Zoom In | `Cmd++` | `Ctrl+=` |
 | Zoom Out | `Cmd+-` | `Ctrl+-` |
@@ -76,7 +76,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Next Frame | `Page Down` | `Page Down` |
 
 ### Arrange
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Bring Forward | `Cmd+]` | `Ctrl+]` |
 | Send Backward | `Cmd+[` | `Ctrl+[` |
@@ -101,7 +101,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Show/Hide Layer | `Cmd+Shift+H` | `Ctrl+Shift+H` |
 
 ### Auto Layout
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Add Auto Layout | `Shift+A` | `Shift+A` |
 | Remove Auto Layout | `Alt+Shift+A` | `Alt+Shift+A` |
@@ -116,7 +116,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Align Bottom Right | `Alt+S, Alt+D` | `Alt+S, Alt+D` |
 
 ### Components
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Create Component | `Cmd+Alt+K` | `Ctrl+Alt+K` |
 | Detach Instance | `Cmd+Alt+B` | `Ctrl+Alt+B` |
@@ -124,7 +124,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Reset Instance | `Cmd+Alt+R` | `Ctrl+Alt+R` |
 
 ### Text
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Bold | `Cmd+B` | `Ctrl+B` |
 | Italic | `Cmd+I` | `Ctrl+I` |
@@ -142,7 +142,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 | Justify | `Cmd+Shift+J` | `Ctrl+Shift+J` |
 
 ### Editing
-| Action | macOS | Windows / Linux |
+| Action | macOS | Windows |
 |--------|-------|-----------------|
 | Undo | `Cmd+Z` | `Ctrl+Z` |
 | Redo | `Cmd+Shift+Z` | `Ctrl+Shift+Z` |

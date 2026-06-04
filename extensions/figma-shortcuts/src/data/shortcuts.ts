@@ -3,7 +3,7 @@ export interface FigmaShortcut {
   category: string;
   action: string;
   mac: string; // e.g. "Cmd+Shift+A"
-  windows: string; // e.g. "Ctrl+Shift+A" — Linux uses this same field
+  windows: string; // e.g. "Ctrl+Shift+A"
   keywords?: string[];
 }
 
@@ -574,15 +574,6 @@ export const shortcuts: FigmaShortcut[] = [
     windows: "Ctrl+Alt+R",
     keywords: ["reset", "restore", "override", "instance"],
   },
-  {
-    id: "components-6",
-    category: "Components",
-    action: "Show Assets Panel",
-    mac: "Alt+2",
-    windows: "Alt+2",
-    keywords: ["assets", "panel", "library", "components"],
-  },
-
   // ─── Text ─────────────────────────────────────────────────────────────────
   {
     id: "text-1",
@@ -835,30 +826,6 @@ export const shortcuts: FigmaShortcut[] = [
     keywords: ["move", "nudge", "position", "big"],
   },
   {
-    id: "editing-18",
-    category: "Editing",
-    action: "Set Opacity to 0%",
-    mac: "00",
-    windows: "00",
-    keywords: ["opacity", "transparent", "alpha"],
-  },
-  {
-    id: "editing-19",
-    category: "Editing",
-    action: "Set Opacity to 50%",
-    mac: "5",
-    windows: "5",
-    keywords: ["opacity", "alpha", "semi-transparent"],
-  },
-  {
-    id: "editing-20",
-    category: "Editing",
-    action: "Set Opacity to 100%",
-    mac: "0",
-    windows: "0",
-    keywords: ["opacity", "alpha", "solid"],
-  },
-  {
     id: "editing-21",
     category: "Editing",
     action: "Place Image",
@@ -907,4 +874,7 @@ export const shortcuts: FigmaShortcut[] = [
   { id: "transform-7", category: "Transform", action: "Set Opacity 70%", mac: "7", windows: "7", keywords: ["opacity", "alpha", "70"] },
   { id: "transform-8", category: "Transform", action: "Set Opacity 80%", mac: "8", windows: "8", keywords: ["opacity", "alpha", "80"] },
   { id: "transform-9", category: "Transform", action: "Set Opacity 90%", mac: "9", windows: "9", keywords: ["opacity", "alpha", "90"] },
+  { id: "transform-10", category: "Transform", action: "Set Opacity 0%", mac: "00", windows: "00", keywords: ["opacity", "transparent", "alpha", "0"] },
+  { id: "transform-11", category: "Transform", action: "Set Opacity 50%", mac: "5", windows: "5", keywords: ["opacity", "alpha", "semi-transparent", "50"] },
+  { id: "transform-12", category: "Transform", action: "Set Opacity 100%", mac: "0", windows: "0", keywords: ["opacity", "alpha", "solid", "100"] },
 ];
