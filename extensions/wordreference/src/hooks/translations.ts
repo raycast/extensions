@@ -2,47 +2,71 @@ import { useEffect, useState } from "react";
 import usePreferences from "./preferences";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Alert, Color, Icon, LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
+import { WordReferenceErrorResponse, wordReferenceRequestHeaders } from "../wordreference";
 
 export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: string }) {
   const [searchText, setSearchText] = useState(initialSearch);
-
   const { preferences } = usePreferences();
 
-  const { data, isLoading } = useFetch<{ word: string; lang: string }[]>(
+  const { data: response, isLoading } = useFetch<SearchTranslationsResponse>(
     `https://www.wordreference.com/autocomplete?dict=${preferences.translationKey}&query=${searchText.trim()}`,
     {
       method: "GET",
+      headers: wordReferenceRequestHeaders,
       keepPreviousData: true,
       parseResponse: async (response) => {
+        const body = await response.text();
+
         if (response.status >= 400) {
-          return [];
+          return {
+            type: "error",
+            status: response.status,
+            statusText: response.statusText,
+          };
         }
-        const data = await response.text();
-        if (!data || data.length === 0) {
-          return [];
-        }
-        const lines = data.split("\n");
-        const result = [];
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          const split = line.split("\t");
-          if (split?.length < 2) {
-            continue;
-          }
-          const [word, lang] = split.map((s) => s.trim());
-          if (!word || !lang) {
-            continue;
-          }
-          result.push({ word, lang });
-        }
-        return result;
+
+        return {
+          type: "success",
+          data: parseSearchTranslations(body),
+        };
       },
       execute: !!searchText.trim(),
     }
   );
 
-  return { searchText, setSearchText, data: data, isLoading };
+  const data = response?.type === "success" ? response.data : [];
+  const errorResponse = response?.type === "error" ? response : undefined;
+
+  return { searchText, setSearchText, data, isLoading, errorResponse };
 }
+
+function parseSearchTranslations(rawData: string): SearchTranslation[] {
+  if (!rawData) {
+    return [];
+  }
+
+  return rawData.split("\n").flatMap((line) => {
+    const [word, lang] = line.split("\t").map((s) => s.trim());
+
+    if (!word || !lang) {
+      return [];
+    }
+
+    return [{ word, lang }];
+  });
+}
+
+interface SearchTranslation {
+  word: string;
+  lang: string;
+}
+
+type SearchTranslationsResponse =
+  | {
+      type: "success";
+      data: SearchTranslation[];
+    }
+  | WordReferenceErrorResponse;
 
 interface RecentSearch {
   word: string;

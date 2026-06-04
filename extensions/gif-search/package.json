@@ -18,7 +18,8 @@
     "seanparkross",
     "YourMCGeek",
     "thomas",
-    "tim_gailey"
+    "tim_gailey",
+    "clins1994"
   ],
   "license": "MIT",
   "categories": [
@@ -133,6 +134,14 @@
         {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Copy GIF Square",
+          "value": "copySquareGif"
+        },
+        {
+          "title": "Paste GIF Square",
+          "value": "pasteSquareGif"
         },
         {
           "title": "Copy Page Link",

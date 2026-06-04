@@ -11,7 +11,8 @@
     "hsuq",
     "pernielsentikaer",
     "ViGeng",
-    "sebdanielsson"
+    "sebdanielsson",
+    "greiner-petter"
   ],
   "categories": [
     "System",
@@ -27,6 +28,13 @@
         "internet"
       ],
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "IP in Menu Bar",
+      "description": "Display my IP address in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "dependencies": {

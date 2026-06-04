@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pinwork",
+  "title": "Pinwork",
+  "description": "Manage your tasks with Pinwork - a GTD-inspired task management app",
+  "icon": "extension-icon.png",
+  "author": "adapting.tech",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showCompletedTasks",
+      "type": "checkbox",
+      "default": false,
+      "title": "Show Completed Tasks",
+      "label": "Show completed tasks",
+      "description": "Include recently completed tasks in list views",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-today",
+      "title": "Show Today",
+      "subtitle": "Pinwork",
+      "description": "View tasks scheduled for today",
+      "mode": "view",
+      "keywords": [
+        "tasks",
+        "today",
+        "focus"
+      ]
+    },
+    {
+      "name": "show-inbox",
+      "title": "Show Inbox",
+      "subtitle": "Pinwork",
+      "description": "View unscheduled tasks in your inbox",
+      "mode": "view",
+      "keywords": [
+        "tasks",
+        "inbox",
+        "capture"
+      ]
+    },
+    {
+      "name": "show-next",
+      "title": "Show Next",
+      "subtitle": "Pinwork",
+      "description": "View upcoming tasks for the next few days",
+      "mode": "view",
+      "keywords": [
+        "tasks",
+        "next",
+        "upcoming"
+      ]
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Task",
+      "subtitle": "Pinwork",
+      "description": "Add a new task using natural language",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "create",
+        "new",
+        "task"
+      ]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Pinwork",
+      "description": "Search across all your tasks",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "find",
+        "tasks"
+      ]
+    },
+    {
+      "name": "show-projects",
+      "title": "Show Projects",
+      "subtitle": "Pinwork",
+      "description": "View all projects and their tasks",
+      "mode": "view",
+      "keywords": [
+        "projects",
+        "list"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
+    "date-fns": "^4.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

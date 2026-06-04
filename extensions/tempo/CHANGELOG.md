@@ -1,5 +1,11 @@
 # Tempo Changelog
 
+## [Worklog Time Range Improvements] - 2026-06-03
+
+- Add optional start and end time entry when logging work and derive the duration automatically
+- Support `8:00`, `08:00`, `8h`, and `8h30` time formats in time-range mode
+- Remember the preferred time-range input mode between worklogs
+
 ## [Initial Version] - 2025-11-04
 
 - Add Worklog command with issue selection

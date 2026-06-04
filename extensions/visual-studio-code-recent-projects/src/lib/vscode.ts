@@ -59,6 +59,22 @@ interface PackageJSONInfo {
   preview?: boolean;
 }
 
+function getWindowsVSCodeInstallRoots(): string[] {
+  const localAppDataPath = process.env.LOCALAPPDATA ?? path.join(os.homedir(), "AppData", "Local");
+  const roots = [
+    path.join(localAppDataPath, "Programs"),
+    process.env.ProgramFiles,
+    process.env["ProgramFiles(x86)"],
+  ].filter((value): value is string => Boolean(value));
+
+  return [...new Set(roots)];
+}
+
+function resolveWindowsVSCodePath(relativePath: string): string {
+  const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
 function getNLSVariable(text: string | undefined): string | undefined {
   if (!text) {
     return text;
@@ -75,10 +91,11 @@ function cliPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
       Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
-      Code: path.join(programsFolder, "Microsoft VS Code", "bin", "code.cmd"),
-      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
+      Code: resolveWindowsVSCodePath(path.join("Microsoft VS Code", "bin", "code.cmd")),
+      "Code - Insiders": resolveWindowsVSCodePath(path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd")),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
       Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob", "bin", "bobide.cmd"),
       Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
       Qoder: path.join(programsFolder, "Qoder", "bin", "code.cmd"),
       Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
@@ -96,6 +113,7 @@ function cliPaths(): Record<string, string> {
       Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
       "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
       Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+      "IBM Bob": "/Applications/IBM Bob.app/Contents/Resources/app/bin/bobide",
       Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
       Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
       Qoder: "/Applications/Qoder.app/Contents/Resources/app/bin/code",
@@ -112,10 +130,10 @@ function cliPaths(): Record<string, string> {
 }
 
 export function getVSCodeCLIFilename(): string {
-  const cliPathsMac = cliPaths();
-  const name = cliPathsMac[getBuildNamePreference()];
+  const availableCliPaths = cliPaths();
+  const name = availableCliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
-    return cliPathsMac.Code;
+    return availableCliPaths.Code;
   }
   return name;
 }
@@ -127,9 +145,10 @@ function programPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     programPaths = {
       Antigravity: path.join(programsFolder, "Antigravity"),
-      Code: path.join(programsFolder, "Microsoft VS Code"),
-      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders"),
+      Code: resolveWindowsVSCodePath("Microsoft VS Code"),
+      "Code - Insiders": resolveWindowsVSCodePath("Microsoft VS Code Insiders"),
       Cursor: path.join(programsFolder, "cursor"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob"),
       Kiro: path.join(programsFolder, "Kiro"),
       Positron: path.join(programsFolder, "Positron"),
       Qoder: path.join(programsFolder, "Qoder"),
@@ -148,6 +167,7 @@ function programPaths(): Record<string, string> {
       Code: "/Applications/Visual Studio Code.app/Contents/Resources/app",
       "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app",
       Cursor: "/Applications/Cursor.app/Contents/Resources/app",
+      "IBM Bob": "/Applications/IBM Bob.app/Contents/Resources/app",
       Kiro: "/Applications/Kiro.app/Contents/Resources/app",
       Positron: "/Applications/Positron.app/Contents/Resources/app",
       Qoder: "/Applications/Qoder.app/Contents/Resources/app",
@@ -222,6 +242,22 @@ export class VSCodeCLI {
 
   uninstallExtensionByIDSync(id: string) {
     child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], this.execOptions);
+  }
+
+  openFolderURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--folder-uri", uri],
+      this.execOptions,
+    );
+  }
+
+  openFileURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--file-uri", uri],
+      this.execOptions,
+    );
   }
 
   async newWindow() {
@@ -317,6 +353,7 @@ const buildSchemes: Record<string, string> = {
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
+  "IBM Bob": "bobide",
   Kiro: "kiro",
   VSCodium: "vscode-oss",
   Positron: "positron",

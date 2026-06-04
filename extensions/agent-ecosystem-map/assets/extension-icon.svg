@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Central hub -->
+  <circle cx="256" cy="256" r="40" fill="white" opacity="0.95"/>
+  <!-- Nodes -->
+  <circle cx="256" cy="120" r="24" fill="white" opacity="0.85"/>
+  <circle cx="370" cy="190" r="24" fill="white" opacity="0.85"/>
+  <circle cx="370" cy="322" r="24" fill="white" opacity="0.85"/>
+  <circle cx="256" cy="392" r="24" fill="white" opacity="0.85"/>
+  <circle cx="142" cy="322" r="24" fill="white" opacity="0.85"/>
+  <circle cx="142" cy="190" r="24" fill="white" opacity="0.85"/>
+  <!-- Connections -->
+  <line x1="256" y1="216" x2="256" y2="144" stroke="white" stroke-width="3" opacity="0.5"/>
+  <line x1="290" y1="232" x2="348" y2="200" stroke="white" stroke-width="3" opacity="0.5"/>
+  <line x1="290" y1="280" x2="348" y2="312" stroke="white" stroke-width="3" opacity="0.5"/>
+  <line x1="256" y1="296" x2="256" y2="368" stroke="white" stroke-width="3" opacity="0.5"/>
+  <line x1="222" y1="280" x2="164" y2="312" stroke="white" stroke-width="3" opacity="0.5"/>
+  <line x1="222" y1="232" x2="164" y2="200" stroke="white" stroke-width="3" opacity="0.5"/>
+  <!-- H letter in center -->
+  <text x="256" y="270" text-anchor="middle" font-family="SF Pro Display, Helvetica, Arial" font-size="48" font-weight="700" fill="#6366f1">H</text>
+</svg>
