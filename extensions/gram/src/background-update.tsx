@@ -128,23 +128,37 @@ async function run() {
   }
 
   try {
-    const updateCount = await processBackgroundUpdates(prefs.build, { silent: !isUserTriggered });
+    const { installed, failed } = await processBackgroundUpdates(prefs.build, { silent: !isUserTriggered });
 
     safeCacheSet("last-check", now.toString());
-
     const timeString = formatTime(now);
 
-    if (updateCount > 0) {
+    if (installed > 0) {
       safeCacheSet("last-update", now.toString());
 
-      const message = `Updated ${updateCount} extension${updateCount === 1 ? "" : "s"}`;
+      const isPartialFailure = failed > 0;
+      const message = isPartialFailure
+        ? `Updated ${installed}, ${failed} failed`
+        : `Updated ${installed} extension${installed === 1 ? "" : "s"}`;
 
       await safeUpdateSubtitle(formatSubtitle(`${message} • ${timeString}`, schedule));
 
       if (isUserTriggered) {
         await showToast({
-          style: Toast.Style.Success,
-          title: "Updates Installed",
+          style: isPartialFailure ? Toast.Style.Failure : Toast.Style.Success,
+          title: isPartialFailure ? "Some Updates Failed" : "Updates Installed",
+          message,
+        });
+      }
+    } else if (failed > 0) {
+      const message = `Failed to install ${failed} extension${failed === 1 ? "" : "s"}`;
+
+      await safeUpdateSubtitle(formatSubtitle(`Update failed • ${timeString}`, schedule));
+
+      if (isUserTriggered) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Installation Failed",
           message,
         });
       }
