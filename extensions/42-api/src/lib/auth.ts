@@ -4,7 +4,7 @@ import { OAuthService } from "@raycast/utils";
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "42",
-  providerIcon: "42.png",
+  providerIcon: "41.png",
   description: "Connect your 42 account",
 });
 
