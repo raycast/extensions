@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-06-04
 
 - Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)
 - Failures are now recoverable: added a "Try Again" action (⌘R) so a transient error no longer leaves the command stuck
