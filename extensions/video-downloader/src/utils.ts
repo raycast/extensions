@@ -83,7 +83,9 @@ export function describeYtdlpError(error: unknown): FriendlyError {
   if (lower.includes("unavailable") || lower.includes("removed") || lower.includes("deleted")) {
     return { title: "Video Unavailable", message: "This video is no longer available.", retryable: false };
   }
-  if (lower.includes("bad guest token") || lower.includes("rate") || lower.includes("429")) {
+  // Match real rate-limiting messages with a word boundary so "bitrate",
+  // "framerate", "sample rate", etc. don't get misclassified as transient.
+  if (lower.includes("bad guest token") || /\brate[ -]?limit/.test(lower) || lower.includes("429")) {
     return {
       title: "Temporary Rate Limit",
       message: "The site is rate-limiting requests. Try again, or set the “Use Cookies from Browser” preference.",
