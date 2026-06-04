@@ -459,22 +459,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.17",
+    "@raycast/api": "^1.104.19",
     "@raycast/utils": "^2.2.5",
-    "date-fns": "^4.2.1",
+    "date-fns": "^4.4.0",
     "node-html-markdown": "^2.0.0",
     "pinyin-pro": "^3.28.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "eslint": "^10.4.0",
+    "@types/react": "^19.2.16",
+    "eslint": "^10.4.1",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
