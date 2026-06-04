@@ -10,7 +10,12 @@ import {
 import { getIgnoredExtensionsMap } from "./ignore";
 import { apiFetch } from "./api";
 
-export async function processBackgroundUpdates(gramBuild: GramBuild): Promise<number> {
+export async function processBackgroundUpdates(
+  gramBuild: GramBuild,
+  options: { silent?: boolean } = {},
+): Promise<number> {
+  const silent = options.silent ?? false;
+
   const extensionPath = getGramExtensionsDir(gramBuild);
   const installed = await getInstalledExtensions(extensionPath);
 
@@ -23,7 +28,7 @@ export async function processBackgroundUpdates(gramBuild: GramBuild): Promise<nu
 
   const url = new URL("https://api.zed.dev/extensions");
   url.searchParams.append("max_schema_version", "1");
-  const response = await apiFetch(url.toString());
+  const response = await apiFetch(url.toString(), { silent });
 
   const json = (await response.json()) as ZedResponse;
   const allExtensions = json.data || [];
@@ -46,6 +51,7 @@ export async function processBackgroundUpdates(gramBuild: GramBuild): Promise<nu
         downloadUrl: getLatestExtensionDownloadUrl(ext),
         extensionId: ext.id,
         targetInstallDir,
+        silent,
       });
       successCount++;
     } catch (err) {

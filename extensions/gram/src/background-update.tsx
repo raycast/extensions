@@ -128,7 +128,7 @@ async function run() {
   }
 
   try {
-    const updateCount = await processBackgroundUpdates(prefs.build);
+    const updateCount = await processBackgroundUpdates(prefs.build, { silent: !isUserTriggered });
 
     safeCacheSet("last-check", now.toString());
 

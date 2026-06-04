@@ -377,7 +377,7 @@ export default function Command() {
       const targetVersion = versionOverride || ext.version;
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: versionOverride ? `Installing v${targetVersion}...` : `Installing ${ext.name}...`,
+        title: versionOverride ? `Installing ${ext.name} v${targetVersion}...` : `Installing ${ext.name}...`,
       });
 
       try {

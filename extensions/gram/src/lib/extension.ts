@@ -33,6 +33,7 @@ interface InstallExtensionOptions {
   downloadUrl: string;
   extensionId: string;
   targetInstallDir: string;
+  silent?: boolean;
 }
 
 interface InstalledExtension {
@@ -116,6 +117,7 @@ export async function installExtension({
   downloadUrl,
   extensionId,
   targetInstallDir,
+  silent = false,
 }: InstallExtensionOptions): Promise<void> {
   const installId = `${extensionId}-${Date.now()}-${randomUUID()}`;
   const tempFilePath = path.join(os.tmpdir(), `${installId}.tar.gz`);
@@ -125,7 +127,7 @@ export async function installExtension({
   let hasBackup = false;
 
   try {
-    const response = await apiFetch(downloadUrl);
+    const response = await apiFetch(downloadUrl, { silent });
 
     if (!response.body) throw new Error("Response body is empty");
 
