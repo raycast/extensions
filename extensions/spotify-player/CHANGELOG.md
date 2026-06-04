@@ -1,5 +1,15 @@
 # Spotify Player Changelog
 
+## [Fix Podcast Episode Navigation] - 2026-05-28
+
+- Prevent podcast episode navigation from crashing when Spotify omits show details in search results
+
+## [Add Keyboard Shortcuts] - 2026-05-17
+
+- Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
+- Added shortcuts for liking, disliking, adding to playlists, connecting devices, and showing related content
+- Added artist action shortcuts for showing albums and popular songs
+
 ## [Fix OAuth PKCE invalid_grant] - 2026-04-04
 
 - Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck

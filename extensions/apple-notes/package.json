@@ -450,22 +450,20 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/utils": "^2.2.5",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",
     "node-html-markdown": "^2.0.0",
     "pinyin-pro": "^3.28.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash": "^4.17.24",
     "@types/node": "^22.19.11",
     "@types/react": "^19.2.14",
-    "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
-    "prettier": "^3.2.5",
-    "react": "^19.0.0",
-    "typescript": "^5.4.5"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add VC Deal Flow Signal MCP Server] - 2026-06-03
+
+Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).
+
 ## [Add Alai MCP Server] - 2026-04-30
 
 Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).

@@ -5,6 +5,9 @@
   "description": "Search Anna's Archive, the largest truly open library in human history",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "seanwessmith"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -48,6 +51,21 @@
       "type": "textfield",
       "default": "",
       "description": "Enter a custom mirror URL to use, something like \"https://de.anna-archive.org\". Only use this if the default mirrors are not working for you. I cannot guarantee that this will work, use at your own risk.",
+      "required": false
+    },
+    {
+      "name": "annaSecretKey",
+      "title": "Anna's Archive Secret Key",
+      "type": "password",
+      "description": "Optional Anna's Archive member secret key for the official fast-download API.",
+      "required": false
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "type": "directory",
+      "default": "~/Downloads/Anna's Archive",
+      "description": "Folder where EPUB downloads are saved.",
       "required": false
     }
   ],

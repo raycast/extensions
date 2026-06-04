@@ -178,6 +178,14 @@
           "required": false
         },
         {
+          "name": "sortByPriority",
+          "type": "checkbox",
+          "label": "Sort tasks by priority",
+          "description": "When enabled, tasks are sorted by priority (highest first), then by their default order.",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "view",
           "type": "dropdown",
           "data": [

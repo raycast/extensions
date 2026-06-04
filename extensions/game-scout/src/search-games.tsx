@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { showFailureToast, useFetch } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import {
   List,
   ActionPanel,
@@ -23,6 +23,9 @@ const MAX_RESULTS = parseInt(preferences.maxResults) || 25;
 const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
+const searchCache = new Cache({ namespace: "search_queries" });
+const CACHE_KEY = `itad_saved_prices_v22_${COUNTRY}`;
+
 const getBundleCount = (bundles: OverviewItem["bundles"] | undefined) => {
   if (typeof bundles === "number") {
     return bundles;
@@ -33,7 +36,12 @@ const getBundleCount = (bundles: OverviewItem["bundles"] | undefined) => {
   return bundles?.count || 0;
 };
 
-import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
+import {
+  formatPrice,
+  isStoreAllowed,
+  computeGameInsight,
+  safeParse,
+} from "./utils";
 import type {
   BundleInfo,
   Deal,
@@ -47,7 +55,6 @@ import type {
   SteamSearchItem,
   SteamSearchResponse,
 } from "./types";
-import { flattenOverviewResponse } from "./types";
 
 export default function Command() {
   const [apiError, setApiError] = useState(false);
@@ -57,12 +64,20 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchData, setSearchData] = useState<GameSearchResult[]>([]);
+  const [overviewData, setOverviewData] = useState<OverviewResponse | null>(
+    null,
+  );
+  const [pricesData, setPricesData] = useState<Record<string, Deal[]>>({});
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
+  const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
 
   useEffect(() => {
-    LocalStorage.getItem<string>("saved_itad_games").then(
-      (stored) => stored && setSavedGames(JSON.parse(stored)),
+    LocalStorage.getItem<string>("saved_itad_games").then((s) =>
+      setSavedGames(safeParse(s, [])),
+    );
+    LocalStorage.getItem<string>("selected_stores").then((s) =>
+      setSelectedStores(safeParse(s, ["all"])),
     );
   }, []);
 
@@ -80,21 +95,44 @@ export default function Command() {
           type: game.type || "OTHER",
         },
       ];
-
-      const savedCache = new Cache();
-      savedCache.remove(`itad_saved_prices_v1_${COUNTRY}`);
     }
     setSavedGames(newList);
     await LocalStorage.setItem("saved_itad_games", JSON.stringify(newList));
+    const savedCache = new Cache();
+    savedCache.remove(CACHE_KEY);
   };
 
   useEffect(() => {
     if (!searchQuery) {
       setSearchData([]);
+      setOverviewData(null);
       return;
     }
     const fetchData = async () => {
       setLoadingSearch(true);
+      const cacheKey = `search_${COUNTRY}_${searchQuery}`;
+      const cached = searchCache.get(cacheKey);
+
+      if (cached) {
+        const parsed = safeParse<{
+          timestamp?: number;
+          searchData?: GameSearchResult[];
+          overviewData?: OverviewResponse | null;
+          pricesData?: Record<string, Deal[]>;
+        } | null>(cached, null);
+        if (
+          parsed &&
+          parsed.timestamp &&
+          Date.now() - parsed.timestamp < 1000 * 60 * 60
+        ) {
+          setSearchData(parsed.searchData || []);
+          setOverviewData(parsed.overviewData || null);
+          setPricesData(parsed.pricesData || {});
+          setLoadingSearch(false);
+          return;
+        }
+      }
+
       try {
         const res = await fetch(
           `https://api.isthereanydeal.com/games/search/v1?key=${API_KEY}&title=${encodeURIComponent(searchQuery)}`,
@@ -105,9 +143,9 @@ export default function Command() {
           return;
         }
         const json = (await res.json()) as
-          | GameSearchResult[]
-          | { data?: GameSearchResult[]; results?: GameSearchResult[] };
-        const results = Array.isArray(json)
+          | { data?: GameSearchResult[]; results?: GameSearchResult[] }
+          | GameSearchResult[];
+        const results: GameSearchResult[] = Array.isArray(json)
           ? json
           : json.data || json.results || [];
         const query = searchQuery.toLowerCase();
@@ -121,9 +159,89 @@ export default function Command() {
         };
         results.sort((a, b) => score(a.title) - score(b.title));
 
+        const gameIds = results.slice(0, MAX_RESULTS).map((g) => g.id);
+        let overview = null;
+        let prices: Record<string, Deal[]> = {};
+        let pricesFetched = false;
+        gameIds.forEach((id) => {
+          prices[String(id)] = [];
+        });
+
+        if (gameIds.length > 0) {
+          try {
+            const [oRes, pRes] = await Promise.all([
+              fetch(
+                `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(gameIds),
+                },
+              ),
+              fetch(
+                `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(gameIds),
+                },
+              ),
+            ]);
+
+            if (oRes.ok) overview = await oRes.json();
+            if (pRes.ok) {
+              pricesFetched = true;
+              const pJson = await pRes.json();
+              const pArray = Array.isArray(pJson)
+                ? pJson
+                : Object.values(pJson);
+              pArray.forEach(
+                (item: { id?: string | number; deals?: Deal[] }) => {
+                  if (item.id) prices[String(item.id)] = item.deals || [];
+                },
+              );
+            }
+          } catch {
+            // Silently catch overview/prices failures
+          }
+        }
+
+        if (gameIds.length > 0 && cached) {
+          const parsed = safeParse<{
+            timestamp?: number;
+            searchData?: GameSearchResult[];
+            overviewData?: OverviewResponse | null;
+            pricesData?: Record<string, Deal[]>;
+          } | null>(cached, null);
+          if (parsed) {
+            if (!overview) overview = parsed.overviewData || null;
+            if (!pricesFetched) prices = parsed.pricesData || prices;
+          }
+        }
+
         setSearchData(results);
+        setOverviewData(overview);
+        setPricesData(prices);
+
+        if (
+          overview ||
+          Object.keys(prices).length > 0 ||
+          gameIds.length === 0
+        ) {
+          searchCache.set(
+            cacheKey,
+            JSON.stringify({
+              timestamp: Date.now(),
+              searchData: results,
+              overviewData: overview,
+              pricesData: prices,
+            }),
+          );
+        }
       } catch (error) {
         setSearchData([]);
+        setOverviewData(null);
+        setPricesData({});
         await showFailureToast(error, {
           title: "Failed to search games",
         });
@@ -133,20 +251,32 @@ export default function Command() {
     fetchData();
   }, [searchQuery]);
 
-  const gameIds = searchData?.slice(0, MAX_RESULTS).map((g) => g.id) || [];
-
-  const { data: priceData, isLoading: priceLoading } = useFetch<OverviewItem[]>(
-    `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(gameIds),
-      execute: gameIds.length > 0 && searchQuery.length > 0,
-      mapResult: (res: OverviewResponse) => ({
-        data: flattenOverviewResponse(res),
-      }),
-    },
-  );
+  const activeBundleMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    const data = overviewData as {
+      bundles?: {
+        expiry?: string;
+        tiers?: { games?: { id?: string | number }[] }[];
+      }[];
+    } | null;
+    if (!data?.bundles) return map;
+    const now = new Date();
+    for (const bundle of data.bundles) {
+      const isActive = !bundle.expiry || new Date(bundle.expiry) > now;
+      if (!isActive) continue;
+      const games =
+        bundle.tiers?.flatMap(
+          (tier: { games?: { id?: string | number }[] }) => tier.games || [],
+        ) || [];
+      const uniqueGameIds = new Set(games.map((g) => String(g.id)));
+      for (const gid of uniqueGameIds) {
+        if (gid && gid !== "undefined") {
+          map[gid] = (map[gid] || 0) + 1;
+        }
+      }
+    }
+    return map;
+  }, [overviewData]);
 
   const filteredData = searchData.filter((game) => {
     if (!preferences.showMature && game.mature) return false;
@@ -226,11 +356,22 @@ export default function Command() {
         />
       ) : (
         filteredData.slice(0, MAX_RESULTS).map((game) => {
-          const overview = Array.isArray(priceData)
-            ? priceData.find((p) => String(p.id) === game.id)
-            : undefined;
-          const deal: Deal | undefined =
-            overview?.current || (overview as Deal | undefined);
+          const data = overviewData as {
+            prices?: { id?: string | number }[];
+            bundles?: BundleInfo[];
+          } | null;
+          const overviewItem = data?.prices?.find(
+            (p) => String(p.id) === game.id,
+          );
+
+          const validDeals = (pricesData[game.id] || []).filter((d: Deal) =>
+            isStoreAllowed(d.shop?.name || "", selectedStores),
+          );
+          const deal = validDeals.reduce<Deal | null>((min, d) => {
+            if (!min) return d;
+            return d.price.amount < min.price.amount ? d : min;
+          }, null);
+
           const isSaved = savedGames.some((g) => g.id === game.id);
 
           const accessories = [];
@@ -240,7 +381,15 @@ export default function Command() {
               tooltip: "Mature Content",
             });
 
-          if (priceLoading && !deal) {
+          const bundleCount = activeBundleMap[game.id] || 0;
+          if (bundleCount > 0) {
+            accessories.push({
+              icon: { source: Icon.Box, tintColor: Color.Purple },
+              tooltip: `In ${bundleCount} active bundle${bundleCount > 1 ? "s" : ""}`,
+            });
+          }
+
+          if (loadingSearch && !deal) {
             accessories.push({
               icon: Icon.Clock,
               tooltip: "Loading price...",
@@ -249,13 +398,6 @@ export default function Command() {
           } else if (deal) {
             const currentAmount = deal.price?.amount;
             const regularAmount = deal.regular?.amount;
-            const bundleCount = getBundleCount(overview?.bundles);
-            if (bundleCount > 0) {
-              accessories.push({
-                icon: { source: Icon.Box, tintColor: Color.Purple },
-                tooltip: "Available in a Bundle",
-              });
-            }
             const currency = deal.price?.currency;
             const cut = deal.cut || 0;
 
@@ -273,6 +415,8 @@ export default function Command() {
             } else {
               accessories.push({ text: formatPrice(currentAmount, currency) });
             }
+          } else {
+            accessories.push({ text: "NO INFO" });
           }
           const isMusic =
             (game.type === null || game.type === "dlc") &&
@@ -321,6 +465,27 @@ export default function Command() {
                             gameType={game.type || "OTHER"}
                             isSaved={isSaved}
                             toggleSave={() => toggleSave(game)}
+                            preloadedDeals={pricesData[game.id]}
+                            preloadedOverview={
+                              overviewItem
+                                ? {
+                                    prices: [overviewItem],
+                                    bundles:
+                                      (
+                                        overviewData as {
+                                          bundles?: BundleInfo[];
+                                        }
+                                      )?.bundles?.filter((b) =>
+                                        b.tiers?.some((t) =>
+                                          t.games?.some(
+                                            (g) =>
+                                              String(g.id) === String(game.id),
+                                          ),
+                                        ),
+                                      ) || [],
+                                  }
+                                : null
+                            }
                           />
                         }
                         icon={Icon.Sidebar}
@@ -359,6 +524,11 @@ interface GameDetailProps {
   isSaved?: boolean;
   toggleSave?: () => void;
   removeGame?: () => void;
+  preloadedDeals?: Deal[];
+  preloadedOverview?:
+    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
+    | OverviewItem
+    | null;
 }
 
 function GameDetail({
@@ -369,13 +539,15 @@ function GameDetail({
   isSaved,
   toggleSave,
   removeGame,
+  preloadedDeals,
+  preloadedOverview,
 }: GameDetailProps) {
   const [data, setData] = useState<DetailData>({
     steamData: null,
     realBundles: [],
-    deals: [],
+    deals: preloadedDeals || [],
     historyLow: null,
-    overview: null,
+    overview: preloadedOverview || null,
     historyChart: [],
     lastChecked: null,
   });
@@ -387,7 +559,7 @@ function GameDetail({
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(s ? JSON.parse(s) : ["all"]),
+      setSelectedStores(safeParse(s, ["all"])),
     );
     LocalStorage.getItem<string>("preferred_chart_range").then((saved) => {
       if (saved === "3m" || saved === "6m" || saved === "1y") {
@@ -413,10 +585,27 @@ function GameDetail({
       setIsLoading(true);
       const cached = detailCache.get(detailCacheKey);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.timestamp < DETAIL_CACHE_TTL) {
+        const parsed = safeParse<{
+          timestamp?: number;
+          data?: DetailData;
+        } | null>(cached, null);
+        if (
+          parsed &&
+          parsed.timestamp &&
+          Date.now() - parsed.timestamp < DETAIL_CACHE_TTL
+        ) {
           if (isMounted) {
-            setData({ ...parsed.data, lastChecked: parsed.timestamp });
+            if (!parsed.data) return;
+            const d = parsed.data;
+            setData({
+              steamData: d.steamData ?? null,
+              realBundles: d.realBundles ?? [],
+              deals: d.deals ?? [],
+              historyLow: d.historyLow ?? null,
+              overview: d.overview ?? null,
+              historyChart: d.historyChart ?? [],
+              lastChecked: parsed.timestamp ?? null,
+            });
             setIsLoading(false);
           }
           return;
@@ -458,20 +647,27 @@ function GameDetail({
           steamData = steamJson?.[String(targetItem.id)]?.data || null;
         }
 
+        const mockResponse = (mockData: unknown) =>
+          Promise.resolve({
+            json: () => Promise.resolve(mockData),
+          } as Response);
+
         const fetchPromises = [
           fetch(
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedDeals != null
+            ? mockResponse([{ deals: preloadedDeals }])
+            : fetch(
+                `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
           fetch(
             `https://api.isthereanydeal.com/games/historylow/v1?key=${API_KEY}&country=${COUNTRY}`,
             {
@@ -481,15 +677,17 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([gameId]),
-              signal: abort.signal,
-            },
-          ),
+          preloadedOverview != null
+            ? mockResponse([preloadedOverview])
+            : fetch(
+                `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify([gameId]),
+                  signal: abort.signal,
+                },
+              ),
         ];
         if (SHOW_CHART) {
           const rawDate = new Date(
@@ -508,21 +706,34 @@ function GameDetail({
         const jsons = await Promise.all(
           (await Promise.all(fetchPromises)).map((r) => r.json()),
         );
+        const [
+          bundlesJson,
+          pricesJson,
+          historyLowJson,
+          overviewJson,
+          historyChartJson,
+        ] = jsons;
+
         const combined = {
           steamData,
-          realBundles: Array.isArray(jsons[0])
-            ? jsons[0]
-            : jsons[0]?.[gameId]?.bundles || [],
+          realBundles: Array.isArray(bundlesJson)
+            ? bundlesJson
+            : bundlesJson?.[gameId]?.bundles || [],
           deals:
-            (Array.isArray(jsons[1])
-              ? jsons[1][0]?.deals
-              : jsons[1]?.[gameId]?.deals) || [],
+            (Array.isArray(pricesJson)
+              ? pricesJson[0]?.deals
+              : pricesJson?.[gameId]?.deals) || [],
           historyLow:
-            (Array.isArray(jsons[2])
-              ? jsons[2][0]?.low
-              : jsons[2]?.[gameId]?.low) || null,
-          overview: Array.isArray(jsons[3]) ? jsons[3][0] : jsons[3],
-          historyChart: Array.isArray(jsons[4]) ? jsons[4] : [],
+            (Array.isArray(historyLowJson)
+              ? historyLowJson[0]?.low
+              : historyLowJson?.[gameId]?.low) || null,
+          overview: Array.isArray(overviewJson)
+            ? overviewJson[0]
+            : overviewJson,
+          historyChart:
+            SHOW_CHART && Array.isArray(historyChartJson)
+              ? historyChartJson
+              : [],
         };
 
         if (isMounted) {
@@ -776,6 +987,7 @@ function GameDetail({
       .filter((pt) => new Date(pt.timestamp).getTime() >= twelveMonthTime)
       .map((pt) => pt.deal?.price?.amount ?? 0),
     allTimeLow,
+    allowedHistory,
     currentBest,
     bundleValue,
     dataMonths: 0,
@@ -893,17 +1105,19 @@ function GameDetail({
     chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&w=250&h=110&devicePixelRatio=2&bkg=transparent`;
   }
 
-  const isDiscounted = currentBest && currentBest.cut > 0;
+  const steamCut = steamData?.price_overview?.discount_percent ?? 0;
+  const effectiveCut = Math.max(currentBest?.cut ?? 0, steamCut);
+  const isDiscounted = effectiveCut > 0;
   let saleTagText = "";
   let saleTagColor = Color.Green;
   if (isDiscounted) {
-    if (currentBest.cut >= 70) {
+    if (effectiveCut >= 70) {
       saleTagText = "MEGA SALE";
       saleTagColor = Color.Green;
-    } else if (currentBest.cut >= 40) {
+    } else if (effectiveCut >= 40) {
       saleTagText = "ON SALE";
       saleTagColor = Color.Green;
-    } else if (currentBest.cut >= 20) {
+    } else if (effectiveCut >= 20) {
       saleTagText = "DISCOUNT";
       saleTagColor = Color.SecondaryText;
     } else {
@@ -934,12 +1148,26 @@ function GameDetail({
                       ? "⏱️"
                       : "";
 
-  const heroSection =
-    currentBest && currentPrice != null
-      ? `<h2 align="center">${signalText !== "INSUFFICIENT DATA" ? `${signalEmoji} ${signalText}` : ""}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${currentBest.cut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`
-      : "";
+  const isUnreleased = (steamData?.release_date as { coming_soon?: boolean })
+    ?.coming_soon;
+  const releaseDateText = steamData?.release_date?.date;
+
+  let heroSection = "";
+  if (currentBest && currentPrice != null) {
+    heroSection = `<h2 align="center">${signalText !== "INSUFFICIENT DATA" ? `${signalEmoji} ${signalText}` : ""}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${effectiveCut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`;
+  } else if (isUnreleased) {
+    heroSection = `<h2 align="center">⏱️ UNRELEASED</h2>\n<h3 align="center">Expected: ${releaseDateText || "TBA"}</h3>\n\n---\n\n`;
+  } else {
+    heroSection = `<h2 align="center">🤷‍♂️ NO INFO</h2>\n<h3 align="center">No store listings found</h3>\n\n---\n\n`;
+  }
+
+  const hasInsights = !!(signalText || primaryInsight || secondaryInsight);
+  const hasTags = !!(isDiscounted || bundle.activeCount > 0);
+  const hideHistoricalData = isUnreleased && currentPrice == null;
+  const hasHistorical = !hideHistoricalData;
 
   const markdown = `
+  
 ${steamData?.header_image ? `<img src="${steamData.header_image}" width="280" />\n\n` : ""}
 # ${gameTitle}
 ${
@@ -960,7 +1188,7 @@ ${heroSection}
 
 | Store | Price | RRP | Discount |
 | :--- | :--- | :--- | :--- |
-${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : "| No data found | - | - | - |"}
+${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : isUnreleased ? `| ${releaseDateText || "TBA"} | - | - | - |` : "| No info | - | - | - |"}
 
 ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
 `;
@@ -979,7 +1207,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
       navigationTitle={gameTitle}
       metadata={
         <Detail.Metadata>
-          {signalText && (
+          {signalText && signalText !== "INSUFFICIENT DATA" && (
             <Detail.Metadata.Label
               title="Signal"
               text={signalText}
@@ -1012,9 +1240,10 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
               }
             />
           )}
-          {(isDiscounted || bundle.activeCount > 0) && (
+
+          {hasTags && (
             <>
-              <Detail.Metadata.Separator />
+              {hasInsights && <Detail.Metadata.Separator />}
               <Detail.Metadata.TagList title="Tags">
                 {isDiscounted && (
                   <Detail.Metadata.TagList.Item
@@ -1031,62 +1260,69 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
               </Detail.Metadata.TagList>
             </>
           )}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="All-Time Low"
-            text={
-              allTimeLow != null
-                ? formatPrice(allTimeLow, hCurrency)
-                : "No History"
-            }
-            icon={
-              allTimeLow != null
-                ? { source: Icon.Checkmark, tintColor: Color.Green }
-                : Icon.XMarkCircle
-            }
-          />
-          {medianSale !== null && (
-            <Detail.Metadata.Label
-              title="Median Price (1Y)"
-              text={formatPrice(medianSale, hCurrency)}
-            />
-          )}
 
-          {bundle.state && (
+          {hasHistorical && (
             <>
-              <Detail.Metadata.Separator />
-              {bundle.icon ? (
+              {(hasInsights || hasTags) && <Detail.Metadata.Separator />}
+              <Detail.Metadata.Label
+                title="All-Time Low"
+                text={
+                  allTimeLow != null
+                    ? formatPrice(allTimeLow, hCurrency)
+                    : "No History"
+                }
+                icon={
+                  allTimeLow != null
+                    ? { source: Icon.Checkmark, tintColor: Color.Green }
+                    : Icon.XMarkCircle
+                }
+              />
+              {medianSale !== null && (
                 <Detail.Metadata.Label
-                  title="Bundle Status"
-                  text={bundle.state}
-                  icon={{
-                    source: bundle.icon as Icon,
-                    tintColor: bundle.color,
-                  }}
+                  title="Median Price (1Y)"
+                  text={formatPrice(medianSale, hCurrency)}
                 />
-              ) : (
-                <Detail.Metadata.Label
-                  title="Bundle Status"
-                  text={bundle.state}
+              )}
+
+              {bundle.state && (
+                <>
+                  <Detail.Metadata.Separator />
+                  {bundle.icon ? (
+                    <Detail.Metadata.Label
+                      title="Bundle Status"
+                      text={bundle.state}
+                      icon={{
+                        source: bundle.icon as Icon,
+                        tintColor: bundle.color,
+                      }}
+                    />
+                  ) : (
+                    <Detail.Metadata.Label
+                      title="Bundle Status"
+                      text={bundle.state}
+                    />
+                  )}
+                </>
+              )}
+              {bundleValue?.tier && bundleValue?.bundle && (
+                <Detail.Metadata.Link
+                  title="Bundle Tier"
+                  target={
+                    bundleValue.bundle.url || bundleValue.bundle.details || ""
+                  }
+                  text={
+                    bundleValue.tier.price
+                      ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
+                      : bundleValue.bundle.page?.name || "View Bundle"
+                  }
                 />
               )}
             </>
           )}
-          {bundleValue?.tier && bundleValue?.bundle && (
-            <Detail.Metadata.Link
-              title="Bundle Tier"
-              target={
-                bundleValue.bundle.url || bundleValue.bundle.details || ""
-              }
-              text={
-                bundleValue.tier.price
-                  ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
-                  : bundleValue.bundle.page?.name || "View Bundle"
-              }
-            />
-          )}
 
-          <Detail.Metadata.Separator />
+          {(hasInsights || hasTags || hasHistorical) && (
+            <Detail.Metadata.Separator />
+          )}
           <Detail.Metadata.Label
             title="Price Sources"
             text={

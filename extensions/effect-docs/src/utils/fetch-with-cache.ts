@@ -1,34 +1,57 @@
 import { LocalStorage } from "@raycast/api";
 
-type CachedText = {
-	data: string;
+export const ONE_HOUR_MS = 3600000;
+
+type CacheEntry<T> = {
+	data: T;
 	timestamp: number;
 };
 
-export async function fetchTextWithCache(url: string, cacheKey: string, cacheTtl: number): Promise<string> {
-	const cachedJson = await LocalStorage.getItem<string>(cacheKey);
-	if (cachedJson) {
-		try {
-			const cached = JSON.parse(cachedJson) as CachedText;
-			if (Date.now() - cached.timestamp < cacheTtl) return cached.data;
+export async function fetchWithCache<T>(
+	url: string,
+	cacheKey: string,
+	cacheTtl: number,
+	parse: (raw: string) => T,
+): Promise<T> {
+	const cached = readCache<T>(await LocalStorage.getItem<string>(cacheKey));
+	if (cached) {
+		if (Date.now() - cached.timestamp < cacheTtl) return cached.data;
 
-			void refreshCachedText(url, cacheKey).catch(() => undefined);
-			return cached.data;
-		} catch {
-			// Ignore malformed cache entries and refresh from the source.
-		}
+		void refresh(url, cacheKey, parse).catch(() => undefined);
+		return cached.data;
 	}
 
-	return refreshCachedText(url, cacheKey);
+	return refresh(url, cacheKey, parse);
 }
 
-async function refreshCachedText(url: string, cacheKey: string): Promise<string> {
+function readCache<T>(raw: string | undefined): CacheEntry<T> | undefined {
+	if (!raw) return undefined;
+
+	try {
+		const parsed = JSON.parse(raw) as unknown;
+		if (
+			parsed &&
+			typeof parsed === "object" &&
+			"data" in parsed &&
+			"timestamp" in parsed &&
+			typeof (parsed as { timestamp: unknown }).timestamp === "number"
+		) {
+			return parsed as CacheEntry<T>;
+		}
+	} catch {
+		// Malformed JSON — fall through and refresh from the source.
+	}
+
+	return undefined;
+}
+
+async function refresh<T>(url: string, cacheKey: string, parse: (raw: string) => T): Promise<T> {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`Failed to fetch ${url}: ${response.status}`);
 	}
 
-	const data = await response.text();
+	const data = parse(await response.text());
 	await LocalStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
 
 	return data;

@@ -41,7 +41,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
 
       await addProject(json);
 
-      showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
+      await showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });
       focus('title');
     },
@@ -78,7 +78,7 @@ Here's the project you need to break-down: "${values.title}"
 ${values.notes.length > 0 ? `For additional context, here are the task's notes: "${values.notes}"` : ''}
 
 Tasks:`);
-      toast.hide();
+      await toast.hide();
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {

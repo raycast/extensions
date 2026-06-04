@@ -38,12 +38,16 @@
     },
     {
       "name": "send-selected-finder-item",
-      "title": "Send Selected Finder Item to Blip",
-      "description": "Send the current Finder selection to Blip. Requires Raycast Accessibility permission.",
+      "title": "Send Selected File to Blip",
+      "description": "Send the current file manager selection to Blip. Requires Raycast Accessibility permission.",
       "mode": "no-view"
     }
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "brunocbreis"
   ]
 }
