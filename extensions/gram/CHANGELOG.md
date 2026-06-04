@@ -1,6 +1,6 @@
 # Gram Changelog
 
-## [New Commands & Fixes] - {PR_MERGE_DATE}
+## [New Commands & Fixes] - 2026-06-04
 
 ### Added
 - **'Manage Extensions' Command:** Allows users to search for, install, uninstall, update, or downgrade (to a user-selected version) extensions for Gram. Includes the ability to ignore updates to certain extensions.
