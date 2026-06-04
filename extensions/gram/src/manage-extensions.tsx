@@ -52,7 +52,7 @@ const FILTER_CRITERIA: FilterCriterion[] = [
   },
   {
     regex: /desc:(\S+)/,
-    validator: (ext: ZedExtension, val: string) => ext.description.toLowerCase().includes(val),
+    validator: (ext: ZedExtension, val: string) => (ext.description ?? "").toLowerCase().includes(val),
   },
   {
     regex: /version:(\S+)/,
@@ -64,7 +64,7 @@ const FILTER_CRITERIA: FilterCriterion[] = [
   },
   {
     regex: /repo:(\S+)/,
-    validator: (ext: ZedExtension, val: string) => ext.repository.toLowerCase().includes(val),
+    validator: (ext: ZedExtension, val: string) => (ext.repository ?? "").toLowerCase().includes(val),
   },
   {
     regex: /schema:(\S+)/,
@@ -565,14 +565,16 @@ function ExtensionFilterDropdown({
   onSelectedProvidesChange: (value: string) => void;
   onSelectedStatusChange: (value: string) => void;
 }) {
-  const dropdownValue = getFilterDropdownValue(selectedStatus, selectedProvides);
-  const dropdownLabel = getFilterDropdownLabel(selectedStatus, selectedProvides);
+  const selectedFilterValue = getSelectedFilterDropdownValue(selectedStatus, selectedProvides);
+  const selectedFilterLabel = getFilterDropdownLabel(selectedStatus, selectedProvides);
+  const clearStatus = () => onSelectedStatusChange("all");
+  const clearProvides = () => onSelectedProvidesChange("all");
 
   return (
     <List.Dropdown
       tooltip="Filter View"
       storeValue={false}
-      value={dropdownValue}
+      value={selectedFilterValue}
       onChange={(value) => {
         if (value === "all") {
           onSelectedStatusChange("all");
@@ -581,31 +583,45 @@ function ExtensionFilterDropdown({
           onSelectedStatusChange(value.replace("status:", ""));
         } else if (value.startsWith("provides:")) {
           onSelectedProvidesChange(value.replace("provides:", ""));
+        } else if (value.startsWith("selected:")) {
+          return;
+        } else if (value === "clearStatus") {
+          clearStatus();
+        } else if (value === "clearProvides") {
+          clearProvides();
         }
       }}
     >
       <List.Dropdown.Item title="All Extensions" value="all" />
+
       <List.Dropdown.Section title="Status">
         <List.Dropdown.Item title="Installed" value="status:installed" />
         <List.Dropdown.Item title="Not Installed" value="status:uninstalled" />
         <List.Dropdown.Item title="Outdated" value="status:outdated" />
         <List.Dropdown.Item title="Ignored" value="status:ignored" />
       </List.Dropdown.Section>
+
       <List.Dropdown.Section title="Capabilities">
         {allProvidesOptions.map((item) => (
           <List.Dropdown.Item key={item} title={item} value={`provides:${item}`} />
         ))}
       </List.Dropdown.Section>
-      {dropdownValue !== "all" && (
-        <List.Dropdown.Section>
-          <List.Dropdown.Item title={dropdownLabel} value={dropdownValue} />
+
+      {(selectedStatus !== "all" || selectedProvides !== "all") && (
+        <List.Dropdown.Section title="Selected">
+          <List.Dropdown.Item title={selectedFilterLabel} value={selectedFilterValue} />
         </List.Dropdown.Section>
       )}
+
+      <List.Dropdown.Section title="Clear Filters">
+        <List.Dropdown.Item title={`Clear Status Filter`} value="clearStatus" />
+        <List.Dropdown.Item title={`Clear Capabilities Filter`} value="clearProvides" />
+      </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
 
-function getFilterDropdownValue(selectedStatus: string, selectedProvides: string): string {
+function getSelectedFilterDropdownValue(selectedStatus: string, selectedProvides: string): string {
   if (selectedStatus === "all" && selectedProvides === "all") return "all";
 
   return `selected:${selectedStatus}:${selectedProvides}`;
