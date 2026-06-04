@@ -585,11 +585,6 @@ function ExtensionFilterDropdown({
       }}
     >
       <List.Dropdown.Item title="All Extensions" value="all" />
-      {dropdownValue !== "all" && (
-        <List.Dropdown.Section title={`Selected: ${dropdownLabel}`}>
-          <List.Dropdown.Item title={dropdownLabel} value={dropdownValue} />
-        </List.Dropdown.Section>
-      )}
       <List.Dropdown.Section title="Status">
         <List.Dropdown.Item title="Installed" value="status:installed" />
         <List.Dropdown.Item title="Not Installed" value="status:uninstalled" />
@@ -601,6 +596,11 @@ function ExtensionFilterDropdown({
           <List.Dropdown.Item key={item} title={item} value={`provides:${item}`} />
         ))}
       </List.Dropdown.Section>
+      {dropdownValue !== "all" && (
+        <List.Dropdown.Section>
+          <List.Dropdown.Item title={dropdownLabel} value={dropdownValue} />
+        </List.Dropdown.Section>
+      )}
     </List.Dropdown>
   );
 }
