@@ -41,12 +41,12 @@ Download it from [www.lifedever.com/TaskTick/](https://www.lifedever.com/TaskTic
             onAction={openCommandPreferences}
           />
           <Action.Open
-            title="Open TaskTick"
+            title="Open Tasktick"
             target="/Applications/TaskTick.app"
             icon={Icon.Window}
           />
           <Action.OpenInBrowser
-            title="Download TaskTick"
+            title="Download Tasktick"
             url="https://www.lifedever.com/TaskTick/"
           />
         </ActionPanel>

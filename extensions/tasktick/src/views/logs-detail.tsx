@@ -1,5 +1,4 @@
-// src/views/logs-detail.tsx
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Detail,
   ActionPanel,
@@ -8,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { tasktick, CliError } from "../lib/tasktick";
 import type { ExecutionLog } from "../lib/types";
 
@@ -19,80 +18,80 @@ interface Props {
   format: "text" | "json";
 }
 
-export function LogsDetail({ cliPath, taskId, taskName, format }: Props) {
-  const [log, setLog] = useState<ExecutionLog | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function formatLogMarkdown(
+  taskName: string,
+  log: ExecutionLog,
+  format: "text" | "json",
+): string {
+  if (format === "json") {
+    return `# ${taskName}\n\n\`\`\`json\n${JSON.stringify(log, null, 2)}\n\`\`\``;
+  }
 
-  useEffect(() => {
-    tasktick
-      .logs(cliPath, taskId)
-      .then(setLog)
-      .catch((err) =>
-        setError(err instanceof CliError ? err.message : String(err)),
-      );
-  }, [cliPath, taskId]);
-
-  let markdown: string;
-  if (error) {
-    markdown = `# ${taskName}\n\n\`\`\`\n${error}\n\`\`\``;
-  } else if (!log) {
-    markdown = `# ${taskName}\n\nLoading…`;
-  } else if (format === "json") {
-    markdown = `# ${taskName}\n\n\`\`\`json\n${JSON.stringify(log, null, 2)}\n\`\`\``;
+  const exit = log.exitCode ?? "?";
+  let body: string;
+  if (log.lines?.length) {
+    body = log.lines
+      .map(
+        (l) =>
+          `[${l.ts.slice(11, 19)}] ${l.stream === "stderr" ? "⚠ " : "  "}${l.text}`,
+      )
+      .join("\n");
   } else {
-    const exit = log.exitCode ?? "?";
-    // The CLI's ExecutionLogDTO currently emits an empty `lines` array
-    // (per-line timestamps aren't tracked in the SwiftData schema yet —
-    // see Sources/CLI/Output/TaskDTO.swift). The actual content lives in
-    // `stdout` / `stderr`. Prefer those; fall back to `lines` for forward
-    // compatibility if a future CLI starts populating it.
-    let body: string;
-    if (log.lines && log.lines.length > 0) {
-      body = log.lines
-        .map(
-          (l) =>
-            `[${l.ts.slice(11, 19)}] ${l.stream === "stderr" ? "⚠ " : "  "}${l.text}`,
-        )
-        .join("\n");
-    } else {
-      const parts: string[] = [];
-      if (log.stdout) parts.push(log.stdout.replace(/\n+$/, ""));
-      if (log.stderr) {
-        const tagged = log.stderr
+    const parts: string[] = [];
+    if (log.stdout) parts.push(log.stdout.replace(/\n+$/, ""));
+    if (log.stderr) {
+      parts.push(
+        log.stderr
           .replace(/\n+$/, "")
           .split("\n")
           .map((l) => `⚠ ${l}`)
-          .join("\n");
-        parts.push(tagged);
-      }
-      body = parts.join("\n");
+          .join("\n"),
+      );
     }
-    markdown = `# ${taskName}\n\nExit ${exit}\n\n\`\`\`\n${body || "(no output)"}\n\`\`\``;
+    body = parts.join("\n");
   }
+  return `# ${taskName}\n\nExit ${exit}\n\n\`\`\`\n${body || "(no output)"}\n\`\`\``;
+}
+
+export function LogsDetail({ cliPath, taskId, taskName, format }: Props) {
+  const {
+    data: log,
+    error,
+    isLoading,
+  } = useCachedPromise(
+    (path: string, id: string) => tasktick.logs(path, id),
+    [cliPath, taskId],
+    { failureToastOptions: { title: "Failed to load logs" } },
+  );
+
+  const markdown = useMemo(() => {
+    if (error) {
+      const msg = error instanceof CliError ? error.message : String(error);
+      return `# ${taskName}\n\n\`\`\`\n${msg}\n\`\`\``;
+    }
+    if (!log) return `# ${taskName}\n\nLoading…`;
+    return formatLogMarkdown(taskName, log, format);
+  }, [error, log, taskName, format]);
+
+  const copyContent = useMemo(() => {
+    if (!log) return undefined;
+    if (log.lines.length > 0) return log.lines.map((l) => l.text).join("\n");
+    return [log.stdout, log.stderr].filter(Boolean).join("\n");
+  }, [log]);
 
   return (
     <Detail
-      isLoading={!log && !error}
+      isLoading={isLoading && log === undefined}
       markdown={markdown}
       actions={
         <ActionPanel>
-          {log && (
-            <Action.CopyToClipboard
-              title="Copy Output"
-              content={
-                log.lines.length > 0
-                  ? log.lines.map((l) => l.text).join("\n")
-                  : [log.stdout, log.stderr].filter(Boolean).join("\n")
-              }
-            />
+          {copyContent && (
+            <Action.CopyToClipboard title="Copy Output" content={copyContent} />
           )}
           <Action
-            title="Reveal Task in TaskTick"
+            title="Reveal Task in Tasktick"
             icon={Icon.Window}
             onAction={async () => {
-              // Go through the CLI so behaviour matches tasks-list (URL
-              // schemes fail silently if the OS registration is missing;
-              // CLI errors surface as toasts).
               try {
                 await tasktick.reveal(cliPath, taskId);
               } catch (err) {

@@ -1,5 +1,4 @@
-// src/views/tasks-list.tsx
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import {
   ActionPanel,
   Action,
@@ -7,28 +6,14 @@ import {
   Icon,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { tasktick, CliError } from "../lib/tasktick";
-import { EventsStream } from "../lib/events";
 import { statusIcon, statusAccessories } from "../lib/format";
 import { isGuiRunning } from "../lib/gui-status";
+import { useTasktickTasks } from "../hooks/use-tasktick-tasks";
 import { LogsDetail } from "./logs-detail";
 import type { Task } from "../lib/types";
-
-/**
- * Sort by recent activity, falling back to creation time. Mirrors the GUI's
- * "quick access" intent (TaskListView.swift sorts by lastManualRunAt) — we
- * use lastRunAt because the CLI DTO doesn't expose lastManualRunAt yet.
- * Cron-driven runs will reshuffle here in a way the GUI suppresses, but the
- * raycast workflow is burst-style and a recent activity bias is still useful.
- */
-function sortTasks(tasks: Task[]): Task[] {
-  return [...tasks].sort((a, b) => {
-    const ka = a.lastRunAt ?? a.createdAt;
-    const kb = b.lastRunAt ?? b.createdAt;
-    return kb.localeCompare(ka);
-  });
-}
 
 interface Props {
   cliPath: string;
@@ -36,77 +21,12 @@ interface Props {
 }
 
 export function TasksList({ cliPath, prefs }: Props) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setLoading] = useState(true);
-  // The post-action refresh runs on a 2s delay so the GUI has time to flush
-  // the run's lastRunAt back to SwiftData. We track the timer so unmount can
-  // cancel it — otherwise a quick navigate-away triggers setState on a dead
-  // component tree.
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(
-    () => () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    },
-    [],
-  );
-
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const list = await tasktick.list(cliPath);
-      setTasks(sortTasks(list));
-    } catch (err) {
-      const msg = err instanceof CliError ? err.message : String(err);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load tasks",
-        message: msg,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [cliPath]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    const stream = new EventsStream(cliPath);
-    stream.on("started", ({ id }) =>
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, status: "running" } : t)),
-      ),
-    );
-    // Update lastExitCode inline so the row icon flips to its red/green
-    // state immediately — without this, a freshly-failed task stays
-    // green/blue until the next full list refresh (or vice versa).
-    stream.on("completed", ({ id, exitCode }) =>
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === id ? { ...t, status: "idle", lastExitCode: exitCode } : t,
-        ),
-      ),
-    );
-    // EventEmitter throws uncaught if "error" has no listener — a CLI that
-    // disappears mid-session would otherwise crash the extension.
-    stream.on("error", (err) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Events stream error",
-        message: err.message,
-      });
-    });
-    return () => stream.kill();
-  }, [cliPath]);
+  const { tasks, isLoading, refreshList, scheduleRefresh } =
+    useTasktickTasks(cliPath);
 
   const performAction = useCallback(
     async (verb: "run" | "stop" | "restart" | "reveal", task: Task) => {
       const verbCap = verb.charAt(0).toUpperCase() + verb.slice(1);
-      // Reveal is allowed to wake the GUI — that's the whole point. Other
-      // verbs require a running GUI; otherwise the CLI would silently
-      // auto-launch and report success, which surprises raycast users.
       if (verb !== "reveal" && !(await isGuiRunning(cliPath))) {
         await showToast({
           style: Toast.Style.Failure,
@@ -131,11 +51,7 @@ export function TasksList({ cliPath, prefs }: Props) {
             message: task.name,
           });
         }
-        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = setTimeout(() => {
-          refreshTimerRef.current = null;
-          refresh();
-        }, 2000);
+        scheduleRefresh();
       } catch (err) {
         const msg = err instanceof CliError ? err.message : String(err);
         await showToast({
@@ -145,85 +61,110 @@ export function TasksList({ cliPath, prefs }: Props) {
         });
       }
     },
-    [cliPath, prefs.showCompletionToast, refresh],
+    [cliPath, prefs.showCompletionToast, scheduleRefresh],
   );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tasks…">
-      {tasks.map((task) => {
-        const isRunning = task.status === "running";
-        return (
-          <List.Item
-            key={task.id}
-            icon={statusIcon(task)}
-            title={task.name}
-            subtitle={task.scheduleSummary}
-            accessories={statusAccessories(task)}
-            actions={
-              <ActionPanel>
-                {isRunning ? (
-                  <>
-                    <Action
-                      title="Stop"
-                      icon={Icon.Stop}
-                      onAction={() => performAction("stop", task)}
-                    />
-                    <Action
-                      title="Restart"
-                      icon={Icon.RotateClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      onAction={() => performAction("restart", task)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Action
-                      title="Run"
-                      icon={Icon.Play}
-                      onAction={() => performAction("run", task)}
-                    />
-                    <Action
-                      title="Stop"
-                      icon={Icon.Stop}
-                      onAction={() => performAction("stop", task)}
-                    />
-                  </>
-                )}
-                <Action
-                  title="Reveal in TaskTick"
-                  icon={Icon.Window}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  onAction={() => performAction("reveal", task)}
-                />
-                <Action.Push
-                  title="View Last Output"
-                  icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
-                  target={
-                    <LogsDetail
-                      cliPath={cliPath}
-                      taskId={task.id}
-                      taskName={task.name}
-                      format={prefs.logsFormat}
-                    />
-                  }
-                />
-                <Action.CopyToClipboard
-                  title="Copy Task ID"
-                  content={task.id}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action
-                  title="Refresh List"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  onAction={() => refresh()}
-                />
-              </ActionPanel>
+      {tasks.map((task) => (
+        <TaskListItem
+          key={task.id}
+          task={task}
+          cliPath={cliPath}
+          logsFormat={prefs.logsFormat}
+          onAction={performAction}
+          onRefresh={refreshList}
+        />
+      ))}
+    </List>
+  );
+}
+
+interface TaskListItemProps {
+  task: Task;
+  cliPath: string;
+  logsFormat: "text" | "json";
+  onAction: (verb: "run" | "stop" | "restart" | "reveal", task: Task) => void;
+  onRefresh: () => Promise<void>;
+}
+
+function TaskListItem({
+  task,
+  cliPath,
+  logsFormat,
+  onAction,
+  onRefresh,
+}: TaskListItemProps) {
+  const isRunning = task.status === "running";
+
+  return (
+    <List.Item
+      icon={statusIcon(task)}
+      title={task.name}
+      subtitle={task.scheduleSummary}
+      accessories={statusAccessories(task)}
+      actions={
+        <ActionPanel>
+          {isRunning ? (
+            <>
+              <Action
+                title="Stop"
+                icon={Icon.Stop}
+                onAction={() => onAction("stop", task)}
+              />
+              <Action
+                title="Restart"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => onAction("restart", task)}
+              />
+            </>
+          ) : (
+            <>
+              <Action
+                title="Run"
+                icon={Icon.Play}
+                onAction={() => onAction("run", task)}
+              />
+              <Action
+                title="Stop"
+                icon={Icon.Stop}
+                onAction={() => onAction("stop", task)}
+              />
+            </>
+          )}
+          <Action
+            title="Reveal in Tasktick"
+            icon={Icon.Window}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            onAction={() => onAction("reveal", task)}
+          />
+          <Action.Push
+            title="View Last Output"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={
+              <LogsDetail
+                cliPath={cliPath}
+                taskId={task.id}
+                taskName={task.name}
+                format={logsFormat}
+              />
             }
           />
-        );
-      })}
-    </List>
+          <Action.CopyToClipboard
+            title="Copy Task ID"
+            content={task.id}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <Action
+            title="Refresh List"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onRefresh}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
