@@ -595,11 +595,7 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={
-            previewImage
-              ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 250, raycastHeight: 250 })
-              : ""
-          }
+          markdown={previewImage ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 300 }) : ""}
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }
