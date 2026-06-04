@@ -8,6 +8,6 @@ export default async function RetrieveAccountBalance() {
     await showToast({
       style: Toast.Style.Success,
       title: "SUCCESS!",
-      message: `Your Balance: ${response.display}`,
+      message: `Your Balance: ${response.display ?? "N/A"}`,
     });
 }

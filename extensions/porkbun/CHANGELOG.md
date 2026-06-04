@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [Retrieve Account Balance] - 2026-06-04
+## [Retrieve Account Balance] - {PR_MERGE_DATE}
 
 - Add new command to check account credit balance
 
