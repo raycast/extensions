@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
-import { runPowerShellScript } from "@raycast/utils";
 import { isMac } from "./platform";
+import { buildWindowsBlipVerbScript, getWindowsPowerShellArguments } from "./windows-scripts";
 
 const execFileAsync = promisify(execFile);
 
@@ -43,29 +43,10 @@ async function sendPathToBlipMac(path: string) {
 }
 
 async function sendPathToBlipWindows(path: string) {
-  // Invoke the "Blip" context menu verb via PowerShell Shell.Application COM automation.
-  // This mirrors the macOS Services approach: find the registered Blip shell verb and execute it.
-  const escapedPath = path.replace(/'/g, "''");
-  const script = `
-try {
-  $filePath = '${escapedPath}'
-  $folder = Split-Path $filePath -Parent
-  $file = Split-Path $filePath -Leaf
-  $shell = New-Object -ComObject Shell.Application
-  $shellFolder = $shell.NameSpace($folder)
-  if ($null -eq $shellFolder) { throw 'folder_not_found' }
-  $shellFile = $shellFolder.ParseName($file)
-  if ($null -eq $shellFile) { throw 'file_not_found' }
-  $blipVerb = @($shellFile.Verbs() | Where-Object { $_.Name -match 'Blip' })
-  if ($blipVerb.Count -eq 0) { throw 'blip_not_found' }
-  $blipVerb[0].DoIt()
-} catch {
-  Write-Error $_.Exception.Message
-  exit 1
-}`;
+  const script = buildWindowsBlipVerbScript(path);
 
   try {
-    await runPowerShellScript(script);
+    await execFileAsync("powershell.exe", getWindowsPowerShellArguments(script), { timeout: 10000 });
   } catch (error) {
     const details = error instanceof Error ? error.message : "Unknown error.";
     throw new Error(buildWindowsError(details));
