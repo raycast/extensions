@@ -1,11 +1,11 @@
-import { exec, execFile } from 'child_process';
+import { exec } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
-import { runAppleScript } from '@raycast/utils';
+import { runAppleScript, executeSQL } from '@raycast/utils';
 import queryString from 'query-string';
 import {
   Area,
@@ -17,6 +17,13 @@ import {
   UpdateTodoParams,
   AddProjectParams,
   UpdateProjectParams,
+  TodoSummary,
+  TodoDetails,
+  ProjectSummary,
+  ProjectDetails,
+  AreaSummary,
+  AreaDetails,
+  ChecklistItem,
 } from './types';
 
 export const preferences = getPreferenceValues<Preferences>();
@@ -49,11 +56,424 @@ function getThingsDBPath(): string {
   return _thingsDBPath;
 }
 
-const execFileAsync = promisify(execFile);
+// ---------------------------------------------------------------------------
+// Things packed-date helpers (ported from Swift Database.swift)
+// Things stores dates as packed Int64: (year << 16) | (month << 12) | (day << 7)
+// ---------------------------------------------------------------------------
 
-async function runSqlite(dbPath: string, sql: string): Promise<string> {
-  const { stdout } = await execFileAsync('/usr/bin/sqlite3', ['-readonly', dbPath, sql]);
-  return stdout.trim();
+const YEAR_SHIFT = 16;
+const MONTH_SHIFT = 12;
+const DAY_SHIFT = 7;
+const MONTH_MASK = 0xf;
+const DAY_MASK = 0x1f;
+const RECURRING_DEADLINE_PLACEHOLDER = 262213760;
+const NEXT_INSTANCE_PLACEHOLDER = 69760;
+
+/** Decode a Things packed-date integer to "YYYY-MM-DD", or null if invalid/placeholder. */
+export function convertThingsDate(value: number): string | null {
+  if (!value || value === RECURRING_DEADLINE_PLACEHOLDER || value === NEXT_INSTANCE_PLACEHOLDER) return null;
+  const year = value >> YEAR_SHIFT;
+  const month = (value >> MONTH_SHIFT) & MONTH_MASK;
+  const day = (value >> DAY_SHIFT) & DAY_MASK;
+  if (year <= 0 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
+/** Encode a calendar date to Things packed-date integer. */
+function encodeThingsDate(year: number, month: number, day: number): number {
+  return (year << YEAR_SHIFT) | (month << MONTH_SHIFT) | (day << DAY_SHIFT);
+}
+
+/** Returns Things packed-date for end-of-today (encodeThingsDate(today) + 127 covers all times within today). */
+function getEndOfToday(): number {
+  const now = new Date();
+  return encodeThingsDate(now.getFullYear(), now.getMonth() + 1, now.getDate()) + 127;
+}
+
+/** Add N calendar days to a Things packed-date integer and re-encode. */
+function addDaysToThingsDate(packedDate: number, days: number): number | null {
+  const dateStr = convertThingsDate(packedDate);
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() + days);
+  return encodeThingsDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+}
+
+/** Parse the recurrence offset (in days) from a Things plist XML recurrence rule. */
+function parseDeadlineOffset(plistXml: unknown): number | null {
+  if (!plistXml || typeof plistXml !== 'string') return null;
+  const match = plistXml.match(/<key>ts<\/key>\s*<integer>(-?\d+)<\/integer>/);
+  if (!match) return null;
+  return Math.abs(parseInt(match[1], 10));
+}
+
+/** Escape a string for safe embedding in a SQLite string literal. */
+function sqlEscape(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+type ResolvedDates = {
+  effectiveDeadline: string | null;
+  effectiveStartDate: string | null;
+  dueDateIsRecurring: boolean;
+};
+
+/**
+ * Resolve effective dates for a todo/project (handles recurring tasks).
+ * Ported from Swift Database.swift resolveEffectiveDates().
+ */
+export function resolveEffectiveDates(
+  startDate: number,
+  deadline: number,
+  nextInstanceStartDate: number,
+  recurrenceRule: unknown,
+): ResolvedDates {
+  // Effective start: prefer startDate, fall back to nextInstanceStartDate (unless placeholder)
+  let effectiveStartDate: string | null = null;
+  if (startDate && startDate !== 0) {
+    effectiveStartDate = convertThingsDate(startDate);
+  } else if (
+    nextInstanceStartDate &&
+    nextInstanceStartDate !== 0 &&
+    nextInstanceStartDate !== NEXT_INSTANCE_PLACEHOLDER
+  ) {
+    effectiveStartDate = convertThingsDate(nextInstanceStartDate);
+  }
+
+  // Recurring deadline: placeholder indicates deadline is relative to next instance
+  if (deadline === RECURRING_DEADLINE_PLACEHOLDER) {
+    const offset = parseDeadlineOffset(recurrenceRule);
+    if (offset !== null && nextInstanceStartDate && nextInstanceStartDate !== 0) {
+      const computedPacked = addDaysToThingsDate(nextInstanceStartDate, offset);
+      const effectiveDeadline = computedPacked !== null ? convertThingsDate(computedPacked) : null;
+      return { effectiveDeadline, effectiveStartDate, dueDateIsRecurring: true };
+    }
+    return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: true };
+  }
+
+  if (deadline && deadline !== 0) {
+    return { effectiveDeadline: convertThingsDate(deadline), effectiveStartDate, dueDateIsRecurring: false };
+  }
+
+  return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: false };
+}
+
+// ---------------------------------------------------------------------------
+// SQLite query helpers (executeSQL from @raycast/utils)
+// ---------------------------------------------------------------------------
+
+// Common SQL fragments (ported from Swift TodoQueries.swift)
+
+const TODO_JOINS = `
+  FROM TMTask t
+  LEFT JOIN TMTask p ON t.project = p.uuid
+  LEFT JOIN TMArea pa ON p.area = pa.uuid
+  LEFT JOIN TMArea a ON t.area = a.uuid`;
+
+const TODO_SELECT_SUMMARY = `
+  t.uuid as id,
+  t.title as name,
+  t.deadline,
+  t.startDate,
+  NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+  t.rt1_recurrenceRule as recurrenceRule,
+  (t.rt1_recurrenceRule IS NOT NULL OR t.rt1_repeatingTemplate IS NOT NULL) as isRecurring,
+  p.title as projectName,
+  p.uuid as projectId,
+  COALESCE(a.title, pa.title) as areaName,
+  COALESCE(a.uuid, pa.uuid) as areaId`;
+
+const TODO_SELECT_DETAIL = `${TODO_SELECT_SUMMARY},
+  t.status,
+  COALESCE(t.notes, '') as notes,
+  (SELECT GROUP_CONCAT(tg.title, ',')
+   FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
+   WHERE tt.tasks = t.uuid) as tagList`;
+
+// Excludes recurring master tasks that have an active instance
+const EXCLUDE_MASTER = `
+  AND NOT (
+    t.rt1_repeatingTemplate IS NULL
+    AND t.rt1_recurrenceRule IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM TMTask i
+      WHERE i.rt1_repeatingTemplate = t.uuid
+        AND i.trashed = 0
+        AND i.status = 0
+    )
+  )`;
+
+const TODO_BASE_WHERE = `t.type = 0 AND t.trashed = 0 AND t.status = 0`;
+
+function listWhere(listName: string): string {
+  const todayEnd = getEndOfToday();
+  switch (listName) {
+    case 'inbox':
+      return `${TODO_BASE_WHERE} AND t.start = 0`;
+    case 'today':
+      return `${TODO_BASE_WHERE} AND t.start = 1 AND t.startDate IS NOT NULL AND t.startDate <= ${todayEnd}`;
+    case 'anytime':
+      return `${TODO_BASE_WHERE} AND t.start = 1 AND (t.startDate IS NULL OR t.startDate > ${todayEnd})`;
+    case 'upcoming':
+      return `${TODO_BASE_WHERE} AND t.start = 2 AND t.startDate IS NOT NULL`;
+    case 'someday':
+      return `${TODO_BASE_WHERE} AND t.start = 2 AND t.startDate IS NULL`;
+    default:
+      return TODO_BASE_WHERE;
+  }
+}
+
+/** Build WHERE clause for queryTodos(), mutually exclusive filters. */
+function buildTodosWhereClause(listName?: string | null, projectId?: string | null, areaId?: string | null): string {
+  if (projectId) {
+    return `${TODO_BASE_WHERE} AND t.project = '${sqlEscape(projectId)}'${EXCLUDE_MASTER}`;
+  }
+  if (areaId) {
+    return `${TODO_BASE_WHERE} AND t.area = '${sqlEscape(areaId)}' AND t.project IS NULL${EXCLUDE_MASTER}`;
+  }
+  if (listName) {
+    return `${listWhere(listName)}${EXCLUDE_MASTER}`;
+  }
+  return `${TODO_BASE_WHERE}${EXCLUDE_MASTER}`;
+}
+
+// Raw row types returned by executeSQL (dates are still packed integers from DB)
+type TodoSummaryRow = {
+  id: string;
+  name: string;
+  deadline: number | null;
+  startDate: number | null;
+  nextInstanceStartDate: number | null;
+  recurrenceRule: unknown;
+  isRecurring: number;
+  projectName: string | null;
+  projectId: string | null;
+  areaName: string | null;
+  areaId: string | null;
+};
+
+type TodoDetailRow = TodoSummaryRow & {
+  status: number;
+  notes: string;
+  tagList: string | null;
+};
+
+/** Convert a raw DB summary row to a TodoSummary (with decoded dates). */
+function rowToTodoSummary(row: TodoSummaryRow): TodoSummary {
+  const { effectiveDeadline, effectiveStartDate, dueDateIsRecurring } = resolveEffectiveDates(
+    row.startDate ?? 0,
+    row.deadline ?? 0,
+    row.nextInstanceStartDate ?? 0,
+    row.recurrenceRule,
+  );
+  return {
+    id: row.id,
+    name: row.name,
+    dueDate: effectiveDeadline ?? undefined,
+    dueDateIsRecurring,
+    activationDate: effectiveStartDate ?? undefined,
+    isRecurring: Boolean(row.isRecurring),
+    projectName: row.projectName ?? undefined,
+    projectId: row.projectId ?? undefined,
+    areaName: row.areaName ?? undefined,
+    areaId: row.areaId ?? undefined,
+  };
+}
+
+/** Query todos with optional list/project/area filter. Returns TodoSummary[]. */
+export async function queryTodos(
+  opts: {
+    listName?: string | null;
+    projectId?: string | null;
+    areaId?: string | null;
+  } = {},
+): Promise<TodoSummary[]> {
+  const where = buildTodosWhereClause(opts.listName, opts.projectId, opts.areaId);
+  const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS} WHERE ${where} ORDER BY t."index"`;
+  const rows = await executeSQL<TodoSummaryRow>(getThingsDBPath(), sql);
+  return rows.map(rowToTodoSummary);
+}
+
+/** Query a single todo's full details including checklist items. */
+export async function queryTodoDetails(todoId: string): Promise<TodoDetails | null> {
+  const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
+    WHERE t.uuid = '${sqlEscape(todoId)}' AND t.type = 0 AND t.trashed = 0 LIMIT 1`;
+  const rows = await executeSQL<TodoDetailRow>(getThingsDBPath(), sql);
+  if (!rows.length) return null;
+  const row = rows[0];
+  const checklistItems = await queryChecklistItems(todoId);
+  const summary = rowToTodoSummary(row);
+  return {
+    ...summary,
+    status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+    notes: row.notes,
+    tags: row.tagList ? row.tagList.split(',').filter(Boolean) : [],
+    checklistItems,
+  };
+}
+
+/** Query multiple todos' full details in batch. */
+export async function queryTodosDetails(todoIds: string[]): Promise<TodoDetails[]> {
+  if (!todoIds.length) return [];
+  const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
+  const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
+    WHERE t.uuid IN (${inClause}) AND t.type = 0 AND t.trashed = 0 ORDER BY t."index"`;
+  const rows = await executeSQL<TodoDetailRow>(getThingsDBPath(), sql);
+
+  // Batch fetch all checklist items
+  const allChecklist = await queryChecklistItemsBatch(todoIds);
+
+  return rows.map((row) => {
+    const summary = rowToTodoSummary(row);
+    return {
+      ...summary,
+      status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+      notes: row.notes,
+      tags: row.tagList ? row.tagList.split(',').filter(Boolean) : [],
+      checklistItems: allChecklist[row.id] ?? [],
+    };
+  });
+}
+
+/** Search todos by title/notes keyword. */
+export async function searchTodos(query: string): Promise<TodoSummary[]> {
+  // Escape special LIKE characters
+  const q = sqlEscape(query).replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+  const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS}
+    WHERE ${TODO_BASE_WHERE}
+      AND (t.title LIKE '%${q}%' ESCAPE '\\' OR t.notes LIKE '%${q}%' ESCAPE '\\')
+    ${EXCLUDE_MASTER}
+    ORDER BY t."index"`;
+  const rows = await executeSQL<TodoSummaryRow>(getThingsDBPath(), sql);
+  return rows.map(rowToTodoSummary);
+}
+
+/** Query checklist items for a single todo. */
+export async function queryChecklistItems(todoId: string): Promise<ChecklistItem[]> {
+  const sql = `SELECT uuid as id, title, status FROM TMChecklistItem WHERE task = '${sqlEscape(todoId)}' ORDER BY "index"`;
+  const rows = await executeSQL<{ id: string; title: string; status: number }>(getThingsDBPath(), sql);
+  return rows.map((r) => ({ id: r.id, title: r.title, completed: r.status === 3 }));
+}
+
+/** Batch query checklist items for multiple todos. Returns a dict keyed by todo uuid. */
+async function queryChecklistItemsBatch(todoIds: string[]): Promise<Record<string, ChecklistItem[]>> {
+  if (!todoIds.length) return {};
+  const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
+  const sql = `SELECT uuid as id, task, title, status FROM TMChecklistItem WHERE task IN (${inClause}) ORDER BY task, "index"`;
+  const rows = await executeSQL<{ id: string; task: string; title: string; status: number }>(getThingsDBPath(), sql);
+  const result: Record<string, ChecklistItem[]> = {};
+  for (const r of rows) {
+    if (!result[r.task]) result[r.task] = [];
+    result[r.task].push({ id: r.id, title: r.title, completed: r.status === 3 });
+  }
+  return result;
+}
+
+/** Query all open projects (summary). */
+export async function queryProjects(): Promise<ProjectSummary[]> {
+  const sql = `SELECT uuid as id, title as name, status FROM TMTask WHERE type = 1 AND trashed = 0 AND status = 0 ORDER BY "index"`;
+  const rows = await executeSQL<{ id: string; name: string; status: number }>(getThingsDBPath(), sql);
+  return rows.map((r) => ({ id: r.id, name: r.name }));
+}
+
+/** Query a single project's full details. */
+export async function queryProjectDetails(projectId: string): Promise<ProjectDetails | null> {
+  const sql = `
+    SELECT
+      p.uuid as id, p.title as name, p.status,
+      COALESCE(p.notes, '') as notes,
+      p.deadline, p.startDate,
+      NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+      p.rt1_recurrenceRule as recurrenceRule,
+      a.uuid as areaId, a.title as areaName,
+      (SELECT GROUP_CONCAT(tg.title, ',')
+       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tagList,
+      (SELECT COUNT(*) FROM TMTask t WHERE t.project = p.uuid AND t.type = 0 AND t.trashed = 0 AND t.status = 0) as todoCount
+    FROM TMTask p
+    LEFT JOIN TMArea a ON a.uuid = p.area
+    WHERE p.uuid = '${sqlEscape(projectId)}' AND p.type = 1 AND p.trashed = 0 LIMIT 1`;
+  type ProjectRow = {
+    id: string;
+    name: string;
+    status: number;
+    notes: string;
+    deadline: number | null;
+    startDate: number | null;
+    nextInstanceStartDate: number | null;
+    recurrenceRule: unknown;
+    areaId: string | null;
+    areaName: string | null;
+    tagList: string | null;
+    todoCount: number;
+  };
+  const rows = await executeSQL<ProjectRow>(getThingsDBPath(), sql);
+  if (!rows.length) return null;
+  const r = rows[0];
+  const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+    r.startDate ?? 0,
+    r.deadline ?? 0,
+    r.nextInstanceStartDate ?? 0,
+    r.recurrenceRule,
+  );
+  return {
+    id: r.id,
+    name: r.name,
+    status: r.status === 2 ? 'canceled' : r.status === 3 ? 'completed' : 'open',
+    notes: r.notes,
+    tags: r.tagList ? r.tagList.split(',').filter(Boolean) : [],
+    dueDate: effectiveDeadline ?? undefined,
+    activationDate: effectiveStartDate ?? undefined,
+    areaId: r.areaId ?? undefined,
+    areaName: r.areaName ?? undefined,
+    todoCount: r.todoCount,
+  };
+}
+
+/** Query all areas (summary). */
+export async function queryAreas(): Promise<AreaSummary[]> {
+  const sql = `SELECT uuid as id, title as name FROM TMArea ORDER BY "index"`;
+  const rows = await executeSQL<{ id: string; name: string }>(getThingsDBPath(), sql);
+  return rows;
+}
+
+/** Query a single area's full details. */
+export async function queryAreaDetails(areaId: string): Promise<AreaDetails | null> {
+  const sql = `
+    SELECT
+      a.uuid as id, a.title as name,
+      (SELECT GROUP_CONCAT(tg.title, ',')
+       FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tagList,
+      (SELECT COUNT(*) FROM TMTask p WHERE p.area = a.uuid AND p.type = 1 AND p.trashed = 0 AND p.status = 0) as projectCount,
+      (SELECT COUNT(*) FROM TMTask t WHERE t.area = a.uuid AND t.type = 0 AND t.project IS NULL AND t.trashed = 0 AND t.status = 0) as todoCount
+    FROM TMArea a
+    WHERE a.uuid = '${sqlEscape(areaId)}' LIMIT 1`;
+  type AreaRow = { id: string; name: string; tagList: string | null; projectCount: number; todoCount: number };
+  const rows = await executeSQL<AreaRow>(getThingsDBPath(), sql);
+  if (!rows.length) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    name: r.name,
+    tags: r.tagList ? r.tagList.split(',').filter(Boolean) : [],
+    projectCount: r.projectCount,
+    todoCount: r.todoCount,
+  };
+}
+
+/** Query all tag names. */
+export async function queryTags(): Promise<string[]> {
+  const sql = `SELECT title FROM TMTag ORDER BY title COLLATE NOCASE`;
+  const rows = await executeSQL<{ title: string }>(getThingsDBPath(), sql);
+  return rows.map((r) => r.title);
+}
+
+/** Add a JSON payload via the things:///json URL scheme (requires auth token). */
+export async function addJson(jsonData: unknown[]): Promise<void> {
+  const { authToken } = getPreferenceValues<Preferences>();
+  if (!authToken) throw new Error('unauthorized');
+  const encoded = encodeURIComponent(JSON.stringify(jsonData));
+  await silentlyOpenThingsURL(`things:///json?auth-token=${encodeURIComponent(authToken)}&data=${encoded}`);
 }
 
 export class ThingsError extends Error {
@@ -138,7 +558,146 @@ const commandListNameToListIdMapping: Record<CommandListName, string> = {
   trash: 'TMTrashListSource',
 };
 
-export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> => {
+// SQLite-based getListTodos — much faster than JXA (~15s → <100ms).
+// Logbook and Trash are not available via the SQLite query layer (they require
+// different status/trashed flags); those fall back to JXA automatically.
+const SQL_SUPPORTED_LISTS = new Set(['inbox', 'today', 'anytime', 'upcoming', 'someday']);
+
+async function getListTodosFromDB(commandListName: CommandListName): Promise<Todo[]> {
+  // Build a richer SQL query that also fetches project/area info and creation date
+  const where = buildTodosWhereClause(commandListName);
+  const sql = `
+    SELECT
+      t.uuid as id,
+      t.title as name,
+      t.deadline,
+      t.startDate,
+      NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+      t.rt1_recurrenceRule as recurrenceRule,
+      (t.rt1_recurrenceRule IS NOT NULL OR t.rt1_repeatingTemplate IS NOT NULL) as isRecurring,
+      t.status,
+      COALESCE(t.notes, '') as notes,
+      t.type,
+      (SELECT GROUP_CONCAT(tg.title, ',')
+       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
+       WHERE tt.tasks = t.uuid) as tagList,
+      p.uuid as projectId,
+      p.title as projectName,
+      p.status as projectStatus,
+      NULLIF(p.deadline, 0) as projectDeadline,
+      NULLIF(p.startDate, 0) as projectStartDate,
+      (SELECT GROUP_CONCAT(tg.title, ',')
+       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
+       WHERE tt.tasks = p.uuid) as projectTagList,
+      pa.uuid as projectAreaId,
+      pa.title as projectAreaName,
+      a.uuid as areaId,
+      a.title as areaName,
+      (SELECT GROUP_CONCAT(tg.title, ',')
+       FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags
+       WHERE at2.areas = COALESCE(a.uuid, pa.uuid)) as areaTagList,
+      t.creationDate as creationDateRaw
+    FROM TMTask t
+    LEFT JOIN TMTask p ON t.project = p.uuid
+    LEFT JOIN TMArea pa ON p.area = pa.uuid
+    LEFT JOIN TMArea a ON t.area = a.uuid
+    WHERE ${where}
+    ORDER BY t."index"`;
+
+  type ListTodoRow = {
+    id: string;
+    name: string;
+    deadline: number | null;
+    startDate: number | null;
+    nextInstanceStartDate: number | null;
+    recurrenceRule: unknown;
+    isRecurring: number;
+    status: number;
+    notes: string;
+    type: number;
+    tagList: string | null;
+    projectId: string | null;
+    projectName: string | null;
+    projectStatus: number | null;
+    projectDeadline: number | null;
+    projectStartDate: number | null;
+    projectTagList: string | null;
+    projectAreaId: string | null;
+    projectAreaName: string | null;
+    areaId: string | null;
+    areaName: string | null;
+    areaTagList: string | null;
+    creationDateRaw: number | null;
+  };
+
+  const rows = await executeSQL<ListTodoRow>(getThingsDBPath(), sql);
+
+  return rows.map((row): Todo => {
+    const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+      row.startDate ?? 0,
+      row.deadline ?? 0,
+      row.nextInstanceStartDate ?? 0,
+      row.recurrenceRule,
+    );
+
+    let project: Project | undefined;
+    let area: Area | undefined;
+    let areaTags: string | null = null;
+
+    if (row.projectId) {
+      let projectArea: Area | undefined;
+      if (row.projectAreaId) {
+        projectArea = { id: row.projectAreaId, name: row.projectAreaName ?? '' };
+        areaTags = row.areaTagList ?? null;
+      }
+      project = {
+        id: row.projectId,
+        name: row.projectName ?? '',
+        status: row.projectStatus === 2 ? 'canceled' : row.projectStatus === 3 ? 'completed' : 'open',
+        tags: row.projectTagList ?? '',
+        dueDate: row.projectDeadline ? (convertThingsDate(row.projectDeadline) ?? '') : '',
+        activationDate: row.projectStartDate ? (convertThingsDate(row.projectStartDate) ?? '') : '',
+        notes: '',
+        area: projectArea,
+      };
+    } else if (row.areaId) {
+      area = { id: row.areaId, name: row.areaName ?? '' };
+      areaTags = row.areaTagList ?? null;
+    }
+
+    // creationDate is stored as Unix timestamp seconds in SQLite
+    const creationDate = row.creationDateRaw ? new Date(row.creationDateRaw * 1000).toISOString() : null;
+
+    return {
+      id: row.id,
+      name: row.name,
+      status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+      notes: row.notes,
+      tags: row.tagList ?? '',
+      dueDate: effectiveDeadline ?? '',
+      activationDate: effectiveStartDate ?? '',
+      creationDate: creationDate ?? '',
+      isProject: row.type === 1,
+      areaTags,
+      project,
+      area,
+    };
+  });
+}
+
+export const getListTodos = async (commandListName: CommandListName): Promise<Todo[]> => {
+  // Use fast SQLite path for supported lists, fall back to JXA for logbook/trash
+  if (SQL_SUPPORTED_LISTS.has(commandListName)) {
+    try {
+      return await getListTodosFromDB(commandListName);
+    } catch (error) {
+      console.warn(`getListTodos: SQLite query failed for '${commandListName}', falling back to JXA:`, error);
+    }
+  }
+  return getListTodosViaJXA(commandListName);
+};
+
+const getListTodosViaJXA = (commandListName: CommandListName): Promise<Todo[]> => {
   return executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
@@ -221,14 +780,19 @@ export const getProjectName = (projectId: string) =>
     'Get project name',
   );
 
-export const setTodoProperty = (todoId: string, key: string, value: string) =>
-  executeJxa(
+const DATE_KEYS = new Set(['dueDate', 'activationDate', 'completionDate', 'cancellationDate']);
+
+export const setTodoProperty = (todoId: string, key: string, value: string) => {
+  // Date keys must be passed as JS Date objects in JXA — plain strings crash Things
+  const valueExpr = DATE_KEYS.has(key) ? `new Date('${value}')` : `'${value}'`;
+  return executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  things.toDos.byId('${todoId}').${key} = '${value}';
+  things.toDos.byId('${todoId}').${key} = ${valueExpr};
 `,
     'Set todo property',
   );
+};
 
 export const deleteTodo = (todoId: string) =>
   executeJxa(
@@ -414,10 +978,10 @@ const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
       LEFT JOIN TMArea pa ON pa.uuid = p.area
       WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0
     ), json('[]'))
-  );`;
+  ) as result`;
 
-  const stdout = await runSqlite(getThingsDBPath(), sql);
-  const data = JSON.parse(stdout);
+  const rows = await executeSQL<{ result: string }>(getThingsDBPath(), sql);
+  const data = JSON.parse(rows[0].result);
 
   // SQLite returns null for missing values; convert to undefined to match TypeScript optionals
   const nullToUndefined = (v: string | null) => v ?? undefined;

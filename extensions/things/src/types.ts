@@ -1,5 +1,81 @@
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
 
+// ---------------------------------------------------------------------------
+// Flat AI-friendly types (used by the AI tools, distinct from the nested UI types)
+// ---------------------------------------------------------------------------
+
+/** Checklist item within a to-do. */
+export type ChecklistItem = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
+/** Lightweight to-do summary — used by list/search/filter tools. */
+export type TodoSummary = {
+  id: string;
+  name: string;
+  /** ISO 8601 date string (YYYY-MM-DD), or undefined if no due date. */
+  dueDate?: string;
+  /**
+   * true when the due date is dynamically computed from a recurrence rule
+   * (i.e. it will shift each time the task repeats). Do NOT treat it as a
+   * fixed deadline.
+   */
+  dueDateIsRecurring: boolean;
+  /** ISO 8601 date string (YYYY-MM-DD) for when the task becomes active, or undefined. */
+  activationDate?: string;
+  /** true when the task is a recurring task (repeating template or instance). */
+  isRecurring: boolean;
+  projectName?: string;
+  projectId?: string;
+  areaName?: string;
+  areaId?: string;
+};
+
+/** Full to-do details including notes, tags, and checklist. */
+export type TodoDetails = TodoSummary & {
+  status: 'open' | 'completed' | 'canceled';
+  notes: string;
+  tags: string[];
+  checklistItems: ChecklistItem[];
+};
+
+/** Lightweight project summary. */
+export type ProjectSummary = {
+  id: string;
+  name: string;
+};
+
+/** Full project details. */
+export type ProjectDetails = {
+  id: string;
+  name: string;
+  status: 'open' | 'completed' | 'canceled';
+  notes: string;
+  tags: string[];
+  dueDate?: string;
+  activationDate?: string;
+  areaId?: string;
+  areaName?: string;
+  todoCount: number;
+};
+
+/** Lightweight area summary. */
+export type AreaSummary = {
+  id: string;
+  name: string;
+};
+
+/** Full area details. */
+export type AreaDetails = {
+  id: string;
+  name: string;
+  tags: string[];
+  projectCount: number;
+  todoCount: number;
+};
+
 export type Todo = {
   id: string;
   name: string;

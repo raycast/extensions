@@ -1,5 +1,13 @@
 # Things Changelog
 
+## [SQLite-Based Reading and Expanded AI Tools] - {PR_MERGE_DATE}
+
+- Replaced JXA-based list fetching with direct SQLite reads via `executeSQL` (inbox/today/anytime/upcoming/someday load in <100ms instead of ~15s). Logbook and Trash still use JXA as a fallback.
+- Fixed recurring task due dates: Tasks with a repeating deadline now show the correct upcoming deadline date instead of a placeholder value. Added `dueDateIsRecurring` field to signal when a due date shifts with each recurrence.
+- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects via JXA instead of plain strings.
+- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, `add-json` (create projects with headings and nested to-dos in one call).
+- Improved AI instructions: search-first guidance, batch-details preference, and clearer write-operation routing.
+
 ## [Bug Fixes] - 2026-06-04
 
 - Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
