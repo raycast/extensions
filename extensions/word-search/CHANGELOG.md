@@ -1,6 +1,6 @@
 # Word Search Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-06-04
 
 - Avoided reading selected text when the Use Selection preference is disabled.
 
