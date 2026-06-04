@@ -16,13 +16,13 @@ interface VersionSubmenuProps {
 
 export function VersionSubmenu({ extension, installedVersion, onInstall }: VersionSubmenuProps) {
   const [versions, setVersions] = useState<ExtensionVersionInfo[]>(() => getCachedVersions(extension.id));
-  const [isLoading, setIsLoading] = useState<boolean>(() => !hasCachedVersions(extension.id));
+  const [isLoading, setIsLoading] = useState<boolean>(() => getCachedVersions(extension.id).length === 0);
 
   useEffect(() => {
     let isCancelled = false;
 
     const cachedVersions = getCachedVersions(extension.id);
-    if (cachedVersions.length > 0 || hasCachedVersions(extension.id)) {
+    if (cachedVersions.length > 0) {
       setVersions(cachedVersions);
       setIsLoading(false);
       return () => {
@@ -62,39 +62,43 @@ export function VersionSubmenu({ extension, installedVersion, onInstall }: Versi
 
   return (
     <ActionPanel.Submenu title="Install a Specific Version…" icon={Icon.Layers}>
-      {versions.map((v, index) => {
-        const isLatest = index === 0;
-        const isInstalled = v.version === installedVersion;
-        const isUpdateAvailable = !!installedVersion && installedVersion !== versions[0]?.version;
+      {versions.length === 0 ? (
+        <Action title="No Versions Found" icon={Icon.Info} />
+      ) : (
+        versions.map((v, index) => {
+          const isLatest = index === 0;
+          const isInstalled = v.version === installedVersion;
+          const isUpdateAvailable = !!installedVersion && installedVersion !== versions[0]?.version;
 
-        let versionIcon = Icon.Box;
+          let versionIcon = Icon.Box;
 
-        if (isInstalled) {
-          versionIcon = Icon.Checkmark;
-        } else if (isLatest) {
-          versionIcon = Icon.Star;
-        }
+          if (isInstalled) {
+            versionIcon = Icon.Checkmark;
+          } else if (isLatest) {
+            versionIcon = Icon.Star;
+          }
 
-        let statusBadge = "";
-        if (isLatest && isInstalled) {
-          statusBadge = " (Latest)";
-        } else if (isInstalled) {
-          statusBadge = " (Installed)";
-        } else if (isLatest && isUpdateAvailable) {
-          statusBadge = " (Update Available)";
-        } else if (isLatest) {
-          statusBadge = " (Latest)";
-        }
+          let statusBadge = "";
+          if (isLatest && isInstalled) {
+            statusBadge = " (Latest)";
+          } else if (isInstalled) {
+            statusBadge = " (Installed)";
+          } else if (isLatest && isUpdateAvailable) {
+            statusBadge = " (Update Available)";
+          } else if (isLatest) {
+            statusBadge = " (Latest)";
+          }
 
-        return (
-          <Action
-            key={v.version}
-            title={`${v.version}${statusBadge} • ${new Date(v.published_at).toLocaleDateString("en-US")}`}
-            icon={versionIcon}
-            onAction={() => onInstall(extension, v.version)}
-          />
-        );
-      })}
+          return (
+            <Action
+              key={v.version}
+              title={`${v.version}${statusBadge} • ${new Date(v.published_at).toLocaleDateString("en-US")}`}
+              icon={versionIcon}
+              onAction={() => onInstall(extension, v.version)}
+            />
+          );
+        })
+      )}
     </ActionPanel.Submenu>
   );
 }
@@ -109,8 +113,4 @@ function getCachedVersions(extensionId: string): ExtensionVersionInfo[] {
   } catch {
     return [];
   }
-}
-
-function hasCachedVersions(extensionId: string): boolean {
-  return versionCache.get(extensionId) !== undefined;
 }
