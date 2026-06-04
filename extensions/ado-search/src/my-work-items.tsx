@@ -45,6 +45,7 @@ import {
 } from "./lib/attachments";
 import { useEffect, useState } from "react";
 import path from "path";
+import crypto from "crypto";
 
 function useProcessedDescription(description: string | undefined): ProcessedDescription | null {
   const [media, setMedia] = useState<ProcessedDescription | null>(null);
@@ -605,10 +606,7 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
   });
 
   const richHtmls = [current.description, current.acceptanceCriteria, current.reproSteps, ...(comments ?? [])];
-  const richKey = `${current.id}|${richHtmls
-    .filter(Boolean)
-    .map((h) => h?.length ?? 0)
-    .join(",")}`;
+  const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join(" ")).digest("hex")}`;
   const media = useProcessedHtmlList(richHtmls, richKey);
 
   const {
@@ -797,11 +795,13 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
               actions={
                 <ActionPanel>
                   <Action title="Open" icon={Icon.Eye} onAction={() => open(img.localPath)} />
-                  <Action.OpenInBrowser
-                    title="Open Source URL"
-                    url={img.originalUrl}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
+                  {img.originalUrl.startsWith("http") && (
+                    <Action.OpenInBrowser
+                      title="Open Source URL"
+                      url={img.originalUrl}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                  )}
                   <Action.ShowInFinder
                     title="Show in Finder"
                     path={img.localPath}

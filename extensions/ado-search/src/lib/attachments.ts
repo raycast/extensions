@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { writeFile, mkdir, access, readdir } from "fs/promises";
+import { writeFile, mkdir, access, readdir, stat, unlink } from "fs/promises";
 import path from "path";
 import { pathToFileURL } from "url";
 import crypto from "crypto";
@@ -10,6 +10,40 @@ function getAuthHeader(): string {
 }
 
 const cacheDir = path.join(environment.supportPath, "attachments");
+
+// Evict cached attachments older than this so the cache can't grow unbounded.
+const MAX_CACHE_AGE_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+let prunePromise: Promise<void> | null = null;
+
+/**
+ * Delete cached attachment files older than MAX_CACHE_AGE_MS. Runs at most once
+ * per session and is best-effort — any error (including a missing cache dir) is
+ * ignored so it never interferes with rendering.
+ */
+function pruneCacheOnce(): Promise<void> {
+  if (!prunePromise) {
+    prunePromise = (async () => {
+      const now = Date.now();
+      try {
+        const files = await readdir(cacheDir);
+        await Promise.all(
+          files.map(async (f) => {
+            const p = path.join(cacheDir, f);
+            try {
+              const s = await stat(p);
+              if (now - s.mtimeMs > MAX_CACHE_AGE_MS) await unlink(p);
+            } catch {
+              /* ignore individual file errors */
+            }
+          }),
+        );
+      } catch {
+        /* cache dir may not exist yet — nothing to prune */
+      }
+    })();
+  }
+  return prunePromise;
+}
 
 export interface ProcessedImage {
   originalUrl: string;
@@ -83,6 +117,7 @@ async function cacheDataUrl(url: string, alt: string): Promise<{ localPath: stri
   const hash = crypto.createHash("sha1").update(data).digest("hex").slice(0, 16);
 
   await mkdir(cacheDir, { recursive: true });
+  void pruneCacheOnce();
   const cached = await findCachedByPrefix(hash);
   if (cached) {
     return { localPath: cached, filename: deriveFilename(url, alt, ext) };
@@ -96,6 +131,7 @@ async function cacheDataUrl(url: string, alt: string): Promise<{ localPath: stri
 
 async function cacheRemoteUrl(url: string, alt: string): Promise<{ localPath: string; filename: string }> {
   await mkdir(cacheDir, { recursive: true });
+  void pruneCacheOnce();
   const hash = crypto.createHash("sha1").update(url).digest("hex").slice(0, 16);
 
   const cached = await findCachedByPrefix(hash);
