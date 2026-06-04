@@ -1,30 +1,35 @@
-import { Detail, showToast, Toast } from "@raycast/api";
-import Bookmark from "./dtos/bookmark-dto";
+import { Detail } from "@raycast/api";
 import BookmarkList from "./components/bookmark-list";
-import { fetchBookmarks, isGitfoxCliInstalled, gitfoxCliRequiredMessage } from "./utils";
-import { usePromise } from "@raycast/utils";
-
-export function fetchRepositories(): Promise<void | Bookmark[]> {
-  return fetchBookmarks().catch((error) => {
-    const err = error instanceof Error ? error : new Error("Something went wrong");
-    showToast(Toast.Style.Failure, err.name, err.message);
-  });
-}
+import { isGitfoxCliInstalled, gitfoxCliRequiredMessage } from "./utils";
+import { useBookmarks } from "./hooks/use-bookmarks";
+import { usePinnedRepos } from "./hooks/use-pinned-repos";
+import { useRecentRepos } from "./hooks/use-recent-repos";
+import { useBatchGitStatus } from "./hooks/use-batch-git-status";
+import { useMemo } from "react";
 
 export default function Command() {
-  const { data, isLoading } = usePromise(fetchRepositories);
+  const { data: groups = [], isLoading } = useBookmarks();
+  const { pinnedIds, togglePin, isPinned } = usePinnedRepos();
+  const { recentIds, recordOpen, clearRecent } = useRecentRepos();
 
-  if (!data) {
-    return <Detail navigationTitle="Loading..." />;
+  const allBookmarks = useMemo(() => groups.flatMap((g) => g.bookmarks), [groups]);
+  const gitStatusMap = useBatchGitStatus(allBookmarks);
+
+  if (!isGitfoxCliInstalled()) {
+    return <Detail navigationTitle="GitFox CLI not configured" markdown={gitfoxCliRequiredMessage()} />;
   }
 
   return (
-    <>
-      {isGitfoxCliInstalled() ? (
-        <BookmarkList bookmarks={data} isLoading={isLoading} />
-      ) : (
-        <Detail navigationTitle="GitFox CLI not configured" markdown={gitfoxCliRequiredMessage()} />
-      )}
-    </>
+    <BookmarkList
+      groups={groups}
+      isLoading={isLoading}
+      pinnedIds={pinnedIds}
+      recentIds={recentIds}
+      isPinned={isPinned}
+      onTogglePin={togglePin}
+      onOpen={recordOpen}
+      onClearRecent={clearRecent}
+      gitStatusMap={gitStatusMap}
+    />
   );
 }

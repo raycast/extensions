@@ -10,5 +10,8 @@ raycast-env.d.ts
 compiled_raycast_swift
 compiled_raycast_rust
 
+# test coverage
+/coverage
+
 # misc
 .DS_Store

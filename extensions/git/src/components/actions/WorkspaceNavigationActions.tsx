@@ -3,6 +3,7 @@ import { GitView } from "../../types";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { RepositoryDirectoryActions } from "./RepositoryDirectoryActions";
 import { SwitchRepositoryAction } from "./SwitchRepositoryAction";
+import { GitConfigView } from "../views/GitConfigView";
 
 export function WorkspaceNavigationDropdown(context: NavigationContext) {
   return (
@@ -21,6 +22,7 @@ export function WorkspaceNavigationDropdown(context: NavigationContext) {
       <List.Dropdown.Item title="Branches" value="branches" keywords={["graph", "remote"]} icon={`git-branch.svg`} />
       <List.Dropdown.Item title="Tags" value="tags" icon={Icon.Tag} />
       <List.Dropdown.Item title="Remotes" value="remotes" keywords={["origin"]} icon={Icon.Network} />
+      <List.Dropdown.Item title="Submodules" value="submodules" icon={`submodule-folder.svg`} />
       <List.Dropdown.Item title="Stashes" value="stashes" keywords={["bookmark"]} icon={Icon.Bookmark} />
       <List.Dropdown.Item
         title="Files"
@@ -67,10 +69,16 @@ export function WorkspaceNavigationActions(context: NavigationContext & Reposito
           shortcut={{ modifiers: ["cmd"], key: "5" }}
         />
         <Action
+          title="Go to Submodules"
+          onAction={() => context.navigateTo("submodules")}
+          icon={`submodule-folder.svg`}
+          shortcut={{ modifiers: ["cmd"], key: "6" }}
+        />
+        <Action
           title="Go to Stash"
           onAction={() => context.navigateTo("stashes")}
           icon={Icon.Bookmark}
-          shortcut={{ modifiers: ["cmd"], key: "6" }}
+          shortcut={{ modifiers: ["cmd"], key: "7" }}
         />
         <Action
           title="Go to Files"
@@ -81,6 +89,14 @@ export function WorkspaceNavigationActions(context: NavigationContext & Reposito
       </ActionPanel.Section>
 
       <RepositoryDirectoryActions repositoryPath={context.gitManager.repoPath} />
+
+      <Action.Push
+        title="Show Git Config"
+        target={<GitConfigView {...context} />}
+        icon={Icon.Gear}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+      />
+
       <SwitchRepositoryAction repositoryPath={context.gitManager.repoPath} onSwitch={context.switchTo} />
     </>
   );

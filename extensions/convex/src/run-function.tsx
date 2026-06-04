@@ -25,8 +25,7 @@ import {
   useProjects,
   useDeployments,
 } from "./hooks/useConvexData";
-import { runFunction, type FunctionSpec, type AuthOptions } from "./lib/api";
-import { type DeployKeyConfig } from "./lib/deployKeyAuth";
+import { runFunction, type FunctionSpec } from "./lib/api";
 
 interface FunctionWithPath extends FunctionSpec {
   fullPath: string;
@@ -34,38 +33,35 @@ interface FunctionWithPath extends FunctionSpec {
 }
 
 export default function RunFunctionCommand() {
-  const { session, selectedContext, isDeployKeyMode, deployKeyConfig } =
-    useConvexAuth();
+  const { session, selectedContext } = useConvexAuth();
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
   const accessToken = session?.accessToken ?? null;
   const deploymentName = selectedContext.deploymentName;
 
-  // Fetch context data (only in OAuth mode - not available with deploy keys)
-  const { data: teams } = useTeams(isDeployKeyMode ? null : accessToken);
-  const { data: projects } = useProjects(
-    isDeployKeyMode ? null : accessToken,
-    selectedContext.teamId,
-  );
+  // Fetch context data
+  const { data: teams } = useTeams(accessToken);
+  const { data: projects } = useProjects(accessToken, selectedContext.teamId);
   const { data: deployments } = useDeployments(
-    isDeployKeyMode ? null : accessToken,
+    accessToken,
     selectedContext.projectId,
   );
 
-  const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
-  const selectedProject = projects?.find(
-    (p) => p.id === selectedContext.projectId,
-  );
-  const selectedDeployment = deployments?.find(
-    (d) => d.name === deploymentName,
-  );
+  const selectedTeam = Array.isArray(teams)
+    ? teams.find((t) => t.id === selectedContext.teamId)
+    : undefined;
+  const selectedProject = Array.isArray(projects)
+    ? projects.find((p) => p.id === selectedContext.projectId)
+    : undefined;
+  const selectedDeployment = Array.isArray(deployments)
+    ? deployments.find((d) => d.name === deploymentName)
+    : undefined;
 
-  // Fetch functions (supports both OAuth and deploy key modes)
+  // Fetch functions
   const { data: modules, isLoading: functionsLoading } = useFunctions(
     accessToken,
     deploymentName,
-    deployKeyConfig,
   );
 
   // Handle authentication
@@ -88,7 +84,9 @@ export default function RunFunctionCommand() {
   }
 
   // Flatten functions for search
-  const allFunctions: FunctionWithPath[] = (modules ?? []).flatMap((module) =>
+  const allFunctions: FunctionWithPath[] = (
+    Array.isArray(modules) ? modules : []
+  ).flatMap((module) =>
     module.functions
       .filter((fn) => fn.visibility?.kind === "public")
       .map((fn) => {
@@ -137,7 +135,6 @@ export default function RunFunctionCommand() {
         functionSpec={fn}
         deploymentName={deploymentName}
         accessToken={accessToken!}
-        deployKeyConfig={deployKeyConfig}
         teamSlug={selectedTeam?.slug}
         projectSlug={selectedProject?.slug}
         deploymentType={selectedDeployment?.deploymentType}
@@ -214,7 +211,6 @@ interface FunctionRunnerProps {
   functionSpec: FunctionWithPath;
   deploymentName: string;
   accessToken: string;
-  deployKeyConfig?: DeployKeyConfig | null;
   teamSlug?: string;
   projectSlug?: string;
   deploymentType?: string;
@@ -224,7 +220,6 @@ function FunctionRunner({
   functionSpec,
   deploymentName,
   accessToken,
-  deployKeyConfig,
   teamSlug,
   projectSlug,
   deploymentType,
@@ -254,29 +249,13 @@ function FunctionRunner({
     setResult(null);
 
     try {
-      let response;
-      if (deployKeyConfig) {
-        // Deploy key mode
-        const auth: AuthOptions = {
-          deployKey: deployKeyConfig.deployKey,
-          deploymentUrl: deployKeyConfig.deploymentUrl,
-        };
-        response = await runFunction(
-          auth,
-          functionSpec.fullPath,
-          functionSpec.functionType,
-          args,
-        );
-      } else {
-        // OAuth mode
-        response = await runFunction(
-          deploymentName,
-          accessToken,
-          functionSpec.fullPath,
-          functionSpec.functionType,
-          args,
-        );
-      }
+      const response = await runFunction(
+        deploymentName,
+        accessToken,
+        functionSpec.fullPath,
+        functionSpec.functionType,
+        args,
+      );
 
       setResult({
         data: response.result,

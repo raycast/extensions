@@ -1,5 +1,11 @@
 # Claude Changelog
 
+## [Fix memory leak] - 2026-02-01
+
+- Fix: Resolved JS heap out of memory error by throttling UI updates during streaming responses
+- Fix: Removed duplicate history entries that were being created when streaming was enabled
+- Fix: Added proper stream cleanup on component unmount to prevent orphaned handlers
+
 ## [Update] - 2025-11-03
 
 - Feature: Added dynamic model retrieval removing the need to update the extension with each model release.

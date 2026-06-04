@@ -138,3 +138,26 @@ export interface TransactionsResponse {
   transactions: Transaction[];
   transactions_details: TransactionsDetails;
 }
+
+// Category Types
+export interface Category {
+  id: number;
+  parent_id: number | null;
+  guest_id: number;
+  category_type: string | null;
+  updated_at: string;
+  created_at: string;
+  entity_key: string | null;
+  name: string;
+  icon_key: string;
+  parent?: {
+    id: number;
+  };
+  guest?: {
+    id: number;
+  };
+}
+
+export interface CategoriesResponse {
+  categories: Category[];
+}

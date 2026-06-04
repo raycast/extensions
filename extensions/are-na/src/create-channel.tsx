@@ -1,15 +1,16 @@
 import { Form, ActionPanel, Action, showToast, useNavigation, Toast } from "@raycast/api";
-import { showFailureToast, FormValidation, useForm } from "@raycast/utils";
+import { showFailureToast, FormValidation, useForm, withAccessToken } from "@raycast/utils";
 import { useArena } from "./hooks/useArena";
 import { ChannelStatus } from "./api/types";
 import { ChannelView } from "./components/channel";
+import { arenaOAuth } from "./api/oauth";
 
 type Values = {
   title: string;
   status: ChannelStatus;
 };
 
-export default function Command() {
+function Command() {
   const { push } = useNavigation();
   const arena = useArena();
   const { handleSubmit, itemProps } = useForm<Values>({
@@ -60,3 +61,5 @@ export default function Command() {
     </Form>
   );
 }
+
+export default withAccessToken(arenaOAuth)(Command);

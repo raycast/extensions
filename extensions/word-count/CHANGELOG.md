@@ -1,5 +1,14 @@
 # Word Count Changelog
 
+## [New Feature] - 2026-01-28
+
+- Create new command to show overlay rather than open raycast window
+- Is meant for quickly checking word count without being intrusive, keeping the current app in focus
+
+## [Update] - 2026-01-27
+
+- Add Raycast Cross-Extension badge to readme
+
 ## [New Feature] - 2026-01-19
 
 - **Added screenshot-based word counting** - Capture any text on screen and get instant counts using OCR

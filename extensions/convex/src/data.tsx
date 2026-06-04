@@ -58,13 +58,15 @@ export default function BrowseTablesCommand() {
     selectedContext.projectId,
   );
 
-  const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
-  const selectedProject = projects?.find(
-    (p) => p.id === selectedContext.projectId,
-  );
-  const selectedDeployment = deployments?.find(
-    (d) => d.name === deploymentName,
-  );
+  const selectedTeam = Array.isArray(teams)
+    ? teams.find((t) => t.id === selectedContext.teamId)
+    : undefined;
+  const selectedProject = Array.isArray(projects)
+    ? projects.find((p) => p.id === selectedContext.projectId)
+    : undefined;
+  const selectedDeployment = Array.isArray(deployments)
+    ? deployments.find((d) => d.name === deploymentName)
+    : undefined;
 
   // Fetch tables (supports both OAuth and deploy key modes)
   const { data: tables, isLoading: tablesLoading } = useTables(

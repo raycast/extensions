@@ -1,5 +1,72 @@
 # GitHub Copilot Changelog
 
+## [Fix tasks without an associated pull request] - 2026-05-13
+
+- Handle tasks returned by the Copilot API that don't have an associated pull request
+- Show "Open in Browser" for tasks without a pull request
+- Fix `TypeError: Cannot read properties of undefined (reading 'toString')` when viewing the task list
+
+## [Improve repository picker] - 2026-03-26
+
+- Remember "Recently used" repositories in the repository picker
+- Show a more relevant list of repositories in the repository picker by default
+- Fix repository picker search filtering to only show matching repositories, hiding the previously selected repository if it doesn't match
+
+## [Fix "Create Task" command error on successful creation] - 2026-03-20
+
+- Fix error when a task is created successfully with the "Create Task" command
+
+## [View live agent logs] - 2026-03-17
+
+- Allow viewing the live agent logs for a task with the "View Tasks" command
+
+## [Fix View Tasks sort field] - 2026-03-14
+
+- Fix 422 error in "View Tasks" command caused by invalid sort field (`last_updated_at` → `updated_at`)
+- Update getTaskIconPath to use state field
+
+## [Fix copilot quota 100% cap] - 2026-02-24
+
+- Fix Copilot quota cap at 100% when user has used all of their quota and have the "Allow usage beyond quota" setting enabled
+
+## [Fix search-repositories AI tool] - 2026-02-09
+
+- Fix search-repositories AI tool crash
+
+## [Premium requests on view tasks] - 2026-02-08
+
+- Add premium requests used to the "View Tasks" command
+
+## [Fix titles and URLs for tasks without a pull request] - 2026-02-06
+
+- Fix titles and URLs for tasks without a pull request in "View Tasks" command
+
+## [Additional instructions for issue assignment] - 2026-02-06
+
+- Add optional "Additional Instructions" field when assigning an issue to Copilot
+
+## [Switch extension to use new API] - 2026-02-06
+
+- Switch "Create Task", "View Tasks" and "Menu Bar Tasks" commands to use new API
+
+## [Open workflow run] - 2026-02-03
+
+- Add "Open workflow run" menu item to the "View Tasks" command
+
+## [Assign Issue to Copilot] - 2026-02-03
+
+- Add "Assign Issue to Copilot" command
+
+## [Manage Paid Premium Requests action] - 2026-02-02
+
+- Add "Manage Paid Premium Requests" action to the "Copilot Usage" command
+- Fix title casing for "Log Out" action
+
+## [Copilot usage auth] - 2026-02-01
+
+- Fix auth for Copilot usage command using existing OAuth
+- Remove apps.json preference (no longer needed)
+
 ## [Menu bar command] - 2026-01-09
 
 - Hide the menu bar command when there are no open pull requests

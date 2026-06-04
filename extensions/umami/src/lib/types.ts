@@ -31,4 +31,41 @@ export type AddWebsiteFormValues = {
   name: string;
 };
 
+export type UmamiWebsiteStats = {
+  pageviews: {
+    value: number;
+    prev: number;
+  };
+  visitors: {
+    value: number;
+    prev: number;
+  };
+  visits: {
+    value: number;
+    prev: number;
+  };
+  bounces: {
+    value: number;
+    prev: number;
+  };
+  totaltime: {
+    value: number;
+    prev: number;
+  };
+};
+export type UmamiWebsiteStatsV3 = {
+  pageviews: number;
+  visitors: number;
+  visits: number;
+  bounces: number;
+  totaltime: number;
+  comparison: {
+    pageviews: number;
+    visitors: number;
+    visits: number;
+    bounces: number;
+    totaltime: number;
+  };
+};
+
 export type UmamiErrorResponse = { error: { message: string; code: string; status: number } };

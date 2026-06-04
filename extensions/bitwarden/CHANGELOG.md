@@ -1,5 +1,75 @@
 # Bitwarden Changelog
 
+## [Fix sync session handling] - 2026-05-28
+
+- Fixed failed sync attempts immediately clearing the active session before cached vault data can load.
+
+## [CLI update] - 2026-05-27
+
+- Update CLI to v2026.4.2
+
+## [Update Contributors] - 2026-05-19
+
+- Update contributors
+
+## [Update packages] - 2026-04-24
+
+- Update Raycast packages to the latest version
+
+## [CLI update & Fix] - 2026-04-23
+
+- Update CLI to v2026.3.0
+- Logout whenever there is a "Invalid session token" error
+
+## [Fix] - 2026-04-20
+
+- 🐛 Fix infinite retry loop when unlocking vault with invalid session token
+
+## [Fix] - 2026-04-03
+
+- Update bundled Bitwarden CLI from v2025.11.0 to v2026.2.0 to fix "Invalid session token" error caused by server-side KDF upgrades
+- Fix incorrect vault status saved after API key login
+
+## [Fix] - 2026-04-02
+
+- Catch Invalid session token error
+
+## [Fix & Improvements] - 2026-03-24
+
+- Catch error when unlinking data.json file
+- Fix Search Vault primaryAction preference and add "Show Details" option
+
+## [Fix] - 2026-03-20
+
+- Fix custom server URL "Restart Required" alert loop after CLI binary update
+- Fix reverting to default server when custom server URL preference is removed
+
+## [Unified Item Detail View] - 2026-03-20
+
+- Add unified detail screen for all vault item types (login, card, identity, note, SSH key)
+- Add field-type components with copy, paste, reveal/hide, and open-in-browser actions
+- Add keyboard shortcuts for copy/paste password and TOTP actions
+- Remove separate card and identity detail screens in favor of the unified view
+
+## [Fix Password Generation] - 2026-02-18
+
+- Fix password generation failing due to false boolean options
+
+## [Fix & Improvements] - 2026-02-17
+
+- Fix potential stale session token issue
+- Small feedback improvements
+
+## [Fix & Feature] - 2026-02-16
+
+- Fix unhandled error when unlocking vault
+- Fix mismatched Windows CLI binary hash
+- Add support for Steam Guard TOTP
+
+## [Fix Password Generation] - 2026-02-11
+
+- Fix password generation failing due to values passed to boolean options
+
 ## [Added PasteUsernameAction] - 2026-01-01
 
 ## [Added support for Windows] - 2025-10-15

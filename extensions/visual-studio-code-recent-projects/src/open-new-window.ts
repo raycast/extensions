@@ -13,6 +13,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.Code]: 3,
   [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,
+  [VSCodeBuild.IBMBob]: 3,
   [VSCodeBuild.Kiro]: 3,
   [VSCodeBuild.Positron]: 3,
   [VSCodeBuild.Trae]: 3,
@@ -20,6 +21,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.VSCodium]: 3,
   [VSCodeBuild.VSCodiumInsiders]: 3,
   [VSCodeBuild.Windsurf]: 3,
+  [VSCodeBuild.Lingma]: 3,
 };
 
 /**

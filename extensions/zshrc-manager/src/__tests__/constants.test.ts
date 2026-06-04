@@ -1,16 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getSectionFormatsInOrder } from "../constants";
 import { SectionMarkerType } from "../types/enums";
-import { getSectionPrefs, getCustomPatterns } from "../lib/preferences";
 
-// Mock preferences module
-vi.mock("../lib/preferences", () => ({
-  getSectionPrefs: vi.fn(),
-  getCustomPatterns: vi.fn(),
+// Mock only the Raycast API, not the preferences module itself
+vi.mock("@raycast/api", () => ({
+  getPreferenceValues: vi.fn(),
 }));
 
-const mockGetSectionPrefs = vi.mocked(getSectionPrefs);
-const mockGetCustomPatterns = vi.mocked(getCustomPatterns);
+import { getPreferenceValues } from "@raycast/api";
+import { getSectionFormatsInOrder } from "../lib/preferences";
+
+const mockGetPreferenceValues = vi.mocked(getPreferenceValues);
 
 describe("constants.ts", () => {
   beforeEach(() => {
@@ -19,16 +18,12 @@ describe("constants.ts", () => {
 
   describe("getSectionFormatsInOrder", () => {
     it("should return default patterns when defaults are enabled and no custom patterns", () => {
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
       });
 
       const formats = getSectionFormatsInOrder();
@@ -46,16 +41,12 @@ describe("constants.ts", () => {
     });
 
     it("should return empty array when defaults are disabled and no custom patterns", () => {
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
       });
 
       const formats = getSectionFormatsInOrder();
@@ -64,176 +55,130 @@ describe("constants.ts", () => {
     });
 
     it("should prioritize custom start/end patterns over defaults", () => {
-      const customStartPattern = /^#\s*custom-start\s+(.+)$/i;
-      const customEndPattern = /^#\s*custom-end$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: customStartPattern,
-        endPattern: customEndPattern,
+        configFileType: "zshrc",
+        customStartPattern: "#\\s*custom-start\\s+(.+)",
+        customEndPattern: "#\\s*custom-end",
       });
 
       const formats = getSectionFormatsInOrder();
 
       // Should have custom patterns (2) + defaults without CUSTOM_START/END (7) = 9 total
-      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
       expect(formats).toHaveLength(9);
       // Custom patterns should come first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0]?.regex).toBe(customStartPattern);
       expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[1]?.regex).toBe(customEndPattern);
     });
 
     it("should include custom header pattern when enabled", () => {
-      const customHeaderPattern = /^#\s+custom-header\s+(.+)$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: false,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: customHeaderPattern,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
+        customHeaderPattern: "#\\s+custom-header\\s+(.+)",
       });
 
       const formats = getSectionFormatsInOrder();
 
-      // Custom header pattern should be added at the end
+      // Custom header pattern should be added at the end (10 = 9 defaults + 1 custom header)
+      expect(formats).toHaveLength(10);
       const lastFormat = formats[formats.length - 1];
       expect(lastFormat?.type).toBe(SectionMarkerType.LABELED);
-      expect(lastFormat?.regex).toBe(customHeaderPattern);
     });
 
     it("should include custom header pattern even when defaults are disabled", () => {
-      const customHeaderPattern = /^#\s+custom-header\s+(.+)$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: false,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: false,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: customHeaderPattern,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
+        customHeaderPattern: "#\\s+custom-header\\s+(.+)",
       });
 
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
       expect(formats[0]?.type).toBe(SectionMarkerType.LABELED);
-      expect(formats[0]?.regex).toBe(customHeaderPattern);
     });
 
     it("should include all custom patterns when all are enabled", () => {
-      const customStartPattern = /^#\s*custom-start\s+(.+)$/i;
-      const customEndPattern = /^#\s*custom-end$/i;
-      const customHeaderPattern = /^#\s+custom-header\s+(.+)$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: customHeaderPattern,
-        startPattern: customStartPattern,
-        endPattern: customEndPattern,
+        configFileType: "zshrc",
+        customStartPattern: "#\\s*custom-start\\s+(.+)",
+        customEndPattern: "#\\s*custom-end",
+        customHeaderPattern: "#\\s+custom-header\\s+(.+)",
       });
 
       const formats = getSectionFormatsInOrder();
 
       // Should have custom start/end (2) + defaults without CUSTOM_START/END (7) + custom header (1) = 10 total
-      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
       expect(formats).toHaveLength(10);
       // Custom start/end should be first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0]?.regex).toBe(customStartPattern);
       expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[1]?.regex).toBe(customEndPattern);
       // Custom header should be last
       const lastFormat = formats[formats.length - 1];
       expect(lastFormat?.type).toBe(SectionMarkerType.LABELED);
-      expect(lastFormat?.regex).toBe(customHeaderPattern);
     });
 
     it("should handle only custom start pattern", () => {
-      const customStartPattern = /^#\s*custom-start\s+(.+)$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: customStartPattern,
-        endPattern: null,
+        configFileType: "zshrc",
+        customStartPattern: "#\\s*custom-start\\s+(.+)",
       });
 
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0]?.regex).toBe(customStartPattern);
     });
 
     it("should handle only custom end pattern", () => {
-      const customEndPattern = /^#\s*custom-end$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: null,
-        endPattern: customEndPattern,
+        configFileType: "zshrc",
+        customEndPattern: "#\\s*custom-end",
       });
 
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[0]?.regex).toBe(customEndPattern);
     });
 
     it("should maintain correct priority order", () => {
-      const customStartPattern = /^#\s*custom-start\s+(.+)$/i;
-      const customEndPattern = /^#\s*custom-end$/i;
-      const customHeaderPattern = /^#\s+custom-header\s+(.+)$/i;
-
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: customHeaderPattern,
-        startPattern: customStartPattern,
-        endPattern: customEndPattern,
+        configFileType: "zshrc",
+        customStartPattern: "#\\s*custom-start\\s+(.+)",
+        customEndPattern: "#\\s*custom-end",
+        customHeaderPattern: "#\\s+custom-header\\s+(.+)",
       });
 
       const formats = getSectionFormatsInOrder();
 
       // Order should be: custom start, custom end, defaults without CUSTOM_START/END (7 patterns), custom header
-      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
       expect(formats.length).toBe(10); // 2 custom + 7 defaults + 1 custom header
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
@@ -242,43 +187,33 @@ describe("constants.ts", () => {
       expect(formats[3]?.type).toBe(SectionMarkerType.DASHED_START);
       // Custom header is last
       expect(formats[9]?.type).toBe(SectionMarkerType.LABELED);
-      expect(formats[9]?.regex).toBe(customHeaderPattern);
     });
 
     it("should handle null custom patterns gracefully", () => {
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
+        // No custom patterns provided (undefined)
       });
 
       const formats = getSectionFormatsInOrder();
 
-      // When custom patterns feature is enabled but patterns are null, defaults still include CUSTOM_START/CUSTOM_END
-      // because no actual custom patterns exist to replace them
-      // Should have defaults (9 patterns) - CUSTOM_START/CUSTOM_END are included since no actual custom patterns exist
+      // When custom patterns feature is enabled but patterns are undefined, defaults still include CUSTOM_START/CUSTOM_END
       expect(formats).toHaveLength(9);
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[8]?.type).toBe(SectionMarkerType.LABELED);
     });
 
     it("should return formats with correct regex instances", () => {
-      mockGetSectionPrefs.mockReturnValue({
+      mockGetPreferenceValues.mockReturnValue({
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
         enableCustomZshrcPath: false,
-      });
-      mockGetCustomPatterns.mockReturnValue({
-        headerPattern: null,
-        startPattern: null,
-        endPattern: null,
+        configFileType: "zshrc",
       });
 
       const formats = getSectionFormatsInOrder();

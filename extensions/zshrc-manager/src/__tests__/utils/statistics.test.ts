@@ -8,9 +8,9 @@ import {
   hasContent,
   getTotalEntryCount,
   getTopEntries,
-  ZshrcStatistics,
+  type ZshrcStatistics,
 } from "../../utils/statistics";
-import { LogicalSection } from "../../lib/parse-zshrc";
+import type { LogicalSection } from "../../lib/parse-zshrc";
 
 // Mock data factory
 const createMockSection = (

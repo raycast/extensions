@@ -1,5 +1,7 @@
 # Leader Key Changelog
 
+## Update Extension Icon - 2026-02-13
+
 ## [Initial Version] - 2026-01-07
 
 ### Features

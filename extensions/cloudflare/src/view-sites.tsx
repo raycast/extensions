@@ -22,9 +22,16 @@ import {
   handleNetworkError,
 } from './utils';
 import { CachePurgeView, purgeEverything } from './view-cache-purge';
-import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
+import {
+  FormValidation,
+  useCachedPromise,
+  useForm,
+  useLocalStorage,
+} from '@raycast/utils';
 
 const service = new Service(getToken());
+
+const FAVORITES_STORAGE_KEY = 'favorite-zone-ids';
 
 function Command() {
   const {
@@ -55,8 +62,109 @@ function Command() {
     },
   );
 
+  const {
+    value: favoriteIds = [],
+    setValue: setFavoriteIds,
+    isLoading: isLoadingFavorites,
+  } = useLocalStorage<string[]>(FAVORITES_STORAGE_KEY, []);
+  const favoriteSet = new Set(favoriteIds);
+
+  const toggleFavorite = async (zoneId: string) => {
+    const next = favoriteSet.has(zoneId)
+      ? favoriteIds.filter((id) => id !== zoneId)
+      : [...favoriteIds, zoneId];
+    await setFavoriteIds(next);
+    await showToast({
+      style: Toast.Style.Success,
+      title: favoriteSet.has(zoneId)
+        ? 'Removed from favorites'
+        : 'Added to favorites',
+    });
+  };
+
+  const favoriteSites: { accountId: string; site: Zone }[] = [];
+  Object.entries(sites).forEach(([accountId, accountSites]) => {
+    accountSites.forEach((site) => {
+      if (favoriteSet.has(site.id)) {
+        favoriteSites.push({ accountId, site });
+      }
+    });
+  });
+
+  const renderSiteItem = (accountId: string, site: Zone) => {
+    const isFavorite = favoriteSet.has(site.id);
+    return (
+      <List.Item
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action.Push
+                icon={Icon.Document}
+                title="Show Details"
+                target={<SiteView accountId={accountId} id={site.id} />}
+              />
+              <Action.Push
+                icon={Icon.List}
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Show DNS Records"
+                target={<DnsRecordView siteId={site.id} />}
+              />
+              <Action.OpenInBrowser
+                title="Open on Cloudflare"
+                url={getSiteUrl(accountId, site.name)}
+                shortcut={{ modifiers: ['cmd'], key: 'o' }}
+              />
+              <Action
+                icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+                title={
+                  isFavorite ? 'Remove from Favorites' : 'Add to Favorites'
+                }
+                shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                onAction={() => toggleFavorite(site.id)}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action.Push
+                icon={Icon.Hammer}
+                title="Purge Cache"
+                target={<CachePurgeView accountId={accountId} id={site.id} />}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+              />
+              <Action
+                icon={Icon.Hammer}
+                title="Purge Everything from Cache"
+                shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                onAction={async () => {
+                  purgeEverything(site);
+                }}
+              />
+              <Action
+                icon={Icon.ArrowClockwise}
+                title="Reload Sites from Cloudflare"
+                onAction={clearSiteCache}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                icon={Icon.CopyClipboard}
+                content={site.name}
+                title="Copy Site URL"
+                shortcut={{ modifiers: ['cmd'], key: '.' }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+        icon={getSiteStatusIcon(site.status)}
+        key={site.id}
+        title={site.name}
+        accessories={isFavorite ? [{ icon: Icon.Star }] : undefined}
+      />
+    );
+  };
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || isLoadingFavorites}>
       {!isLoading && !Object.keys(sites).length && (
         <List.EmptyView
           icon="no-sites.svg"
@@ -69,83 +177,28 @@ function Command() {
           }
         />
       )}
-      {Object.entries(sites)
-        .filter((entry) => entry[1].length > 0)
-        .map((entry) => {
-          const [accountId, accountSites] = entry;
-          const account = accounts.find((account) => account.id === accountId);
-          const name = account?.name || '';
-          return (
-            <List.Section title={name} key={accountId}>
-              {accountSites.map((site) => (
-                <List.Item
-                  actions={
-                    <ActionPanel>
-                      <ActionPanel.Section>
-                        <Action.Push
-                          icon={Icon.Document}
-                          title="Show Details"
-                          target={
-                            <SiteView accountId={accountId} id={site.id} />
-                          }
-                        />
-                        <Action.Push
-                          icon={Icon.List}
-                          // eslint-disable-next-line @raycast/prefer-title-case
-                          title="Show DNS Records"
-                          target={<DnsRecordView siteId={site.id} />}
-                        />
-                        <Action.OpenInBrowser
-                          title="Open on Cloudflare"
-                          url={getSiteUrl(accountId, site.name)}
-                          shortcut={{ modifiers: ['cmd'], key: 'o' }}
-                        />
-                      </ActionPanel.Section>
-                      <ActionPanel.Section>
-                        <Action.Push
-                          icon={Icon.Hammer}
-                          title="Purge Files from Cache by URL"
-                          target={
-                            <CachePurgeView
-                              accountId={accountId}
-                              id={site.id}
-                            />
-                          }
-                          shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
-                        />
-                        <Action
-                          icon={Icon.Hammer}
-                          title="Purge Everything from Cache"
-                          shortcut={{ modifiers: ['cmd'], key: 'e' }}
-                          onAction={async () => {
-                            purgeEverything(site);
-                          }}
-                        />
-                        <Action
-                          icon={Icon.ArrowClockwise}
-                          title="Reload Sites from Cloudflare"
-                          onAction={clearSiteCache}
-                          shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                        />
-                      </ActionPanel.Section>
-                      <ActionPanel.Section>
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          content={site.name}
-                          title="Copy Site URL"
-                          shortcut={{ modifiers: ['cmd'], key: '.' }}
-                        />
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  }
-                  icon={getSiteStatusIcon(site.status)}
-                  key={site.id}
-                  title={site.name}
-                />
-              ))}
-            </List.Section>
-          );
-        })}
+      {favoriteSites.length > 0 && (
+        <List.Section title="Favorites" key="favorites">
+          {favoriteSites.map(({ accountId, site }) =>
+            renderSiteItem(accountId, site),
+          )}
+        </List.Section>
+      )}
+      {!isLoadingFavorites &&
+        Object.entries(sites)
+          .filter((entry) => entry[1].length > 0)
+          .map((entry) => {
+            const [accountId, accountSites] = entry;
+            const account = accounts.find(
+              (account) => account.id === accountId,
+            );
+            const name = account?.name || '';
+            return (
+              <List.Section title={name} key={accountId}>
+                {accountSites.map((site) => renderSiteItem(accountId, site))}
+              </List.Section>
+            );
+          })}
     </List>
   );
 }

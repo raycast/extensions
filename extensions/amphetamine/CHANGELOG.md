@@ -1,5 +1,9 @@
 # Changelog
 
+## [Add until-time option for configurable sessions] - 2026-05-25
+
+- Add an until-time option to the configurable session command.
+
 ## [1.0.2] - 2025-01-10
 
 - No longer reset Session duration when changing its Interval
@@ -11,4 +15,5 @@
 - Add command Start Session with Duration command to start a new Amphetamine session with a specific duration (it can be in minutes or in hours).
 
 ## [1.0.0] - 2022-06-05
+
 - Add commands start and end

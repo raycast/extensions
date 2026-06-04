@@ -8,21 +8,21 @@ import { getGitHubUser } from "../helpers/users";
 import RepositoryActions from "./RepositoryActions";
 import { SortActionProps, SortTypesDataProps } from "./SortAction";
 
-type RepositoryListItemProps = {
+type RepositoryListItemProps<T = ExtendedRepositoryFieldsFragment[] | undefined> = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
+  mutateList: MutatePromise<T>;
 } & SortActionProps &
   SortTypesDataProps;
 
-export default function RepositoryListItem({
+export default function RepositoryListItem<T = ExtendedRepositoryFieldsFragment[] | undefined>({
   repository,
   mutateList,
   onVisit,
   sortQuery,
   setSortQuery,
   sortTypesData,
-}: RepositoryListItemProps) {
+}: RepositoryListItemProps<T>) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);

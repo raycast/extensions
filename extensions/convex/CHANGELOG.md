@@ -1,5 +1,15 @@
 # Convex Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Fix TypeError Crashes] - 2026-01-26
+
+- Fix TypeError crashes when API returns non-array responses
+- Add defensive Array.isArray checks in data hooks and components
+- Ensure useTeams, useProjects, and useDeployments always return arrays
+
 ## [Deploy Key Authentication] - 2026-01-21
 
 - Add deploy key authentication as alternative to OAuth login

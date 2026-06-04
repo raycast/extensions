@@ -5,7 +5,7 @@
  * across logical sections and entry types.
  */
 
-import { LogicalSection } from "../lib/parse-zshrc";
+import type { LogicalSection } from "../lib/parse-zshrc";
 import {
   parseAliases,
   parseExports,
@@ -52,7 +52,7 @@ export interface ZshrcStatistics {
  * const stats = calculateStatistics(sections);
  * console.log(`${stats.aliases.length} aliases found`);
  */
-export function calculateStatistics(sections: LogicalSection[]): ZshrcStatistics {
+export function calculateStatistics(sections: readonly LogicalSection[]): ZshrcStatistics {
   return {
     sectionCount: sections.length,
     aliases: sections.flatMap((section) => parseAliases(section.content)),

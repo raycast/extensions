@@ -13,6 +13,9 @@ import SendMessage from "./send-message";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
+// See OpenInSlack.tsx — `application` hint is mac-only.
+const isMac = process.platform === "darwin";
+
 function getCoworkerTime(coworkerTimeZone: string): string {
   const localTime = new Date();
   const coworkerTime = toZonedTime(localTime, coworkerTimeZone);
@@ -47,11 +50,18 @@ function searchItemAccessories(
   return searchMetadata;
 }
 
+function foldForSearch(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
 function matchesAllWords(text: string, searchText: string): boolean {
   if (!searchText.trim()) return true;
-  const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-  const lowerText = text.toLowerCase();
-  return words.every((word) => lowerText.includes(word));
+  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
+  const folded = foldForSearch(text);
+  return words.every((word) => folded.includes(word));
 }
 
 function CopyIdAction({ id }: { id: string }) {
@@ -61,7 +71,7 @@ function CopyIdAction({ id }: { id: string }) {
       content={id}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "c" },
-        windows: { modifiers: ["ctrl", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
       }}
     />
   );
@@ -79,11 +89,7 @@ function Search() {
   const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
 
   return (
-    <List
-      isLoading={isLoading || isLoadingChannels}
-      filtering={false}
-      onSearchTextChange={setSearchText}
-    >
+    <List isLoading={isLoading || isLoadingChannels} filtering={false} onSearchTextChange={setSearchText}>
       {filteredRecents.map((item) => {
         const isUser = item.id.startsWith("U");
 
@@ -124,7 +130,10 @@ function Search() {
                     quicklink={{
                       name: `Open Chat with ${name}`,
                       ...(isAppInstalled
-                        ? { link: `slack://user?team=${workspaceId}&id=${userId}`, application: "Slack" }
+                        ? {
+                            link: `slack://user?team=${workspaceId}&id=${userId}`,
+                            ...(isMac ? { application: "Slack" } : {}),
+                          }
                         : { link: `https://app.slack.com/client/${workspaceId}/${conversationId}` }),
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
@@ -167,7 +176,10 @@ function Search() {
                     quicklink={{
                       name: `Open #${name} Channel`,
                       ...(isAppInstalled
-                        ? { link: `slack://channel?team=${workspaceId}&id=${channelId}`, application: "Slack" }
+                        ? {
+                            link: `slack://channel?team=${workspaceId}&id=${channelId}`,
+                            ...(isMac ? { application: "Slack" } : {}),
+                          }
                         : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}

@@ -13,10 +13,12 @@ import {
   Image,
   LaunchType,
   launchCommand,
+  Clipboard,
+  Cache,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
-import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
+import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
 import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
@@ -32,6 +34,7 @@ import { existsSync } from "fs";
 import { RemoteWebPageAction } from "./components/actions/RemoteActions";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CopyToClipboardMenuAction } from "./components/actions/CopyToClipboardMenuAction";
+import { validateGitUrl } from "./utils/url-utils";
 
 export default function ManageRepositories() {
   const {
@@ -48,24 +51,8 @@ export default function ManageRepositories() {
   // Use view hook only for regular repositories
   const { displayedRepositories } = useRepositoriesView(currentRepositories);
 
-  const handleRemove = async (repoName: string, repoPath: string) => {
-    const confirmed = await confirmAlert({
-      title: "Remove from recent?",
-      message: `Are you sure you want to remove "${repoName}" from the recent repositories list?`,
-      primaryAction: {
-        title: "Remove",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      await removeRepository(repoPath);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Repository removed",
-        message: `"${repoName}" removed from recent list`,
-      });
-    }
+  const handleRemove = async (repoPath: string) => {
+    await removeRepository(repoPath);
   };
 
   const handleKillClone = async (repoPath: string) => {
@@ -113,7 +100,7 @@ export default function ManageRepositories() {
                 key={repo.id}
                 repo={repo}
                 onOpen={() => visitRepository(repo.path)}
-                onRemove={() => handleRemove(repo.name, repo.path)}
+                onRemove={() => handleRemove(repo.path)}
                 onAddRepository={addRepository}
               />
             ))}
@@ -153,7 +140,7 @@ function RepositoryListItem({
     }
 
     return result;
-  }, [repo.languageStats, remotes]);
+  }, [remotes]);
 
   const icon: Image.ImageLike = useMemo(() => {
     if (repo.languageStats && repo.languageStats.length > 0 && repo.languageStats[0].color) {
@@ -162,6 +149,26 @@ function RepositoryListItem({
 
     return { source: `git-project.svg`, tintColor: Color.SecondaryText };
   }, [repo.languageStats]);
+
+  const handleRemove = async () => {
+    const confirmed = await confirmAlert({
+      title: "Remove from recent?",
+      message: `Are you sure you want to remove "${repo.name}" from the recent repositories list?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      onRemove();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Repository removed",
+        message: `"${repo.name}" removed from recent list`,
+      });
+    }
+  };
 
   return (
     <List.Item
@@ -199,23 +206,19 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              quicklink={{
-                link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(
-                  JSON.stringify({ path: repo.path }),
-                )}`,
-                name: `Show ${repo.name} in Git`,
-              }}
-            />
+            <RepositoryQuickLinkAction repositoryPath={repo.path} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            <RepositoriesClearCacheAction />
             <Action
               title="Remove from List"
-              onAction={onRemove}
+              onAction={handleRemove}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
-            <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+            <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
           <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
@@ -232,6 +235,15 @@ function RepositoryListItem({
 }
 
 function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+  const copiedUrl = useCallback(async () => {
+    const text = await Clipboard.readText();
+    const trimmed = text?.trim();
+    if (trimmed && validateGitUrl(trimmed) === undefined) {
+      return trimmed;
+    }
+    return "";
+  }, []);
+
   return (
     <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
       <Action.Push
@@ -246,13 +258,15 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
       />
       <Action
         title="Clone Repository"
-        onAction={async () =>
+        onAction={async () => {
+          const defaultUrl = await copiedUrl();
+
           await launchCommand({
             name: "clone-repository",
             type: LaunchType.UserInitiated,
-            arguments: { url: "" },
-          })
-        }
+            arguments: { url: defaultUrl },
+          });
+        }}
         icon={Icon.Download}
       />
     </ActionPanel.Submenu>
@@ -516,7 +530,7 @@ function CloningRepositoryListItem({
                 onAction={onRemove}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
-              <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+              <Action.Trash paths={[repo.path]} onTrash={onRemove} />
             </>
           ) : (
             <>
@@ -590,4 +604,31 @@ function RepositoryAttachedLinksAction({ remotes }: { remotes: Record<string, Re
       ))}
     </ActionPanel.Submenu>
   );
+}
+
+/**
+ * Action for clearing the extension cache.
+ */
+function RepositoriesClearCacheAction() {
+  const handleClearCache = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Extension Cache?",
+      message: "This clears all data stored in Raycast Cache (UI state, filters, drafts, and other cached preferences)",
+      primaryAction: {
+        title: "Clear Cache",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      new Cache().clear();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cache cleared",
+        message: "Extension cache has been cleared",
+      });
+    }
+  };
+
+  return <Action title="Clear Cache" icon={Icon.Eraser} onAction={handleClearCache} style={Action.Style.Destructive} />;
 }

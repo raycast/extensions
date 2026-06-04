@@ -37,3 +37,11 @@ export async function callOvh<T>(endpoint: string, { method = "GET", body }: { m
   if (!response.ok) throw new Error((result as Error).message);
   return result as T;
 }
+
+export const ovh = {
+  domain: {
+    zone: {
+      refresh: (zoneName: string) => callOvh(`v1/domain/zone/${zoneName}/refresh`, { method: "POST" }),
+    },
+  },
+};

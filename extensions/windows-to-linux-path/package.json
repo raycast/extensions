@@ -9,7 +9,21 @@
     {
       "name": "windows-linux-path",
       "title": "Convert Windows to Linux Path",
-      "description": "Converts a Windows path into a Linux one.",
+      "description": "Converts a Windows path into a Linux one with the prefix \"/\".",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "path",
+          "type": "text",
+          "required": true,
+          "placeholder": "C:\\..."
+        }
+      ]
+    },
+    {
+      "name": "windows-linux-path-mnt",
+      "title": "Convert Windows to Linux Mount Path",
+      "description": "Converts a Windows path into a Linux one with the prefix \"/mnt/\".",
       "mode": "no-view",
       "arguments": [
         {

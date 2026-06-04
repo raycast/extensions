@@ -130,7 +130,7 @@ export default function Command() {
             title: "Open in Browser",
             shortcut: {
               macOS: { modifiers: ["cmd", "shift"], key: "o" },
-              windows: { modifiers: ["ctrl", "shift"], key: "o" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "o" },
             },
             async onAction() {
               await open(response.target.url);
@@ -140,7 +140,7 @@ export default function Command() {
             title: "Copy URL",
             shortcut: {
               macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "c" },
             },
             async onAction() {
               await Clipboard.copy(response.target.url);

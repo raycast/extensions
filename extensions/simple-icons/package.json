@@ -3,7 +3,7 @@
   "name": "simple-icons",
   "title": "Brand Icons - simpleicons.org",
   "type": "module",
-  "description": "Browse, Search, and Copy 3300+ popular brand icons from Simple Icons.",
+  "description": "Browse, Search, and Copy 3400+ popular brand icons from Simple Icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "platforms": [
@@ -26,7 +26,7 @@
     {
       "name": "index",
       "title": "Search Brand Icons",
-      "description": "Browse, search, and copy 3300+ SVG icons for popular brands from Simple Icons",
+      "description": "Browse, search, and copy 3400+ SVG icons for popular brands from Simple Icons",
       "mode": "view"
     }
   ],
@@ -133,28 +133,37 @@
       "required": false,
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "usePasteInsteadOfCopy",
+      "title": "Use Paste Instead of Copy",
+      "label": "Enabled",
+      "description": "Use paste action instead of copy action for copying content",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
-    "array-shuffle": "^4.0.0",
-    "date-fns": "^4.1.0",
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "array-shuffle": "^4.1.0",
+    "date-fns": "^4.3.0",
     "fast-fuzzy": "^1.12.0",
-    "got": "^14.6.5",
-    "lodash": "^4.17.21",
-    "pacote": "^21.0.4",
+    "got": "^15.0.5",
+    "lodash": "^4.18.1",
+    "pacote": "^21.5.0",
     "raycast-cross-extension": "^0.2.3",
-    "semver": "^7.7.3"
+    "semver": "^7.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash": "^4.17.21",
+    "@types/lodash": "^4.17.24",
     "@types/pacote": "^11.1.8",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.15",
     "@types/semver": "^7.7.1",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   }
 }

@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast, useExec, useForm } from "@raycast/utils";
-import { useRepoStorage } from "../../hooks/useRepo.js";
+import { useSelectedRepo } from "../../hooks/useRepo.js";
+import { validateBranchName } from "../../utils/validators.js";
 
 interface Props {
   checkBranches: () => void;
 }
 
 export function CreateBranch({ checkBranches }: Props) {
-  const repo = useRepoStorage();
+  const repo = useSelectedRepo();
   const { pop } = useNavigation();
   const [branchName, setBranchName] = useState("");
   const { revalidate, isLoading } = useExec("git", ["switch", "-c", branchName], {
@@ -29,14 +30,11 @@ export function CreateBranch({ checkBranches }: Props) {
     onSubmit: revalidate,
     validation: {
       newBranch: (value) => {
-        const newBranchName = value.trim();
-        if (!newBranchName) {
-          return "A branch name is required";
-        } else if (/[~^:?*[\\\s]/g.test(newBranchName)) {
-          return "Branch name contains invalid characters. Avoid using ~, ^, :, ?, *, [, \\, or any whitespace characters";
-        } else if (newBranchName.startsWith("-")) {
-          return "Branch name cannot start with '-'";
+        const error = validateBranchName(value);
+        if (error) {
+          return `Branch name ${error}`;
         }
+        return undefined;
       },
     },
   });
@@ -53,7 +51,7 @@ export function CreateBranch({ checkBranches }: Props) {
     >
       <Form.TextField
         id="newBranch"
-        title="New branch name"
+        title="Branch name"
         info="Do not include any whitespace characters"
         value={branchName}
         onChange={setBranchName}

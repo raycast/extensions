@@ -179,3 +179,4 @@ bun.lock
 
 scripts/internal/**
 .claude**
+.cursor/**

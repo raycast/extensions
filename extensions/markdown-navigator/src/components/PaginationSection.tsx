@@ -7,7 +7,6 @@ interface PaginationSectionProps {
   setCurrentPage: (page: number) => void;
   revalidate: () => void;
   pageInfoText: string;
-  loadMoreFiles: () => void;
   showTagSearchList: () => void;
   selectedTag: string | null;
   setSelectedTag: (tag: string | null) => void;
@@ -21,7 +20,6 @@ export function PaginationSection({
   setCurrentPage,
   revalidate,
   pageInfoText,
-  loadMoreFiles,
   showTagSearchList,
   selectedTag,
   setSelectedTag,
@@ -75,12 +73,6 @@ export function PaginationSection({
               icon={Icon.RotateClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={revalidate}
-            />
-            <Action
-              title="Load More Files"
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-              onAction={loadMoreFiles}
             />
           </ActionPanel>
         }

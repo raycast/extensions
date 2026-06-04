@@ -10,4 +10,9 @@ This project was inspired by TinyPNG, it doesn't require an API key. All compres
 
 ## Binary
 
-The compression capability is provided by the open-source project [Libcaesium WASM](https://github.com/Lymphatus/libcaesium-wasm). I've compiled it into WebAssembly (WASM) code to run in Node.js.
+The compression capability is provided by the following open-source projects:
+
+- [Libcaesium WASM](https://github.com/Lymphatus/libcaesium-wasm): Provides general image compression (JPG, PNG, WebP).
+- [apngopt-rs](https://github.com/wuyax/apngopt-rs): Provides specialized APNG (Animated PNG) optimization.
+
+All libraries are compiled into WebAssembly (WASM) to run locally in Node.js.

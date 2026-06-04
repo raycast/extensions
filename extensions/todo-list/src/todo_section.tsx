@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useAtom } from "jotai";
-import { todoAtom, TodoSections } from "./atoms";
+import { ALL_TAG_VALUE, todoAtom, TodoSections } from "./atoms";
 import { SECTIONS_DATA } from "./config";
 import SingleTodoItem from "./todo_item";
 import { sortTodoItem } from "./utils";
@@ -12,7 +12,7 @@ const TodoSection = ({ sectionKey, selectedTag }: { sectionKey: keyof TodoSectio
       {todoSections[sectionKey]
         .sort(sortTodoItem)
         .map((item, i) =>
-          selectedTag == item.tag || selectedTag == "All" ? (
+          selectedTag == item.tag || selectedTag == ALL_TAG_VALUE ? (
             <SingleTodoItem idx={i} item={item} key={i} sectionKey={sectionKey} />
           ) : null,
         )}

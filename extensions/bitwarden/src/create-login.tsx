@@ -138,13 +138,13 @@ function CreateLoginComponent() {
             icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
             title={showPassword ? "Hide Password" : "Show Password"}
             onAction={togglePasswordVisibility}
-            shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+            shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
           />
           <Action
             icon={Icon.Key}
             title="Generate Password"
             onAction={generatePassword}
-            shortcut={{ macOS: { key: "g", modifiers: ["opt"] }, windows: { key: "g", modifiers: ["alt"] } }}
+            shortcut={{ macOS: { key: "g", modifiers: ["opt"] }, Windows: { key: "g", modifiers: ["alt"] } }}
           />
           <DebuggingBugReportingActionSection />
         </ActionPanel>

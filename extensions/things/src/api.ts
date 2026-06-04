@@ -1,4 +1,7 @@
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
+import { existsSync, readdirSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
@@ -17,6 +20,41 @@ import {
 } from './types';
 
 export const preferences = getPreferenceValues<Preferences>();
+
+// Things stores its data in a SQLite database with WAL mode (concurrent reads safe)
+// Modern Things 3 uses: ThingsData-XXXXX/Things Database.thingsdatabase/main.sqlite
+// Older versions used: Things Database.thingsSQLite
+function findThingsDBPath(): string {
+  const container = join(homedir(), 'Library', 'Group Containers', 'JLMPQHK86H.com.culturedcode.ThingsMac');
+
+  // New path format (Things 3.x modern): ThingsData-*/Things Database.thingsdatabase/main.sqlite
+  try {
+    const entries = readdirSync(container);
+    const dataDir = entries.find((e) => e.startsWith('ThingsData-'));
+    if (dataDir) {
+      const newPath = join(container, dataDir, 'Things Database.thingsdatabase', 'main.sqlite');
+      if (existsSync(newPath)) return newPath;
+    }
+  } catch {
+    // container doesn't exist or isn't readable — fall through
+  }
+
+  // Legacy path format
+  return join(container, 'Things Database.thingsSQLite');
+}
+
+let _thingsDBPath: string | undefined;
+function getThingsDBPath(): string {
+  if (!_thingsDBPath) _thingsDBPath = findThingsDBPath();
+  return _thingsDBPath;
+}
+
+const execFileAsync = promisify(execFile);
+
+async function runSqlite(dbPath: string, sql: string): Promise<string> {
+  const { stdout } = await execFileAsync('/usr/bin/sqlite3', ['-readonly', dbPath, sql]);
+  return stdout.trim();
+}
 
 export class ThingsError extends Error {
   constructor(
@@ -109,6 +147,9 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return todos.map(todo => {
     const props = todo.properties();
 
+    let areaTags = '';
+    const areaRef = props.area;
+
     let project = null;
     const projectRef = props.project;
     if (projectRef) {
@@ -118,6 +159,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       if (projectAreaRef) {
         const areaProps = projectAreaRef.properties();
         projectArea = { id: areaProps.id, name: areaProps.name };
+        areaTags = projectAreaRef.tagNames() || '';
       }
       project = {
         id: projectProps.id,
@@ -131,10 +173,10 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     }
 
     let area = null;
-    const areaRef = props.area;
     if (areaRef && !projectRef) {
       const areaProps = areaRef.properties();
       area = { id: areaProps.id, name: areaProps.name };
+      areaTags = areaRef.tagNames() || '';
     }
 
     return {
@@ -145,7 +187,9 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       tags: todo.tagNames(),
       dueDate: props.dueDate ? props.dueDate.toISOString() : null,
       activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+      creationDate: props.creationDate ? props.creationDate.toISOString() : null,
       isProject: props.pcls === "project",
+      areaTags: areaTags || null,
       project,
       area,
     };
@@ -208,6 +252,15 @@ export const deleteProject = (projectId: string) =>
 // Uses properties() batching to minimize Apple Event overhead
 const mapTagJxa = `tag => tag.name()`;
 
+const mapTagWithHierarchyJxa = `tag => {
+  const props = tag.properties();
+  const parentRef = props.parentTag;
+  return {
+    name: props.name,
+    parent: parentRef ? parentRef.name() : null
+  };
+}`;
+
 const mapProjectTodoJxa = `todo => {
   const props = todo.properties();
   return {
@@ -218,6 +271,7 @@ const mapProjectTodoJxa = `todo => {
     tags: todo.tagNames(),
     dueDate: props.dueDate ? props.dueDate.toISOString() : null,
     activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    creationDate: props.creationDate ? props.creationDate.toISOString() : null,
   };
 }`;
 
@@ -252,6 +306,7 @@ const mapAreaTodoJxa = `todo => {
     tags: todo.tagNames(),
     dueDate: props.dueDate ? props.dueDate.toISOString() : null,
     activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    creationDate: props.creationDate ? props.creationDate.toISOString() : null,
     isProject: props.pcls === "project",
   };
 }`;
@@ -266,107 +321,158 @@ const mapAreaJxa = `area => {
   };
 }`;
 
-export const getTags = (): Promise<string[]> =>
-  executeJxa(
-    `
-  const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(${mapTagJxa});
-`,
-    'Get tags',
-  );
-
-export const getProjects = async (): Promise<Project[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.projects().map(${mapProjectJxa});
-  `,
-    'Get projects',
-  );
+export type TagWithParent = {
+  name: string;
+  parent: string | null;
 };
 
-export const getAreas = async (): Promise<Area[]> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-    return things.areas().map(${mapAreaJxa});
-  `,
-    'Get areas',
-  );
-};
-
-export const getTagsProjectsAndAreas = async (): Promise<{
+type CollectionMap = {
   tags: string[];
+  tagsWithHierarchy: TagWithParent[];
   projects: Project[];
   areas: Area[];
-}> => {
-  return executeJxa(
-    `
-    const things = Application('${preferences.thingsAppIdentifier}');
-
-    const tags = things.tags().map(${mapTagJxa});
-    const projects = things.projects().map(${mapProjectJxa});
-    const areas = things.areas().map(${mapAreaJxa});
-
-    return { tags, projects, areas };
-  `,
-    'Get tags, projects, and areas',
-  );
+  lists: List[];
 };
 
-export const getListsAndTags = async (): Promise<{ lists: List[]; tags: string[] }> => {
-  const { tags, projects, areas } = await getTagsProjectsAndAreas();
+const jxaFetches = [
+  { name: 'tags', needs: ['tags'], expr: `things.tags().map(${mapTagJxa})` },
+  { name: 'tagsWithHierarchy', needs: ['tagsWithHierarchy'], expr: `things.tags().map(${mapTagWithHierarchyJxa})` },
+  { name: 'projects', needs: ['projects', 'lists'], expr: `things.projects().map(${mapProjectJxa})` },
+  { name: 'areas', needs: ['areas', 'lists'], expr: `things.areas().map(${mapAreaJxa})` },
+];
 
+export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
+  const keySet = new Set<string>(keys);
+
+  const script = [
+    `const things = Application('${preferences.thingsAppIdentifier}');`,
+    `const result = {};`,
+    ...jxaFetches
+      .filter(({ needs }) => needs.some((k) => keySet.has(k)))
+      .map(({ name, expr }) => `result.${name} = ${expr};`),
+    `return result;`,
+  ].join('\n');
+
+  const raw = await executeJxa(script, `Get ${keys.join(', ')}`);
+
+  return Object.fromEntries(
+    keys.map((key) => [key, key === 'lists' ? organizeLists(raw.projects, raw.areas) : raw[key]]),
+  ) as Pick<CollectionMap, K>;
+}
+
+function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
     .map((project) => ({ ...project, type: 'project' as const }));
 
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
+  const organizedAreasAndProjects: List[] = [];
   areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
 
     const associatedProjects = projects
       .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
-    organizedAreasAndProjects.push(...associatedProjects);
-  });
-
-  const lists = [...projectsWithoutAreas, ...organizedAreasAndProjects];
-
-  return { lists, tags };
-};
-
-export const getLists = async (): Promise<List[]> => {
-  const projects = (await getProjects()) || [];
-  const areas = (await getAreas()) || [];
-
-  const projectsWithoutAreas = projects
-    .filter((project) => !project.area)
-    .map((project) => ({ ...project, type: 'project' as const }));
-
-  const organizedAreasAndProjects: { name: string; id: string; type: 'area' | 'project' }[] = [];
-  areas.forEach((area) => {
-    organizedAreasAndProjects.push({
-      ...area,
-      type: 'area' as const,
-    });
-
-    const associatedProjects = projects
-      .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({
-        ...project,
-        type: 'project' as const,
-      }));
+      .map((project) => ({ ...project, type: 'project' as const }));
     organizedAreasAndProjects.push(...associatedProjects);
   });
 
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
+}
+
+type QuickFindData = {
+  areas: Array<{ id: string; name: string }>;
+  projects: Array<{ id: string; name: string; areaName?: string }>;
+  todos: Array<{ id: string; name: string; status: string; projectName?: string; areaName?: string }>;
+};
+
+// Read directly from Things' SQLite database — bypasses Apple Events entirely.
+// A single SQL query with JOINs replaces hundreds of serialized Apple Events,
+// reducing initial load from ~15s to <100ms.
+const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
+  const sql = `SELECT json_object(
+    'areas', COALESCE((
+      SELECT json_group_array(json_object('id', a.uuid, 'name', a.title))
+      FROM TMArea a WHERE a.visible = 1
+    ), json('[]')),
+    'projects', COALESCE((
+      SELECT json_group_array(json_object(
+        'id', p.uuid, 'name', p.title, 'areaName', a.title
+      ))
+      FROM TMTask p
+      LEFT JOIN TMArea a ON a.uuid = p.area
+      WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0
+    ), json('[]')),
+    'todos', COALESCE((
+      SELECT json_group_array(json_object(
+        'id', t.uuid, 'name', t.title,
+        'status', 'open',
+        'projectName', p.title,
+        'areaName', COALESCE(pa.title, da.title)
+      ))
+      FROM TMTask t
+      LEFT JOIN TMTask p ON p.uuid = t.project
+      LEFT JOIN TMArea da ON da.uuid = t.area
+      LEFT JOIN TMArea pa ON pa.uuid = p.area
+      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0
+    ), json('[]'))
+  );`;
+
+  const stdout = await runSqlite(getThingsDBPath(), sql);
+  const data = JSON.parse(stdout);
+
+  // SQLite returns null for missing values; convert to undefined to match TypeScript optionals
+  const nullToUndefined = (v: string | null) => v ?? undefined;
+
+  return {
+    areas: (data.areas || []).filter((v: unknown) => v != null),
+    projects: (data.projects || [])
+      .filter((v: unknown) => v != null)
+      .map((p: { id: string; name: string; areaName: string | null }) => ({
+        ...p,
+        areaName: nullToUndefined(p.areaName),
+      })),
+    todos: (data.todos || [])
+      .filter((v: unknown) => v != null)
+      .map((t: { id: string; name: string; status: string; projectName: string | null; areaName: string | null }) => ({
+        ...t,
+        projectName: nullToUndefined(t.projectName),
+        areaName: nullToUndefined(t.areaName),
+      })),
+  };
+};
+
+// JXA fallback — used only if SQLite access fails (e.g., DB path changed).
+// Mirrors the SQLite query: all open, non-trashed todos regardless of which
+// list they live in (Inbox, Today, Anytime, Upcoming, Someday, or a project).
+const getQuickFindDataJXA = async (): Promise<QuickFindData> => {
+  return executeJxa(
+    `
+    const things = Application('${preferences.thingsAppIdentifier}');
+    const areas = things.areas().map(area => ({ id: area.id(), name: area.name() }));
+    const projects = things.projects().map(project => ({
+      id: project.id(), name: project.name(),
+      areaName: project.area() && project.area().name(),
+    }));
+    const todos = things.toDos().filter(t => t.status() === 'open').map(todo => ({
+      id: todo.id(),
+      name: todo.name(),
+      status: 'open',
+      projectName: todo.project() && todo.project().name(),
+      areaName: todo.area() && todo.area().name(),
+    }));
+    return { areas, projects, todos };
+  `,
+    'Get quick find data',
+  );
+};
+
+// Try SQLite first (fast, <100ms), fall back to JXA if DB access fails
+export const getQuickFindData = async (): Promise<QuickFindData> => {
+  try {
+    return await getQuickFindDataFromDB();
+  } catch (error) {
+    console.warn('Quick Find: SQLite query failed, falling back to JXA:', error);
+    return getQuickFindDataJXA();
+  }
 };
 
 export async function silentlyOpenThingsURL(url: string) {
@@ -418,13 +524,12 @@ export async function addProject(projectParams: AddProjectParams) {
   await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
-export function handleError(error: unknown, title?: string) {
+export async function handleError(error: unknown, title?: string) {
   if (error instanceof Error && error.message === 'unauthorized') {
-    showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: 'This action needs an authentication token.',
-      message:
-        'Please set it in the extension preferences.\nYou can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage',
+      message: `Please set it in the extension preferences.\nYou can find your unique token in Things' settings. go to Things → Settings → General → Enable Things URLs → Manage`,
       primaryAction: {
         title: 'Open Extension Preferences',
         onAction(toast) {
@@ -436,7 +541,7 @@ export function handleError(error: unknown, title?: string) {
     return;
   }
 
-  showToast({
+  await showToast({
     style: Toast.Style.Failure,
     title: title ?? 'Something went wrong',
     message: error instanceof Error ? error.message : String(error),

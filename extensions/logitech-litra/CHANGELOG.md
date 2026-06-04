@@ -1,5 +1,13 @@
 # Logitech Litra Changelog
 
+## [Add support for back light control on Litra Beam LX] - 2026-02-02
+
+- Add support for managing the colorful back light on Litra Beam LX devices (requires v3.x of the [`litra` CLI](https://github.com/timrogers/litra-rs)):
+  - Toggle the back light on and off
+  - Set the back light brightness using presets
+  - Change the back light color (white, red, green, blue, yellow, cyan, magenta)
+- Add support for v3.x of the [`litra` CLI](https://github.com/timrogers/litra-rs). All versions v2.4.0 onwards are still supported.
+
 ## [Add support for Litra devices which don't expose a serial number] - 2025-08-25
 
 - __BREAKING CHANGE__: Require at least v2.4.0 of the [`litra` CLI](https://github.com/timrogers/litra-rs)

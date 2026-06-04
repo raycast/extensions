@@ -1,4 +1,6 @@
-import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
+import type React from "react";
+import { useState, useMemo } from "react";
+import { Action, ActionPanel, List, Icon, Color, Clipboard, showToast, Toast } from "@raycast/api";
 import { getZshrcPath } from "./lib/zsh";
 import Sections from "./sections";
 import Aliases from "./aliases";
@@ -12,7 +14,159 @@ import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
 import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { truncateValueMiddle } from "./utils/formatters";
-import { calculateStatistics, hasContent, getTopEntries } from "./utils/statistics";
+import { calculateStatistics, hasContent, getTopEntries, type ZshrcStatistics as StatsType } from "./utils/statistics";
+import { StatListItem } from "./components";
+import { shellQuoteSingle, shellQuoteDouble } from "./utils/shell-escape";
+
+interface ZshrcStatisticsProps {
+  searchBarAccessory?: React.ReactElement;
+}
+
+/**
+ * Unified search result item for search functionality
+ */
+interface SearchResult {
+  id: string;
+  type: "alias" | "export" | "function" | "plugin" | "source" | "eval" | "setopt";
+  title: string;
+  subtitle: string;
+  keywords: string[];
+  icon: { source: Icon; tintColor: string };
+  copyValue: string;
+}
+
+/**
+ * Creates searchable results from statistics
+ */
+function createSearchResults(stats: StatsType): SearchResult[] {
+  const results: SearchResult[] = [];
+
+  stats.aliases.forEach((alias, idx) => {
+    results.push({
+      id: `alias-${idx}`,
+      type: "alias",
+      title: alias.name,
+      subtitle: alias.command,
+      keywords: [alias.name.toLowerCase(), alias.command.toLowerCase(), "alias"],
+      icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.success },
+      copyValue: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
+    });
+  });
+
+  stats.exports.forEach((exp, idx) => {
+    results.push({
+      id: `export-${idx}`,
+      type: "export",
+      title: exp.variable,
+      subtitle: exp.value,
+      keywords: [exp.variable.toLowerCase(), exp.value.toLowerCase(), "export", "env"],
+      icon: { source: Icon.Upload, tintColor: MODERN_COLORS.primary },
+      copyValue: `export ${exp.variable}="${shellQuoteDouble(exp.value)}"`,
+    });
+  });
+
+  stats.functions.forEach((func, idx) => {
+    results.push({
+      id: `function-${idx}`,
+      type: "function",
+      title: func.name,
+      subtitle: "function",
+      keywords: [func.name.toLowerCase(), "function", "func"],
+      icon: { source: Icon.Code, tintColor: MODERN_COLORS.purple },
+      copyValue: func.name,
+    });
+  });
+
+  stats.plugins.forEach((plugin, idx) => {
+    results.push({
+      id: `plugin-${idx}`,
+      type: "plugin",
+      title: plugin.name,
+      subtitle: "plugin",
+      keywords: [plugin.name.toLowerCase(), "plugin"],
+      icon: { source: Icon.Plug, tintColor: MODERN_COLORS.warning },
+      copyValue: plugin.name,
+    });
+  });
+
+  stats.sources.forEach((source, idx) => {
+    results.push({
+      id: `source-${idx}`,
+      type: "source",
+      title: source.path,
+      subtitle: "source",
+      keywords: [source.path.toLowerCase(), "source"],
+      icon: { source: Icon.Document, tintColor: Color.Orange },
+      copyValue: `source ${source.path}`,
+    });
+  });
+
+  stats.evals.forEach((evalCmd, idx) => {
+    results.push({
+      id: `eval-${idx}`,
+      type: "eval",
+      title: truncateValueMiddle(evalCmd.command, 60),
+      subtitle: "eval",
+      keywords: [evalCmd.command.toLowerCase(), "eval"],
+      icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.error },
+      copyValue: `eval "${shellQuoteDouble(evalCmd.command)}"`,
+    });
+  });
+
+  stats.setopts.forEach((setopt, idx) => {
+    results.push({
+      id: `setopt-${idx}`,
+      type: "setopt",
+      title: setopt.option,
+      subtitle: "setopt",
+      keywords: [setopt.option.toLowerCase(), "setopt", "option"],
+      icon: { source: Icon.Gear, tintColor: MODERN_COLORS.neutral },
+      copyValue: `setopt ${setopt.option}`,
+    });
+  });
+
+  return results;
+}
+
+/**
+ * Filters results based on search text
+ */
+function filterResults(results: SearchResult[], searchText: string): SearchResult[] {
+  if (!searchText.trim()) {
+    return results;
+  }
+  const query = searchText.toLowerCase();
+  return results.filter((result) => result.keywords.some((keyword) => keyword.includes(query)));
+}
+
+/**
+ * Groups results by type for display
+ */
+function groupResultsByType(results: SearchResult[]): Map<string, SearchResult[]> {
+  const groups = new Map<string, SearchResult[]>();
+  results.forEach((result) => {
+    const existing = groups.get(result.type) || [];
+    existing.push(result);
+    groups.set(result.type, existing);
+  });
+  return groups;
+}
+
+/**
+ * Gets display name for result type
+ */
+function getTypeDisplayName(type: string): string {
+  const names: Record<string, string> = {
+    alias: "Aliases",
+    export: "Exports",
+    function: "Functions",
+    plugin: "Plugins",
+    source: "Sources",
+    eval: "Evals",
+    setopt: "Setopts",
+  };
+  return names[type] || type;
+}
 
 /**
  * Statistics overview command for zshrc content
@@ -20,19 +174,35 @@ import { calculateStatistics, hasContent, getTopEntries } from "./utils/statisti
  * Displays aggregated statistics across all configuration sections,
  * with quick links to manage individual entry types.
  */
-export default function ZshrcStatistics() {
+export default function ZshrcStatistics({ searchBarAccessory }: ZshrcStatisticsProps = {}) {
   const { sections, isLoading, refresh, isFromCache } = useZshrcLoader("Statistics");
-  const stats = sections.length > 0 ? calculateStatistics(sections) : null;
+  const [searchText, setSearchText] = useState("");
+  const stats = useMemo(() => (sections.length > 0 ? calculateStatistics(sections) : null), [sections]);
+
+  const allResults = useMemo(() => (stats ? createSearchResults(stats) : []), [stats]);
+  const filteredResults = useMemo(() => filterResults(allResults, searchText), [allResults, searchText]);
+  const groupedResults = useMemo(() => groupResultsByType(filteredResults), [filteredResults]);
+
+  const isSearching = searchText.trim().length > 0;
 
   const handleRefresh = () => {
     refresh();
+  };
+
+  const handleCopy = async (value: string) => {
+    await Clipboard.copy(value);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Copied to Clipboard",
+      message: truncateValueMiddle(value, 40),
+    });
   };
 
   const renderOverview = () => {
     if (!stats) {
       return (
         <List.Item
-          title="📊 Loading..."
+          title="Loading..."
           subtitle="Analyzing .zshrc"
           icon={{ source: Icon.Document, tintColor: MODERN_COLORS.primary }}
           accessories={[{ text: isFromCache ? "Cached" : "Reading", icon: Icon.Clock }]}
@@ -48,39 +218,93 @@ ${isFromCache ? "⚠️ Using cached data" : "📖 Reading file..."}
         />
       );
     }
+
+    // Check if zshrc is essentially empty
+    const totalEntries =
+      stats.aliases.length +
+      stats.exports.length +
+      stats.functions.length +
+      stats.plugins.length +
+      stats.sources.length +
+      stats.evals.length +
+      stats.setopts.length;
+
+    if (totalEntries === 0 && stats.sectionCount <= 1) {
+      return (
+        <List.Item
+          title="Empty Configuration"
+          subtitle="Your .zshrc file appears to be empty"
+          icon={{ source: Icon.Document, tintColor: MODERN_COLORS.neutral }}
+          detail={
+            <List.Item.Detail
+              markdown={`
+# Empty Configuration
+
+Your \`.zshrc\` file doesn't contain any recognized configuration entries.
+
+## Getting Started
+
+You can add configuration by:
+1. Opening your \`.zshrc\` file with the action below
+2. Adding aliases, exports, or other shell configuration
+3. Refreshing this view to see your changes
+
+## Example Entries
+
+\`\`\`zsh
+# Aliases
+alias ll='ls -la'
+alias gs='git status'
+
+# Exports
+export EDITOR='vim'
+export PATH="$HOME/bin:$PATH"
+\`\`\`
+
+Press ⌘R to refresh after making changes.
+              `}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={handleRefresh}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+
     return null;
   };
 
   const renderStats = () => {
     if (!stats) return null;
 
-    const {
-      sectionCount: sectionLength,
-      aliases: allAliases,
-      exports: allExports,
-      functions: allFunctions,
-      plugins: allPlugins,
-      sources: allSources,
-      evals: allEvals,
-      setopts: allSetopts,
-    } = stats;
+    const { sectionCount, aliases, exports, functions, plugins, sources, evals, setopts } = stats;
 
     return (
       <>
+        {/* Sections - special case with custom metadata */}
         <List.Item
           title="Sections"
           icon={{ source: Icon.Folder, tintColor: MODERN_COLORS.neutral }}
-          accessories={[{ text: `${sectionLength}` }]}
+          accessories={[{ text: `${sectionCount}` }]}
           detail={
             <List.Item.Detail
               markdown={`
 # Sections
 
-**${sectionLength}** configuration blocks
-                `}
+**${sectionCount}** configuration blocks
+              `}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Sections Found" text={`${sectionLength} total`} />
+                  <List.Item.Detail.Metadata.Label title="Sections Found" text={`${sectionCount} total`} />
                   {getTopEntries(sections, 6).map((section, idx) => (
                     <List.Item.Detail.Metadata.Label
                       key={`section-${idx}`}
@@ -109,288 +333,246 @@ ${isFromCache ? "⚠️ Using cached data" : "📖 Reading file..."}
             </ActionPanel>
           }
         />
-        <List.Item
+
+        {/* Aliases */}
+        <StatListItem
           title="Aliases"
-          icon={{ source: Icon.Terminal, tintColor: MODERN_COLORS.success }}
-          accessories={[{ text: `${allAliases.length}` }]}
-          detail={
-            <List.Item.Detail
-              markdown={`
+          icon={Icon.Terminal}
+          tintColor={MODERN_COLORS.success}
+          items={aliases}
+          getItemLabel={(a) => a.name}
+          getItemSubtitle={(a) => a.command}
+          markdownContent={`
 # Aliases
 
-**${allAliases.length}** command shortcuts
+**${aliases.length}** command shortcuts
 
-${getTopEntries(allAliases, 5)
+${getTopEntries(aliases, 5)
   .map((alias) => `- **\`${alias.name}\`** → \`${alias.command}\``)
   .join("\n")}
-                `}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Aliases Found" text={`${allAliases.length} total`} />
-                  {getTopEntries(allAliases, 6).map((alias, idx) => (
-                    <List.Item.Detail.Metadata.Label
-                      key={`alias-${idx}`}
-                      title={alias.name}
-                      text={truncateValueMiddle(alias.command)}
-                      icon={{ source: Icon.Terminal, tintColor: Color.Green }}
-                    />
-                  ))}
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.Push title="View All Aliases" target={<Aliases />} icon={Icon.Terminal} />
-              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-              <Action
-                title="Refresh Statistics"
-                icon={Icon.ArrowClockwise}
-                onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
+          `}
+          viewAllTarget={<Aliases />}
+          viewAllTitle="View All Aliases"
+          onRefresh={handleRefresh}
         />
-        <List.Item
+
+        {/* Exports */}
+        <StatListItem
           title="Exports"
-          icon={{ source: Icon.Box, tintColor: MODERN_COLORS.primary }}
-          accessories={[{ text: `${allExports.length}` }]}
-          detail={
-            <List.Item.Detail
-              markdown={`
+          icon={Icon.Upload}
+          tintColor={MODERN_COLORS.primary}
+          items={exports}
+          getItemLabel={(e) => e.variable}
+          getItemSubtitle={(e) => e.value}
+          markdownContent={`
 # Exports
 
-**${allExports.length}** environment variables
+**${exports.length}** environment variables
 
-${getTopEntries(allExports, 5)
+${getTopEntries(exports, 5)
   .map((exp) => `- **\`${exp.variable}\`** = \`${exp.value}\``)
   .join("\n")}
-                `}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Exports Found" text={`${allExports.length} total`} />
-                  {getTopEntries(allExports, 6).map((exp, idx) => (
-                    <List.Item.Detail.Metadata.Label
-                      key={`export-${idx}`}
-                      title={exp.variable}
-                      text={truncateValueMiddle(exp.value)}
-                      icon={{ source: Icon.Box, tintColor: Color.Blue }}
-                    />
-                  ))}
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.Push title="View All Exports" target={<Exports />} icon={Icon.Box} />
-              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-              <Action
-                title="Refresh Statistics"
-                icon={Icon.ArrowClockwise}
-                onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
+          `}
+          viewAllTarget={<Exports />}
+          viewAllTitle="View All Exports"
+          onRefresh={handleRefresh}
         />
 
-        {/* Additional Entry Type Statistics */}
+        {/* Functions */}
         {hasContent(stats, "functions") && (
-          <List.Item
+          <StatListItem
             title="Functions"
-            icon={{ source: Icon.Code, tintColor: MODERN_COLORS.primary }}
-            accessories={[{ text: `${allFunctions.length}` }]}
-            detail={
-              <List.Item.Detail
-                markdown={`
+            icon={Icon.Code}
+            tintColor={MODERN_COLORS.purple}
+            items={functions}
+            getItemLabel={(f) => `${f.name}()`}
+            markdownContent={`
 # Function Statistics
 
-## 🔧 Functions
-**Total:** ${allFunctions.length} functions found
+## Functions
+**Total:** ${functions.length} functions found
 
 Functions are custom shell commands defined in your zshrc file.
 
 ### Functions Found
-${getTopEntries(allFunctions, 10)
+${getTopEntries(functions, 10)
   .map((func) => `- **\`${func.name}()\`**`)
   .join("\n")}
-                  `}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.Push title="View All Functions" target={<Functions />} icon={Icon.Code} />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh Statistics"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            `}
+            viewAllTarget={<Functions />}
+            viewAllTitle="View All Functions"
+            onRefresh={handleRefresh}
           />
         )}
 
+        {/* Plugins */}
         {hasContent(stats, "plugins") && (
-          <List.Item
+          <StatListItem
             title="Plugins"
-            icon={{ source: Icon.Box, tintColor: MODERN_COLORS.warning }}
-            accessories={[{ text: `${allPlugins.length}` }]}
-            detail={
-              <List.Item.Detail
-                markdown={`
+            icon={Icon.Plug}
+            tintColor={MODERN_COLORS.warning}
+            items={plugins}
+            getItemLabel={(p) => p.name}
+            markdownContent={`
 # Plugin Statistics
 
-## 🔌 Plugins
-**Total:** ${allPlugins.length} plugins found
+## Plugins
+**Total:** ${plugins.length} plugins found
 
 Plugins extend zsh functionality with additional features and commands.
 
 ### Plugins Found
-${getTopEntries(allPlugins, 10)
+${getTopEntries(plugins, 10)
   .map((plugin) => `- **\`${plugin.name}\`**`)
   .join("\n")}
-                  `}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.Push title="View All Plugins" target={<Plugins />} icon={Icon.Box} />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh Statistics"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            `}
+            viewAllTarget={<Plugins />}
+            viewAllTitle="View All Plugins"
+            onRefresh={handleRefresh}
           />
         )}
 
+        {/* Sources */}
         {hasContent(stats, "sources") && (
-          <List.Item
+          <StatListItem
             title="Sources"
-            icon={{ source: Icon.Document, tintColor: MODERN_COLORS.primary }}
-            accessories={[{ text: `${allSources.length}` }]}
-            detail={
-              <List.Item.Detail
-                markdown={`
+            icon={Icon.Document}
+            tintColor={MODERN_COLORS.primary}
+            items={sources}
+            getItemLabel={(s) => s.path}
+            markdownContent={`
 # Source Statistics
 
-## 📄 Source Commands
-**Total:** ${allSources.length} source commands found
+## Source Commands
+**Total:** ${sources.length} source commands found
 
 Source commands load additional configuration files into your shell session.
 
 ### Sources Found
-${getTopEntries(allSources, 10)
+${getTopEntries(sources, 10)
   .map((source) => `- **\`${source.path}\`**`)
   .join("\n")}
-                  `}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.Push title="View All Sources" target={<Sources />} icon={Icon.Document} />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh Statistics"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            `}
+            viewAllTarget={<Sources />}
+            viewAllTitle="View All Sources"
+            onRefresh={handleRefresh}
           />
         )}
 
+        {/* Evals */}
         {hasContent(stats, "evals") && (
-          <List.Item
+          <StatListItem
             title="Evals"
-            icon={{ source: Icon.Terminal, tintColor: MODERN_COLORS.error }}
-            accessories={[{ text: `${allEvals.length}` }]}
-            detail={
-              <List.Item.Detail
-                markdown={`
+            icon={Icon.Terminal}
+            tintColor={MODERN_COLORS.error}
+            items={evals}
+            getItemLabel={(e) => truncateValueMiddle(e.command, 40)}
+            markdownContent={`
 # Eval Statistics
 
-## ⚡ Eval Commands
-**Total:** ${allEvals.length} eval commands found
+## Eval Commands
+**Total:** ${evals.length} eval commands found
 
 Eval commands execute shell code dynamically at runtime.
 
 ### Evals Found
-${getTopEntries(allEvals, 10)
+${getTopEntries(evals, 10)
   .map((evalCmd) => `- **\`${truncateValueMiddle(evalCmd.command, 60)}\`**`)
   .join("\n")}
-                  `}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.Push title="View All Evals" target={<Evals />} icon={Icon.Terminal} />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh Statistics"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            `}
+            viewAllTarget={<Evals />}
+            viewAllTitle="View All Evals"
+            onRefresh={handleRefresh}
           />
         )}
 
+        {/* Setopts */}
         {hasContent(stats, "setopts") && (
-          <List.Item
+          <StatListItem
             title="Setopts"
-            icon={{ source: Icon.Gear, tintColor: MODERN_COLORS.neutral }}
-            accessories={[{ text: `${allSetopts.length}` }]}
-            detail={
-              <List.Item.Detail
-                markdown={`
+            icon={Icon.Gear}
+            tintColor={MODERN_COLORS.neutral}
+            items={setopts}
+            getItemLabel={(s) => s.option}
+            markdownContent={`
 # Setopt Statistics
 
-## ⚙️ Setopt Commands
-**Total:** ${allSetopts.length} setopt commands found
+## Setopt Commands
+**Total:** ${setopts.length} setopt commands found
 
 Setopt commands configure zsh behavior and options.
 
 ### Setopts Found
-${getTopEntries(allSetopts, 10)
+${getTopEntries(setopts, 10)
   .map((setopt) => `- **\`${setopt.option}\`**`)
   .join("\n")}
-                  `}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.Push title="View All Setopts" target={<Setopts />} icon={Icon.Gear} />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh Statistics"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            `}
+            viewAllTarget={<Setopts />}
+            viewAllTitle="View All Setopts"
+            onRefresh={handleRefresh}
           />
         )}
       </>
     );
   };
 
+  const renderSearchResults = () => {
+    if (filteredResults.length === 0) {
+      return (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No Results Found"
+          description={`No entries matching "${searchText}"`}
+        />
+      );
+    }
+
+    return Array.from(groupedResults.entries()).map(([type, results]) => (
+      <List.Section key={type} title={getTypeDisplayName(type)} subtitle={`${results.length}`}>
+        {results.slice(0, 50).map((result) => (
+          <List.Item
+            key={result.id}
+            title={result.title}
+            subtitle={result.subtitle !== result.type ? truncateValueMiddle(result.subtitle, 50) : ""}
+            icon={result.icon}
+            accessories={[{ tag: result.type }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Copy Definition"
+                  icon={Icon.Clipboard}
+                  onAction={() => handleCopy(result.copyValue)}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action
+                  title="Copy Name/Value"
+                  icon={Icon.Clipboard}
+                  onAction={() => handleCopy(result.title)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={handleRefresh}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    ));
+  };
+
   return (
     <List
       navigationTitle={`Zshrc Statistics${isFromCache ? " (Cached)" : ""}`}
       searchBarPlaceholder="Search aliases, exports, functions, plugins, or sections..."
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
+      onSearchTextChange={setSearchText}
       isLoading={isLoading}
-      isShowingDetail={true}
+      isShowingDetail={!isSearching}
       actions={
         <ActionPanel>
           <Action
@@ -403,10 +585,14 @@ ${getTopEntries(allSetopts, 10)
         </ActionPanel>
       }
     >
-      <List.Section title="Overview">
-        {renderOverview()}
-        {renderStats()}
-      </List.Section>
+      {isSearching ? (
+        renderSearchResults()
+      ) : (
+        <List.Section title="Overview">
+          {renderOverview()}
+          {renderStats()}
+        </List.Section>
+      )}
     </List>
   );
 }

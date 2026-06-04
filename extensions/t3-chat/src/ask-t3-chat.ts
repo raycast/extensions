@@ -2,9 +2,9 @@ import { getPreferenceValues, LaunchProps, open, showHUD } from "@raycast/api";
 import { isSearchGroundingSupported } from "./utils/model-check";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.AskT3Chat }>) {
-  const { model, useBeta } = getPreferenceValues<Preferences.AskT3Chat>();
+  const { model } = getPreferenceValues<Preferences.AskT3Chat>();
 
-  const domain = useBeta ? "beta.t3.chat" : "t3.chat";
+  const domain = "t3.chat";
   const enableSearch = props.arguments.search === "true";
 
   const url = new URL(`https://${domain}/new`);

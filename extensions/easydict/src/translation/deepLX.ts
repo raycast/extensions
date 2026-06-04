@@ -39,39 +39,42 @@ export async function requestDeepLXTranslate(queryWordInfo: QueryWordInfo): Prom
     return Promise.resolve(result);
   }
 
-  const startTime = new Date().getTime();
-  try {
+  return new Promise((resolve, reject) => {
+    const startTime = new Date().getTime();
     // `sourceLang` is guaranteed not to be 'auto', safe to cast to TargetLanguage
-    const translatedText = await translate(word, targetLang as TargetLanguage, sourceLang as TargetLanguage);
-    const costTime = new Date().getTime() - startTime;
-    console.log(`DeepLX translate: ${JSON.stringify(translatedText, null, 4)}, cost: ${costTime} ms`);
+    translate(word, targetLang as TargetLanguage, sourceLang as TargetLanguage)
+      .then((translatedText: string) => {
+        const costTime = new Date().getTime() - startTime;
+        console.log(`DeepLX translate: ${JSON.stringify(translatedText, null, 4)}, cost: ${costTime} ms`);
 
-    // Create a result object similar to DeepL API structure
-    const deepLXResult = {
-      translations: [
-        {
-          detected_source_language: sourceLang,
-          text: translatedText,
-        },
-      ],
-    };
+        // Create a result object similar to DeepL API structure
+        const deepLXResult = {
+          translations: [
+            {
+              detected_source_language: sourceLang,
+              text: translatedText,
+            },
+          ],
+        };
 
-    const deepLXTypeResult: QueryTypeResult = {
-      type: TranslationType.DeepLX,
-      result: deepLXResult,
-      translations: translatedText.split("\n"),
-      queryWordInfo: queryWordInfo,
-    };
-    return deepLXTypeResult;
-  } catch (error: unknown) {
-    console.error(`---> DeepLX translate error:`, error);
+        const deepLXTypeResult: QueryTypeResult = {
+          type: TranslationType.DeepLX,
+          result: deepLXResult,
+          translations: translatedText.split("\n"),
+          queryWordInfo: queryWordInfo,
+        };
+        resolve(deepLXTypeResult);
+      })
+      .catch((error: unknown) => {
+        console.error(`---> DeepLX translate error:`, error);
 
-    const errorInfo: RequestErrorInfo = {
-      type: deepLXType,
-      code: error instanceof Error ? error.name : "unknown",
-      message: error instanceof Error ? error.message : "DeepLX translate failed",
-    };
+        const errorInfo: RequestErrorInfo = {
+          type: deepLXType,
+          code: error instanceof Error ? error.name : "unknown",
+          message: error instanceof Error ? error.message : "DeepLX translate failed",
+        };
 
-    throw errorInfo;
-  }
+        reject(errorInfo);
+      });
+  });
 }

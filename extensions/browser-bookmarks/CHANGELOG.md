@@ -1,5 +1,45 @@
 # Browser Bookmarks Changelog
 
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
+
+## [Bug Fix] - 2026-05-19
+
+- Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
+
+## [Windows Support for Chromium Browsers] - 2026-04-30
+
+- Added Windows support for Chrome, Edge, and Brave bookmarks
+- Automatically refresh Chromium bookmarks when the selected profile changes on disk
+
+## [Support for Perplexity Comet Browser] - 2026-03-04
+
+- Added support for `Perplexity Comet` browser
+
+## [Improvements] - 2026-03-03
+
+- Improved browser handling and opening bookmarks
+- Added profile support for Vivaldi Snapshot
+- Fixed inconsistent icon usage for Brave and Edge variants
+- Updated dependencies to latest versions
+- Fixed formatting and code style issues
+
+## [Bug Fix] - 2026-02-18
+
+- Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks
+
+## [Support for Vivaldi Snapshot Browser] - 2026-02-17
+
+- Added support for `Vivaldi Snapshot` browser.
+
+## [Bug Fixes] - 2026-02-12
+
+- Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
+- Improved error handling for file access operations to gracefully handle permission restrictions
+- Fixed dependency conflicts by downgrading ESLint to version 9 for compatibility with existing plugins
+- Fixed linting issues by removing unused catch variables and invalid ESLint rule references
+
 ## [Support for Helium Browser] - 2025-12-08
 
 - Added support for `Helium` browser.

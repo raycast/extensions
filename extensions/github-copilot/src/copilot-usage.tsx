@@ -1,9 +1,10 @@
-import { List, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 import { useCopilotUsage } from "./hooks/useCopilotUsage";
-import { RefreshAction } from "./components/RefreshAction";
+import { provider, reauthorize } from "./lib/oauth";
 
 function Command() {
-  const { isLoading, usage, revalidate } = useCopilotUsage();
+  const { isLoading, usage, error, revalidate } = useCopilotUsage();
 
   const formatUsage = (percentageUsed: number, limit: number | null): string => {
     if (limit === null) {
@@ -36,13 +37,23 @@ function Command() {
     });
   };
 
+  const UsageActions = (
+    <ActionPanel>
+      <Action.OpenInBrowser title="Manage Paid Premium Requests" url="https://github.com/settings/billing/budgets" />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
+      <Action title="Log Out" icon={Icon.Logout} onAction={reauthorize} />
+    </ActionPanel>
+  );
+
   if (!usage && !isLoading) {
     return (
       <List>
         <List.EmptyView
           icon={{ source: "copilot.svg", tintColor: Color.PrimaryText }}
           title="Usage Data Not Available"
-          description="Failed to fetch usage data. Please check your connection."
+          description={error ? error.message : "Failed to fetch usage data. Please check your connection."}
+          actions={UsageActions}
         />
       </List>
     );
@@ -65,7 +76,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Code, tintColor: Color.PrimaryText }}
-              actions={<RefreshAction onRefresh={revalidate} />}
+              actions={UsageActions}
             />
             <List.Item
               title="Chat messages"
@@ -79,7 +90,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Message, tintColor: Color.PrimaryText }}
-              actions={<RefreshAction onRefresh={revalidate} />}
+              actions={UsageActions}
             />
             <List.Item
               title="Premium requests"
@@ -93,7 +104,7 @@ function Command() {
                 },
               ]}
               icon={{ source: Icon.Star, tintColor: Color.PrimaryText }}
-              actions={<RefreshAction onRefresh={revalidate} />}
+              actions={UsageActions}
             />
           </List.Section>
 
@@ -102,12 +113,12 @@ function Command() {
               <List.Item
                 title="Additional paid premium requests enabled."
                 icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
-                actions={<RefreshAction onRefresh={revalidate} />}
+                actions={UsageActions}
               />
               <List.Item
                 title={`Allowance resets ${formatResetDate(usage.allowanceResetAt)}.`}
                 icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-                actions={<RefreshAction onRefresh={revalidate} />}
+                actions={UsageActions}
               />
             </List.Section>
           )}
@@ -117,4 +128,4 @@ function Command() {
   );
 }
 
-export default Command;
+export default withAccessToken(provider)(Command);

@@ -11,6 +11,10 @@
 - Replaced official 42 logo with a custom one to avoid trademark issues
 - Implemented OAuth token refresh to prevent users from being logged out
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Initial Version] - 2026-01-26
 
 ### Features

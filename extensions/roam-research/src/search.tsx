@@ -1,9 +1,9 @@
-import { List, Icon, ActionPanel, Action, confirmAlert, Alert, useNavigation, getPreferenceValues } from "@raycast/api";
-import { useEvent, useGraphsConfig } from "./utils";
+import { List, Icon, ActionPanel, Action, useNavigation, getPreferenceValues } from "@raycast/api";
+import { useGraphsConfig } from "./utils";
 import { debounce } from "debounce";
 import { SingleGraphSearchView, searchSingleGraphMinimal, MinimalSearchResult } from "./components";
 import { keys, values } from "./utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
 interface GraphResults {
@@ -23,21 +23,20 @@ function isGraphResultsOrErrorMessageAnError(val: GraphResultsOrErrorMessage) {
 
 type GraphsMinimalResultsOrErrorMessageMap = Record<GraphName, GraphResultsOrErrorMessage>;
 
-// defining this outside because the fn was getting recreated all the time defeating the purpose of the debounce
-const changeResult = debounce((text: string, setSearchText: (text: string) => any) => {
-  text = text.trim();
-  if (!text || text.length < 2) {
-    return;
-  }
-  // console.log("setSearchText", text);
-  setSearchText(text);
-}, 500);
-
 export default function Command() {
   // TODO: I feel the code in this command is not that good (is hard to understand and change)
   //   Do a proper refactoring of this later
-  const { graphsConfig } = useGraphsConfig();
-  // console.log("graphsConfig.values()", values(graphsConfig))
+  const { graphsConfig, orderedGraphNames } = useGraphsConfig();
+  // Filter to graphs with read capability (undefined = full access for backward compat)
+  const readableGraphsConfig = useMemo(() => {
+    const result: GraphsConfigMap = {};
+    for (const name of keys(graphsConfig)) {
+      if (graphsConfig[name].capabilities?.read !== false) {
+        result[name] = graphsConfig[name];
+      }
+    }
+    return result;
+  }, [graphsConfig]);
   const [graphNames, setGraphNames] = useState<string[]>([]);
 
   const { push } = useNavigation();
@@ -48,24 +47,33 @@ export default function Command() {
   // data which is textData but after debouncing
   const [searchText, setSearchText] = useState("");
 
+  const changeResult = useMemo(
+    () =>
+      debounce((text: string, setSearchText: (text: string) => any) => {
+        text = text.trim();
+        if (!text || text.length < 2) {
+          return;
+        }
+        setSearchText(text);
+      }, 500),
+    []
+  );
+  useEffect(() => () => changeResult.clear(), [changeResult]);
+
   const {
     isLoading,
     data,
-  }: // error
-  // revalidate
-  // mutate
-  {
+  }: {
     isLoading: boolean;
-    data: GraphsMinimalResultsOrErrorMessageMap;
+    data: GraphsMinimalResultsOrErrorMessageMap | undefined;
   } = useCachedPromise(
     (graphsConfig, query: string) => {
-      // return Promise.resolve(undefined);
       if (!graphsConfig || keys(graphsConfig).length === 0) {
         return Promise.resolve(undefined);
       }
       return Promise.allSettled(
         values(graphsConfig).map(
-          (graphConfig: any) =>
+          (graphConfig) =>
             new Promise((resolve, reject) => {
               searchSingleGraphMinimal(graphConfig, query, preferences.hideCodeBlocksInSearch)
                 .then((results) => resolve([graphConfig.nameField, results]))
@@ -80,7 +88,6 @@ export default function Command() {
         for (const result of results) {
           if (result.status === "fulfilled") {
             const [graphName, minimalResults] = result.value as [string, MinimalSearchResult[]];
-            // console.log("fulfilled:", graphName, minimalResults);
             const counts = !minimalResults
               ? [0, 0]
               : minimalResults.reduce(
@@ -99,58 +106,53 @@ export default function Command() {
               counts: counts,
             };
           } else {
-            // console.log("rejected:", result.reason);
             const [graphName, err] = result.reason as [string, Error];
             graphsResultsMap[graphName] = err.message;
           }
         }
-        // console.log("graphsResultsMap", graphsResultsMap);
         return graphsResultsMap;
       });
     },
-    [graphsConfig, searchText],
+    [readableGraphsConfig, searchText],
     { keepPreviousData: true }
   );
 
   useEffect(() => {
-    const graphNames = keys(graphsConfig);
-    // sort
-    if (data) {
-      graphNames.sort(function (a: GraphName, b: GraphName) {
-        let da = data[a];
-        let db = data[b];
-        if (!da || isGraphResultsOrErrorMessageAnError(da)) {
-          return 1;
-        }
-        if (!db || isGraphResultsOrErrorMessageAnError(db)) {
-          return -1;
-        }
-        da = da as GraphResults;
-        db = db as GraphResults;
-        const aCounts = da["counts"][0] + da["counts"][1];
-        const bCounts = db["counts"][0] + db["counts"][1];
-        return bCounts - aCounts;
-      });
-    }
-    // console.log("useEffect: graphNames", graphNames)
-    setGraphNames(graphNames);
-  }, [graphsConfig, data]);
+    // Start from user-configured order, filtered to readable graphs
+    const readableOrdered = orderedGraphNames.filter((name) => readableGraphsConfig[name]);
+    readableOrdered.sort(function (a: GraphName, b: GraphName) {
+      if (data) {
+        const da = data[a];
+        const db = data[b];
+        if (!da || isGraphResultsOrErrorMessageAnError(da)) return 1;
+        if (!db || isGraphResultsOrErrorMessageAnError(db)) return -1;
+        const aCounts = (da as GraphResults)["counts"][0] + (da as GraphResults)["counts"][1];
+        const bCounts = (db as GraphResults)["counts"][0] + (db as GraphResults)["counts"][1];
+        if (bCounts !== aCounts) return bCounts - aCounts;
+      }
+      // Tiebreaker: user-configured graph order (already in orderedGraphNames order)
+      return 0;
+    });
+    setGraphNames(readableOrdered);
+  }, [readableGraphsConfig, orderedGraphNames, data]);
 
   if (graphNames.length === 0) {
     return (
       <List>
-        <List.EmptyView icon={Icon.Tray} title="Please add graph first" />
+        <List.EmptyView
+          icon={Icon.Tray}
+          title={keys(graphsConfig).length === 0 ? "Please add graph first" : "No graphs with read access"}
+        />
       </List>
     );
   }
   if (graphNames.length === 1) {
-    const graphConfig = graphsConfig[graphNames[0]];
+    const graphConfig = readableGraphsConfig[graphNames[0]];
     return <SingleGraphSearchView graphConfig={graphConfig} />;
   }
 
   const getAccessories = (graphSearchDataOrError: GraphResultsOrErrorMessage | false) => {
     // let graphSearchDataOrError = (textData && textData.length >= 2 && searchText === textData.trim() && data && data[graphName]);
-    // console.log("getAccessories", graphName, graphSearchDataOrError);
     if (!graphSearchDataOrError) {
       return [];
     } else if (isGraphResultsOrErrorMessageAnError(graphSearchDataOrError)) {
@@ -173,8 +175,6 @@ export default function Command() {
     }
   };
 
-  // console.log("graphNames", graphNames);
-
   return (
     <List
       isLoading={isLoading}
@@ -196,7 +196,7 @@ export default function Command() {
             title={graphName}
             key={graphName}
             icon={Icon.MagnifyingGlass}
-            accessories={isLoading ? [] : getAccessories(graphSearchDataOrError)}
+            accessories={[...(isLoading ? [] : getAccessories(graphSearchDataOrError || false))]}
             actions={
               !isError && (
                 <ActionPanel>
@@ -204,7 +204,7 @@ export default function Command() {
                     icon={Icon.MagnifyingGlass}
                     title="Search Graph"
                     onAction={() => {
-                      const graphConfig = graphsConfig[graphName];
+                      const graphConfig = readableGraphsConfig[graphName];
                       const singleGraphSearchInitData =
                         searchText === textData.trim() &&
                         data &&

@@ -1,8 +1,10 @@
 import { DailyUsageCommandResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
+import { getCustomNpxPath } from "../preferences";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { captureCcusageVersion } from "../utils/ccusage-version";
 import { validateDateFormat } from "../utils/date-validator";
 import { getCurrentLocalDate } from "../utils/date-formatter";
 
@@ -30,7 +32,7 @@ export default async function getDailyUsage(input?: Input): Promise<{
   totalTokens: number;
   date: string;
 }> {
-  const npxCommand = preferences.customNpxPath || "npx";
+  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
   // Build command with optional parameters
@@ -63,7 +65,8 @@ export default async function getDailyUsage(input?: Input): Promise<{
   const parseResult = stringToJSON.pipe(DailyUsageCommandResponseSchema).safeParse(stdout.toString());
 
   if (!parseResult.success) {
-    throw new Error(`Invalid daily usage data: ${parseResult.error.message}`);
+    const version = await captureCcusageVersion();
+    throw new Error(describeParseFailure("Invalid daily usage data", stdout.toString(), parseResult.error, version));
   }
 
   const today = getCurrentLocalDate();

@@ -1,5 +1,11 @@
 # Surge Changelog
 
+## [New Command and UI Improvements] - 2026-03-01
+
+- **New standalone command**: Added `toggle-enhanced-mode` for quickly toggling Surge Enhanced Mode with no-view mode
+- **UI**: Grouped `List.Item` entries into `List.Section` for a cleaner and more organized layout
+- **Refactor**: Extracted enabled/disabled emoji into a shared `constants/emoji.ts` file
+
 ## [Routine Maintenance] - 2025-11-03
 
 - Mark this extension as macOS only

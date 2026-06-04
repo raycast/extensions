@@ -7,7 +7,8 @@
   "author": "pablopunk",
   "contributors": [
     "mlz11",
-    "tonypinkevych"
+    "tonypinkevych",
+    "bulutfatih"
   ],
   "categories": [
     "Productivity",
@@ -52,6 +53,53 @@
             }
           ],
           "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "gif_quality",
+          "type": "textfield",
+          "required": false,
+          "title": "GIF Quality",
+          "description": "Quality of the GIF from 1 to 100. Higher values use more colors for better quality at a larger file size. Only applies when converting to GIF.",
+          "default": "90",
+          "placeholder": "90"
+        },
+        {
+          "name": "gif_fps",
+          "type": "textfield",
+          "required": false,
+          "title": "GIF Frame Rate",
+          "description": "Frames per second for the GIF (1-60). Lower values produce smaller files. Only applies when converting to GIF.",
+          "default": "15",
+          "placeholder": "15"
+        },
+        {
+          "name": "gif_speed",
+          "type": "dropdown",
+          "required": false,
+          "title": "GIF Speed",
+          "description": "Playback speed of the GIF. Only applies when converting to GIF.",
+          "default": "1",
+          "data": [
+            { "title": "0.25x", "value": "0.25" },
+            { "title": "0.5x", "value": "0.5" },
+            { "title": "1x (Normal)", "value": "1" },
+            { "title": "1.5x", "value": "1.5" },
+            { "title": "2x", "value": "2" }
+          ]
+        },
+        {
+          "name": "gif_loop",
+          "type": "dropdown",
+          "required": false,
+          "title": "GIF Loop",
+          "description": "Whether the GIF loops forever or plays once. Only applies when converting to GIF.",
+          "default": "forever",
+          "data": [
+            { "title": "Loop Forever", "value": "forever" },
+            { "title": "Play Once", "value": "once" }
+          ]
         }
       ]
     },
@@ -108,6 +156,32 @@
       "title": "Stabilize",
       "description": "The command allows to stabilize video",
       "mode": "no-view"
+    },
+    {
+      "name": "trim",
+      "title": "Trim",
+      "description": "Trim video by specifying start time and either end time or duration. Time format: seconds (e.g., '10') or HH:MM:SS (e.g., '00:00:10').",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "startTime",
+          "placeholder": "Start time (hh:mm:ss or ss)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "endTime",
+          "placeholder": "End time (hh:mm:ss or ss)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "duration",
+          "placeholder": "Duration (seconds)",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -139,5 +213,8 @@
       "default": "/opt/homebrew/bin/ffmpeg",
       "placeholder": "/opt/homebrew/bin/ffmpeg"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

@@ -2,19 +2,26 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import {
+  getWeekMonthOccurrences,
   getDayOccurrences,
   getLunarDayOccurrences,
   getFullDetail,
   getDateDiff,
 } from "./utils/date-utils";
 import { SolarDate } from "lunar-date-vn";
-import { getHoliday, isOfficialHoliday, isLunarEvent } from "./utils/holidays";
+import {
+  getHoliday,
+  isOfficialHoliday,
+  isLunarEvent,
+  getMothersDay,
+  getFathersDay,
+} from "./utils/holidays";
 
 interface Props {
   date: Date;
 }
 
-type DateType = "solar" | "lunar";
+type DateType = "solar" | "lunar" | "week";
 
 export default function DayDetailView({ date: initialDate }: Props) {
   const [occurrences, setOccurrences] = useState<Date[]>([]);
@@ -24,7 +31,15 @@ export default function DayDetailView({ date: initialDate }: Props) {
   const [manualDateType, setManualDateType] = useState<DateType | null>(null);
 
   const initialLunarCheck = isLunarEvent(initialDate);
-  const dateType = manualDateType ?? (initialLunarCheck ? "lunar" : "solar");
+  const solarYear = initialDate.getFullYear();
+  const solarKey = `${initialDate.getDate()}/${initialDate.getMonth() + 1}`;
+  const isMomDadDay =
+    solarKey === getMothersDay(solarYear) ||
+    solarKey === getFathersDay(solarYear);
+
+  const dateType =
+    manualDateType ??
+    (isMomDadDay ? "week" : initialLunarCheck ? "lunar" : "solar");
 
   // Reset manual override when the date changes
   useEffect(() => {
@@ -33,10 +48,14 @@ export default function DayDetailView({ date: initialDate }: Props) {
 
   // Calculate occurrences based on the effective dateType
   useEffect(() => {
-    const dates =
-      dateType === "solar"
-        ? getDayOccurrences(initialDate, 0, 10)
-        : getLunarDayOccurrences(initialDate, 0, 10);
+    let dates: Date[] = [];
+    if (dateType === "solar") {
+      dates = getDayOccurrences(initialDate, 0, 10);
+    } else if (dateType === "lunar") {
+      dates = getLunarDayOccurrences(initialDate, 0, 10);
+    } else if (dateType === "week") {
+      dates = getWeekMonthOccurrences(initialDate, 0, 10);
+    }
 
     setOccurrences(dates);
   }, [initialDate, dateType]);
@@ -52,7 +71,7 @@ export default function DayDetailView({ date: initialDate }: Props) {
       selectedItemId={initialSelectionId}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="View as Solar or Lunar"
+          tooltip="View as Solar, Lunar, or Week Count"
           value={dateType}
           onChange={(val) => {
             setManualDateType(val as DateType);
@@ -67,6 +86,11 @@ export default function DayDetailView({ date: initialDate }: Props) {
             title="Lunar Cycle"
             value="lunar"
             icon={Icon.Moon}
+          />
+          <List.Dropdown.Item
+            title="Week Count Cycle"
+            value="week"
+            icon={Icon.Calendar}
           />
         </List.Dropdown>
       }

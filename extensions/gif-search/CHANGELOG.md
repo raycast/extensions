@@ -1,5 +1,22 @@
 # GIF Search Changelog
 
+## [Add square GIF actions] - 2026-06-02
+
+- Added new actions to copy and paste center-cropped square GIFs on macOS
+
+## [Add Paste GIF Link action] - 2026-05-06
+
+- Added a new action to paste a GIF link into the front-most application
+- Added Windows shortcut support
+
+## [Fix] - 2026-04-23
+
+- Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
+
+## [Add Klipy support] - 2026-02-05
+
+- Add Klipy support
+
 ## [Faster Thumbnails] - 2025-12-17
 
 - Speed up loading of thumbnails in large grid items

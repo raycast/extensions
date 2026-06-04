@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { IS_CLOUD, umami } from "./lib/umami";
+import { IS_CLOUD, umami, useWebsites } from "./lib/umami";
 import { UmamiAdminUser } from "./lib/types";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import WithUmami from "./components/WithUmami";
@@ -53,24 +53,7 @@ function Users() {
 }
 
 function Websites({ user }: { user: UmamiAdminUser }) {
-  const { isLoading, data: websites = [] } = useCachedPromise(
-    async (userId) => {
-      const { ok, error, data } = await umami.getWebsites({ userId });
-      if (!ok) handleUmamiError(error);
-      const websites = data?.data ?? [];
-      const endAt = Date.now();
-      const pastDate = new Date();
-      pastDate.setDate(pastDate.getDate() - 1); // 1 day ago
-      const startAt = pastDate.getTime();
-
-      const statsResponses = await Promise.all(
-        websites.map((website) => umami.getWebsiteStats(website.id, { startAt, endAt })),
-      );
-      const stats = statsResponses.map(({ data }) => data);
-      return websites.map((website, index) => ({ ...website, stats: stats[index] }));
-    },
-    [user.id],
-  );
+  const { isLoading, data: websites = [] } = useWebsites(user.id);
 
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle={`View Users / ${user.username} / View Websites`}>
@@ -86,17 +69,11 @@ function Websites({ user }: { user: UmamiAdminUser }) {
                   {website.stats && (
                     <>
                       <List.Item.Detail.Metadata.Label title="Stats" />
-                      <List.Item.Detail.Metadata.Label title="Bounces" text={`${website.stats.bounces.value || 0}`} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Page Views"
-                        text={`${website.stats.pageviews.value || 0}`}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Total Time"
-                        text={`${website.stats.totaltime.value || 0}`}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Visitors" text={`${website.stats.visitors.value || 0}`} />
-                      <List.Item.Detail.Metadata.Label title="Visits" text={`${website.stats.visits.value || 0}`} />
+                      <List.Item.Detail.Metadata.Label title="Bounces" text={`${website.stats.bounces}`} />
+                      <List.Item.Detail.Metadata.Label title="Page Views" text={`${website.stats.pageviews}`} />
+                      <List.Item.Detail.Metadata.Label title="Total Time" text={`${website.stats.totaltime}`} />
+                      <List.Item.Detail.Metadata.Label title="Visitors" text={`${website.stats.visitors}`} />
+                      <List.Item.Detail.Metadata.Label title="Visits" text={`${website.stats.visits}`} />
                     </>
                   )}
                 </List.Item.Detail.Metadata>
