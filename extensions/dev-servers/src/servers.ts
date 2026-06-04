@@ -192,7 +192,7 @@ function detectTool(command: string, cwd: string): string {
     if (name === "vite" && hasSvelteConfig(cwd)) return "sveltekit";
     return name;
   }
-  // 2. Fall back to the package name from node_modules/<pkg>/ — handles
+  // 2. Fall back to the package name from node_modules/<pkg>/. This handles
   //    `node node_modules/serve/build/main.js` (→ "serve") and scoped
   //    packages like `node_modules/@vitejs/plugin-react/...`.
   const pkg = command.match(/node_modules\/(@[^/]+\/[^/\s]+|[^/\s]+)/);
@@ -205,7 +205,9 @@ function detectTool(command: string, cwd: string): string {
 function hasSvelteConfig(cwd: string): boolean {
   return (
     fs.existsSync(`${cwd}/svelte.config.js`) ||
-    fs.existsSync(`${cwd}/svelte.config.ts`)
+    fs.existsSync(`${cwd}/svelte.config.ts`) ||
+    fs.existsSync(`${cwd}/svelte.config.mjs`) ||
+    fs.existsSync(`${cwd}/svelte.config.cjs`)
   );
 }
 
@@ -235,7 +237,7 @@ export async function fetchServers(): Promise<DevServer[]> {
   ]);
   const candidates = procs.filter(isCandidate);
   const portByPid = lowestPortPerPid(listeners);
-  // Only query cwds for candidates that are actually listening — keeps the
+  // Only query cwds for candidates that are actually listening, which keeps the
   // lsof argument list short and skips dead PIDs.
   const finalPids = candidates
     .map((p) => p.pid)
@@ -243,7 +245,7 @@ export async function fetchServers(): Promise<DevServer[]> {
   const cwdByPid = await listCwds(finalPids);
 
   // Look up git info per unique cwd, in parallel. Worktrees of the same repo
-  // share a git common-dir, so we use that path as the project key — collapses
+  // share a git common-dir, so we use that path as the project key, which collapses
   // sibling worktrees into one group while still letting us show the branch on
   // each row. The project's display name is the basename of the common-dir's
   // parent (the repo root).
@@ -260,7 +262,7 @@ export async function fetchServers(): Promise<DevServer[]> {
     const cwd = cwdByPid.get(proc.pid);
     if (!cwd) continue; // shouldn't happen for live processes, but be safe
     const tool = detectTool(proc.command, cwd);
-    // Drop the portless proxy daemon itself — it's a node process out of
+    // Drop the portless proxy daemon itself. It's a node process out of
     // node_modules/portless/ that binds 80/443/1355, and would otherwise
     // appear as a phantom "dev server" row. Child processes spawned by
     // portless run their own framework binary (next, vite, …) so they
@@ -294,6 +296,11 @@ export async function fetchServers(): Promise<DevServer[]> {
   return servers;
 }
 
+// User-initiated kill: SIGTERM (the default signal), graceful: the
+// dev server gets a chance to flush logs, close connections, etc. Use
+// this from the dashboard's Kill / Kill All flows. Pair with `killServer`
+// below when you need an *immediate* port release (e.g. restart).
+//
 // Async-shaped so callers can pass the returned promise to Raycast's
 // `mutate(fn, { optimisticUpdate })` flow. `process.kill` itself is sync.
 export async function killProcess(pid: number): Promise<void> {
@@ -313,19 +320,110 @@ export function detectPackageManager(cwd: string): PackageManager {
   return "npm";
 }
 
-const PM_COMMAND: Record<PackageManager, [string, string[]]> = {
-  bun: ["bun", ["run", "dev"]],
-  pnpm: ["pnpm", ["dev"]],
-  yarn: ["yarn", ["dev"]],
-  npm: ["npm", ["run", "dev"]],
+// All managers honor `<pm> run <script>`. Explicit `run` works for arbitrary
+// script names (including ones with colons like `dev:web`) and removes the
+// ambiguity of the bare-shorthand form.
+const PM_RUN: Record<PackageManager, [string, string[]]> = {
+  bun: ["bun", ["run"]],
+  pnpm: ["pnpm", ["run"]],
+  yarn: ["yarn", ["run"]],
+  npm: ["npm", ["run"]],
 };
+
+// Heuristic tokens for the script-value fallback in pickDevScript. We match
+// the binary names that frameworks actually invoke in dev mode, with negative
+// lookaheads on the common production subcommands so we don't accidentally
+// pick a `build` or `preview` script. Ordering doesn't matter; first hit
+// wins inside any given script value.
+const DEV_SCRIPT_TOKENS: RegExp[] = [
+  /\bvite\b(?!\s+(?:build|preview|optimize))/,
+  /\bnext\s+dev\b/,
+  /\bastro\s+dev\b/,
+  /\bnuxt\s+dev\b/,
+  /\bwebpack-dev-server\b/,
+  /\bwebpack\s+serve\b/,
+  /\bparcel\b(?!\s+build)/,
+  /\bgatsby\s+develop\b/,
+  /\bremix\s+(?:dev|vite:dev)\b/,
+  /\bturbo\s+(?:run\s+)?dev\b/,
+  /\bbun\s+(?:--watch|--hot|run\s+dev)\b/,
+  /\bnodemon\b/,
+  /\btsx\s+watch\b/,
+  /\bts-node-dev\b/,
+  /\bserve\b/,
+  /\bhttp-server\b/,
+  /\blive-server\b/,
+];
+
+// Pick the most likely dev-server script in a project. First tries the
+// canonical key chain (`dev` → `start` → `develop`), then falls back to a
+// value-side heuristic so monorepo conventions like `dev:web` or
+// `start:dev` still resolve. Returns the script key (not the command), or
+// null when nothing in package.json looks like a dev server.
+export function pickDevScript(cwd: string): string | null {
+  let pkg: { scripts?: Record<string, unknown> };
+  try {
+    pkg = JSON.parse(
+      fs.readFileSync(path.join(cwd, "package.json"), "utf8"),
+    ) as { scripts?: Record<string, unknown> };
+  } catch {
+    return null;
+  }
+  const scripts = pkg.scripts ?? {};
+  for (const name of ["dev", "start", "develop"]) {
+    if (typeof scripts[name] === "string") return name;
+  }
+  // Iterate in declared order (Node preserves JSON insertion order), so the
+  // pick is deterministic for a given package.json.
+  for (const [name, value] of Object.entries(scripts)) {
+    if (typeof value !== "string") continue;
+    if (DEV_SCRIPT_TOKENS.some((re) => re.test(value))) return name;
+  }
+  return null;
+}
+
+// Canonicalize a path so two equivalent forms (alias / symlink / `/tmp` vs
+// `/private/tmp`) compare equal. Critical for the "is this project already
+// running?" check: lsof reports realpath for a process's cwd, so anything
+// we compare against it must also be realpath. Returns the input on
+// failure so callers don't have to handle a missing path twice.
+export function canonicalCwd(p: string): string {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return p;
+  }
+}
+
+// Walk up from a filesystem path to the nearest directory containing a
+// package.json. Used to resolve a Finder selection (which may be a file, a
+// subfolder, or the project root itself) to a project root we can spawn in.
+// The returned path is canonicalized so it round-trips through process
+// inspection without symlink-induced mismatches. Returns null when the
+// path isn't inside any Node project.
+export function findProjectRoot(startPath: string): string | null {
+  let cur: string;
+  try {
+    const st = fs.statSync(startPath);
+    cur = st.isDirectory() ? startPath : path.dirname(startPath);
+  } catch {
+    return null;
+  }
+  for (;;) {
+    if (fs.existsSync(path.join(cur, "package.json"))) return canonicalCwd(cur);
+    const parent = path.dirname(cur);
+    if (parent === cur) return null;
+    cur = parent;
+  }
+}
 
 // Slugify cwd for use in a temp-dir log filename.
 function cwdSlug(cwd: string): string {
   return cwd.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "root";
 }
 
-// Restart a dev server using the project's detected package manager.
+// Spawn a dev server for a project. Shared by the Start Dev Server flow
+// in the dashboard and by `restartServer` below.
 //
 // Implementation notes:
 // - We launch via `/bin/zsh -ilc` so the user's PATH is loaded. `-l` reads
@@ -334,38 +432,90 @@ function cwdSlug(cwd: string): string {
 //   GUI-app PATH is otherwise too minimal to find these tools.
 // - `cwd` is passed as a spawn option (NOT shell-concatenated) so the path
 //   never goes through the shell, removing one injection surface.
+// - The package manager, `run`, and the script name are passed as positional
+//   args (`$0`/`$@`) rather than interpolated into the command string. zsh
+//   re-quotes them, so a script key containing spaces or shell metacharacters
+//   can't break or inject; it's just run verbatim.
 // - `detached: true` + `unref()` lets the spawned process outlive the
 //   extension command's lifetime.
 // - The log filename is keyed by a slug of cwd so it stays meaningful after
-//   the PID has been replaced by the new server.
-export async function restartServer(server: DevServer): Promise<void> {
-  // SIGKILL (vs default SIGTERM) so the old listener releases the port
-  // immediately — no graceful-shutdown window where the new spawn races
-  // the old process for the same port. Poll process.kill(pid, 0) until
-  // ESRCH to confirm exit before spawning. Both SIGKILL and signal-0 are
-  // mapped to TerminateProcess / OpenProcess on Windows, so this stays
-  // portable when we add the Windows backend.
-  process.kill(server.pid, "SIGKILL");
-  const deadline = Date.now() + 500;
-  while (Date.now() < deadline) {
-    try {
-      process.kill(server.pid, 0);
-      await new Promise((r) => setTimeout(r, 20));
-    } catch {
-      break;
-    }
+//   the PID has been replaced by the new server. Use `spawnLogPath(cwd)`
+//   to reach it from error toasts.
+//
+// Throws if pickDevScript can't find a runnable script.
+export async function startDevServer(cwd: string): Promise<void> {
+  const script = pickDevScript(cwd);
+  if (!script) {
+    throw new Error(
+      "No dev script found in package.json. Expected one of: dev, start, develop, or a script that invokes a known dev-server tool.",
+    );
   }
-  const pm = detectPackageManager(server.cwd);
-  const [cmd, args] = PM_COMMAND[pm];
-  const logPath = path.join(
-    os.tmpdir(),
-    `dev-servers-restart-${cwdSlug(server.cwd)}.log`,
-  );
-  const out = fs.openSync(logPath, "a");
-  const child = spawn("/bin/zsh", ["-ilc", `exec ${cmd} ${args.join(" ")}`], {
-    cwd: server.cwd,
+  const pm = detectPackageManager(cwd);
+  const [cmd, baseArgs] = PM_RUN[pm];
+  const args = [...baseArgs, script];
+  const out = fs.openSync(spawnLogPath(cwd), "a");
+  const child = spawn("/bin/zsh", ["-ilc", 'exec "$0" "$@"', cmd, ...args], {
+    cwd,
     detached: true,
     stdio: ["ignore", out, out],
   });
+  // Close our copy of the log fd once the child owns its own dup, so repeated
+  // starts/restarts in a long-lived dashboard session don't leak descriptors.
+  // We wait for the 'spawn' event rather than closing immediately because
+  // libuv dups the fd into the child asynchronously; closing too early could
+  // truncate the child's stdio. The 'error' listener covers the spawn-failed
+  // path and also keeps a spawn error from throwing as an unhandled event.
+  const closeLog = () => {
+    try {
+      fs.closeSync(out);
+    } catch {
+      // Already closed / invalid fd; nothing to do.
+    }
+  };
+  child.once("spawn", closeLog);
+  child.once("error", closeLog);
   child.unref();
+}
+
+// Path of the spawn log for a given cwd. Useful for error toasts that point
+// the user at the right file when a spawn appears to fail.
+export function spawnLogPath(cwd: string): string {
+  return path.join(os.tmpdir(), `dev-servers-spawn-${cwdSlug(cwd)}.log`);
+}
+
+// Restart pre-spawn kill: SIGKILL + wait-for-exit. Unlike `killProcess`
+// above, this is *not* graceful: the spawn flow needs the listener to
+// release its port immediately so the new server can bind it without
+// racing. Polling `process.kill(pid, 0)` until ESRCH (max 500ms)
+// confirms exit before we return.
+//
+// Best-effort: any error along the way is swallowed. If the kernel
+// refuses to signal the process or it dies between snapshots, the next
+// spawn will either succeed cleanly or fail to bind the port, and both
+// surface their own errors at the right layer.
+//
+// Cross-platform: both SIGKILL and signal-0 map cleanly to Windows'
+// TerminateProcess / OpenProcess, so this stays portable.
+export async function killServer(pid: number): Promise<void> {
+  try {
+    process.kill(pid, "SIGKILL");
+  } catch {
+    return;
+  }
+  const deadline = Date.now() + 500;
+  while (Date.now() < deadline) {
+    try {
+      process.kill(pid, 0);
+      await new Promise((r) => setTimeout(r, 20));
+    } catch {
+      return;
+    }
+  }
+}
+
+// Restart a dev server: force-kill the old listener, then spawn a
+// replacement via startDevServer.
+export async function restartServer(server: DevServer): Promise<void> {
+  await killServer(server.pid);
+  await startDevServer(server.cwd);
 }

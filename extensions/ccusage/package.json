@@ -85,6 +85,24 @@
           ]
         },
         {
+          "name": "menuBarIconStyle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Icon Style",
+          "description": "Choose whether the menu bar icon uses the extension artwork or a native monochrome Raycast icon",
+          "default": "color",
+          "data": [
+            {
+              "title": "Color",
+              "value": "color"
+            },
+            {
+              "title": "Monochrome",
+              "value": "monochrome"
+            }
+          ]
+        },
+        {
           "name": "showRemainingUsage",
           "type": "dropdown",
           "required": false,

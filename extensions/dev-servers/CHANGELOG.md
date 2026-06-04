@@ -1,24 +1,61 @@
 # Dev Servers Changelog
 
-## [Custom domain detection] - 2026-05-26
+## [Start Dev Server] - 2026-06-01
+
+Adds a `Start Dev Server` command for spinning up dev servers without leaving Raycast. Works from a Finder selection, from a list of recently-seen projects, or from a native folder picker.
+
+### Start Dev Server
+
+- **From Finder**: select a project folder (or any file inside one) and run **Start Dev Server**. The extension walks up to the nearest `package.json`, detects the package manager (npm / pnpm / yarn / bun), picks the right script, and spawns it with the same PATH-aware login-shell pattern used by Restart. The dashboard opens immediately and shows a "Starting…" toast that transitions to "X is running" the moment the server binds a port.
+- **From recents**: run the command with nothing selected in Finder and you get a picker over the projects the extension has seen running recently. Recents auto-populate from the dashboard's polling loop, with no explicit bookmarking. LRU-bounded at 30 entries. Running projects are hidden from this list (they live in the dashboard); they reappear once stopped.
+- **From anywhere**: the picker also exposes a **Choose Folder…** entry that opens the native macOS folder dialog directly, with no intermediate screen.
+- **From the dashboard**: the empty state offers a primary **Start Dev Server** action (just press `↵` from a fresh dashboard to land in the picker). Each running-server row's action panel also carries `Start Dev Server` (`⌘N`), so spinning up another project never requires bouncing back to root search.
+- Each picker row shows last-seen, git branch when applicable, and a framework tag inferred from `package.json` dependencies. Cached favicons appear inline once the dashboard has seen the project running, so even stopped projects keep their real icon. Per-row actions: Start, Open in Terminal (`⌘T`), Show in Finder (`⌘⇧F`), Copy Path (`⌘C`), Remove from Recents (`⌃X`).
+- Folders that no longer exist on disk are hidden this render but kept in storage so they reappear when (for example) an external drive remounts.
+- **Startup logs**: every spawned server's stdout+stderr is captured to a per-project log. If a server doesn't bind a port within 15s, the toast escalates to a failure with a **View Startup Log** action instead of silently disappearing, so a misconfigured or custom setup (e.g. portless needing sudo, a missing binary, a crashing build) is diagnosable from inside Raycast. Every running-server row also carries a **View Startup Log** action (`⌘L`) for inspecting output on demand.
+
+### Behavior
+
+- Script picker tries `dev` → `start` → `develop` first, then scans script values for known dev-server tools (Vite, Next, Astro, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, Bun watch/hot, nodemon, tsx watch, ts-node-dev, serve, http-server, live-server). Monorepo conventions like `dev:web` and `start:dev` resolve out of the box.
+- Already running on that folder? You get one consolidated alert: `X is already running. Restart?` for a single target, `All 3 already running. Restart them?` when every selected folder is running, or `2 of 3 already running. Restart these, then start the other one?` for the mixed case. No more N-alert cascades for N-folder selections.
+- The Finder selection is only honored when Finder is the frontmost app. Previously a folder selected earlier (to start one server) lingered in Finder's selection, so running the command later from another app, e.g. the browser, would silently treat that stale folder as the target and surface a spurious `already running. Restart?`. Now, unless you're actually in Finder, the command goes straight to the recents picker, where you can start whatever project you meant.
+- After a server is started (from Finder, the picker, or a recent), the dashboard moves the selection onto that new row, so pressing `↵` acts on the server you just launched rather than re-opening whatever was previously selected. Restart (`⌘⇧R`) likewise re-focuses the replacement once it binds.
+- Multi-folder selection prompts for confirmation by default, useful for monorepo siblings or a "frontend + backend" startup, with an opt-out preference for users who do this regularly.
+- New **Open in browser when the port binds** preference auto-opens the URL once the new server starts listening. Off by default; a one-time hint surfaces it in the in-flight toast for the first few starts.
+
+### Under the hood
+
+- The dashboard is the controller for the entire spawn flow. The launching command resolves a target list and hands off via `launchContext`, which lets the user land on the dashboard immediately and watch the spawn happen there, rather than waiting on a blank loading view for a pre-spawn `fetchServers` call.
+- Spawn lifecycle is a clean state machine on the dashboard: `idle → pending → confirming → spawning → done`. The "Starting…" toast lives on the dashboard so it's visible the whole time the user is waiting, and transitions to a green "running" state the moment every expected cwd appears in the polling loop.
+- All filesystem paths flow through `canonicalCwd` (a `realpathSync` wrapper) so symlinked project paths compare equal between Finder selections, the recents store, and `lsof`'s view of running processes.
+- Extracted `startDevServer(cwd)` and `killServer(pid)` so the new command and the existing restart flow share one spawn path. Restart is now `killServer + startDevServer`.
+- The spawn passes the package manager and chosen script as separate arguments rather than building a shell string, so projects with unusual script names (spaces, punctuation) start reliably and the launch surface stays free of shell-interpolation surprises.
+- Shared `tool-display.ts` so the framework tag styling stays consistent across the dashboard and the picker.
+- Favicons cached onto recents for stopped-project icons are size-capped, keeping the recents store small; the live dashboard always renders the real favicon regardless.
+
+### Preferences
+
+- **Terminal App** is now a single shared preference that applies to both **Dev Servers** and **Start Dev Server**: set the terminal `⌘T` opens once, and both commands honor it.
+
+## [Portless & Shortcuts] - 2026-05-26
 
 Surfaces custom local domains from [portless](https://github.com/vercel-labs/portless), and tightens the action panel, shortcuts, and preferences to align with Raycast conventions.
 
-**Custom domain detection**
+### Custom domain detection
 
 - Detect custom local domains via portless and show the named URL (e.g. `myapp.localhost`) as the row title instead of `localhost:PORT`. The `localhost:PORT` pill stays visible alongside it, since the raw loopback target is still useful for env files, OAuth allowlists, CORS rules, and anything that doesn't trust the local CA.
 - "Open in Browser" and "Copy URL" target the custom domain when one is present. New "Open Localhost URL" and "Copy Localhost URL" actions target loopback explicitly.
-- Search the list by custom domain — typing "myapp" surfaces `https://myapp.localhost`.
+- Search the list by custom domain: typing "myapp" surfaces `https://myapp.localhost`.
 - New "Show localhost URL with custom domain" preference, for users who'd rather hide the `localhost:PORT` pill once a named domain is in place.
 - Filter out the portless proxy daemon itself so it never appears as a phantom dev server row.
 
-**Action panel and shortcuts**
+### Action panel and shortcuts
 
 - Kill Server's shortcut moves from `⌘D` to `⌃X`. `⌘D` is officially "Duplicate" in Raycast's keyboard conventions; `⌃X` is "Remove". Kill All for Project and Kill All Servers shift to `⌃⇧X` and `⌃⌥X` to stay in the same family.
 - Copy Localhost URL is bound to `⌘⇧C`, mirroring `⌘C` for Copy URL.
-- Action panel reordered: Restart Server now sits at position 3, above Kill Server. Restarting is the more common mutation (iterate-on-change), and placing it above Kill also means Raycast's reserved `⌘↵` second-action shortcut never auto-fires Kill — it falls through to Open Localhost URL when a custom domain is present, or to Restart otherwise. Both are safe.
+- Action panel reordered: Restart Server now sits at position 3, above Kill Server. Restarting is the more common mutation (iterate-on-change), and placing it above Kill also means Raycast's reserved `⌘↵` second-action shortcut never auto-fires Kill. It falls through to Open Localhost URL when a custom domain is present, or to Restart otherwise. Both are safe.
 
-**Preferences**
+### Preferences
 
 - Refresh Interval (a behavior setting) moves above Project Display (cosmetic), so settings that change what the extension *does* appear before settings that change how it *looks*.
 
@@ -50,7 +87,7 @@ Dashboard for every running dev server, grouped by project.
 - Auto-detects servers from any framework that uses `node_modules/` (Vite, Next.js, Astro, SvelteKit, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, esbuild) plus the Bun runtime.
 - Servers are grouped by project with favicons, uptime, framework, and runtime tags.
   
-Actions:
+### Actions:
 - Open in browser
 - Copy URL
 - Kill

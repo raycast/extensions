@@ -6,7 +6,7 @@ import path from "path";
 import { useEffect, useMemo, useState } from "react";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import { isMac, isSameEntry, isWin } from "./utils";
+import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "../utils/exec";
 import { getBuildNamePreference, getProductJSONPath } from "./vscode";
 
@@ -307,23 +307,9 @@ function getSharedStateDatabasePath() {
 
   if (!sharedDataFolderName) return undefined;
 
-  if (isWin) {
-    return path.join(homedir(), "AppData", "Roaming", sharedDataFolderName, "User", "sharedStorage", "state.vscdb");
-  }
-
-  if (isMac) {
-    return path.join(
-      homedir(),
-      "Library",
-      "Application Support",
-      sharedDataFolderName,
-      "User",
-      "sharedStorage",
-      "state.vscdb",
-    );
-  }
-
-  return undefined;
+  // sharedDataFolderName (e.g. ".vscode-shared") lives directly in the home
+  // directory on all platforms — not in AppData/Roaming or Library/Application Support.
+  return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
 }
 
 function getSharedDataFolderName() {

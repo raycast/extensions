@@ -1,5 +1,21 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Tolerate dateless sessions] - 2026-06-03
+
+### Fixed
+
+- Session views no longer crash when `ccusage` reports a session with no activity date (a non-Claude agent row, or one whose entries lack timestamps); the session shows "unknown" instead of failing the entire list
+
+### Changed
+
+- Schema validation failures now report the `ccusage` version and a redacted structural fingerprint of the output (field names and value types, never values), so version-specific schema drift is diagnosable from an error report alone
+
+## [Monochrome menu bar icon] - 2026-06-02
+
+### Added
+
+- Added a menu bar preference to use a monochrome icon instead of the extension icon
+
 ## [ccusage v20] - 2026-05-25
 
 ### Added

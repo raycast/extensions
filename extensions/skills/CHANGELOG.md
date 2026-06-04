@@ -1,5 +1,13 @@
 # Skills Changelog
 
+## [Fix Global Skill Updates] - 2026-06-04
+
+- Run skill update actions against global installs, matching the global skill list shown in Manage Skills
+
+## [Default Agents Preference] - 2026-06-01
+
+- Add a "Default Agents" preference to pre-select agents when installing a skill, so frequently-used agents (e.g. Claude Code) are checked automatically without manual selection each time
+
 ## [Show Installed Skill Audit Details] - 2026-05-20
 
 - Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
