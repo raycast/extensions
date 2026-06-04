@@ -76,7 +76,7 @@ const FILTER_CRITERIA: FilterCriterion[] = [
   },
   {
     regex: /provides:(\S+)/,
-    validator: (ext: ZedExtension, val: string) => ext.provides?.some((p) => p.toLowerCase().includes(val)),
+    validator: (ext: ZedExtension, val: string) => ext.provides?.some((p) => p.toLowerCase().includes(val)) ?? false,
   },
   {
     regex: /date:(\S+)/,

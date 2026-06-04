@@ -27,7 +27,7 @@ export function ExtensionItem({
   const mainMarkdown = [
     `# ${extension.name}`,
     `***`,
-    extension.description?.trim() || "_No description provided._",
+    extension.description.trim() || "_No description provided._",
   ].join("\n\n");
 
   const remoteVersion = extension.version;
