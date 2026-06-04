@@ -105,16 +105,13 @@
     "ai": "^4.3.16"
   },
   "devDependencies": {
-    "@eslint/js": "10.0.1",
     "@raycast/eslint-config": "^1.0.11",
     "@raycast/utils": "1.19.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "8.57.1",
-    "globals": "17.5.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "8.59.0"
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
