@@ -161,12 +161,15 @@ export async function installExtension({
     await fs.rm(tempExtractDir, { recursive: true, force: true });
     if (hasBackup) {
       await fs.rename(backupDestDir, finalDestDir);
+      hasBackup = false;
     }
     throw error;
   } finally {
     await fs.rm(tempFilePath, { force: true });
     await fs.rm(tempExtractDir, { recursive: true, force: true });
-    await fs.rm(backupDestDir, { recursive: true, force: true });
+    if (!hasBackup) {
+      await fs.rm(backupDestDir, { recursive: true, force: true });
+    }
   }
 }
 
@@ -231,7 +234,9 @@ export async function getExtensionVersions(extensionId: string): Promise<Extensi
         schema_version: item.schema_version,
         wasm_api_version: item.wasm_api_version,
       }))
-      .reverse();
+      .sort((a, b) => {
+        return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+      });
   } catch (error) {
     console.error(`Failed to fetch versions for ${extensionId}:`, error);
     return [];
