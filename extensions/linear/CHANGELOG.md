@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Set Priority shortcut] - {PR_MERGE_DATE}
+
+- Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.
+
 ## [Confirmation Fixes] - 2026-05-15
 
 - Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
