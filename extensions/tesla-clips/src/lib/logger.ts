@@ -8,7 +8,7 @@ type LogContext = Record<string, unknown>;
 
 function isVerboseEnabled(): boolean {
   try {
-    const prefs = getPreferenceValues<{ enableDebugLogging?: boolean }>();
+    const prefs = getPreferenceValues<Preferences.TeslaClips>();
     return environment.isDevelopment || prefs.enableDebugLogging === true;
   } catch {
     return environment.isDevelopment;

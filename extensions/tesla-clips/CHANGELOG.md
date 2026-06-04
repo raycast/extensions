@@ -10,11 +10,11 @@
 - **Remove Merged Outputs** action to move merged output folders to Trash while keeping source clips.
 - Merge and cleanup progress screens with per-event status.
 - Actions section on the main screen to choose between merging or removing merged outputs.
-- Per-clip and bulk selection when removing merged outputs.
+- Per-event and bulk selection when removing merged outputs.
 - Gap detection warns when consecutive clips are more than 2 minutes apart.
 - Parallel camera merges within each event for faster processing.
 - Output validation ensures merged files exist and are non-empty.
-- Safe cleanup moves original clips to Trash (not permanent delete) with confirmation dialog.
+- Safe cleanup moves merged output folders to Trash (not permanent delete) with confirmation dialog.
 - Live per-event status indicators: ready, already merged, partially merged, merging, merged, skipped, partial failure, failed.
 - Scan-time detection of existing merged outputs with per-camera merge review before overwriting.
 - Detail panel shows camera breakdown with segment counts, gap status, and existing output status per event.
