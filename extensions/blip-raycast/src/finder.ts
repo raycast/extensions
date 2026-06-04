@@ -31,9 +31,13 @@ try {
 
   try {
     const path = (await runPowerShellScript(script)).trim();
-    if (!path) throw new Error();
+    if (!path) throw new Error("no_selection");
     return path;
-  } catch {
-    throw new Error(`No ${fileManagerName} item is selected.`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("no_selection") || message.includes("no_window")) {
+      throw new Error(`No ${fileManagerName} item is selected.`);
+    }
+    throw new Error(`Failed to read ${fileManagerName} selection: ${message}`);
   }
 }
