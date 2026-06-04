@@ -25,22 +25,58 @@ export async function processBackgroundUpdates(
   const ignoredMap = await getIgnoredExtensionsMap();
   const outdated: ZedExtension[] = [];
 
+  // Fetch bulk extensions once (handles up to 1000)
+  const bulkUrl = new URL("https://api.zed.dev/extensions");
+  bulkUrl.searchParams.append("max_schema_version", "1");
+
+  let bulkExtensions: ZedExtension[] = [];
+  try {
+    const response = await apiFetch(bulkUrl.toString(), { silent });
+    const json = (await response.json()) as ZedResponse;
+    bulkExtensions = json.data || [];
+  } catch (err) {
+    console.error("Failed to fetch bulk extensions list:", err);
+  }
+
+  // Cross-reference installed with the bulk list
+  const missingExtensions = [];
+
   for (const installedExt of installed) {
-    const url = new URL("https://api.zed.dev/extensions");
-    url.searchParams.append("max_schema_version", "1");
-    url.searchParams.append("filter", installedExt.id);
+    const remoteExt = bulkExtensions.find((e) => e.id === installedExt.id);
 
-    try {
-      const response = await apiFetch(url.toString(), { silent });
-      const json = (await response.json()) as ZedResponse;
-
-      const remoteExt = (json.data || []).find((e) => e.id === installedExt.id);
-
-      if (remoteExt && isExtensionOutdated(remoteExt, installedExt.version, ignoredMap)) {
+    if (remoteExt) {
+      if (isExtensionOutdated(remoteExt, installedExt.version, ignoredMap)) {
         outdated.push(remoteExt);
       }
-    } catch (err) {
-      console.error(`Failed to fetch registry info for ${installedExt.id}:`, err);
+    } else {
+      // Keep track of any extension not in the first 1000 results
+      missingExtensions.push(installedExt);
+    }
+  }
+
+  // Fallback to concurrent fetches for any extensions missing from the bulk list
+  if (missingExtensions.length > 0) {
+    const fetchResults = await Promise.allSettled(
+      missingExtensions.map(async (installedExt) => {
+        const url = new URL("https://api.zed.dev/extensions");
+        url.searchParams.append("max_schema_version", "1");
+        url.searchParams.append("filter", installedExt.id);
+
+        const response = await apiFetch(url.toString(), { silent });
+        const json = (await response.json()) as ZedResponse;
+
+        const remoteExt = (json.data || []).find((e) => e.id === installedExt.id);
+
+        if (remoteExt && isExtensionOutdated(remoteExt, installedExt.version, ignoredMap)) {
+          outdated.push(remoteExt);
+        }
+      }),
+    );
+
+    for (const result of fetchResults) {
+      if (result.status === "rejected") {
+        console.error("Failed to fetch registry info for an extension:", result.reason);
+      }
     }
   }
 
