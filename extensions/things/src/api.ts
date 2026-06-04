@@ -783,8 +783,16 @@ export const getProjectName = (projectId: string) =>
 const DATE_KEYS = new Set(['dueDate', 'activationDate', 'completionDate', 'cancellationDate']);
 
 export const setTodoProperty = (todoId: string, key: string, value: string) => {
-  // Date keys must be passed as JS Date objects in JXA — plain strings crash Things
-  const valueExpr = DATE_KEYS.has(key) ? `new Date('${value}')` : `'${value}'`;
+  // Date keys must be passed as JS Date objects in JXA — plain strings crash Things.
+  // Use the local-time constructor (y, m-1, d) instead of new Date('YYYY-MM-DD') which
+  // parses as UTC midnight and shifts the date by one day in negative-offset timezones.
+  let valueExpr: string;
+  if (DATE_KEYS.has(key)) {
+    const [y, m, d] = value.split('-').map(Number);
+    valueExpr = `new Date(${y}, ${m - 1}, ${d})`;
+  } else {
+    valueExpr = `'${value}'`;
+  }
   return executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
