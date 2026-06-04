@@ -31,7 +31,7 @@ function formatSubtitle(content: string, schedule: string): string {
 }
 
 function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString([], {
+  return new Date(timestamp).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });

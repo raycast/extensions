@@ -18,7 +18,7 @@ export function ExtensionItem({
   areUpdatesIgnored = false,
   ...props
 }: ExtensionItemProps) {
-  const publishedDate = new Date(extension.published_at).toLocaleDateString(undefined, {
+  const publishedDate = new Date(extension.published_at).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",

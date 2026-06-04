@@ -16,10 +16,10 @@ import {
 } from "./lib/extension";
 import { getIgnoredExtensionsMap, setExtensionIgnore, removeExtensionIgnore, IgnoredMap } from "./lib/ignore";
 import { ExtensionItem } from "./components/extension-item";
-import { VersionSubmenu } from "./components/version-submenu";
+import { VersionSubmenu, clearVersionCache } from "./components/version-submenu";
 import { apiFetch } from "./lib/api";
 
-const raycastCache = new Cache({ namespace: "extension-versions" });
+const raycastCache = new Cache({ namespace: "gram-extension-list" });
 
 type FilterCriterion = {
   regex: RegExp;
@@ -295,6 +295,7 @@ export default function Command() {
 
   const handleClearCache = useCallback(async () => {
     raycastCache.clear();
+    clearVersionCache();
     setExtensionCache({});
     revalidate();
     await showToast({ style: Toast.Style.Success, title: "Cache cleared successfully" });

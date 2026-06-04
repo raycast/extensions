@@ -4,6 +4,10 @@ import { getExtensionVersions, ExtensionVersionInfo, ZedExtension } from "../lib
 
 const versionCache = new Cache({ namespace: "extension-versions" });
 
+export function clearVersionCache() {
+  versionCache.clear();
+}
+
 interface VersionSubmenuProps {
   extension: ZedExtension;
   installedVersion?: string;
@@ -85,7 +89,7 @@ export function VersionSubmenu({ extension, installedVersion, onInstall }: Versi
         return (
           <Action
             key={v.version}
-            title={`${v.version}${statusBadge} • ${new Date(v.published_at).toLocaleDateString()}`}
+            title={`${v.version}${statusBadge} • ${new Date(v.published_at).toLocaleDateString("en-US")}`}
             icon={versionIcon}
             onAction={() => onInstall(extension, v.version)}
           />
