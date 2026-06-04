@@ -32,31 +32,6 @@ public static class User32 {
     } catch {}
   }
 
-  Add-Type -AssemblyName System.Windows.Forms
-  $previousClipboard = $null
-  $hadClipboard = [System.Windows.Forms.Clipboard]::ContainsData("Preferred DropEffect") -or
-    [System.Windows.Forms.Clipboard]::ContainsFileDropList() -or
-    [System.Windows.Forms.Clipboard]::ContainsText()
-  if ($hadClipboard) {
-    $previousClipboard = [System.Windows.Forms.Clipboard]::GetDataObject()
-  }
-
-  try {
-    [System.Windows.Forms.SendKeys]::SendWait("^c")
-    Start-Sleep -Milliseconds 250
-    $fileDropList = [System.Windows.Forms.Clipboard]::GetFileDropList()
-    if ($fileDropList.Count -gt 0) {
-      Write-Output $fileDropList[0]
-      exit 0
-    }
-  } finally {
-    if ($previousClipboard -ne $null) {
-      [System.Windows.Forms.Clipboard]::SetDataObject($previousClipboard, $true)
-    } elseif (-not $hadClipboard) {
-      [System.Windows.Forms.Clipboard]::Clear()
-    }
-  }
-
   throw 'no_selection'
 } catch {
   Write-Error $_.Exception.Message
