@@ -147,38 +147,37 @@ export async function installExtension({
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
 
-    try {
-      await fs.rename(tempExtractDir, finalDestDir);
-      hasBackup = false;
-    } catch (error) {
-      if (hasBackup) {
-        await restoreBackupDir(backupDestDir, finalDestDir);
-      }
-      throw error;
-    }
+    await fs.rename(tempExtractDir, finalDestDir);
 
+    hasBackup = false;
     await safeRemovePath(backupDestDir, { recursive: true, force: true });
   } catch (error) {
     await safeRemovePath(tempExtractDir, { recursive: true, force: true });
+
     if (hasBackup) {
-      await restoreBackupDir(backupDestDir, finalDestDir);
-      hasBackup = false;
+      const restored = await restoreBackupDir(backupDestDir, finalDestDir);
+      if (restored) {
+        hasBackup = false;
+      }
     }
     throw error;
   } finally {
     await safeRemovePath(tempFilePath, { force: true });
     await safeRemovePath(tempExtractDir, { recursive: true, force: true });
+
     if (!hasBackup) {
       await safeRemovePath(backupDestDir, { recursive: true, force: true });
     }
   }
 }
 
-async function restoreBackupDir(backupDestDir: string, finalDestDir: string): Promise<void> {
+async function restoreBackupDir(backupDestDir: string, finalDestDir: string): Promise<boolean> {
   try {
     await fs.rename(backupDestDir, finalDestDir);
+    return true;
   } catch (error) {
     console.error(`Failed to restore backup directory from ${backupDestDir} to ${finalDestDir}:`, error);
+    return false;
   }
 }
 
