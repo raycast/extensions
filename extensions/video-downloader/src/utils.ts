@@ -73,7 +73,16 @@ export function describeYtdlpError(error: unknown): FriendlyError {
   if (lower.includes("unable to download") && lower.includes("404")) {
     return { title: "Video Not Found", message: "This video doesn't exist or has been removed.", retryable: false };
   }
-  if (lower.includes("private") || lower.includes("members-only") || lower.includes("sign in")) {
+  // yt-dlp emits "members only" (with a space, e.g. "Premium members only",
+  // "Channel members only"), not "members-only"; also covers private videos,
+  // login prompts, and channel-membership gates.
+  if (
+    lower.includes("private") ||
+    lower.includes("members only") ||
+    lower.includes("sign in") ||
+    lower.includes("login required") ||
+    lower.includes("join this channel")
+  ) {
     return {
       title: "Video Requires Sign-In",
       message: "This video is private or restricted. Try the “Use Cookies from Browser” preference.",
