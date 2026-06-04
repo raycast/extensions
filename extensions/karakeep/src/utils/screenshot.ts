@@ -15,6 +15,10 @@ function extensionFromContentType(contentType: string) {
   return "img";
 }
 
+function cacheKeyFromAssetId(id: string) {
+  return id.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 async function sweepExpiredCacheEntries(imageCacheDirectory: string) {
   const now = Date.now();
   if (now - lastCacheSweep < CACHE_MAX_AGE_MS) return;
@@ -45,12 +49,13 @@ export async function getScreenshot(id: string) {
   const encodedUrl = encodeURIComponent(`/api/assets/${id}`);
   const imageUrl = `${apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
   const imageCacheDirectory = path.join(environment.supportPath, "preview-images");
+  const cacheKey = cacheKeyFromAssetId(id);
 
   await mkdir(imageCacheDirectory, { recursive: true });
   void sweepExpiredCacheEntries(imageCacheDirectory);
 
   for (const extension of IMAGE_EXTENSIONS) {
-    const cachedPath = path.join(imageCacheDirectory, `${id}.${extension}`);
+    const cachedPath = path.join(imageCacheDirectory, `${cacheKey}.${extension}`);
     try {
       const cached = await stat(cachedPath);
       if (cached.size > 0) return cachedPath;
@@ -78,7 +83,7 @@ export async function getScreenshot(id: string) {
 
   const bytes = Buffer.from(await response.arrayBuffer());
   const extension = extensionFromContentType(contentType);
-  const imagePath = path.join(imageCacheDirectory, `${id}.${extension}`);
+  const imagePath = path.join(imageCacheDirectory, `${cacheKey}.${extension}`);
   const temporaryPath = `${imagePath}.${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`;
 
   await writeFile(temporaryPath, bytes);
