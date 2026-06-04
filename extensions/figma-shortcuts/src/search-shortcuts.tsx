@@ -3,12 +3,11 @@ import { useState } from "react";
 import { shortcuts, CATEGORIES } from "./data/shortcuts";
 import type { FigmaShortcut } from "./data/shortcuts";
 
-type Platform = "mac" | "windows" | "linux";
+type Platform = "mac" | "windows";
 
 const PLATFORMS: { value: Platform; label: string }[] = [
   { value: "mac", label: "macOS" },
   { value: "windows", label: "Win" },
-  { value: "linux", label: "Linux" },
 ];
 
 function getKeys(shortcut: FigmaShortcut, platform: Platform): string {

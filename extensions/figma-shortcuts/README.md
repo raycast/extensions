@@ -4,9 +4,9 @@ A [Raycast](https://raycast.com) extension for quickly finding and copying Figma
 
 ## Features
 
-- **Search** across 95+ shortcuts by name, category, or keyword (e.g. "autolayout", "bold", "align")
-- **8 categories**: Tools, View, Zoom, Arrange, Auto Layout, Components, Text, Editing
-- **Platform support**: macOS, Windows, and Linux — set once in Raycast Preferences
+- **Search** across 140+ shortcuts by name, category, or keyword (e.g. "autolayout", "bold", "align")
+- **12 categories**: Tools, View, Zoom, Arrange, Auto Layout, Components, Text, Editing, Shape, Selection, Cursor, Transform
+- **Platform support**: macOS and Windows — set once in Raycast Preferences
 - **Copy to clipboard**: press `Enter` to copy the shortcut (e.g. `Cmd+Shift+A`), `Shift+Enter` to copy the action name
 
 ## Usage
@@ -24,7 +24,7 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 |----------|----------|
 | macOS    | `Cmd`, `Opt` |
 | Windows  | `Ctrl`, `Alt` |
-| Linux    | `Ctrl`, `Alt` (same as Windows) |
+
 
 ## Shortcuts Reference
 

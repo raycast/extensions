@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figma-shortcuts",
   "title": "Figma Shortcuts",
-  "description": "Search and copy Figma keyboard shortcuts for macOS, Windows, or Linux",
+  "description": "Search and copy Figma keyboard shortcuts for macOS and Windows",
   "icon": "command-icon.png",
   "author": "arturdz",
   "categories": [
@@ -30,10 +30,6 @@
             {
               "value": "windows",
               "title": "Windows"
-            },
-            {
-              "value": "linux",
-              "title": "Linux"
             }
           ],
           "default": "mac",

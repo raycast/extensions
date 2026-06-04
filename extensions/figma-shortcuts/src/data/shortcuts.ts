@@ -8,7 +8,7 @@ export interface FigmaShortcut {
 }
 
 // Explicit category order for List.Section display
-export const CATEGORIES = ["Tools", "View", "Zoom", "Arrange", "Auto Layout", "Components", "Text", "Editing"] as const;
+export const CATEGORIES = ["Tools", "View", "Zoom", "Arrange", "Auto Layout", "Components", "Text", "Editing", "Shape", "Selection", "Cursor", "Transform"] as const;
 
 export const shortcuts: FigmaShortcut[] = [
   // ─── Tools ───────────────────────────────────────────────────────────────
@@ -866,4 +866,45 @@ export const shortcuts: FigmaShortcut[] = [
     windows: "Ctrl+Shift+K",
     keywords: ["image", "photo", "insert", "place"],
   },
+
+  // ─── Shape ────────────────────────────────────────────────────────────────
+  { id: "shape-1", category: "Shape", action: "Paint Bucket", mac: "B", windows: "B", keywords: ["fill", "color", "bucket"] },
+  { id: "shape-2", category: "Shape", action: "Bend Tool", mac: "Cmd (hold)", windows: "Ctrl (hold)", keywords: ["curve", "path", "vector", "bend"] },
+  { id: "shape-3", category: "Shape", action: "Remove Fill", mac: "Alt+/", windows: "Alt+/", keywords: ["fill", "none", "remove"] },
+  { id: "shape-4", category: "Shape", action: "Remove Stroke", mac: "Shift+/", windows: "Shift+/", keywords: ["stroke", "border", "none", "remove"] },
+  { id: "shape-5", category: "Shape", action: "Swap Fill and Stroke", mac: "Shift+X", windows: "Shift+X", keywords: ["fill", "stroke", "swap", "exchange"] },
+  { id: "shape-6", category: "Shape", action: "Join Selection", mac: "Cmd+J", windows: "Ctrl+J", keywords: ["join", "merge", "path", "vector"] },
+  { id: "shape-7", category: "Shape", action: "Smooth Join Selection", mac: "Cmd+Shift+J", windows: "Ctrl+Shift+J", keywords: ["smooth", "join", "path", "vector"] },
+  { id: "shape-8", category: "Shape", action: "Delete and Heal", mac: "Shift+Backspace", windows: "Shift+Backspace", keywords: ["delete", "heal", "path", "point"] },
+  { id: "shape-9", category: "Shape", action: "Section Tool", mac: "Shift+S", windows: "Shift+S", keywords: ["section", "slice", "container", "group"] },
+
+  // ─── Selection ────────────────────────────────────────────────────────────
+  { id: "selection-1", category: "Selection", action: "Deep Select", mac: "Cmd+Click", windows: "Ctrl+Click", keywords: ["select", "deep", "nested", "child"] },
+  { id: "selection-2", category: "Selection", action: "Deep Select with Rect", mac: "Cmd+Drag", windows: "Ctrl+Drag", keywords: ["select", "deep", "drag", "marquee"] },
+  { id: "selection-3", category: "Selection", action: "Select Inverse", mac: "Cmd+Shift+A", windows: "Ctrl+Shift+A", keywords: ["invert", "inverse", "deselect"] },
+  { id: "selection-4", category: "Selection", action: "Select Children", mac: "Enter", windows: "Enter", keywords: ["children", "enter", "group", "select"] },
+  { id: "selection-5", category: "Selection", action: "Select Parent", mac: "Escape", windows: "Escape", keywords: ["parent", "escape", "back", "up"] },
+  { id: "selection-6", category: "Selection", action: "Select Next Sibling", mac: "Tab", windows: "Tab", keywords: ["next", "sibling", "tab", "cycle"] },
+  { id: "selection-7", category: "Selection", action: "Select Previous Sibling", mac: "Shift+Tab", windows: "Shift+Tab", keywords: ["previous", "sibling", "tab", "cycle"] },
+  { id: "selection-8", category: "Selection", action: "Select All Matching", mac: "Cmd+Alt+A", windows: "Ctrl+Alt+A", keywords: ["match", "same", "type", "select all"] },
+  { id: "selection-9", category: "Selection", action: "Show Left Panel", mac: "Cmd+Shift+\\", windows: "Ctrl+Shift+\\", keywords: ["panel", "sidebar", "layers", "toggle"] },
+
+  // ─── Cursor ───────────────────────────────────────────────────────────────
+  { id: "cursor-1", category: "Cursor", action: "Measure to Selection", mac: "Alt (hold)", windows: "Alt (hold)", keywords: ["measure", "distance", "spacing", "redline"] },
+  { id: "cursor-2", category: "Cursor", action: "Duplicate while Moving", mac: "Alt (while moving)", windows: "Alt (while moving)", keywords: ["duplicate", "copy", "drag", "move"] },
+  { id: "cursor-3", category: "Cursor", action: "Resize from Center", mac: "Alt (while resizing)", windows: "Alt (while resizing)", keywords: ["resize", "center", "scale"] },
+  { id: "cursor-4", category: "Cursor", action: "Resize Proportionally", mac: "Shift (while resizing)", windows: "Shift (while resizing)", keywords: ["proportional", "aspect ratio", "resize"] },
+  { id: "cursor-5", category: "Cursor", action: "Crop Image / Ignore Constraints", mac: "Cmd (while resizing)", windows: "Ctrl (while resizing)", keywords: ["crop", "constraints", "resize", "image"] },
+  { id: "cursor-6", category: "Cursor", action: "Move while Dragging", mac: "Space (while dragging)", windows: "Space (while dragging)", keywords: ["move", "reposition", "drag", "space"] },
+
+  // ─── Transform ────────────────────────────────────────────────────────────
+  { id: "transform-1", category: "Transform", action: "Resize Frame to Fit", mac: "Cmd+Alt+Shift+R", windows: "Ctrl+Alt+Shift+R", keywords: ["fit", "resize", "frame", "contents"] },
+  { id: "transform-2", category: "Transform", action: "Set Opacity 10%", mac: "1", windows: "1", keywords: ["opacity", "alpha", "10"] },
+  { id: "transform-3", category: "Transform", action: "Set Opacity 20%", mac: "2", windows: "2", keywords: ["opacity", "alpha", "20"] },
+  { id: "transform-4", category: "Transform", action: "Set Opacity 30%", mac: "3", windows: "3", keywords: ["opacity", "alpha", "30"] },
+  { id: "transform-5", category: "Transform", action: "Set Opacity 40%", mac: "4", windows: "4", keywords: ["opacity", "alpha", "40"] },
+  { id: "transform-6", category: "Transform", action: "Set Opacity 60%", mac: "6", windows: "6", keywords: ["opacity", "alpha", "60"] },
+  { id: "transform-7", category: "Transform", action: "Set Opacity 70%", mac: "7", windows: "7", keywords: ["opacity", "alpha", "70"] },
+  { id: "transform-8", category: "Transform", action: "Set Opacity 80%", mac: "8", windows: "8", keywords: ["opacity", "alpha", "80"] },
+  { id: "transform-9", category: "Transform", action: "Set Opacity 90%", mac: "9", windows: "9", keywords: ["opacity", "alpha", "90"] },
 ];
