@@ -52,7 +52,7 @@ const FILTER_CRITERIA: FilterCriterion[] = [
   },
   {
     regex: /desc:(\S+)/,
-    validator: (ext: ZedExtension, val: string) => (ext.description ?? "").toLowerCase().includes(val),
+    validator: (ext: ZedExtension, val: string) => ext.description.toLowerCase().includes(val),
   },
   {
     regex: /version:(\S+)/,
