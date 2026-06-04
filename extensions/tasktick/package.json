@@ -5,6 +5,9 @@
   "description": "Quick launcher for TaskTick scheduled tasks",
   "icon": "extension-icon.png",
   "author": "lifedever",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
