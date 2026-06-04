@@ -1,6 +1,6 @@
  # Changelog
 
-## [Unreleased]
+## [Update] - {PR_MERGE_DATE}
 
 ### Added
 - New "Dictate with AI Prompt" command to select a specific prompt before dictating
