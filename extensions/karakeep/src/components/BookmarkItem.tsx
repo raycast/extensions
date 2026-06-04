@@ -12,6 +12,7 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
@@ -594,7 +595,11 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={previewImage ? `<img src="${previewImage}" center width="300" />` : ""}
+          markdown={
+            previewImage
+              ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 250, raycastHeight: 250 })
+              : ""
+          }
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }
