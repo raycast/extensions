@@ -52,7 +52,8 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       END as group_participants,
       attachment.filename as attachment_filename,
       attachment.transfer_name as attachment_name,
-      attachment.mime_type as attachment_mime_type
+      attachment.mime_type as attachment_mime_type,
+      hex(replied.attributedBody) as reply_body
     FROM
       message
       JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
@@ -61,8 +62,10 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
       LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
       LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
+      LEFT JOIN message replied ON message.reply_to_guid = replied.guid
     WHERE
       message.attributedBody IS NOT NULL
+      AND message.associated_message_type = 0
       ${safeChatIdentifier !== null ? `AND chat.chat_identifier = '${safeChatIdentifier}'` : ""}
       ${beforeNs !== null ? `AND message.date < ${beforeNs}` : ""}
     GROUP BY
@@ -79,8 +82,9 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
   const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
   const contactMap = createContactMap(contacts);
 
-  const messages = rawData.map((m) => {
+  const mapped = rawData.map((m) => {
     const decodedBody = decodeHexString(m.body);
+    const decodedReply = m.reply_body ? decodeHexString(m.reply_body) : null;
     const messageInfo: ChatOrMessageInfo = {
       chat_identifier: m.chat_identifier,
       is_from_me: Boolean(m.is_from_me),
@@ -100,8 +104,21 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       is_audio_message: Boolean(m.is_audio_message),
       is_sent: Boolean(m.is_sent),
       is_read: m.is_sent ? true : Boolean(m.is_read),
+      replyingTo: decodedReply || null,
     };
   });
+
+  // Reverse to oldest-first, apply reply dedup filter, then reverse back to date DESC
+  // Dedup: strip consecutive identical replyingTo to reduce noise (same logic as imessage Swift extension)
+  const oldestFirst = [...mapped].reverse();
+  let prevReply: string | null = null;
+  for (const msg of oldestFirst) {
+    if (msg.replyingTo && msg.replyingTo === prevReply) {
+      msg.replyingTo = null;
+    }
+    prevReply = msg.replyingTo ?? null;
+  }
+  const messages = oldestFirst.reverse();
 
   if (!searchText) return messages.slice(0, 50);
 

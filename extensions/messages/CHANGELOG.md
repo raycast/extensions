@@ -9,6 +9,10 @@
 - Remove deprecated AI model
 - Remove unused SQLite dependency from Swift package
 - Update packages
+- Exclude tapbacks and reactions from message results to reduce noise in AI context
+- Add reply-context (`replyingTo`) to messages — shows the text of the message being replied to when a message explicitly targets a non-adjacent earlier message
+- Return AI tool messages in chronological order (oldest first) with consecutive duplicate reply-context stripped
+- Improve AI instructions with message data format documentation and pagination guidance
 
 ## [Fix chat list memory usage] - 2026-05-28
 

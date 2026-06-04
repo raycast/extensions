@@ -268,7 +268,7 @@ export function getContactOrGroupInfo(
       ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
       : getAvatarIcon(displayName);
 
-    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0].number };
+    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0]?.number };
   }
 
   return {

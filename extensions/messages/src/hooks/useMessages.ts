@@ -25,12 +25,14 @@ export type SQLMessage = ChatParticipant & {
   attachment_filename: string | null;
   attachment_name: string | null;
   attachment_mime_type: string | null;
+  reply_body: string | null;
 };
 
 export type Message = SQLMessage & {
   avatar?: Image.ImageLike;
   sender: string;
   senderName: string;
+  replyingTo?: string | null;
 };
 
 export function useMessages(searchText?: string, filter?: Filter) {
@@ -104,7 +106,8 @@ export function useMessages(searchText?: string, filter?: Filter) {
         END as group_participants,
         attachment.filename as attachment_filename,
         attachment.transfer_name as attachment_name,
-        attachment.mime_type as attachment_mime_type
+        attachment.mime_type as attachment_mime_type,
+        hex(replied.attributedBody) as reply_body
       FROM
         message
         JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
@@ -113,8 +116,10 @@ export function useMessages(searchText?: string, filter?: Filter) {
         LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
         LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
         LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
+        LEFT JOIN message replied ON message.reply_to_guid = replied.guid
       WHERE
         message.attributedBody IS NOT NULL
+        AND message.associated_message_type = 0
         ${filterClause}
         ${filters}
       GROUP BY
@@ -156,6 +161,8 @@ export function useMessages(searchText?: string, filter?: Filter) {
 
         const { avatar, displayName } = getContactOrGroupInfo(messageInfo, contactMap);
 
+        const decodedReply = m.reply_body ? decodeHexString(m.reply_body) : null;
+
         return {
           ...m,
           body: decodedBody,
@@ -166,6 +173,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
           is_audio_message: Boolean(m.is_audio_message),
           is_sent: Boolean(m.is_sent),
           is_read: m.is_sent ? true : Boolean(m.is_read),
+          replyingTo: decodedReply || null,
         };
       });
     },
