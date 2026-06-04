@@ -1,6 +1,6 @@
 # YAFW Changelog
 
-## [Improve GIF conversion] - {PR_MERGE_DATE}
+## [Improve GIF conversion] - 2026-06-04
 
 - Fix GIF conversion two-pass palette: the generated palette is now applied with `paletteuse`, producing noticeably better colors and less banding (previously the palette was generated and discarded, so output was effectively single-pass)
 - Add GIF quality preference (1-100) controlling the number of palette colors
