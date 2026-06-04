@@ -1,9 +1,11 @@
 import { environment } from "@raycast/api";
-import { mkdir, rename, stat, writeFile } from "fs/promises";
+import { mkdir, readdir, rename, stat, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { getApiConfig } from "./config";
 
+const CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 const IMAGE_EXTENSIONS = ["jpg", "png", "gif", "webp", "img"];
+let lastCacheSweep = 0;
 
 function extensionFromContentType(contentType: string) {
   if (contentType.includes("jpeg") || contentType.includes("jpg")) return "jpg";
@@ -13,6 +15,31 @@ function extensionFromContentType(contentType: string) {
   return "img";
 }
 
+async function sweepExpiredCacheEntries(imageCacheDirectory: string) {
+  const now = Date.now();
+  if (now - lastCacheSweep < CACHE_MAX_AGE_MS) return;
+  lastCacheSweep = now;
+
+  try {
+    const entries = await readdir(imageCacheDirectory);
+    await Promise.all(
+      entries.map(async (entry) => {
+        const entryPath = path.join(imageCacheDirectory, entry);
+        try {
+          const cached = await stat(entryPath);
+          if (cached.isFile() && now - cached.mtimeMs > CACHE_MAX_AGE_MS) {
+            await unlink(entryPath);
+          }
+        } catch {
+          // Ignore races with other preview loads or user cleanup.
+        }
+      }),
+    );
+  } catch {
+    // Cache cleanup should never block preview loading.
+  }
+}
+
 export async function getScreenshot(id: string) {
   const { apiUrl, apiKey } = await getApiConfig();
   const encodedUrl = encodeURIComponent(`/api/assets/${id}`);
@@ -20,6 +47,7 @@ export async function getScreenshot(id: string) {
   const imageCacheDirectory = path.join(environment.supportPath, "preview-images");
 
   await mkdir(imageCacheDirectory, { recursive: true });
+  void sweepExpiredCacheEntries(imageCacheDirectory);
 
   for (const extension of IMAGE_EXTENSIONS) {
     const cachedPath = path.join(imageCacheDirectory, `${id}.${extension}`);
