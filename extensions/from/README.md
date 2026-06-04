@@ -6,9 +6,11 @@ From is an outliner that *understands what you write*. You type the way you thin
 
 ## Commands
 
-- **Create in From** — Jot down a thought and it lands in today's note. Pick note / task / event and an optional date; From does the rest.
+- **Create in From** — Jot down a thought and it lands in today's note. From figures out whether it's a note, task or event, adds the date and applies any `@contexts` from your text — no menus, you just write.
 - **Search From** — Full-text search across your whole vault. Open any result in the Mac app or on the web.
 - **Open Today's Note** — Jump straight to your daily note.
+
+> **Create** uses From's own capture engine via the `from://` deep link, so it needs the From Mac app installed. **Search** and **Open Today's Note** work with just the API token.
 
 ## Setup
 

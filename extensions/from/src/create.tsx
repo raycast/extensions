@@ -3,20 +3,20 @@ import {
   ActionPanel,
   Form,
   Icon,
+  open,
   showToast,
   Toast,
   popToRoot,
   closeMainWindow,
 } from "@raycast/api";
 import { useState } from "react";
-import { createInToday } from "./from-client";
 
-type NodeType = "note" | "task" | "event";
-
+// "Crear" delega en el motor de captura de From (deep link from://capture).
+// From decide si es nota, tarea o evento, le pone fecha y aplica @contextos
+// escritos en el texto — la misma inteligencia que el icono de la barra de
+// menús y el Atajo de Apple. Requiere la app de From para Mac.
 export default function CreateCommand() {
   const [text, setText] = useState("");
-  const [type, setType] = useState<NodeType>("note");
-  const [due, setDue] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function submit() {
@@ -30,23 +30,15 @@ export default function CreateCommand() {
     }
     setLoading(true);
     try {
-      await createInToday({
-        text: value,
-        isTask: type === "task",
-        due: due ? due.toISOString() : null,
-      });
-      const label =
-        type === "task" ? "Task" : type === "event" ? "Event" : "Note";
-      await showToast({
-        style: Toast.Style.Success,
-        title: `✓ ${label} added to today's note`,
-      });
+      const url = `from://capture?text=${encodeURIComponent(value)}&silent=1`;
+      await open(url);
+      await showToast({ style: Toast.Style.Success, title: "✓ Sent to From" });
       await closeMainWindow();
       await popToRoot();
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Could not create",
+        title: "Could not reach From",
         message: String(e),
       });
     } finally {
@@ -60,7 +52,7 @@ export default function CreateCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Create in From"
+            title="Send to From"
             icon={Icon.Plus}
             onSubmit={submit}
           />
@@ -69,28 +61,13 @@ export default function CreateCommand() {
     >
       <Form.TextArea
         id="text"
-        title="Text"
-        placeholder="Write the way you think… From files it in today's note"
+        title="Capture"
+        placeholder="Write the way you think… From figures out if it's a note, task or event"
         value={text}
         onChange={setText}
         autoFocus
       />
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        value={type}
-        onChange={(v) => setType(v as NodeType)}
-      >
-        <Form.Dropdown.Item value="note" title="Note" icon={Icon.Document} />
-        <Form.Dropdown.Item value="task" title="Task" icon={Icon.Checkmark} />
-        <Form.Dropdown.Item value="event" title="Event" icon={Icon.Calendar} />
-      </Form.Dropdown>
-      <Form.DatePicker
-        id="due"
-        title="Date (optional)"
-        value={due}
-        onChange={setDue}
-      />
+      <Form.Description text="From detects the type, date and @contexts from your text — no need to pick anything." />
     </Form>
   );
 }

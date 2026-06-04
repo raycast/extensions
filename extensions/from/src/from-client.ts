@@ -101,21 +101,6 @@ export async function getTodayNoteId(): Promise<string> {
   return (r.id || r.nodeId || "").trim();
 }
 
-/** Crea un nodo en la nota de hoy. */
-export async function createInToday(opts: {
-  text: string;
-  isTask?: boolean;
-  due?: string | null;
-}): Promise<FromNode> {
-  const parentId = await getTodayNoteId();
-  return mcpCall<FromNode>("from_create_node", {
-    text: opts.text,
-    isTask: !!opts.isTask,
-    ...(opts.due ? { due: opts.due } : {}),
-    parentId,
-  });
-}
-
 /** Busca nodos por texto (server-side full-text). */
 export async function searchNodes(q: string, limit = 25): Promise<FromNode[]> {
   const res = await fetch(
