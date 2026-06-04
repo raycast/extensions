@@ -11,9 +11,9 @@ import { Message, SQLMessage } from "../hooks/useMessages";
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 export async function getMessages(searchText?: string, chatIdentifier?: string, before?: string): Promise<Message[]> {
-  // Sanitize chatIdentifier: allow only the characters Apple uses in chat identifiers
+  // Sanitize chatIdentifier: escape single quotes
   const safeChatIdentifier = chatIdentifier?.replace(/'/g, "''") ?? null;
-  // Convert before to an Apple-epoch nanosecond integer — avoids any string interpolation
+  // Convert before to an Apple-epoch nanosecond integer
   const beforeNs =
     before && !isNaN(Date.parse(before))
       ? Math.floor((new Date(before).getTime() / 1000 - 978307200) * 1_000_000_000)
@@ -108,15 +108,16 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
     };
   });
 
-  // Reverse to oldest-first, apply reply dedup filter, then reverse back to date DESC
-  // Dedup: strip consecutive identical replyingTo to reduce noise (same logic as imessage Swift extension)
+  // Reverse to oldest-first, apply reply dedup filter, then reverse back to date DESC.
+  // Dedup: strip consecutive identical replyingTo to reduce noise.
   const oldestFirst = [...mapped].reverse();
   let prevReply: string | null = null;
   for (const msg of oldestFirst) {
+    const originalReply = msg.replyingTo ?? null;
     if (msg.replyingTo && msg.replyingTo === prevReply) {
       msg.replyingTo = null;
     }
-    prevReply = msg.replyingTo ?? null;
+    prevReply = originalReply;
   }
   const messages = oldestFirst.reverse();
 
