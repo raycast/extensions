@@ -72,7 +72,7 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       message.guid
     ORDER BY
       date DESC
-    LIMIT 100
+    LIMIT 50
     `,
   );
 
@@ -108,41 +108,38 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
     };
   });
 
-  // Reverse to oldest-first, apply reply dedup filter, then reverse back to date DESC.
+  // Reverse to oldest-first, apply reply dedup filter.
   // Dedup: strip consecutive identical replyingTo to reduce noise.
-  const oldestFirst = [...mapped].reverse();
+  const messages = [...mapped].reverse();
   let prevReply: string | null = null;
-  for (const msg of oldestFirst) {
+  for (const msg of messages) {
     const originalReply = msg.replyingTo ?? null;
     if (msg.replyingTo && msg.replyingTo === prevReply) {
       msg.replyingTo = null;
     }
     prevReply = originalReply;
   }
-  const messages = oldestFirst.reverse();
 
-  if (!searchText) return messages.slice(0, 50);
+  if (!searchText) return messages;
 
   const searchTerms = searchText
     .toLowerCase()
     .split(/\s+/)
     .filter((term) => term.length > 0);
 
-  return messages
-    .filter((m) => {
-      const searchableText = [
-        m.body,
-        m.senderName,
-        m.sender,
-        m.is_from_me ? "me" : "",
-        m.is_read ? "read" : "unread",
-        m.is_audio_message ? "audio" : "",
-        ...[m.attachment_mime_type?.split("/")],
-      ]
-        .join(" ")
-        .toLowerCase();
+  return messages.filter((m) => {
+    const searchableText = [
+      m.body,
+      m.senderName,
+      m.sender,
+      m.is_from_me ? "me" : "",
+      m.is_read ? "read" : "unread",
+      m.is_audio_message ? "audio" : "",
+      ...[m.attachment_mime_type?.split("/")],
+    ]
+      .join(" ")
+      .toLowerCase();
 
-      return fuzzySearch(searchableText, searchTerms);
-    })
-    .slice(0, 50);
+    return fuzzySearch(searchableText, searchTerms);
+  });
 }
