@@ -13,7 +13,7 @@ const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>, disa
     async () => {
       try {
         return await getSelectedText();
-      } catch (_error) {
+      } catch {
         return "";
       }
     },
