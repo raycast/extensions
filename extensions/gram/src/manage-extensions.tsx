@@ -338,12 +338,13 @@ export default function Command() {
       title: `Updating ${outdatedExtensions.length} extensions...`,
     });
 
-    try {
-      let successCount = 0;
+    let successCount = 0;
+    let failureCount = 0;
 
-      for (const ext of outdatedExtensions) {
-        toast.message = `Updating ${ext.name} (${successCount + 1}/${outdatedExtensions.length})`;
+    for (const [index, ext] of outdatedExtensions.entries()) {
+      toast.message = `Updating ${ext.name} (${index + 1}/${outdatedExtensions.length})`;
 
+      try {
         await installExtension({
           downloadUrl: getLatestExtensionDownloadUrl(ext),
           extensionId: ext.id,
@@ -351,18 +352,24 @@ export default function Command() {
         });
 
         successCount++;
+      } catch (error) {
+        failureCount++;
+        console.error(`Failed to update ${ext.name}:`, error);
       }
+    }
 
+    if (failureCount === 0) {
       toast.style = Toast.Style.Success;
       toast.title = `Successfully updated ${successCount} extensions!`;
       toast.message = "";
-      await checkInstallations();
-    } catch (error) {
+    } else {
       toast.style = Toast.Style.Failure;
-      toast.title = "Auto-update failed midway";
-      toast.message = String(error);
-      await checkInstallations();
+      toast.title = `Updated ${successCount}, failed ${failureCount}`;
+      toast.message =
+        failureCount === outdatedExtensions.length ? "No extensions were updated." : "Some updates failed.";
     }
+
+    await checkInstallations();
   }, [outdatedExtensions, targetInstallDir, checkInstallations]);
 
   const handleInstall = useCallback(
@@ -461,6 +468,8 @@ export default function Command() {
       searchBarAccessory={
         <ExtensionFilterDropdown
           allProvidesOptions={allProvidesOptions}
+          selectedProvides={selectedProvides}
+          selectedStatus={selectedStatus}
           onSelectedProvidesChange={setSelectedProvides}
           onSelectedStatusChange={setSelectedStatus}
         />
@@ -544,29 +553,42 @@ export default function Command() {
 
 function ExtensionFilterDropdown({
   allProvidesOptions,
+  selectedProvides,
+  selectedStatus,
   onSelectedProvidesChange,
   onSelectedStatusChange,
 }: {
   allProvidesOptions: string[];
+  selectedProvides: string;
+  selectedStatus: string;
   onSelectedProvidesChange: (value: string) => void;
   onSelectedStatusChange: (value: string) => void;
 }) {
+  const dropdownValue = getFilterDropdownValue(selectedStatus, selectedProvides);
+  const dropdownLabel = getFilterDropdownLabel(selectedStatus, selectedProvides);
+
   return (
     <List.Dropdown
       tooltip="Filter View"
       storeValue={false}
+      value={dropdownValue}
       onChange={(value) => {
-        if (value.startsWith("status:")) {
+        if (value === "all") {
+          onSelectedStatusChange("all");
+          onSelectedProvidesChange("all");
+        } else if (value.startsWith("status:")) {
           onSelectedStatusChange(value.replace("status:", ""));
         } else if (value.startsWith("provides:")) {
           onSelectedProvidesChange(value.replace("provides:", ""));
-        } else {
-          onSelectedStatusChange("all");
-          onSelectedProvidesChange("all");
         }
       }}
     >
       <List.Dropdown.Item title="All Extensions" value="all" />
+      {dropdownValue !== "all" && (
+        <List.Dropdown.Section title={`Selected: ${dropdownLabel}`}>
+          <List.Dropdown.Item title={dropdownLabel} value={dropdownValue} />
+        </List.Dropdown.Section>
+      )}
       <List.Dropdown.Section title="Status">
         <List.Dropdown.Item title="Installed" value="status:installed" />
         <List.Dropdown.Item title="Not Installed" value="status:uninstalled" />
@@ -580,6 +602,37 @@ function ExtensionFilterDropdown({
       </List.Dropdown.Section>
     </List.Dropdown>
   );
+}
+
+function getFilterDropdownValue(selectedStatus: string, selectedProvides: string): string {
+  if (selectedStatus === "all" && selectedProvides === "all") return "all";
+
+  return `selected:${selectedStatus}:${selectedProvides}`;
+}
+
+function getFilterDropdownLabel(selectedStatus: string, selectedProvides: string): string {
+  if (selectedStatus === "all" && selectedProvides === "all") return "All Extensions";
+
+  return `Status: ${getStatusLabel(selectedStatus)} • Capabilities: ${getProvidesLabel(selectedProvides)}`;
+}
+
+function getStatusLabel(selectedStatus: string): string {
+  switch (selectedStatus) {
+    case "installed":
+      return "Installed";
+    case "uninstalled":
+      return "Not Installed";
+    case "outdated":
+      return "Outdated";
+    case "ignored":
+      return "Ignored";
+    default:
+      return "All Extensions";
+  }
+}
+
+function getProvidesLabel(selectedProvides: string): string {
+  return selectedProvides === "all" ? "All Capabilities" : selectedProvides;
 }
 
 function ExtensionActions({

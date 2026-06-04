@@ -1,6 +1,8 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Cache, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getExtensionVersions, ExtensionVersionInfo, ZedExtension } from "../lib/extension";
+
+const versionCache = new Cache({ namespace: "extension-versions" });
 
 interface VersionSubmenuProps {
   extension: ZedExtension;
@@ -9,21 +11,41 @@ interface VersionSubmenuProps {
 }
 
 export function VersionSubmenu({ extension, installedVersion, onInstall }: VersionSubmenuProps) {
-  const [versions, setVersions] = useState<ExtensionVersionInfo[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [versions, setVersions] = useState<ExtensionVersionInfo[]>(() => getCachedVersions(extension.id));
+  const [isLoading, setIsLoading] = useState<boolean>(() => !hasCachedVersions(extension.id));
 
   useEffect(() => {
+    let isCancelled = false;
+
+    const cachedVersions = getCachedVersions(extension.id);
+    if (cachedVersions.length > 0 || hasCachedVersions(extension.id)) {
+      setVersions(cachedVersions);
+      setIsLoading(false);
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    setIsLoading(true);
+
     async function loadData() {
       try {
         const fetchedVersions = await getExtensionVersions(extension.id);
+        if (isCancelled) return;
+
         setVersions(fetchedVersions);
+        versionCache.set(extension.id, JSON.stringify(fetchedVersions));
       } catch (error) {
         console.error("Failed to load extension versions:", error);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       }
     }
+
     loadData();
+    return () => {
+      isCancelled = true;
+    };
   }, [extension.id]);
 
   if (isLoading) {
@@ -71,4 +93,20 @@ export function VersionSubmenu({ extension, installedVersion, onInstall }: Versi
       })}
     </ActionPanel.Submenu>
   );
+}
+
+function getCachedVersions(extensionId: string): ExtensionVersionInfo[] {
+  const cachedValue = versionCache.get(extensionId);
+  if (!cachedValue) return [];
+
+  try {
+    const parsed = JSON.parse(cachedValue) as ExtensionVersionInfo[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function hasCachedVersions(extensionId: string): boolean {
+  return versionCache.get(extensionId) !== undefined;
 }

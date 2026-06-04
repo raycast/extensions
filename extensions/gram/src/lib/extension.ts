@@ -150,26 +150,41 @@ export async function installExtension({
       hasBackup = false;
     } catch (error) {
       if (hasBackup) {
-        await fs.rename(backupDestDir, finalDestDir);
-        hasBackup = false;
+        await restoreBackupDir(backupDestDir, finalDestDir);
       }
       throw error;
     }
 
-    await fs.rm(backupDestDir, { recursive: true, force: true });
+    await safeRemovePath(backupDestDir, { recursive: true, force: true });
   } catch (error) {
-    await fs.rm(tempExtractDir, { recursive: true, force: true });
+    await safeRemovePath(tempExtractDir, { recursive: true, force: true });
     if (hasBackup) {
-      await fs.rename(backupDestDir, finalDestDir);
+      await restoreBackupDir(backupDestDir, finalDestDir);
       hasBackup = false;
     }
     throw error;
   } finally {
-    await fs.rm(tempFilePath, { force: true });
-    await fs.rm(tempExtractDir, { recursive: true, force: true });
+    await safeRemovePath(tempFilePath, { force: true });
+    await safeRemovePath(tempExtractDir, { recursive: true, force: true });
     if (!hasBackup) {
-      await fs.rm(backupDestDir, { recursive: true, force: true });
+      await safeRemovePath(backupDestDir, { recursive: true, force: true });
     }
+  }
+}
+
+async function restoreBackupDir(backupDestDir: string, finalDestDir: string): Promise<void> {
+  try {
+    await fs.rename(backupDestDir, finalDestDir);
+  } catch (error) {
+    console.error(`Failed to restore backup directory from ${backupDestDir} to ${finalDestDir}:`, error);
+  }
+}
+
+async function safeRemovePath(targetPath: string, options: { recursive?: boolean; force?: boolean }): Promise<void> {
+  try {
+    await fs.rm(targetPath, options);
+  } catch (error) {
+    console.error(`Failed to remove path ${targetPath}:`, error);
   }
 }
 
@@ -222,23 +237,18 @@ async function getExtensionVersionFromDisk(extensionDir: string): Promise<string
 }
 
 export async function getExtensionVersions(extensionId: string): Promise<ExtensionVersionInfo[]> {
-  try {
-    const response = await apiFetch(`https://api.zed.dev/extensions/${extensionId}`);
+  const response = await apiFetch(`https://api.zed.dev/extensions/${extensionId}`);
 
-    const json = (await response.json()) as ZedResponse;
-    const data = json.data || [];
-    return data
-      .map((item) => ({
-        published_at: item.published_at,
-        version: item.version,
-        schema_version: item.schema_version,
-        wasm_api_version: item.wasm_api_version,
-      }))
-      .sort((a, b) => {
-        return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-      });
-  } catch (error) {
-    console.error(`Failed to fetch versions for ${extensionId}:`, error);
-    return [];
-  }
+  const json = (await response.json()) as ZedResponse;
+  const data = json.data || [];
+  return data
+    .map((item) => ({
+      published_at: item.published_at,
+      version: item.version,
+      schema_version: item.schema_version,
+      wasm_api_version: item.wasm_api_version,
+    }))
+    .sort((a, b) => {
+      return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+    });
 }
