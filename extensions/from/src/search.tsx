@@ -12,6 +12,7 @@ import {
   searchNodes,
   nodeDeepLink,
   nodeWebUrl,
+  nodeTypes,
   type FromNode,
 } from "./from-client";
 
@@ -75,7 +76,9 @@ export default function SearchCommand() {
             key={n.id}
             icon={iconFor(n)}
             title={n.text || "Untitled"}
-            subtitle={(n.types || []).map((t) => `@${t}`).join(" ")}
+            subtitle={nodeTypes(n)
+              .map((t) => `@${t}`)
+              .join(" ")}
             actions={
               <ActionPanel>
                 <Action

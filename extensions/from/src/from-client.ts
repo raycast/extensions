@@ -10,10 +10,26 @@ export interface FromNode {
   text: string;
   body?: string | null;
   parentId?: string | null;
-  types?: string[];
+  // El servidor puede devolver types como array o como string JSON.
+  types?: string[] | string | null;
   status?: string | null;
   due?: string | null;
   isEvent?: boolean;
+}
+
+/** Normaliza el campo types (array o string JSON) a un array de strings. */
+export function nodeTypes(n: FromNode): string[] {
+  const t = n.types;
+  if (Array.isArray(t)) return t;
+  if (typeof t === "string") {
+    try {
+      const parsed = JSON.parse(t);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 function prefs(): Prefs {
