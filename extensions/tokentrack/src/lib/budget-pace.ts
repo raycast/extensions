@@ -148,7 +148,6 @@ export function computeBudgetPace(
     return {
       status: "no_spend",
       title: "No spend yet",
-      listHint: "No spend",
     };
   }
 

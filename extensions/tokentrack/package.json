@@ -30,13 +30,6 @@
       "title": "Token Dashboard",
       "description": "View token usage across Codex, Claude Code, and Cursor.",
       "mode": "view"
-    },
-    {
-      "name": "budget-monitor",
-      "title": "Monitor Budgets",
-      "description": "Check budgets in the background. Run once to start scheduled checks.",
-      "mode": "no-view",
-      "interval": "1h"
     }
   ],
   "preferences": [
@@ -71,22 +64,6 @@
       "type": "textfield",
       "default": "300",
       "required": true
-    },
-    {
-      "name": "alertThreshold",
-      "title": "Alert Threshold (%)",
-      "description": "Notify when spend reaches this percentage of the cap.",
-      "type": "textfield",
-      "default": "80",
-      "required": true
-    },
-    {
-      "name": "enableBudgetAlerts",
-      "title": "Alerts",
-      "description": "Show a notification when spend crosses the threshold above.",
-      "type": "checkbox",
-      "label": "Enable budget alerts",
-      "required": false
     },
     {
       "name": "defaultSource",

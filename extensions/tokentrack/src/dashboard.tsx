@@ -9,13 +9,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  BUDGET_MONITOR_PROVIDERS,
-  checkBudgetThresholdAlerts,
-  showBudgetAlertToasts,
-} from "./lib/budget-alerts";
-import { getBudgetAlertSettings } from "./lib/budget-alert-settings";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   budgetPeriodLabel,
   budgetRowTitle,
@@ -42,7 +36,6 @@ import {
 import type { SourceProviderKey } from "./lib/types";
 import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { clearUsageSnapshotCache, loadUsage } from "./lib/usage";
-import type { ProviderUsageSnapshot } from "./lib/usage-snapshot";
 import { UsageDetailsView } from "./usage-details";
 
 const CURSOR_BRAND_HEX = "#A8DFB6";
@@ -132,7 +125,6 @@ function isPeriodKey(id: string): id is PeriodKey {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
-  const alertSettings = getBudgetAlertSettings(prefs);
   const currency = prefs.currency || "USD";
   const defaultSource: SourceProviderKey = providersMeta.some(
     (p) => p.key === prefs.defaultSource,
@@ -156,31 +148,6 @@ export default function Command() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
     undefined,
   );
-  const initialAlertPassDone = useRef(false);
-
-  const runBudgetAlerts = useCallback(
-    async (provider: SourceProviderKey, snapshot: ProviderUsageSnapshot) => {
-      if (!alertSettings.enabled) return;
-
-      const providers = initialAlertPassDone.current
-        ? [provider]
-        : BUDGET_MONITOR_PROVIDERS;
-      const results = await checkBudgetThresholdAlerts(prefs, {
-        recordAlert: true,
-        settings: alertSettings,
-        providers,
-        snapshots: { [provider]: snapshot },
-      });
-      await showBudgetAlertToasts(results);
-      initialAlertPassDone.current = true;
-    },
-    [prefs, alertSettings],
-  );
-
-  useEffect(() => {
-    if (isLoading || !data) return;
-    void runBudgetAlerts(tab, data);
-  }, [isLoading, data, tab, runBudgetAlerts]);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => revalidate(), REFRESH_INTERVAL);
@@ -308,7 +275,6 @@ export default function Command() {
 
   const handleRefresh = () => {
     clearUsageSnapshotCache();
-    initialAlertPassDone.current = false;
     revalidate();
   };
 
