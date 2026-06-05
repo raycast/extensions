@@ -199,13 +199,21 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
     return <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />;
   }
 
+  // Helper to trigger staggered revalidations while Raycast is in the background.
+  // This gives Zed enough time to launch and update its SQLite DB.
+  const triggerRevalidation = () => {
+    setTimeout(revalidate, 500);
+    setTimeout(revalidate, 1500);
+    setTimeout(revalidate, 3000);
+  };
+
   // Multi-folder workspace - use CLI
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        setTimeout(revalidate, 200);
         await closeMainWindow();
         await openWithZedCli(cliPath, entry.paths);
+        triggerRevalidation();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -221,9 +229,9 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        setTimeout(revalidate, 200);
         await closeMainWindow();
         await openWithZedCli(cliPath!, [entry.paths[0]]);
+        triggerRevalidation();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -236,7 +244,9 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   }
 
   // Fallback: open via URI scheme (no revalidation)
-  return <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />;
+  return (
+    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
+  );
 }
 
 function RemoveActionSection({
