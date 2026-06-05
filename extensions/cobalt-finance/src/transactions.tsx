@@ -11,41 +11,12 @@ import {
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
-import { categoryIcon, pickInstitutionIcon, pickMerchantIcon } from "./icons";
+import type { components } from "./api-types";
+import { categoryIcon, pickMerchantIcon } from "./icons";
 import { authorize, logout } from "./oauth";
 
-interface Counterparty {
-  type?: string | null;
-  website?: string | null;
-  logo_url?: string | null;
-}
-
-interface TransactionItem {
-  id: string;
-  name: string;
-  merchantName: string | null;
-  amount: number;
-  date: string;
-  authorizedDate: string | null;
-  pending: boolean;
-  category: { primary?: string | null } | string | null;
-  categoryDetail: string | null;
-  logoUrl: string | null;
-  accountName: string | null;
-  accountType: string | null;
-  institutionName: string | null;
-  institutionLogo: string | null;
-  institutionUrl: string | null;
-  website: string | null;
-  notes: string | null;
-  counterparties?: Counterparty[] | null;
-}
-
-interface TransactionListResponse {
-  transactions: TransactionItem[];
-  nextCursor: string | null;
-  hasMore: boolean;
-}
+type Transaction = components["schemas"]["Transaction"];
+type TransactionList = components["schemas"]["TransactionList"];
 
 const PAGE_SIZE = 50;
 
@@ -62,36 +33,38 @@ const dateDisplay = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-/** Mirror `getTransactionDisplayName`: prefer raw `name`, fall back to merchant. */
-function displayName(tx: TransactionItem): string {
-  return tx.name?.trim() || tx.merchantName?.trim() || "";
+function displayName(tx: Transaction): string {
+  return tx.merchant?.trim() || tx.name?.trim() || "";
 }
 
-/** Mirror `truncateName(_, 40)` from `transactions-table.tsx`. */
 function truncateName(name: string, max = 40): string {
   return name.length <= max ? name : `${name.slice(0, max)}…`;
 }
 
-/** Mirror `formatTransactionDateDisplay`: parse the date as a UTC noon to avoid TZ skew. */
 function formatDate(iso: string): string {
   const day = String(iso).split("T")[0] ?? String(iso);
   const t = new Date(`${day}T12:00:00.000Z`).getTime();
   return Number.isNaN(t) ? iso : dateDisplay.format(new Date(t));
 }
 
+function formatLocation(loc: Transaction["location"]): string | null {
+  if (!loc) {
+    return null;
+  }
+  const parts = [loc.city, loc.region, loc.country].filter((v): v is string => !!v);
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
 function TransactionMetadata({
-  institutionIcon,
-  merchantUrl,
-  primaryCategory,
+  category,
   signedAmount,
   tx,
 }: {
-  institutionIcon: string | null;
-  merchantUrl: string | null;
-  primaryCategory: string | null;
+  category: string | null;
   signedAmount: string;
-  tx: TransactionItem;
+  tx: Transaction;
 }) {
+  const location = formatLocation(tx.location);
   return (
     <Detail.Metadata>
       <Detail.Metadata.TagList title="Status">
@@ -102,48 +75,16 @@ function TransactionMetadata({
       </Detail.Metadata.TagList>
       <Detail.Metadata.Label title="Amount" text={signedAmount} />
       <Detail.Metadata.Label title="Date" text={formatDate(tx.date)} />
-      {tx.authorizedDate && tx.authorizedDate !== tx.date ? (
-        <Detail.Metadata.Label
-          title="Authorized"
-          text={formatDate(tx.authorizedDate)}
-        />
-      ) : null}
       <Detail.Metadata.Separator />
-      {primaryCategory ? (
+      {category ? (
         <Detail.Metadata.Label
           title="Category"
-          icon={categoryIcon(primaryCategory)}
-          text={primaryCategory}
+          icon={categoryIcon(category)}
+          text={category}
         />
       ) : null}
-      {tx.categoryDetail ? (
-        <Detail.Metadata.Label title="Subcategory" text={tx.categoryDetail} />
-      ) : null}
-      {tx.merchantName ? (
-        <Detail.Metadata.Label title="Merchant" text={tx.merchantName} />
-      ) : null}
-      {merchantUrl ? (
-        <Detail.Metadata.Link
-          title="Website"
-          target={merchantUrl}
-          text={tx.website ?? merchantUrl}
-        />
-      ) : null}
-      <Detail.Metadata.Separator />
-      {tx.accountName ? (
-        <Detail.Metadata.Label title="Account" text={tx.accountName} />
-      ) : null}
-      {tx.institutionName ? (
-        <Detail.Metadata.Label
-          title="Institution"
-          icon={
-            institutionIcon
-              ? { mask: Image.Mask.Circle, source: institutionIcon }
-              : undefined
-          }
-          text={tx.institutionName}
-        />
-      ) : null}
+      {tx.merchant ? <Detail.Metadata.Label title="Merchant" text={tx.merchant} /> : null}
+      {location ? <Detail.Metadata.Label title="Location" text={location} /> : null}
     </Detail.Metadata>
   );
 }
@@ -153,29 +94,18 @@ function TransactionDetail({
   tx,
 }: {
   brandfetchClientId: string | undefined;
-  tx: TransactionItem;
+  tx: Transaction;
 }) {
-  const isCredit = tx.amount < 0;
+  const isCredit = tx.amount > 0;
   const amountStr = currency.format(Math.abs(tx.amount));
   const signedAmount = `${isCredit ? "+" : "-"}${amountStr}`;
-  const primaryCategory =
-    typeof tx.category === "string"
-      ? tx.category
-      : (tx.category?.primary ?? null);
   const merchantIcon = pickMerchantIcon({
     brandfetchClientId,
-    counterparties: tx.counterparties,
-    logoUrl: tx.logoUrl,
-    website: tx.website,
+    counterparties: null,
+    logoUrl: null,
+    website: null,
   });
-  const institutionIcon = pickInstitutionIcon({
-    accountName: tx.accountName,
-    brandfetchClientId,
-    institutionLogo: tx.institutionLogo,
-    institutionName: tx.institutionName,
-    institutionUrl: tx.institutionUrl,
-  });
-  const title = displayName(tx) || tx.merchantName || "—";
+  const title = displayName(tx) || "—";
 
   const logoMd =
     typeof merchantIcon === "string" && /^https?:\/\//.test(merchantIcon)
@@ -189,39 +119,15 @@ function TransactionDetail({
     tx.notes ? `\n---\n\n${tx.notes}\n` : "",
   ].join("");
 
-  let merchantUrl: string | null = null;
-  if (tx.website) {
-    merchantUrl = tx.website.startsWith("http")
-      ? tx.website
-      : `https://${tx.website}`;
-  }
-
   return (
     <Detail
       markdown={markdown}
       navigationTitle={title}
-      metadata={
-        <TransactionMetadata
-          institutionIcon={institutionIcon}
-          merchantUrl={merchantUrl}
-          primaryCategory={primaryCategory}
-          signedAmount={signedAmount}
-          tx={tx}
-        />
-      }
+      metadata={<TransactionMetadata category={tx.category} signedAmount={signedAmount} tx={tx} />}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
-          <Action.CopyToClipboard
-            title="Copy Merchant"
-            content={tx.merchantName ?? title}
-          />
-          {merchantUrl ? (
-            <Action.OpenInBrowser
-              title="Open Merchant Website"
-              url={merchantUrl}
-            />
-          ) : null}
+          <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
         </ActionPanel>
       }
     />
@@ -252,30 +158,28 @@ export default function Command() {
       if (options.cursor) {
         params.set("cursor", options.cursor);
       }
-      if (searchText.trim()) {
-        params.set("searchQuery", searchText.trim());
-      }
       return `${base}/v1/transactions?${params.toString()}`;
     },
-    [base, searchText],
+    [base],
   );
 
-  const { isLoading, data, revalidate, error, pagination } = useFetch(
-    buildUrl,
-    {
-      execute: !!accessToken,
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      initialData: [] as TransactionItem[],
-      keepPreviousData: true,
-      mapResult(result: TransactionListResponse) {
-        return {
-          cursor: result.nextCursor ?? undefined,
-          data: result.transactions,
-          hasMore: result.hasMore,
-        };
-      },
+  const { isLoading, data, revalidate, error, pagination } = useFetch<
+    TransactionList,
+    Transaction[],
+    Transaction[]
+  >(buildUrl, {
+    execute: !!accessToken,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    initialData: [],
+    keepPreviousData: true,
+    mapResult(result: TransactionList) {
+      return {
+        cursor: result.nextCursor ?? undefined,
+        data: result.items,
+        hasMore: result.hasMore,
+      };
     },
-  );
+  });
 
   const signOutAction = (
     <Action
@@ -289,6 +193,14 @@ export default function Command() {
       }}
     />
   );
+
+  const q = searchText.trim().toLowerCase();
+  const filtered = q
+    ? data.filter((tx) => {
+        const fields = [tx.name, tx.merchant ?? "", tx.category ?? "", String(tx.amount)];
+        return fields.some((f) => f.toLowerCase().includes(q));
+      })
+    : data;
 
   return (
     <List
@@ -307,29 +219,11 @@ export default function Command() {
           actions={<ActionPanel>{signOutAction}</ActionPanel>}
         />
       ) : null}
-      {data.map((tx) => {
-        const title = truncateName(displayName(tx) || tx.merchantName || "—");
-        // Web: amount >= 0 is a debit (red), amount < 0 is a credit (green).
-        const isCredit = tx.amount < 0;
+      {filtered.map((tx) => {
+        const title = truncateName(displayName(tx) || "—");
+        const isCredit = tx.amount > 0;
         const amountStr = currency.format(Math.abs(tx.amount));
-        const primaryCategory =
-          typeof tx.category === "string"
-            ? tx.category
-            : (tx.category?.primary ?? null);
-
-        const institutionIcon = pickInstitutionIcon({
-          accountName: tx.accountName,
-          brandfetchClientId,
-          institutionLogo: tx.institutionLogo,
-          institutionName: tx.institutionName,
-          institutionUrl: tx.institutionUrl,
-        });
-        const institutionAccessory: List.Item.Accessory = institutionIcon
-          ? {
-              icon: { mask: Image.Mask.Circle, source: institutionIcon },
-              tooltip: tx.institutionName ?? undefined,
-            }
-          : { icon: "transparent.svg" };
+        const category = tx.category;
 
         const accessories: List.Item.Accessory[] = [
           {
@@ -339,24 +233,21 @@ export default function Command() {
             },
           },
           {
-            icon: tx.pending
-              ? "categories/pending.svg"
-              : "categories/posted.svg",
+            icon: tx.pending ? "categories/pending.svg" : "categories/posted.svg",
             tooltip: tx.pending ? "Pending" : "Posted",
           },
           {
-            icon: categoryIcon(primaryCategory),
-            tooltip: primaryCategory ?? undefined,
+            icon: categoryIcon(category),
+            tooltip: category ?? undefined,
           },
-          institutionAccessory,
           { text: formatDate(tx.date) },
         ];
 
         const merchantIcon = pickMerchantIcon({
           brandfetchClientId,
-          counterparties: tx.counterparties,
-          logoUrl: tx.logoUrl,
-          website: tx.website,
+          counterparties: null,
+          logoUrl: null,
+          website: null,
         });
 
         return (
@@ -370,31 +261,10 @@ export default function Command() {
                 <Action.Push
                   title="Show Details"
                   icon={Icon.Sidebar}
-                  target={
-                    <TransactionDetail
-                      brandfetchClientId={brandfetchClientId}
-                      tx={tx}
-                    />
-                  }
+                  target={<TransactionDetail brandfetchClientId={brandfetchClientId} tx={tx} />}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Amount"
-                  content={amountStr}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Merchant"
-                  content={tx.merchantName ?? title}
-                />
-                {tx.website ? (
-                  <Action.OpenInBrowser
-                    title="Open Merchant Website"
-                    url={
-                      tx.website.startsWith("http")
-                        ? tx.website
-                        : `https://${tx.website}`
-                    }
-                  />
-                ) : null}
+                <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
+                <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
                 <Action
                   title="Reload"
                   icon={Icon.ArrowClockwise}
@@ -407,13 +277,11 @@ export default function Command() {
           />
         );
       })}
-      {!isLoading && !error && accessToken && data.length === 0 ? (
+      {!isLoading && !error && accessToken && filtered.length === 0 ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No transactions"
-          description={
-            searchText ? "Try a different search" : "Nothing here yet"
-          }
+          description={searchText ? "Try a different search" : "Nothing here yet"}
           actions={<ActionPanel>{signOutAction}</ActionPanel>}
         />
       ) : null}

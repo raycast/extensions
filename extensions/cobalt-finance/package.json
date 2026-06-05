@@ -165,33 +165,6 @@
         "bank",
         "credit"
       ]
-    },
-    {
-      "name": "networth",
-      "title": "Net Worth",
-      "description": "Net worth totals and history sourced from snapshots",
-      "mode": "view",
-      "keywords": [
-        "cobalt",
-        "net worth",
-        "networth",
-        "balance",
-        "wealth"
-      ]
-    },
-    {
-      "name": "menu-bar-networth",
-      "title": "Net Worth in Menu Bar",
-      "description": "Always-on net worth glance in the macOS menu bar with category breakdown",
-      "mode": "menu-bar",
-      "interval": "30m",
-      "keywords": [
-        "cobalt",
-        "net worth",
-        "menu bar",
-        "balance",
-        "wealth"
-      ]
     }
   ],
   "platforms": [

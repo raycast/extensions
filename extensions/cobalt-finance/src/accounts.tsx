@@ -11,41 +11,12 @@ import {
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+import type { components } from "./api-types";
 import { pickInstitutionIcon } from "./icons";
 import { authorize, logout } from "./oauth";
 
-interface AccountItem {
-  plaidAccountId: string | null;
-  plaidItemId: string;
-  name: string;
-  mask: string | null;
-  type: string;
-  subtype: string | null;
-  currency: string | null;
-  current: number | null;
-  creditLimit: number | null;
-  updatedAt: string | null;
-  institutionName: string | null;
-  newAccountsAvailable: boolean | null;
-  logo: string | null;
-  canAddInvestments: boolean;
-  hasInvestments: boolean;
-  hasLiabilities: boolean;
-  needsReauth: boolean;
-  pendingDisconnectAt: string | null;
-  userOverrideCreditLimit: number | null;
-}
-
-interface AccountsResponse {
-  accounts: AccountItem[];
-}
-
-const dateDisplay = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  month: "short",
-});
+type Account = components["schemas"]["Account"];
+type AccountType = components["schemas"]["AccountType"];
 
 function currencyFor(code: string | null): Intl.NumberFormat {
   return new Intl.NumberFormat("en-US", {
@@ -63,36 +34,33 @@ function formatBalance(amount: number | null, code: string | null): string {
   return currencyFor(code).format(amount);
 }
 
-function formatUpdated(iso: string | null): string {
-  if (!iso) {
-    return "—";
-  }
-  const t = new Date(iso).getTime();
-  return Number.isNaN(t) ? iso : dateDisplay.format(new Date(t));
+function isCreditAccount(a: Account): boolean {
+  return a.type === "credit_card";
 }
 
-function isCreditAccount(a: AccountItem): boolean {
-  return a.type === "credit";
+const TYPE_LABEL: Record<AccountType, string> = {
+  bank: "Bank",
+  credit_card: "Credit Card",
+  investment: "Investment",
+  loan: "Loan",
+  other: "Other",
+};
+
+function accountTypeLabel(a: Account): string {
+  return TYPE_LABEL[a.type];
 }
 
-function accountTypeLabel(a: AccountItem): string {
-  if (a.subtype) {
-    return a.subtype
-      .replaceAll("_", " ")
-      .replaceAll(/\b\w/g, (c) => c.toUpperCase());
-  }
-  return a.type.replaceAll(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function utilization(a: AccountItem): number | null {
+function utilization(a: Account): number | null {
   if (!isCreditAccount(a)) {
     return null;
   }
-  const limit = a.userOverrideCreditLimit ?? a.creditLimit;
-  if (!limit || a.current === null) {
+  if (!a.creditLimit || a.balance === null) {
     return null;
   }
-  return Math.min(100, Math.max(0, (Math.abs(a.current) / limit) * 100));
+  return Math.min(
+    100,
+    Math.max(0, (Math.abs(a.balance) / a.creditLimit) * 100),
+  );
 }
 
 function buildLimitLine(
@@ -111,19 +79,19 @@ function AccountDetail({
   account,
   brandfetchClientId,
 }: {
-  account: AccountItem;
+  account: Account;
   brandfetchClientId: string | undefined;
 }) {
   const a = account;
-  const balance = formatBalance(a.current, a.currency);
-  const limit = a.userOverrideCreditLimit ?? a.creditLimit;
-  const limitStr = limit === null ? null : formatBalance(limit, a.currency);
+  const balance = formatBalance(a.balance, a.currency);
+  const limitStr =
+    a.creditLimit === null ? null : formatBalance(a.creditLimit, a.currency);
   const util = utilization(a);
   const institutionIcon = pickInstitutionIcon({
     accountName: a.name,
     brandfetchClientId,
-    institutionLogo: a.logo,
-    institutionName: a.institutionName,
+    institutionLogo: null,
+    institutionName: a.institution,
     institutionUrl: null,
   });
 
@@ -145,25 +113,6 @@ function AccountDetail({
       navigationTitle={a.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="Status">
-            {a.needsReauth ? (
-              <Detail.Metadata.TagList.Item
-                text="Needs Reauth"
-                color={Color.Red}
-              />
-            ) : (
-              <Detail.Metadata.TagList.Item
-                text="Connected"
-                color={Color.Green}
-              />
-            )}
-            {a.pendingDisconnectAt ? (
-              <Detail.Metadata.TagList.Item
-                text="Pending Disconnect"
-                color={Color.Orange}
-              />
-            ) : null}
-          </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Balance" text={balance} />
           {isCreditAccount(a) && limitStr ? (
             <Detail.Metadata.Label title="Credit Limit" text={limitStr} />
@@ -184,7 +133,7 @@ function AccountDetail({
             text={(a.currency ?? "USD").toUpperCase()}
           />
           <Detail.Metadata.Separator />
-          {a.institutionName ? (
+          {a.institution ? (
             <Detail.Metadata.Label
               title="Institution"
               icon={
@@ -192,13 +141,9 @@ function AccountDetail({
                   ? { mask: Image.Mask.Circle, source: institutionIcon }
                   : undefined
               }
-              text={a.institutionName}
+              text={a.institution}
             />
           ) : null}
-          <Detail.Metadata.Label
-            title="Last updated"
-            text={formatUpdated(a.updatedAt)}
-          />
         </Detail.Metadata>
       }
       actions={
@@ -230,16 +175,13 @@ export default function Command() {
     void run();
   }, [base]);
 
-  const { isLoading, data, revalidate, error } = useFetch(
+  const { isLoading, data, revalidate, error } = useFetch<Account[]>(
     `${base}/v1/accounts`,
     {
       execute: !!accessToken,
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      initialData: [] as AccountItem[],
+      initialData: [],
       keepPreviousData: true,
-      mapResult(result: AccountsResponse) {
-        return { data: result.accounts };
-      },
     },
   );
 
@@ -258,9 +200,9 @@ export default function Command() {
 
   const accounts = data ?? [];
 
-  const grouped: Record<string, AccountItem[]> = {};
+  const grouped: Record<string, Account[]> = {};
   for (const a of accounts) {
-    const key = a.institutionName ?? "Other";
+    const key = a.institution ?? "Other";
     if (!grouped[key]) {
       grouped[key] = [];
     }
@@ -292,12 +234,12 @@ export default function Command() {
             subtitle={`${sectionAccounts.length} account${sectionAccounts.length === 1 ? "" : "s"}`}
           >
             {sectionAccounts.map((a) => {
-              const balance = formatBalance(a.current, a.currency);
+              const balance = formatBalance(a.balance, a.currency);
               const institutionIcon = pickInstitutionIcon({
                 accountName: a.name,
                 brandfetchClientId,
-                institutionLogo: a.logo,
-                institutionName: a.institutionName,
+                institutionLogo: null,
+                institutionName: a.institution,
                 institutionUrl: null,
               });
               const util = utilization(a);
@@ -325,16 +267,10 @@ export default function Command() {
                   tooltip: "Mask",
                 });
               }
-              if (a.needsReauth) {
-                accessories.push({
-                  icon: { source: Icon.Warning, tintColor: Color.Red },
-                  tooltip: "Needs reauth",
-                });
-              }
 
               return (
                 <List.Item
-                  key={a.plaidAccountId ?? `${a.plaidItemId}-${a.name}`}
+                  key={a.id}
                   icon={
                     institutionIcon
                       ? {
