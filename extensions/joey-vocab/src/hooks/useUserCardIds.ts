@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
  * Fetches all dictionary IDs the user has already added as cards.
  * Returns a plain array (Sets don't survive useCachedPromise serialization).
  */
-async function fetchUserCardDictionaryIds(userId: string): Promise<string[]> {
+async function _fetchUserCardDictionaryIds(userId: string): Promise<string[]> {
   const { data: cardRows, error } = await supabase.from("user_cards").select("dictionary_id").eq("user_id", userId);
 
   if (error) {
@@ -22,7 +22,7 @@ async function fetchUserCardDictionaryIds(userId: string): Promise<string[]> {
  */
 export function useUserCardIds(userId: string | null) {
   const { data, isLoading, error, revalidate } = useCachedPromise(
-    (id: string) => fetchUserCardDictionaryIds(id),
+    (id: string) => _fetchUserCardDictionaryIds(id),
     [userId!],
     { execute: !!userId },
   );

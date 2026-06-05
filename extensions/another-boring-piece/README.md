@@ -18,6 +18,10 @@ Shows the three most recent wallpapers. Preview them, see the details (title, ar
 
 Instantly sets a random wallpaper. No UI, no prompts — just a fresh background.
 
+**History**
+
+Shows wallpapers you selected or downloaded, including automatic wallpaper switches, with options to set or download them again.
+
 **Auto Switch Wallpaper**
 
 Rotates your wallpaper on a schedule in the background. Pick the refresh interval (30 minutes, 1 hour, or 1 day) and optionally show a brief HUD when the wallpaper changes.

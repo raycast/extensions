@@ -2,6 +2,14 @@
 
 All notable changes to "Raycast WordReference Extension" will be documented in this file.
 
+## [1.1.1] - 2026-06-02
+
+### Fixed
+
+- Prevent crashes when WordReference rejects translation detail requests.
+- Show a clear translation error page with probable causes and recovery suggestions.
+- Classify common WordReference HTTP errors such as bot protection, rate limits, missing pages, and server issues.
+
 ## [1.1.0] - 2023-09-19
 
 ### Added

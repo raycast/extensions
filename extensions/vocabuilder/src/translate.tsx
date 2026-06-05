@@ -15,13 +15,18 @@ import {
 import { useEffect, useRef, useState } from "react";
 import PronounceAction from "./components/PronounceAction";
 import LanguageConfigError from "./components/LanguageConfigError";
+import LanguagePairDropdown from "./components/LanguagePairDropdown";
 import { useLanguagePair } from "./hooks/useLanguagePair";
 import History from "./history";
 import { translateWord, translateText } from "./lib/gemini";
-import { MAX_WORD_LENGTH, normalizeWordInput, normalizeTextInput } from "./lib/input";
-import { LanguagePair, storageKeyPrefix, swapLanguagePair } from "./lib/languages";
+import { defaultToastFor } from "./lib/errorToast";
+import { geminiError, isGeminiError } from "./lib/geminiError";
+import { getPreferenceDefault } from "./lib/manifest";
+import { looksLikeWordAttempt, normalizeWordInput, normalizeTextInput } from "./lib/input";
+import { storageKeyPrefix } from "./lib/languages";
+import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { posColor } from "./lib/colors";
-import { buildTranslationDetailMarkdown, buildTextTranslationDetailMarkdown } from "./lib/markdown";
+import { TranslationDetail } from "./components/TranslationDetail";
 import { getHistory, saveTranslation } from "./lib/storage";
 import { Translation, WordSense } from "./lib/types";
 
@@ -37,12 +42,16 @@ function pickSenseShortcut(index: number): { modifiers: "cmd"[]; key: "1" | "2" 
   return { modifiers: ["cmd"], key: keys[index] };
 }
 
-const RETRYABLE_ERRORS = [
-  "NETWORK_OFFLINE",
-  "GEMINI_REQUEST_FAILED",
-  "GEMINI_EMPTY_RESPONSE",
-  "GEMINI_INVALID_RESPONSE",
-];
+// Codes that surface a Retry button. See AGENTS.md → Error Handling (Retry policy).
+// Wider than isTransient: empty-response and invalid-response are NOT auto-retried
+// (Gemini already responded, just badly) but a human-triggered retry is still worth
+// offering since the next call may produce a usable response.
+const RETRYABLE_ERROR_CODES = new Set<string>([
+  "network-offline",
+  "request-failed",
+  "empty-response",
+  "invalid-response",
+]);
 
 const SECRET_PREFIX_RE = /^(sk-|ghp_|github_pat_|xox[baprs]-|AKIA|ASIA|AIza)/i;
 
@@ -53,24 +62,16 @@ function isSafeClipboardSuggestion(raw: string): boolean {
   return normalizeWordInput(text) !== null;
 }
 
-function getUserFacingErrorMessage(errorCode: string): string {
-  switch (errorCode) {
-    case "INVALID_API_KEY":
-      return "Invalid API key. Please check your Gemini API key in preferences.";
-    case "GEMINI_REQUEST_FAILED":
-      return "Gemini request failed. Please try again.";
-    case "GEMINI_EMPTY_RESPONSE":
-    case "GEMINI_INVALID_RESPONSE":
-      return "Gemini returned an unexpected response. Please try again.";
-    case "NETWORK_OFFLINE":
-      return "You appear to be offline. Check your connection and try again.";
-    case "INVALID_WORD_INPUT":
-      return `Enter one word (letters, apostrophe, hyphen, max ${MAX_WORD_LENGTH} chars).`;
-    case "INVALID_TEXT_INPUT":
-      return "Text is empty or too long.";
-    default:
-      return "Translation failed. Please try again.";
+type ErrorDescription = { code: string; title: string; message: string };
+
+// UNKNOWN_ERROR is the catch-all for AbortError and genuinely unexpected throws;
+// everything recognized routes through defaultToastFor.
+function describeError(err: unknown): ErrorDescription {
+  if (isGeminiError(err)) {
+    const { title, message } = defaultToastFor(err.cause);
+    return { code: err.cause.kind, title, message };
   }
+  return { code: "UNKNOWN_ERROR", title: "Translation failed", message: "Translation failed. Please try again." };
 }
 
 function truncate(text: string, maxLen: number): string {
@@ -89,8 +90,20 @@ function relativeTime(timestamp: number): string {
   return `${days}d ago`;
 }
 
+function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
+  return (
+    <Action
+      title="Toggle Languages"
+      icon={Icon.Switch}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      onAction={onAction}
+    />
+  );
+}
+
 export default function Translate() {
-  const { geminiApiKey, readClipboardOnOpen } = getPreferenceValues<Preferences.Translate>();
+  const { geminiApiKey, readClipboardOnOpen, translationModel } = getPreferenceValues<Preferences.Translate>();
+  const model = translationModel.trim() || getPreferenceDefault("translationModel");
   const langResult = useLanguagePair();
   const { push } = useNavigation();
 
@@ -101,19 +114,14 @@ export default function Translate() {
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [recentHistory, setRecentHistory] = useState<Translation[]>([]);
   const [pendingWord, setPendingWord] = useState<PendingWordTranslation | null>(null);
-  const [languagePair, setLanguagePair] = useState<LanguagePair | null>(langResult.pair);
-
-  // Re-sync when preferences become valid after LanguageConfigError
-  if (!languagePair && langResult.pair) {
-    setLanguagePair(langResult.pair);
-  }
-
   const [clipboardSuggestion, setClipboardSuggestion] = useState("");
   const [recentShowingDetail, setRecentShowingDetail] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const languagePair = langResult.pair;
+  const defaultPair = langResult.defaultPair;
   const pairKey = languagePair ? storageKeyPrefix(languagePair) : null;
 
   useEffect(() => {
@@ -143,8 +151,13 @@ export default function Translate() {
     };
   }, [readClipboardOnOpen, pairKey]);
 
-  if (!languagePair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
-  const { source } = languagePair;
+  if (!languagePair || !defaultPair) {
+    return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  }
+
+  const activePair = languagePair;
+  const activeDefaultPair = defaultPair;
+  const { source } = activePair;
 
   function clearDebounce() {
     if (debounceRef.current) {
@@ -153,7 +166,7 @@ export default function Translate() {
     }
   }
 
-  function handleToggleLanguages() {
+  function resetForLanguagePairChange() {
     if (abortRef.current) {
       abortRef.current.abort();
       abortRef.current = null;
@@ -167,27 +180,32 @@ export default function Translate() {
     setPendingWord(null);
     setClipboardSuggestion("");
     setRecentShowingDetail(false);
+    setRecentHistory([]);
+  }
 
-    setLanguagePair((prev) => {
-      if (!prev) return prev;
-      const swapped = swapLanguagePair(prev);
-      showToast({
-        style: Toast.Style.Success,
-        title: `${swapped.source.name} → ${swapped.target.name}`,
+  async function handleLanguagePairChange(value: string) {
+    if (value === pairKey) return;
+    resetForLanguagePairChange();
+
+    const selected = await langResult.selectPairValue(value);
+    if (!selected) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid language pair",
+        message: "Choose one of the supported language pairs.",
       });
-      return swapped;
+      return;
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: languagePairTitle(selected),
     });
   }
 
-  function ToggleLanguagesAction() {
-    return (
-      <Action
-        title="Toggle Languages"
-        icon={Icon.Switch}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        onAction={handleToggleLanguages}
-      />
-    );
+  function handleToggleLanguages() {
+    const swapped = swapLanguagePair(activePair);
+    void handleLanguagePairChange(languagePairValue(swapped));
   }
 
   function submitTranslation(rawText: string, clearPending = true) {
@@ -196,6 +214,19 @@ export default function Translate() {
     const normalizedWord = normalizeWordInput(rawText);
     if (normalizedWord) {
       fetchWordTranslation(normalizedWord);
+      return;
+    }
+
+    // Short, no-space inputs that failed the word/phrase regex (e.g. "fahj89sdf")
+    // are almost certainly junk, not sentences — reject with a word-level error
+    // instead of sending them down the lenient text-translation path.
+    if (looksLikeWordAttempt(rawText)) {
+      setResult(null);
+      setPendingWord(null);
+      setIsLoading(false);
+      const desc = describeError(geminiError({ domain: "outcome", kind: "invalid-word-input", surface: "translate" }));
+      setErrorCode(desc.code);
+      setError(desc.message);
       return;
     }
 
@@ -208,8 +239,9 @@ export default function Translate() {
     setResult(null);
     setPendingWord(null);
     setIsLoading(false);
-    setErrorCode("INVALID_TEXT_INPUT");
-    setError(getUserFacingErrorMessage("INVALID_TEXT_INPUT"));
+    const desc = describeError(geminiError({ domain: "outcome", kind: "invalid-text-input", surface: "translate" }));
+    setErrorCode(desc.code);
+    setError(desc.message);
   }
 
   async function readClipboardSuggestion(): Promise<string | null> {
@@ -226,7 +258,7 @@ export default function Translate() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Clipboard not used",
-          message: "Clipboard does not look like a single word.",
+          message: "Clipboard does not look like a word or short phrase.",
         });
         return;
       }
@@ -322,7 +354,9 @@ export default function Translate() {
     setPendingWord(null);
 
     try {
-      const geminiResult = await translateWord(word, geminiApiKey, languagePair, controller.signal);
+      const geminiResult = await translateWord(word, geminiApiKey, languagePair, controller.signal, {
+        model,
+      });
 
       if (controller.signal.aborted) return;
 
@@ -337,16 +371,11 @@ export default function Translate() {
     } catch (err) {
       if (controller.signal.aborted) return;
 
-      const rawCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
-      const userMessage = getUserFacingErrorMessage(rawCode);
-      setErrorCode(rawCode);
-      setError(userMessage);
+      const { code, title, message } = describeError(err);
+      setErrorCode(code);
+      setError(message);
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: rawCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation failed",
-        message: userMessage,
-      });
+      await showToast({ style: Toast.Style.Failure, title, message });
     } finally {
       if (!controller.signal.aborted) {
         setIsLoading(false);
@@ -367,7 +396,9 @@ export default function Translate() {
     setPendingWord(null);
 
     try {
-      const geminiResult = await translateText(text, geminiApiKey, languagePair, controller.signal);
+      const geminiResult = await translateText(text, geminiApiKey, languagePair, controller.signal, {
+        model,
+      });
 
       if (controller.signal.aborted) return;
 
@@ -397,16 +428,11 @@ export default function Translate() {
     } catch (err) {
       if (controller.signal.aborted) return;
 
-      const rawCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
-      const userMessage = getUserFacingErrorMessage(rawCode);
-      setErrorCode(rawCode);
-      setError(userMessage);
+      const { code, title, message } = describeError(err);
+      setErrorCode(code);
+      setError(message);
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: rawCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation failed",
-        message: userMessage,
-      });
+      await showToast({ style: Toast.Style.Failure, title, message });
     } finally {
       if (!controller.signal.aborted) {
         setIsLoading(false);
@@ -425,28 +451,31 @@ export default function Translate() {
   return (
     <List
       navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
-      isLoading={isLoading}
+      isLoading={isLoading || langResult.isLoading}
       isShowingDetail={
         (showResult && isTextResult) || showSensePicker || (showEmpty && showRecent && recentShowingDetail)
       }
       searchBarPlaceholder={`Type a ${source.name} word or text...`}
       searchText={searchText}
       onSearchTextChange={handleSearchChange}
+      searchBarAccessory={
+        <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+      }
     >
       {error ? (
         <List.EmptyView
-          title={errorCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation Error"}
+          title={errorCode === "network-offline" ? "No Internet Connection" : "Translation Error"}
           description={error}
-          icon={errorCode === "NETWORK_OFFLINE" ? Icon.WifiDisabled : Icon.ExclamationMark}
+          icon={errorCode === "network-offline" ? Icon.WifiDisabled : Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              {errorCode === "INVALID_API_KEY" && (
+              {(errorCode === "invalid-api-key" || errorCode === "model-not-found") && (
                 <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               )}
-              {RETRYABLE_ERRORS.includes(errorCode ?? "") && searchText.trim() && (
+              {RETRYABLE_ERROR_CODES.has(errorCode ?? "") && searchText.trim() && (
                 <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => submitTranslation(searchText)} />
               )}
-              <ToggleLanguagesAction />
+              <ToggleLanguagesAction onAction={handleToggleLanguages} />
             </ActionPanel>
           }
         />
@@ -474,20 +503,7 @@ export default function Translate() {
                     : []),
                   { tag: { value: sense.partOfSpeech, color: posColor(sense.partOfSpeech) } },
                 ]}
-                detail={
-                  <List.Item.Detail
-                    markdown={buildTranslationDetailMarkdown(detailTranslation, pendingWord.originalInput)}
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label
-                          title=""
-                          text="⌘O to pronounce · ⌘⇧O for translation"
-                          icon={Icon.SpeakerHigh}
-                        />
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
-                }
+                detail={<TranslationDetail item={detailTranslation} originalInput={pendingWord.originalInput} />}
                 actions={
                   <ActionPanel>
                     <Action
@@ -519,7 +535,7 @@ export default function Translate() {
                       shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
                       onAction={() => push(<History languagePair={languagePair} />)}
                     />
-                    <ToggleLanguagesAction />
+                    <ToggleLanguagesAction onAction={handleToggleLanguages} />
                   </ActionPanel>
                 }
               />
@@ -532,7 +548,7 @@ export default function Translate() {
             title={truncate(result.word, 60)}
             subtitle={truncate(result.translation, 60)}
             accessories={[{ tag: { value: "text", color: Color.Purple } }]}
-            detail={<List.Item.Detail markdown={buildTextTranslationDetailMarkdown(result.word, result.translation)} />}
+            detail={<TranslationDetail item={result} />}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
@@ -558,7 +574,7 @@ export default function Translate() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
                   onAction={() => push(<History languagePair={languagePair} />)}
                 />
-                <ToggleLanguagesAction />
+                <ToggleLanguagesAction onAction={handleToggleLanguages} />
               </ActionPanel>
             }
           />
@@ -574,7 +590,7 @@ export default function Translate() {
             actions={
               <ActionPanel>
                 <Action title="Translate Now" icon={Icon.Book} onAction={() => submitTranslation(searchText)} />
-                <ToggleLanguagesAction />
+                <ToggleLanguagesAction onAction={handleToggleLanguages} />
               </ActionPanel>
             }
           />
@@ -602,7 +618,7 @@ export default function Translate() {
                     <Action title="Read Clipboard" icon={Icon.Clipboard} onAction={handleReadClipboard} />
                   )}
                   <Action title="Refresh Clipboard" icon={Icon.ArrowClockwise} onAction={handleReadClipboard} />
-                  <ToggleLanguagesAction />
+                  <ToggleLanguagesAction onAction={handleToggleLanguages} />
                 </ActionPanel>
               }
             />
@@ -626,15 +642,7 @@ export default function Translate() {
                       : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
                     { text: relativeTime(item.timestamp) },
                   ]}
-                  detail={
-                    <List.Item.Detail
-                      markdown={
-                        item.type === "text"
-                          ? buildTextTranslationDetailMarkdown(item.word, item.translation)
-                          : buildTranslationDetailMarkdown(item)
-                      }
-                    />
-                  }
+                  detail={<TranslationDetail item={item} />}
                   actions={
                     <ActionPanel>
                       <Action
@@ -653,14 +661,19 @@ export default function Translate() {
                         title="Pronounce Word"
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
-                      {/* Recent items only show source pronunciation — full history has both */}
+                      <PronounceAction
+                        word={item.translation}
+                        languageCode={languagePair.target.code}
+                        title="Pronounce Translation"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      />
                       <Action
                         title="Open History"
                         icon={Icon.Clock}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
                         onAction={() => push(<History languagePair={languagePair} />)}
                       />
-                      <ToggleLanguagesAction />
+                      <ToggleLanguagesAction onAction={handleToggleLanguages} />
                     </ActionPanel>
                   }
                 />

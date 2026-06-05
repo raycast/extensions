@@ -23,7 +23,7 @@ export function SkillListItem({
   const isInstalled = installedMatch.type === "exact";
   const hasSourceConflict = installedMatch.type === "conflict";
   const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
-  const skillUrl = buildSkillUrl(skill.source, skill.skillId);
+  const skillUrl = buildSkillUrl(skill);
 
   const iconValue = isInstalled
     ? { source: Icon.CheckCircle, tintColor: Color.Green }
