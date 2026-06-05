@@ -1,13 +1,18 @@
 VocaBuilder Changelog
 
-## [Switch language pairs, pronunciation, and configurable models] - {PR_MERGE_DATE}
+## [Configurable models and reasoning] - {PR_MERGE_DATE}
+
+- Added a `Reasoning Level` preference for translations, defaulting to `Minimum` for the fastest Gemini responses.
+- Replaced the free-form translation model default with a curated Gemini model dropdown plus an advanced custom model override.
+- Replaced the free-form text-to-speech model default with a curated Gemini TTS dropdown plus an advanced custom model override.
+- Refreshed the extension icon.
+- Tightened the pronunciation prompt for more accurate text-to-speech output.
+
+## [Switch language pairs, pronunciation, and configurable models] - 2026-06-01
 
 - Added an in-command language pair selector: switch the source and target language straight from a dropdown in the `Translate`, `Translation History`, and `View Flashcards` commands, without opening preferences. The selection persists across commands.
 - Renamed the `Source Language` / `Target Language` preferences to `Default Source Language` / `Default Target Language` — they now apply until you pick a pair from the dropdown.
 - Added `Translation Model` and `Text-to-Speech Model` preferences so you can point to a newer Gemini model if a default is deprecated.
-- Added a `Reasoning Level` preference for translations, defaulting to `Minimum` for the fastest Gemini responses.
-- Replaced the free-form translation model default with a curated Gemini model dropdown plus an advanced custom model override.
-- Replaced the free-form text-to-speech model default with a curated Gemini TTS dropdown plus an advanced custom model override.
 - Reworked error handling into clearer, more consistent toasts, including deprecation-aware messages that tell you when a model is no longer available and how to switch.
 - Added a target-language purity rule so translations stay in the chosen language, reducing cases where words from another language leak into the output.
 - Reject non-existing/gibberish words instead of hallucinating translations.
