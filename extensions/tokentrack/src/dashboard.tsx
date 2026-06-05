@@ -72,7 +72,6 @@ const periodListTitles: Record<PeriodKey, string> = {
 
 const REFRESH_INTERVAL = 5 * 60_000;
 const WARN_TITLE_MAX = 42;
-const CACHE_NAMESPACE = "tokentrack-dashboard-v3";
 
 const emptySummary = {
   totalTokens: 0,
@@ -131,7 +130,6 @@ export default function Command() {
   const { isLoading, data, revalidate } = useCachedPromise(
     (provider: SourceProviderKey) => loadUsage(getUsageLoadRange(), provider),
     [tab],
-    { cacheNamespace: CACHE_NAMESPACE },
   );
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
