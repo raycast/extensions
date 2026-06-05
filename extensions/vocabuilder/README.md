@@ -26,11 +26,11 @@ A [Raycast](https://raycast.com) extension that translates words and short text 
 
 ## Commands
 
-| Command             | Description                    |
-| ------------------- | ------------------------------ |
-| Translate           | Translate a word or short text |
-| Translation History | Open your saved translations   |
-| View Flashcards     | Review words you've saved      |
+| Command | Description |
+| --- | --- |
+| Translate | Translate a word or short text |
+| Translation History | Open your saved translations |
+| View Flashcards | Review words you've saved |
 
 ## Supported Languages
 
@@ -38,19 +38,19 @@ English, Ukrainian, Polish, German, French, Spanish, Italian, Portuguese, Dutch,
 
 ## Keyboard Shortcuts
 
-| Shortcut      | Action                                   |
-| ------------- | ---------------------------------------- |
-| `⌘ C`         | Copy translation                         |
-| `⌘ O`         | Pronounce source word                    |
-| `⌘ ⇧ O`       | Pronounce translation                    |
+| Shortcut | Action |
+| --- | --- |
+| `⌘ C` | Copy translation |
+| `⌘ O` | Pronounce source word |
+| `⌘ ⇧ O` | Pronounce translation |
 | `⌘ 1` → `⌘ 5` | Pick a word sense and save it to history |
-| `⌘ ⇧ H`       | Open History (from Translate)            |
-| `⌘ ⇧ T`       | Toggle source and target languages       |
-| `⌘ D`         | Delete entry (from History)              |
-| `⌘ ⇧ D`       | Clear all history                        |
-| `⌘ E`         | Export history as JSON                   |
-| `⌘ ⇧ A`       | Export word history for Anki             |
-| `⌘ ⇧ Q`       | Export word history for Quizlet          |
+| `⌘ ⇧ H` | Open History (from Translate) |
+| `⌘ ⇧ T` | Toggle source and target languages |
+| `⌘ D` | Delete entry (from History) |
+| `⌘ ⇧ D` | Clear all history |
+| `⌘ E` | Export history as JSON |
+| `⌘ ⇧ A` | Export word history for Anki |
+| `⌘ ⇧ Q` | Export word history for Quizlet |
 
 ## Development
 

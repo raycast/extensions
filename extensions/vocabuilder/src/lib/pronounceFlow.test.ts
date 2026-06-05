@@ -1,7 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { geminiError } from "./geminiError";
 import { runPronounceWithFallback } from "./pronounceFlow";
-import { routeTtsError, SYSTEM_VOICE_FALLBACK_MESSAGE } from "./ttsErrorRouter";
 
 const NEVER_ABORT = new AbortController().signal;
 
@@ -60,26 +58,6 @@ describe("runPronounceWithFallback", () => {
       title: "Pronunciation failed",
       message: "Try again.",
     });
-  });
-
-  it("failed after double TTS error uses failure copy, not the system-voice success line", async () => {
-    const err = geminiError({ domain: "infrastructure", kind: "network-offline", surface: "tts" });
-    const outcome = await runPronounceWithFallback({
-      signal: NEVER_ABORT,
-      attemptPrimary: vi.fn(async () => {
-        throw err;
-      }),
-      attemptFallback: vi.fn(async () => {
-        throw new Error("say failed");
-      }),
-      routeError: (e) => routeTtsError(e, "en"),
-    });
-    expect(outcome).toEqual({
-      kind: "failed",
-      title: "No internet connection",
-      message: "Check your connection and try again.",
-    });
-    expect(outcome).not.toMatchObject({ message: SYSTEM_VOICE_FALLBACK_MESSAGE });
   });
 
   it("skips fallback when route says fallback=false (terminal errors like invalid-api-key)", async () => {

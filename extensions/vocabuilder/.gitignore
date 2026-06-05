@@ -21,11 +21,7 @@ dist/
 # Raycast
 .raycast/
 
-# Claude Code
 .claude/
-
-# Subagent scratch
-.agents/
 
 # Promptfoo local artifacts
 .promptfoo/

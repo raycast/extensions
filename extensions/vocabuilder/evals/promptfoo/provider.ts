@@ -1,5 +1,10 @@
 import { z } from "zod";
-import type { ApiProvider, CallApiContextParams, ProviderOptions, ProviderResponse } from "promptfoo";
+import type {
+  ApiProvider,
+  CallApiContextParams,
+  ProviderOptions,
+  ProviderResponse,
+} from "promptfoo";
 import { translateWord } from "../../src/lib/gemini";
 import { isGeminiError, isOutcome } from "../../src/lib/geminiError";
 import { getPreferenceDefault } from "../../src/lib/manifest";
@@ -35,7 +40,11 @@ export const EvalVarsSchema = z
     input: v.input,
   }));
 
-function projectSuccess(input: string, pair: LanguagePair, response: GeminiWordResponse): Record<string, unknown> {
+function projectSuccess(
+  input: string,
+  pair: LanguagePair,
+  response: GeminiWordResponse,
+): Record<string, unknown> {
   return {
     status: "ok",
     input,
