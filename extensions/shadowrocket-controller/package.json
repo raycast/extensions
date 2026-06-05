@@ -1,0 +1,63 @@
+{
+    "name": "shadowrocket-controller",
+    "title": "Shadowrocket Controller",
+    "description": "Control Shadowrocket from Raycast: toggle VPN and change routing mode.",
+    "icon": "icon.png",
+    "author": "zp29",
+    "platforms":
+    [
+        "macOS"
+    ],
+    "categories":
+    [
+        "Productivity",
+        "System"
+    ],
+    "license": "MIT",
+    "keywords":
+    [
+        "shadowrocket",
+        "vpn",
+        "proxy",
+        "小火箭"
+    ],
+    "commands":
+    [
+        {
+            "name": "control-panel",
+            "title": "Shadowrocket 控制面板 Shadowrocket Controller",
+            "description": "Toggle VPN and change routing mode.",
+            "mode": "view"
+        },
+        {
+            "name": "disconnect-vpn",
+            "title": "关闭 Shadowrocket VPN",
+            "description": "Disconnect the Shadowrocket VPN tunnel.",
+            "mode": "no-view"
+        },
+        {
+            "name": "connect-vpn",
+            "title": "打开 Shadowrocket VPN",
+            "description": "Connect the Shadowrocket VPN tunnel.",
+            "mode": "no-view"
+        }
+    ],
+    "scripts":
+    {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "typecheck": "tsc --noEmit",
+        "generate-icon": "node scripts/generate-icon.mjs"
+    },
+    "dependencies":
+    {
+        "@raycast/api": "latest"
+    },
+    "devDependencies":
+    {
+        "@raycast/eslint-config": "^2.1.1",
+        "@types/node": "latest",
+        "typescript": "latest"
+    }
+}
