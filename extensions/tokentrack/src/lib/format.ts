@@ -75,6 +75,11 @@ function safeCurrencyCode(currency: string): string {
   return isValidCurrencyCode(currency) ? currency : "USD";
 }
 
+/** Whole dollars omit cents ($300); fractional amounts keep two places ($1.50). */
+function minimumMoneyFractionDigits(value: number): 0 | 2 {
+  return Math.round(value * 100) % 100 === 0 ? 0 : 2;
+}
+
 export function formatCurrency(value: number, currency: string) {
   const formatted = new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -92,7 +97,7 @@ export function formatCurrencyMoney(value: number, currency: string) {
     style: "currency",
     currency: safeCurrencyCode(currency),
     currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: 0,
+    minimumFractionDigits: minimumMoneyFractionDigits(value),
     maximumFractionDigits: 2,
   }).format(value);
   return formatted.replace(/\bUS\$/g, "$");

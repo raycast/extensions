@@ -37,6 +37,11 @@ type CursorConversationsCache = {
 let eventsCache: CursorEventsCache | null = null;
 let conversationsCache: CursorConversationsCache | null = null;
 
+export function clearCursorApiCache(): void {
+  eventsCache = null;
+  conversationsCache = null;
+}
+
 function rangeKey(range: DateRange): string {
   return `${range.start.getTime()}:${range.end.getTime()}`;
 }

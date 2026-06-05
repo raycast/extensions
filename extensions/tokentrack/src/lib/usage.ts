@@ -13,13 +13,14 @@ import {
 import { readClaudeUsage } from "./sources/claude";
 import { readCodexUsage } from "./sources/codex";
 import {
+  clearCursorApiCache,
   readCursorConversationBreakdown,
   readCursorUsage,
 } from "./sources/cursor";
 import { groupEventsByConversation } from "./conversation-details";
 import { getPeriodRange, getUsageLoadRange, type PeriodKey } from "./format";
 import {
-  clearUsageSnapshotCache,
+  clearUsageSnapshotCache as clearSnapshotCache,
   readUsageSnapshotCache,
   writeUsageSnapshotCache,
 } from "./usage-cache";
@@ -38,7 +39,10 @@ function briefRejectReason(reason: unknown): string {
   return t.length <= REJECT_MSG_MAX ? t : `${t.slice(0, REJECT_MSG_MAX - 1)}…`;
 }
 
-export { clearUsageSnapshotCache };
+export function clearUsageSnapshotCache(): void {
+  clearSnapshotCache();
+  clearCursorApiCache();
+}
 
 export async function loadUsage(
   range: DateRange,
