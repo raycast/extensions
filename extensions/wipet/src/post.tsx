@@ -10,8 +10,9 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { basename } from "node:path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createProject, createTodo, listProjects, type Project } from "./lib/api";
 import { MAX_IMAGES, inspectFile, uploadFiles, type LocalImage } from "./lib/upload";
 
@@ -45,11 +46,7 @@ function AttachForm({ slotsRemaining, onPick }: { slotsRemaining: number; onPick
                 onPick(inspected);
                 pop();
               } catch (err) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Couldn't attach",
-                  message: err instanceof Error ? err.message : String(err),
-                });
+                await showFailureToast(err, { title: "Couldn't attach" });
               }
             }}
           />
@@ -72,6 +69,7 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [images, setImages] = useState<LocalImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,11 +78,7 @@ export default function Command() {
         if (!cancelled) setProjects(rows);
       })
       .catch(async (err) => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't load projects",
-          message: err instanceof Error ? err.message : String(err),
-        });
+        await showFailureToast(err, { title: "Couldn't load projects" });
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -138,11 +132,15 @@ export default function Command() {
   }
 
   async function submit(done: boolean) {
+    if (isSubmittingRef.current) return;
+
     const text = searchText.trim();
     if (!text) {
-      await showToast({ style: Toast.Style.Failure, title: "Empty entry" });
+      await showFailureToast("Empty entry", { title: "Empty entry" });
       return;
     }
+
+    isSubmittingRef.current = true;
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: images.length > 0 ? "Uploading images…" : done ? "Shipping…" : "Adding todo…",
@@ -165,6 +163,8 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
       toast.message = err instanceof Error ? err.message : String(err);
+    } finally {
+      isSubmittingRef.current = false;
     }
   }
 
@@ -177,6 +177,23 @@ export default function Command() {
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       target={<AttachForm slotsRemaining={slotsRemaining} onPick={addImages} />}
     />
+  );
+
+  const postSubmitActions = (
+    <>
+      <Action
+        title="Post as Done"
+        icon={Icon.Checkmark}
+        shortcut={{ modifiers: ["cmd"], key: "return" }}
+        onAction={() => submit(true)}
+      />
+      <Action
+        title="Post as Todo"
+        icon={Icon.Circle}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+        onAction={() => submit(false)}
+      />
+    </>
   );
 
   const trimmed = searchText.trim();
@@ -201,18 +218,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action title={`Insert #${p.slug}`} icon={Icon.Plus} onAction={() => pickProject(p.slug)} />
-                  <Action
-                    title="Post as Done"
-                    icon={Icon.Checkmark}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
-                    onAction={() => submit(true)}
-                  />
-                  <Action
-                    title="Post as Todo"
-                    icon={Icon.Circle}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-                    onAction={() => submit(false)}
-                  />
+                  {postSubmitActions}
                   {attachAction}
                 </ActionPanel>
               }
@@ -254,21 +260,7 @@ export default function Command() {
                         style={Action.Style.Destructive}
                         onAction={() => removeImage(img.path)}
                       />
-                      <Action
-                        title="Post as Done"
-                        icon={Icon.Checkmark}
-                        shortcut={{ modifiers: ["cmd"], key: "return" }}
-                        onAction={() => submit(true)}
-                      />
-                      <Action
-                        title="Post as Todo"
-                        icon={Icon.Circle}
-                        shortcut={{
-                          modifiers: ["cmd", "shift"],
-                          key: "return",
-                        }}
-                        onAction={() => submit(false)}
-                      />
+                      {postSubmitActions}
                       {attachAction}
                     </ActionPanel>
                   }

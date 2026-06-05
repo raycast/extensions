@@ -33,6 +33,14 @@ function authFetch(path: string, init: RequestInit = {}) {
   });
 }
 
+async function parseJsonResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`${res.status}: ${body || res.statusText}`);
+  }
+  return (await res.json()) as T;
+}
+
 export async function createTodo(input: {
   text: string;
   done: boolean;
@@ -44,12 +52,7 @@ export async function createTodo(input: {
     body: JSON.stringify(input),
   });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`${res.status}: ${body || res.statusText}`);
-  }
-
-  return (await res.json()) as CreateTodoResponse;
+  return parseJsonResponse<CreateTodoResponse>(res);
 }
 
 export type PresignedUpload = {
@@ -66,21 +69,13 @@ export async function presignUploads(files: { mimeType: string; sizeBytes: numbe
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ files }),
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`${res.status}: ${body || res.statusText}`);
-  }
-  const data = (await res.json()) as { uploads: PresignedUpload[] };
+  const data = await parseJsonResponse<{ uploads: PresignedUpload[] }>(res);
   return data.uploads;
 }
 
 export async function listProjects(): Promise<Project[]> {
   const res = await authFetch("/projects");
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`${res.status}: ${body || res.statusText}`);
-  }
-  const data = (await res.json()) as { projects: Project[] };
+  const data = await parseJsonResponse<{ projects: Project[] }>(res);
   return data.projects;
 }
 
@@ -90,9 +85,5 @@ export async function createProject(slug: string): Promise<Project> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ slug }),
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`${res.status}: ${body || res.statusText}`);
-  }
-  return (await res.json()) as Project;
+  return parseJsonResponse<Project>(res);
 }

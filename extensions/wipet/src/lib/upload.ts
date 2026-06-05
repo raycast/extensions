@@ -2,7 +2,6 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, basename } from "node:path";
 import { presignUploads, type UploadedImage } from "./api";
 
-export const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 export const MAX_BYTES = 10 * 1024 * 1024;
 export const MAX_IMAGES = 3;
 
