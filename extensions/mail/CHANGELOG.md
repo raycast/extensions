@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Add AI Tools] - {PR_MERGE_DATE}
+
+- Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
