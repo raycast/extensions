@@ -25,8 +25,7 @@
         "screenshot",
         "upload",
         "imgbed",
-        "picture",
-        "图床"
+        "picture"
       ]
     }
   ],
@@ -68,13 +67,17 @@
     "dev": "ray develop",
     "build": "ray build",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.17"
+    "@raycast/api": "^1.104.19"
   },
   "devDependencies": {
-    "@types/node": "22.19.17",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
   }
 }

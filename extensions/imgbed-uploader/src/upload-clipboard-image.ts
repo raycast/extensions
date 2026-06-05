@@ -22,7 +22,7 @@ const imageMimeByExtension: Record<string, string> = {
   ".png": "image/png",
   ".tif": "image/tiff",
   ".tiff": "image/tiff",
-  ".webp": "image/webp"
+  ".webp": "image/webp",
 };
 
 const clipboardImageToPngScript = `
@@ -82,7 +82,7 @@ function run(argv) {
 export default async function command() {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Uploading image"
+    title: "Uploading image",
   });
 
   let clipboardImage: ClipboardImage | undefined;
@@ -145,7 +145,7 @@ async function extractRawClipboardImage(): Promise<ClipboardImage> {
   try {
     await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", clipboardImageToPngScript, filePath], {
       timeout: 5000,
-      maxBuffer: 1024 * 1024
+      maxBuffer: 1024 * 1024,
     });
   } catch (error) {
     await rm(tempDir, { force: true, recursive: true });
@@ -166,9 +166,9 @@ async function uploadImage(filePath: string): Promise<string> {
   const response = await fetch(uploadUrl, {
     method: "POST",
     headers: {
-      authCode: preferences.authCode
+      authCode: preferences.authCode,
     },
-    body: formData
+    body: formData,
   });
 
   const responseText = await response.text();
@@ -191,7 +191,7 @@ function buildUploadUrl(preferences: Preferences): string {
 
   url.searchParams.set("uploadChannel", preferences.uploadChannel.trim() || "cfr2");
   url.searchParams.set("returnFormat", "full");
-  url.searchParams.set("autoRetry", String(Boolean(preferences.autoRetry)));
+  url.searchParams.set("autoRetry", String(preferences.autoRetry));
 
   return url.toString();
 }
