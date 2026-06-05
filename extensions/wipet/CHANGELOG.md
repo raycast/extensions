@@ -1,6 +1,6 @@
 # wip.et Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-05
 
 - **Ship It** command — compose dones and todos from Raycast.
 - Project autocomplete on `#` with inline create-if-missing.
