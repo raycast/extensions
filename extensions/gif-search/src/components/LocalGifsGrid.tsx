@@ -18,7 +18,9 @@ export function LocalGifsGrid({ type }: LocalGifsGridProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
 
-  const { allGifs, isLoading, mutate } = useLocalGifs(type, itemSize);
+  // itemSize only feeds the grid column count below; the favorites/recents path of
+  // useLocalGifs ignores it, so there's no need to pass it to the hook.
+  const { allGifs, isLoading, mutate } = useLocalGifs(type);
 
   const isFavorites = type === "favorites";
   const emptyState = isFavorites
