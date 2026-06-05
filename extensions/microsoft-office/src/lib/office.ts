@@ -93,7 +93,7 @@ export async function recentMSOfficeFiles(): Promise<Result> {
 }
 
 function powershellDateStringToDate(dateString: string): Date {
-  if (!dateString) return new Date();
+  if (!dateString) return new Date(0);
   const ms = parseInt(dateString.replace(/\D/g, ""), 10);
   const date = new Date(ms);
   return date;
