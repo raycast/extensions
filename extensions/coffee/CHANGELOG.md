@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-05
 
 - Fixed a typo in the "Caffeinate While" command description ("an certain app" → "a certain app").
 
