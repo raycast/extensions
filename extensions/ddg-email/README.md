@@ -9,11 +9,9 @@ This is an unofficial community extension and is not affiliated with DuckDuckGo.
 You can authenticate in either of two ways:
 
 - Add a DuckDuckGo Email Protection access token in Raycast extension preferences.
-- Leave preferences empty, run `Generate Duck Address`, request a one-time passphrase, and sign in with your Duck address.
+- Leave preferences empty, run `Generate Duck Address`, enter your Duck address without `@duck.com`, request a one-time passphrase, and sign in with the passphrase DuckDuckGo sends you.
 
-The command stores the resulting access token locally in Raycast so you do not need to sign in every time. Generated aliases are copied to the clipboard and recent aliases are kept locally for quick reuse.
-
-Before publishing to the Raycast Store, confirm the final Raycast store handle. The current `author` value is the handle accepted by Raycast's local linting tools.
+The command stores the resulting access token locally in Raycast so you do not need to sign in every time. Generated aliases are copied to the clipboard and recent aliases are kept locally for quick reuse, copying, or pasting.
 
 ## Privacy
 
@@ -25,3 +23,4 @@ Before publishing to the Raycast Store, confirm the final Raycast store handle. 
 ## Commands
 
 - `Generate Duck Address`: Generate a private `@duck.com` alias, copy it, and manage recent generated aliases.
+- `Generate and Copy Duck Address`: Generate a private `@duck.com` alias and copy it without opening a view. If no access token is saved, it offers to open the setup command.

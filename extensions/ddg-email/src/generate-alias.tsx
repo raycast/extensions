@@ -14,7 +14,6 @@ import { RecentAliases } from "./components/RecentAliases";
 import { SetupForm } from "./components/SetupForm";
 import { generateAddress, getDashboard, loginWithOtp } from "./lib/ddg-api";
 import { getToastOptions, isDdgApiError } from "./lib/errors";
-import type { Preferences } from "./lib/preferences";
 import {
   clearRecentAliases,
   clearStoredSession,

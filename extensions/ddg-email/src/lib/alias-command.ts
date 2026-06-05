@@ -9,7 +9,6 @@ import {
 import { generateAddress } from "./ddg-api";
 import { getToastOptions } from "./errors";
 import { getStoredSession, saveRecentAlias } from "./storage";
-import type { Preferences } from "./preferences";
 
 export async function getAccessToken() {
   const preferences = getPreferenceValues<Preferences>();
