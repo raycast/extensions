@@ -22,18 +22,21 @@
       "name": "deploy",
       "title": "Deploy",
       "description": "Run a configured Fastlane lane",
+      "icon": "fastlane.png",
       "mode": "view"
     },
     {
       "name": "monitor-deployments",
       "title": "Monitor Deployments",
       "description": "View deployment status, progress, and logs",
+      "icon": "fastlane.png",
       "mode": "view"
     },
     {
       "name": "manage-projects",
       "title": "Manage Projects",
       "description": "Configure Fastlane projects and lanes",
+      "icon": "fastlane.png",
       "mode": "view"
     }
   ],
