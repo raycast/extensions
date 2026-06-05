@@ -1,6 +1,7 @@
 import {
   formatCurrencyMoney,
-  getPeriodRange,
+  formatDateRangeCompact,
+  getPeriodCalendarBounds,
   periodLabels,
   type PeriodKey,
 } from "./format";
@@ -71,16 +72,9 @@ export function formatBudgetCapCompact(
   return formatCurrencyMoney(amount, currency);
 }
 
-/** Elapsed span for the provider's budget window. */
+/** Full calendar span for the provider's budget window. */
 export function formatBudgetSpanLabel(provider: SourceProviderKey): string {
   const period = budgetPeriodForProvider(provider);
-  const { start, end } = getPeriodRange(period);
-  const fmt = new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-  const startStr = fmt.format(start);
-  const endStr = fmt.format(end);
-  if (startStr === endStr) return startStr;
-  return `${startStr} – ${endStr}`;
+  const { start, end } = getPeriodCalendarBounds(period);
+  return formatDateRangeCompact(start, end);
 }

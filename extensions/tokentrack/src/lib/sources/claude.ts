@@ -12,10 +12,17 @@ import type { DateRange, UsageEvent, UsageReaderSink } from "../types";
 import { estimateCost } from "../pricing";
 import { expandHome, isInRange, safeNumber } from "./shared";
 
+type ClaudeFileTitles = {
+  customTitle?: string;
+  aiTitle?: string;
+  firstUserMessage?: string;
+};
+
 type ClaudeRecord = {
   type?: string;
   timestamp?: string;
   aiTitle?: string;
+  customTitle?: string;
   /** Top-level Anthropic request id (`req_…`); pairs with `message.id` to dedupe. */
   requestId?: string;
   message?: {
@@ -73,7 +80,7 @@ export async function readClaudeUsage(
 
   try {
     const files = await findJsonl(projectRoot, range);
-    const fileTitles = new Map<string, string>();
+    const fileTitles = new Map<string, ClaudeFileTitles>();
     await runWithConcurrency(files, CLAUDE_READ_CONCURRENCY, (file) =>
       readClaudeFile(file, range, sink, seen, fileTitles),
     );
@@ -111,7 +118,7 @@ export function readClaudeUsageSync(basePath: string, range: DateRange) {
 
   if (!existsSync(projectRoot)) return { events, errors };
 
-  const fileTitles = new Map<string, string>();
+  const fileTitles = new Map<string, ClaudeFileTitles>();
   try {
     for (const file of findJsonlSync(projectRoot, range)) {
       readClaudeFileSync(file, range, events, seen, fileTitles);
@@ -128,7 +135,7 @@ async function readClaudeFile(
   range: DateRange,
   sink: UsageReaderSink,
   seen: Set<string>,
-  fileTitles: Map<string, string>,
+  fileTitles: Map<string, ClaudeFileTitles>,
 ) {
   const reader = createInterface({
     input: createReadStream(file, { encoding: "utf8" }),
@@ -138,7 +145,7 @@ async function readClaudeFile(
   let lineNumber = 0;
   for await (const line of reader) {
     lineNumber += 1;
-    tryNoteClaudeSessionTitle(file, line, fileTitles);
+    noteClaudeSessionLine(file, line, fileTitles);
     pushClaudeLine(file, line, lineNumber, range, sink, seen, fileTitles);
   }
 }
@@ -148,12 +155,12 @@ function readClaudeFileSync(
   range: DateRange,
   events: UsageEvent[],
   seen: Set<string>,
-  fileTitles: Map<string, string>,
+  fileTitles: Map<string, ClaudeFileTitles>,
 ) {
   readFileSync(file, "utf8")
     .split(/\r?\n/)
     .forEach((line, index) => {
-      tryNoteClaudeSessionTitle(file, line, fileTitles);
+      noteClaudeSessionLine(file, line, fileTitles);
       pushClaudeLine(
         file,
         line,
@@ -171,28 +178,81 @@ const TIMESTAMP_RE = /"timestamp"\s*:\s*"([^"]+)"/;
 const CLAUDE_TITLE_MAX = 80;
 
 const CLAUDE_AI_TITLE_RE = /"aiTitle"\s*:\s*"((?:\\.|[^"\\])*)"/;
+const CLAUDE_CUSTOM_TITLE_RE = /"customTitle"\s*:\s*"((?:\\.|[^"\\])*)"/;
 
-/** Regex-only — avoid JSON.parse on every transcript line. */
-function tryNoteClaudeSessionTitle(
+function decodeClaudeTitleField(raw: string): string {
+  try {
+    return JSON.parse(`"${raw}"`) as string;
+  } catch {
+    return raw.replace(/\\n/g, " ").replace(/\\"/g, '"');
+  }
+}
+
+/**
+ * Claude Code stores two title types in each JSONL: `custom-title` (rename, Plan
+ * mode, `-n`) beats background `ai-title`. Keep the last of each while scanning.
+ */
+function noteClaudeSessionLine(
   file: string,
   line: string,
-  fileTitles: Map<string, string>,
+  fileTitles: Map<string, ClaudeFileTitles>,
 ) {
-  if (fileTitles.has(file)) return;
-  if (!line.includes('"ai-title"') || line.length > 4_000) return;
+  if (line.length > 4_000) return;
 
-  const match = CLAUDE_AI_TITLE_RE.exec(line);
-  if (!match) return;
-
-  try {
-    const title = truncateClaudeTitle(JSON.parse(`"${match[1]}"`) as string);
-    if (title) fileTitles.set(file, title);
-  } catch {
-    const title = truncateClaudeTitle(
-      match[1].replace(/\\n/g, " ").replace(/\\"/g, '"'),
-    );
-    if (title) fileTitles.set(file, title);
+  let state = fileTitles.get(file);
+  if (!state) {
+    state = {};
+    fileTitles.set(file, state);
   }
+
+  if (line.includes('"custom-title"')) {
+    const match = CLAUDE_CUSTOM_TITLE_RE.exec(line);
+    if (match) {
+      const title = truncateClaudeTitle(decodeClaudeTitleField(match[1]));
+      if (title) state.customTitle = title;
+    }
+  }
+
+  if (line.includes('"ai-title"')) {
+    const match = CLAUDE_AI_TITLE_RE.exec(line);
+    if (match) {
+      const title = truncateClaudeTitle(decodeClaudeTitleField(match[1]));
+      if (title) state.aiTitle = title;
+    }
+  }
+
+  if (!state.firstUserMessage && line.includes('"type":"user"')) {
+    const record = parseLine(line);
+    if (record?.type === "user") {
+      const text = firstClaudeUserText(record);
+      if (text) state.firstUserMessage = truncateClaudeTitle(text);
+    }
+  }
+}
+
+function resolveClaudeSessionTitle(
+  state: ClaudeFileTitles | undefined,
+): string | undefined {
+  if (!state) return undefined;
+  return state.customTitle ?? state.aiTitle ?? state.firstUserMessage;
+}
+
+function firstClaudeUserText(record: ClaudeRecord): string | undefined {
+  const content = record.message?.content;
+  if (typeof content === "string" && content.trim()) return content.trim();
+  if (!Array.isArray(content)) return undefined;
+  for (const part of content) {
+    if (
+      part &&
+      typeof part === "object" &&
+      part.type === "text" &&
+      typeof part.text === "string" &&
+      part.text.trim()
+    ) {
+      return part.text.trim();
+    }
+  }
+  return undefined;
 }
 
 function truncateClaudeTitle(text: string): string {
@@ -210,7 +270,7 @@ function pushClaudeLine(
   range: DateRange,
   sink: UsageReaderSink,
   seen: Set<string>,
-  fileTitles: Map<string, string>,
+  fileTitles: Map<string, ClaudeFileTitles>,
 ) {
   if (!line.includes('"usage"')) return;
 
@@ -291,7 +351,7 @@ function pushClaudeLine(
     estimatedTokens: false,
     sourcePath: file,
     conversationKey: file,
-    conversationTitle: fileTitles.get(file),
+    conversationTitle: resolveClaudeSessionTitle(fileTitles.get(file)),
   });
 }
 

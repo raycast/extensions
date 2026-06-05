@@ -1,25 +1,21 @@
 import { join } from "node:path";
-import { existsSync, statSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import https from "node:https";
-import type {
-  DateRange,
-  UsageEvent,
-  UsageMetric,
-  UsageReaderSink,
-} from "../types";
+import type { DateRange, UsageEvent, UsageReaderSink } from "../types";
 import { estimateCost } from "../pricing";
 import { expandHome, isInRange, safeNumber } from "./shared";
 
 const execFileAsync = promisify(execFile);
 
-/** Reuse API + SQLite results across dashboard opens (Token Lens uses ~60s). */
-const CURSOR_CACHE_TTL_MS = 60_000;
+/** Dashboard API totals — reused when View Details needs attribution. */
+const CURSOR_API_CACHE_TTL_MS = 5 * 60_000;
+/** Per-chat SQLite breakdown — Cursor writes to the DB constantly; ignore mtime. */
+const CURSOR_CONVERSATIONS_CACHE_TTL_MS = 15 * 60_000;
 
 type CursorEventsCache = {
   at: number;
-  dbMtimeMs: number;
   rangeKey: string;
   events: UsageEvent[];
   errors: string[];
@@ -27,9 +23,7 @@ type CursorEventsCache = {
 
 type CursorConversationsCache = {
   at: number;
-  dbMtimeMs: number;
   rangeKey: string;
-  apiEvents: UsageEvent[];
   events: UsageEvent[];
   errors: string[];
 };
@@ -46,26 +40,19 @@ function rangeKey(range: DateRange): string {
   return `${range.start.getTime()}:${range.end.getTime()}`;
 }
 
-function dbMtimeMs(dbPath: string): number {
-  try {
-    return statSync(dbPath).mtimeMs;
-  } catch {
-    return 0;
-  }
+function cacheWithinTtl(at: number, ttlMs: number): boolean {
+  return Date.now() - at < ttlMs;
 }
 
-function cacheIsFresh(
-  at: number,
-  dbPath: string,
-  range: DateRange,
-  cachedMtime: number,
-  cachedRangeKey: string,
-): boolean {
-  return (
-    Date.now() - at < CURSOR_CACHE_TTL_MS &&
-    cachedMtime === dbMtimeMs(dbPath) &&
-    cachedRangeKey === rangeKey(range)
-  );
+function cachedApiEventsForRange(range: DateRange): UsageEvent[] {
+  if (
+    !eventsCache ||
+    eventsCache.rangeKey !== rangeKey(range) ||
+    !cacheWithinTtl(eventsCache.at, CURSOR_API_CACHE_TTL_MS)
+  ) {
+    return [];
+  }
+  return eventsCache.events;
 }
 
 function sqlInList(ids: string[]): string {
@@ -217,117 +204,37 @@ function truncateCursorTitle(text: string): string {
     : `${t.slice(0, CURSOR_TITLE_MAX - 1)}…`;
 }
 
-function metricFromFiltered(raw: FilteredUsageEvent): UsageMetric | null {
-  const tsMs = Number(raw.timestamp);
-  if (!Number.isFinite(tsMs)) return null;
-  if (raw.kind && /_NOT_CHARGED$/.test(raw.kind)) return null;
-
-  const inputTokens = safeNumber(raw.tokenUsage?.inputTokens);
-  const outputTokens = safeNumber(raw.tokenUsage?.outputTokens);
-  const cacheReadTokens = safeNumber(raw.tokenUsage?.cacheReadTokens);
-  const cacheWriteTokens = safeNumber(raw.tokenUsage?.cacheWriteTokens);
-  const totalTokens =
-    inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
-  if (totalTokens <= 0) return null;
-
-  const totalCents = raw.tokenUsage?.totalCents;
-  const estimatedCost =
-    typeof totalCents === "number" && Number.isFinite(totalCents)
-      ? totalCents / 100
-      : estimateCost({
-          model: modelForCostEstimate(raw.model),
-          inputTokens,
-          outputTokens,
-          cacheReadTokens,
-          cacheWriteTokens,
-        });
-
-  return {
-    timestamp: new Date(tsMs),
-    totalTokens,
-    estimatedCost,
-    estimatedTokens: false,
-  };
-}
-
 async function streamCursorApiEvents(
   dbPath: string,
   range: DateRange,
   sink: UsageReaderSink,
 ): Promise<{ errors: string[]; hadEvents: boolean }> {
-  const errors: string[] = [];
+  const { events, errors } = await fetchCursorApiEvents(dbPath, range);
   let hadEvents = false;
 
-  const token = await readAccessToken(dbPath);
-  if (!token) {
-    if (existsSync(dbPath)) errors.push("Cursor: not signed in");
-    return { errors, hadEvents };
-  }
-
-  const userId = extractUserId(token);
-  if (!userId) {
-    errors.push("Cursor: no user id");
-    return { errors, hadEvents };
-  }
-
-  try {
-    const cookie = buildCookie(token, userId);
-    let truncated = false;
-    let index = 0;
-
-    for (let page = 1; page <= MAX_PAGES; page += 1) {
-      const resp = await postJson<FilteredUsageEventsResponse>(
-        "/api/dashboard/get-filtered-usage-events",
-        cookie,
-        {
-          startDate: String(range.start.getTime()),
-          endDate: String(range.end.getTime()),
-          page,
-          pageSize: PAGE_SIZE,
-        },
-      );
-
-      const rows = resp.usageEventsDisplay ?? [];
-      if (rows.length === 0) break;
-
-      for (const raw of rows) {
-        const rowIndex = index;
-        index += 1;
-        if (sink.event) {
-          const evt = eventFromFiltered(raw, rowIndex);
-          if (!evt) continue;
-          if (!isInRange(evt.timestamp, range.start, range.end)) continue;
-          sink.metric?.({
-            timestamp: evt.timestamp,
-            totalTokens: evt.totalTokens,
-            estimatedCost: evt.estimatedCost,
-            estimatedTokens: evt.estimatedTokens,
-          });
-          sink.event(evt);
-          hadEvents = true;
-          continue;
-        }
-        const metric = metricFromFiltered(raw);
-        if (!metric) continue;
-        if (!isInRange(metric.timestamp, range.start, range.end)) continue;
-        sink.metric?.(metric);
-        hadEvents = true;
-      }
-
-      if (rows.length < PAGE_SIZE) break;
-      const oldest = Number(rows[rows.length - 1].timestamp);
-      if (Number.isFinite(oldest) && oldest < range.start.getTime()) break;
-      if (page === MAX_PAGES) truncated = true;
+  for (const evt of events) {
+    if (!isInRange(evt.timestamp, range.start, range.end)) continue;
+    if (sink.event) {
+      sink.metric?.({
+        timestamp: evt.timestamp,
+        totalTokens: evt.totalTokens,
+        estimatedCost: evt.estimatedCost,
+        estimatedTokens: evt.estimatedTokens,
+      });
+      sink.event(evt);
+      hadEvents = true;
+      continue;
     }
-
-    if (truncated) {
-      errors.push("Cursor: results truncated, increase MAX_PAGES");
-    }
-    return { errors, hadEvents };
-  } catch (err) {
-    errors.push(`Cursor API: ${err instanceof Error ? err.message : "failed"}`);
-    return { errors, hadEvents };
+    sink.metric?.({
+      timestamp: evt.timestamp,
+      totalTokens: evt.totalTokens,
+      estimatedCost: evt.estimatedCost,
+      estimatedTokens: evt.estimatedTokens,
+    });
+    hadEvents = true;
   }
+
+  return { errors, hadEvents };
 }
 
 async function fetchUsageEventsInRange(
@@ -845,12 +752,12 @@ async function fetchCursorApiEvents(
   range: DateRange,
 ): Promise<{ events: UsageEvent[]; errors: string[] }> {
   const errors: string[] = [];
-  const mtime = dbMtimeMs(dbPath);
   const key = rangeKey(range);
 
   if (
     eventsCache &&
-    cacheIsFresh(eventsCache.at, dbPath, range, eventsCache.dbMtimeMs, key)
+    eventsCache.rangeKey === key &&
+    cacheWithinTtl(eventsCache.at, CURSOR_API_CACHE_TTL_MS)
   ) {
     return { events: eventsCache.events, errors: eventsCache.errors };
   }
@@ -885,7 +792,6 @@ async function fetchCursorApiEvents(
     }
     eventsCache = {
       at: Date.now(),
-      dbMtimeMs: mtime,
       rangeKey: key,
       events,
       errors: [...errors],
@@ -897,27 +803,18 @@ async function fetchCursorApiEvents(
   }
 }
 
-/** Loads per-chat rows for View Details (uses cached API events when available). */
+/** Loads per-chat rows for View Details (SQLite + API attribution). */
 export async function readCursorConversationBreakdown(
   basePath: string,
   loadRange: DateRange,
 ): Promise<{ events: UsageEvent[]; errors: string[] }> {
   const dbPath = cursorDbPath(basePath);
-  const mtime = dbMtimeMs(dbPath);
   const key = rangeKey(loadRange);
-
-  const { events: apiEvents } = await fetchCursorApiEvents(dbPath, loadRange);
 
   if (
     conversationsCache &&
-    cacheIsFresh(
-      conversationsCache.at,
-      dbPath,
-      loadRange,
-      conversationsCache.dbMtimeMs,
-      key,
-    ) &&
-    conversationsCache.apiEvents === apiEvents
+    conversationsCache.rangeKey === key &&
+    cacheWithinTtl(conversationsCache.at, CURSOR_CONVERSATIONS_CACHE_TTL_MS)
   ) {
     return {
       events: conversationsCache.events,
@@ -925,19 +822,43 @@ export async function readCursorConversationBreakdown(
     };
   }
 
-  const result = await readCursorConversations(
+  let apiEvents = cachedApiEventsForRange(loadRange);
+  let result = await readCursorConversations(
     dbPath,
     apiEvents,
     loadRange.start.getTime(),
   );
-  conversationsCache = {
-    at: Date.now(),
-    dbMtimeMs: mtime,
-    rangeKey: key,
-    apiEvents,
-    events: result.events,
-    errors: result.errors,
-  };
+
+  // Many Cursor chats store bubbles without per-message tokenCount; attribution
+  // comes from the dashboard API. Reuse a warm cache when possible, otherwise
+  // fetch once so View Details still works when opened before the dashboard.
+  if (result.events.length === 0) {
+    const fetchErrors: string[] = [];
+    if (apiEvents.length === 0) {
+      const fetched = await fetchCursorApiEvents(dbPath, loadRange);
+      apiEvents = fetched.events;
+      fetchErrors.push(...fetched.errors);
+    }
+    if (apiEvents.length > 0) {
+      result = await readCursorConversations(
+        dbPath,
+        apiEvents,
+        loadRange.start.getTime(),
+      );
+    }
+    if (fetchErrors.length > 0) {
+      result = { ...result, errors: [...result.errors, ...fetchErrors] };
+    }
+  }
+
+  if (result.events.length > 0) {
+    conversationsCache = {
+      at: Date.now(),
+      rangeKey: key,
+      events: result.events,
+      errors: result.errors,
+    };
+  }
   return result;
 }
 

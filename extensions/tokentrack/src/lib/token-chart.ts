@@ -8,7 +8,7 @@ export type UsageBucket = { label: string; tokens: number };
 const Y_AXIS_TITLE = "Tokens";
 
 /** Nudge chart left to line up with Detail.Metadata label column. */
-const CHART_SHIFT_LEFT = 18;
+const CHART_SHIFT_LEFT = 22;
 
 const CHART_W = 384;
 const CHART_H = 172;
@@ -198,7 +198,8 @@ function computeChartLayout(
   const plotH = baselineY - plotTop;
 
   const yTitleColumn = axisTitleSize + 4;
-  const yTitleX = yTitleColumn / 2;
+  /** Left of the y-axis tick labels — keep "Tokens" tucked toward the chart edge. */
+  const yTitleX = 5;
   const yTickLabelMaxW = Math.max(
     ...ticks.map((tv) =>
       estimateSvgTextWidth(formatAxisTick(tv), axisTickSize),
@@ -274,9 +275,10 @@ function chartGradientDefs(fillHex: string): string {
 }
 
 function renderPlotBackground(layout: ChartLayout): string {
-  const { plotLeft, plotTop, plotWActual, baselineY } = layout;
+  const { plotLeft, plotTop, baselineY, padR } = layout;
   const pad = 4;
-  return `<rect x="${(plotLeft - pad).toFixed(1)}" y="${(plotTop - pad).toFixed(1)}" width="${(plotWActual + pad * 2).toFixed(1)}" height="${(baselineY - plotTop + pad).toFixed(1)}" rx="7" fill="${PLOT_BG}" fill-opacity="0.5"/>`;
+  const plotRight = CHART_W - padR;
+  return `<rect x="${(plotLeft - pad).toFixed(1)}" y="${(plotTop - pad).toFixed(1)}" width="${(plotRight - plotLeft + pad).toFixed(1)}" height="${(baselineY - plotTop + pad).toFixed(1)}" rx="7" fill="${PLOT_BG}" fill-opacity="0.5"/>`;
 }
 
 function renderAxesAndGrid(layout: ChartLayout, xAxisTitle: string): string[] {

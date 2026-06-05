@@ -31,6 +31,7 @@ import {
   type UsageBucket,
 } from "./lib/token-chart";
 import type { SourceProviderKey } from "./lib/types";
+import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { clearUsageSnapshotCache, loadUsage } from "./lib/usage";
 import { UsageDetailsView } from "./usage-details";
 
@@ -153,7 +154,6 @@ export default function Command() {
   const budgetSpendStr = formatCurrencyMoney(budgetSpend, currency);
   const budgetCapStr = formatCurrencyMoney(nativeBudget, currency);
   const budgetCapCompact = formatBudgetCapCompact(nativeBudget, currency);
-  const budgetSubtitle = `${budgetSpendStr} / ${budgetCapCompact}`;
   const budgetPairLabel = `${budgetSpendStr} / ${budgetCapStr}`;
   const budgetTooltip = `${formatBudgetPercent(budgetPct)} of ${budgetRowTitle(tab).toLowerCase()} (${budgetPairLabel})`;
   const remaining = Math.max(nativeBudget - budgetSpend, 0);
@@ -246,20 +246,20 @@ export default function Command() {
               ? formatTokens(snapshot.totalTokens)
               : undefined;
 
-          const subtitleValue =
-            snapshot.estimatedCost > 0
-              ? spendStr
-              : tokensStr
-                ? tokensStr
-                : undefined;
-
-          const tokenAccessory =
-            snapshot.estimatedCost > 0 && tokensStr
-              ? {
-                  text: tokensStr,
-                  tooltip: `${tokensStr} tokens`,
-                }
-              : undefined;
+          const hasCost = snapshot.estimatedCost > 0;
+          const periodAccessories = [
+            ...(hasCost
+              ? [
+                  {
+                    text: { value: spendStr, color: COST_COLOR },
+                    tooltip: `Estimated cost · ${spendStr}`,
+                  },
+                ]
+              : []),
+            ...(tokensStr
+              ? [{ text: tokensStr, tooltip: `${tokensStr} tokens` }]
+              : []),
+          ];
 
           return (
             <List.Item
@@ -270,11 +270,11 @@ export default function Command() {
                 tooltip: periodLabels[period],
               }}
               subtitle={
-                subtitleValue
-                  ? { value: subtitleValue, tooltip: subtitleValue }
+                !hasCost && tokensStr
+                  ? { value: tokensStr, tooltip: tokensStr }
                   : undefined
               }
-              accessories={tokenAccessory ? [tokenAccessory] : []}
+              accessories={periodAccessories}
               detail={
                 <List.Item.Detail
                   markdown={chartMarkdown}
@@ -290,7 +290,7 @@ export default function Command() {
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Estimated Cost"
-                        text={spendStr}
+                        text={{ value: spendStr, color: COST_COLOR }}
                       />
                     </List.Item.Detail.Metadata>
                   }
@@ -326,11 +326,15 @@ export default function Command() {
         <List.Item
           id={BUDGET_ITEM_ID}
           title={budgetRowTitle(tab)}
-          subtitle={{
-            value: budgetSubtitle,
-            tooltip: budgetPairLabel,
-          }}
           accessories={[
+            {
+              text: { value: budgetSpendStr, color: COST_COLOR },
+              tooltip: `Spent · ${budgetSpendStr}`,
+            },
+            {
+              text: `/ ${budgetCapCompact}`,
+              tooltip: `Budget cap · ${budgetCapStr}`,
+            },
             {
               icon: {
                 source: budgetProgressIcon(budgetPct),
@@ -353,11 +357,17 @@ export default function Command() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Span"
-                    text={formatBudgetSpanLabel(tab)}
+                    text={{
+                      value: formatBudgetSpanLabel(tab),
+                      color: DATE_COLOR,
+                    }}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Remaining"
-                    text={formatCurrencyMoney(remaining, currency)}
+                    text={{
+                      value: formatCurrencyMoney(remaining, currency),
+                      color: COST_COLOR,
+                    }}
                   />
                 </List.Item.Detail.Metadata>
               }

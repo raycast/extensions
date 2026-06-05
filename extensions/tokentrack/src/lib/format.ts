@@ -9,21 +9,46 @@ export const periodLabels: Record<PeriodKey, string> = {
   month: "This Month",
 };
 
-/** Calendar-aligned windows (local time): week = Monday → today, month = 1st → today. */
+function startOfWeekSunday(date: Date): Date {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay());
+  return start;
+}
+
+/** Calendar-aligned windows (local time): week = Sunday → today, month = 1st → today. */
 export function getPeriodRange(period: PeriodKey): DateRange {
   const end = new Date();
   const start = new Date(end);
 
   if (period === "week") {
-    start.setHours(0, 0, 0, 0);
-    const day = start.getDay();
-    const diff = day === 0 ? 6 : day - 1;
-    start.setDate(start.getDate() - diff);
-  } else {
-    start.setDate(1);
-    start.setHours(0, 0, 0, 0);
+    return { start: startOfWeekSunday(end), end };
   }
 
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  return { start, end };
+}
+
+/** Full calendar period bounds: week = Sun → Sat, month = 1st → last day. */
+export function getPeriodCalendarBounds(period: PeriodKey): DateRange {
+  const anchor = new Date();
+
+  if (period === "week") {
+    const start = startOfWeekSunday(anchor);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  const start = new Date(anchor);
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1, 0);
+  end.setHours(23, 59, 59, 999);
   return { start, end };
 }
 
@@ -121,4 +146,31 @@ export function formatShortDate(value: Date) {
     opts.year = "numeric";
   }
   return new Intl.DateTimeFormat(undefined, opts).format(value);
+}
+
+/** Compact range for narrow metadata columns, e.g. `1–30 Jun` or `31 May–6 Jun`. */
+export function formatDateRangeCompact(start: Date, end: Date): string {
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+  const startMonth = start.getMonth();
+  const endMonth = end.getMonth();
+  const startYear = start.getFullYear();
+  const endYear = end.getFullYear();
+  const monthFmt = new Intl.DateTimeFormat(undefined, { month: "short" });
+  const endMonthStr = monthFmt.format(end);
+
+  if (startYear === endYear && startMonth === endMonth && startDay === endDay) {
+    return `${startDay} ${endMonthStr}`;
+  }
+
+  if (startYear === endYear && startMonth === endMonth) {
+    return `${startDay}–${endDay} ${endMonthStr}`;
+  }
+
+  const startMonthStr = monthFmt.format(start);
+  if (startYear === endYear) {
+    return `${startDay} ${startMonthStr}–${endDay} ${endMonthStr}`;
+  }
+
+  return `${startDay} ${startMonthStr} ${startYear}–${endDay} ${endMonthStr} ${endYear}`;
 }

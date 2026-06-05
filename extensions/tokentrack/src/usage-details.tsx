@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import {
@@ -9,6 +9,7 @@ import {
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
+import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { loadConversationDetails } from "./lib/usage";
 import type { ConversationUsageSummary, SourceProviderKey } from "./lib/types";
 
@@ -20,9 +21,6 @@ type UsageDetailsProps = {
 };
 
 type SortKey = "date" | "tokens" | "cost";
-
-const COST_COLOR = Color.Green;
-const DATE_COLOR = Color.Orange;
 
 function sortConversations(
   conversations: ConversationUsageSummary[],

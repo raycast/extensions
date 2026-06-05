@@ -1,5 +1,12 @@
 # Token Track Changelog
 
+## [Claude titles and Cursor details cache] - {PR_MERGE_DATE}
+
+- Fix Claude Code chat titles to prefer `custom-title` (Plan mode, `/rename`) over background `ai-title`, matching the Claude app.
+- Keep the latest title per session and fall back to the first user message when no title entry exists.
+- Speed up Cursor **View Details** by caching conversation breakdowns for 15 minutes without invalidating on every DB write.
+- Reuse dashboard API results for Cursor conversation attribution when cached; fetch from the API only when local SQLite rows lack token data.
+
 ## [Dashboard overhaul and performance] - {PR_MERGE_DATE}
 
 ![Codex week usage and token chart](metadata/tokentrack-1.png)
