@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Confirmation Dialog Icon] - {PR_MERGE_DATE}
+## [Fix Confirmation Dialog Icon] - 2026-06-05
 
 - Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
 
