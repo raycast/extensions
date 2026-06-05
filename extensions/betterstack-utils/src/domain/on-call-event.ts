@@ -23,9 +23,7 @@ export function formatUserName(user: User): string {
 }
 
 export function getCurrentOnCallUser(date: Date, events: OnCallEvent[]): User | null {
-  const active = events.filter((event) =>
-    isDateInInterval(date, new Date(event.started_at), new Date(event.ended_at)),
-  );
+  const active = events.filter((event) => isDateInInterval(date, new Date(event.started_at), new Date(event.ended_at)));
   const override = active.find((event) => event.override);
   if (override) return override.user;
 
