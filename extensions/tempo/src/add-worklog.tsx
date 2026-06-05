@@ -428,6 +428,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         <Form.TextField
           id="timeSpent"
           title="Time Spent"
+          autoFocus
           placeholder="1h, 1h30m, 30m"
           defaultValue="1h"
           info="Enter duration in human format: 1h, 1h30m, 2h, 45m, etc."
