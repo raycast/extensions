@@ -1,6 +1,6 @@
 # Tempo Changelog
 
-## [Add Autofocus to Worklog Duration] - {PR_MERGE_DATE}
+## [Add Autofocus to Worklog Duration] - 2026-06-05
 
 - Autofocus the Time Spent field when opening the Add Worklog form
 
