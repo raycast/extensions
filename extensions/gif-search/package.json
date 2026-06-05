@@ -40,6 +40,20 @@
       "title": "Search for GIFs",
       "description": "Search for GIFs across multiple services…",
       "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Browse Favorite GIFs",
+      "description": "Browse and search your favorite GIFs across all services",
+      "mode": "view",
+      "icon": "favorites-icon.png"
+    },
+    {
+      "name": "recents",
+      "title": "Browse Recent GIFs",
+      "description": "Browse and search your recently used GIFs across all services",
+      "mode": "view",
+      "icon": "recents-icon.png"
     }
   ],
   "preferences": [

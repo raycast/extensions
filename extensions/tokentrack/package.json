@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tokentrack",
+  "description": "Track Token Usage across AI editors - Codex, Claude Code, Cursor.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "20.8.10",
+    "@types/react": "19.2.7",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Token Dashboard",
+      "description": "View token usage across Codex, Claude Code, and Cursor.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "codexPath",
+      "title": "Codex Data Path",
+      "description": "Path to the local Codex data directory.",
+      "type": "textfield",
+      "default": "~/.codex",
+      "required": true
+    },
+    {
+      "name": "claudePath",
+      "title": "Claude Code Data Path",
+      "description": "Path to the local Claude Code data directory.",
+      "type": "textfield",
+      "default": "~/.claude",
+      "required": true
+    },
+    {
+      "name": "cursorPath",
+      "title": "Cursor Data Path",
+      "description": "Path to the local Cursor application support directory.",
+      "type": "textfield",
+      "default": "~/Library/Application Support/Cursor",
+      "required": true
+    },
+    {
+      "name": "claudeBudget",
+      "title": "Claude Monthly Budget ($)",
+      "description": "Monthly Anthropic spend cap. Shorter periods are prorated.",
+      "type": "textfield",
+      "default": "300",
+      "required": false
+    },
+    {
+      "name": "codexBudget",
+      "title": "Codex Weekly Budget ($)",
+      "description": "Weekly Codex spend cap. Month and today are derived from it.",
+      "type": "textfield",
+      "default": "100",
+      "required": false
+    },
+    {
+      "name": "cursorBudget",
+      "title": "Cursor Monthly Budget ($)",
+      "description": "Monthly Cursor spend cap. Shorter periods are prorated.",
+      "type": "textfield",
+      "default": "300",
+      "required": false
+    },
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Currency code used to format estimated spend.",
+      "type": "textfield",
+      "default": "USD",
+      "required": true
+    },
+    {
+      "name": "defaultSource",
+      "title": "Default Source",
+      "description": "Provider shown first when opening the dashboard.",
+      "type": "dropdown",
+      "default": "claude",
+      "required": false,
+      "data": [
+        {
+          "title": "Claude Code",
+          "value": "claude"
+        },
+        {
+          "title": "Codex",
+          "value": "codex"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        }
+      ]
+    }
+  ],
+  "title": "Token Track",
+  "author": "liel_azulay",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
