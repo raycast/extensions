@@ -1,6 +1,6 @@
 # Gram
 
-Supercharge the [Gram editor](https://gram-editor.com) from within Raycast: manage Gram extensions, configure auto-updates, and quickly search, pin, or open your recent projects.
+Streamline your workflow with the Raycast Extension for [Gram](https://gram-editor.com). Effortlessly manage extensions, configure auto-updates, and instantly access your projects.
 
 > **Requirement:** You must have the [Gram editor](https://gram-editor.com) installed on your system to use this extension.
 
@@ -56,12 +56,12 @@ From each extension result, you can quickly:
 *   **Open** the extension repository in your browser.
 *   **Reveal** the installed extension in Finder.
 
-> **Tip:** If any extensions are out of date, the view surfaces a dedicated updates section with a convenient **Update All** action.
+> **Tip:** If any extensions are out of date, use the Update All action in the dedicated Updates section.
 
 ---
 
 ## Credits & Acknowledgements
 
-This extension is a fork of the [Raycast extension for Zed](https://www.raycast.com/ewgenius/zed-recent-projects), originally created by **ewgenius** and contributors (tleo19, jylamont, pernielsentikaer, tm.wrnr, true-real-michael, xmorse, ivens_joris).
+This extension started out as a fork of the [Raycast extension for Zed](https://www.raycast.com/ewgenius/zed-recent-projects), created by **ewgenius** and contributors (tleo19, jylamont, pernielsentikaer, tm.wrnr, true-real-michael, xmorse, ivens_joris).
 
 This project would not have been possible without their work.
