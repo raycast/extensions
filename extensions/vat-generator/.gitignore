@@ -1,0 +1,9 @@
+# Raycast / Node
+node_modules
+.DS_Store
+dist
+*.log
+.raycast-swift-build
+.swiftpm
+compiled.entitlements
+raycast-env.d.ts
