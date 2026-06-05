@@ -400,7 +400,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
                 query: props.query,
               };
               const query = encodeURIComponent(JSON.stringify(args));
-              return "[" + p1 + "](${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` + query + ")";
+              return "[" + p1 + "](" + `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` + query + ")";
             })
       }
       actions={EntryActions(
