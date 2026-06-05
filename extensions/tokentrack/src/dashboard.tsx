@@ -136,6 +136,7 @@ export default function Command() {
         provider,
       ),
     [tab],
+    { keepPreviousData: true },
   );
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(

@@ -22,7 +22,9 @@ import { createCodexBudgetAccumulator } from "./codex-budget";
 import { getPeriodRange, getUsageLoadRange, type PeriodKey } from "./format";
 import {
   clearUsageSnapshotCache as clearSnapshotCache,
+  readLastGoodUsageSnapshot,
   readUsageSnapshotCache,
+  snapshotHasUsage,
   writeUsageSnapshotCache,
 } from "./usage-cache";
 import {
@@ -69,9 +71,31 @@ export async function loadUsage(
     });
     const snapshot = builder.build(errors);
     if (codexBudget) snapshot.codexBudget = codexBudget.build();
+
+    if (!snapshotHasUsage(snapshot) && errors.length > 0) {
+      const stale = await readLastGoodUsageSnapshot(provider, range);
+      if (stale) {
+        const merged: ProviderUsageSnapshot = {
+          ...stale,
+          errors: [...errors],
+        };
+        writeUsageSnapshotCache(provider, range, merged);
+        return merged;
+      }
+    }
+
     writeUsageSnapshotCache(provider, range, snapshot);
     return snapshot;
   } catch (reason) {
+    const stale = await readLastGoodUsageSnapshot(provider, range);
+    if (stale) {
+      const merged: ProviderUsageSnapshot = {
+        ...stale,
+        errors: [...stale.errors, briefRejectReason(reason)],
+      };
+      writeUsageSnapshotCache(provider, range, merged);
+      return merged;
+    }
     const builder = createUsageSnapshotBuilder();
     return builder.build([briefRejectReason(reason)]);
   }

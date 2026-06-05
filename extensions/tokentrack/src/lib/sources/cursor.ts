@@ -149,6 +149,18 @@ function buildCookie(token: string, userId: string): string {
   return v;
 }
 
+/** Ensure exactly one `Cursor API:` prefix (handles legacy double-wrapped messages). */
+function cursorApiErrorMessage(err: unknown): string {
+  const raw =
+    typeof err === "string"
+      ? err
+      : err instanceof Error
+        ? err.message
+        : "failed";
+  const stripped = raw.replace(/^(Cursor API:\s*)+/i, "").trim() || "failed";
+  return `Cursor API: ${stripped}`;
+}
+
 function postJson<T>(path: string, cookie: string, body: unknown): Promise<T> {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body ?? {});
@@ -175,18 +187,18 @@ function postJson<T>(path: string, cookie: string, body: unknown): Promise<T> {
             try {
               resolve(JSON.parse(buf));
             } catch {
-              reject(new Error("Cursor API: invalid JSON"));
+              reject(new Error("invalid JSON"));
             }
           } else {
-            reject(new Error(`Cursor API: HTTP ${res.statusCode}`));
+            reject(new Error(`HTTP ${res.statusCode}`));
           }
         });
       },
     );
-    req.on("error", (err) => reject(new Error(`Cursor API: ${err.message}`)));
+    req.on("error", (err) => reject(err));
     req.setTimeout(10000, () => {
       req.destroy();
-      reject(new Error("Cursor API: timeout"));
+      reject(new Error("timeout"));
     });
     req.write(data);
     req.end();
@@ -760,7 +772,10 @@ async function fetchCursorApiEvents(
     eventsCache.rangeKey === key &&
     cacheWithinTtl(eventsCache.at, CURSOR_API_CACHE_TTL_MS)
   ) {
-    return { events: eventsCache.events, errors: eventsCache.errors };
+    return {
+      events: eventsCache.events,
+      errors: eventsCache.errors.map(cursorApiErrorMessage),
+    };
   }
 
   const token = await readAccessToken(dbPath);
@@ -799,7 +814,14 @@ async function fetchCursorApiEvents(
     };
     return { events, errors };
   } catch (err) {
-    errors.push(`Cursor API: ${err instanceof Error ? err.message : "failed"}`);
+    errors.push(cursorApiErrorMessage(err));
+    if (
+      eventsCache &&
+      eventsCache.rangeKey === key &&
+      eventsCache.events.length > 0
+    ) {
+      return { events: eventsCache.events, errors };
+    }
     return { events: [], errors };
   }
 }

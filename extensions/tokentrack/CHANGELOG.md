@@ -14,6 +14,7 @@
 - Improve first-time setup: **Currency** first, all budget fields required; budget titles follow the selected currency (no hardcoded `$`).
 - Stream usage metrics on the dashboard path to stay within Raycast's memory cap; defer per-chat lists to **View Details** (lazy load).
 - Add in-memory usage caching and persistent `useCachedPromise` snapshots; manual refresh clears dashboard, snapshot, and Cursor API caches.
+- Keep showing last good Cursor charts when the dashboard API times out; reuse stale API and snapshot data instead of wiping totals on failed refresh.
 - Improve Cursor hybrid loading: API totals on the dashboard, SQLite + API attribution for conversation breakdown; cache breakdowns for 15 minutes and reuse warm API data when opening **View Details**.
 - Fix Claude Code chat titles to prefer `custom-title` (Plan mode, `/rename`) over background `ai-title`, with first-user-message fallback.
 - Redesign token charts as SVG bar charts with rounded tops, nice axis ticks, and single-chart rendering for the selected period.
