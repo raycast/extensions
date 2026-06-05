@@ -2,10 +2,6 @@ import { runAppleScript } from '@raycast/utils';
 import { CommandListName, Todo, TodoSummary, TodoDetails, ProjectDetails, AreaDetails } from './types';
 import { CollectionMap, QuickFindData, organizeLists } from './api-sql';
 
-// ---------------------------------------------------------------------------
-// JXA execution engine
-// ---------------------------------------------------------------------------
-
 export class ThingsError extends Error {
   constructor(
     message: string,
@@ -78,10 +74,6 @@ export const executeJxa = async (script: string, operation?: string) => {
   }
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const commandListNameToListIdMapping: Record<CommandListName, string> = {
   inbox: 'TMInboxListSource',
   today: 'TMTodayListSource',
@@ -96,10 +88,7 @@ function sqlEscapeJxa(value: string): string {
   return value.replace(/'/g, "\\'");
 }
 
-// ---------------------------------------------------------------------------
 // JXA map templates — reusable across individual and combined queries
-// ---------------------------------------------------------------------------
-
 const mapTagJxa = `tag => tag.name()`;
 
 const mapTagWithHierarchyJxa = `tag => {
@@ -173,11 +162,6 @@ const mapAreaJxa = `area => {
   };
 }`;
 
-// ---------------------------------------------------------------------------
-// JXA query functions
-// ---------------------------------------------------------------------------
-
-/** Query todos with optional list/project/area filter. Returns TodoSummary[]. */
 export async function queryTodosJxa(
   appId: string,
   opts: {
@@ -212,7 +196,6 @@ export async function queryTodosJxa(
   );
 }
 
-/** Query a single todo's full details including checklist items. */
 export async function queryTodoDetailsJxa(appId: string, todoId: string): Promise<TodoDetails | null> {
   const result = await executeJxa(
     `
@@ -244,7 +227,6 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
   return result as TodoDetails;
 }
 
-/** Query multiple todos' full details in batch. */
 export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Promise<TodoDetails[]> {
   if (!todoIds.length) return [];
   const idList = todoIds.map((id) => `'${sqlEscapeJxa(id)}'`).join(', ');
@@ -280,7 +262,6 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
   return results ?? [];
 }
 
-/** Search todos by title/notes keyword. */
 export async function searchTodosJxa(appId: string, query: string): Promise<TodoSummary[]> {
   const escaped = query.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   return executeJxa(
@@ -314,7 +295,6 @@ export async function searchTodosJxa(appId: string, query: string): Promise<Todo
   );
 }
 
-/** Query a single project's full details. */
 export async function queryProjectDetailsJxa(appId: string, projectId: string): Promise<ProjectDetails | null> {
   const result = await executeJxa(
     `
@@ -342,7 +322,6 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
   return result as ProjectDetails;
 }
 
-/** Query a single area's full details. */
 export async function queryAreaDetailsJxa(appId: string, areaId: string): Promise<AreaDetails | null> {
   const result = await executeJxa(
     `
@@ -365,7 +344,6 @@ export async function queryAreaDetailsJxa(appId: string, areaId: string): Promis
   return result as AreaDetails;
 }
 
-/** Get todos for a specific list via JXA. */
 export const getListTodosViaJXA = (appId: string, commandListName: CommandListName): Promise<Todo[]> => {
   return executeJxa(
     `

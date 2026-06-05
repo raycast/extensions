@@ -16,21 +16,15 @@ import {
   ChecklistItem,
 } from './types';
 
-// ---------------------------------------------------------------------------
-// Database path helpers
-// ---------------------------------------------------------------------------
-
-// Things stores its data in a SQLite database with WAL mode (concurrent reads safe).
-// Path priority (mirrors Swift Database.swift + things.py):
-//   1. ThingsData-*/Things Database.thingsdatabase/main.sqlite  (Things 3.15.16+)
-//   2. Things Database.thingsdatabase/main.sqlite               (Things 3.x pre-3.15.16, container root)
-//   3. ~/Library/Containers/com.culturedcode.ThingsMac/.../Things.sqlite3  (very old sandbox container)
-//   4. Things Database.thingsSQLite                             (legacy fallback)
-// Things Beta uses the same Group Container as the stable app (shared app group), so no separate path needed.
+// Things stores its data in a SQLite database. Tries known locations in order:
+//   1. ThingsData-*/Things Database.thingsdatabase/main.sqlite
+//   2. Things Database.thingsdatabase/main.sqlite
+//   3. ~/Library/Containers/com.culturedcode.ThingsMac/.../Things.sqlite3
+//   4. Things Database.thingsSQLite
 function findThingsDBPath(): string {
   const container = join(homedir(), 'Library', 'Group Containers', 'JLMPQHK86H.com.culturedcode.ThingsMac');
 
-  // 1. ThingsData-*/Things Database.thingsdatabase/main.sqlite  (Things 3.15.16+)
+  // 1. ThingsData-*/Things Database.thingsdatabase/main.sqlite
   try {
     const entries = readdirSync(container);
     const dataDir = entries.find((e) => e.startsWith('ThingsData-'));
@@ -42,11 +36,11 @@ function findThingsDBPath(): string {
     // container doesn't exist or isn't readable — fall through
   }
 
-  // 2. Things Database.thingsdatabase/main.sqlite  (Things 3.x pre-3.15.16, container root)
+  // 2. Things Database.thingsdatabase/main.sqlite  (container root)
   const p2 = join(container, 'Things Database.thingsdatabase', 'main.sqlite');
   if (existsSync(p2)) return p2;
 
-  // 3. Very old sandbox container path (pre-Group Containers era)
+  // 3. Older sandbox container path
   const p3 = join(
     homedir(),
     'Library',
@@ -71,11 +65,7 @@ function getThingsDBPath(): string {
   return _thingsDBPath;
 }
 
-// ---------------------------------------------------------------------------
-// Things packed-date helpers (ported from Swift Database.swift)
 // Things stores dates as packed Int64: (year << 16) | (month << 12) | (day << 7)
-// ---------------------------------------------------------------------------
-
 const YEAR_SHIFT = 16;
 const MONTH_SHIFT = 12;
 const DAY_SHIFT = 7;
@@ -134,10 +124,7 @@ type ResolvedDates = {
   dueDateIsRecurring: boolean;
 };
 
-/**
- * Resolve effective dates for a todo/project (handles recurring tasks).
- * Ported from Swift Database.swift resolveEffectiveDates().
- */
+/** Resolve effective dates for a todo/project (handles recurring tasks). */
 function resolveEffectiveDates(
   startDate: number,
   deadline: number,
@@ -173,10 +160,6 @@ function resolveEffectiveDates(
 
   return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: false };
 }
-
-// ---------------------------------------------------------------------------
-// SQL fragments (ported from Swift TodoQueries.swift)
-// ---------------------------------------------------------------------------
 
 const TODO_JOINS = `
   FROM TMTask t
@@ -261,11 +244,6 @@ function rowToTodoSummary(row: TodoSummaryRow): TodoSummary {
   };
 }
 
-// ---------------------------------------------------------------------------
-// SQL query functions
-// ---------------------------------------------------------------------------
-
-/** Query todos with optional list/project/area filter. Returns TodoSummary[]. */
 export async function queryTodosSQL(
   opts: {
     listName?: string | null;
@@ -299,7 +277,6 @@ function todoToSummary(todo: Todo): TodoSummary {
   };
 }
 
-/** Query a single todo's full details including checklist items. */
 export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails | null> {
   const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
     WHERE t.uuid = '${sqlEscape(todoId)}' AND t.type = 0 AND t.trashed = 0 LIMIT 1`;
@@ -317,7 +294,6 @@ export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails |
   };
 }
 
-/** Query multiple todos' full details in batch. */
 export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetails[]> {
   if (!todoIds.length) return [];
   const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
@@ -337,7 +313,6 @@ export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetai
   });
 }
 
-/** Search todos by title/notes keyword. */
 export async function searchTodosSQL(query: string): Promise<TodoSummary[]> {
   const q = sqlEscape(query).replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
   const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS}
@@ -369,7 +344,6 @@ async function queryChecklistItemsBatchSQL(todoIds: string[]): Promise<Record<st
   return result;
 }
 
-/** Query a single project's full details. */
 export async function queryProjectDetailsSQL(projectId: string): Promise<ProjectDetails | null> {
   const sql = `
     SELECT
@@ -422,7 +396,6 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
   };
 }
 
-/** Query a single area's full details. */
 export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails | null> {
   const sql = `
     SELECT
@@ -632,11 +605,10 @@ async function getTodayTodosFromDB(): Promise<Todo[]> {
   `);
 }
 
-// Anytime display order matches Things UI:
+// Anytime is built in two groups:
 //   1. Today todos (type=0, start=1, startDate <= today) — sorted by index
 //   2. Rest todos  (type=0, start=1, startDate IS NULL or > today) — sorted by index
-// Projects are NOT shown in the Anytime list (JXA confirmed).
-// Todos inside Someday/Upcoming projects (project.start = 2) are excluded.
+// Projects are not included. Todos inside Someday/Upcoming projects (project.start = 2) are excluded.
 // Recurring master templates that have an active instance are excluded (the instance is shown instead).
 async function getAnytimeTodosFromDB(): Promise<Todo[]> {
   const todayEnd = getEndOfToday();
@@ -770,7 +742,6 @@ async function getTrashTodosFromDB(): Promise<Todo[]> {
   `);
 }
 
-/** Query todos for a specific list from the database. */
 export async function getListTodosFromDB(commandListName: CommandListName): Promise<Todo[]> {
   switch (commandListName) {
     case 'inbox':
@@ -994,9 +965,8 @@ export type QuickFindData = {
   todos: Array<{ id: string; name: string; status: string; projectName?: string; areaName?: string }>;
 };
 
-// Read directly from Things' SQLite database — bypasses Apple Events entirely.
-// A single SQL query with JOINs replaces hundreds of serialized Apple Events,
-// reducing initial load from ~15s to <100ms.
+// Read directly from Things' SQLite database — a single SQL query with JOINs
+// replaces many serialized Apple Events.
 export const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
   const sql = `SELECT json_object(
     'areas', COALESCE((

@@ -79,7 +79,7 @@
       "name": "quick-find",
       "title": "Quick Find",
       "subtitle": "Things",
-      "description": "Search across all areas, projects, and to-dos. Requires Full Disk Access granted to Raycast.",
+      "description": "Search across all areas, projects, and to-dos.",
       "mode": "view"
     },
     {
@@ -108,13 +108,6 @@
           "required": false
         }
       ]
-    },
-    {
-      "name": "compare-jxa-sql",
-      "title": "Compare JXA VS SQL (Dev)",
-      "subtitle": "Things",
-      "description": "Developer tool: compares JXA and SQL output for every built-in list. Results logged to console.",
-      "mode": "no-view"
     },
     {
       "name": "quick-add-todo",
@@ -172,7 +165,7 @@
     {
       "name": "get-todo-details",
       "title": "Get To-Do Details",
-      "description": "Get full details of a single to-do including notes, tags, and checklist items."
+      "description": "Get full details of a single to-do including notes and tags."
     },
     {
       "name": "get-todos-details",

@@ -16,7 +16,6 @@ import {
   AreaDetails,
 } from './types';
 
-// Re-export shared types and helpers so callers only need to import from './api'
 export type { TagWithParent } from './api-sql';
 export { ThingsError } from './api-jxa';
 
@@ -48,11 +47,6 @@ import {
 
 const preferences = getPreferenceValues<Preferences>();
 
-// ---------------------------------------------------------------------------
-// Facade functions — switch between SQL and JXA based on preference
-// ---------------------------------------------------------------------------
-
-/** Query todos with optional list/project/area filter. */
 export async function queryTodos(
   opts: {
     listName?: string | null;
@@ -66,7 +60,6 @@ export async function queryTodos(
   return queryTodosJxa(preferences.thingsAppIdentifier, opts);
 }
 
-/** Query a single todo's full details including checklist items. */
 export async function queryTodoDetails(todoId: string): Promise<TodoDetails | null> {
   if (preferences.useUnofficialApi) {
     return queryTodoDetailsSQL(todoId);
@@ -74,7 +67,6 @@ export async function queryTodoDetails(todoId: string): Promise<TodoDetails | nu
   return queryTodoDetailsJxa(preferences.thingsAppIdentifier, todoId);
 }
 
-/** Query multiple todos' full details in batch. */
 export async function queryTodosDetails(todoIds: string[]): Promise<TodoDetails[]> {
   if (preferences.useUnofficialApi) {
     return queryTodosDetailsSQL(todoIds);
@@ -82,7 +74,6 @@ export async function queryTodosDetails(todoIds: string[]): Promise<TodoDetails[
   return queryTodosDetailsJxa(preferences.thingsAppIdentifier, todoIds);
 }
 
-/** Search todos by title/notes keyword. */
 export async function searchTodos(query: string): Promise<TodoSummary[]> {
   if (preferences.useUnofficialApi) {
     return searchTodosSQL(query);
@@ -90,7 +81,6 @@ export async function searchTodos(query: string): Promise<TodoSummary[]> {
   return searchTodosJxa(preferences.thingsAppIdentifier, query);
 }
 
-/** Query a single project's full details. */
 export async function queryProjectDetails(projectId: string): Promise<ProjectDetails | null> {
   if (preferences.useUnofficialApi) {
     return queryProjectDetailsSQL(projectId);
@@ -98,7 +88,6 @@ export async function queryProjectDetails(projectId: string): Promise<ProjectDet
   return queryProjectDetailsJxa(preferences.thingsAppIdentifier, projectId);
 }
 
-/** Query a single area's full details. */
 export async function queryAreaDetails(areaId: string): Promise<AreaDetails | null> {
   if (preferences.useUnofficialApi) {
     return queryAreaDetailsSQL(areaId);
@@ -106,19 +95,12 @@ export async function queryAreaDetails(areaId: string): Promise<AreaDetails | nu
   return queryAreaDetailsJxa(preferences.thingsAppIdentifier, areaId);
 }
 
-/** Get todos for a specific list. */
 export const getListTodos = async (commandListName: CommandListName): Promise<Todo[]> => {
-  const result = preferences.useUnofficialApi
-    ? await getListTodosFromDB(commandListName)
-    : await getListTodosViaJXA(preferences.thingsAppIdentifier, commandListName);
-  console.log(
-    `[getListTodos] list=${commandListName} mode=${preferences.useUnofficialApi ? 'SQL' : 'JXA'} count=${result.length}`,
-  );
-  console.log(`[getListTodos] items:`, JSON.stringify(result, null, 2));
-  return result;
+  return preferences.useUnofficialApi
+    ? getListTodosFromDB(commandListName)
+    : getListTodosViaJXA(preferences.thingsAppIdentifier, commandListName);
 };
 
-/** Get collections (tags, projects, areas, lists). */
 export async function getCollections<K extends keyof CollectionMap>(...keys: K[]): Promise<Pick<CollectionMap, K>> {
   if (preferences.useUnofficialApi) {
     return getCollectionsFromDB(...keys);
@@ -126,17 +108,12 @@ export async function getCollections<K extends keyof CollectionMap>(...keys: K[]
   return getCollectionsJxa(preferences.thingsAppIdentifier, ...keys);
 }
 
-/** Get data for the quick find command. */
 export const getQuickFindData = () => {
   if (preferences.useUnofficialApi) {
     return getQuickFindDataFromDB();
   }
   return getQuickFindDataJXA(preferences.thingsAppIdentifier);
 };
-
-// ---------------------------------------------------------------------------
-// JXA write operations (always JXA — URL scheme not available for reads)
-// ---------------------------------------------------------------------------
 
 export const getTodoName = (todoId: string) =>
   executeJxa(
@@ -199,10 +176,6 @@ export const deleteProject = (projectId: string) =>
 `,
     'Delete project',
   );
-
-// ---------------------------------------------------------------------------
-// URL scheme write operations
-// ---------------------------------------------------------------------------
 
 async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
