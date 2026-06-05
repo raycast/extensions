@@ -35,9 +35,16 @@ function roundedTopBarPath(
   rx: number,
 ): string {
   if (h <= 0) return "";
-  const r = Math.min(rx, w / 2, h);
-  if (h <= r) {
-    return `M ${x.toFixed(2)} ${(y + h).toFixed(2)} L ${x.toFixed(2)} ${(y + r).toFixed(2)} A ${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${(x + w).toFixed(2)} ${(y + r).toFixed(2)} L ${(x + w).toFixed(2)} ${(y + h).toFixed(2)} Z`;
+  // Scale radius with bar height so tiny usage days stay flat-topped, not dome-shaped.
+  const r = Math.min(rx, w / 2, h * 0.35);
+  if (r < 0.75) {
+    return [
+      `M ${x.toFixed(2)} ${y.toFixed(2)}`,
+      `L ${(x + w).toFixed(2)} ${y.toFixed(2)}`,
+      `L ${(x + w).toFixed(2)} ${(y + h).toFixed(2)}`,
+      `L ${x.toFixed(2)} ${(y + h).toFixed(2)}`,
+      "Z",
+    ].join(" ");
   }
   return [
     `M ${x.toFixed(2)} ${(y + h).toFixed(2)}`,
@@ -182,6 +189,8 @@ function computeChartLayout(
   const marginBottom = 6;
   const gapTitleTicks = 10;
   const gapTicksPlot = 8;
+  /** Space between the y-axis line and the first bar / point. */
+  const dataPadLeft = 12;
 
   const xTitleY = CHART_H - marginBottom;
   const xLabelRowY = xTitleY - gapTitleTicks - axisTickSize;
@@ -197,7 +206,7 @@ function computeChartLayout(
   );
   const plotLeft = yTitleColumn + gapTitleTicks + yTickLabelMaxW + gapTicksPlot;
   const yTickX = plotLeft - gapTicksPlot;
-  const plotWActual = CHART_W - plotLeft - padR;
+  const plotWActual = CHART_W - plotLeft - padR - dataPadLeft;
 
   const minGap =
     n <= 5 ? 14 : n <= 8 ? 11 : n <= 10 ? 8 : n <= 14 ? 4 : n <= 24 ? 2 : 3;
@@ -227,7 +236,7 @@ function computeChartLayout(
     plotWActual,
     barW,
     gap,
-    barOriginX: plotLeft,
+    barOriginX: plotLeft + dataPadLeft,
     labelStep,
     midY,
     yTitleX,
