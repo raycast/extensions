@@ -591,11 +591,12 @@ async function runListQuery(sql: string): Promise<Todo[]> {
 }
 
 // Open, unscheduled (start=0), not trashed. Sorted by user-defined index.
+// Includes todos (type=0) and projects (type=1) — Things shows both in Inbox.
 async function getInboxTodosFromDB(): Promise<Todo[]> {
   return runListQuery(`
     ${LIST_SELECT}
     WHERE
-      t.type = 0
+      t.type IN (0, 1)
       AND t.trashed = 0
       AND t.status = 0
       AND t.start = 0
@@ -627,7 +628,7 @@ async function getTodayTodosFromDB(): Promise<Todo[]> {
             AND i.status = 0
         )
       )
-    ORDER BY t."index" ASC
+    ORDER BY t.todayIndex ASC, t."index" ASC
   `);
 }
 
@@ -743,24 +744,29 @@ async function getSomedayTodosFromDB(): Promise<Todo[]> {
   `);
 }
 
-// Completed todos (status=3), not trashed. Natural DB order.
+// Completed or canceled items (status IN (2,3)) with a stop date, not trashed.
+// Includes todos (type=0) and projects (type=1). Sorted by completion date, newest first.
 async function getLogbookTodosFromDB(): Promise<Todo[]> {
   return runListQuery(`
     ${LIST_SELECT}
     WHERE
-      t.type = 0
+      t.type IN (0, 1)
       AND t.trashed = 0
-      AND t.status = 3
+      AND t.status IN (2, 3)
+      AND t.stopDate IS NOT NULL
+    ORDER BY t.stopDate DESC
   `);
 }
 
-// All trashed items regardless of status. Natural DB order.
+// All trashed items regardless of status. Includes todos and projects.
+// Sorted by most recently modified first.
 async function getTrashTodosFromDB(): Promise<Todo[]> {
   return runListQuery(`
     ${LIST_SELECT}
     WHERE
-      t.type = 0
+      t.type IN (0, 1)
       AND t.trashed = 1
+    ORDER BY t.userModificationDate DESC
   `);
 }
 
