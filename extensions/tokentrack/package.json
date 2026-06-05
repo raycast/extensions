@@ -34,33 +34,9 @@
   ],
   "preferences": [
     {
-      "name": "codexPath",
-      "title": "Codex Data Path",
-      "description": "Path to the local Codex data directory.",
-      "type": "textfield",
-      "default": "~/.codex",
-      "required": true
-    },
-    {
-      "name": "claudePath",
-      "title": "Claude Code Data Path",
-      "description": "Path to the local Claude Code data directory.",
-      "type": "textfield",
-      "default": "~/.claude",
-      "required": true
-    },
-    {
-      "name": "cursorPath",
-      "title": "Cursor Data Path",
-      "description": "Path to the local Cursor application support directory.",
-      "type": "textfield",
-      "default": "~/Library/Application Support/Cursor",
-      "required": true
-    },
-    {
       "name": "claudeBudget",
       "title": "Claude Monthly Budget ($)",
-      "description": "Monthly Anthropic spend cap. Shorter periods are prorated.",
+      "description": "Monthly Anthropic spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",
       "required": false
@@ -68,7 +44,7 @@
     {
       "name": "codexBudget",
       "title": "Codex Weekly Budget ($)",
-      "description": "Weekly Codex spend cap. Month and today are derived from it.",
+      "description": "Weekly Codex spend cap for the current calendar week.",
       "type": "textfield",
       "default": "100",
       "required": false
@@ -76,7 +52,7 @@
     {
       "name": "cursorBudget",
       "title": "Cursor Monthly Budget ($)",
-      "description": "Monthly Cursor spend cap. Shorter periods are prorated.",
+      "description": "Monthly Cursor spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",
       "required": false

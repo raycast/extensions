@@ -7,7 +7,7 @@ import {
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
-import type { DateRange, UsageEvent } from "../types";
+import type { DateRange, UsageEvent, UsageReaderSink } from "../types";
 import { estimateCost } from "../pricing";
 import { expandHome, isInRange, safeNumber } from "./shared";
 
@@ -45,7 +45,7 @@ type CodexRecord = {
   };
 };
 
-const CODEX_READ_CONCURRENCY = 4;
+const CODEX_READ_CONCURRENCY = 1;
 
 /**
  * Date buffer when filtering YYYY/MM/DD folders: a session whose file lives in
@@ -55,26 +55,29 @@ const CODEX_READ_CONCURRENCY = 4;
  */
 const CODEX_FOLDER_BACKDATE_MS = 36 * 60 * 60 * 1000;
 
-export async function readCodexUsage(basePath: string, range: DateRange) {
+export async function readCodexUsage(
+  basePath: string,
+  range: DateRange,
+  sink: UsageReaderSink,
+): Promise<string[]> {
   const root = expandHome(basePath || "~/.codex");
   const sessionsRoot = join(root, "sessions");
   const errors: string[] = [];
-  const events: UsageEvent[] = [];
 
-  if (!existsSync(sessionsRoot)) return { events, errors };
+  if (!existsSync(sessionsRoot)) return errors;
 
   const sessionIndex = loadCodexSessionIndex(root);
 
   try {
     const files = await findRolloutsAsync(sessionsRoot, range);
     await runWithConcurrency(files, CODEX_READ_CONCURRENCY, (file) =>
-      readCodexFile(file, range, events, sessionIndex),
+      readCodexFile(file, range, sink, sessionIndex),
     );
   } catch {
     errors.push("Codex: read error");
   }
 
-  return { events, errors };
+  return errors;
 }
 
 export function readCodexUsageSync(basePath: string, range: DateRange) {
@@ -223,7 +226,7 @@ function noteCodexSessionTitleFallbackFromLine(line: string, state: FileState) {
 async function readCodexFile(
   file: string,
   range: DateRange,
-  events: UsageEvent[],
+  sink: UsageReaderSink,
   sessionIndex: CodexSessionIndex,
 ) {
   const reader = createInterface({
@@ -235,7 +238,7 @@ async function readCodexFile(
   resolveCodexSessionTitle(file, sessionIndex, state);
   let offset = 0;
   for await (const line of reader) {
-    pushCodexLine(file, line, offset, range, events, state, sessionIndex);
+    pushCodexLine(file, line, offset, range, sink, state, sessionIndex);
     offset += 1;
   }
 }
@@ -251,7 +254,15 @@ function readCodexFileSync(
   readFileSync(file, "utf8")
     .split(/\r?\n/)
     .forEach((line, index) =>
-      pushCodexLine(file, line, index, range, events, state, sessionIndex),
+      pushCodexLine(
+        file,
+        line,
+        index,
+        range,
+        { event: (e) => events.push(e) },
+        state,
+        sessionIndex,
+      ),
     );
 }
 
@@ -262,7 +273,7 @@ function pushCodexLine(
   line: string,
   offset: number,
   range: DateRange,
-  events: UsageEvent[],
+  sink: UsageReaderSink,
   state: FileState,
   sessionIndex: CodexSessionIndex,
 ) {
@@ -341,7 +352,22 @@ function pushCodexLine(
   const totalTokens = inputTokens + outputTokens + reasoningTokens;
   if (totalTokens <= 0) return;
 
-  events.push({
+  const estimatedCost = estimateCost({
+    model: state.currentModel,
+    inputTokens: effectiveInput,
+    outputTokens: billedOutput,
+    cacheReadTokens: cachedInputTokens,
+    cacheWriteTokens: 0,
+  });
+
+  sink.metric?.({
+    timestamp,
+    totalTokens,
+    estimatedCost,
+    estimatedTokens: false,
+  });
+
+  sink.event?.({
     id: `codex:${file}:${offset}`,
     provider: "codex",
     timestamp,
@@ -351,13 +377,7 @@ function pushCodexLine(
     cacheReadTokens: cachedInputTokens,
     cacheWriteTokens: 0,
     totalTokens,
-    estimatedCost: estimateCost({
-      model: state.currentModel,
-      inputTokens: effectiveInput,
-      outputTokens: billedOutput,
-      cacheReadTokens: cachedInputTokens,
-      cacheWriteTokens: 0,
-    }),
+    estimatedCost,
     estimatedTokens: false,
     sourcePath: file,
     conversationKey: file,

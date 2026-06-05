@@ -13,14 +13,9 @@ export function truncateTitle(text: string, max = TITLE_MAX): string {
 }
 
 export function supportsConversationDetails(
-  provider: SourceProviderKey,
+  _provider: SourceProviderKey,
   events: UsageEvent[],
 ): boolean {
-  if (provider === "cursor") {
-    return events.some(
-      (e) => e.conversationKey && e.id.startsWith("cursor:local:"),
-    );
-  }
   return events.some((e) => e.conversationKey);
 }
 
@@ -66,7 +61,7 @@ export function groupEventsByConversation(
 }
 
 function fallbackTitle(event: UsageEvent): string {
-  if (event.sourcePath && event.sourcePath !== "cursor-api") {
+  if (event.sourcePath?.endsWith(".jsonl")) {
     const base = event.sourcePath.split("/").pop() ?? event.sourcePath;
     const withoutExt = base.replace(/\.jsonl$/i, "");
     if (withoutExt.startsWith("rollout-")) {

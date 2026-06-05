@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import {
   formatCurrencyMoney,
@@ -8,14 +9,14 @@ import {
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
-import type { ConversationUsageSummary } from "./lib/types";
+import { loadConversationDetails } from "./lib/usage";
+import type { ConversationUsageSummary, SourceProviderKey } from "./lib/types";
 
 type UsageDetailsProps = {
   period: PeriodKey;
+  provider: SourceProviderKey;
   providerTitle: string;
   currency: string;
-  conversations: ConversationUsageSummary[];
-  unavailableReason?: string;
 };
 
 type SortKey = "date" | "tokens" | "cost";
@@ -52,29 +53,37 @@ function sortConversations(
 
 export function UsageDetailsView({
   period,
+  provider,
   providerTitle,
   currency,
-  conversations,
-  unavailableReason,
 }: UsageDetailsProps) {
   const [sort, setSort] = useState<SortKey>("date");
   const periodLabel = periodLabels[period];
 
+  const { isLoading, data: conversations } = useCachedPromise(
+    (p: PeriodKey, prov: SourceProviderKey) => loadConversationDetails(p, prov),
+    [period, provider],
+    { keepPreviousData: true },
+  );
+
   const sorted = useMemo(
-    () => sortConversations(conversations, sort),
+    () => sortConversations(conversations ?? [], sort),
     [conversations, sort],
   );
 
-  if (unavailableReason || sorted.length === 0) {
+  if (isLoading && sorted.length === 0) {
+    return (
+      <List isLoading navigationTitle={`${providerTitle} · ${periodLabel}`} />
+    );
+  }
+
+  if (sorted.length === 0) {
     return (
       <List navigationTitle={`${providerTitle} · ${periodLabel}`}>
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Details unavailable"
-          description={
-            unavailableReason ??
-            "No per-chat breakdown is available for this provider and period."
-          }
+          description="No per-chat breakdown is available for this period."
         />
       </List>
     );
@@ -132,7 +141,6 @@ function ConversationListItem({
     <List.Item
       title={chat.title}
       accessories={[
-        { text: tokensStr, tooltip: `${tokensStr} tokens` },
         ...(costStr
           ? [
               {
@@ -141,6 +149,7 @@ function ConversationListItem({
               },
             ]
           : []),
+        { text: tokensStr, tooltip: `${tokensStr} tokens` },
         {
           text: { value: dateStr, color: DATE_COLOR },
           tooltip: `Last active · ${formatDateTime(chat.lastActive)}`,

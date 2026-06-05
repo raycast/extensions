@@ -1,13 +1,71 @@
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import https from "node:https";
-import type { DateRange, UsageEvent } from "../types";
+import type {
+  DateRange,
+  UsageEvent,
+  UsageMetric,
+  UsageReaderSink,
+} from "../types";
 import { estimateCost } from "../pricing";
 import { expandHome, isInRange, safeNumber } from "./shared";
 
 const execFileAsync = promisify(execFile);
+
+/** Reuse API + SQLite results across dashboard opens (Token Lens uses ~60s). */
+const CURSOR_CACHE_TTL_MS = 60_000;
+
+type CursorEventsCache = {
+  at: number;
+  dbMtimeMs: number;
+  rangeKey: string;
+  events: UsageEvent[];
+  errors: string[];
+};
+
+type CursorConversationsCache = {
+  at: number;
+  dbMtimeMs: number;
+  rangeKey: string;
+  apiEvents: UsageEvent[];
+  events: UsageEvent[];
+  errors: string[];
+};
+
+let eventsCache: CursorEventsCache | null = null;
+let conversationsCache: CursorConversationsCache | null = null;
+
+function rangeKey(range: DateRange): string {
+  return `${range.start.getTime()}:${range.end.getTime()}`;
+}
+
+function dbMtimeMs(dbPath: string): number {
+  try {
+    return statSync(dbPath).mtimeMs;
+  } catch {
+    return 0;
+  }
+}
+
+function cacheIsFresh(
+  at: number,
+  dbPath: string,
+  range: DateRange,
+  cachedMtime: number,
+  cachedRangeKey: string,
+): boolean {
+  return (
+    Date.now() - at < CURSOR_CACHE_TTL_MS &&
+    cachedMtime === dbMtimeMs(dbPath) &&
+    cachedRangeKey === rangeKey(range)
+  );
+}
+
+function sqlInList(ids: string[]): string {
+  return ids.map((id) => `'${id.replace(/'/g, "''")}'`).join(", ");
+}
 
 /**
  * Cursor bubbles often omit a real API id (`default`, empty, `auto`). LiteLLM has
@@ -26,43 +84,15 @@ function modelForCostEstimate(modelName: string | null | undefined): string {
 /*  Cursor dashboard API types                                        */
 /* ------------------------------------------------------------------ */
 
-/**
- * Shape returned by `POST /api/dashboard/get-filtered-usage-events`.
- * This is the same endpoint cursor.com/dashboard uses to render its own
- * usage chart — it returns one row per chargeable request with real
- * timestamps + Cursor's own computed `totalCents` cost. Unlike the
- * `/api/usage` aggregate (which buckets to start-of-month only), this lets
- * us bin into Session / Today / Week / Month windows and avoids re-pricing
- * tokens ourselves with stale rate cards.
- */
 type FilteredUsageEvent = {
-  /** Unix ms epoch, encoded as a string. */
   timestamp: string;
-  /** Cursor's internal model id, e.g. `claude-opus-4-7-thinking-xhigh`. */
   model: string;
-  /**
-   * Event categorisation. `USAGE_EVENT_KIND_ABORTED_NOT_CHARGED` rows have
-   * tokenUsage but the user wasn't billed (aborted mid-stream). We skip those
-   * so the dashboard reflects billable usage only.
-   */
   kind?: string;
-  requestsCosts?: number;
-  isTokenBasedCall?: boolean;
-  isChargeable?: boolean;
-  isHeadless?: boolean;
-  /** Per-event flat fee in cents (business plan), already in `chargedCents`. */
-  cursorTokenFee?: number;
-  /** Cents actually charged to the user/team for this event. */
-  chargedCents?: number;
   tokenUsage?: {
     inputTokens?: number;
     outputTokens?: number;
     cacheReadTokens?: number;
     cacheWriteTokens?: number;
-    /**
-     * Cursor's own re-priced cost for this event, in cents. Matches what the
-     * cursor.com dashboard sums under "Spend".
-     */
     totalCents?: number;
   };
 };
@@ -71,10 +101,6 @@ type FilteredUsageEventsResponse = {
   totalUsageEventsCount: number;
   usageEventsDisplay: FilteredUsageEvent[];
 };
-
-/* ------------------------------------------------------------------ */
-/*  Auth (read access token from Cursor's SQLite store)                */
-/* ------------------------------------------------------------------ */
 
 function cursorDbPath(basePath: string) {
   return join(
@@ -130,10 +156,6 @@ function buildCookie(token: string, userId: string): string {
   return v;
 }
 
-/* ------------------------------------------------------------------ */
-/*  HTTP helpers                                                       */
-/* ------------------------------------------------------------------ */
-
 function postJson<T>(path: string, cookie: string, body: unknown): Promise<T> {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body ?? {});
@@ -178,17 +200,9 @@ function postJson<T>(path: string, cookie: string, body: unknown): Promise<T> {
   });
 }
 
-/* ------------------------------------------------------------------ */
-/*  Dashboard API path — granular per-event usage                      */
-/* ------------------------------------------------------------------ */
-
-/**
- * Page size for `/api/dashboard/get-filtered-usage-events`. The endpoint
- * happily returns 200+ rows per call; we keep it modest so a single
- * dashboard render only pulls what it needs. Pagination stops early once
- * we cross `range.start` (events are returned newest-first).
- */
 const CURSOR_TITLE_MAX = 80;
+const PAGE_SIZE = 200;
+const MAX_PAGES = 50;
 
 function truncateCursorTitle(text: string): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -198,9 +212,118 @@ function truncateCursorTitle(text: string): string {
     : `${t.slice(0, CURSOR_TITLE_MAX - 1)}…`;
 }
 
-const PAGE_SIZE = 200;
-/** Hard cap to avoid runaway loops if the API ever stops ordering by ts desc. */
-const MAX_PAGES = 50;
+function metricFromFiltered(raw: FilteredUsageEvent): UsageMetric | null {
+  const tsMs = Number(raw.timestamp);
+  if (!Number.isFinite(tsMs)) return null;
+  if (raw.kind && /_NOT_CHARGED$/.test(raw.kind)) return null;
+
+  const inputTokens = safeNumber(raw.tokenUsage?.inputTokens);
+  const outputTokens = safeNumber(raw.tokenUsage?.outputTokens);
+  const cacheReadTokens = safeNumber(raw.tokenUsage?.cacheReadTokens);
+  const cacheWriteTokens = safeNumber(raw.tokenUsage?.cacheWriteTokens);
+  const totalTokens =
+    inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
+  if (totalTokens <= 0) return null;
+
+  const totalCents = raw.tokenUsage?.totalCents;
+  const estimatedCost =
+    typeof totalCents === "number" && Number.isFinite(totalCents)
+      ? totalCents / 100
+      : estimateCost({
+          model: modelForCostEstimate(raw.model),
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheWriteTokens,
+        });
+
+  return {
+    timestamp: new Date(tsMs),
+    totalTokens,
+    estimatedCost,
+    estimatedTokens: false,
+  };
+}
+
+async function streamCursorApiEvents(
+  dbPath: string,
+  range: DateRange,
+  sink: UsageReaderSink,
+): Promise<{ errors: string[]; hadEvents: boolean }> {
+  const errors: string[] = [];
+  let hadEvents = false;
+
+  const token = await readAccessToken(dbPath);
+  if (!token) {
+    if (existsSync(dbPath)) errors.push("Cursor: not signed in");
+    return { errors, hadEvents };
+  }
+
+  const userId = extractUserId(token);
+  if (!userId) {
+    errors.push("Cursor: no user id");
+    return { errors, hadEvents };
+  }
+
+  try {
+    const cookie = buildCookie(token, userId);
+    let truncated = false;
+    let index = 0;
+
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
+      const resp = await postJson<FilteredUsageEventsResponse>(
+        "/api/dashboard/get-filtered-usage-events",
+        cookie,
+        {
+          startDate: String(range.start.getTime()),
+          endDate: String(range.end.getTime()),
+          page,
+          pageSize: PAGE_SIZE,
+        },
+      );
+
+      const rows = resp.usageEventsDisplay ?? [];
+      if (rows.length === 0) break;
+
+      for (const raw of rows) {
+        const rowIndex = index;
+        index += 1;
+        if (sink.event) {
+          const evt = eventFromFiltered(raw, rowIndex);
+          if (!evt) continue;
+          if (!isInRange(evt.timestamp, range.start, range.end)) continue;
+          sink.metric?.({
+            timestamp: evt.timestamp,
+            totalTokens: evt.totalTokens,
+            estimatedCost: evt.estimatedCost,
+            estimatedTokens: evt.estimatedTokens,
+          });
+          sink.event(evt);
+          hadEvents = true;
+          continue;
+        }
+        const metric = metricFromFiltered(raw);
+        if (!metric) continue;
+        if (!isInRange(metric.timestamp, range.start, range.end)) continue;
+        sink.metric?.(metric);
+        hadEvents = true;
+      }
+
+      if (rows.length < PAGE_SIZE) break;
+      const oldest = Number(rows[rows.length - 1].timestamp);
+      if (Number.isFinite(oldest) && oldest < range.start.getTime()) break;
+      if (page === MAX_PAGES) truncated = true;
+    }
+
+    if (truncated) {
+      errors.push("Cursor: results truncated, increase MAX_PAGES");
+    }
+    return { errors, hadEvents };
+  } catch (err) {
+    errors.push(`Cursor API: ${err instanceof Error ? err.message : "failed"}`);
+    return { errors, hadEvents };
+  }
+}
 
 async function fetchUsageEventsInRange(
   cookie: string,
@@ -224,16 +347,10 @@ async function fetchUsageEventsInRange(
     const rows = resp.usageEventsDisplay ?? [];
     if (rows.length === 0) break;
     events.push(...rows);
-
-    // Server-side date filter usually returns < PAGE_SIZE on the final page;
-    // a full page means there is likely another page to fetch.
     if (rows.length < PAGE_SIZE) break;
 
-    // Defensive early-stop: if oldest row in this page is older than the
-    // window's start, we're done regardless of the server filter.
     const oldest = Number(rows[rows.length - 1].timestamp);
     if (Number.isFinite(oldest) && oldest < range.start.getTime()) break;
-
     if (page === MAX_PAGES) truncated = true;
   }
 
@@ -246,11 +363,6 @@ function eventFromFiltered(
 ): UsageEvent | null {
   const tsMs = Number(raw.timestamp);
   if (!Number.isFinite(tsMs)) return null;
-
-  // Drop rows the user wasn't billed for — they pollute the spend chart
-  // and don't appear in cursor.com's own dashboard totals. Anything ending
-  // in `_NOT_CHARGED` (`ABORTED`, `ERRORED`, …) is safe to skip; we match
-  // on the suffix so new "no charge" kinds keep working without a code edit.
   if (raw.kind && /_NOT_CHARGED$/.test(raw.kind)) return null;
 
   const inputTokens = safeNumber(raw.tokenUsage?.inputTokens);
@@ -260,8 +372,6 @@ function eventFromFiltered(
   const totalTokens =
     inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
 
-  // Cursor's own cost in cents → USD. This already accounts for cached vs
-  // fresh input tiers, so we don't need to re-price via litellm.
   const totalCents = raw.tokenUsage?.totalCents;
   const estimatedCost =
     typeof totalCents === "number" && Number.isFinite(totalCents)
@@ -285,14 +395,13 @@ function eventFromFiltered(
     cacheWriteTokens,
     totalTokens,
     estimatedCost,
-    // Tokens come straight from Cursor's billing pipeline — not an estimate.
     estimatedTokens: false,
     sourcePath: "cursor-api",
   };
 }
 
 /* ------------------------------------------------------------------ */
-/*  Local SQLite fallback                                              */
+/*  Local SQLite — per-conversation aggregates (View Details)          */
 /* ------------------------------------------------------------------ */
 
 type ComposerRow = {
@@ -312,17 +421,151 @@ type BubbleRow = {
   model: string | null;
 };
 
+type ComposerAgg = {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  messageCount: number;
+  modelCounts: Map<string, number>;
+};
+
+type ComposerWindowRow = {
+  composerId: string;
+  firstBubble: string | number | null;
+  lastBubble: string | number | null;
+  bubbleCount: number | null;
+};
+
+type ComposerSession = {
+  composerId: string;
+  title: string;
+  lastMs: number;
+  windowStart: number;
+  windowEnd: number;
+};
+
+type ApiComposerAgg = {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  totalTokens: number;
+  estimatedCost: number;
+  messageCount: number;
+  modelCounts: Map<string, number>;
+};
+
+function emptyAgg(): ComposerAgg {
+  return {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    messageCount: 0,
+    modelCounts: new Map(),
+  };
+}
+
+function emptyApiAgg(): ApiComposerAgg {
+  return {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    totalTokens: 0,
+    estimatedCost: 0,
+    messageCount: 0,
+    modelCounts: new Map(),
+  };
+}
+
+function parseBubbleTime(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const ms = Date.parse(value);
+    if (Number.isFinite(ms)) return ms;
+  }
+  return null;
+}
+
+function pickComposerForApiEvent(
+  eventMs: number,
+  sessions: ComposerSession[],
+): ComposerSession | null {
+  const candidates = sessions.filter(
+    (session) => eventMs >= session.windowStart && eventMs <= session.windowEnd,
+  );
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+  return candidates.sort((a, b) => {
+    const spanA = a.windowEnd - a.windowStart;
+    const spanB = b.windowEnd - b.windowStart;
+    if (spanA !== spanB) return spanA - spanB;
+    return (
+      Math.abs(a.lastMs - eventMs) - Math.abs(b.lastMs - eventMs) ||
+      b.lastMs - a.lastMs
+    );
+  })[0];
+}
+
+function attributeApiEventsToComposers(
+  apiEvents: UsageEvent[],
+  sessions: ComposerSession[],
+): Map<string, ApiComposerAgg> {
+  const byComposer = new Map<string, ApiComposerAgg>();
+  for (const event of apiEvents) {
+    const session = pickComposerForApiEvent(
+      event.timestamp.getTime(),
+      sessions,
+    );
+    if (!session) continue;
+
+    let agg = byComposer.get(session.composerId);
+    if (!agg) {
+      agg = emptyApiAgg();
+      byComposer.set(session.composerId, agg);
+    }
+    agg.inputTokens += event.inputTokens;
+    agg.outputTokens += event.outputTokens;
+    agg.cacheReadTokens += event.cacheReadTokens;
+    agg.cacheWriteTokens += event.cacheWriteTokens;
+    agg.totalTokens += event.totalTokens;
+    agg.estimatedCost += event.estimatedCost;
+    agg.messageCount += 1;
+    if (event.model) {
+      agg.modelCounts.set(
+        event.model,
+        (agg.modelCounts.get(event.model) ?? 0) + 1,
+      );
+    }
+  }
+  return byComposer;
+}
+
+function pickTopModel(modelCounts: Map<string, number>): string {
+  let top = "cursor-auto";
+  let count = 0;
+  for (const [model, n] of modelCounts) {
+    if (n > count) {
+      top = model;
+      count = n;
+    }
+  }
+  return top;
+}
+
 /**
- * Local DB fallback used when the API is unreachable (offline, expired token,
- * etc.). The cursorDiskKV `bubbleId:<composerId>:<bubbleId>` rows hold
- * per-bubble token counts but no timestamp; we join them to their parent
- * `composerData:<composerId>` row to recover a `lastUpdatedAt` timestamp
- * so the bubbles bucket into Session/Today/Week/Month correctly instead of
- * collapsing onto start-of-month.
+ * Builds one UsageEvent per composer for View Details.
+ * Uses local bubble token sums when present; otherwise attributes API events to
+ * composers by matching event timestamps to each chat's bubble activity window.
  */
-async function readLocalUsage(
+async function readCursorConversations(
   dbPath: string,
-  range: DateRange,
+  apiEvents: UsageEvent[] = [],
+  activeSinceMs?: number,
 ): Promise<{ events: UsageEvent[]; errors: string[] }> {
   const errors: string[] = [];
   if (!existsSync(dbPath)) {
@@ -330,6 +573,13 @@ async function readLocalUsage(
   }
 
   const uri = `file:${dbPath.replace(/ /g, "%20")}?mode=ro&immutable=1`;
+  const sinceFilter =
+    typeof activeSinceMs === "number" && Number.isFinite(activeSinceMs)
+      ? `and coalesce(
+          json_extract(cast(value as text), '$.lastUpdatedAt'),
+          json_extract(cast(value as text), '$.createdAt')
+        ) >= ${Math.floor(activeSinceMs)}`
+      : "";
 
   let composerRows: ComposerRow[] = [];
   try {
@@ -338,9 +588,14 @@ async function readLocalUsage(
         substr(key, instr(key, ':') + 1)                                   as composerId,
         json_extract(cast(value as text), '$.lastUpdatedAt')               as lastUpdatedAt,
         json_extract(cast(value as text), '$.createdAt')                   as createdAt,
-        json_extract(cast(value as text), '$.text')                        as title
+        coalesce(
+          nullif(json_extract(cast(value as text), '$.text'), ''),
+          nullif(json_extract(cast(value as text), '$.name'), ''),
+          nullif(json_extract(cast(value as text), '$.title'), '')
+        )                                                                  as title
       from cursorDiskKV
       where key like 'composerData:%'
+      ${sinceFilter}
     `;
     const { stdout } = await execFileAsync(
       "sqlite3",
@@ -350,17 +605,86 @@ async function readLocalUsage(
     if (stdout.trim())
       composerRows = JSON.parse(stdout.trim()) as ComposerRow[];
   } catch {
-    errors.push("Cursor: composer read error");
+    return { events: [], errors: ["Cursor: composer read error"] };
+  }
+
+  const composers = new Map<
+    string,
+    { lastMs: number; firstMs: number; title: string }
+  >();
+  for (const row of composerRows) {
+    const lastMs = Number(row.lastUpdatedAt ?? row.createdAt ?? NaN);
+    const firstMs = Number(row.createdAt ?? row.lastUpdatedAt ?? NaN);
+    if (!Number.isFinite(lastMs) || lastMs <= 0) continue;
+    const title =
+      typeof row.title === "string" && row.title.trim()
+        ? truncateCursorTitle(row.title)
+        : "Cursor conversation";
+    composers.set(row.composerId, {
+      lastMs,
+      firstMs: Number.isFinite(firstMs) && firstMs > 0 ? firstMs : lastMs,
+      title,
+    });
+  }
+
+  const activeComposerIds = [...composers.keys()];
+  if (activeComposerIds.length === 0) {
     return { events: [], errors };
   }
 
-  const composerTs = new Map<string, number>();
-  const composerTitles = new Map<string, string>();
-  for (const row of composerRows) {
-    const ts = Number(row.lastUpdatedAt ?? row.createdAt ?? NaN);
-    if (Number.isFinite(ts) && ts > 0) composerTs.set(row.composerId, ts);
-    const title = typeof row.title === "string" ? row.title.trim() : "";
-    if (title) composerTitles.set(row.composerId, truncateCursorTitle(title));
+  const composerInClause = sqlInList(activeComposerIds);
+
+  const windows = new Map<
+    string,
+    { firstBubble: unknown; lastBubble: unknown; bubbleCount: number }
+  >();
+  try {
+    const windowSql = `
+      select
+        substr(key, length('bubbleId:') + 1, 36)                            as composerId,
+        min(json_extract(cast(value as text), '$.createdAt'))               as firstBubble,
+        max(json_extract(cast(value as text), '$.createdAt'))               as lastBubble,
+        count(*)                                                            as bubbleCount
+      from cursorDiskKV
+      where key like 'bubbleId:%'
+        and substr(key, length('bubbleId:') + 1, 36) in (${composerInClause})
+      group by composerId
+    `;
+    const { stdout } = await execFileAsync(
+      "sqlite3",
+      ["-json", uri, windowSql],
+      { encoding: "utf8", maxBuffer: 1024 * 1024 * 20, timeout: 20000 },
+    );
+    if (stdout.trim()) {
+      for (const row of JSON.parse(stdout.trim()) as ComposerWindowRow[]) {
+        windows.set(row.composerId, {
+          firstBubble: row.firstBubble,
+          lastBubble: row.lastBubble,
+          bubbleCount: safeNumber(row.bubbleCount),
+        });
+      }
+    }
+  } catch {
+    return { events: [], errors: ["Cursor: bubble window read error"] };
+  }
+
+  const sessions: ComposerSession[] = [];
+  for (const [composerId, composer] of composers) {
+    const window = windows.get(composerId);
+    const windowStart =
+      parseBubbleTime(window?.firstBubble) ?? composer.firstMs;
+    const windowEnd = Math.max(
+      parseBubbleTime(window?.lastBubble) ?? composer.lastMs,
+      composer.lastMs,
+    );
+    if (!Number.isFinite(windowStart) || !Number.isFinite(windowEnd)) continue;
+    sessions.push({
+      composerId,
+      title: composer.title,
+      lastMs: composer.lastMs,
+      windowStart,
+      windowEnd,
+    });
   }
 
   let bubbleRows: BubbleRow[] = [];
@@ -376,7 +700,7 @@ async function readLocalUsage(
         json_extract(cast(value as text), '$.model')                        as model
       from cursorDiskKV
       where key like 'bubbleId:%'
-        and json_extract(cast(value as text), '$.tokenCount.inputTokens') > 0
+        and substr(key, length('bubbleId:') + 1, 36) in (${composerInClause})
     `;
     const { stdout } = await execFileAsync(
       "sqlite3",
@@ -385,18 +709,11 @@ async function readLocalUsage(
     );
     if (stdout.trim()) bubbleRows = JSON.parse(stdout.trim()) as BubbleRow[];
   } catch {
-    errors.push("Cursor: bubble read error");
-    return { events: [], errors };
+    return { events: [], errors: ["Cursor: bubble read error"] };
   }
 
-  const events: UsageEvent[] = [];
-  for (let i = 0; i < bubbleRows.length; i += 1) {
-    const row = bubbleRows[i];
-    const tsMs = composerTs.get(row.composerId);
-    if (!tsMs) continue;
-    const timestamp = new Date(tsMs);
-    if (!isInRange(timestamp, range.start, range.end)) continue;
-
+  const localAggByComposer = new Map<string, ComposerAgg>();
+  for (const row of bubbleRows) {
     const inputTokens = safeNumber(row.inputTokens);
     const outputTokens = safeNumber(row.outputTokens);
     const cacheReadTokens = safeNumber(row.cacheReadTokens);
@@ -405,36 +722,218 @@ async function readLocalUsage(
       inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
     if (totalTokens <= 0) continue;
 
-    const displayModel = row.modelName || row.model || "cursor-auto";
-    const pricingModel = modelForCostEstimate(displayModel);
+    let agg = localAggByComposer.get(row.composerId);
+    if (!agg) {
+      agg = emptyAgg();
+      localAggByComposer.set(row.composerId, agg);
+    }
+    agg.inputTokens += inputTokens;
+    agg.outputTokens += outputTokens;
+    agg.cacheReadTokens += cacheReadTokens;
+    agg.cacheWriteTokens += cacheWriteTokens;
+    agg.messageCount += 1;
 
+    const model = (row.modelName || row.model || "").trim();
+    if (model)
+      agg.modelCounts.set(model, (agg.modelCounts.get(model) ?? 0) + 1);
+  }
+
+  const apiAggByComposer =
+    apiEvents.length > 0
+      ? attributeApiEventsToComposers(apiEvents, sessions)
+      : new Map<string, ApiComposerAgg>();
+
+  const composerIds = new Set<string>([
+    ...localAggByComposer.keys(),
+    ...apiAggByComposer.keys(),
+  ]);
+
+  const events: UsageEvent[] = [];
+  for (const composerId of composerIds) {
+    const composer = composers.get(composerId);
+    if (!composer) continue;
+
+    const localAgg = localAggByComposer.get(composerId);
+    const localTotal = localAgg
+      ? localAgg.inputTokens +
+        localAgg.outputTokens +
+        localAgg.cacheReadTokens +
+        localAgg.cacheWriteTokens
+      : 0;
+    const apiAgg = apiAggByComposer.get(composerId);
+
+    if (localTotal > 0 && localAgg) {
+      const topModel = pickTopModel(localAgg.modelCounts);
+      events.push({
+        id: `cursor:convo:${composerId}`,
+        provider: "cursor",
+        timestamp: new Date(composer.lastMs),
+        model: topModel,
+        inputTokens: localAgg.inputTokens,
+        outputTokens: localAgg.outputTokens,
+        cacheReadTokens: localAgg.cacheReadTokens,
+        cacheWriteTokens: localAgg.cacheWriteTokens,
+        totalTokens: localTotal,
+        estimatedCost: estimateCost({
+          model: modelForCostEstimate(topModel),
+          inputTokens: localAgg.inputTokens,
+          outputTokens: localAgg.outputTokens,
+          cacheReadTokens: localAgg.cacheReadTokens,
+          cacheWriteTokens: localAgg.cacheWriteTokens,
+        }),
+        estimatedTokens: false,
+        sourcePath: composerId,
+        conversationKey: composerId,
+        conversationTitle: composer.title,
+      });
+      continue;
+    }
+
+    if (!apiAgg || apiAgg.totalTokens <= 0) continue;
+
+    const topModel = pickTopModel(apiAgg.modelCounts);
     events.push({
-      id: `cursor:local:${row.composerId}:${i}`,
+      id: `cursor:convo:${composerId}`,
       provider: "cursor",
-      timestamp,
-      model: displayModel,
-      inputTokens,
-      outputTokens,
-      cacheReadTokens,
-      cacheWriteTokens,
-      totalTokens,
-      estimatedCost: estimateCost({
-        model: pricingModel,
-        inputTokens,
-        outputTokens,
-        cacheReadTokens,
-        cacheWriteTokens,
-      }),
-      // Token counts are accurate but pricing is a local estimate.
-      estimatedTokens: true,
-      sourcePath: dbPath,
-      conversationKey: row.composerId,
-      conversationTitle: composerTitles.get(row.composerId),
+      timestamp: new Date(composer.lastMs),
+      model: topModel,
+      inputTokens: apiAgg.inputTokens,
+      outputTokens: apiAgg.outputTokens,
+      cacheReadTokens: apiAgg.cacheReadTokens,
+      cacheWriteTokens: apiAgg.cacheWriteTokens,
+      totalTokens: apiAgg.totalTokens,
+      estimatedCost: apiAgg.estimatedCost,
+      estimatedTokens: false,
+      sourcePath: composerId,
+      conversationKey: composerId,
+      conversationTitle: composer.title,
     });
   }
 
-  if (events.length > 0) errors.push("Cursor: local DB");
   return { events, errors };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Local SQLite fallback for usage totals when API is unavailable     */
+/* ------------------------------------------------------------------ */
+
+async function readLocalUsageFallback(
+  dbPath: string,
+  range: DateRange,
+): Promise<{ events: UsageEvent[]; errors: string[] }> {
+  const { events: allConversations, errors } = await readCursorConversations(
+    dbPath,
+    [],
+    range.start.getTime(),
+  );
+  const filtered = allConversations.filter((e) =>
+    isInRange(e.timestamp, range.start, range.end),
+  );
+  if (filtered.length > 0) {
+    errors.push("Cursor: local DB (API unavailable)");
+  }
+  return { events: filtered, errors };
+}
+
+async function fetchCursorApiEvents(
+  dbPath: string,
+  range: DateRange,
+): Promise<{ events: UsageEvent[]; errors: string[] }> {
+  const errors: string[] = [];
+  const mtime = dbMtimeMs(dbPath);
+  const key = rangeKey(range);
+
+  if (
+    eventsCache &&
+    cacheIsFresh(eventsCache.at, dbPath, range, eventsCache.dbMtimeMs, key)
+  ) {
+    return { events: eventsCache.events, errors: eventsCache.errors };
+  }
+
+  const token = await readAccessToken(dbPath);
+  if (!token) {
+    if (existsSync(dbPath)) errors.push("Cursor: not signed in");
+    return { events: [], errors };
+  }
+
+  const userId = extractUserId(token);
+  if (!userId) {
+    errors.push("Cursor: no user id");
+    return { events: [], errors };
+  }
+
+  try {
+    const cookie = buildCookie(token, userId);
+    const { events: rawEvents, truncated } = await fetchUsageEventsInRange(
+      cookie,
+      range,
+    );
+    const events: UsageEvent[] = [];
+    for (let i = 0; i < rawEvents.length; i += 1) {
+      const evt = eventFromFiltered(rawEvents[i], i);
+      if (!evt) continue;
+      if (!isInRange(evt.timestamp, range.start, range.end)) continue;
+      events.push(evt);
+    }
+    if (truncated) {
+      errors.push("Cursor: results truncated, increase MAX_PAGES");
+    }
+    eventsCache = {
+      at: Date.now(),
+      dbMtimeMs: mtime,
+      rangeKey: key,
+      events,
+      errors: [...errors],
+    };
+    return { events, errors };
+  } catch (err) {
+    errors.push(`Cursor API: ${err instanceof Error ? err.message : "failed"}`);
+    return { events: [], errors };
+  }
+}
+
+/** Loads per-chat rows for View Details (uses cached API events when available). */
+export async function readCursorConversationBreakdown(
+  basePath: string,
+  loadRange: DateRange,
+): Promise<{ events: UsageEvent[]; errors: string[] }> {
+  const dbPath = cursorDbPath(basePath);
+  const mtime = dbMtimeMs(dbPath);
+  const key = rangeKey(loadRange);
+
+  const { events: apiEvents } = await fetchCursorApiEvents(dbPath, loadRange);
+
+  if (
+    conversationsCache &&
+    cacheIsFresh(
+      conversationsCache.at,
+      dbPath,
+      loadRange,
+      conversationsCache.dbMtimeMs,
+      key,
+    ) &&
+    conversationsCache.apiEvents === apiEvents
+  ) {
+    return {
+      events: conversationsCache.events,
+      errors: conversationsCache.errors,
+    };
+  }
+
+  const result = await readCursorConversations(
+    dbPath,
+    apiEvents,
+    loadRange.start.getTime(),
+  );
+  conversationsCache = {
+    at: Date.now(),
+    dbMtimeMs: mtime,
+    rangeKey: key,
+    apiEvents,
+    events: result.events,
+    errors: result.errors,
+  };
+  return result;
 }
 
 /* ------------------------------------------------------------------ */
@@ -444,51 +943,38 @@ async function readLocalUsage(
 export async function readCursorUsage(
   basePath: string,
   range: DateRange,
-): Promise<{ events: UsageEvent[]; errors: string[] }> {
+  sink: UsageReaderSink,
+): Promise<string[]> {
   const errors: string[] = [];
   const dbPath = cursorDbPath(basePath);
 
-  const token = await readAccessToken(dbPath);
-  if (token) {
-    const userId = extractUserId(token);
-    if (userId) {
-      try {
-        const cookie = buildCookie(token, userId);
-        const { events: rawEvents, truncated } = await fetchUsageEventsInRange(
-          cookie,
-          range,
-        );
-        const events: UsageEvent[] = [];
-        for (let i = 0; i < rawEvents.length; i += 1) {
-          const evt = eventFromFiltered(rawEvents[i], i);
-          if (!evt) continue;
-          if (!isInRange(evt.timestamp, range.start, range.end)) continue;
-          events.push(evt);
-        }
+  const streamed = await streamCursorApiEvents(dbPath, range, sink);
+  errors.push(...streamed.errors);
 
-        if (truncated) {
-          errors.push("Cursor: results truncated, increase MAX_PAGES");
-        }
-
-        // API succeeded — even if the user has no usage yet (e.g. brand new
-        // billing month), we return the empty result rather than falling back
-        // to potentially stale local-DB bubbles from previous months.
-        return { events, errors };
-      } catch (err) {
-        errors.push(
-          `Cursor API: ${err instanceof Error ? err.message : "failed"}`,
-        );
-      }
-    } else {
-      errors.push("Cursor: no user id");
-    }
-  } else if (existsSync(dbPath)) {
-    errors.push("Cursor: not signed in");
+  if (streamed.hadEvents || streamed.errors.length === 0) {
+    return errors;
   }
 
-  const local = await readLocalUsage(dbPath, range);
-  return {
-    events: local.events,
-    errors: [...errors, ...local.errors],
-  };
+  const local = await readLocalUsageFallback(dbPath, range);
+  for (const event of local.events) {
+    if (!isInRange(event.timestamp, range.start, range.end)) continue;
+    if (sink.event) {
+      sink.metric?.({
+        timestamp: event.timestamp,
+        totalTokens: event.totalTokens,
+        estimatedCost: event.estimatedCost,
+        estimatedTokens: event.estimatedTokens,
+      });
+      sink.event(event);
+    } else {
+      sink.metric?.({
+        timestamp: event.timestamp,
+        totalTokens: event.totalTokens,
+        estimatedCost: event.estimatedCost,
+        estimatedTokens: event.estimatedTokens,
+      });
+    }
+  }
+  errors.push(...local.errors);
+  return errors;
 }

@@ -8,12 +8,21 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
-import { loadUsage } from "./lib/usage";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  budgetPeriodForProvider,
+  budgetPeriodLabel,
+  budgetRowTitle,
+  formatBudgetCapCompact,
+  formatBudgetSpanLabel,
+  getProviderBudgetAmount,
+} from "./lib/budget";
+import { renderBudgetProgressMarkdown } from "./lib/budget-chart";
 import {
   formatCurrencyMoney,
   formatTokens,
   getUsageLoadRange,
+  PERIOD_KEYS,
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
@@ -21,24 +30,18 @@ import {
   renderTokenUsageChartMarkdown,
   type UsageBucket,
 } from "./lib/token-chart";
-import {
-  deserializeConversation,
-  supportsConversationDetailsFromSnapshot,
-} from "./lib/usage-snapshot";
 import type { SourceProviderKey } from "./lib/types";
+import { clearUsageSnapshotCache, loadUsage } from "./lib/usage";
 import { UsageDetailsView } from "./usage-details";
 
-/* ------------------------------------------------------------------ */
-/*  Provider metadata (brand marks via assets/)                         */
-/* ------------------------------------------------------------------ */
+const CURSOR_BRAND_HEX = "#A8DFB6";
+const BUDGET_ITEM_ID = "budget";
 
-/** Cursor UI accent — very light green so it reads apart from Claude’s orange. */
-const CURSOR_BRAND_HEX = "#C8F4CE";
+type SelectionId = PeriodKey | typeof BUDGET_ITEM_ID;
 
 const providersMeta: readonly {
   key: SourceProviderKey;
   title: string;
-  /** Hex accent for healthy usage, charts, and icon tints (Raycast accepts hex strings). */
   brandColor: string;
   dropdownIcon: Image.ImageLike;
 }[] = [
@@ -62,20 +65,22 @@ const providersMeta: readonly {
   },
 ];
 
-const periods: PeriodKey[] = ["today", "week", "month"];
-
-/** Short period names for the list title (full label in tooltip & detail). */
 const periodListTitles: Record<PeriodKey, string> = {
-  today: "Today",
   week: "Week",
   month: "Month",
 };
 
-/** Auto-refresh interval — full corpus rescans are expensive; 5 min keeps heap stable. */
 const REFRESH_INTERVAL = 5 * 60_000;
-
-/** Raycast list rows clip long titles; keep a single line with full detail on hover. */
 const WARN_TITLE_MAX = 42;
+const CACHE_NAMESPACE = "tokentrack-dashboard-v3";
+
+const emptySummary = {
+  totalTokens: 0,
+  estimatedCost: 0,
+  hasEstimatedTokens: false,
+  hasEstimatedCost: false,
+  buckets: [] as UsageBucket[],
+};
 
 function warningListTitle(text: string): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -86,63 +91,12 @@ function isCursorWarning(text: string): boolean {
   return text.startsWith("Cursor");
 }
 
-/* ------------------------------------------------------------------ */
-/*  Budget helpers                                                    */
-/* ------------------------------------------------------------------ */
-
-/** Claude + Cursor: limits align with calendar-ish monthly totals; sub-periods are even splits for planning. */
-function deriveBudgetsFromMonthly(monthly: number): Record<PeriodKey, number> {
-  return {
-    month: monthly,
-    week: monthly / 4,
-    today: monthly / 30,
-  };
-}
-
-/** Codex: OpenAI’s published limits center on 5h + weekly; user cap is weekly; month ≈ 30/7 weeks. */
-function deriveBudgetsFromWeekly(weekly: number): Record<PeriodKey, number> {
-  return {
-    week: weekly,
-    month: weekly * (30 / 7),
-    today: weekly / 7,
-  };
-}
-
-function getProviderBudgetAmount(
-  prefs: Preferences,
-  provider: SourceProviderKey,
-): number {
-  const raw =
-    provider === "claude"
-      ? prefs.claudeBudget
-      : provider === "codex"
-        ? prefs.codexBudget
-        : prefs.cursorBudget;
-  const val = Number(raw);
-  return Number.isFinite(val) && val > 0 ? val : 0;
-}
-
-function budgetsForProvider(
-  prefs: Preferences,
-  provider: SourceProviderKey,
-): Record<PeriodKey, number> | null {
-  const amount = getProviderBudgetAmount(prefs, provider);
-  if (amount <= 0) return null;
-  if (provider === "codex") return deriveBudgetsFromWeekly(amount);
-  return deriveBudgetsFromMonthly(amount);
-}
-
-/* ------------------------------------------------------------------ */
-/*  Budget visuals (Raycast circle progress icons)                    */
-/* ------------------------------------------------------------------ */
-
 function usageAccentColor(pct: number, brandHex: string): Color.ColorLike {
   if (pct >= 0.9) return Color.Red;
   if (pct >= 0.6) return Color.Yellow;
   return brandHex;
 }
 
-/** Maps usage (share of period budget) to Raycast's discrete circle icons (25 / 50 / 75 / 100 — not a continuous arc). */
 function budgetProgressIcon(pct: number): Icon {
   if (!Number.isFinite(pct) || pct <= 0) return Icon.Circle;
   const p = Math.min(pct, 1);
@@ -155,13 +109,12 @@ function budgetProgressIcon(pct: number): Icon {
 
 function formatBudgetPercent(pct: number): string {
   if (!Number.isFinite(pct) || pct <= 0) return "0%";
-  const whole = Math.round(pct * 100);
-  return `${whole.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`;
+  return `${Math.round(pct * 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}%`;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Command                                                           */
-/* ------------------------------------------------------------------ */
+function isPeriodKey(id: string): id is PeriodKey {
+  return PERIOD_KEYS.includes(id as PeriodKey);
+}
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
@@ -172,12 +125,13 @@ export default function Command() {
     ? prefs.defaultSource
     : "claude";
   const [tab, setTab] = useState<SourceProviderKey>(defaultSource);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>("week");
+  const [selectedItemId, setSelectedItemId] = useState<SelectionId>("week");
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    async (provider: SourceProviderKey) =>
-      loadUsage(prefs, getUsageLoadRange(), provider),
+    (provider: SourceProviderKey) => loadUsage(getUsageLoadRange(), provider),
     [tab],
-    { keepPreviousData: false },
+    { cacheNamespace: CACHE_NAMESPACE },
   );
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -190,16 +144,56 @@ export default function Command() {
     };
   }, [revalidate]);
 
-  const errors = data?.errors ?? [];
   const activeProvider = providersMeta.find((p) => p.key === tab)!;
-  const budgets = budgetsForProvider(prefs, tab);
+  const nativeBudget = getProviderBudgetAmount(prefs, tab);
+  const errors = data?.errors ?? [];
+
+  const budgetPeriod = budgetPeriodForProvider(tab);
+  const budgetSnapshot = data?.periods[budgetPeriod] ?? emptySummary;
+  const budgetSpend = budgetSnapshot.estimatedCost;
+  const budgetPct = nativeBudget > 0 ? budgetSpend / nativeBudget : 0;
+  const budgetSpendStr = formatCurrencyMoney(budgetSpend, currency);
+  const budgetCapStr = formatCurrencyMoney(nativeBudget, currency);
+  const budgetCapCompact = formatBudgetCapCompact(nativeBudget, currency);
+  const budgetSubtitle = `${budgetSpendStr} / ${budgetCapCompact}`;
+  const budgetPairLabel = `${budgetSpendStr} / ${budgetCapStr}`;
+  const budgetTooltip = `${formatBudgetPercent(budgetPct)} of ${budgetRowTitle(tab).toLowerCase()} (${budgetPairLabel})`;
+  const remaining = Math.max(nativeBudget - budgetSpend, 0);
+
+  const selectedChartMarkdown = useMemo(() => {
+    const snapshot = data?.periods[selectedPeriod];
+    if (!snapshot) return "";
+    return renderTokenUsageChartMarkdown(
+      selectedPeriod,
+      snapshot.buckets,
+      activeProvider.brandColor,
+    );
+  }, [data, selectedPeriod, activeProvider.brandColor]);
+
+  const budgetBarFill =
+    budgetPct >= 0.9
+      ? "#FF453A"
+      : budgetPct >= 0.6
+        ? "#FFD60A"
+        : activeProvider.brandColor;
+  const budgetDetailMarkdown = renderBudgetProgressMarkdown(
+    budgetSpend,
+    nativeBudget,
+    currency,
+    budgetBarFill,
+  );
+
+  const handleRefresh = () => {
+    clearUsageSnapshotCache();
+    revalidate();
+  };
 
   const refreshAction = (
     <ActionPanel>
       <Action
         title="Refresh Data"
         icon={Icon.ArrowClockwise}
-        onAction={() => revalidate()}
+        onAction={handleRefresh}
       />
     </ActionPanel>
   );
@@ -210,6 +204,18 @@ export default function Command() {
       isLoading={isLoading}
       filtering={false}
       searchBarPlaceholder=""
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => {
+        if (!id) return;
+        if (id === BUDGET_ITEM_ID) {
+          setSelectedItemId(BUDGET_ITEM_ID);
+          return;
+        }
+        if (isPeriodKey(id)) {
+          setSelectedItemId(id);
+          setSelectedPeriod(id);
+        }
+      }}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Provider"
@@ -228,48 +234,38 @@ export default function Command() {
       }
     >
       <List.Section title="Usage">
-        {periods.map((period) => {
-          const snapshot = data?.periods[period];
-          const summary = snapshot ?? {
-            totalTokens: 0,
-            estimatedCost: 0,
-            hasEstimatedTokens: false,
-            hasEstimatedCost: false,
-            buckets: [] as UsageBucket[],
-            conversations: [],
-          };
-          const budget = budgets ? budgets[period] : undefined;
-          const chartMarkdown = renderTokenUsageChartMarkdown(
-            period,
-            summary.buckets,
-            activeProvider.brandColor,
+        {PERIOD_KEYS.map((period) => {
+          const snapshot = data?.periods[period] ?? emptySummary;
+          const chartMarkdown =
+            period === selectedPeriod ? selectedChartMarkdown : "";
+
+          const spendStr = formatCurrencyMoney(
+            snapshot.estimatedCost,
+            currency,
           );
-          const detailsAvailable = snapshot
-            ? supportsConversationDetailsFromSnapshot(tab, snapshot)
-            : false;
-          const conversations = summary.conversations.map(
-            deserializeConversation,
-          );
+          const tokensStr =
+            snapshot.totalTokens > 0
+              ? formatTokens(snapshot.totalTokens)
+              : undefined;
 
-          const pct = budget && budget > 0 ? summary.estimatedCost / budget : 0;
-          const hasBudget = budget !== undefined && budget > 0;
-
-          const spendStr = formatCurrencyMoney(summary.estimatedCost, currency);
-          const budgetStr = budget ? formatCurrencyMoney(budget, currency) : "";
-          const budgetTooltip = hasBudget
-            ? `${formatBudgetPercent(pct)} of period budget (${spendStr} / ${budgetStr})`
-            : undefined;
-
-          const subtitleValue = hasBudget
-            ? `${spendStr} / ${budgetStr}`
-            : summary.estimatedCost > 0
+          const subtitleValue =
+            snapshot.estimatedCost > 0
               ? spendStr
-              : summary.totalTokens > 0
-                ? formatTokens(summary.totalTokens)
+              : tokensStr
+                ? tokensStr
                 : undefined;
+
+          const tokenAccessory =
+            snapshot.estimatedCost > 0 && tokensStr
+              ? {
+                  text: tokensStr,
+                  tooltip: `${tokensStr} tokens`,
+                }
+              : undefined;
 
           return (
             <List.Item
+              id={period}
               key={period}
               title={{
                 value: periodListTitles[period],
@@ -277,28 +273,10 @@ export default function Command() {
               }}
               subtitle={
                 subtitleValue
-                  ? {
-                      value: subtitleValue,
-                      tooltip: hasBudget ? budgetTooltip : undefined,
-                    }
+                  ? { value: subtitleValue, tooltip: subtitleValue }
                   : undefined
               }
-              accessories={
-                hasBudget
-                  ? [
-                      {
-                        icon: {
-                          source: budgetProgressIcon(pct),
-                          tintColor: usageAccentColor(
-                            pct,
-                            activeProvider.brandColor,
-                          ),
-                        },
-                        tooltip: budgetTooltip,
-                      },
-                    ]
-                  : []
-              }
+              accessories={tokenAccessory ? [tokenAccessory] : []}
               detail={
                 <List.Item.Detail
                   markdown={chartMarkdown}
@@ -307,45 +285,15 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Label
                         title="Period"
                         text={periodLabels[period]}
-                        icon={{
-                          source: Icon.Calendar,
-                          tintColor: activeProvider.brandColor,
-                        }}
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Total Tokens"
-                        text={formatTokens(summary.totalTokens)}
-                        icon={{
-                          source: Icon.TextDocument,
-                          tintColor: activeProvider.brandColor,
-                        }}
+                        text={formatTokens(snapshot.totalTokens)}
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Estimated Cost"
                         text={spendStr}
-                        icon={{
-                          source: Icon.CreditCard,
-                          tintColor: activeProvider.brandColor,
-                        }}
                       />
-                      {hasBudget ? (
-                        <List.Item.Detail.Metadata.TagList title="Usage">
-                          <List.Item.Detail.Metadata.TagList.Item
-                            icon={{
-                              source: budgetProgressIcon(pct),
-                              tintColor: usageAccentColor(
-                                pct,
-                                activeProvider.brandColor,
-                              ),
-                            }}
-                            text={formatBudgetPercent(pct)}
-                            color={usageAccentColor(
-                              pct,
-                              activeProvider.brandColor,
-                            )}
-                          />
-                        </List.Item.Detail.Metadata.TagList>
-                      ) : null}
                     </List.Item.Detail.Metadata>
                   }
                 />
@@ -358,29 +306,66 @@ export default function Command() {
                     target={
                       <UsageDetailsView
                         period={period}
+                        provider={tab}
                         providerTitle={activeProvider.title}
                         currency={currency}
-                        conversations={conversations}
-                        unavailableReason={
-                          detailsAvailable
-                            ? undefined
-                            : tab === "cursor"
-                              ? "Not available for Cursor."
-                              : "No per-chat breakdown is available for this period."
-                        }
                       />
                     }
                   />
                   <Action
                     title="Refresh Data"
                     icon={Icon.ArrowClockwise}
-                    onAction={() => revalidate()}
+                    onAction={handleRefresh}
                   />
                 </ActionPanel>
               }
             />
           );
         })}
+      </List.Section>
+
+      <List.Section title="Budget" subtitle={budgetPeriodLabel(tab)}>
+        <List.Item
+          id={BUDGET_ITEM_ID}
+          title={budgetRowTitle(tab)}
+          subtitle={{
+            value: budgetSubtitle,
+            tooltip: budgetPairLabel,
+          }}
+          accessories={[
+            {
+              icon: {
+                source: budgetProgressIcon(budgetPct),
+                tintColor: usageAccentColor(
+                  budgetPct,
+                  activeProvider.brandColor,
+                ),
+              },
+              tooltip: budgetTooltip,
+            },
+          ]}
+          detail={
+            <List.Item.Detail
+              markdown={budgetDetailMarkdown}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label
+                    title="Period"
+                    text={budgetPeriodLabel(tab)}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Span"
+                    text={formatBudgetSpanLabel(tab)}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Remaining"
+                    text={formatCurrencyMoney(remaining, currency)}
+                  />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+        />
       </List.Section>
 
       {errors.length > 0 ? (

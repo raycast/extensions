@@ -8,7 +8,7 @@ import {
 import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
-import type { DateRange, UsageEvent } from "../types";
+import type { DateRange, UsageEvent, UsageReaderSink } from "../types";
 import { estimateCost } from "../pricing";
 import { expandHome, isInRange, safeNumber } from "./shared";
 
@@ -49,16 +49,19 @@ type ClaudeRecord = {
  * last-parsed-line object alive concurrently and pushes Raycast past its
  * 100 MB JS heap budget.
  */
-const CLAUDE_READ_CONCURRENCY = 4;
+const CLAUDE_READ_CONCURRENCY = 2;
 
 /** Skip JSONL files not touched since before the window (sessions can span days). */
 const CLAUDE_FILE_BACKDATE_MS = 7 * 24 * 60 * 60 * 1000;
 
-export async function readClaudeUsage(basePath: string, range: DateRange) {
+export async function readClaudeUsage(
+  basePath: string,
+  range: DateRange,
+  sink: UsageReaderSink,
+): Promise<string[]> {
   const root = expandHome(basePath || "~/.claude");
   const projectRoot = join(root, "projects");
   const errors: string[] = [];
-  const events: UsageEvent[] = [];
   // Cross-file dedup: Claude Code replicates assistant messages into the new
   // JSONL whenever a session is resumed or forked, so the same API response
   // appears in N project directories. Without this set the same usage row is
@@ -66,19 +69,19 @@ export async function readClaudeUsage(basePath: string, range: DateRange) {
   // Matches ccusage's `messageId:requestId` key.
   const seen = new Set<string>();
 
-  if (!existsSync(projectRoot)) return { events, errors };
+  if (!existsSync(projectRoot)) return errors;
 
   try {
     const files = await findJsonl(projectRoot, range);
     const fileTitles = new Map<string, string>();
     await runWithConcurrency(files, CLAUDE_READ_CONCURRENCY, (file) =>
-      readClaudeFile(file, range, events, seen, fileTitles),
+      readClaudeFile(file, range, sink, seen, fileTitles),
     );
   } catch {
     errors.push("Claude: read error");
   }
 
-  return { events, errors };
+  return errors;
 }
 
 async function runWithConcurrency<T>(
@@ -123,7 +126,7 @@ export function readClaudeUsageSync(basePath: string, range: DateRange) {
 async function readClaudeFile(
   file: string,
   range: DateRange,
-  events: UsageEvent[],
+  sink: UsageReaderSink,
   seen: Set<string>,
   fileTitles: Map<string, string>,
 ) {
@@ -136,7 +139,7 @@ async function readClaudeFile(
   for await (const line of reader) {
     lineNumber += 1;
     tryNoteClaudeSessionTitle(file, line, fileTitles);
-    pushClaudeLine(file, line, lineNumber, range, events, seen, fileTitles);
+    pushClaudeLine(file, line, lineNumber, range, sink, seen, fileTitles);
   }
 }
 
@@ -151,7 +154,15 @@ function readClaudeFileSync(
     .split(/\r?\n/)
     .forEach((line, index) => {
       tryNoteClaudeSessionTitle(file, line, fileTitles);
-      pushClaudeLine(file, line, index + 1, range, events, seen, fileTitles);
+      pushClaudeLine(
+        file,
+        line,
+        index + 1,
+        range,
+        { event: (e) => events.push(e) },
+        seen,
+        fileTitles,
+      );
     });
 }
 
@@ -197,7 +208,7 @@ function pushClaudeLine(
   line: string,
   lineNumber: number,
   range: DateRange,
-  events: UsageEvent[],
+  sink: UsageReaderSink,
   seen: Set<string>,
   fileTitles: Map<string, string>,
 ) {
@@ -250,7 +261,23 @@ function pushClaudeLine(
     inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
   if (totalTokens <= 0) return;
 
-  events.push({
+  const estimatedCost = estimateCost({
+    model: record.message.model,
+    inputTokens,
+    outputTokens,
+    cacheReadTokens,
+    cacheWriteTokens,
+    cacheWrite1hTokens,
+  });
+
+  sink.metric?.({
+    timestamp,
+    totalTokens,
+    estimatedCost,
+    estimatedTokens: false,
+  });
+
+  sink.event?.({
     id: dedupKey ? `claude:${dedupKey}` : `claude:${file}:${lineNumber}`,
     provider: "claude",
     timestamp,
@@ -260,14 +287,7 @@ function pushClaudeLine(
     cacheReadTokens,
     cacheWriteTokens,
     totalTokens,
-    estimatedCost: estimateCost({
-      model: record.message.model,
-      inputTokens,
-      outputTokens,
-      cacheReadTokens,
-      cacheWriteTokens,
-      cacheWrite1hTokens,
-    }),
+    estimatedCost,
     estimatedTokens: false,
     sourcePath: file,
     conversationKey: file,
