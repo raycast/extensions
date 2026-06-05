@@ -6,6 +6,45 @@ import { executeSQL } from "@raycast/utils";
 export const fileIcon = "/System/Applications/Notes.app";
 export const NOTES_DB = resolve(os.homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
+export type Link = {
+  id: string;
+  text: string | null;
+  url: string | null;
+  notePk: number;
+};
+
+export type Backlink = {
+  id: string;
+  title: string;
+  url: string;
+};
+
+export type Tag = {
+  id: string;
+  text: string | null;
+  notePk: number;
+};
+
+export type NoteItem = {
+  id: string;
+  pk: number;
+  UUID: string;
+  title: string;
+  modifiedAt?: Date;
+  folder: string;
+  snippet: string;
+  account: string;
+  invitationLink: string | null;
+  links: Link[];
+  backlinks: Backlink[];
+  tags: Tag[];
+  // the booleans below are stored as 0 or 1 in the database
+  locked: boolean;
+  pinned: boolean;
+  checklist: boolean;
+  checklistInProgress: boolean;
+};
+
 type ResolvedNoteId = {
   id: string;
 };

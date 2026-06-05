@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { match } from "pinyin-pro";
-import { useMemo, useState } from "react";
+import { useMemo, useCallback, useState } from "react";
 
 import { createNote } from "./api/applescript";
 import NoteListItem from "./components/NoteListItem";
@@ -15,24 +15,27 @@ export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
   const [searchText, setSearchText] = useState<string>("");
 
-  const filteredNotes = useMemo(() => {
-    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? []), ...(data?.deletedNotes ?? [])].filter(
-      (note) => {
-        const chineseMatch = (text: string | null) =>
-          text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
-        return (
-          chineseMatch(note.title) ||
-          chineseMatch(note.snippet) ||
-          chineseMatch(note.folder) ||
-          note.tags.some((tag) => chineseMatch(tag.text)) ||
-          note.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
-          note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
-          note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      },
-    );
-  }, [searchText, data]);
+  const filterNote = useCallback(
+    (note: ReturnType<typeof useNotes>["data"]["pinnedNotes"][number]) => {
+      const chineseMatch = (text: string | null) =>
+        text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
+      return (
+        chineseMatch(note.title) ||
+        chineseMatch(note.snippet) ||
+        chineseMatch(note.folder) ||
+        note.tags.some((tag) => chineseMatch(tag.text)) ||
+        note.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase()))
+      );
+    },
+    [searchText],
+  );
+
+  const filteredPinned = useMemo(() => (data?.pinnedNotes ?? []).filter(filterNote), [filterNote, data]);
+  const filteredUnpinned = useMemo(() => (data?.unpinnedNotes ?? []).filter(filterNote), [filterNote, data]);
+  const filteredDeleted = useMemo(() => (data?.deletedNotes ?? []).filter(filterNote), [filterNote, data]);
 
   if (permissionView) {
     return permissionView;
@@ -45,27 +48,21 @@ export default function Command() {
       searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
     >
       <List.Section title="Pinned">
-        {filteredNotes
-          .filter((note) => note.pinned && note.folder !== "Recently Deleted")
-          .map((note) => (
-            <NoteListItem key={note.id} note={note} mutate={mutate} />
-          ))}
+        {filteredPinned.map((note) => (
+          <NoteListItem key={note.id} note={note} mutate={mutate} />
+        ))}
       </List.Section>
 
       <List.Section title="Notes">
-        {filteredNotes
-          .filter((note) => !note.pinned && note.folder !== "Recently Deleted")
-          .map((note) => (
-            <NoteListItem key={note.id} note={note} mutate={mutate} />
-          ))}
+        {filteredUnpinned.map((note) => (
+          <NoteListItem key={note.id} note={note} mutate={mutate} />
+        ))}
       </List.Section>
 
       <List.Section title="Recently Deleted">
-        {filteredNotes
-          .filter((note) => note.folder === "Recently Deleted")
-          .map((note) => (
-            <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
-          ))}
+        {filteredDeleted.map((note) => (
+          <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
+        ))}
       </List.Section>
 
       <List.EmptyView
