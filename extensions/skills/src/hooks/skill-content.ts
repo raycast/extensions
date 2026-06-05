@@ -3,6 +3,7 @@ import { type Skill, type SkillFrontmatter, parseFrontmatter } from "../shared";
 type SkillContentResult = {
   frontmatter: SkillFrontmatter;
   body: string;
+  raw: string;
 };
 
 function buildSkillContentUrls(skill: Skill) {
@@ -38,7 +39,7 @@ export async function fetchSkillContent(skill: Skill): Promise<SkillContentResul
     const response = await fetch(url);
     if (response.ok && !response.headers.get("content-type")?.includes("text/html")) {
       const text = await response.text();
-      return parseFrontmatter(text);
+      return { ...parseFrontmatter(text), raw: text };
     }
     throw new Error(`Failed to fetch ${url}`);
   };
