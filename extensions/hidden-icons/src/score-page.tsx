@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, LocalStorage, open } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LocalStorage, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getNumberCanvas } from "./utils/common-utils";
-import { spawnSync } from "child_process";
 import { alertDialog } from "./hooks/hooks";
 import { HistoryScore } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
@@ -28,8 +27,12 @@ export default function ScorePage(props: { myScore: HistoryScore; historyScore: 
       });
       setBreakRecord(_breakRecord);
       if (_breakRecord) {
-        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
-        spawnSync(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://`, { shell: true });
+        await launchCommand({
+          ownerOrAuthorName: "raycast",
+          extensionName: "raycast",
+          name: "confetti",
+          type: LaunchType.UserInitiated,
+        });
       }
       await LocalStorage.setItem("HistoryScore", JSON.stringify(_newHistoryScore));
     }
