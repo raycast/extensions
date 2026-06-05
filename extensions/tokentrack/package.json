@@ -33,19 +33,19 @@
     },
     {
       "name": "claude-quick-usage",
-      "title": "Claude Code Quick Usage",
+      "title": "Quick Usage Claude Code",
       "description": "Show Claude Code spend against your monthly budget.",
       "mode": "no-view"
     },
     {
       "name": "codex-quick-usage",
-      "title": "Codex Quick Usage",
+      "title": "Quick Usage Codex",
       "description": "Show Codex spend against your rolling weekly budget.",
       "mode": "no-view"
     },
     {
       "name": "cursor-quick-usage",
-      "title": "Cursor Quick Usage",
+      "title": "Quick Usage Cursor",
       "description": "Show Cursor spend against your monthly budget.",
       "mode": "no-view"
     }

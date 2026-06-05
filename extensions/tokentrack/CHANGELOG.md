@@ -2,7 +2,7 @@
 
 ## [Quick usage commands] - {PR_MERGE_DATE}
 
-- Add **Claude Code Quick Usage**, **Codex Quick Usage**, and **Cursor Quick Usage** no-view commands that show a toast with estimated spend against your configured budget cap.
+- Add **Quick Usage Claude Code**, **Quick Usage Codex**, and **Quick Usage Cursor** no-view commands that show a toast with estimated spend against your configured budget cap.
 
 ## [Remove budget alerts] - {PR_MERGE_DATE}
 
