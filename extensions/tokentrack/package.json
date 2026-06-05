@@ -34,12 +34,20 @@
   ],
   "preferences": [
     {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Currency code used to format estimated spend.",
+      "type": "textfield",
+      "default": "USD",
+      "required": true
+    },
+    {
       "name": "claudeBudget",
       "title": "Claude Monthly Budget ($)",
       "description": "Monthly Anthropic spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",
-      "required": false
+      "required": true
     },
     {
       "name": "codexBudget",
@@ -47,7 +55,7 @@
       "description": "Weekly Codex spend cap for the current rolling 7-day window (anchored to first use).",
       "type": "textfield",
       "default": "100",
-      "required": false
+      "required": true
     },
     {
       "name": "cursorBudget",
@@ -55,14 +63,6 @@
       "description": "Monthly Cursor spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",
-      "required": false
-    },
-    {
-      "name": "currency",
-      "title": "Currency",
-      "description": "Currency code used to format estimated spend.",
-      "type": "textfield",
-      "default": "USD",
       "required": true
     },
     {
