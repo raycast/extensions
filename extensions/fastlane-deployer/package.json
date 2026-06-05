@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastlane-deployer",
+  "title": "Fastlane Deployer",
+  "description": "Deploy and monitor Fastlane lanes for multiple iOS and Android projects",
+  "icon": "command-icon.png",
+  "author": "ddxkalin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "Fastlane",
+    "iOS",
+    "Android",
+    "Deploy",
+    "TestFlight",
+    "Mobile"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "deploy",
+      "title": "Deploy",
+      "description": "Run a configured Fastlane lane",
+      "mode": "view"
+    },
+    {
+      "name": "monitor-deployments",
+      "title": "Monitor Deployments",
+      "description": "View deployment status, progress, and logs",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Configure Fastlane projects and lanes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
