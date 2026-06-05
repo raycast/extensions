@@ -41,12 +41,6 @@ export type TodoDetails = TodoSummary & {
   checklistItems: ChecklistItem[];
 };
 
-/** Lightweight project summary. */
-export type ProjectSummary = {
-  id: string;
-  name: string;
-};
-
 /** Full project details. */
 export type ProjectDetails = {
   id: string;
@@ -59,12 +53,6 @@ export type ProjectDetails = {
   areaId?: string;
   areaName?: string;
   todoCount: number;
-};
-
-/** Lightweight area summary. */
-export type AreaSummary = {
-  id: string;
-  name: string;
 };
 
 /** Full area details. */

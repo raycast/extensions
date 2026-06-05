@@ -110,6 +110,13 @@
       ]
     },
     {
+      "name": "compare-jxa-sql",
+      "title": "Compare JXA VS SQL (Dev)",
+      "subtitle": "Things",
+      "description": "Developer tool: compares JXA and SQL output for every built-in list. Results logged to console.",
+      "mode": "no-view"
+    },
+    {
       "name": "quick-add-todo",
       "title": "Quick Add To-Do",
       "subtitle": "Things",
@@ -464,6 +471,15 @@
       "label": "Group by Project or Area",
       "description": "Group to-dos in lists by their project or area",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "useUnofficialApi",
+      "type": "checkbox",
+      "title": "Unofficial API",
+      "label": "Read directly from Things database",
+      "description": "Requires Full Disk Access for Raycast and uses an unofficial internal format that may break on Things updates.",
+      "default": false,
       "required": false
     }
   ],

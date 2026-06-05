@@ -39,7 +39,7 @@ export default function TodoDetail({
   }
 
   const area = todo.area || todo.project?.area;
-  const tagList = todo.tags?.split(', ').filter(Boolean) ?? [];
+  const tagList = todo.tags?.split(',').filter(Boolean) ?? [];
 
   const markdown = `# ${todo.name}\n\n${todo.notes?.trim() || '_No notes_'}`;
 

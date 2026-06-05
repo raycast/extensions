@@ -1,11 +1,9 @@
 import { queryTodos } from '../api';
 import { CommandListName } from '../types';
 
-const VALID_LIST_NAMES: CommandListName[] = ['inbox', 'today', 'anytime', 'upcoming', 'someday'];
-
 type Input = {
   /**
-   * Filter by built-in list name. One of: inbox, today, anytime, upcoming, someday.
+   * Filter by built-in list name. One of: inbox, today, anytime, upcoming, someday, logbook, trash.
    * WARNING: omitting all filters returns ALL open to-dos — only do this when truly needed.
    */
   listName?: CommandListName;
@@ -16,8 +14,5 @@ type Input = {
 };
 
 export default async function ({ listName, projectId, areaId }: Input) {
-  if (listName && !VALID_LIST_NAMES.includes(listName)) {
-    throw new Error(`Invalid list name: "${listName}". Valid values: ${VALID_LIST_NAMES.join(', ')}`);
-  }
   return await queryTodos({ listName, projectId, areaId });
 }

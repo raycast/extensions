@@ -1,4 +1,4 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
+import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, environment } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
 import { addProject, getCollections } from './api';
@@ -100,7 +100,9 @@ Tasks:`);
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add New Project" onSubmit={handleSubmit} icon={Icon.Plus} />
-          <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          {environment.canAccess(AI) && (
+            <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          )}
           <ActionPanel.Section>
             <Action
               title="Focus Title"

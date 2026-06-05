@@ -21,7 +21,7 @@ const ALL_TAGS = 'all';
 const NO_TAG = 'none';
 
 function parseTags(tagString: string | null | undefined): string[] {
-  return tagString?.split(', ').filter(Boolean) ?? [];
+  return tagString?.split(',').filter(Boolean) ?? [];
 }
 
 function buildTagHierarchy(tags: TagWithParent[]) {
@@ -62,7 +62,7 @@ function buildTagHierarchy(tags: TagWithParent[]) {
     computeAncestorPath(tag.name);
   }
 
-  return { childrenMap, ancestorPath, getDescendants };
+  return { ancestorPath, getDescendants };
 }
 
 export default function TodoList({ commandListName, displayActivationDates }: TodoListProps) {
