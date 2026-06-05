@@ -10,13 +10,14 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  budgetPeriodForProvider,
   budgetPeriodLabel,
   budgetRowTitle,
+  budgetSpendForProvider,
   formatBudgetCapCompact,
   formatBudgetSpanLabel,
   getProviderBudgetAmount,
 } from "./lib/budget";
+import { getCodexBudgetLoadRange } from "./lib/codex-budget";
 import { renderBudgetProgressMarkdown } from "./lib/budget-chart";
 import {
   formatCurrencyMoney,
@@ -129,7 +130,11 @@ export default function Command() {
   const [selectedItemId, setSelectedItemId] = useState<SelectionId>("week");
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    (provider: SourceProviderKey) => loadUsage(getUsageLoadRange(), provider),
+    (provider: SourceProviderKey) =>
+      loadUsage(
+        provider === "codex" ? getCodexBudgetLoadRange() : getUsageLoadRange(),
+        provider,
+      ),
     [tab],
   );
 
@@ -147,9 +152,11 @@ export default function Command() {
   const nativeBudget = getProviderBudgetAmount(prefs, tab);
   const errors = data?.errors ?? [];
 
-  const budgetPeriod = budgetPeriodForProvider(tab);
-  const budgetSnapshot = data?.periods[budgetPeriod] ?? emptySummary;
-  const budgetSpend = budgetSnapshot.estimatedCost;
+  const budgetSpend = budgetSpendForProvider(
+    tab,
+    data?.periods ?? { week: emptySummary, month: emptySummary },
+    data?.codexBudget,
+  );
   const budgetPct = nativeBudget > 0 ? budgetSpend / nativeBudget : 0;
   const budgetSpendStr = formatCurrencyMoney(budgetSpend, currency);
   const budgetCapStr = formatCurrencyMoney(nativeBudget, currency);
@@ -358,7 +365,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label
                     title="Span"
                     text={{
-                      value: formatBudgetSpanLabel(tab),
+                      value: formatBudgetSpanLabel(tab, data?.codexBudget),
                       color: DATE_COLOR,
                     }}
                   />

@@ -44,7 +44,7 @@
     {
       "name": "codexBudget",
       "title": "Codex Weekly Budget ($)",
-      "description": "Weekly Codex spend cap for the current calendar week.",
+      "description": "Weekly Codex spend cap for the current rolling 7-day window (anchored to first use).",
       "type": "textfield",
       "default": "100",
       "required": false

@@ -1,5 +1,6 @@
 import { buildUsageBucketsFromDaily, type UsageBucket } from "./token-chart";
 import { getPeriodRange, PERIOD_KEYS, type PeriodKey } from "./format";
+import type { CodexBudgetSnapshot } from "./codex-budget";
 import type { UsageMetric } from "./types";
 
 export type PeriodUsageSnapshot = {
@@ -13,6 +14,8 @@ export type PeriodUsageSnapshot = {
 export type ProviderUsageSnapshot = {
   errors: string[];
   periods: Record<PeriodKey, PeriodUsageSnapshot>;
+  /** Codex only — rolling weekly budget window (first-use anchored). */
+  codexBudget?: CodexBudgetSnapshot;
 };
 
 type PeriodAccumulator = {

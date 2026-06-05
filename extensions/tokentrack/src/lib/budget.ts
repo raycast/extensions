@@ -1,3 +1,5 @@
+import type { CodexBudgetSnapshot } from "./codex-budget";
+import { formatCodexBudgetSpanLabel } from "./codex-budget";
 import {
   formatCurrencyMoney,
   formatDateRangeCompact,
@@ -31,6 +33,7 @@ export function budgetRowTitle(provider: SourceProviderKey): string {
 }
 
 export function budgetPeriodLabel(provider: SourceProviderKey): string {
+  if (provider === "codex") return "Rolling Week";
   return periodLabels[budgetPeriodForProvider(provider)];
 }
 
@@ -72,9 +75,30 @@ export function formatBudgetCapCompact(
   return formatCurrencyMoney(amount, currency);
 }
 
-/** Full calendar span for the provider's budget window. */
-export function formatBudgetSpanLabel(provider: SourceProviderKey): string {
+/** Span label for the provider's budget window. */
+export function formatBudgetSpanLabel(
+  provider: SourceProviderKey,
+  codexBudget?: CodexBudgetSnapshot,
+): string {
+  if (provider === "codex") {
+    if (codexBudget) return formatCodexBudgetSpanLabel(codexBudget);
+    const end = new Date();
+    const start = new Date(end.getTime() - 7 * 86_400_000);
+    return formatDateRangeCompact(start, end);
+  }
+
   const period = budgetPeriodForProvider(provider);
   const { start, end } = getPeriodCalendarBounds(period);
   return formatDateRangeCompact(start, end);
+}
+
+/** Spend total for the provider's native budget window. */
+export function budgetSpendForProvider(
+  provider: SourceProviderKey,
+  periods: Record<PeriodKey, { estimatedCost: number }>,
+  codexBudget?: CodexBudgetSnapshot,
+): number {
+  if (provider === "codex" && codexBudget) return codexBudget.spend;
+  const period = budgetPeriodForProvider(provider);
+  return periods[period]?.estimatedCost ?? 0;
 }

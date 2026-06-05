@@ -18,6 +18,7 @@ import {
   readCursorUsage,
 } from "./sources/cursor";
 import { groupEventsByConversation } from "./conversation-details";
+import { createCodexBudgetAccumulator } from "./codex-budget";
 import { getPeriodRange, getUsageLoadRange, type PeriodKey } from "./format";
 import {
   clearUsageSnapshotCache as clearSnapshotCache,
@@ -58,10 +59,16 @@ export async function loadUsage(
 
   try {
     const builder = createUsageSnapshotBuilder();
+    const codexBudget =
+      provider === "codex" ? createCodexBudgetAccumulator() : undefined;
     const errors = await streamProviderUsage(range, provider, {
-      metric: builder.addMetric,
+      metric: (metric) => {
+        builder.addMetric(metric);
+        codexBudget?.addMetric(metric);
+      },
     });
     const snapshot = builder.build(errors);
+    if (codexBudget) snapshot.codexBudget = codexBudget.build();
     writeUsageSnapshotCache(provider, range, snapshot);
     return snapshot;
   } catch (reason) {
