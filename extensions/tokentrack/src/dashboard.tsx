@@ -6,9 +6,16 @@ import {
   Image,
   List,
   getPreferenceValues,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  BUDGET_MONITOR_PROVIDERS,
+  checkBudgetThresholdAlerts,
+  showBudgetAlertToasts,
+} from "./lib/budget-alerts";
+import { getBudgetAlertSettings } from "./lib/budget-alert-settings";
 import {
   budgetPeriodLabel,
   budgetRowTitle,
@@ -17,6 +24,7 @@ import {
   formatBudgetSpanLabel,
   getProviderBudgetAmount,
 } from "./lib/budget";
+import { computeBudgetPace } from "./lib/budget-pace";
 import { getCodexBudgetLoadRange } from "./lib/codex-budget";
 import { renderBudgetProgressMarkdown } from "./lib/budget-chart";
 import {
@@ -34,12 +42,17 @@ import {
 import type { SourceProviderKey } from "./lib/types";
 import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { clearUsageSnapshotCache, loadUsage } from "./lib/usage";
+import type { ProviderUsageSnapshot } from "./lib/usage-snapshot";
 import { UsageDetailsView } from "./usage-details";
 
 const CURSOR_BRAND_HEX = "#A8DFB6";
 const BUDGET_ITEM_ID = "budget";
+const BUDGET_PACE_ITEM_ID = "budget-pace";
 
-type SelectionId = PeriodKey | typeof BUDGET_ITEM_ID;
+type SelectionId =
+  | PeriodKey
+  | typeof BUDGET_ITEM_ID
+  | typeof BUDGET_PACE_ITEM_ID;
 
 const providersMeta: readonly {
   key: SourceProviderKey;
@@ -119,6 +132,7 @@ function isPeriodKey(id: string): id is PeriodKey {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
+  const alertSettings = getBudgetAlertSettings(prefs);
   const currency = prefs.currency || "USD";
   const defaultSource: SourceProviderKey = providersMeta.some(
     (p) => p.key === prefs.defaultSource,
@@ -142,6 +156,32 @@ export default function Command() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
     undefined,
   );
+  const initialAlertPassDone = useRef(false);
+
+  const runBudgetAlerts = useCallback(
+    async (provider: SourceProviderKey, snapshot: ProviderUsageSnapshot) => {
+      if (!alertSettings.enabled) return;
+
+      const providers = initialAlertPassDone.current
+        ? [provider]
+        : BUDGET_MONITOR_PROVIDERS;
+      const results = await checkBudgetThresholdAlerts(prefs, {
+        recordAlert: true,
+        settings: alertSettings,
+        providers,
+        snapshots: { [provider]: snapshot },
+      });
+      await showBudgetAlertToasts(results);
+      initialAlertPassDone.current = true;
+    },
+    [prefs, alertSettings],
+  );
+
+  useEffect(() => {
+    if (isLoading || !data) return;
+    void runBudgetAlerts(tab, data);
+  }, [isLoading, data, tab, runBudgetAlerts]);
+
   useEffect(() => {
     intervalRef.current = setInterval(() => revalidate(), REFRESH_INTERVAL);
     return () => {
@@ -166,6 +206,13 @@ export default function Command() {
   const budgetTooltip = `${formatBudgetPercent(budgetPct)} of ${budgetRowTitle(tab).toLowerCase()} (${budgetPairLabel})`;
   const remaining = Math.max(nativeBudget - budgetSpend, 0);
   const remainingStr = formatCurrencyMoney(remaining, currency);
+  const budgetPace = computeBudgetPace(
+    tab,
+    budgetSpend,
+    nativeBudget,
+    currency,
+    data?.codexBudget,
+  );
 
   const selectedChartMarkdown = useMemo(() => {
     const snapshot = data?.periods[selectedPeriod];
@@ -190,8 +237,79 @@ export default function Command() {
     budgetBarFill,
   );
 
+  const budgetDetailMetadata = (
+    <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label
+        title="Period"
+        text={budgetPeriodLabel(tab)}
+      />
+      <List.Item.Detail.Metadata.Label
+        title="Span"
+        text={{
+          value: formatBudgetSpanLabel(tab, data?.codexBudget),
+          color: DATE_COLOR,
+        }}
+      />
+      <List.Item.Detail.Metadata.Label
+        title="Remaining"
+        text={{
+          value: remainingStr,
+          color: COST_COLOR,
+        }}
+      />
+    </List.Item.Detail.Metadata>
+  );
+
+  const budgetPaceDetailMetadata = (
+    <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label
+        title="Period"
+        text={budgetPeriodLabel(tab)}
+      />
+      <List.Item.Detail.Metadata.Label
+        title="Span"
+        text={{
+          value: formatBudgetSpanLabel(tab, data?.codexBudget),
+          color: DATE_COLOR,
+        }}
+      />
+      {budgetPace.dailyBurn ? (
+        <List.Item.Detail.Metadata.Label
+          title="Daily Burn"
+          text={{ value: budgetPace.dailyBurn, color: COST_COLOR }}
+        />
+      ) : null}
+      {budgetPace.dailyAllowance ? (
+        <List.Item.Detail.Metadata.Label
+          title="Daily Allowance"
+          text={{ value: budgetPace.dailyAllowance, color: COST_COLOR }}
+        />
+      ) : null}
+      {budgetPace.projection ? (
+        <List.Item.Detail.Metadata.Label
+          title="Projection"
+          text={{
+            value: budgetPace.projection,
+            color: DATE_COLOR,
+            tooltip: budgetPace.subtitle,
+          }}
+        />
+      ) : null}
+      {budgetPace.status === "under_pace" && budgetPace.subtitle ? (
+        <List.Item.Detail.Metadata.Label
+          title="Status"
+          text={budgetPace.subtitle}
+        />
+      ) : null}
+      {!budgetPace.dailyBurn && budgetPace.title ? (
+        <List.Item.Detail.Metadata.Label title="Pace" text={budgetPace.title} />
+      ) : null}
+    </List.Item.Detail.Metadata>
+  );
+
   const handleRefresh = () => {
     clearUsageSnapshotCache();
+    initialAlertPassDone.current = false;
     revalidate();
   };
 
@@ -201,6 +319,11 @@ export default function Command() {
         title="Refresh Data"
         icon={Icon.ArrowClockwise}
         onAction={handleRefresh}
+      />
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
       />
     </ActionPanel>
   );
@@ -214,8 +337,8 @@ export default function Command() {
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => {
         if (!id) return;
-        if (id === BUDGET_ITEM_ID) {
-          setSelectedItemId(BUDGET_ITEM_ID);
+        if (id === BUDGET_ITEM_ID || id === BUDGET_PACE_ITEM_ID) {
+          setSelectedItemId(id);
           return;
         }
         if (isPeriodKey(id)) {
@@ -324,6 +447,11 @@ export default function Command() {
                     icon={Icon.ArrowClockwise}
                     onAction={handleRefresh}
                   />
+                  <Action
+                    title="Open Extension Preferences"
+                    icon={Icon.Gear}
+                    onAction={openExtensionPreferences}
+                  />
                 </ActionPanel>
               }
             />
@@ -358,30 +486,40 @@ export default function Command() {
           detail={
             <List.Item.Detail
               markdown={budgetDetailMarkdown}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Period"
-                    text={budgetPeriodLabel(tab)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Span"
-                    text={{
-                      value: formatBudgetSpanLabel(tab, data?.codexBudget),
-                      color: DATE_COLOR,
-                    }}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Remaining"
-                    text={{
-                      value: remainingStr,
-                      color: COST_COLOR,
-                    }}
-                  />
-                </List.Item.Detail.Metadata>
-              }
+              metadata={budgetDetailMetadata}
             />
           }
+        />
+        <List.Item
+          id={BUDGET_PACE_ITEM_ID}
+          title="Pace"
+          subtitle={
+            budgetPace.listHint
+              ? {
+                  value: budgetPace.listHint,
+                  tooltip: budgetPace.subtitle ?? budgetPace.title,
+                  color:
+                    budgetPace.projection !== undefined
+                      ? DATE_COLOR
+                      : undefined,
+                }
+              : undefined
+          }
+          accessories={
+            budgetPace.listBurn
+              ? [
+                  {
+                    text: {
+                      value: budgetPace.listBurn,
+                      color: COST_COLOR,
+                    },
+                    tooltip: budgetPace.title,
+                  },
+                ]
+              : []
+          }
+          detail={<List.Item.Detail metadata={budgetPaceDetailMetadata} />}
+          actions={refreshAction}
         />
       </List.Section>
 

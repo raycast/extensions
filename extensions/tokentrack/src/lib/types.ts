@@ -37,6 +37,8 @@ export type UsageReaderSink = {
 export type ConversationUsageSummary = {
   key: string;
   title: string;
+  /** Rollout/jsonl path or composer id — used by Open Chat. */
+  sourcePath?: string;
   totalTokens: number;
   estimatedCost: number;
   eventCount: number;

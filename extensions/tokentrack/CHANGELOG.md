@@ -1,5 +1,22 @@
 # Token Track Changelog
 
+## [Open Chat] - {PR_MERGE_DATE}
+
+- Add **Open Chat** as the primary action in View Details for Claude Code and Codex chats (deeplink into the desktop app; Claude falls back to the session folder in Finder when needed).
+- Cursor View Details shows **Open Cursor** (app only) with a tooltip — no verified deeplink to jump to a specific chat yet.
+
+## [Budget monitor & alerts] - {PR_MERGE_DATE}
+
+- New extension preferences: **Alert Threshold (%)** (required, default 80) and **Enable budget alerts** checkbox; grouped with budget caps in Token Track settings.
+- Add **Monitor Budgets** background command (1-hour interval) to silently refresh usage and notify when any provider crosses the alert threshold.
+- Alerts fire once per threshold crossing per budget period; user-initiated runs show an HUD summary and update the command subtitle in root search.
+- Dashboard also checks thresholds on open (all providers) and on refresh, sharing the same dedup state as background monitoring.
+
+## [Budget pace] - {PR_MERGE_DATE}
+
+- Add a **Budget Pace** row under the budget cap showing daily burn, remaining spend allowance, and projected cap-hit date when spend is on track to exceed the limit before the period ends.
+- Extend the budget detail panel with pace metadata (daily burn, daily allowance, projection).
+
 ## [Major dashboard update] - {PR_MERGE_DATE}
 
 ![Codex week usage and token chart](metadata/tokentrack-1.png)

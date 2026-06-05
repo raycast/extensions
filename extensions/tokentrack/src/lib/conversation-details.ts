@@ -33,6 +33,7 @@ export function groupEventsByConversation(
         key: event.conversationKey,
         title:
           truncateTitle(event.conversationTitle ?? "") || fallbackTitle(event),
+        sourcePath: event.sourcePath ?? event.conversationKey,
         totalTokens: event.totalTokens,
         estimatedCost: event.estimatedCost,
         eventCount: 1,

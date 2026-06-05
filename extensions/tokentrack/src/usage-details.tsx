@@ -9,6 +9,11 @@ import {
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
+import {
+  openConversationTitle,
+  openConversationTooltip,
+  runOpenConversation,
+} from "./lib/open-conversation";
 import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { loadConversationDetails } from "./lib/usage";
 import type { ConversationUsageSummary, SourceProviderKey } from "./lib/types";
@@ -114,6 +119,7 @@ export function UsageDetailsView({
             key={chat.key}
             chat={chat}
             currency={currency}
+            provider={provider}
           />
         ))}
       </List.Section>
@@ -124,9 +130,11 @@ export function UsageDetailsView({
 function ConversationListItem({
   chat,
   currency,
+  provider,
 }: {
   chat: ConversationUsageSummary;
   currency: string;
+  provider: SourceProviderKey;
 }) {
   const tokensStr = formatTokens(chat.totalTokens);
   const costStr =
@@ -134,10 +142,12 @@ function ConversationListItem({
       ? formatCurrencyMoney(chat.estimatedCost, currency)
       : undefined;
   const dateStr = formatShortDate(chat.lastActive);
+  const openTooltip = openConversationTooltip(provider);
 
   return (
     <List.Item
       title={chat.title}
+      tooltip={openTooltip}
       accessories={[
         ...(costStr
           ? [
@@ -155,6 +165,12 @@ function ConversationListItem({
       ]}
       actions={
         <ActionPanel>
+          <Action
+            title={openConversationTitle(provider)}
+            icon={Icon.ArrowNe}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            onAction={() => runOpenConversation(provider, chat)}
+          />
           <Action.CopyToClipboard
             title="Copy Token Count"
             content={String(chat.totalTokens)}

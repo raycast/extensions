@@ -29,7 +29,8 @@ export function budgetPeriodForProvider(
 }
 
 export function budgetRowTitle(provider: SourceProviderKey): string {
-  return provider === "codex" ? "Weekly Budget" : "Monthly Budget";
+  void provider;
+  return "Limit";
 }
 
 export function budgetPeriodLabel(provider: SourceProviderKey): string {
