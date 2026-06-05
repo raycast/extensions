@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openreview",
+  "title": "OpenReview",
+  "description": "View your OpenReview submissions, review scores, and decisions across all venues.",
+  "icon": "icon.png",
+  "author": "yongmin_kim",
+  "categories": ["Productivity", "Documentation"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-submissions",
+      "title": "My Submissions",
+      "subtitle": "OpenReview",
+      "description": "List your OpenReview submissions with review scores and decisions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "OpenReview Email",
+      "description": "The email you log in to OpenReview with.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "you@example.com"
+    },
+    {
+      "name": "password",
+      "title": "OpenReview Password",
+      "description": "Your OpenReview password. Stored securely in Raycast.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
