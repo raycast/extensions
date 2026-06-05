@@ -1,12 +1,34 @@
-import type { DateRange, SourceProviderKey } from "./types";
+import type {
+  DateRange,
+  SourceProviderKey,
+  UsageEvent,
+  UsageReaderSink,
+} from "./types";
 import { refreshLivePricingIfStale } from "./pricing";
+import {
+  CLAUDE_DATA_PATH,
+  CODEX_DATA_PATH,
+  CURSOR_DATA_PATH,
+} from "./source-paths";
 import { readClaudeUsage } from "./sources/claude";
 import { readCodexUsage } from "./sources/codex";
-import { readCursorUsage } from "./sources/cursor";
 import {
-  buildProviderUsageSnapshot,
+  readCursorConversationBreakdown,
+  readCursorUsage,
+} from "./sources/cursor";
+import { groupEventsByConversation } from "./conversation-details";
+import { getPeriodRange, getUsageLoadRange, type PeriodKey } from "./format";
+import {
+  clearUsageSnapshotCache,
+  readUsageSnapshotCache,
+  writeUsageSnapshotCache,
+} from "./usage-cache";
+import {
+  createUsageSnapshotBuilder,
   type ProviderUsageSnapshot,
 } from "./usage-snapshot";
+import type { ConversationUsageSummary } from "./types";
+import { isInRange } from "./sources/shared";
 
 const REJECT_MSG_MAX = 42;
 
@@ -16,41 +38,74 @@ function briefRejectReason(reason: unknown): string {
   return t.length <= REJECT_MSG_MAX ? t : `${t.slice(0, REJECT_MSG_MAX - 1)}…`;
 }
 
-type SourcePreferences = {
-  codexPath: string;
-  claudePath: string;
-  cursorPath: string;
-};
+export { clearUsageSnapshotCache };
 
 export async function loadUsage(
-  preferences: SourcePreferences,
   range: DateRange,
   provider: SourceProviderKey,
+  options?: { force?: boolean },
 ): Promise<ProviderUsageSnapshot> {
-  await refreshLivePricingIfStale();
+  if (!options?.force) {
+    const cached = readUsageSnapshotCache(provider, range);
+    if (cached) return cached;
+  }
+
+  void refreshLivePricingIfStale();
 
   try {
-    const result = await readProviderUsage(preferences, range, provider);
-    const events = result.events.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
-    );
-    return buildProviderUsageSnapshot(events, result.errors);
+    const builder = createUsageSnapshotBuilder();
+    const errors = await streamProviderUsage(range, provider, {
+      metric: builder.addMetric,
+    });
+    const snapshot = builder.build(errors);
+    writeUsageSnapshotCache(provider, range, snapshot);
+    return snapshot;
   } catch (reason) {
-    return buildProviderUsageSnapshot([], [briefRejectReason(reason)]);
+    const builder = createUsageSnapshotBuilder();
+    return builder.build([briefRejectReason(reason)]);
   }
 }
 
-async function readProviderUsage(
-  preferences: SourcePreferences,
+async function streamProviderUsage(
   range: DateRange,
   provider: SourceProviderKey,
-) {
+  sink: UsageReaderSink,
+): Promise<string[]> {
   switch (provider) {
     case "codex":
-      return readCodexUsage(preferences.codexPath, range);
+      return readCodexUsage(CODEX_DATA_PATH, range, sink);
     case "claude":
-      return readClaudeUsage(preferences.claudePath, range);
+      return readClaudeUsage(CLAUDE_DATA_PATH, range, sink);
     case "cursor":
-      return readCursorUsage(preferences.cursorPath, range);
+      return readCursorUsage(CURSOR_DATA_PATH, range, sink);
   }
+}
+
+/** Lazy-loaded per-chat breakdown (deferred from dashboard to save heap). */
+export async function loadConversationDetails(
+  period: PeriodKey,
+  provider: SourceProviderKey,
+): Promise<ConversationUsageSummary[]> {
+  const loadRange = getUsageLoadRange();
+  const periodRange = getPeriodRange(period);
+
+  if (provider === "cursor") {
+    const { events } = await readCursorConversationBreakdown(
+      CURSOR_DATA_PATH,
+      loadRange,
+    );
+    const filtered = events.filter((event) =>
+      isInRange(event.timestamp, periodRange.start, periodRange.end),
+    );
+    return groupEventsByConversation(filtered);
+  }
+
+  const events: UsageEvent[] = [];
+  await streamProviderUsage(loadRange, provider, {
+    event: (event) => events.push(event),
+  });
+  const filtered = events.filter((event) =>
+    isInRange(event.timestamp, periodRange.start, periodRange.end),
+  );
+  return groupEventsByConversation(filtered);
 }

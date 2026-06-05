@@ -2,6 +2,14 @@ export type ProviderKey = "all" | "codex" | "claude" | "cursor";
 
 export type SourceProviderKey = Exclude<ProviderKey, "all">;
 
+/** Minimal fields for dashboard aggregation — avoids retaining path/title strings. */
+export type UsageMetric = {
+  timestamp: Date;
+  totalTokens: number;
+  estimatedCost: number;
+  estimatedTokens: boolean;
+};
+
 export type UsageEvent = {
   id: string;
   provider: SourceProviderKey;
@@ -19,6 +27,11 @@ export type UsageEvent = {
   conversationKey?: string;
   /** Human-readable chat title when the source provides one. */
   conversationTitle?: string;
+};
+
+export type UsageReaderSink = {
+  metric?: (metric: UsageMetric) => void;
+  event?: (event: UsageEvent) => void;
 };
 
 export type ConversationUsageSummary = {

@@ -12,3 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# local agent instructions and reference docs (not for the store repo)
+AGENTS.md
+.raycast-docs/
