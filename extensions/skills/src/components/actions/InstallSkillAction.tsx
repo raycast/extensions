@@ -145,6 +145,7 @@ function buildConfirmation({
   ].join("\n\n");
 
   return {
+    icon: hasAuditRisk ? { source: Icon.Warning, tintColor: Color.Red } : Icon.Download,
     title: `${operation} "${skill.name}"${TITLE_SUFFIX_BY_RISK[auditRisk]}?`,
     message,
     primaryAction: {
@@ -204,7 +205,7 @@ function AgentPickerInstallForm({
     }
 
     const auditResult = await resolveAuditResult(skill, prefetchedAuditResult);
-    const { title, message, primaryAction } = buildConfirmation({
+    const { icon, title, message, primaryAction } = buildConfirmation({
       skill,
       auditResult,
       selectedAgents,
@@ -213,6 +214,7 @@ function AgentPickerInstallForm({
     });
 
     const confirmed = await confirmAlert({
+      icon,
       title,
       message,
       primaryAction,

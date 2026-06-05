@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Confirmation Dialog Icon] - {PR_MERGE_DATE}
+
+- Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
+
 ## [Fix Global Skill Updates] - 2026-06-04
 
 - Run skill update actions against global installs, matching the global skill list shown in Manage Skills
