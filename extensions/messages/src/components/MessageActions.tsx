@@ -1,8 +1,7 @@
 import { Action, ActionPanel, AI, Icon, Keyboard, open, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 
 import { extractOTP, getAttachmentType, getMessagesUrl } from "../helpers";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { Message } from "../hooks/useMessages";
 
 import Details from "./Details";

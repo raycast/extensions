@@ -2,10 +2,15 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
-import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
-import { decodeHexString, fuzzySearch } from "../helpers";
-import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import {
+  buildMessagesQuery,
+  decodeHexString,
+  fuzzySearch,
+  createContactMap,
+  getContactOrGroupInfo,
+  ChatOrMessageInfo,
+} from "../helpers";
 import { Message, SQLMessage } from "../hooks/useMessages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -21,64 +26,16 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
 
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
-    `
-    SELECT
-      message.guid,
-      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date / 1000000000 + strftime('%s', '2001-01-01'),
-        'unixepoch'
-      )) AS date,
-      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date_read / 1000000000 + strftime('%s', '2001-01-01'),
-        'unixepoch'
-      )) AS date_read,
-      message.is_from_me,
-      message.is_audio_message,
-      message.is_sent,
-      message.is_read,
-      chat.chat_identifier,
-      chat.display_name,
-      CASE
-        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
-        THEN chat.display_name
-        ELSE NULL
-      END as group_name,
-      message.service,
-      hex(message.attributedBody) as body,
-      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
-      CASE
-        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
-        ELSE handle.id
-      END as group_participants,
-      attachment.filename as attachment_filename,
-      attachment.transfer_name as attachment_name,
-      attachment.mime_type as attachment_mime_type,
-      hex(replied.attributedBody) as reply_body
-    FROM
-      message
-      JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
-      JOIN chat ON chat_message_join.chat_id = chat."ROWID"
-      LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
-      LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
-      LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
-      LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
-      LEFT JOIN message replied ON message.reply_to_guid = replied.guid
-    WHERE
-      message.attributedBody IS NOT NULL
-      AND message.associated_message_type = 0
-      ${safeChatIdentifier !== null ? `AND chat.chat_identifier = '${safeChatIdentifier}'` : ""}
-      ${beforeNs !== null ? `AND message.date < ${beforeNs}` : ""}
-    GROUP BY
-      message.guid
-    ORDER BY
-      date DESC
-    LIMIT 50
-    `,
+    buildMessagesQuery({
+      chatIdentifierClause: safeChatIdentifier !== null ? `AND chat.chat_identifier = '${safeChatIdentifier}'` : "",
+      beforeClause: beforeNs !== null ? `AND message.date < ${beforeNs}` : "",
+    }),
   );
 
   if (!rawData) return [];
 
   const uniqueChatIdentifiers = [...new Set(rawData.map((m) => m.chat_identifier))];
+  const { fetchContactsForPhoneNumbers } = await import("swift:../../swift/contacts");
   const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
   const contactMap = createContactMap(contacts);
 

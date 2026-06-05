@@ -6,21 +6,13 @@ import { usePromise, useSQL } from "@raycast/utils";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import { fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import { ChatParticipant, fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export interface ChatParticipant {
-  chat_identifier: string;
-  service_name: "iMessage" | "SMS";
-  group_name: string | null;
-  display_name: string | null;
-  group_participants: string | null;
-  is_group: boolean;
-}
-
 export type SQLChat = ChatParticipant & {
   guid: string;
+  service_name: "iMessage" | "SMS";
   last_message_date: string;
 };
 

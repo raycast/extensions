@@ -2,7 +2,6 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
-import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo, fuzzySearch } from "../helpers";
 import { Chat, SQLChat } from "../hooks/useChats";
@@ -51,6 +50,7 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
   if (!rawData) return [];
 
   const uniqueChatIdentifiers = [...new Set(rawData.map((c) => c.chat_identifier))];
+  const { fetchContactsForPhoneNumbers } = await import("swift:../../swift/contacts");
   const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
   const contactMap = createContactMap(contacts);
 

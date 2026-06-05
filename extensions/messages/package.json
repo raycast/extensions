@@ -16,7 +16,11 @@
     "janosorcsik"
   ],
   "keywords": [
-    "2fa"
+    "2fa",
+    "sms",
+    "imessage",
+    "messages",
+    "chat"
   ],
   "license": "MIT",
   "preferences": [
@@ -310,6 +314,14 @@
           },
           {
             "callsTool": {
+              "name": "search-latest-messages",
+              "arguments": {
+                "chatIdentifier": "+1234567890"
+              }
+            }
+          },
+          {
+            "callsTool": {
               "name": "send-message",
               "arguments": {
                 "service_name": "SMS",
@@ -327,7 +339,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
+    "@raycast/utils": "^2.2.6",
     "date-fns": "^4.4.0",
     "libphonenumber-js": "^1.13.5"
   },
