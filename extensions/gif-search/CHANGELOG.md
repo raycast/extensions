@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Direct Favorites & Recents commands] - {PR_MERGE_DATE}
+## [Direct Favorites & Recents commands] - 2026-06-05
 
 - Added a "Browse Favorite GIFs" command that opens straight into your favorites
 - Added a "Browse Recent GIFs" command that opens straight into your recent GIFs
