@@ -24,6 +24,14 @@ import {
 import { WorkSessionTypesForm } from "./work-session-types-form";
 
 const POMODORO_STATUS_COMMAND = "pomodoro-status";
+const WORK_TYPE_SHORTCUT_KEYS = ["2", "3", "4", "5"] as const;
+
+function getShortcutWorkTypeSlots(workSessionTypes: string[]) {
+  return WORK_TYPE_SHORTCUT_KEYS.flatMap((key, index) => {
+    const workType = workSessionTypes[index + 1];
+    return workType ? [{ key, workType }] : [];
+  });
+}
 
 type FormValues = {
   workType: string;
@@ -103,9 +111,13 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
     await startWithWorkType(values.workType);
   }
 
-  const secondWorkType = workSessionTypes[1];
-  const thirdWorkType = workSessionTypes[2];
-  const fourthWorkType = workSessionTypes[3];
+  const shortcutWorkTypeSlots = getShortcutWorkTypeSlots(workSessionTypes);
+  const shortcutGuideText =
+    shortcutWorkTypeSlots.length > 0
+      ? shortcutWorkTypeSlots
+          .map(({ key, workType }) => `⌘${key}: ${workType}`)
+          .join("\n")
+      : "作業種類が 2 つ以上あると、⌘2〜⌘5 で素早く開始できます。";
 
   return (
     <Form
@@ -113,27 +125,14 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
-          {secondWorkType ? (
+          {shortcutWorkTypeSlots.map(({ key, workType }) => (
             <Action
-              title={`2番目の種類で開始: ${secondWorkType}`}
-              shortcut={{ modifiers: ["cmd"], key: "2" }}
-              onAction={() => startWithWorkType(secondWorkType)}
+              key={key}
+              title={`${workType} で開始`}
+              shortcut={{ modifiers: ["cmd"], key }}
+              onAction={() => startWithWorkType(workType)}
             />
-          ) : null}
-          {thirdWorkType ? (
-            <Action
-              title={`3番目の種類で開始: ${thirdWorkType}`}
-              shortcut={{ modifiers: ["cmd"], key: "3" }}
-              onAction={() => startWithWorkType(thirdWorkType)}
-            />
-          ) : null}
-          {fourthWorkType ? (
-            <Action
-              title={`4番目の種類で開始: ${fourthWorkType}`}
-              shortcut={{ modifiers: ["cmd"], key: "4" }}
-              onAction={() => startWithWorkType(fourthWorkType)}
-            />
-          ) : null}
+          ))}
           <Action
             title="作業種類を編集"
             shortcut={Keyboard.Shortcut.Common.Edit}
@@ -163,6 +162,7 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
           <Form.Dropdown.Item key={type} value={type} title={type} />
         ))}
       </Form.Dropdown>
+      <Form.Description title="ショートカット" text={shortcutGuideText} />
     </Form>
   );
 }

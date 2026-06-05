@@ -290,7 +290,7 @@ export default function PomodoroStatusCommand() {
   const markdown = useMemo(() => {
     if (!session || !snapshot) {
       return [
-        "# Pomodoro Status",
+        "# PomoNotion Status",
         "",
         "進行中のセッションはありません。ここから新しい作業セッションを開始できます。",
         "",
@@ -353,7 +353,7 @@ export default function PomodoroStatusCommand() {
     }
 
     const lines = [
-      "# Pomodoro Status",
+      "# PomoNotion Status",
       "",
       `- 種別: ${getKindLabel(session.kind)}`,
       `- 状態: ${getStatusLabel(snapshot.displayStatus)}`,
