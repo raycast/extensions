@@ -21,7 +21,7 @@ on cleanup()
   try
     tell application "System Settings" to quit
   end try
-  do shell script "open raycast://"
+  do shell script "open ${process.env.RAYCAST_SCHEME ?? \"raycast\"}://"
   delay 0.3
 end cleanup
 
@@ -119,7 +119,7 @@ tell application "System Events"
 end tell
 
 tell application "System Settings" to quit
-do shell script "open raycast://"
+do shell script "open ${process.env.RAYCAST_SCHEME ?? \"raycast\"}://"
 delay 0.3
 return "success"
 `;

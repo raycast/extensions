@@ -35,7 +35,7 @@ export function createStoreDeeplink(url: string): string {
   if (!parsed) {
     return url;
   }
-  return `raycast://extensions/${parsed.author}/${parsed.extension}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${parsed.author}/${parsed.extension}`;
 }
 
 /**

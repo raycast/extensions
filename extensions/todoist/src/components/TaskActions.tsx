@@ -155,7 +155,7 @@ export default function TaskActions({
     }
     if (useConfetti) {
       try {
-        await open("raycast://extensions/raycast/raycast/confetti");
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
       } catch (error) {
         await showFailureToast(error, { title: "Unable to show celebration" });
       }

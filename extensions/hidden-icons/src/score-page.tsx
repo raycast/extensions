@@ -28,8 +28,8 @@ export default function ScorePage(props: { myScore: HistoryScore; historyScore: 
       });
       setBreakRecord(_breakRecord);
       if (_breakRecord) {
-        await open(`raycast://extensions/raycast/raycast/confetti`);
-        spawnSync(`open raycast://`, { shell: true });
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
+        spawnSync(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://`, { shell: true });
       }
       await LocalStorage.setItem("HistoryScore", JSON.stringify(_newHistoryScore));
     }

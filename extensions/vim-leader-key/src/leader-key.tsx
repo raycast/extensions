@@ -998,7 +998,8 @@ function getValuePreview(action: ActionItem): string {
     case "application":
       return value.split("/").pop()?.replace(".app", "") || value;
     case "url":
-      if (value.startsWith("raycast://")) {
+      const urlScheme = process.env.RAYCAST_SCHEME ?? "raycast";
+      if (value.startsWith(`${urlScheme}://`) || value.startsWith("raycast://")) {
         return "Raycast: " + value.split("/").pop();
       }
       return value.length > 40 ? value.substring(0, 37) + "..." : value;

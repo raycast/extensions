@@ -57,12 +57,12 @@ export default function CacheStatusMenuBar() {
         <MenuBarExtra.Item
           title="Scan & Clean..."
           icon={Icon.MagnifyingGlass}
-          onAction={() => open("raycast://extensions/Undolog/dev-cache-cleaner/scan-caches")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/dev-cache-cleaner/scan-caches`)}
         />
         <MenuBarExtra.Item
           title="Clean Safe Caches"
           icon={Icon.Trash}
-          onAction={() => open("raycast://extensions/Undolog/dev-cache-cleaner/clean-safe-caches")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/dev-cache-cleaner/clean-safe-caches`)}
         />
       </MenuBarExtra.Section>
       {results.length === 0 && !isLoading ? (

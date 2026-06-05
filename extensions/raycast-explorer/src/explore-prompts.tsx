@@ -95,8 +95,8 @@ export default function ExplorePrompts(props: Props) {
       .flatMap((category) => category.prompts)
       .filter((prompt) => selectedIds.includes(prompt.id));
 
-    const { extensionName, commandName, raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const { extensionName, commandName } = environment;
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
     const baseLink = `${protocol}extensions/thomaslombart/${extensionName}/${commandName}`;
 
     return `${baseLink}?launchContext=${encodeURIComponent(JSON.stringify(prompts.map((prompt) => prompt.id)))}`;

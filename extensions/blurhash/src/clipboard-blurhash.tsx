@@ -262,7 +262,7 @@ function FallbackMenu({
               title="Open Clipboard History"
               onAction={() =>
                 open(
-                  "raycast://extensions/raycast/clipboard-history/clipboard-history",
+                  `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/clipboard-history/clipboard-history`,
                 )
               }
             />

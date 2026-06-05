@@ -142,7 +142,7 @@ function RepoActions({
         <Action.Open
           title="Create Launch Configuration"
           icon={Icon.Plus}
-          target="raycast://extensions/jarry_chung/ghostty/open-ghostty-launch-configuration"
+          target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/jarry_chung/ghostty/open-ghostty-launch-configuration`}
         />
       ) : (
         configs.map((lc) => (

@@ -27,7 +27,7 @@ export const textToSpeech = async (text: string, voice?: string) => {
       title: i18n.externalExtensionRequired.title,
       message: i18n.externalExtensionRequired.message,
     });
-    if (confirm) open("raycast://extensions/litomore/say");
+    if (confirm) open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/say`);
   }
 };
 

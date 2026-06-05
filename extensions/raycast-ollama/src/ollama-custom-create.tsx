@@ -63,7 +63,7 @@ The following tags are supported:
     <ActionPanel>
       <Action.CreateQuicklink
         quicklink={{
-          link: `raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-command?arguments=${encodeURIComponent(
+          link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-command?arguments=${encodeURIComponent(
             JSON.stringify({
               prompt: itemProps.prompt.value,
               model: `${itemProps.server.value}:${itemProps.model.value}`,

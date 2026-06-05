@@ -128,7 +128,7 @@ export default function InstanceStatus() {
               <ActionPanel.Section>
                 <Action.Open
                   title="Open Extension Preferences"
-                  target="raycast://extensions/preferences"
+                  target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
                   icon={Icon.Gear}
                 />
               </ActionPanel.Section>
@@ -220,7 +220,7 @@ export default function InstanceStatus() {
             <ActionPanel>
               <Action.Open
                 title="Open Extension Preferences"
-                target="raycast://extensions/preferences"
+                target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
                 icon={Icon.Gear}
               />
             </ActionPanel>
