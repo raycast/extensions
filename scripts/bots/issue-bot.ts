@@ -234,6 +234,19 @@ export default async ({ github, context }: API) => {
     } catch (error) {
       console.error(`Failed to add platform label ${platformLabel}:`, error);
     }
+  } else if (context.payload.action === "edited") {
+    for (const label of ["platform: macOS", "platform: Windows"]) {
+      try {
+        await github.rest.issues.removeLabel({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          name: label,
+        });
+      } catch {
+        // ignore, it might not be there
+      }
+    }
   }
 
   try {
