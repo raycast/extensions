@@ -43,9 +43,9 @@ export default function Command() {
 
   const filterSummary = useMemo(() => summarizeFilters(filters), [filters]);
 
-  return (
-    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Filter loaded visitors...">
-      {error ? (
+  if (error) {
+    return (
+      <List isLoading={isLoading}>
         <List.EmptyView
           title="Could Not Load Visitors"
           description={error}
@@ -56,8 +56,12 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : null}
+      </List>
+    );
+  }
 
+  return (
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Filter loaded visitors...">
       <List.Section title="Search" subtitle={filterSummary}>
         <List.Item
           icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}

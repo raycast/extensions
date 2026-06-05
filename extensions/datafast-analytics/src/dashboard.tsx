@@ -64,22 +64,18 @@ export default function Command() {
 
   const currency = state.overview?.currency ?? state.metadata?.currency;
   const rangeLabel = useMemo(() => getDateRange(range).label, [range]);
+  const dateRangeDropdown = (
+    <List.Dropdown tooltip="Date Range" value={range} onChange={(value) => setRange(value as DateRangeKey)}>
+      <List.Dropdown.Item title="Last 7 Days" value="7d" />
+      <List.Dropdown.Item title="Last 30 Days" value="30d" />
+      <List.Dropdown.Item title="Last 90 Days" value="90d" />
+      <List.Dropdown.Item title="All Time" value="all" />
+    </List.Dropdown>
+  );
 
-  return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Search dashboard rows..."
-      searchBarAccessory={
-        <List.Dropdown tooltip="Date Range" value={range} onChange={(value) => setRange(value as DateRangeKey)}>
-          <List.Dropdown.Item title="Last 7 Days" value="7d" />
-          <List.Dropdown.Item title="Last 30 Days" value="30d" />
-          <List.Dropdown.Item title="Last 90 Days" value="90d" />
-          <List.Dropdown.Item title="All Time" value="all" />
-        </List.Dropdown>
-      }
-    >
-      {error ? (
+  if (error) {
+    return (
+      <List isLoading={isLoading} searchBarAccessory={dateRangeDropdown}>
         <List.EmptyView
           title="Could Not Load DataFast"
           description={error}
@@ -90,8 +86,17 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : null}
+      </List>
+    );
+  }
 
+  return (
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder="Search dashboard rows..."
+      searchBarAccessory={dateRangeDropdown}
+    >
       <List.Section title="Overview" subtitle={rangeLabel}>
         <List.Item
           icon={{ source: Icon.BarChart, tintColor: Color.Orange }}
