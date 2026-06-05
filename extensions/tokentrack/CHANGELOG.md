@@ -2,6 +2,11 @@
 
 ## [Dashboard overhaul and performance] - {PR_MERGE_DATE}
 
+![Codex week usage and token chart](metadata/tokentrack-1.png)
+![Codex month usage and token chart](metadata/tokentrack-2.png)
+![Cursor monthly budget progress](metadata/tokentrack-3.png)
+![Cursor conversation details](metadata/tokentrack-4.png)
+
 - Rework dashboard around **Week** and **Month** calendar periods (Monday → today, 1st → today); removed the Today row.
 - Add a dedicated **Budget** row with native weekly (Codex) or monthly (Claude, Cursor) caps and an SVG progress bar in the detail panel.
 - Remove data-path preferences; providers read from standard macOS locations (`~/.codex`, `~/.claude`, `~/Library/Application Support/Cursor`).
@@ -12,6 +17,7 @@
 - Fix Codex chat titles using `session_index.jsonl` thread names.
 - Guard currency formatting against invalid ISO codes; omit trailing `.00` on whole-dollar amounts.
 - Fix week totals undercounting when the week starts before the current month.
+- Refresh store screenshots (Codex usage charts, Cursor budget, conversation details).
 
 ## [Initial Release] - 2026-06-05
 
