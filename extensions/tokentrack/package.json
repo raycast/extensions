@@ -30,6 +30,24 @@
       "title": "Token Dashboard",
       "description": "View token usage across Codex, Claude Code, and Cursor.",
       "mode": "view"
+    },
+    {
+      "name": "claude-quick-usage",
+      "title": "Claude Code Quick Usage",
+      "description": "Show Claude Code spend against your monthly budget.",
+      "mode": "no-view"
+    },
+    {
+      "name": "codex-quick-usage",
+      "title": "Codex Quick Usage",
+      "description": "Show Codex spend against your rolling weekly budget.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cursor-quick-usage",
+      "title": "Cursor Quick Usage",
+      "description": "Show Cursor spend against your monthly budget.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
