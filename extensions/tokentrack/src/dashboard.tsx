@@ -291,7 +291,6 @@ export default function Command() {
           text={{
             value: budgetPace.projection,
             color: DATE_COLOR,
-            tooltip: budgetPace.subtitle,
           }}
         />
       ) : null}
@@ -498,10 +497,6 @@ export default function Command() {
               ? {
                   value: budgetPace.listHint,
                   tooltip: budgetPace.subtitle ?? budgetPace.title,
-                  color:
-                    budgetPace.projection !== undefined
-                      ? DATE_COLOR
-                      : undefined,
                 }
               : undefined
           }

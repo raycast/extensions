@@ -146,8 +146,10 @@ function ConversationListItem({
 
   return (
     <List.Item
-      title={chat.title}
-      tooltip={openTooltip}
+      title={{
+        value: chat.title,
+        tooltip: openTooltip,
+      }}
       accessories={[
         ...(costStr
           ? [
