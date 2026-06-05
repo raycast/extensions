@@ -17,7 +17,7 @@ export const TYPE_COLOR: Record<ModuleReplacement["type"], Color> = {
 
 export const ALL_MODULES = Object.values(all.mappings).map((value) => ({
   ...value,
-  replacements: value.replacements.map((key) => all.replacements[key]),
+  replacements: value.replacements.map((key) => all.replacements[key]).filter(Boolean),
 }));
 
 export type ModuleReplacementResolved = (typeof ALL_MODULES)[number];
