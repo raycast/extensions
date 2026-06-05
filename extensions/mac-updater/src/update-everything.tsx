@@ -9,7 +9,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Source, UpdateInfo, UpdateResult } from "./utils/types";
-import { brewUpdateIndex, upgradeAllBrew } from "./utils/sources/homebrew";
+import {
+  brewUpdateIndex,
+  upgradeAllFormulae,
+  upgradeCask,
+} from "./utils/sources/homebrew";
 import { isMasInstalled, installMas, upgradeAllMas } from "./utils/sources/mas";
 import {
   isGemAvailable,
@@ -18,12 +22,12 @@ import {
   upgradeAllPip,
 } from "./utils/sources/cli-managers";
 import { commandExists } from "./utils/shell";
-import { quitAppIfRunning } from "./utils/process-control";
 import { downloadAndInstall } from "./utils/updater";
 import { openAppForSparkleUpdate } from "./utils/sources/sparkle";
 import { scanAll, ScanResult } from "./utils/coordinator";
 import { recordHistory } from "./utils/update-history";
 import { shortenVersion } from "./utils/version";
+import { progressBar } from "./utils/format";
 
 type TaskStatus = "pending" | "running" | "success" | "failed" | "skipped";
 
@@ -118,6 +122,16 @@ export default function UpdateEverything() {
       title: KICKOFF_TITLE,
     });
 
+    // Drive a live progress bar in the toast as tasks finish. Counts every
+    // task that reaches a terminal state (done OR failed), since both represent
+    // work the queue has gotten through.
+    const total = tasks.length;
+    let finished = 0;
+    const bump = () => {
+      finished++;
+      toast.title = `Updating  ${progressBar(finished, total)}  (${finished}/${total})`;
+    };
+
     // Group A: package managers — run in parallel
     const systemTasks = tasks.filter(
       (t) => t.group === "system" || t.group === "packages",
@@ -135,6 +149,7 @@ export default function UpdateEverything() {
           error: result.error,
           progress: undefined,
         });
+        bump();
       }),
     );
 
@@ -147,6 +162,7 @@ export default function UpdateEverything() {
         error: result.error,
         progress: undefined,
       });
+      bump();
     }
 
     setRunning(false);
@@ -198,6 +214,12 @@ export default function UpdateEverything() {
   const updatesTotal = tasks.length;
   const updatesDone = tasks.filter((t) => t.status === "success").length;
   const updatesFailed = tasks.filter((t) => t.status === "failed").length;
+  // "Processed" = every task in a terminal state. Drives the on-screen bar so
+  // it advances on both successes and failures, matching the toast.
+  const updatesProcessed = tasks.filter(
+    (t) =>
+      t.status === "success" || t.status === "failed" || t.status === "skipped",
+  ).length;
 
   const groupedTasks = {
     system: tasks.filter((t) => t.group === "system"),
@@ -236,6 +258,39 @@ export default function UpdateEverything() {
             </ActionPanel>
           }
         />
+      )}
+
+      {(running || done) && updatesTotal > 0 && (
+        <List.Section title="Progress">
+          <List.Item
+            icon={
+              done
+                ? updatesFailed > 0
+                  ? { source: Icon.XMarkCircle, tintColor: Color.Red }
+                  : { source: Icon.CheckCircle, tintColor: Color.Green }
+                : { source: Icon.ArrowClockwise, tintColor: Color.Blue }
+            }
+            title={progressBar(updatesProcessed, updatesTotal)}
+            accessories={[
+              ...(updatesFailed > 0
+                ? [
+                    {
+                      tag: {
+                        value: `${updatesFailed} failed`,
+                        color: Color.Red,
+                      },
+                    },
+                  ]
+                : []),
+              {
+                tag: {
+                  value: `${updatesProcessed}/${updatesTotal}`,
+                  color: done && updatesFailed === 0 ? Color.Green : Color.Blue,
+                },
+              },
+            ]}
+          />
+        </List.Section>
       )}
 
       {!running && !done && tasks.length > 0 && (
@@ -359,34 +414,49 @@ export default function UpdateEverything() {
 async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
   const tasks: QueueTask[] = [];
 
-  // ── Apps via Homebrew (managed by brew): roll up into one task per source (brew handles all)
+  // ── Apps via Homebrew: ONE TASK PER CASK.
+  //
+  // We used to roll every cask into a single `brew upgrade --greedy`. That had
+  // three problems the per-cask split fixes:
+  //   1. Greedy mode scans every installed tap. If ANY third-party tap is
+  //      "untrusted" (kde-mac, etc.), brew exits non-zero — so an unrelated tap
+  //      made the whole batch "fail" even though the casks it touched upgraded
+  //      fine. That's the "failed but already updated" bug.
+  //   2. One genuinely-failing cask dragged all the others down with it.
+  //   3. The progress bar had a single task → 0% then 100%, no granularity.
+  // Per-cask: isolated success/failure, real progress, and `upgradeCask` only
+  // scans the one cask's tap. brew holds a global lock, so these run in the
+  // serial "apps" group (which also runs after the parallel package-manager
+  // batch, so they never collide with the formulae upgrade below).
   const brewApps = scan.apps.filter(
     (a) => a.hasUpdate && a.source === "homebrew-cask",
   );
-  if (brewApps.length > 0) {
+  for (const a of brewApps) {
+    const token = a.caskToken ?? a.app.name.toLowerCase();
     tasks.push({
-      id: "system:brew-casks",
-      group: "system",
+      id: `cask:${token}`,
+      group: "apps",
       source: "homebrew-cask",
-      title: "Homebrew apps",
-      subtitle: `${brewApps.length} app${brewApps.length === 1 ? "" : "s"} via brew upgrade`,
+      title: a.app.name,
+      subtitle: `${shortenVersion(a.app.version)} → ${shortenVersion(a.latestVersion)}`,
+      icon: a.app.appPath,
       status: "pending",
       run: async (onProgress) => {
-        // Quit any running brew-managed apps first — pkg-based casks (Google
-        // Drive, Microsoft Teams, Docker) fail or hang when the target is
-        // open. Sequenced so the user only sees one "quitting…" line at a time.
-        for (const a of brewApps) {
-          onProgress(`Quitting ${a.app.name}…`);
-          try {
-            await quitAppIfRunning(a.app.name);
-          } catch {
-            /* ignore — best effort */
-          }
+        // upgradeCask quits the app if it's running and handles pkg-sudo via
+        // SUDO_ASKPASS, so we just drive the label here.
+        onProgress("Upgrading…");
+        const r = await upgradeCask(token, a.app.name);
+        if (r.success) {
+          recordHistory({
+            name: a.app.name,
+            bundleId: a.app.bundleId,
+            source: "homebrew-cask",
+            fromVersion: a.app.version,
+            toVersion: a.latestVersion,
+            trigger: "bulk",
+          });
         }
-        onProgress("Refreshing Homebrew index…");
-        await brewUpdateIndex();
-        onProgress("Running brew upgrade…");
-        return upgradeAllBrew();
+        return r;
       },
     });
   }
@@ -478,25 +548,27 @@ async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
     });
   }
 
-  // Homebrew formulae (CLI tools): rolled into the brew-casks task above via `brew upgrade`.
-  // If there are formulae updates but no cask updates, we still need a brew task.
-  const hasFormulaeUpdates = scan.cliPackages.some(
+  // Homebrew formulae (CLI tools): one bulk task. Formulae are reliable and
+  // free of the tap-trust/pkg-sudo quirks that make casks worth doing
+  // individually, so a single `brew upgrade --formula` is fine. Runs in the
+  // parallel "system" batch, which completes before the serial "apps" batch
+  // (the per-cask upgrades) starts — so the two never hold brew's lock at once.
+  const formulaeCount = scan.cliPackages.filter(
     (p) => p.source === "homebrew-formula",
-  );
-  if (hasFormulaeUpdates && !tasks.some((t) => t.id === "system:brew-casks")) {
-    const n = scan.cliPackages.filter(
-      (p) => p.source === "homebrew-formula",
-    ).length;
+  ).length;
+  if (formulaeCount > 0) {
     tasks.push({
       id: "system:brew-formulae",
       group: "system",
       source: "homebrew-formula",
       title: "Homebrew CLI tools",
-      subtitle: `${n} formula${n === 1 ? "" : "e"}`,
+      subtitle: `${formulaeCount} formula${formulaeCount === 1 ? "" : "e"}`,
       status: "pending",
-      run: async () => {
+      run: async (onProgress) => {
+        onProgress("Refreshing index…");
         await brewUpdateIndex();
-        return upgradeAllBrew();
+        onProgress("Upgrading formulae…");
+        return upgradeAllFormulae();
       },
     });
   }

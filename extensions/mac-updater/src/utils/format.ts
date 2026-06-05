@@ -37,6 +37,19 @@ export function dayLabel(epochMs: number): string {
   });
 }
 
+/**
+ * A compact unicode progress bar, e.g. `███████░░░ 70%`. Raycast's List has no
+ * native progress widget, so we render one with block characters. The ratio is
+ * clamped to [0, 1]; `total <= 0` yields an empty string (nothing to show).
+ */
+export function progressBar(done: number, total: number, width = 20): string {
+  if (total <= 0) return "";
+  const ratio = Math.max(0, Math.min(1, done / total));
+  const filled = Math.round(ratio * width);
+  const bar = "█".repeat(filled) + "░".repeat(Math.max(0, width - filled));
+  return `${bar} ${Math.round(ratio * 100)}%`;
+}
+
 /** Short clock display like "4:21 PM". */
 export function timeOfDay(epochMs: number): string {
   return new Date(epochMs).toLocaleTimeString(undefined, {

@@ -41,7 +41,24 @@ function humanizeBrewError(err: unknown, raw: string): string {
   ) {
     return "This app installs via a macOS .pkg and needs your administrator password. Run the update again and enter your password when the dialog appears.";
   }
+  if (looksLikeBadDownload(raw)) {
+    return "The download was corrupted and couldn't be mounted, even after re-fetching. Check your network and try again, or update the app from its own updater.";
+  }
   return raw;
+}
+
+/**
+ * True when a cask failure points at a corrupt/truncated *download* rather than
+ * an install problem. Homebrew's sha256 check can pass on a stale cache file
+ * whose payload is actually bad, so the failure only surfaces later when
+ * hdiutil can't mount the DMG ("no mountable file systems"), the convert step
+ * exits non-zero, or brew rolls the install back ("Reverting upgrade"). The
+ * remedy is to re-download with `brew fetch --force` and try once more.
+ */
+function looksLikeBadDownload(raw: string): boolean {
+  return /no mountable file systems|hdiutil.*exited with|reverting upgrade|checksum (does not match|mismatch)|sha256 mismatch|corrupt|truncat/i.test(
+    raw,
+  );
 }
 
 const CASK_API = "https://formulae.brew.sh/api/cask.json";
@@ -596,21 +613,65 @@ export async function upgradeCask(
   }
 
   const greedyFlag = greedyFlagFor(token);
-
-  try {
-    await runWithTimeout(
+  const doUpgrade = () =>
+    runWithTimeout(
       brew,
       ["upgrade", "--cask", greedyFlag, token],
       BREW_UPGRADE_TIMEOUT_MS,
       { SUDO_ASKPASS: getAskpassScript() },
     );
+
+  try {
+    await doUpgrade();
     return { name: token, source: "homebrew-cask", success: true };
   } catch (e) {
+    const raw = extractCmdError(e);
+    // Homebrew 4.6+ refuses to act on casks from "untrusted" third-party taps.
+    // The user already adopted this cask from that tap, so trust it and retry
+    // once. Only applies to tap-qualified tokens (owner/repo/cask); official
+    // casks have a bare token and never hit this.
+    if (/not trusted|untrusted tap/i.test(raw) && token.includes("/")) {
+      const tap = token.split("/").slice(0, 2).join("/");
+      try {
+        await run(brew, ["tap", "--force", tap]);
+        await doUpgrade();
+        return { name: token, source: "homebrew-cask", success: true };
+      } catch (e2) {
+        return {
+          name: token,
+          source: "homebrew-cask",
+          success: false,
+          error: humanizeBrewError(e2, extractCmdError(e2)),
+        };
+      }
+    }
+    // Corrupt/truncated cached download (e.g. an LZMA DMG that won't mount):
+    // re-fetch the artifact fresh and retry the upgrade once. This is the
+    // single most common transient cask failure — a stale download in
+    // ~/Library/Caches/Homebrew that passed sha but won't mount.
+    if (looksLikeBadDownload(raw)) {
+      try {
+        await runWithTimeout(
+          brew,
+          ["fetch", "--force", "--cask", token],
+          BREW_BULK_TIMEOUT_MS,
+        );
+        await doUpgrade();
+        return { name: token, source: "homebrew-cask", success: true };
+      } catch (e2) {
+        return {
+          name: token,
+          source: "homebrew-cask",
+          success: false,
+          error: humanizeBrewError(e2, extractCmdError(e2)),
+        };
+      }
+    }
     return {
       name: token,
       source: "homebrew-cask",
       success: false,
-      error: humanizeBrewError(e, extractCmdError(e)),
+      error: humanizeBrewError(e, raw),
     };
   }
 }
@@ -680,24 +741,30 @@ export async function upgradeFormula(name: string): Promise<UpdateResult> {
   }
 }
 
-export async function upgradeAllBrew(): Promise<UpdateResult> {
+/**
+ * Bulk-upgrade Homebrew *formulae* only (CLI tools), never casks. Formulae are
+ * reliable, live under the user-owned prefix, and don't have the tap-trust /
+ * pkg-sudo quirks that make casks worth upgrading one-by-one. `--formula`
+ * scopes the command so it never re-touches casks (which we now handle per-cask
+ * via upgradeCask).
+ */
+export async function upgradeAllFormulae(): Promise<UpdateResult> {
   const brew = findBrew();
-  if (!brew) return noBrewResult("Homebrew (all)", "homebrew-cask");
+  if (!brew) return noBrewResult("Homebrew CLI tools", "homebrew-formula");
   try {
-    // 2>&1 so any pkg-installer warnings on stderr land in our captured output
-    // for the error-message extractor. SUDO_ASKPASS lets brew authenticate the
-    // .pkg casks in the batch via a native password dialog (sudo -A) — one
-    // prompt covers the whole run since sudo caches the credential.
     await runShellWithTimeout(
-      `${brew} upgrade --greedy 2>&1`,
+      `${brew} upgrade --formula 2>&1`,
       BREW_BULK_TIMEOUT_MS,
-      { SUDO_ASKPASS: getAskpassScript() },
     );
-    return { name: "Homebrew (all)", source: "homebrew-cask", success: true };
+    return {
+      name: "Homebrew CLI tools",
+      source: "homebrew-formula",
+      success: true,
+    };
   } catch (e) {
     return {
-      name: "Homebrew (all)",
-      source: "homebrew-cask",
+      name: "Homebrew CLI tools",
+      source: "homebrew-formula",
       success: false,
       error: humanizeBrewError(e, extractCmdError(e)),
     };

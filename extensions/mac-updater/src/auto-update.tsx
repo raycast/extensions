@@ -1,6 +1,11 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { BREW, runShell } from "./utils/shell";
+import { runShell } from "./utils/shell";
 import { findMas, isMasInstalled } from "./utils/sources/mas";
+import {
+  brewUpdateIndex,
+  upgradeAllFormulae,
+  upgradeCask,
+} from "./utils/sources/homebrew";
 import { scanAll } from "./utils/coordinator";
 import { saveScanCache } from "./utils/scan-cache";
 import { recordHistory } from "./utils/update-history";
@@ -36,38 +41,62 @@ export default async function AutoUpdate() {
   }
 
   if (prefs.enableBrew) {
+    // Per-cask + formula-only, mirroring Update Everything. A single
+    // `brew upgrade --greedy` would fail the whole run if any one cask (or an
+    // unrelated untrusted tap) errored, recording no history even for the casks
+    // that DID upgrade. Doing them individually means each success is counted
+    // and logged independently.
     try {
-      await runShell(`${BREW} update --quiet`);
-      await runShell(`${BREW} upgrade --greedy --quiet`);
-      const before =
-        preScan?.apps.filter(
-          (a) => a.hasUpdate && a.source === "homebrew-cask",
-        ) ?? [];
-      const beforeFormulae =
-        preScan?.cliPackages.filter((p) => p.source === "homebrew-formula") ??
-        [];
-      brewUpdated = before.length + beforeFormulae.length;
-      for (const a of before) {
-        recordHistory({
-          name: a.app.name,
-          bundleId: a.app.bundleId,
-          source: "homebrew-cask",
-          fromVersion: a.app.version,
-          toVersion: a.latestVersion,
-          trigger: "auto",
-        });
-      }
-      for (const p of beforeFormulae) {
-        recordHistory({
-          name: p.name,
-          source: "homebrew-formula",
-          fromVersion: p.currentVersion,
-          toVersion: p.latestVersion,
-          trigger: "auto",
-        });
-      }
+      await brewUpdateIndex();
     } catch {
-      // best-effort — auto-update never blocks the user with an error UI
+      /* soft fail */
+    }
+    const before =
+      preScan?.apps.filter(
+        (a) => a.hasUpdate && a.source === "homebrew-cask",
+      ) ?? [];
+    for (const a of before) {
+      try {
+        const r = await upgradeCask(
+          a.caskToken ?? a.app.name.toLowerCase(),
+          a.app.name,
+        );
+        if (r.success) {
+          brewUpdated++;
+          recordHistory({
+            name: a.app.name,
+            bundleId: a.app.bundleId,
+            source: "homebrew-cask",
+            fromVersion: a.app.version,
+            toVersion: a.latestVersion,
+            trigger: "auto",
+          });
+        }
+      } catch {
+        // best-effort — one cask failing never blocks the rest
+      }
+    }
+
+    const beforeFormulae =
+      preScan?.cliPackages.filter((p) => p.source === "homebrew-formula") ?? [];
+    if (beforeFormulae.length > 0) {
+      try {
+        const r = await upgradeAllFormulae();
+        if (r.success) {
+          brewUpdated += beforeFormulae.length;
+          for (const p of beforeFormulae) {
+            recordHistory({
+              name: p.name,
+              source: "homebrew-formula",
+              fromVersion: p.currentVersion,
+              toVersion: p.latestVersion,
+              trigger: "auto",
+            });
+          }
+        }
+      } catch {
+        // ignore
+      }
     }
   }
 

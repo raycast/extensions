@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import * as assert from "node:assert/strict";
-import { formatDuration, hostnameOf, navigationTitle, dayLabel, timeOfDay } from "../src/utils/format";
+import { formatDuration, hostnameOf, navigationTitle, dayLabel, timeOfDay, progressBar } from "../src/utils/format";
 
 test("formatDuration buckets hours, days, and short windows", () => {
   assert.equal(formatDuration(30 * 60 * 1000), "<1h"); // 30 min
@@ -45,4 +45,17 @@ test("timeOfDay produces a clock string", () => {
   // Locale-dependent but should at minimum contain a digit and a colon
   assert.ok(/\d/.test(out));
   assert.ok(out.includes(":"));
+});
+
+test("progressBar renders a clamped unicode bar with percentage", () => {
+  assert.equal(progressBar(0, 10, 10), "░░░░░░░░░░ 0%");
+  assert.equal(progressBar(10, 10, 10), "██████████ 100%");
+  assert.equal(progressBar(5, 10, 10), "█████░░░░░ 50%");
+  // total <= 0 → empty (nothing to show)
+  assert.equal(progressBar(0, 0, 10), "");
+  // ratio clamps when done exceeds total (shouldn't happen, but be safe)
+  assert.equal(progressBar(99, 10, 10), "██████████ 100%");
+  // filled cells + empty cells always equal width
+  const bar = progressBar(3, 10, 10).split(" ")[0];
+  assert.equal(bar.length, 10);
 });
