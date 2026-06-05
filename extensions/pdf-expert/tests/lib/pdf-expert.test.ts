@@ -76,8 +76,10 @@ describe("getOpenTabs", () => {
     const result = getOpenTabs();
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe("notes");
+    expect(result[0].fullName).toBe("notes.pdf");
     expect(result[0].path).toBe("/tmp/notes.pdf");
     expect(result[1].name).toBe("slides");
+    expect(result[1].fullName).toBe("slides.PDF");
     expect(result[1].path).toBe("/tmp/slides.PDF");
   });
 
@@ -106,6 +108,7 @@ describe("getOpenTabs", () => {
     const result = getOpenTabs();
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("My File (2026)");
+    expect(result[0].fullName).toBe("My File (2026).pdf");
     expect(result[0].path).toBe("/Users/test/My Documents/My File (2026).pdf");
     expect(result[0].folder).toBe("/Users/test/My Documents");
   });
@@ -189,5 +192,6 @@ describe("getRecentDocuments", () => {
 
     const result = getRecentDocuments();
     expect(result[0].name).toBe("Übungen für Prüfung");
+    expect(result[0].fullName).toBe("Übungen für Prüfung.pdf");
   });
 });

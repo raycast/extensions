@@ -11,6 +11,7 @@ const SFL4_PATH = join(
 
 export interface PdfFile {
   name: string;
+  fullName: string;
   path: string;
   folder: string;
   exists: boolean;
@@ -122,6 +123,7 @@ function pathToPdfFile(filePath: string): PdfFile {
   const ext = filePath.match(/\.pdf$/i)?.[0] ?? "";
   return {
     name: basename(filePath, ext),
+    fullName: basename(filePath),
     path: filePath,
     folder: dirname(filePath),
     exists: existsSync(filePath),

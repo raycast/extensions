@@ -86,7 +86,8 @@ export default function RecentDocuments() {
                 {doc.exists ? (
                   <>
                     <Action
-                      title="Open in Pdf Expert"
+                      // eslint-disable-next-line @raycast/prefer-title-case
+                      title="Open in PDF Expert"
                       icon={Icon.ArrowRight}
                       onAction={async () => {
                         try {
@@ -134,7 +135,7 @@ export default function RecentDocuments() {
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                   onAction={async () => {
-                    await Clipboard.copy(doc.name + ".pdf");
+                    await Clipboard.copy(doc.fullName);
                     await showHUD("Name copied");
                   }}
                 />

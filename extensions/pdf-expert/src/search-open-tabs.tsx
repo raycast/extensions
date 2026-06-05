@@ -67,7 +67,8 @@ export default function SearchOpenTabs() {
           actions={
             <ActionPanel>
               <Action
-                title="Open Pdf Expert"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Open PDF Expert"
                 icon={Icon.AppWindow}
                 onAction={async () => {
                   try {
@@ -154,7 +155,7 @@ export default function SearchOpenTabs() {
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                   onAction={async () => {
-                    await Clipboard.copy(tab.name + ".pdf");
+                    await Clipboard.copy(tab.fullName);
                     await showHUD("Name copied");
                   }}
                 />
