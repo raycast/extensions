@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Add AI Tools] - {PR_MERGE_DATE}
+## [Add AI Tools] - 2026-06-05
 
 - Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
 
