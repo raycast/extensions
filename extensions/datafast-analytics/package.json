@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "datafast-analytics",
+  "title": "DataFast Analytics",
+  "description": "Check Datafa.st analytics, browse visitors, and send custom goals from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "DevBySami",
+  "categories": [
+    "Applications",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "View DataFast overview, realtime, and top analytics breakdowns.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "visitors",
+      "title": "Visitors",
+      "description": "Search DataFast visitors and inspect visitor journeys.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "create-goal",
+      "title": "Create Goal",
+      "description": "Send a server-side custom goal event for a DataFast visitor.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key or Account Token",
+      "description": "Use a df_ website key or a dft_ account token with the required scopes.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "websiteId",
+      "title": "Website ID",
+      "description": "Required when using a dft_ account token. Leave empty for df_ website keys.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultDateRange",
+      "title": "Default Date Range",
+      "description": "Initial reporting window for analytics commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "30d",
+      "data": [
+        {
+          "title": "Last 7 Days",
+          "value": "7d"
+        },
+        {
+          "title": "Last 30 Days",
+          "value": "30d"
+        },
+        {
+          "title": "Last 90 Days",
+          "value": "90d"
+        },
+        {
+          "title": "All Time",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "Optional IANA timezone, such as America/New_York, Europe/Zurich, or UTC.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "eslint src --ext .ts,.tsx && prettier --check .",
+    "lint:raycast": "ray lint",
+    "fix-lint": "eslint src --ext .ts,.tsx --fix && prettier --write .",
+    "publish": "ray publish"
+  }
+}
