@@ -27,7 +27,7 @@
   "commands": [
     {
       "name": "dashboard",
-      "title": "Token Dashboard",
+      "title": "Dashboard",
       "description": "View token usage across Codex, Claude Code, and Cursor.",
       "mode": "view"
     },

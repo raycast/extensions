@@ -3,6 +3,7 @@
 ## [Quick usage commands] - {PR_MERGE_DATE}
 
 - Add **Quick Usage Claude Code**, **Quick Usage Codex**, and **Quick Usage Cursor** no-view commands that show a toast with estimated spend against your configured budget cap.
+- Rename main command to **Dashboard** (was Token Dashboard).
 
 ## [Remove budget alerts] - {PR_MERGE_DATE}
 
