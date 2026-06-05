@@ -76,7 +76,7 @@ ${scoreCanvas}
                     _historyScore.push({ mode: value.mode, score: 0 });
                   });
                   setHistoryScore(_historyScore);
-                }
+                },
               ).then();
             }}
           />
