@@ -84,7 +84,7 @@ const commandListNameToListIdMapping: Record<CommandListName, string> = {
   trash: 'TMTrashListSource',
 };
 
-function sqlEscapeJxa(value: string): string {
+export function escapeJxa(value: string): string {
   return value.replace(/'/g, "\\'");
 }
 
@@ -173,7 +173,7 @@ export async function queryTodosJxa(
   return executeJxa(
     `
   const things = Application('${appId}');
-  ${opts.projectId ? `const todos = things.projects.byId('${sqlEscapeJxa(opts.projectId)}').toDos();` : opts.areaId ? `const todos = things.areas.byId('${sqlEscapeJxa(opts.areaId)}').toDos();` : opts.listName ? `const todos = things.lists.byId('${commandListNameToListIdMapping[opts.listName as CommandListName] ?? opts.listName}').toDos();` : `const todos = things.toDos();`}
+  ${opts.projectId ? `const todos = things.projects.byId('${escapeJxa(opts.projectId)}').toDos();` : opts.areaId ? `const todos = things.areas.byId('${escapeJxa(opts.areaId)}').toDos();` : opts.listName ? `const todos = things.lists.byId('${commandListNameToListIdMapping[opts.listName as CommandListName] ?? opts.listName}').toDos();` : `const todos = things.toDos();`}
   return todos.map(todo => {
     const props = todo.properties();
     const projectRef = props.project;
@@ -200,7 +200,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const todo = things.toDos.byId('${sqlEscapeJxa(todoId)}');
+  const todo = things.toDos.byId('${escapeJxa(todoId)}');
   const props = todo.properties();
   const projectRef = props.project;
   const areaRef = props.area;
@@ -229,7 +229,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
 
 export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Promise<TodoDetails[]> {
   if (!todoIds.length) return [];
-  const idList = todoIds.map((id) => `'${sqlEscapeJxa(id)}'`).join(', ');
+  const idList = todoIds.map((id) => `'${escapeJxa(id)}'`).join(', ');
   const results: TodoDetails[] = await executeJxa(
     `
   const things = Application('${appId}');
@@ -299,7 +299,7 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const project = things.projects.byId('${sqlEscapeJxa(projectId)}');
+  const project = things.projects.byId('${escapeJxa(projectId)}');
   const props = project.properties();
   const areaRef = props.area;
   const todoCount = project.toDos().filter(t => t.status() === 'open').length;
@@ -326,7 +326,7 @@ export async function queryAreaDetailsJxa(appId: string, areaId: string): Promis
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const area = things.areas.byId('${sqlEscapeJxa(areaId)}');
+  const area = things.areas.byId('${escapeJxa(areaId)}');
   const props = area.properties();
   const todos = area.toDos().filter(t => t.status() === 'open' && !t.project());
   const projects = area.projects().filter(p => p.status() === 'open');

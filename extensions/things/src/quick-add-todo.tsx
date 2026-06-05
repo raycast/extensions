@@ -46,7 +46,14 @@ Here are some examples to help you out:
 
 Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
-      json = JSON.parse(result.trim());
+      const parsed = JSON.parse(result.trim());
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        throw new Error('AI returned an unexpected format. Please try again.');
+      }
+      if (typeof parsed.title !== 'string' || !parsed.title) {
+        throw new Error('AI returned a response without a title. Please try again.');
+      }
+      json = parsed;
     }
 
     if (props.arguments.notes) {

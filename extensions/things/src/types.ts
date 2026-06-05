@@ -77,6 +77,8 @@ export type Todo = {
   creationDate: string;
   notes: string;
   isProject?: boolean;
+  isRecurring?: boolean;
+  dueDateIsRecurring?: boolean;
 };
 
 export type Project = {

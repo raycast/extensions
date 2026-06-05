@@ -74,10 +74,6 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               name = 'anytime';
             } else if (values.when === 'someday') {
               name = 'someday';
-            } else if (values.when === 'logbook') {
-              name = 'logbook';
-            } else if (values.when === 'trash') {
-              name = 'trash';
             } else {
               name = 'inbox';
             }

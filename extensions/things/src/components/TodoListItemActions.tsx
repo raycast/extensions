@@ -15,7 +15,7 @@ import {
 import { AddNewTodo } from '../add-new-todo';
 import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
 import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '../helpers';
-import { capitalize } from '../utils';
+import { capitalize, getDateString } from '../utils';
 
 import EditTodo from './EditTodo';
 import OpenInThings from './OpenInThings';
@@ -179,10 +179,7 @@ New title:
   }
 
   function formatDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const datePart = `${year}-${month}-${day}`;
+    const datePart = getDateString(date);
 
     // If the user picked a full day, we avoid providing the time, as
     // Things leverages the time part to understand whether a reminder
@@ -326,12 +323,14 @@ New title:
           />
         )}
 
-        <Action
-          title="Make To-Do Actionable with AI"
-          icon={Icon.Text}
-          shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
-          onAction={makeTodoActionable}
-        />
+        {environment.canAccess(AI) && (
+          <Action
+            title="Make To-Do Actionable with AI"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
+            onAction={makeTodoActionable}
+          />
+        )}
 
         <Action
           title="Delete"

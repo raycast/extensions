@@ -1,4 +1,4 @@
-import { addJson, handleError } from '../api';
+import { addJson } from '../api';
 
 type Input = {
   /**
@@ -24,7 +24,13 @@ export default async function ({ jsonData }: Input) {
     await addJson(parsed);
     return { success: true };
   } catch (error) {
-    await handleError(error);
+    if (error instanceof Error && error.message === 'unauthorized') {
+      return {
+        error: 'No token provided',
+        message:
+          'Add your Things token in the extension settings. You can find your unique token in Things settings. go to Things → Settings → General → Enable Things URLs → Manage',
+      };
+    }
     throw error;
   }
 }

@@ -133,20 +133,16 @@ function resolveEffectiveDates(
 ): ResolvedDates {
   // Effective start: prefer startDate, fall back to nextInstanceStartDate (unless placeholder)
   let effectiveStartDate: string | null = null;
-  if (startDate && startDate !== 0) {
+  if (startDate) {
     effectiveStartDate = convertThingsDate(startDate);
-  } else if (
-    nextInstanceStartDate &&
-    nextInstanceStartDate !== 0 &&
-    nextInstanceStartDate !== NEXT_INSTANCE_PLACEHOLDER
-  ) {
+  } else if (nextInstanceStartDate && nextInstanceStartDate !== NEXT_INSTANCE_PLACEHOLDER) {
     effectiveStartDate = convertThingsDate(nextInstanceStartDate);
   }
 
   // Recurring deadline: placeholder indicates deadline is relative to next instance
   if (deadline === RECURRING_DEADLINE_PLACEHOLDER) {
     const offset = parseDeadlineOffset(recurrenceRule);
-    if (offset !== null && nextInstanceStartDate && nextInstanceStartDate !== 0) {
+    if (offset !== null && nextInstanceStartDate) {
       const computedPacked = addDaysToThingsDate(nextInstanceStartDate, offset);
       const effectiveDeadline = computedPacked !== null ? convertThingsDate(computedPacked) : null;
       return { effectiveDeadline, effectiveStartDate, dueDateIsRecurring: true };
@@ -154,7 +150,7 @@ function resolveEffectiveDates(
     return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: true };
   }
 
-  if (deadline && deadline !== 0) {
+  if (deadline) {
     return { effectiveDeadline: convertThingsDate(deadline), effectiveStartDate, dueDateIsRecurring: false };
   }
 
@@ -267,9 +263,9 @@ function todoToSummary(todo: Todo): TodoSummary {
     id: todo.id,
     name: todo.name,
     dueDate: todo.dueDate || undefined,
-    dueDateIsRecurring: false,
+    dueDateIsRecurring: todo.dueDateIsRecurring ?? false,
     activationDate: todo.activationDate || undefined,
-    isRecurring: false,
+    isRecurring: todo.isRecurring ?? false,
     projectName: todo.project?.name,
     projectId: todo.project?.id,
     areaName: todo.area?.name,
@@ -502,7 +498,7 @@ type ListTodoRow = {
 };
 
 function mapListTodoRow(row: ListTodoRow): Todo {
-  const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+  const { effectiveDeadline, effectiveStartDate, dueDateIsRecurring } = resolveEffectiveDates(
     row.startDate ?? 0,
     row.deadline ?? 0,
     row.nextInstanceStartDate ?? 0,
@@ -552,6 +548,8 @@ function mapListTodoRow(row: ListTodoRow): Todo {
     activationDate: effectiveStartDate ?? '',
     creationDate: creationDate ?? '',
     isProject: row.type === 1,
+    isRecurring: Boolean(row.isRecurring),
+    dueDateIsRecurring,
     areaTags,
     project,
     area,
@@ -591,16 +589,7 @@ async function getTodayTodosFromDB(): Promise<Todo[]> {
       AND t.start = 1
       AND t.startDate IS NOT NULL
       AND t.startDate <= ${todayEnd}
-      AND NOT (
-        t.rt1_repeatingTemplate IS NULL
-        AND t.rt1_recurrenceRule IS NOT NULL
-        AND EXISTS (
-          SELECT 1 FROM TMTask i
-          WHERE i.rt1_repeatingTemplate = t.uuid
-            AND i.trashed = 0
-            AND i.status = 0
-        )
-      )
+      ${EXCLUDE_MASTER_WHERE}
     ORDER BY t.todayIndex ASC, t."index" ASC
   `);
 }
@@ -623,16 +612,7 @@ async function getAnytimeTodosFromDB(): Promise<Todo[]> {
         AND t.startDate IS NOT NULL
         AND t.startDate <= ${todayEnd}
         AND (t.project IS NULL OR (SELECT p.start FROM TMTask p WHERE p.uuid = t.project) = 1)
-        AND NOT (
-          t.rt1_repeatingTemplate IS NULL
-          AND t.rt1_recurrenceRule IS NOT NULL
-          AND EXISTS (
-            SELECT 1 FROM TMTask i
-            WHERE i.rt1_repeatingTemplate = t.uuid
-              AND i.trashed = 0
-              AND i.status = 0
-          )
-        )
+        ${EXCLUDE_MASTER_WHERE}
       ORDER BY
         CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
         p."index" ASC,
@@ -647,16 +627,7 @@ async function getAnytimeTodosFromDB(): Promise<Todo[]> {
         AND t.start = 1
         AND (t.startDate IS NULL OR t.startDate > ${todayEnd})
         AND (t.project IS NULL OR (SELECT p.start FROM TMTask p WHERE p.uuid = t.project) = 1)
-        AND NOT (
-          t.rt1_repeatingTemplate IS NULL
-          AND t.rt1_recurrenceRule IS NOT NULL
-          AND EXISTS (
-            SELECT 1 FROM TMTask i
-            WHERE i.rt1_repeatingTemplate = t.uuid
-              AND i.trashed = 0
-              AND i.status = 0
-          )
-        )
+        ${EXCLUDE_MASTER_WHERE}
       ORDER BY
         CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
         p."index" ASC,
@@ -812,7 +783,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
         CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
         COALESCE(p.notes, '') as notes,
         (SELECT GROUP_CONCAT(tg.title, ',') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
-        NULL as dueDate, NULL as activationDate,
+        NULL as dueDate, NULL as activationDate, -- dates not fetched in collection summary; use queryProjectDetailsSQL for full data
         a.uuid as areaId, a.title as areaName,
         (SELECT GROUP_CONCAT(tg.title, ',') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
       FROM TMTask p

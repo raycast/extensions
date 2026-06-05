@@ -43,6 +43,7 @@ import {
   getCollectionsJxa,
   getQuickFindDataJXA,
   executeJxa,
+  escapeJxa,
 } from './api-jxa';
 
 const preferences = getPreferenceValues<Preferences>();
@@ -119,7 +120,7 @@ export const getTodoName = (todoId: string) =>
   executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  const todo = things.toDos.byId('${todoId}')
+  const todo = things.toDos.byId('${escapeJxa(todoId)}')
 
   return todo.name();
 `,
@@ -130,7 +131,7 @@ export const getProjectName = (projectId: string) =>
   executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  const project = things.projects.byId('${projectId}')
+  const project = things.projects.byId('${escapeJxa(projectId)}')
 
   return project.name();
 `,

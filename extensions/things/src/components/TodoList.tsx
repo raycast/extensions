@@ -1,4 +1,4 @@
-import { List, Detail, getPreferenceValues, Icon } from '@raycast/api';
+import { List, getPreferenceValues, Icon } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 
@@ -148,12 +148,6 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   if (error) {
     return <ErrorView error={error} onRetry={() => mutate()} />;
-  }
-
-  if (!todos && !isLoading) {
-    return (
-      <Detail markdown="## No Data\n\nNo to-dos found and no error occurred. This might indicate an issue with the Things connection." />
-    );
   }
 
   const groupByProjectOrArea = preferences.groupByProjectOrArea !== false;

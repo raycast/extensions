@@ -50,9 +50,14 @@ export function getTypeIcon(type: 'area' | 'project' | 'todo'): Image.ImageLike 
   }
 }
 
+/** Returns a dayjs object for the start of today in local time (no timezone shift). */
+export function getLocalToday(): ReturnType<typeof dayjs> {
+  const now = new Date();
+  return dayjs(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+}
+
 export function getDeadlineColor(dueDate: string): Color | undefined {
-  const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
-  const diff = dayjs(dueDate).diff(today, 'day');
+  const diff = dayjs(dueDate).diff(getLocalToday(), 'day');
   if (Math.abs(diff) >= 15) return undefined;
   if (diff <= 0) return Color.Red;
   return Color.Orange;
