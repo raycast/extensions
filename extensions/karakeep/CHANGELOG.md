@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.3.2] - {PR_MERGE_DATE}
+## [2.3.2] - 2026-06-05
 
 - Fixed bookmark preview images not rendering by caching previews locally and escaping local image paths in Markdown
 
