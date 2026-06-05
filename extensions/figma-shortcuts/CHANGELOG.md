@@ -1,6 +1,6 @@
 # Changelog
 
-## [Complete Figma Shortcuts List] - {PR_MERGE_DATE}
+## [Complete Figma Shortcuts List] - 2026-06-05
 
 ### Changed
 
