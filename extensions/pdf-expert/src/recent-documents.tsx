@@ -1,0 +1,148 @@
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Icon,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import {
+  getRecentDocuments,
+  isInstalled,
+  PdfFile,
+  revealInFinder,
+  switchToTab,
+} from "./lib/pdf-expert";
+import { shortenPath } from "./lib/utils";
+
+export default function RecentDocuments() {
+  const [docs, setDocs] = useState<PdfFile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const load = useCallback(() => {
+    if (!isInstalled()) {
+      setIsLoading(false);
+      return;
+    }
+    try {
+      setDocs(getRecentDocuments());
+    } catch (err) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Read Recent Documents",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (!isLoading && !isInstalled()) {
+    return (
+      <List>
+        <List.EmptyView
+          title="PDF Expert Is Not Installed"
+          description="Install PDF Expert from the App Store to use this extension"
+          icon={Icon.Warning}
+        />
+      </List>
+    );
+  }
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter recent documents…">
+      {docs.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Recent Documents"
+          description="Open a PDF in PDF Expert and it will appear here"
+          icon={Icon.Document}
+        />
+      ) : (
+        docs.map((doc) => (
+          <List.Item
+            key={doc.path}
+            title={doc.name}
+            subtitle={shortenPath(doc.folder)}
+            icon={
+              doc.exists
+                ? Icon.Document
+                : { source: Icon.Document, tintColor: Color.SecondaryText }
+            }
+            accessories={
+              doc.exists
+                ? []
+                : [{ text: { value: "Not Found", color: Color.SecondaryText } }]
+            }
+            actions={
+              <ActionPanel>
+                {doc.exists ? (
+                  <>
+                    <Action
+                      title="Open in Pdf Expert"
+                      icon={Icon.ArrowRight}
+                      onAction={async () => {
+                        try {
+                          switchToTab(doc.path);
+                        } catch (err) {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: "Could Not Open File",
+                            message:
+                              err instanceof Error ? err.message : String(err),
+                          });
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Reveal in Finder"
+                      icon={Icon.Finder}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                      onAction={async () => {
+                        try {
+                          revealInFinder(doc.path);
+                        } catch (err) {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: "Could Not Reveal File",
+                            message:
+                              err instanceof Error ? err.message : String(err),
+                          });
+                        }
+                      }}
+                    />
+                  </>
+                ) : null}
+                <Action
+                  title="Copy File Path"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  onAction={async () => {
+                    await Clipboard.copy(doc.path);
+                    await showHUD("Path copied");
+                  }}
+                />
+                <Action
+                  title="Copy File Name"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  onAction={async () => {
+                    await Clipboard.copy(doc.name + ".pdf");
+                    await showHUD("Name copied");
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
+  );
+}
