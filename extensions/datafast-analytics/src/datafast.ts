@@ -8,7 +8,6 @@ import type {
   DateRangeKey,
   Metadata,
   Overview,
-  Preferences,
   Realtime,
   VisitorDetail,
   VisitorListRow,

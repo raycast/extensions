@@ -1,12 +1,5 @@
 export type DateRangeKey = "7d" | "30d" | "90d" | "all";
 
-export type Preferences = {
-  apiKey: string;
-  websiteId?: string;
-  defaultDateRange: DateRangeKey;
-  timezone?: string;
-};
-
 export type ApiEnvelope<T> = {
   status: "success";
   data: T;

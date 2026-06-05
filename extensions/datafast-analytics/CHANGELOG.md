@@ -1,6 +1,6 @@
 # DataFast Analytics Changelog
 
-## [Initial Version] - 2026-06-05
+## [Initial Release] - {PR_MERGE_DATE}
 
 - View overview metrics, realtime visitors, and top analytics breakdowns from DataFast.
 - Search visitors by page, goal, location, device, campaign, referrer, or customer status.
