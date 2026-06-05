@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import VocabuilderTranslateWordProvider, {
   EvalVarsSchema,
+  ReasoningLevelSchema,
   describeFailure,
   parseOrThrow,
   projectKnownErrorOrNull,
@@ -71,6 +72,19 @@ describe("parseOrThrow", () => {
     expect(() => parseOrThrow(schema, { a: 1 }, "Bad input", "set a and b in the config.")).toThrow(
       /^Bad input \(a, b\) — set a and b in the config\.$/,
     );
+  });
+});
+
+describe("ReasoningLevelSchema", () => {
+  it("accepts the manifest reasoning defaults and selectable values", () => {
+    expect(ReasoningLevelSchema.parse("none")).toBe("none");
+    expect(ReasoningLevelSchema.parse("low")).toBe("low");
+    expect(ReasoningLevelSchema.parse("medium")).toBe("medium");
+    expect(ReasoningLevelSchema.parse("high")).toBe("high");
+  });
+
+  it("rejects invalid manifest reasoning values instead of relying on a cast", () => {
+    expect(() => ReasoningLevelSchema.parse("minimal")).toThrow();
   });
 });
 

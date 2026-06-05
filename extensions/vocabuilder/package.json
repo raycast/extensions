@@ -205,21 +205,105 @@
       "description": "If enabled, prefill a suggestion only when clipboard content is a safe single word"
     },
     {
+      "name": "translationModelPreset",
+      "type": "dropdown",
+      "required": true,
+      "title": "Translation Model",
+      "description": "Gemini model used for translation. Use the custom model field only if you need an ID not listed here.",
+      "default": "gemini-3.5-flash",
+      "data": [
+        {
+          "title": "Gemini 3.5 Flash",
+          "value": "gemini-3.5-flash"
+        },
+        {
+          "title": "Gemini 3.1 Flash-Lite",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "Gemini 3.1 Pro Preview",
+          "value": "gemini-3.1-pro-preview"
+        },
+        {
+          "title": "Gemini 3 Flash Preview",
+          "value": "gemini-3-flash-preview"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Flash-Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        }
+      ]
+    },
+    {
       "name": "translationModel",
       "type": "textfield",
       "required": false,
-      "title": "Translation Model",
-      "description": "Gemini model ID for translation (e.g. gemini-2.5-flash, gemini-3-flash-preview). Leave blank to use the default. Override if your model is deprecated.",
-      "default": "gemini-3-flash-preview",
-      "placeholder": "gemini-3-flash-preview"
+      "title": "Custom Translation Model ID",
+      "description": "Optional advanced override. If set, it is used instead of Translation Model; reasoning controls are applied only for recognized models.",
+      "placeholder": "gemini-3.5-flash"
+    },
+    {
+      "name": "reasoningLevel",
+      "type": "dropdown",
+      "required": true,
+      "title": "Reasoning Level",
+      "description": "Controls Gemini reasoning for translations. Minimum is fastest: it disables thinking where supported; Pro models use their lowest supported reasoning level.",
+      "default": "none",
+      "data": [
+        {
+          "title": "Minimum (fastest)",
+          "value": "none"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "ttsModelPreset",
+      "type": "dropdown",
+      "required": true,
+      "title": "Text-to-Speech Model",
+      "description": "Gemini model used for word pronunciation. Use the custom model field only if you need an ID not listed here.",
+      "default": "gemini-3.1-flash-tts-preview",
+      "data": [
+        {
+          "title": "Gemini 3.1 Flash TTS Preview",
+          "value": "gemini-3.1-flash-tts-preview"
+        },
+        {
+          "title": "Gemini 2.5 Flash Preview TTS",
+          "value": "gemini-2.5-flash-preview-tts"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview TTS",
+          "value": "gemini-2.5-pro-preview-tts"
+        }
+      ]
     },
     {
       "name": "ttsModel",
       "type": "textfield",
       "required": false,
-      "title": "Text-to-Speech Model",
-      "description": "Gemini TTS model ID for word pronunciation. Leave blank to use the default. Override if your model is deprecated.",
-      "default": "gemini-3.1-flash-tts-preview",
+      "title": "Custom Text-to-Speech Model ID",
+      "description": "Optional advanced override. If set, it is used instead of Text-to-Speech Model.",
       "placeholder": "gemini-3.1-flash-tts-preview"
     }
   ],

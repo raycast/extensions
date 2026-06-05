@@ -5,10 +5,11 @@ describe("getPreferenceDefault", () => {
   it("returns the default declared in package.json for an existing preference", () => {
     // These assertions intentionally read package.json's actual values rather
     // than hardcoding strings — the whole point of this helper is to NOT
-    // duplicate the manifest. We assert that we got *some* non-empty string,
-    // matching the textfield shape; the exact model name lives in the manifest.
-    expect(getPreferenceDefault("translationModel")).toMatch(/\S/);
-    expect(getPreferenceDefault("ttsModel")).toMatch(/\S/);
+    // duplicate the manifest. We assert that we got *some* non-empty string;
+    // exact preference values live in the manifest.
+    expect(getPreferenceDefault("translationModelPreset")).toMatch(/\S/);
+    expect(getPreferenceDefault("reasoningLevel")).toMatch(/\S/);
+    expect(getPreferenceDefault("ttsModelPreset")).toMatch(/\S/);
   });
 
   it("throws when the preference is not declared", () => {
