@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import type { User } from "../domain/on-call-event";
 
 const BASE_URL = "https://uptime.betterstack.com/api/v2";
 
@@ -11,27 +12,10 @@ export interface Calendar {
   };
 }
 
-export interface CalendarEvent {
-  id: string;
-  attributes: {
-    started_at: string;
-    ended_at: string;
-    user: {
-      first_name: string;
-      last_name: string;
-      email: string;
-    };
-  };
-}
-
 interface IncludedUser {
   id: string;
   type: "user";
-  attributes: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
+  attributes: User;
 }
 
 interface ApiResponse<T> {
@@ -52,46 +36,47 @@ interface BetterStackEvent {
 
 interface EventsResponse {
   events: BetterStackEvent[];
-  pagination?: {
-    next?: string | null;
-  };
 }
 
-export async function getOnCallCalendars(): Promise<Calendar[]> {
-  const { data } = await fetchAllPages<Calendar>(`${BASE_URL}/on-calls`);
-
-  return data;
+export interface RawCalendarEvent {
+  started_at: string;
+  ended_at: string;
+  override: boolean;
+  user: User;
 }
 
-export async function getCalendarEvents(calendarId: string, from: Date, to: Date): Promise<CalendarEvent[]> {
-  const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString() });
+export interface OnCallCalendarsResult {
+  calendars: Calendar[];
+  usersByEmail: Map<string, User>;
+}
 
-  let url: string | null | undefined = `${BASE_URL}/on-calls/${calendarId}/events?${params}`;
-  const allEvents: BetterStackEvent[] = [];
+export async function getOnCallCalendars(): Promise<OnCallCalendarsResult> {
+  const result = await fetchAllPages<Calendar>(`${BASE_URL}/on-calls`);
+  const usersByEmail = new Map<string, User>();
 
-  while (url) {
-    const page: EventsResponse = await fetchJson<EventsResponse>(url);
-    allEvents.push(...page.events);
-    url = page.pagination?.next;
+  for (const included of result.included ?? []) {
+    if (included.type === "user") {
+      usersByEmail.set(included.attributes.email.toLowerCase(), included.attributes);
+    }
   }
 
-  return allEvents.flatMap((event) => {
-    const startsAt = new Date(event.starts_at);
-    const endsAt = new Date(event.ends_at);
+  return { calendars: result.data, usersByEmail };
+}
 
-    if (endsAt < from || startsAt > to) {
-      return [];
-    }
+export async function getCalendarEvents(
+  calendarId: string,
+  usersByEmail: Map<string, User>,
+): Promise<RawCalendarEvent[]> {
+  const { events } = await fetchJson<EventsResponse>(`${BASE_URL}/on-calls/${calendarId}/events`);
 
-    return event.users.map((email) => ({
-      id: String(event.id),
-      attributes: {
-        started_at: event.starts_at,
-        ended_at: event.ends_at,
-        user: buildUserFromEmail(email),
-      },
-    }));
-  });
+  return events.flatMap((event) =>
+    event.users.map((email) => ({
+      started_at: event.starts_at,
+      ended_at: event.ends_at,
+      override: event.override,
+      user: usersByEmail.get(email.toLowerCase()) ?? buildUserFromEmail(email),
+    })),
+  );
 }
 
 async function fetchAllPages<T>(url: string): Promise<ApiResponse<T>> {
@@ -120,7 +105,7 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-function buildUserFromEmail(email: string): CalendarEvent["attributes"]["user"] {
+function buildUserFromEmail(email: string): User {
   const name = email.split("@")[0] ?? email;
   const [firstName = name, ...lastNameParts] = name
     .split(/[._-]/)

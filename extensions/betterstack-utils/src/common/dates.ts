@@ -1,7 +1,8 @@
 import { DateTime } from "luxon";
 
 export function startOfWeek(date: Date): Date {
-  return DateTime.fromJSDate(date).startOf("week").toJSDate();
+  const dateTime = DateTime.fromJSDate(date);
+  return dateTime.minus({ days: dateTime.weekday - 1 }).startOf("day").toJSDate();
 }
 
 export function addDays(date: Date, days: number): Date {
