@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.raycast/
+.DS_Store
+npm-debug.log*

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ddg-email",
+  "title": "DuckDuckGo Email",
+  "description": "Generate DuckDuckGo Email Protection private aliases from Raycast.",
+  "icon": "icon.png",
+  "author": "CrudeBadger",
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-alias",
+      "title": "Generate Duck Address",
+      "description": "Generate a private DuckDuckGo Email Protection alias",
+      "mode": "view"
+    },
+    {
+      "name": "generate-copy-alias",
+      "title": "Generate and Copy Duck Address",
+      "description": "Generate a private DuckDuckGo Email Protection alias and copy it without opening a view",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "DuckDuckGo Email Protection access token. Leave empty to sign in from the command.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "duckAddress",
+      "title": "Duck Address",
+      "description": "Your main Duck address without @duck.com. Used for one-time passphrase login.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}
