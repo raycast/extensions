@@ -1,12 +1,11 @@
 # Things Changelog
 
-## [SQLite-Based Reading and Expanded AI Tools] - {PR_MERGE_DATE}
+## [Expanded AI Tools and Optional Database Reading] - {PR_MERGE_DATE}
 
-- Replaced JXA-based list fetching with direct SQLite reads via `executeSQL` for all built-in lists: inbox, today, anytime, upcoming, someday, logbook, and trash (all load in <100ms instead of ~15s).
-- Fixed recurring task due dates: Tasks with a repeating deadline now show the correct upcoming deadline date instead of a placeholder value. Added `dueDateIsRecurring` field to signal when a due date shifts with each recurrence.
-- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects via JXA instead of plain strings.
-- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, `add-json` (create projects with headings and nested to-dos in one call).
-- Improved AI instructions: search-first guidance, batch-details preference, and clearer write-operation routing.
+- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, and `add-json` (create projects with headings and nested to-dos in one call).
+- Added an optional "Unofficial API" preference that reads lists directly from the Things database instead of using Apple Events. It requires Full Disk Access and is off by default.
+- When the Unofficial API is enabled, recurring tasks now show the correct upcoming deadline instead of a placeholder value, and a `dueDateIsRecurring` field signals when a due date shifts with each recurrence.
+- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects instead of plain strings.
 
 ## [Bug Fixes] - 2026-06-04
 
