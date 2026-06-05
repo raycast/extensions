@@ -1,30 +1,26 @@
 # Token Track Changelog
 
-## [Claude titles and Cursor details cache] - {PR_MERGE_DATE}
-
-- Fix Claude Code chat titles to prefer `custom-title` (Plan mode, `/rename`) over background `ai-title`, matching the Claude app.
-- Keep the latest title per session and fall back to the first user message when no title entry exists.
-- Speed up Cursor **View Details** by caching conversation breakdowns for 15 minutes without invalidating on every DB write.
-- Reuse dashboard API results for Cursor conversation attribution when cached; fetch from the API only when local SQLite rows lack token data.
-
-## [Dashboard overhaul and performance] - {PR_MERGE_DATE}
+## [Major dashboard update] - {PR_MERGE_DATE}
 
 ![Codex week usage and token chart](metadata/tokentrack-1.png)
 ![Codex month usage and token chart](metadata/tokentrack-2.png)
 ![Cursor monthly budget progress](metadata/tokentrack-3.png)
 ![Cursor conversation details](metadata/tokentrack-4.png)
 
-- Rework dashboard around **Week** and **Month** calendar periods (Monday → today, 1st → today); removed the Today row.
-- Add a dedicated **Budget** row with native weekly (Codex) or monthly (Claude, Cursor) caps and an SVG progress bar in the detail panel.
+- Rework dashboard around **Week** and **Month** calendar periods (Sunday → today, 1st → today); removed the Today row.
+- Add a dedicated **Budget** row with native monthly caps (Claude, Cursor) or a **rolling 7-day Codex window** (first-use anchored, matching Codex CLI) and an SVG progress bar in the detail panel.
+- Show cost and token counts as colored list accessories; budget row shows spend and cap separately.
 - Remove data-path preferences; providers read from standard macOS locations (`~/.codex`, `~/.claude`, `~/Library/Application Support/Cursor`).
+- Improve first-time setup: **Currency** first, all budget fields required; budget titles follow the selected currency (no hardcoded `$`).
 - Stream usage metrics on the dashboard path to stay within Raycast's memory cap; defer per-chat lists to **View Details** (lazy load).
-- Add 60s in-memory usage cache and persistent `useCachedPromise` snapshot; manual refresh clears both.
-- Improve Cursor hybrid loading: API totals on the dashboard, SQLite + API attribution for conversation breakdown.
+- Add in-memory usage caching and persistent `useCachedPromise` snapshots; manual refresh clears dashboard, snapshot, and Cursor API caches.
+- Improve Cursor hybrid loading: API totals on the dashboard, SQLite + API attribution for conversation breakdown; cache breakdowns for 15 minutes and reuse warm API data when opening **View Details**.
+- Fix Claude Code chat titles to prefer `custom-title` (Plan mode, `/rename`) over background `ai-title`, with first-user-message fallback.
 - Redesign token charts as SVG bar charts with rounded tops, nice axis ticks, and single-chart rendering for the selected period.
 - Fix Codex chat titles using `session_index.jsonl` thread names.
-- Guard currency formatting against invalid ISO codes; omit trailing `.00` on whole-dollar amounts.
+- Round money to cents before display; omit trailing `.00` on whole-dollar amounts only (`$300`, not `$300.00`; `$1.50` keeps both decimals).
 - Fix week totals undercounting when the week starts before the current month.
-- Refresh store screenshots (Codex usage charts, Cursor budget, conversation details).
+- Update extension icon and refresh store screenshots.
 
 ## [Initial Release] - 2026-06-05
 

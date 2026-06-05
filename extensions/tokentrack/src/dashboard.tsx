@@ -164,6 +164,7 @@ export default function Command() {
   const budgetPairLabel = `${budgetSpendStr} / ${budgetCapStr}`;
   const budgetTooltip = `${formatBudgetPercent(budgetPct)} of ${budgetRowTitle(tab).toLowerCase()} (${budgetPairLabel})`;
   const remaining = Math.max(nativeBudget - budgetSpend, 0);
+  const remainingStr = formatCurrencyMoney(remaining, currency);
 
   const selectedChartMarkdown = useMemo(() => {
     const snapshot = data?.periods[selectedPeriod];
@@ -372,7 +373,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label
                     title="Remaining"
                     text={{
-                      value: formatCurrencyMoney(remaining, currency),
+                      value: remainingStr,
                       color: COST_COLOR,
                     }}
                   />

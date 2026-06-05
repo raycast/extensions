@@ -43,7 +43,7 @@
     },
     {
       "name": "claudeBudget",
-      "title": "Claude Monthly Budget ($)",
+      "title": "Claude Monthly Budget",
       "description": "Monthly Anthropic spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",
@@ -51,7 +51,7 @@
     },
     {
       "name": "codexBudget",
-      "title": "Codex Weekly Budget ($)",
+      "title": "Codex Weekly Budget",
       "description": "Weekly Codex spend cap for the current rolling 7-day window (anchored to first use).",
       "type": "textfield",
       "default": "100",
@@ -59,7 +59,7 @@
     },
     {
       "name": "cursorBudget",
-      "title": "Cursor Monthly Budget ($)",
+      "title": "Cursor Monthly Budget",
       "description": "Monthly Cursor spend cap for the current calendar month.",
       "type": "textfield",
       "default": "300",

@@ -100,6 +100,11 @@ function safeCurrencyCode(currency: string): string {
   return isValidCurrencyCode(currency) ? currency : "USD";
 }
 
+export function roundMoneyToCents(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.round(value * 100) / 100;
+}
+
 /** Whole dollars omit cents ($300); fractional amounts keep two places ($1.50). */
 function minimumMoneyFractionDigits(value: number): 0 | 2 {
   return Math.round(value * 100) % 100 === 0 ? 0 : 2;
@@ -118,13 +123,14 @@ export function formatCurrency(value: number, currency: string) {
 
 /** Currency for dashboards; omits cents when zero (e.g. $300, not $300.00). */
 export function formatCurrencyMoney(value: number, currency: string) {
+  const rounded = roundMoneyToCents(value);
   const formatted = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: safeCurrencyCode(currency),
     currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: minimumMoneyFractionDigits(value),
+    minimumFractionDigits: minimumMoneyFractionDigits(rounded),
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(rounded);
   return formatted.replace(/\bUS\$/g, "$");
 }
 

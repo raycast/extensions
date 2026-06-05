@@ -36,8 +36,9 @@ export function clearCursorApiCache(): void {
   conversationsCache = null;
 }
 
+/** Load windows share a stable start; end is always `new Date()` and drifts every call. */
 function rangeKey(range: DateRange): string {
-  return `${range.start.getTime()}:${range.end.getTime()}`;
+  return String(range.start.getTime());
 }
 
 function cacheWithinTtl(at: number, ttlMs: number): boolean {
