@@ -1,13 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List, showHUD } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { tryReadJSONPref } from "./lib/plist";
 import { buildStartURL, openSpokenlyURL } from "./lib/urls";
 
@@ -20,42 +12,27 @@ interface QuickCommand {
   prompt?: string;
 }
 
+async function loadQuickCommands(): Promise<QuickCommand[]> {
+  const raw = tryReadJSONPref<QuickCommand[]>("quickCommands") ?? [];
+  return raw.filter((qc) => qc && qc.id && qc.isEnabled !== false);
+}
+
 export default function RunQuickCommand() {
-  const [commands, setCommands] = useState<QuickCommand[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const load = useCallback(() => {
-    try {
-      const raw = tryReadJSONPref<QuickCommand[]>("quickCommands") ?? [];
-      const filtered = raw.filter(
-        (qc) => qc && qc.id && qc.isEnabled !== false,
-      );
-      setCommands(filtered);
-    } catch (err) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not read quick commands",
-        message: err instanceof Error ? err.message : String(err),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { isLoading, data: commands = [] } = useCachedPromise(
+    loadQuickCommands,
+    [],
+    {
+      initialData: [],
+      failureToastOptions: { title: "Could not read quick commands" },
+    },
+  );
 
   async function handleRun(qc: QuickCommand) {
     try {
       await openSpokenlyURL(buildStartURL(qc.id));
       await showHUD(`Running ${qc.name ?? "quick command"}`);
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to start quick command",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Failed to start quick command" });
     }
   }
 
@@ -86,7 +63,7 @@ export default function RunQuickCommand() {
                   onAction={() => handleRun(qc)}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Quick Command Id"
+                  title="Copy Quick Command ID"
                   content={qc.id}
                 />
               </ActionPanel>

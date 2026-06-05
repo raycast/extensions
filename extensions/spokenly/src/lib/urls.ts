@@ -1,4 +1,5 @@
-import { execa } from "execa";
+import { open } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 export function buildStartURL(promptId: string): string {
   // URL-encode just to be safe; UUIDs don't need it but quick command IDs might
@@ -7,7 +8,7 @@ export function buildStartURL(promptId: string): string {
 }
 
 export async function openSpokenlyURL(url: string): Promise<void> {
-  await execa("open", [url]);
+  await open(url);
 }
 
 // macOS NSEvent modifier flag bits
@@ -40,5 +41,5 @@ export async function simulateShortcut(keys: ShortcutKeys): Promise<void> {
       ? ` using {${mods.map((m) => `${m} down`).join(", ")}}`
       : "";
   const script = `tell application "System Events" to key code ${keys.keyCode}${using}`;
-  await execa("osascript", ["-e", script]);
+  await runAppleScript(script);
 }

@@ -1,4 +1,5 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getLatestEntry } from "./lib/history";
 
 export default async function main() {
@@ -17,10 +18,6 @@ export default async function main() {
       entry.text.length > 40 ? `${entry.text.slice(0, 40)}…` : entry.text;
     await showHUD(`Copied: ${preview}`);
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not read history",
-      message: err instanceof Error ? err.message : String(err),
-    });
+    await showFailureToast(err, { title: "Could not read history" });
   }
 }

@@ -1,4 +1,5 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { tryReadJSONPref } from "./lib/plist";
 import {
   buildStartURL,
@@ -44,10 +45,6 @@ export default async function main() {
     await openSpokenlyURL(buildStartURL(mainPrompt.id));
     await showHUD("Dictation started");
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to toggle dictation",
-      message: err instanceof Error ? err.message : String(err),
-    });
+    await showFailureToast(err, { title: "Failed to toggle dictation" });
   }
 }

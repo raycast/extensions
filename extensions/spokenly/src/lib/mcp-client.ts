@@ -1,4 +1,4 @@
-import { execa } from "execa";
+import { runAppleScript } from "@raycast/utils";
 import { DEFAULT_MCP_PORT } from "./constants";
 
 interface JsonRpcResponse {
@@ -46,7 +46,7 @@ export async function ensureRunning(
 ): Promise<void> {
   if (await isUp(port)) return;
   try {
-    await execa("open", ["-gj", "-a", "Spokenly"]);
+    await runAppleScript('do shell script "open -gj -a Spokenly"');
   } catch (err) {
     throw new Error(
       `Could not launch Spokenly: ${err instanceof Error ? err.message : String(err)}`,

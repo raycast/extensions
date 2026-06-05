@@ -13,6 +13,19 @@ export interface HistoryEntry {
   isError: boolean;
 }
 
+/** JSON-serializable form for useCachedPromise. */
+export type CachedHistoryEntry = Omit<HistoryEntry, "date"> & { date: string };
+
+export function toCachedHistoryEntry(entry: HistoryEntry): CachedHistoryEntry {
+  return { ...entry, date: entry.date.toISOString() };
+}
+
+export function fromCachedHistoryEntry(
+  entry: CachedHistoryEntry,
+): HistoryEntry {
+  return { ...entry, date: new Date(entry.date) };
+}
+
 export interface HistoryPath {
   jsonPath: string;
   mtimeMs: number;
@@ -137,6 +150,12 @@ export function listHistory(historyDir: string = HISTORY_DIR): HistoryEntry[] {
     if (entry) entries.push(entry);
   }
   return entries.sort((a, b) => b.date.getTime() - a.date.getTime());
+}
+
+export async function listCachedHistory(
+  historyDir: string = HISTORY_DIR,
+): Promise<CachedHistoryEntry[]> {
+  return listHistory(historyDir).map(toCachedHistoryEntry);
 }
 
 export function getLatestEntry(

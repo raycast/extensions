@@ -1,5 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
-import { execa } from "execa";
+import { showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { existsSync } from "fs";
 import { getLatestEntry } from "./lib/history";
 
@@ -18,13 +18,9 @@ export default async function main() {
       });
       return;
     }
-    await execa("open", ["-R", entry.audioPath]);
+    await showInFinder(entry.audioPath);
     await showHUD("Revealing last recording");
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open recording",
-      message: err instanceof Error ? err.message : String(err),
-    });
+    await showFailureToast(err, { title: "Could not open recording" });
   }
 }

@@ -9,6 +9,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { writeFileSync } from "fs";
 import { basename, extname, dirname, join } from "path";
 import { useState } from "react";
@@ -64,11 +65,7 @@ function ResultView({
         message: suggestedPath,
       });
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not save",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Could not save" });
     }
   }
 
@@ -146,9 +143,8 @@ export default function TranscribeFileCommand() {
         />,
       );
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Transcription failed";
-      toast.message = err instanceof Error ? err.message : String(err);
+      toast.hide();
+      await showFailureToast(err, { title: "Transcription failed" });
     } finally {
       setIsLoading(false);
     }

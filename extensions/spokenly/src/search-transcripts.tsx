@@ -4,14 +4,18 @@ import {
   Color,
   Icon,
   List,
+  showInFinder,
   showToast,
   Toast,
   trash,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { execa } from "execa";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { existsSync } from "fs";
-import { HistoryEntry, listHistory } from "./lib/history";
+import {
+  fromCachedHistoryEntry,
+  HistoryEntry,
+  listCachedHistory,
+} from "./lib/history";
 
 function formatDuration(seconds: number | null): string {
   if (seconds == null) return "";
@@ -27,41 +31,41 @@ function previewText(text: string): string {
   return oneLine.length > 80 ? `${oneLine.slice(0, 80)}…` : oneLine;
 }
 
+function entryKey(entry: Pick<HistoryEntry, "id" | "jsonPath">): string {
+  return entry.id || entry.jsonPath;
+}
+
 export default function SearchTranscripts() {
-  const [entries, setEntries] = useState<HistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    isLoading,
+    data: cachedEntries = [],
+    mutate,
+  } = useCachedPromise(listCachedHistory, [], {
+    initialData: [],
+    failureToastOptions: { title: "Could not read history" },
+  });
 
-  const load = useCallback(() => {
-    try {
-      setEntries(listHistory());
-    } catch (err) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not read history",
-        message: err instanceof Error ? err.message : String(err),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const entries = cachedEntries.map(fromCachedHistoryEntry);
 
   async function handleDelete(entry: HistoryEntry) {
+    const key = entryKey(entry);
     try {
       const toTrash: string[] = [];
       if (existsSync(entry.jsonPath)) toTrash.push(entry.jsonPath);
       if (existsSync(entry.audioPath)) toTrash.push(entry.audioPath);
-      if (toTrash.length > 0) await trash(toTrash);
-      load();
+
+      await mutate(
+        (async () => {
+          if (toTrash.length > 0) await trash(toTrash);
+        })(),
+        {
+          optimisticUpdate(cached) {
+            return cached.filter((e) => entryKey(e) !== key);
+          },
+        },
+      );
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not delete entry",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Could not delete entry" });
     }
   }
 
@@ -75,13 +79,9 @@ export default function SearchTranscripts() {
         });
         return;
       }
-      await execa("open", ["-R", entry.audioPath]);
+      await showInFinder(entry.audioPath);
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not reveal recording",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Could not reveal recording" });
     }
   }
 
@@ -110,7 +110,7 @@ export default function SearchTranscripts() {
 
           return (
             <List.Item
-              key={entry.id || entry.jsonPath}
+              key={entryKey(entry)}
               title={previewText(entry.text)}
               keywords={[entry.text, entry.modelId ?? ""].filter(Boolean)}
               icon={
