@@ -1,26 +1,26 @@
 # Token Track Changelog
 
-## [Quick usage commands] - {PR_MERGE_DATE}
+## [Quick usage commands] - 2026-06-06
 
 - Add **Quick Usage Claude Code**, **Quick Usage Codex**, and **Quick Usage Cursor** no-view commands that show a toast with estimated spend against your configured budget cap.
 - Rename main command to **Dashboard** (was Token Dashboard).
 
-## [Remove budget alerts] - {PR_MERGE_DATE}
+## [Remove budget alerts] - 2026-06-06
 
 - Remove **Monitor Budgets** background command and threshold alert preferences (**Alert Threshold (%)**, **Enable budget alerts**).
 - Budget caps, progress, and pace remain on the Token Dashboard only.
 
-## [Open Chat] - {PR_MERGE_DATE}
+## [Open Chat] - 2026-06-06
 
 - Add **Open Chat** as the primary action in View Details for Claude Code and Codex chats (deeplink into the desktop app; Claude falls back to the session folder in Finder when needed).
 - Cursor View Details shows **Open Cursor** (app only) with a tooltip — no verified deeplink to jump to a specific chat yet.
 
-## [Budget pace] - {PR_MERGE_DATE}
+## [Budget pace] - 2026-06-06
 
 - Add a **Budget Pace** row under the budget cap showing daily burn, remaining spend allowance, and projected cap-hit date when spend is on track to exceed the limit before the period ends.
 - Extend the budget detail panel with pace metadata (daily burn, daily allowance, projection).
 
-## [Major dashboard update] - {PR_MERGE_DATE}
+## [Major dashboard update] - 2026-06-06
 
 ![Codex week usage and token chart](metadata/tokentrack-1.png)
 ![Codex month usage and token chart](metadata/tokentrack-2.png)
