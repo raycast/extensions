@@ -245,7 +245,7 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
     return <Action title={actionTitle} icon={zedIcon} onAction={openSingleFolder} />;
   }
 
-  // Fallback: open via URI scheme (no revalidation)
+  // Fallback: open via URI scheme
   return (
     <Action.Open title={actionTitle} target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
   );
