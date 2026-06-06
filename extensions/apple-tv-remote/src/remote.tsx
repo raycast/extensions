@@ -154,7 +154,7 @@ export default function Remote() {
         />
         <Action
           title="Back"
-          icon={Icon.ArrowUturnLeft}
+          icon={Icon.Undo}
           shortcut={{ modifiers: ["opt"], key: "backspace" }}
           onAction={() => press(RemoteKey.Menu)}
         />
@@ -231,7 +231,7 @@ export default function Remote() {
     B("b4"),
     // Row 3
     B("b5"),
-    { id: "back", icon: Icon.ArrowUturnLeft, title: "Back · B", action: (c) => sendKey(c, RemoteKey.Menu) },
+    { id: "back", icon: Icon.Undo, title: "Back · B", action: (c) => sendKey(c, RemoteKey.Menu) },
     {
       id: "down",
       icon: Icon.ChevronDown,

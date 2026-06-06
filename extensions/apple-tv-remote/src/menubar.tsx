@@ -45,7 +45,7 @@ export default function Command() {
         />
         <MenuBarExtra.Item
           title="Back"
-          icon={Icon.ArrowUturnLeft}
+          icon={Icon.Undo}
           onAction={fire("back")}
           alternate={
             <MenuBarExtra.Item title="App Switcher" icon={Icon.AppWindowGrid2x2} onAction={fire("app switcher")} />
