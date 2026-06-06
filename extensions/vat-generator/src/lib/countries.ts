@@ -206,7 +206,7 @@ export const COUNTRIES: Country[] = [
     region: "EU",
     tier: "checksum",
     body: gen.ee,
-    format: "10 + 7 digits",
+    format: "9 digits (starts with 10)",
   },
   {
     code: "GR",

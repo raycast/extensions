@@ -20,8 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.78.0"
   },
   "devDependencies": {
     "@accountable/jsvat": "^1.3.4",
