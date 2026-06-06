@@ -14,7 +14,7 @@ export const useBinance: UseSource = (currency, coinSymbols) => {
     data.map((d: any) => {
       const symbol = d.symbol.replace("USDT", "");
       const coin: Coin = {
-        ...COINS[symbol],
+        name: COINS[symbol]?.name ?? symbol,
         symbol,
         price: parseFloat(d.lastPrice),
         high24h: parseFloat(d.highPrice),

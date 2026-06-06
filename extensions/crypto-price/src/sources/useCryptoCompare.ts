@@ -14,7 +14,7 @@ export const useCryptoCompare: UseSource = (currency, coinSymbols) => {
   const coins = mapValues(data.RAW, (currencies: any, symbol: string) => {
     const d = currencies[currency];
     const coin: Coin = {
-      ...COINS[symbol],
+      name: COINS[symbol]?.name ?? symbol,
       symbol,
       price: d.PRICE,
       high24h: d.HIGH24HOUR,
