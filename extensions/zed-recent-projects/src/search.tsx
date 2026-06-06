@@ -192,11 +192,13 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const zedIcon = { fileIcon: app.path };
   const primaryPath = getEntryPrimaryPath(entry);
 
+  const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
+
   // WSL support (Windows only)
   const openZedInWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${primaryPath}`]);
 
   if (entry.wsl) {
-    return <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openZedInWsl} icon={zedIcon} />;
   }
 
   // Helper to trigger staggered revalidations while Raycast is in the background.
@@ -222,7 +224,7 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
         });
       }
     };
-    return <Action title="Open in Zed" onAction={openMultiFolder} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openMultiFolder} icon={zedIcon} />;
   }
 
   // If CLI available, use it for consistency (handles revalidation)
@@ -240,12 +242,12 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
         });
       }
     };
-    return <Action title="Open in Zed" icon={zedIcon} onAction={openSingleFolder} />;
+    return <Action title={actionTitle} icon={zedIcon} onAction={openSingleFolder} />;
   }
 
   // Fallback: open via URI scheme (no revalidation)
   return (
-    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
+    <Action.Open title={actionTitle} target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
   );
 }
 

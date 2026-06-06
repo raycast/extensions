@@ -4,6 +4,7 @@
 
 - Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.
 - Update to @raycast/api 1.104.
+- Update primary action title dynamically based on window open status
 
 ## [Fix Non-POSIX Shell Support] - 2026-05-17
 
