@@ -167,7 +167,7 @@ export async function openConversation(
       await open("cursor://", bundleId);
       return {
         ok: true,
-        reason: "Cursor opened. Find this chat in Previous Chats",
+        reason: "Find this chat in Cursor's Previous Chats",
       };
     }
     if (provider === "codex") {
