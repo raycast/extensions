@@ -31,8 +31,6 @@ const CODEX_ROLLOUT_ID_RE =
 const CLAUDE_SESSION_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const CLAUDE_PROJECT_CWD_RE = /\/\.claude\/projects\/([^/]+)\//;
-
 export type OpenConversationResult = { ok: boolean; reason?: string };
 
 /** Cursor has deeplinks for prompts/MCP/BugBot, but not to open a local chat by composerId. */
@@ -64,11 +62,24 @@ function claudeSessionId(
   return CLAUDE_SESSION_ID_RE.test(id) ? id : undefined;
 }
 
-/** `projects/-Users-foo-bar/` → `/Users/foo/bar`. */
-function claudeCwdFromSourcePath(sourcePath: string): string | undefined {
-  const encoded = CLAUDE_PROJECT_CWD_RE.exec(sourcePath)?.[1];
-  if (!encoded?.startsWith("-")) return undefined;
-  return `/${encoded.slice(1).replace(/-/g, "/")}`;
+/** Authoritative `cwd` from session transcript — folder names are lossy to decode. */
+function loadClaudeCwdFromSessionFile(sessionFile: string): string | undefined {
+  if (!sessionFile.endsWith(".jsonl") || !existsSync(sessionFile)) {
+    return undefined;
+  }
+
+  try {
+    for (const line of readFileSync(sessionFile, "utf8")
+      .split(/\r?\n/)
+      .slice(0, 20)) {
+      if (!line.trim()) continue;
+      const row = JSON.parse(line) as { cwd?: string };
+      if (typeof row.cwd === "string") return row.cwd;
+    }
+  } catch {
+    // optional transcript field
+  }
+  return undefined;
 }
 
 function loadClaudeSessionCwd(sessionId: string): string | undefined {
@@ -98,7 +109,7 @@ function resolveClaudeSessionCwd(
 ): string | undefined {
   return (
     loadClaudeSessionCwd(sessionId) ??
-    (sourcePath ? claudeCwdFromSourcePath(sourcePath) : undefined)
+    (sourcePath ? loadClaudeCwdFromSessionFile(sourcePath) : undefined)
   );
 }
 
