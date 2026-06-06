@@ -28,11 +28,6 @@
 
 ## [Major dashboard update] - 2026-06-06
 
-![Codex week usage and token chart](metadata/tokentrack-1.png)
-![Codex month usage and token chart](metadata/tokentrack-2.png)
-![Cursor monthly budget progress](metadata/tokentrack-3.png)
-![Cursor conversation details](metadata/tokentrack-4.png)
-
 - Rework dashboard around **Week** and **Month** calendar periods (Sunday → today, 1st → today); removed the Today row.
 - Add a dedicated **Budget** row with native monthly caps (Claude, Cursor) or a **rolling 7-day Codex window** (first-use anchored, matching Codex CLI) and an SVG progress bar in the detail panel.
 - Show cost and token counts as colored list accessories; budget row shows spend and cap separately.
