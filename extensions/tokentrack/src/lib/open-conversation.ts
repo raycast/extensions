@@ -5,15 +5,18 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { dirname } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { CLAUDE_DATA_PATH } from "./source-paths";
+import { expandHome } from "./sources/shared";
 import type { ConversationUsageSummary, SourceProviderKey } from "./types";
 
 /**
  * Verified macOS URL schemes (Jun 2026):
  * - Codex: `codex://threads/{session-uuid}` — OpenAI Codex app docs
- * - Claude: `claude://code/{session-uuid}` — Claude mobile/desktop Code tab links
- * - Cursor: no public deeplink to open a local composer by id (cursor-deeplink
- *   handles MCP, BugBot, cloud agents, prompts — not local composerId)
+ * - Claude Desktop Code: `claude://resume?session={uuid}&cwd={path}` opens the
+ *   session; `claude://code/{uuid}` opens the Code tab (may not jump to session)
+ * - Cursor: no public deeplink to open a local composer by id
  */
 const APP_BUNDLES: Record<SourceProviderKey, string> = {
   claude: "com.anthropic.claudefordesktop",
@@ -24,6 +27,11 @@ const APP_BUNDLES: Record<SourceProviderKey, string> = {
 /** Matches `src/lib/sources/codex.ts` — rollout filename trailing UUID. */
 const CODEX_ROLLOUT_ID_RE =
   /-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/i;
+
+const CLAUDE_SESSION_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const CLAUDE_PROJECT_CWD_RE = /\/\.claude\/projects\/([^/]+)\//;
 
 export type OpenConversationResult = { ok: boolean; reason?: string };
 
@@ -44,10 +52,54 @@ export function openConversationTooltip(
 function claudeSessionId(
   summary: ConversationUsageSummary,
 ): string | undefined {
+  if (summary.key.startsWith("claude:")) {
+    const id = summary.key.slice("claude:".length);
+    if (CLAUDE_SESSION_ID_RE.test(id)) return id;
+  }
+
   const path = summary.sourcePath ?? summary.key;
   const base = path.split("/").pop() ?? "";
   if (!base.endsWith(".jsonl")) return undefined;
-  return base.replace(/\.jsonl$/i, "");
+  const id = base.replace(/\.jsonl$/i, "");
+  return CLAUDE_SESSION_ID_RE.test(id) ? id : undefined;
+}
+
+/** `projects/-Users-foo-bar/` → `/Users/foo/bar`. */
+function claudeCwdFromSourcePath(sourcePath: string): string | undefined {
+  const encoded = CLAUDE_PROJECT_CWD_RE.exec(sourcePath)?.[1];
+  if (!encoded?.startsWith("-")) return undefined;
+  return `/${encoded.slice(1).replace(/-/g, "/")}`;
+}
+
+function loadClaudeSessionCwd(sessionId: string): string | undefined {
+  const sessionsDir = join(expandHome(CLAUDE_DATA_PATH), "sessions");
+  if (!existsSync(sessionsDir)) return undefined;
+
+  for (const name of readdirSync(sessionsDir)) {
+    if (!name.endsWith(".json")) continue;
+    try {
+      const row = JSON.parse(readFileSync(join(sessionsDir, name), "utf8")) as {
+        sessionId?: string;
+        cwd?: string;
+      };
+      if (row.sessionId === sessionId && typeof row.cwd === "string") {
+        return row.cwd;
+      }
+    } catch {
+      // optional registry
+    }
+  }
+  return undefined;
+}
+
+function resolveClaudeSessionCwd(
+  sessionId: string,
+  sourcePath?: string,
+): string | undefined {
+  return (
+    loadClaudeSessionCwd(sessionId) ??
+    (sourcePath ? claudeCwdFromSourcePath(sourcePath) : undefined)
+  );
 }
 
 function codexSessionId(summary: ConversationUsageSummary): string | undefined {
@@ -60,8 +112,46 @@ async function isAppInstalled(bundleId: string): Promise<boolean> {
   return apps.some((app) => app.bundleId === bundleId);
 }
 
-async function openDeeplink(url: string, bundleId: string): Promise<void> {
-  await open(url, bundleId);
+function claudeDeepLinks(sessionId: string, cwd?: string): string[] {
+  const links: string[] = [];
+  if (cwd) {
+    const resume = new URL("claude://resume");
+    resume.searchParams.set("session", sessionId);
+    resume.searchParams.set("cwd", cwd);
+    links.push(resume.toString());
+  }
+  links.push(`claude://code/${sessionId}`);
+  return links;
+}
+
+async function openClaudeSession(
+  sessionId: string,
+  cwd: string | undefined,
+  bundleId: string,
+): Promise<void> {
+  const links = claudeDeepLinks(sessionId, cwd);
+  let lastError: unknown;
+
+  for (const link of links) {
+    try {
+      // Let Launch Services route the URL; forcing bundleId can foreground the
+      // app without handing off the session path.
+      await open(link);
+      return;
+    } catch (error) {
+      lastError = error;
+      try {
+        await open(link, bundleId);
+        return;
+      } catch (bundleError) {
+        lastError = bundleError;
+      }
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Failed to open Claude session");
 }
 
 export async function openConversation(
@@ -89,7 +179,7 @@ export async function openConversation(
       if (!(await isAppInstalled(bundleId))) {
         return { ok: false, reason: "Codex app is not installed" };
       }
-      await openDeeplink(`codex://threads/${sessionId}`, bundleId);
+      await open(`codex://threads/${sessionId}`, bundleId);
       return { ok: true };
     }
 
@@ -101,7 +191,8 @@ export async function openConversation(
 
       if (sessionId && appInstalled) {
         try {
-          await openDeeplink(`claude://code/${sessionId}`, bundleId);
+          const cwd = resolveClaudeSessionCwd(sessionId, path);
+          await openClaudeSession(sessionId, cwd, bundleId);
           return { ok: true };
         } catch {
           // Desktop may not route to the session — fall back to Finder.

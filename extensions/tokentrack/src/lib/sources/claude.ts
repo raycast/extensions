@@ -14,15 +14,30 @@ import { expandHome, isInRange, safeNumber } from "./shared";
 
 type ClaudeFileTitles = {
   customTitle?: string;
+  /** From `{"type":"ai-title","aiTitle":"…"}` — sidebar title in Claude Desktop. */
   aiTitle?: string;
   firstUserMessage?: string;
 };
 
+type ClaudeSessionIndexEntry = {
+  customTitle?: string;
+  firstPrompt?: string;
+  summary?: string;
+  fullPath?: string;
+};
+
+type ClaudeSessionIndex = Map<string, ClaudeSessionIndexEntry>;
+
+/** Titles keyed by session UUID — survives stale paths in sessions-index. */
+type ClaudeSessionTitles = Map<string, ClaudeFileTitles>;
+
 type ClaudeRecord = {
   type?: string;
   timestamp?: string;
-  aiTitle?: string;
+  sessionId?: string;
+  isSidechain?: boolean;
   customTitle?: string;
+  aiTitle?: string;
   /** Top-level Anthropic request id (`req_…`); pairs with `message.id` to dedupe. */
   requestId?: string;
   message?: {
@@ -61,6 +76,13 @@ const CLAUDE_READ_CONCURRENCY = 2;
 /** Skip JSONL files not touched since before the window (sessions can span days). */
 const CLAUDE_FILE_BACKDATE_MS = 7 * 24 * 60 * 60 * 1000;
 
+const CLAUDE_SESSION_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Main session logs live at `projects/<cwd>/<uuid>.jsonl` — not `subagents/`. */
+const CLAUDE_MAIN_SESSION_FILE_RE =
+  /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jsonl$/i;
+
 export async function readClaudeUsage(
   basePath: string,
   range: DateRange,
@@ -80,9 +102,10 @@ export async function readClaudeUsage(
 
   try {
     const files = await findJsonl(projectRoot, range);
-    const fileTitles = new Map<string, ClaudeFileTitles>();
+    const sessionIndex = loadClaudeSessionsIndex(projectRoot);
+    const sessionTitles = preloadClaudeSessionTitles(projectRoot);
     await runWithConcurrency(files, CLAUDE_READ_CONCURRENCY, (file) =>
-      readClaudeFile(file, range, sink, seen, fileTitles),
+      readClaudeFile(file, range, sink, seen, sessionTitles, sessionIndex),
     );
   } catch {
     errors.push("Claude: read error");
@@ -118,10 +141,19 @@ export function readClaudeUsageSync(basePath: string, range: DateRange) {
 
   if (!existsSync(projectRoot)) return { events, errors };
 
-  const fileTitles = new Map<string, ClaudeFileTitles>();
+  const sessionIndex = loadClaudeSessionsIndex(projectRoot);
+  const sessionTitles = preloadClaudeSessionTitles(projectRoot);
+  const files = findJsonlSync(projectRoot, range);
   try {
-    for (const file of findJsonlSync(projectRoot, range)) {
-      readClaudeFileSync(file, range, events, seen, fileTitles);
+    for (const file of files) {
+      readClaudeFileSync(
+        file,
+        range,
+        events,
+        seen,
+        sessionTitles,
+        sessionIndex,
+      );
     }
   } catch {
     errors.push("Claude: read error");
@@ -135,7 +167,8 @@ async function readClaudeFile(
   range: DateRange,
   sink: UsageReaderSink,
   seen: Set<string>,
-  fileTitles: Map<string, ClaudeFileTitles>,
+  sessionTitles: ClaudeSessionTitles,
+  sessionIndex: ClaudeSessionIndex,
 ) {
   const reader = createInterface({
     input: createReadStream(file, { encoding: "utf8" }),
@@ -145,8 +178,16 @@ async function readClaudeFile(
   let lineNumber = 0;
   for await (const line of reader) {
     lineNumber += 1;
-    noteClaudeSessionLine(file, line, fileTitles);
-    pushClaudeLine(file, line, lineNumber, range, sink, seen, fileTitles);
+    pushClaudeLine(
+      file,
+      line,
+      lineNumber,
+      range,
+      sink,
+      seen,
+      sessionTitles,
+      sessionIndex,
+    );
   }
 }
 
@@ -155,12 +196,12 @@ function readClaudeFileSync(
   range: DateRange,
   events: UsageEvent[],
   seen: Set<string>,
-  fileTitles: Map<string, ClaudeFileTitles>,
+  sessionTitles: ClaudeSessionTitles,
+  sessionIndex: ClaudeSessionIndex,
 ) {
   readFileSync(file, "utf8")
     .split(/\r?\n/)
     .forEach((line, index) => {
-      noteClaudeSessionLine(file, line, fileTitles);
       pushClaudeLine(
         file,
         line,
@@ -168,7 +209,8 @@ function readClaudeFileSync(
         range,
         { event: (e) => events.push(e) },
         seen,
-        fileTitles,
+        sessionTitles,
+        sessionIndex,
       );
     });
 }
@@ -177,64 +219,186 @@ const TIMESTAMP_RE = /"timestamp"\s*:\s*"([^"]+)"/;
 
 const CLAUDE_TITLE_MAX = 80;
 
-const CLAUDE_AI_TITLE_RE = /"aiTitle"\s*:\s*"((?:\\.|[^"\\])*)"/;
-const CLAUDE_CUSTOM_TITLE_RE = /"customTitle"\s*:\s*"((?:\\.|[^"\\])*)"/;
+function isMainClaudeSessionFile(file: string): boolean {
+  return CLAUDE_MAIN_SESSION_FILE_RE.test(file);
+}
 
-function decodeClaudeTitleField(raw: string): string {
-  try {
-    return JSON.parse(`"${raw}"`) as string;
-  } catch {
-    return raw.replace(/\\n/g, " ").replace(/\\"/g, '"');
+function sessionIdFromMainSessionFile(file: string): string | undefined {
+  if (!isMainClaudeSessionFile(file)) return undefined;
+  const base = file.split("/").pop() ?? "";
+  const id = base.replace(/\.jsonl$/i, "");
+  return CLAUDE_SESSION_ID_RE.test(id) ? id : undefined;
+}
+
+function mainSessionPathForFile(
+  file: string,
+  sessionId: string,
+  sessionIndex: ClaudeSessionIndex,
+): string {
+  const indexed = sessionIndex.get(sessionId)?.fullPath;
+  if (indexed) return indexed;
+
+  if (isMainClaudeSessionFile(file)) return file;
+
+  const marker = `/${sessionId}/`;
+  const subagentIdx = file.indexOf(marker);
+  if (subagentIdx >= 0) {
+    return `${file.slice(0, subagentIdx)}/${sessionId}.jsonl`;
   }
+
+  const dir = file.split("/").slice(0, -1).join("/");
+  const candidate = join(dir, `${sessionId}.jsonl`);
+  return existsSync(candidate) ? candidate : file;
 }
 
 /**
- * Claude Code stores two title types in each JSONL: `custom-title` (rename, Plan
- * mode, `-n`) beats background `ai-title`. Keep the last of each while scanning.
+ * Claude Desktop sidebar: `/rename` custom title, then `ai-title` lines in the
+ * session JSONL, then `sessions-index.json` when present.
  */
-function noteClaudeSessionLine(
-  file: string,
-  line: string,
-  fileTitles: Map<string, ClaudeFileTitles>,
-) {
+function loadClaudeSessionsIndex(projectRoot: string): ClaudeSessionIndex {
+  const index: ClaudeSessionIndex = new Map();
+  if (!existsSync(projectRoot)) return index;
+
+  for (const entry of readdirSync(projectRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const indexPath = join(projectRoot, entry.name, "sessions-index.json");
+    if (!existsSync(indexPath)) continue;
+
+    try {
+      const raw = JSON.parse(readFileSync(indexPath, "utf8")) as {
+        entries?: Array<{
+          sessionId?: string;
+          customTitle?: string;
+          firstPrompt?: string;
+          summary?: string;
+          fullPath?: string;
+          isSidechain?: boolean;
+        }>;
+      };
+      for (const row of raw.entries ?? []) {
+        if (typeof row.sessionId !== "string" || row.isSidechain) continue;
+        const customTitle =
+          typeof row.customTitle === "string" && row.customTitle.trim()
+            ? truncateClaudeTitle(row.customTitle)
+            : undefined;
+        const firstPrompt =
+          typeof row.firstPrompt === "string" && row.firstPrompt.trim()
+            ? truncateClaudeTitle(row.firstPrompt)
+            : undefined;
+        const summary =
+          typeof row.summary === "string" && row.summary.trim()
+            ? truncateClaudeTitle(row.summary)
+            : undefined;
+        const fullPath =
+          typeof row.fullPath === "string" ? row.fullPath : undefined;
+        const existing = index.get(row.sessionId);
+        index.set(row.sessionId, {
+          customTitle: customTitle ?? existing?.customTitle,
+          firstPrompt: firstPrompt ?? existing?.firstPrompt,
+          summary: summary ?? existing?.summary,
+          fullPath: fullPath ?? existing?.fullPath,
+        });
+      }
+    } catch {
+      // index is optional and may be stale
+    }
+  }
+
+  return index;
+}
+
+/** Main sessions only: `projects/<cwd>/<uuid>.jsonl` (never `subagents/`). */
+function findMainSessionJsonl(projectRoot: string): string[] {
+  if (!existsSync(projectRoot)) return [];
+
+  return readdirSync(projectRoot, { withFileTypes: true }).flatMap((entry) => {
+    if (!entry.isDirectory()) return [];
+    const dir = join(projectRoot, entry.name);
+    try {
+      return readdirSync(dir, { withFileTypes: true }).flatMap((file) => {
+        if (!file.isFile() || !file.name.endsWith(".jsonl")) return [];
+        const sessionId = file.name.replace(/\.jsonl$/i, "");
+        if (!CLAUDE_SESSION_ID_RE.test(sessionId)) return [];
+        return [join(dir, file.name)];
+      });
+    } catch {
+      return [];
+    }
+  });
+}
+
+function preloadClaudeSessionTitles(projectRoot: string): ClaudeSessionTitles {
+  const titles: ClaudeSessionTitles = new Map();
+
+  for (const file of findMainSessionJsonl(projectRoot)) {
+    const sessionId = sessionIdFromMainSessionFile(file);
+    if (!sessionId) continue;
+
+    let state = titles.get(sessionId);
+    if (!state) {
+      state = {};
+      titles.set(sessionId, state);
+    }
+
+    try {
+      for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+        noteClaudeSessionLine(line, state);
+      }
+    } catch {
+      // optional metadata
+    }
+  }
+
+  return titles;
+}
+
+function noteClaudeSessionLine(line: string, state: ClaudeFileTitles) {
   if (line.length > 4_000) return;
+  if (
+    !line.includes('"custom-title"') &&
+    !line.includes('"ai-title"') &&
+    !line.includes('"type":"user"')
+  )
+    return;
 
-  let state = fileTitles.get(file);
-  if (!state) {
-    state = {};
-    fileTitles.set(file, state);
+  const record = parseLine(line);
+  if (!record) return;
+
+  if (record.type === "custom-title" && record.customTitle) {
+    const title = truncateClaudeTitle(record.customTitle);
+    if (title) state.customTitle = title;
+    return;
   }
 
-  if (line.includes('"custom-title"')) {
-    const match = CLAUDE_CUSTOM_TITLE_RE.exec(line);
-    if (match) {
-      const title = truncateClaudeTitle(decodeClaudeTitleField(match[1]));
-      if (title) state.customTitle = title;
-    }
+  if (record.type === "ai-title" && record.aiTitle) {
+    const title = truncateClaudeTitle(record.aiTitle);
+    if (title) state.aiTitle = title;
+    return;
   }
 
-  if (line.includes('"ai-title"')) {
-    const match = CLAUDE_AI_TITLE_RE.exec(line);
-    if (match) {
-      const title = truncateClaudeTitle(decodeClaudeTitleField(match[1]));
-      if (title) state.aiTitle = title;
-    }
-  }
+  if (record.isSidechain || record.type !== "user") return;
 
-  if (!state.firstUserMessage && line.includes('"type":"user"')) {
-    const record = parseLine(line);
-    if (record?.type === "user") {
-      const text = firstClaudeUserText(record);
-      if (text) state.firstUserMessage = truncateClaudeTitle(text);
-    }
+  if (!state.firstUserMessage) {
+    const text = firstClaudeUserText(record);
+    if (text) state.firstUserMessage = truncateClaudeTitle(text);
   }
 }
 
 function resolveClaudeSessionTitle(
-  state: ClaudeFileTitles | undefined,
+  sessionId: string,
+  sessionTitles: ClaudeSessionTitles,
+  sessionIndex: ClaudeSessionIndex,
 ): string | undefined {
-  if (!state) return undefined;
-  return state.customTitle ?? state.aiTitle ?? state.firstUserMessage;
+  const indexed = sessionIndex.get(sessionId);
+  const fileState = sessionTitles.get(sessionId);
+  return (
+    indexed?.customTitle ??
+    fileState?.customTitle ??
+    fileState?.aiTitle ??
+    indexed?.summary ??
+    indexed?.firstPrompt ??
+    fileState?.firstUserMessage
+  );
 }
 
 function firstClaudeUserText(record: ClaudeRecord): string | undefined {
@@ -242,9 +406,9 @@ function firstClaudeUserText(record: ClaudeRecord): string | undefined {
   if (typeof content === "string" && content.trim()) return content.trim();
   if (!Array.isArray(content)) return undefined;
   for (const part of content) {
+    if (!part || typeof part !== "object") continue;
+    if (part.type === "tool_result") continue;
     if (
-      part &&
-      typeof part === "object" &&
       part.type === "text" &&
       typeof part.text === "string" &&
       part.text.trim()
@@ -270,7 +434,8 @@ function pushClaudeLine(
   range: DateRange,
   sink: UsageReaderSink,
   seen: Set<string>,
-  fileTitles: Map<string, ClaudeFileTitles>,
+  sessionTitles: ClaudeSessionTitles,
+  sessionIndex: ClaudeSessionIndex,
 ) {
   if (!line.includes('"usage"')) return;
 
@@ -337,6 +502,15 @@ function pushClaudeLine(
     estimatedTokens: false,
   });
 
+  const sessionId =
+    (typeof record.sessionId === "string" &&
+      CLAUDE_SESSION_ID_RE.test(record.sessionId) &&
+      record.sessionId) ||
+    sessionIdFromMainSessionFile(file);
+  if (!sessionId) return;
+
+  const mainSessionPath = mainSessionPathForFile(file, sessionId, sessionIndex);
+
   sink.event?.({
     id: dedupKey ? `claude:${dedupKey}` : `claude:${file}:${lineNumber}`,
     provider: "claude",
@@ -349,9 +523,13 @@ function pushClaudeLine(
     totalTokens,
     estimatedCost,
     estimatedTokens: false,
-    sourcePath: file,
-    conversationKey: file,
-    conversationTitle: resolveClaudeSessionTitle(fileTitles.get(file)),
+    sourcePath: mainSessionPath,
+    conversationKey: `claude:${sessionId}`,
+    conversationTitle: resolveClaudeSessionTitle(
+      sessionId,
+      sessionTitles,
+      sessionIndex,
+    ),
   });
 }
 

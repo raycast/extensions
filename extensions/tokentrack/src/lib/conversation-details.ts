@@ -62,6 +62,9 @@ export function groupEventsByConversation(
 }
 
 function fallbackTitle(event: UsageEvent): string {
+  if (event.conversationKey?.startsWith("claude:")) {
+    return "Untitled chat";
+  }
   if (event.sourcePath?.endsWith(".jsonl")) {
     const base = event.sourcePath.split("/").pop() ?? event.sourcePath;
     const withoutExt = base.replace(/\.jsonl$/i, "");

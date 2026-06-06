@@ -1,5 +1,11 @@
 # Token Track Changelog
 
+## [Claude Code chat titles and Open Chat] - {PR_MERGE_DATE}
+
+- Fix Claude Code conversation names to match the app sidebar: prefer `/rename` custom titles, then `ai-title` lines from session JSONL.
+- Attribute subagent and forked-session usage to the parent chat so View Details totals match the dashboard.
+- Fix **Open Chat** to resume the session via `claude://resume?session={uuid}&cwd={path}` (falls back to `claude://code/{uuid}`).
+
 ## [Quick usage commands] - 2026-06-06
 
 - Add **Quick Usage Claude Code**, **Quick Usage Codex**, and **Quick Usage Cursor** no-view commands that show a toast with estimated spend against your configured budget cap.

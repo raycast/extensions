@@ -84,9 +84,9 @@ export function UsageDetailsView({
     return (
       <List navigationTitle={`${providerTitle} · ${periodLabel}`}>
         <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Details unavailable"
-          description="No per-chat breakdown is available for this period."
+          icon={Icon.Message}
+          title="No chats"
+          description="Nothing in this period."
         />
       </List>
     );
