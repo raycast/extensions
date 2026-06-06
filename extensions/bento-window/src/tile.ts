@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast, WindowManagement } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast, WindowManagement } from "@raycast/api";
 
 type LayoutGrid = number[][];
 
@@ -98,23 +98,12 @@ function computeFrames(grid: LayoutGrid, screen: { width: number; height: number
   });
 }
 
-type PositionedBounds = { position: { x: number; y: number }; size: { width: number; height: number } };
-
-function isPositioned(bounds: WindowManagement.Window["bounds"]): bounds is PositionedBounds {
-  return bounds !== "fullscreen";
-}
-
-// 从当前桌面的所有窗口位置推断屏幕可用区域的左上角坐标
-function inferScreenOrigin(windows: WindowManagement.Window[]): { x: number; y: number } {
-  const positioned = windows.filter((w) => isPositioned(w.bounds)).map((w) => w.bounds as PositionedBounds);
-  if (positioned.length === 0) return { x: 0, y: 25 };
-  return {
-    x: Math.min(...positioned.map((b) => b.position.x)),
-    y: Math.min(...positioned.map((b) => b.position.y)),
-  };
-}
-
 export default async function Command() {
+  if (!environment.canAccess(WindowManagement)) {
+    await showToast({ style: Toast.Style.Failure, title: "Window Management permission required" });
+    return;
+  }
+
   const prefs = getPreferenceValues<Preferences.Tile>();
   const appNames = (prefs.appName || "")
     .split(",")
@@ -140,13 +129,18 @@ export default async function Command() {
       return;
     }
 
-    // 确定目标 app
     let targetAppName: string | undefined;
     if (appNames.length > 0) {
       for (const candidate of appNames) {
         const lower = candidate.toLowerCase();
         if (
-          windows.some((w) => w.application?.name?.toLowerCase() === lower && w.positionable && isPositioned(w.bounds))
+          windows.some(
+            (w) =>
+              w.application?.name?.toLowerCase() === lower &&
+              w.positionable &&
+              w.resizable &&
+              w.bounds !== "fullscreen",
+          )
         ) {
           targetAppName = candidate;
           break;
@@ -157,7 +151,7 @@ export default async function Command() {
         const active = await WindowManagement.getActiveWindow();
         targetAppName = active.application?.name;
       } catch {
-        // 无活跃窗口
+        /* no active window */
       }
     }
 
@@ -170,10 +164,15 @@ export default async function Command() {
       return;
     }
 
-    // 筛选目标窗口
     const targetLower = targetAppName.toLowerCase();
     const targetWindows = windows
-      .filter((w) => w.application?.name?.toLowerCase() === targetLower && w.positionable && isPositioned(w.bounds))
+      .filter(
+        (w) =>
+          w.application?.name?.toLowerCase() === targetLower &&
+          w.positionable &&
+          w.resizable &&
+          w.bounds !== "fullscreen",
+      )
       .slice(0, MAX_WINDOWS);
 
     if (targetWindows.length === 0) {
@@ -184,16 +183,16 @@ export default async function Command() {
 
     const count = targetWindows.length;
     const grid = layoutFor(count);
-    const origin = inferScreenOrigin(windows);
     const frames = computeFrames(grid, activeDesktop.size, gap).filter((f) => f.windowIndex < count);
 
-    await Promise.all(
+    await Promise.allSettled(
       frames.map((f) => {
         const win = targetWindows[f.windowIndex];
         return WindowManagement.setWindowBounds({
           id: win.id,
+          desktopId: activeDesktop.id,
           bounds: {
-            position: { x: f.x + origin.x, y: f.y + origin.y },
+            position: { x: f.x, y: f.y },
             size: { width: f.width, height: f.height },
           },
         });
