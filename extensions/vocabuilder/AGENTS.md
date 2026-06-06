@@ -2,6 +2,7 @@
 
 - Use `npm` to run build scripts (e.g. `npm run lint`, `npm run build`).
 - Use a Node/npm version compatible with `.nvmrc` — **Node 22.22.2 / npm 10.x** — which matches the current Raycast extension toolchain. Use whichever Node version manager is already available in the environment. Do not regenerate `package-lock.json` under npm 11.
+- When `mise` is available, run repo commands through it from the start: `mise exec -- npm run ...`, `mise exec -- npx ...`, and `mise exec -- git commit ...`. Git hooks inherit the Node version from the `git commit` process, so do not use plain `git commit` when the shell's default Node/npm differs from `.nvmrc`.
 
 # Raycast Store Publishing
 
@@ -156,6 +157,7 @@ A Promptfoo-driven end-to-end harness over the production `translateWord` path. 
 - For multi-sense word translation, prefer one decisive primary action: save to history and flashcards, copy the chosen gloss, then dismiss with `closeMainWindow({ clearRootSearch: true })` instead of an extra results screen after picking a sense.
 - Match list and detail behavior between History and the Translate screen Recent section (for example Show/Hide Detail as the primary action and the same markdown detail patterns).
 - Prefer breaking storage or schema changes over optional legacy compatibility when the project is still greenfield and the simpler model is worth a reset.
+- Prefer clear input contracts and UI hints over defensive compatibility code for unlikely custom-field formats; if an advanced setting expects a specific shape, document an example instead of silently accepting weird variants.
 
 ## Raycast Reserved Keyboard Shortcuts
 

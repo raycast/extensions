@@ -148,7 +148,7 @@ describe("pronounce", () => {
     expect(fetchCall[0]).toContain(`/${customModel}:generateContent`);
   });
 
-  it("accepts Google model IDs with the optional models/ prefix", async () => {
+  it("trims custom model IDs before building the request", async () => {
     const fakePcm = Buffer.alloc(48).toString("base64");
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify(ttsResponseBody(fakePcm)), {
@@ -157,7 +157,7 @@ describe("pronounce", () => {
       }),
     );
 
-    await pronounce("hello", API_KEY, "en", undefined, "models/gemini-3.1-flash-tts-preview");
+    await pronounce("hello", API_KEY, "en", undefined, " gemini-3.1-flash-tts-preview ");
 
     const fetchCall = vi.mocked(fetch).mock.calls[0];
     expect(fetchCall[0]).toContain("/gemini-3.1-flash-tts-preview:generateContent");

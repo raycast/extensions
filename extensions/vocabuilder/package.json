@@ -247,7 +247,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom Translation Model ID",
-      "description": "Optional advanced override. If set, it is used instead of Translation Model; reasoning controls are applied only for recognized models.",
+      "description": "Optional advanced override. Use an unprefixed ID, for example gemini-3.5-flash. Reasoning controls are applied only for recognized models.",
       "placeholder": "gemini-3.5-flash"
     },
     {
@@ -303,7 +303,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom Text-to-Speech Model ID",
-      "description": "Optional advanced override. If set, it is used instead of Text-to-Speech Model.",
+      "description": "Optional advanced override. Use an unprefixed ID, for example gemini-3.1-flash-tts-preview.",
       "placeholder": "gemini-3.1-flash-tts-preview"
     }
   ],

@@ -80,13 +80,9 @@ const MODEL_THINKING_PROFILES: Record<string, ThinkingProfile> = {
   "gemini-2.5-pro": { kind: "thinkingBudget", budgets: PRO_THINKING_BUDGETS },
 };
 
-function normalizeGeminiModelId(model: string): string {
-  return model.trim().replace(/^models\//, "");
-}
-
 function buildThinkingConfig(model: string, level: ReasoningLevel | undefined): Record<string, unknown> | undefined {
   if (!level) return undefined;
-  const profile = MODEL_THINKING_PROFILES[normalizeGeminiModelId(model)];
+  const profile = MODEL_THINKING_PROFILES[model.trim()];
   if (!profile) return undefined;
   if (profile.kind === "thinkingLevel") return { thinkingLevel: profile.levels[level] };
   return { thinkingBudget: profile.budgets[level] };
@@ -155,7 +151,7 @@ async function callGemini(
   signal: AbortSignal | undefined,
   options: GeminiCallOptions,
 ): Promise<string> {
-  const model = normalizeGeminiModelId(options.model);
+  const model = options.model.trim();
   const url = `${BASE_URL}/${model}:generateContent`;
 
   const generationConfig: Record<string, unknown> = {};
@@ -425,9 +421,9 @@ if (import.meta.vitest) {
       expect(body.generationConfig).toBeUndefined();
     });
 
-    it("accepts Google model IDs with the optional models/ prefix", async () => {
+    it("trims custom model IDs before building the request", async () => {
       await callGemini("hi", "key", undefined, {
-        model: "models/gemini-3.5-flash",
+        model: " gemini-3.5-flash ",
         reasoningLevel: "low",
       });
       const [url, init] = fetchMock.mock.calls[0];
