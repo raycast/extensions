@@ -60,7 +60,7 @@ function SessionListItem({ session, refresh }: { session: Session; refresh: () =
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   }
 

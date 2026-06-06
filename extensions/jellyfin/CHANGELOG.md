@@ -1,5 +1,9 @@
 # Jellyfin Changelog
 
+## [Windows] - {PR_MERGE_DATE}
+
+- Add Windows support
+
 ## [Initial Version] - 2023-07-12
 
 - Added `Search Movies and Shows` Command

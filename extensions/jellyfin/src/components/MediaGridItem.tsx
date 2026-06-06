@@ -143,7 +143,7 @@ export default function MediaGridItem({
           content={streamUrl}
           icon={Icon.Livestream}
           shortcut={{ key: "s", modifiers: ["cmd"] }}
-        />
+        />,
       );
       break;
     case "BoxSet":
@@ -152,9 +152,10 @@ export default function MediaGridItem({
           title="View Items"
           icon={Icon.Eye}
           onAction={() => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             pushNavigation && pushNavigation(<ListMediaCommand parentId={item.Id} />);
           }}
-        />
+        />,
       );
   }
 

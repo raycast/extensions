@@ -55,7 +55,7 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   } else {
     actions.push(
@@ -80,7 +80,7 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   }
 
