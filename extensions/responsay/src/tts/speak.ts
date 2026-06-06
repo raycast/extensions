@@ -88,7 +88,7 @@ export async function exportAudio(
       .replace(/^-+|-+$/g, "")
       .slice(0, 40) || "clip";
   const ext = extname(path).replace(".", "") || "wav";
-  return exportToDownloads(path, `say-it-right-${slug}.${ext}`);
+  return exportToDownloads(path, `responsay-${slug}.${ext}`);
 }
 
 export async function repeatLast(): Promise<boolean> {

@@ -15,7 +15,7 @@ This is a contract-level before/after evaluation of first-tier Raycast and VS Co
 | Repository | Main generated output | Before | After | Change |
 | --- | --- | ---: | ---: | --- |
 | `raycast-ai-translate` | translation + Vision OCR text | 3 / 5 | 5 / 5 | Added explicit faithfulness, native-language, OCR, and translation-only gates. |
-| `raycast-say-it-right` | natural-English expression + prosody JSON | 4 / 5 | 5 / 5 | Added/kept SkillOpt gates and clarified Expression Coach vs Pronunciation Coach UX. |
+| `raycast-responsay` | natural-English expression + prosody JSON | 4 / 5 | 5 / 5 | Added/kept SkillOpt gates and clarified Expression Coach vs Pronunciation Coach UX. |
 | `raycast-skill-manager` | skill recommendation JSON | 2 / 5 | 5 / 5 | Added exact catalog-name, relevance, diversity, and JSON gates. |
 | `vscode-english-coach` | translation, rewrite, expression, feedback, prosody | 3 / 5 | 5 / 5 | Added gates for translation fidelity, expression anti-invention, transcript evidence, and prosody text fidelity. |
 | `vscode-html-writer` | five-step academic rewrite JSON | 4 / 5 | 5 / 5 | Added a pipeline-wide SkillOpt gate for source-of-truth, traceability, step boundary, and edit usefulness. |
@@ -26,7 +26,7 @@ This is a contract-level before/after evaluation of first-tier Raycast and VS Co
 
 ## Interpretation
 
-The strongest pre-existing prompts already had good schema or grounding rules, especially HTML Writer, Parlance, Say It Right, and English Speaking Training. The rollout makes those constraints explicit as a final validation gate, so future prompt edits preserve the same mental model:
+The strongest pre-existing prompts already had good schema or grounding rules, especially HTML Writer, Parlance, Responsay, and English Speaking Training. The rollout makes those constraints explicit as a final validation gate, so future prompt edits preserve the same mental model:
 
 - treat model output as a candidate artifact;
 - validate it against task-specific evidence and schema;
@@ -38,7 +38,7 @@ The strongest pre-existing prompts already had good schema or grounding rules, e
 Verified on 2026-06-02:
 
 - `raycast-ai-translate`: `npm test && npm run build && npm run lint` passed.
-- `raycast-say-it-right`: `npm test && npm run typecheck && npm run build && npm run lint` passed after Prettier formatting `src/TranslateView.tsx`.
+- `raycast-responsay`: `npm test && npm run typecheck && npm run build && npm run lint` passed after Prettier formatting `src/TranslateView.tsx`.
 - `raycast-skill-manager`: `npm test && npm run build` passed.
 - `vscode-english-coach`: `npm test && npm run check && npm run compile` passed.
 - `vscode-html-writer`: `npm run check` passed.

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "say-it-right",
-  "title": "Say It Right",
+  "name": "responsay",
+  "title": "Responsay",
   "description": "Turn English text or Chinese intent into spoken-English practice with prosody, model audio, and shadowing.",
   "icon": "extension-icon.png",
   "author": "xianwei_zhang",
@@ -13,49 +13,49 @@
     {
       "name": "analyze-selection",
       "title": "Analyze Selected English",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Analyze selected English text for stress, intonation, rhythm, linking, and model pronunciation.",
       "mode": "view"
     },
     {
       "name": "practice-sentence",
       "title": "Practice English",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Type or paste English and turn it into a pronunciation lesson.",
       "mode": "view"
     },
     {
       "name": "translate-selection",
       "title": "Say Selection in English",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Turn selected Chinese intent or rough wording into natural English you can practice aloud.",
       "mode": "view"
     },
     {
       "name": "translate-clipboard",
       "title": "Say Clipboard in English",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Turn clipboard text into natural English you can practice aloud.",
       "mode": "view"
     },
     {
       "name": "translate-intent",
       "title": "Say What I Mean",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Type what you mean in Chinese and get natural English wording ready for pronunciation practice.",
       "mode": "view"
     },
     {
       "name": "saved-results",
       "title": "Saved Results",
-      "subtitle": "Say It Right",
-      "description": "Review expressions and pronunciation analyses saved from Say It Right.",
+      "subtitle": "Responsay",
+      "description": "Review expressions and pronunciation analyses saved from Responsay.",
       "mode": "view"
     },
     {
       "name": "pinned-expressions",
       "title": "Pinned Expressions",
-      "subtitle": "Say It Right",
+      "subtitle": "Responsay",
       "description": "Keep your saved expressions one click away in the menu bar.",
       "mode": "menu-bar"
     }

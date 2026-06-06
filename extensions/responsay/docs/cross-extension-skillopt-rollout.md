@@ -9,7 +9,7 @@ SkillOpt-inspired principle: treat each built-in system prompt as a compact skil
 | Surface | Repository | Prompt role | Gate focus |
 | --- | --- | --- | --- |
 | Raycast | `raycast-ai-translate` | translation and Vision OCR | faithfulness, native target-language wording, OCR boundary, translation-only output |
-| Raycast | `raycast-say-it-right` | expression coach and pronunciation coach | meaning fidelity, anti-invention, speakability, coaching usefulness, JSON schema |
+| Raycast | `raycast-responsay` | expression coach and pronunciation coach | meaning fidelity, anti-invention, speakability, coaching usefulness, JSON schema |
 | Raycast | `raycast-skill-manager` | skill recommendations | exact catalog names, relevance, duplicate avoidance, JSON array |
 | VS Code | `vscode-english-coach` | translation, expression, rewrite, prosody, pronunciation feedback | expression/pronunciation separation, transcript evidence, schema |
 | VS Code | `vscode-html-writer` | five-step paper rewrite pipeline | source of truth, quote/claim traceability, step boundary, no invention |
@@ -26,7 +26,7 @@ The scan also found audio-first prompt surfaces in `raycast-ai-voice-studio`, `r
 
 AI Translate owns translation, OCR, captured UI text, target-language reading, provider comparison, and copy/paste workflows.
 
-Say It Right owns natural English expression and speech practice:
+Responsay owns natural English expression and speech practice:
 
 - Expression Coach: say selection, clipboard, or typed intent in natural English, with a short why-this-works note.
 - Pronunciation Coach: analyze English text for stress, rhythm, IPA, thought groups, and intonation.

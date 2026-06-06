@@ -1,6 +1,6 @@
 # Prompt Optimization Plan
 
-This plan adapts the SkillOpt idea to Say It Right: treat each built-in prompt as a reusable skill artifact, improve it through scored rollouts, and accept prompt edits only when they beat the current prompt on held-out cases.
+This plan adapts the SkillOpt idea to Responsay: treat each built-in prompt as a reusable skill artifact, improve it through scored rollouts, and accept prompt edits only when they beat the current prompt on held-out cases.
 
 ## Prompt Artifacts
 

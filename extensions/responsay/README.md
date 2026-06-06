@@ -1,12 +1,12 @@
-# Say It Right
+# Responsay
 
-**Turn English text or Chinese intent into spoken-English practice.** Select a sentence anywhere on your Mac and Say It Right shows you exactly _how to say it_ — which words to stress, where your pitch should rise and fall, the rhythm, and the connected‑speech links — then reads it aloud as a clear model you can slow down, loop, and shadow. If you start from Chinese intent, it first turns what you mean into natural English and then lets you practice that English.
+**Turn English text or Chinese intent into spoken-English practice.** Select a sentence anywhere on your Mac and Responsay shows you exactly _how to say it_ — which words to stress, where your pitch should rise and fall, the rhythm, and the connected‑speech links — then reads it aloud as a clear model you can slow down, loop, and shadow. If you start from Chinese intent, it first turns what you mean into natural English and then lets you practice that English.
 
 Made for non‑native speakers, presenters, and anyone who wants their spoken English to sound natural.
 
 ## Why it's different
 
-Most tools either read text aloud flatly or drill isolated words. Say It Right tackles what learners actually struggle with — **the melody of a whole sentence.** It maps the _up‑and‑down_ of English (sentence stress, rising/falling intonation, thought‑group pauses, rhythm) onto the words themselves, then gives you a model voice to imitate. No file to import, no setup ritual: highlight text, get a lesson.
+Most tools either read text aloud flatly or drill isolated words. Responsay tackles what learners actually struggle with — **the melody of a whole sentence.** It maps the _up‑and‑down_ of English (sentence stress, rising/falling intonation, thought‑group pauses, rhythm) onto the words themselves, then gives you a model voice to imitate. No file to import, no setup ritual: highlight text, get a lesson.
 
 ## Features
 
@@ -27,7 +27,7 @@ Most tools either read text aloud flatly or drill isolated words. Say It Right t
 
 ## Commands
 
-Say It Right is layered around the way learners expect to move from meaning to speech:
+Responsay is layered around the way learners expect to move from meaning to speech:
 
 - **Expression Coach** — `Say Selection in English`, `Say Clipboard in English`, and `Say What I Mean` turn intent into natural English plus a short "Why This Works" note.
 - **Pronunciation Coach** — `Analyze Selected English` and `Practice English` explain stress, rhythm, IPA, thought groups, and intonation for English text.
@@ -58,9 +58,9 @@ Expression commands also include a **Tone** picker: Natural, Casual, Formal, or 
 
 ## Division with AI Translate
 
-Use **AI Translate** for general translation, screenshot OCR, captured UI text, provider comparison, and copy-ready bilingual reading. Use **Say It Right** for English expression and speech practice: natural English wording, pronunciation analysis, model audio, slow playback, and shadowing.
+Use **AI Translate** for general translation, screenshot OCR, captured UI text, provider comparison, and copy-ready bilingual reading. Use **Responsay** for English expression and speech practice: natural English wording, pronunciation analysis, model audio, slow playback, and shadowing.
 
-In practice: AI Translate answers "what does this text mean in another language?" Say It Right answers "how should I say this naturally in English, why does that wording work, and how do I pronounce it?"
+In practice: AI Translate answers "what does this text mean in another language?" Responsay answers "how should I say this naturally in English, why does that wording work, and how do I pronounce it?"
 
 ## Setup
 

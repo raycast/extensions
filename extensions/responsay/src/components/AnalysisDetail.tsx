@@ -405,7 +405,7 @@ function renderPageMarkdown(
   const first = items[0].index + 1;
   const last = items[items.length - 1].index + 1;
   const lines = [
-    "# Say It Right",
+    "# Responsay",
     "",
     sentenceTotal > 1
       ? `Page ${first}-${last} of ${sentenceTotal}. Active sentence: ${activeIndex + 1}.`
