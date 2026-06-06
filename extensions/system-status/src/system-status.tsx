@@ -1066,6 +1066,7 @@ export default function Command() {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "r" } }}
                   onAction={() => setRefreshKey((value) => value + 1)}
                 />
                 <Action.CopyToClipboard
