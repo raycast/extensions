@@ -17,7 +17,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
   const [qrData, setQrData] = useState<string>();
   const [sourceText, setSourceText] = useState<string>("");
 
-  const { defaultColor } = getPreferenceValues<{ defaultColor?: string }>();
+  const { defaultColor } = getPreferenceValues<Preferences>();
   const color = resolveColorPreference(defaultColor);
 
   useEffect(() => {

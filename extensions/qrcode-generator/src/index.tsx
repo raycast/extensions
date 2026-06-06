@@ -31,13 +31,6 @@ interface FormValues {
   utmContent: string;
 }
 
-interface Preferences {
-  Index: {
-    primaryAction: "save" | "inline" | "copy";
-    defaultColor?: string;
-  };
-}
-
 /** The raw selected color string (a preset value or the custom hex input). */
 function selectedColor(values: FormValues): string {
   return values.color === CUSTOM_COLOR_VALUE ? values.customColor : values.color;
@@ -92,7 +85,7 @@ async function prepareUrl(values: FormValues): Promise<string | null> {
 }
 
 export default function Command() {
-  const { primaryAction, defaultColor } = getPreferenceValues<Preferences["Index"]>();
+  const { primaryAction, defaultColor } = getPreferenceValues<Preferences.Index>();
   const [qrData, setQrData] = useState<string>();
 
   // The default-color preference pre-fills the custom field; the form opens directly in Custom mode.
