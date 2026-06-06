@@ -1,5 +1,13 @@
 # QR Code Generator Changelog
 
+## [Custom colors, distinct icons, link shortening & UTM] - 2026-06-06
+
+- Added distinct icons per command for easier recognition in Raycast
+- Added the ability to choose the QR code color (presets or custom hex) with a low-contrast warning
+- Added color-chip previews in the color dropdown
+- Added an opt-in link shortener (is.gd, da.gd, then TinyURL) to keep QR codes simple for long URLs
+- Added optional UTM tracking parameters
+
 ## [Fix error toast] - 2026-06-06
 
 - Fixed error toasts showing "[object Object]" instead of the actual error message
