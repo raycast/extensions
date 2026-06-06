@@ -40,10 +40,7 @@ export default function Command() {
           }
           setQrData(qrData);
         } catch (error) {
-          await showFailureToast({
-            title: "Error",
-            message: error instanceof Error ? error.message : "Failed to generate QR code",
-          });
+          await showFailureToast(error, { title: "Failed to generate QR code" });
         }
       } else if (values.copy) {
         await copyQRCodeToClipboard({ url: values.url, format: values.format });
@@ -69,10 +66,7 @@ export default function Command() {
             open(path);
           }
         } catch (error) {
-          await showFailureToast({
-            title: "Error",
-            message: error instanceof Error ? error.message : "Failed to save QR code",
-          });
+          await showFailureToast(error, { title: "Failed to save QR code" });
         }
       }
     },

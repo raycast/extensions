@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Fix error toast] - 2026-06-06
+
+- Fixed error toasts showing "[object Object]" instead of the actual error message
+
 ## [Improve UX] - 2025-12-27
 
 - Persist the selected format in the dropdown

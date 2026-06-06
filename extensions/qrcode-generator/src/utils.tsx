@@ -16,7 +16,7 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
   });
 
   if (URL === undefined) {
-    await showFailureToast({ title: "An error occurred", message: "URL is undefined" });
+    await showFailureToast(new Error("URL is undefined"), { title: "An error occurred" });
     return;
   }
 
@@ -38,10 +38,7 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
     });
     return result;
   } catch (error) {
-    await showFailureToast({
-      title: "Error",
-      message: error instanceof Error ? error.message : "Failed to generate QR code",
-    });
+    await showFailureToast(error, { title: "Failed to generate QR code" });
     throw error;
   }
 }
@@ -97,10 +94,7 @@ export async function copyQRCodeToClipboard(options: { url: string; format: "png
       await showToast(Toast.Style.Success, "QR Code copied to clipboard");
     }
   } catch (error) {
-    await showFailureToast({
-      title: "Error",
-      message: error instanceof Error ? error.message : "Failed to copy QR code",
-    });
+    await showFailureToast(error, { title: "Failed to copy QR code" });
     throw error;
   }
 }
