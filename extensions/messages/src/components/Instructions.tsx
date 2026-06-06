@@ -5,7 +5,7 @@ import { Message } from "../hooks/useMessages";
 
 type InstructionsProps = {
   message: Message;
-  instructions: Record<string, string>;
+  instructions: Record<string, string> | undefined;
   setInstructions: (value: Record<string, string>) => void;
 };
 
