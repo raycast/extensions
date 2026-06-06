@@ -43,13 +43,16 @@ export default function Command() {
 
   useEffect(() => {
     async function loadState() {
-      const [storedSession, aliases] = await Promise.all([
-        getStoredSession(),
-        getRecentAliases(),
-      ]);
-      setSession(storedSession);
-      setRecentAliases(aliases);
-      setIsLoading(false);
+      try {
+        const [storedSession, aliases] = await Promise.all([
+          getStoredSession(),
+          getRecentAliases(),
+        ]);
+        setSession(storedSession);
+        setRecentAliases(aliases);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     loadState();
