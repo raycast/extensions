@@ -3,7 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
-  Image,
+  LaunchProps,
   List,
   getPreferenceValues,
   openExtensionPreferences,
@@ -33,12 +33,12 @@ import {
   renderTokenUsageChartMarkdown,
   type UsageBucket,
 } from "./lib/token-chart";
+import { PROVIDERS } from "./lib/provider-meta";
 import type { SourceProviderKey } from "./lib/types";
 import { COST_COLOR, DATE_COLOR } from "./lib/ui-colors";
 import { clearUsageSnapshotCache, loadUsage } from "./lib/usage";
 import { UsageDetailsView } from "./usage-details";
 
-const CURSOR_BRAND_HEX = "#A8DFB6";
 const BUDGET_ITEM_ID = "budget";
 const BUDGET_PACE_ITEM_ID = "budget-pace";
 
@@ -46,32 +46,6 @@ type SelectionId =
   | PeriodKey
   | typeof BUDGET_ITEM_ID
   | typeof BUDGET_PACE_ITEM_ID;
-
-const providersMeta: readonly {
-  key: SourceProviderKey;
-  title: string;
-  brandColor: string;
-  dropdownIcon: Image.ImageLike;
-}[] = [
-  {
-    key: "claude",
-    title: "Claude Code",
-    brandColor: "#D97757",
-    dropdownIcon: "provider-claude.png",
-  },
-  {
-    key: "codex",
-    title: "Codex",
-    brandColor: "#2D8EFF",
-    dropdownIcon: "provider-codex.png",
-  },
-  {
-    key: "cursor",
-    title: "Cursor",
-    brandColor: CURSOR_BRAND_HEX,
-    dropdownIcon: "provider-cursor.png",
-  },
-];
 
 const periodListTitles: Record<PeriodKey, string> = {
   week: "Week",
@@ -98,6 +72,9 @@ function isCursorWarning(text: string): boolean {
   return text.startsWith("Cursor");
 }
 
+const CURSOR_BRAND_HEX =
+  PROVIDERS.find((p) => p.key === "cursor")?.brandColor ?? "#A8DFB6";
+
 function usageAccentColor(pct: number, brandHex: string): Color.ColorLike {
   if (pct >= 0.9) return Color.Red;
   if (pct >= 0.6) return Color.Yellow;
@@ -123,15 +100,26 @@ function isPeriodKey(id: string): id is PeriodKey {
   return PERIOD_KEYS.includes(id as PeriodKey);
 }
 
-export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
-  const currency = prefs.currency || "USD";
-  const defaultSource: SourceProviderKey = providersMeta.some(
-    (p) => p.key === prefs.defaultSource,
-  )
+function resolveInitialProvider(
+  prefs: Preferences,
+  launchProvider?: SourceProviderKey,
+): SourceProviderKey {
+  if (launchProvider && PROVIDERS.some((p) => p.key === launchProvider)) {
+    return launchProvider;
+  }
+  return PROVIDERS.some((p) => p.key === prefs.defaultSource)
     ? prefs.defaultSource
     : "claude";
-  const [tab, setTab] = useState<SourceProviderKey>(defaultSource);
+}
+
+export default function Command(
+  props: LaunchProps<{ launchContext?: { provider?: SourceProviderKey } }>,
+) {
+  const prefs = getPreferenceValues<Preferences>();
+  const currency = prefs.currency || "USD";
+  const [tab, setTab] = useState<SourceProviderKey>(() =>
+    resolveInitialProvider(prefs, props.launchContext?.provider),
+  );
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>("week");
   const [selectedItemId, setSelectedItemId] = useState<SelectionId>("week");
 
@@ -156,7 +144,7 @@ export default function Command() {
     };
   }, [revalidate]);
 
-  const activeProvider = providersMeta.find((p) => p.key === tab)!;
+  const activeProvider = PROVIDERS.find((p) => p.key === tab)!;
   const nativeBudget = getProviderBudgetAmount(prefs, tab);
   const errors = data?.errors ?? [];
 
@@ -317,7 +305,7 @@ export default function Command() {
           value={tab}
           onChange={(v) => setTab(v as SourceProviderKey)}
         >
-          {providersMeta.map((p) => (
+          {PROVIDERS.map((p) => (
             <List.Dropdown.Item
               key={p.key}
               title={p.title}

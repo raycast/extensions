@@ -48,6 +48,14 @@
       "title": "Quick Usage Cursor",
       "description": "Show Cursor spend against your monthly budget.",
       "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-budget",
+      "title": "Budget Menu Bar",
+      "description": "Show Claude, Codex, and Cursor budget usage in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "disabledByDefault": true
     }
   ],
   "preferences": [

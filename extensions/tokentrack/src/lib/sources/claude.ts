@@ -103,7 +103,7 @@ export async function readClaudeUsage(
   try {
     const files = await findJsonl(projectRoot, range);
     const sessionIndex = loadClaudeSessionsIndex(projectRoot);
-    const sessionTitles = preloadClaudeSessionTitles(projectRoot);
+    const sessionTitles = preloadClaudeSessionTitles(projectRoot, range);
     await runWithConcurrency(files, CLAUDE_READ_CONCURRENCY, (file) =>
       readClaudeFile(file, range, sink, seen, sessionTitles, sessionIndex),
     );
@@ -142,7 +142,7 @@ export function readClaudeUsageSync(basePath: string, range: DateRange) {
   if (!existsSync(projectRoot)) return { events, errors };
 
   const sessionIndex = loadClaudeSessionsIndex(projectRoot);
-  const sessionTitles = preloadClaudeSessionTitles(projectRoot);
+  const sessionTitles = preloadClaudeSessionTitles(projectRoot, range);
   const files = findJsonlSync(projectRoot, range);
   try {
     for (const file of files) {
@@ -308,8 +308,9 @@ function loadClaudeSessionsIndex(projectRoot: string): ClaudeSessionIndex {
 }
 
 /** Main sessions only: `projects/<cwd>/<uuid>.jsonl` (never `subagents/`). */
-function findMainSessionJsonl(projectRoot: string): string[] {
+function findMainSessionJsonl(projectRoot: string, range: DateRange): string[] {
   if (!existsSync(projectRoot)) return [];
+  const cutoffMs = range.start.getTime() - CLAUDE_FILE_BACKDATE_MS;
 
   return readdirSync(projectRoot, { withFileTypes: true }).flatMap((entry) => {
     if (!entry.isDirectory()) return [];
@@ -319,7 +320,13 @@ function findMainSessionJsonl(projectRoot: string): string[] {
         if (!file.isFile() || !file.name.endsWith(".jsonl")) return [];
         const sessionId = file.name.replace(/\.jsonl$/i, "");
         if (!CLAUDE_SESSION_ID_RE.test(sessionId)) return [];
-        return [join(dir, file.name)];
+        const path = join(dir, file.name);
+        try {
+          if (statSync(path).mtimeMs < cutoffMs) return [];
+        } catch {
+          return [];
+        }
+        return [path];
       });
     } catch {
       return [];
@@ -327,10 +334,13 @@ function findMainSessionJsonl(projectRoot: string): string[] {
   });
 }
 
-function preloadClaudeSessionTitles(projectRoot: string): ClaudeSessionTitles {
+function preloadClaudeSessionTitles(
+  projectRoot: string,
+  range: DateRange,
+): ClaudeSessionTitles {
   const titles: ClaudeSessionTitles = new Map();
 
-  for (const file of findMainSessionJsonl(projectRoot)) {
+  for (const file of findMainSessionJsonl(projectRoot, range)) {
     const sessionId = sessionIdFromMainSessionFile(file);
     if (!sessionId) continue;
 
