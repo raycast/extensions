@@ -2,7 +2,7 @@
 
 Control your Apple TV from Raycast — no Python, no helper apps, no external installs. Pure TypeScript over Apple's Companion protocol.
 
-![The remote](metadata/apple-tv-remote-1.png)
+![The remote](media/remote.png)
 
 ## Features
 
@@ -15,7 +15,7 @@ Control your Apple TV from Raycast — no Python, no helper apps, no external in
 
 | Every function, one search away | Remote in your menu bar |
 |---|---|
-| ![Commands](metadata/apple-tv-remote-2.png) | ![Menu bar](metadata/apple-tv-remote-3.png) |
+| ![Commands](media/commands.png) | ![Menu bar](media/menubar.png) |
 
 ## Setup
 
