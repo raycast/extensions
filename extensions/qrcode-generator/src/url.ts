@@ -81,9 +81,7 @@ export async function shortenUrl(value: string): Promise<string> {
     try {
       return await requestShort(build(value));
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn(`[qrcode-generator] ${name} shortener failed: ${message}`);
-      errors.push(`${name}: ${message}`);
+      errors.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   throw new Error(`Could not shorten link (${errors.join("; ")})`);
