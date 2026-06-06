@@ -60,24 +60,16 @@ async function prepareUrl(values: FormValues): Promise<string | null> {
     });
   }
 
-  if (values.shorten) {
-    if (!isHttpUrl(url)) {
-      // Shortening only applies to links; plain text just passes through.
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Cannot shorten",
-        message: "Only http(s) links can be shortened — using the original content.",
-      });
-    } else {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Shortening link..." });
-      try {
-        url = await shortenUrl(url);
-        toast.style = Toast.Style.Success;
-        toast.title = "Link shortened";
-      } catch (error) {
-        await showFailureToast(error, { title: "Failed to shorten link" });
-        return null;
-      }
+  // Shortening only applies to http(s) links; for plain text we skip it and encode the content as-is.
+  if (values.shorten && isHttpUrl(url)) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Shortening link..." });
+    try {
+      url = await shortenUrl(url);
+      toast.style = Toast.Style.Success;
+      toast.title = "Link shortened";
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to shorten link" });
+      return null;
     }
   }
 
