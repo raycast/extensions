@@ -468,7 +468,6 @@ export default function Command(
               : []
           }
           detail={<List.Item.Detail metadata={budgetPaceDetailMetadata} />}
-          actions={refreshAction}
         />
       </List.Section>
 
