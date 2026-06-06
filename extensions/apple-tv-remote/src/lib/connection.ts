@@ -4,10 +4,6 @@ import { loadSelectedDevice, saveSelectedDevice } from "./devices";
 import { loadCredentials } from "./credentials";
 import { UnreachableError } from "./errors";
 
-interface Preferences {
-  connectTimeout?: string;
-}
-
 function connectTimeoutMs(): number {
   const { connectTimeout } = getPreferenceValues<Preferences>();
   const parsed = Number(connectTimeout);

@@ -169,7 +169,7 @@ export async function playContent(title: string, appHint?: string): Promise<Play
   }
 
   // 3. Universal Search flow (Netflix & friends, or unresolved titles).
-  const { searchAutomation } = getPreferenceValues<{ searchAutomation?: SearchAutomation }>();
+  const { searchAutomation } = getPreferenceValues<Preferences>();
   const stage = await withConnection((conn) => searchAndPlay(conn, displayTitle, searchAutomation ?? "open"));
   if (stage !== "failed") {
     const where = offer

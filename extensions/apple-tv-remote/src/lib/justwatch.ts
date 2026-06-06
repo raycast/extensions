@@ -56,7 +56,7 @@ let detectedCountry: string | null = null;
 
 /** Country from the extension preference, else auto-detected from the Mac's region setting. */
 async function country(): Promise<string> {
-  const prefs = getPreferenceValues<{ country?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const fromPref = (prefs.country ?? "").trim().toUpperCase();
   if (/^[A-Z]{2}$/.test(fromPref)) return fromPref;
 

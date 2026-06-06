@@ -43,7 +43,7 @@ export default function Setup() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Apple TVs…">
       <List.EmptyView
-        icon={Icon.Tv}
+        icon={Icon.Monitor}
         title={isLoading ? "Scanning your network…" : "No Apple TVs Found"}
         description={
           isLoading
@@ -60,7 +60,7 @@ export default function Setup() {
         {devices.map((device) => (
           <List.Item
             key={device.identifier}
-            icon={Icon.Tv}
+            icon={Icon.Monitor}
             title={device.name}
             subtitle={device.address}
             accessories={[{ text: device.model }]}

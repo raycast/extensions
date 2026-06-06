@@ -81,7 +81,7 @@ export default function LaunchAppCommand() {
           subtitle={entry.bundleId}
           actions={
             <ActionPanel>
-              <Action title="Open on Apple TV" icon={Icon.Tv} onAction={() => open(entry)} />
+              <Action title="Open on Apple TV" icon={Icon.Monitor} onAction={() => open(entry)} />
               {/* Saved quicklinks accept their own global hotkey/alias — one keystroke to any app. */}
               <Action.CreateQuicklink
                 title="Save as Quicklink (Hotkey-Able)"

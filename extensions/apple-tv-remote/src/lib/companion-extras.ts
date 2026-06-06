@@ -8,7 +8,6 @@
  * Worth upstreaming to https://github.com/bsharper/atvjs.
  */
 import { AppleTVConnection, HidCommand, RemoteKey, sendKeyDown, sendKeyUp, sendKey } from "@bharper/atv-js";
-import { opackFloat } from "@bharper/atv-js/dist/opack";
 
 /** pyatv `is_url_or_scheme`: URLs and custom schemes deep-link, bundle IDs launch. */
 function isUrlOrScheme(value: string): boolean {
@@ -92,6 +91,9 @@ export async function startScreensaver(conn: AppleTVConnection): Promise<void> {
  * key-press mapping for the skip keys is incomplete upstream.
  */
 export async function skipBy(conn: AppleTVConnection, seconds: number): Promise<void> {
-  // opackFloat: the OPACK integer packer rejects negatives; pyatv sends _skpS as a float.
-  await conn.protocol.sendCommand("_mcc", { _mcc: 7, _skpS: opackFloat(seconds) });
+  // The library's OPACK integer packer rejects negative integers, and pyatv
+  // sends _skpS as a float anyway — nudging the value off the integer grid
+  // routes it through the encoder's float64 branch without reaching into the
+  // library's internals. (Proper fix upstreamed in bsharper/atvjs#1.)
+  await conn.protocol.sendCommand("_mcc", { _mcc: 7, _skpS: seconds + 1e-9 });
 }
