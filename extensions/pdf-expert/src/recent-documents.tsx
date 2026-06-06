@@ -2,9 +2,11 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  closeMainWindow,
   Color,
   Icon,
   List,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
@@ -92,6 +94,8 @@ export default function RecentDocuments() {
                       onAction={async () => {
                         try {
                           switchToTab(doc.path);
+                          await closeMainWindow();
+                          await popToRoot();
                         } catch (err) {
                           await showToast({
                             style: Toast.Style.Failure,

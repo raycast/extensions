@@ -2,8 +2,10 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  closeMainWindow,
   Icon,
   List,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
@@ -73,8 +75,8 @@ export default function SearchOpenTabs() {
                 onAction={async () => {
                   try {
                     openApp();
-                    await showHUD("Opening PDF Expert…");
-                    setTimeout(load, 1500);
+                    await closeMainWindow();
+                    await popToRoot();
                   } catch (err) {
                     await showToast({
                       style: Toast.Style.Failure,
@@ -114,6 +116,8 @@ export default function SearchOpenTabs() {
                   onAction={async () => {
                     try {
                       switchToTab(tab.path);
+                      await closeMainWindow();
+                      await popToRoot();
                     } catch (err) {
                       await showToast({
                         style: Toast.Style.Failure,
