@@ -10,8 +10,9 @@ export default function Command() {
 
   const grouped = useMemo(() => {
     const eu = sorted.filter((c) => c.region === "EU");
-    const world = sorted.filter((c) => c.region === "World");
-    return { eu, world };
+    const europe = sorted.filter((c) => c.region === "Europe");
+    const us = sorted.filter((c) => c.region === "US");
+    return { eu, europe, us };
   }, [sorted]);
 
   const regenerateAll = () => setSeed((s) => s + 1);
@@ -41,8 +42,13 @@ export default function Command() {
           <CountryItem key={country.code} country={country} seed={seed} onRegenerateAll={regenerateAll} />
         ))}
       </List.Section>
-      <List.Section title="Rest of the World" subtitle={`${grouped.world.length} countries`}>
-        {grouped.world.map((country) => (
+      <List.Section title="Other Europe" subtitle={`${grouped.europe.length} countries`}>
+        {grouped.europe.map((country) => (
+          <CountryItem key={country.code} country={country} seed={seed} onRegenerateAll={regenerateAll} />
+        ))}
+      </List.Section>
+      <List.Section title="United States" subtitle={`${grouped.us.length} country`}>
+        {grouped.us.map((country) => (
           <CountryItem key={country.code} country={country} seed={seed} onRegenerateAll={regenerateAll} />
         ))}
       </List.Section>
@@ -69,17 +75,30 @@ function CountryItem({
   );
 
   const isChecksum = country.tier === "checksum";
+  const vatCode = country.prefix || country.code;
+  const vatCodeAccessory: List.Item.Accessory = {
+    tag: vatCode,
+    tooltip: country.prefix
+      ? "VAT country code prefix (prepended to the number)"
+      : "Country code (no VAT prefix — uses EIN format)",
+  };
   const tierAccessory: List.Item.Accessory = isChecksum
     ? { tag: { value: "checksum", color: Color.Green }, tooltip: "Passes the country's check-digit algorithm" }
-    : { tag: { value: "format", color: Color.SecondaryText }, tooltip: "Matches length/pattern only" };
+    : {
+        tag: { value: "format", color: Color.SecondaryText },
+        tooltip:
+          country.code === "US"
+            ? "Valid IRS EIN prefix only — the US publishes no public checksum"
+            : "Matches length/pattern only",
+      };
 
   return (
     <List.Item
       icon={country.flag}
       title={country.name}
       subtitle={value}
-      keywords={[country.code, country.prefix, country.format]}
-      accessories={[{ text: country.format }, tierAccessory]}
+      keywords={[country.code, country.prefix, country.format, vatCode]}
+      accessories={[vatCodeAccessory, { text: country.format }, tierAccessory]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

@@ -2,6 +2,7 @@
 node_modules
 .DS_Store
 dist
+scripts/.dist
 *.log
 .raycast-swift-build
 .swiftpm

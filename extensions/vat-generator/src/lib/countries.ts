@@ -2,10 +2,7 @@
  * Country VAT format catalog.
  *
  * Each entry knows how to build the body of a VAT number (everything after the
- * prefix). Entries are either:
- *   - tier "checksum": the generated number satisfies the country's documented
- *     check-digit algorithm, or
- *   - tier "format":   the number matches the country's length/pattern only.
+ * prefix) so the full number passes the country's check-digit algorithm.
  */
 
 import * as gen from "./generators";
@@ -26,11 +23,6 @@ export interface Country {
   /** Human-readable description of the format. */
   format: string;
 }
-
-const fmt =
-  (pattern: string): (() => string) =>
-  () =>
-    gen.formatBody(pattern);
 
 export const COUNTRIES: Country[] = [
   // ----- EU: checksum-correct -----
@@ -155,15 +147,15 @@ export const COUNTRIES: Country[] = [
     format: "9 digits",
   },
 
-  // ----- EU: format-valid only -----
+  // ----- EU: checksum-correct (continued) -----
   {
     code: "AT",
     name: "Austria",
     flag: "🇦🇹",
     prefix: "AT",
     region: "EU",
-    tier: "format",
-    body: fmt("U99999999"),
+    tier: "checksum",
+    body: gen.at,
     format: "U + 8 digits",
   },
   {
@@ -172,9 +164,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇧🇬",
     prefix: "BG",
     region: "EU",
-    tier: "format",
-    body: fmt("999999999"),
-    format: "9-10 digits",
+    tier: "checksum",
+    body: gen.bg,
+    format: "9-digit legal entity",
   },
   {
     code: "HR",
@@ -182,8 +174,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇭🇷",
     prefix: "HR",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999999"),
+    tier: "checksum",
+    body: gen.hr,
     format: "11 digits",
   },
   {
@@ -192,8 +184,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇨🇾",
     prefix: "CY",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999A"),
+    tier: "checksum",
+    body: gen.cy,
     format: "8 digits + 1 letter",
   },
   {
@@ -202,9 +194,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇨🇿",
     prefix: "CZ",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999"),
-    format: "8-10 digits",
+    tier: "checksum",
+    body: gen.cz,
+    format: "8-digit legal entity",
   },
   {
     code: "EE",
@@ -212,9 +204,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇪🇪",
     prefix: "EE",
     region: "EU",
-    tier: "format",
-    body: fmt("999999999"),
-    format: "9 digits",
+    tier: "checksum",
+    body: gen.ee,
+    format: "10 + 7 digits",
   },
   {
     code: "GR",
@@ -222,8 +214,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇬🇷",
     prefix: "EL",
     region: "EU",
-    tier: "format",
-    body: fmt("999999999"),
+    tier: "checksum",
+    body: gen.gr,
     format: "9 digits",
   },
   {
@@ -232,8 +224,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇭🇺",
     prefix: "HU",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999"),
+    tier: "checksum",
+    body: gen.hu,
     format: "8 digits",
   },
   {
@@ -242,9 +234,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇮🇪",
     prefix: "IE",
     region: "EU",
-    tier: "format",
-    body: fmt("9999999AA"),
-    format: "7 digits + 1-2 letters",
+    tier: "checksum",
+    body: gen.ie,
+    format: "7 digits + check letter",
   },
   {
     code: "LV",
@@ -252,9 +244,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇱🇻",
     prefix: "LV",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999999"),
-    format: "11 digits",
+    tier: "checksum",
+    body: gen.lv,
+    format: "11-digit legal entity",
   },
   {
     code: "LT",
@@ -262,9 +254,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇱🇹",
     prefix: "LT",
     region: "EU",
-    tier: "format",
-    body: fmt("999999999"),
-    format: "9 or 12 digits",
+    tier: "checksum",
+    body: gen.lt,
+    format: "9-digit legal person",
   },
   {
     code: "MT",
@@ -272,8 +264,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇲🇹",
     prefix: "MT",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999"),
+    tier: "checksum",
+    body: gen.mt,
     format: "8 digits",
   },
   {
@@ -282,9 +274,9 @@ export const COUNTRIES: Country[] = [
     flag: "🇷🇴",
     prefix: "RO",
     region: "EU",
-    tier: "format",
-    body: fmt("999999999"),
-    format: "2-10 digits",
+    tier: "checksum",
+    body: gen.ro,
+    format: "10-digit CIF",
   },
   {
     code: "SK",
@@ -292,8 +284,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇸🇰",
     prefix: "SK",
     region: "EU",
-    tier: "format",
-    body: fmt("9999999999"),
+    tier: "checksum",
+    body: gen.sk,
     format: "10 digits",
   },
   {
@@ -302,20 +294,40 @@ export const COUNTRIES: Country[] = [
     flag: "🇸🇮",
     prefix: "SI",
     region: "EU",
-    tier: "format",
-    body: fmt("99999999"),
+    tier: "checksum",
+    body: gen.si,
     format: "8 digits",
   },
 
-  // ----- Rest of the world: format-valid only -----
+  // ----- Other Europe (non-EU) -----
   {
     code: "GB",
     name: "United Kingdom",
     flag: "🇬🇧",
     prefix: "GB",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999"),
+    region: "Europe",
+    tier: "checksum",
+    body: gen.gb,
+    format: "9 digits",
+  },
+  {
+    code: "AD",
+    name: "Andorra",
+    flag: "🇦🇩",
+    prefix: "AD",
+    region: "Europe",
+    tier: "checksum",
+    body: gen.ad,
+    format: "letter + 6 digits + letter",
+  },
+  {
+    code: "RS",
+    name: "Serbia",
+    flag: "🇷🇸",
+    prefix: "RS",
+    region: "Europe",
+    tier: "checksum",
+    body: gen.rs,
     format: "9 digits",
   },
   {
@@ -323,9 +335,9 @@ export const COUNTRIES: Country[] = [
     name: "Switzerland",
     flag: "🇨🇭",
     prefix: "CHE",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999"),
+    region: "Europe",
+    tier: "checksum",
+    body: gen.ch,
     format: "CHE + 9 digits",
   },
   {
@@ -333,160 +345,22 @@ export const COUNTRIES: Country[] = [
     name: "Norway",
     flag: "🇳🇴",
     prefix: "NO",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999MVA"),
+    region: "Europe",
+    tier: "checksum",
+    body: gen.no,
     format: "9 digits + MVA",
   },
+
+  // ----- United States (EIN, not VAT) -----
   {
-    code: "AU",
-    name: "Australia",
-    flag: "🇦🇺",
+    code: "US",
+    name: "United States",
+    flag: "🇺🇸",
     prefix: "",
-    region: "World",
+    region: "US",
     tier: "format",
-    body: fmt("99999999999"),
-    format: "11-digit ABN",
-  },
-  {
-    code: "CA",
-    name: "Canada",
-    flag: "🇨🇦",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999RT0001"),
-    format: "9 digits + RT0001",
-  },
-  {
-    code: "NZ",
-    name: "New Zealand",
-    flag: "🇳🇿",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999"),
-    format: "9-digit GST/IRD",
-  },
-  {
-    code: "ZA",
-    name: "South Africa",
-    flag: "🇿🇦",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("4999999999"),
-    format: "10 digits (starts with 4)",
-  },
-  {
-    code: "RU",
-    name: "Russia",
-    flag: "🇷🇺",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("9999999999"),
-    format: "10 or 12-digit INN",
-  },
-  {
-    code: "IN",
-    name: "India",
-    flag: "🇮🇳",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("99AAAAA9999A9ZX"),
-    format: "15-char GSTIN",
-  },
-  {
-    code: "JP",
-    name: "Japan",
-    flag: "🇯🇵",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("T9999999999999"),
-    format: "T + 13 digits",
-  },
-  {
-    code: "KR",
-    name: "South Korea",
-    flag: "🇰🇷",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("9999999999"),
-    format: "10-digit BRN",
-  },
-  {
-    code: "SG",
-    name: "Singapore",
-    flag: "🇸🇬",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("M99999999A"),
-    format: "GST registration",
-  },
-  {
-    code: "AE",
-    name: "United Arab Emirates",
-    flag: "🇦🇪",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999999999"),
-    format: "15-digit TRN",
-  },
-  {
-    code: "SA",
-    name: "Saudi Arabia",
-    flag: "🇸🇦",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999999999"),
-    format: "15-digit VAT",
-  },
-  {
-    code: "MX",
-    name: "Mexico",
-    flag: "🇲🇽",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("AAA999999XXX"),
-    format: "12-13 char RFC",
-  },
-  {
-    code: "BR",
-    name: "Brazil",
-    flag: "🇧🇷",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("99999999999999"),
-    format: "14-digit CNPJ",
-  },
-  {
-    code: "TR",
-    name: "Turkey",
-    flag: "🇹🇷",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("9999999999"),
-    format: "10-digit VKN",
-  },
-  {
-    code: "UA",
-    name: "Ukraine",
-    flag: "🇺🇦",
-    prefix: "",
-    region: "World",
-    tier: "format",
-    body: fmt("999999999999"),
-    format: "12 digits",
+    body: gen.us,
+    format: "9-digit EIN (XX-XXXXXXX)",
   },
 ];
 
