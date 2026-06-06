@@ -1,5 +1,4 @@
 import { getPreferences } from "./preferences";
-import fetch, { Response } from "node-fetch";
 import { ErrStatus400, ErrStatus401 } from "./errors";
 
 const preferences = getPreferences();

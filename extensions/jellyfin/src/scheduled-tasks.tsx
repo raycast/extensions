@@ -8,7 +8,7 @@ import { getProgressIcon } from "@raycast/utils";
 
 const sections: TaskState[] = ["Running", "Idle"];
 
-function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => void }): JSX.Element {
+function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => void }) {
   let color: Color = Color.SecondaryText;
   let icon: Image.ImageLike = Icon.Heartbeat;
 
