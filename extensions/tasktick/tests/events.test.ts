@@ -12,6 +12,25 @@ function makeFakeCli(body: string): string {
     return path;
 }
 
+/**
+ * Poll `predicate` until it returns true or `timeoutMs` elapses. Replaces
+ * fixed-duration sleeps: spawning a subprocess + echoing + readline parsing
+ * has no fixed latency, so a hardcoded wait (e.g. 200ms) flakes under load.
+ */
+async function waitFor(
+    predicate: () => boolean,
+    timeoutMs = 4000,
+    pollMs = 10,
+): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (!predicate()) {
+        if (Date.now() > deadline) {
+            throw new Error(`waitFor: condition not met within ${timeoutMs}ms`);
+        }
+        await new Promise((r) => setTimeout(r, pollMs));
+    }
+}
+
 describe("EventsStream", () => {
     it("emits parsed events from NDJSON stdout", async () => {
         const cli = makeFakeCli(
@@ -23,7 +42,7 @@ describe("EventsStream", () => {
         const events: any[] = [];
         stream.on("started", (ev) => events.push({ type: "started", ...ev }));
         stream.on("completed", (ev) => events.push({ type: "completed", ...ev }));
-        await new Promise((r) => setTimeout(r, 200));
+        await waitFor(() => events.length >= 2);
         stream.kill();
         expect(events).toHaveLength(2);
         expect(events[0].type).toBe("started");
@@ -48,7 +67,7 @@ describe("EventsStream", () => {
         chmodSync(cliPath, 0o755);
 
         const stream = new EventsStream(cliPath, { initialBackoffMs: 20, maxBackoffMs: 100 });
-        await new Promise((r) => setTimeout(r, 1000));
+        await waitFor(() => parseInt(readFileSync(counterFile, "utf8")) > 1);
         stream.kill();
 
         const finalCount = parseInt(readFileSync(counterFile, "utf8"));
