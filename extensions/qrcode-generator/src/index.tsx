@@ -141,6 +141,9 @@ export default function Command() {
   // Non-blocking warning: a valid-but-light color can still be generated, but may not scan well.
   const showLowContrast = isLowContrast(selectedColor(values));
 
+  // "Shorten link" only affects http(s) URLs; surface that inline when it would be a no-op.
+  const shortenSkipped = values.shorten && values.url.trim() !== "" && !isHttpUrl(values.url);
+
   const renderActions = () => {
     const saveAction = (
       <Action.SubmitForm
@@ -247,6 +250,9 @@ export default function Command() {
         {...itemProps.shorten}
         info="Sends the URL to a link shortener (is.gd, da.gd, then TinyURL) to create a short link."
       />
+      {shortenSkipped && (
+        <Form.Description text="Shortening applies to http(s) links only — this content will be encoded as-is." />
+      )}
       <Form.Separator />
       <Form.Checkbox label="Add tracking parameters (UTM)" {...itemProps.utmEnabled} />
       {values.utmEnabled && (
