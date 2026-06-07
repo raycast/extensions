@@ -10,15 +10,30 @@ import {
   Application,
 } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
-import { AddFromFinderAction } from "@components/add-from-finder-action";
 import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
 import { basename, dirname } from "path";
 import { base64ShellSanitize } from "@utils/misc";
 
-export const SearchResult = ({ searchResult, searchText }: { searchResult: SearchResult; searchText?: string }) => {
+export const SearchResult = ({
+  searchResult,
+  searchText,
+  onBoost,
+}: {
+  searchResult: SearchResult;
+  searchText?: string;
+  onBoost?: () => void;
+}) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
-  const { "open-in": openIn } = getPreferenceValues<{ "open-in": Application }>();
+  const {
+    "open-in": openIn,
+    "open-in-terminal": terminal,
+    "open-in-editor": editor,
+  } = getPreferenceValues<{
+    "open-in": Application;
+    "open-in-terminal": Application;
+    "open-in-editor": Application;
+  }>();
 
   const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
@@ -33,12 +48,42 @@ export const SearchResult = ({ searchResult, searchText }: { searchResult: Searc
   const folder = basename(searchResult.path);
   const parent = dirname(searchResult.path) === "." ? "/" : dirname(searchResult.path);
 
-  const openResult = async () => {
+  // Mirror the configured "open in" app (required preference, always set): the
+  // Finder icon when it's Finder, otherwise the chosen app's name + folder icon.
+  const isFinder = openIn.bundleId === "com.apple.finder";
+  const openTitle = `Open in ${openIn.name}`;
+  const openIcon = isFinder ? Icon.Finder : Icon.Folder;
+
+  // Avoid duplicate "Open in <app>" entries: only show the terminal/editor
+  // actions when they target an app not already represented by another action.
+  const showTerminal = terminal.bundleId !== openIn.bundleId;
+  const showEditor = editor.bundleId !== openIn.bundleId && editor.bundleId !== terminal.bundleId;
+
+  // Opening a result counts as a visit, so boost its score in zoxide first.
+  // Pass a bundle id, not an app name — `open(path, "Finder")` by name lands on AirDrop.
+  const openIn_ = async (bundleId: string | undefined, failureTitle: string) => {
     try {
       await addQuery();
-      open(searchResult.originalPath, openIn?.bundleId || "Finder");
+      if (bundleId) open(searchResult.originalPath, bundleId);
+      else open(searchResult.originalPath);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to open folder" });
+      showFailureToast(error, { title: failureTitle });
+    }
+  };
+
+  const openResult = () => openIn_(openIn.bundleId, "Failed to open folder");
+
+  const boostResult = async () => {
+    try {
+      await addQuery();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Boosted in Zoxide",
+        message: searchResult.path,
+      });
+      onBoost?.();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to boost score" });
     }
   };
 
@@ -66,7 +111,24 @@ export const SearchResult = ({ searchResult, searchText }: { searchResult: Searc
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Open Folder" onAction={openResult} />
+            <Action title={openTitle} icon={openIcon} onAction={openResult} />
+            {showTerminal && (
+              <Action
+                title={`Open in ${terminal.name}`}
+                icon={Icon.Terminal}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                onAction={() => openIn_(terminal.bundleId, "Failed to open in terminal")}
+              />
+            )}
+            {showEditor && (
+              <Action
+                title={`Open in ${editor.name}`}
+                icon={Icon.Code}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onAction={() => openIn_(editor.bundleId, "Failed to open in editor")}
+              />
+            )}
+            <Action.ShowInFinder path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
             <Action.OpenWith path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
@@ -77,7 +139,12 @@ export const SearchResult = ({ searchResult, searchText }: { searchResult: Searc
               shortcut={{ modifiers: ["cmd"], key: "c" }}
               content={searchResult.path}
             />
-            <AddFromFinderAction />
+            <Action
+              title="Boost in Zoxide"
+              icon={Icon.ArrowUp}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              onAction={boostResult}
+            />
             {searchResult.score && (
               <Action
                 title="Remove Result"
