@@ -1,6 +1,6 @@
 # HeyClaude Changelog
 
-## [Trending Resources, Recent Updates, and PR-first submissions] - {PR_MERGE_DATE}
+## [Trending Resources, Recent Updates, and PR-first submissions] - 2026-06-07
 
 - Add the `Trending Resources` command for registry entries with public
   activity signals.
