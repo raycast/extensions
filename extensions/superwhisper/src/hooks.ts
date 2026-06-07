@@ -7,6 +7,8 @@ import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 
+export const RECORDINGS_PAGE_SIZE = 50;
+
 export type RecordingMeta = {
   rawResult?: string;
   llmResult?: string;
@@ -17,6 +19,12 @@ export type TranscriptVariant = "processed" | "unprocessed";
 export type Recording = {
   directory: string;
   meta: RecordingMeta;
+  timestamp: Date;
+};
+
+export type RecordingRef = {
+  directory: string;
+  metaPath: string;
   timestamp: Date;
 };
 
@@ -178,24 +186,89 @@ export async function getLatestRecordingByVariant(variant: TranscriptVariant): P
   return latestRecording;
 }
 
+async function listRecordingRefs(customRecordingsPath?: string): Promise<RecordingRef[]> {
+  const isInstalled = await isSuperwhisperInstalled();
+  if (!isInstalled) {
+    throw new Error("Superwhisper is not installed");
+  }
+
+  const recordingsPath = customRecordingsPath ?? join(homedir(), "Documents", "superwhisper", "recordings");
+  if (!existsSync(recordingsPath)) {
+    throw new Error("Recording directory not found. Please make a recording first.");
+  }
+
+  const dirNames = readdirSync(recordingsPath).filter((dir) => /^\d+$/.test(dir));
+  if (dirNames.length === 0) {
+    throw new Error("No recordings found. Please make a recording first.");
+  }
+
+  const refs: RecordingRef[] = [];
+  for (const dirName of dirNames) {
+    const metaPath = join(recordingsPath, dirName, "meta.json");
+    try {
+      const stats = statSync(metaPath);
+      refs.push({ directory: dirName, metaPath, timestamp: stats.mtime });
+    } catch {
+      // meta.json missing or unreadable; skip this folder.
+    }
+  }
+
+  refs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  return refs;
+}
+
+function loadRecordingsForRefs(refs: RecordingRef[]): Recording[] {
+  const recordings: Recording[] = [];
+  for (const ref of refs) {
+    const meta = parseRecordingMeta(ref.metaPath);
+    if (!meta) {
+      continue;
+    }
+    recordings.push({ directory: ref.directory, meta, timestamp: ref.timestamp });
+  }
+  return recordings;
+}
+
 export function useRecordings(customRecordingsPath?: string) {
   const {
     data: recordings,
     isLoading,
+    pagination,
     error,
-  } = useCachedPromise(getRecordings, [customRecordingsPath], {
-    failureToastOptions: {
-      title: `Failed to fetch recordings`,
-      message: "Check if Superwhisper is installed and the recording directory is correct.",
-      primaryAction: {
-        title: "Install from superwhisper.com",
-        onAction: async (toast) => {
-          await open("https://superwhisper.com");
-          await toast.hide();
+  } = useCachedPromise(
+    (path?: string) => {
+      let cachedRefs: RecordingRef[] | undefined;
+      return async (options: { page: number }) => {
+        if (!cachedRefs) {
+          cachedRefs = await listRecordingRefs(path);
+        }
+        const start = options.page * RECORDINGS_PAGE_SIZE;
+        const slice = cachedRefs.slice(start, start + RECORDINGS_PAGE_SIZE);
+        const data = loadRecordingsForRefs(slice);
+        const hasMore = start + RECORDINGS_PAGE_SIZE < cachedRefs.length;
+        return { data, hasMore };
+      };
+    },
+    [customRecordingsPath],
+    {
+      failureToastOptions: {
+        title: `Failed to fetch recordings`,
+        message: "Check if Superwhisper is installed and the recording directory is correct.",
+        primaryAction: {
+          title: "Install from superwhisper.com",
+          onAction: async (toast) => {
+            await open("https://superwhisper.com");
+            await toast.hide();
+          },
         },
       },
     },
-  });
+  );
 
-  return { recordings, isLoading: (!recordings && !error) || isLoading, error };
+  return {
+    recordings,
+    isLoading: (!recordings && !error) || isLoading,
+    pagination,
+    error,
+  };
 }
