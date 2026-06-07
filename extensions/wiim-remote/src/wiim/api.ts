@@ -125,16 +125,17 @@ export class WiiMAPI {
     const raw = await this.request("getMetaInfo");
     try {
       const json = JSON.parse(raw);
+      const meta = asRecord(json.metaData);
       return {
-        album: defaultIfUnknown(json.metaData.album),
-        title: defaultIfUnknown(json.metaData.title),
-        subtitle: defaultIfUnknown(json.metaData.subtitle),
-        artist: defaultIfUnknown(json.metaData.artist),
-        albumArtURI: defaultIfUnknown(json.metaData.albumArtURI),
-        sampleRate: Number(defaultIfUnknown(json.metaData.sampleRate, "0")),
-        bitDepth: Number(defaultIfUnknown(json.metaData.bitDepth, "0")),
-        bitRate: Number(defaultIfUnknown(json.metaData.bitRate, "0")),
-        trackId: json.metaData.trackId ?? "",
+        album: defaultIfUnknown(meta.album),
+        title: defaultIfUnknown(meta.title),
+        subtitle: defaultIfUnknown(meta.subtitle),
+        artist: defaultIfUnknown(meta.artist),
+        albumArtURI: defaultIfUnknown(meta.albumArtURI),
+        sampleRate: Number(defaultIfUnknown(meta.sampleRate, "0")),
+        bitDepth: Number(defaultIfUnknown(meta.bitDepth, "0")),
+        bitRate: Number(defaultIfUnknown(meta.bitRate, "0")),
+        trackId: defaultIfUnknown(meta.trackId),
       };
     } catch {
       throw new WiiMAPIError("INVALID_RESPONSE", `Cannot parse metadata info: ${raw}`);
@@ -197,7 +198,7 @@ export class WiiMAPI {
     }
   }
 
-  // FIXME: this currently failes with {status: "failed"} despite being documented
+  // Known issue: this currently fails with {status: "failed"} despite being documented.
   /*
   async getEQStatus(): Promise<boolean> {
     const raw = await this.request("EQGetStat");
@@ -265,6 +266,26 @@ export class WiiMAPI {
   }
 }
 
-function defaultIfUnknown(value: string, fallback = ""): string {
-  return value.toLowerCase() === "unknow" ? fallback : value;
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function defaultIfUnknown(value: unknown, fallback = ""): string {
+  if (value === undefined || value === null) {
+    return fallback;
+  }
+
+  let normalized = fallback;
+  if (typeof value === "string") {
+    normalized = value.trim();
+  } else if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    normalized = String(value);
+  }
+
+  if (normalized === fallback) {
+    return fallback;
+  }
+
+  const lower = normalized.toLowerCase();
+  return lower === "unknow" || lower === "unknown" ? fallback : normalized;
 }
