@@ -152,7 +152,7 @@ function PairForm({ device }: { device: AppleTVDevice }) {
       await saveSelectedDevice(device);
       toast.style = Toast.Style.Success;
       toast.title = `Paired with ${device.name}`;
-      toast.message = "You're ready — try the Apple TV Remote command.";
+      toast.message = "You're ready. Try the Apple TV Remote command.";
       await popToRoot();
     } catch (e) {
       toast.style = Toast.Style.Failure;

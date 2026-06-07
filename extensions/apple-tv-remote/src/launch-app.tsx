@@ -82,7 +82,7 @@ export default function LaunchAppCommand() {
           actions={
             <ActionPanel>
               <Action title="Open on Apple TV" icon={Icon.Monitor} onAction={() => open(entry)} />
-              {/* Saved quicklinks accept their own global hotkey/alias — one keystroke to any app. */}
+              {/* Saved quicklinks accept their own global hotkey/alias, one keystroke to any app. */}
               <Action.CreateQuicklink
                 title="Save as Quicklink (Hotkey-Able)"
                 quicklink={{

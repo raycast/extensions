@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-tv-remote",
   "title": "Apple TV Remote",
-  "description": "Control your Apple TV over the local network — d-pad remote, app launcher, deep links, and AI commands. No external installs required.",
+  "description": "Control your Apple TV from Raycast. D-pad remote, app launcher, deep links, and AI commands. No external installs.",
   "icon": "command-icon.png",
   "author": "camschroedes",
   "categories": [
@@ -15,7 +15,7 @@
       "name": "remote",
       "title": "Apple TV Remote",
       "subtitle": "Apple TV",
-      "description": "Full remote control — d-pad, playback, volume, and text input.",
+      "description": "On-screen remote with d-pad, playback, volume, and text input.",
       "mode": "view"
     },
     {
@@ -187,7 +187,7 @@
       "name": "context-menu",
       "title": "Open Context Menu",
       "subtitle": "Apple TV",
-      "description": "Long-press select on the Apple TV — opens the context menu for the focused item.",
+      "description": "Long-press select on the Apple TV to open the context menu for the focused item.",
       "mode": "no-view",
       "keywords": [
         "atv",
@@ -298,7 +298,7 @@
     }
   ],
   "ai": {
-    "instructions": "You control the user's Apple TV. For playback/navigation requests (pause, play, up, back, home, volume) call remote-key with the matching key — 'pause' and 'play' both map to play_pause. When the user names an app, call launch-app. When the user names a show or movie, call play-content (include the app if they named one). For sleep/wake/'turn off'/'turn on' call power. Never invent bundle IDs or deep-link URLs; the tools resolve real identifiers themselves. If a request is ambiguous (which show, which app), ask a short clarifying question first. Relay play-content result messages verbatim — they state exactly what happened.",
+    "instructions": "You control the user's Apple TV. For playback/navigation requests (pause, play, up, back, home, volume) call remote-key with the matching key ('pause' and 'play' both map to play_pause). When the user names an app, call launch-app. When the user names a show or movie, call play-content (include the app if they named one). For sleep/wake/'turn off'/'turn on' call power. Never invent bundle IDs or deep-link URLs; the tools resolve real identifiers themselves. If a request is ambiguous (which show, which app), ask a short clarifying question first. Relay play-content result messages verbatim; they state exactly what happened.",
     "evals": [
       {
         "input": "@apple-tv-remote pause",
@@ -374,7 +374,7 @@
     {
       "name": "searchAutomation",
       "title": "Search Automation",
-      "description": "How far to go after typing a title into Apple TV Search. 'Open top result' stops on the title page so you pick the streaming app — pressing Play blindly can start the wrong provider.",
+      "description": "How far to go after typing a title into Apple TV Search. 'Open top result' stops on the title page so you pick the streaming app. Pressing Play blindly can start the wrong provider.",
       "type": "dropdown",
       "default": "open",
       "required": false,

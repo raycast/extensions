@@ -31,8 +31,8 @@ export async function listApps(conn: AppleTVConnection): Promise<Record<string, 
 
 /**
  * Fire a HID command as a full button press. pyatv's sleep example sends only
- * the button-up event, but its HID helper presses down+up like a real button —
- * we match the helper.
+ * the button-up event, but its HID helper presses down+up like a real button,
+ * so we match the helper.
  */
 async function pressHid(conn: AppleTVConnection, command: HidCommand): Promise<void> {
   await conn.protocol.sendCommand("_hidC", { _hBtS: 1, _hidC: command });
@@ -51,7 +51,7 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Long-press a key (button down → 1s → up). tvOS distinguishes tap from hold
- * at the ~1s boundary — this is how context menus open (long-press select)
+ * at the ~1s boundary. This is how context menus open (long-press select)
  * and how pyatv implements every "hold" action.
  */
 export async function longPress(conn: AppleTVConnection, key: RemoteKey, holdMs = 1000): Promise<void> {
@@ -74,25 +74,25 @@ export async function appSwitcher(conn: AppleTVConnection): Promise<void> {
 
 /**
  * Open Control Center. Counter-intuitively this is NOT a Home-hold over the
- * protocol — pyatv sends a single HID PageDown (19).
+ * protocol, pyatv sends a single HID PageDown (19).
  */
 export async function controlCenter(conn: AppleTVConnection): Promise<void> {
   await pressHid(conn, HidCommand.PageDown);
 }
 
-/** Start the screensaver. Known-flaky upstream (pyatv #2139) — callers should tolerate failure. */
+/** Start the screensaver. Known-flaky upstream (pyatv #2139), callers should tolerate failure. */
 export async function startScreensaver(conn: AppleTVConnection): Promise<void> {
   await pressHid(conn, HidCommand.Screensaver);
 }
 
 /**
  * Skip within the current media by N seconds (negative = backward) via the
- * MediaControl channel — the seconds-based path pyatv uses; the library's
+ * MediaControl channel, the seconds-based path pyatv uses; the library's
  * key-press mapping for the skip keys is incomplete upstream.
  */
 export async function skipBy(conn: AppleTVConnection, seconds: number): Promise<void> {
   // The library's OPACK integer packer rejects negative integers, and pyatv
-  // sends _skpS as a float anyway — nudging the value off the integer grid
+  // sends _skpS as a float anyway, nudging the value off the integer grid
   // routes it through the encoder's float64 branch without reaching into the
   // library's internals. (Proper fix upstreamed in bsharper/atvjs#1.)
   await conn.protocol.sendCommand("_mcc", { _mcc: 7, _skpS: seconds + 1e-9 });

@@ -6,7 +6,7 @@ const execFileAsync = promisify(execFile);
 
 /**
  * Deterministic title → streaming deep-link resolution via JustWatch's GraphQL
- * API (the same backend justwatch.com uses — keyless, non-commercial use).
+ * API (the same backend justwatch.com uses; keyless, non-commercial use).
  * This replaces LLM-guessed title IDs with real per-provider URLs.
  * Results are cached for 24h to keep API usage polite.
  */

@@ -13,7 +13,7 @@ type Input = {
 
 const VALID_KEYS = new Set<string>(Object.values(RemoteKey));
 
-// EXTRAS intentionally shadows the enum's skip keys — the MediaControl path works; the key-press mapping doesn't.
+// EXTRAS intentionally shadows the enum's skip keys, the MediaControl path works; the key-press mapping doesn't.
 const EXTRAS: Record<string, (conn: AppleTVConnection) => Promise<void>> = {
   context_menu: longPressSelect,
   long_press_select: longPressSelect,

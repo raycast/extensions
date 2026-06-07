@@ -5,7 +5,7 @@ import { loadCachedApps } from "./lib/deep-links";
 
 /**
  * Menu-bar remote. Clicking an item closes the menu and Raycast unloads this
- * command immediately — which would kill an in-flight Companion handshake. So
+ * command immediately, which would kill an in-flight Companion handshake. So
  * every action is delegated to a background launch of the `ask` command,
  * which gets its own process lifetime and completes reliably.
  */

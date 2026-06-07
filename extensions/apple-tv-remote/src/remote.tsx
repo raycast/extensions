@@ -13,7 +13,7 @@ type DeviceAction = (conn: AppleTVConnection) => Promise<void>;
  * A visual Apple TV remote: a 3-column grid laid out like the physical remote,
  * clickable with the mouse, holding ONE live Companion connection so every
  * press is instant. Keyboard layers on top:
- *  - Bare keys via search interception — WASD/HJKL move, F select, Space ⏯.
+ *  - Bare keys via search interception: WASD/HJKL move, F select, Space ⏯.
  *  - ⌥-shortcuts for every action, regardless of selection.
  */
 export default function Remote() {
@@ -272,7 +272,7 @@ export default function Remote() {
       columns={5}
       aspectRatio="4/3"
       inset={Grid.Inset.Small}
-      navigationTitle={`${deviceName} — ${statusLabel}`}
+      navigationTitle={`${deviceName} · ${statusLabel}`}
       searchBarPlaceholder="Keys: WASD move · F select · Space ⏯ · B back · Q home"
       filtering={false}
       onSearchTextChange={handleTyped}
@@ -336,7 +336,7 @@ function TypeTextForm({ connRef }: { connRef: React.MutableRefObject<AppleTVConn
         </ActionPanel>
       }
     >
-      <Form.Description text="Sends text into the focused field on the Apple TV — focus a search box there first." />
+      <Form.Description text="Sends text into the focused field on the Apple TV. Focus a search box there first." />
       <Form.TextField id="text" title="Text" placeholder="rick and morty" autoFocus />
     </Form>
   );

@@ -9,18 +9,18 @@ import { offerMatchesHint, pickOffer, searchTitle } from "./justwatch";
  * The "play <title> [on <app>]" flow, shared by the AI tool and the Ask command.
  *
  * Strategy, in order of reliability:
- * 1. JustWatch-resolved deep link (real per-provider URL, no guessed IDs) —
+ * 1. JustWatch-resolved deep link (real per-provider URL, no guessed IDs),
  *    works for Apple TV+, Disney+, Max, and most others.
  * 2. Netflix (whose tvOS deep links broke in Sept 2025) and unresolvable
  *    titles fall back to tvOS universal Search: launch the system Search app,
- *    wait for the on-screen keyboard (a real Companion text-input session —
+ *    wait for the on-screen keyboard (a real Companion text-input session,
  *    verifiable!), and type the title. Selecting a result deep-links natively.
  * 3. Bare app launch as the last resort.
  */
 
 const TV_SEARCH_BUNDLE = "com.apple.TVSearch";
 
-/** Providers whose web URLs don't deep-link on tvOS — route via universal search. */
+/** Providers whose web URLs don't deep-link on tvOS, route via universal search. */
 const BROKEN_DEEP_LINK_PROVIDERS = new Set(["netflix", "netflixbasicwithads"]);
 
 const PROVIDER_BUNDLES: Record<string, string> = {
@@ -52,7 +52,7 @@ function adaptUrlForTvos(url: string, technicalName: string): string {
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// tvOS coalesces rapid keypresses into long-presses (pyatv #792) — keep gaps generous.
+// tvOS coalesces rapid keypresses into long-presses (pyatv #792), keep gaps generous.
 const KEY_GAP_MS = 800;
 
 async function keyboardFocused(conn: AppleTVConnection): Promise<boolean> {
@@ -72,10 +72,10 @@ type SearchStage = "failed" | "typed" | "opened" | "played";
  * machine toward playback. The keyboard-focus flag is the only feedback
  * channel, and it gives us two verifiable transitions:
  *  - Down flips focus → false: we verifiably left the keyboard into results.
- *    (If it doesn't flip, that's the known tvOS single/zero-result quirk — bail
+ *    (If it doesn't flip, that's the known tvOS single/zero-result quirk, bail
  *    and leave the typed query on screen rather than pressing blind.)
  *  - Select flips focus back → true: we hit a search *suggestion*, not a
- *    poster — the query was refined, so descend again and re-select.
+ *    poster, the query was refined, so descend again and re-select.
  * After opening the top result, one more Select hits the detail page's
  * default-focused Play/Open button. Playback itself isn't verifiable without
  * the MRP channel, so messaging stays honest about that.
@@ -102,7 +102,7 @@ async function searchAndPlay(
   // Let live results populate (no "results ready" event exists).
   await delay(2000);
 
-  // Leave the keyboard — verified by the focus flag flipping false.
+  // Leave the keyboard, verified by the focus flag flipping false.
   let leftKeyboard = false;
   for (let presses = 0; presses < 2; presses++) {
     await sendKey(conn, RemoteKey.Down);
@@ -112,13 +112,13 @@ async function searchAndPlay(
       break;
     }
   }
-  if (!leftKeyboard) return "typed"; // single/zero-result quirk — don't press blind
+  if (!leftKeyboard) return "typed"; // single/zero-result quirk, don't press blind
 
   // Open the focused item.
   await sendKey(conn, RemoteKey.Select);
   await delay(1500);
 
-  // If the keyboard came back, we selected a suggestion (query refined) —
+  // If the keyboard came back, we selected a suggestion (query refined),
   // descend into the refreshed results and open the top poster.
   if (await keyboardFocused(conn)) {
     await delay(800);
@@ -131,7 +131,7 @@ async function searchAndPlay(
 
   // We're now on the title's canonical page. Stopping here is the reliable
   // default: it lists every provider, and which "watch option" has default
-  // focus is invisible to us — a blind Play can start the wrong app.
+  // focus is invisible to us, a blind Play can start the wrong app.
   if (automation !== "play") return "opened";
 
   await delay(KEY_GAP_MS);
@@ -150,13 +150,13 @@ export async function playContent(title: string, appHint?: string): Promise<Play
   try {
     resolvedTitle = await searchTitle(title);
   } catch {
-    // offline or API hiccup — fall through to search/app-launch paths
+    // offline or API hiccup, fall through to search/app-launch paths
   }
 
   const offer = resolvedTitle ? pickOffer(resolvedTitle, appHint) : null;
   const displayTitle = resolvedTitle?.title ?? title;
 
-  // Never silently open a different service than the one the user named —
+  // Never silently open a different service than the one the user named,
   // if their provider has no offer in this region, the universal-search flow
   // lets them decide on screen instead.
   const honorsHint = !appHint || (offer !== null && offerMatchesHint(offer, appHint));
@@ -174,14 +174,14 @@ export async function playContent(title: string, appHint?: string): Promise<Play
   if (stage !== "failed") {
     const where = offer
       ? honorsHint
-        ? ` — it's on ${offer.provider.clearName}`
-        : ` — heads up: in your region it's on ${offer.provider.clearName}`
+        ? ` (it's on ${offer.provider.clearName})`
+        : ` (in your region it's on ${offer.provider.clearName})`
       : "";
     return {
       ok: true,
       message:
         stage === "played"
-          ? `Pressed Play on the top result for “${displayTitle}”${where}. Check the TV — the default watch option may not be your preferred app.`
+          ? `Pressed Play on the top result for “${displayTitle}”${where}. Check the TV; the default watch option may not be your preferred app.`
           : stage === "opened"
             ? `Opened “${displayTitle}”${where}. Pick your streaming app on the title page.`
             : `Typed “${displayTitle}” into Apple TV Search${where}. Pick the result on screen.`,
@@ -195,7 +195,7 @@ export async function playContent(title: string, appHint?: string): Promise<Play
   if (bundleId) {
     await withConnection((conn) => launchApp(conn, bundleId));
     const appName = offer?.provider.clearName ?? fromHint?.name ?? "the app";
-    return { ok: true, message: `Opened ${appName} — search for “${displayTitle}” there.` };
+    return { ok: true, message: `Opened ${appName}. Search for “${displayTitle}” there.` };
   }
 
   return {

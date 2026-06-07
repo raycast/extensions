@@ -60,7 +60,7 @@ async function openApp(appName: string): Promise<void> {
   const cached = await loadCachedApps();
   const resolved = resolveAppName(appName, cached?.apps ?? {});
   if (!resolved) {
-    await showHUD(`❓ Don't know the app “${appName}” — try the Launch Apple TV App command`);
+    await showHUD(`❓ Don't know the app “${appName}”. Try the Launch Apple TV App command`);
     return;
   }
   await withConnection((conn) => launchApp(conn, resolved.bundleId));
@@ -128,7 +128,7 @@ export default async function Ask(props: LaunchProps<{ arguments: { query: strin
       return;
     }
 
-    // 3. "open/launch <app or URL>" — URLs deep-link directly
+    // 3. "open/launch <app or URL>": URLs deep-link directly
     const openMatch = query.match(/^(?:open|launch|start|go to)\s+(.+)$/);
     if (openMatch) {
       const target = openMatch[1].trim();

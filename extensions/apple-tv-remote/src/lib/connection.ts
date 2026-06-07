@@ -33,7 +33,7 @@ export async function openConnection(): Promise<AppleTVConnection> {
   );
 
   // connect() re-discovers the endpoint if the saved address/port went stale
-  // (e.g. a new DHCP lease) — persist the corrected record for next time.
+  // (e.g. a new DHCP lease), persist the corrected record for next time.
   if (!conn.usedCredentialsMatchProvided) {
     await saveSelectedDevice(conn.device satisfies AppleTVDevice);
   }
@@ -43,7 +43,7 @@ export async function openConnection(): Promise<AppleTVConnection> {
 
 /**
  * Run a single action against the Apple TV with a short-lived connection.
- * Used by no-view commands, the menu bar, and AI tools — the persistent-
+ * Used by no-view commands, the menu bar, and AI tools, the persistent-
  * connection path for the remote view lives in `remote.tsx` itself.
  */
 export async function withConnection<T>(fn: (conn: AppleTVConnection) => Promise<T>): Promise<T> {
