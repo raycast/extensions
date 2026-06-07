@@ -1,11 +1,11 @@
 # Token Track Changelog
 
-## [Budget Menu Bar] - {PR_MERGE_DATE}
+## [Budget Menu Bar] - 2026-06-07
 
 - Add **Budget Menu Bar** command: glanceable spend vs cap for Claude Code, Codex, and Cursor with provider-colored progress bars.
 - Opt-in command (`disabledByDefault`); run it once from Raycast to pin the menu bar item. Background refresh every 15 minutes (enable in command preferences).
 
-## [Claude Code chat titles and Open Chat] - {PR_MERGE_DATE}
+## [Claude Code chat titles and Open Chat] - 2026-06-07
 
 - Fix Claude Code conversation names to match the app sidebar: prefer `/rename` custom titles, then `ai-title` lines from session JSONL.
 - Attribute subagent and forked-session usage to the parent chat so View Details totals match the dashboard.
