@@ -47,8 +47,8 @@ async function getRunningAppsPaths(): Promise<string[]> {
       const match = line.match(/(.+\.app)\/Contents\/MacOS\//);
       if (match && match[1]) {
         const appPath = match[1];
-        // Exclude system services and helper processes in /System/Library/ (except /System/Applications/)
-        if (appPath.startsWith("/System/Library/") && !appPath.startsWith("/System/Applications/")) {
+        // Exclude system services and helper processes in /System/Library/
+        if (appPath.startsWith("/System/Library/")) {
           continue;
         }
         // Exclude helper/system items in /Library/
@@ -176,14 +176,14 @@ async function restartAppWithToast(app: string, displayName = app): Promise<bool
   }
 }
 
-function getQuickLinkForApp(appName: string, action: string): string {
-  const context = JSON.stringify({ appName, action });
+function getQuickLinkForApp(appPath: string, appName: string, action: string): string {
+  const context = JSON.stringify({ appPath, appName, action });
   const encodedContext = encodeURIComponent(context);
   return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
 }
 
 type CommandProps = {
-  launchContext?: { appName: string; action: string /* quit | restart */ };
+  launchContext?: { appPath?: string; appName: string; action: string /* quit | restart */ };
 };
 
 export default function Command({ launchContext }: CommandProps) {
@@ -199,13 +199,14 @@ export default function Command({ launchContext }: CommandProps) {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if (launchContext && launchContext.appName && launchContext.action) {
-      const { appName, action } = launchContext;
+    if (launchContext && launchContext.action) {
+      const { appPath, appName, action } = launchContext;
+      const target = appPath || appName;
 
       if (action === "quit") {
-        void quitAppWithToast(appName);
+        void quitAppWithToast(target, appName);
       } else if (action === "restart") {
-        void restartAppWithToast(appName);
+        void restartAppWithToast(target, appName);
       }
       return;
     }
@@ -337,11 +338,11 @@ export default function Command({ launchContext }: CommandProps) {
               />
               <Action.CreateQuicklink
                 title="Create Quit Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+                quicklink={{ link: getQuickLinkForApp(app.path, app.name, "quit"), name: `Quit ${app.name}` }}
               />
               <Action.CreateQuicklink
                 title="Create Restart Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
+                quicklink={{ link: getQuickLinkForApp(app.path, app.name, "restart"), name: `Restart ${app.name}` }}
               />
             </ActionPanel>
           }
