@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-06-07
 
 - Fix tags not rendering in note detail view
 - Fix "Recently Deleted" notes not appearing in search results
