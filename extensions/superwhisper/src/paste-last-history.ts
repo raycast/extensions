@@ -1,4 +1,6 @@
 import { Clipboard, Toast, closeMainWindow, getPreferenceValues, showToast } from "@raycast/api";
+import { homedir } from "os";
+import { join } from "path";
 
 import { getLatestRecordingByVariant, TranscriptVariant } from "./hooks";
 import { checkSuperwhisperInstallation } from "./utils";
@@ -8,14 +10,15 @@ function wait(ms: number): Promise<void> {
 }
 
 export default async function main() {
-  const { transcriptVariant } = getPreferenceValues<Preferences.PasteLastHistory>();
+  const { transcriptVariant, recordingDir } = getPreferenceValues<Preferences.PasteLastHistory>();
+  const recordingsPath = recordingDir || join(homedir(), "Documents", "superwhisper", "recordings");
   const isInstalled = await checkSuperwhisperInstallation();
   if (!isInstalled) {
     return;
   }
 
   try {
-    const latestRecording = await getLatestRecordingByVariant(transcriptVariant as TranscriptVariant);
+    const latestRecording = await getLatestRecordingByVariant(transcriptVariant as TranscriptVariant, recordingsPath);
     const variantTitle = transcriptVariant === "processed" ? "AI processed" : "unprocessed";
 
     await closeMainWindow();

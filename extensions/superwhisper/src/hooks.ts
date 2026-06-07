@@ -164,8 +164,11 @@ export function getLatestRecordingByVariantFromRecordings(
   };
 }
 
-export async function getLatestRecordingByVariant(variant: TranscriptVariant): Promise<LatestRecording> {
-  const recordings = await getRecordings();
+export async function getLatestRecordingByVariant(
+  variant: TranscriptVariant,
+  customRecordingsPath?: string,
+): Promise<LatestRecording> {
+  const recordings = await getRecordings(customRecordingsPath);
   const latestRecording = getLatestRecordingByVariantFromRecordings(recordings, variant);
   if (!latestRecording) {
     if (variant === "processed") {
