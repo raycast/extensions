@@ -15,7 +15,6 @@
 - Contributors list updated
 
 ### Removed
-- All `[Beeper OAuth DEBUG]` console.log statements (debug-only tracing, not suitable for production)
 - Unused `ensureOAuthClientRegistered()` function (dead code from OAuth experimentation)
 - `(prefs as any)` cast replaced with properly typed `as Record<string, unknown>`
 
