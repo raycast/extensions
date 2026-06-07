@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Stale Project Status in Search Menu] - {PR_MERGE_DATE}
+## [Fix Stale Project Status in Search Menu] - 2026-06-07
 
 - Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.
 - Update to @raycast/api 1.104.
