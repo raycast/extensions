@@ -1068,7 +1068,7 @@ export default function Command() {
                   icon={Icon.ArrowClockwise}
                   shortcut={{
                     macOS: { modifiers: ["cmd"], key: "r" },
-                    windows: { modifiers: ["ctrl"], key: "r" },
+                    Windows: { modifiers: ["ctrl"], key: "r" },
                   }}
                   onAction={() => setRefreshKey((value) => value + 1)}
                 />
