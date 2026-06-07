@@ -1,18 +1,21 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getOfficerAppointments } from "../api";
-import { PAGE_SIZE } from "../constants";
 import {
   companyStatusLabel,
   companyWebUrl,
+  formatAddress,
   formatDate,
+  formatDateOfBirth,
   officerRoleLabel,
   statusColor,
 } from "../helpers";
-import type { AppointmentItem } from "../types";
+import type { AppointmentItem, DateOfBirth } from "../types";
 
 import { CompanyProfile } from "./CompanyProfile";
+
+const MAX_PAGES = 10;
 
 export function OfficerAppointments({
   officerId,
@@ -21,31 +24,46 @@ export function OfficerAppointments({
   officerId: string;
   officerName?: string;
 }) {
-  const { isLoading, data, pagination } = useCachedPromise(
-    (id: string) => async (options: { page: number }) => {
-      const startIndex = options.page * PAGE_SIZE;
-      const res = await getOfficerAppointments(id, startIndex);
-      const items = res.items ?? [];
-      const total = res.total_results ?? items.length;
-      return { data: items, hasMore: startIndex + items.length < total };
+  const { isLoading, data } = useCachedPromise(
+    async (id: string) => {
+      const items: AppointmentItem[] = [];
+      let name: string | undefined;
+      let dateOfBirth: DateOfBirth | undefined;
+      let startIndex = 0;
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const res = await getOfficerAppointments(id, startIndex);
+        if (page === 0) {
+          name = res.name;
+          dateOfBirth = res.date_of_birth;
+        }
+        const pageItems = res.items ?? [];
+        items.push(...pageItems);
+        const total = res.total_results ?? items.length;
+        startIndex += pageItems.length;
+        if (pageItems.length === 0 || items.length >= total) break;
+      }
+      return { name, dateOfBirth, items };
     },
     [officerId],
   );
 
+  const born = formatDateOfBirth(data?.dateOfBirth);
+  const appointments = data?.items ?? [];
+
   return (
     <List
       isLoading={isLoading}
-      pagination={pagination}
-      navigationTitle={
-        officerName ? `${officerName} · Appointments` : "Appointments"
-      }
-      searchBarPlaceholder="Filter appointments…"
+      isShowingDetail
+      filtering
+      navigationTitle={data?.name ?? officerName ?? "Appointments"}
+      searchBarPlaceholder="Filter appointments by company…"
     >
-      {data?.length ? (
-        data.map((appointment, index) => (
+      {appointments.length ? (
+        appointments.map((appointment, index) => (
           <AppointmentRow
             key={`${appointment.appointed_to?.company_number ?? index}`}
             appointment={appointment}
+            born={born}
           />
         ))
       ) : (
@@ -55,32 +73,95 @@ export function OfficerAppointments({
   );
 }
 
-function AppointmentRow({ appointment }: { appointment: AppointmentItem }) {
+function AppointmentRow({
+  appointment,
+  born,
+}: {
+  appointment: AppointmentItem;
+  born?: string;
+}) {
   const company = appointment.appointed_to;
   const status = company?.company_status;
   const resigned = Boolean(appointment.resigned_on);
-
-  const accessories: List.Item.Accessory[] = [];
-  if (status) {
-    accessories.push({
-      tag: {
-        value: companyStatusLabel(status) ?? status,
-        color: statusColor(status),
-      },
-    });
-  }
-  accessories.push({
-    text: resigned
-      ? `${formatDate(appointment.appointed_on) ?? "?"} – ${formatDate(appointment.resigned_on)}`
-      : (formatDate(appointment.appointed_on) ?? ""),
-    tooltip: resigned ? "Appointed – Resigned" : "Appointed",
-  });
+  const address = formatAddress(appointment.address);
 
   return (
     <List.Item
       title={company?.company_name ?? "Unknown company"}
       subtitle={officerRoleLabel(appointment.officer_role)}
-      accessories={accessories}
+      accessories={[
+        {
+          icon: resigned
+            ? { source: Icon.XMarkCircle, tintColor: Color.SecondaryText }
+            : { source: Icon.CheckCircle, tintColor: Color.Green },
+          tooltip: resigned ? "Resigned" : "Active appointment",
+        },
+      ]}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              {company?.company_name ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Company"
+                  text={company.company_name}
+                />
+              ) : null}
+              {status ? (
+                <List.Item.Detail.Metadata.TagList title="Company Status">
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={companyStatusLabel(status) ?? status}
+                    color={statusColor(status)}
+                  />
+                </List.Item.Detail.Metadata.TagList>
+              ) : null}
+              {appointment.officer_role ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Role"
+                  text={officerRoleLabel(appointment.officer_role)}
+                />
+              ) : null}
+              {appointment.appointed_on ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Appointed"
+                  text={formatDate(appointment.appointed_on)}
+                />
+              ) : null}
+              {appointment.resigned_on ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Resigned"
+                  text={formatDate(appointment.resigned_on)}
+                />
+              ) : null}
+              <List.Item.Detail.Metadata.Separator />
+              {born ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Date of Birth"
+                  text={born}
+                />
+              ) : null}
+              {appointment.nationality ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Nationality"
+                  text={appointment.nationality}
+                />
+              ) : null}
+              {appointment.occupation ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Occupation"
+                  text={appointment.occupation}
+                />
+              ) : null}
+              {address ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Correspondence Address"
+                  text={address}
+                />
+              ) : null}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           {company?.company_number ? (

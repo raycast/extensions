@@ -75,8 +75,7 @@ export function CompanyProfile({
   if (activeOfficers.length) {
     const escapeCell = (value: string) => value.replace(/\|/g, "\\|");
     const shown = Math.min(activeOfficers.length, OFFICERS_IN_SUMMARY);
-    markdown += "\n\n## Officers\n\n";
-    markdown += "| Officer | Role |\n| --- | --- |\n";
+    markdown += "\n\n| Officer | Role |\n| --- | --- |\n";
     markdown += activeOfficers
       .slice(0, OFFICERS_IN_SUMMARY)
       .map(
