@@ -1,6 +1,5 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import {
-  QuickTranscriptMode,
   getLatestHistoryRow,
   hasTranscript,
   modeLabel,
@@ -8,12 +7,8 @@ import {
   quickModeLabel,
 } from "./lib/typeless";
 
-type QuickPreferences = {
-  quickMode?: QuickTranscriptMode;
-};
-
 export default async function Command() {
-  const preferences = getPreferenceValues<QuickPreferences>();
+  const preferences = getPreferenceValues<Preferences.CopyLastTranscript>();
   const mode = preferences.quickMode ?? "latest";
 
   try {

@@ -38,9 +38,6 @@ type Filter =
   | "other";
 
 type CopyWindowBehavior = "keep-open" | "close" | "close-and-exit-command";
-type HistoryPreferences = {
-  copyWindowBehavior?: CopyWindowBehavior;
-};
 
 const monochromeModeColor = {
   light: "#111111",
@@ -156,7 +153,7 @@ function HistoryItem({ row }: { row: TypelessHistoryRow }) {
 
 function HistoryActions({ row }: { row: TypelessHistoryRow }) {
   const label = copyLabel(row);
-  const preferences = getPreferenceValues<HistoryPreferences>();
+  const preferences = getPreferenceValues<Preferences.ViewHistory>();
   const copyWindowBehavior = preferences.copyWindowBehavior ?? "close";
 
   if (!hasTranscript(row) && !row.audioPath) return null;
