@@ -21,18 +21,13 @@ import {
   Project,
   Label,
 } from "./api";
-
-const PRIORITIES = [
-  { value: "0", title: "Unset" },
-  { value: "1", title: "Low" },
-  { value: "2", title: "Medium" },
-  { value: "3", title: "High" },
-  { value: "4", title: "Urgent" },
-  { value: "5", title: "DO NOW" },
-];
+import { PRIORITY_MAP } from "./helpers/priorities";
 
 export default function CreateTask(
-  props: LaunchProps<{ arguments: Arguments.CreateTask }>,
+  props: LaunchProps<{
+    arguments: Arguments.CreateTask;
+    launchContext?: { projectId?: number };
+  }>,
 ) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
@@ -40,6 +35,11 @@ export default function CreateTask(
   const argTitle = props.arguments.title?.trim() ?? "";
   const [prefillTitle, setPrefillTitle] = useState(argTitle);
   const [prefillReady, setPrefillReady] = useState(!!argTitle);
+  // Prefer projectId passed as a command argument, fallback to launch context if present
+  const argProjectId = props.arguments.projectId?.trim();
+  const contextProjectId = argProjectId
+    ? parseInt(argProjectId)
+    : props.launchContext?.projectId;
 
   useEffect(() => {
     async function loadData() {
@@ -62,7 +62,11 @@ export default function CreateTask(
     if (!argTitle) {
       getSelectedText()
         .then((text) => {
-          if (text.trim()) setPrefillTitle(text.trim());
+          // Only prefill if there's actual selected text (non-empty, reasonable length)
+          const trimmed = text?.trim();
+          if (trimmed && trimmed.length > 0 && trimmed.length < 500) {
+            setPrefillTitle(trimmed);
+          }
         })
         .catch(() => {
           // No selected text available — leave title empty
@@ -179,7 +183,17 @@ export default function CreateTask(
             title="Description"
             placeholder="Optional description"
           />
-          <Form.Dropdown id="projectId" title="Project">
+          <Form.Dropdown
+            id="projectId"
+            title="Project"
+            defaultValue={
+              props.arguments.projectId
+                ? String(props.arguments.projectId)
+                : contextProjectId
+                  ? String(contextProjectId)
+                  : undefined
+            }
+          >
             {projects.map((project) => (
               <Form.Dropdown.Item
                 key={project.id}
@@ -194,12 +208,8 @@ export default function CreateTask(
             type={Form.DatePicker.Type.Date}
           />
           <Form.Dropdown id="priority" title="Priority" defaultValue="0">
-            {PRIORITIES.map((p) => (
-              <Form.Dropdown.Item
-                key={p.value}
-                value={p.value}
-                title={p.title}
-              />
+            {Object.entries(PRIORITY_MAP).map(([value, label]) => (
+              <Form.Dropdown.Item key={value} value={value} title={label} />
             ))}
           </Form.Dropdown>
           <Form.TagPicker id="labelIds" title="Labels">

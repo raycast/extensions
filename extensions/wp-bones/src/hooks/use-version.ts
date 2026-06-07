@@ -1,11 +1,13 @@
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { LocalStorage } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 type VersionAPIResponse = {
   version: string;
 };
 
-const INITIAL_VERSION_STORAGE = 170;
+const STORAGE_KEY = "wpbones-version";
+const INITIAL_VERSION_STORAGE = 1_007_000;
 
 /**
  * Custom hook to manage version checking and storage for the application.
@@ -23,44 +25,63 @@ export function useVersion() {
 
   const { isLoading, data, error } = useFetch<VersionAPIResponse>("https://wpbones.com/api/version");
 
-  const {
-    value: versionStorage,
-    setValue,
-    isLoading: isLoadingVersionStorage,
-  } = useLocalStorage("wpbones-version", INITIAL_VERSION_STORAGE);
+  const [versionStorage, setVersionStorage] = useState<number | undefined>(undefined);
+  const [isLoadingVersionStorage, setIsLoadingVersionStorage] = useState<boolean>(true);
+
+  // Read the stored version on mount. Wrapped in try/catch so a filesystem
+  // failure (e.g. ENOSPC on the Raycast cache journal) falls back to the
+  // initial version instead of crashing the menu-bar command.
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await LocalStorage.getItem<number>(STORAGE_KEY);
+        setVersionStorage(typeof raw === "number" ? raw : INITIAL_VERSION_STORAGE);
+      } catch {
+        setVersionStorage(INITIAL_VERSION_STORAGE);
+      } finally {
+        setIsLoadingVersionStorage(false);
+      }
+    })();
+  }, []);
+
+  function versionToNumber(ver: string): number {
+    const parts = ver.split(".").map((p) => {
+      const n = parseInt(p, 10);
+      return Number.isNaN(n) ? 0 : n;
+    });
+    return (parts[0] ?? 0) * 1_000_000 + (parts[1] ?? 0) * 1_000 + (parts[2] ?? 0);
+  }
 
   useEffect(() => {
-    if (data && versionStorage) {
-      const version = versionNumber();
-      if (version > versionStorage) {
+    if (data && versionStorage !== undefined) {
+      const num = versionToNumber(data.version);
+      // The old storage format ("170" for "1.7.0") cannot be deterministically
+      // decoded into major/minor/patch, so we cannot safely compare it against
+      // the new format. Treat any value below the minimum new-format value
+      // (1_000_000 = 1.0.0) as stale and silently adopt the current version as
+      // the baseline. The user may miss a single notification at the migration
+      // boundary, but never gets a false positive.
+      if (versionStorage < 1_000_000) {
+        LocalStorage.setItem(STORAGE_KEY, num).catch(() => {
+          // Best-effort write: ignore filesystem failures (e.g. ENOSPC).
+        });
+      } else if (num > versionStorage) {
         setIsThereNewVersion(true);
       }
       setVersion(data.version);
     }
   }, [data, versionStorage]);
 
-  /**
-   * Extracts and parses the version number from the data object.
-   *
-   * This function retrieves the version string from the `data` object,
-   * removes all dots from the version string, and converts the resulting
-   * string to an integer. If the version string is not present, it returns 0.
-   *
-   * @returns {number} The parsed version number as an integer, or 0 if the version is not available.
-   */
-  const versionNumber = (): number => (data?.version ? parseInt(data.version.replace(/\./g, ""), 10) : 0);
-
-  /**
-   * Updates the current version value and resets the new version flag.
-   *
-   * This function checks if both `data` and `version` are available. If they are,
-   * it sets the current version value using the `versionNumber` function and
-   * resets the `isThereNewVersion` flag to `false`.
-   */
-  const flushNewVersion = () => {
+  const flushNewVersion = async () => {
     if (data && version) {
       setIsThereNewVersion(false);
-      setValue(versionNumber());
+      const num = versionToNumber(data.version);
+      setVersionStorage(num);
+      try {
+        await LocalStorage.setItem(STORAGE_KEY, num);
+      } catch {
+        // Best-effort write: ignore filesystem failures (e.g. ENOSPC).
+      }
     }
   };
 

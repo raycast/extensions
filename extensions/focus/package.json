@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focus",
-  "title": "Focus - Website Blocker for Mac",
-  "description": "Raycast extension for Focus app",
+  "title": "Focus",
+  "description": "Control Focus App – Website and App Blocker for Mac",
   "icon": "focus-icon.png",
   "author": "ernest",
   "categories": [
@@ -122,6 +122,75 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Focus Status",
+      "description": "Returns whether a focus session or break is currently active, the active profile, and all available profiles"
+    },
+    {
+      "name": "start-focus",
+      "title": "Start Focus Session",
+      "description": "Starts a focus session. Optionally specify a profile name and/or duration in hours and minutes"
+    },
+    {
+      "name": "stop-focus",
+      "title": "Stop Focus Session",
+      "description": "Stops the currently active focus session"
+    },
+    {
+      "name": "take-break",
+      "title": "Take a Break",
+      "description": "Takes a break from the current focus session. Defaults to 5 minutes, or specify a custom duration"
+    }
+  ],
+  "ai": {
+    "instructions": "Use this extension to control the Focus app on macOS, which blocks distracting websites and apps. Always call get-status first to check the current state before starting or stopping sessions. Use the available profiles from get-status when the user mentions a profile by name.",
+    "evals": [
+      {
+        "input": "@focus Am I currently focusing?",
+        "mocks": {
+          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work", "Study"] }
+        },
+        "expected": [
+          { "callsTool": "get-status" },
+          { "meetsCriteria": "Confirms a focus session is active with the Work profile" }
+        ]
+      },
+      {
+        "input": "@focus Start a 25-minute focus session",
+        "mocks": {
+          "get-status": { "isFocusing": false, "isOnBreak": false, "activeProfile": null, "availableProfiles": ["Work"] },
+          "start-focus": "Focus session started (25m)."
+        },
+        "expected": [
+          { "callsTool": "get-status" },
+          { "callsTool": { "name": "start-focus", "arguments": { "minutes": 25 } } }
+        ]
+      },
+      {
+        "input": "@focus Stop my focus session",
+        "mocks": {
+          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work"] },
+          "stop-focus": "Focus session stopped."
+        },
+        "expected": [
+          { "callsTool": "get-status" },
+          { "callsTool": "stop-focus" }
+        ]
+      },
+      {
+        "input": "@focus Take a 10 minute break",
+        "mocks": {
+          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work"] },
+          "take-break": "10-minute break started."
+        },
+        "expected": [
+          { "callsTool": { "name": "take-break", "arguments": { "minutes": 10 } } }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",

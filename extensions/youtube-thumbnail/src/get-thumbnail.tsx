@@ -127,12 +127,7 @@ export default function Command() {
     let cancelled = false;
 
     async function loadHistoryThumbnails() {
-      if (urlHistory.length === 0) {
-        setHistoryThumbnailUrls({});
-        return;
-      }
-
-      const missingEntries = urlHistory.filter((entry) => !historyThumbnailUrls[entry.url]);
+      const missingEntries = urlHistory.filter((entry) => !(entry.url in historyThumbnailUrls));
       if (missingEntries.length === 0) {
         return;
       }
@@ -150,7 +145,7 @@ export default function Command() {
 
       setHistoryThumbnailUrls((currentUrls) => ({
         ...currentUrls,
-        ...Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry[1].length > 0)),
+        ...Object.fromEntries(entries),
       }));
     }
 

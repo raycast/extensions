@@ -12,6 +12,7 @@ export interface Preferences {
   bibtex_path?: string;
   csl_style?: string;
   cache_period?: string;
+  quote_pdf_path?: boolean;
 }
 
 export interface RefData {
@@ -136,7 +137,7 @@ ORDER BY "index" ASC
 `;
 
 const ALL_COLLECTIONS_SQL = `
-SELECT  collections.collectionName AS name
+SELECT DISTINCT collections.collectionName AS name
     FROM collections
 `;
 

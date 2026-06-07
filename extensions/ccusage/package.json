@@ -13,7 +13,9 @@
     "zzyfisher",
     "garrick_zhang",
     "pernielsentikaer",
-    "raulg"
+    "raulg",
+    "ridemountainpig",
+    "bendrucker"
   ],
   "license": "MIT",
   "commands": [
@@ -30,6 +32,7 @@
       "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
       "mode": "menu-bar",
+      "interval": "5m",
       "preferences": [
         {
           "name": "menuBarTitle",
@@ -46,6 +49,10 @@
             {
               "title": "Today's Cost",
               "value": "todayCost"
+            },
+            {
+              "title": "Weekly Cost",
+              "value": "weeklyCost"
             },
             {
               "title": "Monthly Cost",
@@ -68,8 +75,30 @@
               "value": "utilization"
             },
             {
+              "title": "Block Projection",
+              "value": "blockProjection"
+            },
+            {
               "title": "None",
               "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "menuBarIconStyle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Icon Style",
+          "description": "Choose whether the menu bar icon uses the extension artwork or a native monochrome Raycast icon",
+          "default": "color",
+          "data": [
+            {
+              "title": "Color",
+              "value": "color"
+            },
+            {
+              "title": "Monochrome",
+              "value": "monochrome"
             }
           ]
         },
@@ -147,6 +176,10 @@
         {
           "title": "Today Usage",
           "value": "today"
+        },
+        {
+          "title": "This Week",
+          "value": "week"
         },
         {
           "title": "Session Usage",

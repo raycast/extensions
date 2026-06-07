@@ -1,5 +1,24 @@
 # GIF Search Changelog
 
+## [Direct Favorites & Recents commands] - 2026-06-05
+
+- Added a "Browse Favorite GIFs" command that opens straight into your favorites
+- Added a "Browse Recent GIFs" command that opens straight into your recent GIFs
+- Both commands can be assigned their own hotkey or alias for one-keystroke access
+
+## [Add square GIF actions] - 2026-06-02
+
+- Added new actions to copy and paste center-cropped square GIFs on macOS
+
+## [Add Paste GIF Link action] - 2026-05-06
+
+- Added a new action to paste a GIF link into the front-most application
+- Added Windows shortcut support
+
+## [Fix] - 2026-04-23
+
+- Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
+
 ## [Add Klipy support] - 2026-02-05
 
 - Add Klipy support

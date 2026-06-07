@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, LocalStorage } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getProjects, project } from "./composables/FetchData";
-import { getTokens } from "./composables/WebClient";
+import { getTokens, onTokenChange } from "./composables/WebClient";
 
 const Actions = (props: { projectID: string; isBillable: boolean }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
@@ -88,26 +88,18 @@ const ProjectItem = (props: { project: project }) => {
 };
 
 export default function Command() {
-  const { data: token, revalidate } = usePromise(getTokens, [], {
-    onData: (data) => {
-      if (!data || data.isExpired()) {
-        revalidate();
-      }
-    },
-  });
+  const { data: token, revalidate: revalidateToken } = usePromise(getTokens);
+
+  useEffect(() => {
+    return onTokenChange(revalidateToken);
+  }, [revalidateToken]);
   const [searchText, setSearchText] = useState<string>("");
   const {
     data: projects,
     isLoading,
     pagination,
-    revalidate: updateSearch,
   } = useCachedPromise(getProjects, [token?.accessToken as string, searchText, 100], {
     execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!data || (data.length === 0 && !searchText)) {
-        updateSearch();
-      }
-    },
   });
 
   return (

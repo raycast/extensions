@@ -166,5 +166,8 @@
     "pc": "prettier --check .",
     "pw": "prettier --write .",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -18,6 +18,14 @@
       "type": "textfield",
       "required": false,
       "default": ""
+    },
+    {
+      "name": "kittenPath",
+      "title": "Kitten Path",
+      "description": "Path to the kitten binary. Leave empty to auto-detect from PATH and standard locations",
+      "type": "textfield",
+      "required": false,
+      "default": ""
     }
   ],
   "commands": [

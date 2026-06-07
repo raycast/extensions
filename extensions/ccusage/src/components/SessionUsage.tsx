@@ -80,7 +80,7 @@ export function SessionUsage() {
           <List.Item.Detail.Metadata.Label
             key={`${session.sessionId || "unknown"}-${index}`}
             title={session.sessionId}
-            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true })}`}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${session.lastActivity ? formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true }) : "unknown"}`}
           />
         ))}
       </List.Item.Detail.Metadata>

@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { createTask, getProjects, Project, withErrorHandling, getProjectIcon } from "./api";
+import { createTask, getProjects, Project, withErrorHandling, getProjectIcon, getProjectIndent } from "./api";
 
 function Command() {
   const [title, setTitle] = useState("");
@@ -87,7 +87,7 @@ function Command() {
             <Form.Dropdown.Item
               key={project.id}
               value={project.id}
-              title={`${getProjectIcon(project, true).source}  ${project.title}`}
+              title={`${getProjectIndent(project)}${getProjectIcon(project, true).source}  ${project.title}`}
             />
           ))}
         </Form.Dropdown>

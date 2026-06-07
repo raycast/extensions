@@ -108,3 +108,28 @@ export function estimateCost(tokens: number, pricePerMillion: number): string {
   if (cost < 1) return `$${cost.toFixed(3)}`;
   return `$${cost.toFixed(2)}`;
 }
+
+/**
+ * Parse release date string into a Date object.
+ * Handles "YYYY-MM-DD" and "YYYY-MM" formats.
+ * For "YYYY-MM", assumes the 1st day of the month.
+ * Returns null if the date is invalid or missing.
+ */
+export function parseReleaseDate(dateStr: string | undefined): Date | null {
+  if (!dateStr) return null;
+
+  // Match YYYY-MM-DD or YYYY-MM
+  const fullMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (fullMatch) {
+    const [, year, month, day] = fullMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const partialMatch = dateStr.match(/^(\d{4})-(\d{2})$/);
+  if (partialMatch) {
+    const [, year, month] = partialMatch;
+    return new Date(Number(year), Number(month) - 1, 1);
+  }
+
+  return null;
+}

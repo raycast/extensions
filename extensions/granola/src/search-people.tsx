@@ -12,7 +12,7 @@ import { mapColorToHex } from "./utils/iconMapper";
 type SortOption = PeopleSortOption;
 
 export default function Command() {
-  const { people, isLoading, hasError } = usePeople();
+  const { people, isLoading, hasError, error } = usePeople();
   const [sortBy, setSortBy] = useState<SortOption>("last-meeting");
 
   const sortedPeople = useMemo(() => sortPeople(people, sortBy), [people, sortBy]);
@@ -22,7 +22,7 @@ export default function Command() {
   }
 
   if (hasError) {
-    return <Unresponsive />;
+    return <Unresponsive context="search-people" error={error} />;
   }
 
   return (

@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { PrusaClient, createPrusaClientFromPreferences } from "./api/prusaClient";
-import { PrusaApiError } from "./api/errors";
+import { ERROR_MESSAGES, PrusaApiError } from "./api/errors";
 import { PrinterStatus, PrinterInfo } from "./api/types";
 import { logger } from "./utils/logger";
 
@@ -117,7 +117,11 @@ export default function Command() {
           await fetchPrinterInfo(client);
         }
       } catch (e) {
-        logger.error("Error in fetchStatus:", e);
+        if (e instanceof PrusaApiError && e.kind === "offline") {
+          logger.debug("Printer is offline");
+        } else {
+          logger.error("Error in fetchStatus:", e);
+        }
         const message =
           e instanceof PrusaApiError ? e.message : e instanceof Error ? e.message : "An unexpected error occurred";
 
@@ -139,12 +143,12 @@ export default function Command() {
         setError(message);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Error",
+          title: e instanceof PrusaApiError && e.kind === "offline" ? "Printer Offline" : "Error",
           message: message,
         });
 
         // Show network diagnostics if it's a connection error
-        if (e instanceof PrusaApiError && !e.statusCode) {
+        if (e instanceof PrusaApiError && !e.statusCode && e.kind !== "offline") {
           setError(
             `${message}\n\nTroubleshooting Steps:\n1. Check if printer is powered on\n2. Verify printer IP address (${getPreferenceValues<Preferences>().printerIP})\n3. Ensure you're on the same network\n4. Try accessing printer web interface`,
           );
@@ -162,7 +166,7 @@ export default function Command() {
     fetchStatus();
 
     const interval = setInterval(() => {
-      if (status?.printer.state.toUpperCase() !== "IDLE") {
+      if (status && status.printer.state.toUpperCase() !== "IDLE") {
         fetchStatus();
       }
     }, 5000);
@@ -282,10 +286,12 @@ export default function Command() {
   logger.debug("Rendering component with state:", { isLoading, hasError: !!error, hasStatus: !!status });
 
   if (error) {
+    const isPrinterOffline = error.startsWith(ERROR_MESSAGES.PRINTER_OFFLINE);
+
     return (
       <List
         isLoading={isLoading}
-        navigationTitle="Printer Status"
+        navigationTitle={isPrinterOffline ? "Printer Offline" : "Printer Status"}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
@@ -299,19 +305,14 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
-              <Action
-                title="Open Preferences"
-                icon={Icon.Gear}
-                onAction={() => open("raycast://preferences")}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
-              />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={() => open("raycast://preferences")} />
             </ActionPanel.Section>
           </ActionPanel>
         }
       >
         <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Connection Error"
+          icon={isPrinterOffline ? Icon.WifiDisabled : Icon.ExclamationMark}
+          title={isPrinterOffline ? "Printer Offline" : "Connection Error"}
           description={error}
           actions={
             <ActionPanel>

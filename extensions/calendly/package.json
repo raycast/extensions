@@ -5,6 +5,7 @@
   "description": "Quickly share your Calendly meeting links",
   "icon": "logo.png",
   "author": "eluce2",
+  "contributors": ["eric_dumesnil"],
   "license": "MIT",
   "commands": [
     {
@@ -53,5 +54,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

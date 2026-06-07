@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Raycast
+.raycast/
+
+# Claude Code
+.claude/
+
+# Subagent scratch
+.agents/
+
+# Promptfoo local artifacts
+.promptfoo/
+evals/results/

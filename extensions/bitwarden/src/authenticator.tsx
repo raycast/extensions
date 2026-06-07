@@ -32,7 +32,7 @@ import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSec
 import { Err, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
-import ComponentReverser from "~/components/ComponentReverser";
+import ComponentOrderer from "~/components/ComponentOrderer";
 import { useStateEffect } from "~/utils/hooks/useStateEffect";
 import { captureException } from "~/utils/development";
 
@@ -154,10 +154,10 @@ function ListItem({ item }: { item: Item }) {
         actions={
           <ActionPanel>
             {canGenerate ? (
-              <ComponentReverser reverse={preferences.primaryAction === "paste"}>
-                <CopyCodeAction />
-                <PasteCodeAction />
-              </ComponentReverser>
+              <ComponentOrderer first={preferences.primaryAction}>
+                <CopyCodeAction data-order-key="copy" />
+                <PasteCodeAction data-order-key="paste" />
+              </ComponentOrderer>
             ) : (
               <ConfirmAction onConfirm={() => setCanGenerate(true)} />
             )}

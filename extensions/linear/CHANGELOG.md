@@ -1,5 +1,15 @@
 # Linear Changelog
 
+## [Confirmation Fixes] - 2026-05-15
+
+- Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
+
+## [OAuth Client Unification] - 2026-04-04
+
+- Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
+- Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.
+- Fix `quick-add-comment-to-issue`: validate API result before treating the operation as successful (check `newComment` instead of the input `comment`).
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

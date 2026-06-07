@@ -11,12 +11,12 @@ export interface ColimaInstance {
 
 export interface ColimaCreateOptions {
   profile: string;
-  cpus?: number;
-  memory?: number;
-  disk?: number;
-  runtime?: "docker" | "containerd" | "incus";
-  vmType?: "qemu" | "vz" | "krunkit";
-  kubernetes?: boolean;
+  cpus: number;
+  memory: number;
+  disk: number;
+  runtime: "docker" | "containerd" | "incus";
+  vmType: "qemu" | "vz" | "krunkit";
+  kubernetes: boolean;
 }
 
 export interface ColimaTemplateDefaults {

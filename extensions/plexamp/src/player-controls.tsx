@@ -181,6 +181,10 @@ export default function Command() {
       throw new Error("This track is missing album metadata.");
     }
 
+    if (!resolvedTrack.librarySectionKey) {
+      throw new Error("This track is missing library section metadata.");
+    }
+
     const album = await getMetadataByRatingKey(resolvedTrack.parentRatingKey);
 
     if (!album || album.type !== "album") {
@@ -193,6 +197,7 @@ export default function Command() {
       context: {
         target: "album",
         ratingKey: album.ratingKey,
+        sectionKey: resolvedTrack.librarySectionKey,
       },
     });
   }, []);

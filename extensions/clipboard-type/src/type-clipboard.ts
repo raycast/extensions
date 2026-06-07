@@ -45,7 +45,9 @@ end tell
 
   // Execute the AppleScript using osascript directly
   try {
-    await runAppleScript(appleScriptContent);
+    await runAppleScript(appleScriptContent, {
+      timeout: 0, // runAppleScript defaults to 10s: typing long text + human cadence can exceed that
+    });
   } catch (error) {
     await showFailureToast(error);
   }

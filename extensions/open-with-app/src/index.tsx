@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   Action,
-  getSelectedFinderItems,
   getApplications,
   FileSystemItem,
   Application,
@@ -11,32 +10,10 @@ import {
   PopToRootType,
   popToRoot,
 } from "@raycast/api";
-import { useCachedPromise, useFrecencySorting, usePromise, runAppleScript, showFailureToast } from "@raycast/utils";
+import { useCachedPromise, useFrecencySorting, usePromise, showFailureToast } from "@raycast/utils";
 import { homedir } from "node:os";
-import { useEffect, useState } from "react";
-
-/**
- * Get selected items from Finder, even if Finder is not the frontmost
- * application. (Raycast's getSelectedFinderItems only works if Finder is the
- * frontmost application.)
- */
-async function getBackgroundFinderItems(): Promise<FileSystemItem[]> {
-  const paths = (await runAppleScript(`
-    tell application "Finder"
-      set selectedItems to selection
-      set selectedPaths to {}
-     
-      repeat with selectedItem in selectedItems
-        set selectedItemPath to POSIX path of (selectedItem as text)
-        set end of selectedPaths to selectedItemPath
-      end repeat
-     
-      return selectedPaths as list
-    end tell
-  `)) as string;
-  if (paths.length === 0) return [];
-  return paths.split(", ").map((path) => ({ path }));
-}
+import { useEffect, useRef, useState } from "react";
+import { PROVIDERS, resolveActiveProvider } from "./file-managers";
 
 /**
  * Get the extensions of the selected items.
@@ -96,10 +73,12 @@ function makeTitle(items: FileSystemItem[]) {
 }
 
 function ApplicationListItem({
+  id,
   app,
   items,
   onAction,
 }: {
+  id: string;
   app: Application;
   items: FileSystemItem[];
   onAction?: (app: Application) => void;
@@ -112,6 +91,7 @@ function ApplicationListItem({
   }
   return (
     <List.Item
+      id={id}
       title={app.name}
       icon={{ fileIcon: app.path }}
       actions={
@@ -124,12 +104,19 @@ function ApplicationListItem({
 }
 
 export default function Command() {
-  // get selected items from Finder
-  const { data: items = [], isLoading: isLoadingSelection } = usePromise(() =>
-    getSelectedFinderItems()
-      .catch(getBackgroundFinderItems)
-      .catch(() => void showFailureToast("Error getting Finder selection")),
-  );
+  // detect the frontmost file manager and get its current selection
+  const { data: selection, isLoading: isLoadingSelection } = usePromise(async () => {
+    const provider = await resolveActiveProvider();
+    try {
+      const paths = await provider.getSelectedPaths();
+      return { provider, items: paths.map((path) => ({ path }) as FileSystemItem) };
+    } catch (error) {
+      void showFailureToast(error, { title: `Error getting selection from ${provider.name}` });
+      return { provider, items: [] as FileSystemItem[] };
+    }
+  });
+  const items = selection?.items ?? [];
+  const providerName = selection?.provider.name ?? PROVIDERS[0].name;
 
   // call getApplications for each selected item and return the intersection
   const { data: apps = [], isLoading: isLoadingApplications } = usePromise(
@@ -165,7 +152,7 @@ export default function Command() {
 
   const isLoading = isLoadingSelection || isLoadingApplications;
 
-  const placeholder = !isLoading && items.length === 0 ? "No selected item in Finder..." : makeTitle(items);
+  const placeholder = !isLoading && items.length === 0 ? `No selected item in ${providerName}...` : makeTitle(items);
 
   // implement custom filtering to support keeping the Recommended Apps section always on top of the Other Apps section
   const [searchText, setSearchText] = useState("");
@@ -178,19 +165,41 @@ export default function Command() {
     filterOtherList(sortedOtherApps.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, isLoading]);
 
+  // Seed the selection to the first Recommended app on initial load and on
+  // search changes. Without this, Raycast 2 auto-selects the first item of
+  // "Other Applications". We don't sync selectedItemId from onSelectionChange
+  // so Raycast handles arrow-key navigation internally without re-applying the
+  // prop on every selection change (which caused a one-row scroll on the first
+  // arrow press).
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
+  const lastDefaultFirstIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const firstId = filteredRecommendedList?.[0]?.path ?? filteredOtherList?.[0]?.path;
+    if (firstId !== lastDefaultFirstIdRef.current) {
+      lastDefaultFirstIdRef.current = firstId;
+      setSelectedItemId(firstId);
+    }
+  }, [filteredRecommendedList, filteredOtherList]);
+
   return (
-    <List filtering={false} onSearchTextChange={setSearchText} isLoading={isLoading} searchBarPlaceholder={placeholder}>
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      searchBarPlaceholder={placeholder}
+      selectedItemId={selectedItemId}
+    >
       {items.length > 0 && !isLoading && filteredRecommendedList.length > 0 && (
         <List.Section title="Recommended Applications">
           {filteredRecommendedList.map((app) => (
-            <ApplicationListItem key={app.path} app={app} items={items} onAction={visitScope} />
+            <ApplicationListItem id={app.path} key={app.path} app={app} items={items} onAction={visitScope} />
           ))}
         </List.Section>
       )}
       {items.length > 0 && !isLoading && filteredOtherList.length > 0 && (
         <List.Section title="Other Applications">
           {filteredOtherList.map((app) => (
-            <ApplicationListItem key={app.path} app={app} items={items} onAction={visitAll} />
+            <ApplicationListItem id={app.path} key={app.path} app={app} items={items} onAction={visitAll} />
           ))}
         </List.Section>
       )}

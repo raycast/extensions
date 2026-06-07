@@ -6,7 +6,8 @@
   "icon": "browser-icon.png",
   "author": "clins1994",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "elfitaflores"
   ],
   "platforms": [
     "macOS"
@@ -21,6 +22,12 @@
       "title": "Set Default Browser",
       "description": "Set your default browser",
       "mode": "view"
+    },
+    {
+      "name": "open-default",
+      "title": "Open Default Browser",
+      "description": "Open your default browser",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

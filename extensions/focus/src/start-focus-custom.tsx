@@ -1,6 +1,6 @@
 import { Toast, showToast, showHUD, LaunchProps } from "@raycast/api";
 import { getProfileNames, startFocusCustom, getActiveProfileName } from "./utils";
-import { ensureFocusIsRunning } from "./helpers";
+import { ensureFocusIsInstalled } from "./helpers";
 
 interface FocusArguments {
   hours?: number;
@@ -24,7 +24,7 @@ export default async function Command(props: LaunchProps<{ arguments: FocusArgum
     title: "Starting Focus (Custom Duration)...",
   });
 
-  if (!(await ensureFocusIsRunning())) {
+  if (!(await ensureFocusIsInstalled())) {
     return;
   }
 

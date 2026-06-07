@@ -114,7 +114,7 @@ function getHistoryQuery(searchText?: string, limit = 100) {
         .filter((word) => word.length > 0)
         .map((term) => {
           const escapedTerm = escapeSQLLikePattern(term);
-          return `(url LIKE "%${escapedTerm}%" ESCAPE '\\' OR title LIKE "%${escapedTerm}%" ESCAPE '\\')`;
+          return `(url LIKE '%${escapedTerm}%' ESCAPE '\\' OR title LIKE '%${escapedTerm}%' ESCAPE '\\')`;
         })
         .join(" AND ")
     : undefined;

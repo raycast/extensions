@@ -21,6 +21,7 @@ type PullRequestListItemProps = {
   pullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
   mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  showAuthor?: boolean;
 };
 
 export default function PullRequestListItem({
@@ -29,35 +30,33 @@ export default function PullRequestListItem({
   mutateList,
   sortQuery,
   setSortQuery,
+  showAuthor = false,
 }: PullRequestListItemProps & SortActionProps) {
   const updatedAt = new Date(pullRequest.updatedAt);
 
-  const numberOfComments = useMemo(() => getNumberOfComments(pullRequest), []);
-  const author = getPullRequestAuthor(pullRequest);
+  const numberOfComments = useMemo(() => getNumberOfComments(pullRequest), [pullRequest]);
+  const author = showAuthor ? getPullRequestAuthor(pullRequest) : null;
   const status = getPullRequestStatus(pullRequest);
   const reviewDecision = getReviewDecision(pullRequest.reviewDecision);
 
   const accessories: List.Item.Accessory[] = [
     {
-      date: updatedAt,
+      text: format(updatedAt, "MMM dd"),
       tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
-    },
-    {
-      icon: author.icon,
-      tooltip: `Author: ${author.text}`,
     },
   ];
 
-  if (reviewDecision) {
-    accessories.unshift(reviewDecision);
-  }
+  accessories.unshift({
+    text: {
+      value: `${numberOfComments}`,
+      color: numberOfComments > 0 ? Color.PrimaryText : Color.SecondaryText,
+    },
+    icon: Icon.Bubble,
+  });
 
-  if (numberOfComments > 0) {
-    accessories.unshift({
-      text: `${numberOfComments}`,
-      icon: Icon.Bubble,
-    });
-  }
+  accessories.unshift(
+    reviewDecision ?? { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "No review requested" },
+  );
 
   if (pullRequest.repository.autoMergeAllowed && pullRequest.autoMergeRequest) {
     accessories.unshift({ tag: { value: "Auto-merge", color: Color.Yellow } });
@@ -70,6 +69,13 @@ export default function PullRequestListItem({
     if (checkStateAccessory) {
       accessories.unshift(checkStateAccessory);
     }
+  }
+
+  if (author) {
+    accessories.splice(accessories.length - 1, 0, {
+      icon: author.icon,
+      tooltip: `Author: ${author.text}`,
+    });
   }
 
   const keywords = [`${pullRequest.number}`];

@@ -88,6 +88,15 @@ export class TimeoutError extends DisplayableError {
   }
 }
 
+export class AuthError extends DisplayableError {
+  name = "AuthError";
+
+  constructor(action: Toast.ActionOptions, stack?: string) {
+    super("Authentication error. Please log out and log back in.", stack);
+    this.action = action;
+  }
+}
+
 /**
  * These errors are shown buz should not be send to raycast
  */
@@ -98,6 +107,7 @@ const uncapturedErrors = [
   TimeoutError,
   CLINotFoundError,
   TouchIDVerificationFailed,
+  AuthError,
 ];
 
 /**

@@ -1,5 +1,10 @@
 # Betaseries Changelog
 
+## [Episode Copy Action and Menu Bar Removal] - 2026-05-14
+
+- Added an action to copy the show title together with the season and episode number directly from an episode.
+- Removed the **New Episodes Menu Bar** command for now because its episode update behavior was not reliable enough.
+
 ## [Menu Bar Background Refresh Fix] - 2026-03-12
 
 - Fixed an error when marking an episode as watched from **My Shows** while **New Episodes Menu Bar** had not been activated yet.

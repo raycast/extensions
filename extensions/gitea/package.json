@@ -1,0 +1,279 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitea",
+  "title": "Gitea",
+  "description": "Check your notifications and manage issues and pull requests.",
+  "icon": "logo/gitea.png",
+  "author": "mitsimi",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Gitea URL",
+      "description": "URL to your Gitea instance, eg. https://cloud.gitea.com.",
+      "type": "textfield",
+      "placeholder": "https://cloud.gitea.com",
+      "required": true
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Your Gitea Access Token",
+      "type": "password",
+      "placeholder": "Enter your Access Token here",
+      "required": true
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "The date format to use in the UI.",
+      "type": "dropdown",
+      "label": "",
+      "default": "YYYY-MM-DD",
+      "required": false,
+      "data": [
+        {
+          "title": "YYYY-MM-DD",
+          "value": "YYYY-MM-DD"
+        },
+        {
+          "title": "MM/DD/YYYY",
+          "value": "MM/DD/YYYY"
+        },
+        {
+          "title": "DD.MM.YYYY",
+          "value": "DD.MM.YYYY"
+        }
+      ]
+    },
+    {
+      "name": "editorVSCode",
+      "title": "Clone Editors",
+      "description": "Show Visual Studio Code in clone actions",
+      "type": "checkbox",
+      "label": "Visual Studio Code",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "editorCursor",
+      "title": "",
+      "description": "Show Cursor in clone actions",
+      "type": "checkbox",
+      "label": "Cursor",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "editorZed",
+      "title": "",
+      "description": "Show Zed in clone actions",
+      "type": "checkbox",
+      "label": "Zed",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "editorIntelliJ",
+      "title": "",
+      "description": "Show IntelliJ IDEA in clone actions",
+      "type": "checkbox",
+      "label": "IntelliJ IDEA",
+      "default": true,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "issue-mine",
+      "title": "My Issues",
+      "subtitle": "Gitea",
+      "description": "List issues created by you, assigned to you, or mentioning you",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "includeAssigned",
+          "description": "Show issues assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "default": true
+        },
+        {
+          "name": "includeMentioned",
+          "description": "Show issues where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "description": "Show recently closed issues",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Gitea",
+      "description": "List all unread notifications",
+      "mode": "view"
+    },
+    {
+      "name": "notifications-menu-bar",
+      "title": "Notifications Menu Bar",
+      "subtitle": "Gitea",
+      "description": "Show unread notification count in menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "my-pull-requests",
+      "title": "My Pull Requests",
+      "subtitle": "Gitea",
+      "description": "List pull requests created by you, assigned to you, or mentioning you",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeCreated",
+          "description": "Show pull requests you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "includeAssigned",
+          "description": "Show pull requests assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "default": true
+        },
+        {
+          "name": "includeMentioned",
+          "description": "Show pull requests where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "includeReviewRequested",
+          "description": "Show pull requests where you are requested to review",
+          "type": "checkbox",
+          "required": false,
+          "label": "Review Requests",
+          "default": true
+        },
+        {
+          "name": "includeReviewed",
+          "description": "Show pull requests you reviewed",
+          "type": "checkbox",
+          "required": false,
+          "label": "Reviewed",
+          "default": false
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "description": "Show recently closed pull requests",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
+        },
+        {
+          "name": "includeOwnedRepositories",
+          "description": "Show pull requests in repositories you own",
+          "type": "checkbox",
+          "required": false,
+          "label": "Owned Repositories",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "issue-search",
+      "title": "Search Issues",
+      "subtitle": "Gitea",
+      "description": "Search issues across repositories",
+      "mode": "view"
+    },
+    {
+      "name": "issue-create",
+      "title": "Create Issue",
+      "subtitle": "Gitea",
+      "description": "Create an issue in a repository",
+      "mode": "view"
+    },
+    {
+      "name": "repository-explore",
+      "title": "Explore Repositories",
+      "subtitle": "Gitea",
+      "description": "Explore Repositories available to you",
+      "mode": "view"
+    },
+    {
+      "name": "repository-mine",
+      "title": "My Repositories",
+      "subtitle": "Gitea",
+      "description": "Shows your repositories",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.19",
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.1",
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.6",
+    "swagger2openapi": "^7.0.8",
+    "openapi-typescript": "^7.13.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "check": "npm run lint && npm run check:type && npm run test",
+    "check:type": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "gen:langs": "tsx scripts/fetch-langs.ts",
+    "gen:types": "tsx scripts/generate-gitea-types.ts"
+  }
+}

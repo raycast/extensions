@@ -4,7 +4,7 @@
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
 
-## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
 
 - Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
 

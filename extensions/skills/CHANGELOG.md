@@ -1,4 +1,133 @@
-# Changelog
+# Skills Changelog
+
+## [Copy Skill Contents] - 2026-06-06
+
+- Add a "Copy Skill Contents" action to copy a skill's full SKILL.md to the clipboard from search results, skill details, and installed skills, so it can be pasted into tools like ChatGPT or Claude without installing the skill
+- Move the "Copy Install Command" action to `⌘ ⇧ I` so the canonical copy shortcut (`⌘ ⇧ C`) copies the skill contents
+
+## [Fix Confirmation Dialog Icon] - 2026-06-05
+
+- Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
+
+## [Fix Global Skill Updates] - 2026-06-04
+
+- Run skill update actions against global installs, matching the global skill list shown in Manage Skills
+
+## [Default Agents Preference] - 2026-06-01
+
+- Add a "Default Agents" preference to pre-select agents when installing a skill, so frequently-used agents (e.g. Claude Code) are checked automatically without manual selection each time
+
+## [Show Installed Skill Audit Details] - 2026-05-20
+
+- Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
+- Show security audit statuses, audit links, and audit actions in installed skill details
+
+## [Ask Skills AI Extension] - 2026-05-12
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
+## [Fix Stale Search Results] - 2026-05-12
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
+## [Standardize Open Actions] - 2026-05-12
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
+## [Fix Support Directory Initialization] - 2026-05-11
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
+## [Add Newly Supported Agents] - 2026-05-05
+
+- Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal
+
+## [Improve Installed Indicators, Source Matching & Refresh] - 2026-05-05
+
+- Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
+- Show the skill source (`owner/repo`) as the subtitle in "Search Skills" and "Manage Skills" to better distinguish skills between them
+- Move "Search Skills" result details out of the side panel and into a full-screen detail view
+- Detect skills with the same `skillId` installed from different sources. Show a warning indicator and rename the "Install Skill" action to "Replace Installed Skill" for clarity on the outcome
+- Immediately refresh installed indicators in "Search Skills" after installing or replacing a skill
+- Add "Refresh Installed Skills" actions with Cmd+R in "Manage Skills"
+- Consolidate shared install, remove, and update action handling for more consistent confirmations, toasts, and error messages
+
+## [Show Last Updated Date in Search Results] - 2026-04-30
+
+- Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
+
+## [Add Repository Shortcut] - 2026-04-30
+
+- Add a keyboard shortcut to open a skill's repository from the action panel
+
+## [Fix Windows bunx Fallback] - 2026-04-30
+
+- Fix the Skills CLI throwing `'"bunx"' is not recognized as an internal or external command` on Windows when Bun is not installed; the extension now correctly falls back to `npx` as intended
+
+## [Add bunx support] - 2026-04-28
+
+- Added initial support for `bunx`, it is only called optimally if `npx` is not found
+
+## [Add Skills CLI Telemetry Opt-Out] - 2026-04-28
+
+- Add an extension preference to opt out of anonymous usage telemetry collected by the underlying Skills CLI when commands are run from Raycast
+- Pass `DISABLE_TELEMETRY=1` to all Skills CLI invocations when the preference is enabled
+- Trim the optional GitHub token preference before using it for repository stats and update checks
+
+## [Fix Homebrew `node@` Resolution and add Custom `npx` Validation] - 2026-04-23
+
+- Detect versioned Homebrew Node formula bins like `/opt/homebrew/opt/node@24/bin` so the Skills CLI can find `node` when `npx` comes from Homebrew, while still preferring Node installs from version managers first
+- Validate the optional "Custom npx Path" override before running the CLI and show a clearer error detail when the configured path is incorrect
+
+## [Fix Silent Auto-Update on Load] - 2026-04-21
+
+- Stop silently auto-updating outdated skills when opening Manage Skills
+- Fix the orange "Update available" highlight that stopped appearing for outdated skills
+
+## [Show Installed Badge in Search Results] - 2026-04-20
+
+- Show a green "Installed" tag on search results for skills that are already installed locally
+
+## [Update Individual Skills] - 2026-04-17
+
+- Add per-skill update action using `skills update <name>` (requires `skills` CLI 1.5.0+), so a single outdated skill can be updated without touching the others
+
+## [Reduce Complexity] - 2026-04-11
+
+- Remove test infrastructure (vitest, test stubs, all test files) that added maintenance burden without meaningful coverage
+- Inline over-abstracted `CommandStates` components back into command files
+- Restore internal functions to private scope
+
+## [Follow Up on Maintainability] - 2026-04-03
+
+- Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
+- Standardize `search` and `manage` empty/error states with shared retry handling and clearer recovery copy
+- Document the maintainer validation workflow in `README.md` and add a manual smoke checklist in `TESTING.md`
+
+## [Improve Maintainability] - 2026-04-02
+
+- Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension
+- Extract search and skill content loading logic into reusable helpers for easier testing and maintenance
+- Improve empty states in the search and manage flows while keeping the current upstream behavior intact
+
+## [Remove Trending Skills Command] - 2026-03-31
+
+- Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills
+
+## [Agent-Specific Skill Installation] - 2026-03-31
+
+- Support installing skills to specific agents instead of all agents at once
+- Show all 43 supported agents with already-installed agents marked as read-only
+
+## [Fix `fnm` macOS Path Resolution] - 2026-03-28
+
+- Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
+- Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
+
+## [Agent-Specific Skill Removal] - 2026-03-27
+
+- Support removing skills from specific agents instead of all agents at once
+- Show an agent picker form with checkboxes when a skill is installed in multiple agents
 
 ## [Lock File Metadata] - 2026-03-23
 

@@ -46,7 +46,18 @@ export function useTagPicker({ tags, initialTagIds = [] }: UseTagPickerOptions):
   function commitNewTag(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
-    if (tags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
+
+    // If the typed name matches an existing tag, select it instead of creating a new one.
+    const existingTag = tags.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
+    if (existingTag) {
+      if (!selectedTagIdsRef.current.includes(existingTag.id)) {
+        const next = [...selectedTagIdsRef.current, existingTag.id];
+        selectedTagIdsRef.current = next;
+        setSelectedTagIds(next);
+      }
+      return;
+    }
+
     if (newTagItemsRef.current.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
 
     const id = `${NEW_TAG_PREFIX}${trimmed}`;

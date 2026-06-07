@@ -69,6 +69,13 @@
       "title": "Arc",
       "path": "/Library/Application Support/Arc/User Data",
       "icon": "arc.png"
+    },
+    {
+      "app": "Vivaldi",
+      "type": "CHROMIUM",
+      "title": "Vivaldi",
+      "path": "/Library/Application Support/Vivaldi",
+      "icon": "vivaldi.png"
     }
   ],
   "firefox": [

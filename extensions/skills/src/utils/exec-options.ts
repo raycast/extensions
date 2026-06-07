@@ -26,7 +26,7 @@ export const getExecOptions = async () => {
 
     if (!process.env.FNM_DIR) {
       const fnmBaseDir = await resolveFnmBaseDir(home);
-      if (fnmBaseDir && (await pathExists(fnmBaseDir))) {
+      if (fnmBaseDir) {
         env.FNM_DIR = fnmBaseDir;
       }
     }

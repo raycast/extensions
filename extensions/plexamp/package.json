@@ -59,6 +59,13 @@
       "subtitle": "Plexamp",
       "description": "Search songs, albums, and artists in the selected Plex music library.",
       "mode": "view"
+    },
+    {
+      "name": "recently-played",
+      "title": "Recently Played",
+      "subtitle": "Plexamp",
+      "description": "Browse recently played tracks from the selected Plex music library.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -94,6 +101,20 @@
       ]
     },
     {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Album View Grid Columns",
+      "default": "4",
+      "description": "Number of columns in album grid view.",
+      "data": [
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "5", "value": "5" },
+        { "title": "6", "value": "6" }
+      ]
+    },
+    {
       "name": "menuBarFormat",
       "type": "textfield",
       "required": false,
@@ -105,6 +126,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.3",
     "fast-xml-parser": "^5.2.5"
   },
   "devDependencies": {

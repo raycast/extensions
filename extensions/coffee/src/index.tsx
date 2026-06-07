@@ -35,13 +35,7 @@ function useCaffeinateInfo(execute: boolean) {
         return { isRunning: false, timeRemaining: null };
       }
 
-      // Filter out keep-alive "caffeinate -u" processes used to reset the
-      // idle timer on battery (see status.ts), so they don't interfere with
-      // the time-remaining calculation.
-      const lines = stdout.split("\n").filter((l) => !l.includes("caffeinate -u"));
-      if (lines.length === 0) {
-        return { isRunning: false, timeRemaining: null };
-      }
+      const lines = stdout.split("\n");
       const [etime, ...cmdArgs] = lines[lines.length - 1].trim().split(/\s+/);
 
       const secondsRunning = parseEtime(etime);
@@ -79,14 +73,15 @@ export default function Command(props: LaunchProps) {
 
   const extraInfoStr = data.timeRemaining;
 
-  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState(caffeinateStatus);
+  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
+  const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
 
   useEffect(() => {
-    setLocalCaffeinateStatus(caffeinateStatus);
+    setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
 
   const handleCaffeinateStatus = async () => {
-    if (localCaffeinateStatus) {
+    if (displayCaffeinateStatus) {
       setLocalCaffeinateStatus(false);
       await mutate(stopCaffeinate({ menubar: true, status: true }), {
         optimisticUpdate: () => ({ isRunning: false, timeRemaining: null }),
@@ -102,7 +97,7 @@ export default function Command(props: LaunchProps) {
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !localCaffeinateStatus && !isLoading) {
+  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
     return null;
   }
 
@@ -110,17 +105,17 @@ export default function Command(props: LaunchProps) {
     <MenuBarExtra
       isLoading={caffeinateLoader}
       icon={
-        localCaffeinateStatus
+        displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
           : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (
         <>
-          <MenuBarExtra.Section title={`Your mac is ${localCaffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
-          {localCaffeinateStatus && extraInfoStr && <MenuBarExtra.Section title={extraInfoStr} />}
+          <MenuBarExtra.Section title={`Your mac is ${displayCaffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
+          {displayCaffeinateStatus && extraInfoStr && <MenuBarExtra.Section title={extraInfoStr} />}
           <MenuBarExtra.Item
-            title={localCaffeinateStatus ? "Decaffeinate" : "Caffeinate"}
+            title={displayCaffeinateStatus ? "Decaffeinate" : "Caffeinate"}
             onAction={handleCaffeinateStatus}
           />
         </>

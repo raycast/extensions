@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   closeMainWindow,
+  Color,
   environment,
   Icon,
   Keyboard,
@@ -17,6 +18,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance, Server } from "../types";
 import { joinServer, launchInstance } from "../utils/instance";
+import { pingServer } from "../utils/ping";
 import {
   isPrismLauncherInstalled,
   loadFavoriteInstanceIds,
@@ -68,8 +70,18 @@ export default function JoinServer() {
       favorite: favoriteAddresses.includes(server.address),
     }));
 
-    // Sort servers with favorites at the top
+    // Show the list immediately, then fill in status badges as pings resolve
     setServers(sortServers(serversWithFavorites, favoriteAddresses));
+
+    for (const server of serversWithFavorites) {
+      pingServer(server).then((pingResult) => {
+        setServers((prev) => {
+          if (!prev) return prev;
+          const updated = prev.map((s) => (s.address === server.address ? { ...s, ...pingResult } : s));
+          return sortServers(updated, favoriteAddresses);
+        });
+      });
+    }
   };
 
   const revalidateInstances = async () => {
@@ -106,7 +118,19 @@ export default function JoinServer() {
               key={`server-${index}`}
               title={server.name}
               subtitle={server.address}
-              accessories={server.favorite ? [{ icon: Icon.Star }] : []}
+              accessories={[
+                ...(server.online === true
+                  ? [
+                      {
+                        tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
+                        tooltip: server.version,
+                      },
+                    ]
+                  : server.online === false
+                    ? [{ tag: { value: "Offline", color: Color.Red } }]
+                    : [{ tag: { value: "Checking…", color: Color.SecondaryText } }]),
+                ...(server.favorite ? [{ icon: Icon.Star }] : []),
+              ]}
               icon={
                 server.icon
                   ? {

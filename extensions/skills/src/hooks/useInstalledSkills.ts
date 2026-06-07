@@ -1,31 +1,20 @@
-import { useCachedPromise } from "@raycast/utils";
-import { listInstalledSkills, checkForUpdates, readSkillLock } from "../utils/skills-cli";
-import { stripGitSuffix } from "../shared";
+import { useCachedPromise, type MutatePromise } from "@raycast/utils";
+import { checkForUpdates, getInstalledSkillsWithLock } from "../utils/installed-skills";
+import { type InstalledSkill } from "../shared";
 
-async function fetchSkillsWithUpdateStatus() {
-  const [skills, updatable, lockEntries] = await Promise.all([
-    listInstalledSkills(),
-    checkForUpdates().catch(() => [] as string[]),
-    readSkillLock(),
+export type MutateSkills = MutatePromise<InstalledSkill[] | undefined>;
+
+async function fetchSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
+  const [skills, updatable] = await Promise.all([
+    getInstalledSkillsWithLock(),
+    checkForUpdates().catch((): string[] => []),
   ]);
   const updatableSet = new Set(updatable);
-  return skills.map((skill) => {
-    const lock = lockEntries[skill.name];
-    return {
-      ...skill,
-      hasUpdate: updatableSet.has(skill.name),
-      ...(lock && {
-        source: lock.source,
-        sourceUrl: lock.sourceUrl ? stripGitSuffix(lock.sourceUrl) : undefined,
-        installedAt: lock.installedAt,
-        updatedAt: lock.updatedAt,
-      }),
-    };
-  });
+  return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
 }
 
 export function useInstalledSkills() {
-  const { data, isLoading, error, revalidate } = useCachedPromise(fetchSkillsWithUpdateStatus, [], {
+  const { data, isLoading, error, revalidate, mutate } = useCachedPromise(fetchSkillsWithUpdateStatus, [], {
     keepPreviousData: true,
   });
 
@@ -34,5 +23,6 @@ export function useInstalledSkills() {
     isLoading,
     error,
     revalidate,
+    mutate,
   };
 }

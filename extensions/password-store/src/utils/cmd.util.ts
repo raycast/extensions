@@ -1,29 +1,38 @@
 import { getPreferenceValues } from "@raycast/api";
-import { exec, execFile } from "child_process";
+import { exec, execFile, spawn } from "child_process";
 import { promisify } from "node:util";
 
-/** Executes `pass` executable directly without spawing a shell.  */
+/** Executes `pass` executable directly. Uses `spawn` when stdin input is needed, `execFile` otherwise. */
 export const runPassCmd = async (args: string[], input?: string): Promise<string> => {
+  const preferences = getPreferenceValues();
+  const paths = [...(preferences.ADDITIONAL_PATH?.split(":") || []), "/opt/homebrew/bin"].filter(Boolean).join(":");
+  const env = {
+    ...process.env,
+    PATH: `/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${process.env.PATH}:${paths}`,
+  };
+
+  if (input !== undefined) {
+    return new Promise((resolve, reject) => {
+      const child = spawn("pass", args, { env });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.on("data", (data: Buffer) => (stdout += data.toString()));
+      child.stderr.on("data", (data: Buffer) => (stderr += data.toString()));
+      child.on("error", reject);
+      child.on("close", (code) => {
+        if (code === 0) resolve(stdout);
+        else reject(new Error(`pass exited with code ${code}: ${stderr}`));
+      });
+      child.stdin.write(input);
+      child.stdin.end();
+    });
+  }
+
   try {
     const execFileAsync = promisify(execFile);
-    const preferences = getPreferenceValues();
-
-    // Needed for the 'pass' command to work on M1 Mac
-    const paths = [...(preferences.ADDITIONAL_PATH?.split(":") || []), "/opt/homebrew/bin"].filter(Boolean).join(":");
-
-    const env = {
-      ...process.env,
-      PATH: `/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${process.env.PATH}:${paths}`,
-    };
-
-    const { stdout } = await execFileAsync("pass", args, {
-      env,
-      ...(input ? { input } : {}),
-    });
-
+    const { stdout } = await execFileAsync("pass", args, { env });
     return stdout;
   } catch (error) {
-    // Log the error and rethrow it
     console.error("Error executing command:", error);
     throw error;
   }

@@ -1,5 +1,54 @@
 # Todoist Changelog
 
+## [Include deadlines in Today] - 2026-05-20
+
+- Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
+
+## [Menu bar priority sorting] - 2026-05-18
+
+- **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.
+- **Toggle from preferences**: A new **Sort tasks by priority** checkbox in the menu bar command preferences lets you turn priority sorting off and fall back to the previous default ordering. Enabled by default.
+
+## [Reduce Menu Bar sync size] - 2026-05-28
+
+- Reduced Menu Bar Tasks memory usage by syncing only the Todoist resources used by the menu bar.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a shortcut to create Raycast quicklinks from Todoist views.
+- Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
+
+## [Filter completion UI and incremental reminder sync] - 2026-05-04
+
+- **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
+- **Filter views after completing a task**: Filter results are merged with cached items by id only; tasks no longer present in sync cache (for example a completed non-recurring task) are omitted instead of falling back to stale filter API rows, so the list updates immediately without reopening the extension.
+- **Merge incremental Sync reminder updates**: Todoist’s Sync API often returns **partial** `reminders` arrays on incremental sync. The extension now merges those deltas into the local cache (`mergeSyncedReminders` in `updateTask` and `closeTask`) instead of replacing the whole list, so editing one task’s schedule or reminders no longer clears other tasks’ alarm accessories until a full reload. **`addReminder`** still uses `sync_token: "*"` for the requested resource type, so its `reminders` response remains a **full replace** of the cached list (avoids stale rows after deletes elsewhere).
+
+## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
+
+- **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.
+- **Filter project accessory**: Tasks shown in filter views now include the project/section accessory tag (like Today view), making project context visible directly in filter results.
+- **Recurrence update correctness**: In task actions, repeat updates now build from the latest cached task snapshot when available, reducing stale due payload issues.
+- **Hourly reminder safety**: The follow-up "at time of task" reminder check for hourly recurrence now runs only when the synced task due value is a datetime (contains time), avoiding incorrect reminder handling for all-day dates.
+- **Update callback context**: Extended the `updateTask` sync callback context to include `updatedTask`, allowing post-update logic to use the server-synced task shape safely.
+
+## [Scheduling, repeat options, and sync reliability] - 2026-04-30
+
+- **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.
+- **Pick date**: when you set a **due time** (not an all-day date), the extension can add Todoist’s **“at time of task”** relative reminder if you don’t already have one; **hourly** repeat rules get the same treatment.
+- **Accurate list after edits**: Todoist sync results merge onto the **latest** cached data so chained updates (e.g. due then reminder) don’t leave wrong or missing icons until you restart.
+- **Clear due date**: clearing the due date also applies **reminder** changes from the server so the alarm accessory matches Todoist.
+- **Complete recurring tasks**: completing uses the sync response so the **next occurrence** appears instead of the task vanishing until a full reload.
+- **Task details**: shows **Repeat** details when the task is recurring.
+
+## [Fix group and sort actions in filter views] - 2026-04-27
+
+- In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).
+- Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
+
+## [Show deadline as how many days remains] - 2026-03-31
+- The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
+
 ## [Fix reminders and Create Task NLP parsing] - 2026-03-06
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.

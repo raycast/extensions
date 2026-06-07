@@ -18,7 +18,8 @@
   "author": "theo_daguier",
   "contributors": [
     "pernielsentikaer",
-    "ridemountainpig"
+    "ridemountainpig",
+    "TurboCoder13"
   ],
   "categories": [
     "Productivity",
@@ -54,16 +55,22 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^8.51.0",
+    "jsdom": "^28.0.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "platforms": [
     "macOS"

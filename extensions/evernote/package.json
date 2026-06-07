@@ -2,38 +2,45 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "evernote",
   "title": "Evernote Instant Search",
-  "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
+  "description": "Search your Evernote notes instantly using the local database of the official Evernote client.",
   "icon": "ev-icon.png",
   "author": "artpi",
   "contributors": [
-    "magnusmoaner"
+    "magnusmoaner",
+    "mackid1993"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-notes",
       "title": "Search Notes",
       "subtitle": "Search your Evernote notes",
-      "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
+      "description": "Search your Evernote notes instantly using the local database of the official Evernote client.",
       "mode": "view"
     },
     {
-        "name": "search-tasks",
-        "title": "Search Open Tasks",
-        "subtitle": "Search your Evernote tasks within notes",
-        "description": "Search your Evernote tasks within notes instantly using the local database of the Mac official Evernote client.",
-        "mode": "view"
-      }
+      "name": "search-tasks",
+      "title": "Search Open Tasks",
+      "subtitle": "Search your Evernote tasks within notes",
+      "description": "Search your Evernote tasks within notes instantly using the local database of the official Evernote client.",
+      "mode": "view"
+    }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
-
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"

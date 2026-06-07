@@ -100,8 +100,6 @@ export function selectDisplayModels(models: AntigravityModelQuota[]): Antigravit
   return [...models].sort((a, b) => a.percentLeft - b.percentLeft);
 }
 
-export { formatResetTime } from "../agents/format";
-
 function quotaFromConfig(rawConfig: unknown): AntigravityModelQuota | null {
   const config = asRecord(rawConfig);
   if (!config) return null;

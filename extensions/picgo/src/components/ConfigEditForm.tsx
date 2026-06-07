@@ -1,32 +1,32 @@
 import { useForm } from "@raycast/utils";
 import { Form, useNavigation, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
-import type { IPluginConfig, IUploaderConfigItem } from "picgo";
+import type { IUploaderConfigItem } from "picgo";
 import { useEffect, useMemo, useState } from "react";
+import getPicGoContext from "../util/context";
 
 type Props = {
+    picgo: ReturnType<typeof getPicGoContext>;
     type: string;
-    getConfigItems: (type: string) => IPluginConfig[];
-    config?: IUploaderConfigItem;
-    onSave?: () => any;
-    getUploaderTypeList: () => string[];
-    createOrUpdateConfig: (type: string, config: IUploaderConfigItem) => void;
-    renameConfig: (type: string, oldName: string, newName: string) => void;
-};
+} & ({ mode: "create"; config?: undefined } | { mode: "update"; config: IUploaderConfigItem });
 
-export default function ConfigEditForm({
-    type,
-    config,
-    getConfigItems,
-    onSave,
-    getUploaderTypeList,
-    createOrUpdateConfig,
-    renameConfig,
-}: Props) {
+/**
+ * Render a form for creating or updating an uploader configuration.
+ *
+ * Renders fields for the selected uploader type, populates initial values when `config` is provided,
+ * validates required fields, and saves or renames the configuration via the provided `picgo` context.
+ *
+ * @param mode - "create" to add a new configuration or "update" to edit an existing one
+ * @param type - The uploader type to display or preselect
+ * @param config - Existing uploader configuration used to populate form fields when updating; omit for create mode
+ * @param picgo - PicGo context exposing uploader list, item details, rename, and createOrUpdate operations
+ * @returns The form UI for creating or editing an uploader configuration
+ */
+export default function ConfigEditForm({ mode, type, config, picgo }: Props) {
+    const { getUploaderTypeList, getUploaderConfigItemDetails, renameConfig, createOrUpdateConfig } = picgo;
     const [uploader, setUploader] = useState<string>(type);
     const configItems = useMemo(() => {
-        // config === undefined means it's create mode
-        if (config) return getConfigItems(type);
-        return getConfigItems(uploader);
+        if (mode === "update") return getUploaderConfigItemDetails(type);
+        return getUploaderConfigItemDetails(uploader);
     }, [uploader]);
 
     const { pop } = useNavigation();
@@ -38,11 +38,9 @@ export default function ConfigEditForm({
                 if (configItemKeys.includes(k)) continue;
                 delete value[k];
             }
-            if (config && value._configName !== config._configName)
+            if (mode === "update" && value._configName !== config._configName)
                 renameConfig(uploader, config._configName, value._configName);
-            // config === undefined means it's create mode
             createOrUpdateConfig(uploader, value);
-            onSave?.();
             pop();
             showToast({ title: "Save successfully", style: Toast.Style.Success });
         },

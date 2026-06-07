@@ -1,5 +1,18 @@
 # Kill Process Changelog
 
+## [Bugfix] - 2026-05-27
+
+- Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.
+
+## [Added Restart Action] - 2026-04-08
+
+- Added `Restart` and `Force Restart` actions for restartable processes
+
+## [Added Kill All action] - 2026-04-01
+
+- Added action to kill all processes with the same name
+- Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
+
 ## [UX Improvements] - 2026-02-11
 
 - Removed the redundant **Default Sort By** preference (sorting is now persisted via the command dropdown)

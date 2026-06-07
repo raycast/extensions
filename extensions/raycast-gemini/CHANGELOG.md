@@ -1,5 +1,13 @@
 # Google Gemini Changelog
 
+## [AI Chat UX & Naming Improvements] - 2026-04-03
+
+- 💬 Make `Enter` send messages in AI Chat instead of copying the current answer.
+- ⚙️ Add shared `System Prompt`, default `Model`, and `Title Model` preferences for the `AI Chat` command.
+- 🆕 Remove the chat creation form and start new chats immediately from the main AI Chat view.
+- 🏷️ Automatically generate a chat title from the first user prompt with a lightweight model.
+- 🧭 Reuse the existing empty draft chat instead of creating multiple blank conversations.
+
 ## [TypeScript Migration & Model Updates] - 2026-03-16
 
 - 🛠️ Migrated entire codebase from JSX to TypeScript (TSX/TS) for improved type safety.

@@ -1,5 +1,16 @@
 # Changelog
 
+## [Ghostty Support] - 2026-04-02
+
+### Features
+
+- Added Ghostty as a first-class terminal option
+- Generic handler for custom terminals — "Other (specify below)" now works with any terminal app
+
+### Fixes
+
+- Custom terminals no longer fall back to Terminal.app silently
+
 ## [Initial Release] - 2026-02-28
 
 ### Features

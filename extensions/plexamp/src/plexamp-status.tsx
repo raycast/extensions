@@ -187,7 +187,7 @@ export default function Command() {
     ].join("\n");
   }, [state]);
 
-  if (error || !state.selectedLibrary) {
+  if (!isLoading && (error || !state.selectedLibrary)) {
     return <PlexSetupView navigationTitle="Plexamp Status" problem={error} onConfigured={() => void reload()} />;
   }
 

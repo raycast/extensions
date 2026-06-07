@@ -1,5 +1,10 @@
 # Claude Code Launcher
 
+## [1.0.4] - 2026-03-24
+
+### Added
+- Support for iTerm2 terminal
+
 ## [1.0.3] - 2026-03-08
 
 ### Fixed

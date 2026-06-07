@@ -17,7 +17,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
 export default async function tool(input: Input) {
   try {
-    await deleteFileOrFolder(input.latestDownloadPath);
+    await deleteFileOrFolder(input.latestDownloadPath, { skipConfirmation: true });
     return "Deleted lastest download";
   } catch {
     throw new Error("Deletion Failed");

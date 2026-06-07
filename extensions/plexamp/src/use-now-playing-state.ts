@@ -167,7 +167,7 @@ async function loadNowPlayingState(): Promise<{
 
   if (timeline.playQueueID) {
     try {
-      queue = await getPlayQueueForTimeline(timeline);
+      queue = await getPlayQueueForTimeline(timeline, { window: 200 });
     } catch (queueError) {
       warnings.push(queueError instanceof Error ? queueError.message : String(queueError));
     }
