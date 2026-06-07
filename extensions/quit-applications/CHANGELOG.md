@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Bugfix & Performance] - 2026-06-07
+## [Bugfix & Performance] - {PR_MERGE_DATE}
 
 - Migrated running apps query to ASObjC (NSWorkspace) to prevent 5-second execution timeouts and process retrieval crashes.
 - Prevented system helper processes from cluttering the application list.
