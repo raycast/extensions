@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  open,
-  Icon,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  Application,
-} from "@raycast/api";
+import { ActionPanel, Action, List, open, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
@@ -25,15 +15,12 @@ export const SearchResult = ({
   onBoost?: () => void;
 }) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
-  const {
-    "open-in": openIn,
-    "open-in-terminal": terminal,
-    "open-in-editor": editor,
-  } = getPreferenceValues<{
-    "open-in": Application;
-    "open-in-terminal": Application;
-    "open-in-editor": Application;
-  }>();
+  // appPicker prefs are required with defaults, so always set at runtime — the
+  // generated `Preferences` type marks them optional, hence the assertions.
+  const prefs = getPreferenceValues<Preferences>();
+  const openIn = prefs["open-in"]!;
+  const terminal = prefs["open-in-terminal"]!;
+  const editor = prefs["open-in-editor"]!;
 
   const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
@@ -64,8 +51,8 @@ export const SearchResult = ({
   const openIn_ = async (bundleId: string | undefined, failureTitle: string) => {
     try {
       await addQuery();
-      if (bundleId) open(searchResult.originalPath, bundleId);
-      else open(searchResult.originalPath);
+      if (bundleId) await open(searchResult.originalPath, bundleId);
+      else await open(searchResult.originalPath);
     } catch (error) {
       showFailureToast(error, { title: failureTitle });
     }

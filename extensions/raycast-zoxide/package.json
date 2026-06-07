@@ -30,7 +30,7 @@
   "preferences": [
     {
       "name": "search-mode",
-      "title": "Search mode",
+      "title": "Search Mode",
       "description": "Full Path (fuzzy): filters your whole zoxide list with fzf, matching anywhere in the path (requires fzf). Folder Name (strict): a pure zoxide method that re-queries zoxide on each keystroke, matching the folder name with its native ranking.",
       "type": "dropdown",
       "required": true,
@@ -48,7 +48,7 @@
     },
     {
       "name": "open-in",
-      "title": "Open directories in",
+      "title": "Open Directories in",
       "description": "Choose the application to open directories with.",
       "type": "appPicker",
       "required": true,
@@ -57,7 +57,7 @@
     },
     {
       "name": "open-in-terminal",
-      "title": "Terminal application",
+      "title": "Terminal Application",
       "description": "Application used by the \"Open in Terminal\" action.",
       "type": "appPicker",
       "required": true,
@@ -66,7 +66,7 @@
     },
     {
       "name": "open-in-editor",
-      "title": "Editor application",
+      "title": "Editor Application",
       "description": "Application used by the \"Open in Editor\" action.",
       "type": "appPicker",
       "required": true,
@@ -75,7 +75,7 @@
     },
     {
       "name": "addl-paths",
-      "title": "Additional path directories",
+      "title": "Additional Path Directories",
       "description": "Additional directories to prepend to the $PATH variable when using zoxide and other commands. Uses path syntax, e.g. `/usr/bin:/bin`.",
       "type": "textfield",
       "required": false

@@ -13,7 +13,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [removedKeys, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
 
-  const { "search-mode": mode } = getPreferenceValues<{ "search-mode": "fuzzy" | "zoxide" }>();
+  const { "search-mode": mode } = getPreferenceValues<Preferences>();
   const pure = mode === "zoxide";
 
   // Pure mode re-queries zoxide per keystroke (an empty query lists everything by
