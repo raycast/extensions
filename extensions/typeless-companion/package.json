@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typeless-companion",
   "title": "Typeless Companion",
-  "description": "Browse and copy local Typeless history.",
+  "description": "Browse and copy local Typeless transcripts.",
   "icon": "typeless-icon.png",
   "author": "arjan.flac",
   "license": "MIT",
@@ -15,25 +15,75 @@
   "commands": [
     {
       "name": "view-history",
-      "title": "View Typeless History",
-      "description": "Browse local Typeless history and retry-needed recordings.",
+      "title": "Browse History",
+      "description": "Browse, filter, copy, and paste saved Typeless transcripts.",
       "mode": "view"
     },
     {
       "name": "copy-last-transcript",
-      "title": "Copy Last Typeless Transcript",
-      "description": "Copy the newest saved dictation transcript.",
-      "mode": "no-view"
+      "title": "Copy Previous Transcript",
+      "description": "Copy the most recent saved Typeless transcript.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "quickMode",
+          "title": "Transcript Type",
+          "description": "Choose which saved Typeless transcript this command copies.",
+          "type": "dropdown",
+          "required": false,
+          "default": "latest",
+          "data": [
+            {
+              "title": "Latest Transcript",
+              "value": "latest"
+            },
+            {
+              "title": "Latest Dictation",
+              "value": "dictation"
+            },
+            {
+              "title": "Latest Ask Anything",
+              "value": "ask-anything"
+            },
+            {
+              "title": "Latest Translation",
+              "value": "translation"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
     {
       "name": "databasePath",
       "title": "Database Path",
-      "description": "Optional override for Typeless's SQLite history database.",
+      "description": "Override the local Typeless SQLite database path.",
       "type": "textfield",
       "required": false,
       "placeholder": "~/Library/Application Support/Typeless/typeless.db"
+    },
+    {
+      "name": "copyWindowBehavior",
+      "title": "Window Behavior On Copy",
+      "description": "What to do with the window when copying a transcript to the clipboard.",
+      "type": "dropdown",
+      "required": false,
+      "default": "close",
+      "data": [
+        {
+          "title": "Keep Open",
+          "value": "keep-open"
+        },
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Close and Exit Command",
+          "value": "close-and-exit-command"
+        }
+      ]
     }
   ],
   "dependencies": {

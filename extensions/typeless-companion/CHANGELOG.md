@@ -2,7 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Browse local Typeless history across dictations, Ask Anything, translations, and retry-needed recordings.
+- Browse local Typeless history across dictations, Ask Anything, translations, and `No Transcript` entries.
 - Copy or paste saved transcripts and Ask Anything answers from Raycast.
-- Open Typeless History or reveal saved recordings for retry-needed rows.
-- Copy the newest saved dictation transcript with a no-view command.
+- Show empty or failed entries as `No Transcript`.
+- Copy recording paths from the action menu when needed.
+- Copy the latest saved Typeless transcript with a transcript type preference.

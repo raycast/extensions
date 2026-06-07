@@ -6,23 +6,24 @@ import {
   Color,
   Icon,
   List,
-  Toast,
-  open,
+  PopToRootType,
+  getPreferenceValues,
+  showHUD,
   showToast,
 } from "@raycast/api";
 import {
   TypelessHistoryRow,
   copyLabel,
   databaseExists,
+  formatCharacterCount,
   formatDate,
   formatDuration,
+  hasNoTranscript,
   hasTranscript,
   listHistory,
   modeKind,
   modeLabel,
-  needsRetry,
-  openTypelessHistory,
-  revealInFinder,
+  originalModeLabel,
   statusLabel,
   titleForRow,
 } from "./lib/typeless";
@@ -32,8 +33,19 @@ type Filter =
   | "dictation"
   | "ask-anything"
   | "translation"
-  | "needs-retry"
+  | "no-transcript"
   | "other";
+
+type CopyWindowBehavior = "keep-open" | "close" | "close-and-exit-command";
+type HistoryPreferences = {
+  copyWindowBehavior?: CopyWindowBehavior;
+};
+
+const monochromeModeColor = {
+  light: "#111111",
+  dark: "#FFFFFF",
+  adjustContrast: false,
+};
 
 export default function Command() {
   const [rows, setRows] = useState<TypelessHistoryRow[]>([]);
@@ -74,7 +86,7 @@ export default function Command() {
     if (filter === "translation") {
       return rows.filter((row) => modeKind(row) === "translation");
     }
-    if (filter === "needs-retry") return rows.filter(needsRetry);
+    if (filter === "no-transcript") return rows.filter(hasNoTranscript);
     if (filter === "other") {
       return rows.filter((row) => modeKind(row) === "other");
     }
@@ -96,7 +108,7 @@ export default function Command() {
           <List.Dropdown.Item title="Dictations" value="dictation" />
           <List.Dropdown.Item title="Ask Anything" value="ask-anything" />
           <List.Dropdown.Item title="Translations" value="translation" />
-          <List.Dropdown.Item title="Needs Retry" value="needs-retry" />
+          <List.Dropdown.Item title="No Transcript" value="no-transcript" />
           <List.Dropdown.Item title="Other" value="other" />
         </List.Dropdown>
       }
@@ -118,24 +130,14 @@ export default function Command() {
         />
       ) : (
         visibleRows.map((row) => (
-          <HistoryItem
-            key={`${row.source}-${row.id}`}
-            row={row}
-            onRefresh={refresh}
-          />
+          <HistoryItem key={`${row.source}-${row.id}`} row={row} />
         ))
       )}
     </List>
   );
 }
 
-function HistoryItem({
-  row,
-  onRefresh,
-}: {
-  row: TypelessHistoryRow;
-  onRefresh: () => Promise<void>;
-}) {
+function HistoryItem({ row }: { row: TypelessHistoryRow }) {
   const title = titleForRow(row);
   const duration = formatDuration(row.duration);
 
@@ -146,97 +148,73 @@ function HistoryItem({
       subtitle={subtitleForRow(row)}
       accessories={duration ? [{ text: duration }] : undefined}
       detail={<HistoryDetail row={row} />}
-      actions={<HistoryActions row={row} onRefresh={onRefresh} />}
+      actions={<HistoryActions row={row} />}
     />
   );
 }
 
-function HistoryActions({
-  row,
-  onRefresh,
-}: {
-  row: TypelessHistoryRow;
-  onRefresh: () => Promise<void>;
-}) {
+function HistoryActions({ row }: { row: TypelessHistoryRow }) {
   const label = copyLabel(row);
+  const preferences = getPreferenceValues<HistoryPreferences>();
+  const copyWindowBehavior = preferences.copyWindowBehavior ?? "close";
+
+  if (!hasTranscript(row) && !row.audioPath) return null;
 
   return (
     <ActionPanel>
       {hasTranscript(row) ? (
         <ActionPanel.Section>
-          <Action.CopyToClipboard
-            title={`Copy ${label}`}
-            content={row.transcript}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
           <Action
+            title={`Copy ${label}`}
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            onAction={async () => {
+              await copyHistoryText(row, copyWindowBehavior);
+            }}
+          />
+          <Action.Paste
             title={`Paste ${label}`}
+            content={row.transcript}
             icon={Icon.TextCursor}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={async () => {
-              await Clipboard.paste(row.transcript);
-            }}
           />
         </ActionPanel.Section>
       ) : null}
 
-      {needsRetry(row) ? (
-        <ActionPanel.Section title="Retry">
-          <Action
-            title="Open Typeless History"
-            icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={async () => {
-              await openTypelessHistory();
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Opened Typeless",
-                message: "Use the Retry button on the matching history row.",
-              });
-            }}
-          />
-          {row.audioPath ? (
-            <Action
-              title="Reveal Recording in Finder"
-              icon={Icon.Finder}
-              onAction={async () => {
-                await revealInFinder(row.audioPath as string);
-              }}
-            />
-          ) : null}
-        </ActionPanel.Section>
-      ) : null}
-
-      <ActionPanel.Section>
-        {row.audioPath ? (
-          <Action.Open
-            title="Open Recording"
-            target={row.audioPath}
-            icon={Icon.Play}
-          />
-        ) : null}
-        {row.audioPath ? (
+      {row.audioPath ? (
+        <ActionPanel.Section title="Recording">
           <Action.CopyToClipboard
             title="Copy Recording Path"
             content={row.audioPath}
           />
-        ) : null}
-        <Action.CopyToClipboard title="Copy Row ID" content={row.id} />
-        <Action
-          title="Open Typeless"
-          icon={Icon.Gear}
-          onAction={async () => {
-            await open("typeless://");
-          }}
-        />
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          onAction={onRefresh}
-        />
-      </ActionPanel.Section>
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
+}
+
+async function copyHistoryText(
+  row: TypelessHistoryRow,
+  behavior: CopyWindowBehavior,
+) {
+  await Clipboard.copy(row.transcript);
+
+  const title = `Copied ${modeLabel(row)}`;
+  if (behavior === "keep-open") {
+    await showToast({
+      style: Toast.Style.Success,
+      title,
+    });
+    return;
+  }
+
+  await showHUD(title, {
+    clearRootSearch: behavior === "close-and-exit-command",
+    popToRootType:
+      behavior === "close-and-exit-command"
+        ? PopToRootType.Immediate
+        : PopToRootType.Suspended,
+  });
 }
 
 function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
@@ -253,6 +231,12 @@ function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
               color={colorForRow(row)}
             />
           </List.Item.Detail.Metadata.TagList>
+          {hasNoTranscript(row) ? (
+            <List.Item.Detail.Metadata.Label
+              title="Attempt"
+              text={originalModeLabel(row)}
+            />
+          ) : null}
           {row.duration !== null ? (
             <List.Item.Detail.Metadata.Label
               title="Duration"
@@ -261,7 +245,7 @@ function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
           ) : null}
           <List.Item.Detail.Metadata.Label
             title="Text Length"
-            text={`${row.textLength} chars`}
+            text={formatCharacterCount(row.textLength)}
           />
           <List.Item.Detail.Metadata.Label
             title="Status"
@@ -280,7 +264,7 @@ function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
           {row.selectedText ? (
             <List.Item.Detail.Metadata.Label
               title="Selected Text"
-              text={`${row.selectedText.length} chars`}
+              text={formatCharacterCount(row.selectedText.length)}
             />
           ) : null}
           <List.Item.Detail.Metadata.Separator />
@@ -308,14 +292,6 @@ function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
               text={row.focusedWindowTitle}
             />
           ) : null}
-          <List.Item.Detail.Metadata.Label title="Source" text={row.source} />
-          <List.Item.Detail.Metadata.Label title="Row ID" text={row.id} />
-          {row.appVersion ? (
-            <List.Item.Detail.Metadata.Label
-              title="Typeless Version"
-              text={row.appVersion}
-            />
-          ) : null}
         </List.Item.Detail.Metadata>
       }
     />
@@ -324,14 +300,14 @@ function HistoryDetail({ row }: { row: TypelessHistoryRow }) {
 
 function iconForRow(row: TypelessHistoryRow) {
   switch (modeKind(row)) {
-    case "retry":
+    case "no-transcript":
       return { source: Icon.ExclamationMark, tintColor: Color.Orange };
     case "ask-anything":
-      return { source: Icon.QuestionMark, tintColor: Color.Purple };
+      return { source: Icon.QuestionMark, tintColor: Color.Green };
     case "translation":
-      return { source: Icon.Globe, tintColor: Color.Green };
+      return { source: Icon.Globe, tintColor: Color.Blue };
     case "dictation":
-      return { source: Icon.Microphone, tintColor: Color.Blue };
+      return { source: Icon.Microphone, tintColor: monochromeModeColor };
     case "other":
       return { source: Icon.Circle, tintColor: Color.SecondaryText };
   }
@@ -339,24 +315,30 @@ function iconForRow(row: TypelessHistoryRow) {
 
 function colorForRow(row: TypelessHistoryRow) {
   switch (modeKind(row)) {
-    case "retry":
+    case "no-transcript":
       return Color.Orange;
     case "ask-anything":
-      return Color.Purple;
-    case "translation":
       return Color.Green;
-    case "dictation":
+    case "translation":
       return Color.Blue;
+    case "dictation":
+      return monochromeModeColor;
     case "other":
       return Color.SecondaryText;
   }
 }
 
 function subtitleForRow(row: TypelessHistoryRow) {
+  if (hasNoTranscript(row)) return originalModeLabel(row);
   return row.focusedAppName ?? undefined;
 }
 
 function detailMarkdown(row: TypelessHistoryRow) {
+  if (hasNoTranscript(row)) {
+    const attempt = originalModeLabel(row).toLowerCase();
+    return `## No Transcript\n\nTypeless did not save a usable transcript for this ${attempt} attempt. Open Typeless directly if you want to retry or inspect it there.`;
+  }
+
   if (modeKind(row) === "ask-anything") {
     const prompt = row.askPrompt || titleForRow(row);
     const answer = row.askAnswer || row.transcript;
@@ -364,10 +346,8 @@ function detailMarkdown(row: TypelessHistoryRow) {
       ? `\n\n## Selected Text\n\n${row.selectedText}`
       : "";
 
-    return `## Prompt\n\n${prompt}${selectedText}\n\n## Answer\n\n${answer || "No answer was saved."}`;
+    return `## Prompt\n\n${prompt}${selectedText}\n\n## Answer\n\n${answer}`;
   }
 
-  if (hasTranscript(row)) return row.transcript;
-
-  return "No transcript was saved for this recording. Open Typeless History and use its Retry button for this row.";
+  return row.transcript;
 }

@@ -7,13 +7,11 @@ import { getPreferenceValues } from "@raycast/api";
 const execFileAsync = promisify(execFile);
 
 type SqliteJsonValue = string | number | null;
+type BaseModeKind = "dictation" | "ask-anything" | "translation";
+type OriginalModeKind = BaseModeKind | "other";
 
-export type TypelessModeKind =
-  | "dictation"
-  | "ask-anything"
-  | "translation"
-  | "retry"
-  | "other";
+export type TypelessModeKind = OriginalModeKind | "no-transcript";
+export type QuickTranscriptMode = "latest" | BaseModeKind;
 
 export type TypelessHistoryRow = {
   id: string;
@@ -30,7 +28,6 @@ export type TypelessHistoryRow = {
   createdAt: string | null;
   updatedAt: string | null;
   audioPath: string | null;
-  appVersion: string | null;
   focusedAppName: string | null;
   focusedWindowTitle: string | null;
 };
@@ -55,24 +52,20 @@ export async function listHistory() {
   return rows.map(normalizeRow);
 }
 
-export async function getLatestTranscript() {
+export async function getLatestHistoryRow(
+  mode: QuickTranscriptMode = "latest",
+) {
   const rows = await listHistory();
-  return (
-    rows.find((row) => modeKind(row) === "dictation" && hasTranscript(row)) ??
-    rows.find((row) => hasTranscript(row)) ??
-    null
-  );
+  if (mode === "latest") return rows[0] ?? null;
+  return rows.find((row) => originalModeKind(row) === mode) ?? null;
 }
 
 export function hasTranscript(row: TypelessHistoryRow) {
-  return row.transcript.trim().length > 0;
+  return visibleText(row.transcript).length > 0;
 }
 
-export function needsRetry(row: TypelessHistoryRow) {
-  return (
-    !hasTranscript(row) &&
-    (row.status === null || row.status === "" || row.status === "dismissed")
-  );
+export function hasNoTranscript(row: TypelessHistoryRow) {
+  return !hasTranscript(row);
 }
 
 export function formatDate(value: string | null) {
@@ -97,21 +90,40 @@ export function formatDate(value: string | null) {
 export function formatDuration(seconds: number | null) {
   if (seconds === null || Number.isNaN(seconds)) return null;
   if (seconds < 60) return `${Math.round(seconds)}s`;
+
   const minutes = Math.floor(seconds / 60);
   const remainder = Math.round(seconds % 60);
   return `${minutes}m ${remainder}s`;
 }
 
+export function formatCharacterCount(count: number) {
+  return `${new Intl.NumberFormat().format(count)} ${count === 1 ? "char" : "chars"}`;
+}
+
+export function quickModeLabel(mode: QuickTranscriptMode) {
+  switch (mode) {
+    case "latest":
+      return "Typeless transcript";
+    case "dictation":
+      return "Dictation";
+    case "ask-anything":
+      return "Ask Anything";
+    case "translation":
+      return "Translation";
+  }
+}
+
 export function statusLabel(row: TypelessHistoryRow) {
   if (hasTranscript(row)) return row.status || "completed";
-  if (needsRetry(row))
-    return row.status === "dismissed" ? "dismissed" : "needs retry";
-  return row.status || "unknown";
+  if (row.status && row.status !== "completed") return row.status;
+  return "no transcript";
 }
 
 export function modeKind(row: TypelessHistoryRow): TypelessModeKind {
-  if (needsRetry(row)) return "retry";
+  return hasNoTranscript(row) ? "no-transcript" : originalModeKind(row);
+}
 
+export function originalModeKind(row: TypelessHistoryRow): OriginalModeKind {
   const mode = row.mode.toLowerCase();
   if (mode.includes("translation") || mode.includes("translate")) {
     return "translation";
@@ -136,8 +148,21 @@ export function modeLabel(row: TypelessHistoryRow) {
       return "Ask Anything";
     case "translation":
       return "Translation";
-    case "retry":
-      return "Retry";
+    case "no-transcript":
+      return "No Transcript";
+    case "other":
+      return row.mode || "Other";
+  }
+}
+
+export function originalModeLabel(row: TypelessHistoryRow) {
+  switch (originalModeKind(row)) {
+    case "dictation":
+      return "Dictation";
+    case "ask-anything":
+      return "Ask Anything";
+    case "translation":
+      return "Translation";
     case "other":
       return row.mode || "Other";
   }
@@ -155,24 +180,15 @@ export function copyLabel(row: TypelessHistoryRow) {
 }
 
 export function titleForRow(row: TypelessHistoryRow) {
-  if (row.askPrompt) return row.askPrompt.replace(/\s+/g, " ").trim();
-  if (hasTranscript(row)) {
-    return row.transcript.replace(/\s+/g, " ").trim();
-  }
-  if (needsRetry(row)) return "The transcription was dismissed.";
+  if (hasNoTranscript(row)) return noTranscriptTitle(row);
+  if (row.askPrompt) return singleLine(row.askPrompt);
+  return singleLine(row.transcript);
+}
+
+export function noTranscriptTitle(row: TypelessHistoryRow) {
+  if (row.status === "dismissed") return "Transcription dismissed.";
+  if (row.status === "error") return "Transcription failed.";
   return "No transcript saved.";
-}
-
-export async function openTypelessHistory() {
-  try {
-    await execFileAsync("/usr/bin/open", ["typeless://history"]);
-  } catch {
-    await execFileAsync("/usr/bin/open", ["-a", "Typeless"]);
-  }
-}
-
-export async function revealInFinder(path: string) {
-  await execFileAsync("/usr/bin/open", ["-R", path]);
 }
 
 async function sqliteJson<T>(dbPath: string, query: string) {
@@ -199,7 +215,10 @@ function normalizeRow(row: RawHistoryRow): TypelessHistoryRow {
   const selectedText = nullableString(parsedModeMeta.selected_text);
   const askPrompt = nullableString(parsedModeMeta.ai_result?.user_prompt);
   const askAnswer = nullableString(parsedModeMeta.ai_result?.refined_text);
-  const transcript = stringValue(row.transcript) || askAnswer || "";
+  const rowTranscript = stringValue(row.transcript);
+  const transcript = visibleText(rowTranscript)
+    ? rowTranscript
+    : askAnswer || rowTranscript;
 
   return {
     id: stringValue(row.id),
@@ -211,12 +230,11 @@ function normalizeRow(row: RawHistoryRow): TypelessHistoryRow {
     askAnswer,
     delivery: nullableString(parsedModeMeta.ai_result?.delivery),
     transcript,
-    textLength: transcript.length,
+    textLength: visibleText(transcript).length,
     duration: nullableNumber(row.duration),
     createdAt: nullableString(row.createdAt),
     updatedAt: nullableString(row.updatedAt),
     audioPath: nullableString(row.audioPath),
-    appVersion: nullableString(row.appVersion),
     focusedAppName: nullableString(row.focusedAppName),
     focusedWindowTitle: nullableString(row.focusedWindowTitle),
   };
@@ -262,6 +280,14 @@ function nullableNumber(value: SqliteJsonValue | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function visibleText(value: string) {
+  return value.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+}
+
+function singleLine(value: string) {
+  return visibleText(value).replace(/\s+/g, " ");
+}
+
 const historyQuery = `
 WITH normalized AS (
   SELECT
@@ -275,7 +301,6 @@ WITH normalized AS (
     created_at AS createdAt,
     updated_at AS updatedAt,
     audio_local_path AS audioPath,
-    app_version AS appVersion,
     NULL AS focusedAppName,
     NULL AS focusedWindowTitle
   FROM history_v2
@@ -293,7 +318,6 @@ WITH normalized AS (
     created_at AS createdAt,
     updated_at AS updatedAt,
     audio_local_path AS audioPath,
-    app_version AS appVersion,
     focused_app_name AS focusedAppName,
     focused_app_window_title AS focusedWindowTitle
   FROM history
@@ -305,12 +329,10 @@ SELECT
   mode,
   modeMeta,
   coalesce(transcript, '') AS transcript,
-  length(coalesce(transcript, '')) AS textLength,
   duration,
   createdAt,
   updatedAt,
   audioPath,
-  appVersion,
   focusedAppName,
   focusedWindowTitle
 FROM normalized

@@ -1,28 +1,37 @@
-import { Clipboard, Toast, showToast } from "@raycast/api";
-import { getLatestTranscript } from "./lib/typeless";
+import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import {
+  QuickTranscriptMode,
+  getLatestHistoryRow,
+  hasTranscript,
+  modeLabel,
+  noTranscriptTitle,
+  quickModeLabel,
+} from "./lib/typeless";
+
+type QuickPreferences = {
+  quickMode?: QuickTranscriptMode;
+};
 
 export default async function Command() {
+  const preferences = getPreferenceValues<QuickPreferences>();
+  const mode = preferences.quickMode ?? "latest";
+
   try {
-    const row = await getLatestTranscript();
+    const row = await getLatestHistoryRow(mode);
     if (!row) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Typeless transcript found",
-      });
+      await showHUD(`No ${quickModeLabel(mode).toLowerCase()} found`);
+      return;
+    }
+
+    if (!hasTranscript(row)) {
+      await showHUD(noTranscriptTitle(row));
       return;
     }
 
     await Clipboard.copy(row.transcript);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied Typeless transcript",
-      message: `${row.textLength} chars`,
-    });
+    await showHUD(`Copied ${modeLabel(row)}`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not copy transcript",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    console.error(error);
+    await showHUD("Typeless action failed");
   }
 }

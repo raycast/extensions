@@ -1,18 +1,23 @@
 # Typeless Companion
 
-Unofficial Raycast companion for local Typeless history.
-
-It reads Typeless's local SQLite history database and does not call private Typeless APIs.
+Unofficial Raycast companion for local Typeless transcripts.
 
 ## Commands
 
-- `View Typeless History`: Browse, filter, copy, paste, and open retry-needed rows.
-- `Copy Last Typeless Transcript`: Copy the newest saved dictation transcript.
+- `Browse History`: Search Typeless history, copy or paste saved transcripts, and spot `No Transcript` entries.
+- `Copy Previous Transcript`: Copy the latest matching transcript without opening Raycast.
+
+## Settings
+
+- `Transcript Type`: Choose latest transcript, dictation, Ask Anything, or translation for quick copy.
+- `Window Behavior On Copy`: Keep Raycast open, close it, or close and exit after copying from history.
+- `Database Path`: Override Typeless's local database path.
 
 ## Notes
 
-- Retry uses Typeless's built-in History view.
-- Dictionary editing is not supported.
+- Reads Typeless's local SQLite database only.
+- Does not call private Typeless APIs.
+- Empty or failed rows are shown as `No Transcript`.
 
 ## Development
 
