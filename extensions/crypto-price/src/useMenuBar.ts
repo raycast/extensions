@@ -13,7 +13,9 @@ export function useMenuBar() {
   let items: string[] = [];
   let sections: { title: string; items: string[] }[] = [];
 
-  if (!isLoading && coins) {
+  if (!isLoading && !coins) {
+    title = "Unavailable";
+  } else if (!isLoading && coins) {
     const primarySymbols = coinsConfig.symbols.slice(0, coinsConfig.primaryCount);
     const secondarySymbols = coinsConfig.symbols.slice(coinsConfig.primaryCount);
     title = primarySymbols.map((symbol) => genTitle(coins[symbol], style, currency)).join(" | ");

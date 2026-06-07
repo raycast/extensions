@@ -6,9 +6,12 @@ import { COINS } from "#/constants";
 export const useBinance: UseSource = (currency, coinSymbols) => {
   const symbols = JSON.stringify(coinSymbols.map((symbol) => `${symbol}USDT`));
   const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${symbols}&type=MINI`;
-  const { isLoading, data } = useFetch<any>(url);
+  const { isLoading, data, error } = useFetch<any>(url);
   if (isLoading) {
     return { isLoading, coins: undefined };
+  }
+  if (error || !data) {
+    return { isLoading: false, coins: undefined };
   }
   const coins = Object.fromEntries(
     data.map((d: any) => {
