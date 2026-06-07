@@ -33,6 +33,7 @@
       "description": "Your Companies House REST API key. Create a free application key in the developer dashboard.",
       "type": "password",
       "required": true,
+      "placeholder": "Your Companies House API key",
       "link": "https://developer.company-information.service.gov.uk/manage-applications"
     }
   ],
@@ -86,14 +87,14 @@
         "mocks": {
           "search-companies": [{ "company_number": "09446231", "name": "MONZO BANK LIMITED", "status": "Active" }]
         },
-        "expected": [{ "includes": "09446231" }]
+        "expected": [{ "callsTool": "search-companies" }, { "includes": "09446231" }]
       },
       {
         "input": "@companies-house who are the current directors of company 09446231?",
         "mocks": {
           "get-officers": [{ "name": "Doe, Jane", "role": "Director", "status": "Active" }]
         },
-        "expected": [{ "includes": "Jane" }]
+        "expected": [{ "callsTool": "get-officers" }, { "includes": "Jane" }]
       },
       {
         "input": "@companies-house who are the beneficial owners of company OC394454?",
@@ -102,7 +103,7 @@
             { "name": "Smith, John", "kind": "Individual", "natures_of_control": ["Ownership of shares – 75% or more"] }
           ]
         },
-        "expected": [{ "includes": "John" }]
+        "expected": [{ "callsTool": "get-persons-with-significant-control" }, { "includes": "John" }]
       }
     ]
   },
