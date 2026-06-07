@@ -1,6 +1,6 @@
 # Jellyfin Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2026-06-07
 
 - Add Windows support
 
