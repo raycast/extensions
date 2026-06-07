@@ -16,6 +16,8 @@ interface Enumerations {
   sic_descriptions: Record<string, string>;
   register_types: Record<string, string>;
   cessation_label_for_status: Record<string, string>;
+  psc_descriptions: Record<string, string>;
+  psc_short_descriptions: Record<string, string>;
 }
 
 let cachedEnums: Enumerations | undefined;
@@ -111,6 +113,24 @@ export function companyTypeLabel(type?: string): string | undefined {
 export function officerRoleLabel(role?: string): string | undefined {
   if (!role) return undefined;
   return enums().officer_role[role] ?? humanise(role);
+}
+
+/** A concise label for a PSC nature-of-control code, e.g. "Ownership of shares – 75% or more". */
+export function pscNatureLabel(code: string): string {
+  return (
+    enums().psc_short_descriptions[code] ??
+    enums().psc_descriptions[code] ??
+    humanise(code)
+  );
+}
+
+/** Turns a PSC kind into a readable label, e.g. "Individual", "Corporate entity". */
+export function pscKindLabel(kind?: string): string | undefined {
+  if (!kind) return undefined;
+  const cleaned = kind
+    .replace(/-person-with-significant-control$/, "")
+    .replace(/-beneficial-owner$/, "");
+  return humanise(cleaned);
 }
 
 /** Renders a SIC code with its description, e.g. "62012 — Business and domestic software development". */

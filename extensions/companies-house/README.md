@@ -14,7 +14,7 @@ This extension uses the free Companies House Public Data API. You'll need your o
 
 ## Commands
 
-- **Search Companies** — find a UK company by name or number, then open its profile to see status, registered office, nature of business, accounts and confirmation-statement dates, officers, filing history and charges.
+- **Search Companies** — find a UK company by name or number, then open its profile to see status, registered office, nature of business, accounts and confirmation-statement dates, officers, filing history, charges and persons with significant control.
 - **Search Officers** — find a director or officer by name and view their appointments across every company.
 
 ## Features
@@ -23,7 +23,17 @@ This extension uses the free Companies House Public Data API. You'll need your o
 - Officers and directors with full appointment details, plus an officer's appointments across all companies.
 - Filing history rendered with the official Companies House descriptions.
 - Charges (mortgages) with status, dates and persons entitled.
+- Persons with significant control (beneficial owners), with their nature of control.
+- Filter officers by name and by status (active or resigned).
 - Quick actions to open any record on the Companies House website or copy a company number.
+
+## AI
+
+This is an AI extension — with Raycast AI you can ask natural-language questions and it will call the right Companies House lookups for you, for example:
+
+- _"@companies-house is Monzo Bank still active and who are its directors?"_
+- _"@companies-house who are the beneficial owners of company OC394454?"_
+- _"@companies-house what other companies is a given director involved in?"_
 
 ## Notes
 

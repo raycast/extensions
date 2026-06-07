@@ -9,6 +9,7 @@ import type {
   CompanySearchResponse,
   FilingHistoryResponse,
   OfficerSearchResponse,
+  PscResponse,
 } from "./types";
 
 type QueryParams = Record<string, string | number | undefined>;
@@ -116,5 +117,18 @@ export function getFilingHistory(companyNumber: string, startIndex: number) {
 export function getCharges(companyNumber: string) {
   return request<ChargesResponse>(
     `/company/${encodeURIComponent(companyNumber)}/charges`,
+  );
+}
+
+export function getPersonsWithSignificantControl(
+  companyNumber: string,
+  startIndex: number,
+) {
+  return request<PscResponse>(
+    `/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control`,
+    {
+      items_per_page: PAGE_SIZE,
+      start_index: startIndex,
+    },
   );
 }

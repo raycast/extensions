@@ -7,3 +7,6 @@
 - Browse company officers and view appointment history across companies
 - Search officers and directors by name
 - View filing history with official Companies House descriptions, and charges
+- View persons with significant control (beneficial owners)
+- Filter officers by name and by status (active or resigned)
+- AI tools: ask Raycast AI natural-language questions about companies and officers

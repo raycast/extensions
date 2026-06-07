@@ -22,6 +22,7 @@ import type {
 import { Charges } from "./Charges";
 import { CompanyOfficers } from "./CompanyOfficers";
 import { FilingHistory } from "./FilingHistory";
+import { PersonsWithSignificantControl } from "./PersonsWithSignificantControl";
 
 const OFFICERS_IN_SUMMARY = 10;
 
@@ -250,6 +251,18 @@ export function CompanyProfile({
                 icon={Icon.Coins}
                 target={
                   <Charges companyNumber={companyNumber} companyName={title} />
+                }
+              />
+            ) : null}
+            {company?.links?.persons_with_significant_control ? (
+              <Action.Push
+                title="View Persons with Significant Control"
+                icon={Icon.PersonCircle}
+                target={
+                  <PersonsWithSignificantControl
+                    companyNumber={companyNumber}
+                    companyName={title}
+                  />
                 }
               />
             ) : null}

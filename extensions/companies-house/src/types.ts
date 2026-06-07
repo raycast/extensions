@@ -208,3 +208,31 @@ export interface ChargesResponse {
   satisfied_count?: number;
   part_satisfied_count?: number;
 }
+
+// --- Persons with significant control ------------------------------------
+
+export interface PscItem {
+  name?: string;
+  kind?: string;
+  natures_of_control?: string[];
+  notified_on?: string;
+  ceased_on?: string;
+  nationality?: string;
+  country_of_residence?: string;
+  date_of_birth?: DateOfBirth;
+  address?: Address;
+  identification?: {
+    legal_form?: string;
+    legal_authority?: string;
+    place_registered?: string;
+    registration_number?: string;
+    country_registered?: string;
+  };
+  links?: { self?: string };
+}
+
+export interface PscResponse extends PagedResponse {
+  items?: PscItem[];
+  active_count?: number;
+  ceased_count?: number;
+}
