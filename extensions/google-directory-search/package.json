@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-directory-search",
+  "type": "module",
+  "title": "Google Directory Search",
+  "description": "Quickly search your Google Contacts and Workspace directory and paste emails or names. Contacts are cached on disk for instant access and refreshed in the background.",
+  "icon": "command-icon.png",
+  "author": "victor_schmidt",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts and Directory",
+      "subtitle": "Google Directory Search",
+      "description": "Search your Google Contacts and Workspace directory and paste an email or name into the frontmost app.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Google OAuth Client ID",
+      "description": "OAuth 2.0 Client ID (iOS application type) from your own Google Cloud project. See the README for the one-time setup.",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

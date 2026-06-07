@@ -1,0 +1,15 @@
+{
+  "$schema": "https://www.raycast.com/schemas/tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}
