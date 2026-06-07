@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import {
   companyStatusLabel,
+  companyTypeLabel,
   companyWebUrl,
   formatDate,
   statusColor,
@@ -10,7 +11,15 @@ import type { CompanySearchItem } from "../types";
 
 import { CompanyProfile } from "./CompanyProfile";
 
-export function CompanyListItem({ item }: { item: CompanySearchItem }) {
+export function CompanyListItem({
+  item,
+  showingDetail,
+  onToggleDetail,
+}: {
+  item: CompanySearchItem;
+  showingDetail: boolean;
+  onToggleDetail: () => void;
+}) {
   const accessories: List.Item.Accessory[] = [];
   if (item.date_of_creation) {
     accessories.push({
@@ -30,8 +39,55 @@ export function CompanyListItem({ item }: { item: CompanySearchItem }) {
   return (
     <List.Item
       title={item.title}
-      subtitle={item.company_number}
-      accessories={accessories}
+      subtitle={showingDetail ? undefined : item.company_number}
+      accessories={showingDetail ? undefined : accessories}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label
+                title="Company Number"
+                text={item.company_number}
+              />
+              {item.company_status ? (
+                <List.Item.Detail.Metadata.TagList title="Status">
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={
+                      companyStatusLabel(item.company_status) ??
+                      item.company_status
+                    }
+                    color={statusColor(item.company_status)}
+                  />
+                </List.Item.Detail.Metadata.TagList>
+              ) : null}
+              {item.company_type ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Type"
+                  text={companyTypeLabel(item.company_type)}
+                />
+              ) : null}
+              {item.date_of_creation ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Incorporated"
+                  text={formatDate(item.date_of_creation)}
+                />
+              ) : null}
+              {item.date_of_cessation ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Dissolved"
+                  text={formatDate(item.date_of_cessation)}
+                />
+              ) : null}
+              {item.address_snippet ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Registered Office"
+                  text={item.address_snippet}
+                />
+              ) : null}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <Action.Push
@@ -48,6 +104,12 @@ export function CompanyListItem({ item }: { item: CompanySearchItem }) {
           <Action.OpenInBrowser
             title="Open on Companies House"
             url={companyWebUrl(item.company_number)}
+          />
+          <Action
+            title={showingDetail ? "Hide Details" : "Show Details"}
+            icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={onToggleDetail}
           />
           <Action.CopyToClipboard
             title="Copy Company Number"

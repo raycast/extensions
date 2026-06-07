@@ -5,7 +5,7 @@ import {
   List,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { searchCompanies } from "./api";
@@ -14,6 +14,10 @@ import { PAGE_SIZE } from "./constants";
 
 export default function SearchCompanies() {
   const [searchText, setSearchText] = useState("");
+  const [showDetail, setShowDetail] = useCachedState(
+    "companies-show-detail",
+    false,
+  );
 
   const { isLoading, data, pagination, error } = useCachedPromise(
     (query: string) => async (options: { page: number }) => {
@@ -31,15 +35,31 @@ export default function SearchCompanies() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={showDetail}
       throttle
       pagination={pagination}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search companies by name or number…"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="View"
+          value={showDetail ? "detail" : "list"}
+          onChange={(value) => setShowDetail(value === "detail")}
+        >
+          <List.Dropdown.Item title="List View" value="list" />
+          <List.Dropdown.Item title="List & Detail" value="detail" />
+        </List.Dropdown>
+      }
     >
       {data?.length ? (
         data.map((item) => (
-          <CompanyListItem key={item.company_number} item={item} />
+          <CompanyListItem
+            key={item.company_number}
+            item={item}
+            showingDetail={showDetail}
+            onToggleDetail={() => setShowDetail((previous) => !previous)}
+          />
         ))
       ) : error ? (
         <List.EmptyView
