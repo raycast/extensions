@@ -9,11 +9,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Source, UpdateInfo, UpdateResult } from "./utils/types";
-import {
-  brewUpdateIndex,
-  upgradeAllFormulae,
-  upgradeCask,
-} from "./utils/sources/homebrew";
+import { upgradeCask, upgradeFormula } from "./utils/sources/homebrew";
 import { isMasInstalled, installMas, upgradeAllMas } from "./utils/sources/mas";
 import {
   isGemAvailable,
@@ -132,29 +128,7 @@ export default function UpdateEverything() {
       toast.title = `Updating  ${progressBar(finished, total)}  (${finished}/${total})`;
     };
 
-    // Group A: package managers — run in parallel
-    const systemTasks = tasks.filter(
-      (t) => t.group === "system" || t.group === "packages",
-    );
-    // Group B: individual app downloads — run serially (avoid network thrash + admin prompt spam)
-    const appTasks = tasks.filter((t) => t.group === "apps");
-
-    // Run package-manager tasks in parallel
-    await Promise.all(
-      systemTasks.map(async (t) => {
-        patch(t.id, { status: "running" });
-        const result = await t.run((label) => patch(t.id, { progress: label }));
-        patch(t.id, {
-          status: result.success ? "success" : "failed",
-          error: result.error,
-          progress: undefined,
-        });
-        bump();
-      }),
-    );
-
-    // Run individual app downloads serially
-    for (const t of appTasks) {
+    const runOne = async (t: QueueTask) => {
       patch(t.id, { status: "running" });
       const result = await t.run((label) => patch(t.id, { progress: label }));
       patch(t.id, {
@@ -163,7 +137,29 @@ export default function UpdateEverything() {
         progress: undefined,
       });
       bump();
-    }
+    };
+    const runSerially = async (list: QueueTask[]) => {
+      for (const t of list) await runOne(t);
+    };
+
+    // Every Homebrew command (casks AND formulae) shares brew's global lock, so
+    // they must run one at a time — but each is its own task, so the progress
+    // bar still advances per app/formula. Everything else is independent:
+    // package managers fan out in parallel, app downloads run serially (to keep
+    // network + admin prompts sane). All three lanes run concurrently.
+    const isBrew = (t: QueueTask) =>
+      t.source === "homebrew-cask" || t.source === "homebrew-formula";
+    const brewLane = tasks.filter(isBrew);
+    const parallelLane = tasks.filter(
+      (t) => !isBrew(t) && (t.group === "system" || t.group === "packages"),
+    );
+    const appLane = tasks.filter((t) => !isBrew(t) && t.group === "apps");
+
+    await Promise.all([
+      runSerially(brewLane),
+      ...parallelLane.map(runOne),
+      runSerially(appLane),
+    ]);
 
     setRunning(false);
     setDone(true);
@@ -548,27 +544,35 @@ async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
     });
   }
 
-  // Homebrew formulae (CLI tools): one bulk task. Formulae are reliable and
-  // free of the tap-trust/pkg-sudo quirks that make casks worth doing
-  // individually, so a single `brew upgrade --formula` is fine. Runs in the
-  // parallel "system" batch, which completes before the serial "apps" batch
-  // (the per-cask upgrades) starts — so the two never hold brew's lock at once.
-  const formulaeCount = scan.cliPackages.filter(
+  // Homebrew formulae (CLI tools): ONE TASK PER FORMULA, mirroring casks.
+  // Scoping each `brew upgrade <name>` to a single formula (a) gives the
+  // progress bar real granularity and (b) avoids the bulk `brew upgrade
+  // --formula` tap-trust scan that fails the whole run when any third-party tap
+  // is untrusted. These join the serial brew lane in runAll.
+  const outdatedFormulae = scan.cliPackages.filter(
     (p) => p.source === "homebrew-formula",
-  ).length;
-  if (formulaeCount > 0) {
+  );
+  for (const f of outdatedFormulae) {
     tasks.push({
-      id: "system:brew-formulae",
-      group: "system",
+      id: `formula:${f.name}`,
+      group: "packages",
       source: "homebrew-formula",
-      title: "Homebrew CLI tools",
-      subtitle: `${formulaeCount} formula${formulaeCount === 1 ? "" : "e"}`,
+      title: f.name,
+      subtitle: `${shortenVersion(f.currentVersion)} → ${shortenVersion(f.latestVersion)}`,
       status: "pending",
       run: async (onProgress) => {
-        onProgress("Refreshing index…");
-        await brewUpdateIndex();
-        onProgress("Upgrading formulae…");
-        return upgradeAllFormulae();
+        onProgress("Upgrading…");
+        const r = await upgradeFormula(f.name);
+        if (r.success) {
+          recordHistory({
+            name: f.name,
+            source: "homebrew-formula",
+            fromVersion: f.currentVersion,
+            toVersion: f.latestVersion,
+            trigger: "bulk",
+          });
+        }
+        return r;
       },
     });
   }

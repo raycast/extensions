@@ -61,6 +61,32 @@ function looksLikeBadDownload(raw: string): boolean {
   );
 }
 
+/**
+ * Homebrew 4.6+ can require third-party taps to be explicitly "trusted" (when
+ * HOMEBREW_REQUIRE_TAP_TRUST is set). A bulk upgrade then fails with e.g.
+ * "Warning: The following taps are not trusted: kde-mac/kde theboredteam/...".
+ *
+ * Parse the tap names out of that message and run `brew trust --tap <name>` for
+ * each — the user already installed apps from these taps, so trusting them on
+ * upgrade is expected. Returns true if at least one tap was trusted (caller
+ * should then retry the operation). Best-effort: never throws.
+ */
+async function trustUntrustedTaps(brew: string, raw: string): Promise<boolean> {
+  const m = raw.match(/not trusted:\s*([^\n]+)/i);
+  if (!m) return false;
+  const taps = m[1].match(/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+/g) ?? [];
+  let trustedAny = false;
+  for (const tap of taps) {
+    try {
+      await run(brew, ["trust", "--tap", tap]);
+      trustedAny = true;
+    } catch {
+      /* ignore — a tap we can't trust just won't retry-succeed */
+    }
+  }
+  return trustedAny;
+}
+
 const CASK_API = "https://formulae.brew.sh/api/cask.json";
 const CASK_CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
@@ -626,16 +652,16 @@ export async function upgradeCask(
     return { name: token, source: "homebrew-cask", success: true };
   } catch (e) {
     const raw = extractCmdError(e);
-    // Homebrew 4.6+ refuses to act on casks from "untrusted" third-party taps.
-    // The user already adopted this cask from that tap, so trust it and retry
-    // once. Only applies to tap-qualified tokens (owner/repo/cask); official
-    // casks have a bare token and never hit this.
-    if (/not trusted|untrusted tap/i.test(raw) && token.includes("/")) {
-      const tap = token.split("/").slice(0, 2).join("/");
+    // Untrusted third-party tap (HOMEBREW_REQUIRE_TAP_TRUST). Trust the listed
+    // taps via `brew trust --tap` and retry once. The message may list taps
+    // unrelated to this cask, so we parse them from the error rather than
+    // guessing from the token.
+    if (/not trusted/i.test(raw)) {
       try {
-        await run(brew, ["tap", "--force", tap]);
-        await doUpgrade();
-        return { name: token, source: "homebrew-cask", success: true };
+        if (await trustUntrustedTaps(brew, raw)) {
+          await doUpgrade();
+          return { name: token, source: "homebrew-cask", success: true };
+        }
       } catch (e2) {
         return {
           name: token,
@@ -728,15 +754,34 @@ export async function upgradeFormula(name: string): Promise<UpdateResult> {
   // Formulae rarely need sudo (they live under /opt/homebrew which the user
   // owns), but we still bound it on a timeout so the UI can't lock up if a
   // formula's post-install script wedges on a prompt.
+  const doUpgrade = () =>
+    runWithTimeout(brew, ["upgrade", name], BREW_UPGRADE_TIMEOUT_MS);
   try {
-    await runWithTimeout(brew, ["upgrade", name], BREW_UPGRADE_TIMEOUT_MS);
+    await doUpgrade();
     return { name, source: "homebrew-formula", success: true };
   } catch (e) {
+    const raw = extractCmdError(e);
+    // Untrusted third-party tap → trust the listed taps and retry once.
+    if (/not trusted/i.test(raw)) {
+      try {
+        if (await trustUntrustedTaps(brew, raw)) {
+          await doUpgrade();
+          return { name, source: "homebrew-formula", success: true };
+        }
+      } catch (e2) {
+        return {
+          name,
+          source: "homebrew-formula",
+          success: false,
+          error: humanizeBrewError(e2, extractCmdError(e2)),
+        };
+      }
+    }
     return {
       name,
       source: "homebrew-formula",
       success: false,
-      error: extractCmdError(e),
+      error: humanizeBrewError(e, raw),
     };
   }
 }
@@ -751,22 +796,44 @@ export async function upgradeFormula(name: string): Promise<UpdateResult> {
 export async function upgradeAllFormulae(): Promise<UpdateResult> {
   const brew = findBrew();
   if (!brew) return noBrewResult("Homebrew CLI tools", "homebrew-formula");
+  const doUpgrade = () =>
+    runShellWithTimeout(`${brew} upgrade --formula 2>&1`, BREW_BULK_TIMEOUT_MS);
   try {
-    await runShellWithTimeout(
-      `${brew} upgrade --formula 2>&1`,
-      BREW_BULK_TIMEOUT_MS,
-    );
+    await doUpgrade();
     return {
       name: "Homebrew CLI tools",
       source: "homebrew-formula",
       success: true,
     };
   } catch (e) {
+    const raw = extractCmdError(e);
+    // Bulk `brew upgrade --formula` scans every tap, so an untrusted third-party
+    // tap (even a cask-only one) fails the whole run. Trust the listed taps and
+    // retry once.
+    if (/not trusted/i.test(raw)) {
+      try {
+        if (await trustUntrustedTaps(brew, raw)) {
+          await doUpgrade();
+          return {
+            name: "Homebrew CLI tools",
+            source: "homebrew-formula",
+            success: true,
+          };
+        }
+      } catch (e2) {
+        return {
+          name: "Homebrew CLI tools",
+          source: "homebrew-formula",
+          success: false,
+          error: humanizeBrewError(e2, extractCmdError(e2)),
+        };
+      }
+    }
     return {
       name: "Homebrew CLI tools",
       source: "homebrew-formula",
       success: false,
-      error: humanizeBrewError(e, extractCmdError(e)),
+      error: humanizeBrewError(e, raw),
     };
   }
 }
