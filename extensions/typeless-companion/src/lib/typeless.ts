@@ -55,9 +55,12 @@ export async function listHistory() {
 export async function getLatestHistoryRow(
   mode: QuickTranscriptMode = "latest",
 ) {
-  const rows = await listHistory();
-  if (mode === "latest") return rows[0] ?? null;
-  return rows.find((row) => originalModeKind(row) === mode) ?? null;
+  const dbPath = getDatabasePath();
+  const rows = await sqliteJson<RawHistoryRow>(
+    dbPath,
+    latestHistoryRowQuery(mode),
+  );
+  return rows[0] ? normalizeRow(rows[0]) : null;
 }
 
 export function hasTranscript(row: TypelessHistoryRow) {
@@ -288,7 +291,7 @@ function singleLine(value: string) {
   return visibleText(value).replace(/\s+/g, " ");
 }
 
-const historyQuery = `
+const normalizedHistoryCte = `
 WITH normalized AS (
   SELECT
     id,
@@ -322,6 +325,9 @@ WITH normalized AS (
     focused_app_window_title AS focusedWindowTitle
   FROM history
 )
+`;
+
+const historyColumns = `
 SELECT
   id,
   source,
@@ -336,8 +342,50 @@ SELECT
   focusedAppName,
   focusedWindowTitle
 FROM normalized
+`;
+
+const historyOrder = `
 ORDER BY
   coalesce(createdAt, updatedAt) DESC,
   coalesce(updatedAt, createdAt) DESC,
-  source DESC;
+  source DESC
 `;
+
+const historyQuery = `
+${normalizedHistoryCte}
+${historyColumns}
+${historyOrder};
+`;
+
+function latestHistoryRowQuery(mode: QuickTranscriptMode) {
+  const whereClause = latestModeWhereClause(mode);
+
+  return `
+${normalizedHistoryCte}
+${historyColumns}
+${whereClause ? `WHERE ${whereClause}` : ""}
+${historyOrder}
+LIMIT 1;
+`;
+}
+
+function latestModeWhereClause(mode: QuickTranscriptMode) {
+  switch (mode) {
+    case "latest":
+      return "";
+    case "dictation":
+      return "lower(mode) = 'voice_transcript'";
+    case "ask-anything":
+      return [
+        "lower(mode) = 'voice_command'",
+        "lower(mode) LIKE '%ask%'",
+        "lower(CAST(modeMeta AS TEXT)) LIKE '%user_prompt%'",
+        "lower(CAST(modeMeta AS TEXT)) LIKE '%selected_text%'",
+      ].join(" OR ");
+    case "translation":
+      return [
+        "lower(mode) LIKE '%translation%'",
+        "lower(mode) LIKE '%translate%'",
+      ].join(" OR ");
+  }
+}
