@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Add Features from Zoxide Plus] - {PR_MERGE_DATE}
+## [Add Features from Zoxide Plus] - 2026-06-07
 
 Inspired by [UnlockHomes](https://github.com/UnlockHomes)' [similar zoxide extension](https://github.com/raycast/extensions/pull/27348), this update brings over several of its ideas — a configurable search mode, opening directories in your terminal or editor, and more per-result actions.
 
