@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Custom colors, distinct icons, link shortening & UTM] - {PR_MERGE_DATE}
+## [Custom colors, distinct icons, link shortening & UTM] - 2026-06-07
 
 - Fixed error toasts showing "[object Object]" instead of the actual error message (#27569)
 - Added a distinct, color-coded icon per command for easier recognition in Raycast
