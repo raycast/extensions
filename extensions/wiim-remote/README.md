@@ -52,5 +52,5 @@ Once installed, simply trigger the Raycast command palette and search for the Wi
 
 ## Preferences ⚙️
 
-* `IP Address` - You can set the default IP address to use when connecting to a WiiM device. The default IP address is `192.168.1.100`.
+* `IP Address` - You can set the default IP address to use when connecting to a WiiM device. If this is not set, the extension will try to connect to the last connected device or the first detected device on the network.
 * `Volume Step` - You can set the default volume step to use when adjusting the volume on a WiiM device. The default volume step is `5`.

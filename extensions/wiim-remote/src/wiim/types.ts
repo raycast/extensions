@@ -42,7 +42,7 @@ export const DeviceChannel = {
 export const DeviceMode = {
   NONE: "0",
   AIRPLAY: "1",
-  DNLA: "2",
+  DLNA: "2",
   // 10-20 Wiimu playlist types
   PLAYLIST_WIIMU: "10",
   PLAYLIST_USB: "11",

@@ -33,8 +33,8 @@ export class WiiMAPI {
       const req = https
         .get(this.url(command), { agent: this.agent }, (res) => {
           let body = "";
-          res.on("data", (chunk: string) => {
-            body += chunk;
+          res.on("data", (chunk: Buffer) => {
+            body += chunk.toString("utf-8");
           });
           res.on("end", () => {
             if (settled) return;
@@ -243,7 +243,6 @@ export class WiiMAPI {
     const raw = await this.request("getPlayerStatus");
     try {
       const json = JSON.parse(raw);
-      console.log("Raw player status response:", json);
       return {
         type: mapConstType(DeviceType, json.type, "MASTER"),
         ch: mapConstType(DeviceChannel, json.ch, "STEREO"),

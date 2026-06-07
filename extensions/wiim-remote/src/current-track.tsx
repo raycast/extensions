@@ -51,7 +51,6 @@ export default function Command() {
           </Detail.Metadata.TagList>
         </Detail.Metadata>
       }
-      actions={[]}
     />
   );
 }

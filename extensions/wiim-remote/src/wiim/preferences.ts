@@ -1,10 +1,5 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 
-interface WiiMPreferences {
-  wiim_device_ip?: string;
-  wiim_volume_step?: string;
-}
-
 const STORAGE_KEYS = {
   CACHED_IP: "wiim_cached_device_ip",
   CACHE_TIME: "wiim_discovery_cache_time",
@@ -18,7 +13,7 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
  * Returns undefined if not set.
  */
 export function getManualDeviceIP(): string | undefined {
-  const prefs = getPreferenceValues<WiiMPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const ip = prefs.wiim_device_ip?.trim();
   return ip || undefined;
 }
@@ -27,9 +22,9 @@ export function getManualDeviceIP(): string | undefined {
  * Get volume step from user preferences (1–50, default 5).
  */
 export function getVolumeStep(): number {
-  const prefs = getPreferenceValues<WiiMPreferences>();
-  const parsed = prefs.wiim_volume_step ? parseInt(prefs.wiim_volume_step, 10) : 5;
-  return Math.max(1, Math.min(50, isNaN(parsed) ? 5 : parsed));
+  const prefs = getPreferenceValues<Preferences>();
+  const parsed = prefs.wiim_volume_step ? Number.parseInt(prefs.wiim_volume_step, 10) : 5;
+  return Math.max(1, Math.min(50, Number.isNaN(parsed) ? 5 : parsed));
 }
 
 /**
@@ -62,8 +57,8 @@ export async function clearCachedDeviceIP(): Promise<void> {
 export async function isCacheValid(): Promise<boolean> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEYS.CACHE_TIME);
   if (!raw) return false;
-  const cachedAt = parseInt(raw, 10);
-  return !isNaN(cachedAt) && Date.now() - cachedAt < CACHE_TTL;
+  const cachedAt = Number.parseInt(raw, 10);
+  return !Number.isNaN(cachedAt) && Date.now() - cachedAt < CACHE_TTL;
 }
 
 /**
