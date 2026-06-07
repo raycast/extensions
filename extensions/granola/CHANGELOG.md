@@ -1,5 +1,20 @@
 # Granola Changelog
 
+## [Read tokens from Granola's encrypted cache] - {PR_MERGE_DATE}
+
+### Bug Fixes
+
+- Fixed Search Notes, Export Transcripts, Get Transcript, and other commands failing with
+  "Could not communicate with the Granola service" / empty or missing transcripts on newer Granola
+  desktop versions (v7.x+). These versions stop maintaining usable plaintext tokens in
+  `supabase.json` / `stored-accounts.json` (the refresh tokens get revoked with `logout_user`) and
+  instead store the live session in an encrypted cache (`*.enc` + `storage.dek`).
+- The extension now reads the access token from the encrypted store on macOS, decrypting it with the
+  "Granola Safe Storage" Keychain key (Chromium `safeStorage` scheme: PBKDF2 + AES-128-CBC to unwrap
+  the data key, then AES-256-GCM for the payload). The existing plaintext token sources are kept as a
+  fallback for older Granola versions, and the error message now guides users to allow the Keychain
+  prompt when needed.
+
 ## [Sortable date prefixes for exports] - 2026-05-29
 
 - Prefix exported note and transcript filenames with ISO-8601 creation date

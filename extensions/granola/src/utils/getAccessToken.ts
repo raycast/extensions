@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import { getStoredAccountsPath, getSupabaseConfigPath } from "./granolaConfig";
 import { logGranolaError, logGranolaInfo, logGranolaWarn } from "./errorUtils";
+import { decryptGranolaFile, getKeychainPassword, loadDek } from "./granolaCrypto";
 
 const GRANOLA_API_URL = "https://api.granola.ai/v1";
 const GRANOLA_CLIENT_VERSION = "7.162.1";
@@ -247,6 +248,60 @@ async function getAccessTokenFromPlaintextSupabase(): Promise<string | undefined
   return tryRefreshAndSelectAccessToken(workosTokens, persistWorkOsTokensToSupabase);
 }
 
+function parseAccountsArray(value: unknown): Record<string, unknown>[] | undefined {
+  let parsed: unknown = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return undefined;
+    }
+  }
+  return Array.isArray(parsed) ? (parsed as Record<string, unknown>[]) : undefined;
+}
+
+/**
+ * Read a valid access token from the encrypted `supabase.json.enc`, which newer Granola versions
+ * keep up to date (the plaintext `supabase.json` is left stale). Returns undefined if the file
+ * cannot be decrypted (e.g. non-macOS, keychain access denied) so callers fall back.
+ */
+async function getAccessTokenFromEncryptedSupabase(): Promise<string | undefined> {
+  const jsonData = await decryptGranolaFile("supabase.json");
+  if (!jsonData) return undefined;
+
+  const validToken = selectAccessTokenFromSupabaseData(jsonData);
+  if (validToken) return validToken;
+
+  const workosTokens = parseMaybeJsonRecord(jsonData.workos_tokens);
+  return tryRefreshAndSelectAccessToken(workosTokens, persistWorkOsTokensToSupabase);
+}
+
+/**
+ * Read a valid access token from the encrypted `stored-accounts.json.enc`.
+ */
+async function getAccessTokenFromEncryptedStoredAccounts(): Promise<string | undefined> {
+  const jsonData = await decryptGranolaFile("stored-accounts.json");
+  if (!jsonData) return undefined;
+
+  const accounts = parseAccountsArray(jsonData.accounts);
+  if (!accounts) return undefined;
+
+  for (const account of sortStoredAccounts(accounts)) {
+    try {
+      const parsedTokens = parseMaybeJsonRecord(account.tokens);
+      const token = selectAccessToken(parsedTokens);
+      if (token) return token;
+
+      const refreshedToken = await tryRefreshAndSelectAccessToken(parsedTokens);
+      if (refreshedToken) return refreshedToken;
+    } catch {
+      // Try the next saved account.
+    }
+  }
+
+  return undefined;
+}
+
 export async function getLocalGranolaUserInfo(): Promise<LocalGranolaUserInfo> {
   const plaintextSupabase = await readPlaintextSupabaseConfig();
   if (plaintextSupabase?.user_info) {
@@ -267,6 +322,35 @@ export async function getLocalGranolaUserInfo(): Promise<LocalGranolaUserInfo> {
         return {
           userInfo: requireJsonRecord(account.userInfo, "stored account userInfo"),
           sourceName: "stored accounts",
+        };
+      } catch {
+        // Try the next saved account.
+      }
+    }
+  }
+
+  // Newer Granola versions keep user_info only in the encrypted store.
+  const dek = await loadDek();
+  if (dek) {
+    const encryptedSupabase = await decryptGranolaFile("supabase.json", dek);
+    if (encryptedSupabase?.user_info) {
+      try {
+        return {
+          userInfo: requireJsonRecord(encryptedSupabase.user_info, "encrypted Supabase config user_info"),
+          sourceName: "encrypted Supabase config",
+        };
+      } catch {
+        // Fall through to encrypted stored accounts.
+      }
+    }
+
+    const encryptedStored = await decryptGranolaFile("stored-accounts.json", dek);
+    const encryptedAccounts = encryptedStored ? parseAccountsArray(encryptedStored.accounts) : undefined;
+    for (const account of encryptedAccounts ? sortStoredAccounts(encryptedAccounts) : []) {
+      try {
+        return {
+          userInfo: requireJsonRecord(account.userInfo, "encrypted stored account userInfo"),
+          sourceName: "encrypted stored accounts",
         };
       } catch {
         // Try the next saved account.
@@ -333,20 +417,52 @@ async function getAccessTokenDiagnostics(): Promise<Record<string, unknown>> {
     diagnostics.storedAccountsExists = false;
   }
 
+  // Encrypted store (newer Granola versions). Report presence + whether we can decrypt it.
+  try {
+    await fs.access(getSupabaseConfigPath().replace(/supabase\.json$/, "supabase.json.enc"));
+    diagnostics.encryptedSupabaseExists = true;
+  } catch {
+    diagnostics.encryptedSupabaseExists = false;
+  }
+  diagnostics.keychainPasswordAvailable = Boolean(await getKeychainPassword());
+  const encryptedSupabase = await decryptGranolaFile("supabase.json");
+  diagnostics.encryptedSupabaseDecryptable = Boolean(encryptedSupabase);
+  if (encryptedSupabase) {
+    diagnostics.encryptedSupabaseWorkosTokens = describeTokenRecord(
+      parseMaybeJsonRecord(encryptedSupabase.workos_tokens),
+    );
+  }
+
   return diagnostics;
 }
 
 async function getAccessToken() {
-  const accessToken = (await getAccessTokenFromPlaintextSupabase()) ?? (await getAccessTokenFromStoredAccounts());
+  const accessToken =
+    (await getAccessTokenFromPlaintextSupabase()) ??
+    (await getAccessTokenFromEncryptedSupabase()) ??
+    (await getAccessTokenFromStoredAccounts()) ??
+    (await getAccessTokenFromEncryptedStoredAccounts());
 
   if (!accessToken) {
     const diagnostics = await getAccessTokenDiagnostics();
     const workosExpired = diagnostics.supabaseWorkosTokens as { expired?: boolean } | undefined;
-    const error = new Error(
-      workosExpired?.expired
-        ? "Your Granola access token has expired and could not be refreshed automatically. Open the Granola app while logged in to refresh your session, then try again."
-        : "A usable access token was not found in your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.",
-    );
+    const encryptedExists = diagnostics.encryptedSupabaseExists === true;
+    const keychainAvailable = diagnostics.keychainPasswordAvailable === true;
+
+    let message: string;
+    if (encryptedExists && process.platform === "darwin" && !keychainAvailable) {
+      // Newer Granola only keeps a usable token in the encrypted store, which needs Keychain access.
+      message =
+        "Granola stores your session in an encrypted file that requires Keychain access. When macOS asks to use the “Granola Safe Storage” keychain item, choose Allow, then try again. Make sure the Granola app is installed and you are logged in.";
+    } else if (workosExpired?.expired) {
+      message =
+        "Your Granola access token has expired and could not be refreshed automatically. Open the Granola app while logged in to refresh your session, then try again.";
+    } else {
+      message =
+        "A usable access token was not found in your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.";
+    }
+
+    const error = new Error(message);
     logGranolaError("getAccessToken", error, diagnostics);
     throw error;
   }
