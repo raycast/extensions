@@ -15,8 +15,6 @@ Search your Google Contacts **and your organization's directory** from Raycast, 
 
 ![Google Directory Search for Raycast](./metadata/google-directory-search-1.png)
 
-![Google Directory Search for Raycast Settings](./metadata/google-directory-search-2.png)
-
 ## How the cache works
 
 On launch the command renders the contacts saved from last time (instant, zero network). It then asks Google's [People API](https://developers.google.com/people) for changes only, using a **sync token**:
