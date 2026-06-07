@@ -1,5 +1,13 @@
 # Quit Applications Changelog
 
+## [Bugfix & Performance] - 2026-06-07
+
+- Migrated running apps query to ASObjC (NSWorkspace) to prevent 5-second execution timeouts and process retrieval crashes.
+- Prevented system helper processes from cluttering the application list.
+- Patched AppleScript string injection vulnerabilities.
+- Resolved React duplicate key warnings and state synchronization bugs by targeting applications using absolute paths.
+- Fixed a crash in "Quit All" when `excludeApplications` preference is empty/undefined.
+
 ## [Bugfix] - 2026-05-28
 
 - Added timeout handling and fallback app discovery when loading running applications.
