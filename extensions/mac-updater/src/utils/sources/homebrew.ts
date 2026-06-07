@@ -94,86 +94,13 @@ function caskCachePath(): string {
   return path.join(environment.supportPath, "cask-api-v1.json");
 }
 
-// Slim entry — only the fields we actually read at runtime. The full cask.json
-// entries are 3-5KB each and we have ~10,000 of them → ~30-50MB in RAM. Slimming
-// down to these 4 fields (~200-500 bytes/entry) cuts the resident set to ~3-5MB.
-// Anything else we'd want from a cask (description, depends_on, artifacts, etc.)
-// we'll re-fetch on demand via the per-cask endpoint.
-export interface CaskEntry {
-  token: string;
-  name: string[];
-  version: string;
-  homepage: string;
-}
-
-interface CaskIndex {
-  byBundleId: Map<string, CaskEntry>;
-  byName: Map<string, CaskEntry>;
-  byToken: Map<string, CaskEntry>;
-  fetchedAt: number;
-}
+// Cask index types + the memory-frugal Buffer parser live in ../cask-index
+// (kept dependency-free for unit testing). Re-export CaskEntry for existing
+// import sites.
+import { type CaskEntry, type CaskIndex, parseAndIndex } from "../cask-index";
+export type { CaskEntry };
 
 let memCache: CaskIndex | null = null;
-
-// Raw entry shape — we only see this transiently while building the index.
-interface RawCaskEntry {
-  token: string;
-  name?: string[];
-  version?: string;
-  homepage?: string;
-  artifacts?: unknown[];
-}
-
-/**
- * Parse the on-disk cask.json into the lookup index, slimming each entry to
- * only the fields we use. The raw parsed array is deliberately scoped to this
- * function so it becomes unreachable as soon as we return — letting V8's GC
- * reclaim the ~60MB of intermediate allocations.
- */
-function parseAndIndex(raw: string, fetchedAt: number): CaskIndex {
-  const parsed = JSON.parse(raw) as RawCaskEntry[];
-  const byBundleId = new Map<string, CaskEntry>();
-  const byName = new Map<string, CaskEntry>();
-  const byToken = new Map<string, CaskEntry>();
-
-  for (const entry of parsed) {
-    if (!entry.token) continue;
-    const slim: CaskEntry = {
-      token: entry.token,
-      name: entry.name ?? [],
-      version: entry.version ?? "",
-      homepage: entry.homepage ?? "",
-    };
-    byToken.set(slim.token, slim);
-    for (const n of slim.name) {
-      const key = n.toLowerCase().replace(/\.app$/, "");
-      if (!byName.has(key)) byName.set(key, slim);
-    }
-    // Extract bundle IDs from zap/uninstall artifact blocks. We discard the
-    // raw artifact arrays as soon as this loop body returns — only the
-    // extracted bundle ID strings (a few per cask) live on.
-    for (const art of entry.artifacts ?? []) {
-      if (typeof art !== "object" || !art) continue;
-      const obj = art as Record<string, unknown>;
-      const zap = (obj.zap as Array<Record<string, unknown>> | undefined) ?? [];
-      const uninstall =
-        (obj.uninstall as Array<Record<string, unknown>> | undefined) ?? [];
-      for (const block of [...zap, ...uninstall]) {
-        for (const key of ["pkgutil", "quit", "launchctl", "delete", "trash"]) {
-          const val = block[key];
-          const arr = Array.isArray(val) ? val : val ? [val] : [];
-          for (const v of arr) {
-            if (typeof v === "string" && /^[a-z0-9]+\.[a-z0-9.-]+$/i.test(v)) {
-              if (!byBundleId.has(v)) byBundleId.set(v, slim);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return { byBundleId, byName, byToken, fetchedAt };
-}
 
 // cask.json is ~15MB — way larger than child_process.exec's default maxBuffer.
 // Curl directly to a tmp file to skip stdout buffering, then read+parse and
@@ -199,8 +126,10 @@ async function fetchAndIndex(targetPath: string): Promise<CaskIndex> {
     }
     throw new Error(`cask.json fetch returned only ${size} bytes`);
   }
-  const raw = fs.readFileSync(tmp, "utf8");
-  const index = parseAndIndex(raw, Date.now());
+  // Read as a Buffer (off-heap) so parseAndIndex can slice entries without
+  // putting the whole 15MB on the JS heap.
+  const buf = fs.readFileSync(tmp);
+  const index = parseAndIndex(buf, Date.now());
   // Atomic move into place after we have a valid parse
   try {
     fs.renameSync(tmp, targetPath);
@@ -219,8 +148,7 @@ export async function getCaskIndex(): Promise<CaskIndex> {
     if (fs.existsSync(cachePath)) {
       const stat = fs.statSync(cachePath);
       if (Date.now() - stat.mtimeMs < CASK_CACHE_TTL) {
-        const raw = fs.readFileSync(cachePath, "utf8");
-        memCache = parseAndIndex(raw, stat.mtimeMs);
+        memCache = parseAndIndex(fs.readFileSync(cachePath), stat.mtimeMs);
         return memCache;
       }
     }
@@ -241,8 +169,10 @@ export async function getCaskIndex(): Promise<CaskIndex> {
     // If fetch failed but we have a stale disk cache, use it rather than nothing
     try {
       if (fs.existsSync(cachePath)) {
-        const raw = fs.readFileSync(cachePath, "utf8");
-        memCache = parseAndIndex(raw, fs.statSync(cachePath).mtimeMs);
+        memCache = parseAndIndex(
+          fs.readFileSync(cachePath),
+          fs.statSync(cachePath).mtimeMs,
+        );
         return memCache;
       }
     } catch {
