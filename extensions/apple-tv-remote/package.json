@@ -9,6 +9,9 @@
     "Media",
     "Applications"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -27,7 +30,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "pause · open Netflix · play Severance",
+          "placeholder": "pause \u00b7 open Netflix \u00b7 play Severance",
           "type": "text",
           "required": true
         }

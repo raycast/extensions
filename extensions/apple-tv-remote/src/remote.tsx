@@ -272,33 +272,34 @@ export default function Remote() {
       columns={5}
       aspectRatio="4/3"
       inset={Grid.Inset.Small}
-      navigationTitle={`${deviceName} · ${statusLabel}`}
       searchBarPlaceholder="Keys: WASD move · F select · Space ⏯ · B back · Q home"
       filtering={false}
       onSearchTextChange={handleTyped}
       searchText=""
     >
-      {cells.map((cell) => (
-        <Grid.Item
-          key={cell.id}
-          content={
-            cell.icon === "blank" ? "blank.png" : { source: cell.icon, tintColor: cell.tint ?? Color.SecondaryText }
-          }
-          title={cell.title}
-          actions={
-            cell.action ? (
-              <ActionPanel>
-                <Action
-                  title={cell.title || "Press"}
-                  icon={cell.icon === "blank" ? Icon.Dot : cell.icon}
-                  onAction={() => (cell.action === "type-text" ? pushTypeText() : run(cell.action as DeviceAction))}
-                />
-                {sharedShortcuts}
-              </ActionPanel>
-            ) : undefined
-          }
-        />
-      ))}
+      <Grid.Section title={`${deviceName} · ${statusLabel}`}>
+        {cells.map((cell) => (
+          <Grid.Item
+            key={cell.id}
+            content={
+              cell.icon === "blank" ? "blank.png" : { source: cell.icon, tintColor: cell.tint ?? Color.SecondaryText }
+            }
+            title={cell.title}
+            actions={
+              cell.action ? (
+                <ActionPanel>
+                  <Action
+                    title={cell.title || "Press"}
+                    icon={cell.icon === "blank" ? Icon.Dot : cell.icon}
+                    onAction={() => (cell.action === "type-text" ? pushTypeText() : run(cell.action as DeviceAction))}
+                  />
+                  {sharedShortcuts}
+                </ActionPanel>
+              ) : undefined
+            }
+          />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }

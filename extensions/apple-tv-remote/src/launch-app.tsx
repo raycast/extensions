@@ -73,6 +73,11 @@ export default function LaunchAppCommand() {
 
   return (
     <Grid isLoading={isLoading} searchBarPlaceholder="Search Apple TV apps...">
+      <Grid.EmptyView
+        icon={Icon.AppWindow}
+        title="No matching apps"
+        description="Try a different search, or open an app by its bundle ID."
+      />
       {items.map((entry) => (
         <Grid.Item
           key={entry.bundleId}
