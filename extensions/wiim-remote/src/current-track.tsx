@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { resolveDevice } from "./wiim/discovery";
 import { WiiMAPI } from "./wiim/api";
 import { MetaInfo } from "./wiim/types";
+import { showFailureToast } from "@raycast/utils";
+import { WiiMAPIError } from "./wiim/errors";
 
 // Popular encoders and compression libraries cap out at 24-bit.
 function clampBitDepth(value: number, min: number): string {
