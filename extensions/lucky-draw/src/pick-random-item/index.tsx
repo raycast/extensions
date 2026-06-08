@@ -21,7 +21,6 @@ function PickRandomItemResult({ onReset, value }: PickRandomItemResultProps) {
 export default function PickRandomItemCommand() {
   const [searchText, setSearchText] = useState<string>("");
   const [customItems, setCustomItems] = useState<string[]>([]);
-  const [useDefaultList, setUseDefaultList] = useState<boolean>(false);
   const [value, setValue] = useState<string | null>(null);
 
   async function handleAddItem() {
@@ -48,35 +47,27 @@ export default function PickRandomItemCommand() {
   }
 
   async function handlePickRandomItem() {
-    const items = customItems;
-
-    if (items.length === 0) {
+    if (customItems.length === 0) {
       await showToast({
-        message: "Add at least one item or enable a populated default list.",
+        message: "Add at least one item before picking.",
         style: Toast.Style.Failure,
         title: "No items found",
       });
       return;
     }
 
-    setValue(pickRandomItem({ items }) ?? null);
+    setValue(pickRandomItem({ items: customItems }) ?? null);
   }
 
   function handleRemoveItem(index: number) {
     setCustomItems((previousItems) => removeItemAtIndex(previousItems, index));
   }
 
-  function toggleDefaultList() {
-    setUseDefaultList((currentValue) => !currentValue);
-  }
-
   if (value !== null) {
     return <PickRandomItemResult onReset={() => setValue(null)} value={value} />;
   }
 
-  const allItems = customItems;
   const addItemTitle = searchText.length > 0 ? `Add "${searchText}"` : "Type an item to add";
-  const defaultListStatus = useDefaultList ? "On" : "Off";
 
   return (
     <List
@@ -91,7 +82,6 @@ export default function PickRandomItemCommand() {
       <List.Section title="Composer">
         <List.Item
           id="composer"
-          accessories={[{ tag: `Default List: ${defaultListStatus}` }]}
           actions={
             <ActionPanel>
               <Action icon={Icon.Plus} onAction={handleAddItem} title="Add Item" />
@@ -101,45 +91,30 @@ export default function PickRandomItemCommand() {
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
                 title="Pick Random Item"
               />
-              <Action
-                icon={useDefaultList ? Icon.CheckCircle : Icon.Circle}
-                onAction={toggleDefaultList}
-                title={useDefaultList ? "Disable Default List" : "Enable Default List"}
-              />
             </ActionPanel>
           }
           icon={Icon.PlusCircle}
           title={addItemTitle}
         />
       </List.Section>
-      <List.Section subtitle={`${allItems.length}`} title="Items in Play">
-        {allItems.length === 0 ? (
+      <List.Section subtitle={`${customItems.length}`} title="Items in Play">
+        {customItems.length === 0 ? (
           <List.Item
             id="empty-state"
             actions={
               <ActionPanel>
                 <Action icon={Icon.Plus} onAction={handleAddItem} title="Add Item" />
-                <Action
-                  icon={useDefaultList ? Icon.CheckCircle : Icon.Circle}
-                  onAction={toggleDefaultList}
-                  title={useDefaultList ? "Disable Default List" : "Enable Default List"}
-                />
               </ActionPanel>
             }
             icon={Icon.MinusCircle}
             title="No items yet"
           />
         ) : (
-          allItems.map((item, index) => {
-            const isDefaultItem = useDefaultList && index < allItems.length;
-            const itemIndex = useDefaultList ? allItems.length : 0;
-            const customItemIndex = isDefaultItem ? -1 : index - itemIndex;
-
+          customItems.map((item, index) => {
             return (
               <List.Item
-                id={`${isDefaultItem ? "default" : "custom"}-${index}`}
-                key={`${isDefaultItem ? "default" : "custom"}-${index}-${item}`}
-                accessories={isDefaultItem ? [{ tag: "Default" }] : []}
+                id={`custom-${index}`}
+                key={`custom-${index}-${item}`}
                 actions={
                   <ActionPanel>
                     <Action icon={Icon.Plus} onAction={handleAddItem} title="Add Item" />
@@ -149,19 +124,11 @@ export default function PickRandomItemCommand() {
                       shortcut={{ modifiers: ["cmd"], key: "return" }}
                       title="Pick Random Item"
                     />
-                    {isDefaultItem ? null : (
-                      <Action
-                        icon={Icon.Trash}
-                        // Only custom items can be removed from the list.
-                        onAction={() => handleRemoveItem(customItemIndex)}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                        title="Remove Item"
-                      />
-                    )}
                     <Action
-                      icon={useDefaultList ? Icon.CheckCircle : Icon.Circle}
-                      onAction={toggleDefaultList}
-                      title={useDefaultList ? "Disable Default List" : "Enable Default List"}
+                      icon={Icon.Trash}
+                      onAction={() => handleRemoveItem(index)}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      title="Remove Item"
                     />
                   </ActionPanel>
                 }

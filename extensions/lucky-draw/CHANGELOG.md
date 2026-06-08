@@ -1,6 +1,6 @@
 # Lucky Draw Changelog
 
-## Release 1.0.0 - 2026-06-08
+## [Initial Release] - {PR_MERGE_DATE}
 
 This first release introduces the core Lucky Draw command set for Raycast,
 along with visual polish and test coverage to support the extension.
