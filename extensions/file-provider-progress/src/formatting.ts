@@ -45,18 +45,6 @@ export function formatTransfer(progress: TransferProgress | null | undefined): s
   return `${formatBytes(progress.completedBytes)} / ${formatBytes(progress.totalBytes)} (${formatPercent(transferFraction(progress))})`;
 }
 
-export function formatTransferPercent(progress: TransferProgress): string {
-  return formatPercent(transferFraction(progress));
-}
-
-export function formatRemaining(progress: TransferProgress | null | undefined): string | undefined {
-  if (!progress) {
-    return undefined;
-  }
-
-  return `${formatBytes(progress.remainingBytes)} remaining`;
-}
-
 export function formatTransferProgressRow(label: string, progress: TransferProgress | null | undefined): ProgressRow {
   const gradientStart = label === "Uploading" ? "#2DD4FF" : "#67E8A5";
   const gradientEnd = label === "Uploading" ? "#0A84FF" : "#30D158";
@@ -196,25 +184,4 @@ export function domainStatusIcon(snapshot: DomainSnapshot) {
   }
 
   return { source: Icon.CheckCircle, tintColor: Color.Green };
-}
-
-export function statusAccessory(snapshot: DomainSnapshot): string {
-  if (snapshot.probeError) {
-    return "Error";
-  }
-
-  const activeTransfers = [snapshot.upload, snapshot.download].filter(Boolean).length;
-  if (activeTransfers > 0) {
-    return activeTransfers === 1 ? "1 transfer" : `${activeTransfers} transfers`;
-  }
-
-  if (snapshot.health.needsAuth) {
-    return "Needs sign-in";
-  }
-
-  if (snapshot.health.isActive) {
-    return "Active";
-  }
-
-  return "Idle";
 }

@@ -1,17 +1,13 @@
 #!/bin/sh
 set -eu
 
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-NATIVE_DIR="$ROOT_DIR/raycast/native"
-SCRATCH_DIR="$ROOT_DIR/raycast/.raycast-swift-build"
-OUTPUT_DIR="$ROOT_DIR/raycast/assets/bin"
-OUTPUT_BIN="$OUTPUT_DIR/fp-progress"
-SIGNATURE_FILE="$ROOT_DIR/raycast/fp-progress.source.sha256"
+. "$(dirname "$0")/layout.sh"
+
 CONFIGURATION="${1:-release}"
 
 native_source_signature() {
   (
-    cd "$NATIVE_DIR"
+    cd "$SWIFT_PACKAGE_DIR"
     find . \
       -type f \
       ! -name ".DS_Store" \
@@ -37,8 +33,8 @@ case "$CONFIGURATION" in
     ;;
 esac
 
-"$ROOT_DIR/raycast/scripts/sync-native.sh"
-"$ROOT_DIR/raycast/scripts/verify-native.sh"
+"$SCRIPT_DIR/sync-native.sh"
+"$SCRIPT_DIR/verify-native.sh"
 
 case "$CONFIGURATION" in
   debug)
@@ -72,7 +68,7 @@ if [ "$CONFIGURATION" = "debug" ] &&
   exit 0
 fi
 
-swift build --package-path "$NATIVE_DIR" --scratch-path "$SCRATCH_DIR" -c "$CONFIGURATION" --arch arm64 --arch x86_64
+swift build --package-path "$SWIFT_PACKAGE_DIR" --scratch-path "$SCRATCH_DIR" -c "$CONFIGURATION" --arch arm64 --arch x86_64
 lipo "$PRODUCT_BIN" -verify_arch arm64 x86_64
 mkdir -p "$(dirname "$CONFIGURATION_SIGNATURE_FILE")"
 printf "%s\n" "$SOURCE_SIGNATURE" > "$CONFIGURATION_SIGNATURE_FILE"

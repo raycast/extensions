@@ -6,11 +6,6 @@ import type { StatusReport } from "./models";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  cliPath?: string;
-  timeoutSeconds?: string;
-};
-
 export async function loadStatusReport(): Promise<StatusReport> {
   const preferences = getPreferenceValues<Preferences>();
   const cliPath = resolveCliPath(preferences.cliPath);

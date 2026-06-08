@@ -28,6 +28,7 @@
     ]
   },
   "include": [
+    "raycast-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx"
   ]
