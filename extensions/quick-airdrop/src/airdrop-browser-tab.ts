@@ -1,5 +1,5 @@
 import { BrowserExtension, environment, showHUD, showToast, Toast } from "@raycast/api";
-import { airDropItems } from "./lib/airdrop";
+import { airDropItems, isHttpUrl } from "./lib/airdrop";
 
 export default async function Command() {
   if (!environment.canAccess(BrowserExtension)) {
@@ -30,6 +30,15 @@ export default async function Command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "No active browser tab found",
+    });
+    return;
+  }
+
+  if (!isHttpUrl(url)) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot AirDrop this URL",
+      message: "Only http(s) links are supported",
     });
     return;
   }
