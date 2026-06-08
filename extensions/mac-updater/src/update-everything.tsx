@@ -439,9 +439,9 @@ async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
       status: "pending",
       run: async (onProgress) => {
         // upgradeCask quits the app if it's running and handles pkg-sudo via
-        // SUDO_ASKPASS, so we just drive the label here.
+        // SUDO_ASKPASS; the onProgress callback drives a live download bar.
         onProgress("Upgrading…");
-        const r = await upgradeCask(token, a.app.name);
+        const r = await upgradeCask(token, a.app.name, onProgress);
         if (r.success) {
           recordHistory({
             name: a.app.name,

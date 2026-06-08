@@ -3,6 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import { extractCmdError, run, runShell } from "./shell";
 import { quitAppIfRunning } from "./process-control";
+import { headContentLength, pollFileProgress } from "./progress";
 
 export interface ReplaceResult {
   success: boolean;
@@ -35,10 +36,21 @@ async function downloadFile(
   onProgress?: ProgressFn,
 ): Promise<void> {
   onProgress?.("Downloading…");
-  // -L follow redirects, --fail to error on 4xx/5xx, --max-time 10 min
-  await runShell(
-    `/usr/bin/curl -fsSL --max-time 600 -A 'Mac Updater/1.0' -o ${shq(destPath)} ${shq(url)}`,
-  );
+  // Get the total size up front (best-effort) so we can show a real % bar, then
+  // poll the file curl is writing to. curl streams to destPath directly.
+  let stop: (() => void) | null = null;
+  if (onProgress) {
+    const total = await headContentLength(url);
+    stop = pollFileProgress(destPath, total, onProgress, "Downloading");
+  }
+  try {
+    // -L follow redirects, --fail to error on 4xx/5xx, --max-time 10 min
+    await runShell(
+      `/usr/bin/curl -fsSL --max-time 600 -A 'Mac Updater/1.0' -o ${shq(destPath)} ${shq(url)}`,
+    );
+  } finally {
+    stop?.();
+  }
 }
 
 async function detectArchive(

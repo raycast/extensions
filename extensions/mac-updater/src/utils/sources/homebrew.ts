@@ -11,6 +11,8 @@ import {
 } from "../shell";
 import { quitAppIfRunning } from "../process-control";
 import { getAskpassScript } from "../sudo-askpass";
+import { headContentLength, pollFileProgress } from "../progress";
+import type { ProgressFn } from "../progress";
 import { InstalledApp, UpdateInfo, UpdateResult, CliPackage } from "../types";
 import { hasUpdate } from "../version";
 
@@ -537,6 +539,55 @@ function greedyFlagFor(token: string): "--greedy" | "--greedy-latest" {
 }
 
 /**
+ * Start a best-effort download-progress poller for a cask. brew suppresses its
+ * own progress bar when its output is piped (our case), so instead we watch the
+ * file brew downloads into. `brew --cache --cask <token>` gives the final
+ * artifact path; brew streams into `<that>.incomplete` first. The total size
+ * comes from a HEAD on the cask's URL. Everything here is wrapped so it can
+ * never break the upgrade — on any failure the caller just sees phase labels.
+ * Returns a stop() the caller invokes when brew finishes.
+ */
+function startCaskDownloadProgress(
+  brew: string,
+  token: string,
+  onProgress: ProgressFn,
+): () => void {
+  let pollerStop: (() => void) | null = null;
+  let finished = false;
+  onProgress("Downloading…");
+  (async () => {
+    try {
+      const [cacheRes, infoRes] = await Promise.all([
+        run(brew, ["--cache", "--cask", token]),
+        run(brew, ["info", "--cask", "--json=v2", token]),
+      ]);
+      const cachePath = cacheRes.stdout.trim();
+      if (!cachePath || finished) return;
+      let total = 0;
+      try {
+        const url = JSON.parse(infoRes.stdout)?.casks?.[0]?.url;
+        if (typeof url === "string") total = await headContentLength(url);
+      } catch {
+        /* no total — poller shows a MB counter instead */
+      }
+      if (finished) return;
+      pollerStop = pollFileProgress(
+        `${cachePath}.incomplete`,
+        total,
+        onProgress,
+        "Downloading",
+      );
+    } catch {
+      /* ignore — progress is purely cosmetic */
+    }
+  })();
+  return () => {
+    finished = true;
+    pollerStop?.();
+  };
+}
+
+/**
  * Upgrade a single cask, with three resilience layers stacked:
  *   1. Quit the running app first — brew can't replace /Applications/Foo.app
  *      while macOS holds it open, and pkg-based installers often fail silently
@@ -554,6 +605,7 @@ function greedyFlagFor(token: string): "--greedy" | "--greedy-latest" {
 export async function upgradeCask(
   token: string,
   appName?: string,
+  onProgress?: ProgressFn,
 ): Promise<UpdateResult> {
   const brew = findBrew();
   if (!brew) return noBrewResult(token, "homebrew-cask");
@@ -577,58 +629,67 @@ export async function upgradeCask(
       { SUDO_ASKPASS: getAskpassScript() },
     );
 
+  // Live download progress (best-effort): watch brew's .incomplete file.
+  const stopProgress = onProgress
+    ? startCaskDownloadProgress(brew, token, onProgress)
+    : null;
+
   try {
-    await doUpgrade();
-    return { name: token, source: "homebrew-cask", success: true };
-  } catch (e) {
-    const raw = extractCmdError(e);
-    // Untrusted third-party tap (HOMEBREW_REQUIRE_TAP_TRUST). Trust the listed
-    // taps via `brew trust --tap` and retry once. The message may list taps
-    // unrelated to this cask, so we parse them from the error rather than
-    // guessing from the token.
-    if (/not trusted/i.test(raw)) {
-      try {
-        if (await trustUntrustedTaps(brew, raw)) {
+    try {
+      await doUpgrade();
+      return { name: token, source: "homebrew-cask", success: true };
+    } catch (e) {
+      const raw = extractCmdError(e);
+      // Untrusted third-party tap (HOMEBREW_REQUIRE_TAP_TRUST). Trust the listed
+      // taps via `brew trust --tap` and retry once. The message may list taps
+      // unrelated to this cask, so we parse them from the error rather than
+      // guessing from the token.
+      if (/not trusted/i.test(raw)) {
+        try {
+          if (await trustUntrustedTaps(brew, raw)) {
+            await doUpgrade();
+            return { name: token, source: "homebrew-cask", success: true };
+          }
+        } catch (e2) {
+          return {
+            name: token,
+            source: "homebrew-cask",
+            success: false,
+            error: humanizeBrewError(e2, extractCmdError(e2)),
+          };
+        }
+      }
+      // Corrupt/truncated cached download (e.g. an LZMA DMG that won't mount):
+      // re-fetch the artifact fresh and retry the upgrade once. This is the
+      // single most common transient cask failure — a stale download in
+      // ~/Library/Caches/Homebrew that passed sha but won't mount.
+      if (looksLikeBadDownload(raw)) {
+        try {
+          await runWithTimeout(
+            brew,
+            ["fetch", "--force", "--cask", token],
+            BREW_BULK_TIMEOUT_MS,
+          );
           await doUpgrade();
           return { name: token, source: "homebrew-cask", success: true };
+        } catch (e2) {
+          return {
+            name: token,
+            source: "homebrew-cask",
+            success: false,
+            error: humanizeBrewError(e2, extractCmdError(e2)),
+          };
         }
-      } catch (e2) {
-        return {
-          name: token,
-          source: "homebrew-cask",
-          success: false,
-          error: humanizeBrewError(e2, extractCmdError(e2)),
-        };
       }
+      return {
+        name: token,
+        source: "homebrew-cask",
+        success: false,
+        error: humanizeBrewError(e, raw),
+      };
     }
-    // Corrupt/truncated cached download (e.g. an LZMA DMG that won't mount):
-    // re-fetch the artifact fresh and retry the upgrade once. This is the
-    // single most common transient cask failure — a stale download in
-    // ~/Library/Caches/Homebrew that passed sha but won't mount.
-    if (looksLikeBadDownload(raw)) {
-      try {
-        await runWithTimeout(
-          brew,
-          ["fetch", "--force", "--cask", token],
-          BREW_BULK_TIMEOUT_MS,
-        );
-        await doUpgrade();
-        return { name: token, source: "homebrew-cask", success: true };
-      } catch (e2) {
-        return {
-          name: token,
-          source: "homebrew-cask",
-          success: false,
-          error: humanizeBrewError(e2, extractCmdError(e2)),
-        };
-      }
-    }
-    return {
-      name: token,
-      source: "homebrew-cask",
-      success: false,
-      error: humanizeBrewError(e, raw),
-    };
+  } finally {
+    stopProgress?.();
   }
 }
 

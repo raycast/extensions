@@ -330,6 +330,9 @@ export default function MacUpdater() {
           result = await upgradeCask(
             info.caskToken ?? info.app.name.toLowerCase(),
             info.app.name,
+            (label) => {
+              toast.title = `${info.app.name}: ${label}`;
+            },
           );
           break;
         case "homebrew-formula":
