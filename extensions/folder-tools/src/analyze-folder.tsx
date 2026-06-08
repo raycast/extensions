@@ -10,6 +10,7 @@ import {
 import React from "react";
 import {
   ResultDetail,
+  isLongWorkflow,
   prefs,
   runWorkflowCapture,
   runWorkflowTerminal,
@@ -28,12 +29,6 @@ type Values = {
   openResult?: boolean;
   dryRun?: boolean;
 };
-
-function isLongWorkflow(workflow: Workflow): boolean {
-  return Boolean(
-    workflows.find((candidate) => candidate.value === workflow)?.longRunning,
-  );
-}
 
 export default function Command(props: { draftValues?: Values }) {
   const { push } = useNavigation();

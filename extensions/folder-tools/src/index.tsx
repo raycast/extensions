@@ -3,6 +3,7 @@ import React from "react";
 import {
   ResultDetail,
   binPath,
+  isLongWorkflow,
   openPath,
   prefs,
   runGraphifyDetect,
@@ -27,12 +28,6 @@ function useResultRunner() {
     const result = await runner();
     push(<ResultDetail result={result} />);
   };
-}
-
-function isLongWorkflow(workflow: Workflow): boolean {
-  return Boolean(
-    workflows.find((candidate) => candidate.value === workflow)?.longRunning,
-  );
 }
 
 export default function Command() {

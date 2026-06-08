@@ -33,13 +33,6 @@ export type Workflow =
   | "brain-index"
   | "brain-down";
 
-export type Preferences = {
-  toolsRoot: string;
-  defaultTarget: string;
-  neo4jUrl?: string;
-  terminalApp: "Terminal" | "iTerm";
-};
-
 export type CommandResult = {
   title: string;
   command: string;
@@ -132,6 +125,12 @@ export const workflows: {
     description: "Stop agent-brain/Neo4j services.",
   },
 ];
+
+export function isLongWorkflow(workflow: Workflow): boolean {
+  return Boolean(
+    workflows.find((candidate) => candidate.value === workflow)?.longRunning,
+  );
+}
 
 export function expandPath(value: string): string {
   if (value === "~") return homedir();
