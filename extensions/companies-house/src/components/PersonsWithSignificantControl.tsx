@@ -93,7 +93,7 @@ export function PersonsWithSignificantControl({
 }
 
 function PscRow({ psc, pscWebUrl }: { psc: PscItem; pscWebUrl: string }) {
-  const name = psc.name ?? "Super secure person";
+  const name = psc.name ?? "Name withheld";
   const ceased = Boolean(psc.ceased_on);
   const dob = formatDateOfBirth(psc.date_of_birth);
   const address = formatAddress(psc.address);
