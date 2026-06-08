@@ -24,8 +24,9 @@ export default function Command() {
     resolveDevice()
       .then((device) => new WiiMAPI(device).getMetaInfo())
       .then((metaInfo) => setMetaInfo(metaInfo))
-      .catch(() => {
-        /* keep default */
+      .catch((error) => {
+        const hint = error instanceof WiiMAPIError ? error.getHint() : { title: "Error", message: String(error) };
+        showFailureToast(hint.title, { message: hint.message });
       })
       .finally(() => setIsLoading(false));
   }, []);
