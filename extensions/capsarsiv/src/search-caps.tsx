@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Detail,
   getPreferenceValues,
   Icon,
@@ -8,6 +9,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { extname, join } from "node:path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Preferences = {
@@ -86,6 +90,69 @@ function compactText(parts: Array<string | number | null | undefined>): string {
 
 function markdownForCap(baseUrl: string, cap: Cap): string {
   return `[${cap.title}](${capPageUrl(baseUrl, cap)})`;
+}
+
+function safeFilePart(value: string): string {
+  return (
+    value
+      .normalize("NFKD")
+      .replace(/[^\w.-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "cap"
+  );
+}
+
+function imageExtension(imageUrl: string, contentType: string | null): string {
+  const pathname = new URL(imageUrl).pathname;
+  const extension = extname(pathname);
+  if (extension) return extension;
+
+  if (contentType?.includes("png")) return ".png";
+  if (contentType?.includes("gif")) return ".gif";
+  if (contentType?.includes("webp")) return ".webp";
+  if (contentType?.includes("jpeg") || contentType?.includes("jpg")) {
+    return ".jpg";
+  }
+
+  return ".png";
+}
+
+async function copyImageToClipboard(cap: Cap, imageUrl: string) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Gorsel kopyalaniyor",
+    message: cap.title,
+  });
+
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Gorsel indirilemedi (${response.status}).`);
+    }
+
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const extension = imageExtension(
+      imageUrl,
+      response.headers.get("content-type"),
+    );
+    const filePath = join(
+      tmpdir(),
+      `capsarsiv-${cap.id}-${safeFilePart(cap.slug)}${extension}`,
+    );
+
+    await writeFile(filePath, bytes);
+    await Clipboard.copy({ file: filePath });
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Gorsel clipboard'a kopyalandi";
+    toast.message = cap.title;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Gorsel kopyalanamadi.";
+    toast.style = Toast.Style.Failure;
+    toast.title = "Gorsel kopyalanamadi";
+    toast.message = message;
+  }
 }
 
 function detailMarkdown(baseUrl: string, cap: Cap): string {
@@ -182,7 +249,13 @@ function CapActions({ baseUrl, cap }: { baseUrl: string; cap: Cap }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser title="Open in Browser" url={pageUrl} />
+        {imageUrl ? (
+          <Action
+            title="Gorseli Kopyala"
+            icon={Icon.Clipboard}
+            onAction={() => copyImageToClipboard(cap, imageUrl)}
+          />
+        ) : null}
         <Action.Push
           title="Show Details"
           icon={Icon.Sidebar}
@@ -193,14 +266,25 @@ function CapActions({ baseUrl, cap }: { baseUrl: string; cap: Cap }) {
             />
           }
         />
+        <Action.OpenInBrowser
+          title="Sayfayi Tarayicida Ac"
+          url={pageUrl}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.CopyToClipboard title="Copy Page URL" content={pageUrl} />
+        <Action.CopyToClipboard
+          title="Sayfa URL'sini Kopyala"
+          content={pageUrl}
+        />
         {imageUrl ? (
-          <Action.CopyToClipboard title="Copy Image URL" content={imageUrl} />
+          <Action.CopyToClipboard
+            title="Gorsel URL'sini Kopyala"
+            content={imageUrl}
+          />
         ) : null}
         <Action.CopyToClipboard
-          title="Copy Markdown Link"
+          title="Markdown Linkini Kopyala"
           content={markdownForCap(baseUrl, cap)}
         />
       </ActionPanel.Section>
