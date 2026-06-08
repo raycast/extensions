@@ -1,6 +1,6 @@
 # Daytona Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-08
 
 - Create a new Daytona sandbox
 - Run code in a Daytona sandbox
