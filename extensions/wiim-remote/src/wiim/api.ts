@@ -164,8 +164,13 @@ export class WiiMAPI {
   async getEQPresets(): Promise<string[]> {
     const raw = await this.request("EQGetList");
     try {
-      return JSON.parse(raw) as string[];
-    } catch {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        throw new WiiMAPIError("INVALID_RESPONSE", `EQ preset list is not an array: ${raw}`);
+      }
+      return parsed as string[];
+    } catch (e) {
+      if (e instanceof WiiMAPIError) throw e;
       throw new WiiMAPIError("INVALID_RESPONSE", `Cannot parse EQ preset list: ${raw}`);
     }
   }
