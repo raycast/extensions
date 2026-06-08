@@ -1,42 +1,18 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Detail,
-  Form,
-  Icon,
-  Toast,
-  confirmAlert,
-  popToRoot,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { useSubscriptions } from "./storage";
-import { BillingCycle, Subscription } from "./types";
+import { confirmAndDeleteSubscription } from "./subscription-actions";
 import {
-  CATEGORIES,
-  CURRENCIES,
-  LISTS,
-  PRESET_PAYMENT_METHODS,
-  PRESET_SERVICES,
-  formatCurrency,
-  getFaviconUrl,
-  getNextBillingDate,
-} from "./utils";
-
-interface EditFormValues {
-  customName: string;
-  amount: string;
-  currency: string;
-  billingCycle: string;
-  startDate: Date;
-  category: string;
-  customPaymentMethod: string;
-  list: string;
-  iconUrl: string;
-  notes: string;
-}
+  applyServiceSelection,
+  BillingCycleDropdown,
+  CategoryAndPaymentFields,
+  CurrencyDropdown,
+  parseSubscriptionFormFields,
+  ServiceDropdown,
+  SubscriptionFormValues,
+} from "./subscription-form-fields";
+import { BillingCycle, Subscription } from "./types";
+import { PRESET_PAYMENT_METHODS, PRESET_SERVICES, formatCurrency, getNextBillingDate } from "./utils";
 
 function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partial<Subscription>) => Promise<void> }) {
   const { pop } = useNavigation();
@@ -49,42 +25,36 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
   const [serviceSelection, setServiceSelection] = useState(matchedService ? sub.name : "__custom__");
   const [category, setCategory] = useState(sub.category);
   const isCustomService = serviceSelection === "__custom__";
-  const serviceCategories = [...new Set(PRESET_SERVICES.map((s) => s.category))];
 
   function handleServiceChange(value: string) {
-    setServiceSelection(value);
-    const preset = PRESET_SERVICES.find((s) => s.name === value);
-    if (preset) setCategory(preset.category);
+    applyServiceSelection(value, setServiceSelection, setCategory);
   }
 
-  async function handleSubmit(values: EditFormValues) {
+  async function handleSubmit(values: SubscriptionFormValues) {
     const amount = parseFloat(values.amount);
     if (isNaN(amount) || amount <= 0) {
       await showToast({ style: Toast.Style.Failure, title: "Invalid amount" });
       return;
     }
 
-    const name = isCustomService ? values.customName?.trim() : serviceSelection;
+    const { name, iconUrl, paymentMethod, startDate, billingDay } = parseSubscriptionFormFields(
+      values,
+      serviceSelection,
+      paymentSelection,
+      isCustomService,
+    );
     if (!name) {
       await showToast({ style: Toast.Style.Failure, title: "Service name required" });
       return;
     }
-
-    const preset = PRESET_SERVICES.find((s) => s.name === serviceSelection);
-    const iconUrl = preset
-      ? `https://www.google.com/s2/favicons?domain=${preset.domain}&sz=64`
-      : values.iconUrl || getFaviconUrl(values.customName);
-
-    const paymentMethod =
-      paymentSelection === "__custom__" ? values.customPaymentMethod?.trim() || undefined : paymentSelection;
 
     await onSave({
       name,
       amount,
       currency: values.currency,
       billingCycle: values.billingCycle as BillingCycle,
-      billingDay: values.startDate.getDate(),
-      startDate: `${values.startDate.getFullYear()}-${String(values.startDate.getMonth() + 1).padStart(2, "0")}-${String(values.startDate.getDate()).padStart(2, "0")}`,
+      billingDay,
+      startDate,
       category: values.category,
       paymentMethod,
       list: values.list,
@@ -105,41 +75,15 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="serviceSelection" title="Service" value={serviceSelection} onChange={handleServiceChange}>
-        {serviceCategories.map((cat) => (
-          <Form.Dropdown.Section key={cat} title={cat}>
-            {PRESET_SERVICES.filter((s) => s.category === cat).map((s) => (
-              <Form.Dropdown.Item
-                key={s.name}
-                value={s.name}
-                title={s.name}
-                icon={{ source: `https://www.google.com/s2/favicons?domain=${s.domain}&sz=64`, fallback: Icon.Globe }}
-              />
-            ))}
-          </Form.Dropdown.Section>
-        ))}
-        <Form.Dropdown.Section>
-          <Form.Dropdown.Item value="__custom__" title="Other…" icon={Icon.Pencil} />
-        </Form.Dropdown.Section>
-      </Form.Dropdown>
+      <ServiceDropdown serviceSelection={serviceSelection} onServiceChange={handleServiceChange} />
       {isCustomService && (
         <Form.TextField id="customName" title="Service Name" defaultValue={matchedService ? "" : sub.name} />
       )}
       <Form.Separator />
       <Form.TextField id="amount" title="Amount" defaultValue={String(sub.amount)} />
-      <Form.Dropdown id="currency" title="Currency" defaultValue={sub.currency}>
-        {CURRENCIES.map((c) => (
-          <Form.Dropdown.Item key={c.value} value={c.value} title={c.title} icon={c.flag} />
-        ))}
-      </Form.Dropdown>
+      <CurrencyDropdown defaultValue={sub.currency} />
       <Form.Separator />
-      <Form.Dropdown id="billingCycle" title="Billing Cycle" defaultValue={sub.billingCycle}>
-        <Form.Dropdown.Item value="monthly" title="Monthly" />
-        <Form.Dropdown.Item value="yearly" title="Yearly" />
-        <Form.Dropdown.Item value="quarterly" title="Quarterly" />
-        <Form.Dropdown.Item value="half-yearly" title="Half Yearly" />
-        <Form.Dropdown.Item value="weekly" title="Weekly" />
-      </Form.Dropdown>
+      <BillingCycleDropdown defaultValue={sub.billingCycle} />
       <Form.DatePicker
         id="startDate"
         title="Start Date"
@@ -147,30 +91,14 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
         type={Form.DatePicker.Type.Date}
       />
       <Form.Separator />
-      <Form.Dropdown id="category" title="Category" value={category} onChange={setCategory}>
-        {CATEGORIES.map((cat) => (
-          <Form.Dropdown.Item key={cat} value={cat} title={cat} />
-        ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="paymentSelection" title="Pay With" value={paymentSelection} onChange={setPaymentSelection}>
-        {PRESET_PAYMENT_METHODS.map((p) => (
-          <Form.Dropdown.Item key={p.value} value={p.value} title={p.title} icon={p.icon} />
-        ))}
-        <Form.Dropdown.Item value="__custom__" title="Other…" icon={Icon.Pencil} />
-      </Form.Dropdown>
-      {paymentSelection === "__custom__" && (
-        <Form.TextField
-          id="customPaymentMethod"
-          title="Custom Payment Method"
-          defaultValue={isPresetPayment ? "" : (sub.paymentMethod ?? "")}
-          placeholder="e.g. PayPal, Google Pay, Wallet…"
-        />
-      )}
-      <Form.Dropdown id="list" title="List" defaultValue={sub.list}>
-        {LISTS.map((l) => (
-          <Form.Dropdown.Item key={l} value={l} title={l} />
-        ))}
-      </Form.Dropdown>
+      <CategoryAndPaymentFields
+        category={category}
+        onCategoryChange={setCategory}
+        paymentSelection={paymentSelection}
+        onPaymentSelectionChange={setPaymentSelection}
+        customPaymentMethodDefaultValue={isPresetPayment ? "" : (sub.paymentMethod ?? "")}
+        listDefaultValue={sub.list}
+      />
       <Form.Separator />
       {isCustomService && <Form.TextField id="iconUrl" title="Icon URL" defaultValue={sub.iconUrl ?? ""} />}
       <Form.TextArea id="notes" title="Notes" defaultValue={sub.notes ?? ""} />
@@ -279,18 +207,7 @@ ${sub.notes ? `---\n\n${sub.notes}` : ""}
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={async () => {
-              const confirmed = await confirmAlert({
-                title: `Delete "${sub.name}"?`,
-                message: "This action cannot be undone.",
-                primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-              });
-              if (confirmed) {
-                await deleteSubscription(id);
-                await showToast({ style: Toast.Style.Success, title: "Subscription Deleted" });
-                await popToRoot();
-              }
-            }}
+            onAction={() => confirmAndDeleteSubscription(sub.name, () => deleteSubscription(id))}
           />
         </ActionPanel>
       }

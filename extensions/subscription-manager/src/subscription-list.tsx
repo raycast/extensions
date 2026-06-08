@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { useSubscriptions } from "./storage";
+import { confirmAndDeleteSubscription } from "./subscription-actions";
 import { CATEGORIES, formatCurrency, formatCycle } from "./utils";
 
 type SortKey = "name" | "amount" | "billingDay" | "category";
@@ -87,18 +88,7 @@ export function SubscriptionList() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={async () => {
-                      const confirmed = await confirmAlert({
-                        title: `Delete "${sub.name}"?`,
-                        message: "This action cannot be undone.",
-                        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-                      });
-                      if (confirmed) {
-                        await deleteSubscription(sub.id);
-                        await showToast({ style: Toast.Style.Success, title: "Subscription Deleted" });
-                        await popToRoot();
-                      }
-                    }}
+                    onAction={() => confirmAndDeleteSubscription(sub.name, () => deleteSubscription(sub.id))}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Sort By">

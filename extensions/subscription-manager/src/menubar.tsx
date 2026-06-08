@@ -2,7 +2,7 @@ import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } fr
 import { useFetch } from "@raycast/utils";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
-import { formatCurrency, formatCycle, getMonthlyTotal, getSubscriptionsForDay } from "./utils";
+import { formatCurrency, formatCycle, getMonthSubscriptions, getMonthlyTotal, getSubscriptionsForDay } from "./utils";
 
 interface RatesResponse {
   rates: Record<string, number>;
@@ -34,24 +34,7 @@ export default function MenubarCommand() {
     if (subs.length > 0) upcomingDays.push({ date: d, subs });
   }
 
-  const allThisMonth = subscriptions
-    .filter((s) => s.status === "active")
-    .filter((s) => {
-      const start = new Date(s.startDate + "T00:00:00");
-      switch (s.billingCycle) {
-        case "monthly":
-          return true;
-        case "yearly":
-          return start.getMonth() === month;
-        case "quarterly":
-          return (month - start.getMonth() + 12) % 3 === 0;
-        case "half-yearly":
-          return (month - start.getMonth() + 12) % 6 === 0;
-        default:
-          return true;
-      }
-    })
-    .sort((a, b) => a.billingDay - b.billingDay);
+  const allThisMonth = getMonthSubscriptions(month, year, subscriptions);
 
   async function openCalendar() {
     await launchCommand({ name: "manage-subscription", type: LaunchType.UserInitiated });

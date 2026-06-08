@@ -12,28 +12,30 @@
 - **Add Subscription** — Quickly add a new subscription with preset services (Netflix, Spotify, Claude, etc.), auto-filled icons and categories.
 - **Analytics** — Monthly spend breakdown by category, billing cycle, or list. Top expenses, month-over-month comparison, and yearly forecast.
 - **Menubar** — Monthly total and upcoming bills at a glance. Shows due today, next 7 days, or full month view.
-- **Notifications** — Get reminded before a subscription bills. Set up to two reminders with custom timing. Fires within 5 minutes of the set time (e.g. 9:00 may notify at 9:05). *(macOS only — uses AppleScript, not available on Windows)*
+- **Notifications** — Get reminded before a subscription bills. Set up to two reminders with custom timing. Fires within 5 minutes of the set time (e.g. 9:00 may notify at 9:05). _(macOS only — uses AppleScript, not available on Windows)_
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| Manage Subscription | Calendar view with monthly billing overview |
-| All Subscriptions | List view with filter and sort |
-| Add Subscription | Form to add a new subscription |
-| Subscription Analytics | Spending breakdown and insights |
-| Subscriptions Menubar | Menubar item with totals and upcoming bills |
+| Command                    | Description                                                |
+| -------------------------- | ---------------------------------------------------------- |
+| Manage Subscription        | Calendar view with monthly billing overview                |
+| All Subscriptions          | List view with filter and sort                             |
+| Add Subscription           | Form to add a new subscription                             |
+| Subscription Analytics     | Spending breakdown and insights                            |
+| Subscriptions Menubar      | Menubar item with totals and upcoming bills                |
 | Subscription Notifications | Background reminder engine (runs every 5 min) — macOS only |
 
 ## Preferences
 
 ### Extension-level
+
 - **Primary Currency** — Base currency for totals and analytics (INR, USD, EUR, GBP, and 19 more)
 - **Rounding** — Hide decimal places in currency display
 - **Abbreviated Numbers** — Show compact format like ₹99.9K
 - **First / Second Reminder** — Days before billing to notify (same day, 1, 3, or 7 days before), with custom notification time
 
 ### Menubar-level
+
 - **Show Monthly Total** — Display beside the icon or inside the dropdown
 - **Show in Menu** — Full month, upcoming only, or minimal view
 
