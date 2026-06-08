@@ -2,6 +2,12 @@
 
 All notable changes to "Raycast WordReference Extension" will be documented in this file.
 
+## [1.1.2] - 2026-06-08
+
+### Added
+
+- ranking based on word match
+
 ## [1.1.1] - 2026-06-02
 
 ### Fixed

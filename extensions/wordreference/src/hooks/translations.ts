@@ -27,7 +27,7 @@ export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: 
 
         return {
           type: "success",
-          data: parseSearchTranslations(body),
+          data: parseSearchTranslations(body, searchText.trim()),
         };
       },
       execute: !!searchText.trim(),
@@ -40,20 +40,74 @@ export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: 
   return { searchText, setSearchText, data, isLoading, errorResponse };
 }
 
-function parseSearchTranslations(rawData: string): SearchTranslation[] {
+function getMatchRank(word: string, query: string): number {
+  const wordLower = word.toLowerCase();
+  const queryLower = query.toLowerCase();
+
+  if (!queryLower) {
+    return 0;
+  }
+
+  if (wordLower === queryLower) {
+    return 0;
+  }
+
+  if (wordLower.startsWith(queryLower)) {
+    return 1;
+  }
+
+  if (wordLower.includes(queryLower)) {
+    return 2;
+  }
+
+  return 3;
+}
+
+function compareSearchResults(a: ParsedSearchResult, b: ParsedSearchResult, query: string): number {
+  const queryLower = query.toLowerCase();
+  const rankA = getMatchRank(a.word, queryLower);
+  const rankB = getMatchRank(b.word, queryLower);
+
+  if (rankA !== rankB) {
+    return rankA - rankB;
+  }
+
+  const extraLengthA = a.word.length - queryLower.length;
+  const extraLengthB = b.word.length - queryLower.length;
+
+  if (extraLengthA !== extraLengthB) {
+    return extraLengthA - extraLengthB;
+  }
+
+  if (a.popularity !== b.popularity) {
+    return b.popularity - a.popularity;
+  }
+
+  return a.word.localeCompare(b.word);
+}
+
+function parseSearchTranslations(rawData: string, query: string): SearchTranslation[] {
   if (!rawData) {
     return [];
   }
 
-  return rawData.split("\n").flatMap((line) => {
-    const [word, lang] = line.split("\t").map((s) => s.trim());
+  const results = rawData.split("\n").flatMap((line) => {
+    const [word, lang, popularityValue] = line.split("\t").map((s) => s.trim());
 
     if (!word || !lang) {
       return [];
     }
 
-    return [{ word, lang }];
+    return [{ word, lang, popularity: Number(popularityValue) || 0 }];
   });
+
+  return results.sort((a, b) => compareSearchResults(a, b, query)).map(({ word, lang }) => ({ word, lang }));
+}
+
+interface ParsedSearchResult {
+  word: string;
+  lang: string;
+  popularity: number;
 }
 
 interface SearchTranslation {
