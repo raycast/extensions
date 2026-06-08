@@ -1,5 +1,10 @@
 # LeitnerBox Changelog
 
+## [Add Windows support and AI tools] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Add AI tools
+
 ## [Added a bunch of new feedback] - 2024-02-06
 
 - Improve code visibilty
