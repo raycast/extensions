@@ -45,7 +45,8 @@ export default function AnalyticsCommand() {
 
   const thisMonthTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, rates);
   const lastMonthTotal = getMonthlyTotal(subscriptions, lastMonth, lastMonthYear, prefs.primaryCurrency, rates);
-  const yearlyForecast = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0) * 12;
+  const activeMonthlyTotal = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0);
+  const yearlyForecast = activeMonthlyTotal * 12;
 
   const groups: Record<string, Subscription[]> = {};
   for (const sub of active) {
@@ -76,7 +77,7 @@ export default function AnalyticsCommand() {
 
   const breakdownRows = groupTotals
     .map(({ key, total, count }) => {
-      const pct = thisMonthTotal > 0 ? (total / thisMonthTotal) * 100 : 0;
+      const pct = activeMonthlyTotal > 0 ? (total / activeMonthlyTotal) * 100 : 0;
       const label = key.charAt(0).toUpperCase() + key.slice(1);
       return `| ${label} | \`${buildBar(pct)}\` | ${formatCurrency(total, prefs.primaryCurrency)} | ${pct.toFixed(0)}% | ${count} sub${count !== 1 ? "s" : ""} |`;
     })
@@ -138,7 +139,7 @@ ${topRows}
           />
           <Detail.Metadata.Label
             title="Avg Cost / Sub"
-            text={active.length > 0 ? formatCurrency(thisMonthTotal / active.length, prefs.primaryCurrency) : "—"}
+            text={active.length > 0 ? formatCurrency(activeMonthlyTotal / active.length, prefs.primaryCurrency) : "—"}
             icon={Icon.BarChart}
           />
           <Detail.Metadata.Separator />
