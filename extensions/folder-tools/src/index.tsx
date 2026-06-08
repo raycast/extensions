@@ -50,16 +50,16 @@ export default function Command() {
   }
 
   return (
-    <List searchBarPlaceholder="Buscar herramientas genericas para carpetas">
-      <List.Section title="Carpeta por defecto">
+    <List searchBarPlaceholder="Search folder tools and workflows">
+      <List.Section title="Default Folder">
         <List.Item
           icon={Icon.Folder}
-          title="Abrir Carpeta"
+          title="Open Folder"
           subtitle={target}
           actions={
             <ActionPanel>
               <Action
-                title="Abrir"
+                title="Open"
                 icon={Icon.Folder}
                 onAction={() => openPath(target)}
               />
@@ -70,17 +70,17 @@ export default function Command() {
         <List.Item
           icon={Icon.CheckCircle}
           title="Status"
-          subtitle="Comprueba toolsRoot, graphify, agent-brain y Understand-Anything"
+          subtitle="Check toolsRoot, graphify, agent-brain and Understand-Anything"
           accessories={[{ text: "Raycast" }]}
           actions={
             <ActionPanel>
               <Action
-                title="Ejecutar Y Ver Salida"
+                title="Run and Show Output"
                 icon={Icon.Play}
                 onAction={() => runAndPush(() => runStatus(target))}
               />
               <Action
-                title="Abrir En Terminal"
+                title="Open in Terminal"
                 icon={Icon.Terminal}
                 onAction={() =>
                   runInTerminal(
@@ -99,17 +99,17 @@ export default function Command() {
         <List.Item
           icon={Icon.Dot}
           title="Graphify Detect"
-          subtitle="Inventario rapido sin LLM"
+          subtitle="Quick inventory without an LLM"
           accessories={[{ text: "Raycast" }]}
           actions={
             <ActionPanel>
               <Action
-                title="Ejecutar Y Ver Salida"
+                title="Run and Show Output"
                 icon={Icon.Play}
                 onAction={() => runAndPush(() => runGraphifyDetect(target))}
               />
               <Action
-                title="Abrir Reporte"
+                title="Open Report"
                 icon={Icon.TextDocument}
                 onAction={() =>
                   openPath(target + "/graphify-out/GRAPHIFY_DETECT_REPORT.md")
@@ -121,17 +121,17 @@ export default function Command() {
         <List.Item
           icon={Icon.Clock}
           title="Graphify Extract"
-          subtitle="Genera graph.json y HTML/JSON"
+          subtitle="Generate graph.json plus HTML/JSON outputs"
           accessories={[{ text: "Terminal" }]}
           actions={
             <ActionPanel>
               <Action
-                title="Ejecutar En Terminal"
+                title="Run in Terminal"
                 icon={Icon.Terminal}
                 onAction={() => runWorkflowTerminal("graphify-extract", target)}
               />
               <Action
-                title="Abrir Salida Graphify-Out"
+                title="Open Graphify Output"
                 icon={Icon.Folder}
                 onAction={() => openPath(target + "/graphify-out")}
               />
@@ -140,7 +140,7 @@ export default function Command() {
         />
       </List.Section>
 
-      <List.Section title="Flujos genericos">
+      <List.Section title="Generic Workflows">
         {workflows.map((workflow) => (
           <List.Item
             key={workflow.value}
@@ -155,19 +155,19 @@ export default function Command() {
                 <Action
                   title={
                     workflow.longRunning
-                      ? "Ejecutar En Terminal"
-                      : "Ejecutar Y Ver Salida"
+                      ? "Run in Terminal"
+                      : "Run and Show Output"
                   }
                   icon={workflow.longRunning ? Icon.Terminal : Icon.Play}
                   onAction={() => runWorkflow(workflow.value)}
                 />
                 <Action
-                  title="Ejecutar En Terminal"
+                  title="Run in Terminal"
                   icon={Icon.Terminal}
                   onAction={() => runWorkflowTerminal(workflow.value, target)}
                 />
                 <Action.CopyToClipboard
-                  title="Copiar Target"
+                  title="Copy Target"
                   content={target}
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                 />
@@ -177,15 +177,15 @@ export default function Command() {
         ))}
       </List.Section>
 
-      <List.Section title="Aperturas">
+      <List.Section title="Open">
         <List.Item
           icon={Icon.Folder}
-          title="Abrir Tools Root"
+          title="Open Tools Root"
           subtitle={p.toolsRoot}
           actions={
             <ActionPanel>
               <Action
-                title="Abrir"
+                title="Open"
                 icon={Icon.Folder}
                 onAction={() => openPath(p.toolsRoot)}
               />
@@ -195,7 +195,7 @@ export default function Command() {
         />
         <List.Item
           icon={Icon.Globe}
-          title="Abrir Neo4j Browser"
+          title="Open Neo4j Browser"
           subtitle={neo4jUrl}
           actions={
             <ActionPanel>
@@ -205,12 +205,12 @@ export default function Command() {
         />
         <List.Item
           icon={Icon.TextDocument}
-          title="Abrir Understand-Anything Repo"
+          title="Open Understand-Anything Repo"
           subtitle={understandRepo()}
           actions={
             <ActionPanel>
               <Action
-                title="Abrir"
+                title="Open"
                 icon={Icon.Folder}
                 onAction={() => openPath(understandRepo())}
               />
@@ -225,7 +225,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Ejecutar Y Ver Salida"
+                title="Run and Show Output"
                 icon={Icon.Play}
                 onAction={() =>
                   runAndPush(() =>

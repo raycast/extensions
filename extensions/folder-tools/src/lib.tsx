@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import { existsSync } from "fs";
+import { homedir } from "os";
 import { basename } from "path";
 import React from "react";
 import { promisify } from "util";
@@ -35,7 +36,6 @@ export type Workflow =
 export type Preferences = {
   toolsRoot: string;
   defaultTarget: string;
-  installToolsScript: string;
   neo4jUrl?: string;
   terminalApp: "Terminal" | "iTerm";
 };
@@ -66,73 +66,86 @@ export const workflows: {
   {
     value: "recommended",
     title: "Recommended",
-    description: "Inventario rapido y estado de herramientas.",
+    description: "Quick inventory and tool status check.",
   },
   {
     value: "status",
     title: "Status",
-    description: "Comprueba graphify, Understand-Anything y agent-brain.",
+    description: "Check graphify, Understand-Anything and agent-brain.",
   },
   {
     value: "graphify-detect",
     title: "Graphify Detect",
-    description: "Inventario local sin LLM y reporte Markdown.",
+    description: "Create a local inventory without using an LLM.",
   },
   {
     value: "graphify-extract",
     title: "Graphify Extract",
     description:
-      "Genera graph.json y salidas HTML/JSON. Puede requerir backend LLM.",
+      "Generate graph.json plus HTML/JSON outputs. May require an LLM backend.",
     longRunning: true,
   },
   {
     value: "graphify-query",
     title: "Graphify Query",
-    description: "Pregunta sobre graphify-out/graph.json existente.",
+    description:
+      "Ask questions about an existing graphify-out/graph.json file.",
   },
   {
     value: "graphify-tree",
     title: "Graphify Tree",
-    description: "Genera graphify-out/GRAPH_TREE.html si existe graph.json.",
+    description:
+      "Generate graphify-out/GRAPH_TREE.html when graph.json exists.",
   },
   {
     value: "understand-info",
     title: "Understand Info",
-    description: "Lista skills disponibles de Understand-Anything.",
+    description: "List available Understand-Anything skills.",
   },
   {
     value: "understand-dashboard",
     title: "Understand Dashboard",
-    description: "Arranca el dashboard de Understand-Anything.",
+    description: "Start the Understand-Anything dashboard.",
     longRunning: true,
   },
   {
     value: "brain-up",
     title: "Brain Up",
-    description: "Inicializa y arranca agent-brain/Neo4j.",
+    description: "Initialize and start agent-brain/Neo4j.",
     longRunning: true,
   },
   {
     value: "brain-prepare",
     title: "Brain Prepare",
-    description: "Prepara contexto agent-brain para un topic.",
+    description: "Prepare agent-brain context for a topic.",
     longRunning: true,
   },
   {
     value: "brain-index",
     title: "Brain Index",
-    description: "Indexa la carpeta/repo en agent-brain.",
+    description: "Index the selected folder or repository in agent-brain.",
     longRunning: true,
   },
   {
     value: "brain-down",
     title: "Brain Down",
-    description: "Para servicios agent-brain/Neo4j.",
+    description: "Stop agent-brain/Neo4j services.",
   },
 ];
 
+export function expandPath(value: string): string {
+  if (value === "~") return homedir();
+  if (value.startsWith("~/")) return homedir() + value.slice(1);
+  return value;
+}
+
 export function prefs(): Preferences {
-  return getPreferenceValues<Preferences>();
+  const raw = getPreferenceValues<Preferences>();
+  return {
+    ...raw,
+    toolsRoot: expandPath(raw.toolsRoot),
+    defaultTarget: expandPath(raw.defaultTarget),
+  };
 }
 
 export function binPath(name: string): string {
@@ -180,7 +193,7 @@ export async function runInTerminal(
   await execFileAsync("osascript", ["-e", script]);
   await showToast({
     style: Toast.Style.Success,
-    title: "Comando abierto en terminal",
+    title: "Command opened in terminal",
   });
 }
 
@@ -192,7 +205,7 @@ export async function runCapture(
 ): Promise<CommandResult> {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Ejecutando " + title,
+    title: "Running " + title,
   });
   try {
     const result = await execFileAsync(command, args, {
@@ -201,7 +214,7 @@ export async function runCapture(
       env: withToolsPath(),
     });
     toast.style = Toast.Style.Success;
-    toast.title = title + " terminado";
+    toast.title = title + " finished";
     return {
       title,
       command: [command, ...args].join(" "),
@@ -218,7 +231,7 @@ export async function runCapture(
       message?: string;
     };
     toast.style = Toast.Style.Failure;
-    toast.title = title + " fallo";
+    toast.title = title + " failed";
     toast.message = err.message;
     return {
       title,
@@ -238,7 +251,7 @@ export async function runShellCapture(
 ): Promise<CommandResult> {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Ejecutando " + title,
+    title: "Running " + title,
   });
   try {
     const result = await execAsync(command, {
@@ -248,7 +261,7 @@ export async function runShellCapture(
       env: withToolsPath(),
     });
     toast.style = Toast.Style.Success;
-    toast.title = title + " terminado";
+    toast.title = title + " finished";
     return {
       title,
       command,
@@ -265,7 +278,7 @@ export async function runShellCapture(
       message?: string;
     };
     toast.style = Toast.Style.Failure;
-    toast.title = title + " fallo";
+    toast.title = title + " failed";
     toast.message = err.message;
     return {
       title,
@@ -329,7 +342,7 @@ export async function runGraphifyQuery(
       command: binPath("graphify") + " query",
       cwd: target,
       stdout: "",
-      stderr: "No existe " + graph + ". Ejecuta antes Graphify Extract.",
+      stderr: graph + " does not exist. Run Graphify Extract first.",
       exitCode: 1,
     };
   }
@@ -338,7 +351,7 @@ export async function runGraphifyQuery(
     binPath("graphify"),
     [
       "query",
-      question || "Resume esta carpeta y dime que debo revisar primero.",
+      question || "Summarize this folder and tell me what to review first.",
       "--graph",
       graph,
     ],
@@ -358,7 +371,7 @@ export async function runGraphifyTree(
       command: binPath("graphify") + " tree",
       cwd: target,
       stdout: "",
-      stderr: "No existe " + graph + ". Ejecuta antes Graphify Extract.",
+      stderr: graph + " does not exist. Run Graphify Extract first.",
       exitCode: 1,
     };
   }
@@ -485,7 +498,7 @@ export function buildWorkflowCommand(
       " query " +
       shellEscape(
         options?.question ||
-          "Resume esta carpeta y dime que debo revisar primero.",
+          "Summarize this folder and tell me what to review first.",
       ) +
       " --graph " +
       shellEscape(target + "/graphify-out/graph.json")
@@ -532,7 +545,7 @@ export function buildWorkflowCommand(
     return (
       shellEscape(binPath("agent-brain")) +
       " prepare --topic " +
-      shellEscape(options?.topic || "Analizar carpeta") +
+      shellEscape(options?.topic || "Analyze folder") +
       " --budget " +
       shellEscape(options?.budget || "normal") +
       " --fast"
@@ -567,9 +580,9 @@ export function resultMarkdown(result: CommandResult): string {
     "\n\nCommand:\n\n~~~bash\n" +
     result.command +
     "\n~~~\n\n## Stdout\n\n~~~text\n" +
-    (result.stdout || "(sin stdout)") +
+    (result.stdout || "(no stdout)") +
     "\n~~~\n\n## Stderr\n\n~~~text\n" +
-    (result.stderr || "(sin stderr)") +
+    (result.stderr || "(no stderr)") +
     "\n~~~\n"
   );
 }
@@ -605,7 +618,7 @@ export async function openPath(path: string): Promise<void> {
   if (!existsSync(path)) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Ruta no existe",
+      title: "Path does not exist",
       message: path,
     });
     return;

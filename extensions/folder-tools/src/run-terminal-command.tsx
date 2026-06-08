@@ -28,7 +28,7 @@ export default function Command(props: { draftValues?: Values }) {
     if (!cwd || !command) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Falta cwd o comando",
+        title: "Working directory and command are required",
       });
       return;
     }
@@ -48,7 +48,7 @@ export default function Command(props: { draftValues?: Values }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Ejecutar Comando"
+            title="Run Command"
             icon={Icon.Terminal}
             onSubmit={handleSubmit}
           />
@@ -57,28 +57,28 @@ export default function Command(props: { draftValues?: Values }) {
     >
       <Form.TextField
         id="cwd"
-        title="Directorio"
+        title="Folder"
         defaultValue={draft?.cwd ?? p.defaultTarget}
       />
       <Form.TextArea
         id="command"
-        title="Comando"
+        title="Command"
         placeholder="find . -maxdepth 2 -type f | sort"
         defaultValue={draft?.command}
       />
       <Form.Dropdown
         id="mode"
-        title="Modo"
+        title="Mode"
         defaultValue={draft?.mode ?? "terminal"}
       >
         <Form.Dropdown.Item
           value="terminal"
-          title="Terminal: igual que lanzarlo a mano"
+          title="Terminal: same as running it manually"
           icon={Icon.Terminal}
         />
         <Form.Dropdown.Item
           value="raycast"
-          title="Raycast: capturar salida"
+          title="Raycast: capture output"
           icon={Icon.Window}
         />
       </Form.Dropdown>

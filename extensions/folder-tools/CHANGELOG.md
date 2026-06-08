@@ -1,6 +1,6 @@
 # Folder Tools Changelog
 
-## [Initial Release] - 2026-06-08
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add dashboard for generic folder analysis workflows.
 - Add graphify detect, extract, query and tree commands.

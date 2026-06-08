@@ -1,39 +1,46 @@
-# Folder Tools Raycast Extension
+# Folder Tools
 
-Extension generica de Raycast para ejecutar la misma logica de analisis y comandos sobre cualquier carpeta, sin depender de una asignatura concreta.
+Run repeatable folder analysis and developer workflows from Raycast.
 
-## Diferencia con UPSA Stack
+Folder Tools is useful when you work across many local projects and want one place to inspect a folder, run graphify workflows, start Understand-Anything, manage agent-brain, or launch a shell command in a selected working directory.
 
-- UPSA Stack: orientada a Tecnologias Moviles, MAUI, Obsidian UPSA, simulacros y scripts de examen.
-- Folder Tools: orientada a carpetas arbitrarias, repos personales, documentacion, clientes, investigaciones o proyectos no universitarios.
+## Commands
 
-## Comandos incluidos
+- **Folder Tools**: dashboard for the configured default folder.
+- **Analyze Folder**: run graphify, Understand-Anything or agent-brain workflows on any folder.
+- **Install GitHub Tools**: clone or update three GitHub repositories into the selected folder's `.github-tools` directory.
+- **Run Terminal Command**: run an arbitrary shell command in a selected working directory.
 
-- Folder Tools: dashboard generico.
-- Analyze Folder: formulario para graphify, Understand-Anything y agent-brain.
-- Install GitHub Tools: instalador de tres repos GitHub en un target indicado.
-- Run Terminal Command: ejecuta cualquier comando en un cwd elegido.
+## Preferences
 
-## Preferencias
+- **Tools Root**: folder containing installed tool binaries, virtual environments and source checkouts. The default is `~/.folder-tools/.github-tools`.
+- **Default Target Folder**: folder used by the dashboard and as the default value in forms. The default is `~/Developer`.
+- **Neo4j URL**: browser URL used by agent-brain.
+- **Terminal App**: macOS terminal app used for interactive or long-running commands.
 
-- Tools Root: normalmente /Users/dalonsogomez/Developer/UPSA/.github-tools.
-- Default Target Folder: cualquier carpeta base.
-- Install Tools Script: script install-github-tools.sh generico.
-- Neo4j URL: URL del browser de Neo4j.
-- Terminal App: Terminal o iTerm.
+## Tool Layout
 
-## Desarrollo
+Folder Tools expects this optional layout when graphify, Understand-Anything or agent-brain are installed:
+
+~~~text
+~/.folder-tools/.github-tools/
+  bin/
+    graphify
+    agent-brain
+  venvs/
+    graphify/bin/python
+  src/
+    Understand-Anything/
+~~~
+
+You can adapt the paths in Raycast preferences if your tools live somewhere else.
+
+## Local Development
 
 ~~~bash
-cd /Users/dalonsogomez/Developer/UPSA/raycast/folder-tools
 npm install
 npm run lint
 npm run typecheck
 npm run build
-~~~
-
-Para abrirla en Raycast:
-
-~~~bash
 npm run dev
 ~~~

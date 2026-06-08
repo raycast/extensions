@@ -45,7 +45,7 @@ export default function Command(props: { draftValues?: Values }) {
     if (!target) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Falta directorio objetivo",
+        title: "Target folder is required",
       });
       return;
     }
@@ -74,7 +74,7 @@ export default function Command(props: { draftValues?: Values }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Ejecutar"
+            title="Run"
             icon={Icon.Play}
             onSubmit={handleSubmit}
           />
@@ -83,13 +83,13 @@ export default function Command(props: { draftValues?: Values }) {
     >
       <Form.TextField
         id="target"
-        title="Directorio"
-        placeholder="/Users/dalonsogomez/Developer/mi-proyecto"
+        title="Folder"
+        placeholder="~/Developer/my-project"
         defaultValue={draft?.target ?? p.defaultTarget}
       />
       <Form.Dropdown
         id="workflow"
-        title="Flujo"
+        title="Workflow"
         defaultValue={draft?.workflow ?? "recommended"}
       >
         {workflows.map((workflow) => (
@@ -103,58 +103,57 @@ export default function Command(props: { draftValues?: Values }) {
       </Form.Dropdown>
       <Form.Dropdown
         id="mode"
-        title="Modo"
+        title="Mode"
         defaultValue={draft?.mode ?? "auto"}
       >
         <Form.Dropdown.Item
           value="auto"
-          title="Auto: Raycast si es rapido, Terminal si es largo"
+          title="Auto: Raycast for quick runs, terminal for long runs"
           icon={Icon.Bolt}
         />
         <Form.Dropdown.Item
           value="raycast"
-          title="Raycast: capturar salida"
+          title="Raycast: capture output"
           icon={Icon.Window}
         />
         <Form.Dropdown.Item
           value="terminal"
-          title="Terminal: proceso interactivo o largo"
+          title="Terminal: interactive or long-running process"
           icon={Icon.Terminal}
         />
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField
         id="question"
-        title="Pregunta"
-        placeholder="Resume esta carpeta y dime que debo revisar primero."
+        title="Question"
+        placeholder="Summarize this folder and tell me what to review first."
         defaultValue={draft?.question}
       />
       <Form.TextField
         id="topic"
-        title="Topic Brain"
-        placeholder="Analizar carpeta"
+        title="Brain Topic"
+        placeholder="Analyze folder"
         defaultValue={draft?.topic}
       />
       <Form.Dropdown
         id="budget"
-        title="Budget Brain"
+        title="Brain Budget"
         defaultValue={draft?.budget ?? "normal"}
       >
         <Form.Dropdown.Item value="fast" title="fast" />
         <Form.Dropdown.Item value="normal" title="normal" />
         <Form.Dropdown.Item value="deep" title="deep" />
-        <Form.Dropdown.Item value="cavernicola" title="cavernicola" />
       </Form.Dropdown>
       <Form.Separator />
       <Form.Checkbox
         id="openResult"
-        title="Opciones"
-        label="Abrir HTML/URLs cuando proceda"
+        title="Options"
+        label="Open HTML or URLs when available"
         defaultValue={draft?.openResult}
       />
       <Form.Checkbox
         id="dryRun"
-        label="Dry run si el flujo lo soporta"
+        label="Dry run when the workflow supports it"
         defaultValue={draft?.dryRun}
       />
     </Form>

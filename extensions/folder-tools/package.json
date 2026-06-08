@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folder-tools",
   "title": "Folder Tools",
-  "description": "Ejecuta graphify, Understand-Anything, agent-brain y comandos de terminal sobre cualquier carpeta.",
+  "description": "Run folder analysis and developer workflows with graphify, agent-brain and shell commands.",
   "icon": "extension-icon.png",
   "author": "dalonsogomez",
   "license": "MIT",
@@ -12,28 +12,28 @@
     {
       "name": "index",
       "title": "Folder Tools",
-      "description": "Dashboard generico para analizar y operar sobre cualquier carpeta.",
+      "description": "Generic dashboard for folder analysis and developer workflows.",
       "mode": "view",
       "icon": "extension-icon.png"
     },
     {
       "name": "analyze-folder",
       "title": "Analyze Folder",
-      "description": "Ejecuta un flujo graphify, Understand-Anything o agent-brain sobre una carpeta.",
+      "description": "Run graphify, Understand-Anything or agent-brain workflows on a folder.",
       "mode": "view",
       "icon": "extension-icon.png"
     },
     {
       "name": "install-github-tools",
       "title": "Install GitHub Tools",
-      "description": "Instala tres herramientas GitHub en un directorio indicado.",
+      "description": "Install three GitHub tools into a selected folder.",
       "mode": "view",
       "icon": "extension-icon.png"
     },
     {
       "name": "run-terminal-command",
       "title": "Run Terminal Command",
-      "description": "Ejecuta un comando arbitrario en un directorio elegido.",
+      "description": "Run a shell command in a selected working directory.",
       "mode": "view",
       "icon": "extension-icon.png"
     }
@@ -42,31 +42,23 @@
     {
       "name": "toolsRoot",
       "title": "Tools Root",
-      "description": "Directorio .github-tools que contiene binarios, venvs y repos instalados.",
+      "description": "Path to the .github-tools folder containing installed tools.",
       "type": "textfield",
       "required": true,
-      "default": "/Users/dalonsogomez/Developer/UPSA/.github-tools"
+      "default": "~/.folder-tools/.github-tools"
     },
     {
       "name": "defaultTarget",
       "title": "Default Target Folder",
-      "description": "Carpeta generica que se usara por defecto.",
+      "description": "Default folder used by commands and forms.",
       "type": "textfield",
       "required": true,
-      "default": "/Users/dalonsogomez/Developer"
-    },
-    {
-      "name": "installToolsScript",
-      "title": "Install Tools Script",
-      "description": "Script generico install-github-tools.sh.",
-      "type": "textfield",
-      "required": true,
-      "default": "/Users/dalonsogomez/Developer/UPSA/_stack/install-github-tools.sh"
+      "default": "~/Developer"
     },
     {
       "name": "neo4jUrl",
       "title": "Neo4j URL",
-      "description": "URL del navegador Neo4j usado por agent-brain.",
+      "description": "Neo4j browser URL used by agent-brain.",
       "type": "textfield",
       "required": false,
       "default": "http://localhost:17723"
@@ -74,7 +66,7 @@
     {
       "name": "terminalApp",
       "title": "Terminal App",
-      "description": "Aplicacion donde abrir comandos interactivos o largos.",
+      "description": "App used to open interactive or long-running commands.",
       "type": "dropdown",
       "required": true,
       "default": "Terminal",
