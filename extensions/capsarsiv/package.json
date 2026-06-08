@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capsarsiv",
+  "title": "Capsarsiv",
+  "description": "Turkce Caps Arsivi'nde caps ara ve hizlica ac.",
+  "icon": "icon.png",
+  "author": "mert_cobanov",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "caps",
+    "meme",
+    "turkce",
+    "arsiv",
+    "reaction"
+  ],
+  "commands": [
+    {
+      "name": "search-caps",
+      "title": "Caps Ara",
+      "description": "Turkce Caps Arsivi'nde baslik, aciklama, tag ve alternatif ada gore ara.",
+      "mode": "view",
+      "keywords": [
+        "caps",
+        "meme",
+        "ara",
+        "bul"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Capsarsiv URL",
+      "description": "Raycast'in baglanacagi Capsarsiv site adresi.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://capsarsiv.com",
+      "placeholder": "https://capsarsiv.com"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}
