@@ -8,7 +8,8 @@
   "author": "gbarba",
   "contributors": [
     "FezVrasta",
-    "garrill"
+    "garrill",
+    "kalaschnik"
   ],
   "license": "MIT",
   "commands": [
@@ -22,6 +23,12 @@
       "name": "show-clipboard",
       "title": "Show Clipboard",
       "description": "Show the current clipboard in large type",
+      "mode": "view"
+    },
+    {
+      "name": "show-selected-text",
+      "title": "Show Selected Text",
+      "description": "Show the selected text of the frontmost application in large type",
       "mode": "view"
     }
   ],
