@@ -5,7 +5,6 @@ import {
   RANDOM_FACT_SOURCES,
   USELESS_FACTS_SOURCE,
   WIKIFEEDS_SOURCE,
-  ZEN_QUOTES_SOURCE,
   pickRandomFactSource,
 } from ".";
 
@@ -25,13 +24,6 @@ describe("random-fact sources", () => {
   });
 
   it("normalizes quote and history feeds", () => {
-    expect(ZEN_QUOTES_SOURCE.parse([{ a: "Zen", q: "Breathe." }])).toEqual([
-      {
-        description: "- Zen",
-        title: "Breathe.",
-      },
-    ]);
-
     expect(
       WIKIFEEDS_SOURCE.parse({
         events: [

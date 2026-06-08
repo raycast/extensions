@@ -12,31 +12,6 @@ Built for quick workflows, everyday use for everybody
 Lucky Draw is designed around quick, lightweight command flows and compact
 result views.
 
-## Screenshots
-
-These screenshots show the main command launcher and a few representative
-flows.
-
-### Command list
-
-![Lucky Draw command list](assets/SCR-20260608-rkjg.png)
-
-### Pick random item
-
-![Pick Random Item composer](assets/SCR-20260608-rkrq.png)
-
-### Flip coin
-
-![Flip Coin result](assets/SCR-20260608-rkvx.jpeg)
-
-### Generate number
-
-![Generate Number form](assets/SCR-20260608-rkxy.jpeg)
-
-### Random fact
-
-![Random Fact result](assets/SCR-20260608-rlfx.png)
-
 ## Currently available commands
 
 These are the Raycast commands included in this extension:
@@ -47,6 +22,20 @@ These are the Raycast commands included in this extension:
 - `pick-random-item` - Pick Random Item
 - `spin-decision-wheel` - Spin Decision Wheel
 - `random-fact` - Random Fact
+
+## Screenshots
+
+These screenshots show the main command launcher and a few representative
+flows.
+
+### Examples
+
+![Lucky Draw command list](metadata/large-lucky-draw.png)
+
+### Random fact
+
+![Random Fact result](metadata/random-fact.png)
+
 
 ## Development scripts
 
