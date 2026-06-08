@@ -334,7 +334,7 @@
     }
   ],
   "dependencies": {
-    "@mcdays/cloudflare-images-core": "^0.0.1",
+    "@mcdays/cloudflare-images-core": "^0.1.0",
     "@raycast/api": "^1.104.0"
   },
   "devDependencies": {
