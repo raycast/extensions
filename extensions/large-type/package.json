@@ -69,10 +69,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.104.19",
     "@types/react-dom": "^17.0.14",
-    "react-dom": "^17.0.2",
-    "graphemer": "^1.4.0"
+    "graphemer": "^1.4.0",
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
