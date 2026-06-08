@@ -63,7 +63,9 @@
     "lint:eslint": "eslint .",
     "lint:raycast": "ray lint --relaxed",
     "lint:store": "ray lint && npm run lint:eslint",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "npm run package-swift -- release && npm run build && npx @raycast/api@latest publish",
+    "sync-native": "scripts/sync-native.sh",
+    "verify-native": "scripts/verify-native.sh",
     "typecheck": "tsc --noEmit",
     "package-swift": "scripts/package-swift-binary.sh"
   },

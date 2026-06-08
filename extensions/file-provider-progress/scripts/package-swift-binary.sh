@@ -2,6 +2,8 @@
 set -eu
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+NATIVE_DIR="$ROOT_DIR/raycast/native"
+SCRATCH_DIR="$ROOT_DIR/raycast/.raycast-swift-build"
 OUTPUT_DIR="$ROOT_DIR/raycast/assets/bin"
 OUTPUT_BIN="$OUTPUT_DIR/fp-progress"
 CONFIGURATION="${1:-release}"
@@ -15,7 +17,9 @@ case "$CONFIGURATION" in
     ;;
 esac
 
-swift build --package-path "$ROOT_DIR/native" -c "$CONFIGURATION" --arch arm64 --arch x86_64
+"$ROOT_DIR/raycast/scripts/sync-native.sh"
+"$ROOT_DIR/raycast/scripts/verify-native.sh"
+swift build --package-path "$NATIVE_DIR" --scratch-path "$SCRATCH_DIR" -c "$CONFIGURATION" --arch arm64 --arch x86_64
 
 case "$CONFIGURATION" in
   debug)
@@ -27,7 +31,8 @@ case "$CONFIGURATION" in
 esac
 
 mkdir -p "$OUTPUT_DIR"
-cp "$ROOT_DIR/native/.build/apple/Products/$PRODUCT_CONFIGURATION/fp-progress" "$OUTPUT_BIN"
+cp "$SCRATCH_DIR/apple/Products/$PRODUCT_CONFIGURATION/fp-progress" "$OUTPUT_BIN"
 chmod +x "$OUTPUT_BIN"
+lipo "$OUTPUT_BIN" -verify_arch arm64 x86_64
 
 printf "Bundled universal %s build at %s\n" "$CONFIGURATION" "$OUTPUT_BIN"
