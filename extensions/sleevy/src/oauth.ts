@@ -62,7 +62,7 @@ function deviceLabel(): string {
   return `Raycast on ${deviceName()}`;
 }
 
-function deriveWebUrl(apiUrl: string): string {
+export function deriveWebUrl(apiUrl: string): string {
   try {
     const parsed = new URL(apiUrl);
     if (parsed.hostname.startsWith("api.")) {

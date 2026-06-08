@@ -47,7 +47,28 @@ export type EnrichmentStatus = "pending" | "enriched" | "failed";
 export const savedItemSorts = ["newest", "oldest", "title", "unread"] as const;
 export type SavedItemSort = "title" | "newest" | "oldest" | "unread";
 
+export type FolderDto = {
+  readonly id: string;
+  readonly name: string;
+  readonly emoji: string | null;
+  readonly color: string | null;
+};
+
+export type FoldersResponse = {
+  readonly folders: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly emoji: string | null;
+    readonly color: string | null;
+  }[];
+};
+
 export type SavedItemDto = {
+  readonly id: string;
+  readonly originalUrl: string;
+  readonly normalizedUrl: string;
+  readonly host: string;
+  readonly type: "article" | "video" | "website" | "repository";
   readonly tags: readonly (
     | "ai"
     | "tools"
@@ -57,12 +78,13 @@ export type SavedItemDto = {
     | "backend"
     | "front-end"
   )[];
-  readonly id: string;
-  readonly originalUrl: string;
-  readonly normalizedUrl: string;
-  readonly host: string;
-  readonly type: "article" | "video" | "website" | "repository";
   readonly enrichmentStatus: "pending" | "enriched" | "failed";
+  readonly folder: {
+    readonly id: string;
+    readonly name: string;
+    readonly emoji: string | null;
+    readonly color: string | null;
+  } | null;
   readonly isRead: boolean;
   readonly lastSavedAt: string;
   readonly createdAt: string;
@@ -89,6 +111,11 @@ export type SavedItemDto = {
 
 export type SavedItemsResponse = {
   readonly savedItems: readonly {
+    readonly id: string;
+    readonly originalUrl: string;
+    readonly normalizedUrl: string;
+    readonly host: string;
+    readonly type: "article" | "video" | "website" | "repository";
     readonly tags: readonly (
       | "ai"
       | "tools"
@@ -98,12 +125,13 @@ export type SavedItemsResponse = {
       | "backend"
       | "front-end"
     )[];
-    readonly id: string;
-    readonly originalUrl: string;
-    readonly normalizedUrl: string;
-    readonly host: string;
-    readonly type: "article" | "video" | "website" | "repository";
     readonly enrichmentStatus: "pending" | "enriched" | "failed";
+    readonly folder: {
+      readonly id: string;
+      readonly name: string;
+      readonly emoji: string | null;
+      readonly color: string | null;
+    } | null;
     readonly isRead: boolean;
     readonly lastSavedAt: string;
     readonly createdAt: string;
@@ -130,8 +158,12 @@ export type SavedItemsResponse = {
 };
 
 export type CaptureCreated = {
-  readonly captureResult: "created";
   readonly savedItem: {
+    readonly id: string;
+    readonly originalUrl: string;
+    readonly normalizedUrl: string;
+    readonly host: string;
+    readonly type: "article" | "video" | "website" | "repository";
     readonly tags: readonly (
       | "ai"
       | "tools"
@@ -141,12 +173,13 @@ export type CaptureCreated = {
       | "backend"
       | "front-end"
     )[];
-    readonly id: string;
-    readonly originalUrl: string;
-    readonly normalizedUrl: string;
-    readonly host: string;
-    readonly type: "article" | "video" | "website" | "repository";
     readonly enrichmentStatus: "pending" | "enriched" | "failed";
+    readonly folder: {
+      readonly id: string;
+      readonly name: string;
+      readonly emoji: string | null;
+      readonly color: string | null;
+    } | null;
     readonly isRead: boolean;
     readonly lastSavedAt: string;
     readonly createdAt: string;
@@ -170,11 +203,16 @@ export type CaptureCreated = {
       | "api"
       | undefined;
   };
+  readonly captureResult: "created";
 };
 
 export type CaptureUpdated = {
-  readonly captureResult: "updated";
   readonly savedItem: {
+    readonly id: string;
+    readonly originalUrl: string;
+    readonly normalizedUrl: string;
+    readonly host: string;
+    readonly type: "article" | "video" | "website" | "repository";
     readonly tags: readonly (
       | "ai"
       | "tools"
@@ -184,12 +222,13 @@ export type CaptureUpdated = {
       | "backend"
       | "front-end"
     )[];
-    readonly id: string;
-    readonly originalUrl: string;
-    readonly normalizedUrl: string;
-    readonly host: string;
-    readonly type: "article" | "video" | "website" | "repository";
     readonly enrichmentStatus: "pending" | "enriched" | "failed";
+    readonly folder: {
+      readonly id: string;
+      readonly name: string;
+      readonly emoji: string | null;
+      readonly color: string | null;
+    } | null;
     readonly isRead: boolean;
     readonly lastSavedAt: string;
     readonly createdAt: string;
@@ -213,12 +252,22 @@ export type CaptureUpdated = {
       | "api"
       | undefined;
   };
+  readonly captureResult: "updated";
 };
 
 export type HealthResponse = { readonly ok: boolean };
 
 export type CapturePayload = {
   readonly url: string;
+  readonly sourceName?: string | undefined;
+  readonly captureChannel?:
+    | "chrome-extension"
+    | "ios-app"
+    | "ios-share-extension"
+    | "raycast"
+    | "web-companion"
+    | "api"
+    | undefined;
   readonly tags?:
     | readonly (
         | "ai"
@@ -230,22 +279,23 @@ export type CapturePayload = {
         | "front-end"
       )[]
     | undefined;
-  readonly sourceName?: string | undefined;
-  readonly captureChannel?:
-    | "chrome-extension"
-    | "ios-app"
-    | "ios-share-extension"
-    | "raycast"
-    | "web-companion"
-    | "api"
-    | undefined;
+  readonly folderId?: string | null | undefined;
 };
 
 export type SavedItemReadStatePayload = { readonly isRead: boolean };
 
 export type SavedItemsQuery = {
   readonly sort?: "title" | "newest" | "oldest" | "unread" | undefined;
+  readonly folder?: string | undefined;
 };
+
+export type FolderNamePayload = {
+  readonly name: string;
+  readonly emoji?: string | null | undefined;
+  readonly color?: string | null | undefined;
+};
+
+export type FolderAssignmentPayload = { readonly folderId: string | null };
 
 export type Unauthorized = {
   readonly _tag: "Unauthorized";
@@ -258,9 +308,9 @@ export type RateLimitExceeded = {
 };
 
 export type InvalidUrlError = {
-  readonly url: string;
   readonly _tag: "InvalidUrlError";
   readonly message: string;
+  readonly url: string;
 };
 
 export type SavedItemNotFoundError = {
@@ -269,10 +319,29 @@ export type SavedItemNotFoundError = {
   readonly savedItemId: string;
 };
 
+export type InvalidFolderNameError = {
+  readonly _tag: "InvalidFolderNameError";
+  readonly message: string;
+};
+
+export type FolderNotFoundError = {
+  readonly _tag: "FolderNotFoundError";
+  readonly message: string;
+  readonly folderId: string;
+};
+
+export type FolderNameConflictError = {
+  readonly _tag: "FolderNameConflictError";
+  readonly message: string;
+};
+
 export type CaptureResponse = CaptureCreated | CaptureUpdated;
 
 export type ApiError =
   | Unauthorized
   | RateLimitExceeded
   | InvalidUrlError
-  | SavedItemNotFoundError;
+  | SavedItemNotFoundError
+  | InvalidFolderNameError
+  | FolderNotFoundError
+  | FolderNameConflictError;

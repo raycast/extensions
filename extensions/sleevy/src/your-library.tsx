@@ -18,7 +18,7 @@ import {
 } from "@raycast/utils";
 import { useState } from "react";
 
-import { authorize, oauthClient } from "./oauth";
+import { authorize, deriveWebUrl, oauthClient } from "./oauth";
 import { getSleevyPreferences } from "./preferences";
 import type { SavedItemDto, SavedItemsResponse } from "./contract";
 
@@ -59,6 +59,7 @@ function formatDate(dateString: string): string {
 
 function YourLibrary() {
   const preferences = getSleevyPreferences();
+  const webUrl = preferences.webUrl ?? deriveWebUrl(preferences.apiUrl);
   const { token } = getAccessToken();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
@@ -157,6 +158,9 @@ function YourLibrary() {
           title: "Deleted successfully",
         });
         revalidate();
+      } else if (response.status === 401) {
+        await oauthClient.removeTokens();
+        throw new Error("Unauthorized. Run the command again to reconnect.");
       } else {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -192,6 +196,9 @@ function YourLibrary() {
           title: item.isRead ? "Marked as unread" : "Marked as read",
         });
         revalidate();
+      } else if (response.status === 401) {
+        await oauthClient.removeTokens();
+        throw new Error("Unauthorized. Run the command again to reconnect.");
       } else {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -255,6 +262,12 @@ function YourLibrary() {
                   title="Open in Browser"
                   icon={Icon.Globe}
                   onAction={() => handleOpen(item)}
+                />
+                <Action
+                  title="Open in Sleevy"
+                  icon={Icon.AppWindow}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  onAction={() => open(`${webUrl}/library`)}
                 />
                 <Action
                   title={isShowingDetail ? "Hide Details" : "Show Details"}
