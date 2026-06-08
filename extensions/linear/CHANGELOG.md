@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Label Fetching] - {PR_MERGE_DATE}
+
+- Add an "API Label Limit" preference (default 100) so more labels can be fetched per team when creating or editing issues. Increase it if some labels are missing because your team has more than 100 labels.
+
 ## [Confirmation Fixes] - 2026-05-15
 
 - Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
