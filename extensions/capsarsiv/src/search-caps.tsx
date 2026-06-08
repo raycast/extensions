@@ -19,22 +19,14 @@ type Preferences = {
 };
 
 type Cap = {
-  id: number;
   slug: string;
   title: string;
   image_url: string | null;
-  image_text: string | null;
-  image_width: number | null;
-  image_height: number | null;
   description: string;
-  type: string;
   tags: string[];
   aliases: string[];
   score: number;
-  source_url: string | null;
   view_count: number;
-  created_order: number;
-  created_by: { username: string; role: string } | null;
 };
 
 type CapsList = {
@@ -61,8 +53,7 @@ function capPageUrl(baseUrl: string, cap: Cap): string {
 
 function capSearchUrl(baseUrl: string, query: string): string {
   const params = new URLSearchParams({
-    sort: "popular",
-    limit: "40",
+    limit: "20",
   });
 
   const trimmedQuery = query.trim();
@@ -70,7 +61,7 @@ function capSearchUrl(baseUrl: string, query: string): string {
     params.set("q", trimmedQuery);
   }
 
-  return `${baseUrl}/api/caps?${params.toString()}`;
+  return `${baseUrl}/api/integrations/raycast/caps?${params.toString()}`;
 }
 
 function shortNumber(value: number): string {
@@ -137,7 +128,7 @@ async function copyImageToClipboard(cap: Cap, imageUrl: string) {
     );
     const filePath = join(
       tmpdir(),
-      `capsarsiv-${cap.id}-${safeFilePart(cap.slug)}${extension}`,
+      `capsarsiv-${safeFilePart(cap.slug)}${extension}`,
     );
 
     await writeFile(filePath, bytes);
@@ -162,11 +153,6 @@ function detailMarkdown(baseUrl: string, cap: Cap): string {
     ? cap.tags.map((tag) => `#${tag}`).join(" ")
     : "tagsiz";
   const aliases = cap.aliases.length ? cap.aliases.join(", ") : "yok";
-  const sourceUrl = absoluteUrl(baseUrl, cap.source_url);
-  const source = sourceUrl ? `[kaynak](${sourceUrl})` : "yok";
-  const imageText = cap.image_text
-    ? `\n\n## Gorseldeki Metin\n${cap.image_text}`
-    : "";
 
   return `${image}# ${cap.title}
 
@@ -176,12 +162,9 @@ ${cap.description}
 | --- | --- |
 | puan | ${cap.score} |
 | goruntulenme | ${cap.view_count} |
-| tur | ${cap.type || "caps"} |
 | tagler | ${tags} |
 | alternatif adlar | ${aliases} |
-| kaynak | ${source} |
-
-${imageText}`;
+`;
 }
 
 function useCapsSearch(baseUrl: string, query: string) {
@@ -203,6 +186,11 @@ function useCapsSearch(baseUrl: string, query: string) {
         signal: controller.signal,
         headers: { Accept: "application/json" },
       });
+
+      if (response.status === 422 && !query.trim()) {
+        setItems([]);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`Capsarsiv API ${response.status} dondu.`);
@@ -359,10 +347,7 @@ export default function Command() {
             key={cap.slug}
             id={cap.slug}
             title={cap.title}
-            subtitle={compactText([
-              cap.type || "caps",
-              cap.tags.slice(0, 3).join(", "),
-            ])}
+            subtitle={compactText(["caps", cap.tags.slice(0, 3).join(", ")])}
             icon={imageUrl ? { source: imageUrl } : Icon.Image}
             accessories={accessories}
             keywords={[cap.slug, cap.description, ...cap.tags, ...cap.aliases]}
