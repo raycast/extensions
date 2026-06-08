@@ -56,7 +56,7 @@
     }
   ],
   "scripts": {
-    "dev": "ray develop",
+    "dev": "npm run package-swift -- debug && FP_PROGRESS_BIN=\"$PWD/.raycast-swift-build/apple/Products/Debug/fp-progress\" ray develop",
     "build": "ray build -e dist",
     "lint": "ray lint && npm run lint:eslint && npm run typecheck",
     "fix-lint": "ray lint --fix && eslint . --fix",
