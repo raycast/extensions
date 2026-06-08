@@ -23,13 +23,13 @@ import {
 } from "@mcdays/cloudflare-images-core";
 import { buildCloudflareConfig, getPreferences } from "./lib/config.js";
 import { getEffectiveDefaultVariant } from "./lib/variant.js";
-import { getSigningKey } from "./lib/signing-key.js";
+import { clearCachedSigningKey, getSigningKey } from "./lib/signing-key.js";
 
 /**
- * My Cloudflare Images — V0.4.
+ * My Cloudflare Images.
  *
  * Lists every image in the configured Cloudflare Images account (first page,
- * up to 100 — TODO: pagination via the `continuation_token` returned by the
+ * up to 100. TODO: pagination via the `continuation_token` returned by the
  * v2 list endpoint). Each entry can be searched, previewed inline with full
  * metadata, copied in any of the three output formats, opened in a browser,
  * or deleted (with a destructive confirm).
@@ -54,7 +54,7 @@ import { getSigningKey } from "./lib/signing-key.js";
  *     `generateSignedUrl` (signed image) or `buildPublicUrl` (everything
  *     else). If the signing-key fetch fails (token lacks Images Read
  *     permission, etc.), signed images still render but their thumbnails
- *     and URLs won't load — that's flagged with a "Signing key unavailable"
+ *     and URLs won't load, that's flagged with a "Signing key unavailable"
  *     accessory tag.
  */
 export default function MyImagesCommand() {
@@ -264,7 +264,7 @@ function MyImageRow({
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
                 title="Filename"
-                text={image.filename || "—"}
+                text={image.filename || "(none)"}
               />
               <List.Item.Detail.Metadata.Label
                 title="Image ID"
@@ -382,6 +382,49 @@ function MyImageRow({
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={onReload}
             />
+            {(image.requireSignedURLs ||
+              signingKeyError ||
+              prefs.useSignedUrls) && (
+              <Action
+                title="Refresh Signing Key"
+                icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                onAction={async () => {
+                  const toast = await showToast({
+                    style: Toast.Style.Animated,
+                    title: "Refreshing signing key…",
+                  });
+                  try {
+                    // Clear the cached key so the next fetch re-pulls from
+                    // Cloudflare. Use prefs.accountId (untrimmed) to match the
+                    // exact cache key the list effect writes under. This is the
+                    // recovery path after a CF-side signing-key rotation, which
+                    // would otherwise leave the extension serving a stale key
+                    // and silently 404-ing signed URLs.
+                    await clearCachedSigningKey(prefs.accountId);
+                    // Re-fetch immediately to validate + re-cache (honours the
+                    // manualSigningKey override). Throws on failure so the
+                    // toast can surface a useful message.
+                    await getSigningKey({
+                      accountId: prefs.accountId,
+                      apiToken: prefs.apiToken,
+                      manualOverride: prefs.manualSigningKey,
+                    });
+                    // Reload so list previews pick up the fresh key (the
+                    // effect's getSigningKey now hits the warm cache, no
+                    // second API call).
+                    onReload();
+                    toast.style = Toast.Style.Success;
+                    toast.title = "Signing key refreshed";
+                  } catch (err) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Couldn't refresh signing key";
+                    toast.message =
+                      err instanceof Error ? err.message : String(err);
+                  }
+                }}
+              />
+            )}
             <Action
               title="Delete Image"
               icon={Icon.Trash}
