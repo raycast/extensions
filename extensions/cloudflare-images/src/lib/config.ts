@@ -41,25 +41,32 @@ export function getPreferences(): CfImagesPreferences {
 
 /**
  * Builds a `CloudflareConfig` (the core's auth + URL-shape struct) from
- * Raycast preferences. The `signingKey` field starts empty — the surface
+ * Raycast preferences. The `signingKey` field starts empty, the surface
  * is expected to populate it lazily from cache or by calling
  * `fetchSigningKey()` when an actual signed-URL upload happens.
  *
- * `defaultVariantOverride` lets the caller supply a variant resolved via the
- * `lib/variant.ts` precedence chain (stored → preference → /public). When
- * omitted, the textfield value flows straight through.
+ * `defaultVariantOverride` lets the caller supply a Variant resolved via
+ * the `lib/variant.ts` precedence chain (override → stored → preference →
+ * /public). When omitted, the textfield value flows straight through.
+ *
+ * `useSignedUrlsOverride` lets the caller supply the Effective Signed Mode
+ * resolved via `resolveSignedMode(prefs.useSignedUrls, opts.signed)`. When
+ * omitted, the preference value flows straight through. Pass this to honour
+ * per-invocation Overrides from commands like `Upload Clipboard as Signed
+ * Image` or `Upload Clipboard as Public Image`.
  */
 export function buildCloudflareConfig(
   prefs: CfImagesPreferences,
   signingKey = "",
   defaultVariantOverride?: string,
+  useSignedUrlsOverride?: boolean,
 ): CloudflareConfig {
   return {
     accountId: prefs.accountId.trim(),
     apiToken: prefs.apiToken.trim(),
     accountHash: prefs.accountHash.trim(),
     defaultVariant: defaultVariantOverride ?? prefs.defaultVariant,
-    useSignedUrls: prefs.useSignedUrls,
+    useSignedUrls: useSignedUrlsOverride ?? prefs.useSignedUrls,
     signingKey,
     signedUrlExpiration: clampNonNegativeInt(prefs.signedUrlExpiration, 0),
   };

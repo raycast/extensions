@@ -5,5 +5,5 @@ import { runUploadClipboard } from "./lib/upload-clipboard-impl.js";
  * the user's outputFormat preference.
  */
 export default async function () {
-  await runUploadClipboard("html");
+  await runUploadClipboard({ format: "html" });
 }

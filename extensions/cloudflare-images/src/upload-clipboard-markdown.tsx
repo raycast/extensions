@@ -5,5 +5,5 @@ import { runUploadClipboard } from "./lib/upload-clipboard-impl.js";
  * outputFormat preference. Useful for hotkey-bound power users.
  */
 export default async function () {
-  await runUploadClipboard("markdown");
+  await runUploadClipboard({ format: "markdown" });
 }

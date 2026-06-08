@@ -30,7 +30,7 @@
       "name": "upload-clipboard",
       "title": "Upload Clipboard Image",
       "subtitle": "Cloudflare Images",
-      "description": "Reads the image currently on your clipboard, uploads it to Cloudflare Images, and pastes the formatted URL at the cursor. Pass an optional output format (Markdown, HTML, or Raw URL) at the dropdown to override your preference for this invocation.",
+      "description": "Reads the image currently on your clipboard, uploads it to Cloudflare Images, and pastes the formatted URL at the cursor. Both dropdowns are optional. Leave them on 'Use my preference' to fall back to your settings, or pick a value to override format and/or signed-mode for this single invocation.",
       "mode": "no-view",
       "arguments": [
         {
@@ -44,6 +44,17 @@
             { "title": "HTML", "value": "html" },
             { "title": "Raw URL", "value": "raw" }
           ]
+        },
+        {
+          "name": "signed",
+          "type": "dropdown",
+          "placeholder": "Signed mode",
+          "required": false,
+          "data": [
+            { "title": "Use my preference", "value": "preference" },
+            { "title": "Signed", "value": "signed" },
+            { "title": "Public", "value": "public" }
+          ]
         }
       ]
     },
@@ -51,7 +62,7 @@
       "name": "upload-clipboard-markdown",
       "title": "Upload Clipboard as Markdown",
       "subtitle": "Cloudflare Images",
-      "description": "Uploads the clipboard image and pastes the URL as Markdown — ![filename](url) — regardless of your default output format. Bind a hotkey if you live in Markdown.",
+      "description": "Uploads the clipboard image and pastes the URL as Markdown, ![filename](url), regardless of your default output format. Bind a hotkey if you live in Markdown.",
       "mode": "no-view"
     },
     {
@@ -65,7 +76,42 @@
       "name": "upload-clipboard-url",
       "title": "Upload Clipboard as URL",
       "subtitle": "Cloudflare Images",
-      "description": "Uploads the clipboard image and pastes only the raw URL — no Markdown or HTML wrapping — regardless of your default output format. The 'just give me the link' path for Slack, JSON fields, CSS, etc.",
+      "description": "Uploads the clipboard image and pastes only the raw URL, no Markdown or HTML wrapping, regardless of your default output format. The 'just give me the link' path for Slack, JSON fields, CSS, etc.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed",
+      "title": "Upload Clipboard as Signed Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image with a Signed URL and copies the URL to the clipboard. Hotkey-friendly for the 'this one needs a signed link' case. Paste anywhere with ⌘V.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-public",
+      "title": "Upload Clipboard as Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image with a public URL and copies the URL to the clipboard. Use this instead of 'Upload Clipboard Image' when you want the raw URL on the clipboard (no Markdown / HTML wrapping, no paste at cursor).",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-markdown",
+      "title": "Upload Clipboard as Signed Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes as Markdown at cursor, regardless of your Signed URLs preference. Hotkey-friendly for 'signed Markdown image, right here, right now'.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-html",
+      "title": "Upload Clipboard as Signed HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes as an HTML <img> tag at cursor, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-url",
+      "title": "Upload Clipboard as Signed URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes the raw URL string at cursor (no Markdown / HTML wrapping), regardless of your Signed URLs preference. Differs from 'Upload Clipboard as Signed Image' (which copies to clipboard without pasting).",
       "mode": "no-view"
     },
     {
@@ -94,6 +140,41 @@
       "title": "Upload Selected File as URL",
       "subtitle": "Cloudflare Images",
       "description": "Uploads selected Finder image(s) and copies only the raw URL(s), regardless of your default output format. The 'just give me the link' path for Finder uploads.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed",
+      "title": "Upload Selected File as Signed Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) with Signed URLs and copies the URL(s) to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-public",
+      "title": "Upload Selected File as Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) with public URLs and copies the raw URL(s) to the clipboard. Use this instead of 'Upload Selected File' when you want the raw URLs (no Markdown / HTML wrapping).",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-markdown",
+      "title": "Upload Selected File as Signed Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies as Markdown image references to the clipboard, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-html",
+      "title": "Upload Selected File as Signed HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies as HTML <img> tags to the clipboard, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-url",
+      "title": "Upload Selected File as Signed URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies the raw URL(s) to the clipboard. Functionally equivalent to 'Upload Selected File as Signed Image' on Finder (the Finder pipeline always copies, never pastes), but kept for naming consistency with the clipboard family.",
       "mode": "no-view"
     },
     {
@@ -139,7 +220,7 @@
     {
       "name": "defaultVariant",
       "title": "Default Variant (fallback)",
-      "description": "Variant appended to delivery URLs. Conventionally /public. Run 'Set Default Variant' to pick from a live list of your account's variants — that selection takes precedence over this textfield.",
+      "description": "Variant appended to delivery URLs. Conventionally /public. Run 'Set Default Variant' to pick from a live list of your account's variants. That selection takes precedence over this textfield.",
       "type": "textfield",
       "required": false,
       "default": "/public",
@@ -153,8 +234,8 @@
       "required": false,
       "default": "markdown",
       "data": [
-        { "title": "Markdown — ![name](url)", "value": "markdown" },
-        { "title": "HTML — <img src=\"url\" alt=\"name\" />", "value": "html" },
+        { "title": "Markdown (![name](url))", "value": "markdown" },
+        { "title": "HTML (<img src=\"url\" alt=\"name\" />)", "value": "html" },
         { "title": "Raw URL", "value": "raw" }
       ]
     },
@@ -179,7 +260,7 @@
     {
       "name": "manualSigningKey",
       "title": "Manual Signing Key (optional)",
-      "description": "Optional override. If set, this value is used directly for HMAC signing and the auto-fetch from the Cloudflare API is skipped entirely. Leave blank to use the automatic flow — most users want that.",
+      "description": "Optional override. If set, this value is used directly for HMAC signing and the auto-fetch from the Cloudflare API is skipped entirely. Leave blank to use the automatic flow. Most users want that.",
       "type": "password",
       "required": false,
       "placeholder": "Leave blank for auto-fetch"

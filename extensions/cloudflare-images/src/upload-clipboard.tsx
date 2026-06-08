@@ -3,25 +3,40 @@ import type { OutputFormat } from "@mcdays/cloudflare-images-core";
 import { runUploadClipboard } from "./lib/upload-clipboard-impl.js";
 
 /**
- * Argument shape from the manifest's `arguments` entry. The dropdown's first
- * option ("Use my preference") yields the sentinel value "preference"; the
- * rest map 1:1 to OutputFormat values.
+ * Argument shapes from the manifest's `arguments` entries. Both
+ * dropdowns expose a "preference" sentinel as their default, meaning
+ * "no Override; fall back to the user's preference".
  */
 type FormatArg = "preference" | OutputFormat;
+type SignedArg = "preference" | "signed" | "public";
+
+function resolveFormatArg(arg: FormatArg | undefined): OutputFormat | null {
+  return arg && arg !== "preference" ? arg : null;
+}
+
+function resolveSignedArg(arg: SignedArg | undefined): boolean | null {
+  if (arg === "signed") return true;
+  if (arg === "public") return false;
+  return null;
+}
 
 /**
- * Default Upload Clipboard Image command. Reads an optional `format`
- * dropdown argument and delegates to the shared `runUploadClipboard`
- * implementation. With no argument (or "preference"), the user's
- * outputFormat preference wins.
+ * Default Upload Clipboard Image command. Reads two optional dropdown
+ * arguments, `format` and `signed`, and delegates to the shared
+ * `runUploadClipboard` implementation.
  *
- * Format-locked variants (`Upload Clipboard as Markdown/HTML/URL`) live
- * in sibling files and pass an explicit format to the same impl.
+ * For dedicated zero-arg hotkey variants on either axis, see the
+ * format-locked (`upload-clipboard-markdown.tsx` etc.), signed-locked
+ * (`upload-clipboard-signed.tsx` / `-public.tsx`), and combo-locked
+ * (`upload-clipboard-signed-markdown.tsx` etc.) sibling files.
  */
 export default async function UploadClipboardCommand(
-  props: LaunchProps<{ arguments: { format?: FormatArg } }>,
+  props: LaunchProps<{
+    arguments: { format?: FormatArg; signed?: SignedArg };
+  }>,
 ) {
-  const argFormat = props.arguments?.format;
-  const override = argFormat && argFormat !== "preference" ? argFormat : null;
-  await runUploadClipboard(override);
+  await runUploadClipboard({
+    format: resolveFormatArg(props.arguments?.format),
+    signed: resolveSignedArg(props.arguments?.signed),
+  });
 }

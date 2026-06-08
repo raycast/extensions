@@ -14,8 +14,10 @@ import {
   buildDeliveryUrl,
   calculateFileHash,
   formatImageUrl,
+  resolveSignedMode,
   uploadImage,
   type OutputFormat,
+  type UploadOverrides,
 } from "@mcdays/cloudflare-images-core";
 import {
   buildCloudflareConfig,
@@ -45,13 +47,15 @@ const IMAGE_EXTENSIONS = new Set([
 ]);
 
 /**
- * The full Upload Selected File pipeline, parameterised by an optional
- * format override. Used by:
+ * The full Upload Selected File pipeline, parameterised by an `opts`
+ * object carrying per-invocation Overrides. Used by:
  *
- *   - `upload-finder.tsx`           (formatOverride = null → user preference)
- *   - `upload-finder-markdown.tsx`  (formatOverride = "markdown")
- *   - `upload-finder-html.tsx`      (formatOverride = "html")
- *   - `upload-finder-url.tsx`       (formatOverride = "raw")
+ *   - `upload-finder.tsx`           (no Overrides → user preferences)
+ *   - `upload-finder-markdown.tsx`  ({ format: "markdown" })
+ *   - `upload-finder-html.tsx`      ({ format: "html" })
+ *   - `upload-finder-url.tsx`       ({ format: "raw" })
+ *   - `upload-finder-signed.tsx`    ({ signed: true })
+ *   - `upload-finder-public.tsx`    ({ signed: false })
  *
  * Sequential not parallel: keeps the progress toast linear and readable, and
  * sidesteps cache races (two simultaneous uploads of identical bytes would
@@ -60,20 +64,24 @@ const IMAGE_EXTENSIONS = new Set([
  * Failure mode is partial-tolerant: a single bad file doesn't kill the whole
  * batch. Successes are still copied; failures are surfaced afterwards in a
  * follow-up toast naming the affected files.
+ *
+ * See `CONTEXT.md > Override` for the canonical list of Overrides.
  */
 export async function runUploadFinder(
-  formatOverride: OutputFormat | null,
+  opts: UploadOverrides = {},
 ): Promise<void> {
   const prefs = getPreferences();
-  const effectiveFormat: OutputFormat = formatOverride ?? prefs.outputFormat;
+  const effectiveFormat: OutputFormat = opts.format ?? prefs.outputFormat;
+  const effectiveSigned = resolveSignedMode(prefs.useSignedUrls, opts.signed);
+  const copyRawOnly = opts.copyRawOnly ?? false;
 
-  // Credentials check up front — bail before closing the window.
+  // Credentials check up front, bail before closing the window.
   const missing = missingCredentials(prefs);
   if (missing.length > 0) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Cloudflare credentials missing",
-      message: `Fill in ${missing.join(", ")} via ⌘ , — or run Validate Cloudflare Credentials.`,
+      message: `Fill in ${missing.join(", ")} via ⌘ , or run Validate Cloudflare Credentials.`,
       primaryAction: {
         title: "Run Validate Credentials",
         onAction: async () => {
@@ -87,7 +95,7 @@ export async function runUploadFinder(
     return;
   }
 
-  // Read the Finder selection BEFORE closing the Raycast window — Raycast
+  // Read the Finder selection BEFORE closing the Raycast window, Raycast
   // sometimes returns an empty selection if Finder has lost focus first.
   let selection: Awaited<ReturnType<typeof getSelectedFinderItems>>;
   try {
@@ -118,12 +126,17 @@ export async function runUploadFinder(
     return;
   }
 
-  // Resolve variant + signing key up front so every file uses the same
-  // current settings. Signing key honours the manualSigningKey preference
-  // override before falling back to LocalStorage cache / API auto-fetch.
-  const effectiveVariant = await getEffectiveDefaultVariant(prefs);
+  // Resolve Variant + signing key up front so every file uses the same
+  // current settings. Variant honours the per-invocation Override before
+  // falling back to LocalStorage / preference / "/public". Signing key
+  // honours `manualSigningKey` preference before falling back to
+  // LocalStorage cache / API auto-fetch.
+  const effectiveVariant = await getEffectiveDefaultVariant(
+    prefs,
+    opts.variant,
+  );
   let signingKey = "";
-  if (prefs.useSignedUrls) {
+  if (effectiveSigned) {
     try {
       signingKey = await getSigningKey({
         accountId: prefs.accountId,
@@ -139,7 +152,12 @@ export async function runUploadFinder(
       return;
     }
   }
-  const config = buildCloudflareConfig(prefs, signingKey, effectiveVariant);
+  const config = buildCloudflareConfig(
+    prefs,
+    signingKey,
+    effectiveVariant,
+    effectiveSigned,
+  );
   const compression = buildCompressionConfig(prefs);
 
   // Metadata: parse once for the whole batch. If invalid JSON, warn once.
@@ -149,7 +167,7 @@ export async function runUploadFinder(
     if (parsed.parseError) {
       void showToast({
         style: Toast.Style.Failure,
-        title: "Metadata template JSON invalid — using default",
+        title: "Metadata template JSON invalid, using default",
         message: parsed.errorMessage ?? "Check the JSON in preferences.",
       });
     }
@@ -233,16 +251,29 @@ export async function runUploadFinder(
     return;
   }
 
-  const formatted = successes
-    .map((s) => formatImageUrl(s.url, s.fileName, effectiveFormat))
-    .join("\n");
+  // Post-upload delivery.
+  //
+  // Two paths (mirror the clipboard impl):
+  //   - copyRawOnly = true → join raw delivery URLs with newlines, no
+  //     format-wrapping. The user ⌘Vs wherever they want.
+  //   - copyRawOnly = false (default) → format-wrap each URL per the
+  //     effective output format, then join.
+  //
+  // Finder always copies (never pastes) regardless, so there's no
+  // clipboard-history caveat to work around here, `Clipboard.copy()`
+  // populates history natively.
+  const formatted = copyRawOnly
+    ? successes.map((s) => s.url).join("\n")
+    : successes
+        .map((s) => formatImageUrl(s.url, s.fileName, effectiveFormat))
+        .join("\n");
 
   await Clipboard.copy(formatted);
 
   const cacheHits = successes.filter((s) => s.fromCache).length;
   const cacheHitsNote =
     cacheHits > 0 ? ` (${cacheHits} reused from dedupe cache)` : "";
-  const formatLabel = humanFormatLabel(effectiveFormat);
+  const formatLabel = copyRawOnly ? "URL" : humanFormatLabel(effectiveFormat);
 
   if (failures.length === 0) {
     if (total === 1) {

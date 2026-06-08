@@ -5,5 +5,5 @@ import { runUploadFinder } from "./lib/upload-finder-impl.js";
  * preference. Format-locked variants live in sibling files.
  */
 export default async function UploadFinderCommand() {
-  await runUploadFinder(null);
+  await runUploadFinder();
 }

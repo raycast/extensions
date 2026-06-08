@@ -6,8 +6,7 @@ listing page, so keep the most recent release at the top.
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Upload images straight to Cloudflare Images from your clipboard or Finder selection, with the formatted URL pasted at your cursor.
+- Upload images straight to Cloudflare Images from your clipboard or Finder selection, with the formatted URL pasted at your cursor (or copied, your choice).
 - Browse, search, and delete your uploaded images from the **My Cloudflare Images** list, including custom metadata as searchable keywords.
-- Pick output format per command (Markdown, HTML, or raw URL), or set a default in preferences.
+- Choose your output format (Markdown, HTML, or raw URL) and whether each URL is public or signed, per upload or as a saved default. Dedicated commands let you bind a hotkey to any combination you reach for often.
 - Tag uploads with custom metadata using a JSON template with `${fileName}`, `${timestamp}`, and more placeholders.
-- Supports signed URLs for private Cloudflare Images accounts.
