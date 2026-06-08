@@ -1,0 +1,712 @@
+{
+  "countries": [
+    {
+      "code": "AT",
+      "name": "Austria",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "de-AT",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            10,
+            13
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "code": "BE",
+      "name": "Belgium",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "nl-BE",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            6,
+            12
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "BG",
+      "name": "Bulgaria",
+      "currency": "BGN",
+      "currencySymbol": "лв",
+      "locale": "bg-BG",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "code": "HR",
+      "name": "Croatia",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "hr-HR",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            13
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CY",
+      "name": "Cyprus",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "el-CY",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CZ",
+      "name": "Czechia",
+      "currency": "CZK",
+      "currencySymbol": "Kč",
+      "locale": "cs-CZ",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            12
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DK",
+      "name": "Denmark",
+      "currency": "DKK",
+      "currencySymbol": "kr",
+      "locale": "da-DK",
+      "rates": [
+        {
+          "name": "Standard",
+          "rates": [
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "code": "EE",
+      "name": "Estonia",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "et-EE",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "code": "FI",
+      "name": "Finland",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "fi-FI",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            10,
+            14
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            25.5
+          ]
+        }
+      ]
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "fr-FR",
+      "rates": [
+        {
+          "name": "Super-reduced",
+          "rates": [
+            2.1
+          ]
+        },
+        {
+          "name": "Reduced",
+          "rates": [
+            5.5,
+            10
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "de-DE",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            7
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "code": "GR",
+      "name": "Greece",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "el-GR",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            6,
+            13
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "code": "HU",
+      "name": "Hungary",
+      "currency": "HUF",
+      "currencySymbol": "Ft",
+      "locale": "hu-HU",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            18
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "code": "IS",
+      "name": "Iceland",
+      "currency": "ISK",
+      "currencySymbol": "kr",
+      "locale": "is-IS",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            11
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "code": "IE",
+      "name": "Ireland",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "en-IE",
+      "rates": [
+        {
+          "name": "Super-reduced",
+          "rates": [
+            4.8
+          ]
+        },
+        {
+          "name": "Reduced",
+          "rates": [
+            9,
+            13.5
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "code": "IT",
+      "name": "Italy",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "it-IT",
+      "rates": [
+        {
+          "name": "Super-reduced",
+          "rates": [
+            4
+          ]
+        },
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            10
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "code": "LV",
+      "name": "Latvia",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "lv-LV",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            12
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "LT",
+      "name": "Lithuania",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "lt-LT",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "LU",
+      "name": "Luxembourg",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "fr-LU",
+      "rates": [
+        {
+          "name": "Super-reduced",
+          "rates": [
+            3
+          ]
+        },
+        {
+          "name": "Reduced",
+          "rates": [
+            8
+          ]
+        },
+        {
+          "name": "Parking",
+          "rates": [
+            14
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MT",
+      "name": "Malta",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "en-MT",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            7
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "code": "NL",
+      "name": "Netherlands",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "nl-NL",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "NO",
+      "name": "Norway",
+      "currency": "NOK",
+      "currencySymbol": "kr",
+      "locale": "nb-NO",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            12,
+            15
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "code": "PL",
+      "name": "Poland",
+      "currency": "PLN",
+      "currencySymbol": "zł",
+      "locale": "pl-PL",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            8
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "code": "PT",
+      "name": "Portugal",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "pt-PT",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            6,
+            13
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "code": "RO",
+      "name": "Romania",
+      "currency": "RON",
+      "currencySymbol": "lei",
+      "locale": "ro-RO",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            9
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SK",
+      "name": "Slovakia",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "sk-SK",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            19
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SI",
+      "name": "Slovenia",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "sl-SI",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5,
+            9.5
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ES",
+      "name": "Spain",
+      "currency": "EUR",
+      "currencySymbol": "€",
+      "locale": "es-ES",
+      "rates": [
+        {
+          "name": "Super-reduced",
+          "rates": [
+            4
+          ]
+        },
+        {
+          "name": "Reduced",
+          "rates": [
+            10
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SE",
+      "name": "Sweden",
+      "currency": "SEK",
+      "currencySymbol": "kr",
+      "locale": "sv-SE",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            6,
+            12
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CH",
+      "name": "Switzerland",
+      "currency": "CHF",
+      "currencySymbol": "CHF",
+      "locale": "de-CH",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            2.6
+          ]
+        },
+        {
+          "name": "Special",
+          "rates": [
+            3.8
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            8.1
+          ]
+        }
+      ]
+    },
+    {
+      "code": "GB",
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "currencySymbol": "£",
+      "locale": "en-GB",
+      "rates": [
+        {
+          "name": "Reduced",
+          "rates": [
+            5
+          ]
+        },
+        {
+          "name": "Standard",
+          "rates": [
+            20
+          ]
+        }
+      ]
+    }
+  ]
+}

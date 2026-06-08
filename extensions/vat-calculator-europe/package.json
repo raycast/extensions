@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vat-calculator-europe",
+  "description": "Calculate VAT for different European Countries.",
+  "license": "MIT",
+  "scripts": {
+    "sync:countries": "node scripts/sync-countries.mjs",
+    "predev": "npm run sync:countries",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "prebuild": "npm run sync:countries",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "calculate-vat",
+      "title": "Calculate VAT",
+      "description": "Calculate VAT for different Countries.",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "required": false,
+          "placeholder": "9.99"
+        },
+        {
+          "name": "country",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Select country",
+          "data": [
+            {
+              "title": "Austria",
+              "value": "AT"
+            },
+            {
+              "title": "Belgium",
+              "value": "BE"
+            },
+            {
+              "title": "Bulgaria",
+              "value": "BG"
+            },
+            {
+              "title": "Croatia",
+              "value": "HR"
+            },
+            {
+              "title": "Cyprus",
+              "value": "CY"
+            },
+            {
+              "title": "Czechia",
+              "value": "CZ"
+            },
+            {
+              "title": "Denmark",
+              "value": "DK"
+            },
+            {
+              "title": "Estonia",
+              "value": "EE"
+            },
+            {
+              "title": "Finland",
+              "value": "FI"
+            },
+            {
+              "title": "France",
+              "value": "FR"
+            },
+            {
+              "title": "Germany",
+              "value": "DE"
+            },
+            {
+              "title": "Greece",
+              "value": "GR"
+            },
+            {
+              "title": "Hungary",
+              "value": "HU"
+            },
+            {
+              "title": "Iceland",
+              "value": "IS"
+            },
+            {
+              "title": "Ireland",
+              "value": "IE"
+            },
+            {
+              "title": "Italy",
+              "value": "IT"
+            },
+            {
+              "title": "Latvia",
+              "value": "LV"
+            },
+            {
+              "title": "Lithuania",
+              "value": "LT"
+            },
+            {
+              "title": "Luxembourg",
+              "value": "LU"
+            },
+            {
+              "title": "Malta",
+              "value": "MT"
+            },
+            {
+              "title": "Netherlands",
+              "value": "NL"
+            },
+            {
+              "title": "Norway",
+              "value": "NO"
+            },
+            {
+              "title": "Poland",
+              "value": "PL"
+            },
+            {
+              "title": "Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "Romania",
+              "value": "RO"
+            },
+            {
+              "title": "Slovakia",
+              "value": "SK"
+            },
+            {
+              "title": "Slovenia",
+              "value": "SI"
+            },
+            {
+              "title": "Spain",
+              "value": "ES"
+            },
+            {
+              "title": "Sweden",
+              "value": "SE"
+            },
+            {
+              "title": "Switzerland",
+              "value": "CH"
+            },
+            {
+              "title": "United Kingdom",
+              "value": "GB"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "title": "VAT Calculator",
+  "author": "juulliian",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ]
+}
