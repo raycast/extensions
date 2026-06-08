@@ -1,4 +1,4 @@
-import { Form, Icon } from "@raycast/api";
+import { Form, Icon, Toast, showToast } from "@raycast/api";
 import {
   CATEGORIES,
   CURRENCIES,
@@ -56,6 +56,39 @@ export function parseSubscriptionFormFields(
     startDate: formatStartDate(values.startDate),
     billingDay: values.startDate.getDate(),
   };
+}
+
+type ParsedSubscriptionFields = ReturnType<typeof parseSubscriptionFormFields>;
+
+export async function validateSubscriptionFormInput(
+  values: SubscriptionFormValues,
+  serviceSelection: string,
+  paymentSelection: string,
+  isCustomService: boolean,
+  options?: { requireServiceSelection?: boolean; invalidAmountMessage?: string },
+): Promise<({ amount: number } & ParsedSubscriptionFields) | null> {
+  const amount = parseFloat(values.amount);
+  if (isNaN(amount) || amount <= 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid amount",
+      ...(options?.invalidAmountMessage ? { message: options.invalidAmountMessage } : {}),
+    });
+    return null;
+  }
+
+  if (options?.requireServiceSelection && serviceSelection === "__none__") {
+    await showToast({ style: Toast.Style.Failure, title: "Please select a service" });
+    return null;
+  }
+
+  const fields = parseSubscriptionFormFields(values, serviceSelection, paymentSelection, isCustomService);
+  if (!fields.name) {
+    await showToast({ style: Toast.Style.Failure, title: "Service name required" });
+    return null;
+  }
+
+  return { amount, ...fields };
 }
 
 export function ServiceDropdown({

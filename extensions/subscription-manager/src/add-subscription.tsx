@@ -7,9 +7,9 @@ import {
   BillingCycleDropdown,
   CategoryAndPaymentFields,
   CurrencyDropdown,
-  parseSubscriptionFormFields,
   ServiceDropdown,
   SubscriptionFormValues,
+  validateSubscriptionFormInput,
 } from "./subscription-form-fields";
 import { BillingCycle, Subscription } from "./types";
 import { generateId, PRESET_PAYMENT_METHODS } from "./utils";
@@ -23,38 +23,15 @@ export function AddSubscriptionForm() {
   const { value: lastCurrency, setValue: setLastCurrency } = useLocalStorage("last-currency", "INR");
 
   const isCustomService = serviceSelection === "__custom__";
-  const isNoneSelected = serviceSelection === "__none__";
-
-  function handleServiceChange(value: string) {
-    applyServiceSelection(value, setServiceSelection, setCategory);
-  }
 
   async function handleSubmit(values: SubscriptionFormValues) {
-    const amount = parseFloat(values.amount);
-    if (isNaN(amount) || amount <= 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid amount",
-        message: "Enter a valid positive number",
-      });
-      return;
-    }
+    const parsed = await validateSubscriptionFormInput(values, serviceSelection, paymentSelection, isCustomService, {
+      requireServiceSelection: true,
+      invalidAmountMessage: "Enter a valid positive number",
+    });
+    if (!parsed) return;
 
-    if (isNoneSelected) {
-      await showToast({ style: Toast.Style.Failure, title: "Please select a service" });
-      return;
-    }
-
-    const { name, iconUrl, paymentMethod, startDate, billingDay } = parseSubscriptionFormFields(
-      values,
-      serviceSelection,
-      paymentSelection,
-      isCustomService,
-    );
-    if (!name) {
-      await showToast({ style: Toast.Style.Failure, title: "Service name required" });
-      return;
-    }
+    const { amount, name, iconUrl, paymentMethod, startDate, billingDay } = parsed;
 
     const sub: Subscription = {
       id: generateId(),
@@ -87,7 +64,11 @@ export function AddSubscriptionForm() {
         </ActionPanel>
       }
     >
-      <ServiceDropdown serviceSelection={serviceSelection} onServiceChange={handleServiceChange} showPlaceholder />
+      <ServiceDropdown
+        serviceSelection={serviceSelection}
+        onServiceChange={(value) => applyServiceSelection(value, setServiceSelection, setCategory)}
+        showPlaceholder
+      />
       {isCustomService && (
         <Form.TextField id="customName" title="Service Name" placeholder="Enter service name…" autoFocus />
       )}

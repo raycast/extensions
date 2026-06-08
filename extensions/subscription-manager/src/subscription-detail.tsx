@@ -7,9 +7,9 @@ import {
   BillingCycleDropdown,
   CategoryAndPaymentFields,
   CurrencyDropdown,
-  parseSubscriptionFormFields,
   ServiceDropdown,
   SubscriptionFormValues,
+  validateSubscriptionFormInput,
 } from "./subscription-form-fields";
 import { BillingCycle, Subscription } from "./types";
 import { PRESET_PAYMENT_METHODS, PRESET_SERVICES, formatCurrency, getNextBillingDate } from "./utils";
@@ -26,27 +26,11 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
   const [category, setCategory] = useState(sub.category);
   const isCustomService = serviceSelection === "__custom__";
 
-  function handleServiceChange(value: string) {
-    applyServiceSelection(value, setServiceSelection, setCategory);
-  }
-
   async function handleSubmit(values: SubscriptionFormValues) {
-    const amount = parseFloat(values.amount);
-    if (isNaN(amount) || amount <= 0) {
-      await showToast({ style: Toast.Style.Failure, title: "Invalid amount" });
-      return;
-    }
+    const parsed = await validateSubscriptionFormInput(values, serviceSelection, paymentSelection, isCustomService);
+    if (!parsed) return;
 
-    const { name, iconUrl, paymentMethod, startDate, billingDay } = parseSubscriptionFormFields(
-      values,
-      serviceSelection,
-      paymentSelection,
-      isCustomService,
-    );
-    if (!name) {
-      await showToast({ style: Toast.Style.Failure, title: "Service name required" });
-      return;
-    }
+    const { amount, name, iconUrl, paymentMethod, startDate, billingDay } = parsed;
 
     await onSave({
       name,
@@ -75,7 +59,10 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
         </ActionPanel>
       }
     >
-      <ServiceDropdown serviceSelection={serviceSelection} onServiceChange={handleServiceChange} />
+      <ServiceDropdown
+        serviceSelection={serviceSelection}
+        onServiceChange={(value) => applyServiceSelection(value, setServiceSelection, setCategory)}
+      />
       {isCustomService && (
         <Form.TextField id="customName" title="Service Name" defaultValue={matchedService ? "" : sub.name} />
       )}
