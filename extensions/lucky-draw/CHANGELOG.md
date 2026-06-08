@@ -25,3 +25,10 @@ along with visual polish and test coverage to support the extension.
 
 - Added Vitest setup.
 - Expanded domain coverage with tests.
+
+### Fixes
+
+- Removed a stale `RandomFactError` re-export from the random-fact API.
+- Fixed type safety in shared random helpers and spin-wheel rendering.
+- Cleaned up the lockfile to keep CI installs stable.
+- Restored a clean TypeScript check in CI.

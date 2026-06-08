@@ -19,12 +19,12 @@ const SPIN_STATUS_LINES = [
   "Closing in on the final call...",
 ] as const;
 
-export default function spinDecisionWheel({ items }: SpinDecisionWheelOptions) {
+export default function spinDecisionWheel({ items }: SpinDecisionWheelOptions): string {
   if (typeof items === "string") {
     return spinDecisionWheel({ items: items.split(",").map((item) => item.trim()) });
   }
 
-  return items[pickSpinWinnerIndex(items)];
+  return items[pickSpinWinnerIndex(items)]!;
 }
 
 export function pickSpinWinnerIndex(items: string[]): number {
@@ -85,7 +85,7 @@ function buildWheelOptionLines(items: string[], activeIndex: number): string[] {
     return ["- No options loaded"];
   }
 
-  const orderedItems = items.map((_, index) => items[(activeIndex + index) % items.length]);
+  const orderedItems = items.map((_, index) => items[(activeIndex + index) % items.length]!);
   const visibleItems = orderedItems.slice(0, 6);
   const hiddenItemsCount = Math.max(orderedItems.length - visibleItems.length, 0);
   const wheelLines = visibleItems.map((item, index) => {

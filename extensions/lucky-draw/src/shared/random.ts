@@ -15,7 +15,9 @@ export function pickRandom<T>(items: readonly T[], random = Math.random): T {
     throw new Error("Cannot pick from an empty list");
   }
 
-  return items[randomIntInclusive(0, items.length - 1, random)];
+  const index = randomIntInclusive(0, items.length - 1, random);
+
+  return items[index]!;
 }
 
 export function shuffleList<T>(items: readonly T[], random = Math.random): T[] {
@@ -23,7 +25,11 @@ export function shuffleList<T>(items: readonly T[], random = Math.random): T[] {
 
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const swapIndex = randomIntInclusive(0, index, random);
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    const current = shuffled[index]!;
+    const swap = shuffled[swapIndex]!;
+
+    shuffled[index] = swap;
+    shuffled[swapIndex] = current;
   }
 
   return shuffled;
