@@ -29,3 +29,13 @@ In "Retrieve Brands", by default the secondary `Action` performs "Deletion" but 
 ## 🗒️ NOTE
 
 The Free Plan of Context.dev includes **500** *one-time* API Calls so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`.
+
+## ❗ TIP
+
+If you are using an old API Key (prefix "brand__"), for best results, please create a new API Key via Context.dev dashboard (prefix "ctxt_secret_").
+
+## ➕ More
+
+Looking for more information on a Lead? Try the following extension:
+
+<a title="Install visitor-queue Raycast Extension" href="https://www.raycast.com/xmok/visitor-queue"><img src="https://www.raycast.com/xmok/visitor-queue/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
