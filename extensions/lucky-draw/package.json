@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lucky-draw",
+  "title": "Lucky Draw",
+  "description": "Lucky Draw is a collection of fast randomness, decision-making, and discovery tools for Raycast.\nGenerate random outcomes, make choices, explore fun utilities, and interact with lightweight widgets — all without leaving your keyboard.\n\nBuilt for quick workflows, everyday use for everybody",
+  "icon": "extension-icon.png",
+  "author": "jorggerojas",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "flip-coin",
+      "title": "Flip Coin",
+      "subtitle": "Heads or tails",
+      "description": "Flip a virtual coin and get a random result instantly.",
+      "mode": "view"
+    },
+    {
+      "name": "roll-dice",
+      "title": "Roll Dice",
+      "subtitle": "Roll a dice",
+      "description": "Roll dice to get a random number between 1-6",
+      "mode": "view"
+    },
+    {
+      "name": "generate-number",
+      "title": "Generate Number",
+      "subtitle": "Random number between ranges",
+      "description": "Generate a random number between a minimum and maximum value.",
+      "mode": "view"
+    },
+    {
+      "name": "pick-random-item",
+      "title": "Pick Random Item",
+      "subtitle": "Choose from a custom list",
+      "description": "Pick a random item from a list of options.",
+      "mode": "view"
+    },
+    {
+      "name": "spin-decision-wheel",
+      "title": "Spin Decision Wheel",
+      "subtitle": "Make random decisions visually",
+      "description": "Spin a customizable wheel to randomly select an option.",
+      "mode": "view"
+    },
+    {
+      "name": "random-fact",
+      "title": "Random Fact",
+      "subtitle": "Discover something unexpected",
+      "description": "Explore a random fact pulled from rotating knowledge sources.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest watch",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
