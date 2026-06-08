@@ -1,6 +1,6 @@
 import { randomIntInclusive } from "../../shared";
 import type { RandomFactSource } from "../types";
-import { parseHistoryMuffinLabs, parseUselessFacts, parseWikifeeds, parseZenQuotes } from "./parsers";
+import { parseHistoryMuffinLabs, parseUselessFacts, parseWikifeeds } from "./parsers";
 
 export const USELESS_FACTS_SOURCE: RandomFactSource = {
   buildUrl: () => "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en",
@@ -18,14 +18,6 @@ export const USELESS_FACTS_SOURCE: RandomFactSource = {
 //   name: "Quotable",
 //   parse: parseQuotable,
 // };
-
-export const ZEN_QUOTES_SOURCE: RandomFactSource = {
-  buildUrl: () => "https://zenquotes.io/api/random",
-  homepageUrl: "https://zenquotes.io/",
-  id: "zenquotes",
-  name: "ZenQuotes",
-  parse: parseZenQuotes,
-};
 
 export const WIKIFEEDS_SOURCE: RandomFactSource = {
   buildUrl: (date) => {
