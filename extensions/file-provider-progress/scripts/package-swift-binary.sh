@@ -6,7 +6,7 @@ NATIVE_DIR="$ROOT_DIR/raycast/native"
 SCRATCH_DIR="$ROOT_DIR/raycast/.raycast-swift-build"
 OUTPUT_DIR="$ROOT_DIR/raycast/assets/bin"
 OUTPUT_BIN="$OUTPUT_DIR/fp-progress"
-SIGNATURE_FILE="$OUTPUT_DIR/fp-progress.source.sha256"
+SIGNATURE_FILE="$ROOT_DIR/raycast/fp-progress.source.sha256"
 CONFIGURATION="${1:-release}"
 
 native_source_signature() {
