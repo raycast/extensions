@@ -1,6 +1,6 @@
 # MXroute Changelog
 
-## [Remove Domain] - {PR_MERGE_DATE}
+## [Remove Domain] - 2026-06-08
 
 - Add "Remove Domain" `Action`
 
