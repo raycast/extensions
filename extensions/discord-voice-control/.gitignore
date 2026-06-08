@@ -1,0 +1,16 @@
+# Raycast
+node_modules
+dist
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# Build / test artifacts
+coverage
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea

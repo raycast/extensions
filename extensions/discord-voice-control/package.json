@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "discord-voice-control",
+  "title": "Discord Voice Control",
+  "description": "Toggle Discord mute and deafen from Raycast without leaving your current app. Local-only, best-effort.",
+  "icon": "command-icon.png",
+  "author": "paulchris_yeow",
+  "categories": ["Communication", "Productivity"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Discord",
+      "description": "Send the Discord toggle-mute shortcut (best-effort; cannot confirm the resulting state).",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-deafen",
+      "title": "Toggle Deafen",
+      "subtitle": "Discord",
+      "description": "Send the Discord toggle-deafen shortcut (best-effort; cannot confirm the resulting state).",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-voice-control-status",
+      "title": "Check Voice Control Status",
+      "subtitle": "Discord",
+      "description": "Check whether the extension is ready to attempt mute/deafen toggles.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "muteShortcut",
+      "title": "Mute Shortcut",
+      "description": "Discord in-app keybind for Toggle Mute. Must match your Discord keybind. Format: cmd+shift+m.",
+      "type": "textfield",
+      "required": false,
+      "default": "cmd+shift+m"
+    },
+    {
+      "name": "deafenShortcut",
+      "title": "Deafen Shortcut",
+      "description": "Discord in-app keybind for Toggle Deafen. Must match your Discord keybind. Format: cmd+shift+d.",
+      "type": "textfield",
+      "required": false,
+      "default": "cmd+shift+d"
+    },
+    {
+      "name": "diagnosticLogging",
+      "title": "Diagnostics",
+      "label": "Enable local diagnostic logging",
+      "description": "Write sanitized, local-only diagnostic logs to the extension support folder. No content or secrets are logged. Off by default.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "quality": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+  }
+}
