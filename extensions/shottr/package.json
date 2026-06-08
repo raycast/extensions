@@ -5,6 +5,9 @@
   "description": "Capture and record your screen using shottr!",
   "icon": "main-icon.png",
   "author": "fernando_barrios",
+  "contributors": [
+    "CaffeineCat"
+  ],
   "categories": [
     "Applications"
   ],
