@@ -70,7 +70,8 @@ export default function AnalyticsCommand() {
   for (const sub of active) {
     const next = getNextBillingDate(sub);
     if (!next) continue;
-    const days = Math.round((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.round((next.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24));
     if (!nextBill || days < nextBill.daysAway) nextBill = { name: sub.name, daysAway: days };
   }
 

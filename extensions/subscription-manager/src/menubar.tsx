@@ -30,7 +30,7 @@ export default function MenubarCommand() {
 
   const monthlyTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, ratesData?.rates);
   const totalStr = isLoading ? "" : formatCurrency(monthlyTotal, prefs.primaryCurrency);
-  const showInTitle = (prefs.showTotalIn ?? "title") !== "dropdown";
+  const showInTitle = (prefs.showTotalIn ?? "dropdown") !== "dropdown";
 
   const todaySubs = getSubscriptionsForDay(today.getDate(), month, year, subscriptions);
 
