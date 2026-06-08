@@ -1,5 +1,9 @@
 # MXroute Changelog
 
+## [Remove Domain] - {PR_MERGE_DATE}
+
+- Add "Remove Domain" `Action`
+
 ## [Toggle Domain Mail Hosting Status] - 2026-02-27
 
 - Enable or Disable mail hosting in "Domains"
