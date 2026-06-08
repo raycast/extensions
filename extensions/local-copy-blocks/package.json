@@ -1,0 +1,181 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-copy-blocks",
+  "title": "Local Copy Blocks",
+  "description": "Find local Markdown-backed text blocks and copy them for reuse.",
+  "icon": "icon.png",
+  "author": "uchimanajet7",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "local",
+    "copy",
+    "blocks",
+    "markdown",
+    "clipboard",
+    "reuse"
+  ],
+  "commands": [
+    {
+      "name": "block-set-1",
+      "title": "Block Set 1",
+      "description": "Browse Markdown-backed text blocks from Block Set 1.",
+      "mode": "view"
+    },
+    {
+      "name": "block-set-2",
+      "title": "Block Set 2",
+      "description": "Browse Markdown-backed text blocks from Block Set 2.",
+      "mode": "view"
+    },
+    {
+      "name": "block-set-3",
+      "title": "Block Set 3",
+      "description": "Browse Markdown-backed text blocks from Block Set 3.",
+      "mode": "view"
+    },
+    {
+      "name": "all-block-sets",
+      "title": "All Block Sets",
+      "description": "Search Markdown-backed text blocks across all enabled Block Sets.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "folder1Enabled",
+      "title": "Block Set 1",
+      "label": "Enable Block Set 1",
+      "description": "Include Block Set 1 in its command and All Block Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder1Directory",
+      "title": "Block Set 1 Folder",
+      "description": "Folder that Block Set 1 reads Markdown-backed text blocks from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder1DisplayName",
+      "title": "Block Set 1 Name",
+      "description": "Display name for Block Set 1. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "folder2Enabled",
+      "title": "Block Set 2",
+      "label": "Enable Block Set 2",
+      "description": "Include Block Set 2 in its command and All Block Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder2Directory",
+      "title": "Block Set 2 Folder",
+      "description": "Folder that Block Set 2 reads Markdown-backed text blocks from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder2DisplayName",
+      "title": "Block Set 2 Name",
+      "description": "Display name for Block Set 2. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "folder3Enabled",
+      "title": "Block Set 3",
+      "label": "Enable Block Set 3",
+      "description": "Include Block Set 3 in its command and All Block Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder3Directory",
+      "title": "Block Set 3 Folder",
+      "description": "Folder that Block Set 3 reads Markdown-backed text blocks from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder3DisplayName",
+      "title": "Block Set 3 Name",
+      "description": "Display name for Block Set 3. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "editor",
+      "title": "Editor",
+      "description": "Editor used to open Markdown-backed text block files.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "previewLineCount",
+      "title": "Preview Line Count",
+      "description": "Number of leading lines to show in the preview.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "previewMaxCharacters",
+      "title": "Preview Max Characters",
+      "description": "Maximum number of characters to show in the preview.",
+      "type": "textfield",
+      "required": false,
+      "default": "4000"
+    }
+  ],
+  "scripts": {
+    "check": "npm run check:type && npm run lint:local && npm run check:local",
+    "check:type": "tsc -p tsconfig.json --noEmit",
+    "check:lint": "eslint src/**",
+    "check:format": "node scripts/format.mjs --check",
+    "check:local": "node scripts/local-verification.mjs",
+    "update:dependencies": "node scripts/update-dependencies.mjs",
+    "dev": "ray develop",
+    "demo:setup": "node scripts/demo-block-sets.mjs setup",
+    "demo:clean": "node scripts/demo-block-sets.mjs clean",
+    "sync:readme-media": "node scripts/sync-readme-media.mjs",
+    "icon:generate": "node scripts/generate-icon.mjs",
+    "build": "ray build -e dist",
+    "lint:local": "npm run check:lint && npm run check:format",
+    "lint": "ray lint",
+    "fix-lint": "eslint src/** --fix && npm run format",
+    "migrate": "npx --yes @raycast/migration@latest .",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "node scripts/format.mjs --write"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.28.0": true
+  }
+}
