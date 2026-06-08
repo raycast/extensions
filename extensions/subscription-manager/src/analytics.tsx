@@ -3,7 +3,13 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
-import { formatCurrency, getMonthlyEquivalent, getMonthlyTotal, getNextBillingDate } from "./utils";
+import {
+  formatCurrency,
+  getMonthlyEquivalent,
+  getMonthlyTotal,
+  getNextBillingDate,
+  getSubscriptionIcon,
+} from "./utils";
 
 type GroupBy = "category" | "cycle" | "list";
 
@@ -158,7 +164,7 @@ ${topRows}
             <Detail.Metadata.Label
               title="Most Expensive"
               text={`${mostExpensive.name} · ${formatCurrency(toMonthlyPrimary(mostExpensive), prefs.primaryCurrency)} /mo`}
-              icon={{ source: mostExpensive.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(mostExpensive)}
             />
           )}
           {nextBill && (

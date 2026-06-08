@@ -1,4 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Icon, getPreferenceValues } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { BillingCycle, Subscription } from "./types";
 
@@ -6,9 +7,29 @@ export function generateId(): string {
   return randomUUID();
 }
 
-export function getFaviconUrl(name: string): string {
-  const domain = name.toLowerCase().replace(/\s+/g, "");
-  return `https://www.google.com/s2/favicons?domain=${domain}.com&sz=64`;
+export function getServiceUrl(nameOrDomain: string, isDomain = false): string {
+  if (isDomain) return `https://${nameOrDomain}`;
+  const domain = nameOrDomain.toLowerCase().replace(/\s+/g, "");
+  return `https://${domain}.com`;
+}
+
+function getSubscriptionFaviconUrl(sub: Pick<Subscription, "name" | "iconUrl">): string {
+  const preset = PRESET_SERVICES.find((s) => s.name === sub.name);
+  if (sub.iconUrl) {
+    const legacyMatch = sub.iconUrl.match(/domain=([^&]+)/);
+    if (legacyMatch) return `https://${legacyMatch[1]}`;
+    return sub.iconUrl;
+  }
+  if (preset) return `https://${preset.domain}`;
+  return getServiceUrl(sub.name);
+}
+
+export function getSubscriptionIcon(sub: Pick<Subscription, "name" | "iconUrl">) {
+  return getFavicon(getSubscriptionFaviconUrl(sub), { fallback: Icon.CreditCard });
+}
+
+export function getServiceIcon(domain: string) {
+  return getFavicon(getServiceUrl(domain, true), { fallback: Icon.Globe });
 }
 
 export function formatCurrency(amount: number, currency: string): string {

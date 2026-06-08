@@ -4,7 +4,7 @@ import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { useSubscriptions } from "./storage";
 import { confirmAndDeleteSubscription } from "./subscription-actions";
-import { CATEGORIES, formatCurrency, formatCycle } from "./utils";
+import { CATEGORIES, formatCurrency, formatCycle, getSubscriptionIcon } from "./utils";
 
 type SortKey = "name" | "amount" | "billingDay" | "category";
 
@@ -45,7 +45,7 @@ export function SubscriptionList() {
         {items.map((sub) => (
           <List.Item
             key={sub.id}
-            icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+            icon={getSubscriptionIcon(sub)}
             title={sub.name}
             subtitle={sub.category}
             accessories={[

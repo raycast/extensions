@@ -6,7 +6,8 @@ import {
   PRESET_PAYMENT_METHODS,
   PRESET_SERVICES,
   formatStartDate,
-  getFaviconUrl,
+  getServiceIcon,
+  getServiceUrl,
 } from "./utils";
 
 const SERVICE_CATEGORIES = [...new Set(PRESET_SERVICES.map((s) => s.category))];
@@ -43,8 +44,8 @@ export function parseSubscriptionFormFields(
   const name = isCustomService ? values.customName?.trim() : serviceSelection;
   const preset = PRESET_SERVICES.find((s) => s.name === serviceSelection);
   const iconUrl = preset
-    ? `https://www.google.com/s2/favicons?domain=${preset.domain}&sz=64`
-    : values.iconUrl || getFaviconUrl(values.customName);
+    ? getServiceUrl(preset.domain, true)
+    : values.iconUrl?.trim() || getServiceUrl(values.customName);
   const paymentMethod =
     paymentSelection === "__custom__" ? values.customPaymentMethod?.trim() || undefined : paymentSelection;
 
@@ -72,12 +73,7 @@ export function ServiceDropdown({
       {SERVICE_CATEGORIES.map((cat) => (
         <Form.Dropdown.Section key={cat} title={cat}>
           {PRESET_SERVICES.filter((s) => s.category === cat).map((s) => (
-            <Form.Dropdown.Item
-              key={s.name}
-              value={s.name}
-              title={s.name}
-              icon={{ source: `https://www.google.com/s2/favicons?domain=${s.domain}&sz=64`, fallback: Icon.Globe }}
-            />
+            <Form.Dropdown.Item key={s.name} value={s.name} title={s.name} icon={getServiceIcon(s.domain)} />
           ))}
         </Form.Dropdown.Section>
       ))}

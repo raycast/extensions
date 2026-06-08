@@ -100,7 +100,7 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
         listDefaultValue={sub.list}
       />
       <Form.Separator />
-      {isCustomService && <Form.TextField id="iconUrl" title="Icon URL" defaultValue={sub.iconUrl ?? ""} />}
+      {isCustomService && <Form.TextField id="iconUrl" title="Website URL" defaultValue={sub.iconUrl ?? ""} />}
       <Form.TextArea id="notes" title="Notes" defaultValue={sub.notes ?? ""} />
     </Form>
   );

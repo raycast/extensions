@@ -114,7 +114,7 @@ export function AddSubscriptionForm() {
       <Form.Separator />
 
       {isCustomService && (
-        <Form.TextField id="iconUrl" title="Icon URL" placeholder="Leave empty to auto-detect favicon" />
+        <Form.TextField id="iconUrl" title="Website URL" placeholder="Leave empty to auto-detect from name" />
       )}
       <Form.TextArea id="notes" title="Notes" placeholder="Any additional notes…" />
     </Form>

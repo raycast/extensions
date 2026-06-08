@@ -2,7 +2,14 @@ import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } fr
 import { useFetch } from "@raycast/utils";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
-import { formatCurrency, formatCycle, getMonthSubscriptions, getMonthlyTotal, getSubscriptionsForDay } from "./utils";
+import {
+  formatCurrency,
+  formatCycle,
+  getMonthSubscriptions,
+  getMonthlyTotal,
+  getSubscriptionsForDay,
+  getSubscriptionIcon,
+} from "./utils";
 
 interface RatesResponse {
   rates: Record<string, number>;
@@ -75,7 +82,7 @@ export default function MenubarCommand() {
               key={sub.id}
               title={sub.name}
               subtitle={`${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
-              icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(sub)}
               onAction={openCalendar}
             />
           ))}
@@ -90,7 +97,7 @@ export default function MenubarCommand() {
                 key={`${sub.id}-${date.getDate()}`}
                 title={sub.name}
                 subtitle={`${date.getDate()} ${date.toLocaleString("default", { month: "short" })} · ${formatCurrency(sub.amount, sub.currency)}`}
-                icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+                icon={getSubscriptionIcon(sub)}
                 onAction={openCalendar}
               />
             )),
@@ -105,7 +112,7 @@ export default function MenubarCommand() {
               key={sub.id}
               title={sub.name}
               subtitle={`${sub.billingDay} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
-              icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(sub)}
               onAction={openCalendar}
             />
           ))}
