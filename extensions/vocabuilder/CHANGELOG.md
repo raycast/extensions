@@ -1,6 +1,6 @@
 VocaBuilder Changelog
 
-## [Configurable models and reasoning] - {PR_MERGE_DATE}
+## [Configurable models and reasoning] - 2026-06-08
 
 - Added a `Reasoning Level` preference for translations, defaulting to `Minimum` for the fastest Gemini responses.
 - Replaced the free-form translation model default with a curated Gemini model dropdown plus an advanced custom model override.
