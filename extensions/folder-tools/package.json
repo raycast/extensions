@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-tools",
+  "title": "Folder Tools",
+  "description": "Ejecuta graphify, Understand-Anything, agent-brain y comandos de terminal sobre cualquier carpeta.",
+  "icon": "extension-icon.png",
+  "author": "dalonsogomez",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "Productivity"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Folder Tools",
+      "description": "Dashboard generico para analizar y operar sobre cualquier carpeta.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "analyze-folder",
+      "title": "Analyze Folder",
+      "description": "Ejecuta un flujo graphify, Understand-Anything o agent-brain sobre una carpeta.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "install-github-tools",
+      "title": "Install GitHub Tools",
+      "description": "Instala tres herramientas GitHub en un directorio indicado.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "run-terminal-command",
+      "title": "Run Terminal Command",
+      "description": "Ejecuta un comando arbitrario en un directorio elegido.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "toolsRoot",
+      "title": "Tools Root",
+      "description": "Directorio .github-tools que contiene binarios, venvs y repos instalados.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Users/dalonsogomez/Developer/UPSA/.github-tools"
+    },
+    {
+      "name": "defaultTarget",
+      "title": "Default Target Folder",
+      "description": "Carpeta generica que se usara por defecto.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Users/dalonsogomez/Developer"
+    },
+    {
+      "name": "installToolsScript",
+      "title": "Install Tools Script",
+      "description": "Script generico install-github-tools.sh.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Users/dalonsogomez/Developer/UPSA/_stack/install-github-tools.sh"
+    },
+    {
+      "name": "neo4jUrl",
+      "title": "Neo4j URL",
+      "description": "URL del navegador Neo4j usado por agent-brain.",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:17723"
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "Aplicacion donde abrir comandos interactivos o largos.",
+      "type": "dropdown",
+      "required": true,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.2",
+    "@types/react": "19.0.12",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
