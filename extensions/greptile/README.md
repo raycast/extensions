@@ -4,7 +4,7 @@
 
 # Greptile
 
-_Browse Greptile pull requests, code reviews, and review comments from Raycast._
+_Browse Greptile pull requests, code reviews, and review comments directly from Raycast._
 
 This extension is not affiliated with, endorsed by, or sponsored by Greptile.
 
