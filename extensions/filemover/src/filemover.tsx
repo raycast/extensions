@@ -18,6 +18,30 @@ import * as path from "path";
 import * as fs from "fs";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { performUndo, addHistory } from "./undo-utils";
+
+export interface RenameOptions {
+  mode: "replace" | "prefix" | "suffix" | "find_replace";
+  text: string;
+  findText: string;
+  numberFormat: "brackets" | "dash" | "underscore" | "padded";
+  appendDate: "none" | "iso" | "eu" | "us" | "unix";
+}
+
+function formatIndex(index: number, format: string): string {
+  if (index === 0) return "";
+  switch (format) {
+    case "dash":
+      return `-${index}`;
+    case "underscore":
+      return `_${index}`;
+    case "padded":
+      return index < 10 ? `_0${index}` : `_${index}`;
+    case "brackets":
+    default:
+      return ` (${index})`;
+  }
+}
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_FOLDERS = [
@@ -111,11 +135,48 @@ export default function Command() {
           return;
         }
         const predicate = `kMDItemContentType == "public.folder" && kMDItemDisplayName == "*${safeQuery}*"cd`;
-        const { stdout } = await execFileAsync("mdfind", ["-onlyin", os.homedir(), predicate]);
-        const allPaths = stdout.split("\n").filter(Boolean);
-        const filteredPaths = allPaths
-          .filter((p) => !p.includes("/Library/") && !p.includes("node_modules") && !p.includes(".git"))
-          .slice(0, 15);
+        let filteredPaths: string[] = [];
+
+        try {
+          const { stdout } = await execFileAsync("mdfind", ["-onlyin", os.homedir(), predicate], { timeout: 2000 });
+          const allPaths = stdout.split("\n").filter(Boolean);
+          filteredPaths = allPaths
+            .filter((p) => !p.includes("/Library/") && !p.includes("node_modules") && !p.includes(".git"))
+            .slice(0, 15);
+        } catch {
+          // Ignore mdfind errors or timeouts and rely on fallback
+        }
+
+        // Fallback: If mdfind is broken, hangs, or lacks permissions, search common directories manually
+        if (filteredPaths.length === 0) {
+          const commonPaths = [
+            os.homedir(),
+            path.join(os.homedir(), "Desktop"),
+            path.join(os.homedir(), "Documents"),
+            path.join(os.homedir(), "Downloads"),
+            path.join(os.homedir(), "Development"),
+          ];
+          for (const base of commonPaths) {
+            try {
+              if (fs.existsSync(base)) {
+                const entries = await fs.promises.readdir(base, { withFileTypes: true });
+                for (const entry of entries) {
+                  if (
+                    entry.isDirectory() &&
+                    entry.name.toLowerCase().includes(safeQuery.toLowerCase()) &&
+                    !entry.name.startsWith(".")
+                  ) {
+                    filteredPaths.push(path.join(base, entry.name));
+                  }
+                }
+              }
+            } catch {
+              // Ignore read errors
+            }
+          }
+          // Remove exact duplicates and limit
+          filteredPaths = Array.from(new Set(filteredPaths)).slice(0, 15);
+        }
         const newResults = filteredPaths.map((p) => ({ name: path.basename(p), path: p }));
         setSearchResults(newResults);
         if (newResults.length > 0) {
@@ -148,6 +209,7 @@ export default function Command() {
 
     const errors: { file: string; error: string }[] = [];
     let successCount = 0;
+    const historyFiles: { originalPath: string; newPath: string }[] = [];
 
     for (const src of files) {
       try {
@@ -188,7 +250,8 @@ export default function Command() {
           }
         }
         successCount++;
-      } catch (e) {
+        historyFiles.push({ originalPath: src, newPath: destPath });
+      } catch {
         errors.push({
           file: path.basename(src),
           error: e instanceof Error ? e.message : String(e),
@@ -196,7 +259,97 @@ export default function Command() {
       }
     }
 
-    return { successCount, errors };
+    return { successCount, errors, historyFiles };
+  }
+
+  async function safeRenameAndMove(files: string[], destFolder: string, options: RenameOptions) {
+    if (!fs.existsSync(destFolder)) {
+      await fs.promises.mkdir(destFolder, { recursive: true });
+    }
+
+    const errors: { file: string; error: string }[] = [];
+    let successCount = 0;
+    const historyFiles: { originalPath: string; newPath: string }[] = [];
+
+    let index = 1;
+    let dateSuffix = "";
+    if (options.appendDate !== "none") {
+      const now = new Date();
+      if (options.appendDate === "iso") {
+        dateSuffix = `_${now.toISOString().split("T")[0]}`;
+      } else if (options.appendDate === "eu") {
+        dateSuffix = `_${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")}.${now.getFullYear()}`;
+      } else if (options.appendDate === "us") {
+        dateSuffix = `_${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}-${now.getFullYear()}`;
+      } else if (options.appendDate === "unix") {
+        dateSuffix = `_${Math.floor(now.getTime() / 1000)}`;
+      }
+    }
+
+    for (const src of files) {
+      try {
+        const ext = path.extname(src);
+        const originalBase = path.basename(src, ext);
+        let newBase = originalBase;
+
+        if (options.mode === "replace") {
+          newBase = options.text;
+        } else if (options.mode === "prefix") {
+          newBase = `${options.text}${originalBase}`;
+        } else if (options.mode === "suffix") {
+          newBase = `${originalBase}${options.text}`;
+        } else if (options.mode === "find_replace" && options.findText) {
+          newBase = originalBase.split(options.findText).join(options.text);
+        }
+
+        // Security: Prevent Directory Traversal by stripping path separators from the user input
+        newBase = newBase.replace(/[/\\]/g, "_");
+
+        newBase = `${newBase}${dateSuffix}`;
+
+        // Force numbering from the start ONLY for "replace" mode with multiple files
+        const forceNumbering = options.mode === "replace" && files.length > 1;
+
+        let safeName = forceNumbering
+          ? `${newBase}${formatIndex(index, options.numberFormat)}${ext}`
+          : `${newBase}${ext}`;
+        let destPath = path.join(destFolder, safeName);
+
+        let conflictCounter = forceNumbering ? index : 1;
+        while (fs.existsSync(destPath)) {
+          // If a file already exists, append an index to resolve the conflict
+          safeName = `${newBase}${formatIndex(conflictCounter, options.numberFormat)}${ext}`;
+          destPath = path.join(destFolder, safeName);
+          conflictCounter++;
+        }
+
+        if (forceNumbering) {
+          index++;
+        }
+
+        try {
+          await fs.promises.rename(src, destPath);
+        } catch (error) {
+          const e = error as NodeJS.ErrnoException;
+          if (e.code === "EXDEV") {
+            await fs.promises.cp(src, destPath, { recursive: true });
+            await fs.promises.rm(src, { recursive: true });
+          } else {
+            throw e;
+          }
+        }
+
+        successCount++;
+        historyFiles.push({ originalPath: src, newPath: destPath });
+      } catch {
+        errors.push({
+          file: path.basename(src),
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
+
+    return { successCount, errors, historyFiles };
   }
 
   async function handleAction(destinationPath: string, folderName: string, isCopy: boolean) {
@@ -210,10 +363,17 @@ export default function Command() {
     }
 
     try {
-      const { successCount, errors } = await safeMoveOrCopy(selectedFiles, destinationPath, isCopy);
+      const { successCount, errors, historyFiles } = await safeMoveOrCopy(selectedFiles, destinationPath, isCopy);
 
       if (successCount > 0) {
         await updateRecents(folderName, destinationPath);
+
+        await addHistory({
+          timestamp: Date.now(),
+          type: isCopy ? "copy" : "move",
+          destFolder: destinationPath,
+          files: historyFiles,
+        });
       }
 
       if (errors.length > 0) {
@@ -231,12 +391,49 @@ export default function Command() {
         await closeMainWindow();
         await popToRoot();
       }
-    } catch (e) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to ${isCopy ? "copy" : "move"} files`,
         message: String(e),
       });
+    }
+  }
+
+  async function handleRenameAction(destinationPath: string, folderName: string, options: RenameOptions) {
+    if (selectedFiles.length === 0) {
+      await showToast({ style: Toast.Style.Failure, title: "No files selected" });
+      return;
+    }
+
+    try {
+      const { successCount, errors, historyFiles } = await safeRenameAndMove(selectedFiles, destinationPath, options);
+
+      if (successCount > 0) {
+        await updateRecents(folderName, destinationPath);
+
+        await addHistory({
+          timestamp: Date.now(),
+          type: "rename",
+          destFolder: destinationPath,
+          files: historyFiles,
+        });
+      }
+
+      if (errors.length > 0) {
+        const errorMsg = errors.map((err) => `"${err.file}": ${err.error}`).join("; ");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to rename some files`,
+          message: `Processed ${successCount} files. Errors: ${errorMsg}`,
+        });
+      } else {
+        await showToast({ style: Toast.Style.Success, title: `Files renamed and moved successfully` });
+        await closeMainWindow();
+        await popToRoot();
+      }
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: `Failed to rename files`, message: String(e) });
     }
   }
 
@@ -302,6 +499,16 @@ export default function Command() {
           title="No files selected"
           description="Select files in Finder or on your Desktop to move them."
           icon={Icon.Document}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Undo Last File Move"
+                icon={Icon.Undo}
+                onAction={performUndo}
+                shortcut={{ modifiers: ["cmd"], key: "z" }}
+              />
+            </ActionPanel>
+          }
         />
       )}
 
@@ -327,6 +534,7 @@ export default function Command() {
                       onRemoveFavorite={removeFavorite}
                       onClearRecents={clearRecents}
                       onAction={handleAction}
+                      onRenameAction={handleRenameAction}
                     />
                   }
                 />
@@ -352,6 +560,7 @@ export default function Command() {
                     onRemoveFavorite={removeFavorite}
                     onClearRecents={clearRecents}
                     onAction={handleAction}
+                    onRenameAction={handleRenameAction}
                   />
                 }
               />
@@ -378,6 +587,7 @@ export default function Command() {
                       onRemoveFavorite={removeFavorite}
                       onClearRecents={clearRecents}
                       onAction={handleAction}
+                      onRenameAction={handleRenameAction}
                     />
                   }
                 />
@@ -399,6 +609,18 @@ export default function Command() {
                       title="Move Files Here"
                       icon={Icon.ArrowRight}
                       onAction={() => handleAction(folder.path, folder.name, false)}
+                    />
+                    <Action.Push
+                      title="Rename & Move Here"
+                      icon={Icon.Pencil}
+                      target={
+                        <RenameAndMoveForm
+                          destinationPath={folder.path}
+                          folderName={folder.name}
+                          onRenameAction={handleRenameAction}
+                        />
+                      }
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                     <Action
                       title="Copy Files Here"
@@ -423,6 +645,12 @@ export default function Command() {
                       icon={Icon.Plus}
                       target={<AddFavoriteForm onAddFavorite={addFavorite} />}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    />
+                    <Action
+                      title="Undo Last File Move"
+                      icon={Icon.Undo}
+                      onAction={performUndo}
+                      shortcut={{ modifiers: ["cmd"], key: "z" }}
                     />
                   </ActionPanel>
                 }
@@ -462,6 +690,7 @@ interface FolderActionPanelProps {
   onRemoveFavorite: (folderPath: string) => Promise<void>;
   onClearRecents: () => Promise<void>;
   onAction: (destinationPath: string, folderName: string, isCopy: boolean) => Promise<void>;
+  onRenameAction?: (destinationPath: string, folderName: string, options: RenameOptions) => Promise<void>;
 }
 
 function FolderActionPanel({
@@ -473,10 +702,17 @@ function FolderActionPanel({
   onRemoveFavorite,
   onClearRecents,
   onAction,
+  onRenameAction,
 }: FolderActionPanelProps) {
   if (fileCount === 0) {
     return (
       <ActionPanel>
+        <Action
+          title="Undo Last File Move"
+          icon={Icon.Undo}
+          onAction={performUndo}
+          shortcut={{ modifiers: ["cmd"], key: "z" }}
+        />
         <Action.Push
           title="Add to Favorites"
           icon={Icon.Star}
@@ -517,6 +753,16 @@ function FolderActionPanel({
         icon={Icon.ArrowRight}
         onAction={() => onAction(folder.path, folder.name, false)}
       />
+      {onRenameAction && (
+        <Action.Push
+          title="Rename & Move Here"
+          icon={Icon.Pencil}
+          target={
+            <RenameAndMoveForm destinationPath={folder.path} folderName={folder.name} onRenameAction={onRenameAction} />
+          }
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+      )}
       <Action
         title="Copy Files Here"
         icon={Icon.CopyClipboard}
@@ -540,6 +786,12 @@ function FolderActionPanel({
         icon={Icon.Star}
         target={<AddFavoriteForm onAddFavorite={onAddFavorite} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      />
+      <Action
+        title="Undo Last File Move"
+        icon={Icon.Undo}
+        onAction={performUndo}
+        shortcut={{ modifiers: ["cmd"], key: "z" }}
       />
       {favorites.some((f) => f.path === folder.path) && (
         <Action
@@ -691,6 +943,80 @@ function MoveToNewFolderForm({ onAction }: MoveToNewFolderFormProps) {
         defaultValue={[path.join(os.homedir(), "Desktop")]}
       />
       <Form.Checkbox id="copy" label="Copy instead of move" defaultValue={false} />
+    </Form>
+  );
+}
+
+interface RenameAndMoveFormProps {
+  destinationPath: string;
+  folderName: string;
+  onRenameAction: (dest: string, folder: string, options: RenameOptions) => Promise<void>;
+}
+
+function RenameAndMoveForm({ destinationPath, folderName, onRenameAction }: RenameAndMoveFormProps) {
+  const { pop } = useNavigation();
+  const [mode, setMode] = useState<RenameOptions["mode"]>("replace");
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Rename & Move"
+            onSubmit={async (values: RenameOptions) => {
+              if (values.mode === "replace" && !values.text && values.appendDate === "none") {
+                await showToast({ style: Toast.Style.Failure, title: "Please enter a base name or select a date" });
+                return;
+              }
+              if (values.mode === "find_replace" && !values.findText) {
+                await showToast({ style: Toast.Style.Failure, title: "Please enter text to find" });
+                return;
+              }
+              await onRenameAction(destinationPath, folderName, values);
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text={`Moving files to ${folderName}`} />
+
+      <Form.Dropdown
+        id="mode"
+        title="Rename Mode"
+        value={mode}
+        onChange={(newValue) => setMode(newValue as RenameOptions["mode"])}
+      >
+        <Form.Dropdown.Item value="replace" title="Replace Entirely" />
+        <Form.Dropdown.Item value="prefix" title="Add Prefix" />
+        <Form.Dropdown.Item value="suffix" title="Add Suffix" />
+        <Form.Dropdown.Item value="find_replace" title="Find & Replace" />
+      </Form.Dropdown>
+
+      {mode === "find_replace" && <Form.TextField id="findText" title="Find Text" placeholder="e.g. IMG_" />}
+
+      <Form.TextField
+        id="text"
+        title={mode === "replace" ? "New Base Name" : mode === "find_replace" ? "Replace With" : "Text"}
+        placeholder={mode === "replace" ? "e.g. Invoice" : mode === "find_replace" ? "e.g. Holiday_" : "e.g. text"}
+      />
+
+      {mode === "replace" && (
+        <Form.Dropdown id="numberFormat" title="Numbering Format" defaultValue="brackets">
+          <Form.Dropdown.Item value="brackets" title="(1), (2), (3)" />
+          <Form.Dropdown.Item value="dash" title="-1, -2, -3" />
+          <Form.Dropdown.Item value="underscore" title="_1, _2, _3" />
+          <Form.Dropdown.Item value="padded" title="_01, _02, _03" />
+        </Form.Dropdown>
+      )}
+
+      <Form.Dropdown id="appendDate" title="Append Date" defaultValue="none">
+        <Form.Dropdown.Item value="none" title="None" />
+        <Form.Dropdown.Item value="iso" title="YYYY-MM-DD (e.g. 2026-06-09)" />
+        <Form.Dropdown.Item value="eu" title="DD.MM.YYYY (e.g. 09.06.2026)" />
+        <Form.Dropdown.Item value="us" title="MM-DD-YYYY (e.g. 06-09-2026)" />
+        <Form.Dropdown.Item value="unix" title="UNIX Timestamp" />
+      </Form.Dropdown>
     </Form>
   );
 }

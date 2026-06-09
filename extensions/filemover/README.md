@@ -2,15 +2,20 @@
 
 Filemover is a highly efficient Raycast extension that allows you to instantly move or copy currently selected files in Finder (or your Desktop) to predefined or custom folders without taking your hands off the keyboard.
 
+A blazing fast and powerful extension to route, rename, and manage your Mac files system-wide without ever touching a Finder window.
+
+![Filemover Demo](assets/FM_BatchRename_History_Undo_Demo.gif)
+
 ## Features
 
 - **System-Wide Detection:** Automatically detects any selected files in macOS Finder or on your Desktop. No need to pass files manually.
-- **Smart Duplicate Handling:** Safely handles filename conflicts. If a file already exists in the destination folder, Filemover automatically appends a number (e.g., `(1)`) to the new file, ensuring your workflow is never interrupted by error popups.
-- **Favorites & Recents:** Add your most-used folders to Favorites, or just let Filemover track your 4 most recently used folders for lightning-fast repetitive sorting.
-- **Move or Copy:** Press `Enter` to move files, or use `Cmd + D` to copy them instead.
+- **Advanced Batch Rename:** Hit `Cmd + R` to rename and move files simultaneously. Completely replace names, add prefixes/suffixes, use advanced find & replace, and dynamically append padded indexes or current dates.
+- **Action History:** Accidentally moved something? Open the *File Move History* command to view your last 20 operations and instantly revert any of them with a single keystroke.
+- **System-Wide Undo:** Press `Cmd + Z` right inside Filemover to instantly undo your last action. You can even bind the invisible *Undo Last File Move* command to a global hotkey to undo file operations system-wide without opening the extension.
+- **Smart Duplicate Handling:** Safely handles filename conflicts by intelligently auto-indexing new files.
+- **Favorites & Recents:** Instantly access a unified list of your Favorites and 4 most recently used folders right on launch. No deep menu navigation required.
 - **Create New Folders:** Hit `Cmd + N` to create a brand new directory on-the-fly and move your files directly into it.
-- **Custom Destinations:** Use `Cmd + Shift + F` to pick any one-off destination folder from your system.
-- **Detailed Preview:** Always see exactly which files are queued up in the Raycast detail view before confirming the move.
+- **Detailed Preview:** Always see exactly which files are queued up in the Raycast detail view before confirming.
 
 ## Usage
 
@@ -20,8 +25,10 @@ Filemover is a highly efficient Raycast extension that allows you to instantly m
 4. Highlight a target folder and press:
    - `Enter` to Move
    - `Cmd + D` to Copy
-   - `Cmd + Shift + F` to pick a custom folder
+   - `Cmd + R` to open the Advanced Batch Rename & Move form
    - `Cmd + N` to create a new folder and move the files there
+   - `Cmd + Shift + F` to pick a custom destination
+   - `Cmd + Z` to Undo the last file operation
 
 ## Setup
 

@@ -29,6 +29,18 @@
       "title": "Move Files",
       "description": "Move or copy currently selected Finder items to a specific directory.",
       "mode": "view"
+    },
+    {
+      "name": "undo",
+      "title": "Undo Last File Move",
+      "description": "Undo the last file move or copy operation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "File Move History",
+      "description": "View and undo recent file move and copy operations.",
+      "mode": "view"
     }
   ],
   "title": "File Mover",
