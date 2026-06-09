@@ -74,6 +74,17 @@ function looksLikeBadDownload(raw: string): boolean {
 }
 
 /**
+ * True when a formula upgrade installed the new version but the symlink step
+ * failed because something already occupies the target path. `brew link
+ * --overwrite <name>` is brew's own recommended fix.
+ */
+function looksLikeLinkConflict(raw: string): boolean {
+  return /could not symlink|brew link --overwrite|not symlinked into|already exists\. you may want to remove/i.test(
+    raw,
+  );
+}
+
+/**
  * Homebrew 4.6+ can require third-party taps to be explicitly "trusted" (when
  * HOMEBREW_REQUIRE_TAP_TRUST is set). A bulk upgrade then fails with e.g.
  * "Warning: The following taps are not trusted: kde-mac/kde theboredteam/...".
@@ -769,6 +780,28 @@ export async function upgradeFormula(name: string): Promise<UpdateResult> {
           await doUpgrade();
           return { name, source: "homebrew-formula", success: true };
         }
+      } catch (e2) {
+        return {
+          name,
+          source: "homebrew-formula",
+          success: false,
+          error: humanizeBrewError(e2, extractCmdError(e2)),
+        };
+      }
+    }
+    // Link conflict: the new version installed fine, but brew couldn't symlink
+    // it because another file/symlink already owns the path — most often a GUI
+    // app shipping its own CLI (e.g. Ollama.app owns /opt/homebrew/bin/ollama).
+    // The upgrade itself succeeded; only the link step failed. `brew link
+    // --overwrite` is brew's own recommended remedy and completes it.
+    if (looksLikeLinkConflict(raw)) {
+      try {
+        await runWithTimeout(
+          brew,
+          ["link", "--overwrite", name],
+          BREW_UPGRADE_TIMEOUT_MS,
+        );
+        return { name, source: "homebrew-formula", success: true };
       } catch (e2) {
         return {
           name,
