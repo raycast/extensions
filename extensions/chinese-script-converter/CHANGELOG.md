@@ -1,6 +1,6 @@
 # Traditional/Simplified Chinese Converter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Convert selected text between Simplified and Traditional Chinese with automatic direction detection.
 - Manage Dictionary command to add, edit, and delete custom conversion rules.
