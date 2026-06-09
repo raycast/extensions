@@ -674,6 +674,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "olostep",
+    title: "Olostep",
+    description:
+      "A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API.",
+    icon: "https://www.olostep.com/images/olostep-logo-cropped.svg",
+    homepage: "https://github.com/olostep/olostep-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "olostep-mcp"],
+      env: {
+        OLOSTEP_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "routemesh",
     title: "RouteMesh",
     description:
