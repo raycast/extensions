@@ -9,6 +9,8 @@ import { ExtendedRepositoryFieldsFragment, OrderDirection, StarOrderField } from
 import { STARRED_REPO_DEFAULT_SORT_QUERY, STARRED_REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
+const STARRED_REPOSITORIES_BATCH_SIZE = 25;
+
 function MyStarredRepositories() {
   const { github } = getGitHubClient();
 
@@ -27,17 +29,32 @@ function MyStarredRepositories() {
     async (sort: string, afterCursor: string | null) => {
       const orderByField = sort.split(":")[0].toUpperCase() as StarOrderField;
       const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
-      const perPage = getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 });
+      const requestedCount = getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 });
+      const repos: ExtendedRepositoryFieldsFragment[] = [];
+      let pageInfo: { hasNextPage: boolean; endCursor?: string | null } = {
+        hasNextPage: false,
+        endCursor: afterCursor,
+      };
+      let nextCursor = afterCursor;
 
-      const result = await github.myStarredRepositories({
-        numberOfItems: perPage,
-        after: afterCursor,
-        orderByField,
-        orderByDirection,
-      });
+      while (repos.length < requestedCount) {
+        const result = await github.myStarredRepositories({
+          numberOfItems: Math.min(STARRED_REPOSITORIES_BATCH_SIZE, requestedCount - repos.length),
+          after: nextCursor,
+          orderByField,
+          orderByDirection,
+        });
 
-      const repos = result.viewer.starredRepositories.nodes as ExtendedRepositoryFieldsFragment[];
-      const pageInfo = result.viewer.starredRepositories.pageInfo;
+        const starredRepositories = result.viewer.starredRepositories;
+        repos.push(...(starredRepositories.nodes as ExtendedRepositoryFieldsFragment[]));
+        pageInfo = starredRepositories.pageInfo;
+
+        if (!pageInfo.hasNextPage || !pageInfo.endCursor) {
+          break;
+        }
+
+        nextCursor = pageInfo.endCursor;
+      }
 
       return {
         repositories: repos,

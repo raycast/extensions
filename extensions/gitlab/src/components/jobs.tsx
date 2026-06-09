@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
 import { gql } from "@apollo/client";
 import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
-import { RefreshJobsAction, RetryJobAction } from "./job_actions";
+import { CancelJobAction, PlayJobAction, RefreshJobsAction, RetryJobAction, ShowJobLogAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { Project } from "../gitlabapi";
@@ -152,10 +152,15 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
             <GitLabOpenInBrowserAction
               url={getGitLabGQL().urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)}
             />
+            <ShowJobLogAction job={props.job} projectFullPath={props.projectFullPath} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <PlayJobAction job={props.job} onAfter={props.onRefreshJobs} />
+            <RetryJobAction job={props.job} />
+            <CancelJobAction job={props.job} onAfter={props.onRefreshJobs} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
-            <RetryJobAction job={props.job} />
           </ActionPanel.Section>
         </ActionPanel>
       }

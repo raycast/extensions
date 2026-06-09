@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getWeather, type TimeseriesEntry } from "../weather-client";
 import { getSunTimes, type SunTimes } from "../sunrise-client";
 import {
@@ -11,8 +11,8 @@ import {
 } from "../storage";
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph";
-import { getUIThresholds, getTimingThresholds } from "../config/weather-config";
+import { TIMING_THRESHOLDS } from "../config/weather-config";
+import { ToastMessages } from "../utils/toast-utils";
 
 export interface UseFavoritesReturn {
   // Favorites state
@@ -24,17 +24,16 @@ export interface UseFavoritesReturn {
   favoritesLoading: Record<string, boolean>;
   weatherDataInitialized: boolean;
   isInitialLoad: boolean;
-  preWarmedGraphs: Record<string, string>;
+  isBackgroundLoading: boolean; // New: indicates if background loading is in progress
 
   // Favorites actions
-  addFavoriteLocation: (location: FavoriteLocation) => Promise<void>;
+  addFavoriteLocation: (location: FavoriteLocation) => Promise<boolean>;
   removeFavoriteLocation: (location: FavoriteLocation) => Promise<void>;
   moveFavoriteUp: (location: FavoriteLocation) => Promise<void>;
   moveFavoriteDown: (location: FavoriteLocation) => Promise<void>;
   refreshFavorites: () => Promise<void>;
 
   // Utility functions
-  isLocationFavorite: (locationId: string) => boolean;
   getFavoriteWeather: (locationId: string, lat: number, lon: number) => TimeseriesEntry | undefined;
   getFavoriteSunTimes: (locationId: string, lat: number, lon: number) => SunTimes | undefined;
   isFavoriteLoading: (locationId: string, lat: number, lon: number) => boolean;
@@ -55,7 +54,17 @@ export function useFavorites(): UseFavoritesReturn {
   const [favoritesLoading, setFavoritesLoading] = useState<Record<string, boolean>>({});
   const [weatherDataInitialized, setWeatherDataInitialized] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [preWarmedGraphs, setPreWarmedGraphs] = useState<Record<string, string>>({});
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
+  const favoriteWeatherRef = useRef(favoriteWeather);
+  const isInitialLoadRef = useRef(isInitialLoad);
+
+  useEffect(() => {
+    favoriteWeatherRef.current = favoriteWeather;
+  }, [favoriteWeather]);
+
+  useEffect(() => {
+    isInitialLoadRef.current = isInitialLoad;
+  }, [isInitialLoad]);
 
   // Load favorites on mount
   useEffect(() => {
@@ -74,40 +83,89 @@ export function useFavorites(): UseFavoritesReturn {
   useEffect(() => {
     if (favorites.length === 0) {
       setFavoriteWeather({});
+      setSunTimes({});
       setFavoriteErrors({});
       setFavoritesLoading({});
       setWeatherDataInitialized(true); // No favorites to load, so we're "done"
+      setIsInitialLoad(false);
+      setIsBackgroundLoading(false);
+      return;
+    }
+
+    const hasOwn = (record: Record<string, unknown>, key: string): boolean =>
+      Object.prototype.hasOwnProperty.call(record, key);
+
+    const favoriteEntries = favorites.map((fav) => ({
+      fav,
+      key: LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon),
+    }));
+    const activeKeys = new Set(favoriteEntries.map((entry) => entry.key));
+    const pruneToActiveKeys = <T>(record: Record<string, T>): Record<string, T> => {
+      return Object.fromEntries(Object.entries(record).filter(([key]) => activeKeys.has(key))) as Record<string, T>;
+    };
+
+    // Keep keyed state aligned with active favorites.
+    setFavoriteWeather((prev) => pruneToActiveKeys(prev));
+    setSunTimes((prev) => pruneToActiveKeys(prev));
+    setFavoriteErrors((prev) => pruneToActiveKeys(prev));
+    setFavoritesLoading((prev) => pruneToActiveKeys(prev));
+
+    const latestFavoriteWeather = favoriteWeatherRef.current;
+    const missingEntries = favoriteEntries.filter(({ key }) => {
+      return !hasOwn(latestFavoriteWeather as Record<string, unknown>, key);
+    });
+
+    if (missingEntries.length === 0) {
+      setWeatherDataInitialized(true);
+      if (isInitialLoadRef.current) {
+        setIsInitialLoad(false);
+      }
+      setIsBackgroundLoading(false);
       return;
     }
 
     let cancelled = false;
-    setWeatherDataInitialized(false); // Starting fresh data load
+    if (isInitialLoadRef.current) {
+      setWeatherDataInitialized(false); // Initial load still in progress
+    }
+    setIsBackgroundLoading(true); // Start background loading
 
-    async function fetchAll() {
-      // Reset states
-      setFavoriteErrors({});
+    async function fetchMissing() {
+      let toastShown = false;
 
-      // Mark all favorites as loading
-      const loadingMap: Record<string, boolean> = {};
-      favorites.forEach((fav) => {
-        const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
-        loadingMap[key] = true;
+      // Mark only missing favorites as loading and clear stale errors from prior failures.
+      setFavoritesLoading((prev) => {
+        const next = pruneToActiveKeys(prev);
+        missingEntries.forEach(({ key }) => {
+          next[key] = true;
+        });
+        return next;
       });
-      setFavoritesLoading(loadingMap);
+      setFavoriteErrors((prev) => {
+        const next = { ...prev };
+        for (const { key } of missingEntries) {
+          delete next[key];
+        }
+        return next;
+      });
 
       try {
         const entries = await Promise.all(
-          favorites.map(async (fav) => {
-            const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
+          missingEntries.map(async ({ fav, key }) => {
             try {
               const ts = await getWeather(fav.lat, fav.lon);
               const sun = await getSunTimes(fav.lat, fav.lon).catch(() => ({}) as SunTimes);
               return [key, ts, sun] as const;
             } catch {
+              if (!toastShown) {
+                toastShown = true;
+                void ToastMessages.weatherApiUnavailable();
+              }
               // Immediately mark error so UI doesn't stay stuck in "Loading..."
               if (!cancelled) {
                 setFavoriteErrors((prev) => ({ ...prev, [key]: true }));
                 setFavoritesLoading((prev) => ({ ...prev, [key]: false }));
+                setSunTimes((prev) => ({ ...prev, [key]: {} as SunTimes }));
               }
               return [key, undefined, {} as SunTimes] as const;
             }
@@ -115,79 +173,47 @@ export function useFavorites(): UseFavoritesReturn {
         );
 
         if (!cancelled) {
-          // Set each entry individually to ensure React picks up the changes
+          // Set each entry individually so updates can stream to the UI.
           for (const [key, ts, sun] of entries) {
             if (ts) {
               setFavoriteWeather((prev) => ({ ...prev, [key]: ts }));
-
-              // Pre-warm graph for this favorite
-              try {
-                const graphMarkdown = buildGraphMarkdown(
-                  favorites.find((f) => LocationUtils.getLocationKey(f.id, f.lat, f.lon) === key)?.name || "Location",
-                  [ts], // Single entry for favorites
-                  getUIThresholds().DEFAULT_FORECAST_HOURS,
-                  { title: "48h forecast", smooth: true },
-                ).markdown;
-
-                setPreWarmedGraphs((prev) => ({ ...prev, [key]: graphMarkdown }));
-              } catch (err) {
-                DebugLogger.error("Error pre-warming graph for favorite:", err);
-              }
             }
             setSunTimes((prev) => ({ ...prev, [key]: sun }));
-            // Mark as no longer loading
+            // Mark this key as no longer loading.
             setFavoritesLoading((prev) => ({ ...prev, [key]: false }));
           }
 
-          // Add a small delay to ensure smooth transition without flashing
+          // Preserve the existing transition delay to avoid visual flashes.
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
-          }, getTimingThresholds().COMPONENT_INIT_DELAY);
+            setIsBackgroundLoading(false); // Background loading complete
+          }, TIMING_THRESHOLDS.COMPONENT_INIT_DELAY);
         }
       } catch (err) {
-        DebugLogger.error("Error fetching favorites:", err);
-        // Mark all as no longer loading on general error
+        DebugLogger.error("Error fetching missing favorites:", err);
         if (!cancelled) {
-          setFavoritesLoading({});
-          // Even on error, we're "done" trying - show with small delay
+          setFavoritesLoading((prev) => {
+            const next = pruneToActiveKeys(prev);
+            missingEntries.forEach(({ key }) => {
+              next[key] = false;
+            });
+            return next;
+          });
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
-          }, getTimingThresholds().COMPONENT_INIT_DELAY);
+            setIsBackgroundLoading(false); // Background loading complete
+          }, TIMING_THRESHOLDS.COMPONENT_INIT_DELAY);
         }
       }
     }
 
-    fetchAll();
+    fetchMissing();
     return () => {
       cancelled = true;
     };
   }, [favorites]);
-
-  // Add favorite location
-  const addFavoriteLocation = useCallback(async (location: FavoriteLocation) => {
-    await addFavorite(location);
-    await refreshFavorites();
-  }, []);
-
-  // Remove favorite location
-  const removeFavoriteLocation = useCallback(async (location: FavoriteLocation) => {
-    await removeFavorite(location);
-    await refreshFavorites();
-  }, []);
-
-  // Move favorite up
-  const moveFavoriteUpAction = useCallback(async (location: FavoriteLocation) => {
-    await moveFavoriteUp(location);
-    await refreshFavorites();
-  }, []);
-
-  // Move favorite down
-  const moveFavoriteDownAction = useCallback(async (location: FavoriteLocation) => {
-    await moveFavoriteDown(location);
-    await refreshFavorites();
-  }, []);
 
   // Refresh favorites from storage
   const refreshFavorites = useCallback(async () => {
@@ -195,12 +221,43 @@ export function useFavorites(): UseFavoritesReturn {
     setFavorites(favs);
   }, []);
 
-  // Check if location is favorite
-  const isLocationFavorite = useCallback(
-    (locationId: string) => {
-      return favorites.some((fav) => fav.id === locationId);
+  // Add favorite location
+  const addFavoriteLocation = useCallback(
+    async (location: FavoriteLocation) => {
+      const wasAdded = await addFavorite(location);
+      if (wasAdded) {
+        await refreshFavorites();
+      }
+      return wasAdded;
     },
-    [favorites],
+    [refreshFavorites],
+  );
+
+  // Remove favorite location
+  const removeFavoriteLocation = useCallback(
+    async (location: FavoriteLocation) => {
+      await removeFavorite(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
+  );
+
+  // Move favorite up
+  const moveFavoriteUpAction = useCallback(
+    async (location: FavoriteLocation) => {
+      await moveFavoriteUp(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
+  );
+
+  // Move favorite down
+  const moveFavoriteDownAction = useCallback(
+    async (location: FavoriteLocation) => {
+      await moveFavoriteDown(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
   );
 
   // Get weather data for a favorite location
@@ -249,7 +306,7 @@ export function useFavorites(): UseFavoritesReturn {
     favoritesLoading,
     weatherDataInitialized,
     isInitialLoad,
-    preWarmedGraphs,
+    isBackgroundLoading,
 
     // Favorites actions
     addFavoriteLocation,
@@ -259,7 +316,6 @@ export function useFavorites(): UseFavoritesReturn {
     refreshFavorites,
 
     // Utility functions
-    isLocationFavorite,
     getFavoriteWeather,
     getFavoriteSunTimes,
     isFavoriteLoading,

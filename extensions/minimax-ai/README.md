@@ -1,9 +1,10 @@
 # MiniMax - Raycast Extension
 
-A "Bring Your Own Key" Raycast extension for AI chat. Currently supports **MiniMax M2.5**, **M2.1**, and **M2** with streaming responses.
+A "Bring Your Own Key" Raycast extension for AI chat. Supports **MiniMax M2.7**, **M2.5**, **M2.1**, and **M2** models with streaming responses, for both **China** and **International** regions.
 
 ## Features
 
+- **Dual-region support** — China (`api.minimaxi.com`) and International (`api.minimax.io`) endpoints
 - **Conversational chat** with persistent history
 - **Streaming responses** in real-time
 - **Quick question** (Ask AI) for simple queries
@@ -29,23 +30,32 @@ npm run dev
 
 Open Raycast → Search for "AI Chat" → `Cmd + ,` to open preferences:
 
-| Preference           | Type     | Description                                                             |
-| -------------------- | -------- | ----------------------------------------------------------------------- |
-| **MiniMax API Key**  | password | Your MiniMax API key (required)                                         |
-| **Model**            | dropdown | MiniMax-M2.5 (recommended), MiniMax-M2.1, MiniMax-M2                    |
-| **System Prompt**    | text     | Custom system prompt (optional)                                         |
-| **Temperature**      | dropdown | 0.3 / 0.7 / 1.0 / 1.5                                                   |
-| **Max Tokens**       | dropdown | 1024 / 2048 / 4096 / 8192                                               |
-| **Stream Responses** | checkbox | Enable streaming (default: true)                                        |
-| **Concise Mode**     | checkbox | Brief 2-3 sentence answers unless more detail requested (default: true) |
+| Preference           | Type     | Description                                                                  |
+| -------------------- | -------- | ---------------------------------------------------------------------------- |
+| **MiniMax API Key**  | password | Your MiniMax API key (required)                                              |
+| **API Endpoint**     | dropdown | China (`api.minimaxi.com`) or International (`api.minimax.io`) (default: International) |
+| **Model**            | dropdown | MiniMax-M2.7 (recommended), M2.7-highspeed, M2.5, M2.5-highspeed, M2-her, M2.1, M2 |
+| **System Prompt**    | text     | Custom system prompt (optional)                                              |
+| **Temperature**      | dropdown | 0.3 / 0.7 / 1.0 / 1.5                                                       |
+| **Max Tokens**       | dropdown | 1024 / 2048 / 4096 / 8192                                                    |
+| **Stream Responses** | checkbox | Enable streaming (default: true)                                             |
+| **Concise Mode**     | checkbox | Brief 2-3 sentence answers unless more detail requested (default: true)      |
 
 ### Getting a MiniMax API Key
 
+**International users:**
 1. Visit [MiniMax Platform](https://platform.minimax.chat/)
 2. Create an account or sign in
 3. Navigate to API Keys section
 4. Generate a new API key
 5. Copy and paste it into the extension preferences
+
+**China users:**
+1. Visit [MiniMax Platform (China)](https://platform.minimaxi.com/)
+2. Create an account or sign in
+3. Navigate to API Keys section
+4. Generate a new API key
+5. Select **China** as the API Endpoint in extension preferences and paste your key
 
 ## Commands
 
@@ -96,13 +106,20 @@ raycast-minimax/
 
 ## MiniMax API
 
-**Endpoint:** `https://api.minimax.io/v1/chat/completions`
+| Region      | Endpoint                                        |
+| ----------- | ----------------------------------------------- |
+| International | `https://api.minimax.io/v1/chat/completions`   |
+| China       | `https://api.minimaxi.com/v1/chat/completions` |
 
 **Models:**
 
-- `MiniMax-M2.5`: Recommended, latest model
-- `MiniMax-M2.1`: Previous generation
-- `MiniMax-M2`: 200k context window
+- `MiniMax-M2.7`: Latest generation, recommended
+- `MiniMax-M2.7-highspeed`: Fast variant of M2.7
+- `MiniMax-M2.5`: Previous generation
+- `MiniMax-M2.5-highspeed`: Fast variant of M2.5
+- `M2-her`: Roleplay-optimized model
+- `MiniMax-M2.1`: Earlier generation
+- `MiniMax-M2`: Legacy model, 200k context
 
 The provider automatically filters `<think>...</think>` content generated during the model's internal reasoning.
 
@@ -130,8 +147,13 @@ npm run fix-lint
 
 ## Dependencies
 
-- `@raycast/api`: ^1.93.0
-- `@raycast/utils`: ^1.19.0
+- `@raycast/api`: ^1.104.5
+- `@raycast/utils`: ^2.2.2
+
+## Contributors
+
+- [@monfortegg](https://github.com/monfortegg) — creator and maintainer
+- [@tolshao](https://github.com/tolshao) — China region support, M2.7 models, API key validation (v1.2.0)
 
 ## License
 

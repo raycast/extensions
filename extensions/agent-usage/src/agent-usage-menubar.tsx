@@ -30,6 +30,10 @@ import { useSyntheticAccounts } from "./synthetic/fetcher";
 import { getSyntheticAccessory } from "./synthetic/renderer";
 import { useZaiAccounts } from "./zai/fetcher";
 import { getZaiAccessory } from "./zai/renderer";
+import { useMiniMaxUsage } from "./minimax/fetcher";
+import { getMiniMaxAccessory } from "./minimax/renderer";
+import { useOpencodegoUsage } from "./opencode-go/fetcher";
+import { getOpencodegoAccessory } from "./opencode-go/renderer";
 
 interface MenuBarAgent {
   id: AgentId;
@@ -66,6 +70,8 @@ export default function MenuBarCommand() {
   const isSyntheticVisible = Boolean(prefs.showSynthetic);
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
   const isZaiVisible = Boolean(prefs.showZai);
+  const isMinimaxVisible = Boolean(prefs.showMinimax);
+  const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
@@ -77,6 +83,8 @@ export default function MenuBarCommand() {
   const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiAccounts = useZaiAccounts(isZaiVisible);
+  const minimaxState = useMiniMaxUsage(isMinimaxVisible);
+  const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
@@ -135,6 +143,24 @@ export default function MenuBarCommand() {
         accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
         revalidate: antigravityState.revalidate,
       },
+      {
+        id: "minimax",
+        name: "MiniMax",
+        icon: "minimax-icon.svg",
+        visible: isMinimaxVisible,
+        isLoading: minimaxState.isLoading,
+        accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
+        revalidate: minimaxState.revalidate,
+      },
+      {
+        id: "opencode-go",
+        name: "OpenCode Go",
+        icon: "opencode-go-icon.png",
+        visible: isOpencodeGoVisible,
+        isLoading: opencodegoState.isLoading,
+        accessory: getOpencodegoAccessory(opencodegoState.usage, opencodegoState.error, opencodegoState.isLoading),
+        revalidate: opencodegoState.revalidate,
+      },
     ],
     [
       isAmpVisible,
@@ -167,6 +193,15 @@ export default function MenuBarCommand() {
       antigravityState.usage,
       antigravityState.error,
       antigravityState.revalidate,
+      minimaxState.isLoading,
+      minimaxState.usage,
+      minimaxState.error,
+      minimaxState.revalidate,
+      isOpencodeGoVisible,
+      opencodegoState.isLoading,
+      opencodegoState.usage,
+      opencodegoState.error,
+      opencodegoState.revalidate,
     ],
   );
 

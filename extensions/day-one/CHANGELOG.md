@@ -1,5 +1,9 @@
 # Day One Changelog
 
+## [Bug fix] - 2026-05-19
+
+- Fixed CLI detection when Raycast does not inherit the terminal PATH.
+
 ## [Bug fix] - 2025-03-17
 
 - Fixed an issue where adding an entry when the journal name contains a space character causes an error.

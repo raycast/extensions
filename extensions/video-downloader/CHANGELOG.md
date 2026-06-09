@@ -1,5 +1,23 @@
 # Video Downloader Changelog
 
+## [Improvement] - 2026-06-04
+
+- Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)
+- Failures are now recoverable: added a "Try Again" action (⌘R) so a transient error no longer leaves the command stuck
+- Clearer error messages — failures like an unsupported site now show a plain-language reason instead of the raw command output, and only offer "Try Again" when retrying could actually help
+- Added a "Copy Logs" action to failure toasts for easier debugging
+- Added an "Update Libraries" shortcut to the download-failed toast to quickly update yt-dlp and FFmpeg
+- Space out requests and retry known extractor errors to reduce rate-limit failures
+- Download success/failure is now determined by yt-dlp's exit code, and a file that downloaded despite a non-fatal error can still be opened
+- Download progress in the toast is no longer overwritten by background log output
+- The Update Libraries view now shows a timestamp, and surfaces an error instead of spinning forever when a check fails
+- Added a "Download entire playlist" option that appears for playlist URLs (defaults to downloading just the linked video)
+- Fixed video titles being truncated at the first period, exclamation, or question mark (e.g. "Dr. Mehmet Oz…" no longer becomes "Dr")
+- Transcript extraction now returns the requested language instead of falling back to another
+- Fixed file path detection for downloads on Windows
+- Friendlier placeholder for the video title before a URL is queried
+- Updated dependencies
+
 ## [Improvement] - 2026-01-28
 
 - Added MP3 format option for audio downloads

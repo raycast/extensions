@@ -1,9 +1,9 @@
-import { access, readFile, stat } from "node:fs/promises";
+import { access, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join } from "node:path";
-import { getCustomNpxPath, preferences } from "../preferences";
-import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
+import { basename } from "node:path";
+import { getCustomNpxPath, shouldDisableSkillsCliTelemetry } from "../preferences";
+import type { InstalledSkill, Skill } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
 
@@ -12,11 +12,15 @@ const isWindows = process.platform === "win32";
 
 let validatedCustomNpxPath: string | null = null;
 let pendingCustomNpxValidation: { path: string; promise: Promise<void> } | null = null;
+let pendingSkillsCliRun: Promise<unknown> = Promise.resolve();
+let bunxResolutionFailed = false;
 
 type ExecFailure = Error & {
   code?: string | number;
   stderr?: string;
 };
+
+type PackageRunner = "npx" | "bunx";
 
 export class NpxResolutionError extends Error {
   constructor(message: string) {
@@ -40,23 +44,62 @@ export function isInvalidCustomNpxPathError(error: unknown): boolean {
   return error instanceof InvalidCustomNpxPathError;
 }
 
-function buildSkillsCliCommand(npxCommand: string, args: string[]): string {
-  return [npxCommand, "-y", "skills@latest", ...args].map(shellEscape).join(" ");
+function buildSkillsCliCommand(runner: PackageRunner, args: string[], executable: string = runner): string {
+  const runnerArgs = runner === "npx" ? ["-y", "skills@latest"] : ["--silent", "skills@latest"];
+  return [executable, ...runnerArgs, ...args].map(shellEscape).join(" ");
+}
+
+function getSkillsCliEnvOverrides(): Record<string, string> {
+  return shouldDisableSkillsCliTelemetry() ? { DISABLE_TELEMETRY: "1" } : {};
 }
 
 async function runSkillsCli(args: string[]): Promise<string> {
+  return enqueueSkillsCliRun(() => runSkillsCliCommand(args));
+}
+
+async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
+  const runAfterPending = pendingSkillsCliRun.then(run, run);
+  pendingSkillsCliRun = runAfterPending.catch(() => undefined);
+  return runAfterPending;
+}
+
+async function runSkillsCliCommand(args: string[]): Promise<string> {
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     await validateCustomNpxPath(customNpxPath);
+
+    const execOptions = await getExecOptions();
+    try {
+      const { stdout } = await execAsync(buildSkillsCliCommand("npx", args, customNpxPath), execOptions);
+      return stdout;
+    } catch (error) {
+      throw normalizeCliError(error, customNpxPath);
+    }
   }
 
-  const npxCommand = customNpxPath ?? "npx";
+  if (!bunxResolutionFailed) {
+    try {
+      const execOptions = await getExecOptions();
+      const { stdout } = await execAsync(buildSkillsCliCommand("bunx", args), execOptions);
+      return stdout;
+    } catch (error) {
+      if (!isNpxCommandResolutionFailure(error, "bunx")) {
+        throw normalizeCliError(error, "bunx");
+      }
+      bunxResolutionFailed = true;
+    }
+  }
+
   try {
     const execOptions = await getExecOptions();
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
+    execOptions.env = {
+      ...execOptions.env,
+      ...getSkillsCliEnvOverrides(),
+    };
+    const { stdout } = await execAsync(buildSkillsCliCommand("npx", args), execOptions);
     return stdout;
-  } catch (error) {
-    throw normalizeCliError(error, npxCommand);
+  } catch (npxError) {
+    throw normalizeCliError(npxError, "npx");
   }
 }
 
@@ -71,7 +114,7 @@ function shellEscape(arg: string): string {
 function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
-      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in the extension configuration under 'Custom npx Path'.",
+      "Unable to find a working bunx or npx command. Install Bun, or install Node.js/npm. If you need to force a custom npx executable, set it in the extension configuration under 'Custom npx Path'.",
     );
   }
 
@@ -140,23 +183,34 @@ function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): bool
     .join("\n")
     .toLowerCase();
   const normalizedNpxCommand = npxCommand.toLowerCase();
-  const commandBase = basename(normalizedNpxCommand).replace(/\.exe$/, "");
+  const commandBase = basename(normalizedNpxCommand).replace(/\.(cmd|exe)$/, "");
   const windowsCommandNotFound = `'${commandBase}' is not recognized as an internal or external command`;
+  // cmd.exe echoes the command name with its surrounding double quotes from the shell-escaped invocation,
+  // so the error reads `'"bunx"' is not recognized...` when bunx is missing.
+  const windowsCommandNotFoundQuoted = `'"${commandBase}"' is not recognized as an internal or external command`;
 
   const mentionsCommand =
     details.includes(`spawn ${normalizedNpxCommand} `) ||
     details.includes(`spawn ${commandBase} `) ||
     details.includes(`command not found: ${commandBase}`) ||
     details.includes(`${commandBase}: command not found`) ||
-    details.includes(windowsCommandNotFound);
+    details.includes(windowsCommandNotFound) ||
+    details.includes(windowsCommandNotFoundQuoted);
+
+  const npxShimModuleNotFound =
+    commandBase === "npx" &&
+    details.includes("cannot find module") &&
+    (details.includes("npm-prefix.js") || details.includes("npx-cli.js"));
 
   return (
     (code === "ENOENT" && mentionsCommand) ||
+    npxShimModuleNotFound ||
     details.includes(`spawn ${normalizedNpxCommand} enoent`) ||
     details.includes(`spawn ${commandBase} enoent`) ||
     details.includes(`command not found: ${commandBase}`) ||
     details.includes(`${commandBase}: command not found`) ||
-    details.includes(windowsCommandNotFound)
+    details.includes(windowsCommandNotFound) ||
+    details.includes(windowsCommandNotFoundQuoted)
   );
 }
 
@@ -206,12 +260,16 @@ export async function installSkill(skill: Skill, agentDisplayNames?: string[]): 
  */
 const AGENT_DISPLAY_TO_ID = new Map<string, string>([
   ["AdaL", "adal"],
+  ["AiderDesk", "aider-desk"],
   ["Amp", "amp"],
   ["Antigravity", "antigravity"],
   ["Augment", "augment"],
   ["Claude Code", "claude-code"],
   ["Cline", "cline"],
+  ["Code Studio", "codestudio"],
+  ["CodeArts Agent", "codearts-agent"],
   ["CodeBuddy", "codebuddy"],
+  ["Codemaker", "codemaker"],
   ["Codex", "codex"],
   ["Command Code", "command-code"],
   ["Continue", "continue"],
@@ -219,11 +277,15 @@ const AGENT_DISPLAY_TO_ID = new Map<string, string>([
   ["Crush", "crush"],
   ["Cursor", "cursor"],
   ["Deep Agents", "deepagents"],
+  ["Devin for Terminal", "devin"],
+  ["Dexto", "dexto"],
   ["Droid", "droid"],
   ["Firebender", "firebender"],
+  ["ForgeCode", "forgecode"],
   ["Gemini CLI", "gemini-cli"],
   ["GitHub Copilot", "github-copilot"],
   ["Goose", "goose"],
+  ["IBM Bob", "bob"],
   ["iFlow CLI", "iflow-cli"],
   ["Junie", "junie"],
   ["Kilo Code", "kilo"],
@@ -243,8 +305,11 @@ const AGENT_DISPLAY_TO_ID = new Map<string, string>([
   ["Qwen Code", "qwen-code"],
   ["Replit", "replit"],
   ["Roo Code", "roo"],
+  ["Rovo Dev", "rovodev"],
+  ["Tabnine CLI", "tabnine-cli"],
   ["Trae", "trae"],
   ["Trae CN", "trae-cn"],
+  ["Universal", "universal"],
   ["Warp", "warp"],
   ["Windsurf", "windsurf"],
   ["Zencoder", "zencoder"],
@@ -293,105 +358,17 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
   await runSkillsCli(args);
 }
 
-interface GitHubTreeResponse {
-  sha: string;
-  tree: Array<{ path: string; sha: string; type: string }>;
-  truncated?: boolean;
-}
-
-async function fetchRepoTree(source: string, token: string | undefined): Promise<GitHubTreeResponse | null> {
-  const [owner, repo] = source.split("/");
-  if (!owner || !repo) return null;
-
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
-  for (const branch of ["main", "master"]) {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
-      headers,
-    });
-    if (res.ok) {
-      const data = (await res.json()) as GitHubTreeResponse;
-      if (data.truncated) return null;
-      return data;
-    }
-    if (res.status === 403 || res.status === 429) return null;
-  }
-  return null;
-}
-
-/**
- * Implemented against the GitHub Trees API rather than `npx skills check` because
- * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
- */
-export async function checkForUpdates(): Promise<string[]> {
-  const lock = await readSkillLock();
-  const entries = Object.entries(lock).filter(([, e]) => e.sourceType === "github" && e.skillFolderHash && e.skillPath);
-  if (entries.length === 0) return [];
-
-  const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
-  for (const [name, entry] of entries) {
-    const list = byRepo.get(entry.source) ?? [];
-    list.push({ name, skillPath: entry.skillPath, expectedHash: entry.skillFolderHash });
-    byRepo.set(entry.source, list);
-  }
-
-  const { githubToken } = preferences;
-
-  const results = await Promise.all(
-    [...byRepo.entries()].map(async ([source, skills]) => {
-      try {
-        const tree = await fetchRepoTree(source, githubToken);
-        if (!tree) return [];
-        const { sha: rootSha, tree: entries } = tree;
-        return skills.flatMap((skill) => {
-          const folder = skill.skillPath.replace(/\/?SKILL\.md$/, "");
-          const upstreamSha = folder ? entries.find((t) => t.path === folder && t.type === "tree")?.sha : rootSha;
-          return upstreamSha && upstreamSha !== skill.expectedHash ? [skill.name] : [];
-        });
-      } catch {
-        return [];
-      }
-    }),
-  );
-  return results.flat();
-}
-
 /**
  * Update all installed skills.
  */
 export async function updateAllSkills(): Promise<void> {
-  await runSkillsCli(["update", "-y"]);
+  await runSkillsCli(["update", "-g", "-y"]);
 }
 
 /**
  * Update a single installed skill by name.
- * Runs `npx -y skills@latest update <skill-name> -y`.
+ * Runs `skills update <skill-name> -g -y` via the resolved package runner (bunx with npx fallback).
  */
 export async function updateSkill(skillName: string): Promise<void> {
-  await runSkillsCli(["update", skillName, "-y"]);
-}
-
-const LOCK_FILE = ".skill-lock.json";
-const AGENTS_DIR = ".agents";
-
-function getSkillLockPath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
-  return join(home, AGENTS_DIR, LOCK_FILE);
-}
-
-export async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
-  try {
-    const raw = await readFile(getSkillLockPath(), "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
-      return parsed.skills as Record<string, SkillLockEntry>;
-    }
-    return {};
-  } catch {
-    return {};
-  }
+  await runSkillsCli(["update", skillName, "-g", "-y"]);
 }

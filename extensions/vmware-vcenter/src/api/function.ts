@@ -98,8 +98,8 @@ export async function RemoveServerConfig(name: string): Promise<void> {
 /* Add VMware Server Config */
 export async function AddServerConfig(config: Server): Promise<void> {
   /* Get Saved VMware Servers */
-  const dataRaw = await LocalStorage.getItem<string>(LocalStorageItemServer);
-  if (!dataRaw) throw Error("VMware Server is not configured");
+  let dataRaw = await LocalStorage.getItem<string>(LocalStorageItemServer);
+  if (!dataRaw) dataRaw = "[]";
 
   /* Parse Data */
   const data = jsonParse<Server[]>(dataRaw);

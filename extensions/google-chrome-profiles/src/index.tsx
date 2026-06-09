@@ -334,7 +334,11 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               key={index}
               title={b.title}
               subtitle={b.subtitle}
-              icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
+              icon={
+                b.iconURL
+                  ? getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })
+                  : { source: Icon.Globe, mask: Image.Mask.Circle }
+              }
               actions={
                 <ActionPanelForTarget
                   profile={props.profile}

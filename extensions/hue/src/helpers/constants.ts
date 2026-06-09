@@ -2,6 +2,7 @@ import { CssColor } from "../lib/types";
 
 export const APP_NAME = "raycast_hue_extension";
 export const BRIDGE_CONFIG_KEY = "bridgeCredentials";
+export const CONNECTION_TIMEOUT_MS = 5000;
 
 export const BRIGHTNESSES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 1];
 export const BRIGHTNESS_MIN = BRIGHTNESSES[BRIGHTNESSES.length - 1];

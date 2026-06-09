@@ -318,7 +318,9 @@ export async function getBrightnessForDisplay(displaySerial: string): Promise<nu
     return await retryWithBackoff(
       async () => {
         const lunarPath = getLunarPath();
-        const { stdout } = await execFileAsync(lunarPath, ["displays", displaySerial, "brightness"], { timeout: 3000 });
+        const { stdout } = await execFileAsync(lunarPath, ["displays", displaySerial, "brightness"], {
+          timeout: 3000,
+        });
         const match = stdout.match(/brightness:\s*(\d+)/i);
 
         if (!match) {
@@ -384,7 +386,7 @@ export async function adjustCursorBrightness(delta: number): Promise<{ name: str
 
   const lunarPath = getLunarPath();
   const deltaArg = delta >= 0 ? `+${delta}` : `${delta}`;
-  await execFileAsync(lunarPath, ["displays", target.serial, "brightness", deltaArg], { timeout: 5000 });
+  await execFileAsync(lunarPath, ["displays", target.serial, "brightness", "--", deltaArg], { timeout: 5000 });
 
   const expected = Math.max(0, Math.min(100, target.brightness + delta));
   return { name: target.name, brightness: expected };

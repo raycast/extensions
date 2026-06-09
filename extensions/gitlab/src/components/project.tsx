@@ -1,7 +1,7 @@
-import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Color, Icon, Image, List, getPreferenceValues } from "@raycast/api";
+import { useRef, useState } from "react";
 import { gitlab } from "../common";
-import { Project, searchData } from "../gitlabapi";
+import { Project } from "../gitlabapi";
 import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
@@ -102,30 +102,46 @@ export function ProjectListEmptyView() {
   return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
 }
 
+// Cap rendered List.Items to avoid OOM — each item creates ~18 action components in the ActionPanel
+const MAX_RENDERED_PROJECTS = 100;
+
 export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
   const [searchText, setSearchText] = useState<string>();
+  const activeOnly = (getPreferenceValues().active as boolean) || false;
+  const totalCount = useRef(0);
   const { data, error, isLoading } = useCache<Project[]>(
-    hashRecord({ membership: membership, starred: starred }, "projects"),
+    hashRecord({ membership: membership, starred: starred, active: activeOnly }, "projects"),
     async () => {
-      let glProjects: Project[] = [];
-      if (starred) {
-        glProjects = await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
-      } else {
-        if (membership) {
-          glProjects = await gitlab.getUserProjects({ search: "" }, true);
-        }
+      const params: Record<string, string> = { search: "" };
+      if (activeOnly) {
+        params.archived = "false";
       }
-      return glProjects;
+      if (starred) {
+        return await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
+      }
+      if (membership) {
+        return await gitlab.getUserProjects(params, true);
+      }
+      return [];
     },
     {
       deps: [searchText, membership, starred],
+      // Substring match instead of Fuse.js — building a Fuse index on thousands of projects exceeds the worker memory limit
       onFilter: async (projects) => {
-        return searchData<Project[]>(projects, {
-          search: searchText || "",
-          keys: ["name_with_namespace"],
-          limit: 50,
-        });
+        totalCount.current = projects.length;
+        if (!searchText || searchText.length === 0) return projects.slice(0, MAX_RENDERED_PROJECTS);
+        const terms = searchText.toLowerCase().split(/\s+/);
+        const filtered: Project[] = [];
+        for (const p of projects) {
+          const name = p.name_with_namespace.toLowerCase();
+          if (terms.every((t) => name.includes(t))) {
+            filtered.push(p);
+            if (filtered.length >= MAX_RENDERED_PROJECTS) break;
+          }
+        }
+        return filtered;
       },
+      secondsToRefetch: daysInSeconds(1),
       secondsToInvalid: daysInSeconds(7),
     },
   );
@@ -142,8 +158,10 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
       throttle={true}
     >
       <List.Section
-        title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
-        subtitle={`${data?.length}`}
+        title={searchText && searchText.length > 0 ? "Search Results" : "Recent Projects"}
+        subtitle={
+          data && totalCount.current > data.length ? `${data.length} of ${totalCount.current}` : `${data?.length ?? 0}`
+        }
       >
         {data?.map((project) => (
           <ProjectListItem key={project.id} project={project} />
@@ -163,17 +181,9 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
     error,
     isLoading,
   } = useCache<Project[]>(
-    hashRecord({ membership: membership, starred: starred }, "projects"),
+    hashRecord({ membership: membership, starred: starred, active: false }, "projects"),
     async () => {
-      let glProjects: Project[] = [];
-      if (starred) {
-        glProjects = await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
-      } else {
-        if (membership) {
-          glProjects = await gitlab.getUserProjects({ search: "" }, true);
-        }
-      }
-      return glProjects;
+      return await gitlab.getUserProjects({ search: "" }, true);
     },
     {
       deps: [],

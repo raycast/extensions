@@ -52,7 +52,7 @@ export default function ShowTodayInMenuBar() {
       await mutate();
       await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
     } catch (error) {
-      handleError(error);
+      await handleError(error);
     }
   }
 
@@ -66,7 +66,7 @@ export default function ShowTodayInMenuBar() {
       await mutate();
       await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
     } catch (error) {
-      handleError(error);
+      await handleError(error);
     }
   }
 
