@@ -17,5 +17,5 @@
     "strict": true,
     "target": "ES2021"
   },
-  "include": ["src/**/*", "env.d.ts"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { promises as fs, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { getNotesDirectory, generateFilename, listFolders } from "./utils";
 
@@ -35,7 +35,7 @@ export default function QuickCapture() {
     const content = body ? `${title}\n\n${body}` : title;
 
     try {
-      writeFileSync(filePath, content, "utf-8");
+      await fs.writeFile(filePath, content, "utf-8");
       const folderLabel = values.folder ? ` in ${values.folder}` : "";
       await showToast({
         style: Toast.Style.Success,

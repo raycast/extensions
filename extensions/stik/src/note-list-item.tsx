@@ -49,11 +49,7 @@ export function NoteListItem({
               icon={Icon.Pencil}
               target={note.filePath}
             />
-            <Action.CopyToClipboard
-              title="Copy Contents"
-              content={note.body}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Contents" content={note.body} />
           </ActionPanel.Section>
 
           <ActionPanel.Section>

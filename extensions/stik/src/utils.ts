@@ -1,13 +1,9 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, trash } from "@raycast/api";
 import { homedir } from "os";
 import { promises as fs } from "fs";
 import { existsSync, mkdirSync } from "fs";
 import { join, basename, dirname } from "path";
 import { randomUUID } from "crypto";
-
-interface Preferences {
-  notesDirectory: string;
-}
 
 export interface NoteMeta {
   title: string;
@@ -169,7 +165,7 @@ export async function getAllNotes(): Promise<NoteMeta[]> {
 }
 
 export async function deleteNote(filePath: string): Promise<void> {
-  await fs.unlink(filePath);
+  await trash(filePath);
 }
 
 export async function moveNote(
