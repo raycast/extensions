@@ -38,7 +38,7 @@ function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActio
   return (
     <ActionPanel.Section>
       <Action
-        title="Move Up in Favorites"
+        title="Move up in Favorites"
         icon={Icon.ArrowUp}
         shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
         onAction={() => favoritesStore.moveUp(quote.symbol!)}
