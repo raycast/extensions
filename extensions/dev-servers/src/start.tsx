@@ -69,11 +69,10 @@ async function maybeConsumeAutoOpenHint(): Promise<boolean> {
 // package.json dependencies. UI tag only. Process inspection is still the
 // source of truth for a running server.
 function guessFramework(cwd: string): string | undefined {
-  // Shopify projects first: themes have no package.json at all, and app /
-  // Hydrogen projects carry framework deps (Remix, Vite) that would
-  // otherwise win below and mislabel them.
+  // Themes first: they have no package.json at all, so nothing below could
+  // ever label them.
   if (isShopifyThemeRoot(cwd)) return "shopify-theme";
-  if (isShopifyAppRoot(cwd)) return "shopify-app";
+  let deps: Record<string, string> = {};
   try {
     const pkg = JSON.parse(
       fs.readFileSync(path.join(cwd, "package.json"), "utf8"),
@@ -81,27 +80,30 @@ function guessFramework(cwd: string): string | undefined {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };
-    const deps = {
-      ...(pkg.dependencies ?? {}),
-      ...(pkg.devDependencies ?? {}),
-    };
-    if ("@shopify/hydrogen" in deps) return "shopify-hydrogen";
-    if ("next" in deps) return "next";
-    if ("@sveltejs/kit" in deps) return "sveltekit";
-    if ("svelte" in deps) return "svelte";
-    if ("astro" in deps) return "astro";
-    if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
-    if ("@remix-run/dev" in deps) return "remix";
-    if ("gatsby" in deps) return "gatsby";
-    if ("vite" in deps) return "vite";
-    if ("webpack" in deps) return "webpack";
-    if ("parcel" in deps) return "parcel";
-    if ("turbo" in deps) return "turbo";
-    if ("esbuild" in deps) return "esbuild";
-    return undefined;
+    deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   } catch {
-    return undefined;
+    // No readable package.json; the marker checks below still apply.
   }
+  // Hydrogen before the app-toml marker: the skeleton ships no
+  // shopify.app.toml today, but if a project ever carries both, the dep is
+  // the more specific signal. Both before the generic deps chain, since
+  // Shopify projects also carry framework deps (Remix, Vite) that would
+  // otherwise win and mislabel them.
+  if ("@shopify/hydrogen" in deps) return "shopify-hydrogen";
+  if (isShopifyAppRoot(cwd)) return "shopify-app";
+  if ("next" in deps) return "next";
+  if ("@sveltejs/kit" in deps) return "sveltekit";
+  if ("svelte" in deps) return "svelte";
+  if ("astro" in deps) return "astro";
+  if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
+  if ("@remix-run/dev" in deps) return "remix";
+  if ("gatsby" in deps) return "gatsby";
+  if ("vite" in deps) return "vite";
+  if ("webpack" in deps) return "webpack";
+  if ("parcel" in deps) return "parcel";
+  if ("turbo" in deps) return "turbo";
+  if ("esbuild" in deps) return "esbuild";
+  return undefined;
 }
 
 function formatLastSeen(ts: number): string {

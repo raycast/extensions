@@ -334,11 +334,22 @@ function hasSvelteConfig(cwd: string): boolean {
 // because configured dev ports (3000, 4321, 5173, 8080) are always below
 // ephemeral ports (32768+); without this the displayed port flickers across
 // refreshes.
-function lowestPortPerPid(listeners: RawListener[]): Map<number, number> {
-  const out = new Map<number, number>();
-  for (const { pid, port } of listeners) {
+//
+// lanExposed is tracked for the CHOSEN port specifically (OR'd across
+// same-port binds, e.g. separate IPv4 and IPv6 sockets), not for any socket
+// of the PID. A loopback-only HTTP server whose HMR socket happens to bind
+// wildcard must not advertise a network URL that can't actually connect.
+function lowestPortPerPid(
+  listeners: RawListener[],
+): Map<number, { port: number; lanExposed: boolean }> {
+  const out = new Map<number, { port: number; lanExposed: boolean }>();
+  for (const { pid, port, lanExposed } of listeners) {
     const cur = out.get(pid);
-    if (cur === undefined || port < cur) out.set(pid, port);
+    if (cur === undefined || port < cur.port) {
+      out.set(pid, { port, lanExposed });
+    } else if (port === cur.port && lanExposed) {
+      cur.lanExposed = true;
+    }
   }
   return out;
 }
@@ -369,13 +380,6 @@ export async function fetchServers(): Promise<DevServer[]> {
   const candidates = procs.filter(isCandidate);
   const portByPid = lowestPortPerPid(listeners);
   const live = candidates.filter((p) => portByPid.has(p.pid));
-
-  // True when any of the PID's listening sockets (lowest-port or not) is
-  // reachable beyond loopback. Wildcard binds show up as "*:PORT".
-  const lanExposedByPid = new Set<number>();
-  for (const l of listeners) {
-    if (l.lanExposed) lanExposedByPid.add(l.pid);
-  }
 
   // Resolve cwds only for PIDs we haven't seen before (or whose lstart says
   // the PID was recycled). On a steady-state poll this list is empty and the
@@ -424,8 +428,9 @@ export async function fetchServers(): Promise<DevServer[]> {
   for (const proc of live) {
     const meta = pidMetaCache.get(proc.pid);
     if (!meta) continue;
-    const port = portByPid.get(proc.pid);
-    if (port === undefined) continue;
+    const listener = portByPid.get(proc.pid);
+    if (listener === undefined) continue;
+    const port = listener.port;
     // Drop the portless proxy daemon itself. It's a node process out of
     // node_modules/portless/ that binds 80/443/1355, and would otherwise
     // appear as a phantom "dev server" row. Child processes spawned by
@@ -454,7 +459,7 @@ export async function fetchServers(): Promise<DevServer[]> {
       projectKey,
       projectName,
       branch: git?.branch || undefined,
-      lanExposed: lanExposedByPid.has(proc.pid),
+      lanExposed: listener.lanExposed,
       startedAt: new Date(proc.lstart),
     });
   }
