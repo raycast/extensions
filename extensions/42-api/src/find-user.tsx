@@ -169,7 +169,7 @@ export default function Command() {
         description: "Your access token may be invalid or expired. Please re-authenticate.",
         actions: (
           <ActionPanel>
-            <Action title="Re-authenticate" onAction={authenticate} icon={Icon.Lock} />
+            <Action title="Re-Authenticate" onAction={authenticate} icon={Icon.Lock} />
             <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel>
         ),
