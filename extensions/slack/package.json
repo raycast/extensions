@@ -100,7 +100,21 @@
       "title": "Set Status",
       "subtitle": "Slack",
       "description": "Set your status.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "statusText",
+          "placeholder": "Status text",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "emoji",
+          "placeholder": ":rocket:",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
