@@ -1,6 +1,6 @@
 # superwhisper Changelog
 
-## [Paginate Search History to fix memory crash] - {PR_MERGE_DATE}
+## [Paginate Search History to fix memory crash] - 2026-06-09
 
 - Fixed Search History crashing with an out-of-memory error on large recording libraries by loading the list one page at a time instead of reading every `meta.json` up front.
 - Search History now sorts recordings cheaply by modified time and only parses transcripts for the page on screen, with more loaded on scroll.
