@@ -1,6 +1,6 @@
 # superwhisper Changelog
 
-## [Recording Directory: copy/paste and single extension preference] - {PR_MERGE_DATE}
+## [Recording Directory: copy/paste and single extension preference] - 2026-06-09
 
 - Copy Last History and Paste Last History now read the Recording Directory from preferences when set, matching Search History behaviour; they fall back to `~/Documents/superwhisper/recordings` when not configured.
 - Recording Directory is now configured once at the extension level (Preferences > Extensions > Superwhisper) and shared by Search History, Copy Last History, and Paste Last History; the duplicate per-command setting was removed.
