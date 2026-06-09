@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Skill Contents for Nested Skills] - {PR_MERGE_DATE}
+## [Fix Skill Contents for Nested Skills] - 2026-06-09
 
 - Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree
 
