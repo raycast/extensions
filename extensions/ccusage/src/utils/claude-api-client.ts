@@ -2,8 +2,24 @@ import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
 
 export type UsageLimitsResult =
   | { status: "ok"; data: UsageLimitData }
-  | { status: "rate_limited" }
+  | { status: "rate_limited"; retryAfterMs: number | null }
   | { status: "error"; message: string };
+
+const parseRetryAfter = (headerValue: string | null): number | null => {
+  if (!headerValue) return null;
+
+  const trimmed = headerValue.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return Math.max(0, parseInt(trimmed, 10) * 1000);
+  }
+
+  const dateMs = Date.parse(trimmed);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+
+  return null;
+};
 
 export const fetchClaudeUsageLimits = async (accessToken: string): Promise<UsageLimitsResult> => {
   try {
@@ -17,7 +33,7 @@ export const fetchClaudeUsageLimits = async (accessToken: string): Promise<Usage
     });
 
     if (response.status === 429) {
-      return { status: "rate_limited" };
+      return { status: "rate_limited", retryAfterMs: parseRetryAfter(response.headers.get("retry-after")) };
     }
 
     if (!response.ok) {

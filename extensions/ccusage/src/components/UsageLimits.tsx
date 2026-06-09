@@ -13,8 +13,22 @@ import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
 
 export function UsageLimits() {
-  const { data, isLoading, error, isStale, isRateLimited, lastFetched, revalidate, isUsageLimitsAvailable } =
-    useClaudeUsageLimits();
+  const {
+    data,
+    isLoading,
+    error,
+    isStale,
+    isRateLimited,
+    rateLimitedUntil,
+    lastFetched,
+    revalidate,
+    isUsageLimitsAvailable,
+  } = useClaudeUsageLimits();
+
+  const rateLimitRetryIn =
+    rateLimitedUntil && rateLimitedUntil > Date.now()
+      ? formatTimeRemaining(new Date(rateLimitedUntil).toISOString())
+      : null;
 
   if (!isUsageLimitsAvailable) {
     return null;
@@ -27,7 +41,12 @@ export function UsageLimits() {
     error && !data
       ? STANDARD_ACCESSORIES.ERROR
       : isRateLimited && !data
-        ? [{ icon: Icon.Clock, text: "Rate limited" }]
+        ? [
+            {
+              icon: Icon.Clock,
+              text: rateLimitRetryIn ? `Rate limited · retry in ${rateLimitRetryIn}` : "Rate limited",
+            },
+          ]
         : !data
           ? STANDARD_ACCESSORIES.LOADING
           : isStale && !isLoading
@@ -53,8 +72,10 @@ export function UsageLimits() {
     if (isRateLimited && !data) {
       return (
         <ErrorMetadata
-          noDataMessage="Rate limited by Anthropic API"
-          noDataSubMessage="Retrying automatically — click Refresh to try now"
+          noDataMessage={
+            rateLimitRetryIn ? `Rate limited — retry in ${rateLimitRetryIn}` : "Rate limited by Anthropic API"
+          }
+          noDataSubMessage="Click Refresh to try now"
         />
       );
     }
