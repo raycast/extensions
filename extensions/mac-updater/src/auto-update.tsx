@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { runShell } from "./utils/shell";
+import { runWithTimeout } from "./utils/shell";
 import { findMas, isMasInstalled } from "./utils/sources/mas";
 import {
   brewUpdateIndex,
@@ -103,7 +103,10 @@ export default async function AutoUpdate() {
   if (prefs.enableMas && (await isMasInstalled())) {
     try {
       const mas = findMas() ?? "mas";
-      await runShell(`${mas} upgrade`);
+      // Bounded like every brew op — mas can stall on App Store auth or a slow
+      // MAS service, and a hung command would block the 12h background job
+      // (no post-scan, no HUD) with no user-visible signal.
+      await runWithTimeout(mas, ["upgrade"], 5 * 60 * 1000);
       const beforeMas =
         preScan?.apps.filter((a) => a.hasUpdate && a.source === "mas") ?? [];
       masUpdated = beforeMas.length;
