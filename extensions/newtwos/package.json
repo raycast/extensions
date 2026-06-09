@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "newtwos",
+  "title": "NewTwos",
+  "description": "Capture and organize your lists, to-dos, notes, and reminders in NewTwos.",
+  "icon": "extension-icon.png",
+  "author": "TwosBaller",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-thing",
+      "title": "Add Thing",
+      "subtitle": "NewTwos",
+      "description": "Add a to-do, note, or hyperlink to a list.",
+      "mode": "view"
+    },
+    {
+      "name": "search-things",
+      "title": "Search Things",
+      "subtitle": "NewTwos",
+      "description": "Search and browse your things; complete or open them.",
+      "mode": "view"
+    },
+    {
+      "name": "create-list",
+      "title": "Create List",
+      "subtitle": "NewTwos",
+      "description": "Create a new list.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "A NewTwos API key from Settings → Advanced → API Keys.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.4.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
