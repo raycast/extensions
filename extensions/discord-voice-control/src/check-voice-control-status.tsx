@@ -48,9 +48,12 @@ export default function CheckVoiceControlStatusCommand() {
 
   async function load() {
     setIsLoading(true);
-    const result = await checkVoiceControlStatus();
-    setEvaluation(result);
-    setIsLoading(false);
+    try {
+      const result = await checkVoiceControlStatus();
+      setEvaluation(result);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
