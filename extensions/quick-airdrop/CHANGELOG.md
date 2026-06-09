@@ -1,6 +1,6 @@
 # Quick AirDrop Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-09
 
 - Add `AirDrop Selected File` command for sharing Finder selections
 - Add `AirDrop Clipboard` command for files, URLs, and text on the clipboard
