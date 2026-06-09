@@ -254,7 +254,7 @@ export default function Command() {
     const historySet = new Set(tagHistory);
 
     setTag(nextTag);
-    setSelectedHistoryTags(nextTags.filter((nextTag) => historySet.has(nextTag)));
+    setSelectedHistoryTags(nextTags.filter((parsedTag) => historySet.has(parsedTag)));
   }
 
   function handleHistoryTagsChange(nextSelectedHistoryTags: string[]) {

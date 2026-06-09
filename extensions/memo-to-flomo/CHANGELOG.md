@@ -1,6 +1,6 @@
 # MEMO to flomo Changelog
 
-## [Initial Version] - 2026-06-08
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added the `Send Memo` Raycast command for posting Markdown memos to flomo.
 - Added required editable `MEMO API URL` extension preference.
