@@ -1,6 +1,6 @@
 # No More Caffeine Changelog
 
-## [Fix Default Caffeine Amount] - {PR_MERGE_DATE}
+## [Fix Default Caffeine Amount] - 2026-06-09
 
 ### 🐛 Bug Fixes
 
