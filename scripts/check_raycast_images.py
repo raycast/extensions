@@ -97,7 +97,7 @@ def _find_wide_horizontal_bbox(
         top + int((bottom - top) * ratio)
         for ratio in (0.03, 0.08, 0.20, 0.50, 0.80)
     ]
-    row_candidates.extend([h // 2, int(h * 0.16), int(h * 0.50), int(h * 0.84)])
+    row_candidates.extend([h // 2, int(h * 0.16), int(h * 0.84)])
 
     left_edges: list[int] = []
     right_edges: list[int] = []
@@ -295,6 +295,13 @@ def find_window_bbox(
                         if verbose:
                             print("       Detection method: gradient + wide horizontal fallback")
                         return wide_result
+                    elif verbose:
+                        reason = (
+                            "did not improve padding"
+                            if wide_result
+                            else "found no sane edge candidate"
+                        )
+                        print(f"       Wide horizontal fallback tried but {reason}")
 
                 if verbose:
                     top_src = "Phase-2" if top_p2 else "Phase-1 min"
