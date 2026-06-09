@@ -1,6 +1,6 @@
 # e18e Module Replacements Changelog
 
-## [Updated Data] - {PR_MERGE_DATE}
+## [Updated Data] - 2026-06-09
 
 - Update replacement data
 
