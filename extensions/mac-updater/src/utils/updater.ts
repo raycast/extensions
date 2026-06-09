@@ -195,6 +195,29 @@ async function verifySignature(appPath: string): Promise<boolean> {
   }
 }
 
+/**
+ * The .pkg equivalent of verifySignature. Gates the privileged
+ * `installer -pkg … with administrator privileges` so a corrupted or malicious
+ * .pkg from a compromised Sparkle feed / GitHub release can't be silently
+ * installed as root.
+ *
+ * NB: `pkgutil --check-signature` exits 0 even for an *unsigned* package
+ * ("Status: no signature") and for some unreadable ones — its exit code is
+ * useless here. We must inspect the Status line and accept ONLY a package that
+ * is actually signed (a valid, intact signature reports "signed by …"; a
+ * tampered one reports an invalid status instead).
+ */
+async function verifyPkgSignature(pkgPath: string): Promise<boolean> {
+  try {
+    const { stdout } = await runShell(
+      `/usr/sbin/pkgutil --check-signature ${shq(pkgPath)} 2>&1`,
+    );
+    return /Status:\s*signed by/i.test(stdout);
+  } catch {
+    return false;
+  }
+}
+
 async function swapApps(
   stagedAppPath: string,
   targetPath: string,
@@ -336,6 +359,17 @@ export async function downloadAndInstall(
         // The inner shell command is built with shq() (single-quote safe), then
         // the entire thing is escaped via escapeAS() for AppleScript's
         // double-quoted string literal — avoids quote nesting hazards.
+        // Verify the package signature BEFORE escalating — same guarantee the
+        // .app paths get via codesign. Refuse to run an unsigned/tampered .pkg
+        // as root.
+        onProgress?.("Verifying package signature…");
+        if (!(await verifyPkgSignature(downloadPath))) {
+          return {
+            success: false,
+            error:
+              "Package signature verification failed — refusing to install an unsigned or tampered .pkg as root.",
+          };
+        }
         onProgress?.("Running pkg installer…");
         try {
           const installCmd = `installer -pkg ${shq(downloadPath)} -target /`;
