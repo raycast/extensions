@@ -69,9 +69,18 @@
       "default": "personal",
       "required": false,
       "data": [
-        { "title": "Personal (Documents, Desktop, Downloads, Pictures, Projects)", "value": "personal" },
-        { "title": "Full Home (~/ except Library)", "value": "full_home" },
-        { "title": "Everything (all volumes)", "value": "everything" }
+        {
+          "title": "Personal (Documents, Desktop, Downloads, Pictures, Projects)",
+          "value": "personal"
+        },
+        {
+          "title": "Full Home (~/ except Library)",
+          "value": "full_home"
+        },
+        {
+          "title": "Everything (all volumes)",
+          "value": "everything"
+        }
       ]
     },
     {

@@ -278,12 +278,8 @@ export default function SearchFiles() {
     }
     let cancelled = false;
 
-    // Phase 1: instant cached results (no sync)
-    const staleChild = execFile(
-      findrPath,
-      ["search", "", "--json", "--limit", String(maxResults), "--no-sync"],
-      { env: { ...process.env, ...findrEnv } },
-      (err, stdout) => {
+    const onRecentResults =
+      (clearLoading: boolean) => (err: Error | null, stdout: string) => {
         if (cancelled) return;
         if (!err && stdout) {
           try {
@@ -292,26 +288,20 @@ export default function SearchFiles() {
             /* ignore */
           }
         }
-        setRecentLoading(false);
-      },
-    );
+        if (clearLoading) setRecentLoading(false);
+      };
 
+    const execEnv = { env: { ...process.env, ...findrEnv } };
+    const runRecentSearch = (noSync: boolean, clearLoading: boolean) => {
+      const args = ["search", "", "--json", "--limit", String(maxResults)];
+      if (noSync) args.push("--no-sync");
+      return execFile(findrPath, args, execEnv, onRecentResults(clearLoading));
+    };
+
+    // Phase 1: instant cached results (no sync)
+    const staleChild = runRecentSearch(true, true);
     // Phase 2: background sync + fresh results (replaces stale)
-    const freshChild = execFile(
-      findrPath,
-      ["search", "", "--json", "--limit", String(maxResults)],
-      { env: { ...process.env, ...findrEnv } },
-      (err, stdout) => {
-        if (cancelled) return;
-        if (!err && stdout) {
-          try {
-            setRecentData(JSON.parse(stdout));
-          } catch {
-            /* ignore */
-          }
-        }
-      },
-    );
+    const freshChild = runRecentSearch(false, false);
 
     return () => {
       cancelled = true;

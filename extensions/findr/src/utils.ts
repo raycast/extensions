@@ -11,6 +11,7 @@ import {
 import { createHash } from "crypto";
 import { execFile } from "child_process";
 import { join } from "path";
+import type { IncomingMessage } from "http";
 import { get } from "https";
 
 const GITHUB_REPO = "Roderick111/findr";
@@ -24,6 +25,22 @@ function binDir(): string {
     mkdirSync(dir, { recursive: true });
   }
   return dir;
+}
+
+/** Follow HTTP 301/302 redirects. Returns true if a redirect was followed. */
+function followRedirect(
+  res: IncomingMessage,
+  request: (url: string) => void,
+): boolean {
+  if (res.statusCode === 302 || res.statusCode === 301) {
+    const location = res.headers.location;
+    res.resume();
+    if (location) {
+      request(location);
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Download a file from a URL, following redirects. Downloads to a temp file
@@ -44,14 +61,7 @@ function downloadFile(url: string, dest: string): Promise<void> {
     };
     const request = (u: string) => {
       get(u, (res) => {
-        if (res.statusCode === 302 || res.statusCode === 301) {
-          const location = res.headers.location;
-          res.resume(); // drain redirect response to release socket
-          if (location) {
-            request(location);
-            return;
-          }
-        }
+        if (followRedirect(res, request)) return;
         if (res.statusCode !== 200) {
           fail(new Error(`Download failed: HTTP ${res.statusCode}`));
           return;
@@ -83,14 +93,7 @@ function fetchText(url: string): Promise<string | null> {
   return new Promise((resolve) => {
     const request = (u: string) => {
       get(u, (res) => {
-        if (res.statusCode === 302 || res.statusCode === 301) {
-          const location = res.headers.location;
-          res.resume();
-          if (location) {
-            request(location);
-            return;
-          }
-        }
+        if (followRedirect(res, request)) return;
         if (res.statusCode !== 200) {
           res.resume();
           resolve(null);
