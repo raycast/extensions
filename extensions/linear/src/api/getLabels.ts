@@ -13,7 +13,7 @@ const preferences = getPreferenceValues<Preferences>();
 function getPageLimits() {
   const parsed = Number(preferences.labelsLimit);
   const limit = Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_LABELS_LIMIT;
-  const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
+  const pageSize = Math.floor(Math.min(DEFAULT_PAGE_SIZE, limit));
   const pageLimit = Math.ceil(limit / pageSize);
   return { pageSize, pageLimit };
 }
