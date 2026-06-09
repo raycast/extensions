@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { SlackClient, useMe } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { Action, ActionPanel, closeMainWindow, Icon, LaunchProps, List, popToRoot } from "@raycast/api";
@@ -188,10 +188,19 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
     if (!hasLaunchArguments || didAutoSetStatus.current || isFetchMeLoading || isFetchProfileLoading) {
       return;
     }
-    didAutoSetStatus.current = true;
 
     const statusText = statusTextArgument?.trim() || undefined;
     const emoji = normalizeEmoji(emojiArgument);
+
+    // Preserving the field that wasn't passed relies on the current profile. If it failed to
+    // load, setting only one field would clear the other, so bail with feedback instead.
+    if ((statusText === undefined || emoji === undefined) && !profile) {
+      didAutoSetStatus.current = true;
+      showFailureToast(new Error("Couldn't load your current Slack status."), { title: "Failed to set status" });
+      return;
+    }
+
+    didAutoSetStatus.current = true;
 
     showToastWithPromise(
       async () => {
