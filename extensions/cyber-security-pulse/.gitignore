@@ -1,0 +1,19 @@
+# Node / Raycast
+node_modules
+dist
+.DS_Store
+*.log
+raycast-env.d.ts
+
+# Beads / Dolt files (added by bd init) — internal tracker, never published
+.beads/
+.dolt/
+*.db
+.beads-credential-key
+
+# Agent / dev tooling — internal, never published to the store
+.agents/
+.claude/
+.codex/
+AGENTS.md
+CLAUDE.md
