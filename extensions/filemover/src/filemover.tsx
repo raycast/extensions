@@ -251,7 +251,7 @@ export default function Command() {
         }
         successCount++;
         historyFiles.push({ originalPath: src, newPath: destPath });
-      } catch {
+      } catch (e: unknown) {
         errors.push({
           file: path.basename(src),
           error: e instanceof Error ? e.message : String(e),
@@ -341,7 +341,7 @@ export default function Command() {
 
         successCount++;
         historyFiles.push({ originalPath: src, newPath: destPath });
-      } catch {
+      } catch (e: unknown) {
         errors.push({
           file: path.basename(src),
           error: e instanceof Error ? e.message : String(e),
@@ -391,7 +391,7 @@ export default function Command() {
         await closeMainWindow();
         await popToRoot();
       }
-    } catch {
+    } catch (e: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed to ${isCopy ? "copy" : "move"} files`,
@@ -432,7 +432,7 @@ export default function Command() {
         await closeMainWindow();
         await popToRoot();
       }
-    } catch {
+    } catch (e: unknown) {
       await showToast({ style: Toast.Style.Failure, title: `Failed to rename files`, message: String(e) });
     }
   }
