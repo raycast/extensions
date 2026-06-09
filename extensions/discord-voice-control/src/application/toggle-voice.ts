@@ -20,10 +20,7 @@ export interface ToggleVoiceDeps {
   readonly log?: (result: VoiceControlResult, enabled: boolean) => Promise<void>;
 }
 
-export async function toggleVoice(
-  action: VoiceAction,
-  deps: ToggleVoiceDeps,
-): Promise<VoiceControlResult> {
+export async function toggleVoice(action: VoiceAction, deps: ToggleVoiceDeps): Promise<VoiceControlResult> {
   let result: VoiceControlResult;
   try {
     result = await deps.controller.perform(action);

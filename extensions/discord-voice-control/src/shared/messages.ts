@@ -50,14 +50,12 @@ const MESSAGES: Record<ReasonCode, MessageTemplate> = {
   statusReady:
     "Ready to send mute/deafen toggles. Note: outcomes are best-effort — the toggle is sent, but the actual Discord state cannot be confirmed.",
   statusDiscordNotRunning: "Discord is not running. Open Discord to use voice control.",
-  statusDiscordNotInstalled:
-    "Discord does not appear to be installed. Install Discord to use voice control.",
+  statusDiscordNotInstalled: "Discord does not appear to be installed. Install Discord to use voice control.",
   statusAccessibilityMissing:
     "Accessibility permission is required. Grant Raycast access in System Settings → Privacy & Security → Accessibility.",
   statusShortcutNotConfigured:
     "Shortcut setup is incomplete. Set the mute/deafen keybind in preferences to match your Discord keybind.",
-  statusUnknown:
-    "Readiness could not be determined. Open the status command details for next steps.",
+  statusUnknown: "Readiness could not be determined. Open the status command details for next steps.",
 };
 
 /** Resolve the single user-facing message for a reason code. */

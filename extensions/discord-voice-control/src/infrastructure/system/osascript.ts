@@ -26,10 +26,7 @@ export interface RunOsascriptOptions {
 }
 
 /** Run one or more `osascript` `-e` lines. Never throws for script errors — returns a result. */
-export function runOsascript(
-  lines: readonly string[],
-  options: RunOsascriptOptions,
-): Promise<OsascriptResult> {
+export function runOsascript(lines: readonly string[], options: RunOsascriptOptions): Promise<OsascriptResult> {
   const args = lines.flatMap((line) => ["-e", line]);
   return new Promise((resolve) => {
     execFile(
@@ -44,8 +41,8 @@ export function runOsascript(
           return;
         }
         const timedOut =
-          (error as NodeJS.ErrnoException & { killed?: boolean; signal?: string }).killed ===
-            true || (error as NodeJS.ErrnoException & { signal?: string }).signal === "SIGKILL";
+          (error as NodeJS.ErrnoException & { killed?: boolean; signal?: string }).killed === true ||
+          (error as NodeJS.ErrnoException & { signal?: string }).signal === "SIGKILL";
         resolve({
           ok: false,
           stdout: out,

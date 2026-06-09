@@ -46,10 +46,9 @@ describe("message catalog", () => {
     for (const message of allMessages()) {
       const lower = message.toLowerCase();
       for (const forbidden of FORBIDDEN_STATE_WORDS) {
-        expect(
-          lower.includes(forbidden),
-          `message must not imply confirmed state ("${forbidden}"): "${message}"`,
-        ).toBe(false);
+        expect(lower.includes(forbidden), `message must not imply confirmed state ("${forbidden}"): "${message}"`).toBe(
+          false,
+        );
       }
     }
   });

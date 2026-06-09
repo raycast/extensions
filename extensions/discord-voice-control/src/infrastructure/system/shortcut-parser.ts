@@ -37,12 +37,7 @@ const MODIFIER_ALIASES: Record<string, AppleScriptModifier> = {
 };
 
 /** Canonical order so output is deterministic regardless of how the user typed the combo. */
-const MODIFIER_ORDER: AppleScriptModifier[] = [
-  "command down",
-  "control down",
-  "option down",
-  "shift down",
-];
+const MODIFIER_ORDER: AppleScriptModifier[] = ["command down", "control down", "option down", "shift down"];
 
 export function parseShortcut(input: string | undefined | null): ParseShortcutResult {
   if (input == null) {

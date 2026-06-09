@@ -1,19 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  open,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, open, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { checkVoiceControlStatus } from "./application/check-status";
 import type { StatusEvaluation } from "./application/evaluate-status";
 import { BEST_EFFORT_NOTE } from "./shared/messages";
 
-const ACCESSIBILITY_SETTINGS_URL =
-  "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+const ACCESSIBILITY_SETTINGS_URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
 function checkLine(ok: boolean, okText: string, notOkText: string): string {
   const icon = ok ? "✅" : "⚠️";
@@ -90,11 +81,7 @@ export default function CheckVoiceControlStatusCommand() {
       actions={
         <ActionPanel>
           <Action title="Recheck Status" icon={Icon.ArrowClockwise} onAction={() => void load()} />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action
             title="Open Accessibility Settings"
             icon={Icon.Lock}

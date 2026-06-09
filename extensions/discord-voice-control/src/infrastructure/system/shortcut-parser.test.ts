@@ -24,12 +24,7 @@ describe("parseShortcut", () => {
     const result = parseShortcut("shift+option+ctrl+cmd+k");
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.shortcut.modifiers).toEqual([
-        "command down",
-        "control down",
-        "option down",
-        "shift down",
-      ]);
+      expect(result.shortcut.modifiers).toEqual(["command down", "control down", "option down", "shift down"]);
     }
   });
 

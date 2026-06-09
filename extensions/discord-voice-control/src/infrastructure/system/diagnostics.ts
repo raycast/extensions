@@ -26,10 +26,7 @@ export interface DiagnosticEvent {
 }
 
 /** Build the sanitized event from a result. Exported (and pure) so it can be unit tested. */
-export function toDiagnosticEvent(
-  result: VoiceControlResult,
-  now: Date = new Date(),
-): DiagnosticEvent {
+export function toDiagnosticEvent(result: VoiceControlResult, now: Date = new Date()): DiagnosticEvent {
   return {
     timestamp: now.toISOString(),
     action: result.action,

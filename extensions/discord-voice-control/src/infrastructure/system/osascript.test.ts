@@ -11,25 +11,17 @@ describe("classifyOsascriptError", () => {
   });
 
   it("classifies Accessibility permission errors from various macOS phrasings", () => {
-    expect(
-      classifyOsascriptError(
-        result({ stderr: "osascript is not allowed assistive access. (-1719)" }),
-      ),
-    ).toBe("permission");
-    expect(classifyOsascriptError(result({ stderr: "Error 1002: not authorized" }))).toBe(
+    expect(classifyOsascriptError(result({ stderr: "osascript is not allowed assistive access. (-1719)" }))).toBe(
       "permission",
     );
-    expect(classifyOsascriptError(result({ stderr: "accessibility access disabled" }))).toBe(
-      "permission",
-    );
+    expect(classifyOsascriptError(result({ stderr: "Error 1002: not authorized" }))).toBe("permission");
+    expect(classifyOsascriptError(result({ stderr: "accessibility access disabled" }))).toBe("permission");
   });
 
   it("classifies everything else as other", () => {
-    expect(
-      classifyOsascriptError(
-        result({ stderr: "Discord got an error: Application isn't running." }),
-      ),
-    ).toBe("other");
+    expect(classifyOsascriptError(result({ stderr: "Discord got an error: Application isn't running." }))).toBe(
+      "other",
+    );
     expect(classifyOsascriptError(result({ stderr: "" }))).toBe("other");
   });
 });

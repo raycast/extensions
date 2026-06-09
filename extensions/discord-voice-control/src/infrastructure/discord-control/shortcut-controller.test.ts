@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { OsascriptResult } from "../system/osascript";
-import {
-  buildDispatchScript,
-  ShortcutController,
-  type ShortcutControllerDeps,
-} from "./shortcut-controller";
+import { buildDispatchScript, ShortcutController, type ShortcutControllerDeps } from "./shortcut-controller";
 import { parseShortcut } from "../system/shortcut-parser";
 
 function ok(stdout = ""): OsascriptResult {
@@ -44,9 +40,7 @@ describe("ShortcutController.perform", () => {
 
   it("returns unavailable BEFORE dispatch when Discord is not running", async () => {
     const runOsascript = vi.fn(async () => ok());
-    const controller = new ShortcutController(
-      makeDeps({ isDiscordRunning: async () => false, runOsascript }),
-    );
+    const controller = new ShortcutController(makeDeps({ isDiscordRunning: async () => false, runOsascript }));
     const result = await controller.perform("toggleMute");
     expect(result.outcome).toBe("unavailable");
     expect(result.reasonCode).toBe("discordNotRunning");
@@ -55,9 +49,7 @@ describe("ShortcutController.perform", () => {
 
   it("returns unavailable when the shortcut does not parse", async () => {
     const runOsascript = vi.fn(async () => ok());
-    const controller = new ShortcutController(
-      makeDeps({ getShortcut: () => "totally-invalid", runOsascript }),
-    );
+    const controller = new ShortcutController(makeDeps({ getShortcut: () => "totally-invalid", runOsascript }));
     const result = await controller.perform("toggleDeafen");
     expect(result.outcome).toBe("unavailable");
     expect(result.reasonCode).toBe("shortcutNotConfigured");
@@ -75,9 +67,7 @@ describe("ShortcutController.perform", () => {
   });
 
   it("maps a timeout to a failed timeout result", async () => {
-    const controller = new ShortcutController(
-      makeDeps({ runOsascript: vi.fn(async () => err("", true)) }),
-    );
+    const controller = new ShortcutController(makeDeps({ runOsascript: vi.fn(async () => err("", true)) }));
     const result = await controller.perform("toggleMute");
     expect(result.outcome).toBe("failed");
     expect(result.reasonCode).toBe("dispatchTimedOut");
@@ -94,25 +84,19 @@ describe("ShortcutController.perform", () => {
 
   it("dispatches exactly once (no uncontrolled retries) and restores focus", async () => {
     const runOsascript = mockRun();
-    const controller = new ShortcutController(
-      makeDeps({ runOsascript, getFrontmostApp: async () => "Safari" }),
-    );
+    const controller = new ShortcutController(makeDeps({ runOsascript, getFrontmostApp: async () => "Safari" }));
     await controller.perform("toggleMute");
     const calls = runOsascript.mock.calls.map((c) => c[0]);
     // one dispatch call (the multi-line activate+keystroke) + one restore call
     const dispatchCalls = calls.filter((lines) => lines.some((l) => l.includes("keystroke")));
-    const restoreCalls = calls.filter((lines) =>
-      lines.some((l) => l.includes('"Safari" to activate')),
-    );
+    const restoreCalls = calls.filter((lines) => lines.some((l) => l.includes('"Safari" to activate')));
     expect(dispatchCalls).toHaveLength(1);
     expect(restoreCalls).toHaveLength(1);
   });
 
   it("does not issue a restore call when the previous app was Discord itself", async () => {
     const runOsascript = mockRun();
-    const controller = new ShortcutController(
-      makeDeps({ runOsascript, getFrontmostApp: async () => "Discord" }),
-    );
+    const controller = new ShortcutController(makeDeps({ runOsascript, getFrontmostApp: async () => "Discord" }));
     await controller.perform("toggleMute");
     const calls = runOsascript.mock.calls.map((c) => c[0]);
     const restoreCalls = calls.filter((lines) =>
@@ -129,8 +113,6 @@ describe("buildDispatchScript", () => {
     if (!parsed.ok) return;
     const script = buildDispatchScript(parsed.shortcut);
     expect(script[0]).toContain('"Discord" to activate');
-    expect(script.some((l) => l.includes('keystroke "m" using {command down, shift down}'))).toBe(
-      true,
-    );
+    expect(script.some((l) => l.includes('keystroke "m" using {command down, shift down}'))).toBe(true);
   });
 });

@@ -1,11 +1,7 @@
 import type { DiscordController } from "../../domain/control";
 import { buildResult } from "../../domain/result";
 import type { ReasonCode, VoiceAction, VoiceControlResult } from "../../domain/types";
-import {
-  classifyOsascriptError,
-  type OsascriptResult,
-  type RunOsascriptOptions,
-} from "../system/osascript";
+import { classifyOsascriptError, type OsascriptResult, type RunOsascriptOptions } from "../system/osascript";
 import { DISCORD_APP_NAME } from "../system/discord-probe";
 import { parseShortcut, type ParsedShortcut } from "../system/shortcut-parser";
 
@@ -24,10 +20,7 @@ export interface ShortcutControllerDeps {
   /** Returns true if Discord is currently running. */
   readonly isDiscordRunning: () => Promise<boolean>;
   /** Runs osascript `-e` lines; never throws for script errors. */
-  readonly runOsascript: (
-    lines: readonly string[],
-    options: RunOsascriptOptions,
-  ) => Promise<OsascriptResult>;
+  readonly runOsascript: (lines: readonly string[], options: RunOsascriptOptions) => Promise<OsascriptResult>;
   /** Read the frontmost app name to restore focus afterward (empty string if unknown). */
   readonly getFrontmostApp: () => Promise<string>;
   /** Dispatch timeout in milliseconds. */

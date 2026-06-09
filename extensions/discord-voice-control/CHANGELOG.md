@@ -1,6 +1,6 @@
 # Discord Voice Control Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Toggle Discord mute and deafen from Raycast without leaving your current app.
 - Check Voice Control Status command reports readiness (Discord running, Accessibility permission, shortcut configuration).
