@@ -14,11 +14,9 @@ import { useSearchComments } from "./hooks/useGreptile";
 
 const SEARCH_DEBOUNCE_MS = 350;
 
-type Arguments = {
-  query?: string;
-};
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.SearchComments }>,
+) {
   const [query, setQuery] = useState(props.arguments.query ?? "");
   const preferences = getSearchCommentPreferences();
   const trimmedQuery = query.trim();

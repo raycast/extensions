@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  apiKey?: string;
-  includeAddressed?: boolean;
-};
-
 export function getGreptileApiKey() {
   const preferences = getPreferenceValues<Preferences>();
   const apiKey = preferences.apiKey;
@@ -17,5 +12,5 @@ export function getGreptileApiKey() {
 }
 
 export function getSearchCommentPreferences() {
-  return getPreferenceValues<Preferences>();
+  return getPreferenceValues<Preferences.SearchComments>();
 }
