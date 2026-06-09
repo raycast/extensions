@@ -8,7 +8,7 @@ _Browse Greptile pull requests, code reviews, and review comments from Raycast._
 
 This extension is not affiliated with, endorsed by, or sponsored by Greptile.
 
-Built on the day following Greptile's visit to Tokyo in Ebisu on June 8th, 2026 at Tap & Tumbler. May it be useful for the community. The war on bugs continues 🍻
+Built on the day following Greptile's visit to Tokyo in Ebisu on June 8th, 2026 at Tap & Tumbler, while wearing the "The War On Bugs" Greptile T-shirt acquired at the event. May it be useful for the community. The war on bugs continues 🍻
 
 ## Features
 
