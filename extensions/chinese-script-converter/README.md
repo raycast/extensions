@@ -1,4 +1,4 @@
-# Chinese Script Converter
+# Traditional/Simplified Chinese Converter
 
 Convert the currently selected text between **Simplified** and **Traditional**
 Chinese, with automatic direction detection and a customizable dictionary for

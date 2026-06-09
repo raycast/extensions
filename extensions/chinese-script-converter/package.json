@@ -32,17 +32,17 @@
       "name": "convert",
       "title": "Convert",
       "description": "Convert the currently selected text between Simplified and Traditional Chinese",
-      "subtitle": "Chinese Script Converter"
+      "subtitle": "Traditional/Simplified Chinese Converter"
     },
     {
       "mode": "view",
       "name": "dictionary",
       "title": "Manage Dictionary",
       "description": "Add, edit, or remove custom Simplified/Traditional conversion rules",
-      "subtitle": "Chinese Script Converter"
+      "subtitle": "Traditional/Simplified Chinese Converter"
     }
   ],
-  "title": "Chinese Script Converter",
+  "title": "Traditional/Simplified Chinese Converter",
   "author": "yac516joe",
   "platforms": [
     "Windows"

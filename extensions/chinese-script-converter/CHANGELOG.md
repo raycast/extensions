@@ -1,4 +1,4 @@
-# Chinese Script Converter Changelog
+# Traditional/Simplified Chinese Converter Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
