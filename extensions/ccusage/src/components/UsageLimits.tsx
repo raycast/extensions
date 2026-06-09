@@ -8,6 +8,7 @@ import {
   calculateAverageUsage,
   createProgressBar,
 } from "../utils/usage-limits-formatter";
+import { formatDuration } from "../utils/data-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
@@ -26,9 +27,7 @@ export function UsageLimits() {
   } = useClaudeUsageLimits();
 
   const rateLimitRetryIn =
-    rateLimitedUntil && rateLimitedUntil > Date.now()
-      ? formatTimeRemaining(new Date(rateLimitedUntil).toISOString())
-      : null;
+    rateLimitedUntil && rateLimitedUntil > Date.now() ? formatDuration(rateLimitedUntil - Date.now()) : null;
 
   if (!isUsageLimitsAvailable) {
     return null;
