@@ -18,7 +18,7 @@ export function formatMoney(value?: number, currency?: string, marketCap?: boole
     if (marketCap) {
       return "£" + strValue + suffix;
     }
-    return value + "p";
+    return value.toFixed(2) + "p";
   }
 
   if (currency) {
