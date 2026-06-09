@@ -36,6 +36,16 @@ function humanizeBrewError(err: unknown, raw: string): string {
   if (err instanceof CommandTimeoutError) {
     return "The update timed out. If a password dialog appeared, run it again and enter your password promptly.";
   }
+  // Another brew process already owns this download/operation — e.g. the user
+  // also kicked it off in a Terminal, or triggered it twice. Not a real
+  // failure; the other process will finish the job.
+  if (
+    /already locked|another active homebrew|process is already in progress|currently being (installed|upgraded)/i.test(
+      raw,
+    )
+  ) {
+    return "Another update for this app is already running (in Raycast or a Terminal). Wait for it to finish, then check again — it's probably already done.";
+  }
   if (
     /broken pipe|a password is required|sorry, try again|incorrect password|authentication (failure|error)|with administrator/i.test(
       raw,
