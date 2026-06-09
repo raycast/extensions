@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Label Fetching] - {PR_MERGE_DATE}
+## [Label Fetching] - 2026-06-09
 
 - Add an "API Label Limit" preference (default 100) so more labels can be fetched per team when creating or editing issues. Increase it if some labels are missing because your team has more than 100 labels.
 
