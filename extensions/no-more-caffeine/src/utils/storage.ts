@@ -75,6 +75,18 @@ export async function getIntakes(): Promise<CaffeineIntake[]> {
 }
 
 /**
+ * Update an existing caffeine intake record (matched by id)
+ */
+export async function updateIntake(updated: CaffeineIntake): Promise<void> {
+  const intakes = await getIntakes();
+  const index = intakes.findIndex((intake) => intake.id === updated.id);
+  if (index >= 0) {
+    intakes[index] = updated;
+    await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
+  }
+}
+
+/**
  * Delete a caffeine intake record
  */
 export async function deleteIntake(id: string): Promise<void> {

@@ -16,11 +16,13 @@ interface FormValues {
   drinkType: string;
   amountDescription: string;
   caffeineAmount: string;
+  intakeTime: Date | null;
 }
 
 export default function Command() {
-  const [drinkType, setDrinkType] = useState<string>("");
-  const [caffeineAmount, setCaffeineAmount] = useState<string>("");
+  const [drinkType, setDrinkType] = useState<string>(BUILT_IN_PRESETS[0]?.name ?? "");
+  const [caffeineAmount, setCaffeineAmount] = useState<string>(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
+  const [intakeTime, setIntakeTime] = useState<Date | null>(new Date());
   const [submitted, setSubmitted] = useState(false);
   const [calculation, setCalculation] = useState<CaffeineCalculation | null>(null);
 
@@ -61,13 +63,23 @@ export default function Command() {
       return;
     }
 
+    const chosenTime = values.intakeTime ?? new Date();
+    if (chosenTime > new Date()) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid time",
+        message: "Intake time cannot be in the future",
+      });
+      return;
+    }
+
     try {
-      const metrics = calculateCaffeineMetrics(intakes || [], settings, caffeineMg);
+      const metrics = calculateCaffeineMetrics(intakes || [], settings, caffeineMg, chosenTime);
       setCalculation(metrics);
 
       const intake: CaffeineIntake = {
         id: generateId(),
-        timestamp: new Date(),
+        timestamp: chosenTime,
         amount: caffeineMg,
         drinkType: values.drinkType === OTHER_OPTION ? "Other" : values.drinkType,
         amountDescription: values.amountDescription || undefined,
@@ -128,8 +140,9 @@ ${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine w
               onAction={() => {
                 setSubmitted(false);
                 setCalculation(null);
-                setDrinkType("");
-                setCaffeineAmount("");
+                setDrinkType(BUILT_IN_PRESETS[0]?.name ?? "");
+                setCaffeineAmount(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
+                setIntakeTime(new Date());
               }}
             />
           </ActionPanel>
@@ -163,6 +176,14 @@ ${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine w
         )}
         <Form.Dropdown.Item title="Other" value={OTHER_OPTION} />
       </Form.Dropdown>
+
+      <Form.DatePicker
+        id="intakeTime"
+        title="Time"
+        type={Form.DatePicker.Type.DateTime}
+        value={intakeTime}
+        onChange={setIntakeTime}
+      />
 
       <Form.TextField
         id="amountDescription"
