@@ -1,6 +1,6 @@
 # Spokenly Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-09
 
 - Add `Toggle Dictation` — start Spokenly's main prompt via the `spokenly://` URL scheme, with optional global-shortcut fallback.
 - Add `Copy Last Transcript` / `Paste Last Transcript` — quick access to the most recent dictation result.
