@@ -89,6 +89,9 @@ const fetchRepoSkillMdEntries = withCache(
       throw new Error(`Failed to fetch tree for ${source}: ${response.status}`);
     }
 
+    // For very large repos (>100k git objects) GitHub returns a truncated,
+    // partial tree, so a deeply nested SKILL.md could be missed. Skills repos
+    // are small enough that this isn't a concern in practice.
     const { tree } = (await response.json()) as { tree?: GitTreeEntry[] };
     return (tree ?? [])
       .filter((entry): entry is GitTreeEntry & { url: string } =>
@@ -100,7 +103,7 @@ const fetchRepoSkillMdEntries = withCache(
 );
 
 /**
- * Authoritative lookup: read the repo's SKILL.md index and locate the one whose
+ * Repo-tree lookup: read the repo's SKILL.md index and locate the one whose
  * enclosing folder matches the skill. Handles skills nested at any depth that
  * the flat-path guesses can't reach.
  */
@@ -143,7 +146,7 @@ export async function fetchSkillContent(skill: Skill): Promise<SkillContentResul
     // No flat SKILL.md matched, fall through to the authoritative tree lookup.
   }
 
-  // 2. Authoritative path: locate the SKILL.md anywhere in the repo tree.
+  // 2. Repo-tree path: locate the SKILL.md anywhere in the repo tree.
   try {
     return await fetchSkillContentFromTree(skill);
   } catch {
