@@ -32,5 +32,6 @@ function authorizeOnce(): Promise<string> {
 }
 
 export async function ensureAuthenticated(): Promise<string> {
-  return authorizeOnce();
+  const token = await authorizeOnce();
+  return token;
 }
