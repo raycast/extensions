@@ -1,0 +1,43 @@
+{
+  "name": "fmhy-search",
+  "title": "FMHY Search",
+  "description": "Search FMHY resources locally from the single-page index.",
+  "icon": "icon.png",
+  "author": "jonathan",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-fmhy",
+      "title": "Search FMHY",
+      "description": "Search cached FMHY resources with grouped categories.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "node scripts/develop.cjs",
+    "build": "ray build -e dist -o dist",
+    "lint": "node scripts/lint.cjs --relaxed",
+    "check": "npm run lint && npm run build",
+    "lint:release": "ray lint",
+    "check:release": "npm run lint:release && npm run build"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.26.0",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
+  }
+}
