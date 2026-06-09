@@ -16,7 +16,7 @@ Instantly displays the current clipboard contents in large type — no typing ne
 
 Displays the selected text from the frontmost application in large type.
 
-![Show Selected Text](large-type-selected-text.gif)
+![Show Selected Text](assets/large-type-selected-text.gif)
 
 ## Preferences
 
