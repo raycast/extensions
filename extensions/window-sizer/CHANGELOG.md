@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-06-09
 
 - Fixed list selection behavior while preserving selected item action icons
 - Added timeout handling for unresponsive window operations
