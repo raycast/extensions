@@ -1,6 +1,6 @@
 # Large Type Changelog
 
-## [Added Selected Text Viewer] - 2026-06-08
+## [Added Selected Text Viewer] - {PR_MERGE_DATE}
 
 - New command "Show Selected Text" to display the selected text of the frontmost application in large type
 
