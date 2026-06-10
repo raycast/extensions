@@ -47,7 +47,8 @@ const tool = async (input: Input) => {
     type: input.collectionType,
   })
 
-  const statusName = EpisodeCollectionType[input.collectionType] || input.collectionType.toString()
+  const statusName =
+    EpisodeCollectionTypeName[input.collectionType as EpisodeCollectionType] || input.collectionType.toString()
   return {
     success: true,
     message: `Successfully updated ${input.episodeIds.length} episode(s) of subject ${input.subjectId} to "${statusName}"`,
