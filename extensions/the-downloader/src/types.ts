@@ -16,6 +16,7 @@ export type Format = {
 export type Video = {
   title: string;
   duration: number;
-  live_status: string;
+  /** Absent when the extractor never set it; some extractors emit an explicit `null`. */
+  live_status?: string | null;
   formats: Format[];
 };

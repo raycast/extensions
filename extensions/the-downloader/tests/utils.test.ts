@@ -5,7 +5,8 @@ import * as os from "node:os";
 // module load. `@raycast/api` is aliased to tests/stubs/raycast-api.ts (see
 // vitest.config.ts), which supplies downloadPath "~/Downloads" and
 // networkIdleTimeoutSec "120".
-import { sanitizeVideoTitle, expandTilde, getIdleTimeoutMs, formatFilesize, parseHHMM, isValidHHMM } from "../src/utils";
+import { sanitizeVideoTitle, expandTilde, getIdleTimeoutMs, formatFilesize, getVideoFormats } from "../src/utils";
+import { Format, Video } from "../src/types";
 
 const originalPlatform = process.platform;
 function setPlatform(platform: NodeJS.Platform) {
@@ -67,6 +68,19 @@ describe("sanitizeVideoTitle (host platform = macOS)", () => {
     const long = "First sentence. " + "x".repeat(300);
     expect(sanitizeVideoTitle(long)).toBe("First sentence");
   });
+
+  it("hard-truncates an over-long title with no punctuation boundary", () => {
+    expect(sanitizeVideoTitle("x".repeat(300))).toBe("x".repeat(200));
+  });
+
+  it("leaves short titles containing punctuation whole (no boundary cut under the cap)", () => {
+    // Regression: the boundary cut used to apply unconditionally, chopping
+    // every title at its last . ! or ? — "Mr. Robot…" became "Mr".
+    expect(sanitizeVideoTitle("Mr. Robot S01E01 Explained")).toBe("Mr. Robot S01E01 Explained");
+    expect(sanitizeVideoTitle("What is Love? Haddaway Story")).toBe("What is Love? Haddaway Story");
+    expect(sanitizeVideoTitle("iPhone 15.5 Review")).toBe("iPhone 15.5 Review");
+    expect(sanitizeVideoTitle("Top 10 Goals!")).toBe("Top 10 Goals!");
+  });
 });
 
 describe("sanitizeVideoTitle (Windows reserved set)", () => {
@@ -124,15 +138,33 @@ describe("formatFilesize", () => {
   });
 });
 
-describe("parseHHMM / isValidHHMM", () => {
-  it("parses MM:SS and HH:MM:SS", () => {
-    expect(parseHHMM("01:30")).toBe(90);
-    expect(parseHHMM("01:00:00")).toBe(3600);
+describe("getVideoFormats", () => {
+  const fmt = (overrides: Partial<Format>): Format => ({
+    format_id: "0",
+    vcodec: "avc1",
+    acodec: "mp4a",
+    ext: "mp4",
+    video_ext: "mp4",
+    protocol: "https",
+    resolution: "1920x1080",
+    tbr: null,
+    ...overrides,
+  });
+  const video: Video = {
+    title: "t",
+    duration: 1,
+    formats: [
+      fmt({ format_id: "worst", resolution: "640x360" }),
+      fmt({ format_id: "audio", vcodec: "none", resolution: "audio only" }),
+      fmt({ format_id: "best", resolution: "1920x1080" }),
+    ],
+  };
+
+  it("returns video formats best-first (yt-dlp lists worst-first) and drops audio-only entries", () => {
+    expect(getVideoFormats(video).map((f) => f.format_id)).toEqual(["best", "worst"]);
   });
 
-  it("validates well-formed and rejects malformed input", () => {
-    expect(isValidHHMM("01:30")).toBe(true);
-    expect(isValidHHMM("")).toBe(true); // empty is treated as valid (no constraint)
-    expect(isValidHHMM("not-a-time")).toBe(false);
+  it("returns an empty list when there is no metadata", () => {
+    expect(getVideoFormats(undefined)).toEqual([]);
   });
 });

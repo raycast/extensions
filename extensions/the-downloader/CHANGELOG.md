@@ -1,5 +1,18 @@
 # The Downloader Changelog
 
+## [Fix: Download Correctness] - {PR_MERGE_DATE}
+
+- **Titles with punctuation are no longer mangled.** `sanitizeVideoTitle` cut every title at its last `.`/`!`/`?` — "Mr. Robot S01E01" became "Mr" in the form's title line, transcript filenames, and the AI tool's result. The sentence-boundary cut now applies only to titles that actually exceed the 200-character cap.
+- **`watch?v=…&list=…` URLs download one video, not the whole playlist.** The Download form and Fast Download now pass `--no-playlist` like every other yt-dlp call (metadata probe, thumbnails, transcripts, AI tool) — previously the form showed a single video's title, then yt-dlp fetched the entire playlist. Pure playlist URLs still download every entry.
+- **Audio downloads no longer fetch the full video.** `-f bestaudio/best` is passed alongside `--extract-audio`, so yt-dlp downloads just the audio stream instead of the best video+audio only to strip the video back out.
+- **Long downloads in the Download Video AI tool no longer die at the timeout.** The tool used a *total-runtime* cap equal to the Network: Idle Timeout (2 minutes by default), killing any healthy download that took longer. It now runs through the shared idle watchdog like every other runner — stalls are still killed, progress is not.
+- **Live download progress.** yt-dlp redraws progress with bare `\r` when writing to a pipe, so the percent toast sat at 0% until the end. yt-dlp now gets `--newline`, and the shared line reader also treats `\r`/`\r\n` as line breaks (which makes spotDL's per-track count more robust too).
+- **Live-stream detection** no longer misfires on extractors that emit `live_status: null` — only a concrete status other than `not_live` blocks the download.
+- **Updater honesty.** The versions list now shows the *installed* Homebrew version (previously it showed the formula's latest available version, so never-installed tools appeared installed and "up to date"); the outdated check no longer fails as a batch when one tool isn't installed via brew; Upgrade only touches packages the check actually found outdated; and winget's "no applicable upgrade" exit code is recognized in the form Node actually reports, instead of being logged as a failure.
+- **Windows installer**: a missing winget now surfaces as an error toast instead of an unhandled error with no feedback.
+- **spotDL auto-download network calls are bounded** (30s release lookup, 10min binary download), so a stalled GitHub transfer can no longer leave the Installer's spinner up forever.
+- Internal cleanup: removed dead `parseHHMM`/`isValidHHMM`/`checkUpToDate` helpers and the unused audio-only half of the format list; the exact-format dropdown now falls back to yt-dlp's approximate file size when no exact size is published.
+
 ## [Release Readiness] - {PR_MERGE_DATE}
 
 - **Transcript extraction overhauled.** It now uses the same robust yt-dlp metadata path as the rest of the extension — fixing a crash on yt-dlp debug/warning output, passing the Deno JS runtime (without which YouTube transcript extraction silently failed), and running through the hang-prevention watchdog (closed stdin + idle-kill). The Download form's transcript action gained a **Stop** button and is cancelled on dismiss, subtitle language matching now catches regional/auto variants (`en-US`, `en-GB`, `en-orig`), playlist URLs no longer pull every entry's subtitles, and an empty transcript reports a clear failure instead of saving a blank file.

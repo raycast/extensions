@@ -54,6 +54,17 @@ export async function fetchVideoInfo(
   return extractDumpJson(result.stdout);
 }
 
+/**
+ * True when yt-dlp metadata marks the URL as a live (or upcoming/post-live)
+ * stream. `live_status` is absent for extractors that never set it and an
+ * explicit `null` for some that do — both mean "not live", so only a concrete
+ * status other than "not_live" counts. (A `!== undefined` check alone treated
+ * `null` as live and blocked ordinary downloads on those extractors.)
+ */
+export function isLiveStream(video: Video): boolean {
+  return video.live_status !== undefined && video.live_status !== null && video.live_status !== "not_live";
+}
+
 export type VideoDownloadArgs = {
   url: string;
   format: string;
@@ -87,19 +98,31 @@ const FILEPATH_LINE_RE = new RegExp(`^${FILEPATH_TAG}(.+)$`);
  * mid-encode and leaving a half-written file behind. The format selector already
  * steers toward container-compatible codecs (see `videoFormatSelector`), so a copy
  * is all that's needed.
+ *
+ * `--no-playlist` keeps the download in lock-step with `fetchVideoInfo` (also
+ * called with it): a `watch?v=…&list=…` URL downloads the single video whose
+ * title and live-status the form inspected, not the whole playlist. A pure
+ * playlist URL (no video reference) still downloads every entry.
+ *
+ * `--newline` makes yt-dlp terminate each progress update with a real newline.
+ * On a pipe (non-TTY) it otherwise redraws progress with bare `\r`, which a
+ * line-buffered reader would sit on until the download finished.
  */
 export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
-  const args = ["-o", a.outputTemplate, "--ffmpeg-location", a.ffmpegPath];
+  const args = ["-o", a.outputTemplate, "--ffmpeg-location", a.ffmpegPath, "--no-playlist"];
   if (a.denoPath) {
     args.push("--js-runtimes", `deno:${a.denoPath}`);
   }
   const [downloadFormat, target] = a.format.split("#");
   if (downloadFormat === "bestaudio") {
-    args.push("--extract-audio", "--audio-format", target, "--audio-quality", "0");
+    // Without an explicit selector yt-dlp would download its default best
+    // video+audio and then strip the audio — many times the bytes needed.
+    // `/best` covers sites that publish no audio-only stream.
+    args.push("--format", "bestaudio/best", "--extract-audio", "--audio-format", target, "--audio-quality", "0");
   } else {
     args.push("--format", downloadFormat, "--merge-output-format", target);
   }
-  args.push("--progress", "--print", `after_move:${FILEPATH_TAG}%(filepath)s`, a.url);
+  args.push("--progress", "--newline", "--print", `after_move:${FILEPATH_TAG}%(filepath)s`, a.url);
   return args;
 }
 

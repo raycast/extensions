@@ -13,13 +13,13 @@ import {
 } from "@raycast/api";
 import { ExecaError, execa } from "execa";
 import { getHomebrewPath, getWingetPath, isMac, isWindows } from "../utils.js";
-import { homebrewFormulaFor, isManagedTool, wingetIdFor } from "../lib/tools.js";
+import { homebrewFormulaFor, isManagedTool, isWingetUpdateNotApplicable, wingetIdFor } from "../lib/tools.js";
 import { downloadSpotdl, isAppleSilicon, isRosettaInstalled } from "../lib/managed-binary.js";
 import { resetWingetPackagesCache } from "../lib/binary.js";
 
 const macOSInstallGuide = (executable: string) => `
 # 🚨 Error: \`${executable}\` is not installed
-This extension depends on a command-line utility that is not detected on your system. You must install it continue.
+This extension depends on a command-line utility that is not detected on your system. You must install it to continue.
 
 If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library,
 **it can take up to 2 minutes to install**.
@@ -291,7 +291,6 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
           title="Install with Winget"
           icon={Icon.Download}
           onAction={async () => {
-            const wingetPath = await getWingetPath();
             if (isLoading) return;
 
             setIsLoading(true);
@@ -299,6 +298,10 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
             await installationToast.show();
 
             try {
+              // Inside the try: getWingetPath throws when winget is missing,
+              // and that must land in the error toast below — outside the try
+              // it became an unhandled rejection and the user saw nothing.
+              const wingetPath = await getWingetPath();
               await execa(wingetPath, [
                 "install",
                 "--accept-source-agreements",
@@ -320,7 +323,7 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
               const isExecaError = error instanceof ExecaError;
               const isENOENT = isExecaError && error.code === "ENOENT";
 
-              if (isExecaError && error.exitCode === 2316632107) {
+              if (isExecaError && isWingetUpdateNotApplicable(error.exitCode)) {
                 await showToast({
                   style: Toast.Style.Success,
                   title: `${executable} is already installed`,

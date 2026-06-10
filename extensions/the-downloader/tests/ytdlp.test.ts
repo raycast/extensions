@@ -4,7 +4,13 @@ import { EventEmitter } from "node:events";
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "node:child_process";
-import { buildThumbnailArgs, buildVideoDownloadArgs, extractDumpJson, runVideoDownload } from "../src/lib/ytdlp";
+import {
+  buildThumbnailArgs,
+  buildVideoDownloadArgs,
+  extractDumpJson,
+  isLiveStream,
+  runVideoDownload,
+} from "../src/lib/ytdlp";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -17,18 +23,25 @@ function fakeChild() {
 describe("buildVideoDownloadArgs", () => {
   const base = { url: "https://example.com/v", outputTemplate: "/out/%(title)s.%(ext)s", ffmpegPath: "/ff" };
 
-  it("extracts audio with the requested format (mp3)", () => {
+  it("extracts audio with the requested format (mp3) without downloading the video streams", () => {
+    // `--format bestaudio/best` keeps yt-dlp from fetching its default best
+    // video+audio just to strip the audio back out; `/best` covers sites with
+    // no audio-only stream.
     expect(buildVideoDownloadArgs({ ...base, format: "bestaudio#mp3" })).toEqual([
       "-o",
       "/out/%(title)s.%(ext)s",
       "--ffmpeg-location",
       "/ff",
+      "--no-playlist",
+      "--format",
+      "bestaudio/best",
       "--extract-audio",
       "--audio-format",
       "mp3",
       "--audio-quality",
       "0",
       "--progress",
+      "--newline",
       "--print",
       "after_move:THE-DOWNLOADER-FILEPATH:%(filepath)s",
       "https://example.com/v",
@@ -55,15 +68,24 @@ describe("buildVideoDownloadArgs", () => {
       "/out/%(title)s.%(ext)s",
       "--ffmpeg-location",
       "/ff",
+      "--no-playlist",
       "--format",
       "bestvideo+bestaudio/best",
       "--merge-output-format",
       "mp4",
       "--progress",
+      "--newline",
       "--print",
       "after_move:THE-DOWNLOADER-FILEPATH:%(filepath)s",
       "https://example.com/v",
     ]);
+  });
+
+  it("passes --no-playlist so a watch?v=…&list=… URL downloads only the inspected video", () => {
+    // fetchVideoInfo probes with --no-playlist; without it here, the form
+    // showed one video's title and then downloaded the entire playlist.
+    expect(buildVideoDownloadArgs({ ...base, format: "bestaudio#mp3" })).toContain("--no-playlist");
+    expect(buildVideoDownloadArgs({ ...base, format: "best#mp4" })).toContain("--no-playlist");
   });
 
   it("adds the deno JS runtime when denoPath is given", () => {
@@ -111,6 +133,26 @@ describe("runVideoDownload", () => {
     child.emit("close", 0);
 
     await expect(promise).resolves.toEqual({ filePath: "/out/My Video.mp3" });
+  });
+
+  it("parses progress from \\r-rewritten updates (yt-dlp's pipe output without --newline)", async () => {
+    // Even with --newline passed, stay robust to carriage-return redraws: on a
+    // pipe yt-dlp's MultilinePrinter separates progress updates with bare \r.
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const onProgress = vi.fn();
+    const promise = runVideoDownload("/yt-dlp", options, onProgress);
+
+    child.stdout.emit("data", Buffer.from("\r[download]  10.0% of 10.00MiB\r[download]  55.0% of 10.00MiB"));
+    child.stdout.emit("data", Buffer.from("\r[download] 100.0% of 10.00MiB\n"));
+    child.stdout.emit("data", Buffer.from("THE-DOWNLOADER-FILEPATH:/out/My Video.mp4\n"));
+    child.emit("close", 0);
+
+    await expect(promise).resolves.toEqual({ filePath: "/out/My Video.mp4" });
+    expect(onProgress).toHaveBeenCalledWith(10);
+    expect(onProgress).toHaveBeenCalledWith(55);
+    expect(onProgress).toHaveBeenCalledWith(100);
   });
 
   it("rejects with the stderr text on a non-zero exit", async () => {
@@ -194,6 +236,27 @@ describe("extractDumpJson", () => {
 
   it("throws a clear error on empty stdout", () => {
     expect(() => extractDumpJson("")).toThrow(/no JSON metadata/);
+  });
+});
+
+describe("isLiveStream", () => {
+  const video = (live_status?: string | null) => ({ title: "t", duration: 1, formats: [], live_status });
+
+  it("treats a concrete live status as live", () => {
+    expect(isLiveStream(video("is_live"))).toBe(true);
+    expect(isLiveStream(video("is_upcoming"))).toBe(true);
+  });
+
+  it("treats not_live as not live", () => {
+    expect(isLiveStream(video("not_live"))).toBe(false);
+  });
+
+  it("treats an absent status as not live", () => {
+    expect(isLiveStream(video(undefined))).toBe(false);
+  });
+
+  it("treats an explicit null status (extractors that emit live_status: null) as not live", () => {
+    expect(isLiveStream(video(null))).toBe(false);
   });
 });
 

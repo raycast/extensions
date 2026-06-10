@@ -14,8 +14,7 @@ afterEach(() => vi.restoreAllMocks());
 
 type Profile = { name: string; mtimeMs: number; hasCookies: boolean };
 
-const dirEntry = (name: string) =>
-  ({ name, isDirectory: () => true, isFile: () => false }) as unknown as fs.Dirent;
+const dirEntry = (name: string) => ({ name, isDirectory: () => true, isFile: () => false }) as unknown as fs.Dirent;
 
 function setupFirefoxProfiles(baseDir: string, profiles: Profile[]) {
   vi.mocked(fs.readdirSync).mockImplementation((dir) => {
@@ -24,9 +23,7 @@ function setupFirefoxProfiles(baseDir: string, profiles: Profile[]) {
   });
   vi.mocked(fs.existsSync).mockImplementation((p) => {
     const str = String(p);
-    return profiles.some((profile) =>
-      str === path.join(baseDir, profile.name, "cookies.sqlite") && profile.hasCookies,
-    );
+    return profiles.some((profile) => str === path.join(baseDir, profile.name, "cookies.sqlite") && profile.hasCookies);
   });
   vi.mocked(fs.statSync).mockImplementation((p) => {
     const profile = profiles.find((pp) => String(p) === path.join(baseDir, pp.name));

@@ -22,6 +22,11 @@ function setPlatform(platform: NodeJS.Platform) {
 }
 
 afterEach(() => {
+  // clearAllMocks resets call history on the module-level `spawn` vi.fn() between
+  // tests; restoreAllMocks alone no longer does that (it only restores vi.spyOn
+  // spies), so without this the "already aborted → spawn not called" test would
+  // see calls leaked from earlier tests in this block.
+  vi.clearAllMocks();
   vi.restoreAllMocks();
   Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
 });
@@ -326,6 +331,21 @@ describe("runWithWatchdog", () => {
 
     await promise;
     expect(lines).toEqual(["TAG:/path/file.mp4", "next line"]);
+  });
+
+  it("treats bare \\r and \\r\\n as line breaks (progress redraws on a pipe, Windows tools)", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const lines: string[] = [];
+    const promise = runWithWatchdog("/bin/x", [], { idleMs: 1_000, onStdoutLine: (l) => lines.push(l) });
+
+    // yt-dlp-style \r-rewritten progress updates, then a CRLF-terminated line.
+    child.stdout.emit("data", Buffer.from("[download] 10%\r[download] 55%\rdone\r\nfinal\n"));
+    child.emit("close", 0);
+
+    await promise;
+    expect(lines).toEqual(["[download] 10%", "[download] 55%", "done", "final"]);
   });
 
   it("flushes a trailing partial line (no final newline) via onStdoutLine on close", async () => {

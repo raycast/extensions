@@ -154,7 +154,11 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
       options.onStdoutChunk?.(text);
       if (options.onStdoutLine) {
         stdoutLineBuffer += text;
-        const lines = stdoutLineBuffer.split("\n");
+        // Treat a bare \r as a line break too: progress-style tools (yt-dlp
+        // without --newline, Rich-based CLIs) redraw lines with \r when stdout
+        // is a pipe, and Windows tools emit \r\n. Splitting on \n alone would
+        // buffer those updates until the process finished.
+        const lines = stdoutLineBuffer.split(/\r\n|\r|\n/);
         stdoutLineBuffer = lines.pop() ?? "";
         for (const line of lines) options.onStdoutLine(line);
       }

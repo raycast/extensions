@@ -112,29 +112,6 @@ export function formatHHMM(seconds: number) {
   });
 }
 
-export function parseHHMM(input: string) {
-  const parts = input.split(":");
-  if (parts.length === 2) {
-    const [minutes, seconds] = parts;
-    return parseInt(minutes) * 60 + parseInt(seconds);
-  } else if (parts.length === 3) {
-    const [hours, minutes, seconds] = parts;
-    return parseInt(hours) * 60 * 60 + parseInt(minutes) * 60 + parseInt(seconds);
-  }
-  throw new Error("Invalid input");
-}
-
-export function isValidHHMM(input: string) {
-  try {
-    if (input) {
-      parseHHMM(input);
-    }
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export function formatTbr(tbr: number | null) {
   if (!tbr) return "";
   return `${Math.floor(tbr)} kbps`;
@@ -163,37 +140,18 @@ const hasCodec = ({ vcodec, acodec }: Format) => {
   };
 };
 
-const mp3Format: Format = {
-  format_id: "bestaudio",
-  ext: "mp3",
-  video_ext: "none",
-  protocol: "https",
-  resolution: "audio only",
-  vcodec: "none",
-  acodec: "mp3",
-  tbr: null,
-  filesize: undefined,
-  filesize_approx: undefined,
-};
-
-export const getFormats = (video?: Video) => {
-  const videoKey = "Video";
-  const audioOnlyKey = "Audio Only";
-  const videoWithAudio: Format[] = [];
-  const audioOnly: Format[] = [];
-
-  if (!video) return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
-
-  audioOnly.push(mp3Format);
-
-  for (const format of video.formats.slice().reverse()) {
-    const { hasAcodec, hasVcodec } = hasCodec(format);
-    if (hasVcodec) videoWithAudio.push(format);
-    else if (hasAcodec && !hasVcodec) audioOnly.push(format);
-    else continue;
-  }
-
-  return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+/**
+ * The video formats from yt-dlp metadata, best-first (yt-dlp lists them
+ * worst-first). Audio-only formats are excluded — the exact-format dropdown and
+ * the AI tool's best-format pick both want a video stream; the audio-only path
+ * composes its own `bestaudio` selector instead of picking a concrete format.
+ */
+export const getVideoFormats = (video?: Video): Format[] => {
+  if (!video) return [];
+  return video.formats
+    .slice()
+    .reverse()
+    .filter((format) => hasCodec(format).hasVcodec);
 };
 
 export const getFormatValue = (format: Format) => {
@@ -204,7 +162,7 @@ export const getFormatValue = (format: Format) => {
 };
 
 export const getFormatTitle = (format: Format) =>
-  [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
+  [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize, format.filesize_approx)]
     .filter((x) => Boolean(x))
     .join(" | ");
 
@@ -238,17 +196,16 @@ export function sanitizeVideoTitle(name: string): string {
   // Replace double or more spaces with single space
   safe = safe.replace(/\s+/g, " ");
 
-  // Hard truncate to max length
-  safe = safe.slice(0, maxLen);
-
-  // Truncate to max length at a sensible boundary if possible (like a punctuation mark)
-  const cutoffSymbols = /[.!?]/g;
-  const match = [...safe.matchAll(cutoffSymbols)]
-    .map((m) => m.index)
-    .filter((idx) => idx !== undefined && idx <= maxLen);
-
-  if (match.length > 0) {
-    safe = safe.slice(0, match[match.length - 1]);
+  // Truncate to max length only when the title actually exceeds it, preferring
+  // the last sentence boundary (.!?) inside the cap. The boundary cut must stay
+  // inside this branch: applied unconditionally it chopped every short title at
+  // its last punctuation mark ("Mr. Robot S01E01" became "Mr").
+  if (safe.length > maxLen) {
+    safe = safe.slice(0, maxLen);
+    const cutoff = Math.max(safe.lastIndexOf("."), safe.lastIndexOf("!"), safe.lastIndexOf("?"));
+    if (cutoff > 0) {
+      safe = safe.slice(0, cutoff);
+    }
   }
 
   return safe.trim() || "untitled";

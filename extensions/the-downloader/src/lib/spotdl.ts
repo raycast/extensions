@@ -206,17 +206,18 @@ export async function runSpotdlDownload(
   }
   const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
   let tracks = 0;
-  const handleStdout = (chunk: string) => {
-    // spotDL prints one "Downloaded ..." line per completed track.
-    const completed = chunk.split("\n").filter((line) => line.includes("Downloaded")).length;
-    if (completed > 0) {
-      tracks += completed;
+  // spotDL prints one "Downloaded ..." line per completed track. Line-buffered
+  // (onStdoutLine) so a line split across two stream chunks counts exactly once
+  // — chunk-based matching missed a keyword straddling the chunk boundary.
+  const handleStdoutLine = (line: string) => {
+    if (line.includes("Downloaded")) {
+      tracks += 1;
       onProgress({ tracks });
     }
   };
   const { code, stdout, stderr } = await runWithWatchdog(binaryPath, buildSpotdlArgs(options), {
     idleMs,
-    onStdoutChunk: handleStdout,
+    onStdoutLine: handleStdoutLine,
     abortSignal: options.abortSignal,
     idleKillMessage: `spotdl produced no output for ${Math.round(
       idleMs / 1000,

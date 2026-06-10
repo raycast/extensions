@@ -56,6 +56,11 @@ function setArch(platform: NodeJS.Platform, arch: NodeJS.Architecture) {
 }
 
 afterEach(() => {
+  // clearAllMocks resets call history on the module-level node:fs / execa mocks
+  // between tests; restoreAllMocks alone no longer does that under Vitest 4 (it
+  // only restores vi.spyOn spies), so without this a writeFileSync call from one
+  // test would leak into another's "not.toHaveBeenCalled" assertion.
+  vi.clearAllMocks();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
@@ -100,8 +105,13 @@ describe("downloadSpotdl integrity verification", () => {
   }
 
   beforeEach(() => {
-    // Native arm64 host: make Rosetta present so the fail-fast guard passes and
-    // we reach the integrity logic.
+    // Pin the platform to macOS so the darwin asset resolves regardless of the
+    // host OS the suite runs on (on Linux there is no prebuilt binary, so
+    // resolveSpotdlAsset would throw before reaching the integrity logic these
+    // tests target). afterEach restores process.platform/arch.
+    setArch("darwin", "x64");
+    // Make Rosetta present so the Apple-Silicon fail-fast guard passes and we
+    // reach the integrity logic.
     vi.mocked(fs.existsSync).mockReturnValue(true);
   });
 

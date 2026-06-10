@@ -4,7 +4,7 @@ import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, environment, useNa
 import { execa } from "execa";
 import { getHomebrewPath, getSpotdlPath, getWingetPath, isMac, isWindows } from "../utils.js";
 import { downloadSpotdl, getInstalledVersion, getLatestRelease } from "../lib/managed-binary.js";
-import { friendlyNameFor, HOMEBREW_FORMULAE, WINGET_PACKAGES } from "../lib/tools.js";
+import { friendlyNameFor, HOMEBREW_FORMULAE, isWingetUpdateNotApplicable, WINGET_PACKAGES } from "../lib/tools.js";
 import { resetWingetPackagesCache } from "../lib/binary.js";
 
 type PackageIssue = { pkg: string; message: string };
@@ -98,14 +98,14 @@ export default function Updater() {
                 toast.show();
                 try {
                   setUpgradingMessage("Upgrading... Please do not close Raycast while the upgrade is in progress.");
-                  const { issues } = await upgrade();
+                  // Upgrade only what the version check found outdated — a
+                  // blanket `brew upgrade`/`winget upgrade` of every tool
+                  // errors on packages that were never installed through that
+                  // package manager (or not installed at all).
+                  const { issues, attempted } = await upgrade(outdated);
                   setUpgradeIssues(issues);
                   toast.style =
-                    issues.length === 0
-                      ? Toast.Style.Success
-                      : issues.length === [...HOMEBREW_FORMULAE, ...WINGET_PACKAGES, "spotdl"].length
-                        ? Toast.Style.Failure
-                        : Toast.Style.Success;
+                    issues.length > 0 && issues.length >= attempted ? Toast.Style.Failure : Toast.Style.Success;
                   toast.title =
                     issues.length === 0 ? "Upgrade complete" : `Upgrade finished with ${issues.length} issue(s)`;
                 } catch (error) {
@@ -187,9 +187,13 @@ async function getVersions(): Promise<{ versions: Record<string, string>; issues
   if (isMac) {
     try {
       const { stdout: infoOutput } = await execa(getHomebrewPath(), ["info", "--json=v2", ...HOMEBREW_FORMULAE]);
-      const info = JSON.parse(infoOutput) as { formulae: { name: string; versions: { stable: string } }[] };
-      for (const { name, versions: formulaVersions } of info.formulae) {
-        versions[name] = formulaVersions.stable;
+      // Report the INSTALLED version (`installed`, newest keg last) — NOT
+      // `versions.stable`, which is the latest version in the formula
+      // definition. The old code displayed `stable`, so a tool that was never
+      // brew-installed still showed a version with "(up to date)" next to it.
+      const info = JSON.parse(infoOutput) as { formulae: { name: string; installed: { version: string }[] }[] };
+      for (const { name, installed } of info.formulae) {
+        versions[name] = installed.at(-1)?.version ?? "not installed";
       }
     } catch (error) {
       // `brew info` failed for the whole batch — record it once against brew,
@@ -236,14 +240,15 @@ async function getOutdated(): Promise<{ outdated: Record<string, string>; issues
   const issues: PackageIssue[] = [];
   if (isMac) {
     try {
-      const { stdout: outdatedOutput } = await execa(getHomebrewPath(), [
-        "outdated",
-        "--json=v2",
-        ...HOMEBREW_FORMULAE,
-      ]);
+      // No explicit formula names: `brew outdated <name>` errors out for a
+      // formula that isn't installed (e.g. monolith on a user who never saved
+      // a webpage), failing the whole batch. List everything outdated on the
+      // system instead and filter to our formulae. `current_version` is the
+      // newest version available for the (installed, outdated) formula.
+      const { stdout: outdatedOutput } = await execa(getHomebrewPath(), ["outdated", "--json=v2"]);
       const info = JSON.parse(outdatedOutput) as { formulae: { name: string; current_version: string }[] };
       for (const { name, current_version } of info.formulae) {
-        outdated[name] = current_version;
+        if (HOMEBREW_FORMULAE.includes(name)) outdated[name] = current_version;
       }
     } catch (error) {
       issues.push({ pkg: "brew", message: errorMessageOf(error) });
@@ -281,11 +286,21 @@ async function getOutdated(): Promise<{ outdated: Record<string, string>; issues
   return { outdated, issues };
 }
 
-async function upgrade(): Promise<{ issues: PackageIssue[] }> {
+/**
+ * Upgrade the packages the version check found outdated. `outdated` is the
+ * check's package → newer-version map; anything without an entry is skipped —
+ * upgrading unconditionally made brew/winget error on packages that were never
+ * installed through them. Returns the per-package failures plus how many
+ * upgrades were attempted, so the caller can tell "all failed" from "some".
+ */
+async function upgrade(outdated: Record<string, string>): Promise<{ issues: PackageIssue[]; attempted: number }> {
   const issues: PackageIssue[] = [];
+  let attempted = 0;
   if (isMac) {
     const brew = getHomebrewPath();
     for (const formula of HOMEBREW_FORMULAE) {
+      if (!outdated[formula]) continue;
+      attempted += 1;
       try {
         await execa(brew, ["upgrade", formula]);
       } catch (error) {
@@ -295,38 +310,27 @@ async function upgrade(): Promise<{ issues: PackageIssue[] }> {
   } else if (isWindows) {
     const wingetPath = await getWingetPath();
     for (const pkg of WINGET_PACKAGES) {
+      if (!outdated[pkg]) continue;
+      attempted += 1;
       try {
         await execa(wingetPath, ["upgrade", "--id", pkg, "--accept-source-agreements", "--accept-package-agreements"]);
       } catch (error) {
-        // winget exits non-zero when a package has no available upgrade —
-        // that's the common case, not a real failure. Distinguish from
-        // genuine failure by inspecting the exit code if available; otherwise
-        // surface it but keep going.
+        // winget exits non-zero when a package has no available upgrade (it
+        // may have been upgraded since the check) — not a real failure.
         const exitCode = (error as { exitCode?: number }).exitCode;
-        if (exitCode !== undefined && exitCode !== 0 && exitCode !== -1978335212) {
-          issues.push({ pkg, message: errorMessageOf(error) });
-        }
+        if (exitCode === 0 || isWingetUpdateNotApplicable(exitCode)) continue;
+        issues.push({ pkg, message: errorMessageOf(error) });
       }
     }
     resetWingetPackagesCache();
   }
-  try {
-    const spotdlPath = getSpotdlPath();
-    if (fs.existsSync(spotdlPath)) {
-      const installed = extractSemver(await getInstalledVersion(spotdlPath));
-      const latest = extractSemver((await getLatestRelease()).version);
-      if (installed && latest && installed !== latest) {
-        await downloadSpotdl(environment.supportPath);
-      }
+  if (outdated["spotdl"]) {
+    attempted += 1;
+    try {
+      await downloadSpotdl(environment.supportPath);
+    } catch (error) {
+      issues.push({ pkg: "spotdl", message: errorMessageOf(error) });
     }
-  } catch (error) {
-    issues.push({ pkg: "spotdl", message: errorMessageOf(error) });
   }
-  return { issues };
-}
-
-export async function checkUpToDate() {
-  const { outdated } = await getOutdated();
-  const allUpToDate = Object.values(outdated).every((version) => !version);
-  return allUpToDate;
+  return { issues, attempted };
 }

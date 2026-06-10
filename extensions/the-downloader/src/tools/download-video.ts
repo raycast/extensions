@@ -1,7 +1,6 @@
-import { execa } from "execa";
 import {
   getFormatValue,
-  getFormats,
+  getVideoFormats,
   downloadPath,
   forceIpv4,
   getIdleTimeoutMs,
@@ -13,7 +12,8 @@ import {
 } from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
-import { fetchVideoInfo } from "../lib/ytdlp.js";
+import { fetchVideoInfo, isLiveStream } from "../lib/ytdlp.js";
+import { runWithWatchdog } from "../lib/run.js";
 import { detectSource } from "../lib/detect.js";
 import { filetypeGuidance } from "../lib/filetype.js";
 
@@ -56,7 +56,7 @@ export default async function tool(input: Input) {
   const video = await fetchVideoInfo(ytdlPath, input.url, forceIpv4, deno, { timeoutMs: getIdleTimeoutMs() });
 
   // Check if it's a live stream
-  if (video.live_status !== "not_live" && video.live_status !== undefined) {
+  if (isLiveStream(video)) {
     throw new Error("Live streams are not supported");
   }
 
@@ -68,9 +68,8 @@ export default async function tool(input: Input) {
   const options: string[] = ["-P", downloadPath, "--no-playlist"];
   if (deno) options.push("--js-runtimes", `deno:${deno}`);
 
-  // Getet the best video+audio format
-  const formats = getFormats(video);
-  const bestFormat = formats["Video"][0]; // First format in Video category is best quality
+  // Get the best video+audio format
+  const bestFormat = getVideoFormats(video)[0]; // Best-first, so the first entry is best quality
   if (bestFormat) {
     const formatValue = getFormatValue(bestFormat);
     const [downloadFormat, container] = formatValue.split("#");
@@ -87,24 +86,21 @@ export default async function tool(input: Input) {
   const FILEPATH_TAG = "THE-DOWNLOADER-FILEPATH:";
   options.push("--print", `after_move:${FILEPATH_TAG}%(filepath)s`);
 
-  // Execute download. execa throws on non-zero exit by default, so we
-  // catch and re-throw with a clean "Failed to download video: <stderr>"
-  // message — the AI tool host surfaces the thrown message to the model,
-  // and the raw ExecaError dump isn't useful to it.
-  let result;
-  try {
-    // stdin: "ignore" so yt-dlp can't block on an interactive auth prompt, and a
-    // total-runtime timeout so a stalled download (dead mirror, stuck transfer)
-    // is killed instead of hanging the agent turn and leaking yt-dlp + ffmpeg.
-    result = await execa(ytdlPath, [...options, input.url], { stdin: "ignore", timeout: getIdleTimeoutMs() });
-  } catch (error) {
-    const stderr = error instanceof Error && "stderr" in error ? String(error.stderr) : "";
-    throw new Error(
-      `Failed to download video: ${stderr || (error instanceof Error ? error.message : "unknown error")}`,
-    );
+  // Execute the download through the shared watchdog: stdin is closed so
+  // yt-dlp can't block on an interactive auth prompt, and the IDLE timeout
+  // kills a stalled child while leaving a healthy long download alone. The
+  // previous execa `timeout` here was a TOTAL-runtime cap — it killed every
+  // download that simply took longer than the idle window (2 minutes by
+  // default), even while bytes were flowing.
+  const { code, stdout, stderr } = await runWithWatchdog(ytdlPath, [...options, input.url], {
+    idleMs: getIdleTimeoutMs(),
+    env: { ...process.env, PYTHONUNBUFFERED: "1" },
+  });
+  if (code !== 0) {
+    throw new Error(`Failed to download video: ${stderr.trim() || `yt-dlp exited with code ${code}`}`);
   }
 
-  const taggedLine = result.stdout
+  const taggedLine = stdout
     .split("\n")
     .map((line) => line.trim())
     .find((line) => line.startsWith(FILEPATH_TAG));

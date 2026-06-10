@@ -3,6 +3,9 @@
 # dependencies
 /node_modules
 
+# build output (`npm run build` → `ray build -e dist`)
+/dist
+
 # misc
 .DS_Store
 raycast-env.d.ts

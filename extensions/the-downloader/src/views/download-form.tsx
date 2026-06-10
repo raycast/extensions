@@ -28,7 +28,7 @@ import {
   supportedFiletypes,
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
-import { fetchVideoInfo, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
+import { fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
@@ -40,13 +40,13 @@ import {
   downloadPath,
   formatHHMM,
   getDenoPath,
-  getFormats,
   getFormatTitle,
   getFormatValue,
   getGalleryDlPath,
   getIdleTimeoutMs,
   getMonolithPath,
   getSpotdlPath,
+  getVideoFormats,
   getffmpegPath,
   getffprobePath,
   getytdlPath,
@@ -221,7 +221,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     { onError: () => undefined, abortable: metaAbortable },
   );
 
-  const liveStream = !!video && video.live_status !== undefined && video.live_status !== "not_live";
+  const liveStream = !!video && isLiveStream(video);
 
   if (missingTool) {
     return <Installer executable={missingTool} onRefresh={() => setRefresh((r) => r + 1)} />;
@@ -630,7 +630,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                 <Form.Dropdown id="exactFormat" title="Exact Format" defaultValue="auto">
                   <Form.Dropdown.Item value="auto" title="Auto — use Quality + Container above" />
                   {video &&
-                    getFormats(video).Video.map((f) => (
+                    getVideoFormats(video).map((f) => (
                       <Form.Dropdown.Item key={f.format_id} value={getFormatValue(f)} title={getFormatTitle(f)} />
                     ))}
                 </Form.Dropdown>

@@ -8,6 +8,16 @@ import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
 const RELEASE_API = "https://api.github.com/repos/spotDL/spotify-downloader/releases/latest";
 const USER_AGENT = "the-downloader-raycast";
 
+/**
+ * Network caps for the GitHub calls, mirroring the hang prevention every child
+ * process already gets from `runWithWatchdog`: without them a stalled fetch
+ * leaves the Installer's animated toast up forever with no error. The release
+ * lookup is a small JSON document; the binary is ~40 MB, so it gets ten
+ * minutes — generous for slow links while still bounded.
+ */
+const RELEASE_LOOKUP_TIMEOUT_MS = 30_000;
+const BINARY_DOWNLOAD_TIMEOUT_MS = 600_000;
+
 /** Hosts the spotDL binary may be downloaded from — GitHub and its asset CDN. */
 const ALLOWED_DOWNLOAD_HOSTS = new Set(["github.com", "objects.githubusercontent.com"]);
 
@@ -67,6 +77,7 @@ export function resolveSpotdlAsset(platform: NodeJS.Platform, assets: ReleaseAss
 export async function getLatestRelease(): Promise<SpotdlRelease> {
   const res = await fetch(RELEASE_API, {
     headers: { Accept: "application/vnd.github+json", "User-Agent": USER_AGENT },
+    signal: AbortSignal.timeout(RELEASE_LOOKUP_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`GitHub release lookup failed (HTTP ${res.status})`);
@@ -110,11 +121,24 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
     throw new Error(`Refusing to download spotDL from an unexpected host: ${host}`);
   }
 
-  const res = await fetch(asset.url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) {
-    throw new Error(`spotDL download failed (HTTP ${res.status})`);
+  // One timeout signal covers the response headers AND the body read — the
+  // body is where a wedged connection actually stalls.
+  let bytes: Buffer;
+  try {
+    const res = await fetch(asset.url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(BINARY_DOWNLOAD_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      throw new Error(`spotDL download failed (HTTP ${res.status})`);
+    }
+    bytes = Buffer.from(await res.arrayBuffer());
+  } catch (error) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      throw new Error("spotDL download timed out. Check your network connection and try again.");
+    }
+    throw error;
   }
-  const bytes = Buffer.from(await res.arrayBuffer());
 
   // Verify the bytes against the SHA-256 GitHub publishes for the asset, when
   // present. This catches a corrupted/truncated download before the binary is

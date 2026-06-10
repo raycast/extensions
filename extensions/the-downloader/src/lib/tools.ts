@@ -56,3 +56,18 @@ export function homebrewFormulaFor(executable: string): string {
   if (executable === "ffprobe") return "ffmpeg";
   return (TOOLS as Record<string, ToolSpec | undefined>)[executable]?.id ?? executable;
 }
+
+/**
+ * winget's UPDATE_NOT_APPLICABLE exit code (0x8A15002B) — returned by `winget
+ * install` when the package is already installed and by `winget upgrade` when
+ * no upgrade is available. Not a failure for our flows. Node reports Windows
+ * exit codes as unsigned 32-bit values, but the signed form is what winget's
+ * docs (and a shell's `$LASTEXITCODE`) show — accept both so the check can't
+ * silently break on either representation.
+ */
+const WINGET_UPDATE_NOT_APPLICABLE_CODES = new Set([2316632107, -1978335189]);
+
+/** True when a winget exit code means "already installed / no applicable upgrade". */
+export function isWingetUpdateNotApplicable(exitCode: number | undefined): boolean {
+  return exitCode !== undefined && WINGET_UPDATE_NOT_APPLICABLE_CODES.has(exitCode);
+}
