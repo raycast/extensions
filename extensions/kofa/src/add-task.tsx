@@ -40,6 +40,7 @@ const COLOR_OPTIONS: { value: TaskColor; title: string }[] = [
 ];
 
 export default function AddTaskCommand() {
+  const [formKey, setFormKey] = useState(0);
   const [titleError, setTitleError] = useState<string | undefined>();
 
   async function submit(
@@ -77,6 +78,8 @@ export default function AddTaskCommand() {
     }
 
     if (opts.again) {
+      setTitleError(undefined);
+      setFormKey((k) => k + 1);
       await showToast({ style: Toast.Style.Success, title: "Task added" });
       return true;
     }
@@ -88,6 +91,7 @@ export default function AddTaskCommand() {
 
   return (
     <Form
+      key={formKey}
       actions={
         <ActionPanel>
           <Action.SubmitForm

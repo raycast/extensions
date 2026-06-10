@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiToken: string;
-  apiBaseUrl?: string;
-}
-
 export type TaskColor =
   | "white"
   | "blue"
@@ -30,7 +25,7 @@ export class ApiError extends Error {
 }
 
 export async function createTask(body: CreateTaskBody): Promise<void> {
-  const { apiToken, apiBaseUrl } = getPreferenceValues<Preferences>();
+  const { apiToken, apiBaseUrl } = getPreferenceValues<Preferences.AddTask>();
   const base = (apiBaseUrl ?? "https://api.kofa.dev").replace(/\/$/, "");
   let res: Response;
   try {
