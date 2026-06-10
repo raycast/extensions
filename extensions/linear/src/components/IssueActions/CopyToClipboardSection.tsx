@@ -11,6 +11,13 @@ const variables: Record<string, ISSUE_KEY> = {
   ISSUE_BRANCH_NAME: "branchName",
 };
 
+function getTitleLink(issue: IssueResult) {
+  return {
+    html: `<a href="${issue.url}">${issue.title}</a>`,
+    text: `[${issue.title}](${issue.url})`,
+  };
+}
+
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
   const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
 
@@ -38,6 +45,7 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           Windows: { modifiers: ["ctrl", "shift"], key: "'" },
         }}
       />
+      <Action.CopyToClipboard content={getTitleLink(issue)} title="Copy Title as Link" />
       <Action.CopyToClipboard
         content={issue.branchName}
         title="Copy Git Branch Name"

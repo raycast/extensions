@@ -20,6 +20,7 @@ import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { getCycleOptions } from "../helpers/cycles";
 import { getErrorMessage } from "../helpers/errors";
 import { getEstimateScale } from "../helpers/estimates";
+import { getCreateIssueValuesFromTemplate, getEmptyTemplateFieldValues } from "../helpers/issueTemplates";
 import { getLinksFromNewLines } from "../helpers/links";
 import { getMilestoneIcon } from "../helpers/milestones";
 import { priorityIcons } from "../helpers/priorities";
@@ -28,6 +29,7 @@ import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getTeamIcon } from "../helpers/teams";
 import { getUserIcon } from "../helpers/users";
 import useCycles from "../hooks/useCycles";
+import useIssueTemplates from "../hooks/useIssueTemplates";
 import useIssues from "../hooks/useIssues";
 import useLabels from "../hooks/useLabels";
 import useMilestones from "../hooks/useMilestones";
@@ -53,6 +55,7 @@ type CreateIssueFormProps = {
 };
 
 export type CreateIssueValues = {
+  templateId: string;
   teamId: string;
   title: string;
   description: string;
@@ -162,6 +165,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           };
 
           reset({
+            templateId: "",
             title: "",
             description: "",
             estimate: "",
@@ -235,6 +239,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       priority: FormValidation.Required,
     },
     initialValues: {
+      templateId: props.draftValues?.templateId || "",
       teamId: props.draftValues?.teamId || props.teamId,
       title: props.draftValues?.title,
       description: props.draftValues?.description,
@@ -253,6 +258,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   });
 
   const execute = !!values.teamId && values.teamId.trim().length > 0;
+  const { issueTemplates, isLoadingIssueTemplates } = useIssueTemplates(values.teamId, { execute });
   const { states } = useStates(values.teamId, { execute });
   const { labels } = useLabels(values.teamId, { execute });
   const { cycles } = useCycles(values.teamId, { execute });
@@ -265,6 +271,35 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       setValue("teamId", teams[0].id);
     }
   }, [teams]);
+
+  useEffect(() => {
+    setValue("templateId", "");
+  }, [values.teamId]);
+
+  function applyTemplate(templateId: string) {
+    setValue("templateId", templateId);
+
+    const template = issueTemplates?.find((template) => template.id === templateId);
+    const templateValues = template
+      ? getCreateIssueValuesFromTemplate(template)
+      : getEmptyTemplateFieldValues({
+          assigneeId: props.assigneeId || "",
+          cycleId: props.cycleId || "",
+          projectId: props.projectId || "",
+        });
+
+    setValue("title", templateValues.title);
+    setValue("description", templateValues.description);
+    setValue("stateId", templateValues.stateId);
+    setValue("priority", templateValues.priority);
+    setValue("assigneeId", templateValues.assigneeId);
+    setValue("labelIds", templateValues.labelIds);
+    setValue("estimate", templateValues.estimate);
+    setValue("dueDate", templateValues.dueDate);
+    setValue("cycleId", templateValues.cycleId);
+    setValue("projectId", templateValues.projectId);
+    setValue("milestoneId", "");
+  }
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -285,6 +320,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const hasProjects = projects && projects.length > 0;
   const hasMilestones = milestones && milestones.length > 0;
   const hasIssues = issues && issues.length > 0;
+  const hasIssueTemplates = issueTemplates && issueTemplates.length > 0;
 
   return (
     <Form
@@ -438,6 +474,24 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           <Form.Separator />
         </>
       )}
+
+      {execute && (isLoadingIssueTemplates || hasIssueTemplates) ? (
+        <>
+          <Form.Dropdown
+            id="templateId"
+            title="Template"
+            value={values.templateId || ""}
+            onChange={applyTemplate}
+            isLoading={isLoadingIssueTemplates}
+          >
+            <Form.Dropdown.Item title="No Template" value="" icon={Icon.Document} />
+            {issueTemplates?.map((template) => (
+              <Form.Dropdown.Item title={template.name} value={template.id} key={template.id} icon={Icon.Document} />
+            ))}
+          </Form.Dropdown>
+          <Form.Separator />
+        </>
+      ) : null}
 
       <Form.TextField
         title="Title"
