@@ -37,10 +37,8 @@ export default function CreateDatabase() {
       title: "Creating database…",
     });
     try {
-      const [me, db] = await Promise.all([
-        getMe(),
-        createDatabase(trimmed, toSlug(trimmed)),
-      ]);
+      const me = await getMe();
+      const db = await createDatabase(trimmed, toSlug(trimmed));
       const path = `${me.namespaceSlug}/${db.slug}`;
       await Clipboard.copy(path);
       toast.style = Toast.Style.Success;
