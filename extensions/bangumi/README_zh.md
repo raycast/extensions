@@ -19,7 +19,7 @@
 
 | 详情页 | 每日放送 |
 | - | - |
-| <img src="https://github.com/user-attachments/assets/e5f5c33e-8f0d-4657-8c42-a01be8e67c78" /> | <img src="https://github.com/user-attachments/assets/641beeb6-6f2b-4215-832c-675528e2d078" /> |
+| <img src="https://github.com/user-attachments/assets/e5f5c33e-8f0d-4657-8c42-a01be8e67c78" /> | <img src="https://github.com/user-attachments/assets/900b90b5-50b6-4045-8de3-bc0f7b643d77" /> |
 
 | 当前收藏 | 进度管理 |
 | - | - |
