@@ -95,20 +95,22 @@ export default function ProgressViewer({
   totalEps,
 }: ProgressViewerProps) {
   const {
-    data: { data: episodes = [] } = {},
+    data: currentCollection,
     isLoading,
     mutate,
   } = usePromise(() => bangumi.getUserSubjectEpisodeCollection({ subjectId }), [])
+  const episodes = currentCollection?.data ?? []
 
   const handleUpdateStatus = async (episodeId: number, status: EpisodeCollectionType) => {
+    if (!currentCollection) return
     const toast = await showToast({ style: Toast.Style.Animated, title: "Updating status..." })
     try {
       await mutate(bangumi.updateEpisodeCollection({ episodeId, type: status }), {
         optimisticUpdate: (currentData) => {
-          if (!currentData) return currentData!
+          const dataToUpdate = currentData ?? currentCollection
           return {
-            ...currentData,
-            data: currentData.data?.map((item) => (item.episode.id === episodeId ? { ...item, type: status } : item)),
+            ...dataToUpdate,
+            data: dataToUpdate.data?.map((item) => (item.episode.id === episodeId ? { ...item, type: status } : item)),
           }
         },
       })
@@ -120,15 +122,16 @@ export default function ProgressViewer({
   }
 
   const handleBatchUpdateStatus = async (episodesToUpdate: number[], status: EpisodeCollectionType) => {
+    if (!currentCollection) return
     const toast = await showToast({ style: Toast.Style.Animated, title: "Batch updating status..." })
     try {
+      const idsSet = new Set(episodesToUpdate)
       await mutate(bangumi.updateSubjectEpisodesCollection({ subjectId, episodeIds: episodesToUpdate, type: status }), {
         optimisticUpdate: (currentData) => {
-          if (!currentData) return currentData!
-          const idsSet = new Set(episodesToUpdate)
+          const dataToUpdate = currentData ?? currentCollection
           return {
-            ...currentData,
-            data: currentData.data?.map((item) => (idsSet.has(item.episode.id) ? { ...item, type: status } : item)),
+            ...dataToUpdate,
+            data: dataToUpdate.data?.map((item) => (idsSet.has(item.episode.id) ? { ...item, type: status } : item)),
           }
         },
       })
