@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Shopify support, faster polling, new actions] - {PR_MERGE_DATE}
+## [Shopify support, faster polling, new actions] - 2026-06-10
 
 ### Shopify
 
