@@ -1,0 +1,14 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# misc
+.DS_Store
+
+# build
+dist
+
+# raycast (auto-generated on build/develop)
+raycast-env.d.ts
+.raycast

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-usage",
+  "title": "Claude Usage",
+  "description": "Monitor your Claude subscription limits (5-hour session & weekly) right in the macOS menu bar — reads your local Claude Code login, no API key or cookie to paste.",
+  "icon": "icon.png",
+  "author": "abrockmann",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "Claude Usage in Menu Bar",
+      "subtitle": "Claude",
+      "description": "Shows session and weekly utilization of your Claude subscription in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "2m"
+    },
+    {
+      "name": "dashboard",
+      "title": "Show Claude Usage",
+      "subtitle": "Claude",
+      "description": "Detailed dashboard with all limits, reset timers, burn rate and projections.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "menuBarStyle",
+      "title": "Menu Bar Display",
+      "description": "What to show as the menu bar title.",
+      "type": "dropdown",
+      "required": false,
+      "default": "both",
+      "data": [
+        {
+          "title": "Session % · Weekly %",
+          "value": "both"
+        },
+        {
+          "title": "Session % only",
+          "value": "session"
+        },
+        {
+          "title": "Weekly % only",
+          "value": "weekly"
+        },
+        {
+          "title": "Icon only",
+          "value": "icon"
+        }
+      ]
+    },
+    {
+      "name": "showOpus",
+      "title": "Model Sub-Limits",
+      "label": "Show Opus / Sonnet weekly sub-limits when available",
+      "description": "Plans with model-specific weekly caps also expose Opus/Sonnet utilization.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
