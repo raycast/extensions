@@ -327,28 +327,42 @@ async function launchMac(
   }
 }
 
-/** Terminal.app: `do script` runs the temp script in a new tab/window. */
+/** Terminal.app: run the script before activating to avoid an extra startup window. */
 async function launchMacTerminal(tmp: string): Promise<void> {
   await run("osascript", [
     "-e",
-    'tell application "Terminal" to activate',
-    "-e",
     `tell application "Terminal" to do script "source ${tmp}"`,
+    "-e",
+    'tell application "Terminal" to activate',
   ]);
 }
 
 /**
- * iTerm2: AppleScript — make a new window whose session runs the temp script.
- * `do script ... in <new session>` so the command lands in the window we just created.
+ * iTerm2: reuse its startup window when launching the app, otherwise create a new one.
+ * Activating iTerm before creating a window can produce an extra empty startup window.
  */
 async function launchMacIterm(tmp: string): Promise<void> {
   const script = [
+    'set wasRunning to application "iTerm" is running',
     'tell application "iTerm"',
-    "  activate",
-    "  set w to (create window with default profile)",
+    "  if wasRunning then",
+    "    set w to (create window with default profile)",
+    "  else",
+    "    launch",
+    "    repeat 40 times",
+    "      if (count of windows) > 0 then exit repeat",
+    "      delay 0.05",
+    "    end repeat",
+    "    if (count of windows) > 0 then",
+    "      set w to current window",
+    "    else",
+    "      set w to (create window with default profile)",
+    "    end if",
+    "  end if",
     "  tell current session of w",
     `    write text "source ${tmp}"`,
     "  end tell",
+    "  activate",
     "end tell",
   ].join("\n");
   await run("osascript", ["-e", script]);
