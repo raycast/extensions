@@ -105,7 +105,9 @@ export function getSeriesVolume(series: KalshiSeries): number {
 export function getSeriesUrl(series: KalshiSeries): string {
   const seriesTicker = (series.series_ticker ?? "").toLowerCase();
   const eventTicker = (series.event_ticker ?? series.series_ticker ?? "").toLowerCase();
-  return `https://kalshi.com/markets/${seriesTicker}/${slugify(getSeriesTitle(series))}/${eventTicker}`;
+  const seriesSlug = slugify(series.series_title ?? getSeriesTitle(series));
+
+  return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${eventTicker}`;
 }
 
 export function isSeriesFavorite(series: KalshiSeries, favoriteTopics: string[]): boolean {
@@ -182,8 +184,19 @@ export function formatNumber(value?: number | string): string {
   }).format(numeric);
 }
 
-export function getMarketUrl(market: KalshiMarket): string {
-  return `https://kalshi.com/markets/${market.ticker}`;
+export function getMarketUrl(market: KalshiMarket, series?: KalshiSeries): string {
+  const marketTicker = market.ticker;
+  const seriesTicker = (series?.series_ticker ?? market.series_ticker ?? "").toLowerCase();
+  const eventTicker = (series?.event_ticker ?? market.event_ticker ?? "").toLowerCase();
+
+  if (seriesTicker && eventTicker) {
+    const seriesSlug = slugify(series?.series_title ?? series?.event_title ?? market.title ?? marketTicker);
+    const params = new URLSearchParams({ op_market_ticker: marketTicker });
+
+    return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${eventTicker}?${params.toString()}`;
+  }
+
+  return `https://kalshi.com/markets/${marketTicker.toLowerCase()}`;
 }
 
 export function getMarketImageUrl(market: KalshiMarket): string | undefined {

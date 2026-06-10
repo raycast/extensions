@@ -451,8 +451,8 @@ class MarketList extends Component<MarketListProps, MarketListState> {
 
     try {
       const [rulesMarket, chartMarkdown] = await Promise.all([
-        fetchFirstMarketDetail(markets[0]),
-        this.props.detailView === "advanced" ? fetchSeriesChartMarkdown(series) : Promise.resolve(""),
+        fetchFirstMarketDetail(markets[0]).catch(() => undefined),
+        this.props.detailView === "advanced" ? fetchSeriesChartMarkdown(series).catch(() => "") : Promise.resolve(""),
       ]);
 
       if (requestId === this.requestId) {
@@ -514,7 +514,7 @@ class MarketList extends Component<MarketListProps, MarketListState> {
                 }
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title="Open in Kalshi" url={getMarketUrl(market)} />
+                    <Action.OpenInBrowser title="Open in Kalshi" url={getMarketUrl(market, series)} />
                     <Action
                       title={favorite ? "Remove Favorite" : "Favorite Option"}
                       icon={favorite ? Icon.StarDisabled : Icon.Star}
@@ -565,7 +565,7 @@ function buildMarketMarkdown(
   error?: string,
 ): string {
   return [
-    `# [${escapeMarkdown(market.yes_sub_title ?? market.subtitle ?? market.ticker)}](${getMarketUrl(market)})`,
+    `# [${escapeMarkdown(market.yes_sub_title ?? market.subtitle ?? market.ticker)}](${getMarketUrl(market, series)})`,
     `_${escapeMarkdown(getSeriesTitle(series))}_`,
     error ? `> ${error}` : "",
     chartMarkdown,
@@ -616,7 +616,7 @@ function formatDate(value: string): string {
     return value;
   }
 
-  return date.toLocaleString();
+  return date.toLocaleString("en-US");
 }
 
 function escapeMarkdown(value: string): string {
