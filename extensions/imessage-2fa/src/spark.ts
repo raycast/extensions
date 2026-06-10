@@ -38,7 +38,7 @@ async function execSpark(args: string[]): Promise<string> {
         "Spark CLI not found. Please make sure Spark Desktop is installed and CLI is enabled:\n" +
           "1. Launch Spark Desktop on your Mac\n" +
           "2. Go to Settings > AI Agents\n" +
-          "3. Click Set Up CLI"
+          "3. Click Enable agent access"
       );
     }
     throw new Error(`Spark CLI error: ${stderr || `Command failed: ${command}`}`);
