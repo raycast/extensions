@@ -12,18 +12,22 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import {
+  DirectoryScan,
   getFinderSelection,
   getQuarantineStatus,
+  isDirectory,
   parseQuarantineData,
   QuarantineStatus,
   removeAllAttributes,
   removeQuarantine,
+  scanDirectory,
 } from "./utils";
 
 type State =
   | { type: "selecting" }
   | { type: "loading"; path: string }
   | { type: "ready"; status: QuarantineStatus }
+  | { type: "ready-dir"; scan: DirectoryScan }
   | { type: "error"; message: string };
 
 function buildMarkdown(status: QuarantineStatus): string {
@@ -73,6 +77,57 @@ function buildMarkdown(status: QuarantineStatus): string {
   return md;
 }
 
+function buildDirMarkdown(scan: DirectoryScan): string {
+  const kind = scan.isApp ? "Application bundle" : "Folder";
+  const total = scan.entries.length + (scan.rootQuarantineData ? 1 : 0);
+  const statusIcon = total > 0 ? "🔒" : "✅";
+  const statusText =
+    total > 0
+      ? `**${total} quarantined item${total !== 1 ? "s" : ""}**`
+      : "**Clean** — no quarantine";
+
+  let md = `# ${statusIcon} ${scan.name}\n\n`;
+  md += `| Property | Value |\n|---|---|\n`;
+  md += `| Status | ${statusText} |\n`;
+  md += `| Type | ${kind} |\n`;
+  md += `| Scan | ${scan.scanMode === "recursive" ? "Recursive (entire bundle)" : "Immediate contents only"} |\n`;
+  md += `| Modified | ${scan.lastModified} |\n`;
+  md += `| Path | \`${scan.path}\` |\n\n`;
+
+  if (scan.rootQuarantineData) {
+    const parsed = parseQuarantineData(scan.rootQuarantineData);
+    md += `## The ${scan.isApp ? "bundle" : "folder"} itself is quarantined\n\n`;
+    if (parsed) {
+      md += `> ✦ Source: **${parsed.source}** · ${parsed.date}\n\n`;
+    }
+  }
+
+  if (scan.entries.length > 0) {
+    md += `## Quarantined Files (${scan.entries.length})\n\n`;
+    md += `| File | Source | Downloaded |\n|---|---|---|\n`;
+    for (const entry of scan.entries) {
+      const parsed = entry.quarantineData
+        ? parseQuarantineData(entry.quarantineData)
+        : null;
+      md += `| \`${entry.relativePath}\` | ${parsed?.source ?? "—"} | ${parsed?.date ?? "—"} |\n`;
+    }
+    md += `\n`;
+  } else if (!scan.rootQuarantineData) {
+    md += `*No quarantined files found`;
+    md +=
+      scan.scanMode === "shallow"
+        ? " in the immediate contents.*\n\n"
+        : ".*\n\n";
+  }
+
+  if (total > 0) {
+    md += `> Use **Remove Quarantine (Recursive)** to clear \`com.apple.quarantine\` from `;
+    md += `${scan.isApp ? "the entire bundle" : "this folder and its contents"} at once.\n`;
+  }
+
+  return md;
+}
+
 export default function RemoveQuarantine() {
   const [state, setState] = useState<State>({ type: "selecting" });
   const didMount = useRef(false);
@@ -96,14 +151,23 @@ export default function RemoveQuarantine() {
 
   async function loadFile(filePath: string) {
     setState({ type: "loading", path: filePath });
+    const scanningDir = isDirectory(filePath);
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Reading attributes…",
+      title: scanningDir
+        ? "Scanning for quarantined files…"
+        : "Reading attributes…",
     });
     try {
-      const status = getQuarantineStatus(filePath);
-      await toast.hide();
-      setState({ type: "ready", status });
+      if (scanningDir) {
+        const scan = scanDirectory(filePath);
+        await toast.hide();
+        setState({ type: "ready-dir", scan });
+      } else {
+        const status = getQuarantineStatus(filePath);
+        await toast.hide();
+        setState({ type: "ready", status });
+      }
     } catch (err) {
       await toast.hide();
       const message = err instanceof Error ? err.message : String(err);
@@ -178,6 +242,72 @@ export default function RemoveQuarantine() {
     }
   }
 
+  async function handleRemoveQuarantineDir(scan: DirectoryScan) {
+    const total = scan.entries.length + (scan.rootQuarantineData ? 1 : 0);
+    const confirmed = await confirmAlert({
+      title: "Remove Quarantine (Recursive)",
+      message: `Remove the quarantine flag from ${total} item${total !== 1 ? "s" : ""} in "${scan.name}"?\n\nThis runs xattr -dr on ${scan.isApp ? "the entire bundle" : "this folder and its contents"}.`,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Removing quarantine…",
+    });
+    const result = removeQuarantine(scan.path);
+    await toast.hide();
+
+    if (result.success) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Quarantine removed",
+        message: result.usedAdmin ? `${scan.name} (required admin)` : scan.name,
+      });
+      void loadFile(scan.path);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not remove quarantine",
+        message: result.error ?? "Unknown error",
+      });
+    }
+  }
+
+  async function handleRemoveAllAttributesDir(scan: DirectoryScan) {
+    const confirmed = await confirmAlert({
+      title: "Remove All Extended Attributes (Recursive)",
+      message: `Remove ALL xattr data from "${scan.name}" and everything inside it?\n\nThis clears quarantine, download source info, and any other extended attributes via xattr -cr.`,
+      primaryAction: {
+        title: "Remove All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Removing attributes…",
+    });
+    const result = removeAllAttributes(scan.path, true);
+    await toast.hide();
+
+    if (result.success) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "All attributes removed",
+        message: scan.name,
+      });
+      void loadFile(scan.path);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not remove attributes",
+        message: result.error ?? "Unknown error",
+      });
+    }
+  }
+
   // ─── Selecting state (no Finder selection) ───────────────────────────────
 
   if (state.type === "selecting") {
@@ -217,6 +347,87 @@ export default function RemoveQuarantine() {
               title="Try Again"
               icon={Icon.RotateClockwise}
               onAction={selectFile}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // ─── Directory scan state ─────────────────────────────────────────────────
+
+  if (state.type === "ready-dir") {
+    const { scan } = state;
+    const total = scan.entries.length + (scan.rootQuarantineData ? 1 : 0);
+    return (
+      <Detail
+        markdown={buildDirMarkdown(scan)}
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.Label
+              title="Quarantine Status"
+              text={total > 0 ? `${total} quarantined` : "Clean"}
+              icon={
+                total > 0
+                  ? { source: Icon.Lock, tintColor: Color.Red }
+                  : { source: Icon.Checkmark, tintColor: Color.Green }
+              }
+            />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Name" text={scan.name} />
+            <Detail.Metadata.Label
+              title="Type"
+              text={scan.isApp ? "Application" : "Folder"}
+            />
+            <Detail.Metadata.Label
+              title="Scan"
+              text={
+                scan.scanMode === "recursive"
+                  ? "Recursive"
+                  : "Immediate contents"
+              }
+            />
+            <Detail.Metadata.Label
+              title="Quarantined Files"
+              text={String(scan.entries.length)}
+            />
+            <Detail.Metadata.Label
+              title="Last Modified"
+              text={scan.lastModified}
+            />
+          </Detail.Metadata>
+        }
+        actions={
+          <ActionPanel>
+            {total > 0 && (
+              <Action
+                title="Remove Quarantine (recursive)"
+                icon={{ source: Icon.LockUnlocked, tintColor: Color.Green }}
+                onAction={() => handleRemoveQuarantineDir(scan)}
+              />
+            )}
+            {total > 0 && (
+              <Action
+                title="Remove All Attributes (recursive)"
+                icon={{ source: Icon.Trash, tintColor: Color.Orange }}
+                onAction={() => handleRemoveAllAttributesDir(scan)}
+              />
+            )}
+            <Action
+              title="Select Different File"
+              icon={Icon.Folder}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => selectFile(true)}
+            />
+            <Action.CopyToClipboard
+              title="Copy Path"
+              content={scan.path}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Recursive Remove Command"
+              content={`xattr -dr com.apple.quarantine "${scan.path}"`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
             />
           </ActionPanel>
         }

@@ -1,5 +1,3 @@
-import { SYSTEM_VOICE_FALLBACK_MESSAGE } from "./ttsErrorRouter";
-
 /**
  * Pure orchestrator for the "try Gemini TTS, fall back to say(1)" flow. Returns
  * a verdict so the component owns the UI. See AGENTS.md → Error Handling for the
@@ -29,7 +27,7 @@ export async function runPronounceWithFallback(deps: PronounceFlowDeps): Promise
     if (routed.fallback && deps.attemptFallback) {
       try {
         await deps.attemptFallback();
-        return { kind: "fallback-ok", message: SYSTEM_VOICE_FALLBACK_MESSAGE };
+        return { kind: "fallback-ok", message: routed.message };
       } catch {
         // Fallback also failed — fall through to surface the original Gemini failure.
       }

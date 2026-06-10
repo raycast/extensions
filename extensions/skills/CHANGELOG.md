@@ -1,5 +1,18 @@
 # Skills Changelog
 
+## [Fix Skill Contents for Nested Skills] - 2026-06-09
+
+- Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree
+
+## [Copy Skill Contents] - 2026-06-06
+
+- Add a "Copy Skill Contents" action to copy a skill's full SKILL.md to the clipboard from search results, skill details, and installed skills, so it can be pasted into tools like ChatGPT or Claude without installing the skill
+- Move the "Copy Install Command" action to `⌘ ⇧ I` so the canonical copy shortcut (`⌘ ⇧ C`) copies the skill contents
+
+## [Fix Confirmation Dialog Icon] - 2026-06-05
+
+- Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
+
 ## [Fix Global Skill Updates] - 2026-06-04
 
 - Run skill update actions against global installs, matching the global skill list shown in Manage Skills

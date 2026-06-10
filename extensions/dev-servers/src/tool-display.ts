@@ -21,6 +21,9 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
   serve: "Serve",
   "http-server": "http-server", // intentionally lowercase per package name
   "live-server": "Live Server",
+  "shopify-theme": "Shopify Theme",
+  "shopify-app": "Shopify App",
+  "shopify-hydrogen": "Hydrogen",
 };
 
 export function toolLabel(tool: string): string {
@@ -56,6 +59,9 @@ export function toolColor(
     svelte: Color.Orange,
     sveltekit: Color.Orange,
     remix: Color.Magenta,
+    "shopify-theme": Color.Green,
+    "shopify-app": Color.Green,
+    "shopify-hydrogen": Color.Green,
     turbo: Color.Blue,
     node: Color.Green,
   };

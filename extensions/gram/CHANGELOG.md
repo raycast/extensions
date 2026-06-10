@@ -1,5 +1,11 @@
 # Gram Changelog
 
+## [Fix Non-POSIX Shell Support] - 2026-06-05
+
+- Fix projects silently failing to open when the user's default shell is non-POSIX (nushell, elvish, xonsh, pwsh, ...) by falling back to `/bin/zsh` for the `env -i ... -lc` invocation. Previously only fish was handled this way.
+- Surface CLI launch failures via a toast in the single-folder open action so future regressions don't fail silently.
+- from [PR #28027](https://github.com/raycast/extensions/pull/28027)
+
 ## [New Commands & Fixes] - 2026-06-04
 
 ### Added

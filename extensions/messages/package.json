@@ -12,10 +12,15 @@
     "aeorge",
     "hayden_barnes",
     "micha_van_eijk",
-    "islamtayeb"
+    "islamtayeb",
+    "janosorcsik"
   ],
   "keywords": [
-    "2fa"
+    "2fa",
+    "sms",
+    "imessage",
+    "messages",
+    "chat"
   ],
   "license": "MIT",
   "preferences": [
@@ -108,7 +113,7 @@
     }
   ],
   "ai": {
-    "instructions": "- Always use the search-chats tool first when sending messages.\\nIMPORTANT: Retrieve the last 5–10 messages using the \"search-latest-messages\" tool for context, then craft your response as a seamless continuation of the conversation, reflecting the user's style and discussion flow.\\n- The user can search for a chat by a group name, so don't actually search for the word \"group\".\\n- If you get an error when accessing the chat database, tell the user he needs to give Raycast the full disk access permission in the system settings in detailed steps. If no contacts were found, simply tell the user you haven't found the contact without mentioning the error.\\n- Use the chat_identifier property when searching for the latest messages in a group, not the guid.",
+    "instructions": "You are a Messages assistant. Help the user read, summarize, search, analyze, and send iMessage and SMS messages.\\n\\nTOOL USAGE:\\n- search-chats: find a chat by contact name or phone number. Always call this first when the user mentions a specific person or group, to get the correct chatIdentifier.\\n- search-latest-messages: fetch messages. Pass chatIdentifier to scope to one conversation. Do NOT pass searchText unless the user explicitly wants to filter by keywords — omitting it returns the most recent messages. Only fetch messages when you need conversation context (e.g. writing a reply, summarizing, answering questions). For simple sends with a clear message (e.g. 'Ask John to call me'), skip it and send directly.\\n- send-message: send a message to a chat. Always use search-chats first to get the chatIdentifier.\\n- The user can search for a chat by group name — do not search for the literal word \\\"group\\\".\\n- PAGINATION: Each call returns up to 50 messages in chronological order (oldest first, newest last). To go further back in time, call search-latest-messages again with `before` set to the `date` of the first (oldest, index 0) message from the previous response. Repeat until you have enough context.\\n\\nDATA FORMAT:\\n- sender: who sent the message. \\\"You\\\" means the user themselves.\\n- date: ISO 8601 timestamp.\\n- text: the message body.\\n- group: present only for group chats.\\n- replyingTo: only present when a message explicitly replies to an earlier (non-adjacent) message. The value is the text of that earlier message. Sequential replies to the immediately preceding message are omitted to reduce noise.\\n\\nBEHAVIOR:\\n- Always present messages in chronological order (oldest first).\\n- When summarizing a conversation, focus on topics, tone, and key events — not metadata.\\n- When the user asks about an ongoing thread, fetch as many pages as needed before answering.\\n- If you get a database error, tell the user to grant Raycast Full Disk Access in System Settings → Privacy & Security → Full Disk Access (step by step). If no contacts were found, simply say you haven't found the contact.\\n- Be concise. Do not repeat raw message data back to the user unless explicitly asked.",
     "evals": [
       {
         "input": "@messages Ask John to call me",
@@ -220,81 +225,34 @@
           ],
           "search-latest-messages": [
             {
-              "body": "Are you serious? This is crazy!",
-              "senderName": "Thomas",
-              "is_sent": false,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2025-01-23T09:31:41.000Z",
-              "date": "2025-01-23T09:25:10.000Z",
-              "display_name": "Thomas",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "38989E42-A75D-4013-B067-1405290AC54D",
-              "is_read": true
-            },
-            {
-              "body": "You've got to do something about this.",
-              "senderName": "Emily",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:22:49.000Z",
-              "display_name": "Emily",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "915D6A56-B47C-4CD6-8021-B5421605FCC4",
-              "is_read": true
-            },
-            {
-              "body": "I can't believe it.",
-              "senderName": "Emily",
-              "attachment_filename": null,
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "attachment_name": null,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:21:50.000Z",
-              "display_name": "Mary",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "0251910D-3777-4673-8DE8-6C1EF293F239",
-              "is_read": true
-            },
-            {
-              "body": "I didn't see the first season",
-              "senderName": "John",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:21:49.000Z",
-              "display_name": "John",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "45929EDF-BEC3-4B5D-8F4B-6EB449C1AE1F",
-              "is_read": true
-            },
-            {
-              "body": "Can't wait for next episode of Severance season 2!",
-              "senderName": "Thomas",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
+              "sender": "Thomas",
               "date": "2025-01-23T09:21:22.000Z",
-              "display_name": "John",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "A03A0263-D677-4684-9885-B44292BD6F64",
-              "is_read": true
+              "text": "Can't wait for next episode of Severance season 2!",
+              "group": "Friends"
+            },
+            {
+              "sender": "John",
+              "date": "2025-01-23T09:21:49.000Z",
+              "text": "I didn't see the first season",
+              "group": "Friends"
+            },
+            {
+              "sender": "Emily",
+              "date": "2025-01-23T09:21:50.000Z",
+              "text": "I can't believe it.",
+              "group": "Friends"
+            },
+            {
+              "sender": "Emily",
+              "date": "2025-01-23T09:22:49.000Z",
+              "text": "You've got to do something about this.",
+              "group": "Friends"
+            },
+            {
+              "sender": "Thomas",
+              "date": "2025-01-23T09:25:10.000Z",
+              "text": "Are you serious? This is crazy!",
+              "group": "Friends"
             }
           ]
         },
@@ -305,7 +263,6 @@
           {
             "callsTool": {
               "arguments": {
-                "searchText": "",
                 "chatIdentifier": "chat778648822228943635"
               },
               "name": "search-latest-messages"
@@ -344,9 +301,9 @@
           ],
           "search-latest-messages": [
             {
-              "sender": "Emili",
-              "senderName": "Emily",
-              "body": "Hey, would you like to join me for dinner tonight?"
+              "sender": "Emily",
+              "date": "2025-01-23T09:00:00.000Z",
+              "text": "Hey, would you like to join me for dinner tonight?"
             }
           ],
           "send-message": "Message sent"
@@ -354,6 +311,14 @@
         "expected": [
           {
             "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "name": "search-latest-messages",
+              "arguments": {
+                "chatIdentifier": "+1234567890"
+              }
+            }
           },
           {
             "callsTool": {
@@ -373,23 +338,20 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.18.0",
-    "date-fns": "^4.1.0",
-    "libphonenumber-js": "^1.11.9"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "date-fns": "^4.4.0",
+    "libphonenumber-js": "^1.13.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.7.4",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.1",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

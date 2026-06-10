@@ -1,5 +1,9 @@
 # Large Type Changelog
 
+## [Added Selected Text Viewer] - 2026-06-09
+
+- New command "Show Selected Text" to display the selected text of the frontmost application in large type
+
 ## [Added Clipboard Viewer] - 2024-10-18
 
 - Second command to use clipboard directly rather than using a form

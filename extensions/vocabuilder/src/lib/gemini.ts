@@ -21,11 +21,72 @@ const log = createLogger("gemini");
 export type GenerationOptions = {
   model: string;
   temperature?: number;
+  reasoningLevel?: ReasoningLevel;
 };
 
 type GeminiCallOptions = GenerationOptions & {
   responseJsonSchema?: Record<string, unknown>;
 };
+
+export type ReasoningLevel = "none" | "low" | "medium" | "high";
+
+type ThinkingLevel = "minimal" | "low" | "medium" | "high";
+type ThinkingProfile =
+  | { kind: "thinkingLevel"; levels: Record<ReasoningLevel, ThinkingLevel> }
+  | { kind: "thinkingBudget"; budgets: Record<ReasoningLevel, number> };
+
+const FLASH_THINKING_LEVELS: Record<ReasoningLevel, ThinkingLevel> = {
+  none: "minimal",
+  low: "low",
+  medium: "medium",
+  high: "high",
+};
+
+// Pro models cannot fully disable thinking; the user-facing "Minimum" option
+// maps to the lowest supported level for those models.
+const PRO_THINKING_LEVELS: Record<ReasoningLevel, ThinkingLevel> = {
+  none: "low",
+  low: "low",
+  medium: "medium",
+  high: "high",
+};
+
+const FLASH_THINKING_BUDGETS: Record<ReasoningLevel, number> = {
+  none: 0,
+  low: 1024,
+  medium: 4096,
+  high: 8192,
+};
+
+const PRO_THINKING_BUDGETS: Record<ReasoningLevel, number> = {
+  none: 128,
+  low: 1024,
+  medium: 4096,
+  high: 8192,
+};
+
+const MODEL_THINKING_PROFILES: Record<string, ThinkingProfile> = {
+  "gemini-3.5-flash": { kind: "thinkingLevel", levels: FLASH_THINKING_LEVELS },
+  "gemini-3.1-flash-lite": { kind: "thinkingLevel", levels: FLASH_THINKING_LEVELS },
+  "gemini-3.1-pro-preview": { kind: "thinkingLevel", levels: PRO_THINKING_LEVELS },
+  // Documented Gemini 3.1 Pro variant for custom-tool workflows; available only
+  // through the advanced custom model preference, not the curated preset list.
+  "gemini-3.1-pro-preview-customtools": { kind: "thinkingLevel", levels: PRO_THINKING_LEVELS },
+  "gemini-3-flash-preview": { kind: "thinkingLevel", levels: FLASH_THINKING_LEVELS },
+  "gemini-2.5-flash": { kind: "thinkingBudget", budgets: FLASH_THINKING_BUDGETS },
+  "gemini-2.5-flash-preview-09-2025": { kind: "thinkingBudget", budgets: FLASH_THINKING_BUDGETS },
+  "gemini-2.5-flash-lite": { kind: "thinkingBudget", budgets: FLASH_THINKING_BUDGETS },
+  "gemini-2.5-flash-lite-preview-09-2025": { kind: "thinkingBudget", budgets: FLASH_THINKING_BUDGETS },
+  "gemini-2.5-pro": { kind: "thinkingBudget", budgets: PRO_THINKING_BUDGETS },
+};
+
+function buildThinkingConfig(model: string, level: ReasoningLevel | undefined): Record<string, unknown> | undefined {
+  if (!level) return undefined;
+  const profile = MODEL_THINKING_PROFILES[model.trim()];
+  if (!profile) return undefined;
+  if (profile.kind === "thinkingLevel") return { thinkingLevel: profile.levels[level] };
+  return { thinkingBudget: profile.budgets[level] };
+}
 
 /** Exponential backoff with full jitter. attempt is 1-based. */
 function getRetryDelayMs(attempt: number): number {
@@ -90,11 +151,13 @@ async function callGemini(
   signal: AbortSignal | undefined,
   options: GeminiCallOptions,
 ): Promise<string> {
-  const { model } = options;
+  const model = options.model.trim();
   const url = `${BASE_URL}/${model}:generateContent`;
 
   const generationConfig: Record<string, unknown> = {};
   if (options.temperature !== undefined) generationConfig.temperature = options.temperature;
+  const thinkingConfig = buildThinkingConfig(model, options.reasoningLevel);
+  if (thinkingConfig) generationConfig.thinkingConfig = thinkingConfig;
   if (options.responseJsonSchema !== undefined) {
     generationConfig.responseMimeType = "application/json";
     generationConfig.responseJsonSchema = options.responseJsonSchema;
@@ -302,6 +365,72 @@ if (import.meta.vitest) {
       expect(body.generationConfig).toEqual({
         responseMimeType: "application/json",
         responseJsonSchema,
+      });
+    });
+
+    it("maps the minimum setting to Gemini 3.5 Flash minimal thinking", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: "gemini-3.5-flash",
+        reasoningLevel: "none",
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(body.generationConfig).toEqual({
+        thinkingConfig: { thinkingLevel: "minimal" },
+      });
+    });
+
+    it("maps the minimum setting to the lowest supported Gemini 3.1 Pro thinking level", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: "gemini-3.1-pro-preview",
+        reasoningLevel: "none",
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(body.generationConfig).toEqual({
+        thinkingConfig: { thinkingLevel: "low" },
+      });
+    });
+
+    it("maps the minimum setting to a zero thinking budget for Gemini 2.5 Flash", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: "gemini-2.5-flash",
+        reasoningLevel: "none",
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(body.generationConfig).toEqual({
+        thinkingConfig: { thinkingBudget: 0 },
+      });
+    });
+
+    it("maps the minimum setting to the lowest valid budget for Gemini 2.5 Pro", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: "gemini-2.5-pro",
+        reasoningLevel: "none",
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(body.generationConfig).toEqual({
+        thinkingConfig: { thinkingBudget: 128 },
+      });
+    });
+
+    it("omits thinkingConfig for unknown future custom models", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: "gemini-4-flash",
+        reasoningLevel: "none",
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(body.generationConfig).toBeUndefined();
+    });
+
+    it("trims custom model IDs before building the request", async () => {
+      await callGemini("hi", "key", undefined, {
+        model: " gemini-3.5-flash ",
+        reasoningLevel: "low",
+      });
+      const [url, init] = fetchMock.mock.calls[0];
+      const body = JSON.parse(init.body as string);
+      expect(url).toContain("/gemini-3.5-flash:generateContent");
+      expect(body.generationConfig).toEqual({
+        thinkingConfig: { thinkingLevel: "low" },
       });
     });
   });

@@ -14,7 +14,7 @@ HeyClaude is a curated, GitHub-native registry for Claude and AI workflow conten
 - Create Raycast Quicklinks for registry entries, category pages, jobs, feeds, and common HeyClaude pages.
 - Create Raycast Snippets from install commands and config snippets when an entry includes them.
 - Favorite useful entries and jobs, with local frecency sorting that keeps repeated workflows easier to reach.
-- Submit new content or suggest changes through HeyClaude and GitHub issue-first review flows.
+- Submit new content or suggest changes through HeyClaude and PR-first review flows.
 - Open project links for the website, registry, API docs, feeds, jobs, newsletter, and GitHub repository.
 
 ## Commands
@@ -38,9 +38,13 @@ HeyClaude is a curated, GitHub-native registry for Claude and AI workflow conten
 
 The extension is intentionally read-only.
 
-It does not request accounts, OAuth, GitHub tokens, API keys, local project-file access, or write access to your Claude/Cursor configuration. Contribution actions open browser URLs for reviewed HeyClaude or GitHub issue flows. They do not create pull requests, forks, branches, or registry entries from Raycast.
+It does not request accounts, OAuth, GitHub tokens, API keys, local project-file access, or write access to your Claude/Cursor configuration. Contribution actions open browser URLs for reviewed HeyClaude submission flows. They do not create pull requests, forks, branches, or registry entries from Raycast.
 
 The extension can create Raycast-native Quicklinks and Snippets only when you explicitly trigger those Raycast actions.
+
+## Submission Safety
+
+Raycast submission actions remain source-first. They help draft reviewed PR-first submissions with canonical source/docs URLs and do not upload, host, or publish community ZIP/MCPB artifacts. Eligible submissions move through the same content validation, Superagent, and private maintainer-agent review used by website and GitHub submissions.
 
 ## Data and Privacy
 
@@ -59,9 +63,14 @@ Raycast `Cache` stores the latest successful registry feed, entry details, and j
 - Submit content: [heyclau.de/submit](https://heyclau.de/submit)
 - Jobs: [heyclau.de/jobs](https://heyclau.de/jobs)
 - API docs: [heyclau.de/api-docs](https://heyclau.de/api-docs)
-- GitHub: [JSONbored/claudepro-directory](https://github.com/JSONbored/claudepro-directory)
+- GitHub: [JSONbored/awesome-claude](https://github.com/JSONbored/awesome-claude)
 
 ## Validation
+
+This integration intentionally uses Raycast's npm-based tooling and keeps its
+own `package-lock.json`. The root workspace remains pnpm-managed; do not remove
+the Raycast npm island unless Raycast tooling is deliberately migrated and
+validated separately.
 
 ```bash
 npm run test:junit

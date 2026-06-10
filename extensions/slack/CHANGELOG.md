@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add deep link arguments to Set Status] - 2026-06-09
+
+- The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
+
 ## [Fix AI Tool for Channel History Failing] - 2026-06-03
 
 - Add fallback to attachment text for the Channel History AI tool.

@@ -1,5 +1,10 @@
 import { z } from "zod";
-import type { ApiProvider, CallApiContextParams, ProviderOptions, ProviderResponse } from "promptfoo";
+import type {
+  ApiProvider,
+  CallApiContextParams,
+  ProviderOptions,
+  ProviderResponse,
+} from "promptfoo";
 import { translateWord } from "../../src/lib/gemini";
 import { isGeminiError, isOutcome } from "../../src/lib/geminiError";
 import { getPreferenceDefault } from "../../src/lib/manifest";
@@ -17,6 +22,8 @@ export const ProviderConfigSchema = z.object({
   temperature: z.number(),
 });
 
+export const ReasoningLevelSchema = z.enum(["none", "low", "medium", "high"]);
+
 export const EvalVarsSchema = z
   .object({
     sourceLanguageCode: z.string().trim().min(1),
@@ -33,7 +40,11 @@ export const EvalVarsSchema = z
     input: v.input,
   }));
 
-function projectSuccess(input: string, pair: LanguagePair, response: GeminiWordResponse): Record<string, unknown> {
+function projectSuccess(
+  input: string,
+  pair: LanguagePair,
+  response: GeminiWordResponse,
+): Record<string, unknown> {
   return {
     status: "ok",
     input,
@@ -114,7 +125,8 @@ export default class VocabuilderTranslateWordProvider implements ApiProvider {
 
     try {
       const response = await translateWord(input, apiKey, pair, undefined, {
-        model: getPreferenceDefault("translationModel"),
+        model: getPreferenceDefault("translationModelPreset"),
+        reasoningLevel: ReasoningLevelSchema.parse(getPreferenceDefault("reasoningLevel")),
         temperature: this.temperature,
       });
       return { output: JSON.stringify(projectSuccess(input, pair, response), null, 2) };

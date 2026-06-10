@@ -2,11 +2,27 @@ import { execFile } from "child_process";
 import { execFileSync } from "node:child_process";
 import { homedir, userInfo } from "node:os";
 import * as util from "util";
+import path from "path";
 
 export const execFilePromise = util.promisify(execFile);
 
 export function shellEscape(arg: string): string {
   return `'${arg.replace(/'/g, "'\\''")}'`;
+}
+
+const POSIX_SHELL_NAMES = new Set(["sh", "bash", "zsh", "dash", "ksh", "ash", "mksh"]);
+
+/**
+ * Returns true when the given shell path's basename is a known POSIX shell
+ * whose `-lc` invocation accepts the POSIX-style command produced by
+ * `shellEscape`. Non-POSIX shells (fish, nu, elvish, xonsh, pwsh, ...) need
+ * to be replaced with a POSIX shell before running such a command.
+ */
+export function isPosixShell(shellPath: string): boolean {
+  if (!shellPath) {
+    return false;
+  }
+  return POSIX_SHELL_NAMES.has(path.basename(shellPath));
 }
 
 /**
@@ -40,19 +56,18 @@ function getUserShell(): string {
  * 2. Only HOME is passed (required for login shell to find profile files)
  * 3. A POSIX-compatible login shell (zsh or bash) sources the user's profile,
  *    then execs the target command directly — avoiding shell-escaping issues
- *    with non-POSIX shells like fish.
+ *    with non-POSIX shells like fish, nushell, etc.
  *
  * This gives the command the same environment as a fresh terminal window.
  */
 export async function execWithCleanEnv(command: string, args: string[]): Promise<void> {
   const userShell = getUserShell();
 
-  // If the user's shell is fish (or any other non-POSIX shell), fall back to
-  // /bin/zsh for the -lc invocation. Fish does not support POSIX-style quoting
-  // or the `-c` flag in the same way, so we must use a POSIX shell to source
-  // the profile and then exec the real command.
-  const isFish = userShell.endsWith("fish");
-  const posixShell = isFish ? "/bin/zsh" : userShell;
+  // Non-POSIX shells (fish, nushell, elvish, xonsh, pwsh, ...) don't accept
+  // the POSIX-style quoted command we build below, so fall back to /bin/zsh
+  // for the -lc invocation. The user's profile still gets sourced, just by a
+  // POSIX shell instead of their interactive shell.
+  const posixShell = isPosixShell(userShell) ? userShell : "/bin/zsh";
 
   const escapedArgs = args.map(shellEscape).join(" ");
   const shellCommand = `${shellEscape(command)} ${escapedArgs}`;

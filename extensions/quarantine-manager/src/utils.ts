@@ -28,6 +28,30 @@ export function isApp(filePath: string): boolean {
   return filePath.endsWith(".app") || filePath.includes(".app/");
 }
 
+export function isDirectory(filePath: string): boolean {
+  try {
+    return fs.statSync(filePath).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * True if a decoded attribute value contains non-printable control bytes or the
+ * Unicode replacement char — i.e. it's raw binary that should be shown as hex
+ * rather than printed directly (which would render as � / □).
+ */
+function looksBinary(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const c = value.charCodeAt(i);
+    // Allow tab (9), newline (10), carriage return (13).
+    if (c === 9 || c === 10 || c === 13) continue;
+    // Other C0 control chars or the Unicode replacement char => binary.
+    if (c < 0x20 || c === 0xfffd) return true;
+  }
+  return false;
+}
+
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -91,6 +115,17 @@ export function getQuarantineStatus(filePath: string): QuarantineStatus {
           } catch {
             value = "(unable to read)";
           }
+        }
+      } else if (looksBinary(raw)) {
+        // Raw binary (e.g. com.apple.macl, com.apple.provenance) — show as hex
+        // instead of letting non-printable bytes render as � / □.
+        try {
+          value = execFileSync("xattr", ["-px", attrName, filePath], {
+            encoding: "utf8",
+            timeout: 5000,
+          }).trim();
+        } catch {
+          value = "(binary data)";
         }
       } else {
         value = raw.trim();
@@ -181,13 +216,18 @@ export function removeQuarantine(filePath: string): {
     }
   }
 }
-export function removeAllAttributes(filePath: string): {
+
+export function removeAllAttributes(
+  filePath: string,
+  recursive = false,
+): {
   success: boolean;
   usedAdmin: boolean;
   error?: string;
 } {
+  const flag = recursive ? "-cr" : "-c";
   try {
-    execFileSync("xattr", ["-c", filePath], { timeout: 10000 });
+    execFileSync("xattr", [flag, filePath], { timeout: 10000 });
     return { success: true, usedAdmin: false };
   } catch {
     try {
@@ -199,7 +239,7 @@ export function removeAllAttributes(filePath: string): {
           "-e",
           "set p to item 1 of argv",
           "-e",
-          'do shell script "xattr -c " & quoted form of POSIX path p with administrator privileges',
+          `do shell script "xattr ${flag} " & quoted form of POSIX path p with administrator privileges`,
           "-e",
           "end run",
           filePath,
@@ -290,4 +330,132 @@ export function parseQuarantineFlags(rawValue: string): string {
   const parsed = parseQuarantineData(rawValue);
   if (!parsed) return rawValue;
   return `Source: ${parsed.source} | Date: ${parsed.date} | Flags: ${parsed.flags.join(", ")}`;
+}
+
+const QUARANTINE_SUFFIX = ": com.apple.quarantine";
+
+export interface DirEntry {
+  path: string;
+  name: string;
+  relativePath: string;
+  quarantineData: string | null;
+}
+
+export interface DirectoryScan {
+  path: string;
+  name: string;
+  isApp: boolean;
+  /** "recursive" for .app bundles, "shallow" (immediate children) for folders */
+  scanMode: "recursive" | "shallow";
+  /** The directory's own com.apple.quarantine attribute, if any */
+  rootQuarantineData: string | null;
+  /** Quarantined items found inside the directory (excludes the root itself) */
+  entries: DirEntry[];
+  lastModified: string;
+}
+
+/**
+ * Reads the value of com.apple.quarantine for a single path.
+ * Returns the raw value, or null if the attribute is absent.
+ */
+function readQuarantineValue(filePath: string): string | null {
+  const res = spawnSync("xattr", ["-p", "com.apple.quarantine", filePath], {
+    encoding: "utf8",
+    timeout: 5000,
+  });
+  if (res.status === 0) {
+    return (res.stdout ?? "").trim();
+  }
+  return null;
+}
+
+/**
+ * Parses `xattr` listing output (one `<path>: <attr>` line per attribute) and
+ * returns the paths that carry com.apple.quarantine. Matching on the exact
+ * suffix keeps paths containing ": " intact.
+ */
+function collectQuarantinedPaths(
+  stdout: string,
+  excludePath?: string,
+): string[] {
+  const paths: string[] = [];
+  for (const line of stdout.split("\n")) {
+    if (!line.endsWith(QUARANTINE_SUFFIX)) continue;
+    const p = line.slice(0, -QUARANTINE_SUFFIX.length);
+    if (p && p !== excludePath) paths.push(p);
+  }
+  return paths;
+}
+
+/**
+ * Scans a directory for quarantined files. .app bundles are scanned recursively
+ * (they are self-contained); plain folders are scanned one level deep so large
+ * trees stay responsive.
+ */
+export function scanDirectory(dirPath: string): DirectoryScan {
+  const name = getFileName(dirPath);
+  const appFlag = isApp(dirPath);
+  const scanMode: "recursive" | "shallow" = appFlag ? "recursive" : "shallow";
+
+  // The directory's own quarantine flag.
+  const rootQuarantineData = readQuarantineValue(dirPath);
+
+  // List candidate paths in a single batched call.
+  let quarantinedPaths: string[] = [];
+  if (scanMode === "recursive") {
+    const res = spawnSync("xattr", ["-r", dirPath], {
+      encoding: "utf8",
+      timeout: 60000,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    quarantinedPaths = collectQuarantinedPaths(res.stdout ?? "", dirPath);
+  } else {
+    let children: string[] = [];
+    try {
+      children = fs.readdirSync(dirPath).map((c) => path.join(dirPath, c));
+    } catch {
+      children = [];
+    }
+    // Process children in chunks to stay well under ARG_MAX, and append dirPath
+    // as a sentinel so every call has >= 2 path arguments. With a single path,
+    // xattr prints bare attribute names (no "<path>: " prefix); the extra arg
+    // forces the prefixed format so a lone quarantined child is never missed.
+    const CHUNK = 256;
+    for (let i = 0; i < children.length; i += CHUNK) {
+      const batch = children.slice(i, i + CHUNK);
+      const res = spawnSync("xattr", [...batch, dirPath], {
+        encoding: "utf8",
+        timeout: 30000,
+        maxBuffer: 64 * 1024 * 1024,
+      });
+      quarantinedPaths.push(
+        ...collectQuarantinedPaths(res.stdout ?? "", dirPath),
+      );
+    }
+  }
+
+  // Fetch values only for the (typically small) set of quarantined paths.
+  const entries: DirEntry[] = quarantinedPaths.map((p) => ({
+    path: p,
+    name: getFileName(p),
+    relativePath: path.relative(dirPath, p) || getFileName(p),
+    quarantineData: readQuarantineValue(p),
+  }));
+
+  let lastModified = "unknown";
+  try {
+    lastModified = new Date(fs.statSync(dirPath).mtime).toLocaleString("en-US");
+  } catch {
+    // ignore
+  }
+
+  return {
+    path: dirPath,
+    name,
+    isApp: appFlag,
+    scanMode,
+    rootQuarantineData,
+    entries,
+    lastModified,
+  };
 }

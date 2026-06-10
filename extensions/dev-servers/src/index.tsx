@@ -21,6 +21,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
 import {
@@ -62,13 +63,18 @@ async function openStartCommand(): Promise<void> {
 }
 
 // Shallow equality on the dashboard's view of the server list: same length,
-// and same pid+port in the same positions. ps returns processes in PID order
-// which is stable for the same processes between polls, so position-wise
+// and same pid+port+branch in the same positions. ps returns processes in PID
+// order which is stable for the same processes between polls, so position-wise
 // comparison is enough to catch what we care about (a server starting or
-// dying), and `fetchStableServers` can hand back the previous array reference
-// when nothing changed so React bails out of the re-render.
+// dying, or a branch switch), and `fetchStableServers` can hand back the
+// previous array reference when nothing changed so React bails out of the
+// re-render.
 //
-// Deliberately compares ONLY pid+port, not derived fields like the portless
+// Branch is included because it comes from a local git/HEAD read that's
+// reliable poll-to-poll, and users do switch branches under a running server;
+// without it the row would keep showing the old branch until the PID changed.
+//
+// Deliberately does NOT compare derived fields like the portless
 // `url`/`customUrls`. Those come from a `portless list` shell-out with a 3s
 // timeout that can intermittently miss, so including them made the comparison
 // flap (alias present one poll, absent the next), defeating the dedupe and
@@ -79,9 +85,30 @@ async function openStartCommand(): Promise<void> {
 function sameServers(a: DevServer[], b: DevServer[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].pid !== b[i].pid || a[i].port !== b[i].port) return false;
+    if (
+      a[i].pid !== b[i].pid ||
+      a[i].port !== b[i].port ||
+      a[i].branch !== b[i].branch
+    )
+      return false;
   }
   return true;
+}
+
+// First non-internal IPv4 address, for "open this on your phone" URLs.
+// Prefer en0/en1 (built-in Wi-Fi / Ethernet on Macs) so a VPN utun or
+// container bridge doesn't win just by sorting first.
+function lanIPv4(): string | undefined {
+  const ifaces = os.networkInterfaces();
+  const pick = (name: string) =>
+    ifaces[name]?.find((a) => a.family === "IPv4" && !a.internal)?.address;
+  const preferred = pick("en0") ?? pick("en1");
+  if (preferred) return preferred;
+  for (const addrs of Object.values(ifaces)) {
+    const hit = addrs?.find((a) => a.family === "IPv4" && !a.internal);
+    if (hit) return hit.address;
+  }
+  return undefined;
 }
 
 // Strip scheme and trailing slash so a primary URL renders cleanly as the row
@@ -190,6 +217,14 @@ function SpawnLogView({ cwd, name }: { cwd: string; name: string }) {
     [logPath],
   );
 
+  // Follow the file while the view is open so a server that's still booting
+  // (or crashing) streams its output in like a live tail, instead of asking
+  // the user to mash ⌘R while diagnosing.
+  useEffect(() => {
+    const id = setInterval(revalidate, 2000);
+    return () => clearInterval(id);
+  }, [revalidate]);
+
   const log = (data ?? "").trim();
   const exists = fs.existsSync(logPath);
   const body = log
@@ -240,6 +275,11 @@ interface ServerItemProps {
   id: string;
   server: DevServer;
   terminalApp: Application;
+  // Unset when the user hasn't picked an editor; the action is hidden then.
+  editorApp?: Application;
+  // This Mac's LAN IPv4, when one exists. Combined with `server.lanExposed`
+  // to offer a network URL other devices on the network can reach.
+  lanIp?: string;
   show: RowVisibility;
   onKill: () => void;
   onKillProject: () => void;
@@ -252,6 +292,8 @@ function ServerItem({
   id,
   server,
   terminalApp,
+  editorApp,
+  lanIp,
   show,
   onKill,
   onKillProject,
@@ -400,8 +442,32 @@ function ServerItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             )}
+            {/* Network URL is for testing on a phone or another machine on
+             * the same network. Only offered when the server actually binds
+             * beyond loopback, so we never hand out a URL that can't connect. */}
+            {server.lanExposed && lanIp && (
+              <Action.CopyToClipboard
+                title="Copy Network URL"
+                content={`http://${lanIp}:${server.port}`}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              />
+            )}
+            <Action.CopyToClipboard
+              title="Copy Port"
+              content={server.port}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            {editorApp && (
+              <Action.Open
+                title={`Open in ${editorApp.name}`}
+                icon={Icon.Code}
+                target={server.cwd}
+                application={editorApp}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+            )}
             <Action.Open
               title={`Open in ${terminalApp.name}`}
               icon={Icon.Terminal}
@@ -1002,6 +1068,10 @@ export default function Command(
   }
 
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
+  const editorApp = prefs.editorApp;
+  // Resolved once per mount; a Wi-Fi change mid-session is rare enough that
+  // reopening the command is an acceptable refresh.
+  const lanIp = useMemo(lanIPv4, []);
   const [toolFilter, setToolFilter] = useState<string>("all");
 
   // Visibility prefs default to true so first-time users see everything.
@@ -1127,6 +1197,8 @@ export default function Command(
               id={String(server.pid)}
               server={server}
               terminalApp={terminalApp}
+              editorApp={editorApp}
+              lanIp={lanIp}
               show={show}
               onKill={() => kill(server.pid)}
               onKillProject={() => killProject(projectKey)}

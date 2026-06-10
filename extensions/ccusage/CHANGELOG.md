@@ -1,5 +1,12 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Honor server rate-limit backoff] - 2026-06-10
+
+### Fixed
+
+- Usage Limits no longer freeze after the Claude API returns a rate-limit response. The fetch now honors the server's `retry-after` window, coordinates one backoff across the menu bar and main view, and shows the real wait time
+- An expired token in `~/.claude/.credentials.json` no longer shadows a fresh Keychain token
+
 ## [Tolerate dateless sessions] - 2026-06-03
 
 ### Fixed

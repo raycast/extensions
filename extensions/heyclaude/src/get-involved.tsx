@@ -70,11 +70,11 @@ const items: LinkItem[] = [
   {
     id: "submissions",
     section: "Contribute",
-    title: "Browse Open Submissions",
-    subtitle: "Review the public submission queue and validation status.",
-    url: `${HEYCLAUDE_URL}/submissions`,
+    title: "Open Pull Requests",
+    subtitle: "Review active PR-first submissions and maintainer imports.",
+    url: `${GITHUB_REPO_URL}/pulls`,
     icon: Icon.MagnifyingGlass,
-    quicklinkName: "HeyClaude Submissions",
+    quicklinkName: "HeyClaude Pull Requests",
   },
   {
     id: "jobs",

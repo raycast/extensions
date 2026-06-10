@@ -1,8 +1,9 @@
-import { confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { confirmAlert, Alert, Image, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 interface WithSkillActionOptions<T> {
   confirm?: {
+    icon?: Image.ImageLike;
     title: string;
     message: string;
     primaryAction?: { title: string; style: Alert.ActionStyle };
@@ -25,6 +26,7 @@ export async function withSkillAction<T = void>({
 }: WithSkillActionOptions<T>): Promise<void> {
   if (confirmOpts) {
     const confirmed = await confirmAlert({
+      icon: confirmOpts.icon,
       title: confirmOpts.title,
       message: confirmOpts.message,
       primaryAction: confirmOpts.primaryAction ?? { title: "Confirm", style: Alert.ActionStyle.Default },

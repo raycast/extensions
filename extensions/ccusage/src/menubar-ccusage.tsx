@@ -234,7 +234,7 @@ export default function MenuBarccusage() {
                   )}
                 </>
               )}
-              {!limitsData && !limitsError && limitsLoading && (
+              {!limitsData && !limitsError && !limitsRateLimited && limitsLoading && (
                 <MenuBarExtra.Item title="Loading limits..." icon={Icon.Clock} />
               )}
             </MenuBarExtra.Section>

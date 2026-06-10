@@ -1,5 +1,9 @@
 # Tempo Changelog
 
+## [Add Autofocus to Worklog Duration] - 2026-06-05
+
+- Autofocus the Time Spent field when opening the Add Worklog form
+
 ## [Worklog Time Range Improvements] - 2026-06-03
 
 - Add optional start and end time entry when logging work and derive the duration automatically

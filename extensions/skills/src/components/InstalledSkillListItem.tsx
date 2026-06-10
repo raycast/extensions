@@ -13,6 +13,7 @@ import {
 } from "../shared";
 import type { MutateSkills } from "../hooks/useInstalledSkills";
 import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-display";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
@@ -247,6 +248,7 @@ function BaseInstalledSkillListItem({
           </ActionPanel.Section>
           {audits && <OpenSecurityAuditActions audits={audits.results} />}
           <ActionPanel.Section title="Copy">
+            <CopySkillContentsAction loadContent={() => readFile(join(skill.path, "SKILL.md"), "utf-8")} />
             <Action.CopyToClipboard
               title="Copy Skill Name"
               content={skill.name}

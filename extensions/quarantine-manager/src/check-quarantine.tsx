@@ -11,11 +11,14 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import {
+  DirectoryScan,
   getFinderSelection,
   getQuarantineStatus,
+  isDirectory,
   parseQuarantineData,
   parseQuarantineFlags,
   QuarantineStatus,
+  scanDirectory,
   XattrInfo,
 } from "./utils";
 
@@ -23,6 +26,7 @@ type State =
   | { type: "selecting" }
   | { type: "loading" }
   | { type: "ready"; status: QuarantineStatus }
+  | { type: "ready-dir"; scan: DirectoryScan }
   | { type: "error"; message: string };
 
 function buildQuarantineMarkdown(attr: XattrInfo): string {
@@ -86,6 +90,16 @@ function buildGenericMarkdown(attr: XattrInfo): string {
   }
 
   return md;
+}
+
+/** Wraps a raw com.apple.quarantine value as an XattrInfo for AttributeDetail. */
+function entryToXattr(value: string): XattrInfo {
+  return {
+    name: "com.apple.quarantine",
+    value,
+    isQuarantine: true,
+    isDangerous: true,
+  };
 }
 
 function AttributeDetail({
@@ -205,14 +219,23 @@ export default function CheckQuarantine() {
 
   async function loadFile(filePath: string) {
     setState({ type: "loading" });
+    const scanningDir = isDirectory(filePath);
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Reading attributes…",
+      title: scanningDir
+        ? "Scanning for quarantined files…"
+        : "Reading attributes…",
     });
     try {
-      const status = getQuarantineStatus(filePath);
-      await toast.hide();
-      setState({ type: "ready", status });
+      if (scanningDir) {
+        const scan = scanDirectory(filePath);
+        await toast.hide();
+        setState({ type: "ready-dir", scan });
+      } else {
+        const status = getQuarantineStatus(filePath);
+        await toast.hide();
+        setState({ type: "ready", status });
+      }
     } catch (err) {
       await toast.hide();
       const message = err instanceof Error ? err.message : String(err);
@@ -263,6 +286,152 @@ export default function CheckQuarantine() {
           </ActionPanel>
         }
       />
+    );
+  }
+
+  // ─── Directory scan state ─────────────────────────────────────────────────
+
+  if (state.type === "ready-dir") {
+    const { scan } = state;
+    const kind = scan.isApp ? "app" : "folder";
+    const scopeNote =
+      scan.scanMode === "recursive"
+        ? "recursive scan"
+        : "immediate contents only";
+    const total = scan.entries.length + (scan.rootQuarantineData ? 1 : 0);
+
+    const selectDifferentFileDir: Action.Props = {
+      title: "Select Different File",
+      icon: Icon.Folder,
+      shortcut: { modifiers: ["cmd"], key: "o" },
+      onAction: () => selectFile(true),
+    };
+
+    return (
+      <List searchBarPlaceholder="Filter quarantined items…">
+        <List.Section title="Summary">
+          <List.Item
+            title={scan.name}
+            subtitle={scan.path}
+            icon={
+              total > 0
+                ? { source: Icon.Lock, tintColor: Color.Red }
+                : { source: Icon.Checkmark, tintColor: Color.Green }
+            }
+            accessories={[
+              {
+                tag: {
+                  value: total > 0 ? `${total} quarantined` : "No quarantine",
+                  color: total > 0 ? Color.Red : Color.Green,
+                },
+              },
+              { text: `${kind} · ${scopeNote}` },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Path" content={scan.path} />
+                <Action.CopyToClipboard
+                  title="Copy Recursive Remove Command"
+                  content={`xattr -dr com.apple.quarantine "${scan.path}"`}
+                />
+                <Action {...selectDifferentFileDir} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+
+        {scan.rootQuarantineData && (
+          <List.Section title={scan.isApp ? "Bundle" : "Folder"}>
+            <List.Item
+              title={`${scan.name} (itself)`}
+              subtitle={parseQuarantineFlags(scan.rootQuarantineData)}
+              icon={{ source: Icon.Lock, tintColor: Color.Red }}
+              accessories={[{ tag: { value: "Security", color: Color.Red } }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Details"
+                    icon={Icon.Eye}
+                    target={
+                      <AttributeDetail
+                        attr={entryToXattr(scan.rootQuarantineData)}
+                        filePath={scan.path}
+                      />
+                    }
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Value"
+                    content={scan.rootQuarantineData}
+                  />
+                  <Action {...selectDifferentFileDir} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        )}
+
+        {scan.entries.length > 0 ? (
+          <List.Section title={`Quarantined Files (${scan.entries.length})`}>
+            {scan.entries.map((entry) => (
+              <List.Item
+                key={entry.path}
+                title={entry.relativePath}
+                subtitle={
+                  entry.quarantineData
+                    ? parseQuarantineFlags(entry.quarantineData)
+                    : undefined
+                }
+                icon={{ source: Icon.Lock, tintColor: Color.Red }}
+                accessories={[
+                  { tag: { value: "Quarantined", color: Color.Red } },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={
+                        <AttributeDetail
+                          attr={entryToXattr(entry.quarantineData ?? "")}
+                          filePath={entry.path}
+                        />
+                      }
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Path"
+                      content={entry.path}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Remove Command"
+                      content={`xattr -d com.apple.quarantine "${entry.path}"`}
+                    />
+                    <Action {...selectDifferentFileDir} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ) : (
+          !scan.rootQuarantineData && (
+            <List.Section title="Result">
+              <List.Item
+                title={`No quarantined files found in this ${kind}`}
+                subtitle={
+                  scan.scanMode === "shallow"
+                    ? "Only immediate contents were scanned"
+                    : undefined
+                }
+                icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+                actions={
+                  <ActionPanel>
+                    <Action {...selectDifferentFileDir} />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          )
+        )}
+      </List>
     );
   }
 

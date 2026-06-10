@@ -84,6 +84,16 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
+
+function macApplicationPath(appName: string, ...segments: string[]) {
+  const candidates = [
+    path.join("/Applications", appName, ...segments),
+    path.join(os.homedir(), "Applications", appName, ...segments),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
 function cliPaths(): Record<string, string> {
   let cliPaths: Record<string, string> = {};
 
@@ -109,20 +119,34 @@ function cliPaths(): Record<string, string> {
 
   if (isMac) {
     cliPaths = {
-      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
-      Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-      "IBM Bob": "/Applications/IBM Bob.app/Contents/Resources/app/bin/bobide",
-      Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
-      Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
-      Qoder: "/Applications/Qoder.app/Contents/Resources/app/bin/code",
-      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
-      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
-      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
-      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
-      Lingma: "/Applications/Lingma.app/Contents/Resources/app/bin/code",
+      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app", "bin", "antigravity"),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code"),
+      "Code - Insiders": macApplicationPath(
+        "Visual Studio Code - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "code",
+      ),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app", "bin", "cursor"), // it also has code, which is an alias
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app", "bin", "bobide"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app", "bin", "kiro"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app", "bin", "code"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app", "bin", "code"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app", "bin", "marscode"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app", "bin", "marscode"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app", "bin", "codium"),
+      "VSCodium - Insiders": macApplicationPath(
+        "VSCodium - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "codium-insiders",
+      ),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app", "bin", "windsurf"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app", "bin", "code"),
     };
   }
 
@@ -163,20 +187,20 @@ function programPaths(): Record<string, string> {
 
   if (isMac) {
     programPaths = {
-      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app",
-      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app",
-      Cursor: "/Applications/Cursor.app/Contents/Resources/app",
-      "IBM Bob": "/Applications/IBM Bob.app/Contents/Resources/app",
-      Kiro: "/Applications/Kiro.app/Contents/Resources/app",
-      Positron: "/Applications/Positron.app/Contents/Resources/app",
-      Qoder: "/Applications/Qoder.app/Contents/Resources/app",
-      Trae: "/Applications/Trae.app/Contents/Resources/app",
-      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app",
-      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app",
-      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app",
-      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app",
-      Lingma: "/Applications/Lingma.app/Contents/Resources/app",
+      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app"),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app"),
+      "Code - Insiders": macApplicationPath("Visual Studio Code - Insiders.app", "Contents", "Resources", "app"),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app"),
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app"),
+      "VSCodium - Insiders": macApplicationPath("VSCodium - Insiders.app", "Contents", "Resources", "app"),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app"),
     };
   }
 
