@@ -4,7 +4,7 @@ All notable changes to the Cloudflare Images extension live here. The Raycast
 Store displays the latest section as the extension's "What's New" copy on the
 listing page, so keep the most recent release at the top.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-10
 
 - Upload images straight to Cloudflare Images from your clipboard or Finder selection, with the formatted URL pasted at your cursor (or copied, your choice).
 - Browse, search, and delete your uploaded images from the **My Cloudflare Images** list, including custom metadata as searchable keywords.
