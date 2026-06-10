@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Add Spark email source] - {PR_MERGE_DATE}
+
+- Add support for Spark Desktop as an email source for 2FA code detection.
+
 ## [Fix invalid verification links] - 2026-05-28
 
 - Ignore unsupported verification link URLs before rendering them in the list.

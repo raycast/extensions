@@ -25,7 +25,7 @@ export interface Preferences {
 export type SearchType = "all" | "code";
 
 export type MessageSource = "all" | "imessage" | "email";
-export type EmailSource = "applemail" | "gmail";
+export type EmailSource = "applemail" | "gmail" | "spark";
 
 export interface VerificationLink {
   url: string;

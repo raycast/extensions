@@ -9,6 +9,7 @@ import { calculateLookBackMinutes, extractCode, extractVerificationLink } from "
 import { useState, useEffect, useCallback, useRef } from "react";
 import { runAppleScript } from "@raycast/utils";
 import { getGmailMessages, checkGmailAuth, processGmailContent } from "./gmail";
+import { getSparkMessages, checkSparkAvailable } from "./spark";
 import { ErrorView } from "./components/ErrorView";
 import React from "react";
 
@@ -280,6 +281,37 @@ export function useEmails(options: UseEmailsOptions) {
                 icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
                 title: "Gmail Error",
                 description: "Failed to fetch messages from Gmail. Please try again.",
+              })
+            );
+            return;
+          }
+        } else if (emailSource === "spark") {
+          try {
+            const isAvailable = await checkSparkAvailable();
+            if (!isAvailable) {
+              setData([]);
+              setPermissionView(
+                React.createElement(ErrorView, {
+                  icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+                  title: "Spark Not Available",
+                  description: [
+                    "Spark CLI not working. Please make sure Spark Desktop is installed and CLI is enabled:",
+                    "1. Launch Spark Desktop on your Mac",
+                    "2. Go to Settings > AI Agents",
+                    "3. Click Enable agent access",
+                  ].join(" "),
+                })
+              );
+              return;
+            }
+            emails = await getSparkMessages(options.searchType, cutoffTime);
+          } catch (error) {
+            setData([]);
+            setPermissionView(
+              React.createElement(ErrorView, {
+                icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+                title: "Spark Error",
+                description: "Failed to fetch messages from Spark. Please try again.",
               })
             );
             return;

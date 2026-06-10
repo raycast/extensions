@@ -12,7 +12,8 @@
     "hitolaus",
     "taschaub",
     "omaerkhan",
-    "clins1994"
+    "clins1994",
+    "CaffeineCat"
   ],
   "pastContributors": [
     "navtoj"
@@ -68,6 +69,10 @@
         {
           "title": "Gmail",
           "value": "gmail"
+        },
+        {
+          "title": "Spark Desktop",
+          "value": "spark"
         }
       ]
     },
