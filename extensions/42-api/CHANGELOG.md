@@ -1,6 +1,6 @@
 # 42 API Changelog
 
-## OAuth Token Refresh - {PR_MERGE_DATE}
+## OAuth Token Refresh - 2026-06-10
 
 ### Features
 
