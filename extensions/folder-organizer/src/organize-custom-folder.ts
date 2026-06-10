@@ -54,13 +54,11 @@ export default async function main() {
 
     if (analysisResult.total_files === 0) {
       const skippedProjectCount = analysisResult.skipped_projects?.length || 0;
+      const skippedFolderCount = analysisResult.skipped_folders?.length || 0;
       await showToast({
-        style: Toast.Style.Success,
+        style: skippedFolderCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
         title: "Folder already clean",
-        message:
-          skippedProjectCount > 0
-            ? `No files need sorting. Skipped ${skippedProjectCount} ${skippedProjectCount === 1 ? "project" : "projects"}.`
-            : "No files need to be sorted!",
+        message: formatSkippedSummary(skippedProjectCount, skippedFolderCount) || "No files need to be sorted!",
       });
       return;
     }
@@ -76,13 +74,11 @@ export default async function main() {
 
     const confirmed = await confirmAlert({
       title: `Sort ${analysisResult.total_files} files?`,
-      message: `Files in "${path.basename(folderPath)}" will be moved into folders:\n\n${categoryList}${
-        analysisResult.skipped_projects?.length
-          ? `\n\nSkipped ${analysisResult.skipped_projects.length} detected ${
-              analysisResult.skipped_projects.length === 1 ? "project" : "projects"
-            }.`
-          : ""
-      }`,
+      message: `Files in "${path.basename(folderPath)}" will be moved into folders:\n\n${categoryList}${formatSkippedSummary(
+        analysisResult.skipped_projects?.length || 0,
+        analysisResult.skipped_folders?.length || 0,
+        "\n\n",
+      )}`,
       primaryAction: {
         title: "Sort Files",
         style: Alert.ActionStyle.Destructive,
@@ -121,7 +117,11 @@ export default async function main() {
     sortingToast.title = "✅ Folder organized!";
     sortingToast.message = `Sorted ${sortResult.total_moved || 0} files into ${
       sortResult.categories_created?.length || 0
-    } folders`;
+    } folders${formatSkippedSummary(
+      sortResult.skipped_projects?.length || 0,
+      sortResult.skipped_folders?.length || 0,
+      ". ",
+    )}`;
 
     // Offer to open the organized folder
     const openFolder = await confirmAlert({
@@ -147,4 +147,17 @@ export default async function main() {
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
+}
+
+function formatSkippedSummary(projectCount: number, folderCount: number, prefix = ""): string {
+  const parts: string[] = [];
+
+  if (projectCount > 0) {
+    parts.push(`Skipped ${projectCount} detected ${projectCount === 1 ? "project" : "projects"}`);
+  }
+  if (folderCount > 0) {
+    parts.push(`Could not scan ${folderCount} ${folderCount === 1 ? "folder" : "folders"}`);
+  }
+
+  return parts.length > 0 ? `${prefix}${parts.join(". ")}.` : "";
 }

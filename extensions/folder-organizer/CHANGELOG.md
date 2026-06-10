@@ -9,6 +9,7 @@
 - Added support for deleting folders that contain only system metadata such as `.DS_Store`
 - Added clear reporting for folders that cannot be scanned because of permissions
 - Improved duplicate filename handling and protection for existing category folders and symbolic links
+- Improved partial cleanup reporting when folders change or cannot be deleted
 
 ## [Initial Release] - 2025-10-02
 

@@ -98,15 +98,13 @@ export default async function main() {
       return;
     }
 
-    deletionToast.style = Toast.Style.Success;
-    deletionToast.title = "Empty folders deleted";
+    const skippedFolders = [...analysisResult.skipped_folders, ...deletionResult.skipped_folders];
+    deletionToast.style = skippedFolders.length > 0 ? Toast.Style.Failure : Toast.Style.Success;
+    deletionToast.title =
+      skippedFolders.length > 0 ? "Cleanup completed with skipped folders" : "Empty folders deleted";
     deletionToast.message = `Deleted ${deletionResult.total_folders} ${
       deletionResult.total_folders === 1 ? "folder" : "folders"
-    }${
-      analysisResult.skipped_folders.length > 0
-        ? `. ${formatSkippedFoldersForToast(analysisResult.skipped_folders)}`
-        : ""
-    }`;
+    }${skippedFolders.length > 0 ? `. ${formatSkippedFoldersForToast(skippedFolders)}` : ""}`;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

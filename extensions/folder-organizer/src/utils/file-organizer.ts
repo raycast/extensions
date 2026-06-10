@@ -52,8 +52,14 @@ export interface OrganizeResult {
   categories_created?: string[];
   moved_files?: string[];
   skipped_projects?: string[];
+  skipped_folders?: SkippedFolder[];
   success: boolean;
   error?: string;
+}
+
+export interface SkippedFolder {
+  path: string;
+  reason: string;
 }
 
 interface FileToOrganize {
@@ -65,20 +71,36 @@ interface FileToOrganize {
 interface ScanResult {
   files: FileToOrganize[];
   skippedProjects: string[];
+  skippedFolders: SkippedFolder[];
+}
+
+function isProjectMarker(entry: fs.Dirent): boolean {
+  if (PROJECT_MARKER_NAMES.has(entry.name)) {
+    return true;
+  }
+
+  if (entry.isDirectory() && PROJECT_SOURCE_DIRECTORY_NAMES.has(entry.name.toLowerCase())) {
+    return true;
+  }
+
+  return PROJECT_FILE_EXTENSIONS.has(path.extname(entry.name).toLowerCase());
 }
 
 function isProjectFolder(entries: fs.Dirent[]): boolean {
-  return entries.some((entry) => {
-    if (PROJECT_MARKER_NAMES.has(entry.name)) {
-      return true;
+  return entries.some(isProjectMarker);
+}
+
+function getErrorReason(error: unknown): string {
+  if (error instanceof Error) {
+    const errorWithCode = error as NodeJS.ErrnoException;
+    if (errorWithCode.code === "EACCES" || errorWithCode.code === "EPERM") {
+      return "Permission denied";
     }
 
-    if (entry.isDirectory() && PROJECT_SOURCE_DIRECTORY_NAMES.has(entry.name.toLowerCase())) {
-      return true;
-    }
+    return error.message;
+  }
 
-    return PROJECT_FILE_EXTENSIONS.has(path.extname(entry.name).toLowerCase());
-  });
+  return "Unknown error";
 }
 
 /**
@@ -91,16 +113,27 @@ function getFilesToOrganize(
 ): ScanResult {
   const filesToOrganize: FileToOrganize[] = [];
   const skippedProjects: string[] = [];
+  const skippedFolders: SkippedFolder[] = [];
   const categoryFolders = new Set(Object.keys(fileTypes));
   const mode = options.mode ?? "root";
 
   function scanFolder(currentPath: string, isRoot: boolean) {
-    const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+    let entries: fs.Dirent[];
+
+    try {
+      entries = fs.readdirSync(currentPath, { withFileTypes: true });
+    } catch (error) {
+      skippedFolders.push({
+        path: path.relative(folderPath, currentPath) || ".",
+        reason: getErrorReason(error),
+      });
+      return;
+    }
 
     // Full organization leaves project trees untouched, including dependencies
-    // and generated files.
-    if (mode === "full" && isProjectFolder(entries)) {
-      skippedProjects.push(path.relative(folderPath, currentPath) || ".");
+    // and generated files. The selected root itself is always scanned.
+    if (mode === "full" && !isRoot && isProjectFolder(entries)) {
+      skippedProjects.push(path.relative(folderPath, currentPath));
       return;
     }
 
@@ -110,6 +143,13 @@ function getFilesToOrganize(
       }
 
       const entryPath = path.join(currentPath, entry.name);
+
+      // A root can contain loose files alongside a project. Preserve its
+      // project markers and infrastructure while organizing the loose files.
+      if (mode === "full" && isRoot && isProjectMarker(entry)) {
+        skippedProjects.push(entry.name);
+        continue;
+      }
 
       if (entry.isDirectory()) {
         if (mode === "full" && !(isRoot && categoryFolders.has(entry.name))) {
@@ -132,6 +172,7 @@ function getFilesToOrganize(
   return {
     files: filesToOrganize,
     skippedProjects,
+    skippedFolders,
   };
 }
 
@@ -185,7 +226,7 @@ export function analyzeFolder(
   options: OrganizeOptions = {},
 ): OrganizeResult {
   try {
-    const { files, skippedProjects } = getFilesToOrganize(folderPath, fileTypes, options);
+    const { files, skippedProjects, skippedFolders } = getFilesToOrganize(folderPath, fileTypes, options);
     const categories = categorizeFiles(files, fileTypes);
 
     // Convert file lists to counts for analysis
@@ -198,6 +239,7 @@ export function analyzeFolder(
       total_files: files.length,
       categories: categoryCounts,
       skipped_projects: skippedProjects,
+      skipped_folders: skippedFolders,
       success: true,
     };
   } catch (error) {
@@ -219,7 +261,7 @@ export function organizeFolder(
   options: OrganizeOptions = {},
 ): OrganizeResult {
   try {
-    const { files, skippedProjects } = getFilesToOrganize(folderPath, fileTypes, options);
+    const { files, skippedProjects, skippedFolders } = getFilesToOrganize(folderPath, fileTypes, options);
 
     if (files.length === 0) {
       return {
@@ -228,6 +270,7 @@ export function organizeFolder(
         categories: {},
         categories_created: [],
         skipped_projects: skippedProjects,
+        skipped_folders: skippedFolders,
         success: true,
       };
     }
@@ -285,6 +328,7 @@ export function organizeFolder(
       categories_created: createdFolders,
       moved_files: movedFiles,
       skipped_projects: skippedProjects,
+      skipped_folders: skippedFolders,
       success: true,
     };
   } catch (error) {

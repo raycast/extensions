@@ -104,11 +104,12 @@ export function analyzeEmptyFolders(rootPath: string): EmptyFolderResult {
 }
 
 export function deleteEmptyFolders(rootPath: string, relativeFolders: string[]): EmptyFolderResult {
-  try {
-    const resolvedRootPath = path.resolve(rootPath);
-    const deletedFolders: string[] = [];
+  const resolvedRootPath = path.resolve(rootPath);
+  const deletedFolders: string[] = [];
+  const skippedFolders: SkippedFolder[] = [];
 
-    for (const relativeFolder of relativeFolders) {
+  for (const relativeFolder of relativeFolders) {
+    try {
       const folderPath = path.resolve(resolvedRootPath, relativeFolder);
 
       if (!folderPath.startsWith(`${resolvedRootPath}${path.sep}`)) {
@@ -116,16 +117,28 @@ export function deleteEmptyFolders(rootPath: string, relativeFolders: string[]):
       }
 
       if (!fs.existsSync(folderPath)) {
+        skippedFolders.push({
+          path: relativeFolder,
+          reason: "Folder no longer exists",
+        });
         continue;
       }
 
       const stats = fs.lstatSync(folderPath);
       if (!stats.isDirectory() || stats.isSymbolicLink()) {
+        skippedFolders.push({
+          path: relativeFolder,
+          reason: "Path is no longer a regular folder",
+        });
         continue;
       }
 
       const entries = fs.readdirSync(folderPath, { withFileTypes: true });
       if (entries.some((entry) => !entry.isFile() || !EMPTY_FOLDER_METADATA_FILES.has(entry.name))) {
+        skippedFolders.push({
+          path: relativeFolder,
+          reason: "Folder is no longer empty",
+        });
         continue;
       }
 
@@ -135,21 +148,18 @@ export function deleteEmptyFolders(rootPath: string, relativeFolders: string[]):
 
       fs.rmdirSync(folderPath);
       deletedFolders.push(relativeFolder);
+    } catch (error) {
+      skippedFolders.push({
+        path: relativeFolder,
+        reason: getErrorReason(error),
+      });
     }
-
-    return {
-      total_folders: deletedFolders.length,
-      folders: deletedFolders,
-      skipped_folders: [],
-      success: true,
-    };
-  } catch (error) {
-    return {
-      total_folders: 0,
-      folders: [],
-      skipped_folders: [],
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
   }
+
+  return {
+    total_folders: deletedFolders.length,
+    folders: deletedFolders,
+    skipped_folders: skippedFolders,
+    success: true,
+  };
 }

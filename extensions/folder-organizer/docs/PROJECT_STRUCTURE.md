@@ -121,6 +121,8 @@ getFilesToOrganize()
 - Deletes directories in deepest-first order.
 - Continues past unreadable directories and reports their paths and failure
   reasons to the user.
+- Reports partial deletion results when a confirmed folder changes or cannot be
+  deleted.
 
 ### `src/utils/folder-picker.ts`
 
@@ -160,6 +162,8 @@ Full organization follows these safety rules:
 - Do not follow symbolic-link directories.
 - Skip root-level category output folders during recursive scanning.
 - Skip detected software project folder trees.
+- Always scan the selected root while preserving root-level project markers and
+  infrastructure folders.
 - Preserve existing duplicate-name handling.
 - Keep empty source directories.
 - Use identical scanning rules for analysis and organization.
