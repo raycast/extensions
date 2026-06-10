@@ -6,9 +6,10 @@ import SubjectDetail from "@/components/SubjectDetail"
 import { OpenInBgmBrowser } from "@/components/actions"
 import { getImageUrl } from "@/shared/utils"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 
 const Calendar = () => {
+  const [selectedDay, setSelectedDay] = useState<string>("all")
   const abortable = useRef<AbortController>(null)
   const { data, isLoading } = usePromise(
     async () => {
@@ -21,35 +22,58 @@ const Calendar = () => {
   const todayId = new Date().getDay() || 7
 
   return (
-    <Grid isLoading={isLoading} searchBarPlaceholder="Search 'today' or '今天' to filter today's schedule">
-      {data?.map((day) => {
-        const isToday = day.weekday?.id === todayId
-        return (
-          <Grid.Section title={`${day.weekday?.en}${isToday ? " (Today)" : ""}`} key={day.weekday?.id}>
-            {day.items?.map((item) => {
-              return (
-                <Grid.Item
-                  key={item.id}
-                  keywords={isToday ? ["today", "今天"] : undefined}
-                  content={getImageUrl(item.images?.common) || Icon.Image}
-                  title={item.name_cn || item.name || `Subject ${item.id}`}
-                  subtitle={item.name}
-                  actions={
-                    <ActionPanel>
-                      <Action.Push
-                        title="Show Details"
-                        target={<SubjectDetail subjectId={item.id} />}
-                        icon={Icon.Sidebar}
-                      />
-                      <OpenInBgmBrowser url={item.url} path={`subject/${item.id}`} />
-                    </ActionPanel>
-                  }
-                />
-              )
-            })}
-          </Grid.Section>
-        )
-      })}
+    <Grid
+      isLoading={isLoading}
+      searchBarPlaceholder="Search subjects"
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Filter by Day" storeValue={true} onChange={setSelectedDay}>
+          <Grid.Dropdown.Item title="All" value="all" />
+          <Grid.Dropdown.Item title="Today" value="today" />
+          <Grid.Dropdown.Section title="Days">
+            <Grid.Dropdown.Item title="Monday" value="1" />
+            <Grid.Dropdown.Item title="Tuesday" value="2" />
+            <Grid.Dropdown.Item title="Wednesday" value="3" />
+            <Grid.Dropdown.Item title="Thursday" value="4" />
+            <Grid.Dropdown.Item title="Friday" value="5" />
+            <Grid.Dropdown.Item title="Saturday" value="6" />
+            <Grid.Dropdown.Item title="Sunday" value="7" />
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
+      }
+    >
+      {data
+        ?.filter((day) => {
+          if (selectedDay === "all") return true
+          if (selectedDay === "today") return day.weekday?.id === todayId
+          return day.weekday?.id?.toString() === selectedDay
+        })
+        .map((day) => {
+          const isToday = day.weekday?.id === todayId
+          return (
+            <Grid.Section title={`${day.weekday?.en}${isToday ? " (Today)" : ""}`} key={day.weekday?.id}>
+              {day.items?.map((item) => {
+                return (
+                  <Grid.Item
+                    key={item.id}
+                    content={getImageUrl(item.images?.common) || Icon.Image}
+                    title={item.name_cn || item.name || `Subject ${item.id}`}
+                    subtitle={item.name}
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="Show Details"
+                          target={<SubjectDetail subjectId={item.id} />}
+                          icon={Icon.Sidebar}
+                        />
+                        <OpenInBgmBrowser url={item.url} path={`subject/${item.id}`} />
+                      </ActionPanel>
+                    }
+                  />
+                )
+              })}
+            </Grid.Section>
+          )
+        })}
     </Grid>
   )
 }
