@@ -1,28 +1,10 @@
 # Linear Changelog
 
-<<<<<<< HEAD
-
 ## [Templates, Copy Title as Link, and Auth Fix] - {PR_MERGE_DATE}
 
 - Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138
 - Add a "Copy title as link" action to issue copy actions. Copy the issue title as a Markdown/HTML link for pasting into Slack and other apps, matching Linear’s native shortcut. See https://github.com/raycast/extensions/issues/28588
-- Fix initial OAuth connection failures where `fetch failed` shows Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
-
-## [Label Fetching] - 2026-06-09
-
-- Add an "API Label Limit" preference (default 100) so more labels can be fetched per team when creating or editing issues. Increase it if some labels are missing because your team has more than 100 labels.
-
-## [Confirmation Fixes] - 2026-05-15
-
-- Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
-
-## [OAuth Client Unification] - 2026-04-04
-
-||||||| 307a9c1
-
-## [OAuth Client Unification] - {PR_MERGE_DATE}
-
-=======
+- Fix initial OAuth connection failures that show Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
 
 ## [Set Priority shortcut] - 2026-06-10
 
@@ -37,8 +19,6 @@
 - Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
 
 ## [OAuth Client Unification] - 2026-04-04
-
-> > > > > > > contributions/merge-1781089023729
 
 - Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
 - Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.

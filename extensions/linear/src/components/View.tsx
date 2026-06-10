@@ -21,7 +21,7 @@ interface AuthErrorBoundaryState {
 }
 
 /**
- * Catches OAuth errors (e.g. fetch failed, invalid_grant) and shows a recoverable
+ * Catches OAuth errors (e.g. invalid_grant) and shows a recoverable
  * "Sign In" screen instead of Raycast's generic "Something went wrong" overlay.
  */
 class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, AuthErrorBoundaryState> {
@@ -42,8 +42,7 @@ class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, A
     const isAuthError =
       error.message.includes("invalid_grant") ||
       error.message.includes("Error while fetching tokens") ||
-      error.message.includes("Could not initialize OAuth") ||
-      error.message.includes("fetch failed");
+      error.message.includes("Could not initialize OAuth");
 
     // Re-throwing inside render() delegates to the next parent error boundary (Raycast's
     // top-level handler). This is intentional: we only want to intercept known auth errors
