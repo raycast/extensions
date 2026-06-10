@@ -2,20 +2,19 @@
 
 # raycast-bangumi
 
-A Raycast extension for Bangumi. Browse and manage your [bangumi.tv](https://bangumi.tv) progress directly within Raycast.
+A full-featured Bangumi([bangumi.tv](https://bangumi.tv)) client for Raycast. Manage collections, track progress, search subjects and characters, view daily schedules. Includes AI tools for Raycast AI.
 
 | [简体中文](./README_zh.md) | English |
 
 ## Features
 
-- **List Collections:** Display all your collections.
-- **List Current Collections:** Manage items with statuses like "Watching/Playing/Reading".
-- **Daily Calendar:** View the daily airing schedule.
-- **Search Subjects:** Search for subjects on Bangumi.
-- **Search Characters:** Search for characters on Bangumi.
-- **AI Tools:** Fully integrated with Raycast AI. Manage your progress and search for anime directly in AI chat.
-- **AI Translation:** Translate subject and character summaries powered by Raycast AI.
-
+* **Collections Management**: List and browse all your Bangumi collections.
+* **Current Status Tracking**: Manage items with statuses such as *Watching*, *Playing*, and *Reading*.
+* **Daily Calendar**: View the daily airing schedule of anime.
+* **Search Subjects**: Search for anime, books, and games on Bangumi.
+* **Search Characters**: Discover and search character profiles.
+* **AI Tools Integration**: Fully integrated with Raycast AI to manage progress and search content directly in chat.
+* **AI Translation**: Translate subject and character summaries using Raycast AI.
 
 | Subject Details | Daily Calendar |
 | - | - |

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bangumi",
-  "description": "Track your anime, game, and book progress from bangumi.tv directly in Raycast, with AI Tools support.",
+  "description": "A full-featured Bangumi client for Raycast. Manage collections, track progress, search subjects and characters, view daily schedules. Includes AI tools for Raycast AI.",
   "categories": [
     "Applications",
     "Productivity",
