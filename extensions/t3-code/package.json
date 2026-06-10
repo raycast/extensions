@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3-code",
+  "description": "Control T3 Code From Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "stream-json": "^3.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "setup-device",
+      "title": "Setup Device",
+      "description": "Lets You Add/Remove And Set Active Remote Device To Use T3 Code",
+      "subtitle": "Manage Remote Device Access To T3 Code"
+    },
+    {
+      "mode": "view",
+      "name": "t3-code-agents",
+      "title": "T3 Code Agents",
+      "description": "Search Projects and Threads, and Run Agents Across Multiple Threads from Raycast",
+      "subtitle": "Run Agents Across Projects In T3 Code Via Raycast"
+    }
+  ],
+  "title": "T3 Code",
+  "author": "adityavardhansharma",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
