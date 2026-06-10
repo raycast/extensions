@@ -1,5 +1,15 @@
 # Folder Organizer Changelog
 
+## [Recursive Organization and Empty Folder Cleanup] - {PR_MERGE_DATE}
+
+- Added **Root Only** and **Full Organization** modes for Downloads and custom folders
+- Added recursive file organization that collects files from nested folders
+- Added software project detection to keep project folders and their contents untouched
+- Added **Delete Empty Folders** command with a confirmation preview
+- Added support for deleting folders that contain only system metadata such as `.DS_Store`
+- Added clear reporting for folders that cannot be scanned because of permissions
+- Improved duplicate filename handling and protection for existing category folders and symbolic links
+
 ## [Initial Release] - 2025-10-02
 
 - **Organize Downloads Folder**: Automatically sort files in Downloads folder into categorized subfolders

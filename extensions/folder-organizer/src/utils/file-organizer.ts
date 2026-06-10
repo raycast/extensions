@@ -3,6 +3,47 @@ import path from "path";
 
 // System files to ignore (these should never be moved)
 const SYSTEM_FILES_TO_IGNORE = [".DS_Store", "Thumbs.db", "desktop.ini"];
+const PROJECT_MARKER_NAMES = new Set([
+  ".git",
+  ".hg",
+  ".svn",
+  ".idea",
+  ".venv",
+  "node_modules",
+  "package.json",
+  "deno.json",
+  "deno.jsonc",
+  "bun.lock",
+  "bun.lockb",
+  "Cargo.toml",
+  "go.mod",
+  "pyproject.toml",
+  "setup.py",
+  "setup.cfg",
+  "requirements.txt",
+  "Pipfile",
+  "poetry.lock",
+  "pom.xml",
+  "build.gradle",
+  "build.gradle.kts",
+  "settings.gradle",
+  "settings.gradle.kts",
+  "composer.json",
+  "Gemfile",
+  "mix.exs",
+  "pubspec.yaml",
+  "Package.swift",
+  "CMakeLists.txt",
+  "Makefile",
+]);
+const PROJECT_SOURCE_DIRECTORY_NAMES = new Set(["src", "source"]);
+const PROJECT_FILE_EXTENSIONS = new Set([".sln", ".csproj", ".fsproj", ".vbproj", ".vcxproj", ".xcodeproj"]);
+
+export type OrganizationMode = "root" | "full";
+
+export interface OrganizeOptions {
+  mode?: OrganizationMode;
+}
 
 export interface OrganizeResult {
   total_files: number;
@@ -10,49 +51,101 @@ export interface OrganizeResult {
   categories: Record<string, string[]> | Record<string, number>;
   categories_created?: string[];
   moved_files?: string[];
+  skipped_projects?: string[];
   success: boolean;
   error?: string;
+}
+
+interface FileToOrganize {
+  sourcePath: string;
+  fileName: string;
+  relativePath: string;
+}
+
+interface ScanResult {
+  files: FileToOrganize[];
+  skippedProjects: string[];
+}
+
+function isProjectFolder(entries: fs.Dirent[]): boolean {
+  return entries.some((entry) => {
+    if (PROJECT_MARKER_NAMES.has(entry.name)) {
+      return true;
+    }
+
+    if (entry.isDirectory() && PROJECT_SOURCE_DIRECTORY_NAMES.has(entry.name.toLowerCase())) {
+      return true;
+    }
+
+    return PROJECT_FILE_EXTENSIONS.has(path.extname(entry.name).toLowerCase());
+  });
 }
 
 /**
  * Get list of files that can be organized
  */
-function getFilesToOrganize(folderPath: string): string[] {
-  try {
-    const allFiles = fs.readdirSync(folderPath);
-    const filesToOrganize: string[] = [];
+function getFilesToOrganize(
+  folderPath: string,
+  fileTypes: Record<string, string[]>,
+  options: OrganizeOptions,
+): ScanResult {
+  const filesToOrganize: FileToOrganize[] = [];
+  const skippedProjects: string[] = [];
+  const categoryFolders = new Set(Object.keys(fileTypes));
+  const mode = options.mode ?? "root";
 
-    for (const file of allFiles) {
-      const filePath = path.join(folderPath, file);
+  function scanFolder(currentPath: string, isRoot: boolean) {
+    const entries = fs.readdirSync(currentPath, { withFileTypes: true });
 
-      // Skip directories
-      if (fs.statSync(filePath).isDirectory()) {
-        continue;
-      }
-
-      // Skip system files
-      if (SYSTEM_FILES_TO_IGNORE.includes(file)) {
-        continue;
-      }
-
-      filesToOrganize.push(file);
+    // Full organization leaves project trees untouched, including dependencies
+    // and generated files.
+    if (mode === "full" && isProjectFolder(entries)) {
+      skippedProjects.push(path.relative(folderPath, currentPath) || ".");
+      return;
     }
 
-    return filesToOrganize;
-  } catch (error) {
-    console.error("Error reading folder:", error);
-    return [];
+    for (const entry of entries) {
+      if (SYSTEM_FILES_TO_IGNORE.includes(entry.name) || entry.isSymbolicLink()) {
+        continue;
+      }
+
+      const entryPath = path.join(currentPath, entry.name);
+
+      if (entry.isDirectory()) {
+        if (mode === "full" && !(isRoot && categoryFolders.has(entry.name))) {
+          scanFolder(entryPath, false);
+        }
+        continue;
+      }
+
+      if (entry.isFile()) {
+        filesToOrganize.push({
+          sourcePath: entryPath,
+          fileName: entry.name,
+          relativePath: path.relative(folderPath, entryPath),
+        });
+      }
+    }
   }
+
+  scanFolder(folderPath, true);
+  return {
+    files: filesToOrganize,
+    skippedProjects,
+  };
 }
 
 /**
  * Categorize files based on their extensions
  */
-function categorizeFiles(files: string[], fileTypes: Record<string, string[]>): Record<string, string[]> {
-  const categories: Record<string, string[]> = {};
+function categorizeFiles(
+  files: FileToOrganize[],
+  fileTypes: Record<string, string[]>,
+): Record<string, FileToOrganize[]> {
+  const categories: Record<string, FileToOrganize[]> = {};
 
   for (const file of files) {
-    const fileExt = path.extname(file).toLowerCase();
+    const fileExt = path.extname(file.fileName).toLowerCase();
     let categoryFound = false;
 
     // Find matching category
@@ -86,9 +179,13 @@ function categorizeFiles(files: string[], fileTypes: Record<string, string[]>): 
 /**
  * Analyze what would be organized without moving files
  */
-export function analyzeFolder(folderPath: string, fileTypes: Record<string, string[]>): OrganizeResult {
+export function analyzeFolder(
+  folderPath: string,
+  fileTypes: Record<string, string[]>,
+  options: OrganizeOptions = {},
+): OrganizeResult {
   try {
-    const files = getFilesToOrganize(folderPath);
+    const { files, skippedProjects } = getFilesToOrganize(folderPath, fileTypes, options);
     const categories = categorizeFiles(files, fileTypes);
 
     // Convert file lists to counts for analysis
@@ -100,6 +197,7 @@ export function analyzeFolder(folderPath: string, fileTypes: Record<string, stri
     return {
       total_files: files.length,
       categories: categoryCounts,
+      skipped_projects: skippedProjects,
       success: true,
     };
   } catch (error) {
@@ -115,9 +213,13 @@ export function analyzeFolder(folderPath: string, fileTypes: Record<string, stri
 /**
  * Actually organize files into folders
  */
-export function organizeFolder(folderPath: string, fileTypes: Record<string, string[]>): OrganizeResult {
+export function organizeFolder(
+  folderPath: string,
+  fileTypes: Record<string, string[]>,
+  options: OrganizeOptions = {},
+): OrganizeResult {
   try {
-    const files = getFilesToOrganize(folderPath);
+    const { files, skippedProjects } = getFilesToOrganize(folderPath, fileTypes, options);
 
     if (files.length === 0) {
       return {
@@ -125,6 +227,7 @@ export function organizeFolder(folderPath: string, fileTypes: Record<string, str
         total_moved: 0,
         categories: {},
         categories_created: [],
+        skipped_projects: skippedProjects,
         success: true,
       };
     }
@@ -149,8 +252,8 @@ export function organizeFolder(folderPath: string, fileTypes: Record<string, str
 
       // Move files to category folder
       for (const file of filesInCategory) {
-        const srcPath = path.join(folderPath, file);
-        let dstPath = path.join(categoryPath, file);
+        const srcPath = file.sourcePath;
+        let dstPath = path.join(categoryPath, file.fileName);
 
         // Handle name conflicts
         let counter = 1;
@@ -165,7 +268,7 @@ export function organizeFolder(folderPath: string, fileTypes: Record<string, str
 
         // Move the file
         fs.renameSync(srcPath, dstPath);
-        movedFiles.push(file);
+        movedFiles.push(file.relativePath);
         totalMoved++;
       }
     }
@@ -173,9 +276,15 @@ export function organizeFolder(folderPath: string, fileTypes: Record<string, str
     return {
       total_files: files.length,
       total_moved: totalMoved,
-      categories,
+      categories: Object.fromEntries(
+        Object.entries(categories).map(([category, categoryFiles]) => [
+          category,
+          categoryFiles.map((file) => file.relativePath),
+        ]),
+      ),
       categories_created: createdFolders,
       moved_files: movedFiles,
+      skipped_projects: skippedProjects,
       success: true,
     };
   } catch (error) {

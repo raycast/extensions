@@ -3,6 +3,7 @@ import path from "path";
 import os from "os";
 import { loadCategories, categoriesToFileTypes } from "./utils/categories";
 import { analyzeFolder, organizeFolder } from "./utils/file-organizer";
+import { chooseOrganizationMode } from "./utils/organization-mode";
 
 export default async function main() {
   try {
@@ -11,6 +12,15 @@ export default async function main() {
     const fileTypes = categoriesToFileTypes(categories);
 
     const downloadsPath = path.join(os.homedir(), "Downloads");
+    const mode = await chooseOrganizationMode();
+
+    if (!mode) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Organization cancelled",
+      });
+      return;
+    }
 
     // First, analyze files to get count
     const analysisToast = await showToast({
@@ -18,7 +28,7 @@ export default async function main() {
       title: "Scanning Downloads folder...",
     });
 
-    const analysisResult = analyzeFolder(downloadsPath, fileTypes);
+    const analysisResult = analyzeFolder(downloadsPath, fileTypes, { mode });
     analysisToast.hide();
 
     if (!analysisResult.success) {
@@ -31,10 +41,14 @@ export default async function main() {
     }
 
     if (analysisResult.total_files === 0) {
+      const skippedProjectCount = analysisResult.skipped_projects?.length || 0;
       await showToast({
         style: Toast.Style.Success,
         title: "Downloads already clean",
-        message: "No files need to be sorted!",
+        message:
+          skippedProjectCount > 0
+            ? `No files need sorting. Skipped ${skippedProjectCount} ${skippedProjectCount === 1 ? "project" : "projects"}.`
+            : "No files need to be sorted!",
       });
       return;
     }
@@ -50,7 +64,13 @@ export default async function main() {
 
     const confirmed = await confirmAlert({
       title: `Sort ${analysisResult.total_files} files?`,
-      message: `Files will be moved into folders:\n\n${categoryList}`,
+      message: `Files will be moved into folders:\n\n${categoryList}${
+        analysisResult.skipped_projects?.length
+          ? `\n\nSkipped ${analysisResult.skipped_projects.length} detected ${
+              analysisResult.skipped_projects.length === 1 ? "project" : "projects"
+            }.`
+          : ""
+      }`,
       primaryAction: {
         title: "Sort Files",
         style: Alert.ActionStyle.Destructive,
@@ -75,7 +95,7 @@ export default async function main() {
       title: "Sorting files...",
     });
 
-    const sortResult = organizeFolder(downloadsPath, fileTypes);
+    const sortResult = organizeFolder(downloadsPath, fileTypes, { mode });
 
     if (!sortResult.success) {
       sortingToast.style = Toast.Style.Failure;

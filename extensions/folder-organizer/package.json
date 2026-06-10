@@ -45,6 +45,13 @@
       "description": "Configure and customize file organization categories",
       "icon": "change_categories.png",
       "mode": "view"
+    },
+    {
+      "name": "delete-empty-folders",
+      "title": "Delete Empty Folders",
+      "description": "Choose a folder and recursively delete its empty subfolders",
+      "icon": "delete_folder.png",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -65,5 +72,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "tcyt56vdyc"
+  ]
 }
