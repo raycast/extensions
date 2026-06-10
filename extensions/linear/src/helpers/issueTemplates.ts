@@ -26,6 +26,7 @@ export type CreateIssueTemplateValues = {
   dueDate: Date | null;
   cycleId: string;
   projectId: string;
+  milestoneId: string;
 };
 
 export function getEmptyTemplateFieldValues(
@@ -42,6 +43,7 @@ export function getEmptyTemplateFieldValues(
     dueDate: null,
     cycleId: "",
     projectId: "",
+    milestoneId: "",
     ...overrides,
   };
 }
@@ -103,5 +105,6 @@ export function getCreateIssueValuesFromTemplate(template: IssueTemplateResult):
     dueDate: data.dueDate !== undefined ? (getDueDate(data.dueDate) ?? null) : defaults.dueDate,
     cycleId: getString(data.cycleId) ?? defaults.cycleId,
     projectId: getString(data.projectId) ?? defaults.projectId,
+    milestoneId: defaults.milestoneId,
   };
 }

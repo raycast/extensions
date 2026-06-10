@@ -286,6 +286,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           assigneeId: props.assigneeId || "",
           cycleId: props.cycleId || "",
           projectId: props.projectId || "",
+          milestoneId: props.milestoneId || "",
         });
 
     setValue("title", templateValues.title);
@@ -298,7 +299,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     setValue("dueDate", templateValues.dueDate);
     setValue("cycleId", templateValues.cycleId);
     setValue("projectId", templateValues.projectId);
-    setValue("milestoneId", "");
+    setValue("milestoneId", templateValues.milestoneId ?? "");
   }
 
   const team = teams?.find((team) => team.id === values.teamId);
