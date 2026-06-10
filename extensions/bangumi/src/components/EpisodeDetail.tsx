@@ -18,7 +18,7 @@ export default function EpisodeDetail({ episode }: EpisodeDetailProps) {
 
   const markdown = `
 # ${title}
-${originalTitle && originalTitle !== title ? `> ${originalTitle}` : ""}
+${originalTitle && originalTitle !== title ? `<sup>${originalTitle}</sup>` : ""}
 
 ${episode.desc ? formatSummary(episode.desc) : "*No description provided.*"}
 ${getTranslationMarkdown(isTranslating, translatedText, formatSummary)}
