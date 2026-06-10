@@ -1,5 +1,10 @@
 # Cobalt Changelog
 
+## [Review Fixes] - {PR_MERGE_DATE}
+
+- Force re-auth when the access token is expired and no refresh token is available (or refresh fails)
+- Drop the shared Brandfetch client ID default; the field is now opt-in so users don't share the author's quota
+
 ## [API Sync] - {PR_MERGE_DATE}
 
 - Realign to current `/v1` public API schemas via generated `api-types.ts` (`bun run gen:api`)

@@ -12,6 +12,7 @@
     "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "gen:api": "openapi-typescript ../server/openapi.json -o src/api-types.ts",
     "lint": "ray lint"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.36.0",
+    "openapi-typescript": "^7.4.4",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
@@ -184,8 +186,7 @@
       "type": "textfield",
       "required": false,
       "title": "Brandfetch Client ID",
-      "description": "Used to render merchant logos via the Brandfetch CDN",
-      "default": "1idNVtuBlzoaNohNxPI"
+      "description": "Optional. Provide your own Brandfetch client ID to render merchant logos via the Brandfetch CDN. Leave blank to fall back to generic icons."
     },
     {
       "name": "logoDevToken",

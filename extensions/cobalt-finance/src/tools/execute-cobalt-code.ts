@@ -103,7 +103,9 @@ async function readMcpResponse(
   } finally {
     try {
       await reader.cancel();
-    } catch {}
+    } catch {
+      // ignore cancel errors
+    }
   }
 
   throw new Error("MCP stream ended without a matching response");
