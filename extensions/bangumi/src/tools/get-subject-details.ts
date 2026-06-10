@@ -14,7 +14,7 @@ type Input = {
 const tool = async (input: Input) => {
   const [result, collection] = await Promise.all([
     bangumi.getSubjectById({ subjectId: input.subjectId }),
-    bangumi.getSubjectCollection({ subjectId: input.subjectId }).catch(() => null),
+    bangumi.getSubjectCollection({ subjectId: input.subjectId }),
   ])
 
   const baseMd = formatSubjectToMarkdown(result)

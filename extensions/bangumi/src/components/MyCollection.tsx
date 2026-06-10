@@ -101,7 +101,7 @@ export default function MyCollection({ filterType }: MyCollectionProps) {
                           subjectName={item.subject?.name}
                           subjectNameCn={item.subject?.name_cn}
                           epStatus={item.ep_status}
-                          totalEps={item.subject?.eps || 0}
+                          totalEps={item.subject?.eps}
                         />
                       }
                     />

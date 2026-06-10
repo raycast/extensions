@@ -1,17 +1,18 @@
-import { ActionPanel, Grid, showToast, Toast } from "@raycast/api"
+import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api"
 import { usePromise, showFailureToast } from "@raycast/utils"
 import { useState } from "react"
 import { bangumi } from "@/api/bangumi"
 import { EpisodeCollectionType, EpisodeType } from "@/shared/const"
 import type { components } from "@/types/generated"
-import { EpisodeStatusActions, OpenInBgmBrowser } from "./actions"
+import { EpisodeStatusActions } from "./actions"
+import EpisodeDetail from "./EpisodeDetail"
 
 interface ProgressViewerProps {
   subjectId: number
   subjectName?: string
   subjectNameCn?: string
   epStatus: number
-  totalEps: number
+  totalEps?: number
 }
 
 const EPISODE_COLLECTION_NAME: Record<EpisodeCollectionType, string> = {
@@ -87,6 +88,18 @@ const buildEpisodeIcon = (text: string, appearance: EpAppearance): string => {
   return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
+const fetchTotalMainEpisodes = async (subjectId: number): Promise<number | undefined> => {
+  try {
+    const response = await bangumi.getUserSubjectEpisodeCollection({
+      subjectId,
+      query: { limit: 1, offset: 0, episode_type: EpisodeType.Main },
+    })
+    return response.total
+  } catch {
+    return undefined
+  }
+}
+
 export default function ProgressViewer({
   subjectId,
   subjectName,
@@ -94,24 +107,40 @@ export default function ProgressViewer({
   epStatus,
   totalEps,
 }: ProgressViewerProps) {
+  const [fetchedTotalEps, setFetchedTotalEps] = useState<number | undefined>()
+
   const {
-    data: currentCollection,
+    data: episodes = [],
     isLoading,
     mutate,
-  } = usePromise(() => bangumi.getUserSubjectEpisodeCollection({ subjectId }), [])
-  const episodes = currentCollection?.data ?? []
+    pagination,
+  } = usePromise(
+    (id: number, eps?: number) => async (options: { page: number }) => {
+      const limit = 100
+      const offset = options.page * limit
+      const { data = [], total } = await bangumi.getUserSubjectEpisodeCollection({
+        subjectId: id,
+        query: { limit, offset },
+      })
+      if (options.page === 0 && !eps) {
+        fetchTotalMainEpisodes(id).then(setFetchedTotalEps)
+      }
+      return {
+        data,
+        hasMore: offset + limit < total,
+      }
+    },
+    [subjectId, totalEps]
+  )
 
   const handleUpdateStatus = async (episodeId: number, status: EpisodeCollectionType) => {
-    if (!currentCollection) return
+    if (episodes.length === 0) return
     const toast = await showToast({ style: Toast.Style.Animated, title: "Updating status..." })
     try {
       await mutate(bangumi.updateEpisodeCollection({ episodeId, type: status }), {
         optimisticUpdate: (currentData) => {
-          const dataToUpdate = currentData ?? currentCollection
-          return {
-            ...dataToUpdate,
-            data: dataToUpdate.data?.map((item) => (item.episode.id === episodeId ? { ...item, type: status } : item)),
-          }
+          const dataToUpdate = currentData ?? episodes
+          return dataToUpdate.map((item) => (item.episode.id === episodeId ? { ...item, type: status } : item))
         },
       })
       toast.style = Toast.Style.Success
@@ -122,17 +151,14 @@ export default function ProgressViewer({
   }
 
   const handleBatchUpdateStatus = async (episodesToUpdate: number[], status: EpisodeCollectionType) => {
-    if (!currentCollection) return
+    if (episodes.length === 0) return
     const toast = await showToast({ style: Toast.Style.Animated, title: "Batch updating status..." })
     try {
       const idsSet = new Set(episodesToUpdate)
       await mutate(bangumi.updateSubjectEpisodesCollection({ subjectId, episodeIds: episodesToUpdate, type: status }), {
         optimisticUpdate: (currentData) => {
-          const dataToUpdate = currentData ?? currentCollection
-          return {
-            ...dataToUpdate,
-            data: dataToUpdate.data?.map((item) => (idsSet.has(item.episode.id) ? { ...item, type: status } : item)),
-          }
+          const dataToUpdate = currentData ?? episodes
+          return dataToUpdate.map((item) => (idsSet.has(item.episode.id) ? { ...item, type: status } : item))
         },
       })
       toast.style = Toast.Style.Success
@@ -142,12 +168,17 @@ export default function ProgressViewer({
     }
   }
 
-  const title = subjectNameCn || subjectName
-  const displayEpStatus = !isLoading
-    ? episodes.filter((ep) => ep.episode.type === EpisodeType.Main && ep.type === EpisodeCollectionType.Watched).length
-    : epStatus
+  const actualTotalEps = totalEps || fetchedTotalEps
 
-  const percent = totalEps > 0 ? Math.round((displayEpStatus / totalEps) * 100) : 0
+  const title = subjectNameCn || subjectName
+  const displayEpStatus =
+    episodes.length > 0
+      ? episodes.filter((ep) => ep.episode.type === EpisodeType.Main && ep.type === EpisodeCollectionType.Watched)
+          .length
+      : epStatus
+
+  const percent = actualTotalEps ? parseFloat(((displayEpStatus / actualTotalEps) * 100).toFixed(1)) : 0
+  const progressText = actualTotalEps ? `${displayEpStatus}/${actualTotalEps} (${percent}%)` : `${displayEpStatus}`
 
   const sortedEps = [...episodes].sort((a, b) => {
     if (a.episode.type !== b.episode.type) {
@@ -184,10 +215,11 @@ export default function ProgressViewer({
   return (
     <Grid
       isLoading={isLoading}
-      navigationTitle={`${title} · ${displayEpStatus}/${totalEps} (${percent}%)`}
+      navigationTitle={`${title} · ${progressText}`}
       columns={8}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarPlaceholder={searchPlaceholder}
+      pagination={pagination}
     >
       {sortedTypes.map((type) => (
         <Grid.Section key={type} title={EP_TYPE_PREFIX[type] || "Other"}>
@@ -207,9 +239,11 @@ export default function ProgressViewer({
                 keywords={[epLabel, epTitle]}
                 actions={
                   <ActionPanel>
-                    {statusType === EpisodeCollectionType.Watched && (
-                      <OpenInBgmBrowser path={`ep/${ep.episode.id}`} isPrimary />
-                    )}
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.BlankDocument}
+                      target={<EpisodeDetail episode={ep.episode} />}
+                    />
                     <EpisodeStatusActions
                       episode={ep.episode}
                       statusType={statusType}
@@ -217,11 +251,6 @@ export default function ProgressViewer({
                       onBatchUpdateStatus={handleBatchUpdateStatus}
                       sortedEps={sortedEps}
                     />
-                    {statusType !== EpisodeCollectionType.Watched && (
-                      <ActionPanel.Section>
-                        <OpenInBgmBrowser path={`ep/${ep.episode.id}`} />
-                      </ActionPanel.Section>
-                    )}
                   </ActionPanel>
                 }
               />
