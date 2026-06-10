@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Simplify Package Actions] - {PR_MERGE_DATE}
+## [Simplify Package Actions] - 2026-06-10
 
 - Remove the `View Details` action from package action panels
 - Make `Install Package` and `Update Package` the primary actions in search and upgrade lists
