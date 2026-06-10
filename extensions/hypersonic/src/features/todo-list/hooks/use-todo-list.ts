@@ -41,7 +41,7 @@ export function useTodoList() {
   const { filterTodo, setFilterTodo } = useFilter()
 
   const { preferences, revalidatePreferences } = useLocalPreferences()
-  const { statuses } = useStatuses(preferences.databaseName)
+  const { statuses } = useStatuses(preferences.databaseId)
   const { todos, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
@@ -50,7 +50,7 @@ export function useTodoList() {
   const { projects, projectsById } = useProjects(
     preferences.properties?.relatedDatabase?.databaseId
   )
-  const { tags } = useTags(preferences.databaseName)
+  const { tags } = useTags(preferences.databaseId)
   const { users } = useUsers()
 
   const isNotionInstalled = useIsNotionInstalled()
@@ -419,7 +419,9 @@ export function useTodoList() {
         status = null
       }
     } else if (filterTodo.status) {
-      status = filterTodo.status
+      // The cached filter can hold a status that no longer exists in Notion
+      status =
+        statuses.find((s: Status) => s.id === filterTodo.status?.id) ?? status
     }
 
     // Clean all values matching from text and previous white space as title constant
