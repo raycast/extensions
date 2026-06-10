@@ -129,7 +129,9 @@ function StreamDetail({
     logoMd,
     `# ${title}\n`,
     `## ${signedAvg} · ${frequencyLabel(stream.frequency)}\n`,
-    stream.predictedNextDate ? `\n**Next charge:** ${formatDate(stream.predictedNextDate)}\n` : "",
+    stream.predictedNextDate
+      ? `\n**Next charge:** ${formatDate(stream.predictedNextDate)}\n`
+      : "",
   ].join("");
 
   return (
@@ -150,7 +152,10 @@ function StreamDetail({
               />
             ) : null}
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Frequency" text={frequencyLabel(stream.frequency)} />
+          <Detail.Metadata.Label
+            title="Frequency"
+            text={frequencyLabel(stream.frequency)}
+          />
           <Detail.Metadata.Label title="Average" text={signedAvg} />
           <Detail.Metadata.Label title="Last charge" text={last} />
           <Detail.Metadata.Label title="Monthly equivalent" text={monthly} />
@@ -159,8 +164,14 @@ function StreamDetail({
             title="Predicted next"
             text={formatDate(stream.predictedNextDate)}
           />
-          <Detail.Metadata.Label title="Last seen" text={formatDate(stream.lastDate)} />
-          <Detail.Metadata.Label title="First seen" text={formatDate(stream.firstDate)} />
+          <Detail.Metadata.Label
+            title="Last seen"
+            text={formatDate(stream.lastDate)}
+          />
+          <Detail.Metadata.Label
+            title="First seen"
+            text={formatDate(stream.firstDate)}
+          />
           <Detail.Metadata.Separator />
           {category ? (
             <Detail.Metadata.Label
@@ -170,14 +181,20 @@ function StreamDetail({
             />
           ) : null}
           {stream.merchantName ? (
-            <Detail.Metadata.Label title="Merchant" text={stream.merchantName} />
+            <Detail.Metadata.Label
+              title="Merchant"
+              text={stream.merchantName}
+            />
           ) : null}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Average" content={avg} />
-          <Action.CopyToClipboard title="Copy Merchant" content={stream.merchantName ?? title} />
+          <Action.CopyToClipboard
+            title="Copy Merchant"
+            content={stream.merchantName ?? title}
+          />
         </ActionPanel>
       }
     />
@@ -185,7 +202,8 @@ function StreamDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId, logoDevToken } = getPreferenceValues<Preferences>();
+  const { apiUrl, brandfetchClientId, logoDevToken } =
+    getPreferenceValues<Preferences>();
   const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");

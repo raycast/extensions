@@ -51,7 +51,9 @@ function formatLocation(loc: Transaction["location"]): string | null {
   if (!loc) {
     return null;
   }
-  const parts = [loc.city, loc.region, loc.country].filter((v): v is string => !!v);
+  const parts = [loc.city, loc.region, loc.country].filter(
+    (v): v is string => !!v,
+  );
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
@@ -83,8 +85,12 @@ function TransactionMetadata({
           text={category}
         />
       ) : null}
-      {tx.merchant ? <Detail.Metadata.Label title="Merchant" text={tx.merchant} /> : null}
-      {location ? <Detail.Metadata.Label title="Location" text={location} /> : null}
+      {tx.merchant ? (
+        <Detail.Metadata.Label title="Merchant" text={tx.merchant} />
+      ) : null}
+      {location ? (
+        <Detail.Metadata.Label title="Location" text={location} />
+      ) : null}
     </Detail.Metadata>
   );
 }
@@ -123,11 +129,20 @@ function TransactionDetail({
     <Detail
       markdown={markdown}
       navigationTitle={title}
-      metadata={<TransactionMetadata category={tx.category} signedAmount={signedAmount} tx={tx} />}
+      metadata={
+        <TransactionMetadata
+          category={tx.category}
+          signedAmount={signedAmount}
+          tx={tx}
+        />
+      }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
-          <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
+          <Action.CopyToClipboard
+            title="Copy Merchant"
+            content={tx.merchant ?? title}
+          />
         </ActionPanel>
       }
     />
@@ -197,7 +212,12 @@ export default function Command() {
   const q = searchText.trim().toLowerCase();
   const filtered = q
     ? data.filter((tx) => {
-        const fields = [tx.name, tx.merchant ?? "", tx.category ?? "", String(tx.amount)];
+        const fields = [
+          tx.name,
+          tx.merchant ?? "",
+          tx.category ?? "",
+          String(tx.amount),
+        ];
         return fields.some((f) => f.toLowerCase().includes(q));
       })
     : data;
@@ -233,7 +253,9 @@ export default function Command() {
             },
           },
           {
-            icon: tx.pending ? "categories/pending.svg" : "categories/posted.svg",
+            icon: tx.pending
+              ? "categories/pending.svg"
+              : "categories/posted.svg",
             tooltip: tx.pending ? "Pending" : "Posted",
           },
           {
@@ -261,10 +283,21 @@ export default function Command() {
                 <Action.Push
                   title="Show Details"
                   icon={Icon.Sidebar}
-                  target={<TransactionDetail brandfetchClientId={brandfetchClientId} tx={tx} />}
+                  target={
+                    <TransactionDetail
+                      brandfetchClientId={brandfetchClientId}
+                      tx={tx}
+                    />
+                  }
                 />
-                <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
-                <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
+                <Action.CopyToClipboard
+                  title="Copy Amount"
+                  content={amountStr}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Merchant"
+                  content={tx.merchant ?? title}
+                />
                 <Action
                   title="Reload"
                   icon={Icon.ArrowClockwise}
@@ -281,7 +314,9 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No transactions"
-          description={searchText ? "Try a different search" : "Nothing here yet"}
+          description={
+            searchText ? "Try a different search" : "Nothing here yet"
+          }
           actions={<ActionPanel>{signOutAction}</ActionPanel>}
         />
       ) : null}

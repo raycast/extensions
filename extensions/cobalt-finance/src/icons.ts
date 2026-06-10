@@ -23,7 +23,9 @@ const CATEGORY_ICON: Record<string, string> = {
 };
 
 /** Bundled SVG for a category group systemKey, or `Icon.BankNote` if unknown. */
-export function categoryIcon(category: string | null | undefined): string | Icon {
+export function categoryIcon(
+  category: string | null | undefined,
+): string | Icon {
   if (!category) {
     return Icon.BankNote;
   }
@@ -52,7 +54,11 @@ function isHttpUrl(url: string): boolean {
 }
 
 /** Brandfetch `type=icon` with `fallback=lettermark` — single-URL fallback chain. */
-function brandfetchIconUrl(domain: string, clientId: string, size = 128): string {
+function brandfetchIconUrl(
+  domain: string,
+  clientId: string,
+  size = 128,
+): string {
   const url = new URL(
     `${BRANDFETCH_CDN}/domain/${domain}/w/${size}/h/${size}/fallback/lettermark/type/icon`,
   );
@@ -132,9 +138,16 @@ const BANK_FALLBACK_ICON = "categories/bank-fallback.svg";
  *      `institutionUrl` or our name→domain map)
  *   3. Generated letter avatar SVG from `institutionName`
  */
-export function pickInstitutionIcon(input: InstitutionIconInput): string | null {
-  const { accountName, brandfetchClientId, institutionLogo, institutionName, institutionUrl } =
-    input;
+export function pickInstitutionIcon(
+  input: InstitutionIconInput,
+): string | null {
+  const {
+    accountName,
+    brandfetchClientId,
+    institutionLogo,
+    institutionName,
+    institutionUrl,
+  } = input;
   if (institutionLogo?.trim()) {
     const t = institutionLogo.trim();
     if (t.startsWith("data:") || isHttpUrl(t)) {
@@ -143,7 +156,9 @@ export function pickInstitutionIcon(input: InstitutionIconInput): string | null 
   }
   if (brandfetchClientId) {
     const host =
-      hostFromUrl(institutionUrl) ?? domainFromName(institutionName) ?? domainFromName(accountName);
+      hostFromUrl(institutionUrl) ??
+      domainFromName(institutionName) ??
+      domainFromName(accountName);
     if (host) {
       return brandfetchIconUrl(host, brandfetchClientId);
     }
@@ -177,8 +192,14 @@ export function logoLookupName(raw: string): string {
 const LOGO_DEV_IMG_ORIGIN = "https://img.logo.dev";
 
 /** Logo.dev brand-name URL (public publishable key). Same pattern as web `SubLogo`. */
-export function logoDevUrlByBrandName(brandName: string, token: string, size = 128): string {
-  const url = new URL(`${LOGO_DEV_IMG_ORIGIN}/name/${encodeURIComponent(brandName)}`);
+export function logoDevUrlByBrandName(
+  brandName: string,
+  token: string,
+  size = 128,
+): string {
+  const url = new URL(
+    `${LOGO_DEV_IMG_ORIGIN}/name/${encodeURIComponent(brandName)}`,
+  );
   url.searchParams.set("token", token);
   url.searchParams.set("size", String(size));
   url.searchParams.set("format", "png");
@@ -246,7 +267,8 @@ export function pickMerchantIcon(input: MerchantIconInput): string | Icon {
     const host =
       hostFromUrl(website) ??
       hostFromUrl(
-        counterparties?.find((c) => c.type === "merchant" && c.website)?.website ??
+        counterparties?.find((c) => c.type === "merchant" && c.website)
+          ?.website ??
           counterparties?.find((c) => c.website)?.website ??
           null,
       );
@@ -259,7 +281,9 @@ export function pickMerchantIcon(input: MerchantIconInput): string | Icon {
     return logoUrl;
   }
 
-  const cpLogo = counterparties?.find((c) => c.logo_url && isHttpUrl(c.logo_url))?.logo_url;
+  const cpLogo = counterparties?.find(
+    (c) => c.logo_url && isHttpUrl(c.logo_url),
+  )?.logo_url;
   if (cpLogo) {
     return cpLogo;
   }
