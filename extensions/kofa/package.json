@@ -7,7 +7,8 @@
   "author": "petar_yovkov",
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity"
@@ -38,17 +39,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.11.0",
-    "@types/react": "^19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "react": "^19.0.0",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

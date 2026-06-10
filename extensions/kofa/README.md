@@ -5,7 +5,7 @@ Capture tasks into [Kofa](https://kofa.dev) — the minimalist todo and day plan
 ## Features
 
 - **Add Task** command with title, optional notes, due date and color.
-- Due date accepts natural language: type *today*, *tomorrow*, *next monday*, *in 3 days*, or pick from the calendar.
+- Due date accepts natural language: type _today_, _tomorrow_, _next monday_, _in 3 days_, or pick from the calendar.
 - Coral / orange / green / blue / purple / white color tags match the in-app palette.
 - `⌘ ⏎` to submit and immediately create another task.
 
