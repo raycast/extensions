@@ -1,23 +1,31 @@
-import { showToast, Toast, Alert, confirmAlert } from "@raycast/api";
+import { closeMainWindow, showToast, Toast, Alert, confirmAlert } from "@raycast/api";
+import { showInFinder } from "@raycast/api";
 import path from "path";
-import os from "os";
 import { loadCategories, categoriesToFileTypes } from "./utils/categories";
-import { analyzeFolder, organizeFolder } from "./utils/file-organizer";
-import { chooseOrganizationMode } from "./utils/organization-mode";
+import { analyzeFolder, OrganizationMode, organizeFolder } from "./utils/file-organizer";
+import { pickFolder } from "./utils/folder-picker";
+import { OrganizationModePicker } from "./utils/organization-mode";
+import { formatSkippedSummary } from "./utils/organization-summary";
 
-export default async function main() {
+export default function Command() {
+  return <OrganizationModePicker onSelect={organizeCustomFolder} />;
+}
+
+async function organizeCustomFolder(mode: OrganizationMode) {
   try {
+    await closeMainWindow();
+
     // Load categories from storage
     const categories = await loadCategories();
     const fileTypes = categoriesToFileTypes(categories);
 
-    const downloadsPath = path.join(os.homedir(), "Downloads");
-    const mode = await chooseOrganizationMode();
+    // Show folder picker dialog
+    const folderPath = await pickFolder("Select a folder to organize:");
 
-    if (!mode) {
+    if (!folderPath) {
       await showToast({
         style: Toast.Style.Success,
-        title: "Organization cancelled",
+        title: "Folder selection cancelled",
       });
       return;
     }
@@ -25,10 +33,11 @@ export default async function main() {
     // First, analyze files to get count
     const analysisToast = await showToast({
       style: Toast.Style.Animated,
-      title: "Scanning Downloads folder...",
+      title: "Scanning folder...",
+      message: `Analyzing files in ${path.basename(folderPath)}`,
     });
 
-    const analysisResult = analyzeFolder(downloadsPath, fileTypes, { mode });
+    const analysisResult = analyzeFolder(folderPath, fileTypes, { mode });
     analysisToast.hide();
 
     if (!analysisResult.success) {
@@ -45,7 +54,7 @@ export default async function main() {
       const skippedFolderCount = analysisResult.skipped_folders?.length || 0;
       await showToast({
         style: skippedFolderCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
-        title: "Downloads already clean",
+        title: "Folder already clean",
         message: formatSkippedSummary(skippedProjectCount, skippedFolderCount) || "No files need to be sorted!",
       });
       return;
@@ -62,7 +71,7 @@ export default async function main() {
 
     const confirmed = await confirmAlert({
       title: `Sort ${analysisResult.total_files} files?`,
-      message: `Files will be moved into folders:\n\n${categoryList}${formatSkippedSummary(
+      message: `Files in "${path.basename(folderPath)}" will be moved into folders:\n\n${categoryList}${formatSkippedSummary(
         analysisResult.skipped_projects?.length || 0,
         analysisResult.skipped_folders?.length || 0,
         "\n\n",
@@ -89,19 +98,20 @@ export default async function main() {
     const sortingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Sorting files...",
+      message: `Organizing files in ${path.basename(folderPath)}`,
     });
 
-    const sortResult = organizeFolder(downloadsPath, fileTypes, { mode });
+    const sortResult = organizeFolder(folderPath, fileTypes, { mode });
 
     if (!sortResult.success) {
       sortingToast.style = Toast.Style.Failure;
-      sortingToast.title = "❌ Cleanup failed";
+      sortingToast.title = "❌ Organization failed";
       sortingToast.message = sortResult.error || "Unknown error occurred";
       return;
     }
 
     sortingToast.style = Toast.Style.Success;
-    sortingToast.title = "✅ Downloads cleaned up!";
+    sortingToast.title = "✅ Folder organized!";
     sortingToast.message = `Sorted ${sortResult.total_moved || 0} files into ${
       sortResult.categories_created?.length || 0
     } folders${formatSkippedSummary(
@@ -109,24 +119,29 @@ export default async function main() {
       sortResult.skipped_folders?.length || 0,
       ". ",
     )}`;
+
+    // Offer to open the organized folder
+    const openFolder = await confirmAlert({
+      title: "Folder organized successfully!",
+      message: `${sortResult.total_moved} files have been sorted. Would you like to view the organized folder?`,
+      primaryAction: {
+        title: "Open Folder",
+        style: Alert.ActionStyle.Default,
+      },
+      dismissAction: {
+        title: "Done",
+        style: Alert.ActionStyle.Cancel,
+      },
+    });
+
+    if (openFolder) {
+      await showInFinder(folderPath);
+    }
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "❌ Cleanup failed",
+      title: "❌ Organization failed",
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
-}
-
-function formatSkippedSummary(projectCount: number, folderCount: number, prefix = ""): string {
-  const parts: string[] = [];
-
-  if (projectCount > 0) {
-    parts.push(`Skipped ${projectCount} detected ${projectCount === 1 ? "project" : "projects"}`);
-  }
-  if (folderCount > 0) {
-    parts.push(`Could not scan ${folderCount} ${folderCount === 1 ? "folder" : "folders"}`);
-  }
-
-  return parts.length > 0 ? `${prefix}${parts.join(". ")}.` : "";
 }

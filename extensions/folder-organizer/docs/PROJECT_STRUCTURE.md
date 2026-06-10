@@ -16,16 +16,17 @@ folder-organizer/
 ├── assets/                         Command icons and README images
 ├── metadata/                       Raycast Store screenshots
 ├── src/
-│   ├── clean-downloads-folder.ts   Organize the user's Downloads folder
+│   ├── clean-downloads-folder.tsx  Organize the user's Downloads folder
 │   ├── delete-empty-folders.ts     Delete empty folders under a selected root
-│   ├── organize-custom-folder.ts   Pick and organize a custom folder
+│   ├── organize-custom-folder.tsx  Pick and organize a custom folder
 │   ├── manage-categories.tsx       Manage category names and extensions
 │   └── utils/
 │       ├── categories.ts           Category defaults and LocalStorage access
 │       ├── empty-folder-cleaner.ts Find and delete empty folders
 │       ├── file-organizer.ts       Scan, analyze, categorize, and move files
 │       ├── folder-picker.ts         Shared macOS folder picker
-│       └── organization-mode.ts    Ask for root-only or full organization
+│       ├── organization-mode.tsx   Show the organization mode picker
+│       └── organization-summary.ts Shared skipped-item message formatting
 ├── CHANGELOG.md
 ├── README.md
 ├── package.json                    Raycast commands, dependencies, and scripts
@@ -38,23 +39,23 @@ Both organizer commands use the same shared workflow:
 
 ```text
 Raycast command
+  -> show organization mode picker
   -> loadCategories()
   -> categoriesToFileTypes()
   -> determine target folder
-  -> chooseOrganizationMode()
   -> analyzeFolder()
   -> show confirmation
   -> organizeFolder()
   -> show result
 ```
 
-### `src/clean-downloads-folder.ts`
+### `src/clean-downloads-folder.tsx`
 
 - Uses `~/Downloads` as the target folder.
 - Analyzes files before showing a confirmation dialog.
 - Organizes confirmed files using the shared organizer.
 
-### `src/organize-custom-folder.ts`
+### `src/organize-custom-folder.tsx`
 
 - Uses AppleScript to let the user select a target folder.
 - Analyzes files before showing a confirmation dialog.
@@ -104,11 +105,15 @@ getFilesToOrganize()
   -> analyzeFolder() or organizeFolder()
 ```
 
-### `src/utils/organization-mode.ts`
+### `src/utils/organization-mode.tsx`
 
-- Asks the user to choose `Full Organization` or `Root Only`.
-- Returns the selected mode to either organizer command.
-- Treats closing the mode dialog as cancellation.
+- Shows a Raycast view for choosing `Root Only` or `Full Organization`.
+- Uses `Enter` for Root Only and `Command + Enter` for Full Organization.
+- Treats closing the view as cancellation.
+
+### `src/utils/organization-summary.ts`
+
+- Formats shared project and unreadable-folder summaries for organizer commands.
 
 ### `src/utils/empty-folder-cleaner.ts`
 

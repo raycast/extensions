@@ -30,14 +30,14 @@
       "title": "Organize Downloads Folder",
       "description": "Sort files in Downloads folder into organized categories",
       "icon": "download_folder.png",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "organize-custom-folder",
       "title": "Organize Custom Folder",
       "description": "Choose any folder and organize its files into categorized subfolders",
       "icon": "custom_folder.png",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "manage-categories",
