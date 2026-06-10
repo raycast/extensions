@@ -150,7 +150,7 @@ export function buildCommand(
     const body = `& ${psArg(bin)}${extra.length ? " " + extra.map(psArg).join(" ") : ""}`;
     return cwd ? `Set-Location -LiteralPath ${psArg(cwd)}; ${body}` : body;
   }
-  const body = `${bin}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
+  const body = `${shArg(bin)}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
   return cwd ? `cd ${shArg(cwd)} && ${body}` : body;
 }
 
@@ -218,7 +218,7 @@ async function launchWsl(
   // leave MCP's npx and friends missing. Using the login shell reproduces "the
   // same environment as the user's everyday terminal".
   const shell = await wslLoginShell(distro);
-  const inner = `${claudeBin()}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
+  const inner = `${shArg(claudeBin())}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
   // cd to cwd → launch claude → exec the user's shell so the window stays open.
   const body = `${cwd ? `cd ${shArg(cwd)} && ` : ""}${inner}\nexec ${shArg(shell)}\n`;
   const winTmp = path.join(os.tmpdir(), `raycast-claude-${Date.now()}.sh`);
@@ -312,7 +312,7 @@ async function launchMac(
   cwd: string | undefined,
   extra: string[],
 ): Promise<void> {
-  const inner = `${claudeBin()}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
+  const inner = `${shArg(claudeBin())}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
   const shell = process.env.SHELL || "/bin/zsh";
   const body = `${cwd ? `cd ${shArg(cwd)} && ` : ""}${inner}\nexec ${shArg(shell)}\n`;
   const tmp = path.join(os.tmpdir(), `raycast-claude-${Date.now()}.sh`);

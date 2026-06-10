@@ -4,7 +4,7 @@
 
 `claude --continue` only takes you back to the most recent session per directory. This extension reads your full session history (the JSONL transcripts under `~/.claude/projects`) and lets you jump back into *any* session, with enough recall to know which one you want before you commit: Claude's auto title, the first prompt, the latest prompt, and the last reply.
 
-![Resume Claude Code Session — session list with detail panel showing title, first prompt, latest prompt, and last reply](metadata/claude-code-resume-2.png)
+![Resume Claude Code Session — session list with detail panel showing title, first prompt, latest prompt, and last reply](media/claude-code-resume-2.png)
 
 ## Commands
 
@@ -16,7 +16,7 @@
 > The session list is newest-first, so pressing Enter on the top row doubles as "resume last".
 > Where launching isn't possible (terminal not found, etc.), the command is copied to the clipboard and a Toast with an "Open Preferences" action appears.
 
-![Open Claude Code Project — project list](metadata/claude-code-resume-1.png)
+![Open Claude Code Project — project list](media/claude-code-resume-1.png)
 
 ## What makes this different
 
