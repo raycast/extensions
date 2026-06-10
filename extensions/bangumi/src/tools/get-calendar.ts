@@ -5,7 +5,7 @@ import { formatSubjectToMarkdown } from "./utils"
 
 const tool = async () => {
   const result = await bangumi.getCalendar()
-  const todayId = new Date().getDay()
+  const todayId = new Date().getDay() || 7
 
   const content = [
     "# Bangumi Daily Calendar\n",
