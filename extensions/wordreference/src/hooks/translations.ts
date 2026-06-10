@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import usePreferences from "./preferences";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { Alert, Color, Icon, LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Alert, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { WordReferenceErrorResponse, wordReferenceRequestHeaders } from "../wordreference";
 
-export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: string }) {
+export function useSearchTranslations({
+  initialSearch = "",
+  translationKey,
+}: {
+  initialSearch?: string;
+  translationKey: string;
+}) {
   const [searchText, setSearchText] = useState(initialSearch);
-  const { preferences } = usePreferences();
 
   const { data: response, isLoading } = useFetch<SearchTranslationsResponse>(
-    `https://www.wordreference.com/autocomplete?dict=${preferences.translationKey}&query=${searchText.trim()}`,
+    `https://www.wordreference.com/autocomplete?dict=${translationKey}&query=${searchText.trim()}`,
     {
       method: "GET",
       headers: wordReferenceRequestHeaders,
@@ -122,47 +126,31 @@ type SearchTranslationsResponse =
     }
   | WordReferenceErrorResponse;
 
-interface RecentSearch {
+export interface RecentSearch {
   word: string;
   sourceLangKey: string;
   targetLangKey: string;
 }
 
 export function useRecentSearches() {
-  const [recentSearches, setRecentSearches] = useCachedState<RecentSearch[] | undefined>("recentSearches", undefined);
-
-  async function loadRecentSearches() {
-    const recentSearchesString = await LocalStorage.getItem<string>("recentSearches");
-    if (recentSearchesString) {
-      setRecentSearches(JSON.parse(recentSearchesString));
-    } else {
-      setRecentSearches([]);
-    }
-  }
-
-  async function saveRecentSearches(searches: RecentSearch[]) {
-    await LocalStorage.setItem("recentSearches", JSON.stringify(searches));
-  }
+  const [recentSearches, setRecentSearches] = useCachedState<RecentSearch[]>("recentSearches", []);
 
   const addRecentSearch = ({ word, sourceLangKey, targetLangKey }: RecentSearch) => {
-    const newRecentSearches =
-      recentSearches?.filter(
-        (recentSearch) =>
-          recentSearch.word !== word ||
-          recentSearch.sourceLangKey !== sourceLangKey ||
-          recentSearch.targetLangKey !== targetLangKey
-      ) || [];
+    const newRecentSearches = recentSearches.filter(
+      (recentSearch) =>
+        recentSearch.word !== word ||
+        recentSearch.sourceLangKey !== sourceLangKey ||
+        recentSearch.targetLangKey !== targetLangKey
+    );
     newRecentSearches.unshift({ word, sourceLangKey, targetLangKey });
     setRecentSearches(newRecentSearches);
-    saveRecentSearches(newRecentSearches);
   };
 
   const removeRecentSearch = (index: number) => {
-    const newRecentSearches = recentSearches ? [...recentSearches] : [];
+    const newRecentSearches = [...recentSearches];
     newRecentSearches.splice(index, 1);
     setRecentSearches(newRecentSearches);
     showToast({ title: "Successfully deleted", style: Toast.Style.Success });
-    saveRecentSearches(newRecentSearches);
   };
 
   const clearRecentSearches = async () => {
@@ -174,17 +162,12 @@ export function useRecentSearches() {
         title: "Clear",
         onAction: () => {
           setRecentSearches([]);
-          saveRecentSearches([]);
           showToast({ title: "Successfully deleted", style: Toast.Style.Success });
         },
         style: Alert.ActionStyle.Destructive,
       },
     });
   };
-
-  useEffect(() => {
-    if (!recentSearches) loadRecentSearches();
-  }, [recentSearches === undefined]);
 
   return { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches };
 }

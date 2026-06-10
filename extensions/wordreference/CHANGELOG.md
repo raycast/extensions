@@ -2,11 +2,15 @@
 
 All notable changes to "Raycast WordReference Extension" will be documented in this file.
 
-## [1.1.2] - 2026-06-08
+## [1.1.2] - {PR_MERGE_DATE}
 
 ### Added
 
-- ranking based on word match
+- Ranking based on word match
+
+### Improved
+
+- Faster command startup by lazy-loading translation parsing and reducing duplicate storage reads
 
 ## [1.1.1] - 2026-06-02
 
