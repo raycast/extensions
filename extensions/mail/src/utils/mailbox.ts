@@ -161,7 +161,7 @@ export const getMailboxType = (name: string): MailboxType => {
   name = name.toLowerCase().trim();
 
   function includes(aliases: string[], name: string) {
-    return aliases.some((alias) => name.includes(alias));
+    return aliases.includes(name);
   }
 
   if (includes(INBOX_ALIAS, name)) return "inbox";
@@ -180,7 +180,7 @@ export const sortMailboxes = (a: Mailbox, b: Mailbox) => {
   const aIndex = MAILBOXES.indexOf(a.type);
   const bIndex = MAILBOXES.indexOf(b.type);
 
-  return (aIndex - bIndex) * (aIndex === -1 || bIndex === -1 ? -1 : 1);
+  return aIndex - bIndex;
 };
 
 export const getMailboxIcon = (type: MailboxType): Image.ImageLike => {
