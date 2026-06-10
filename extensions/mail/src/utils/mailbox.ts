@@ -154,7 +154,7 @@ export const setMailboxTypeOverride = (name: string, type: MailboxType) => {
   Cache.invalidateAccounts();
 };
 
-export const getMailboxType = (name: string): MailboxType => {
+export const translateMailboxName = (name: string): MailboxType => {
   const override = getMailboxTypeOverride(name);
   if (override) return override;
 
@@ -175,6 +175,8 @@ export const getMailboxType = (name: string): MailboxType => {
 
   return "other";
 };
+
+export const getMailboxType = translateMailboxName;
 
 export const sortMailboxes = (a: Mailbox, b: Mailbox) => {
   const aIndex = MAILBOXES.indexOf(a.type);

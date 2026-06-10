@@ -8,7 +8,7 @@ import utf8 from "utf8";
 import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction } from "../types";
 import { constructDate, formatMarkdown, messageLimit, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
-import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { getMailboxType, isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
 import { Validation } from "../utils/validation";
 import { getAccounts } from "./accounts";
@@ -118,6 +118,7 @@ export const getMessageById = async (
   const mailbox = account.mailboxes.find((mailbox) => mailbox.name === resolvedMailboxName) ?? {
     name: resolvedMailboxName,
     unreadCount: 0,
+    type: getMailboxType(resolvedMailboxName),
   };
 
   return {
