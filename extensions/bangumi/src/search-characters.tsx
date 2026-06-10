@@ -19,22 +19,36 @@ const SearchCharacters = (props: LaunchProps<{ arguments: Arguments.SearchCharac
         return { data: [], hasMore: false }
       }
       const baseOffset = options.page * PAGE_SIZE * 2
-      const [res1, res2] = await Promise.all([
-        bangumi.searchCharacters({
-          keyword: text,
-          limit: PAGE_SIZE,
-          offset: baseOffset,
-          signal: abortable.current?.signal,
-        }),
-        bangumi.searchCharacters({
+      const res1Promise = bangumi.searchCharacters({
+        keyword: text,
+        limit: PAGE_SIZE,
+        offset: baseOffset,
+        signal: abortable.current?.signal,
+      })
+
+      const res2Promise = bangumi
+        .searchCharacters({
           keyword: text,
           limit: PAGE_SIZE,
           offset: baseOffset + PAGE_SIZE,
           signal: abortable.current?.signal,
-        }),
-      ])
+        })
+        .then((res) => ({ success: true as const, data: res.data }))
+        .catch((err) => ({ success: false as const, error: err }))
+
+      const res1 = await res1Promise
+      const res2Result = await res2Promise
+
+      let res2Data: typeof res1.data = []
+      if (baseOffset + PAGE_SIZE < res1.total) {
+        if (!res2Result.success) {
+          throw res2Result.error
+        }
+        res2Data = res2Result.data
+      }
+
       return {
-        data: [...res1.data, ...res2.data],
+        data: [...res1.data, ...res2Data],
         hasMore: baseOffset + PAGE_SIZE * 2 < res1.total,
       }
     },
