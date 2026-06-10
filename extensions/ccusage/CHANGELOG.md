@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Honor server rate-limit backoff] - {PR_MERGE_DATE}
+## [Honor server rate-limit backoff] - 2026-06-10
 
 ### Fixed
 
