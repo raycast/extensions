@@ -150,7 +150,7 @@ ${formatSummary(data.summary)}${getTranslationMarkdown(isTranslating, translated
                 target={<SubjectCharactersList characters={characters} />}
               />
             ) : null}
-            <AITranslateAction text={data?.summary} onTranslate={translate} />
+            <AITranslateAction text={data?.summary} onTranslate={translate} isTranslating={isTranslating} />
             <OpenInBgmBrowser path={`subject/${subjectId}`} />
           </ActionPanel.Section>
           <CollectionStatusActions

@@ -38,7 +38,7 @@ ${getTranslationMarkdown(isTranslating, translatedText, formatSummary)}
       actions={
         <ActionPanel>
           <OpenInBgmBrowser path={`ep/${episode.id}`} />
-          <AITranslateAction text={episode.desc} onTranslate={translate} />
+          <AITranslateAction text={episode.desc} onTranslate={translate} isTranslating={isTranslating} />
         </ActionPanel>
       }
     />

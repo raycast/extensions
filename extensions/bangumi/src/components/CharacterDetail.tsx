@@ -109,7 +109,7 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
                 }
               />
             ) : null}
-            <AITranslateAction text={data?.summary} onTranslate={translate} />
+            <AITranslateAction text={data?.summary} onTranslate={translate} isTranslating={isTranslating} />
             <OpenInBgmBrowser path={`character/${characterId}`} />
           </ActionPanel.Section>
         </ActionPanel>
