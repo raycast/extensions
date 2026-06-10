@@ -19,6 +19,7 @@ import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collabo
 import { getRemainingLabels } from "../helpers/labels";
 import { truncateMiddle } from "../helpers/menu-bar";
 import { priorities, getPriorityIcon } from "../helpers/priorities";
+import { rescheduleDuePayload } from "../helpers/repeat";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
@@ -65,9 +66,12 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   async function changeDate(task: Task, timeString: string, type: "due" | "deadline") {
     try {
+      const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
+      const datePayload =
+        type === "due" ? rescheduleDuePayload(currentTask, { string: timeString }) : { string: timeString };
       const updateData = {
         id: task.id,
-        [type]: { string: timeString },
+        [type]: datePayload,
       };
 
       await updateTask(updateData, { data, setData });

@@ -79,12 +79,16 @@ function MenuBar(props: MenuBarProps) {
   const tasks = useMemo(() => [...rawTasks].sort(sorter), [rawTasks, sorter]);
 
   useEffect(() => {
-    const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
+    if (!focusedTask.id || isLoading || !data?.items) {
+      return;
+    }
 
-    if (!isFocusedTaskInTasks) {
+    const isFocusedTaskInItems = data.items.some((t) => t.id === focusedTask.id);
+
+    if (!isFocusedTaskInItems) {
       unfocusTask();
     }
-  }, [focusedTask, unfocusTask, data, filter]);
+  }, [focusedTask.id, unfocusTask, data?.items, isLoading]);
 
   const menuBarExtraTitle = useMemo(() => {
     if (focusedTask.id) {

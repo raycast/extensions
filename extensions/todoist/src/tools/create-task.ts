@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
 import { mapPriority } from "../helpers/priorities";
+import { parseOptionalStringList } from "../helpers/parseStringList";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -117,9 +118,9 @@ type Input = {
    */
   collapsed?: boolean;
   /**
-   * Array of label names that may represent either personal or shared labels
+   * JSON array of label names (e.g. ["work", "urgent"]) or comma-separated label names
    */
-  labels?: string[];
+  labels?: string;
   /**
    * The ID of user who assigns the task. Only relevant for shared projects.
    * Must be 0 or a valid user ID from project collaborators
@@ -142,7 +143,12 @@ type Input = {
 
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
-  input.priority = mapPriority(input.priority);
+  const { labels, ...taskInput } = input;
+  const args = {
+    ...taskInput,
+    priority: mapPriority(taskInput.priority),
+    ...(labels ? { labels: parseOptionalStringList(labels) } : {}),
+  };
 
   return syncRequest({
     sync_token,
@@ -152,7 +158,7 @@ export default withTodoistApi(async function (input: Input) {
         type: "item_add",
         temp_id,
         uuid: crypto.randomUUID(),
-        args: input,
+        args,
       },
     ],
   });

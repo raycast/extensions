@@ -38,7 +38,13 @@ import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
 import { displayReminderName, hasAtTaskTimeRelativeReminder } from "../helpers/reminders";
-import { buildDynamicRepeatOptions, filterRepeatPresets, isHourlyDueString, repeatDuePayload } from "../helpers/repeat";
+import {
+  buildDynamicRepeatOptions,
+  filterRepeatPresets,
+  isHourlyDueString,
+  repeatDuePayload,
+  rescheduleDuePayload,
+} from "../helpers/repeat";
 import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
@@ -304,7 +310,9 @@ export default function TaskActions({
             type={Action.PickDate.Type.DateTime}
             onChange={async (date) => {
               const due = date
-                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                ? rescheduleDuePayload(currentTask, {
+                    date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString(),
+                  })
                 : { string: "no date" };
               let syncReminders: Reminder[] | undefined;
               const merged = await updateTask({ id: task.id, due }, (ctx) => {

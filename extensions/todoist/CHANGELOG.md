@@ -1,5 +1,13 @@
 # Todoist Changelog
 
+## [Keep recurrence when rescheduling] - {PR_MERGE_DATE}
+
+- **Recurring tasks keep their repeat rule** when you change the due date from task actions or the menu bar (including shortcuts like Today, Tomorrow, Next Week, and Next Weekend).
+- **Hourly recurring tasks** still anchor an all-day due to the current time when rescheduled.
+- **Focused task** no longer unfocuses while the menu bar is loading, and removing the focus label is skipped safely when the task is missing.
+- **AI tools** accept comma-separated or JSON-array strings for labels, resource types, and comment notification user IDs.
+- **Windows**: Fixed the Create View Quicklink keyboard shortcut (`Ctrl` + `Shift` + `N`).
+
 ## [Include deadlines in Today] - 2026-05-20
 
 - Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
@@ -47,16 +55,20 @@
 - Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
 
 ## [Show deadline as how many days remains] - 2026-03-31
+
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 
 ## [Fix reminders and Create Task NLP parsing] - 2026-03-06
+
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
 
 ## [Fixing Todoist PR updates] - 2026-02-11
+
 - Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
 
 ## [Set Due Date to Everyday for Existing Tasks] - 2025-10-10
+
 - **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
 
 ## [Improved Due Time Handling] - 2025-09-04
