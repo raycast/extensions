@@ -23,7 +23,10 @@ type ClientSearchLaunchContext = {
 };
 
 function extractIpAddress(text: string): string | undefined {
-  return text.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/)?.[0] ?? text.match(/\b(?:[0-9a-f]{1,4}:){2,7}[0-9a-f]{1,4}\b/i)?.[0];
+  const ipv4 = text.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/)?.[0];
+  if (ipv4) return ipv4;
+  // IPv6 — handle both full and compressed (::) forms
+  return text.match(/\b(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}\b/i)?.[0];
 }
 
 export default function Command(props: LaunchProps<{ launchContext?: ClientSearchLaunchContext }>) {
