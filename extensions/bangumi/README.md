@@ -2,9 +2,10 @@
 
 # raycast-bangumi
 
+| [简体中文](./README_zh.md) | English |
+
 A full-featured Bangumi([bangumi.tv](https://bangumi.tv)) client for Raycast. Manage collections, track progress, search subjects and characters, view daily schedules. Includes AI tools for Raycast AI.
 
-| [简体中文](./README_zh.md) | English |
 
 ## Features
 
