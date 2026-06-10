@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-06-10
 
 - Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
 
