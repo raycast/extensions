@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-resume",
+  "title": "Claude Code Resume",
+  "description": "Resume any past Claude Code session, not just the last one. Browse your full session history with recall (title, first and latest prompt, last reply) and jump back in — on macOS and Windows (WSL and native).",
+  "icon": "icon.png",
+  "author": "izumiz",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "list-sessions",
+      "title": "Resume Claude Code Session",
+      "description": "Browse your Claude Code session history (newest first) and resume any session in its original directory.",
+      "mode": "view"
+    },
+    {
+      "name": "open-project",
+      "title": "Open Claude Code Project",
+
+      "description": "Pick a recent project and start Claude Code in that directory — a new session or continue the last one.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "claudeHome",
+      "title": "Claude Home (.claude)",
+      "description": "Leave empty to auto-detect (~/.claude on macOS; on Windows the WSL home is queried automatically). Set a UNC path only to override, e.g. \\\\wsl.localhost\\Ubuntu\\home\\you\\.claude.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "claudeBin",
+      "title": "Claude Binary",
+      "description": "Use \"claude\" if it is on your PATH, or provide an absolute path.",
+      "type": "textfield",
+      "required": false,
+      "default": "claude"
+    },
+    {
+      "name": "wslDistro",
+      "title": "WSL Distro",
+      "description": "Windows only. e.g. Ubuntu (check with: wsl -l -q).",
+      "type": "textfield",
+      "required": false,
+      "default": "Ubuntu"
+    },
+    {
+      "name": "winShell",
+      "title": "Windows Shell",
+      "description": "Windows only. Shell used to launch Windows-native (non-WSL) sessions.",
+      "type": "dropdown",
+      "required": false,
+      "default": "pwsh",
+      "data": [
+        { "title": "PowerShell 7 (pwsh)", "value": "pwsh" },
+        { "title": "Windows PowerShell (powershell)", "value": "powershell" }
+      ]
+    },
+    {
+      "name": "macTerminal",
+      "title": "macOS Terminal",
+      "description": "macOS only. Which terminal app to launch interactive sessions in.",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "data": [
+        { "title": "Terminal.app", "value": "terminal" },
+        { "title": "iTerm2", "value": "iterm" },
+        { "title": "Ghostty", "value": "ghostty" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
