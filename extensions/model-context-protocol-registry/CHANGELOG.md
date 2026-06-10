@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Olostep MCP Server] - {PR_MERGE_DATE}
+
+Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.
+
 ## [Add VC Deal Flow Signal MCP Server] - 2026-06-03
 
 Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).
