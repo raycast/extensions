@@ -17,19 +17,19 @@ type Input = {
 }
 
 const tool = async (input: Input) => {
-  const result = await bangumi.searchCharacters({
+  const { total, limit, offset, data } = await bangumi.searchCharacters({
     keyword: input.keyword,
     limit: input.limit || 10,
     offset: input.offset || 0,
   })
 
-  const items = result.data.map(formatCharacterToMarkdown).join("\n\n") || "No characters found."
+  const items = data.map(formatCharacterToMarkdown).join("\n\n") || "No characters found."
 
   return {
     pagination: {
-      total: result.total,
-      limit: result.limit,
-      offset: result.offset,
+      total,
+      limit,
+      offset,
     },
     content: `# Character Search Results for "${input.keyword}"\n\n${items}`,
   }

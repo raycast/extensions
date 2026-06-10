@@ -35,6 +35,13 @@ export enum EpisodeCollectionType {
   Dropped = 3,
 }
 
+export const EpisodeCollectionTypeName: Record<EpisodeCollectionType, string> = {
+  [EpisodeCollectionType.NotCollected]: "Unwatched",
+  [EpisodeCollectionType.Wish]: "Wishlist",
+  [EpisodeCollectionType.Watched]: "Watched",
+  [EpisodeCollectionType.Dropped]: "Dropped",
+}
+
 export enum EpisodeType {
   /** 本篇 */
   Main = 0,
@@ -50,6 +57,16 @@ export enum EpisodeType {
   MAD = 5,
   /** 其他 */
   Other = 6,
+}
+
+export const EpisodeTypePrefix: Record<EpisodeType, string> = {
+  [EpisodeType.Main]: "EP",
+  [EpisodeType.SP]: "SP",
+  [EpisodeType.OP]: "OP",
+  [EpisodeType.ED]: "ED",
+  [EpisodeType.Trailer]: "PV",
+  [EpisodeType.MAD]: "MAD",
+  [EpisodeType.Other]: "Other",
 }
 
 export const SubjectVerb: Record<SubjectType, { wish: string; collect: string; doing: string }> = {

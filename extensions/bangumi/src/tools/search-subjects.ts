@@ -23,20 +23,20 @@ type Input = {
 }
 
 const tool = async (input: Input) => {
-  const result = await bangumi.searchSubjects({
+  const { total, limit, offset, data } = await bangumi.searchSubjects({
     keyword: input.keyword,
     limit: input.limit || 10,
     offset: input.offset || 0,
     subjectType: input.subjectType,
   })
 
-  const items = result.data.map(formatSubjectToMarkdown).join("\n\n") || "No results found."
+  const items = data.map(formatSubjectToMarkdown).join("\n\n") || "No results found."
 
   return {
     pagination: {
-      total: result.total,
-      limit: result.limit,
-      offset: result.offset,
+      total,
+      limit,
+      offset,
     },
     content: `# Search Results for "${input.keyword}"\n\n${items}`,
   }

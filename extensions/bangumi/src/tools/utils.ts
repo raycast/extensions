@@ -1,4 +1,4 @@
-import { SubjectType, SubjectTypeName } from "@/shared/const"
+import { SubjectType, SubjectTypeName, EpisodeTypePrefix, EpisodeType } from "@/shared/const"
 import type { components } from "@/types/generated"
 
 type AnySubject = {
@@ -49,12 +49,11 @@ export const formatCharacterToMarkdown = (character: Character) => {
 
 type Episode = components["schemas"]["Episode"]
 export const formatEpisodeToMarkdown = (episode: Episode) => {
-  const typeStr = episode.type === 0 ? "Main" : episode.type === 1 ? "SP" : "Other"
+  const typeStr = EpisodeTypePrefix[episode.type as EpisodeType] ?? "Other"
   const durationStr = episode.duration ? ` - Duration: ${episode.duration}` : ""
   const descStr = episode.desc ? `\n    - Desc: ${episode.desc.replace(/\n/g, " ")}` : ""
-  return `- **Ep ${episode.ep}**: ${episode.name_cn || episode.name} (\`episodeId: ${episode.id}\`)
-    - Air Date: ${episode.airdate || "Unknown"}${durationStr}
-    - Type: ${typeStr} (\`type: ${episode.type}\`)${descStr}`
+  return `- **${typeStr}${episode.ep}**: ${episode.name_cn || episode.name} (\`episodeId: ${episode.id}\`)
+    - Air Date: ${episode.airdate || "Unknown"}${durationStr}${descStr}`
 }
 
 type WikiV0 = components["schemas"]["WikiV0"]

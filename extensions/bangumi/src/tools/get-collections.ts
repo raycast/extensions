@@ -25,7 +25,7 @@ type Input = {
 }
 
 const tool = async (input: Input) => {
-  const result = await bangumi.getMyCollections({
+  const { total, limit, offset, data } = await bangumi.getMyCollections({
     query: {
       subject_type: input.subjectType,
       type: input.collectionType,
@@ -34,7 +34,7 @@ const tool = async (input: Input) => {
     },
   })
 
-  const items = result.data.map((item) => {
+  const items = data.map((item) => {
     const statusStr = getCollectionTag(item.type, item.subject?.type).value
     const subjectMd = item.subject ? formatSubjectToMarkdown(item.subject) : ""
 
@@ -49,9 +49,9 @@ const tool = async (input: Input) => {
 
   return {
     pagination: {
-      total: result.total,
-      limit: result.limit,
-      offset: result.offset,
+      total,
+      limit,
+      offset,
     },
     content: `# User Collections\n\n${markdownItems}`,
   }

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api"
 import { usePromise, showFailureToast } from "@raycast/utils"
 import { useState } from "react"
 import { bangumi } from "@/api/bangumi"
-import { EpisodeCollectionType, EpisodeType } from "@/shared/const"
+import { EpisodeCollectionType, EpisodeCollectionTypeName, EpisodeType, EpisodeTypePrefix } from "@/shared/const"
 import type { components } from "@/types/generated"
 import { EpisodeStatusActions } from "./actions"
 import EpisodeDetail from "./EpisodeDetail"
@@ -15,26 +15,9 @@ interface ProgressViewerProps {
   totalEps?: number
 }
 
-const EPISODE_COLLECTION_NAME: Record<EpisodeCollectionType, string> = {
-  [EpisodeCollectionType.NotCollected]: "Unwatched",
-  [EpisodeCollectionType.Watched]: "Watched",
-  [EpisodeCollectionType.Wish]: "Wishlist",
-  [EpisodeCollectionType.Dropped]: "Dropped",
-}
-
-const EP_TYPE_PREFIX: Record<number, string> = {
-  [EpisodeType.Main]: "EP",
-  [EpisodeType.SP]: "SP",
-  [EpisodeType.OP]: "OP",
-  [EpisodeType.ED]: "ED",
-  [EpisodeType.Trailer]: "PV",
-  [EpisodeType.MAD]: "MAD",
-  [EpisodeType.Other]: "Other",
-}
-
 type Episode = components["schemas"]["Episode"]
 
-const getEpisodeLabel = (ep: Episode) => `${EP_TYPE_PREFIX[ep.type] ?? "EP"}.${ep.sort}`
+const getEpisodeLabel = (ep: Episode) => `${EpisodeTypePrefix[ep.type as EpisodeType] ?? "EP"}.${ep.sort}`
 
 interface EpAppearance {
   bg: string
@@ -222,7 +205,7 @@ export default function ProgressViewer({
       pagination={pagination}
     >
       {sortedTypes.map((type) => (
-        <Grid.Section key={type} title={EP_TYPE_PREFIX[type] || "Other"}>
+        <Grid.Section key={type} title={EpisodeTypePrefix[type as EpisodeType] || "Other"}>
           {groupedEps[type]?.map((ep) => {
             const epTitle = ep.episode.name_cn || ep.episode.name || ""
             const epLabel = getEpisodeLabel(ep.episode)
@@ -234,7 +217,7 @@ export default function ProgressViewer({
                 key={ep.episode.id}
                 content={{
                   source: buildEpisodeIcon(epNum, getEpisodeAppearance(ep.episode, statusType)),
-                  tooltip: EPISODE_COLLECTION_NAME[statusType],
+                  tooltip: EpisodeCollectionTypeName[statusType as EpisodeCollectionType],
                 }}
                 keywords={[epLabel, epTitle]}
                 actions={
