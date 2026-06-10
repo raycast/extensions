@@ -1,6 +1,6 @@
 # UniRate Currency Changelog
 
-## [Fixed API key signup link] - {PR_MERGE_DATE}
+## [Fixed API key signup link] - 2026-06-10
 
 - Replaced dead UniRate dashboard signup URL with the current registration URL
 - Updated extension preference description and README setup instructions
