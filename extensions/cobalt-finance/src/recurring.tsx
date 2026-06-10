@@ -220,15 +220,16 @@ export default function Command() {
     void run();
   }, [base]);
 
-  const { isLoading, data, revalidate, error } = useFetch<RecurringStream[]>(
-    `${base}/v1/recurring`,
-    {
-      execute: !!accessToken,
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      initialData: [],
-      keepPreviousData: true,
-    },
-  );
+  const { isLoading, data, revalidate, error } = useFetch<
+    RecurringStream[],
+    RecurringStream[],
+    RecurringStream[]
+  >(`${base}/v1/recurring`, {
+    execute: !!accessToken,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    initialData: [] as RecurringStream[],
+    keepPreviousData: true,
+  });
 
   const signOutAction = (
     <Action

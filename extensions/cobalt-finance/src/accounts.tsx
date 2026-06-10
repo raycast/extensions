@@ -175,15 +175,16 @@ export default function Command() {
     void run();
   }, [base]);
 
-  const { isLoading, data, revalidate, error } = useFetch<Account[]>(
-    `${base}/v1/accounts`,
-    {
-      execute: !!accessToken,
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      initialData: [],
-      keepPreviousData: true,
-    },
-  );
+  const { isLoading, data, revalidate, error } = useFetch<
+    Account[],
+    Account[],
+    Account[]
+  >(`${base}/v1/accounts`, {
+    execute: !!accessToken,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    initialData: [] as Account[],
+    keepPreviousData: true,
+  });
 
   const signOutAction = (
     <Action
