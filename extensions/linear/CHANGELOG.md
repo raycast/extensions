@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Set Priority shortcut] - {PR_MERGE_DATE}
+## [Set Priority shortcut] - 2026-06-10
 
 - Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.
 
