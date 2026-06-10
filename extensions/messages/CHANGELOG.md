@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+## [Bug Fixes & Improvements] - 2026-06-10
 
 - Add `before` pagination cursor to load older messages in AI chat
 - Show contact name and photo when chat uses an email address instead of a phone number
