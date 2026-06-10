@@ -18,6 +18,7 @@ import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
 import copyFileToClipboard from "../lib/copyFileToClipboard";
+import copyGifAsSquareToClipboard from "../lib/copyGifAsSquareToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
@@ -108,6 +109,18 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     }
   }
 
+  async function copyGifAsSquare() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Copying GIF Square" });
+      const file = await copyGifAsSquareToClipboard(item.download_url, item.download_name);
+      await trackUsage();
+      await closeMainWindow();
+      await showToast({ style: Toast.Style.Success, title: `Copied square GIF "${path.basename(file)}"` });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy GIF square" });
+    }
+  }
+
   async function pasteGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF" });
@@ -120,6 +133,20 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     } catch (error) {
       console.error(error);
       await showFailureToast(error, { title: "Could not paste GIF" });
+    }
+  }
+
+  async function pasteGifSquare() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Pasting GIF Square" });
+      const file = await copyGifAsSquareToClipboard(item.download_url, item.download_name);
+      await trackUsage();
+      await closeMainWindow();
+      await Clipboard.paste({ file });
+      await showToast({ style: Toast.Style.Success, title: `Pasted square GIF "${path.basename(file)}"` });
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, { title: "Could not paste GIF square" });
     }
   }
 
@@ -211,6 +238,14 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       onPaste={trackUsage}
     />
   );
+  const copySquareGif =
+    process.platform === "darwin" ? (
+      <Action icon={Icon.Clipboard} key="copySquareGif" title="Copy GIF Square" onAction={copyGifAsSquare} />
+    ) : undefined;
+  const pasteSquareGif =
+    process.platform === "darwin" ? (
+      <Action icon={Icon.Clipboard} key="pasteSquareGif" title="Paste GIF Square" onAction={pasteGifSquare} />
+    ) : undefined;
   const pasteGifUrl = (
     <Action.Paste
       key="pasteGifUrl"
@@ -309,7 +344,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   );
 
   const actions: Array<(React.JSX.Element | undefined)[]> = [
-    [copyFile, pasteFile, copyGifUrl, pasteGifUrl, copyGifMarkdown, pasteGifMarkdown],
+    [copyFile, pasteFile, copyGifUrl, pasteGifUrl, copyGifMarkdown, pasteGifMarkdown, copySquareGif, pasteSquareGif],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];

@@ -18,7 +18,8 @@
     "dante",
     "5z99tsb75z",
     "xilopaint",
-    "chrahe"
+    "chrahe",
+    "clins1994"
   ],
   "categories": [
     "Applications",
@@ -193,6 +194,11 @@
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "move-to-trash",
+      "title": "Move to Trash",
+      "description": "Move an email to Trash in Apple Mail."
     },
     {
       "name": "copy-email-link",

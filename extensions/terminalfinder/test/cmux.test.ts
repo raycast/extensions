@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { formatCmuxError } from "../src/cmux-error";
 import { extractCmuxWorkingDirectory } from "../src/cmux";
 
 test("returns the cwd for the focused workspace", () => {
@@ -75,5 +76,12 @@ test("throws when the focused workspace has no working directory", () => {
   assert.throws(
     () => extractCmuxWorkingDirectory(sidebarState),
     /cmux did not return a focused workspace with a working directory/,
+  );
+});
+
+test("formats cmux broken pipe socket errors", () => {
+  assert.match(
+    formatCmuxError("Error: Failed to write to socket (Broken pipe, errno 32)"),
+    /Unable to reach cmux over its automation socket/,
   );
 });

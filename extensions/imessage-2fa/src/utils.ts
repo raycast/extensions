@@ -150,6 +150,15 @@ function fixQuotedPrintableUrl(url: string): string {
   });
 }
 
+function isSupportedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Extract verification or sign-in links from messages
  *
@@ -254,6 +263,7 @@ export function extractVerificationLink(message: string): { url: string; type: "
 
       // Skip ignored URLs
       if (ignoreUrls.includes(rawUrl)) continue;
+      if (!isSupportedUrl(rawUrl)) continue;
 
       const linkText = stripHtmlTags(match[3]).toLowerCase(); // Cleaned text inside the tag
       const lowerUrl = rawUrl.toLowerCase();
@@ -340,6 +350,7 @@ export function extractVerificationLink(message: string): { url: string; type: "
 
     // Skip ignored URLs
     if (ignoreUrls.some((ignore) => rawUrl.startsWith(ignore))) continue;
+    if (!isSupportedUrl(rawUrl)) continue;
 
     // Check for verification/sign-in keywords *within the URL itself*
     let type: "verification" | "sign-in" | "unknown" = "unknown";

@@ -57,6 +57,10 @@ export async function ping() {
   return await callApi("ping", "Pinging");
 }
 
+export async function getAccountBalance() {
+  return await callApi("account/balance", "Retrieving");
+}
+
 export async function createRecord(domain: string, { ...params }: CreateDNSRecordRequest) {
   const body = { ...params };
   return await callApi(`dns/create/${domain}`, "Creating DNS Record", body);

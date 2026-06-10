@@ -48,7 +48,7 @@ export function fetchGranolaData(route: string) {
       })
       .catch((err) => {
         if (mounted) {
-          setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
+          setError(new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err }));
         }
       });
     return () => {
@@ -60,7 +60,12 @@ export function fetchGranolaData(route: string) {
 
   // Use parseResponse to transform data BEFORE useFetch caches it
   // This ensures only stripped data is cached, reducing memory usage
-  const { isLoading, data, revalidate } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
+  const {
+    isLoading,
+    data,
+    error: fetchError,
+    revalidate,
+  } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
@@ -128,6 +133,10 @@ export function fetchGranolaData(route: string) {
 
   if (error) {
     throw error;
+  }
+
+  if (fetchError) {
+    throw toError(fetchError);
   }
 
   // Return transformed data (or original if transformation not needed)

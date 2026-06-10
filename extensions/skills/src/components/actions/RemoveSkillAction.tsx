@@ -50,6 +50,7 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
     const label = isAll ? "all agents" : agents.join(", ");
 
     const confirmed = await confirmAlert({
+      icon: { source: Icon.Trash, tintColor: Color.Red },
       title: isAll ? `Remove "${skill.name}"?` : `Remove "${skill.name}" from ${label}?`,
       message: isAll
         ? "This will remove the skill from all agents."
@@ -134,6 +135,7 @@ export function RemoveSkillAction({ skill, mutate }: RemoveSkillActionProps) {
       onAction={() =>
         withSkillAction({
           confirm: {
+            icon: { source: Icon.Trash, tintColor: Color.Red },
             title: `Remove "${skill.name}"?`,
             message: "This will remove the skill from all agents.",
             primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },

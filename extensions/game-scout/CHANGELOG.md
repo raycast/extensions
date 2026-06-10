@@ -1,5 +1,24 @@
 # Game Scout Changelog
 
+## [Update] - 2026-06-01
+
+### Performance & Optimization
+- **Prevented Runtime Crashes**: Implemented safe JSON parsing (safeParse) for all LocalStorage and Cache reads, eliminating silent failures and extension crashes caused by corrupted or incomplete storage data.
+- **Fixed Race Conditions**: Refactored fetchPrices with strict AbortSignal guards to prevent stale API responses from corrupting the state during rapid UI interactions or filter changes.
+- **Reduced API Requests**: Passed pre-fetched prices and overview data as props to the GameDetail component from both Search and Saved list views. Redundant API calls inside GameDetail are now successfully skipped using precise null/undefined guards.
+- **Secured History Chart Parsing**: Replaced hardcoded array indexes with destructuring when reading the history API response, preventing data misalignment and missing charts caused by conditional fetch ordering.
+
+### Bug Fixes & Improvements
+- **Fixed Inaccurate Bundle Counts**: Corrected the bundle calculation logic by deduplicating game IDs across bundle tiers using Set and properly mapping bundle data per game. This prevents inflated bundle counts caused by multi‑tier duplication or global list leaks.
+- **Fixed Divide-by-Zero Errors**: Added strict zero‑value guards (last <= 0) to price drop calculations, preventing NaN and Infinity errors that corrupted UI tags and filtering logic.
+- **Fixed Price Drops Section**: Repaired the logic for the "Price Drops" section. It now accurately evaluates price changes and remains persistently visible across all sorting and filter modes (e.g., A‑Z, Lowest Price) without prematurely resetting.
+- **Fixed Search Store Filters**: Resolved an issue on the search page where displayed prices ignored active store filters and incorrectly defaulted to the absolute lowest price.
+- **Patched API Leak**: Added strict `!== undefined` checks when passing preloaded props to GameDetail to prevent accidental fallback API calls when a game legitimately has no active deals or bundles.
+- **Removed Legacy State**: Completely stripped deprecated `seenDrops` and `seenPriceChanges` states that were causing unexpected UI resets.
+- **Fixed False “Never on Sale” Signal**: Updated the insight algorithm to respect the current discount when historical data is limited. If an active deal has a positive cut, the system no longer falsely reports “Never on Sale” or “No Recent Discounts.”
+- **Integrated Steam Discount Fallback**: The sale tag and hero section now use the maximum of the ITAD‑reported cut and Steam’s `price_overview.discount_percent`, ensuring correct discount display for games that are on sale on Steam but not yet tracked by IsThereAnyDeal.
+- **Enhanced Signal Accuracy**: Passed the full allowedHistory to the `computeGameInsight` function, laying the groundwork for more robust historical discount detection in future releases.
+
 ## [Update] - 2026-05-18
 
 ### Added

@@ -1,5 +1,11 @@
 # Roblox Changelog
 
+## [More Precise Server Location] - 2026-05-22
+
+- Updated to show more precise server locations (uses a maintained server list endpoint, fallback to IP Geolocation)
+- Added 'Get Playing Game' support for Windows.
+- Update some small strings (`Place Id` -> `Place ID`, `Copy Root Place Id` -> `Copy Root Place ID`, etc...)
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

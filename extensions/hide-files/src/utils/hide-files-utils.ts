@@ -2,10 +2,23 @@ import { captureException, getSelectedFinderItems, LocalStorage, showHUD } from 
 import { checkDuplicatePath, getFilesInDirectory, getLocalStorage, isDirectoryOrFile, isEmpty } from "./common-utils";
 import { DirectoryInfo } from "./directory-info";
 import { parse } from "path";
-import { spawn } from "child_process";
 import { LocalStorageKey } from "./constants";
 import { spawnSync } from "node:child_process";
 import fse from "fs-extra";
+
+const runChflags = (flag: "hidden" | "nohidden", paths: string[]) => {
+  if (paths.length === 0) {
+    return;
+  }
+
+  const result = spawnSync("chflags", [flag, ...paths], { encoding: "utf-8" });
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || `chflags ${flag} failed`);
+  }
+};
 
 export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
   try {
@@ -75,10 +88,10 @@ export const removeFilesFromPanelBySelected = async (directory: string[]) => {
 
 /**
  *
- * @param path If there are multiple paths, please separate them with spaces
+ * @param path One path or an array of paths to unhide
  */
-export const showHiddenFiles = (path: string) => {
-  spawn("chflags", ["nohidden", path], { shell: true });
+export const showHiddenFiles = (path: string | string[]) => {
+  runChflags("nohidden", Array.isArray(path) ? path : [path]);
 };
 
 // Judging by the hidden attribute of the first file
@@ -109,15 +122,16 @@ export const hideFilesInFolder = async (path: string) => {
     }
 
     if (isHidden) {
+      const fileSystemItems = getFilesInDirectory(pathStr);
+      runChflags("nohidden", fileSystemItems);
       await showHUD(`🐵 Unhiding files in ${name}`);
-      spawn("chflags", ["nohidden", `${pathStr.replaceAll(" ", `" "`)}*`], { shell: true });
       //remove files from hide panel
       await removeFilesFromPanel(pathStr);
     } else {
-      await showHUD(`🙈 Hiding files in ${name}`);
-      spawn("chflags", ["hidden", `${pathStr.replaceAll(" ", `" "`)}*`], { shell: true });
       //add files to hide panel
       const fileSystemItems = getFilesInDirectory(pathStr);
+      runChflags("hidden", fileSystemItems);
+      await showHUD(`🙈 Hiding files in ${name}`);
       await putFileOnHidePanel(fileSystemItems);
     }
     return isHidden;
@@ -138,31 +152,20 @@ export const hideFilesSelected = async () => {
     }
     const isHidden = isFileHidden(fileSystemItems[0].path);
 
-    let hiddenFilesStr = "";
-    fileSystemItems.forEach((value) => {
-      const parsedPath = parse(value.path);
-      hiddenFilesStr =
-        hiddenFilesStr + " " + parsedPath.dir.replaceAll(" ", `" "`) + "/" + parsedPath.base.replaceAll(" ", `" "`);
-    });
+    const filePaths = fileSystemItems.map((value) => value.path);
 
     if (isHidden) {
+      runChflags("nohidden", filePaths);
       await showHUD(`🐵 Unhiding selected files`);
-      spawn("chflags", ["nohidden", `${hiddenFilesStr}`], { shell: true });
 
       //add files to hide panel
-      const _fileSystemItems = fileSystemItems.map((value) => {
-        return value.path;
-      });
-      await removeFilesFromPanelBySelected(_fileSystemItems);
+      await removeFilesFromPanelBySelected(filePaths);
     } else {
+      runChflags("hidden", filePaths);
       await showHUD(`🙈 Hiding selected files`);
-      spawn("chflags", ["hidden", hiddenFilesStr], { shell: true });
 
       //add files to hide panel
-      const _fileSystemItems = fileSystemItems.map((value) => {
-        return value.path;
-      });
-      await putFileOnHidePanel(_fileSystemItems);
+      await putFileOnHidePanel(filePaths);
     }
   } catch (e) {
     captureException(e);

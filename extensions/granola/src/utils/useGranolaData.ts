@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchGranolaData, getSharedDocuments } from "./fetchData";
 import { NoteData, Doc } from "./types";
-import { toError } from "./errorUtils";
+import { logGranolaError, toError } from "./errorUtils";
 
 function isNoteData(data: unknown): data is NoteData {
   if (typeof data !== "object" || data === null) return false;
@@ -41,6 +41,7 @@ export function useGranolaData(): GranolaDataState {
     fetchResult = fetchGranolaData("get-documents");
   } catch (error) {
     fetchError = toError(error);
+    logGranolaError("useGranolaData.fetchGranolaData", fetchError, { route: "get-documents" });
   }
 
   const isValidData = fetchResult && isNoteData(fetchResult);
@@ -66,11 +67,16 @@ export function useGranolaData(): GranolaDataState {
   }
 
   if (!isValidData || !noteData) {
+    const shapeError = new Error("Invalid data shape returned from Granola API. Expected NoteData structure.");
+    logGranolaError("useGranolaData", shapeError, {
+      reason: "invalid data shape",
+      fetchResultType: fetchResult === null ? "null" : typeof fetchResult,
+    });
     return {
       noteData: null,
       isLoading: false,
       hasError: true,
-      error: new Error("Invalid data shape returned from Granola API. Expected NoteData structure."),
+      error: shapeError,
     };
   }
 
@@ -79,7 +85,13 @@ export function useGranolaData(): GranolaDataState {
   }
 
   if (!noteData.data) {
-    return { noteData, isLoading: false, hasError: true, error: new Error("No data available") };
+    const noDataError = new Error("No data available from Granola API (get-documents returned empty response)");
+    logGranolaError("useGranolaData", noDataError, {
+      reason: "empty response",
+      isLoading: noteData.isLoading,
+      hasRevalidate: typeof noteData.revalidate === "function",
+    });
+    return { noteData, isLoading: false, hasError: true, error: noDataError };
   }
 
   // Merge and deduplicate: owned docs take precedence over shared docs
