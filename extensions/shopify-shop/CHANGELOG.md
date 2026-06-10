@@ -1,3 +1,3 @@
 # Shopify Shop
 
-## [Shopify Shop] - {PR_MERGE_DATE}
+## [Shopify Shop] - 2026-06-10
