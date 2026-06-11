@@ -965,54 +965,39 @@ export type QuickFindData = {
 // Read directly from Things' SQLite database — a single SQL query with JOINs
 // replaces many serialized Apple Events.
 export const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
-  const sql = `SELECT json_object(
-    'areas', COALESCE((
-      SELECT json_group_array(json_object('id', a.uuid, 'name', a.title))
-      FROM TMArea a WHERE a.visible = 1
-    ), json('[]')),
-    'projects', COALESCE((
-      SELECT json_group_array(json_object(
-        'id', p.uuid, 'name', p.title, 'areaName', a.title
-      ))
+  type AreaRow = { id: string; name: string };
+  type ProjectRow = { id: string; name: string; areaName: string | null };
+  type TodoRow = { id: string; name: string; status: string; projectName: string | null; areaName: string | null };
+
+  const [areaRows, projectRows, todoRows] = await Promise.all([
+    executeSQL<AreaRow>(
+      getThingsDBPath(),
+      `SELECT a.uuid as id, a.title as name
+      FROM TMArea a WHERE a.visible = 1`,
+    ),
+    executeSQL<ProjectRow>(
+      getThingsDBPath(),
+      `SELECT p.uuid as id, p.title as name, a.title as areaName
       FROM TMTask p
       LEFT JOIN TMArea a ON a.uuid = p.area
-      WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0
-    ), json('[]')),
-    'todos', COALESCE((
-      SELECT json_group_array(json_object(
-        'id', t.uuid, 'name', t.title,
-        'status', 'open',
-        'projectName', p.title,
-        'areaName', COALESCE(pa.title, da.title)
-      ))
+      WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
+    ),
+    executeSQL<TodoRow>(
+      getThingsDBPath(),
+      `SELECT t.uuid as id, t.title as name, 'open' as status,
+        p.title as projectName,
+        COALESCE(pa.title, da.title) as areaName
       FROM TMTask t
       LEFT JOIN TMTask p ON p.uuid = t.project
       LEFT JOIN TMArea da ON da.uuid = t.area
       LEFT JOIN TMArea pa ON pa.uuid = p.area
-      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0
-    ), json('[]'))
-  ) as result`;
-
-  const rows = await executeSQL<{ result: string }>(getThingsDBPath(), sql);
-  const data = JSON.parse(rows[0].result);
-
-  // SQLite returns null for missing values; convert to undefined to match TypeScript optionals
-  const nullToUndefined = (v: string | null) => v ?? undefined;
+      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0`,
+    ),
+  ]);
 
   return {
-    areas: (data.areas || []).filter((v: unknown) => v != null),
-    projects: (data.projects || [])
-      .filter((v: unknown) => v != null)
-      .map((p: { id: string; name: string; areaName: string | null }) => ({
-        ...p,
-        areaName: nullToUndefined(p.areaName),
-      })),
-    todos: (data.todos || [])
-      .filter((v: unknown) => v != null)
-      .map((t: { id: string; name: string; status: string; projectName: string | null; areaName: string | null }) => ({
-        ...t,
-        projectName: nullToUndefined(t.projectName),
-        areaName: nullToUndefined(t.areaName),
-      })),
+    areas: areaRows,
+    projects: projectRows.map((p) => ({ ...p, areaName: p.areaName ?? undefined })),
+    todos: todoRows.map((t) => ({ ...t, projectName: t.projectName ?? undefined, areaName: t.areaName ?? undefined })),
   };
 };
