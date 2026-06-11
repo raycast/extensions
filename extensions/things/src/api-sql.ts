@@ -132,6 +132,14 @@ function sqlEscape(value: string): string {
   return value.replace(/'/g, "''");
 }
 
+/** Map a Things integer status to its string equivalent. */
+function mapStatus(n: number | null): 'canceled' | 'completed' | 'open' {
+  return n === 2 ? 'canceled' : n === 3 ? 'completed' : 'open';
+}
+
+/** SQL CASE expression that maps a Things integer status column to a string. */
+const STATUS_CASE = (col: string) => `CASE ${col} WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END`;
+
 type ResolvedDates = {
   effectiveDeadline: string | null;
   effectiveStartDate: string | null;
@@ -171,6 +179,14 @@ function resolveEffectiveDates(
   return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: false };
 }
 
+/** SQL subquery: GROUP_CONCAT of tag names for a task row (append `as colName` at the call site). */
+const taskTagsSql = (tableAlias: string) =>
+  `(SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = ${tableAlias}.uuid)`;
+
+/** SQL subquery: GROUP_CONCAT of tag names for an area row (append `as colName` at the call site). */
+const areaTagsSql = (tableAlias: string) =>
+  `(SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = ${tableAlias}.uuid)`;
+
 const TODO_JOINS = `
   FROM TMTask t
   LEFT JOIN TMTask p ON t.project = p.uuid
@@ -193,9 +209,7 @@ const TODO_SELECT_SUMMARY = `
 const TODO_SELECT_DETAIL = `${TODO_SELECT_SUMMARY},
   t.status,
   COALESCE(t.notes, '') as notes,
-  (SELECT GROUP_CONCAT(tg.title, ', ')
-   FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
-   WHERE tt.tasks = t.uuid) as tagList`;
+  ${taskTagsSql('t')} as tagList`;
 
 // Used by AI tool queries (queryTodos, searchTodos) — todos only, no projects
 const TODO_BASE_WHERE = `t.type = 0 AND t.trashed = 0 AND t.status = 0`;
@@ -264,7 +278,7 @@ type CollectionProjectRow = {
   areaTags: string | null;
 };
 
-type CollectionTodoRow = {
+type CollectionTodoBaseRow = {
   id: string;
   name: string;
   status: string;
@@ -275,24 +289,34 @@ type CollectionTodoRow = {
   nextInstanceStartDate: number | null;
   recurrenceRule: unknown;
   creationDate: string | null;
-  projectId: string | null;
 };
+
+type CollectionTodoRow = CollectionTodoBaseRow & { projectId: string | null };
 
 type CollectionAreaRow = { id: string; name: string; tags: string | null };
 
-type CollectionAreaTodoRow = {
-  id: string;
-  name: string;
-  status: string;
-  notes: string;
-  tags: string | null;
-  deadline: number | null;
-  startDate: number | null;
-  nextInstanceStartDate: number | null;
-  recurrenceRule: unknown;
-  creationDate: string | null;
-  areaId: string | null;
-};
+type CollectionAreaTodoRow = CollectionTodoBaseRow & { areaId: string | null };
+
+/** Convert a collection todo row to a Todo object (shared between projects and areas branches). */
+function collectionTodoToTodo(t: CollectionTodoBaseRow): Todo {
+  const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+    t.startDate ?? 0,
+    t.deadline ?? 0,
+    t.nextInstanceStartDate ?? 0,
+    t.recurrenceRule,
+  );
+  return {
+    id: t.id,
+    name: t.name,
+    status: t.status as Todo['status'],
+    notes: t.notes,
+    tags: t.tags ?? '',
+    areaTags: null,
+    dueDate: effectiveDeadline ?? '',
+    activationDate: effectiveStartDate ?? '',
+    creationDate: t.creationDate ?? '',
+  };
+}
 
 /** Convert a raw DB summary row to a TodoSummary (with decoded dates). */
 function rowToTodoSummary(row: TodoSummaryRow): TodoSummary {
@@ -361,7 +385,7 @@ export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails |
   const summary = rowToTodoSummary(row);
   return {
     ...summary,
-    status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+    status: mapStatus(row.status),
     notes: row.notes,
     tags: row.tagList ? row.tagList.split(', ').filter(Boolean) : [],
     checklistItems,
@@ -381,7 +405,7 @@ export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetai
     const summary = rowToTodoSummary(row);
     return {
       ...summary,
-      status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+      status: mapStatus(row.status),
       notes: row.notes,
       tags: row.tagList ? row.tagList.split(', ').filter(Boolean) : [],
       checklistItems: allChecklist[row.id] ?? [],
@@ -429,8 +453,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
       NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
       p.rt1_recurrenceRule as recurrenceRule,
       a.uuid as areaId, a.title as areaName,
-      (SELECT GROUP_CONCAT(tg.title, ', ')
-       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tagList,
+      ${taskTagsSql('p')} as tagList,
       (SELECT COUNT(*) FROM TMTask t WHERE t.project = p.uuid AND t.type = 0 AND t.trashed = 0 AND t.status = 0) as todoCount
     FROM TMTask p
     LEFT JOIN TMArea a ON a.uuid = p.area
@@ -447,7 +470,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
   return {
     id: r.id,
     name: r.name,
-    status: r.status === 2 ? 'canceled' : r.status === 3 ? 'completed' : 'open',
+    status: mapStatus(r.status),
     notes: r.notes,
     tags: r.tagList ? r.tagList.split(', ').filter(Boolean) : [],
     dueDate: effectiveDeadline ?? undefined,
@@ -462,8 +485,7 @@ export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails |
   const sql = `
     SELECT
       a.uuid as id, a.title as name,
-      (SELECT GROUP_CONCAT(tg.title, ', ')
-       FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tagList,
+      ${areaTagsSql('a')} as tagList,
       (SELECT COUNT(*) FROM TMTask p WHERE p.area = a.uuid AND p.type = 1 AND p.trashed = 0 AND p.status = 0) as projectCount,
       (SELECT COUNT(*) FROM TMTask t WHERE t.area = a.uuid AND t.type = 0 AND t.project IS NULL AND t.trashed = 0 AND t.status = 0) as todoCount
     FROM TMArea a
@@ -492,9 +514,7 @@ const LIST_SELECT = `
       t.type,
       t.status,
       COALESCE(t.notes, '') as notes,
-      (SELECT GROUP_CONCAT(tg.title, ', ')
-       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
-       WHERE tt.tasks = t.uuid) as tagList,
+      ${taskTagsSql('t')} as tagList,
       p.uuid as projectId,
       p.title as projectName,
       p.status as projectStatus,
@@ -503,16 +523,12 @@ const LIST_SELECT = `
       NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as projectNextInstanceStartDate,
       p.rt1_recurrenceRule as projectRecurrenceRule,
       COALESCE(p.notes, '') as projectNotes,
-      (SELECT GROUP_CONCAT(tg.title, ', ')
-       FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
-       WHERE tt.tasks = p.uuid) as projectTagList,
+      ${taskTagsSql('p')} as projectTagList,
       pa.uuid as projectAreaId,
       pa.title as projectAreaName,
       a.uuid as areaId,
       a.title as areaName,
-      (SELECT GROUP_CONCAT(tg.title, ', ')
-       FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags
-       WHERE at2.areas = COALESCE(a.uuid, pa.uuid)) as areaTagList,
+      (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = COALESCE(a.uuid, pa.uuid)) as areaTagList,
       t.creationDate as creationDateRaw
     FROM TMTask t
     LEFT JOIN TMTask p ON t.project = p.uuid
@@ -589,7 +605,7 @@ function mapListTodoRow(row: ListTodoRow): Todo {
     project = {
       id: row.projectId,
       name: row.projectName ?? '',
-      status: row.projectStatus === 2 ? 'canceled' : row.projectStatus === 3 ? 'completed' : 'open',
+      status: mapStatus(row.projectStatus),
       notes: row.projectNotes ?? '',
       tags: row.projectTagList ?? '',
       dueDate: projDue ?? '',
@@ -606,7 +622,7 @@ function mapListTodoRow(row: ListTodoRow): Todo {
   return {
     id: row.id,
     name: row.name,
-    status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
+    status: mapStatus(row.status),
     notes: row.notes,
     tags: row.tagList ?? '',
     dueDate: effectiveDeadline ?? '',
@@ -834,14 +850,14 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       executeSQL<CollectionProjectRow>(
         getThingsDBPath(),
         `SELECT p.uuid as id, p.title as name,
-          CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          ${STATUS_CASE('p.status')} as status,
           COALESCE(p.notes, '') as notes,
-          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
+          ${taskTagsSql('p')} as tags,
           p.deadline, p.startDate,
           NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
           p.rt1_recurrenceRule as recurrenceRule,
           a.uuid as areaId, a.title as areaName,
-          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
+          ${areaTagsSql('a')} as areaTags
         FROM TMTask p
         LEFT JOIN TMArea a ON a.uuid = p.area
         WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
@@ -849,9 +865,9 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       executeSQL<CollectionTodoRow>(
         getThingsDBPath(),
         `SELECT t.uuid as id, t.title as name,
-          CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          ${STATUS_CASE('t.status')} as status,
           COALESCE(t.notes, '') as notes,
-          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+          ${taskTagsSql('t')} as tags,
           t.deadline, t.startDate,
           NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
           t.rt1_recurrenceRule as recurrenceRule,
@@ -866,23 +882,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
     for (const t of todoRows) {
       if (t.projectId) {
         if (!todosByProject[t.projectId]) todosByProject[t.projectId] = [];
-        const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
-          t.startDate ?? 0,
-          t.deadline ?? 0,
-          t.nextInstanceStartDate ?? 0,
-          t.recurrenceRule,
-        );
-        todosByProject[t.projectId].push({
-          id: t.id,
-          name: t.name,
-          status: t.status as Todo['status'],
-          notes: t.notes,
-          tags: t.tags ?? '',
-          areaTags: null,
-          dueDate: effectiveDeadline ?? '',
-          activationDate: effectiveStartDate ?? '',
-          creationDate: t.creationDate ?? '',
-        });
+        todosByProject[t.projectId].push(collectionTodoToTodo(t));
       }
     }
 
@@ -912,15 +912,15 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       executeSQL<CollectionAreaRow>(
         getThingsDBPath(),
         `SELECT a.uuid as id, a.title as name,
-          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
+          ${areaTagsSql('a')} as tags
         FROM TMArea a WHERE a.visible = 1`,
       ),
       executeSQL<CollectionAreaTodoRow>(
         getThingsDBPath(),
         `SELECT t.uuid as id, t.title as name,
-          CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          ${STATUS_CASE('t.status')} as status,
           COALESCE(t.notes, '') as notes,
-          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+          ${taskTagsSql('t')} as tags,
           t.deadline, t.startDate,
           NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
           t.rt1_recurrenceRule as recurrenceRule,
@@ -935,23 +935,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
     for (const t of areaTodoRows) {
       if (t.areaId) {
         if (!todosByArea[t.areaId]) todosByArea[t.areaId] = [];
-        const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
-          t.startDate ?? 0,
-          t.deadline ?? 0,
-          t.nextInstanceStartDate ?? 0,
-          t.recurrenceRule,
-        );
-        todosByArea[t.areaId].push({
-          id: t.id,
-          name: t.name,
-          status: t.status as Todo['status'],
-          notes: t.notes,
-          tags: t.tags ?? '',
-          areaTags: null,
-          dueDate: effectiveDeadline ?? '',
-          activationDate: effectiveStartDate ?? '',
-          creationDate: t.creationDate ?? '',
-        });
+        todosByArea[t.areaId].push(collectionTodoToTodo(t));
       }
     }
 
