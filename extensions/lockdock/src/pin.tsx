@@ -1,9 +1,17 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { LockdockNeedsUpdate } from "./components/LockdockNeedsUpdate";
 import { LockdockNotInstalled } from "./components/LockdockNotInstalled";
 import { LockdockNotRunning } from "./components/LockdockNotRunning";
-import { DockStatus, getState, LockdockNotRunningError, lockDock, unlockDock } from "./lib/lockdock";
+import {
+  DockStatus,
+  getState,
+  LockdockNotRunningError,
+  LockdockUnsupportedVersionError,
+  lockDock,
+  unlockDock,
+} from "./lib/lockdock";
 import { getLockDockPathSafe } from "./lib/binary";
 
 export default function Command() {
@@ -25,6 +33,10 @@ export default function Command() {
 
   if (error instanceof LockdockNotRunningError) {
     return <LockdockNotRunning binPath={binPath} />;
+  }
+
+  if (error instanceof LockdockUnsupportedVersionError) {
+    return <LockdockNeedsUpdate version={error.version} />;
   }
 
   const runAction = async (

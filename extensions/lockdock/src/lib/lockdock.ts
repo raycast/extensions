@@ -7,6 +7,8 @@ export interface DockStatus {
   target?: number;
 }
 
+export const SUPPORTED_LOCKDOCK_MAJOR_VERSION = 0;
+
 export class LockdockNotRunningError extends Error {
   constructor(message = "Cannot connect to lockdock. Start daemon and try again.") {
     super(message);
@@ -14,9 +16,17 @@ export class LockdockNotRunningError extends Error {
   }
 }
 
+export class LockdockUnsupportedVersionError extends Error {
+  constructor(readonly version: string) {
+    super(`Lockdock ${version} is not supported by this extension.`);
+    this.name = "LockdockUnsupportedVersionError";
+  }
+}
+
 const ANSI_SEQUENCE_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-?]*[ -/]*[@-~]`, "g");
 
 export async function getState(): Promise<DockStatus> {
+  await assertCompatibleVersion();
   return runLockdock(["list"]).then(parseStatus);
 }
 
@@ -45,6 +55,24 @@ async function runLockdock(args: string[]): Promise<string> {
 
 function stripAnsi(value: string): string {
   return value.replace(ANSI_SEQUENCE_PATTERN, "");
+}
+
+async function assertCompatibleVersion(): Promise<void> {
+  const version = parseVersion(await runLockdock(["version"]));
+  const major = Number(version.split(".")[0]);
+
+  if (major !== SUPPORTED_LOCKDOCK_MAJOR_VERSION) {
+    throw new LockdockUnsupportedVersionError(version);
+  }
+}
+
+function parseVersion(output: string): string {
+  const match = /^lockdock (\d+\.\d+\.\d+)$/.exec(output);
+  if (!match) {
+    throw new Error(`lockdock returned an unexpected version: ${output}`);
+  }
+
+  return match[1];
 }
 
 function parseStatus(output: string): DockStatus {
