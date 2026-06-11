@@ -17,6 +17,7 @@ import {
 } from './types';
 import {
   NEXT_INSTANCE_PLACEHOLDER,
+  REQUIRED_SCHEMA,
   getEndOfToday,
   assertPackedDateEncoding,
   resolveEffectiveDates,
@@ -51,14 +52,52 @@ function findThingsDBPath(): string {
   throw notFoundError;
 }
 
-// Cached DB path. Re-resolved if the cached path no longer exists on disk
-// (e.g. Things was reinstalled or the database file was moved).
-let _thingsDBPath: string | undefined;
-function getThingsDBPath(): string {
-  if (_thingsDBPath && existsSync(_thingsDBPath)) return _thingsDBPath;
-  _thingsDBPath = findThingsDBPath();
+// Cached validated DB path. Re-resolved if the file no longer exists on disk
+// (e.g. Things was reinstalled or the database file was moved), which also
+// re-runs all assertions to catch schema changes after a Things update.
+let _validatedDBPath: string | undefined;
+async function getValidatedDBPath(): Promise<string> {
+  if (_validatedDBPath && existsSync(_validatedDBPath)) return _validatedDBPath;
+  const dbPath = findThingsDBPath();
   assertPackedDateEncoding();
-  return _thingsDBPath;
+  await assertDatabaseSchema(dbPath);
+  _validatedDBPath = dbPath;
+  return _validatedDBPath;
+}
+
+/**
+ * Verify that the Things database contains all tables and columns required by
+ * this extension. Uses a single sqlite_master query for all tables at once.
+ * Throws a descriptive error if Things has changed its schema.
+ */
+async function assertDatabaseSchema(dbPath: string): Promise<void> {
+  const tableNames = Object.keys(REQUIRED_SCHEMA)
+    .map((t) => `'${t}'`)
+    .join(', ');
+  const rows = await executeSQL<{ table_name: string; column_name: string }>(
+    dbPath,
+    `SELECT m.name AS table_name, p.name AS column_name
+     FROM sqlite_master m
+     JOIN pragma_table_info(m.name) p
+     WHERE m.type = 'table' AND m.name IN (${tableNames})`,
+  );
+
+  const found: Record<string, Set<string>> = {};
+  for (const row of rows) {
+    if (!found[row.table_name]) found[row.table_name] = new Set();
+    found[row.table_name].add(row.column_name);
+  }
+
+  const schemaError = (detail: string) =>
+    new Error(
+      `Things updated and changed its internal database schema — please check for an extension update. ${detail}`,
+    );
+
+  for (const [table, columns] of Object.entries(REQUIRED_SCHEMA)) {
+    if (!found[table]) throw schemaError(`Table "${table}" not found.`);
+    const missing = columns.filter((c) => !found[table].has(c));
+    if (missing.length) throw schemaError(`Missing column(s) in "${table}": ${missing.join(', ')}.`);
+  }
 }
 
 /** Escape a string for safe embedding in a SQLite string literal. */
@@ -246,9 +285,10 @@ export async function queryTodosSQL(
     const todos = await getListTodosFromDB(opts.listName as CommandListName);
     return todos.map(todoToSummary);
   }
+  const dbPath = await getValidatedDBPath();
   const where = buildTodosWhereClause(opts.projectId, opts.areaId);
   const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS} WHERE ${where}`;
-  const rows = await executeSQL<TodoSummaryRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<TodoSummaryRow>(dbPath, sql);
   return rows.map(rowToTodoSummary);
 }
 
@@ -269,11 +309,12 @@ function todoToSummary(todo: Todo): TodoSummary {
 }
 
 export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails | null> {
+  const dbPath = await getValidatedDBPath();
   const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
     WHERE t.uuid = '${sqlEscape(todoId)}' AND t.type = 0 AND t.trashed = 0 LIMIT 1`;
   const [rows, checklistItems] = await Promise.all([
-    executeSQL<TodoDetailRow>(getThingsDBPath(), sql),
-    queryChecklistItemsSQL(todoId),
+    executeSQL<TodoDetailRow>(dbPath, sql),
+    queryChecklistItemsSQL(dbPath, todoId),
   ]);
   if (!rows.length) return null;
   const row = rows[0];
@@ -289,12 +330,13 @@ export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails |
 
 export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetails[]> {
   if (!todoIds.length) return [];
+  const dbPath = await getValidatedDBPath();
   const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
   const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
     WHERE t.uuid IN (${inClause}) AND t.type = 0 AND t.trashed = 0`;
   const [rows, allChecklist] = await Promise.all([
-    executeSQL<TodoDetailRow>(getThingsDBPath(), sql),
-    queryChecklistItemsBatchSQL(todoIds),
+    executeSQL<TodoDetailRow>(dbPath, sql),
+    queryChecklistItemsBatchSQL(dbPath, todoIds),
   ]);
   return rows.map((row) => {
     const summary = rowToTodoSummary(row);
@@ -309,28 +351,32 @@ export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetai
 }
 
 export async function searchTodosSQL(query: string): Promise<TodoSummary[]> {
+  const dbPath = await getValidatedDBPath();
   const q = sqlEscape(query).replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
   const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS}
     WHERE ${TODO_BASE_WHERE}
       AND (t.title LIKE '%${q}%' ESCAPE '\\' OR t.notes LIKE '%${q}%' ESCAPE '\\')
     ${EXCLUDE_MASTER_WHERE}`;
-  const rows = await executeSQL<TodoSummaryRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<TodoSummaryRow>(dbPath, sql);
   return rows.map(rowToTodoSummary);
 }
 
 /** Query checklist items for a single todo. */
-async function queryChecklistItemsSQL(todoId: string): Promise<ChecklistItem[]> {
+async function queryChecklistItemsSQL(dbPath: string, todoId: string): Promise<ChecklistItem[]> {
   const sql = `SELECT uuid as id, title, status FROM TMChecklistItem WHERE task = '${sqlEscape(todoId)}' ORDER BY "index"`;
-  const rows = await executeSQL<{ id: string; title: string; status: number }>(getThingsDBPath(), sql);
+  const rows = await executeSQL<{ id: string; title: string; status: number }>(dbPath, sql);
   return rows.map((r) => ({ id: r.id, title: r.title, completed: r.status === 3 }));
 }
 
 /** Batch query checklist items for multiple todos. Returns a dict keyed by todo uuid. */
-async function queryChecklistItemsBatchSQL(todoIds: string[]): Promise<Record<string, ChecklistItem[]>> {
+async function queryChecklistItemsBatchSQL(
+  dbPath: string,
+  todoIds: string[],
+): Promise<Record<string, ChecklistItem[]>> {
   if (!todoIds.length) return {};
   const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
   const sql = `SELECT uuid as id, task, title, status FROM TMChecklistItem WHERE task IN (${inClause}) ORDER BY task, "index"`;
-  const rows = await executeSQL<{ id: string; task: string; title: string; status: number }>(getThingsDBPath(), sql);
+  const rows = await executeSQL<{ id: string; task: string; title: string; status: number }>(dbPath, sql);
   const result: Record<string, ChecklistItem[]> = {};
   for (const r of rows) {
     if (!result[r.task]) result[r.task] = [];
@@ -340,6 +386,7 @@ async function queryChecklistItemsBatchSQL(todoIds: string[]): Promise<Record<st
 }
 
 export async function queryProjectDetailsSQL(projectId: string): Promise<ProjectDetails | null> {
+  const dbPath = await getValidatedDBPath();
   const sql = `
     SELECT
       p.uuid as id, p.title as name, p.status,
@@ -353,7 +400,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
     FROM TMTask p
     LEFT JOIN TMArea a ON a.uuid = p.area
     WHERE p.uuid = '${sqlEscape(projectId)}' AND p.type = 1 AND p.trashed = 0 LIMIT 1`;
-  const rows = await executeSQL<ProjectDetailRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<ProjectDetailRow>(dbPath, sql);
   if (!rows.length) return null;
   const r = rows[0];
   const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
@@ -377,6 +424,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
 }
 
 export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails | null> {
+  const dbPath = await getValidatedDBPath();
   const sql = `
     SELECT
       a.uuid as id, a.title as name,
@@ -385,7 +433,7 @@ export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails |
       (SELECT COUNT(*) FROM TMTask t WHERE t.area = a.uuid AND t.type = 0 AND t.project IS NULL AND t.trashed = 0 AND t.status = 0) as todoCount
     FROM TMArea a
     WHERE a.uuid = '${sqlEscape(areaId)}' LIMIT 1`;
-  const rows = await executeSQL<AreaDetailRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<AreaDetailRow>(dbPath, sql);
   if (!rows.length) return null;
   const r = rows[0];
   return {
@@ -532,15 +580,17 @@ function mapListTodoRow(row: ListTodoRow): Todo {
   };
 }
 
-async function runListQuery(sql: string): Promise<Todo[]> {
-  const rows = await executeSQL<ListTodoRow>(getThingsDBPath(), sql);
+async function runListQuery(dbPath: string, sql: string): Promise<Todo[]> {
+  const rows = await executeSQL<ListTodoRow>(dbPath, sql);
   return rows.map(mapListTodoRow);
 }
 
 // Open, unscheduled (start=0), not trashed. Sorted by user-defined index.
 // Includes todos (type=0) and projects (type=1) — Things shows both in Inbox.
-async function getInboxTodosFromDB(): Promise<Todo[]> {
-  return runListQuery(`
+async function getInboxTodosFromDB(dbPath: string): Promise<Todo[]> {
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
@@ -548,15 +598,18 @@ async function getInboxTodosFromDB(): Promise<Todo[]> {
       AND t.status = 0
       AND t.start = 0
     ORDER BY t."index" ASC
-  `);
+  `,
+  );
 }
 
 // Open, scheduled for today or earlier (start=1, startDate <= end-of-today).
 // Includes todos (type=0) and projects (type=1) — Things shows both in Today.
 // Excludes recurring master templates that have an active instance already scheduled.
-async function getTodayTodosFromDB(): Promise<Todo[]> {
+async function getTodayTodosFromDB(dbPath: string): Promise<Todo[]> {
   const todayEnd = getEndOfToday();
-  return runListQuery(`
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
@@ -567,7 +620,8 @@ async function getTodayTodosFromDB(): Promise<Todo[]> {
       AND t.startDate <= ${todayEnd}
       ${EXCLUDE_MASTER_WHERE}
     ORDER BY t.todayIndex ASC, t."index" ASC
-  `);
+  `,
+  );
 }
 
 // Anytime is built in two groups:
@@ -575,10 +629,12 @@ async function getTodayTodosFromDB(): Promise<Todo[]> {
 //   2. Rest todos  (type=0, start=1, startDate IS NULL or > today) — sorted by index
 // Projects are not included. Todos inside Someday/Upcoming projects (project.start = 2) are excluded.
 // Recurring master templates that have an active instance are excluded (the instance is shown instead).
-async function getAnytimeTodosFromDB(): Promise<Todo[]> {
+async function getAnytimeTodosFromDB(dbPath: string): Promise<Todo[]> {
   const todayEnd = getEndOfToday();
   const [todayTodos, restTodos] = await Promise.all([
-    runListQuery(`
+    runListQuery(
+      dbPath,
+      `
       ${LIST_SELECT}
       WHERE
         t.type = 0
@@ -593,8 +649,11 @@ async function getAnytimeTodosFromDB(): Promise<Todo[]> {
         CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
         p."index" ASC,
         t."index" DESC
-    `),
-    runListQuery(`
+    `,
+    ),
+    runListQuery(
+      dbPath,
+      `
       ${LIST_SELECT}
       WHERE
         t.type = 0
@@ -608,7 +667,8 @@ async function getAnytimeTodosFromDB(): Promise<Todo[]> {
         CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
         p."index" ASC,
         t."index" ASC
-    `),
+    `,
+    ),
   ]);
   const seenIds = new Set(todayTodos.map((t) => t.id));
   return [...todayTodos, ...restTodos.filter((t) => !seenIds.has(t.id))];
@@ -617,8 +677,10 @@ async function getAnytimeTodosFromDB(): Promise<Todo[]> {
 // Open, start=2, has a concrete startDate OR is a recurring master with a known next instance date
 // (rt1_nextInstanceStartDate != 69760 placeholder). Things shows these in Upcoming via the next instance date.
 // Includes todos (type=0) and projects (type=1). Sorted: todos first, then projects, each by index.
-async function getUpcomingTodosFromDB(): Promise<Todo[]> {
-  return runListQuery(`
+async function getUpcomingTodosFromDB(dbPath: string): Promise<Todo[]> {
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
@@ -642,14 +704,17 @@ async function getUpcomingTodosFromDB(): Promise<Todo[]> {
       CASE WHEN t.todayIndex IS NULL OR t.todayIndex = 0 THEN 1 ELSE 0 END ASC,
       t.todayIndex ASC,
       t."index" DESC
-  `);
+  `,
+  );
 }
 
 // Open, start=2, no concrete startDate, non-recurring.
 // Recurring masters are excluded (they belong in Upcoming via next instance date).
 // Includes todos (type=0) and projects (type=1). Sorted: todos first, then projects, each by index.
-async function getSomedayTodosFromDB(): Promise<Todo[]> {
-  return runListQuery(`
+async function getSomedayTodosFromDB(dbPath: string): Promise<Todo[]> {
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
@@ -660,13 +725,16 @@ async function getSomedayTodosFromDB(): Promise<Todo[]> {
       AND t.rt1_recurrenceRule IS NULL
       AND t.rt1_repeatingTemplate IS NULL
     ORDER BY t.type ASC, t."index" ASC
-  `);
+  `,
+  );
 }
 
 // Completed or canceled items (status IN (2,3)) with a stop date, not trashed.
 // Includes todos (type=0) and projects (type=1). Sorted by completion date, newest first.
-async function getLogbookTodosFromDB(): Promise<Todo[]> {
-  return runListQuery(`
+async function getLogbookTodosFromDB(dbPath: string): Promise<Todo[]> {
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
@@ -674,37 +742,42 @@ async function getLogbookTodosFromDB(): Promise<Todo[]> {
       AND t.status IN (2, 3)
       AND t.stopDate IS NOT NULL
     ORDER BY t.stopDate DESC
-  `);
+  `,
+  );
 }
 
 // All trashed items regardless of status. Includes todos and projects.
 // Sorted by most recently modified first.
-async function getTrashTodosFromDB(): Promise<Todo[]> {
-  return runListQuery(`
+async function getTrashTodosFromDB(dbPath: string): Promise<Todo[]> {
+  return runListQuery(
+    dbPath,
+    `
     ${LIST_SELECT}
     WHERE
       t.type IN (0, 1)
       AND t.trashed = 1
     ORDER BY t.userModificationDate DESC
-  `);
+  `,
+  );
 }
 
 export async function getListTodosFromDB(commandListName: CommandListName): Promise<Todo[]> {
+  const dbPath = await getValidatedDBPath();
   switch (commandListName) {
     case 'inbox':
-      return getInboxTodosFromDB();
+      return getInboxTodosFromDB(dbPath);
     case 'today':
-      return getTodayTodosFromDB();
+      return getTodayTodosFromDB(dbPath);
     case 'anytime':
-      return getAnytimeTodosFromDB();
+      return getAnytimeTodosFromDB(dbPath);
     case 'upcoming':
-      return getUpcomingTodosFromDB();
+      return getUpcomingTodosFromDB(dbPath);
     case 'someday':
-      return getSomedayTodosFromDB();
+      return getSomedayTodosFromDB(dbPath);
     case 'logbook':
-      return getLogbookTodosFromDB();
+      return getLogbookTodosFromDB(dbPath);
     case 'trash':
-      return getTrashTodosFromDB();
+      return getTrashTodosFromDB(dbPath);
   }
 }
 
@@ -724,12 +797,13 @@ export type CollectionMap = {
 export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   ...keys: K[]
 ): Promise<Pick<CollectionMap, K>> {
+  const dbPath = await getValidatedDBPath();
   const keySet = new Set<string>(keys);
   const result: Partial<CollectionMap> = {};
 
   if (keySet.has('tags') || keySet.has('tagsWithHierarchy')) {
     const rows = await executeSQL<{ title: string; parentTitle: string | null }>(
-      getThingsDBPath(),
+      dbPath,
       `SELECT t.title, p.title as parentTitle FROM TMTag t LEFT JOIN TMTag p ON p.uuid = t.parent ORDER BY t.title COLLATE NOCASE`,
     );
     if (keySet.has('tags')) {
@@ -743,7 +817,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   if (keySet.has('projects') || keySet.has('lists')) {
     const [projectRows, todoRows] = await Promise.all([
       executeSQL<CollectionProjectRow>(
-        getThingsDBPath(),
+        dbPath,
         `SELECT p.uuid as id, p.title as name,
           ${STATUS_CASE('p.status')} as status,
           COALESCE(p.notes, '') as notes,
@@ -758,7 +832,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
         WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
       ),
       executeSQL<CollectionTodoRow>(
-        getThingsDBPath(),
+        dbPath,
         `SELECT t.uuid as id, t.title as name,
           ${STATUS_CASE('t.status')} as status,
           COALESCE(t.notes, '') as notes,
@@ -805,13 +879,13 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   if (keySet.has('areas') || keySet.has('lists')) {
     const [areaRows, areaTodoRows] = await Promise.all([
       executeSQL<CollectionAreaRow>(
-        getThingsDBPath(),
+        dbPath,
         `SELECT a.uuid as id, a.title as name,
           ${areaTagsSql('a')} as tags
         FROM TMArea a WHERE a.visible = 1`,
       ),
       executeSQL<CollectionAreaTodoRow>(
-        getThingsDBPath(),
+        dbPath,
         `SELECT t.uuid as id, t.title as name,
           ${STATUS_CASE('t.status')} as status,
           COALESCE(t.notes, '') as notes,
@@ -876,25 +950,26 @@ export type QuickFindData = {
 // Read directly from Things' SQLite database — a single SQL query with JOINs
 // replaces many serialized Apple Events.
 export const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
+  const dbPath = await getValidatedDBPath();
   type AreaRow = { id: string; name: string };
   type ProjectRow = { id: string; name: string; areaName: string | null };
   type TodoRow = { id: string; name: string; status: string; projectName: string | null; areaName: string | null };
 
   const [areaRows, projectRows, todoRows] = await Promise.all([
     executeSQL<AreaRow>(
-      getThingsDBPath(),
+      dbPath,
       `SELECT a.uuid as id, a.title as name
       FROM TMArea a WHERE a.visible = 1`,
     ),
     executeSQL<ProjectRow>(
-      getThingsDBPath(),
+      dbPath,
       `SELECT p.uuid as id, p.title as name, a.title as areaName
       FROM TMTask p
       LEFT JOIN TMArea a ON a.uuid = p.area
       WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
     ),
     executeSQL<TodoRow>(
-      getThingsDBPath(),
+      dbPath,
       `SELECT t.uuid as id, t.title as name, 'open' as status,
         p.title as projectName,
         COALESCE(pa.title, da.title) as areaName
