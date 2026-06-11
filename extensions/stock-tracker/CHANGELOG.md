@@ -1,6 +1,6 @@
 # Stock Tracker Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-11
 - Assets denominated in pence are now displayed properly, rather than being taken at face value for pounds.
 
 ## [Improvements] - 2026-04-30
