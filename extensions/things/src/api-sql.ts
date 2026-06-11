@@ -15,6 +15,12 @@ import {
   AreaDetails,
   ChecklistItem,
 } from './types';
+import {
+  NEXT_INSTANCE_PLACEHOLDER,
+  getEndOfToday,
+  assertPackedDateEncoding,
+  resolveEffectiveDates,
+} from './things-internals';
 
 // Things stores its data in a SQLite database. Tries known locations in order:
 //   1. ThingsData-*/Things Database.thingsdatabase/main.sqlite (modern)
@@ -45,17 +51,6 @@ function findThingsDBPath(): string {
   throw notFoundError;
 }
 
-function assertPackedDateEncoding(): void {
-  const packed = encodeThingsDate(2026, 6, 11);
-  const decoded = convertThingsDate(packed);
-  const expected = '2026-06-11';
-  if (decoded !== expected) {
-    throw new Error(
-      `Things date calculation has changed — dates may be incorrect. Expected "${expected}", got "${decoded}".`,
-    );
-  }
-}
-
 // Cached DB path. Re-resolved if the cached path no longer exists on disk
 // (e.g. Things was reinstalled or the database file was moved).
 let _thingsDBPath: string | undefined;
@@ -64,54 +59,6 @@ function getThingsDBPath(): string {
   _thingsDBPath = findThingsDBPath();
   assertPackedDateEncoding();
   return _thingsDBPath;
-}
-
-// Things stores dates as packed Int64: (year << 16) | (month << 12) | (day << 7)
-const YEAR_SHIFT = 16;
-const MONTH_SHIFT = 12;
-const DAY_SHIFT = 7;
-const MONTH_MASK = 0xf;
-const DAY_MASK = 0x1f;
-const RECURRING_DEADLINE_PLACEHOLDER = 262213760;
-const NEXT_INSTANCE_PLACEHOLDER = 69760;
-
-/** Decode a Things packed-date integer to "YYYY-MM-DD", or null if invalid/placeholder. */
-function convertThingsDate(value: number): string | null {
-  if (!value || value === RECURRING_DEADLINE_PLACEHOLDER || value === NEXT_INSTANCE_PLACEHOLDER) return null;
-  const year = value >> YEAR_SHIFT;
-  const month = (value >> MONTH_SHIFT) & MONTH_MASK;
-  const day = (value >> DAY_SHIFT) & DAY_MASK;
-  if (year <= 0 || month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-}
-
-/** Encode a calendar date to Things packed-date integer. */
-function encodeThingsDate(year: number, month: number, day: number): number {
-  return (year << YEAR_SHIFT) | (month << MONTH_SHIFT) | (day << DAY_SHIFT);
-}
-
-/** Returns Things packed-date for end-of-today (encodeThingsDate(today) + 127 covers all times within today). */
-function getEndOfToday(): number {
-  const now = new Date();
-  return encodeThingsDate(now.getFullYear(), now.getMonth() + 1, now.getDate()) + 127;
-}
-
-/** Add N calendar days to a Things packed-date integer and re-encode. */
-function addDaysToThingsDate(packedDate: number, days: number): number | null {
-  const dateStr = convertThingsDate(packedDate);
-  if (!dateStr) return null;
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  date.setDate(date.getDate() + days);
-  return encodeThingsDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
-}
-
-/** Parse the recurrence offset (in days) from a Things plist XML recurrence rule. */
-function parseDeadlineOffset(plistXml: unknown): number | null {
-  if (!plistXml || typeof plistXml !== 'string') return null;
-  const match = plistXml.match(/<key>ts<\/key>\s*<integer>(-?\d+)<\/integer>/);
-  if (!match) return null;
-  return parseInt(match[1], 10);
 }
 
 /** Escape a string for safe embedding in a SQLite string literal. */
@@ -126,45 +73,6 @@ function mapStatus(n: number | null): 'canceled' | 'completed' | 'open' {
 
 /** SQL CASE expression that maps a Things integer status column to a string. */
 const STATUS_CASE = (col: string) => `CASE ${col} WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END`;
-
-type ResolvedDates = {
-  effectiveDeadline: string | null;
-  effectiveStartDate: string | null;
-  dueDateIsRecurring: boolean;
-};
-
-/** Resolve effective dates for a todo/project (handles recurring tasks). */
-function resolveEffectiveDates(
-  startDate: number,
-  deadline: number,
-  nextInstanceStartDate: number,
-  recurrenceRule: unknown,
-): ResolvedDates {
-  // Effective start: prefer startDate, fall back to nextInstanceStartDate (unless placeholder)
-  let effectiveStartDate: string | null = null;
-  if (startDate) {
-    effectiveStartDate = convertThingsDate(startDate);
-  } else if (nextInstanceStartDate && nextInstanceStartDate !== NEXT_INSTANCE_PLACEHOLDER) {
-    effectiveStartDate = convertThingsDate(nextInstanceStartDate);
-  }
-
-  // Recurring deadline: placeholder indicates deadline is relative to next instance
-  if (deadline === RECURRING_DEADLINE_PLACEHOLDER) {
-    const offset = parseDeadlineOffset(recurrenceRule);
-    if (offset !== null && nextInstanceStartDate) {
-      const computedPacked = addDaysToThingsDate(nextInstanceStartDate, offset);
-      const effectiveDeadline = computedPacked !== null ? convertThingsDate(computedPacked) : null;
-      return { effectiveDeadline, effectiveStartDate, dueDateIsRecurring: true };
-    }
-    return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: true };
-  }
-
-  if (deadline) {
-    return { effectiveDeadline: convertThingsDate(deadline), effectiveStartDate, dueDateIsRecurring: false };
-  }
-
-  return { effectiveDeadline: null, effectiveStartDate, dueDateIsRecurring: false };
-}
 
 /** SQL subquery: GROUP_CONCAT of tag names for a task row (append `as colName` at the call site). */
 const taskTagsSql = (tableAlias: string) =>
