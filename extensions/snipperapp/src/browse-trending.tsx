@@ -9,7 +9,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter trending snippets…">
-      <List.EmptyView icon={Icon.LineChart} title="Loading trending snippets…" />
+      <List.EmptyView icon={Icon.LineChart} title={isLoading ? "Loading trending snippets…" : "No trending snippets"} />
       {items.map((snippet) => (
         <HubListItem key={snippet.id} snippet={snippet} />
       ))}

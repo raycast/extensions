@@ -214,6 +214,7 @@ export async function getHelper(): Promise<SnipperHelper> {
 export function disposeHelper() {
   cached?.dispose();
   cached = null;
+  cachedPath = null; // re-resolve on next use so an updated helperPath preference is picked up
 }
 
 function clean(params: Record<string, unknown>): Record<string, unknown> {
