@@ -201,7 +201,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     `
   const things = Application('${appId}');
   const matches = things.toDos.whose({id: '${escapeJxa(todoId)}'})();
-  if (matches.length === 0) return null;
+  if (!matches.length) return null;
   const todo = matches[0];
   const props = todo.properties();
   const projectRef = props.project;
@@ -302,7 +302,7 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
     `
   const things = Application('${appId}');
   const matches = things.projects.whose({id: '${escapeJxa(projectId)}'})();
-  if (matches.length === 0) return null;
+  if (!matches.length) return null;
   const project = matches[0];
   const props = project.properties();
   const areaRef = props.area;
@@ -331,7 +331,7 @@ export async function queryAreaDetailsJxa(appId: string, areaId: string): Promis
     `
   const things = Application('${appId}');
   const matches = things.areas.whose({id: '${escapeJxa(areaId)}'})();
-  if (matches.length === 0) return null;
+  if (!matches.length) return null;
   const area = matches[0];
   const props = area.properties();
   const todos = area.toDos().filter(t => t.status() === 'open' && !t.project());
