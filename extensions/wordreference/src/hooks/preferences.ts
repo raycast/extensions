@@ -15,11 +15,7 @@ export default function usePreferences() {
 
   const _setPreferences = async (newPreferences: Preferences) => {
     setPreferences(newPreferences);
-    showToast({
-      title: "Saving preferences...",
-      style: Toast.Style.Animated,
-    });
-    showToast({
+    await showToast({
       title: "Preferences saved",
       style: Toast.Style.Success,
     });

@@ -12,7 +12,11 @@ export function useMigratedCachedState<T>(key: string, defaultValue: T) {
         return;
       }
 
-      setState(JSON.parse(legacy) as T);
+      try {
+        setState(JSON.parse(legacy) as T);
+      } catch {
+        // Ignore corrupt legacy cache values and fall back to the default state.
+      }
       await LocalStorage.removeItem(key);
     })();
   }, [key, setState]);
