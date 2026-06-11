@@ -107,7 +107,7 @@ function parseStatus(output: string): DockStatus {
   if (location === undefined) {
     throw new Error("lockdock did not report the current Dock display.");
   }
-  if (displays.some((display) => display === undefined)) {
+  if (Object.keys(displays).length !== displays.length) {
     throw new Error("lockdock returned display indices in an unexpected format.");
   }
 
