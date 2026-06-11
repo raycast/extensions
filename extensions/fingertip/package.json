@@ -5,6 +5,9 @@
   "description": "Get online in 60 seconds with our AI powered website builder. Showcase your brand, schedule appointments, and sell products all at your fingertip.",
   "icon": "extension-icon.png",
   "author": "mblode",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Web"
   ],
