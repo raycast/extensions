@@ -1,6 +1,6 @@
 # Sleevy Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-11
 
 - Add commands to save the clipboard URL to Sleevy and browse your saved library.
 - Connect to Sleevy via OAuth browser consent — no manual API key entry required.
