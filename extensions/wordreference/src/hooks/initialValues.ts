@@ -25,7 +25,7 @@ export default function useInitialValues({ commandProps, preferences, setPrefere
         selectedText = selectedText.replace(/(\r\n|\n|\r)/gm, " ");
         setWord(selectedText);
       }
-    } catch (error) {
+    } catch {
       // Continue regardless of error
     }
   };
@@ -44,7 +44,7 @@ export default function useInitialValues({ commandProps, preferences, setPrefere
         showToast(
           Toast.Style.Failure,
           "Invalid language",
-          "You need to set the key translation language (eg: 'fren' for French to English)."
+          "You need to set the key translation language (eg: 'fren' for French to English).",
         );
       }
     }
