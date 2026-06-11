@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-usage",
-  "title": "Claude Usage",
+  "title": "Claude Subscription Usage",
   "description": "Monitor your Claude subscription limits (5-hour session & weekly) right in the macOS menu bar — reads your local Claude Code login, no API key or cookie to paste.",
   "icon": "icon.png",
   "author": "abrockmann",
@@ -10,20 +10,20 @@
     "Productivity"
   ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "menubar",
-      "title": "Claude Usage in Menu Bar",
-      "subtitle": "Claude",
+      "title": "Show in Menu Bar",
       "description": "Shows session and weekly utilization of your Claude subscription in the menu bar.",
       "mode": "menu-bar",
       "interval": "2m"
     },
     {
       "name": "dashboard",
-      "title": "Show Claude Usage",
-      "subtitle": "Claude",
+      "title": "Show Dashboard",
       "description": "Detailed dashboard with all limits, reset timers, burn rate and projections.",
       "mode": "view"
     }
@@ -66,8 +66,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

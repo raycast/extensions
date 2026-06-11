@@ -12,7 +12,7 @@ Monitor your **Claude subscription** limits (Pro / Max / Team) right in the macO
 - Icon color by severity: green < 50 % < yellow < 75 % < orange < 90 % < red
 - In the dropdown: progress bars, reset countdown + time, Opus/Sonnet sub-limits (if your plan has them), burn rate and projection
 
-**Dashboard** (`Show Claude Usage`)
+**Dashboard** (`Show Dashboard`)
 
 - Every window with a detail panel: status, reset, burn rate (%/h), "limit reached in ~…" / "projected at reset"
 - Weekly pace vs. budget (~14.3 %/day)
@@ -35,7 +35,7 @@ npm run dev        # requires Raycast installed
 
 There's **no key to enter**. On the first refresh the extension reads the OAuth token from the Keychain (`/usr/bin/security`) and calls the usage endpoint.
 
-Then run the **"Claude Usage in Menu Bar"** command once → the item appears in your menu bar. Background refresh (every 2 min) has to be enabled once in the command settings after install (standard Raycast behavior).
+Then run the **"Show in Menu Bar"** command once → the item appears in your menu bar. Background refresh (every 2 min) has to be enabled once in the command settings after install (standard Raycast behavior).
 
 ## Preferences
 
