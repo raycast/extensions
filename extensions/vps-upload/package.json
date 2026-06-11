@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vps-upload",
   "title": "VPS Upload",
-  "description": "Upload files to your server over SSH with a live progress bar, and copy the remote path to your clipboard — ideal for referencing local files inside a remote SSH session.",
+  "description": "Upload files to your server over SSH with a live progress bar, then copy the remote path to your clipboard. Ideal for referencing local files inside a remote SSH session.",
   "icon": "icon.png",
   "author": "henrikkvamme",
   "categories": ["Developer Tools", "Productivity"],
@@ -13,7 +13,7 @@
       "name": "upload-selection",
       "title": "Upload Finder Selection",
       "subtitle": "VPS Upload",
-      "description": "Upload the file(s) selected in Finder to your server and copy the remote path. No window — give it a hotkey.",
+      "description": "Upload the file(s) selected in Finder to your server and copy the remote path. No window, so give it a hotkey.",
       "mode": "no-view"
     },
     {

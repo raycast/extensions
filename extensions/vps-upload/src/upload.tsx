@@ -166,7 +166,7 @@ export default function Command() {
         valid.length > 1 ? `Uploaded ${valid.length} files` : "Uploaded";
       toast.message = "Remote path copied to clipboard";
       setPhase("done");
-      await showHUD("☁ Uploaded — remote path copied");
+      await showHUD("☁ Uploaded, remote path copied");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.style = Toast.Style.Failure;
@@ -204,7 +204,7 @@ export default function Command() {
         <Form.Description
           text={
             firstRun
-              ? "☁️ Welcome! Tell VPS Upload where to send files. Settings are stored locally on this Mac — no Raycast Settings trip needed."
+              ? "☁️ Welcome! Tell VPS Upload where to send files. Settings are stored locally on this Mac, with no Raycast Settings trip needed."
               : "Update where VPS Upload sends files."
           }
         />
