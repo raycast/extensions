@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Open File URL from Clipboard command] - 2026-06-11
+## [Open File URL from Clipboard command] - {PR_MERGE_DATE}
 
 - New "Open File URL from Clipboard" command that opens the Figma file URL in
   your clipboard, preferring the Figma desktop app when installed.
