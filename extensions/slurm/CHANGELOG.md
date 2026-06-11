@@ -1,6 +1,6 @@
 # Slurm Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-11
 
 - First public release of the Slurm extension for Raycast
 - Manage Slurm jobs across multiple clusters via SSH
