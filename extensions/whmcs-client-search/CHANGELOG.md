@@ -1,6 +1,6 @@
 # WHMCS Client Search Changelog
 
-## [Better Sync Errors] - {PR_MERGE_DATE}
+## [Better Sync Errors] - 2026-06-11
 
 - Client Sync failures now show the actual error returned by your WHMCS install (e.g. "Invalid IP x.x.x.x") instead of a bare HTTP status, with a "Copy Error" action.
 - 403 errors now include guidance pointing to WHMCS's API IP Access Restriction setting.
