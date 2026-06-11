@@ -147,7 +147,7 @@ function isValidDeadline(deadline: Input["deadline"]): deadline is NonNullable<I
 
 function isValidDuration(duration: Input["duration"]): duration is NonNullable<Input["duration"]> {
   return (
-    duration !== undefined &&
+    duration != null &&
     (duration.unit === "minute" || duration.unit === "day") &&
     Number.isInteger(duration.amount) &&
     duration.amount > 0
