@@ -255,8 +255,10 @@ type CollectionProjectRow = {
   status: string;
   notes: string;
   tags: string | null;
-  dueDate: string | null;
-  activationDate: string | null;
+  deadline: number | null;
+  startDate: number | null;
+  nextInstanceStartDate: number | null;
+  recurrenceRule: unknown;
   areaId: string | null;
   areaName: string | null;
   areaTags: string | null;
@@ -268,8 +270,10 @@ type CollectionTodoRow = {
   status: string;
   notes: string;
   tags: string | null;
-  dueDate: string | null;
-  activationDate: string | null;
+  deadline: number | null;
+  startDate: number | null;
+  nextInstanceStartDate: number | null;
+  recurrenceRule: unknown;
   creationDate: string | null;
   projectId: string | null;
 };
@@ -282,8 +286,10 @@ type CollectionAreaTodoRow = {
   status: string;
   notes: string;
   tags: string | null;
-  dueDate: string | null;
-  activationDate: string | null;
+  deadline: number | null;
+  startDate: number | null;
+  nextInstanceStartDate: number | null;
+  recurrenceRule: unknown;
   creationDate: string | null;
   areaId: string | null;
 };
@@ -831,7 +837,9 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
           COALESCE(p.notes, '') as notes,
           (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
-          NULL as dueDate, NULL as activationDate, -- dates not fetched in collection summary; use queryProjectDetailsSQL for full data
+          p.deadline, p.startDate,
+          NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+          p.rt1_recurrenceRule as recurrenceRule,
           a.uuid as areaId, a.title as areaName,
           (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
         FROM TMTask p
@@ -844,7 +852,9 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
           COALESCE(t.notes, '') as notes,
           (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
-          NULL as dueDate, NULL as activationDate,
+          t.deadline, t.startDate,
+          NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+          t.rt1_recurrenceRule as recurrenceRule,
           datetime(t.creationDate, 'unixepoch') as creationDate,
           t.project as projectId
         FROM TMTask t
@@ -856,6 +866,12 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
     for (const t of todoRows) {
       if (t.projectId) {
         if (!todosByProject[t.projectId]) todosByProject[t.projectId] = [];
+        const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+          t.startDate ?? 0,
+          t.deadline ?? 0,
+          t.nextInstanceStartDate ?? 0,
+          t.recurrenceRule,
+        );
         todosByProject[t.projectId].push({
           id: t.id,
           name: t.name,
@@ -863,24 +879,32 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           notes: t.notes,
           tags: t.tags ?? '',
           areaTags: null,
-          dueDate: t.dueDate ?? '',
-          activationDate: t.activationDate ?? '',
+          dueDate: effectiveDeadline ?? '',
+          activationDate: effectiveStartDate ?? '',
           creationDate: t.creationDate ?? '',
         });
       }
     }
 
-    result.projects = projectRows.map((p) => ({
-      id: p.id,
-      name: p.name,
-      status: p.status as Project['status'],
-      notes: p.notes,
-      tags: p.tags ?? '',
-      dueDate: p.dueDate ?? '',
-      activationDate: p.activationDate ?? '',
-      area: p.areaId ? { id: p.areaId, name: p.areaName ?? '', tags: p.areaTags ?? '' } : undefined,
-      todos: todosByProject[p.id] ?? [],
-    }));
+    result.projects = projectRows.map((p) => {
+      const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+        p.startDate ?? 0,
+        p.deadline ?? 0,
+        p.nextInstanceStartDate ?? 0,
+        p.recurrenceRule,
+      );
+      return {
+        id: p.id,
+        name: p.name,
+        status: p.status as Project['status'],
+        notes: p.notes,
+        tags: p.tags ?? '',
+        dueDate: effectiveDeadline ?? '',
+        activationDate: effectiveStartDate ?? '',
+        area: p.areaId ? { id: p.areaId, name: p.areaName ?? '', tags: p.areaTags ?? '' } : undefined,
+        todos: todosByProject[p.id] ?? [],
+      };
+    });
   }
 
   if (keySet.has('areas') || keySet.has('lists')) {
@@ -897,7 +921,9 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
           COALESCE(t.notes, '') as notes,
           (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
-          NULL as dueDate, NULL as activationDate,
+          t.deadline, t.startDate,
+          NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
+          t.rt1_recurrenceRule as recurrenceRule,
           datetime(t.creationDate, 'unixepoch') as creationDate,
           t.area as areaId
         FROM TMTask t
@@ -909,6 +935,12 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
     for (const t of areaTodoRows) {
       if (t.areaId) {
         if (!todosByArea[t.areaId]) todosByArea[t.areaId] = [];
+        const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
+          t.startDate ?? 0,
+          t.deadline ?? 0,
+          t.nextInstanceStartDate ?? 0,
+          t.recurrenceRule,
+        );
         todosByArea[t.areaId].push({
           id: t.id,
           name: t.name,
@@ -916,8 +948,8 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           notes: t.notes,
           tags: t.tags ?? '',
           areaTags: null,
-          dueDate: t.dueDate ?? '',
-          activationDate: t.activationDate ?? '',
+          dueDate: effectiveDeadline ?? '',
+          activationDate: effectiveStartDate ?? '',
           creationDate: t.creationDate ?? '',
         });
       }
