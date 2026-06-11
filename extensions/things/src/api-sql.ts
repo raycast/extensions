@@ -59,9 +59,23 @@ function findThingsDBPath(): string {
   return join(container, 'Things Database.thingsSQLite');
 }
 
+function assertPackedDateEncoding(): void {
+  const packed = encodeThingsDate(2024, 6, 11);
+  const decoded = convertThingsDate(packed);
+  const expected = '2024-06-11';
+  if (decoded !== expected) {
+    throw new Error(
+      `Things date calculation has changed — dates may be incorrect. Expected "${expected}", got "${decoded}".`,
+    );
+  }
+}
+
 let _thingsDBPath: string | undefined;
 function getThingsDBPath(): string {
-  if (!_thingsDBPath) _thingsDBPath = findThingsDBPath();
+  if (!_thingsDBPath) {
+    _thingsDBPath = findThingsDBPath();
+    assertPackedDateEncoding();
+  }
   return _thingsDBPath;
 }
 
@@ -110,7 +124,7 @@ function parseDeadlineOffset(plistXml: unknown): number | null {
   if (!plistXml || typeof plistXml !== 'string') return null;
   const match = plistXml.match(/<key>ts<\/key>\s*<integer>(-?\d+)<\/integer>/);
   if (!match) return null;
-  return Math.abs(parseInt(match[1], 10));
+  return parseInt(match[1], 10);
 }
 
 /** Escape a string for safe embedding in a SQLite string literal. */
