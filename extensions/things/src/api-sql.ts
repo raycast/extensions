@@ -332,10 +332,12 @@ function todoToSummary(todo: Todo): TodoSummary {
 export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails | null> {
   const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
     WHERE t.uuid = '${sqlEscape(todoId)}' AND t.type = 0 AND t.trashed = 0 LIMIT 1`;
-  const rows = await executeSQL<TodoDetailRow>(getThingsDBPath(), sql);
+  const [rows, checklistItems] = await Promise.all([
+    executeSQL<TodoDetailRow>(getThingsDBPath(), sql),
+    queryChecklistItemsSQL(todoId),
+  ]);
   if (!rows.length) return null;
   const row = rows[0];
-  const checklistItems = await queryChecklistItemsSQL(todoId);
   const summary = rowToTodoSummary(row);
   return {
     ...summary,
@@ -351,8 +353,10 @@ export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetai
   const inClause = todoIds.map((id) => `'${sqlEscape(id)}'`).join(', ');
   const sql = `SELECT ${TODO_SELECT_DETAIL} ${TODO_JOINS}
     WHERE t.uuid IN (${inClause}) AND t.type = 0 AND t.trashed = 0`;
-  const rows = await executeSQL<TodoDetailRow>(getThingsDBPath(), sql);
-  const allChecklist = await queryChecklistItemsBatchSQL(todoIds);
+  const [rows, allChecklist] = await Promise.all([
+    executeSQL<TodoDetailRow>(getThingsDBPath(), sql),
+    queryChecklistItemsBatchSQL(todoIds),
+  ]);
   return rows.map((row) => {
     const summary = rowToTodoSummary(row);
     return {
