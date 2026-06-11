@@ -200,7 +200,9 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const todo = things.toDos.byId('${escapeJxa(todoId)}');
+  const matches = things.toDos.whose({id: '${escapeJxa(todoId)}'})();
+  if (matches.length === 0) return null;
+  const todo = matches[0];
   const props = todo.properties();
   const projectRef = props.project;
   const areaRef = props.area;
@@ -224,7 +226,6 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     `Get todo details`,
   );
   if (!result) return null;
-  console.log(`result:${JSON.stringify(result)}`);
   return result as TodoDetails;
 }
 
@@ -300,7 +301,9 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const project = things.projects.byId('${escapeJxa(projectId)}');
+  const matches = things.projects.whose({id: '${escapeJxa(projectId)}'})();
+  if (matches.length === 0) return null;
+  const project = matches[0];
   const props = project.properties();
   const areaRef = props.area;
   const todoCount = project.toDos().filter(t => t.status() === 'open').length;
@@ -327,7 +330,9 @@ export async function queryAreaDetailsJxa(appId: string, areaId: string): Promis
   const result = await executeJxa(
     `
   const things = Application('${appId}');
-  const area = things.areas.byId('${escapeJxa(areaId)}');
+  const matches = things.areas.whose({id: '${escapeJxa(areaId)}'})();
+  if (matches.length === 0) return null;
+  const area = matches[0];
   const props = area.properties();
   const todos = area.toDos().filter(t => t.status() === 'open' && !t.project());
   const projects = area.projects().filter(p => p.status() === 'open');
