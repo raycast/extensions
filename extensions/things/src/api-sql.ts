@@ -218,6 +218,62 @@ type TodoDetailRow = TodoSummaryRow & {
   tagList: string | null;
 };
 
+type ProjectDetailRow = {
+  id: string;
+  name: string;
+  status: number;
+  notes: string;
+  deadline: number | null;
+  startDate: number | null;
+  nextInstanceStartDate: number | null;
+  recurrenceRule: unknown;
+  areaId: string | null;
+  areaName: string | null;
+  tagList: string | null;
+  todoCount: number;
+};
+
+type AreaDetailRow = { id: string; name: string; tagList: string | null; projectCount: number; todoCount: number };
+
+type CollectionProjectRow = {
+  id: string;
+  name: string;
+  status: string;
+  notes: string;
+  tags: string | null;
+  dueDate: string | null;
+  activationDate: string | null;
+  areaId: string | null;
+  areaName: string | null;
+  areaTags: string | null;
+};
+
+type CollectionTodoRow = {
+  id: string;
+  name: string;
+  status: string;
+  notes: string;
+  tags: string | null;
+  dueDate: string | null;
+  activationDate: string | null;
+  creationDate: string | null;
+  projectId: string | null;
+};
+
+type CollectionAreaRow = { id: string; name: string; tags: string | null };
+
+type CollectionAreaTodoRow = {
+  id: string;
+  name: string;
+  status: string;
+  notes: string;
+  tags: string | null;
+  dueDate: string | null;
+  activationDate: string | null;
+  creationDate: string | null;
+  areaId: string | null;
+};
+
 /** Convert a raw DB summary row to a TodoSummary (with decoded dates). */
 function rowToTodoSummary(row: TodoSummaryRow): TodoSummary {
   const { effectiveDeadline, effectiveStartDate, dueDateIsRecurring } = resolveEffectiveDates(
@@ -355,21 +411,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
     FROM TMTask p
     LEFT JOIN TMArea a ON a.uuid = p.area
     WHERE p.uuid = '${sqlEscape(projectId)}' AND p.type = 1 AND p.trashed = 0 LIMIT 1`;
-  type ProjectRow = {
-    id: string;
-    name: string;
-    status: number;
-    notes: string;
-    deadline: number | null;
-    startDate: number | null;
-    nextInstanceStartDate: number | null;
-    recurrenceRule: unknown;
-    areaId: string | null;
-    areaName: string | null;
-    tagList: string | null;
-    todoCount: number;
-  };
-  const rows = await executeSQL<ProjectRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<ProjectDetailRow>(getThingsDBPath(), sql);
   if (!rows.length) return null;
   const r = rows[0];
   const { effectiveDeadline, effectiveStartDate } = resolveEffectiveDates(
@@ -402,8 +444,7 @@ export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails |
       (SELECT COUNT(*) FROM TMTask t WHERE t.area = a.uuid AND t.type = 0 AND t.project IS NULL AND t.trashed = 0 AND t.status = 0) as todoCount
     FROM TMArea a
     WHERE a.uuid = '${sqlEscape(areaId)}' LIMIT 1`;
-  type AreaRow = { id: string; name: string; tagList: string | null; projectCount: number; todoCount: number };
-  const rows = await executeSQL<AreaRow>(getThingsDBPath(), sql);
+  const rows = await executeSQL<AreaDetailRow>(getThingsDBPath(), sql);
   if (!rows.length) return null;
   const r = rows[0];
   return {
@@ -765,19 +806,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   }
 
   if (keySet.has('projects') || keySet.has('lists')) {
-    type ProjectRow = {
-      id: string;
-      name: string;
-      status: string;
-      notes: string;
-      tags: string | null;
-      dueDate: string | null;
-      activationDate: string | null;
-      areaId: string | null;
-      areaName: string | null;
-      areaTags: string | null;
-    };
-    const projectRows = await executeSQL<ProjectRow>(
+    const projectRows = await executeSQL<CollectionProjectRow>(
       getThingsDBPath(),
       `SELECT p.uuid as id, p.title as name,
         CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
@@ -791,18 +820,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
     );
 
-    type TodoRow = {
-      id: string;
-      name: string;
-      status: string;
-      notes: string;
-      tags: string | null;
-      dueDate: string | null;
-      activationDate: string | null;
-      creationDate: string | null;
-      projectId: string | null;
-    };
-    const todoRows = await executeSQL<TodoRow>(
+    const todoRows = await executeSQL<CollectionTodoRow>(
       getThingsDBPath(),
       `SELECT t.uuid as id, t.title as name,
         CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
@@ -847,26 +865,14 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   }
 
   if (keySet.has('areas') || keySet.has('lists')) {
-    type AreaRow = { id: string; name: string; tags: string | null };
-    const areaRows = await executeSQL<AreaRow>(
+    const areaRows = await executeSQL<CollectionAreaRow>(
       getThingsDBPath(),
       `SELECT a.uuid as id, a.title as name,
         (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
       FROM TMArea a WHERE a.visible = 1`,
     );
 
-    type AreaTodoRow = {
-      id: string;
-      name: string;
-      status: string;
-      notes: string;
-      tags: string | null;
-      dueDate: string | null;
-      activationDate: string | null;
-      creationDate: string | null;
-      areaId: string | null;
-    };
-    const areaTodoRows = await executeSQL<AreaTodoRow>(
+    const areaTodoRows = await executeSQL<CollectionAreaTodoRow>(
       getThingsDBPath(),
       `SELECT t.uuid as id, t.title as name,
         CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
