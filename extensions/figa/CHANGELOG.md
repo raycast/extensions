@@ -1,6 +1,6 @@
 # Figa Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-11
 
 - Add the Figa Raycast extension with workspace context lookup.
 - Add current-month expense search with all/unpaid/paid views, copy/paste actions, and Figa deep links.
