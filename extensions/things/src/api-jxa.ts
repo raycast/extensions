@@ -455,7 +455,7 @@ export const getQuickFindDataJXA = async (appId: string): Promise<QuickFindData>
       name: todo.name(),
       status: 'open',
       projectName: todo.project() ? todo.project().name() : undefined,
-      areaName: todo.area() ? todo.area().name() : undefined,
+      areaName: todo.area() ? todo.area().name() : (todo.project() ? todo.project().area()?.name() : undefined),
     }));
     return { areas, projects, todos };
   `,
