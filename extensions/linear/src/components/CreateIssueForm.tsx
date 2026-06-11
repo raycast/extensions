@@ -280,14 +280,15 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     setValue("templateId", templateId);
 
     const template = issueTemplates?.find((template) => template.id === templateId);
+    const propDefaults = {
+      assigneeId: props.assigneeId || "",
+      cycleId: props.cycleId || "",
+      projectId: props.projectId || "",
+      milestoneId: props.milestoneId || "",
+    };
     const templateValues = template
-      ? getCreateIssueValuesFromTemplate(template)
-      : getEmptyTemplateFieldValues({
-          assigneeId: props.assigneeId || "",
-          cycleId: props.cycleId || "",
-          projectId: props.projectId || "",
-          milestoneId: props.milestoneId || "",
-        });
+      ? getCreateIssueValuesFromTemplate(template, propDefaults)
+      : getEmptyTemplateFieldValues(propDefaults);
 
     setValue("title", templateValues.title);
     setValue("description", templateValues.description);

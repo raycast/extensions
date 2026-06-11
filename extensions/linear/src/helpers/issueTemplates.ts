@@ -89,9 +89,12 @@ function getDueDate(value: unknown) {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
-export function getCreateIssueValuesFromTemplate(template: IssueTemplateResult): CreateIssueTemplateValues {
+export function getCreateIssueValuesFromTemplate(
+  template: IssueTemplateResult,
+  fallbackDefaults: Partial<CreateIssueTemplateValues> = {},
+): CreateIssueTemplateValues {
   const data = parseTemplateData(template.templateData);
-  const defaults = getEmptyTemplateFieldValues();
+  const defaults = getEmptyTemplateFieldValues(fallbackDefaults);
   const labelIds = getStringArray(data.labelIds) ?? getStringArray(data.labels);
 
   return {

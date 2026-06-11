@@ -11,9 +11,13 @@ const variables: Record<string, ISSUE_KEY> = {
   ISSUE_BRANCH_NAME: "branchName",
 };
 
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 function getTitleLink(issue: IssueResult) {
   return {
-    html: `<a href="${issue.url}">${issue.title}</a>`,
+    html: `<a href="${issue.url}">${escapeHtml(issue.title)}</a>`,
     text: `[${issue.title}](${issue.url})`,
   };
 }
