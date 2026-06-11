@@ -806,32 +806,33 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   }
 
   if (keySet.has('projects') || keySet.has('lists')) {
-    const projectRows = await executeSQL<CollectionProjectRow>(
-      getThingsDBPath(),
-      `SELECT p.uuid as id, p.title as name,
-        CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
-        COALESCE(p.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
-        NULL as dueDate, NULL as activationDate, -- dates not fetched in collection summary; use queryProjectDetailsSQL for full data
-        a.uuid as areaId, a.title as areaName,
-        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
-      FROM TMTask p
-      LEFT JOIN TMArea a ON a.uuid = p.area
-      WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
-    );
-
-    const todoRows = await executeSQL<CollectionTodoRow>(
-      getThingsDBPath(),
-      `SELECT t.uuid as id, t.title as name,
-        CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
-        COALESCE(t.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
-        NULL as dueDate, NULL as activationDate,
-        datetime(t.creationDate, 'unixepoch') as creationDate,
-        t.project as projectId
-      FROM TMTask t
-      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0`,
-    );
+    const [projectRows, todoRows] = await Promise.all([
+      executeSQL<CollectionProjectRow>(
+        getThingsDBPath(),
+        `SELECT p.uuid as id, p.title as name,
+          CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          COALESCE(p.notes, '') as notes,
+          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
+          NULL as dueDate, NULL as activationDate, -- dates not fetched in collection summary; use queryProjectDetailsSQL for full data
+          a.uuid as areaId, a.title as areaName,
+          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
+        FROM TMTask p
+        LEFT JOIN TMArea a ON a.uuid = p.area
+        WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
+      ),
+      executeSQL<CollectionTodoRow>(
+        getThingsDBPath(),
+        `SELECT t.uuid as id, t.title as name,
+          CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          COALESCE(t.notes, '') as notes,
+          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+          NULL as dueDate, NULL as activationDate,
+          datetime(t.creationDate, 'unixepoch') as creationDate,
+          t.project as projectId
+        FROM TMTask t
+        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0`,
+      ),
+    ]);
 
     const todosByProject: Record<string, Todo[]> = {};
     for (const t of todoRows) {
@@ -865,25 +866,26 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   }
 
   if (keySet.has('areas') || keySet.has('lists')) {
-    const areaRows = await executeSQL<CollectionAreaRow>(
-      getThingsDBPath(),
-      `SELECT a.uuid as id, a.title as name,
-        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
-      FROM TMArea a WHERE a.visible = 1`,
-    );
-
-    const areaTodoRows = await executeSQL<CollectionAreaTodoRow>(
-      getThingsDBPath(),
-      `SELECT t.uuid as id, t.title as name,
-        CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
-        COALESCE(t.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
-        NULL as dueDate, NULL as activationDate,
-        datetime(t.creationDate, 'unixepoch') as creationDate,
-        t.area as areaId
-      FROM TMTask t
-      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0 AND t.project IS NULL AND t.area IS NOT NULL`,
-    );
+    const [areaRows, areaTodoRows] = await Promise.all([
+      executeSQL<CollectionAreaRow>(
+        getThingsDBPath(),
+        `SELECT a.uuid as id, a.title as name,
+          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
+        FROM TMArea a WHERE a.visible = 1`,
+      ),
+      executeSQL<CollectionAreaTodoRow>(
+        getThingsDBPath(),
+        `SELECT t.uuid as id, t.title as name,
+          CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
+          COALESCE(t.notes, '') as notes,
+          (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+          NULL as dueDate, NULL as activationDate,
+          datetime(t.creationDate, 'unixepoch') as creationDate,
+          t.area as areaId
+        FROM TMTask t
+        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0 AND t.project IS NULL AND t.area IS NOT NULL`,
+      ),
+    ]);
 
     const todosByArea: Record<string, Todo[]> = {};
     for (const t of areaTodoRows) {
