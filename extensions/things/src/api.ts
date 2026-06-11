@@ -149,12 +149,12 @@ export const setTodoProperty = (todoId: string, key: string, value: string) => {
     const [y, m, d] = value.split('-').map(Number);
     valueExpr = `new Date(${y}, ${m - 1}, ${d})`;
   } else {
-    valueExpr = `'${value}'`;
+    valueExpr = `'${escapeJxa(value)}'`;
   }
   return executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  things.toDos.byId('${todoId}').${key} = ${valueExpr};
+  things.toDos.byId('${escapeJxa(todoId)}').${key} = ${valueExpr};
 `,
     'Set todo property',
   );
@@ -164,7 +164,7 @@ export const deleteTodo = (todoId: string) =>
   executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  things.delete(things.toDos.byId('${todoId}'));
+  things.delete(things.toDos.byId('${escapeJxa(todoId)}'));
 `,
     'Delete todo',
   );
@@ -173,7 +173,7 @@ export const deleteProject = (projectId: string) =>
   executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  things.delete(things.projects.byId('${projectId}'));
+  things.delete(things.projects.byId('${escapeJxa(projectId)}'));
 `,
     'Delete project',
   );

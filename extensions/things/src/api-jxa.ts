@@ -173,7 +173,7 @@ export async function queryTodosJxa(
   return executeJxa(
     `
   const things = Application('${appId}');
-  ${opts.projectId ? `const todos = things.projects.byId('${escapeJxa(opts.projectId)}').toDos();` : opts.areaId ? `const todos = things.areas.byId('${escapeJxa(opts.areaId)}').toDos();` : opts.listName ? `const todos = things.lists.byId('${commandListNameToListIdMapping[opts.listName as CommandListName] ?? opts.listName}').toDos();` : `const todos = things.toDos();`}
+  ${opts.projectId ? `const todos = things.projects.byId('${escapeJxa(opts.projectId)}').toDos();` : opts.areaId ? `const todos = things.areas.byId('${escapeJxa(opts.areaId)}').toDos();` : opts.listName ? `const todos = things.lists.byId('${commandListNameToListIdMapping[opts.listName as CommandListName] ?? escapeJxa(opts.listName)}').toDos();` : `const todos = things.toDos();`}
   return todos.map(todo => {
     const props = todo.properties();
     const projectRef = props.project;
