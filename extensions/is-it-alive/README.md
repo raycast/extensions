@@ -34,12 +34,12 @@
 
 The extension auto-detects the provider when you add a URL. Detection order: **Railway → incident.io → Better Stack → Statuspage**.
 
-| Provider | Examples | Detection |
-| --- | --- | --- |
-| **Railway** | [status.railway.com](https://status.railway.com) | Hostname match |
-| **incident.io** | [status.openai.com](https://status.openai.com) | `/proxy/{host}/component_impacts` API |
-| **Better Stack** | [status.yachtway.com](https://status.yachtway.com) | `/index.json` JSON:API |
-| **Statuspage.io** | [status.claude.com](https://status.claude.com), GitHub, Vercel | `/api/v2/summary.json` |
+| Provider          | Examples                                                       | Detection                             |
+| ----------------- | -------------------------------------------------------------- | ------------------------------------- |
+| **Railway**       | [status.railway.com](https://status.railway.com)               | Hostname match                        |
+| **incident.io**   | [status.openai.com](https://status.openai.com)                 | `/proxy/{host}/component_impacts` API |
+| **Better Stack**  | [status.yachtway.com](https://status.yachtway.com)             | `/index.json` JSON:API                |
+| **Statuspage.io** | [status.claude.com](https://status.claude.com), GitHub, Vercel | `/api/v2/summary.json`                |
 
 incident.io is checked before Statuspage because some Statuspage hosts expose proxy-style URLs that look similar but lack incident.io-only endpoints like `component_impacts`.
 
@@ -49,7 +49,6 @@ incident.io is checked before Statuspage because some Statuspage hosts expose pr
 - **Add / edit / delete** — sites stored in Raycast local storage
 - **Detail view** — overview, active incidents, per-component status
 - **Uptime charts** — 90-day SVG bar history with uptime percentage
-
 
 ## Usage
 
