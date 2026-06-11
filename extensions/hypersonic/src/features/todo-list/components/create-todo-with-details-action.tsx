@@ -6,8 +6,7 @@ import { Tag } from '@/types/tag'
 import { User } from '@/types/user'
 import { Project } from '@/types/project'
 import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
-
-const MAX_NOTE_LENGTH = 2000
+import { MAX_NOTE_LENGTH } from '@/services/notion/utils/build-note-blocks'
 
 type CreateTodoWithDetailsProps = {
   todo: Todo
