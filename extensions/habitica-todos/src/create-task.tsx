@@ -1,17 +1,19 @@
-import { Form, ActionPanel, Action, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, launchCommand, LaunchType, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createTask, getTags } from "./api";
-import { HabiticaTag, CreateTaskBody } from "./types";
+import { HabiticaTag, CreateTaskBody, TaskAttribute } from "./types";
 import { toHabiticaDate } from "./date-utils";
-import { PRIORITY_OPTIONS } from "./constants";
+import { PRIORITY_OPTIONS, ATTRIBUTE_OPTIONS } from "./constants";
 
 interface FormValues {
   text: string;
   type: string;
   notes: string;
   priority: string;
+  attribute: string;
   date: Date | null;
   tags: string[];
+  checklist: string;
 }
 
 const TYPE_TO_COMMAND: Record<string, string> = {
@@ -20,9 +22,16 @@ const TYPE_TO_COMMAND: Record<string, string> = {
   daily: "view-dailies",
 };
 
-export default function Command() {
+interface CreateTaskFormProps {
+  defaultType?: CreateTaskBody["type"];
+  onCreated?: () => void;
+}
+
+export function CreateTaskForm({ defaultType = "todo", onCreated }: CreateTaskFormProps) {
+  const { pop } = useNavigation();
   const [tags, setTags] = useState<HabiticaTag[]>([]);
   const [isLoadingTags, setIsLoadingTags] = useState(true);
+  const [type, setType] = useState<string>(defaultType);
 
   useEffect(() => {
     loadTags();
@@ -55,18 +64,36 @@ export default function Command() {
 
     if (values.notes?.trim()) body.notes = values.notes.trim();
     if (values.priority) body.priority = parseFloat(values.priority);
+    if (values.attribute) body.attribute = values.attribute as TaskAttribute;
 
-    const dueDate = toHabiticaDate(values.date);
-    if (dueDate) body.date = dueDate;
+    if (taskType === "todo") {
+      const dueDate = toHabiticaDate(values.date);
+      if (dueDate) body.date = dueDate;
+    }
 
     if (values.tags?.length > 0) body.tags = values.tags;
+
+    if (values.checklist?.trim()) {
+      const items = values.checklist
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
+        .map((text) => ({ text }));
+      if (items.length > 0) body.checklist = items;
+    }
 
     try {
       await showToast({ style: Toast.Style.Animated, title: "Creating task…" });
       await createTask(body);
       await showToast({ style: Toast.Style.Success, title: "Task created!" });
-      const targetCommand = TYPE_TO_COMMAND[taskType] ?? "view-tasks";
-      await launchCommand({ name: targetCommand, type: LaunchType.UserInitiated });
+
+      if (onCreated) {
+        onCreated();
+        pop();
+      } else {
+        const targetCommand = TYPE_TO_COMMAND[taskType] ?? "view-tasks";
+        await launchCommand({ name: targetCommand, type: LaunchType.UserInitiated });
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -87,13 +114,22 @@ export default function Command() {
     >
       <Form.TextField id="text" title="Title" placeholder="What do you need to do?" autoFocus />
 
-      <Form.Dropdown id="type" title="Type" defaultValue="todo">
+      <Form.Dropdown id="type" title="Type" value={type} onChange={setType}>
         <Form.Dropdown.Item value="todo" title="To-Do" />
         <Form.Dropdown.Item value="habit" title="Habit" />
         <Form.Dropdown.Item value="daily" title="Daily" />
       </Form.Dropdown>
 
       <Form.TextArea id="notes" title="Notes" placeholder="Additional details (optional)" />
+
+      {(type === "todo" || type === "daily") && (
+        <Form.TextArea
+          id="checklist"
+          title="Checklist"
+          placeholder="One sub-task per line (optional)"
+          info="Each line becomes a checklist item."
+        />
+      )}
 
       <Form.Separator />
 
@@ -103,7 +139,18 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
-      <Form.DatePicker id="date" title="Due Date" type={Form.DatePicker.Type.Date} />
+      <Form.Dropdown
+        id="attribute"
+        title="Attribute"
+        defaultValue="str"
+        info="Stat this task trains. Auto-allocate uses this to distribute level-up points."
+      >
+        {ATTRIBUTE_OPTIONS.map((opt) => (
+          <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.title} />
+        ))}
+      </Form.Dropdown>
+
+      {type === "todo" && <Form.DatePicker id="date" title="Due Date" type={Form.DatePicker.Type.Date} />}
 
       <Form.Separator />
 
@@ -114,4 +161,8 @@ export default function Command() {
       </Form.TagPicker>
     </Form>
   );
+}
+
+export default function Command() {
+  return <CreateTaskForm />;
 }

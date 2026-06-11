@@ -18,6 +18,7 @@ import { type InstalledSkillMatch } from "../../hooks/useInstalledSkillMatches";
 import { type SkillAuditsResult, fetchSkillAudits } from "../../utils/skill-audits";
 import { installSkill } from "../../utils/skills-cli";
 import { withSkillAction } from "../../utils/with-skill-action";
+import { getDefaultAgents } from "../../preferences";
 
 interface InstallSkillActionProps {
   skill: Skill;
@@ -144,6 +145,7 @@ function buildConfirmation({
   ].join("\n\n");
 
   return {
+    icon: hasAuditRisk ? { source: Icon.Warning, tintColor: Color.Red } : Icon.Download,
     title: `${operation} "${skill.name}"${TITLE_SUFFIX_BY_RISK[auditRisk]}?`,
     message,
     primaryAction: {
@@ -173,7 +175,10 @@ function AgentPickerInstallForm({
   const installedAgents = new Set<string>(installedAgentNames);
   const replacementAgentNames = installedMatch.type === "conflict" ? installedAgentNames : [];
   const selectableAgents = agents.filter((a) => !installedAgents.has(a));
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const defaultAgentNames = getDefaultAgents().map((d) => d.toLowerCase());
+    return new Set(selectableAgents.filter((a) => defaultAgentNames.includes(a.toLowerCase())));
+  });
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
   const installedSource = isReplacing ? (installedMatch.source ?? "Unknown source") : "";
@@ -200,7 +205,7 @@ function AgentPickerInstallForm({
     }
 
     const auditResult = await resolveAuditResult(skill, prefetchedAuditResult);
-    const { title, message, primaryAction } = buildConfirmation({
+    const { icon, title, message, primaryAction } = buildConfirmation({
       skill,
       auditResult,
       selectedAgents,
@@ -209,6 +214,7 @@ function AgentPickerInstallForm({
     });
 
     const confirmed = await confirmAlert({
+      icon,
       title,
       message,
       primaryAction,

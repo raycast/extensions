@@ -2,18 +2,29 @@ import { Color, Icon } from "@raycast/api";
 
 const MAGNITUDE_SUFFIXES = ["", "k", "M", "B", "T"];
 
-export function formatMoney(value?: number, currency?: string) {
+export function formatMoney(value?: number, currency?: string, marketCap?: boolean) {
   if (value === undefined || value === null || Number.isNaN(value)) {
     return "—";
   }
+
+  const isGBX = currency === "GBp" || currency === "GBX";
 
   const magnitude = Math.min(Math.floor(Math.log10(Math.max(Math.abs(value), 1)) / 3), MAGNITUDE_SUFFIXES.length - 1);
   const suffix = MAGNITUDE_SUFFIXES[magnitude];
   const scaledValue = value / Math.pow(10, magnitude * 3);
   let strValue = scaledValue.toFixed(2);
+
+  if (isGBX) {
+    if (marketCap) {
+      return "£" + strValue + suffix;
+    }
+    return value.toFixed(2) + "p";
+  }
+
   if (currency) {
     strValue = new Intl.NumberFormat("en-US", { style: "currency", currency }).format(scaledValue);
   }
+
   return strValue + suffix;
 }
 

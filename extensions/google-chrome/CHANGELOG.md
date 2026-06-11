@@ -1,5 +1,13 @@
 # Google Chrome Changelog
 
+## [Bugfix] - 2026-05-28
+
+- Reset stale cached profile selections so history search does not show Chrome as missing.
+
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for account-synced bookmarks stored in `AccountBookmarks`
+
 ## [Add History Open Action Shortcuts] - 2026-05-13
 
 - Add keyboard shortcuts for opening history items in the current or original profile.

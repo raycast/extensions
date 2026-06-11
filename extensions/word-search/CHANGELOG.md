@@ -1,5 +1,13 @@
 # Word Search Changelog
 
+## [Bugfix] - 2026-06-04
+
+- Avoided reading selected text when the Use Selection preference is disabled.
+
+## [History] - 2026-05-22
+
+- Added History Section
+
 ## [Default open details] - 2024-10-17
 
 - Cache the 'View Details' state, keeping it open ([#14920](https://github.com/raycast/extensions/issues/14920))

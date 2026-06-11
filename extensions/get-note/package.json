@@ -12,6 +12,24 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "manualApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Manual API Key",
+      "description": "Optional. Use a GetNote API key directly instead of the stored local session.",
+      "placeholder": "gk_live_..."
+    },
+    {
+      "name": "manualClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Manual Client ID",
+      "description": "Optional. Defaults to the pre-registered GetNote client ID if omitted.",
+      "placeholder": "cli_..."
+    }
+  ],
   "commands": [
     {
       "name": "recent-notes",
@@ -40,13 +58,29 @@
       "subtitle": "GetNote",
       "description": "Save a text note to GetNote",
       "mode": "view"
+    },
+    {
+      "name": "save-image-note",
+      "title": "Save Image Note",
+      "subtitle": "GetNote",
+      "description": "Save local image files or image URLs to GetNote",
+      "mode": "view"
     }
   ],
   "tools": [
     {
       "name": "get-total-note-count",
-      "title": "Get Total GetNote Note Count",
-      "description": "Return the total number of notes across the user's entire GetNote account. Use this for questions like 'How many notes do I have?' or 'What is my total note count?'. Do not use this for knowledge-base-specific counts.",
+      "title": "Count GetNote Notes",
+      "description": "Return only the total number of notes in the user's GetNote account. Use for questions about how many notes exist. Do not use for API quota, API usage, rate limits, remaining allowance, or knowledge-base-specific counts.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get-quota",
+      "title": "Check GetNote API Quota",
+      "description": "Return current GetNote OpenAPI quota, usage, remaining allowance, rate limits, and daily/monthly reset times for read, write, and write-note buckets. Use whenever the user asks to view, check, or query quota, API usage limits, remaining calls, or whether they can keep calling the API. Do not use for counting notes or listing knowledge bases.",
       "parameters": {
         "type": "object",
         "properties": {}
@@ -55,7 +89,7 @@
     {
       "name": "search-notes",
       "title": "Search GetNote Notes",
-      "description": "Search GetNote with semantic recall. Use this when the user wants to find notes by topic, concept, or a remembered fragment.",
+      "description": "Search the user's notes with semantic recall. Use when the user wants to find notes by topic, concept, keyword, or remembered fragment. Do not use for total counts, API quota, creating notes, deleting notes, or knowledge-base-only search when a topicId is provided.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -76,7 +110,7 @@
     {
       "name": "get-note-detail",
       "title": "Get GetNote Note Detail",
-      "description": "Fetch the full detail of a specific GetNote note, including summary, tags, metadata, and the source URL for link notes.",
+      "description": "Fetch the full detail of one specific GetNote note by note ID, including content, tags, metadata, attachments, audio/web-page fields, and source URL. Use only when a concrete noteId is known or was returned by another tool. Do not use for search, note counts, quota, or listing recent notes.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -93,7 +127,7 @@
     {
       "name": "save-link-note",
       "title": "Save Link to GetNote",
-      "description": "Save a link note to GetNote, wait for the async task to finish, and return the generated note summary.",
+      "description": "Create a new GetNote link note from a public URL, wait for async processing, and return the generated note. Use when the user asks to save, collect, bookmark, or record a URL. Do not use for plain text notes, quota, search, or modifying existing notes.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -110,7 +144,7 @@
     {
       "name": "save-text-note",
       "title": "Save Text Note to GetNote",
-      "description": "Create a plain text note in GetNote. Use this for quick capture, memos, or turning a chat answer into a note.",
+      "description": "Create a new plain-text GetNote note. Use for quick capture, memos, ideas, chat answers, or saving text without a URL. Do not use for link notes, quota, search, deleting notes, or updating an existing note.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -138,7 +172,7 @@
     {
       "name": "list-knowledge-bases",
       "title": "List GetNote Knowledge Bases",
-      "description": "List the user's GetNote knowledge bases with their topic IDs and per-knowledge-base note counts. Use this only when the user explicitly asks about knowledge bases, topics, or the contents or count of a specific knowledge base. Do not use this for the overall note count across the whole account.",
+      "description": "List the user's own GetNote knowledge bases/topics with topic IDs and per-knowledge-base note counts. Use only when the user explicitly asks about knowledge bases, topics, topicId, or the count/list of knowledge bases. This is not an API quota tool. Do not use for quota, API usage limits, remaining calls, total account note count, semantic note search, or subscribed read-only knowledge bases.",
       "parameters": {
         "type": "object",
         "properties": {}
@@ -147,7 +181,7 @@
     {
       "name": "create-knowledge-base",
       "title": "Create GetNote Knowledge Base",
-      "description": "Create a new GetNote knowledge base.",
+      "description": "Create a new GetNote knowledge base/topic. Use only when the user explicitly asks to create a knowledge base/topic. Do not use for listing, searching, note counts, quota, or adding notes to an existing knowledge base.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -172,7 +206,7 @@
     {
       "name": "list-knowledge-base-notes",
       "title": "List GetNote Knowledge Base Notes",
-      "description": "List notes inside a specific GetNote knowledge base.",
+      "description": "List notes inside one specific GetNote knowledge base by topicId. Use when the user provides or has selected a topicId and asks to see/list notes in that knowledge base. Do not use for global note search, global note count, API quota, or listing all knowledge bases.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -193,7 +227,7 @@
     {
       "name": "search-knowledge-base-notes",
       "title": "Search GetNote Knowledge Base Notes",
-      "description": "Run semantic search within a specific GetNote knowledge base.",
+      "description": "Run semantic search within one specific GetNote knowledge base by topicId. Use when the user asks to search/find content inside a named or selected knowledge base/topic. Do not use for global search, total counts, API quota, or listing notes without a search query.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -219,7 +253,7 @@
     {
       "name": "add-note-to-knowledge-base",
       "title": "Add Note to GetNote Knowledge Base",
-      "description": "Add one or more GetNote notes to one of the user's own knowledge bases. Use list-knowledge-bases first to find the right topicId.",
+      "description": "Add one or more existing GetNote notes to one of the user's own writable knowledge bases. Use only when the user explicitly asks to add/move/classify notes into a knowledge base and noteIds plus a topicId are known or can be resolved. Do not use for creating notes, creating knowledge bases, quota, search, or tag changes.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -244,7 +278,7 @@
     {
       "name": "add-tags",
       "title": "Add Tags to GetNote Note",
-      "description": "Add manual tags to a specific GetNote note.",
+      "description": "Add manual tags to one specific GetNote note by noteId. Use when the user explicitly asks to tag or add tags for a known note. This adds tags and does not replace all tags. Do not use for knowledge-base classification, note counts, quota, search, or deleting tags.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -269,7 +303,7 @@
     {
       "name": "delete-tag",
       "title": "Delete GetNote Note Tag",
-      "description": "Delete a specific tag from a GetNote note. Use get-note-detail first to find the tag ID if needed.",
+      "description": "Delete one specific tag from one GetNote note by noteId and tagId. Use only when the user explicitly asks to remove/delete a tag. Use get-note-detail first if the tag ID is unknown. Do not use for deleting notes, quota, search, or removing notes from a knowledge base.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -291,7 +325,7 @@
     {
       "name": "delete-note",
       "title": "Delete GetNote Note",
-      "description": "Move a specific GetNote note to trash. Use this when the user explicitly asks to delete, remove, or trash a note.",
+      "description": "Move one specific GetNote note to trash by noteId. Use only when the user explicitly asks to delete/remove/trash a note. Do not use for deleting tags, removing notes from a knowledge base, quota, counts, or search.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -307,6 +341,7 @@
     }
   ],
   "ai": {
+    "instructions": "Route requests about OpenAPI quota, usage limits, remaining calls, credits, allowance, rate limits, or current API usage to get-quota. Route requests about the total number of notes in the account to get-total-note-count. Route requests about knowledge bases/topics only to list-knowledge-bases when the user explicitly mentions knowledge bases, topics, or topicId. Quota is about API call allowance, not note quantity and not knowledge-base data. If the user asks to view, check, or query quota without mentioning notes or knowledge bases, use get-quota.",
     "evals": [
       {
         "input": "@get-note how many notes do I have",
@@ -319,6 +354,125 @@
           {
             "callsTool": {
               "name": "get-total-note-count",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note how much API quota do I have left",
+        "mocks": {
+          "get-quota": {
+            "read": {
+              "daily": {
+                "limit": 20000,
+                "used": 100,
+                "remaining": 19900
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quota",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note 查看我的当前配额",
+        "usedAsExample": false,
+        "mocks": {
+          "get-quota": {
+            "read": {
+              "daily": {
+                "limit": 20000,
+                "used": 100,
+                "remaining": 19900
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quota",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note 查询配额",
+        "usedAsExample": false,
+        "mocks": {
+          "get-quota": {
+            "read": {
+              "daily": {
+                "limit": 20000,
+                "used": 100,
+                "remaining": 19900
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quota",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note 查看配额",
+        "usedAsExample": false,
+        "mocks": {
+          "get-quota": {
+            "read": {
+              "daily": {
+                "limit": 20000,
+                "used": 100,
+                "remaining": 19900
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quota",
+              "arguments": {}
+            }
+          },
+          {
+            "not": {
+              "callsTool": "list-knowledge-bases"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note check quota",
+        "usedAsExample": false,
+        "mocks": {
+          "get-quota": {
+            "read": {
+              "daily": {
+                "limit": 20000,
+                "used": 100,
+                "remaining": 19900
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quota",
               "arguments": {}
             }
           }
@@ -497,24 +651,6 @@
       }
     ]
   },
-  "preferences": [
-    {
-      "name": "manualApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Manual API Key",
-      "description": "Optional. Use a GetNote API key directly instead of the stored local session.",
-      "placeholder": "gk_live_..."
-    },
-    {
-      "name": "manualClientId",
-      "type": "textfield",
-      "required": false,
-      "title": "Manual Client ID",
-      "description": "Optional. Defaults to the pre-registered GetNote client ID if omitted.",
-      "placeholder": "cli_..."
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.104.11"
   },

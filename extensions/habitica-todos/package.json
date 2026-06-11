@@ -25,7 +25,7 @@
     {
       "name": "view-tasks",
       "title": "View Tasks",
-      "description": "View, check, edit, and delete your Habitica tasks",
+      "description": "View, check, edit, delete, and manage sub-task checklists for your Habitica To-Dos",
       "mode": "view",
       "subtitle": "Habitica"
     },
@@ -53,14 +53,14 @@
     {
       "name": "view-profile",
       "title": "View Profile",
-      "description": "View your Habitica stats and quests",
+      "description": "View stats, cast class skills, allocate stat points, rest in the tavern, and manage quests",
       "mode": "view",
       "subtitle": "Habitica"
     },
     {
       "name": "view-inventory",
       "title": "View Inventory",
-      "description": "View your Habitica eggs, potions, and food",
+      "description": "View, hatch, feed, sell, equip, and open mystery items in your Habitica inventory",
       "mode": "view",
       "subtitle": "Habitica"
     },
