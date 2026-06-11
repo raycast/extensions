@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-desktop",
+  "title": "Codex Desktop",
+  "description": "Search local Codex sessions and projects from Raycast and open them in Codex Desktop.",
+  "icon": "@assets/icon.png",
+  "author": "anduimagui",
+  "license": "MIT",
+  "keywords": [
+    "raycast",
+    "codex",
+    "openai",
+    "macos",
+    "developer-tools"
+  ],
+  "type": "module",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "subtitle": "Codex Desktop",
+      "description": "Search local Codex sessions and open the selected thread in Codex Desktop.",
+      "icon": "@assets/icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Projects",
+      "description": "Search projects from the local Codex state database and open them in Codex Desktop.",
+      "icon": "@assets/icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "open-last-unread-session",
+      "title": "Open Latest Attention Thread",
+      "description": "Open the most recent Codex thread waiting on you, or fall back to your latest thread.",
+      "icon": "@assets/icon.png",
+      "mode": "view",
+      "keywords": [
+        "codex",
+        "attention",
+        "waiting",
+        "thread",
+        "chat"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.19.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
