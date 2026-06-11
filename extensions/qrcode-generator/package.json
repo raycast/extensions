@@ -23,6 +23,7 @@
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from text or URL",
       "mode": "view",
+      "icon": "generate-qr-icon.png",
       "preferences": [
         {
           "name": "primaryAction",
@@ -69,14 +70,26 @@
       "title": "Generate QR Code from Clipboard",
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from clipboard content",
-      "mode": "view"
+      "mode": "view",
+      "icon": "clipboard-icon.png"
     },
     {
       "name": "selection",
       "title": "Generate QR Code from Selection",
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from selection content",
-      "mode": "view"
+      "mode": "view",
+      "icon": "selection-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultColor",
+      "title": "Default QR Color",
+      "description": "Default foreground color (hex) for generated QR codes",
+      "type": "textfield",
+      "required": false,
+      "default": "#000000"
     }
   ],
   "dependencies": {

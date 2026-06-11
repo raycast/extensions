@@ -1,5 +1,30 @@
 # Visual Studio Code Changelog
 
+## [Fix: macOS user Applications path] - 2026-06-05
+
+- Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
+
+## [Update] - 2026-06-02
+
+- Added support for IBM Bob.
+
+## [Fix: Search Recent Projects empty on macOS] - 2026-06-02
+
+- Fixed `Search Recent Projects` showing no results on macOS with VS Code 1.118+. The shared storage database (`.vscode-shared/sharedStorage/state.vscdb`) is placed in the home directory on all platforms, not inside `~/Library/Application Support`. Also removed a spurious `User/` path segment from the Windows shared storage path. Fixes [#28311](https://github.com/raycast/extensions/issues/28311).
+
+## [Fix: Recent Projects on Windows] - 2026-05-25
+
+- Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.
+- Added support for VS Code shared storage and extended the `storage.json` fallback added in the 2026-05-04 fix by merging `backupWorkspaces` and `profileAssociations`, so local and remote recent entries still appear when the primary list is incomplete.
+- Improved `Remove` and `Remove All` so DB-backed entries are cleared while storage-backed duplicates are hidden for the current Raycast session.
+- Fixed Windows remote workspace opening to pass encoded `vscode-remote://` URIs through the VS Code CLI unchanged.
+- Added shared shortcut definitions based on Raycast common shortcuts where possible, with explicit Windows mappings for custom bindings.
+- Improved VS Code CLI path detection for both user and system installs on Windows.
+
+## [Fix: Recent projects on Windows] - 2026-05-17
+
+- Fixed shared storage lookup for recent projects on Windows.
+
 ## [Fix: Windows app path resolution] - 2026-05-11
 
 - Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.
@@ -7,6 +32,10 @@
 ## [Fix: Shared Storage Support] - 2026-05-07
 
 - Added Shared Storage support for new version of VS Code
+
+## [Fix] - 2026-05-25
+
+- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440), originally shipped 2026-05-04)
 
 ## [Update] - 2026-04-07
 

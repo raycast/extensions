@@ -178,21 +178,6 @@ export interface FavoriteRecord {
   group?: string;
 }
 
-export interface CodeSearchResponse {
-  result: CodeSearchTableResult[];
-}
-
-export interface CodeSearchGroupsResponse {
-  result: CodeSearchGroupRecord[];
-}
-
-export interface CodeSearchGroupRecord {
-  sys_id: string;
-  name: string;
-  // Dot-walked from sys_scope reference; returned as a flat key by the Table API.
-  "sys_scope.scope": string;
-}
-
 export interface CodeSearchTableResult {
   tableLabel: string;
   recordType: string;

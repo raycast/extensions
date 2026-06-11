@@ -1,0 +1,207 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt-finance",
+  "description": "Access your Cobalt finances from Raycast.",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "sriket_komali",
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "gen:api": "openapi-typescript ../server/openapi.json -o src/api-types.ts",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "openapi-typescript": "^7.4.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "icon": "extension-icon.png",
+  "ai": {
+    "instructions": "Answer questions about the user's Cobalt finances by writing JavaScript and calling the execute-cobalt-code tool. The sandbox exposes a typed cobalt.* SDK already scoped to the signed-in user — never ask for a userId. Prefer concrete code over describing what you would do. Always console.log final results so they appear in stdout. The sandbox is a V8 isolate — full standard JS globals are available, including Intl.NumberFormat, Intl.DateTimeFormat, and Date. TypeScript syntax is also accepted (annotations, interfaces, generics, and `as` casts are erased before execution); enums, decorators, and namespaces are not. Network access (fetch), filesystem, and process APIs are blocked — fetch data via the cobalt.* SDK only. When a question is ambiguous about time range, default to the last 30 days. Summarize results in plain English after the tool returns — do not paste raw JSON unless the user asks. IMPORTANT: list endpoints return wrapper objects, not raw arrays. cobalt.transactions.list returns { transactions }, cobalt.accounts.listAll returns { accounts }, cobalt.recurring.list returns { streams }, cobalt.snapshots.balances returns { snapshots }, cobalt.brokerage.positions returns { positions }. Always destructure the wrapper key before calling .map/.filter/.reduce. Example: const { transactions } = await cobalt.transactions.list({ pageSize: 10 }); console.log(transactions.map(t => t.name).join('\\n')).",
+    "evals": [
+      {
+        "input": "@cobalt how much did I spend this month",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt what's my net worth",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt top 5 merchants this month by spend",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt total of my active subscriptions per month",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt how much did I spend on coffee in the last 90 days",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt show my last 10 transactions",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt what's the balance on each of my accounts",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt how much did I spend on groceries last month vs this month",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt break down my spending by category this month",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt did I get paid this month",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt what's my biggest single transaction in the last 30 days",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      },
+      {
+        "input": "@cobalt how much credit card debt do I have",
+        "expected": [
+          {
+            "callsTool": "execute-cobalt-code"
+          }
+        ]
+      }
+    ]
+  },
+  "commands": [
+    {
+      "name": "transactions",
+      "title": "Recent Transactions",
+      "description": "Browse and search your recent Cobalt transactions",
+      "mode": "view",
+      "keywords": [
+        "cobalt",
+        "transactions",
+        "spending"
+      ]
+    },
+    {
+      "name": "recurring",
+      "title": "Recurring Transactions",
+      "description": "Active subscriptions, bills, and recurring income",
+      "mode": "view",
+      "keywords": [
+        "cobalt",
+        "recurring",
+        "subscriptions",
+        "bills"
+      ]
+    },
+    {
+      "name": "accounts",
+      "title": "Accounts",
+      "description": "Connected bank and credit accounts with current balances",
+      "mode": "view",
+      "keywords": [
+        "cobalt",
+        "accounts",
+        "balance",
+        "balances",
+        "bank",
+        "credit"
+      ]
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "description": "Cobalt API base URL",
+      "default": "https://api.cobaltpf.com"
+    },
+    {
+      "name": "brandfetchClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Brandfetch Client ID",
+      "description": "Optional. Provide your own Brandfetch client ID to render merchant logos via the Brandfetch CDN. Leave blank to fall back to generic icons."
+    },
+    {
+      "name": "logoDevToken",
+      "type": "textfield",
+      "required": false,
+      "title": "Logo.dev Publishable Token",
+      "description": "Used for recurring/subscription brand logos via logo.dev (matches web)"
+    }
+  ],
+  "title": "Cobalt Finance",
+  "tools": [
+    {
+      "name": "execute-cobalt-code",
+      "title": "Execute Cobalt Code",
+      "description": "Run JavaScript inside the Cobalt sandbox with access to the typed cobalt.* SDK (transactions, accounts, recurring streams, portfolio, news, tickers). userId is captured server-side and cannot be overridden. Use this for any question that needs the user's financial data. IMPORTANT: list endpoints return wrapper objects, not raw arrays — destructure first. Example: const { transactions } = await cobalt.transactions.list({ pageSize: 10 }); console.log(transactions.map(t => `${t.name} ${t.amount}`).join('\\n'));"
+    }
+  ]
+}

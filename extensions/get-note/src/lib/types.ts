@@ -105,7 +105,7 @@ export type NotesPage = {
 
 export type SaveLinkTask = {
   task_id: string;
-  url: string;
+  url?: string;
 };
 
 export type TaskProgress = {
@@ -142,4 +142,40 @@ export type KnowledgeBaseNote = {
 export type KnowledgeBaseNotesPage = {
   notes: KnowledgeBaseNote[];
   has_more: boolean;
+};
+
+export type QuotaInfo = {
+  limit: number;
+  used: number;
+  remaining: number;
+  reset_at: number;
+};
+
+export type QuotaBucket = {
+  daily: QuotaInfo;
+  monthly: QuotaInfo;
+};
+
+export type GetQuotaResponse = {
+  read: QuotaBucket;
+  write: QuotaBucket;
+  write_note: QuotaBucket;
+};
+
+export type ImageUploadConfig = {
+  support_extensions: string[];
+  max_size_bytes: number;
+  max_count: number;
+};
+
+export type ImageUploadToken = {
+  accessid: string;
+  host: string;
+  policy: string;
+  signature: string;
+  expire: number;
+  callback: string;
+  object_key: string;
+  access_url: string;
+  oss_content_type: string;
 };

@@ -19,7 +19,6 @@ This is an unofficial extension developed independently. All data is provided by
 3. Get the translations instantly.
 
 ## Settings
-
 - Automatically use the selected word as search
 
 Enjoy a hassle-free translation experience!

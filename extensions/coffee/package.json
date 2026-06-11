@@ -15,7 +15,9 @@
     "zakj",
     "Visual-Studio-Coder",
     "Katsuba",
-    "alexi.build"
+    "alexi.build",
+    "mbuvarp",
+    "frederik_obe"
   ],
   "platforms": [
     "macOS"
@@ -40,7 +42,7 @@
       "name": "caffeinateWhile",
       "title": "Caffeinate While",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "description": "Prevent your Mac from sleeping while a certain app is running",
       "mode": "view"
     },
     {
