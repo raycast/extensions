@@ -74,14 +74,16 @@ export default function Command() {
 
       {sites.map((site) => {
         const snapshot = snapshots?.[site.id];
-        const hasError = Boolean(snapshot?.error || snapshotsError);
+        const hasSnapshotError = Boolean(snapshot?.error);
+        const hasLoadError = Boolean(snapshotsError && !snapshot);
+        const hasError = hasSnapshotError || hasLoadError;
         const icon = hasError
           ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
           : indicatorListIcon(snapshot?.indicator ?? "unknown");
 
-        const subtitle = snapshot?.error
+        const subtitle = hasSnapshotError
           ? "Failed to fetch — retry"
-          : snapshotsError
+          : hasLoadError
             ? "Failed to load — retry"
             : (snapshot?.overallDescription ?? "Loading...");
 
