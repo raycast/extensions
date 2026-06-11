@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-11
 
 - Monitor status pages from a single Raycast command
 - Auto-detect providers: Statuspage.io, Better Stack, incident.io, and Railway
