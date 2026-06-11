@@ -80,3 +80,39 @@ export type CreateIssue = {
     };
   };
 };
+
+export type RepositoryOwnProps = {
+  id: string;
+  name: string;
+  nameWithOwner: string;
+  url: string;
+  description: string;
+  stargazerCount: number;
+  forkCount: number;
+  updatedAt: string;
+  visibility: "PRIVATE" | "INTERNAL" | "PUBLIC";
+  isFork: boolean;
+  isArchived: boolean;
+  primaryLanguage?: {
+    name: string;
+    color: string;
+  };
+  owner: {
+    login: string;
+    avatarUrl: string;
+  };
+};
+
+export type SearchRepositories = {
+  search: {
+    nodes: RepositoryOwnProps[];
+  };
+};
+
+export type GetUserRepositories = {
+  user: {
+    repositories: {
+      nodes: RepositoryOwnProps[];
+    };
+  };
+};

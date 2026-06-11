@@ -3,8 +3,8 @@ import { useFetch } from "@raycast/utils";
 import { ApiResponse, Collection, Tag } from "./interfaces";
 
 const { LinkwardenUrl, LinkwardenApiKey } = getPreferenceValues<Preferences>();
-const baseUrl = `${LinkwardenUrl}/api/v1/`;
-const headers = {
+export const baseUrl = `${LinkwardenUrl.replace(/\/+$/, "")}/api/v1/`;
+export const headers = {
   Authorization: `Bearer ${LinkwardenApiKey}`,
 };
 
@@ -13,10 +13,12 @@ export const useTags = () =>
     headers,
     mapResult(result: ApiResponse<Tag[]>) {
       return {
-        data: result.response,
+        // Fall back to [] if the API returns an unexpected body shape so that
+        // consumers can always safely call `.map` on `data`.
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
-    initialData: [],
+    initialData: [] as Tag[],
     keepPreviousData: true,
   });
 
@@ -25,9 +27,11 @@ export const useCollections = () =>
     headers,
     mapResult(result: ApiResponse<Collection[]>) {
       return {
-        data: result.response,
+        // Fall back to [] if the API returns an unexpected body shape so that
+        // consumers can always safely call `.map` on `data`.
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
-    initialData: [],
+    initialData: [] as Collection[],
     keepPreviousData: true,
   });

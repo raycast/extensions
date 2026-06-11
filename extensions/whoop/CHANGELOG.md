@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [1.0.4] - 2026-02-12
 
 ### Changed

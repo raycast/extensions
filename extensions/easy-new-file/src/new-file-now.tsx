@@ -46,8 +46,8 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
       ext = fileName.split(".").length > 1 ? fileName.split(".")[1] : "";
     } else {
       const inputFileType = getNewFileType(fileName ? fileName : defaultFileType);
-      ext = inputFileType ? inputFileType.extension : defaultFileType;
-      content = inputFileType.inputContent ? inputText : defaultFileContent;
+      ext = inputFileType && inputFileType.extension ? inputFileType.extension : defaultFileType;
+      content = fileContent ? fileContent : inputFileType.inputContent ? autoContent : "";
       name = !isEmpty(fileName)
         ? inputFileType
           ? inputFileType.name

@@ -65,7 +65,7 @@ export const CommandForm = (props: {
     initialValues: {
       name: cmd?.name ?? props.name ?? "",
       temperature: cmd?.temperature.toString() ?? "1",
-      model: cmd?.model ?? "gpt-4o-mini",
+      model: cmd?.model ?? "gpt-5-nano",
       prompt: cmd?.prompt ?? "",
       contentSource: cmd?.contentSource ?? "selectedText",
       isDisplayInput: cmd?.isDisplayInput ?? false,

@@ -9,6 +9,10 @@
     "bchopson",
     "mrpunkin"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -142,6 +146,15 @@
       "type": "checkbox"
     },
     {
+      "name": "showClientInProject",
+      "title": "Project Dropdown",
+      "description": "Show client name alongside project name in the project dropdown for easier filtering",
+      "required": false,
+      "label": "Show Client Name in Project Dropdown",
+      "type": "checkbox",
+      "default": false
+    },
+    {
       "name": "timeFormat",
       "title": "Time Format",
       "required": false,
@@ -207,8 +220,5 @@
     "publish": "npm run test:run && npx @raycast/api@latest publish",
     "test": "vitest",
     "test:run": "vitest run"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

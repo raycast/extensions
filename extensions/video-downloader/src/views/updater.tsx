@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { execa } from "execa";
+import { format } from "date-fns";
 import { getWingetPath, isMac, isWindows } from "../utils.js";
 
 const { homebrewPath } = getPreferenceValues<ExtensionPreferences>();
@@ -13,6 +14,8 @@ export default function Updater() {
   const [outdated, setOutdated] = useState<Record<string, string>>(
     isMac ? { "yt-dlp": "", ffmpeg: "" } : { "yt-dlp": "" },
   );
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [checkError, setCheckError] = useState<string>("");
   const [upgradingMessage, setUpgradingMessage] = useState<string>("");
 
   const allUpToDate = Object.values(outdated).every((version) => !version);
@@ -21,15 +24,21 @@ export default function Updater() {
     if (upgradingMessage) return;
     const toast = new Toast({ style: Toast.Style.Animated, title: "Checking versions..." });
     toast.show();
+    setLastChecked(null); // reset so the timestamp/loading state reflect this run, not a prior one
+    setCheckError("");
 
     Promise.all([getVersions(), getOutdated()])
       .then(([versions, outdated]) => {
         toast.hide();
         setVersions(versions);
         setOutdated(outdated);
+        setLastChecked(new Date());
       })
       .catch((error) => {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        // Record the error so the Detail body shows it and stops loading —
+        // otherwise the view would sit on a permanent "Checking…" spinner.
+        setCheckError(errorMessage);
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to check versions";
         toast.message = errorMessage;
@@ -44,18 +53,32 @@ export default function Updater() {
       });
   }, [upgradingMessage]);
 
+  const checked = Boolean(lastChecked);
+  const versionLines = Object.entries(versions)
+    .map(([cli, version]) => {
+      // A failed check shows an em dash (the error block below explains why),
+      // rather than a permanent "Checking…".
+      if (checkError) return `${cli}: —`;
+      // Until the check resolves, show only "Checking…" with no status — the
+      // previous code rendered "(up to date)" before results came back.
+      if (!checked) return `${cli}: Checking…`;
+      // An empty version means the check couldn't determine it (e.g. winget
+      // parse miss) — don't assert "(up to date)" for an unknown version.
+      if (!version) return `${cli}: Unknown`;
+      const status = outdated[cli] ? `(update available: ${outdated[cli]})` : "(up to date)";
+      return `${cli}: ${version} ${status}`;
+    })
+    .join("\n\n");
+
+  // A timestamp makes the instantaneous check legible: the result is real, just
+  // fast. Better than a fake spinner delay.
+  const checkedAt = checked ? `_Checked at ${format(lastChecked as Date, "h:mm a 'on' MMM d")}_` : "";
+  const errorBlock = checkError ? `> ⚠️ Couldn't check versions: ${checkError}` : "";
+
   return (
     <Detail
-      markdown={[
-        "## Versions",
-        Object.entries(versions)
-          .map(
-            ([cli, version]) =>
-              `${cli}: ${version === "" ? "Checking..." : version} ${outdated[cli] ? `(outdated: ${outdated[cli]})` : "(up to date)"}`,
-          )
-          .join("\n\n"),
-        upgradingMessage,
-      ]
+      isLoading={!checked && !checkError && !upgradingMessage}
+      markdown={["## Versions", versionLines, checkedAt, errorBlock, upgradingMessage]
         .filter((x) => Boolean(x))
         .join("\n\n")}
       actions={

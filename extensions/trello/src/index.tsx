@@ -1,34 +1,34 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { returnTodos } from "./utils/fetchTodos";
+import { trelloClient } from "./utils/trelloClient";
 import { TrelloFetchResponse } from "./trelloResponse.model";
-import { TodoListItem } from "./TrelloListItem";
+import { CardListItem } from "./TrelloListItem";
 
 export default function PackageList() {
-  const [results, setTodos] = useState<TrelloFetchResponse>([]);
+  const [results, setCards] = useState<TrelloFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function fetchAllTodos() {
+    async function fetchAllCards() {
       try {
         setLoading(true);
-        await returnTodos("").then((response) => {
-          setTodos(response);
-          setLoading(false);
-        });
+        const response = await trelloClient.getMyCards();
+        setCards(response);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Failed loading todos");
+        showToast(Toast.Style.Failure, "Failed loading cards");
+      } finally {
+        setLoading(false);
       }
     }
 
-    fetchAllTodos();
+    fetchAllCards();
   }, []);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder={`Filter todos`} throttle>
+    <List isLoading={loading} searchBarPlaceholder={`Filter cards`} throttle>
       {results?.length
         ? results.map((result) => {
-            return <TodoListItem key={result.id} result={result} />;
+            return <CardListItem key={result.id} card={result} />;
           })
         : null}
     </List>

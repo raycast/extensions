@@ -254,6 +254,38 @@ const SITE_CONFIG_LIST: Array<[RegExp, SiteConfig]> = [
     },
   ],
 
+  // San Francisco Chronicle
+  [
+    /^(.*\.)?sfchronicle\.com$/i,
+    {
+      name: "SanFranciscoChronicle",
+      articleSelector: "article",
+      removeSelectors: [
+        ".pageHeader",
+        ".hide-for-print",
+        ".badge-logo",
+        ".dn-print",
+        ".uiTextLarge",
+        ".deep",
+        ".cardByline",
+        ".smallTimestamp",
+        ".primarySm",
+        ".g40",
+        ".newsletter-inline",
+        "#everlit-audio-embed-container",
+        '[data-testid="paywall"]',
+        '[data-testid="inline-promo"]',
+        '[data-block-type="ad"]',
+        '[data-qa="subscribe-promo"]',
+        '[data-eid="collection-122511-mostPopular"]',
+        '[data-eid="collection-113361-dynamic_package"]',
+        "#__next > main > div.f.fdc.lg\\:fdr.lg\\:sx56.mx20.sm\\:mx32.xl\\:mxa.xl\\:mw1200px.mb20 > div.mnw0.sm\\:px40.lg\\:px56.x100 > div:nth-child(1) > article > div:nth-child(7)",
+        "#__next > main > div.f.fdc.lg\\:fdr.lg\\:sx56.mx20.sm\\:mx32.xl\\:mxa.xl\\:mw1200px.mb20 > div.mnw0.sm\\:px40.lg\\:px56.x100 > div:nth-child(1) > article > div:nth-child(11) > div",
+        ".pt16.sy16.bb.bt.b-gray300.mb32",
+      ],
+    },
+  ],
+
   // Ars Technica
   [
     /^(.*\.)?arstechnica\.com$/i,

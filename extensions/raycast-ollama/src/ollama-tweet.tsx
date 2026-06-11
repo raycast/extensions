@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./lib/types";
 import { Creativity } from "./lib/enum";
 import { CommandAnswer } from "./lib/settings/enum";
 import { AnswerView } from "./lib/ui/AnswerView/main";

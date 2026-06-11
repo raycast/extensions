@@ -7,40 +7,47 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 type Preferences = Preferences.AgentUsage;
+
+function getReplenishInfo(usage: AmpUsage): { timeText: string; hoursUntil: number } | null {
+  if (!usage.ampFree.replenishRate) return null;
+  const replenishValue = parseFloat(usage.ampFree.replenishRate.replace(/[^0-9.]/g, ""));
+  if (replenishValue <= 0) return null;
+  const remainingToFull = usage.ampFree.total - (usage.ampFree.total - usage.ampFree.used);
+  if (remainingToFull <= 0) return null;
+  const hoursToFull = remainingToFull / replenishValue;
+  const totalMinutes = Math.ceil(hoursToFull * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  let timeText = "";
+  if (hours > 0) timeText += `${hours}h `;
+  if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
+  return { timeText: timeText.trim(), hoursUntil: hoursToFull };
+}
 
 export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | null): string {
   const fallback = formatErrorOrNoData("Amp", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { email, nickname, ampFree, individualCredits } = u;
+  const { ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
-  let text = `Amp Usage\nEmail: ${email}`;
-  if (nickname) text += `\nNickname: ${nickname}`;
+  let text = `Amp Usage`;
   text += `\n\nAmp Free: ${ampFree.unit}${ampFreeRemaining.toFixed(2)} / ${ampFree.unit}${ampFree.total.toFixed(2)} (${ampFreePercent.toFixed(1)}%)`;
+  text += `\n${generateAsciiBar(ampFreePercent)}`;
   if (ampFree.replenishRate) {
     text += `\nReplenish Rate: +${ampFree.replenishRate}`;
-    const replenishValue = parseFloat(ampFree.replenishRate.replace(/[^0-9.]/g, ""));
-    if (replenishValue > 0) {
-      const remainingToFull = ampFree.total - ampFreeRemaining;
-      if (remainingToFull > 0) {
-        const hoursToFull = remainingToFull / replenishValue;
-        const totalMinutes = Math.ceil(hoursToFull * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        let timeText = "";
-        if (hours > 0) timeText += `${hours}h `;
-        if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        text += `\nReset In: ${timeText.trim()}`;
-      }
+    const replenishInfo = getReplenishInfo(u);
+    if (replenishInfo) {
+      text += `\nResets In: ${replenishInfo.timeText}`;
     }
   }
-  if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus}`;
+  if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus.replace(/\s+more\s+days?/, "d")}`;
   text += `\n\nIndividual Credits: ${individualCredits.unit}${individualCredits.remaining.toFixed(2)}`;
 
   return text;
@@ -51,41 +58,29 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { email, nickname, ampFree, individualCredits } = u;
+  const { ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Email" text={email} />
-      {nickname && <List.Item.Detail.Metadata.Label title="Nickname" text={nickname} />}
-
-      <List.Item.Detail.Metadata.Separator />
-
       <List.Item.Detail.Metadata.Label title="Amp Free Used" text={`${ampFree.unit}${ampFree.used.toFixed(2)}`} />
       <List.Item.Detail.Metadata.Label title="Amp Free Total" text={`${ampFree.unit}${ampFree.total.toFixed(2)}`} />
       <List.Item.Detail.Metadata.Label
         title="Amp Free Remaining"
-        text={`${ampFree.unit}${ampFreeRemaining.toFixed(2)} (${ampFreePercent.toFixed(1)}%)`}
+        text={`${generateAsciiBar(ampFreePercent)} ${ampFree.unit}${ampFreeRemaining.toFixed(2)} (${ampFreePercent.toFixed(1)}%) remaining`}
       />
       {ampFree.replenishRate && (
         <List.Item.Detail.Metadata.Label title="Replenish Rate" text={`+${ampFree.replenishRate}`} />
       )}
       {(() => {
-        const replenishValue = ampFree.replenishRate ? parseFloat(ampFree.replenishRate.replace(/[^0-9.]/g, "")) : 0;
-        if (replenishValue <= 0) return null;
-        const remainingToFull = ampFree.total - ampFreeRemaining;
-        if (remainingToFull <= 0) return null;
-        const hoursToFull = remainingToFull / replenishValue;
-        const totalMinutes = Math.ceil(hoursToFull * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        let timeText = "";
-        if (hours > 0) timeText += `${hours}h `;
-        if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        return <List.Item.Detail.Metadata.Label title="Reset In" text={timeText.trim()} />;
+        const replenishInfo = getReplenishInfo(u);
+        if (!replenishInfo) return null;
+        return <List.Item.Detail.Metadata.Label title="Resets In" text={replenishInfo.timeText} />;
       })()}
-      {ampFree.bonus && <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus} />}
+      {ampFree.bonus && (
+        <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus.replace(/\s+more\s+days?/, "d")} />
+      )}
 
       <List.Item.Detail.Metadata.Separator />
 

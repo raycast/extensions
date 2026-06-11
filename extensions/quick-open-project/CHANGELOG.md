@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.4] - 2026-03-17
+
+- Add Windows support for opening projects in editor and terminal
+
 ## [1.1.3] - 2025-02-24
 
 - Stop transferring environment variables to opened applications

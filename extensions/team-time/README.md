@@ -17,6 +17,7 @@ A Raycast extension that allows you to see what time it is in different cities a
 When you install the extension, the interval timer starts at the exact time of installation. For example, if you install at 1:30:30 PM, the next update will happen at 1:31:30 PM (not at 1:31:00 PM).
 
 **To synchronize with exact minutes:**
+
 - Run the "Team Time" command manually at the beginning of a minute (e.g., exactly at 1:31:00)
 - This will reset the timing interval to align with the clock
 

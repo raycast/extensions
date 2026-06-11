@@ -1,5 +1,15 @@
 # Warp Changelog
 
+## [Tab Config Support] - 2026-05-28
+
+- Added Tab Config support to the config launcher, with legacy Launch Configurations as a fallback.
+
+## [Windows Support] - 2026-05-12
+
+- Added Windows platform support.
+- Directory search uses PowerShell on Windows (Spotlight on macOS).
+- "Open in Warp" command retrieves the active File Explorer path on Windows.
+
 ## [Improvements] - 2025-04-23
 
 - Added build preference to select between [Warp](https://www.warp.dev) and [Warp Preview](https://www.warp.dev/blog/warp-preview) Releases.

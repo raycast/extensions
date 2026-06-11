@@ -1,4 +1,4 @@
-import { List, ActionPanel, Icon, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Icon, Action } from "@raycast/api";
 import { usePromise, getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import { getBookmarks } from "./utils/bookmarks";
@@ -10,6 +10,8 @@ import {
   CopyBookmarkTitleAction,
   CopyBookmarkAsMarkdownAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { Bookmark } from "./types";
 import { filterSearchable } from "./utils/search";
@@ -59,7 +61,7 @@ export default function SearchBookmarks() {
   );
 }
 
-function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revalidate: () => void }) {
+function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revalidate: () => Promise<Bookmark[]> }) {
   const accessories: List.Item.Accessory[] = [];
 
   // Add folder information if available
@@ -93,22 +95,8 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
               icon={Icon.Globe}
               shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
             />
-            <Action
-              title="Reload Bookmarks"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={async () => {
-                await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Reloading bookmarks...",
-                });
-                await revalidate();
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Bookmarks reloaded",
-                });
-              }}
-            />
+            <ReloadAction subject="Bookmarks" revalidate={revalidate} />
+            <DeduplicateTabsAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

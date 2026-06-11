@@ -1,5 +1,10 @@
 # Roblox Creator Docs Changelog
 
+## [1.1.0] - 2026-04-22
+
+### Added
+- Added Windows Support
+
 ## [1.0.2] - 2025-12-16
 
 ### Fixed

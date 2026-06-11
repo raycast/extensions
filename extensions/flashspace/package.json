@@ -1,0 +1,354 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flashspace",
+  "title": "FlashSpace",
+  "description": "Manage FlashSpace workspaces, profiles, and apps from Raycast",
+  "icon": "extension-icon.png",
+  "author": "krmbzds",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "flashspacePath",
+      "type": "textfield",
+      "required": false,
+      "title": "FlashSpace CLI Path",
+      "description": "Path to the flashspace binary. Leave empty to auto-detect.",
+      "placeholder": "/opt/homebrew/bin/flashspace"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-workspaces",
+      "title": "List Workspaces",
+      "description": "List all FlashSpace workspaces",
+      "mode": "view",
+      "keywords": [
+        "workspace",
+        "spaces",
+        "list"
+      ]
+    },
+    {
+      "name": "create-workspace",
+      "title": "Create Workspace",
+      "description": "Create a new FlashSpace workspace",
+      "mode": "view",
+      "keywords": [
+        "workspace",
+        "new",
+        "create"
+      ]
+    },
+    {
+      "name": "delete-workspace",
+      "title": "Delete Workspace",
+      "description": "Delete a FlashSpace workspace",
+      "mode": "view",
+      "keywords": [
+        "workspace",
+        "remove",
+        "delete"
+      ]
+    },
+    {
+      "name": "update-workspace",
+      "title": "Update Workspace",
+      "description": "Update FlashSpace workspace settings",
+      "mode": "view",
+      "keywords": [
+        "workspace",
+        "edit",
+        "update",
+        "modify"
+      ]
+    },
+    {
+      "name": "activate-workspace",
+      "title": "Activate Workspace",
+      "description": "Switch to a FlashSpace workspace",
+      "mode": "view",
+      "keywords": [
+        "workspace",
+        "switch",
+        "activate"
+      ]
+    },
+    {
+      "name": "list-profiles",
+      "title": "List Profiles",
+      "description": "List all FlashSpace profiles",
+      "mode": "view",
+      "keywords": [
+        "profile",
+        "list"
+      ]
+    },
+    {
+      "name": "create-profile",
+      "title": "Create Profile",
+      "description": "Create a new FlashSpace profile",
+      "mode": "view",
+      "keywords": [
+        "profile",
+        "new",
+        "create"
+      ]
+    },
+    {
+      "name": "delete-profile",
+      "title": "Delete Profile",
+      "description": "Delete a FlashSpace profile",
+      "mode": "view",
+      "keywords": [
+        "profile",
+        "remove",
+        "delete"
+      ]
+    },
+    {
+      "name": "assign-app",
+      "title": "Assign App",
+      "description": "Assign an app to a FlashSpace workspace",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "assign",
+        "add"
+      ]
+    },
+    {
+      "name": "unassign-app",
+      "title": "Unassign App",
+      "description": "Unassign an app from all workspaces",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "unassign",
+        "remove"
+      ]
+    },
+    {
+      "name": "assign-visible-apps",
+      "title": "Assign Visible Apps",
+      "description": "Assign all visible apps to a workspace",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "assign",
+        "visible"
+      ]
+    },
+    {
+      "name": "list-apps",
+      "title": "List Workspace Apps",
+      "description": "List apps assigned to a workspace",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "list",
+        "workspace"
+      ]
+    },
+    {
+      "name": "list-running-apps",
+      "title": "List Running Apps",
+      "description": "List currently running apps",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "running",
+        "list"
+      ]
+    },
+    {
+      "name": "floating-apps",
+      "title": "Floating Apps",
+      "description": "Manage floating apps",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "float",
+        "floating"
+      ]
+    },
+    {
+      "name": "focus-left",
+      "title": "Focus Left",
+      "description": "Focus the window to the left",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "left",
+        "direction"
+      ]
+    },
+    {
+      "name": "focus-right",
+      "title": "Focus Right",
+      "description": "Focus the window to the right",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "right",
+        "direction"
+      ]
+    },
+    {
+      "name": "focus-up",
+      "title": "Focus up",
+      "description": "Focus the window above",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "up",
+        "direction"
+      ]
+    },
+    {
+      "name": "focus-down",
+      "title": "Focus Down",
+      "description": "Focus the window below",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "down",
+        "direction"
+      ]
+    },
+    {
+      "name": "focus-next-app",
+      "title": "Focus Next App",
+      "description": "Focus the next app",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "app",
+        "next"
+      ]
+    },
+    {
+      "name": "focus-prev-app",
+      "title": "Focus Previous App",
+      "description": "Focus the previous app",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "app",
+        "previous",
+        "prev"
+      ]
+    },
+    {
+      "name": "focus-next-window",
+      "title": "Focus Next Window",
+      "description": "Focus the next window",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "next"
+      ]
+    },
+    {
+      "name": "focus-prev-window",
+      "title": "Focus Previous Window",
+      "description": "Focus the previous window",
+      "mode": "no-view",
+      "keywords": [
+        "focus",
+        "window",
+        "previous",
+        "prev"
+      ]
+    },
+    {
+      "name": "list-displays",
+      "title": "List Displays",
+      "description": "List all connected displays",
+      "mode": "view",
+      "keywords": [
+        "display",
+        "monitor",
+        "screen"
+      ]
+    },
+    {
+      "name": "get-status",
+      "title": "Get Status",
+      "description": "Get current FlashSpace status (active profile, workspace, app, display)",
+      "mode": "view",
+      "keywords": [
+        "status",
+        "info",
+        "current",
+        "active"
+      ]
+    },
+    {
+      "name": "hide-unassigned-apps",
+      "title": "Hide Unassigned Apps",
+      "description": "Hide all apps not assigned to any workspace",
+      "mode": "no-view",
+      "keywords": [
+        "hide",
+        "unassigned",
+        "apps"
+      ]
+    },
+    {
+      "name": "open-flashspace",
+      "title": "Open FlashSpace",
+      "description": "Open the FlashSpace application",
+      "mode": "no-view",
+      "keywords": [
+        "open",
+        "launch"
+      ]
+    },
+    {
+      "name": "open-space-control",
+      "title": "Open Space Control",
+      "description": "Open FlashSpace Space Control",
+      "mode": "no-view",
+      "keywords": [
+        "open",
+        "space",
+        "control"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "toml": "^4.1.1",
+    "yaml": "^2.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

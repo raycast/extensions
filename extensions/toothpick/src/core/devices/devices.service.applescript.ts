@@ -58,6 +58,10 @@ export default class ApplescriptDevicesService implements DevicesService {
     return exitCode === "0";
   }
 
+  refreshBluetooth(): boolean {
+    return false;
+  }
+
   private _fetchRawDevicesData(): RawDeviceData[] {
     // Fetch Bluetooth data
     const script = readFileSync(

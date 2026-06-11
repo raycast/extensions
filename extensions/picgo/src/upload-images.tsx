@@ -9,21 +9,24 @@ import {
     Toast,
     useNavigation,
     openExtensionPreferences,
+    getPreferenceValues,
 } from "@raycast/api";
 
 import ConfigDropdownList from "./components/ConfigDropdown";
 import type { UserUploaderConfig, UploadFormData } from "./types/type";
 import { isImgFile } from "./util/util";
-import UploadResultPage from "./components/UploadResultPage";
+import FormatListPage from "./components/FormatListPage";
 import ErrorView from "./components/ErrorView";
 import getPicGoContext from "./util/context";
 import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import UploaderManagement from "./uploader-management";
+import ImagesPreviewPage from "./components/ImagesPreviewPage";
 
 const UPLOADER_CONFIG_KEY = "picgo:user_uploader_config";
 
 export default function Command() {
+    const { uploadResultView } = getPreferenceValues<Preferences.UploadImages>();
     const {
         upload,
         getActiveUploaderType,
@@ -95,7 +98,8 @@ export default function Command() {
             toast.style = Toast.Style.Success;
             toast.title = "Success";
 
-            push(<UploadResultPage result={res} />);
+            if (uploadResultView === "format_list") push(<FormatListPage result={res} />);
+            else push(<ImagesPreviewPage imgs={res} />);
         } catch (err) {
             const e = err as Error;
             console.error("Upload failed:", e);

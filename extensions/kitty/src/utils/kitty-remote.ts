@@ -1,14 +1,47 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { existsSync, readdirSync, statSync } from "fs";
+import { homedir } from "os";
 import { getPreferenceValues } from "@raycast/api";
 import type { KittyOSWindow } from "./types";
 
-interface Preferences {
-  socketPath: string;
-}
-
-const KITTEN_PATH = "/Applications/kitty.app/Contents/MacOS/kitten";
 const TIMEOUT = 5000;
+
+const KITTEN_CANDIDATES = [
+  "/Applications/kitty.app/Contents/MacOS/kitten",
+  `${homedir()}/Applications/kitty.app/Contents/MacOS/kitten`,
+  "/opt/homebrew/bin/kitten",
+  "/usr/local/bin/kitten",
+];
+
+let detectedKittenPath: string | undefined;
+
+function resolveKittenPath(): string {
+  const { kittenPath } = getPreferenceValues<Preferences>();
+  if (kittenPath && existsSync(kittenPath)) {
+    return kittenPath;
+  }
+
+  if (detectedKittenPath) return detectedKittenPath;
+
+  try {
+    const p = execFileSync("which", ["kitten"], { encoding: "utf-8", timeout: 2000 }).trim();
+    if (p && existsSync(p)) {
+      detectedKittenPath = p;
+      return detectedKittenPath;
+    }
+  } catch {
+    // not in PATH, try known locations
+  }
+
+  for (const candidate of KITTEN_CANDIDATES) {
+    if (existsSync(candidate)) {
+      detectedKittenPath = candidate;
+      return detectedKittenPath;
+    }
+  }
+
+  throw new Error("kitten not found — set the path in the Kitten Path extension preference");
+}
 
 function findKittySocket(): string | undefined {
   try {
@@ -29,13 +62,18 @@ export function getSocketPath(): string {
 
 export function runKittenCommand(args: string[]): string {
   const socket = getSocketPath();
-  const cmd = `${KITTEN_PATH} @ --to unix:${socket} ${args.join(" ")}`;
-  return execSync(cmd, { encoding: "utf-8", timeout: TIMEOUT }).trim();
+  return execFileSync(resolveKittenPath(), ["@", "--to", `unix:${socket}`, ...args], {
+    encoding: "utf-8",
+    timeout: TIMEOUT,
+  }).trim();
 }
 
 export function isKittyRunning(): boolean {
   try {
-    execSync("pgrep -x kitty", { encoding: "utf-8", timeout: 3000 });
+    execFileSync("pgrep", ["-f", "kitty.app/Contents/MacOS/kitty"], {
+      encoding: "utf-8",
+      timeout: 3000,
+    });
     return true;
   } catch {
     return false;
@@ -47,12 +85,13 @@ export function isSocketAvailable(): boolean {
 }
 
 export function activateKitty(): void {
-  execSync(`osascript -e 'tell application "kitty" to activate'`, { timeout: 3000 });
+  execFileSync("osascript", ["-e", 'tell application "kitty" to activate'], { timeout: 3000 });
 }
 
 export function launchKittyApp(args?: string[]): void {
-  const extra = args?.length ? ` --args ${args.join(" ")}` : "";
-  execSync(`open -a kitty${extra}`, { timeout: 5000 });
+  const cmd = ["-a", "kitty"];
+  if (args?.length) cmd.push("--args", ...args);
+  execFileSync("open", cmd, { timeout: 5000 });
 }
 
 export async function ensureKittyRunning(): Promise<void> {
@@ -112,8 +151,7 @@ export function focusWindow(windowId: number): void {
 }
 
 export function sendText(windowId: number, text: string): void {
-  const escaped = text.replace(/'/g, "'\\''");
-  runKittenCommand(["send-text", `--match=id:${windowId}`, `'${escaped}\n'`]);
+  runKittenCommand(["send-text", `--match=id:${windowId}`, `${text}\n`]);
 }
 
 export function closeTab(tabId: number): void {

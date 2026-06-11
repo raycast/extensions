@@ -6,7 +6,11 @@ export const getTopModels = (models: ModelUsage[], limit: number = 5): ModelUsag
 };
 
 export const getRecentSessions = (sessions: SessionData[], limit: number = 10): SessionData[] => {
-  return orderBy(sessions, [(session) => new Date(session.lastActivity).getTime()], ["desc"]).slice(0, limit);
+  return orderBy(
+    sessions,
+    [(session) => (session.lastActivity ? new Date(session.lastActivity).getTime() : 0)],
+    ["desc"],
+  ).slice(0, limit);
 };
 
 export const calculateAverageSessionCost = (sessions: SessionData[]): number => {

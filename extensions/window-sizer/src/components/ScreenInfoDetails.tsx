@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useScreenInfo } from "../hooks/useScreenInfo";
 import { getActiveWindowScreenInfo, getActiveWindowInfo } from "../swift-app";
 import { log as logger, error as logError } from "../utils/logger";
+import { withTimeout } from "../utils/timeout";
 
 interface ScreenInfo {
   screens: string[];
@@ -36,13 +37,13 @@ export function ScreenInfoDetails() {
         // Get active window info
         let activeWindowInfo = null;
         try {
-          const windowDetails = await getActiveWindowInfo();
+          const windowDetails = await withTimeout(getActiveWindowInfo(), "Get active window info");
           logger("Window details:", windowDetails);
 
           if (windowDetails.error) {
             logger("No active window detected");
           } else {
-            const rawWindowInfo = await getActiveWindowScreenInfo();
+            const rawWindowInfo = await withTimeout(getActiveWindowScreenInfo(), "Get active window screen info");
             logger("Active window info:", rawWindowInfo);
 
             // Parse the output

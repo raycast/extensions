@@ -64,18 +64,15 @@
       "title": "Add Task",
       "description": "Create a new task in SingularityApp",
       "mode": "view"
-    },
+    }
+  ],
+  "preferences": [
     {
-      "name": "set-api-token",
-      "title": "Set API Token",
-      "description": "Save your SingularityApp API token for use in other commands",
-      "mode": "view"
-    },
-    {
-      "name": "set-max-count",
-      "title": "Set Max Tasks Count",
-      "description": "Configure how many tasks to fetch per request (workaround for API pagination limitation)",
-      "mode": "view"
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your SingularityApp API token. Get it at https://me.singularity-app.com/rest-tokens",
+      "type": "password",
+      "required": true
     }
   ],
   "dependencies": {

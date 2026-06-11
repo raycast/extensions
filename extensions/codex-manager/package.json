@@ -1,0 +1,131 @@
+{
+  "name": "codex-manager",
+  "title": "Codex Manager",
+  "description": "Manage Codex MCP servers and skills with safe local operations",
+  "icon": "icon.png",
+  "author": "jose_de_freitas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "version": "0.0.1",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "mcp-servers",
+      "title": "Manage MCP Servers",
+      "subtitle": "Codex Manager",
+      "description": "View and manage MCP servers",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "skills",
+      "title": "Manage Skills",
+      "subtitle": "Codex Manager",
+      "description": "View and manage Codex skills",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "doctor",
+      "title": "Check Configuration",
+      "subtitle": "Codex Manager",
+      "description": "Diagnose common Codex configuration issues",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "title": "MCP Config Path",
+      "description": "Path to the Codex config.toml file.",
+      "type": "file",
+      "default": "~/.codex/config.toml",
+      "required": true
+    },
+    {
+      "name": "skillsDir",
+      "title": "Skills Folder",
+      "description": "Path to the Codex skills directory.",
+      "type": "directory",
+      "default": "~/.codex/skills/",
+      "required": true
+    },
+    {
+      "name": "editorPreference",
+      "title": "Preferred Editor",
+      "description": "Open files with the system default or VS Code (code).",
+      "type": "dropdown",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "VS Code (code)",
+          "value": "code"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "argsFormat",
+      "title": "Args Format",
+      "description": "How to enter args in forms.",
+      "type": "dropdown",
+      "default": "lines",
+      "data": [
+        {
+          "title": "Lines",
+          "value": "lines"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "createBackup",
+      "label": "Create Backup",
+      "description": "Create a timestamped backup before writing config.toml.",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@iarna/toml": "3.0.0",
+    "@raycast/api": "1.104.1",
+    "gray-matter": "4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

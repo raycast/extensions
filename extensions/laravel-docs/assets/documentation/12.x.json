@@ -23,6 +23,10 @@
       "url": "https://laravel.com/docs/12.x/configuration"
     },
     {
+      "title": "Agentic Development",
+      "url": "https://laravel.com/docs/12.x/ai"
+    },
+    {
       "title": "Directory Structure",
       "url": "https://laravel.com/docs/12.x/structure"
     },
@@ -189,6 +193,10 @@
       "url": "https://laravel.com/docs/12.x/rate-limiting"
     },
     {
+      "title": "Search",
+      "url": "https://laravel.com/docs/12.x/search"
+    },
+    {
       "title": "Strings",
       "url": "https://laravel.com/docs/12.x/strings"
     },
@@ -281,6 +289,20 @@
     {
       "title": "Factories",
       "url": "https://laravel.com/docs/12.x/eloquent-factories"
+    }
+  ],
+  "AI": [
+    {
+      "title": "AI SDK",
+      "url": "https://laravel.com/docs/12.x/ai-sdk"
+    },
+    {
+      "title": "MCP",
+      "url": "https://laravel.com/docs/12.x/mcp"
+    },
+    {
+      "title": "Boost",
+      "url": "https://laravel.com/docs/12.x/boost"
     }
   ],
   "Testing": [

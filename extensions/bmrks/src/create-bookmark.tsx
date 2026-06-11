@@ -23,64 +23,73 @@ function CreateBookmark({ user }: { user: User }) {
     title?: string;
   }
 
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const { handleSubmit, itemProps, setValue, values } = useForm<BookmarkValues>({
     async onSubmit(values) {
-      const isValidColor = Boolean(colorString.get(values.value));
+      if (isSubmitting) return;
+      setIsSubmitting(true);
 
-      if (isValidColor) {
-        const res = await db.insertBookmark({
-          type: "color",
-          group_id: values.groupId,
-          title: values.value,
-        });
+      try {
+        const isValidColor = Boolean(colorString.get(values.value));
 
-        if (res.error) {
-          await showFailureToast(res.error.message);
-          return;
-        }
-      } else if (valueIsUrl) {
-        const validUrl = ensureValidUrl(values.value);
-        const favicon = getFavicon(validUrl);
+        if (isValidColor) {
+          const res = await db.insertBookmark({
+            type: "color",
+            group_id: values.groupId,
+            title: values.value,
+          });
 
-        let { title } = values;
+          if (res.error) {
+            await showFailureToast(res.error.message);
+            return;
+          }
+        } else if (valueIsUrl) {
+          const validUrl = ensureValidUrl(values.value);
+          const favicon = getFavicon(validUrl);
 
-        if (!title) {
-          const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title`);
-          if (response.ok) {
-            const data = (await response.json()) as MicrolinkResponse;
-            title = data.data.title;
+          let { title } = values;
+
+          if (!title) {
+            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title`);
+            if (response.ok) {
+              const data = (await response.json()) as MicrolinkResponse;
+              title = data.data.title;
+            }
+          }
+
+          const res = await db.insertBookmark({
+            type: "link",
+            group_id: values.groupId,
+            url: validUrl,
+            title,
+            // @ts-expect-error: looks like source is missing
+            favicon_url: favicon.source || "",
+          });
+
+          if (res.error) {
+            await showFailureToast(res.error.message);
+            return;
+          }
+        } else {
+          const res = await db.insertBookmark({
+            type: "text",
+            group_id: values.groupId,
+            title: values.value,
+          });
+
+          if (res.error) {
+            await showFailureToast(res.error.message);
+            return;
           }
         }
 
-        const res = await db.insertBookmark({
-          type: "link",
-          group_id: values.groupId,
-          url: validUrl,
-          title,
-          // @ts-expect-error: looks like source is missing
-          favicon_url: favicon.source || "",
+        await showHUD(`Created in ${activeGroup!.name}`, {
+          popToRootType: PopToRootType.Immediate,
         });
-
-        if (res.error) {
-          await showFailureToast(res.error.message);
-          return;
-        }
-      } else {
-        const res = await db.insertBookmark({
-          type: "text",
-          group_id: values.groupId,
-          title: values.value,
-        });
-
-        if (res.error) {
-          await showFailureToast(res.error.message);
-          return;
-        }
+      } finally {
+        setIsSubmitting(false);
       }
-
-      await showHUD(`Created in ${activeGroup!.name}`, {
-        popToRootType: PopToRootType.Immediate,
-      });
     },
     validation: {
       value: FormValidation.Required,
@@ -108,7 +117,7 @@ function CreateBookmark({ user }: { user: User }) {
 
   return (
     <Form
-      isLoading={isLoadingGroups}
+      isLoading={isLoadingGroups || isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Bookmark" icon={Icon.CheckCircle} onSubmit={handleSubmit} />

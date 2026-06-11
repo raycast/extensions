@@ -2,13 +2,14 @@ import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycas
 
 import useInstances from "../hooks/useInstances";
 import Instances from "./InstancesList";
+import { instanceLabel } from "../utils/instanceLabel";
 
-export default function Actions({ cantRefresh, revalidate }: { cantRefresh?: boolean; revalidate: () => void }) {
+export default function Actions({ cantRefresh, revalidate }: { cantRefresh?: boolean; revalidate?: () => void }) {
   const { instances, selectedInstance, setSelectedInstance } = useInstances();
 
   return (
     <>
-      {!cantRefresh && (
+      {!cantRefresh && revalidate && (
         <List.Dropdown.Section title="List">
           <Action
             icon={Icon.ArrowClockwise}
@@ -37,7 +38,7 @@ export default function Actions({ cantRefresh, revalidate }: { cantRefresh?: boo
                 source: selectedInstance?.id == instance.id ? Icon.CheckCircle : Icon.Circle,
                 tintColor: instance.color,
               }}
-              title={instance.alias ? instance.alias : instance.name}
+              title={instanceLabel(instance)}
               onAction={() => {
                 setSelectedInstance(instance);
                 LocalStorage.setItem("selected-instance", JSON.stringify(instance));

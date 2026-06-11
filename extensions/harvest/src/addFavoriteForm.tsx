@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useCompany, useMyProjects } from "./services/harvest";
 import { find } from "es-toolkit/compat";
@@ -37,6 +37,7 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
+  const { showClientInProject = false } = getPreferenceValues<{ showClientInProject?: boolean }>();
   const isEditing = !!favorite;
 
   // Initialize with favorite values if editing, otherwise null/empty
@@ -46,8 +47,11 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
   const [hours, setHours] = useState<string>(favorite?.hours ?? "");
 
   const groupedProjects = useMemo(() => {
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   const tasks = useMemo(() => {
@@ -151,7 +155,9 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );

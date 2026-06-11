@@ -1,5 +1,18 @@
 # Trovu Changelog
 
+## [1.3.1] - 2026-04-08
+
+- Minor code fixes.
+
+## [1.3.0] - 2026-04-08
+
+- After submit, go directly to target URL, not via process script.
+- On reload, stay in app, show message.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [1.2.1] - 2025-04-22
 
 - Fix error when loading environment [#508](https://github.com/trovu/trovu/issues/508)

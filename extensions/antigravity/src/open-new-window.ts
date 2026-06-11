@@ -1,18 +1,22 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { getAntigravityApplicationName, getAntigravityProcessName } from "./utils";
 
 const makeNewWindow = async () => {
+  const appName = getAntigravityApplicationName();
+  const processName = getAntigravityProcessName();
+
   await runAppleScript(`
-    tell application "Antigravity"
+    tell application "${appName}"
 	    activate
     end tell
     delay(0.5)
-    tell application "Antigravity"
+    tell application "${appName}"
 	    activate
     end tell
 
     tell application "System Events"
-	    tell process "Antigravity"
+	    tell process "${processName}"
 		    click menu item "New Window" of menu "File" of menu bar 1
 	    end tell
     end tell

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pie-for-pi-hole",
-  "title": "Pie for Pi-hole",
+  "title": "Pie for Pi-Hole",
   "description": "Control your Pi-hole from Raycast.",
   "icon": "command-icon.png",
   "author": "GLaDO8",
@@ -12,69 +12,180 @@
   "commands": [
     {
       "name": "toggle-pihole",
-      "title": "Toggle Pi-hole",
+      "title": "Toggle Pi-Hole",
       "subtitle": "Pie for Pi-hole",
       "description": "Enable or disable your Pi-Hole, for any custom time",
       "mode": "view"
     },
     {
       "name": "query-log",
-      "title": "Get Query Logs",
+      "title": "Query Log",
       "subtitle": "Pie for Pi-hole",
-      "description": "Get the query log for the last 2 hours.",
+      "description": "View query logs with time range and status filtering.",
       "mode": "view"
     },
     {
       "name": "get-summary",
-      "title": "Get Summary",
+      "title": "Pi-Hole Dashboard",
       "subtitle": "Pie for Pi-hole",
-      "description": "Get a summary of Pi-Hole vitals.",
+      "description": "View Pi-hole dashboard with stats, query types, and system info.",
       "mode": "view"
     },
     {
       "name": "top-queries",
-      "title": "Get Top Queries",
+      "title": "Top Queries",
       "subtitle": "Pie for Pi-hole",
-      "description": "View top allowed and blocked queries for the last 24 hours.",
+      "description": "View top allowed and blocked queries.",
+      "mode": "view"
+    },
+    {
+      "name": "clients-devices",
+      "title": "Clients & Devices",
+      "subtitle": "Pie for Pi-hole",
+      "description": "View top clients and network devices.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-domains",
+      "title": "Manage Domains",
+      "subtitle": "Pie for Pi-hole",
+      "description": "View, add, and delete domains on your allowlist or blocklist.",
+      "mode": "view"
+    },
+    {
+      "name": "add-domain",
+      "title": "Add Domain",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Quickly add domains to your allowlist or blocklist.",
+      "mode": "view"
+    },
+    {
+      "name": "update-gravity",
+      "title": "Update Gravity",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Update Pi-hole gravity (v6 only).",
+      "mode": "no-view"
+    },
+    {
+      "name": "subscription-lists",
+      "title": "Manage Subscription Lists",
+      "subtitle": "Pie for Pi-hole",
+      "description": "View, add, toggle, and delete subscription lists (v6 only).",
+      "mode": "view"
+    },
+    {
+      "name": "add-list",
+      "title": "Add Subscription List",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Quickly add a subscription list to Pi-hole (v6 only).",
+      "mode": "view"
+    },
+    {
+      "name": "check-domain",
+      "title": "Check Domain",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Search if a domain is blocked or allowed (v6 only).",
+      "mode": "view"
+    },
+    {
+      "name": "restart-dns",
+      "title": "Restart DNS",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Restart the DNS resolver (v6 only).",
+      "mode": "no-view"
+    },
+    {
+      "name": "flush-logs",
+      "title": "Flush Logs",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Flush Pi-hole query logs (v6 only).",
+      "mode": "no-view"
+    },
+    {
+      "name": "teleporter-backup",
+      "title": "Backup Config",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Download a Pi-hole Teleporter backup (v6 only).",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-groups-clients",
+      "title": "Groups & Clients",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Manage groups and configured clients (v6 only).",
+      "mode": "view"
+    },
+    {
+      "name": "view-config",
+      "title": "View Configuration",
+      "subtitle": "Pie for Pi-hole",
+      "description": "View full Pi-hole configuration as JSON (v6 only).",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "PIHOLE_VERSION",
+      "type": "dropdown",
+      "required": true,
+      "title": "Pi-hole Version",
+      "description": "Select your Pi-hole version",
+      "default": "v5",
+      "data": [
+        {
+          "title": "Pi-hole 5",
+          "value": "v5"
+        },
+        {
+          "title": "Pi-hole 6",
+          "value": "v6"
+        }
+      ]
+    },
+    {
       "name": "PIHOLE_URL",
       "type": "textfield",
       "required": true,
-      "title": "Pi-Hole URL",
-      "description": "Enter Raspberry Pi IP address or URL for your Pi-hole."
+      "title": "Pi-hole URL",
+      "description": "IP address or hostname (e.g. 192.168.1.2 or pi.hole). v6 defaults to HTTPS; prefix with http:// to override."
     },
     {
       "name": "API_TOKEN",
-      "type": "textfield",
+      "type": "password",
       "required": true,
-      "title": "API Token",
-      "description": "Find this in settings > API/WEB Interface > Show API Token"
+      "title": "API Token / Password",
+      "description": "For v5: API token (Settings > API > Show API Token). For v6: your password or an app password."
+    },
+    {
+      "name": "TOTP_SECRET",
+      "type": "password",
+      "required": false,
+      "title": "TOTP Secret (v6 only)",
+      "description": "Base32 TOTP secret for 2FA. Leave empty if 2FA is disabled or you use an app password."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
-    "dotenv": "^16.0.1",
-    "node-fetch": "^3.2.4",
-    "uuid": "^8.3.2"
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "~20.0.0",
+    "@types/react": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.0"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

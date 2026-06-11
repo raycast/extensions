@@ -234,6 +234,7 @@ export async function getPlanning(): Promise<MemberPlanning[]> {
   }
   const response = await fetchBetaSeries<PlanningResponse | PlanningItem[]>(
     "/planning/member",
+    { unseen: "true" },
   );
 
   let rawItems: PlanningItem[] = [];

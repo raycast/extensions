@@ -3,7 +3,7 @@ import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import { FlavorText, PokemonDexNumber } from "../types";
-import { fixFlavorText, nationalDexNumber } from "../utils";
+import { fixFlavorText, getLocalizedName, nationalDexNumber } from "../utils";
 
 export default function PokedexEntries(props: {
   name: string;
@@ -24,10 +24,14 @@ export default function PokedexEntries(props: {
       groupBy(props.entries, (e) => e.version.versiongroup.generation_id),
     ).map(([id, entries]) => {
       const groups = groupBy(entries, (e) => e.version.versiongroup.name);
+      const name = getLocalizedName(
+        entries[0].version.versiongroup.generation.generationnames,
+        entries[0].version.versiongroup.generation.name,
+      );
+
       return {
         id: Number(id),
-        name: entries[0].version.versiongroup.generation.generationnames[0]
-          .name,
+        name,
         groups: Object.values(groups).map((group) => ({
           version_group: group[0].version.versiongroup,
           entries: group,
@@ -56,10 +60,12 @@ export default function PokedexEntries(props: {
 
               const title =
                 group.version_group.versions
-                  ?.map((v) => v.versionnames[0]?.name || v.name)
+                  ?.map((v) => getLocalizedName(v.versionnames, v.name))
                   .join(" & ") ||
-                entry.version.versionnames[0]?.name ||
-                entry.version.name;
+                getLocalizedName(
+                  entry.version.versionnames,
+                  entry.version.name,
+                );
 
               return (
                 <List.Item

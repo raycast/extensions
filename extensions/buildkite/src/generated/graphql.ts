@@ -1,5 +1,4 @@
-import { GraphQLClient } from 'graphql-request';
-import { GraphQLClientRequestHeaders } from 'graphql-request/build/cjs/types';
+import { GraphQLClient, RequestOptions } from 'graphql-request';
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -8,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -6130,19 +6130,53 @@ export type ViewerPermissions = {
   totpConfigure: Permission;
 };
 
-export type BuildFragment = { id: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string } };
+export type BuildFragment = { id: string, uuid: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string, slug: string } };
+
+type JobStep_StepCommand_Fragment = { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null };
+
+type JobStep_StepInput_Fragment = { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null };
+
+type JobStep_StepTrigger_Fragment = { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null };
+
+type JobStep_StepWait_Fragment = { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null };
+
+export type JobStepFragment = JobStep_StepCommand_Fragment | JobStep_StepInput_Fragment | JobStep_StepTrigger_Fragment | JobStep_StepWait_Fragment;
+
+type BuildJob_JobTypeBlock_Fragment = { __typename: 'JobTypeBlock', id: string, uuid: string, label: string | null, state: JobStates, isUnblockable: boolean | null, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null };
+
+type BuildJob_JobTypeCommand_Fragment = { __typename: 'JobTypeCommand', id: string, uuid: string, label: string | null, state: JobStates, url: string, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null };
+
+type BuildJob_JobTypeTrigger_Fragment = { __typename: 'JobTypeTrigger', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null };
+
+type BuildJob_JobTypeWait_Fragment = { __typename: 'JobTypeWait', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null };
+
+export type BuildJobFragment = BuildJob_JobTypeBlock_Fragment | BuildJob_JobTypeCommand_Fragment | BuildJob_JobTypeTrigger_Fragment | BuildJob_JobTypeWait_Fragment;
+
+export type GetBuildQueryVariables = Exact<{
+  uuid: Scalars['ID']['input'];
+}>;
+
+
+export type GetBuildQuery = { build: { id: string, uuid: string, number: number, state: BuildStates, message: string | null, branch: string, url: string, createdAt: any | null, pipeline: { name: string, slug: string }, jobs: { count: number, pageInfo: { hasNextPage: boolean } | null, edges: Array<{ node: { __typename: 'JobTypeBlock', id: string, uuid: string, label: string | null, state: JobStates, isUnblockable: boolean | null, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeCommand', id: string, uuid: string, label: string | null, state: JobStates, url: string, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeTrigger', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeWait', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | null } | null> | null } | null } | null };
+
+export type UnblockJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UnblockJobMutation = { jobTypeBlockUnblock: { jobTypeBlock: { id: string, state: JobStates } } | null };
 
 export type MyBuildsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyBuildsQuery = { viewer: { user: { builds: { edges: Array<{ node: { id: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string } } | null } | null> | null } | null } | null } | null };
+export type MyBuildsQuery = { viewer: { user: { builds: { edges: Array<{ node: { id: string, uuid: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string, slug: string } } | null } | null> | null } | null } | null } | null };
 
 export type ListBuildsQueryVariables = Exact<{
   pipeline: Scalars['ID']['input'];
 }>;
 
 
-export type ListBuildsQuery = { pipeline: { builds: { edges: Array<{ node: { id: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string } } | null } | null> | null } | null } | null };
+export type ListBuildsQuery = { pipeline: { builds: { edges: Array<{ node: { id: string, uuid: string, branch: string, createdAt: any | null, message: string | null, number: number, state: BuildStates, url: string, pipeline: { name: string, slug: string } } | null } | null> | null } | null } | null };
 
 export type PipelineFragment = { slug: string, name: string, description: string | null, favorite: boolean, url: string, builds: { edges: Array<{ node: { state: BuildStates } | null } | null> | null } | null };
 
@@ -6157,6 +6191,7 @@ export type SearchPipelinesQuery = { organization: { pipelines: { edges: Array<{
 export const BuildFragmentDoc = gql`
     fragment Build on Build {
   id
+  uuid
   branch
   createdAt
   message
@@ -6165,9 +6200,65 @@ export const BuildFragmentDoc = gql`
   url
   pipeline {
     name
+    slug
   }
 }
     `;
+export const JobStepFragmentDoc = gql`
+    fragment JobStep on Step {
+  key
+  dependencies(first: 100) {
+    edges {
+      node {
+        key
+      }
+    }
+  }
+}
+    `;
+export const BuildJobFragmentDoc = gql`
+    fragment BuildJob on JobInterface {
+  __typename
+  ... on JobTypeCommand {
+    id
+    uuid
+    label
+    state
+    url
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeBlock {
+    id
+    uuid
+    label
+    state
+    isUnblockable
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeWait {
+    id
+    uuid
+    label
+    state
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeTrigger {
+    id
+    uuid
+    label
+    state
+    step {
+      ...JobStep
+    }
+  }
+}
+    ${JobStepFragmentDoc}`;
 export const PipelineFragmentDoc = gql`
     fragment Pipeline on Pipeline {
   slug
@@ -6180,6 +6271,45 @@ export const PipelineFragmentDoc = gql`
       node {
         state
       }
+    }
+  }
+}
+    `;
+export const GetBuildDocument = gql`
+    query getBuild($uuid: ID!) {
+  build(uuid: $uuid) {
+    id
+    uuid
+    number
+    state
+    message
+    branch
+    url
+    createdAt
+    pipeline {
+      name
+      slug
+    }
+    jobs(first: 100) {
+      count
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        node {
+          ...BuildJob
+        }
+      }
+    }
+  }
+}
+    ${BuildJobFragmentDoc}`;
+export const UnblockJobDocument = gql`
+    mutation unblockJob($id: ID!) {
+  jobTypeBlockUnblock(input: {id: $id}) {
+    jobTypeBlock {
+      id
+      state
     }
   }
 }
@@ -6231,21 +6361,27 @@ export const SearchPipelinesDocument = gql`
 }
     ${PipelineFragmentDoc}`;
 
-export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
+export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, _variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    myBuilds(variables?: MyBuildsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<MyBuildsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<MyBuildsQuery>(MyBuildsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'myBuilds', 'query');
+    getBuild(variables: GetBuildQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetBuildQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetBuildQuery>({ document: GetBuildDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getBuild', 'query', variables);
     },
-    listBuilds(variables: ListBuildsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ListBuildsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ListBuildsQuery>(ListBuildsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'listBuilds', 'query');
+    unblockJob(variables: UnblockJobMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UnblockJobMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UnblockJobMutation>({ document: UnblockJobDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'unblockJob', 'mutation', variables);
     },
-    searchPipelines(variables: SearchPipelinesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SearchPipelinesQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SearchPipelinesQuery>(SearchPipelinesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchPipelines', 'query');
+    myBuilds(variables?: MyBuildsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<MyBuildsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<MyBuildsQuery>({ document: MyBuildsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'myBuilds', 'query', variables);
+    },
+    listBuilds(variables: ListBuildsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ListBuildsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ListBuildsQuery>({ document: ListBuildsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'listBuilds', 'query', variables);
+    },
+    searchPipelines(variables: SearchPipelinesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SearchPipelinesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchPipelinesQuery>({ document: SearchPipelinesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'searchPipelines', 'query', variables);
     }
   };
 }

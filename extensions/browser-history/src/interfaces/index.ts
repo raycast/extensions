@@ -13,6 +13,7 @@ export interface Preferences {
   readonly enableOrion: boolean;
   readonly enableSidekick: boolean;
   readonly enableDia: boolean;
+  readonly enableHelium: boolean;
   readonly enableComet: boolean;
   readonly enableChatGPTAtlas: boolean;
   readonly profilePathChrome?: string;
@@ -27,6 +28,7 @@ export interface Preferences {
   readonly profilePathOrion?: string;
   readonly profilePathSidekick?: string;
   readonly profilePathDia?: string;
+  readonly profilePathHelium?: string;
   readonly profilePathComet?: string;
   readonly profilePathChatGPTAtlas?: string;
   readonly firstInResults: SupportedBrowsers;
@@ -61,6 +63,7 @@ export enum SupportedBrowsers {
   Orion = "Orion",
   Sidekick = "Sidekick",
   Dia = "Dia",
+  Helium = "Helium",
   Comet = "Comet",
   ChatGPTAtlas = "ChatGPTAtlas",
 }

@@ -39,20 +39,44 @@ export class ENOBUFSError extends Error {}
 export class MaxBufferNaNError extends Error {}
 
 export type StatusDevice = {
-  Active: boolean;
   ID: string;
+  PublicKey: string;
+  HostName: string;
   DNSName: string;
+  OS: string;
+  UserID: number;
+  TailscaleIPs: string[];
+  AllowedIPs: string[];
+  Addrs: string[] | null;
+  CurAddr: string;
+  Relay: string;
+  PeerRelay: string;
+  RxBytes: number;
+  TxBytes: number;
+  Created: string;
+  LastWrite: string;
+  LastSeen: string;
+  LastHandshake: string;
+  Online: boolean;
   ExitNode: boolean;
   ExitNodeOption: boolean;
-  Online: boolean;
-  OS: string;
-  TailscaleIPs: string[];
-  LastSeen: string;
-  UserID: number;
-  HostName: string;
+  Active: boolean;
+  PeerAPIURL: string[] | null;
+  TaildropTarget: number;
+  NoFileSharingReason: string;
+  InNetworkMap: boolean;
+  InMagicSock: boolean;
+  InEngine: boolean;
+  /** Only present when the key has expired. */
+  Expired?: boolean;
+  KeyExpiry?: string;
   /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
   sshHostKeys?: string[];
   Tags?: string[];
+  /** Only present on Self. */
+  Capabilities?: string[];
+  /** Only present on Self. */
+  CapMap?: Record<string, null | string[]>;
   Location?: Location;
 };
 
@@ -61,9 +85,19 @@ export type StatusDevice = {
  */
 export type StatusResponse = {
   Version: string;
+  BackendState: string;
+  HaveNodeKey: boolean;
+  AuthURL: string;
   TailscaleIPs: string[];
   Self: StatusDevice;
+  Health: string[];
   MagicDNSSuffix: string;
+  CurrentTailnet: {
+    Name: string;
+    MagicDNSSuffix: string;
+    MagicDNSEnabled: boolean;
+  };
+  CertDomains: string[] | null;
   Peer: Record<string, StatusDevice>;
   User: Record<
     string,
@@ -71,9 +105,10 @@ export type StatusResponse = {
       ID: number;
       DisplayName: string;
       LoginName: string;
-      ProfilePictureURL: string;
+      ProfilePicURL?: string;
     }
   >;
+  ClientVersion: null | unknown;
 };
 
 /**
@@ -81,11 +116,14 @@ export type StatusResponse = {
  * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
  */
 export type NetcheckResponse = {
+  Now: string;
   UDP: boolean;
-  IPv4: boolean;
-  GlobalV4: string;
   IPv6: boolean;
-  GlobalV6: string;
+  IPv4: boolean;
+  IPv6CanSend: boolean;
+  IPv4CanSend: boolean;
+  OSHasIPv6: boolean;
+  ICMPv4: boolean;
   MappingVariesByDestIP: boolean;
   UPnP: boolean;
   PMP: boolean;
@@ -94,10 +132,15 @@ export type NetcheckResponse = {
   RegionLatency: Record<string, number>;
   RegionV4Latency: Record<string, number>;
   RegionV6Latency: Record<string, number>;
+  GlobalV4Counters: Record<string, number>;
+  GlobalV6Counters: Record<string, number> | null;
+  GlobalV4: string;
+  GlobalV6: string;
+  CaptivePortal: boolean;
 };
 
 export type DerpRegion = {
-  RegionId: number;
+  RegionID: number;
   RegionCode: string;
   RegionName: string;
   Latitude: number;
@@ -141,11 +184,11 @@ export function getNetcheck() {
 }
 
 /**
- * This funtion relies on a debug command, so it may not be stable on the returned value.
+ * This function relies on a debug command, so it may not be stable on the returned value.
  */
 export function getDerpMap() {
   const resp = tailscale("debug netmap");
-  return JSON.parse(resp).DERPMap.Regions as DerpRegion[];
+  return JSON.parse(resp).DERPMap.Regions as Record<string, DerpRegion>;
 }
 
 export function getDevices(status: StatusResponse) {

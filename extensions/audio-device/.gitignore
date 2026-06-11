@@ -4,3 +4,4 @@ raycast-env.d.ts
 compiled_raycast_swift
 node_modules
 win-audio-cli.exe
+docs/

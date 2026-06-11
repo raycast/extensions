@@ -74,6 +74,7 @@ export const TargetLanguageList: React.FC = () => {
                   <Action
                     title="Add"
                     icon={Icon.Plus}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     onAction={() => {
                       setTargetLanguages((prev) => [...prev, lang.code]);
                       clearSearchBar();

@@ -1,7 +1,7 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { ComponentProps } from "react";
+import { ComponentProps, ReactElement } from "react";
 
 import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
@@ -12,6 +12,7 @@ import { getInitiativeIcon } from "./helpers/initiatives";
 import { getProjectIcon } from "./helpers/projects";
 import { getStatusIcon } from "./helpers/states";
 import { getUserIcon } from "./helpers/users";
+import { CustomViewIssues } from "./search-custom-views";
 
 function Favorites() {
   const { data, isLoading } = useCachedPromise(getFavorites);
@@ -27,6 +28,7 @@ function Favorites() {
         ({ id, type, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
           let props: Pick<List.Item.Props, "icon" | "title"> | null = null;
           let openInLinearProps: ComponentProps<typeof OpenInLinear> | null = null;
+          let customAction: ReactElement | null = null;
 
           if (type === "customView" && customView) {
             props = {
@@ -34,10 +36,16 @@ function Favorites() {
               title: customView.name,
             };
 
-            openInLinearProps = {
-              title: "Open View",
-              url: baseLinearUrl + `/view/${customView.id}`,
-            };
+            customAction = (
+              <ActionPanel>
+                <Action.Push
+                  title="Show Issues"
+                  icon={Icon.List}
+                  target={<CustomViewIssues viewId={customView.id} viewName={customView.name} />}
+                />
+                <OpenInLinear title="Open View in Linear" url={baseLinearUrl + `/view/${customView.id}`} />
+              </ActionPanel>
+            );
           }
 
           if (type === "cycle" && cycle) {
@@ -127,19 +135,18 @@ function Favorites() {
 
           if (props) {
             const updated = new Date(updatedAt);
+            const actions = customAction ? (
+              customAction
+            ) : openInLinearProps ? (
+              <ActionPanel>
+                <OpenInLinear {...openInLinearProps} />
+              </ActionPanel>
+            ) : undefined;
             return (
               <List.Item
                 key={id}
                 {...props}
-                {...(openInLinearProps
-                  ? {
-                      actions: (
-                        <ActionPanel>
-                          <OpenInLinear {...openInLinearProps} />
-                        </ActionPanel>
-                      ),
-                    }
-                  : {})}
+                {...(actions ? { actions } : {})}
                 accessories={[
                   {
                     date: updated,

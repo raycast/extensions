@@ -1,48 +1,64 @@
-import { ActionPanel, Action, List, showToast, Toast, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { Download } from "../types";
-import { getDownloadLink } from "../api/downloads";
 import { formatBytes } from "../utils/formatters";
+import { isVideoFile } from "../utils/video";
+import { openInPlayer } from "../utils/video";
+import { copyDownloadLink } from "../utils/downloads";
+import { useVideoPlayers } from "../hooks/useVideoPlayers";
 
 interface DownloadFilesProps {
   download: Download;
   apiKey: string;
 }
 
-const copyFileDownloadLink = async (apiKey: string, download: Download, fileId: number) => {
-  try {
-    await showToast({ style: Toast.Style.Animated, title: "Getting download link..." });
-    const link = await getDownloadLink(apiKey, download.type, download.id, fileId);
-    await Clipboard.copy(link);
-    await showToast({ style: Toast.Style.Success, title: "Download link copied!" });
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to get download link",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
-
 export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
-  const isReady = download.download_finished || download.progress >= 1;
+  const isDownloadReady = download.download_finished || download.progress >= 1;
+  const { players, setDefaultPlayer } = useVideoPlayers();
 
   return (
     <List navigationTitle={download.name} searchBarPlaceholder="Search files...">
       <List.Section title="Files" subtitle={`${download.files.length}`}>
-        {download.files.map((file) => (
-          <List.Item
-            key={file.id}
-            title={file.short_name || file.name}
-            subtitle={formatBytes(file.size)}
-            actions={
-              <ActionPanel>
-                {isReady && (
-                  <Action title="Copy Download Link" onAction={() => copyFileDownloadLink(apiKey, download, file.id)} />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))}
+        {download.files.map((file) => {
+          const filename = file.short_name || file.name;
+          const isVideo = isVideoFile(filename);
+          return (
+            <List.Item
+              key={file.id}
+              title={filename}
+              subtitle={formatBytes(file.size)}
+              actions={
+                <ActionPanel>
+                  {isDownloadReady &&
+                    isVideo &&
+                    players.map((player) => (
+                      <Action
+                        key={player.name}
+                        title={`Open in ${player.name}`}
+                        icon={Icon.Play}
+                        onAction={() => openInPlayer(apiKey, download, player, file.id)}
+                      />
+                    ))}
+                  {isDownloadReady && (
+                    <Action
+                      title="Copy Download Link"
+                      icon={Icon.Link}
+                      onAction={() => copyDownloadLink(apiKey, download, file.id)}
+                    />
+                  )}
+                  {isVideo && players.length > 1 && (
+                    <ActionPanel.Section>
+                      <ActionPanel.Submenu title="Set Default Player" icon={Icon.Star}>
+                        {players.map((player) => (
+                          <Action key={player.name} title={player.name} onAction={() => setDefaultPlayer(player)} />
+                        ))}
+                      </ActionPanel.Submenu>
+                    </ActionPanel.Section>
+                  )}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

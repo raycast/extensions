@@ -1,6 +1,16 @@
 # Changelog
 
-## [1.1.0] - 2026-02-14
+## [1.2.0] - 2026-05-10
+
+Thanks to [@tolshao](https://github.com/tolshao) for contributing this release.
+
+- Add China region API endpoint (`api.minimaxi.com`) alongside International (`api.minimax.io`)
+- Add MiniMax M2.7 and M2.7-highspeed models
+- Add M2-her (Roleplay) and M2.5-highspeed model variants
+- Fix: network errors no longer permanently block the extension
+- Fix: API key validation now re-runs when the key changes in preferences
+
+## [1.1.0] - 2026-02-13
 
 - Add MiniMax M2.5 model support (now default)
 - Remove non-existent highspeed model variants

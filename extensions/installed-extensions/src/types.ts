@@ -7,7 +7,7 @@ export type ExtensionMetadata = {
   owner?: string; // only exists for organizations
   access?: string; // only exists for organizations
   commandCount: number;
-  created: Date;
+  updatedAt: Date;
   isLocalExtension: boolean;
   handle: string;
   link: string;

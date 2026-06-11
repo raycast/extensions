@@ -1,13 +1,15 @@
-import { useState, useCallback, useRef } from "react";
-import { List, Icon } from "@raycast/api";
+import { useCallback, useRef, useState } from "react";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { MessageActions } from "./message-actions";
 import { Account, Mailbox, MessageProps } from "../types";
 import { getMessages } from "../scripts/messages";
-import { shortenText, toRelative, titleCase, invoke, isValidDate } from "../utils";
+import { invoke, isValidDate, shortenText, titleCase, toRelative } from "../utils";
 import { MailIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
+import { getMailboxIcon } from "../utils/mailbox";
+import { MailboxTypeAction } from "./mailbox-type";
 
 export type MessageListProps = {
   account: Account;
@@ -66,7 +68,7 @@ export const MessageList = (props: MessageListProps) => {
               key={mailbox.name}
               title={titleCase(mailbox.name)}
               value={mailbox.name}
-              icon={mailbox.icon}
+              icon={getMailboxIcon(mailbox.type)}
             />
           ))}
         </List.Dropdown>
@@ -83,6 +85,9 @@ export const MessageList = (props: MessageListProps) => {
           }}
         />
       ))}
+      <ActionPanel>
+        <MailboxTypeAction mailbox={mailbox} />
+      </ActionPanel>
     </List>
   );
 };

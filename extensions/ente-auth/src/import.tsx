@@ -1,12 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "./constants/ente";
-import {
-	checkEnteBinary,
-	checkEnteExportDirValue,
-	createEntePath,
-	deleteEnteExport,
-	exportEnteAuthSecrets,
-} from "./helpers/ente";
+import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "./constants/ente";
+import { checkEnteBinary, createEntePath, deleteEnteExport, exportEnteAuthSecrets } from "./helpers/ente";
 import { getSecrets, parseSecrets, storeSecrets } from "./helpers/secrets";
 
 export default async function Command() {
@@ -18,24 +12,18 @@ export default async function Command() {
 		toast.message = "Please install the Ente binary.";
 		return;
 	}
+	const exportDirPath = DEFAULT_EXPORT_DIR_PATH();
+	const exportFilePath = getExportFilePath(exportDirPath);
 
 	try {
-		checkEnteExportDirValue();
-	} catch (error) {
-		toast.style = Toast.Style.Failure;
-		toast.title = "Error checking export directory";
-		toast.message = error instanceof Error ? error.message : "Unknown error";
-	}
-
-	try {
-		createEntePath(DEFAULT_EXPORT_DIR_PATH());
-		exportEnteAuthSecrets();
+		createEntePath(exportDirPath);
+		exportEnteAuthSecrets(exportDirPath);
 	} catch (error) {
 		console.warn("Export failed, proceeding with existing file:", error);
 	}
 
 	try {
-		const secrets = parseSecrets(getSecrets(EXPORT_FILE_PATH));
+		const secrets = parseSecrets(getSecrets(exportFilePath));
 		await storeSecrets(secrets);
 
 		toast.style = secrets.length > 0 ? Toast.Style.Success : Toast.Style.Failure;
@@ -47,6 +35,6 @@ export default async function Command() {
 		toast.message = error instanceof Error ? error.message : "Unknown error";
 	}
 	if (getPreferenceValues<Preferences>().deleteExport === true) {
-		deleteEnteExport();
+		await deleteEnteExport(exportFilePath);
 	}
 }

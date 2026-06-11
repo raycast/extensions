@@ -1,0 +1,26 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Exclude from release archives (git archive / GitHub releases)
+.gitattributes export-ignore
+.gitignore export-ignore
+
+# Exclude demo/documentation assets from releases
+media/ export-ignore
+metadata/ export-ignore
+*.gif export-ignore
+*.mp4 export-ignore
+*.mov export-ignore
+*.webm export-ignore
+
+# Exclude development files
+*.log export-ignore
+.vscode/ export-ignore
+.idea/ export-ignore
+
+# Mark generated files as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+

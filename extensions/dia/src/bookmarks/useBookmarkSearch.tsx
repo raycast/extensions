@@ -1,6 +1,6 @@
 import { ReactNode, useState, useMemo } from "react";
 import { List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { BOOKMARK_NOT_INSTALLED_MESSAGE, BOOKMARK_NO_BOOKMARKS_MESSAGE } from "./constants";
 import { BookmarkSearchResult } from "./types";
 import { getBookmarksTree, navigateToBookmarkFolder, searchAllBookmarks, toBookmarkItem } from "./utils";
@@ -32,7 +32,7 @@ export function useBookmarkSearch(query: string, currentFolderPath: string[]): B
     isLoading,
     data: bookmarkTree,
     revalidate,
-  } = usePromise(
+  } = useCachedPromise(
     async () => {
       const tree = await getBookmarksTree();
       setErrorView(undefined);
@@ -41,6 +41,7 @@ export function useBookmarkSearch(query: string, currentFolderPath: string[]): B
     },
     [],
     {
+      keepPreviousData: true,
       onError(error) {
         if (error.message === BOOKMARK_NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);

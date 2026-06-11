@@ -1,5 +1,39 @@
 # Changelog
 
+## [Update] - 2026-05-25
+
+### Added
+- **Manage Repositories**: Add "Clear Cache" action for clearing the extension cache
+
+### Changed
+- **Storage**: Move stable data from `Cache` to `LocalStorage`
+
+### Fixed
+- **Diff**: Show raw Git diff output without stripping leading whitespace from added/removed lines, so indented code changes display correctly
+- **Commit Details**: Load changed files with `--first-parent` when fetching a commit by hash, matching the commits history view for merge commits
+
+## [Update] - 2026-05-11
+
+### Added
+- **Remotes**: Add "Host Provider" dropdown to `RemoteEditorForm` for manually selecting the provider for unknown host URLs
+
+### Fixed
+- **Remote Host Parser**: Fix SSH URL parsing with port (e.g. `git@host:2224/org/repo.git`)
+- **Azure DevOps**: Fix logo icon path
+
+## [Update] - 2026-04-13
+
+### Added
+- **Remotes**: Add action to create a new repository on GitHub (`CreateGitHubRepositoryAction` in `RemotesView`)
+- **Remotes**: Add actions to open the remote repository in web IDEs (`github.dev`, `vscode.dev`) with VS Code Dev icon
+- **GitHub**: After creating a repo via the GitHub new-repository page, automatically navigate to Add Remote with `origin` and HTTPS URL prefilled (`RemoteEditorForm` default props)
+- **Remotes**: When adding a remote, use clipboard text as the default fetch/push URL when it looks like a valid Git URL
+- **Manage Repositories / Clone**: When cloning from the clipboard, validate the URL before starting clone
+
+### Changed
+- **Switch Repository**: Exclude the current repository from the list of repositories to switch to
+- **Switch Repository**: Remove grouping by parent directory and sort by visit date instead
+
 ## [Update] - 2026-02-19
 
 ### Added

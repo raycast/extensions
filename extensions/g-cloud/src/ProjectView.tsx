@@ -190,7 +190,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: projectId,
       });
 
-      const result = await executeGcloudCommand(gcloudPath, `projects describe ${projectId}`);
+      const result = await executeGcloudCommand(gcloudPath, ["projects", "describe", projectId]);
 
       loadingToast.hide();
 
@@ -395,7 +395,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                       <>
                         <Action title="Network Dashboard" icon={Icon.AppWindow} onAction={viewNetworkService} />
                         <Action title="View Vpc Networks" icon={Icon.Globe} onAction={viewVPCNetworks} />
-                        <Action title="View Ip Addresses" icon={Icon.Link} onAction={viewIPAddresses} />
+                        <Action title="View IP Addresses" icon={Icon.Link} onAction={viewIPAddresses} />
                         <Action title="View Firewall Rules" icon={Icon.Shield} onAction={viewFirewallRules} />
                       </>
                     )}

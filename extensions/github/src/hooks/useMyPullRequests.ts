@@ -8,7 +8,7 @@ import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getRepositoryFilter } from "../helpers/repository";
 
-enum SectionType {
+export enum SectionType {
   Open = "Open",
   Assigned = "Assigned",
   Mentioned = "Mentioned",
@@ -89,7 +89,11 @@ export function useMyPullRequests({
         ),
       );
 
-      return results.map((result) => result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment));
+      return results.map((result) =>
+        result.search.edges
+          ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
+          .filter((node): node is PullRequestFieldsFragment => node != null),
+      );
     },
     [
       repository,

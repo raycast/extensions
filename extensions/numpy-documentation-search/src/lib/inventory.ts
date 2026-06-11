@@ -127,10 +127,13 @@ function resolveUri(uri: string, name: string): string {
   return resolved;
 }
 
-export function transformInventoryResponse(buffer: ArrayBuffer): InventoryItem[] {
-  const raw = Buffer.from(buffer);
-  const lines = parseInventory(raw);
+export function transformInventoryBuffer(buffer: Buffer): InventoryItem[] {
+  const lines = parseInventory(buffer);
   const filtered = dedupeAndFilter(lines);
   filtered.sort((a, b) => a.shortName.localeCompare(b.shortName));
   return filtered;
+}
+
+export function transformInventoryResponse(buffer: ArrayBuffer): InventoryItem[] {
+  return transformInventoryBuffer(Buffer.from(buffer));
 }

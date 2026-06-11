@@ -71,18 +71,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.4",
-    "@raycast/utils": "^2.2.2",
-    "@types/cheerio": "^1.0.0",
-    "axios": "^1.13.4",
+    "@raycast/api": "^1.104.16",
+    "axios": "^1.16.0",
     "cheerio": "^1.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.2.0",
-    "@types/react": "19.2.10",
+    "@types/node": "^25.6.2",
+    "@types/react": "^19.2.14",
     "eslint": "^9.39.2",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   },
   "scripts": {

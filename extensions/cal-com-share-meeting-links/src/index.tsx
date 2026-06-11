@@ -11,9 +11,11 @@ import {
   Toast,
 } from "@raycast/api";
 import {
+  appBaseUrl,
   CalEventType,
   createPrivateLinkForEventType,
   formatCurrency,
+  publicBaseUrl,
   useCurrentUser,
   useEventTypes,
 } from "@api/cal.com";
@@ -57,16 +59,16 @@ export default function Command() {
             ...(item.hidden
               ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.Orange }, tooltip: "Hidden" }]
               : []),
-            ...(item.recurringEvent
+            ...(item.recurrence
               ? [
                   {
                     icon: { source: Icon.Repeat, tintColor: Color.Purple },
-                    text: String(item.recurringEvent.count),
-                    tooltip: `Repeats up to ${item.recurringEvent.count} times`,
+                    text: String(item.recurrence.occurrences),
+                    tooltip: `Repeats up to ${item.recurrence.occurrences} times`,
                   },
                 ]
               : []),
-            ...(item.requiresConfirmation
+            ...(item.confirmationPolicy
               ? [
                   {
                     icon: { source: Icon.QuestionMarkCircle, tintColor: Color.Yellow },
@@ -74,28 +76,28 @@ export default function Command() {
                   },
                 ]
               : []),
-            { icon: { source: Icon.Clock, tintColor: Color.Blue }, text: `${item.length} min` },
+            { icon: { source: Icon.Clock, tintColor: Color.Blue }, text: `${item.lengthInMinutes} min` },
           ]}
-          keywords={item.length ? [item.length.toString()] : []}
+          keywords={item.lengthInMinutes ? [item.lengthInMinutes.toString()] : []}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={item.link} icon={Icon.Link} />
-              <Action.OpenInBrowser url={item.link} title="Preview URL" />
+              <Action.CopyToClipboard content={item.bookingUrl} icon={Icon.Link} />
+              <Action.OpenInBrowser url={item.bookingUrl} title="Preview URL" />
               <ActionPanel.Section title="Quick Links">
                 <Action.OpenInBrowser
                   title="Open Dashboard"
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  url="https://app.cal.com"
+                  url={appBaseUrl}
                 />
                 <Action.OpenInBrowser
                   title="Open Availability Troubleshooter"
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  url={`https://app.cal.com/availability/troubleshoot?eventType=${item.slug}`}
+                  url={`${appBaseUrl}/availability/troubleshoot?eventType=${item.slug}`}
                 />
                 <Action.CopyToClipboard
                   title="Copy My Link"
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
-                  content={`https://cal.com/${user?.username}`}
+                  content={`${publicBaseUrl}/${user?.username}`}
                 />
                 <GeneratePrivateLinkCommand item={item} aborter={generatePrivateLinkAborter} />
               </ActionPanel.Section>

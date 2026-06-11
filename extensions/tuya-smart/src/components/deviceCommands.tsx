@@ -8,7 +8,7 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
     case "Switch":
     case "kg":
     case "Socket": {
-      commands = device.status.filter((status) => status.type === "Boolean");
+      commands = (device.status ?? []).filter((status) => status.type === "Boolean");
       break;
     }
     case "cl":
@@ -25,7 +25,7 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
       commands = [
         {
           code: "switch_led",
-          value: device.status.find((status) => status.code === "switch_led")?.value,
+          value: (device.status ?? []).find((status) => status.code === "switch_led")?.value,
           name: "Toggle On/Off",
         },
         { code: "work_mode", value: "white", name: "Workmode: White" },

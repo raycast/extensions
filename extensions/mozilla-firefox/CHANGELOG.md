@@ -1,5 +1,11 @@
 # Mozilla Firefox Changelog
 
+## [1.0.1] - 2026-04-23
+
+### What's Changed
+
+- Fixed Firefox not being detected when the profile directory uses a non-standard suffix (e.g. `.default`), or when the Profiles folder is missing
+
 ## [Major Refactor & Bug Fixes] - 2025-09-01
 
 - **BREAKING**: Refactored all classes to functional components

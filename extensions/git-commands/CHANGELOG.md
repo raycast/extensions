@@ -1,5 +1,10 @@
 # Git Commands Changelog
 
+## [Beginner-friendly descriptions and keywords] - {2026-04-30}
+
+- Rewrite alias descriptions for beginners with examples, pitfalls, and why.
+- Add search keywords for every alias to improve matching.
+
 ## [Maintenance] - 2026-01-01
 
 - Add copy and paste command to the action panel.

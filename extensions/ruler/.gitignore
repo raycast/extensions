@@ -25,3 +25,9 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+
+
+# rust
+
+rust/ruler/target
+assets/compiled_raycast_rust

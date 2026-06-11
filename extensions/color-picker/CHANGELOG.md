@@ -1,5 +1,17 @@
 # Color Picker Changelog
 
+## [Favorites] - 2026-05-18
+
+- Add favorites to the `Organize Colors` command
+- Add actions to reorder favorite colors
+
+## [Multi-Color Selection] - 2026-04-27
+
+- Add a Single/Multi select mode toggle to the search bar of `Organize Colors` and `Generate Colors`
+- In multi-select mode, switch to a list view with a checkmark prefix on selected colors
+- Copy selected colors as JSON, CSS Classes, or CSS Variables from the action panel
+- Selection persists when switching between modes
+
 ## [Windows: Enhancement] - 2026-02-13
 
 - Add ability to cancel color picker with Esc key

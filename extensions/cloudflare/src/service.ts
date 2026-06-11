@@ -172,11 +172,18 @@ interface Member {
 
 interface WorkerItem {
   id: string;
+  compatibility_date?: string;
+  compatibility_flags?: string[];
   etag: string;
   created_on: string;
+  handlers?: string[];
   modified_on: string;
   logpush?: boolean;
-  placement_mode?: string;
+  placement?: {
+    mode?: string;
+    last_analyzed_at?: string;
+    status?: string;
+  };
   usage_model?: string;
   has_assets?: boolean;
   has_modules?: boolean;
@@ -184,10 +191,17 @@ interface WorkerItem {
 
 interface Worker {
   id: string;
+  compatibilityDate?: string;
+  compatibilityFlags: string[];
   createdOn: string;
+  handlers: string[];
   modifiedOn: string;
   logpush: boolean;
-  placementMode?: string;
+  placement?: {
+    mode?: string;
+    lastAnalyzedAt?: string;
+    status?: string;
+  };
   usageModel?: string;
   hasAssets: boolean;
   hasModules: boolean;
@@ -306,6 +320,45 @@ class Service {
       `zones/${zoneId}/purge_cache`,
       {
         files: urls,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByHostnames(
+    zoneId: string,
+    hosts: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        hosts,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByTags(zoneId: string, tags: string[]): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        tags,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByPrefixes(
+    zoneId: string,
+    prefixes: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        prefixes,
       },
     );
     const { success, errors, messages, result } = response.data;
@@ -441,20 +494,32 @@ function formatDeployment(item: DeploymentItem): Deployment {
 function formatWorker(item: WorkerItem): Worker {
   const {
     id,
+    compatibility_date,
+    compatibility_flags,
     created_on,
+    handlers,
     modified_on,
     logpush,
-    placement_mode,
+    placement,
     usage_model,
     has_assets,
     has_modules,
   } = item;
   return {
     id,
+    compatibilityDate: compatibility_date,
+    compatibilityFlags: compatibility_flags ?? [],
     createdOn: created_on,
+    handlers: handlers ?? [],
     modifiedOn: modified_on,
     logpush: logpush ?? false,
-    placementMode: placement_mode,
+    placement: placement
+      ? {
+          mode: placement.mode,
+          lastAnalyzedAt: placement.last_analyzed_at,
+          status: placement.status,
+        }
+      : undefined,
     usageModel: usage_model,
     hasAssets: has_assets ?? false,
     hasModules: has_modules ?? false,
@@ -464,6 +529,7 @@ function formatWorker(item: WorkerItem): Worker {
 export default Service;
 export type {
   Account,
+  CachePurgeResult,
   Deployment,
   DeploymentStatus,
   DnsRecord,

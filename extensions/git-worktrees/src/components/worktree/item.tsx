@@ -1,7 +1,5 @@
-import ClearCache from "#/components/actions/clear-cache";
 import { OpenEditor } from "#/components/actions/open-editor";
 import { OpenTerminal } from "#/components/actions/open-terminal";
-import { RefreshWorktrees } from "#/components/actions/refresh-worktrees";
 import { RemoveProject } from "#/components/actions/remove-project";
 import { RemoveWorktree } from "#/components/actions/remove-worktree";
 import { RenameWorktree } from "#/components/actions/rename-worktree";
@@ -79,10 +77,6 @@ export const Item = memo(
             </ActionPanel.Section>
 
             <ActionPanel.Section title="Extra Actions">
-              <RefreshWorktrees revalidate={revalidateProjects} />
-
-              <ClearCache revalidateProjects={revalidateProjects} />
-
               <RemoveProject project={project} revalidateProjects={revalidateProjects} />
 
               {gitRemote?.url && (

@@ -1,8 +1,10 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { Model, ModelHook } from "../type";
+import { Model, ModelHook, ReasoningEffort } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
+
+type StoredModel = Partial<Model> & Pick<Model, "id">;
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -10,11 +12,46 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-4o-mini",
+  option: "gpt-5-nano",
   temperature: "1",
+  enableReasoningEffortChange: false,
+  reasoningEffort: "medium",
   pinned: false,
   vision: false,
 };
+
+const REASONING_EFFORT_OPTIONS: ReasoningEffort[] = ["none", "low", "medium", "high"];
+
+function isReasoningEffort(value: unknown): value is ReasoningEffort {
+  return typeof value === "string" && REASONING_EFFORT_OPTIONS.includes(value as ReasoningEffort);
+}
+
+function normalizeModel(model: StoredModel): Model {
+  const now = new Date().toISOString();
+  return {
+    ...DEFAULT_MODEL,
+    ...model,
+    id: model.id,
+    created_at: model.created_at ?? now,
+    updated_at: model.updated_at ?? now,
+    temperature: String(model.temperature ?? DEFAULT_MODEL.temperature),
+    enableReasoningEffortChange: Boolean(model.enableReasoningEffortChange),
+    reasoningEffort: isReasoningEffort(model.reasoningEffort) ? model.reasoningEffort : DEFAULT_MODEL.reasoningEffort,
+    vision: model.vision ?? false,
+    pinned: model.pinned ?? false,
+  };
+}
+
+function normalizeModels(models: Record<string, StoredModel>): Record<string, Model> {
+  const normalized = Object.values(models).reduce<Record<string, Model>>((acc, model) => {
+    acc[model.id] = normalizeModel(model);
+    return acc;
+  }, {});
+  if (!normalized[DEFAULT_MODEL.id]) {
+    normalized[DEFAULT_MODEL.id] = DEFAULT_MODEL;
+  }
+  return normalized;
+}
 
 export function useModel(): ModelHook {
   const [data, setData] = useState<Record<string, Model>>({});
@@ -23,7 +60,7 @@ export function useModel(): ModelHook {
   const gpt = useChatGPT();
   const proxy = useProxy();
   const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-4o-mini", "chatgpt-4o-latest"]);
+  const [option, setOption] = useState<Model["option"][]>(["gpt-5-nano", "gpt-5.2-chat-latest"]);
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -78,26 +115,23 @@ export function useModel(): ModelHook {
 
   useEffect(() => {
     (async () => {
-      const storedModels: Model[] | Record<string, Model> = JSON.parse(
+      const storedModels: StoredModel[] | Record<string, StoredModel> = JSON.parse(
         (await LocalStorage.getItem<string>("models")) || "{}",
       );
-      const storedModelsLength = ((models: Record<string, Model> | Model[]): number =>
+      const storedModelsLength = ((models: Record<string, StoredModel> | StoredModel[]): number =>
         Array.isArray(models) ? models.length : Object.keys(models).length)(storedModels);
 
       if (storedModelsLength === 0) {
         setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
       } else {
-        let modelsById: Record<string, Model>;
+        let modelsById: Record<string, StoredModel>;
         // Support for old data structure
         if (Array.isArray(storedModels)) {
           modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
         } else {
           modelsById = storedModels;
         }
-        if (!modelsById[DEFAULT_MODEL.id]) {
-          modelsById[DEFAULT_MODEL.id] = DEFAULT_MODEL;
-        }
-        setData(modelsById);
+        setData(normalizeModels(modelsById));
       }
       setLoading(false);
       isInitialMount.current = false;
@@ -118,7 +152,10 @@ export function useModel(): ModelHook {
         title: "Saving your model...",
         style: Toast.Style.Animated,
       });
-      setData((prevData) => ({ ...prevData, [model.id]: { ...model, created_at: new Date().toISOString() } }));
+      setData((prevData) => ({
+        ...prevData,
+        [model.id]: normalizeModel({ ...model, created_at: new Date().toISOString() }),
+      }));
       toast.title = "Model saved!";
       toast.style = Toast.Style.Success;
     },
@@ -133,11 +170,11 @@ export function useModel(): ModelHook {
       });
       setData((prevData) => ({
         ...prevData,
-        [model.id]: {
+        [model.id]: normalizeModel({
           ...prevData[model.id],
           ...model,
           updated_at: new Date().toISOString(),
-        },
+        }),
       }));
       toast.title = "Model updated!";
       toast.style = Toast.Style.Success;
@@ -174,7 +211,7 @@ export function useModel(): ModelHook {
 
   const setModels = useCallback(
     async (models: Record<string, Model>) => {
-      setData(models);
+      setData(normalizeModels(models));
     },
     [setData],
   );

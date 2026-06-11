@@ -42,8 +42,8 @@ export default function Command() {
                         .filter((item) => item.package.name.includes("picgo-plugin-"))
                         .filter((item) => {
                             if (
-                                item.package.description.includes("picgo.net") ||
-                                item.package.description.includes("PicGo官方")
+                                item.package.description?.includes("picgo.net") ||
+                                item.package.description?.includes("PicGo官方")
                             ) {
                                 return false;
                             }

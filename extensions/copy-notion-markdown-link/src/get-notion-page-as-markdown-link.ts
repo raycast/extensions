@@ -86,6 +86,11 @@ export default async function main() {
       return;
     }
 
+    // Remove tracking query parameter
+    const url = new URL(linkUrl);
+    url.searchParams.delete("source");
+    const cleanedUrl = url.toString();
+
     // Process title - check if empty first, then escape square brackets
     let cleanedTitle: string;
     if (!windowTitle || windowTitle.trim() === "") {
@@ -94,7 +99,7 @@ export default async function main() {
       cleanedTitle = windowTitle.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
     }
 
-    const markdownLink = `[${cleanedTitle}](${linkUrl})`;
+    const markdownLink = `[${cleanedTitle}](${cleanedUrl})`;
 
     await Clipboard.copy(markdownLink);
 

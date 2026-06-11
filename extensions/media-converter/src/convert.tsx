@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
-import { LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { LocalStorage, getSelectedFinderItems, showToast, Toast, LaunchProps } from "@raycast/api";
 import { HelloPage } from "./components/HelloPage";
 import { ConverterForm } from "./components/ConverterForm";
 import { findFFmpegPath } from "./utils/ffmpeg";
+import type { AllOutputExtension, QualitySettings, TrimOptions } from "./types/media";
 
-export default function Command() {
+type LaunchContext = {
+  prefill?: {
+    inputs?: string[];
+    outputFormat?: AllOutputExtension;
+    quality?: QualitySettings;
+    trim?: TrimOptions;
+    stripMetadata?: boolean;
+    outputDir?: string;
+  };
+};
+
+export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
   // For some reason, limiting this to boolean only (and setting it to false) will show HelloPage.tsx during loading, so that's a no no... There's probably an easy workaround though
   const [hasSeenHelloPage, setHasSeenHelloPage] = useState<boolean | null>(null);
   const [initialFinderFiles, setInitialFinderFiles] = useState<string[]>([]);
@@ -95,5 +107,5 @@ export default function Command() {
     return <HelloPage onContinue={() => setHasSeenHelloPage(true)} lostFFmpegMessage={ffmpegLostMessage} />;
   }
 
-  return <ConverterForm initialFiles={initialFinderFiles} />;
+  return <ConverterForm initialFiles={initialFinderFiles} launchContext={props.launchContext} />;
 }

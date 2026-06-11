@@ -55,6 +55,24 @@
             "default": "30000"
         },
         {
+            "name": "uploadResultView",
+            "type": "dropdown",
+            "title": "Upload Result View",
+            "data": [
+                {
+                    "title": "Format List",
+                    "value": "format_list"
+                },
+                {
+                    "title": "Image Grid",
+                    "value": "image_grid"
+                }
+            ],
+            "required": false,
+            "default": "format_list",
+            "description": "Select the default view of uploaded images."
+        },
+        {
             "name": "autoCopyAfterUpload",
             "type": "checkbox",
             "required": false,
@@ -128,6 +146,7 @@
         "fix-lint": "ray lint --fix",
         "lint": "ray lint",
         "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-        "publish": "npx @raycast/api@latest publish"
+        "publish": "npx @raycast/api@latest publish",
+        "pull-contributions": "npx @raycast/api@latest pull-contributions"
     }
 }

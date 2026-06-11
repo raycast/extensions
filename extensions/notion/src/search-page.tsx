@@ -3,11 +3,12 @@ import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
 import { PageListItem } from "./components";
-import { useRecentPages, useUsers } from "./hooks";
+import { useRecentPages, useUsers, usePinnedPages } from "./hooks";
 import { search } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 
 function Search() {
+  const { data: pinnedPages, setPinnedPage, removePinnedPage } = usePinnedPages();
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
 
@@ -22,9 +23,16 @@ function Search() {
 
   const { data: users } = useUsers();
 
+  const pinnedIds = new Set(pinnedPages?.map((p) => p.id) ?? []);
+
   const sections = [
-    { title: "Recent", pages: recentPages ?? [] },
-    { title: "Search", pages: data?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
+    { title: "Pinned", pages: pinnedPages ?? [], isPinned: true },
+    { title: "Recent", pages: recentPages?.filter((p) => !pinnedIds.has(p.id)) ?? [], isPinned: false },
+    {
+      title: "Search",
+      pages: data?.filter((p) => !recentPages?.some((q) => p.id == q.id) && !pinnedIds.has(p.id)) ?? [],
+      isPinned: false,
+    },
   ];
 
   return (
@@ -34,7 +42,7 @@ function Search() {
       onSearchTextChange={setSearchText}
       throttle
       pagination={pagination}
-      filtering
+      filtering={{ keepSectionOrder: true }}
     >
       {sections.map((section) => {
         return (
@@ -48,6 +56,9 @@ function Search() {
                   mutate={mutate}
                   setRecentPage={setRecentPage}
                   removeRecentPage={removeRecentPage}
+                  isPinned={section.isPinned || pinnedIds.has(p.id)}
+                  setPinnedPage={setPinnedPage}
+                  removePinnedPage={removePinnedPage}
                 />
               );
             })}

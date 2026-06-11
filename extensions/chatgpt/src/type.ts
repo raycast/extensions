@@ -36,9 +36,13 @@ export interface Model {
   prompt: string;
   option: string;
   temperature: string;
+  enableReasoningEffortChange: boolean;
+  reasoningEffort: ReasoningEffort;
   pinned: boolean;
   vision?: boolean;
 }
+
+export type ReasoningEffort = "none" | "low" | "medium" | "high";
 
 export type CommandContentSource = "clipboard" | "selectedText" | "browserTab";
 

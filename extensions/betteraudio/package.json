@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "betteraudio",
+  "title": "BetterAudio",
+  "description": "Control BetterAudio from Raycast — per-app volume, EQ, device routing, media controls, and more.",
+  "icon": "extension-icon.png",
+  "author": "rokartur",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "manage-apps",
+      "title": "Manage Apps",
+      "subtitle": "BetterAudio",
+      "description": "View and control per-app audio — volume, mute, EQ, and device routing.",
+      "mode": "view",
+      "icon": "command-manage-apps.png"
+    },
+    {
+      "name": "list-devices",
+      "title": "List Devices",
+      "subtitle": "BetterAudio",
+      "description": "View all audio devices and set the default output or input device.",
+      "mode": "view",
+      "icon": "command-devices.png"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "BetterAudio",
+      "description": "Set the system output volume to a specific level.",
+      "mode": "view",
+      "icon": "command-volume-set.png",
+      "arguments": [
+        {
+          "name": "level",
+          "type": "text",
+          "placeholder": "0-200",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "subtitle": "BetterAudio",
+      "description": "Increase system volume by one step.",
+      "mode": "no-view",
+      "icon": "command-volume-up.png"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "subtitle": "BetterAudio",
+      "description": "Decrease system volume by one step.",
+      "mode": "no-view",
+      "icon": "command-volume-down.png"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "BetterAudio",
+      "description": "Toggle system input mute on or off.",
+      "mode": "no-view",
+      "icon": "command-toggle-mute.png"
+    },
+    {
+      "name": "toggle-silent-mode",
+      "title": "Toggle Silent Mode",
+      "subtitle": "BetterAudio",
+      "description": "Toggle silent mode on or off.",
+      "mode": "no-view",
+      "icon": "command-silent-mode.png"
+    },
+    {
+      "name": "cycle-device",
+      "title": "Cycle Output Device",
+      "subtitle": "BetterAudio",
+      "description": "Switch to the next output device in your priority list.",
+      "mode": "no-view",
+      "icon": "command-cycle-device.png"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "BetterAudio",
+      "description": "Show current media playback information.",
+      "mode": "view",
+      "icon": "command-now-playing.png"
+    },
+    {
+      "name": "play-pause",
+      "title": "Play / Pause",
+      "subtitle": "BetterAudio",
+      "description": "Toggle media playback.",
+      "mode": "no-view",
+      "icon": "command-play-pause.png"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "BetterAudio",
+      "description": "Skip to the next track.",
+      "mode": "no-view",
+      "icon": "command-next-track.png"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "BetterAudio",
+      "description": "Skip to the previous track.",
+      "mode": "no-view",
+      "icon": "command-prev-track.png"
+    },
+    {
+      "name": "apply-profile",
+      "title": "Apply Profile",
+      "subtitle": "BetterAudio",
+      "description": "Apply a saved audio routing profile.",
+      "mode": "view",
+      "icon": "command-profile.png"
+    },
+    {
+      "name": "bluetooth-devices",
+      "title": "Bluetooth Devices",
+      "subtitle": "BetterAudio",
+      "description": "View connected Bluetooth audio devices and battery levels.",
+      "mode": "view",
+      "icon": "command-bluetooth.png"
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "BetterAudio",
+      "description": "Show BetterAudio application status overview.",
+      "mode": "view",
+      "icon": "command-status.png"
+    },
+    {
+      "name": "toggle-panel",
+      "title": "Toggle Panel",
+      "subtitle": "BetterAudio",
+      "description": "Toggle the BetterAudio menu bar panel.",
+      "mode": "no-view",
+      "icon": "command-toggle-panel.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "BetterAudio",
+      "description": "Persistent menu bar item showing current volume and quick audio controls.",
+      "mode": "menu-bar",
+      "icon": "command-toggle-panel.png",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Custom path to the betteraudio CLI binary. Leave empty for auto-detection.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/usr/local/bin/betteraudio"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

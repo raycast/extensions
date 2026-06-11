@@ -1,13 +1,13 @@
-import { useCachedState } from "@raycast/utils";
-import { IssueTrackerConfig } from "../types";
 import { nanoid } from "nanoid";
 import { useCallback } from "react";
+import { IssueTrackerConfig } from "../types";
+import { useStorage } from "./useStorage";
 
 /**
  * Hook to manage URL tracker configurations (global across the extension).
  */
 export function useIssueTracker() {
-  const [configs, setConfigs] = useCachedState<IssueTrackerConfig[]>("issue-tracker-configs", []);
+  const [configs, setConfigs] = useStorage<IssueTrackerConfig[]>("issue-tracker-configs", []);
 
   const addConfig = useCallback(
     (title: string, regex: string, urlPlaceholder: string) => {

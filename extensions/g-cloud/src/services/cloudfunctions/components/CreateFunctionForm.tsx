@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Detail } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { spawn } from "child_process";
 import { RUNTIMES, MEMORY_OPTIONS, CLOUD_FUNCTIONS_REGIONS } from "../types";
@@ -23,6 +23,7 @@ interface FormValues {
 }
 
 export function CreateFunctionForm({ projectId, gcloudPath, onCreated }: CreateFunctionFormProps) {
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployLogs, setDeployLogs] = useState<string[]>([]);
   const [deployComplete, setDeployComplete] = useState(false);
@@ -256,7 +257,7 @@ ${recentLogs || "Starting deployment..."}
         info="The name of the exported function to invoke"
       />
 
-      <Form.Dropdown id="region" title="Region" defaultValue="us-central1">
+      <Form.Dropdown id="region" title="Region" defaultValue={defaultRegion}>
         {CLOUD_FUNCTIONS_REGIONS.map((region) => (
           <Form.Dropdown.Item key={region.value} value={region.value} title={region.title} />
         ))}

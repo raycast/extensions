@@ -5,6 +5,9 @@
   "description": "Browse the xkcd comics and keep track of the ones you've read.",
   "icon": "icon.png",
   "author": "maggie",
+  "contributors": [
+    "ronakguliani"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,8 +28,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "jotai": "^1.4.0",
-    "node-fetch": "^3.2.2"
+    "jotai": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "22.13.10",

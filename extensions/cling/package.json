@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cling",
+  "title": "Cling File Search",
+  "description": "Instant fuzzy search over the whole filesystem using the Cling app",
+  "icon": "extension-icon.png",
+  "author": "alin",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fuzzy-search-files",
+      "title": "Fuzzy Search Files",
+      "description": "Searches the entire filesystem using fuzzy queries. Additional search operators: .png .jpg to filter by extension, in:~/Desktop to search in a folder.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "reindex-files",
+      "title": "Reindex Files",
+      "description": "Triggers a full reindexing of the filesystem",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "scope",
+          "type": "dropdown",
+          "placeholder": "Scope",
+          "required": false,
+          "data": [
+            { "title": "Home", "value": "home" },
+            { "title": "Library", "value": "library" },
+            { "title": "Applications", "value": "applications" },
+            { "title": "System", "value": "system" },
+            { "title": "Root", "value": "root" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "The terminal app to use for \"Open in Terminal\". Falls back to the Cling app setting, then Terminal.app.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor Application",
+      "description": "The editor app to use for \"Open in Editor\". Falls back to the Cling app setting, then Visual Studio Code.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "shelfApp",
+      "title": "Shelf Application",
+      "description": "The shelf app to use for \"Shelve File\" (e.g. Yoink, Dropover, Dockside). Falls back to the Cling app setting, then auto-detects installed shelf apps.",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,7 @@
 import { AmpUsage, AmpError } from "./types";
 
+const NOT_LOGGED_IN_SIGNALS = ["not logged in", "please sign in", "unauthenticated", "login required"];
+
 // 检测错误类型
 export function detectAmpError(output: string): AmpError | null {
   const cleanOutput = output.toLowerCase();
@@ -8,16 +10,7 @@ export function detectAmpError(output: string): AmpError | null {
     return { type: "not_found", message: "Amp CLI not found. Please install it first." };
   }
 
-  if (
-    cleanOutput.includes("not logged in") ||
-    cleanOutput.includes("login required") ||
-    cleanOutput.includes("unauthorized")
-  ) {
-    return { type: "not_logged_in", message: "Not logged in. Please run 'amp login' first." };
-  }
-
-  if (cleanOutput.includes("signed in as") === false && output.trim().length > 0) {
-    // 有输出但没有登录信息，可能是未登录
+  if (NOT_LOGGED_IN_SIGNALS.some((signal) => cleanOutput.includes(signal))) {
     return { type: "not_logged_in", message: "Not logged in. Please run 'amp login' first." };
   }
 

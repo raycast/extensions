@@ -1,27 +1,27 @@
-import type { ReactNode } from "react";
-
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
+import { jsrUrls } from "@/lib/jsrUrls";
+import { scoreColor } from "@/lib/ui-helpers";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
-import { VersionList } from "@/components/VersionList";
+import Readme from "@/components/Readme";
+import VersionList from "@/components/VersionList";
+import { useSearchContext } from "@/context/SearchContext";
 
 type ListItemProps = {
   item: SearchResultDocument;
-  toggleDetails: () => void;
-  isShowingDetails: boolean;
-  extraActions?: ReactNode;
-  searchQueryURL?: string;
 };
 
-const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQueryURL }: ListItemProps) => {
+const ListItem = ({ item }: ListItemProps) => {
   const { openWebsiteByDefault } = getPreferenceValues<Preferences>();
+  const ctx = useSearchContext();
+  const isShowingDetails = ctx?.isShowingDetails ?? false;
   const progress = item.score ?? 0;
-  const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
+  const iconColor = scoreColor(progress);
   const icons = compatIcons(item);
 
   return (
@@ -34,7 +34,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
           ? undefined
           : [...icons.map((ico) => ({ icon: ico.icon })), { tag: { value: `${progress}%`, color: iconColor } }]
       }
-      detail={isShowingDetails ? <ItemDetails item={item} progress={progress} iconColor={iconColor} /> : null}
+      detail={isShowingDetails ? <ItemDetails item={item} /> : null}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Main">
@@ -43,17 +43,17 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
                   icon={{ source: "jsr.svg" }}
-                  url={`https://jsr.io/${item.id}`}
+                  url={jsrUrls.site.package(item.id)}
                 />
-                <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => toggleDetails()} />
+                <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => ctx?.toggleDetails()} />
               </>
             ) : (
               <>
-                <Action title="Toggle Details" onAction={() => toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
+                <Action title="Toggle Details" onAction={() => ctx?.toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
                   icon={{ source: "jsr.svg" }}
-                  url={`https://jsr.io/${item.id}`}
+                  url={jsrUrls.site.package(item.id)}
                 />
               </>
             )}
@@ -62,23 +62,29 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
             <Action.OpenInBrowser
               title="Open Docs (JSR)"
               icon={{ source: Icon.Document }}
-              url={`https://jsr.io/${item.id}/doc`}
+              url={jsrUrls.site.packageDocs(item.id)}
               shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+            />
+            <Action.Push
+              title="Show Readme"
+              icon={Icon.Sidebar}
+              target={<Readme item={item} />}
+              shortcut={{ key: "d", modifiers: ["cmd", "shift"] }}
             />
             <Action.Push
               title="Show Versions"
               icon={{ source: Icon.List }}
               target={<VersionList scope={item.scope} name={item.name} />}
             />
-            {extraActions ? <>{extraActions}</> : null}
+            {ctx?.extraActions ? <>{ctx.extraActions}</> : null}
           </ActionPanel.Section>
           <CopyActions item={item} />
-          {searchQueryURL ? (
+          {ctx?.searchQueryURL ? (
             <ActionPanel.Section title="Search">
               <Action.OpenInBrowser
                 title="Open Search (JSR)"
                 icon={{ source: "jsr.svg" }}
-                url={searchQueryURL}
+                url={ctx.searchQueryURL}
                 shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
               />
             </ActionPanel.Section>

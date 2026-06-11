@@ -335,6 +335,8 @@
       "label": "NHK BS 8K",
       "description": "Select to include NHK 8K"
     }
-
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

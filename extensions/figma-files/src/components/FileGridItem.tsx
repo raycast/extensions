@@ -29,7 +29,7 @@ export default function FileGridItem(props: {
     searchkeywords,
   } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
-  const isStarred = props.starredFiles.some((item) => item.name === file.name);
+  const isStarred = props.starredFiles.some((item) => item.key === file.key);
 
   const accessory: Grid.Item.Accessory = {};
   accessory.icon = "branch.svg";

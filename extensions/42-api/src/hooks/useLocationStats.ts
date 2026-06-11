@@ -5,8 +5,17 @@
 import { useMemo } from "react";
 import { useFetch } from "@raycast/utils";
 import { useAuth } from "./useAuth";
-import { LocationStats, DateRange } from "../lib/types";
-import { getDateRange, parseTime, calculateTotalSeconds, formatDuration, sortDatesDescending } from "../lib/utils";
+import { LocationStats, DateRange, Location } from "../lib/types";
+import {
+  getDateRange,
+  parseTime,
+  calculateTotalSeconds,
+  formatDuration,
+  sortDatesDescending,
+  aggregateLocationsByDay,
+  buildLocationsRangeParam,
+  formatDateString,
+} from "../lib/utils";
 import { API_BASE_URL } from "../lib/constants";
 
 export interface UseLocationStatsOptions {
@@ -47,15 +56,21 @@ export function useLocationStats(
 
   const url = useMemo(() => {
     if (!userId || !accessToken || isAuthenticating) return API_BASE_URL;
-    return `${API_BASE_URL}/users/${userId}/locations_stats?begin_at=${dateRange.beginAt}&end_at=${dateRange.endAt}`;
+
+    const params = new URLSearchParams({
+      "filter[user_id]": String(userId),
+      "range[begin_at]": buildLocationsRangeParam(dateRange),
+    });
+
+    return `${API_BASE_URL}/locations?${params.toString()}`;
   }, [userId, accessToken, isAuthenticating, dateRange]);
 
   const {
-    data: stats,
+    data: locations,
     isLoading,
     error,
     revalidate,
-  } = useFetch<LocationStats>(url, {
+  } = useFetch<Location[]>(url, {
     headers: {
       Authorization: `Bearer ${accessToken || ""}`,
       "Content-Type": "application/json",
@@ -65,10 +80,15 @@ export function useLocationStats(
     failureToastOptions: suppressToasts
       ? { title: "" }
       : {
-          title: "Failed to fetch location stats",
+          title: "Failed to fetch locations",
           message: `Could not load logtime data for user ID ${userId}`,
         },
   });
+
+  const stats = useMemo(() => {
+    if (!locations) return undefined;
+    return aggregateLocationsByDay(locations, dateRange.endAt);
+  }, [locations, dateRange.endAt]);
 
   // Compute derived values
   const sortedDates = useMemo(() => {
@@ -78,9 +98,9 @@ export function useLocationStats(
 
   const todayLogtime = useMemo(() => {
     if (!stats) return null;
-    const todayStr = dateRange.beginAt; // For single-day queries, beginAt is today
+    const todayStr = formatDateString(new Date(dateRange.beginAt));
     return todayStr in stats ? stats[todayStr] : null;
-  }, [stats, dateRange]);
+  }, [stats, dateRange.beginAt]);
 
   const todayLogtimeSeconds = useMemo(() => {
     if (!todayLogtime) return 0;

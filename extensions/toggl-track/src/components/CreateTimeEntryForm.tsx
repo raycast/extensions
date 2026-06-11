@@ -5,6 +5,8 @@ import {
   Icon,
   Toast,
   clearSearchBar,
+  launchCommand,
+  LaunchType,
   showToast,
   useNavigation,
   confirmAlert,
@@ -79,6 +81,7 @@ function CreateTimeEntryForm({
 
       revalidateRunningTimeEntry();
       revalidateTimeEntries();
+      launchCommand({ name: "menuBar", type: LaunchType.Background }).catch(() => {});
       await clearSearchBar();
     } catch {
       await showToast(Toast.Style.Failure, "Failed to start time entry");

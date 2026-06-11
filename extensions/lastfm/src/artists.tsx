@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 
 // Hooks
 import useTopArtists from "./hooks/useTopArtists";
@@ -21,11 +12,11 @@ const LastFm: React.FC = () => {
   const { loading, error, artists } = useTopArtists({ username, apikey, period, limit });
 
   if (error !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+    showToast({ style: Toast.Style.Failure, title: "Something went wrong.", message: String(error) });
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search songs...">
+    <List isLoading={loading} searchBarPlaceholder="Search artists...">
       <List.Section title="Results">
         {artists.map((a, idx) => {
           const artist = a as Artist;
@@ -36,13 +27,12 @@ const LastFm: React.FC = () => {
               key={`${artist.name}-${idx}`}
               icon={image}
               title={artist.name}
-              accessoryTitle={artist.playcount ? `${artist.playcount} plays` : undefined}
-              accessoryIcon={artist.playcount ? Icon.Star : undefined}
+              accessories={artist.playcount ? [{ text: `${artist.playcount} plays`, icon: Icon.Star }] : []}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={artist.url} title="Open on Last.fm" />
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={artist.url} />
-                  <CopyToClipboardAction title="Copy Name to Clipboard" content={artist.name} />
+                  <Action.OpenInBrowser url={artist.url} title="Open on Last.fm" />
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={artist.url} />
+                  <Action.CopyToClipboard title="Copy Name to Clipboard" content={artist.name} />
                 </ActionPanel>
               }
             />

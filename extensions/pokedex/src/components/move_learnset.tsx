@@ -3,17 +3,19 @@ import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import uniqBy from "lodash.uniqby";
 import { PokemonMove } from "../types";
-import { getPokemonImage, nationalDexNumber } from "../utils";
-import PokeProfile from "./profile";
+import { getLocalizedName, getPokemonImage, nationalDexNumber } from "../utils";
+import Pokemon from "./pokemon";
 import { filterPokemonForms } from "../utils/form";
 
 export default function MoveLearnset(props: {
   name: string;
   moves: PokemonMove[];
 }) {
-  const learnset = groupBy(
-    props.moves,
-    (m) => m.movelearnmethod.movelearnmethodnames[0].name,
+  const learnset = groupBy(props.moves, (m) =>
+    getLocalizedName(
+      m.movelearnmethod.movelearnmethodnames,
+      m.movelearnmethod.name,
+    ),
   );
 
   return (
@@ -58,7 +60,10 @@ export default function MoveLearnset(props: {
 
               const title =
                 form?.pokemonforms[0].pokemonformnames[0]?.pokemon_name ||
-                move.pokemon.pokemonspecy.pokemonspeciesnames[0].name;
+                getLocalizedName(
+                  move.pokemon.pokemonspecy.pokemonspeciesnames,
+                  move.pokemon.pokemonspecy.name,
+                );
 
               return (
                 <Grid.Item
@@ -76,7 +81,7 @@ export default function MoveLearnset(props: {
                         <Action.Push
                           title="Pokémon Profile"
                           icon={Icon.Sidebar}
-                          target={<PokeProfile id={nationalDex} />}
+                          target={<Pokemon id={nationalDex} />}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

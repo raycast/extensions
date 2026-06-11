@@ -24,10 +24,11 @@ Hit `⌘ ⇧ M`, choose the right profile, hit `Enter ↵`, and tada 🎉
 
 When the extension opens, it lists all your existing profiles.
 
-> Hit `Enter ↵` to enter a profile's bookmarks, or `⌘ ↵` to open (or focus) the profile chrome window.
+> Hit `Enter ↵` to enter a profile's bookmarks, `⌘ ↵` to open (or focus) the profile chrome window, or `⌘ ⇧ ↵` to open a new window for the profile.
 
 When entering a profile, you can choose whether:
 
+- open a new window
 - open a new blank tab
 - filter the bookmarks and/or open a bookmark
 - search the input text in the search engine of your choice (cf. settings)

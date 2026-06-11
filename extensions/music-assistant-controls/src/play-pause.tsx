@@ -1,8 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import MusicAssistantClient from "./music-assistant-client";
-import { getSelectedQueueID } from "./use-selected-player-id";
-import { PlayerState } from "./external-code/interfaces";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { getSelectedQueueID } from "./player-selection/use-selected-player-id";
+import { PlayerState } from "./music-assistant/external-code/interfaces";
 
 export default async function main() {
   const selectedPlayerID = await getSelectedQueueID();

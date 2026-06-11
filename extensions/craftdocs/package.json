@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "craftdocs",
   "title": "Craft",
-  "description": "Search documents in Craft",
+  "description": "Search Blocks, browse and add to Daily Notes, and manage Spaces in Craft",
   "icon": "command-icon.png",
   "author": "sfkmk",
+  "platforms": [
+    "macOS"
+  ],
   "contributors": [
     "bgnfu7re",
     "mafredri",
@@ -20,17 +23,16 @@
       "type": "appPicker",
       "required": false,
       "title": "Application to search in",
-      "description": "It is useful for selecting different distribution of Craft, If you don't choose anything, it will select non-Setapp version by default.",
-      "default": "com.lukilabs.lukiapp",
+      "description": "Choose which Craft installation to use. If you leave it empty, the extension auto-detects an installed Craft app.",
       "placeholder": "com.lukilabs.lukiapp"
     }
   ],
   "commands": [
     {
       "name": "search",
-      "title": "Blocks Search",
+      "title": "Search Blocks",
       "subtitle": "Craft",
-      "description": "Search documents in Craft",
+      "description": "Search Craft Blocks and Documents",
       "mode": "view",
       "preferences": [
         {
@@ -40,7 +42,7 @@
           "required": false,
           "default": false,
           "label": "Use detailed view",
-          "description": "Changes the view of the search to show info about documents. It is messy!"
+          "description": "Switch the view to display Document content. It is messy!"
         }
       ]
     },
@@ -48,14 +50,14 @@
       "name": "dailyNotes",
       "title": "Daily Notes",
       "subtitle": "Craft",
-      "description": "Navigate to your daily notes",
+      "description": "Navigate to your Daily Notes",
       "mode": "view"
     },
     {
       "name": "addToDailyNote",
       "title": "Add to Daily Note",
       "subtitle": "Craft",
-      "description": "Add content to your daily note",
+      "description": "Add content to your Daily Note",
       "mode": "view",
       "preferences": [
         {
@@ -74,7 +76,7 @@
               "value": "beginning"
             }
           ],
-          "description": "Choose whether to add content at the beginning or end of the daily note"
+          "description": "Choose whether to add content at the beginning or end of the Daily Note"
         },
         {
           "title": "Add Timestamp",
@@ -118,30 +120,30 @@
       "name": "manageSpaces",
       "title": "Manage Spaces",
       "subtitle": "Craft",
-      "description": "Manage your Craft spaces: rename, enable/disable",
+      "description": "Manage your Craft Spaces: rename, enable/disable",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "chrono-node": "^2.3.9"
+    "@raycast/api": "^1.104.11",
+    "chrono-node": "^2.9.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sql.js": "^1.4.11",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "4.1.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
   }
 }

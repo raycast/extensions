@@ -1,20 +1,19 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, popToRoot, closeMainWindow } from "@raycast/api";
-import { useState, useEffect } from "react";
-import useAppExists from "./hooks/useAppExists";
-import useConfig from "./hooks/useConfig";
-import useDB from "./hooks/useDB";
-import useSearch from "./hooks/useSearch";
-import { getDailyNotePreferences, DailyNotePreferences } from "./preferences";
+import { useEffect, useMemo, useState } from "react";
+import { CraftEnvironmentForm } from "./components/CraftCommandState";
 import { APPEND_POSITIONS } from "./constants";
-import { formatTime, formatCraftInternalDate } from "./utils/dateTimeFormatter";
+import useCraftCommandContext from "./hooks/useCraftCommandContext";
+import { resolveAddToDailyNoteAction } from "./lib/addToDailyNote";
+import { buildDailyNoteOpenUrl, findDailyNoteBlockId } from "./lib/dailyNotes";
+import { getDailyNotePreferences } from "./preferences";
+import { formatTime } from "./utils/dateTimeFormatter";
 
 interface FormValues {
   content: string;
   spaceId: string;
 }
 
-// Helper function to format content with timestamp, prefix, and suffix
-const formatContent = (content: string, preferences: DailyNotePreferences): string => {
+const formatContent = (content: string, preferences: Preferences.AddToDailyNote): string => {
   let finalContent = content;
 
   if (preferences.addTimestamp) {
@@ -25,112 +24,119 @@ const formatContent = (content: string, preferences: DailyNotePreferences): stri
     finalContent = `${preferences.contentPrefix}${finalContent}`;
   }
 
-  // Add suffix
-  finalContent = `${finalContent}${preferences.contentSuffix}`;
-
-  return finalContent;
+  return `${finalContent}${preferences.contentSuffix}`;
 };
 
 export default function AddToDailyNote() {
-  const appExists = useAppExists();
-  const configResult = useConfig(appExists);
-  const config = configResult?.config || null;
-  const configLoading = configResult?.configLoading || false;
+  const command = useCraftCommandContext({ includeDatabases: true });
+  const config = command.config.config;
   const preferences = getDailyNotePreferences();
-  const db = useDB(configResult);
 
   const [formValues, setFormValues] = useState<FormValues>({
     content: "",
     spaceId: "",
   });
 
-  // Format today's date as YYYY.MM.DD (Craft's internal db time format)
-  const today = new Date();
-  const dateString = formatCraftInternalDate(today);
-
-  // Use useSearch hook to get document blocks matching today's date string
-  const { resultsLoading, results } = useSearch(db, dateString);
-
-  // Find daily note blockId from search results and selected space
-  const getDailyNoteBlockId = (): string | null => {
-    if (!results) return null;
-    const dailyNotes = results.filter(
-      (block) => block.entityType === "document" && block.spaceID === formValues.spaceId
-    );
-    if (dailyNotes.length > 0) {
-      return dailyNotes[0].id;
-    }
-    return null;
-  };
-
-  // Set default space when config loads, if none selected yet
   useEffect(() => {
-    if (config && config.primarySpace() && !formValues.spaceId) {
-      setFormValues((prev) => ({
-        ...prev,
-        spaceId: config.primarySpace()?.spaceID || "",
+    if (config?.primarySpace && !formValues.spaceId) {
+      setFormValues((previousState) => ({
+        ...previousState,
+        spaceId: config.primarySpace?.spaceID || "",
       }));
     }
-  }, [config, formValues.spaceId]);
+  }, [config?.primarySpace, formValues.spaceId]);
 
-  const handleSubmit = () => {
+  const todayKey = new Date().toDateString();
+
+  const dailyNoteBlockId = useMemo(() => {
+    if (!formValues.spaceId) {
+      return null;
+    }
+
+    return findDailyNoteBlockId(command.db.databases, formValues.spaceId, new Date());
+  }, [command.db.databases, formValues.spaceId, todayKey]);
+
+  const actionType = resolveAddToDailyNoteAction({
+    content: formValues.content,
+    spaceId: formValues.spaceId,
+    dailyNoteBlockId,
+  });
+
+  const handleSubmit = (submitActionType = actionType) => {
     if (!formValues.content.trim()) {
       showHUD("❌ Content is required");
       return;
     }
+
     if (!formValues.spaceId) {
       showHUD("❌ Space is required");
       return;
     }
-    if (!appExists.appExists) {
+
+    if (!command.environment.environment || command.environment.environment.status !== "ready") {
       showHUD("❌ Craft app is not installed");
       return;
     }
 
-    // Format content with timestamp, prefix and suffix
     const finalContent = formatContent(formValues.content, preferences);
-
-    // Always copy to clipboard as safety fallback
     Clipboard.copy(finalContent);
 
     const position = preferences.appendPosition === "beginning" ? "prepended to" : "appended to";
-    showHUD(`✅ Content ${position} daily note (also copied to clipboard)`);
+    if (submitActionType === "append") {
+      showHUD(`✅ Content ${position} Daily Note (also copied to clipboard)`);
+    } else if (submitActionType === "open-daily-note") {
+      showHUD("✅ Content copied to clipboard. Opened today's Daily Note.");
+    } else {
+      showHUD("✅ Content copied to clipboard");
+    }
 
     popToRoot();
     closeMainWindow();
   };
 
-  // Generate the append URL
   const getAppendUrl = () => {
-    const parentBlockId = getDailyNoteBlockId();
-    if (!parentBlockId || !formValues.spaceId) return null;
+    if (!dailyNoteBlockId || !formValues.spaceId) {
+      return null;
+    }
 
     const finalContent = formatContent(formValues.content, preferences);
-
     const index = preferences.appendPosition === "beginning" ? APPEND_POSITIONS.BEGINNING : APPEND_POSITIONS.END;
 
-    return `craftdocs://createblock?parentBlockId=${parentBlockId}&spaceId=${
-      formValues.spaceId
-    }&content=${encodeURIComponent(finalContent)}&index=${index}`;
+    return `craftdocs://createblock?parentBlockId=${
+      dailyNoteBlockId
+    }&spaceId=${formValues.spaceId}&content=${encodeURIComponent(finalContent)}&index=${index}`;
   };
 
-  // Generate fallback URL when no daily note exists
   const getFallbackUrl = () => {
-    if (!formValues.spaceId) return null;
-    return `craftdocs://openByQuery?query=today&spaceId=${formValues.spaceId}`;
+    if (!formValues.spaceId) {
+      return null;
+    }
+
+    return buildDailyNoteOpenUrl("today", formValues.spaceId);
   };
 
-  if (!appExists.appExists && !appExists.appExistsLoading) {
+  if (command.environment.environmentLoading || command.config.configLoading) {
+    return <Form isLoading={true} />;
+  }
+
+  if (!command.environment.environment || command.environment.environment.status !== "ready") {
+    return <CraftEnvironmentForm environment={command.environment.environment} />;
+  }
+
+  if (!config || config.enabledSpaces.length === 0) {
     return (
       <Form>
-        <Form.Description text="Craft app is not installed. Please install Craft to use this extension." />
+        <Form.Description
+          title="No Spaces found"
+          text="Open Craft and let it finish syncing before adding content to a Daily Note."
+        />
       </Form>
     );
   }
 
   return (
     <Form
-      isLoading={configLoading || appExists.appExistsLoading || resultsLoading}
+      isLoading={command.db.databasesLoading}
       navigationTitle="Add to Daily Note"
       actions={
         <ActionPanel>
@@ -138,27 +144,31 @@ export default function AddToDailyNote() {
             const appendUrl = getAppendUrl();
             const fallbackUrl = getFallbackUrl();
 
-            if (appendUrl && formValues.content.trim() && formValues.spaceId) {
+            if (actionType === "append" && appendUrl) {
               return (
                 <Action.OpenInBrowser
                   title="Add to Daily Note"
                   icon={Icon.Plus}
                   url={appendUrl}
-                  onOpen={handleSubmit}
+                  onOpen={() => handleSubmit("append")}
                 />
               );
-            } else if (fallbackUrl && formValues.content.trim() && formValues.spaceId) {
+            }
+
+            if (actionType === "open-daily-note" && fallbackUrl) {
               return (
                 <Action.OpenInBrowser
                   title="Create Daily Note & Copy Content"
                   icon={Icon.Calendar}
                   url={fallbackUrl}
-                  onOpen={handleSubmit}
+                  onOpen={() => handleSubmit("open-daily-note")}
                 />
               );
-            } else {
-              return <Action.SubmitForm title="Add to Daily Note" icon={Icon.Plus} onSubmit={handleSubmit} />;
             }
+
+            return (
+              <Action.SubmitForm title="Add to Daily Note" icon={Icon.Plus} onSubmit={() => handleSubmit("submit")} />
+            );
           })()}
         </ActionPanel>
       }
@@ -166,18 +176,18 @@ export default function AddToDailyNote() {
       <Form.TextArea
         id="content"
         title="Content"
-        placeholder="What would you like to add to today's daily note?"
+        placeholder="What would you like to add to today's Daily Note?"
         value={formValues.content}
-        onChange={(value) => setFormValues((prev) => ({ ...prev, content: value }))}
-        info="This content will be added to today's daily note with a timestamp"
+        onChange={(value) => setFormValues((previousState) => ({ ...previousState, content: value }))}
+        info="This content will be added to today's Daily Note with a timestamp"
       />
       <Form.Dropdown
         id="spaceId"
         title="Space"
         value={formValues.spaceId}
-        onChange={(value) => setFormValues((prev) => ({ ...prev, spaceId: value }))}
+        onChange={(value) => setFormValues((previousState) => ({ ...previousState, spaceId: value }))}
       >
-        {config?.getEnabledSpaces().map((space) => (
+        {config.enabledSpaces.map((space) => (
           <Form.Dropdown.Item
             key={space.spaceID}
             value={space.spaceID}
@@ -185,6 +195,12 @@ export default function AddToDailyNote() {
           />
         ))}
       </Form.Dropdown>
+      {command.db.fatalIssue ? (
+        <Form.Description
+          title="Search index unavailable"
+          text="Craft's local search data could not be loaded. Your content will still be copied, and today's Daily Note will be opened."
+        />
+      ) : null}
     </Form>
   );
 }

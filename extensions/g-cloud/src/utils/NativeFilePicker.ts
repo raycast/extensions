@@ -129,7 +129,7 @@ tell application "Raycast" to activate
     let result = "";
     try {
       result = (await fsReadFile(outputPath, "utf8")).trim();
-    } catch (error) {
+    } catch {
       loadingToast.hide();
       await cleanupTempFiles([scriptPath, outputPath]);
       return null;
@@ -203,7 +203,7 @@ tell application "Raycast" to activate
     let result = "";
     try {
       result = (await fsReadFile(outputPath, "utf8")).trim();
-    } catch (error) {
+    } catch {
       loadingToast.hide();
       await cleanupTempFiles([scriptPath, outputPath]);
       return null;
@@ -271,7 +271,7 @@ tell application "Raycast" to activate
     let result = "";
     try {
       result = (await fsReadFile(outputPath, "utf8")).trim();
-    } catch (error) {
+    } catch {
       loadingToast.hide();
       await cleanupTempFiles([scriptPath, outputPath]);
       return null;

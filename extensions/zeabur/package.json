@@ -71,6 +71,22 @@
       "subtitle": "Zeabur",
       "description": "View AI Hub balance and usage",
       "mode": "view"
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "subtitle": "Zeabur",
+      "description": "Send emails using Zeabur Email",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "zeaburEmailApiKey",
+          "title": "Email API Key",
+          "description": "Zeabur Email API Key (starts with zs_)",
+          "type": "password",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [

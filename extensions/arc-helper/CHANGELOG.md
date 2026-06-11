@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0] - 2026-05-10
+
+### Added
+
+- **Riven Tides Map** - Added the new Riven Tides map to Open Map (already referenced in events-schedule data)
+- **Quest Guide Links** - Quests with associated MetaForge guides now expose an "Open Quest Guide" action in the action panel
+- **Item Guide Links** - Items with associated MetaForge guides now expose an "Open Item Guide" action
+- **Quest Trader** - Quest list shows the issuing trader as an accessory; the detail view embeds the quest image and shows the trader name in metadata
+- **Item Shield Type** - Detail metadata now shows `Shield Type` for armor items where applicable
+
+### Changed
+
+- Extended `Item`, `Quest`, and `Arc` interfaces in `src/api.ts` to model fields the MetaForge API now returns (`guide_links`, `shield_type`, `image`, `trader_name`, `position`, `created_at`, `updated_at`, etc.)
+
 ## [1.5.1] - 2026-02-16
 
 ### Fixed

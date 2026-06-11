@@ -9,6 +9,7 @@ const KNOWN_ERROR_CODES = [
   "METHOD_NOT_ALLOWED",
   "MISSING_API_KEY",
   "NETWORK_ERROR",
+  "NOT_FOUND",
   "RATE_LIMITED",
   "REQUEST_FAILED",
   "UNAUTHORIZED",
@@ -35,6 +36,8 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
       return "Too many requests right now. Please wait a moment and try again.";
     case "NETWORK_ERROR":
       return "Unable to reach Teak. Check your internet connection and try again.";
+    case "NOT_FOUND":
+      return "This card no longer exists in Teak.";
     case "INVALID_INPUT":
     case "BAD_REQUEST":
       return "The request could not be processed. Please check your input and try again.";
@@ -57,18 +60,48 @@ export const normalizeLimit = (limit?: number): number => {
   return Math.max(1, Math.min(clamped, MAX_LIMIT));
 };
 
-export const buildCardsSearchParams = (
-  query: string,
-  limit = DEFAULT_LIMIT,
-): string => {
+export const buildCardsSearchParams = (input: {
+  createdAfter?: number;
+  createdBefore?: number;
+  favorited?: boolean;
+  limit?: number;
+  query?: string;
+  sort?: "newest" | "oldest";
+  tag?: string;
+  type?: string;
+}): string => {
   const search = new URLSearchParams();
-  const trimmedQuery = query.trim();
+  const trimmedQuery = input.query?.trim();
 
   if (trimmedQuery) {
     search.set("q", trimmedQuery);
   }
 
-  search.set("limit", String(normalizeLimit(limit)));
+  if (input.type?.trim()) {
+    search.set("type", input.type.trim());
+  }
+
+  if (input.tag?.trim()) {
+    search.set("tag", input.tag.trim());
+  }
+
+  if (input.favorited) {
+    search.set("favorited", "true");
+  }
+
+  if (input.sort === "oldest") {
+    search.set("sort", "oldest");
+  }
+
+  if (typeof input.createdAfter === "number") {
+    search.set("createdAfter", String(input.createdAfter));
+  }
+
+  if (typeof input.createdBefore === "number") {
+    search.set("createdBefore", String(input.createdBefore));
+  }
+
+  search.set("limit", String(normalizeLimit(input.limit)));
   return search.toString();
 };
 
@@ -117,6 +150,8 @@ export const getRecoveryHint = (error: unknown): string | null => {
       return "Wait a few seconds, then retry.";
     case "NETWORK_ERROR":
       return "Check network connectivity, then retry.";
+    case "NOT_FOUND":
+      return "Refresh the card list and try again.";
     default:
       return null;
   }

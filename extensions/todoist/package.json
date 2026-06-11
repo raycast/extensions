@@ -29,7 +29,10 @@
     "aditya_pethkar",
     "alanwill",
     "erayack",
-    "chialiyun"
+    "chialiyun",
+    "jakoss",
+    "yashpatel21",
+    "alexi.build"
   ],
   "platforms": [
     "macOS",
@@ -172,6 +175,14 @@
           "label": "Show next task as title",
           "description": "When enabled and no task is focused, displays your next upcoming task in the menu bar title",
           "default": false,
+          "required": false
+        },
+        {
+          "name": "sortByPriority",
+          "type": "checkbox",
+          "label": "Sort tasks by priority",
+          "description": "When enabled, tasks are sorted by priority (highest first), then by their default order.",
+          "default": true,
           "required": false
         },
         {

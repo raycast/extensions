@@ -1,5 +1,7 @@
 # SingularityApp
 
+> **Disclaimer:** This is an unofficial, community-built extension and is not affiliated with, endorsed by, or officially supported by SingularityApp or its developers.
+
 Manage your [SingularityApp](https://singularity-app.com/) tasks directly from Raycast.
 
 ## Features
@@ -19,9 +21,8 @@ You need a SingularityApp account with Pro or Elite subscription and API token t
 ### Setup
 
 1. Install the extension from the Raycast Store
-2. Run the **Set API Token** command
-3. Enter your SingularityApp API token
-4. Start managing your tasks!
+2. Run any command — Raycast will prompt you to enter your API token in the extension preferences
+3. Paste your API token and start managing your tasks!
 
 ### Getting Your API Token
 
@@ -30,7 +31,7 @@ To get your SingularityApp API token:
 1. Log in to your [SingularityApp account](https://me.singularity-app.com/rest-tokens)
 2. Navigate to **API tokens** in side bar
 3. Generate or copy your API token
-4. Paste it into the **Set API Token** command in Raycast
+4. Paste it into the extension preferences
 
 ## Commands
 
@@ -53,14 +54,6 @@ Quickly create a new task with:
 - Notes
 - Start date
 - Project assignment
-
-### Set API Token
-
-Configure your SingularityApp API token for authentication.
-
-### Set Max Tasks Count
-
-Configure the maximum number of tasks to fetch per request (workaround for API pagination limitations).
 
 ## Support
 

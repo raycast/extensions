@@ -1,5 +1,5 @@
 import { getPreferenceValues, Cache, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, usePromise } from "@raycast/utils";
 import parse from "url-parse";
 import FormData from "form-data";
 import fs from "fs";
@@ -11,6 +11,32 @@ import { Preferences, ResponseData, ROW_STATUS, AttachmentObj } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse } from "./types";
 
 const cache = new Cache();
+const CURRENT_USER_PATH = "/api/v1/auth/me";
+const LEGACY_CURRENT_USER_PATH = "/api/v1/auth/sessions/current";
+
+const buildMemoListUrl = ({
+  creatorName,
+  state,
+  pageSize,
+}: {
+  creatorName?: string;
+  state?: ROW_STATUS;
+  pageSize: number;
+}) => {
+  const params = new URLSearchParams({
+    pageSize: String(pageSize),
+  });
+
+  if (state) {
+    params.set("state", state);
+  }
+
+  if (creatorName) {
+    params.set("parent", creatorName);
+  }
+
+  return getRequestUrl(`/api/v1/memos?${params.toString()}`);
+};
 
 const parseResponse = async <T>(response: Response): Promise<T> => {
   const cookie = response.headers.get("Set-Cookie");
@@ -77,18 +103,6 @@ const getOpenId = () => {
   }
 };
 
-const getUseFetch = <T>(url: string, options: Record<string, unknown>) => {
-  return useFetch<T, T>(url, {
-    headers: {
-      "Content-Type": "application/json",
-      // Cookie: getCookie(),
-      Authorization: `Bearer ${getToken()}`,
-    },
-    parseResponse,
-    ...options,
-  });
-};
-
 const getFetch = <T>(options: AxiosRequestConfig) => {
   return axios<T>({
     headers: {
@@ -109,10 +123,26 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
   });
 };
 
+const getCurrentUserRequest = async () => {
+  try {
+    return await getFetch<MeResponse>({
+      url: getRequestUrl(CURRENT_USER_PATH),
+      method: "GET",
+    });
+  } catch (error) {
+    if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+      throw error;
+    }
+
+    return getFetch<MeResponse>({
+      url: getRequestUrl(LEGACY_CURRENT_USER_PATH),
+      method: "GET",
+    });
+  }
+};
+
 export const getMe = () => {
-  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/sessions/current`), {
-    method: "GET",
-  });
+  return usePromise(getCurrentUserRequest, []);
 };
 
 export const sendMemo = (data: PostMemoParams) => {
@@ -126,15 +156,15 @@ export const sendMemo = (data: PostMemoParams) => {
 };
 
 export const getRecentTags = async (): Promise<string[]> => {
-  const { user: me } = await getFetch<MeResponse>({
-    url: getRequestUrl(`/api/v1/auth/sessions/current`),
-    method: "GET",
-  });
+  const { user: me } = await getCurrentUserRequest();
 
   const memos = await getFetch<{
     memos: MemoInfoResponse[];
   }>({
-    url: getRequestUrl(`/api/v1/memos?pageSize=50&parent=${encodeURIComponent(me.name)}`),
+    url: buildMemoListUrl({
+      creatorName: me.name,
+      pageSize: 50,
+    }),
     method: "GET",
   });
 
@@ -185,14 +215,12 @@ export const postMemoAttachments = (memoName: string, attachments: Partial<Attac
   });
 };
 
-export const getAllMemos = (currentUserId?: number, { state = ROW_STATUS.NORMAL } = {}) => {
-  let parent = "";
-
-  if (currentUserId) {
-    parent = encodeURIComponent(`users/${currentUserId}`);
-  }
-
-  const url = getRequestUrl(`/api/v1/memos?parent=${parent}&state=${state}&pageSize=20`);
+export const getAllMemos = (currentUserName?: string, { state = ROW_STATUS.NORMAL } = {}) => {
+  const url = buildMemoListUrl({
+    creatorName: currentUserName,
+    state,
+    pageSize: 20,
+  });
 
   const { isLoading, data, revalidate, pagination } = useFetch<
     {
@@ -206,6 +234,7 @@ export const getAllMemos = (currentUserId?: number, { state = ROW_STATUS.NORMAL 
       "Content-Type": "application/json",
       Authorization: `Bearer ${getToken()}`,
     },
+    execute: Boolean(currentUserName),
     parseResponse,
     mapResult(result) {
       return {
@@ -218,7 +247,7 @@ export const getAllMemos = (currentUserId?: number, { state = ROW_STATUS.NORMAL 
     initialData: [],
   });
 
-  return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
+  return { isLoading, data: currentUserName ? data : [], revalidate, pagination };
 };
 
 export const patchMemo = (memoName: string, { state = ROW_STATUS.NORMAL } = {}) => {

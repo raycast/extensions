@@ -1,4 +1,5 @@
-import { Tool, open } from "@raycast/api";
+import { Tool } from "@raycast/api";
+import { openUrl } from "../utils/open";
 import fs from "fs";
 import { applyTemplates } from "../api/templating/templating.service";
 import { Obsidian, ObsidianTargetType } from "@/obsidian";
@@ -114,7 +115,7 @@ export default async function tool(input: Input) {
 
     logger.debug(`Opening target: "${target}"`);
 
-    await open(target);
+    await openUrl(target, { background: input.silent ?? true });
 
     return `Successfully ${input.prepend ? "prepended" : "appended"} content to daily note in vault "${
       targetVault.name

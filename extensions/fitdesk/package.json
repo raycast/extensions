@@ -1,15 +1,19 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fitdesk",
   "title": "FitDesk",
   "description": "Micro-workouts to stay active while working",
   "icon": "extension-icon.png",
   "author": "rasheed_s",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
-    "Productivity",
-    "Other"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [

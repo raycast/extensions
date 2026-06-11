@@ -1,6 +1,11 @@
 import { Icon } from "@raycast/api";
 import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand, FormValues } from "./types";
-import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES } from "./utils/constants";
+import {
+  RAYCAST_DEEPLINK_PREFIX,
+  RAYCAST_V2_DEEPLINK_PREFIX,
+  EXTENSIONS_HOSTNAME,
+  WEEKDAY_NAMES,
+} from "./utils/constants";
 import { toLocalYMD } from "./utils/dateTime";
 import cronstrue from "cronstrue";
 
@@ -163,7 +168,7 @@ export function parseRaycastDeeplink(deeplink: string): ParsedRaycastCommand | n
   try {
     const trimmedLink = deeplink.trim();
 
-    if (!trimmedLink.startsWith(RAYCAST_DEEPLINK_PREFIX)) {
+    if (!trimmedLink.startsWith(RAYCAST_DEEPLINK_PREFIX) && !trimmedLink.startsWith(RAYCAST_V2_DEEPLINK_PREFIX)) {
       return null;
     }
 

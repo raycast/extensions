@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Person, Company, Attendee, Creator } from "./types";
 import { getDocumentsList } from "./fetchData";
+import { logGranolaError, toError } from "./errorUtils";
 
 // Helper function to safely compare dates
 function compareDates(date1: string | undefined, date2: string | undefined): number {
@@ -87,6 +88,7 @@ export function usePeople() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
     const fetchPeople = async () => {
@@ -190,8 +192,10 @@ export function usePeople() {
 
         setCompanies(Array.from(companyMap.values()));
         setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching people data:", error);
+      } catch (caughtError) {
+        const normalizedError = toError(caughtError);
+        logGranolaError("usePeople.getDocumentsList", normalizedError);
+        setError(normalizedError);
         setHasError(true);
         setIsLoading(false);
       }
@@ -200,5 +204,5 @@ export function usePeople() {
     fetchPeople();
   }, []);
 
-  return { people, companies, isLoading, hasError };
+  return { people, companies, isLoading, hasError, error };
 }

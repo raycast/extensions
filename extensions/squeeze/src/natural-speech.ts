@@ -1,8 +1,9 @@
 import { Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences.NaturalSpeech>();
+  const preferences = getPreferenceValues<{ preserveParagraphs: boolean }>();
 
   try {
     const text = await Clipboard.readText();
@@ -31,12 +32,7 @@ export default async function Command() {
     // Trim leading and trailing whitespace
     processed = processed.trim();
 
-    await Clipboard.copy(processed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Clipboard text converted to natural speech",
-    });
+    await outputResult(processed, "Clipboard text converted to natural speech");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to process clipboard" });
   }

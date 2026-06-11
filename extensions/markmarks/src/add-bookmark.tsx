@@ -41,6 +41,12 @@ export default function AddBookmark() {
             style: Toast.Style.Success,
             title: `Got tab from ${result.browser}`,
           });
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No supported browser detected",
+            message: "Focus Safari, Chrome, Arc, Dia, or Zen before running the command.",
+          });
         }
       } catch (error) {
         showToast({

@@ -37,7 +37,9 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Applications...">
       <List.Section title="Results" subtitle={apps?.length + ""}>
-        {apps?.map((app) => <ListItem key={app.path} app={app} />)}
+        {apps?.map((app) => (
+          <ListItem key={app.path} app={app} />
+        ))}
       </List.Section>
     </List>
   );

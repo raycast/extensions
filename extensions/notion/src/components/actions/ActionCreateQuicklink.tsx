@@ -10,7 +10,10 @@ export default function ActionCreateQuicklink({ page }: { page: Page }) {
 
   return (
     <Action.CreateQuicklink
-      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "l" },
+        Windows: { modifiers: ["ctrl"], key: "l" },
+      }}
       quicklink={{
         link,
         name: getPageName(page),

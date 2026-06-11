@@ -41,7 +41,7 @@ export const Site = {
       await axios.post(`${PLOI_API_URL}/servers/${server.id}/sites/${site.id}/deploy`);
       await showToast(Toast.Style.Success, `Deploying ${site.domain}`);
     } catch (error) {
-      const axiosError = (error as AxiosError).response;
+      const axiosError = (error as AxiosError<{ error: string }>).response;
 
       if (axiosError && axiosError.status === 422 && axiosError.data && axiosError.data.error) {
         await showToast(Toast.Style.Failure, "Error", axiosError.data.error);
@@ -58,7 +58,7 @@ export const Site = {
       await axios.post(`${PLOI_API_URL}/servers/${server.id}/sites/${site.id}/fastcgi-cache/flush`);
       await showToast(Toast.Style.Success, `Flushing FastCGI Cache`);
     } catch (error) {
-      const axiosError = (error as AxiosError).response;
+      const axiosError = (error as AxiosError<{ errors: string[] }>).response;
 
       if (axiosError?.status === 422 && axiosError?.data && axiosError?.data.errors[0]) {
         await showToast(Toast.Style.Failure, "Error", axiosError?.data.errors[0]);

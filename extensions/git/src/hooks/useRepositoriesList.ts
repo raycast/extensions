@@ -1,5 +1,5 @@
-import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect } from "react";
+import { useStorage } from "./useStorage";
 import { Repository, RepositoryCloningProcess } from "../types";
 import { detectRepositoryLanguages } from "../utils/language-detector";
 import { resolveTildePath } from "../utils/path-utils";
@@ -12,8 +12,7 @@ import { basename } from "path";
  * Supports tilde (~) paths.
  */
 export function useRepositoriesList() {
-  // Cache the list of repositories between sessions
-  const [repositories, setRepositories] = useCachedState<Repository[]>("managed-repositories-list", []);
+  const [repositories, setRepositories] = useStorage<Repository[]>("managed-repositories-list", []);
 
   // Revalidate all repositories in the list: remove if not valid, update languageStats if missing
   useEffect(() => {
@@ -30,7 +29,7 @@ export function useRepositoriesList() {
     if (invalidRepositories.length === 0) return;
 
     setRepositories((current) => current.filter((r) => !invalidRepositories.includes(r)));
-  }, []);
+  }, [repositories, setRepositories]);
 
   /**
    * Adds a repository to the recent list.

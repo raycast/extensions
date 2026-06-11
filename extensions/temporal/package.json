@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temporal",
+  "title": "Temporal",
+  "description": "Search, view, and manage Temporal workflows from Raycast",
+  "icon": "icon.png",
+  "author": "applauselab",
+  "contributors": ["nikolaykolibarov"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools"],
+  "commands": [
+    {
+      "name": "search-workflows",
+      "title": "Search Workflows",
+      "description": "Search and manage Temporal workflows",
+      "mode": "view"
+    },
+    {
+      "name": "start-workflow",
+      "title": "Start Workflow",
+      "description": "Start a new Temporal workflow",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "View workflow counts and statistics",
+      "mode": "view"
+    },
+    {
+      "name": "schedules",
+      "title": "Schedules",
+      "description": "View and manage Temporal schedules",
+      "mode": "view"
+    },
+    {
+      "name": "search-attributes",
+      "title": "Search Attributes",
+      "description": "View system and custom search attributes",
+      "mode": "view"
+    },
+    {
+      "name": "manage-connections",
+      "title": "Manage Connections",
+      "description": "Add, edit, and remove Temporal server connections",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.18.0",
+    "@temporalio/client": "^1.11.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Feature] - 2026-04-06
+
+- Added Copy as Astro Component action
+
 ## [Add shadcn/ui Registry Features] - 2025-09-29
 
 - Add the action `Copy shadcn/ui Registry Install Command` to copy the install command to the clipboard.

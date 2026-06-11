@@ -1,5 +1,9 @@
 # Todo List Changelog
 
+## [Clear search bar not text after adding todo on Windows] - 2026-03-19
+
+- When pressing enter to add a todo, clear the search bar text (text was not cleared on Windows)
+
 ## [Added: Add Todo button in menubar] - 2026-02-24
 
 - Add Todo in the menu bar now launches the main todo command for quick access to add new todos.

@@ -38,7 +38,7 @@ export default async function killProcess(input: Input) {
 
     exec(command, (killErr) => {
       if (killErr) {
-        const errorHelp = getPlatformSpecificErrorHelp(input.force || false);
+        const errorHelp = getPlatformSpecificErrorHelp("kill", input.force || false);
         const error = new Error(`${errorHelp.title}: ${killErr.message}`);
         reject(error);
         return;

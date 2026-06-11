@@ -1,15 +1,13 @@
 import { ignoredDirectories } from "#/config";
-import { CACHE_KEYS } from "#/config/constants";
 import { BareRepository, Project, Worktree } from "#/config/types";
-import { Cache } from "@raycast/api";
 import fg from "fast-glob";
 import { statSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { getDataFromCache, storeDataInCache } from "./cache";
 import { batchPromises, executeShellCommand } from "./general";
 import { isInsideBareRepository, parseGitRemotes } from "./git";
 import { getPreferences } from "./raycast";
+import { type Options as ExecaOptions } from "execa";
 
 const findDirectories = async ({
   searchDir,
@@ -34,7 +32,7 @@ const findDirectories = async ({
   }
 };
 
-export const findBareRepos = async (searchDir: string): Promise<BareRepository[]> => {
+export const findProjects = async (searchDir: string): Promise<BareRepository[]> => {
   const bareRepositories = await findDirectories({ searchDir, pattern: "**/.bare" });
 
   const validBareRepos = (
@@ -59,8 +57,14 @@ export const findBareRepos = async (searchDir: string): Promise<BareRepository[]
   });
 };
 
-export const getRepoWorktrees = async (bareDirectory: string): Promise<Worktree[]> => {
-  const { stdout } = await executeShellCommand(`git worktree list --porcelain`, { cwd: bareDirectory });
+export const getRepoWorktrees = async (
+  bareDirectory: string,
+  opts: { signal: ExecaOptions["cancelSignal"] },
+): Promise<Worktree[]> => {
+  const { stdout } = await executeShellCommand(`git worktree list --porcelain`, {
+    cwd: bareDirectory,
+    cancelSignal: opts.signal,
+  });
 
   if (typeof stdout !== "string") return [];
 
@@ -111,55 +115,18 @@ export const isWorktreeDirty = async (path: string): Promise<boolean> => {
   return false;
 };
 
-export async function getWorktrees(searchDir: string): Promise<Project[]> {
-  const repos = await getDirectoriesFromCacheOrFetch(searchDir);
+export async function getWorktrees(
+  searchDir: string,
+  opts: { signal: ExecaOptions["cancelSignal"] },
+): Promise<Project[]> {
+  const repos = await findProjects(searchDir);
 
   return batchPromises(repos, 15, async (repo) => ({
     ...repo,
     id: repo.fullPath,
-    worktrees: await getRepoWorktrees(repo.fullPath),
+    worktrees: await getRepoWorktrees(repo.fullPath, opts),
   }));
 }
-
-export const getDirectoriesFromCacheOrFetch = async (searchDir: string) => {
-  const cache = new Cache();
-
-  const { enableWorktreeCaching } = getPreferences();
-
-  if (!enableWorktreeCaching) return findBareRepos(searchDir);
-
-  if (cache.has(CACHE_KEYS.DIRECTORIES))
-    return JSON.parse(cache.get(CACHE_KEYS.DIRECTORIES) as string) as BareRepository[];
-
-  const directories = await findBareRepos(searchDir);
-  cache.remove(CACHE_KEYS.DIRECTORIES);
-  cache.set(CACHE_KEYS.DIRECTORIES, JSON.stringify(directories));
-
-  return directories;
-};
-
-export const getWorktreeFromCacheOrFetch = async (searchDir: string) => {
-  const cache = new Cache();
-
-  const { enableWorktreeCaching } = getPreferences();
-
-  if (!enableWorktreeCaching) return getWorktrees(searchDir);
-
-  const lastProjectDirectory = getDataFromCache<string>(CACHE_KEYS.LAST_PROJECT_DIR);
-  if (lastProjectDirectory !== searchDir) {
-    cache.clear();
-    storeDataInCache(CACHE_KEYS.LAST_PROJECT_DIR, searchDir);
-    return getWorktrees(searchDir);
-  }
-
-  if (cache.has(CACHE_KEYS.WORKTREES)) return JSON.parse(cache.get(CACHE_KEYS.WORKTREES) as string) as Project[];
-
-  const worktrees = await getWorktrees(searchDir);
-  cache.remove(CACHE_KEYS.WORKTREES);
-  cache.set(CACHE_KEYS.WORKTREES, JSON.stringify(worktrees));
-
-  return worktrees;
-};
 
 const home = `${homedir()}/`;
 

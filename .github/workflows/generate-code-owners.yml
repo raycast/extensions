@@ -61,7 +61,8 @@ jobs:
             exit 1
           fi
           
-          if ! git sparse-checkout set $ALL_SPACED; then
+          read -ra paths_array <<< "$ALL_SPACED"
+          if ! git sparse-checkout set "${paths_array[@]}"; then
             echo "::error::Failed to set sparse checkout files"
             exit 1
           fi
@@ -82,10 +83,12 @@ jobs:
           ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
           
           # Store normalized for the script
-          echo "PACKAGE_FILES<<EOF" >> $GITHUB_ENV
-          echo "$PACKAGE_FILES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED" >> $GITHUB_ENV
+          {
+            echo "PACKAGE_FILES<<EOF"
+            echo "$PACKAGE_FILES"
+            echo "EOF"
+            echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED"
+          } >> "$GITHUB_ENV"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
@@ -99,15 +102,15 @@ jobs:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
       - name: Check for changes
         id: check-changes
         run: |
           if git diff --quiet; then
-            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit"
           else
-            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
             echo "Changes detected, will commit"
           fi
       - name: Commit

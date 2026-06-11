@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const spaceAuthRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,32 +11,31 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     listAuthenticatedSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
         input: void;
         output: string[];
+        meta: object;
     }>;
     listAuthRequiredSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
         input: void;
         output: string[];
+        meta: object;
     }>;
     sendAuthCode: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -44,6 +43,7 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             authEmail: string;
         };
         output: void;
+        meta: object;
     }>;
     verifyAuthCode: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -52,12 +52,14 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             authEmail: string;
         };
         output: void;
+        meta: object;
     }>;
     listMemberAuthPolicies: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             spaceId: string;
         };
         output: string[];
+        meta: object;
     }>;
     createMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -66,6 +68,7 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             authCheckInterval: string;
         };
         output: void;
+        meta: object;
     }>;
     deleteMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -73,6 +76,7 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             emailPattern: string;
         };
         output: void;
+        meta: object;
     }>;
     updateMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -81,6 +85,7 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             authCheckInterval: string;
         };
         output: void;
+        meta: object;
     }>;
     checkMySessionToPassAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -94,5 +99,6 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             } | undefined;
         };
         output: boolean;
+        meta: object;
     }>;
-}>;
+}>>;

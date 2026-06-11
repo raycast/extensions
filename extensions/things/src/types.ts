@@ -10,6 +10,7 @@ export type Todo = {
   area?: Area;
   dueDate: string;
   activationDate: string;
+  creationDate: string;
   notes: string;
   isProject?: boolean;
 };

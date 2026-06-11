@@ -55,12 +55,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.74.1",
-    "cloudconvert": "^2.3.7",
+    "cloudconvert": "^3.0.0",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
-    "@types/mime-types": "^2.1.4",
     "@raycast/eslint-config": "^1.0.6",
+    "@types/mime-types": "^2.1.4",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

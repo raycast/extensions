@@ -1,5 +1,9 @@
 # Tapo Smart Devices Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [v2.0.0] - 2026-01-06
 
 ### Added

@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { Icon, List, Toast, showToast } from "@raycast/api";
 import DiskSection, { parseDiskSections } from "./features/disk/components/DiskSection";
 import { SizesView, cycleSizesView, loadSizesView, saveSizesView } from "./utils/sizesViewUtils";
@@ -12,8 +12,11 @@ export default function ListDisks(): JSX.Element {
   const [filter, setFilter] = useState("all");
   const [sizesView, setSizesView] = useState<SizesView>(SizesView.Full);
   const [, setDiskUpdateTrigger] = useState(0);
+  const didInit = useRef(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     loadSizesView().then(setSizesView);
     fetchDisks("Init");
   }, []);
@@ -121,7 +124,7 @@ export default function ListDisks(): JSX.Element {
             }, BATCH_TIMEOUT_MS);
           }
         }
-      })
+      }),
     );
 
     await Promise.allSettled(sectionInitPromises);
@@ -143,6 +146,20 @@ export default function ListDisks(): JSX.Element {
     setFilter(value);
   }
 
+  function matchesFilter(disk: DiskSection["disks"][number]) {
+    const isEjectable = disk.removable === true || disk.details.Ejectable === true;
+
+    if (filter === "removable") {
+      return isEjectable;
+    }
+
+    if (filter === "fixed") {
+      return !isEjectable;
+    }
+
+    return true;
+  }
+
   async function toggleSizesView() {
     const nextView = cycleSizesView(sizesView);
     setSizesView(nextView);
@@ -150,9 +167,7 @@ export default function ListDisks(): JSX.Element {
   }
 
   const hasDisks = diskSections.length > 0;
-  const hasFilteredDisks = diskSections.some((section) =>
-    section.disks.some((disk) => filter === "all" || disk.removable === (filter === "removable"))
-  );
+  const hasFilteredDisks = diskSections.some((section) => section.disks.some(matchesFilter));
 
   return (
     <List
@@ -162,7 +177,7 @@ export default function ListDisks(): JSX.Element {
         <List.Dropdown tooltip="Filter Disks" onChange={handleFilterChange} value={filter}>
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Item title="Fixed" value="fixed" />
-          <List.Dropdown.Item title="Removable" value="removable" />
+          <List.Dropdown.Item title="Removable or Ejectable" value="removable" />
         </List.Dropdown>
       }
     >
@@ -193,19 +208,17 @@ export default function ListDisks(): JSX.Element {
       ) : (
         diskSections.map((section, index) => (
           <List.Section key={index} title={section.sectionName}>
-            {section.disks
-              .filter((disk) => filter === "all" || disk.removable === (filter === "removable"))
-              .map((disk, diskIndex) => (
-                <DiskListItem
-                  key={diskIndex}
-                  disk={disk}
-                  showingDetail={showingDetail}
-                  sizesView={sizesView}
-                  onToggleDetail={(detailType) => setShowingDetail({ show: !showingDetail.show, detail: detailType })}
-                  onRefresh={(type) => fetchDisks(type)}
-                  onToggleSizesView={toggleSizesView}
-                />
-              ))}
+            {section.disks.filter(matchesFilter).map((disk, diskIndex) => (
+              <DiskListItem
+                key={diskIndex}
+                disk={disk}
+                showingDetail={showingDetail}
+                sizesView={sizesView}
+                onToggleDetail={(detailType) => setShowingDetail({ show: !showingDetail.show, detail: detailType })}
+                onRefresh={(type) => fetchDisks(type)}
+                onToggleSizesView={toggleSizesView}
+              />
+            ))}
           </List.Section>
         ))
       )}

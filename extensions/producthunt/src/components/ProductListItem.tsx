@@ -4,6 +4,14 @@ import { Product } from "../types";
 import { ProductDetailView } from "./ProductDetailView";
 import { ProductActions, ViewContext } from "./ProductActions";
 import { cleanText } from "../util/textUtils";
+import { processImageUrl, ImgixFit } from "../api/imgix";
+
+// PH product images are wide (e.g. 1024x512), which renders as a non-square, cropped-looking
+// list icon. Square-crop imgix URLs to a centered 64x64 so list icons read as logos.
+function squareListIcon(url: string): string {
+  if (!url.includes("imgix.net")) return url;
+  return processImageUrl(url, { width: 64, height: 64, fit: ImgixFit.CROP, auto: ["format", "compress"] });
+}
 
 interface ProductListItemProps {
   product: Product;
@@ -13,6 +21,7 @@ interface ProductListItemProps {
   index?: number;
   totalProducts?: number;
   allProducts?: Product[];
+  onRefresh?: () => void;
 }
 
 export function ProductListItem({
@@ -23,22 +32,30 @@ export function ProductListItem({
   index,
   totalProducts,
   allProducts = [],
+  onRefresh,
 }: ProductListItemProps) {
   const { push } = useNavigation();
 
   const formattedDate = new Date(product.createdAt).toLocaleDateString();
 
-  // Use featuredImage if available, otherwise fall back to thumbnail
-  const thumbnailSource = product.featuredImage || product.thumbnail || Icon.Document;
+  // Use featuredImage if available, otherwise fall back to thumbnail; square-crop URLs for the
+  // list icon (the Icon.Document fallback is not a URL and passes through untouched).
+  const rawThumbnail = product.featuredImage || product.thumbnail;
+  const thumbnailSource = rawThumbnail ? squareListIcon(rawThumbnail) : Icon.Document;
 
   let baseAccessories: List.Item.Accessory[] = [];
 
+  // The submitter (Post.user / feed author) — a documented role, shown as a bare name (not "by",
+  // which would imply making/authorship we can't verify on a public token).
+  const submitter = product.submittedBy ?? product.maker;
   if (featured) {
-    baseAccessories = [
-      { text: product.commentsCount ? `${product.commentsCount}` : undefined, icon: { source: Icon.Bubble } },
-      { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
-      ...(product.maker ? [{ text: `by ${product.maker.name}` }] : []),
-    ];
+    baseAccessories = product.isFeedFallback
+      ? [...(submitter ? [{ text: submitter.name }] : [])]
+      : [
+          { text: product.commentsCount ? `${product.commentsCount}` : undefined, icon: { source: Icon.Bubble } },
+          { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
+          ...(submitter ? [{ text: submitter.name }] : []),
+        ];
   } else {
     baseAccessories = [
       { text: `${product.votesCount} votes` },
@@ -90,6 +107,7 @@ export function ProductListItem({
             onNavigateToProduct={handleNavigateToProduct}
             viewContext={ViewContext.List}
             showTopics={showTopics}
+            onRefresh={onRefresh}
           />
         ) as JSX.Element
       }

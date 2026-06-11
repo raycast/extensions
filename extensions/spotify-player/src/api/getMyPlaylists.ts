@@ -1,9 +1,10 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetUserPlaylistsProps = { limit?: number };
 
-export async function getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {}) {
+async function _getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   let response = null;
   let nextUrl = null;
@@ -29,3 +30,5 @@ export async function getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {})
     throw new Error(error);
   }
 }
+
+export const getMyPlaylists = withCache("api:playlists", 300000, _getMyPlaylists);

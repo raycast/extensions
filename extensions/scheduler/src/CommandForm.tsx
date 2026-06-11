@@ -23,6 +23,7 @@ interface CommandFormProps {
   title: string;
   submitButtonTitle: string;
   draftValues?: Partial<FormValues>;
+  enableDrafts?: boolean;
 }
 
 const PERMISSION_MESSAGES = {
@@ -52,7 +53,14 @@ const showSuccess = async (title: string, message: string) => {
   });
 };
 
-export function CommandForm({ command, onSave, title, submitButtonTitle, draftValues }: CommandFormProps) {
+export function CommandForm({
+  command,
+  onSave,
+  title,
+  submitButtonTitle,
+  draftValues,
+  enableDrafts = false,
+}: CommandFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingCommand, setIsTestingCommand] = useState(false);
   const { getCommandPermission, testCommandPermission } = useCommandPermissions();
@@ -220,7 +228,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
     <Form
       isLoading={isSubmitting || isLoadingBackgroundStatus}
       navigationTitle={title}
-      enableDrafts
+      enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Save Command">

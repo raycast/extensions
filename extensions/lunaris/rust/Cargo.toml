@@ -1,0 +1,17 @@
+[package]
+name = "lunaris-rust"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "lunaris-rust"
+path = "src/main.rs"
+
+[dependencies]
+raycast-rust-macros = { git = "https://github.com/raycast/extensions-rust-tools", branch = "main" }
+raycast-rust-runtime = { git = "https://github.com/raycast/extensions-rust-tools", branch = "main" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+image = "0.24"

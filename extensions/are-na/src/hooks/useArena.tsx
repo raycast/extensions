@@ -1,13 +1,13 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getAccessToken } from "@raycast/utils";
 import { Arena } from "../api/arena";
 import { useMemo } from "react";
 
 export function useArena() {
-  const { accessToken } = getPreferenceValues<Preferences>();
+  const { token } = getAccessToken();
 
   return useMemo(() => {
     return new Arena({
-      accessToken,
+      accessToken: token,
     });
-  }, [accessToken]);
+  }, [token]);
 }

@@ -1,16 +1,15 @@
 import { Detail, Icon } from "@raycast/api";
-
-// Components
 import Actions from "@/components/Actions";
 import { SearchResult } from "@/types";
 
-export const Details: React.FC<{ result: SearchResult }> = ({ result }) => {
-  const image = result.urls?.regular || result.urls?.small || result.urls?.thumb;
+export function Details({ result }: { result: SearchResult }) {
+  const image = result.urls.regular || result.urls.small || result.urls.thumb;
   const date = result.created_at ? new Date(result.created_at).toLocaleString() : "Unknown";
 
   return (
     <Detail
       markdown={`![${result.alt_description}](${image})`}
+      navigationTitle={result.user?.name}
       metadata={
         <Detail.Metadata>
           {result.description && <Detail.Metadata.Label title="Description" text={result.description} />}
@@ -20,10 +19,9 @@ export const Details: React.FC<{ result: SearchResult }> = ({ result }) => {
           <Detail.Metadata.Label title="Dimensions" text={`${result.width}x${result.height}`} icon={Icon.AppWindow} />
         </Detail.Metadata>
       }
-      navigationTitle={result.user?.name}
       actions={<Actions item={result} />}
     />
   );
-};
+}
 
 export default Details;

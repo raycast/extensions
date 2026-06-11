@@ -67,7 +67,7 @@ export default function ExplorePrompts(props: Props) {
       await removeUpvote(prompt);
       await mutate();
       await showToast({ style: Toast.Style.Success, title: "Remove upvote" });
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to remove upvote" });
     }
   }

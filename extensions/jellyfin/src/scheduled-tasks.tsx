@@ -8,7 +8,7 @@ import { getProgressIcon } from "@raycast/utils";
 
 const sections: TaskState[] = ["Running", "Idle"];
 
-function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => void }): JSX.Element {
+function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => void }) {
   let color: Color = Color.SecondaryText;
   let icon: Image.ImageLike = Icon.Heartbeat;
 
@@ -55,7 +55,7 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   } else {
     actions.push(
@@ -80,7 +80,7 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   }
 

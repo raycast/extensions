@@ -264,10 +264,19 @@ function requestWithRetry<A>(retry: number, requestFunc: () => Promise<Response<
 }
 
 function getRetryDelay(err: APIResponseError): Promise<void> | null {
-    const waitTime = err.headers.get("Retry-After")
+    const waitTime = getResponseHeader(err.headers, "Retry-After")
     if (waitTime === null) {
         return null
     }
 
     return new Promise((resolve) => setTimeout(resolve, parseInt(waitTime)))
+}
+
+function getResponseHeader(headers: unknown, name: string): string | null {
+    if (typeof headers !== "object" || headers === null || !("get" in headers)) {
+        return null
+    }
+
+    const value = (headers as { get: (header: string) => unknown }).get(name)
+    return typeof value === "string" ? value : null
 }

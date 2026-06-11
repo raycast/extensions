@@ -13,8 +13,10 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     windows: { name: "Visual Studio Code - Insiders", exe: "Code - Insiders.exe" },
   },
   Cursor: { macos: "com.todesktop.230313mzl4w4u92", windows: { name: "Cursor", exe: "Cursor.exe" } },
+  "IBM Bob": { macos: "com.ibm.software.bob", windows: { name: "IBM Bob", exe: "IBM Bob.exe" } },
   Kiro: { macos: "dev.kiro.desktop", windows: { name: "Kiro", exe: "Kiro.exe" } },
   Positron: { macos: "com.rstudio.positron", windows: { name: "Positron", exe: "Positron.exe" } },
+  Qoder: { macos: "com.qoder.ide", windows: { name: "Qoder", exe: "Qoder.exe" } },
   Trae: { macos: "com.trae.app", windows: { name: "Trae", exe: "Trae.exe" } },
   "Trae CN": { macos: "cn.trae.app", windows: { name: "Trae CN", exe: "Trae - CN.exe" } },
   VSCodium: { macos: "com.vscodium", windows: { name: "VSCodium", exe: "VSCodium.exe" } },
@@ -23,6 +25,7 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" },
   },
   Windsurf: { macos: "com.exafunction.windsurf", windows: { name: "Windsurf", exe: "Windsurf.exe" } },
+  Lingma: { macos: "com.aliyun.lingma.ide", windows: { name: "Lingma", exe: "Lingma.exe" } },
 };
 
 /**

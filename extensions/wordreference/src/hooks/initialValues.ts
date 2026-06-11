@@ -1,19 +1,20 @@
 import { LaunchProps, Toast, getPreferenceValues, getSelectedText, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import availableTranslations from "../data/translationKeyMap.json";
-import usePreferences from "./preferences";
+import { Preferences } from "./preferences";
 
 interface Props {
   commandProps: LaunchProps<{ arguments: Arguments.SearchTranslations }>;
+  preferences: Preferences;
+  setPreferences: (newPreferences: Preferences) => Promise<void>;
 }
 
 interface RaycastPreferenceValues {
   useSelectedText: boolean;
 }
 
-export default function useInitialValues({ commandProps }: Props) {
+export default function useInitialValues({ commandProps, preferences, setPreferences }: Props) {
   const language = commandProps.arguments.language;
-  const { setPreferences, preferences } = usePreferences();
   const [word, setWord] = useState<string | undefined>(commandProps.arguments.word);
   const raycastPreferences = getPreferenceValues<RaycastPreferenceValues>();
 

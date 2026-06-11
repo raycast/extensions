@@ -86,23 +86,30 @@ export interface Bookmark {
   createdAt: string;
   assets?: Asset[];
   tags: Tag[];
+  taggingStatus?: "pending" | "success" | "failure" | null;
 }
+
+export type ListType = "manual" | "smart";
 
 export interface List {
   id: string;
   name: string;
   icon?: string;
   parentId?: string | null;
+  type?: ListType;
+  description?: string;
+  query?: string;
 }
 
 export interface ListDetails {
   bookmarks: Bookmark[];
 }
 
-export interface ApiResponse<T extends List | Tag | Bookmark = List | Tag | Bookmark> {
+export interface ApiResponse<T extends List | Tag | Bookmark | Highlight = List | Tag | Bookmark | Highlight> {
   lists?: T[];
   tags?: T[];
   bookmarks?: Bookmark[];
+  highlights?: Highlight[];
   nextCursor?: string | null;
 }
 
@@ -110,5 +117,50 @@ export interface GetBookmarksParams {
   cursor?: string;
   favourited?: boolean;
   archived?: boolean;
+  type?: "link" | "text" | "asset";
   limit?: number;
+}
+
+export interface Highlight {
+  id: string;
+  bookmarkId: string;
+  text: string;
+  startOffset: number;
+  endOffset: number;
+  note?: string;
+  color?: string;
+  createdAt?: string;
+}
+
+export interface Backup {
+  id: string;
+  createdAt: string;
+  size?: number;
+  status?: string;
+}
+
+export interface UserStats {
+  numBookmarks: number;
+  numFavorites: number;
+  numArchived: number;
+  numTags: number;
+  numLists: number;
+  numHighlights: number;
+  bookmarksByType: {
+    link: number;
+    text: number;
+    asset: number;
+  };
+  topDomains: Array<{ domain: string; count: number }>;
+  totalAssetSize: number;
+  assetsByType: Array<{ type: string; count: number; totalSize: number }>;
+  bookmarkingActivity: {
+    thisWeek: number;
+    thisMonth: number;
+    thisYear: number;
+    byHour: Array<{ hour: number; count: number }>;
+    byDayOfWeek: Array<{ day: number; count: number }>;
+  };
+  tagUsage: Array<{ name: string; count: number }>;
+  bookmarksBySource: Array<{ source: string | null; count: number }>;
 }

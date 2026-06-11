@@ -1,13 +1,9 @@
 import { LocalStorage } from "@raycast/api";
-import { Task, TimerState } from "./types";
+import { Task, TimerState, CalendarEvent } from "./types";
 
 const STORAGE_KEY = "task-timer-state";
 
-// Cleanup configuration
-const MAX_UNEXPORTED_TASKS = 50; // Maximum number of unexported tasks to keep
-const EXPORTED_RETENTION_DAYS = 7; // Days to keep exported tasks before auto-deletion
-
-export async function getTimerState(): Promise<TimerState> {
+async function getTimerState(): Promise<TimerState> {
   const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (stored) {
     try {
@@ -28,53 +24,8 @@ export async function getTimerState(): Promise<TimerState> {
   return { currentTask: null, completedTasks: [] };
 }
 
-export async function saveTimerState(state: TimerState): Promise<void> {
+async function saveTimerState(state: TimerState): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-/**
- * Automatically cleanup old tasks:
- * 1. Delete exported tasks older than 7 days
- * 2. Keep only the latest 50 unexported tasks
- */
-export async function cleanupTasks(): Promise<number> {
-  const state = await getTimerState();
-  const now = Date.now();
-  const retentionMs = EXPORTED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  const originalCount = state.completedTasks.length;
-
-  // Separate exported and unexported tasks
-  const exportedTasks: Task[] = [];
-  const unexportedTasks: Task[] = [];
-
-  for (const task of state.completedTasks) {
-    if (task.exportedToCalendar) {
-      exportedTasks.push(task);
-    } else {
-      unexportedTasks.push(task);
-    }
-  }
-
-  // 1. Remove exported tasks older than retention period
-  const filteredExported = exportedTasks.filter((task) => {
-    const taskTime = new Date(task.endTime || task.startTime).getTime();
-    return now - taskTime < retentionMs;
-  });
-
-  // 2. Limit unexported tasks count (keep the most recent ones)
-  const filteredUnexported = unexportedTasks.slice(0, MAX_UNEXPORTED_TASKS);
-
-  // Merge and sort by time (newest first)
-  state.completedTasks = [...filteredExported, ...filteredUnexported].sort((a, b) => {
-    const timeA = new Date(b.endTime || b.startTime).getTime();
-    const timeB = new Date(a.endTime || a.startTime).getTime();
-    return timeA - timeB;
-  });
-
-  await saveTimerState(state);
-
-  const deletedCount = originalCount - state.completedTasks.length;
-  return deletedCount;
 }
 
 export async function startTask(
@@ -84,6 +35,7 @@ export async function startTask(
   accountName?: string,
   notes?: string,
   url?: string,
+  sourceCalendarEventId?: string,
 ): Promise<Task> {
   const state = await getTimerState();
 
@@ -98,6 +50,7 @@ export async function startTask(
     accountName: accountName,
     notes: notes || undefined,
     url: url || undefined,
+    sourceCalendarEventId: sourceCalendarEventId || undefined,
     startTime: new Date().toISOString(),
     isRunning: true,
   };
@@ -180,28 +133,6 @@ export async function markTaskExported(taskId: string): Promise<void> {
   }
 }
 
-/**
- * Update a task's calendar assignment.
- * Used to assign a calendar to a task that was created without one.
- */
-export async function updateTaskCalendar(
-  taskId: string,
-  calendarId: string,
-  calendarName: string,
-  accountName?: string,
-): Promise<Task | null> {
-  const state = await getTimerState();
-  const task = state.completedTasks.find((t) => t.id === taskId);
-  if (task) {
-    task.calendarId = calendarId;
-    task.calendarName = calendarName;
-    task.accountName = accountName;
-    await saveTimerState(state);
-    return task;
-  }
-  return null;
-}
-
 export interface TaskSuggestion {
   name: string;
   calendarId?: string;
@@ -213,17 +144,16 @@ export interface TaskSuggestion {
 }
 
 /**
- * Get unique task name suggestions from recent completed tasks.
- * Returns the most recent calendar for each unique task name.
+ * Get unique task name suggestions from local tasks and calendar events.
+ * Merges both sources, deduplicates by normalized name, keeps most recent.
  */
-export async function getRecentTaskSuggestions(): Promise<TaskSuggestion[]> {
+export async function getRecentTaskSuggestions(calendarEvents?: CalendarEvent[]): Promise<TaskSuggestion[]> {
   const state = await getTimerState();
   const suggestionMap = new Map<string, TaskSuggestion>();
 
-  // Completed tasks are already sorted by newest first
+  // Local completed tasks (newest first)
   for (const task of state.completedTasks) {
     const normalizedName = task.name.trim().toLowerCase();
-    // Only keep the first occurrence (most recent) for each unique name
     if (!suggestionMap.has(normalizedName)) {
       suggestionMap.set(normalizedName, {
         name: task.name,
@@ -237,7 +167,27 @@ export async function getRecentTaskSuggestions(): Promise<TaskSuggestion[]> {
     }
   }
 
-  // Convert to array and sort by last used (newest first)
+  // Calendar events
+  if (calendarEvents) {
+    for (const event of calendarEvents) {
+      const normalizedName = event.title.trim().toLowerCase();
+      const eventTime = event.endDate || event.startDate;
+      const existing = suggestionMap.get(normalizedName);
+      // Only add if not already present, or if this event is more recent
+      if (!existing || new Date(eventTime).getTime() > new Date(existing.lastUsed).getTime()) {
+        suggestionMap.set(normalizedName, {
+          name: event.title,
+          calendarId: event.calendarId,
+          calendarName: event.calendarName,
+          accountName: event.accountName,
+          notes: existing?.notes,
+          url: existing?.url,
+          lastUsed: eventTime,
+        });
+      }
+    }
+  }
+
   return Array.from(suggestionMap.values()).sort((a, b) => {
     return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
   });

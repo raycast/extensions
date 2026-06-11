@@ -1,10 +1,10 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
+import { addSignature, parseAttendeeEmails, toISO8601WithTimezoneOffset } from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { calendar_v3 } from "@googleapis/calendar";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 type Input = {
   /**
    * The title/summary of the calendar event
@@ -24,11 +24,11 @@ type Input = {
    */
   duration?: number;
   /**
-   * List of email addresses for event attendees
-   * @example ["john@example.com", "jane@example.com"]
+   * Comma-separated email addresses for event attendees
+   * @example "john@example.com, jane@example.com"
    * @remarks The current user will automatically be added as the event organizer
    */
-  attendees?: string[];
+  attendees?: string;
   /**
    * Detailed description or agenda for the event
    * @example "Monthly review of project progress and key metrics discussion"
@@ -67,7 +67,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
         name: "Duration",
         value: humanizeDuration((input.duration ?? parseInt(preferences.defaultEventDuration)) * 60 * 1000),
       },
-      { name: "Attendees", value: input.attendees?.join(", ") },
+      { name: "Attendees", value: input.attendees },
       { name: "Description", value: input.description },
       { name: "Add Google Meet Link", value: input.addGoogleMeetLink ? "Yes" : "No" },
     ],
@@ -76,6 +76,10 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const startDate = parseISO(input.startDate);
   const endDate = addMinutes(startDate, input.duration ?? parseInt(preferences.defaultEventDuration));
@@ -89,14 +93,14 @@ const tool = async (input: Input) => {
     end: {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
-    attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
+    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
     conferenceData: input.addGoogleMeetLink
       ? {
           createRequest: {
             conferenceSolutionKey: {
               type: "hangoutsMeet",
             },
-            requestId: nanoid(),
+            requestId: randomUUID(),
           },
         }
       : undefined,

@@ -58,24 +58,31 @@
       "mode": "view"
     }
   ],
+  "contributors": [
+    "vishalbalaji3"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.91.1",
+    "@raycast/api": "^1.104.10",
     "@raycast/utils": "^1.18.1",
     "@ts-rest/core": "^3.51.0",
     "node-fetch": "^3.3.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.1",
+    "@types/react": "19.0.10",
+    "eslint": "^10.1.0",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "syncpack": "^13.0.2",
+    "syncpack": "^14.2.0",
     "typescript": "^5.7.3"
   },
   "icon": "trakt.png",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "check": "tsc --noEmit",
@@ -86,11 +93,5 @@
     "publish": "ray publish",
     "pull": "ray pull-contributions"
   },
-  "contributors": [
-    "vishalbalaji3"
-  ],
-  "title": "Trakt Manager",
-  "platforms": [
-    "macOS"
-  ]
+  "title": "Trakt Manager"
 }

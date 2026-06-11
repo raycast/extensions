@@ -1,7 +1,7 @@
 import React from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { AsyncStatus, fetchMovieDetails } from "./letterboxd-api";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { STRINGS } from "./strings";
 import type { MovieDetails, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
@@ -179,7 +179,7 @@ function Metadata(props: MetadataProps) {
           <Detail.Metadata.TagList.Item
             key={genre}
             text={genre}
-            color={"#ecf0f1"}
+            color={Color.SecondaryText}
           />
         ))}
       </Detail.Metadata.TagList>

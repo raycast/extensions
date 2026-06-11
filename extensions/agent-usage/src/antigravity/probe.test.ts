@@ -31,6 +31,43 @@ test("parseProcessInfoFromPsOutput marks antigravity seen when csrf token missin
   assert.equal(parsed.processInfo, null);
 });
 
+test("parseProcessInfoFromWindowsProcessList extracts pid, csrf token and extension port for x64", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 444,
+      Name: "language_server_windows_x64.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+      CommandLine:
+        '"C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe" --app_data_dir C:\\Users\\me\\AppData\\Roaming\\Antigravity --csrf_token token-456 --extension_server_port 51234',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 444);
+  assert.equal(parsed.processInfo?.csrfToken, "token-456");
+  assert.equal(parsed.processInfo?.extensionPort, 51234);
+});
+
+test("parseProcessInfoFromWindowsProcessList marks antigravity arm64 process seen when csrf token missing", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 555,
+      Name: "language_server_windows_arm.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_arm.exe",
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.equal(parsed.processInfo, null);
+});
+
 test("parseListeningPorts parses and de-duplicates listening ports", async () => {
   const { parseListeningPorts } = await import("./probe");
 
@@ -44,6 +81,22 @@ server    222 me    12u  IPv4 0x0000000000000000      0t0  TCP 127.0.0.1:9090 (L
   const ports = parseListeningPorts(output);
 
   assert.deepEqual(ports, [8080, 9090]);
+});
+
+test("parseListeningPortsFromNetstatOutput parses and de-duplicates Windows listening ports for one pid", async () => {
+  const { parseListeningPortsFromNetstatOutput } = await import("./probe");
+
+  const output = `
+  Proto  Local Address          Foreign Address        State           PID
+  TCP    127.0.0.1:6463         0.0.0.0:0              LISTENING       19692
+  TCP    127.0.0.1:6463         0.0.0.0:0              LISTENING       19692
+  TCP    [::1]:7768             [::]:0                 LISTENING       19692
+  TCP    127.0.0.1:51234        0.0.0.0:0              LISTENING       99999
+`;
+
+  const ports = parseListeningPortsFromNetstatOutput(output, 19692);
+
+  assert.deepEqual(ports, [6463, 7768]);
 });
 
 test("requestWithFallback retries with HTTP on the same port when HTTPS fails", async () => {

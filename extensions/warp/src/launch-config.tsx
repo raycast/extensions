@@ -5,27 +5,76 @@ import YAML from "yaml";
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, List, showToast, Toast, Icon, Keyboard } from "@raycast/api";
 import useLocalStorage from "./hooks/useLocalStorage";
-import { getLaunchConfigUri } from "./uri";
+import { getLaunchConfigUri, getTabConfigUri } from "./uri";
 import {
-  LAUNCH_CONFIGS_URL,
-  NO_LAUNCH_CONFIGS_TITLE,
+  CONFIGS_URL,
+  NO_CONFIGS_TITLE,
   VIEW_DOCS_ACTION_TITLE,
   OPEN_CONFIGS_DIR_ACTION_TITLE,
-  NO_LAUNCH_CONFIGS_MESSAGE,
+  NO_CONFIGS_MESSAGE,
   getAppName,
 } from "./constants";
+
+type ConfigKind = "tab" | "launch";
 
 interface SearchResult {
   name: string;
   path: string;
+  directory: string;
+  kind: ConfigKind;
 }
 
-const configPath = ".warp/launch_configurations";
-const fullPath = path.join(os.homedir(), configPath);
+const isWindows = process.platform === "win32";
+
+function getAppDataDir(): string {
+  if (isWindows) {
+    return process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+  }
+
+  return path.join(os.homedir(), ".warp");
+}
+
+function getConfigSources(): Array<{ directory: string; kind: ConfigKind; pattern: RegExp }> {
+  const configDir = getAppDataDir();
+
+  if (isWindows) {
+    const warpDataDir = path.join(configDir, "Warp", "Warp", "data");
+    return [
+      { directory: path.join(warpDataDir, "tab_configs"), kind: "tab", pattern: /\.toml$/i },
+      { directory: path.join(warpDataDir, "launch_configurations"), kind: "launch", pattern: /\.ya?ml$/i },
+    ];
+  }
+
+  return [
+    { directory: path.join(configDir, "tab_configs"), kind: "tab", pattern: /\.toml$/i },
+    { directory: path.join(configDir, "launch_configurations"), kind: "launch", pattern: /\.ya?ml$/i },
+  ];
+}
+
+const configSources = getConfigSources();
+const primaryConfigDir = configSources[0].directory;
+
+function parseConfigName(contents: string, filePath: string, kind: ConfigKind): string | null {
+  if (kind === "tab") {
+    const match = contents.match(/^name\s*=\s*["'](.+?)["']/m);
+    return match ? match[1] : path.basename(filePath, path.extname(filePath));
+  }
+
+  const yaml = YAML.parse(contents);
+  return yaml?.name ?? path.basename(filePath, path.extname(filePath));
+}
+
+function getConfigUri(searchResult: SearchResult): string {
+  const configName =
+    searchResult.kind === "tab" ? path.basename(searchResult.path, path.extname(searchResult.path)) : searchResult.name;
+
+  return searchResult.kind === "tab" ? getTabConfigUri(configName) : getLaunchConfigUri(configName);
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [configDir, setConfigDir] = useState(primaryConfigDir);
   const {
     data: resultsOrderList,
     setData: setResultsOrderList,
@@ -45,51 +94,60 @@ export default function Command() {
   };
 
   const init = async () => {
-    const exists = await fs.stat(fullPath).catch(() => false);
+    for (const source of configSources) {
+      const exists = await fs.stat(source.directory).catch(() => false);
 
-    if (exists === false) {
-      return showError("Launch Configuration directory missing", `~/${configPath} wasn't found on your computer!`);
-    }
+      if (exists === false) {
+        continue;
+      }
 
-    const files = await fs.readdir(fullPath).catch(() => null);
+      const files = await fs.readdir(source.directory).catch(() => null);
 
-    if (files === null || typeof files === "undefined") {
-      return showError(
-        "Error reading Launch Configuration directory",
-        "Something went wrong while reading the Launch Configuration directory."
+      if (files === null || typeof files === "undefined") {
+        return showError(
+          "Error reading Tab Config directory",
+          "Something went wrong while reading the config directory."
+        );
+      }
+
+      const fileList = (
+        await Promise.all(
+          files
+            .filter((file) => source.pattern.test(file))
+            .map(async (file) => {
+              const filePath = path.join(source.directory, file);
+              const contents = await fs.readFile(filePath, "utf-8");
+              const name = parseConfigName(contents, file, source.kind);
+
+              return name ? { name, path: filePath, directory: source.directory, kind: source.kind } : null;
+            })
+        )
+      ).filter((item): item is SearchResult => item !== null);
+
+      if (fileList.length === 0) {
+        continue;
+      }
+
+      setConfigDir(source.directory);
+      const allFileNames = fileList.map(({ name }) => name);
+      const resultsOrderListFilteredFromStaleFiles = resultsOrderList.filter(
+        (fileName) => allFileNames.indexOf(fileName) !== -1
       );
-    }
+      const newFileNamesNotPresentOnResultsOrderList = allFileNames.filter(
+        (fileName) => resultsOrderList.indexOf(fileName) === -1
+      );
 
-    const fileList = await Promise.all(
-      files
-        .filter((file) => file.match(/.y(a)?ml$/g))
-        .map(async (file) => {
-          const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
-          const yaml = YAML.parse(contents);
-
-          return { name: yaml.name, path: path.join(fullPath, file) };
+      const currentOrderList = [...resultsOrderListFilteredFromStaleFiles, ...newFileNamesNotPresentOnResultsOrderList];
+      setResultsOrderList(currentOrderList);
+      setResults(
+        [...fileList].sort((fileA, fileB) => {
+          return currentOrderList.indexOf(fileA.name) - currentOrderList.indexOf(fileB.name);
         })
-    );
-
-    if (fileList.length === 0) {
-      return showError(NO_LAUNCH_CONFIGS_TITLE, NO_LAUNCH_CONFIGS_MESSAGE);
+      );
+      return;
     }
 
-    const allFileNames = fileList.map(({ name }) => name);
-    const resultsOrderListFilteredFromStaleFiles = resultsOrderList.filter(
-      (fileName) => allFileNames.indexOf(fileName) !== -1
-    );
-    const newFileNamesNotPresentOnResultsOrderList = allFileNames.filter(
-      (fileName) => resultsOrderList.indexOf(fileName) === -1
-    );
-
-    const currentOrderList = [...resultsOrderListFilteredFromStaleFiles, ...newFileNamesNotPresentOnResultsOrderList];
-    setResultsOrderList(currentOrderList);
-    setResults(
-      [...fileList].sort((fileA, fileB) => {
-        return currentOrderList.indexOf(fileA.name) - currentOrderList.indexOf(fileB.name);
-      })
-    );
+    return showError(NO_CONFIGS_TITLE, NO_CONFIGS_MESSAGE);
   };
 
   let initialized = false;
@@ -122,18 +180,18 @@ export default function Command() {
     <List
       isLoading={results.length === 0 && !error}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Searching for Launch Configurations..."
+      searchBarPlaceholder="Searching for Tab Configs..."
       throttle
     >
       <List.EmptyView
-        title={NO_LAUNCH_CONFIGS_TITLE}
-        description={NO_LAUNCH_CONFIGS_MESSAGE}
+        title={NO_CONFIGS_TITLE}
+        description={NO_CONFIGS_MESSAGE}
         icon={Icon.Terminal}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action.ShowInFinder title={OPEN_CONFIGS_DIR_ACTION_TITLE} path={fullPath} icon={Icon.Folder} />
-              <Action.OpenInBrowser title={VIEW_DOCS_ACTION_TITLE} url={LAUNCH_CONFIGS_URL} icon={Icon.Document} />
+              <Action.ShowInFinder title={OPEN_CONFIGS_DIR_ACTION_TITLE} path={configDir} icon={Icon.Folder} />
+              <Action.OpenInBrowser title={VIEW_DOCS_ACTION_TITLE} url={CONFIGS_URL} icon={Icon.Document} />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -175,33 +233,37 @@ function SearchListItem({
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.path.replace(fullPath + "/", "")}
+      subtitle={searchResult.path.replace(searchResult.directory + path.sep, "")}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               title={`Launch in ${getAppName()}`}
               icon={Icon.Terminal}
-              url={getLaunchConfigUri(searchResult.name)}
+              url={getConfigUri(searchResult)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.ShowInFinder
-              title="Reveal in Finder"
+              title={isWindows ? "Reveal in File Explorer" : "Reveal in Finder"}
               path={searchResult.path}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.Open
-              title="Edit Launch Configuration"
+              title={searchResult.kind === "tab" ? "Edit Tab Config" : "Edit Launch Configuration"}
               target={searchResult.path}
               shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
               title="Save as Quicklink"
-              quicklink={{ link: getLaunchConfigUri(searchResult.name), name: searchResult.name }}
+              quicklink={{ link: getConfigUri(searchResult), name: searchResult.name }}
             />
-            <Action.ShowInFinder title={OPEN_CONFIGS_DIR_ACTION_TITLE} path={fullPath} icon={Icon.Folder} />
-            <Action.OpenInBrowser title={VIEW_DOCS_ACTION_TITLE} url={LAUNCH_CONFIGS_URL} icon={Icon.Document} />
+            <Action.ShowInFinder
+              title={OPEN_CONFIGS_DIR_ACTION_TITLE}
+              path={searchResult.directory}
+              icon={Icon.Folder}
+            />
+            <Action.OpenInBrowser title={VIEW_DOCS_ACTION_TITLE} url={CONFIGS_URL} icon={Icon.Document} />
             {!isSearching && (
               <>
                 <Action

@@ -67,5 +67,8 @@ export interface SearchResponse {
 
 export interface TokenCache {
   value: string;
+  hpKey: string;
+  hpVal: string;
+  userAgent: string;
   timestamp: number;
 }

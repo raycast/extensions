@@ -1,5 +1,16 @@
 # Sentry Changelog
 
+## [Bug Fix] - 2026-05-28
+
+- Prevent issue details from crashing when the latest event has no stack frames.
+
+## [List Latest Releases] - 2026-03-31
+
+- Added new command to list latest releases per project.
+- Shows version, release date, new issues count, and crash-free session rate.
+- Color-coded crash-free rate indicators (green/yellow/red).
+- Open releases in Sentry or copy version.
+
 ## [Show issues for Sentry orgs stored in Europe] - 2025-05-15
 
 - Show issues for Sentry orgs stored in both US and Europe, previously it was showing only projects in the US.

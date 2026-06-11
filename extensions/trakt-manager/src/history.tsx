@@ -20,7 +20,7 @@ import { TraktMediaType, TraktMovieHistoryListItem, TraktShowHistoryListItem, wi
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const [mediaType, setMediaType] = useState<TraktMediaType>("movie");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();

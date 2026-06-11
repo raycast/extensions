@@ -1,20 +1,17 @@
 import { shouldOpenWorktree } from "#/helpers/general";
 import { withToast } from "#/helpers/toast";
-import { useProjects } from "#/hooks/use-projects";
+import { useProjectsWithWorktrees } from "#/hooks/use-projects-with-worktrees";
 import { Action, ActionPanel, confirmAlert, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 import path from "node:path";
 import { useMemo, useRef, useState } from "react";
-import { CACHE_KEYS } from "./config/constants";
-import { BareRepository, Project } from "./config/types";
-import { updateCache } from "./helpers/cache";
+import type { BareRepository } from "./config/types";
 import { formatPath } from "./helpers/file";
 import {
   addNewWorktree,
   addRemoteWorktree,
   checkIfBranchExistsOnRemote,
   fetch,
-  getCurrentCommit,
   getRemoteBranches,
   pullBranchChanges,
   shouldPushWorktree,
@@ -46,7 +43,7 @@ export default function Command({ directory: initialDirectory }: { directory?: s
 
   const preferences = getPreferences();
 
-  const { projects, isLoadingProjects, revalidateProjects } = useProjects();
+  const { projects, isLoadingProjects, revalidateProjects } = useProjectsWithWorktrees();
 
   // Extract bare repositories from projects
   const bareRepos: BareRepository[] = projects
@@ -162,33 +159,6 @@ export default function Command({ directory: initialDirectory }: { directory?: s
               }
 
               return shouldContinue;
-            },
-          });
-        }
-
-        // Update the worktree cache if enabled
-        if (preferences.enableWorktreeCaching) {
-          const commit = await getCurrentCommit({ path: newWorktreePath });
-
-          await updateCache<Project[]>({
-            key: CACHE_KEYS.WORKTREES,
-            updater: (projects) => {
-              if (!projects) return;
-
-              const projectIndex = projects.findIndex((p) => p.id === directory);
-              if (projectIndex === -1) return;
-
-              const project = projects[projectIndex];
-
-              project.worktrees.push({
-                id: newWorktreePath,
-                path: newWorktreePath,
-                commit,
-                branch,
-                dirty: false,
-              });
-
-              return projects;
             },
           });
         }

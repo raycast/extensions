@@ -1,9 +1,19 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showHUD } from "@raycast/api";
+import { useState, useEffect } from "react";
 import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
 import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
 import { RefreshCacheAction } from "./RefreshCacheAction";
+import { cacheManager } from "../utils/cacheManager";
+
+function useFetchingBackground() {
+  const [isFetching, setIsFetching] = useState(() => cacheManager.isFetchingBackground());
+  useEffect(() => {
+    return cacheManager.subscribeFetching(setIsFetching);
+  }, []);
+  return isFetching;
+}
 
 // Shared Copy Actions Section
 export function MeetingCopyActions(props: {
@@ -29,6 +39,7 @@ export function MeetingCopyActions(props: {
           content={shareUrl}
           icon={Icon.Link}
           shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+          onCopy={() => showHUD("Share Link Copied")}
         />
       )}
       {meeting.calendarInvitees && meeting.calendarInvitees.length > 0 && (
@@ -141,6 +152,7 @@ export function MeetingDetailActions(props: {
 export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Promise<void> }) {
   const { meeting, onRefresh } = props;
   const recordingId = meeting.recordingId ?? meeting.id;
+  const isFetchingBackground = useFetchingBackground();
 
   return (
     <ActionPanel>
@@ -169,7 +181,11 @@ export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Prom
 
       {onRefresh && (
         <ActionPanel.Section>
-          <RefreshCacheAction onRefresh={onRefresh} />
+          <RefreshCacheAction
+            onRefresh={onRefresh}
+            onStop={() => cacheManager.stopBackgroundFetch()}
+            isFetchingBackground={isFetchingBackground}
+          />
         </ActionPanel.Section>
       )}
     </ActionPanel>

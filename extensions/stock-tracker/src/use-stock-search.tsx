@@ -6,7 +6,7 @@ import yahooFinance, { Quote } from "./yahoo-finance";
 export function useStockSearch(searchText: string) {
   const abortable = useRef<AbortController>(new AbortController());
   const [symbols, setSymbols] = useState<string[]>([]);
-  const { quotes, isLoading: quotesIsLoading, resetQuotes } = useStockInfo(symbols);
+  const { quotes, isLoading: quotesIsLoading, lastUpdated, resetQuotes } = useStockInfo(symbols);
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Quote[]>([]);
 
@@ -37,9 +37,9 @@ export function useStockSearch(searchText: string) {
       setIsLoading(true);
       try {
         const searchResponse = await yahooFinance.search(searchText, abortable.current.signal);
-        const symbols = searchResponse.quotes.map((q) => q.symbol).filter((s): s is string => !!s);
-        setSymbols(symbols);
-        if (symbols.length === 0) {
+        const nextSymbols = searchResponse.quotes.map((q) => q.symbol).filter((s): s is string => !!s);
+        setSymbols(nextSymbols);
+        if (nextSymbols.length === 0) {
           setIsLoading(false);
         }
       } catch (e) {
@@ -53,7 +53,8 @@ export function useStockSearch(searchText: string) {
       }
     };
     update();
+    return () => abortable.current?.abort();
   }, [searchText]);
 
-  return { searchResults, isLoading };
+  return { searchResults, isLoading, lastUpdated };
 }

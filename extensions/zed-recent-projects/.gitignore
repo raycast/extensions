@@ -8,3 +8,6 @@
 
 # test files
 test/fixtures
+
+# Raycast files
+raycast-env.d.ts

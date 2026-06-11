@@ -13,9 +13,12 @@ Get data from your [Oura ring experience](https://ouraring.com) to keep track of
 - Get Stress - Get the last two week's stress data: stress high, recovery high, and day summary.
 - Get Resilience - Get the last two week's resilience and contributing factors.
 - Info - Get your measurement data from Oura
+- Menu Bar - See your Readiness, Sleep, and Activity scores at a glance in the menu bar
 
 ## Getting set up
+
 In order to get your Oura data directly available in Raycast, follow these steps:
+
 1. Visit [Oura on the web](https://cloud.ouraring.com/user/sign-in).
 2. Click the "Developer" icon in the bottom right (it looks like "</>") to open the developer portal.
 3. Create a new application and set the Redirect URI to `https://raycast.com/redirect?packageName=Extension`.

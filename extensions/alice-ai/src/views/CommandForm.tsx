@@ -16,7 +16,7 @@ const initialValues: ActionModel = {
   color: Colors.Blue,
   description: "",
   systemPrompt: "",
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   temperature: "0.7",
   maxTokens: "-1",
   favorite: false,

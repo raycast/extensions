@@ -26,7 +26,8 @@ alwaysApply: true
 ### State Management and Data Fetching
 - **Use `useCachedPromise` for Git Data**: All hooks that fetch data from Git (e.g., `useGitBranches`, `useGitStatus`) must use `useCachedPromise` from `@raycast/utils`. The repository path (`gitManager.repoPath`) must be part of the dependency array to ensure a separate cache for each repository.
 - **Revalidate Data After Mutations**: After any Git operation that changes repository state (e.g., checkout, commit, push), call the `.revalidate()` function on the relevant data hooks (`branches.revalidate()`, `status.revalidate()`) to refresh the UI.
-- **Use `useCachedState` for UI State**: For simple, persistent UI state (like filters or dropdown selections), use `useCachedState`.
+- **Use `useStorage` for Persistent User Data**: Repository lists, AI presets, issue tracker configs, and other user data that must survive across commands must use `useStorage` from `/src/hooks/useStorage.ts` (LocalStorage with Cache migration). Do not use `useCachedState` or `useLocalStorage` directly for this data.
+- **Use `useCachedState` for UI State**: For simple, persistent UI state (like filters, dropdown selections, or draft text), use `useCachedState`.
 
 ### Error Handling and Toast Notifications
 - **`GitManager` Handles Errors**: The `GitManager` class is responsible for catching errors from `simple-git` and displaying a failure toast.
@@ -67,6 +68,7 @@ alwaysApply: true
 - ❌ Do not create separate `toast-utils` or similar helpers.
 - ❌ Do not use emojis instead of built-in or custom SVG icons.
 - ❌ Do not create separate storage managers for frecency data; use `useCachedPromise` or `useCachedState`.
+- ❌ Do not use `useCachedState` or `useLocalStorage` directly for persistent user data; use `useStorage`.
 - ❌ Do not create config files for preferences (use the API).
 - ❌ Do not create `NavigationActions` (they are available in the Raycast API).
 - ❌ Do not use non-English localization in the code; use only English with commonly accepted Git GUI client terminology.

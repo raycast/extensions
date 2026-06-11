@@ -1,4 +1,5 @@
 import { Detail } from "@raycast/api";
+import { type ReactElement } from "react";
 import { getBannerUrl, getIMDbUrl, getScreenshotUrl, getTraktUrl } from "./helper";
 import {
   TraktEpisodeListItem,
@@ -73,7 +74,7 @@ export const createEpisodeMarkdown = (episode: TraktEpisodeListItem, show?: Trak
 
 export const createMovieMetadata = (
   movie: TraktMovieBaseItem | TraktMovieListItem | TraktMovieHistoryListItem,
-): JSX.Element => {
+): ReactElement => {
   const movieData = "movie" in movie ? movie.movie : movie;
   const baseFields = getMovieMetadataFields(movieData);
   return (
@@ -120,7 +121,7 @@ export const createMovieMetadata = (
   );
 };
 
-export const createEpisodeMetadata = (episode: TraktEpisodeListItem, show: TraktShowBaseItem): JSX.Element => {
+export const createEpisodeMetadata = (episode: TraktEpisodeListItem, show: TraktShowBaseItem): ReactElement => {
   const episodeFields = getEpisodeMetadataFields(episode);
   const showFields = getShowMetadataFields(show);
   return (

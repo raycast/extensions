@@ -13,7 +13,8 @@
     "xilopaint",
     "validate",
     "dead_hikikomori",
-    "mateus_badalotti"
+    "mateus_badalotti",
+    "jomifepe"
   ],
   "platforms": [
     "macOS",
@@ -38,6 +39,11 @@
       "name": "kill-process",
       "title": "(Force) Kill Process",
       "description": "Terminates a process by its exact name or PID (Force kill requires enabling sudo authentication with touchID on macOS: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28, admin rights on Windows)"
+    },
+    {
+      "name": "killall-process",
+      "title": "(Force) Kill All Processes by Name",
+      "description": "Terminates all processes matching a given name using killall (macOS) or taskkill /IM (Windows). Force kill requires enabling sudo authentication with touchID on macOS, admin rights on Windows."
     }
   ],
   "ai": {
@@ -637,6 +643,51 @@
           },
           {
             "meetsCriteria": "Kills only the main UpNote process, as no helpers and/or related processes were specified"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill all node processes",
+        "mocks": {
+          "killall-process": {
+            "success": true,
+            "message": "Killed all \"node\" processes"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "killall-process",
+              "arguments": {
+                "processName": "node"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Kills all node processes using the killall tool"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process force kill all Google Chrome Helper processes",
+        "mocks": {
+          "killall-process": {
+            "success": true,
+            "message": "Killed all \"Google Chrome Helper\" processes"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "killall-process",
+              "arguments": {
+                "processName": "Google Chrome Helper",
+                "force": true
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Force kills all Google Chrome Helper processes using elevated privileges"
           }
         ]
       }

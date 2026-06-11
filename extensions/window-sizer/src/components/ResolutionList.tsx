@@ -10,8 +10,8 @@ interface ResolutionListProps {
   showDeleteAction?: boolean;
   onDeleteResolution?: (resolution: Resolution) => Promise<void>;
   onToggleStar?: (resolution: Resolution) => Promise<void>;
-  selectedItemId?: string | null | undefined;
   starredResolutions?: Resolution[];
+  selectedItemId?: string;
 }
 
 interface ListAccessory {
@@ -43,8 +43,8 @@ export function ResolutionList({
   showDeleteAction = false,
   onDeleteResolution,
   onToggleStar,
-  selectedItemId,
   starredResolutions = [],
+  selectedItemId,
 }: ResolutionListProps) {
   const [isIconsReady, setIsIconsReady] = useState(false);
 
@@ -66,7 +66,6 @@ export function ResolutionList({
   const isStarred = (resolution: Resolution) =>
     starredResolutions.some((r) => r.width === resolution.width && r.height === resolution.height);
 
-  // Pre-compute accessories for each resolution to ensure stable rendering
   const resolutionAccessories = useMemo(() => {
     return resolutions.reduce(
       (acc, resolution, index) => {

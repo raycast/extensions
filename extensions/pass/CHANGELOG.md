@@ -1,5 +1,9 @@
 # Pass Changelog
 
+## [1.2.1] - 2026-03-04
+
+- Fix: Selected row value is no longer truncated at the first colon when copied or shown.
+
 ## [1.2.0] - 2024-11-21
 
 - Fix: Delete LC_ALL env variable messing with nix-darwin.

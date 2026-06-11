@@ -19,6 +19,11 @@ Launch any PowerToys tool instantly:
 - **Workspaces** - Launch workspace configurations
 - **Environment Variables** - Edit system environment variables
 - **Crop and Lock** - Reparent and Thumbnail modes
+- **Awake** - Keep your computer awake
+
+## Settings
+
+- **Auto-start PowerToys** - Attempt to start PowerToys before executing a tool
 
 ## Usage
 

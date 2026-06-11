@@ -1,9 +1,25 @@
-import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage, Alert, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Keyboard,
+  confirmAlert,
+  LocalStorage,
+  Alert,
+  Color,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import InstanceForm from "./InstanceForm";
 
 import useInstances from "../hooks/useInstances";
 import { useEffect, useState } from "react";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { authorizeInstance } from "../utils/oauth";
 
 export default function InstancesList() {
   const [selectedId, setSelectedId] = useState("");
@@ -33,8 +49,22 @@ export default function InstancesList() {
   return (
     <List searchBarPlaceholder="Filter by name, alias, username..." isLoading={isLoading} selectedItemId={selectedId}>
       {instances.map((instance) => {
-        const { id: instanceId, alias, name: instanceName, username, password, color } = instance;
-        const aliasOrName = alias ? alias : instanceName;
+        const { id: instanceId, alias, name: instanceName, username, color } = instance;
+        const aliasOrName = instanceLabel(instance);
+        const isOAuth = instance.authMode === "oauth";
+        const oauthSignedIn = isOAuth && !!instance.accessToken && !!instance.refreshToken;
+
+        const handleSignIn = async () => {
+          try {
+            await showToast({ style: Toast.Style.Animated, title: `Signing in to ${aliasOrName}` });
+            const tokens = await authorizeInstance(instance);
+            await editInstance({ ...instance, ...tokens });
+            await showToast({ style: Toast.Style.Success, title: `Signed in to ${aliasOrName}` });
+          } catch (error) {
+            await showFailureToast(error, { title: "OAuth sign-in failed" });
+          }
+        };
+
         return (
           <List.Item
             key={instanceId}
@@ -45,14 +75,14 @@ export default function InstancesList() {
             }}
             title={aliasOrName}
             subtitle={alias ? instanceName : ""}
-            keywords={[instanceName, alias ?? "", username]}
+            keywords={[instanceName, alias ?? "", username ?? ""]}
             actions={
               <ActionPanel>
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit"
-                    target={<InstanceForm onSubmit={editInstance} instance={instance} />}
+                    target={<InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={instance} />}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     onPop={mutate}
                     onPush={() => setSelectedId(instance.id)}
@@ -66,6 +96,22 @@ export default function InstancesList() {
                       LocalStorage.setItem("selected-instance", JSON.stringify(instance));
                     }}
                   ></Action>
+                  {isOAuth && oauthSignedIn && (
+                    <Action
+                      icon={Icon.Fingerprint}
+                      title="Reauthenticate"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      onAction={handleSignIn}
+                    />
+                  )}
+                  {isOAuth && !oauthSignedIn && (
+                    <Action
+                      icon={Icon.Fingerprint}
+                      title="Sign in to Instance"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      onAction={handleSignIn}
+                    />
+                  )}
                   <Action
                     title="Delete"
                     icon={Icon.Trash}
@@ -89,21 +135,15 @@ export default function InstancesList() {
                 <List.Dropdown.Section>
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
-                    title={"Open Instance"}
+                    title="Open in ServiceNow"
                     shortcut={Keyboard.Shortcut.Common.Open}
-                    url={`https://${instanceName}.service-now.com`}
-                  />
-                  <Action.OpenInBrowser
-                    icon={{ source: "servicenow.svg" }}
-                    title="Login to ServiceNow Instance"
-                    shortcut={{ modifiers: ["cmd"], key: "l" }}
-                    url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
+                    url={getInstanceBaseUrl({ name: instanceName })}
                   />
                 </List.Dropdown.Section>
                 <List.Dropdown.Section title="Instance Profiles">
                   <Action.Push
                     icon={Icon.Plus}
-                    title="Add"
+                    title="Add Instance Profile"
                     target={<InstanceForm onSubmit={addInstance} />}
                     shortcut={Keyboard.Shortcut.Common.New}
                     onPush={() => setSelectedId(instance.id)}
@@ -112,7 +152,14 @@ export default function InstancesList() {
               </ActionPanel>
             }
             accessories={[
-              { text: username, icon: Icon.Person },
+              ...(instance.authError
+                ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: instance.authError }]
+                : []),
+              isOAuth
+                ? oauthSignedIn
+                  ? { text: instance.oauthUserName ?? "", icon: Icon.Fingerprint, tooltip: "OAuth" }
+                  : { icon: { source: Icon.Fingerprint, tintColor: Color.Orange }, tooltip: "OAuth — sign in required" }
+                : { text: username ?? "", icon: Icon.Person, tooltip: "Basic Auth" },
               instance.full == "true"
                 ? { icon: { source: Icon.LockDisabled, tintColor: Color.Green }, tooltip: "Full Access" }
                 : { icon: { source: Icon.Lock, tintColor: Color.Orange }, tooltip: "Limited Access" },
@@ -124,7 +171,7 @@ export default function InstancesList() {
       {instances.length === 0 ? (
         <List.EmptyView
           title="No Instance Profiles Found"
-          description="Press ⏎ to create your first instance profile"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
               <Action.Push

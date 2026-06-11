@@ -5,6 +5,9 @@
   "description": "Never miss new extensions or extension updates ever again!",
   "icon": "store-updates-icon.png",
   "author": "chrismessina",
+  "contributors": [
+    "alexi.build"
+  ],
   "platforms": [
     "macOS",
     "Windows"

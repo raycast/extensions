@@ -1,5 +1,5 @@
-import { useCachedState } from "@raycast/utils";
 import { nanoid } from "nanoid";
+import { useStorage } from "./useStorage";
 
 /**
  * Represents an AI commit message prompt preset.
@@ -112,11 +112,11 @@ Output only the commit message, no markdown or extra text.
 };
 
 /**
- * Hook for managing AI commit message prompt presets in cached state.
+ * Hook for managing AI commit message prompt presets in persistent storage.
  * Presets are global for the extension (not per repository).
  */
 export function useAiPromptPresets() {
-  const [data, setData] = useCachedState<AiPromptPresetsData>("ai-prompt-presets", {
+  const [data, setData] = useStorage<AiPromptPresetsData>("ai-prompt-presets", {
     presets: [CONVENTIONAL_MESSAGE_PROMPT, GITMOJI_MESSAGE_PROMPT, MINIMALIST_MESSAGE_PROMPT],
     defaultPresetId: CONVENTIONAL_MESSAGE_PROMPT.id,
   });

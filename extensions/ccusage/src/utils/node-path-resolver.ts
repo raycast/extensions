@@ -25,6 +25,18 @@ const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): st
   return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
 };
 
+export const resolveFnmBaseDir = (home = process.env.HOME): string | null => {
+  if (!home) return null;
+
+  const legacyFnmPath = join(home, ".fnm");
+  if (existsSync(legacyFnmPath)) {
+    return legacyFnmPath;
+  }
+
+  const xdgDataHome = process.env.XDG_DATA_HOME || join(home, ".local", "share");
+  return join(xdgDataHome, "fnm");
+};
+
 export const resolveVersionManagerPaths = (): string[] => {
   const versionedPaths: Array<{ path: string; version: string }> = [];
   const staticPaths: string[] = [];
@@ -45,17 +57,20 @@ export const resolveVersionManagerPaths = (): string[] => {
     // Directory doesn't exist or no permissions - continue silently
   }
 
-  const fnmVersionsDir = join(home, ".fnm", "node-versions");
-  try {
-    const nodeVersions = readdirSync(fnmVersionsDir);
-    for (const version of nodeVersions) {
-      const binPath = join(fnmVersionsDir, version, "installation", "bin");
-      if (existsSync(binPath)) {
-        versionedPaths.push({ path: binPath, version });
+  const fnmBaseDir = resolveFnmBaseDir(home);
+  if (fnmBaseDir) {
+    const fnmVersionsDir = join(fnmBaseDir, "node-versions");
+    try {
+      const nodeVersions = readdirSync(fnmVersionsDir);
+      for (const version of nodeVersions) {
+        const binPath = join(fnmVersionsDir, version, "installation", "bin");
+        if (existsSync(binPath)) {
+          versionedPaths.push({ path: binPath, version });
+        }
       }
+    } catch {
+      // Directory doesn't exist or no permissions - continue silently
     }
-  } catch {
-    // Directory doesn't exist or no permissions - continue silently
   }
 
   const staticPathCandidates = [join(home, ".n", "bin"), join(home, ".volta", "bin")];

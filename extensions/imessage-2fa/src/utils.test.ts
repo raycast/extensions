@@ -187,6 +187,11 @@ describe("Testing verification link extraction", () => {
     // This link has no keywords, so it should not be detected as verification/sign-in
     expect(result).toBeNull();
   });
+
+  test("Ignores verification anchors with unsupported href values", () => {
+    expect(extractVerificationLink(`<a href="/verify?token=abc123">Verify your email</a>`)).toBeNull();
+    expect(extractVerificationLink(`<a href="mailto:support@example.com">Verify your email</a>`)).toBeNull();
+  });
 });
 
 describe("Testing binary data extraction from iMessage", () => {
@@ -317,6 +322,15 @@ describe("Testing binary data extraction from iMessage", () => {
     const result = extractTextFromBinaryData(binaryData);
     // Should extract codes that contain digits (even without spaces)
     expect(result).toMatch(/ABC123|DEF456|CodeABC123/);
+  });
+
+  test("Extract rich text payload when notification label is prepended", () => {
+    const binaryData =
+      "Time Sensitive \x04\x0Bstreamtyped\x81NSMutableAttributedString\x00Your Example verification code is: 246810\x86NSDictionary";
+    const result = extractTextFromBinaryData(binaryData);
+
+    expect(result).toContain("246810");
+    expect(result).not.toContain("NSMutableAttributedString");
   });
 });
 

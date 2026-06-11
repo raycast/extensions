@@ -36,7 +36,8 @@
       "title": "Add Worktree",
       "subtitle": "Git Worktrees",
       "description": "Add Worktree",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -47,15 +48,6 @@
       "description": "The path to the folder containing your projects",
       "required": true,
       "placeholder": "~/dev"
-    },
-    {
-      "type": "checkbox",
-      "label": "Enable Worktree Caching",
-      "name": "enableWorktreeCaching",
-      "title": "Enable Worktree Caching",
-      "description": "Enable caching of worktrees to avoid scanning directories every time (you can clear it by using the \"Clear Cache\" command)",
-      "required": true,
-      "default": true
     },
     {
       "type": "checkbox",

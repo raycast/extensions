@@ -1,5 +1,9 @@
 # LIFX Changelog
 
+## [Maintenance] - 2026-03-16
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Version 1.2.6] - 2022-09-15
 - Added a guide on how to generate a token
 - Updated screenshots

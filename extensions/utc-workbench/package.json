@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "utc-workbench",
+  "version": "1.0.0",
+  "title": "UTC Workbench",
+  "description": "Timestamp interpretation and timeline reconstruction for developer workflows",
+  "icon": "icon.png",
+  "author": "dfrancour",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "utc-workbench",
+      "title": "UTC Workbench",
+      "description": "Interpret timestamps and reconstruct event timelines",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "luxon": "^3.7.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nError: Use 'npm run publish' instead.\\n\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

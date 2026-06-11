@@ -42,12 +42,16 @@ export async function sendMessage({
     throw new Error("Can't send message to a group chat without a name.");
   }
 
+  // Escape backslashes first, then double-quotes, to safely embed in AppleScript strings.
+  const escapeForAppleScript = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const safeText = escapeForAppleScript(text);
+
   const script = group_name
     ? `
     tell application "Messages"
       try
-        set targetChat to chat "${group_name}"
-        send "${text}" to targetChat
+        set targetChat to chat "${escapeForAppleScript(group_name)}"
+        send "${safeText}" to targetChat
         return "Success"
       on error errMsg
         return "Error: " & errMsg
@@ -59,7 +63,7 @@ export async function sendMessage({
       try
         set targetService to (service 1 whose service type = ${service_name === "iMessage" ? "iMessage" : "SMS"})
         set targetBuddy to participant "${address}" of targetService
-        send "${text}" to targetBuddy
+        send "${safeText}" to targetBuddy
         return "Success"
       on error errMsg
         return "Error: " & errMsg
@@ -189,6 +193,76 @@ export function getAttachmentType(message: Message) {
   return null;
 }
 
+export function buildMessagesQuery({
+  filterClause = "",
+  spamFilters = "",
+  chatIdentifierClause = "",
+  beforeClause = "",
+  limit = "50",
+}: {
+  filterClause?: string;
+  spamFilters?: string;
+  chatIdentifierClause?: string;
+  beforeClause?: string;
+  limit?: string;
+}): string {
+  return `
+    SELECT
+      message.guid,
+      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
+        message.date / 1000000000 + strftime('%s', '2001-01-01'),
+        'unixepoch'
+      )) AS date,
+      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
+        message.date_read / 1000000000 + strftime('%s', '2001-01-01'),
+        'unixepoch'
+      )) AS date_read,
+      message.is_from_me,
+      message.is_audio_message,
+      message.is_sent,
+      message.is_read,
+      chat.chat_identifier,
+      chat.display_name,
+      CASE
+        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
+        THEN chat.display_name
+        ELSE NULL
+      END as group_name,
+      message.service,
+      hex(message.attributedBody) as body,
+      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
+      CASE
+        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
+        ELSE handle.id
+      END as group_participants,
+      attachment.filename as attachment_filename,
+      attachment.transfer_name as attachment_name,
+      attachment.mime_type as attachment_mime_type,
+      hex(replied.attributedBody) as reply_body
+    FROM
+      message
+      JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
+      JOIN chat ON chat_message_join.chat_id = chat."ROWID"
+      LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
+      LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
+      LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
+      LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
+      LEFT JOIN message replied ON message.reply_to_guid = replied.guid
+    WHERE
+      message.attributedBody IS NOT NULL
+      AND message.associated_message_type = 0
+      ${filterClause}
+      ${spamFilters}
+      ${chatIdentifierClause}
+      ${beforeClause}
+    GROUP BY
+      message.guid
+    ORDER BY
+      date DESC
+    LIMIT ${limit}
+  `;
+}
+
 export function extractOTP(text: string): string | null {
   const otpRegex = /\b\d{4,}\b/;
   const match = text.match(otpRegex);
@@ -200,6 +274,7 @@ export type Contact = {
   givenName: string;
   familyName: string;
   phoneNumbers: { number: string; countryCode: string | null }[];
+  emails: string[];
   imageData: string | null;
 };
 
@@ -224,6 +299,10 @@ export function createContactMap(contacts: Contact[]): Map<string, Contact> {
       } catch (error) {
         console.error(`Error parsing phone number ${number}:`, error);
       }
+    });
+
+    contact.emails.forEach((email) => {
+      contactMap.set(email.toLowerCase(), contact);
     });
   });
 
@@ -263,7 +342,7 @@ export function getContactOrGroupInfo(
       ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
       : getAvatarIcon(displayName);
 
-    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0].number };
+    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0]?.number };
   }
 
   return {

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "context7",
+  "title": "Context7",
+  "description": "Search Context7 libraries and browse documentation context from Raycast",
+  "icon": "extension-icon.png",
+  "author": "loris",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Context7 API Key",
+      "description": "API key used to authenticate requests against Context7"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-libraries",
+      "title": "Search Libraries",
+      "description": "Search Context7 libraries and manage favorites",
+      "mode": "view"
+    },
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "description": "Search documentation inside a Context7 library",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "libraryId",
+          "type": "text",
+          "required": true,
+          "placeholder": "Context7 library ID"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.5",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

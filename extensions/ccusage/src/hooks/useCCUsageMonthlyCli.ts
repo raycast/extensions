@@ -1,20 +1,30 @@
+import { useState, useEffect } from "react";
+import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { MonthlyUsageCommandResponseSchema } from "../types/usage-types";
+import { MonthlyUsageCommandResponse, MonthlyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
-/**
- * Hook for executing `ccusage monthly --json` command
- */
+const cache = new Cache();
+const CACHE_KEY = "ccusage-monthly";
+
 export const useCCUsageMonthlyCli = () => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const [initialData] = useState<MonthlyUsageCommandResponse | undefined>(() => {
+    const cached = cache.get(CACHE_KEY);
+    return cached ? (JSON.parse(cached) as MonthlyUsageCommandResponse) : undefined;
+  });
 
   const command = useDirectCommand ? "ccusage" : "npx";
   const args = useDirectCommand ? ["monthly", "--json"] : ["ccusage@latest", "monthly", "--json"];
 
   const result = useExec(command, args, {
     ...getExecOptions(),
+    initialData,
     parseOutput: ({ stdout }) => {
       if (!stdout) {
         throw new Error("No output received from ccusage monthly command");
@@ -23,9 +33,17 @@ export const useCCUsageMonthlyCli = () => {
       const parseResult = stringToJSON.pipe(MonthlyUsageCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid monthly usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid monthly usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
+      cache.set(CACHE_KEY, JSON.stringify(parseResult.data));
       return parseResult.data;
     },
     keepPreviousData: true,
@@ -40,6 +58,12 @@ export const useCCUsageMonthlyCli = () => {
       },
     },
   });
+
+  const intervalMs = parseInt(preferences.usageLimitsRefreshInterval || "60", 10) * 1000;
+  useEffect(() => {
+    const id = setInterval(() => result.revalidate(), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, result.revalidate]);
 
   return result;
 };

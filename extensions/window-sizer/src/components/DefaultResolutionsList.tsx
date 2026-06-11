@@ -5,16 +5,16 @@ interface DefaultResolutionsListProps {
   predefinedResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onToggleStar: (resolution: Resolution) => Promise<void>;
-  selectedItemId?: string;
   starredResolutions: Resolution[];
+  selectedItemId?: string;
 }
 
 export function DefaultResolutionsList({
   predefinedResolutions,
   onResizeWindow,
   onToggleStar,
-  selectedItemId,
   starredResolutions,
+  selectedItemId,
 }: DefaultResolutionsListProps) {
   return (
     <ResolutionList
@@ -22,8 +22,8 @@ export function DefaultResolutionsList({
       onResizeWindow={onResizeWindow}
       sectionTitle="Default Sizes"
       onToggleStar={onToggleStar}
-      selectedItemId={selectedItemId}
       starredResolutions={starredResolutions}
+      selectedItemId={selectedItemId}
     />
   );
 }

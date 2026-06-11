@@ -47,7 +47,7 @@ async function detectAmpPath(): Promise<string> {
 export function useAmpUsage(enabled = true) {
   const [ampPath, setAmpPath] = useState<string>("amp");
   const [pathDetected, setPathDetected] = useState(false);
-  const [shouldExecute, setShouldExecute] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);
 
   useEffect(() => {
@@ -56,7 +56,6 @@ export function useAmpUsage(enabled = true) {
     }
 
     // Reset execution state when Amp is disabled.
-    setShouldExecute(false);
     setPathDetected(false);
     setHasInitialFetch(false);
   }, [enabled]);
@@ -75,8 +74,6 @@ export function useAmpUsage(enabled = true) {
 
       setAmpPath(detected);
       setPathDetected(true);
-      // 路径检测完成后，允许首次执行
-      setShouldExecute(true);
     })();
 
     return () => {
@@ -91,7 +88,7 @@ export function useAmpUsage(enabled = true) {
     revalidate: execRevalidate,
   } = useExec(ampPath, ["usage"], {
     timeout: 10000,
-    execute: enabled && shouldExecute,
+    execute: enabled,
   });
 
   // 首次加载完成后，标记已完成
@@ -100,12 +97,10 @@ export function useAmpUsage(enabled = true) {
       return;
     }
 
-    if (shouldExecute && !execLoading && hasInitialFetch === false) {
+    if (!execLoading && hasInitialFetch === false) {
       setHasInitialFetch(true);
-      // 首次加载完成后，停止自动执行
-      setShouldExecute(false);
     }
-  }, [enabled, shouldExecute, execLoading, hasInitialFetch]);
+  }, [enabled, execLoading, hasInitialFetch]);
 
   const parsedResult = data ? parseAmpUsage(data) : { usage: null, error: null };
   const usage: AmpUsage | null = parsedResult.usage;
@@ -121,17 +116,15 @@ export function useAmpUsage(enabled = true) {
 
   // 合并解析错误和执行错误
   const error: AmpError | null = enabled ? parsedError || execAmpError : null;
-  const isLoading = enabled ? execLoading || !pathDetected || (!hasInitialFetch && !shouldExecute) : false;
+  const isLoading = enabled ? execLoading || !pathDetected || !hasInitialFetch : false;
 
   // 重新验证（手动刷新）
   const revalidate = useCallback(async () => {
     if (!enabled) {
       return;
     }
-
-    setShouldExecute(true);
+    setFetchKey((k) => k + 1);
     await execRevalidate();
-    setShouldExecute(false);
   }, [enabled, execRevalidate]);
 
   return {
@@ -139,5 +132,6 @@ export function useAmpUsage(enabled = true) {
     usage: enabled ? usage : null,
     error,
     revalidate,
+    fetchKey,
   };
 }

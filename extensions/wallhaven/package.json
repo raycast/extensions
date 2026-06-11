@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wallhaven",
+  "title": "Wallhaven",
+  "description": "Browse and download desktop wallpapers from Wallhaven.",
+  "icon": "extension-icon.png",
+  "author": "devadathanmb",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-wallpapers",
+      "title": "Search Wallpapers",
+      "description": "Search Wallhaven with filters for category, purity, and sorting method.",
+      "mode": "view",
+      "keywords": [
+        "wallpaper",
+        "wallhaven",
+        "search",
+        "background",
+        "desktop"
+      ]
+    },
+    {
+      "name": "top-wallpapers",
+      "title": "Top Wallpapers",
+      "description": "Browse the top-rated Wallhaven wallpapers for a selected time range.",
+      "mode": "view",
+      "keywords": [
+        "wallpaper",
+        "wallhaven",
+        "top",
+        "popular",
+        "toplist"
+      ]
+    },
+    {
+      "name": "my-collections",
+      "title": "My Collections",
+      "description": "Browse and set wallpapers from your personal Wallhaven collections.",
+      "mode": "view",
+      "keywords": [
+        "wallpaper",
+        "wallhaven",
+        "collection",
+        "favorites",
+        "saved"
+      ]
+    },
+    {
+      "name": "random-wallpaper",
+      "title": "Random Wallpaper",
+      "description": "Instantly set a random Wallhaven wallpaper as your desktop background.",
+      "mode": "no-view",
+      "keywords": [
+        "wallpaper",
+        "wallhaven",
+        "random",
+        "surprise",
+        "shuffle"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Your Wallhaven API key. Required to access NSFW content and your collections. Get it from https://wallhaven.cc/settings/account"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": false,
+      "title": "Username",
+      "description": "Your Wallhaven username. Required for the My Collections command. Find it at https://wallhaven.cc/settings/account"
+    },
+    {
+      "name": "downloadDir",
+      "type": "directory",
+      "required": false,
+      "title": "Download Directory",
+      "description": "Folder where downloaded wallpapers are saved. Defaults to ~/Downloads.",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "sfwOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Safe Search",
+      "label": "SFW content only",
+      "description": "Always restrict results to SFW content, even when an API key is provided. Disables the purity filter in Search Wallpapers.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

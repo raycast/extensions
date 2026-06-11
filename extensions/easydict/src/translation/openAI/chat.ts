@@ -21,6 +21,29 @@ const timeout = setTimeout(() => {
   controller.abort();
 }, networkTimeout); // set timeout to 15s.
 
+const REASONING_MODEL_PATTERN = /^(o1|o3|gpt-5)/i;
+
+const KNOWN_ENDPOINTS = ["https://api.openai.com/"];
+
+const DEFAULT_MAX_TOKENS = 2000;
+
+type MaxTokensParams = { max_tokens: number };
+type MaxCompletionTokensParams = { max_completion_tokens: number };
+type TokenLimitParams = MaxTokensParams | MaxCompletionTokensParams;
+
+/**
+ * Determines the appropriate token limit parameter based on endpoint and model.
+ */
+function getTokenLimitParams(endpoint: string, model: string): TokenLimitParams {
+  const isKnownEndpoint = KNOWN_ENDPOINTS.some((knownEndpoint) => endpoint.startsWith(knownEndpoint));
+  const isReasoningModel = REASONING_MODEL_PATTERN.test(model);
+  const forceMaxCompletionTokens = AppKeyStore.forceMaxCompletionTokens;
+  const useMaxCompletionTokens = forceMaxCompletionTokens || (isKnownEndpoint && isReasoningModel);
+
+  if (useMaxCompletionTokens) return { max_completion_tokens: DEFAULT_MAX_TOKENS };
+  return { max_tokens: DEFAULT_MAX_TOKENS };
+}
+
 export async function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.warn(`---> start request OpenAI`);
 
@@ -95,11 +118,13 @@ export async function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo)
     },
   ];
 
+  const tokenLimitParams = getTokenLimitParams(url, AppKeyStore.openAIModel);
+
   const params = {
     model: AppKeyStore.openAIModel,
     messages: message,
     temperature: 0,
-    max_tokens: 2000,
+    ...tokenLimitParams,
     top_p: 1.0,
     frequency_penalty: 1,
     presence_penalty: 1,

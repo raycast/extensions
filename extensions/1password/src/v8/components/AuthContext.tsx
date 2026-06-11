@@ -20,6 +20,7 @@ import {
   errorRegex,
   getCliPath,
   getSignInStatus,
+  isWindows,
   signIn,
   useAccounts,
   ZSH_PATH,
@@ -80,14 +81,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
   const authenticate = async () => {
-    await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+    if (!isWindows) {
+      await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+    }
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Authenticating...",
     });
 
     try {
-      if (!ZSH_PATH) {
+      if (!isWindows && !ZSH_PATH) {
         throw new ZshMissingError("Zsh Binary Path Missing!");
       }
 

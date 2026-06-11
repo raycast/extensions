@@ -21,7 +21,7 @@ export interface Attachment {
 }
 
 export interface DocumentStructure {
-  attachments: Attachment[];
+  attachments?: Attachment[];
   type?: string;
   content?: ContentNode[];
 }
@@ -85,6 +85,13 @@ export type Doc = Pick<
   notes_markdown?: string; // Optional - loaded on-demand when viewing "My notes" or exporting
   isShared?: boolean; // True if this doc was shared with the user (not owned by them)
   sharedBy?: string; // Name of the person who shared this doc
+  updated_at?: string;
+  web_url?: string;
+  folder_membership?: Array<{
+    id: string;
+    object: "folder";
+    name: string;
+  }>;
 };
 
 // Notes structure
@@ -333,6 +340,7 @@ export interface RecipesApiResponse {
   sharedRecipes?: Recipe[];
   publicRecipes?: Recipe[];
   unlistedRecipes?: Recipe[];
+  recipesUsage?: Record<string, unknown>;
 }
 
 export interface RecipesListResult {
@@ -341,4 +349,5 @@ export interface RecipesListResult {
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
   unlistedRecipes?: Recipe[];
+  recipesUsage?: Record<string, unknown>;
 }

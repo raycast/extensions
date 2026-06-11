@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetSingleListBookmarks } from "../apis";
 
+const log = logger.child("[ListsBookmarks]");
+
 /**
  * Hook to fetch bookmarks for a specific list with native Raycast pagination support.
  * Eliminates manual state management and cursor tracking.
@@ -29,7 +31,7 @@ export function useGetListsBookmarks(listId: string) {
 
   useEffect(() => {
     if (error) {
-      logger.error("Failed to fetch list bookmarks", { listId, error });
+      log.error("Failed to fetch list bookmarks", { listId, error });
     }
   }, [error]);
 

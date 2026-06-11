@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raylog-markdown-tasks",
+  "title": "Raylog - Markdown Tasks",
+  "description": "Manage focused local tasks from Raycast with a standalone markdown note.",
+  "icon": "raylog-markdown-tasks.png",
+  "author": "dillon-mccardell",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "tasks",
+    "notes",
+    "markdown",
+    "obsidian",
+    "productivity"
+  ],
+  "preferences": [
+    {
+      "name": "storageNotePath",
+      "type": "file",
+      "required": true,
+      "title": "Storage Note",
+      "description": "Markdown note used for Raylog storage",
+      "label": "Storage Note"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "Focus, filter, and move Raylog tasks through their lifecycle",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showDueDateIndicator",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Due Countdown",
+          "description": "Display the due date countdown in the task list",
+          "label": "Display due countdowns in the task list"
+        },
+        {
+          "name": "showPastDueIndicator",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Past Due Indicator",
+          "description": "Display overdue tasks with a past due indicator in the task list",
+          "label": "Highlight overdue tasks in the task list"
+        },
+        {
+          "name": "showStartDateIndicator",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Start Countdown",
+          "description": "Display the start date countdown in the task list",
+          "label": "Display start countdowns in the task list"
+        },
+        {
+          "name": "dueSoonDays",
+          "type": "textfield",
+          "required": false,
+          "default": "2",
+          "title": "Due Soon Days",
+          "description": "Number of days for a task to be considered Due Soon",
+          "placeholder": "2",
+          "label": "Days ahead"
+        },
+        {
+          "name": "logStatusBehavior",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto_start",
+          "title": "Status Change on Log",
+          "description": "Choose what happens when logging work on a to-do task",
+          "data": [
+            {
+              "title": "Auto Start Task",
+              "value": "auto_start"
+            },
+            {
+              "title": "Keep Current Status",
+              "value": "keep_status"
+            },
+            {
+              "title": "Prompt Each Time",
+              "value": "prompt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-task",
+      "title": "Refresh Menu Bar",
+      "description": "Show the next Raylog task in the macOS menu bar.",
+      "mode": "menu-bar",
+      "hidden": true,
+      "interval": "1m"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Capture a new Raylog task with dates and status.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "date-fns": "^4.1.0",
+    "nanoid": "^5.1.11",
+    "react": "^19.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "generate:stress-note": "node --import tsx ./scripts/generate-stress-note.ts",
+    "lint": "ray lint",
+    "test": "node --import tsx --test ./test/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -29,7 +29,6 @@
     "@raycast/eslint-config": "^2.0.4",
     "eslint": "^9.22.0",
     "react": "^18.2.0",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.8.2"
   },
   "scripts": {

@@ -1,0 +1,18 @@
+
+# Raycast
+.raycast
+
+# Dependencies
+node_modules/
+
+# Production
+dist/
+raycast-env.d.ts
+
+# Misc
+.DS_Store
+.env
+.idea/
+.vscode/
+npm-debug.log
+yarn-error.log

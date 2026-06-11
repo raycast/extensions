@@ -137,7 +137,7 @@ export const StateIcon = (state?: DeploymentState) => {
       return { source: Icon.Dot, tintColor: Color.Green };
     case "BUILDING":
     case "INITIALIZING":
-      return { source: Icon.Dot, tintColor: Color.Blue };
+      return { source: Icon.Dot, tintColor: Color.Orange };
     case "FAILED":
       return { source: Icon.Dot, tintColor: Color.Red };
     case "CANCELED":

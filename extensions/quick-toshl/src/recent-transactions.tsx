@@ -1,15 +1,15 @@
-import { ActionPanel, Action, List, useNavigation, Icon, Color, confirmAlert, Alert } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, List, useNavigation, Icon, Color } from "@raycast/api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { toshl } from "./utils/toshl";
-import { TransactionForm } from "./components/TransactionForm";
 import { Transaction } from "./utils/types";
 import { format, startOfMonth } from "date-fns";
 import { formatCurrency } from "./utils/helpers";
+import { isTransferEntry } from "./utils/toshl-model";
+import { EntryEditDeleteSections } from "./components/EntryEditDeleteSections";
 
 export default function RecentTransactions() {
   const { push, pop } = useNavigation();
 
-  // Fetch transactions for the current month
   const today = new Date();
   const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
   const todayStr = format(today, "yyyy-MM-dd");
@@ -19,34 +19,11 @@ export default function RecentTransactions() {
     isLoading,
     revalidate,
     mutate,
-  } = useCachedPromise(() => toshl.getTransactions({ from: monthStart, to: todayStr, per_page: 100 }));
+  } = usePromise(async (from: string, to: string) => toshl.getAllTransactions({ from, to }), [monthStart, todayStr]);
   const { data: categories } = useCachedPromise(() => toshl.getCategories());
   const { data: tags } = useCachedPromise(() => toshl.getTags());
   const { data: accounts } = useCachedPromise(() => toshl.getAccounts());
   const { data: defaultCurrency } = useCachedPromise(() => toshl.getDefaultCurrency());
-
-  async function handleDelete(transaction: Transaction, mode?: "one" | "tail" | "all") {
-    const isRecurring = !!transaction.repeat;
-    const message = isRecurring
-      ? mode === "one"
-        ? "Delete only this occurrence?"
-        : mode === "tail"
-          ? "Delete this and all future occurrences?"
-          : "Delete ALL occurrences (past and future)?"
-      : "Are you sure you want to delete this transaction?";
-
-    if (
-      await confirmAlert({
-        title: "Delete Transaction",
-        message,
-        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-      })
-    ) {
-      await mutate(toshl.deleteTransaction(transaction.id, mode), {
-        optimisticUpdate: (data) => data?.filter((t) => t.id !== transaction.id),
-      });
-    }
-  }
 
   function getCategoryName(id: string) {
     return categories?.find((c) => c.id === id)?.name || "Unknown Category";
@@ -60,10 +37,6 @@ export default function RecentTransactions() {
     return accounts?.find((a) => a.id === id)?.name || "Unknown";
   }
 
-  // Helper to detect transfers
-  const isTransfer = (t: Transaction) => !!t.transaction?.account;
-
-  // Group transactions by date
   const transactionsByDate = transactions?.reduce(
     (acc, t) => {
       const date = t.date;
@@ -76,10 +49,9 @@ export default function RecentTransactions() {
 
   const sortedDates = Object.keys(transactionsByDate || {}).sort((a, b) => b.localeCompare(a));
 
-  // Calculate summary
   const summary = transactions?.reduce(
     (acc, t) => {
-      if (isTransfer(t)) {
+      if (isTransferEntry(t)) {
         acc.transfers += Math.abs(t.amount);
         acc.transferCount++;
       } else if (t.amount < 0) {
@@ -120,10 +92,9 @@ export default function RecentTransactions() {
       {sortedDates.map((date) => (
         <List.Section key={date} title={format(new Date(date), "EEEE, MMM d, yyyy")}>
           {transactionsByDate![date].map((transaction) => {
-            const entryIsTransfer = isTransfer(transaction);
+            const entryIsTransfer = isTransferEntry(transaction);
             const toAccountId = transaction.transaction?.account;
 
-            // Determine icon and subtitle based on type
             let icon;
             let subtitle;
             if (entryIsTransfer) {
@@ -162,91 +133,17 @@ export default function RecentTransactions() {
                 ]}
                 actions={
                   <ActionPanel>
-                    <ActionPanel.Section title="Edit">
-                      <Action
-                        title="Edit This Entry"
-                        icon={Icon.Pencil}
-                        onAction={() =>
-                          push(
-                            <TransactionForm
-                              type={transaction.amount < 0 ? "expense" : "income"}
-                              transaction={transaction}
-                              onSubmit={async (values) => {
-                                await toshl.updateTransaction(
-                                  transaction.id,
-                                  values,
-                                  transaction.repeat ? "one" : undefined,
-                                );
-                                revalidate();
-                                pop();
-                              }}
-                            />,
-                          )
-                        }
-                      />
-                      {transaction.repeat && (
-                        <>
-                          <Action
-                            title="Edit This & Future"
-                            icon={Icon.Forward}
-                            onAction={() =>
-                              push(
-                                <TransactionForm
-                                  type={transaction.amount < 0 ? "expense" : "income"}
-                                  transaction={transaction}
-                                  onSubmit={async (values) => {
-                                    await toshl.updateTransaction(transaction.id, values, "tail");
-                                    revalidate();
-                                    pop();
-                                  }}
-                                />,
-                              )
-                            }
-                          />
-                          <Action
-                            title="Edit All Occurrences"
-                            icon={Icon.List}
-                            onAction={() =>
-                              push(
-                                <TransactionForm
-                                  type={transaction.amount < 0 ? "expense" : "income"}
-                                  transaction={transaction}
-                                  onSubmit={async (values) => {
-                                    await toshl.updateTransaction(transaction.id, values, "all");
-                                    revalidate();
-                                    pop();
-                                  }}
-                                />,
-                              )
-                            }
-                          />
-                        </>
-                      )}
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Delete">
-                      <Action
-                        title={transaction.repeat ? "Delete This Only" : "Delete Transaction"}
-                        icon={Icon.Trash}
-                        style={Action.Style.Destructive}
-                        onAction={() => handleDelete(transaction, transaction.repeat ? "one" : undefined)}
-                      />
-                      {transaction.repeat && (
-                        <>
-                          <Action
-                            title="Delete This & Future"
-                            icon={Icon.Trash}
-                            style={Action.Style.Destructive}
-                            onAction={() => handleDelete(transaction, "tail")}
-                          />
-                          <Action
-                            title="Delete All Occurrences"
-                            icon={Icon.Trash}
-                            style={Action.Style.Destructive}
-                            onAction={() => handleDelete(transaction, "all")}
-                          />
-                        </>
-                      )}
-                    </ActionPanel.Section>
+                    <EntryEditDeleteSections
+                      transaction={transaction}
+                      push={push}
+                      pop={pop}
+                      revalidate={revalidate}
+                      onDeleted={async (t, mode) => {
+                        await mutate(toshl.deleteTransaction(t.id, mode), {
+                          optimisticUpdate: (data) => (data ?? []).filter((x) => x.id !== t.id),
+                        });
+                      }}
+                    />
                     <ActionPanel.Section>
                       <Action.OpenInBrowser title="Open in Toshl" url="https://toshl.com/app/#/expenses" />
                     </ActionPanel.Section>

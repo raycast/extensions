@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import type { RuntimeCompat } from "@/types";
 
 import { runtimeFilterValues, runtimeFilters } from "@/lib/filters";
+import { jsrUrls } from "@/lib/jsrUrls";
 
 /**
  * This type represents the parsed query object.
@@ -66,7 +67,7 @@ export const useQueryParser = (queryString: string, scoped: string | null): Pars
         query += ` runtime:${key}`;
       }
     });
-    return `https://jsr.io/packages?search=${encodeURIComponent(query.trim())}`;
+    return jsrUrls.site.searchQuery(query.trim());
   }, [queryValue, scopeValue, runtimes]);
 
   return {

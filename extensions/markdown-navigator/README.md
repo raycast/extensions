@@ -9,14 +9,14 @@ A powerful Raycast extension for managing and navigating your Markdown files wit
 
 ## Features
 
-- **Fast File Browsing**: Quickly browse and search through all your Markdown files
+- **Complete File Indexing**: Recursively indexes all supported Markdown files in your configured directory
 - **Pagination**: Navigate through large collections of files with easy pagination
 - **Tag Filtering**: Filter files by tags extracted from your Markdown content
 - **Color-coded Tags**: Visually identify important, draft, complete, review, and archive tags
 - **Folder Organization**: Files are automatically grouped by folder for better organization
 - **File Management**: Create, open, delete, and move files to trash directly from Raycast
 - **Editor Integration**: Open files in your preferred Markdown editor, including Typora
-- **Progressive Loading**: Initially loads a subset of files for performance, with option to load more as needed
+- **Full Search Coverage**: Search always runs across the complete Markdown file index
 
 ## Installation
 
@@ -42,7 +42,6 @@ The extension requires a valid Markdown directory to be set in preferences:
 - **Search**: Type to search for file names or folders
 - **Browse**: Use arrow keys to navigate through the list
 - **Pagination**: Use `⌘` + `←` and `⌘` + `→` to navigate between pages
-- **Load More Files**: Press `⌘` + `⇧` + `M` to load more files when needed
 
 ### File Actions
 
@@ -108,17 +107,19 @@ The extension requires a valid Markdown directory to be set in preferences:
 ### Other Actions
 
 - **Refresh List**: Press `⌘` + `R` to refresh the file list
-- **Load More Files**: Press `⌘` + `⇧` + `M` to load more files
 - **Open Preferences**: Press `⌘` + `⇧` + `P` to open extension preferences
 
 ## Performance Considerations
 
-The extension initially loads a limited number of files for better performance. If you have a large collection of Markdown files, you can:
+The extension asynchronously indexes all supported Markdown files in your configured directory, then displays them with pagination for easier browsing. If you have a large collection of Markdown files, you can:
 
-1. Use the "Load More Files" action to progressively load more files (initially loads 50 files, with increments of 50)
-2. Use search and tag filtering to narrow down results
-3. Navigate through pages to browse all loaded files (20 files per page)
-4. View the loading status in the footer to see how many files are loaded
+1. Use search and tag filtering to narrow down results
+2. Navigate through pages to browse indexed files (20 files per page)
+3. Press `⌘` + `R` to refresh the index after adding, renaming, or deleting files outside Raycast
+
+Supported Markdown extensions are `.md`, `.markdown`, `.mdown`, and `.mkd`. Plain text files such as `.txt` are not indexed.
+
+The indexer skips hidden folders, `node_modules`, macOS user Library folders during broad scans, and VS Code history files. Regular note folders named `Library` are still indexed. If an individual Markdown file disappears or becomes inaccessible during indexing, it is skipped while the remaining files stay available.
 
 ## Requirements
 
@@ -133,4 +134,3 @@ If you encounter any issues or have suggestions for improvements, please submit 
 ## License
 
 MIT
-

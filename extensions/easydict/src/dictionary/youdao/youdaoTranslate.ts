@@ -1,5 +1,5 @@
 import axios from "axios";
-import CryptoJS from "crypto-js";
+import crypto from "node:crypto";
 import { userAgent } from "../../consts";
 import { QueryType, QueryTypeResult, QueryWordInfo, RequestErrorInfo, TranslationType } from "../../types";
 import { YoudaoKey } from "./key.type";
@@ -72,7 +72,10 @@ async function getYoudaoKey(): Promise<YoudaoKey> {
     pointParam: "client,mysticTime,product",
     mysticTime: ts,
     keyfrom: "fanyi.web",
-    sign: CryptoJS.MD5(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=asdjnjfenknafdfsdfsd`).toString(),
+    sign: crypto
+      .createHash("md5")
+      .update(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=asdjnjfenknafdfsdfsd`)
+      .digest("hex"),
   };
 
   try {
@@ -113,7 +116,10 @@ async function webTranslate(
   const { secretKey, aesKey, aesIv } = youdaoKey.data;
 
   const ts: string = String(new Date().getTime());
-  const sign = CryptoJS.MD5(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=${secretKey}`).toString();
+  const sign = crypto
+    .createHash("md5")
+    .update(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=${secretKey}`)
+    .digest("hex");
   const params: TranslateParams = {
     keyid: "webfanyi",
     client: "fanyideskweb",
@@ -158,34 +164,24 @@ async function webTranslate(
   }
 }
 
-function m(e: string): string {
-  return CryptoJS.MD5(e).toString(CryptoJS.enc.Hex);
+function md5Hex(str: string): string {
+  return crypto.createHash("md5").update(str).digest("hex");
 }
 
 function decryptAES(text: string, key: string, iv: string): string | null {
-  // console.log("---> Start decrypting...");
-  // console.log("---> Input data:", text);
-
   if (!text) {
     return null;
   }
 
   text = text.replace(/-/g, "+").replace(/_/g, "/");
-  // console.log("---> After replace:", text);
 
-  const a = CryptoJS.enc.Hex.parse(m(key));
-  const r = CryptoJS.enc.Hex.parse(m(iv));
+  const a = Buffer.from(md5Hex(key), "hex");
+  const r = Buffer.from(md5Hex(iv), "hex");
 
   try {
-    const i = CryptoJS.AES.decrypt(text, a, {
-      iv: r,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7,
-    });
-
-    const result = i.toString(CryptoJS.enc.Utf8);
-    // console.log("---> Decryption result:", result);
-    return result;
+    const decipher = crypto.createDecipheriv("aes-128-cbc", a, r);
+    const decrypted = decipher.update(text, "base64", "utf8") + decipher.final("utf8");
+    return decrypted;
   } catch (error) {
     console.error("---> Decryption error:", error);
     return null;

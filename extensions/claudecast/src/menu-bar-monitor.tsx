@@ -4,7 +4,9 @@ import {
   launchCommand,
   LaunchType,
   Color,
+  environment,
   openCommandPreferences,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
@@ -24,15 +26,23 @@ export default function MenuBarMonitor() {
 
   async function refresh() {
     try {
-      const [active, stats, recent] = await Promise.all([
-        isClaudeActive(),
-        getTodayStats(),
-        getMostRecentProject(),
-      ]);
+      const isBackground = environment.launchType === LaunchType.Background;
 
-      setIsActive(active);
-      setTodayStats(stats);
-      setRecentProject(recent?.name || null);
+      // Cheap signals always: process check + LocalStorage-cached today stats.
+      // Skip the full-history "last project" scan on background ticks; only run
+      // it when the user actually opens the menu.
+      const fetches: Promise<unknown>[] = [isClaudeActive(), getTodayStats()];
+      if (!isBackground) {
+        fetches.push(getMostRecentProject());
+      }
+
+      const results = await Promise.all(fetches);
+      setIsActive(results[0] as boolean);
+      setTodayStats(results[1] as UsageStats);
+      if (!isBackground) {
+        const recent = results[2] as { name?: string } | null;
+        setRecentProject(recent?.name || null);
+      }
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -45,21 +55,22 @@ export default function MenuBarMonitor() {
     refresh();
   }, []);
 
-  // Determine icon based on status
+  const preferences = getPreferenceValues<Preferences.MenuBarMonitor>();
+
   const getIcon = () => {
     if (error) {
       return { source: Icon.ExclamationMark, tintColor: Color.Red };
     }
-    if (isActive) {
-      return { source: Icon.CircleFilled, tintColor: Color.Green };
-    }
-    return { source: Icon.Circle, tintColor: Color.SecondaryText };
+    return "command-icon.png";
   };
 
-  // Determine title
   const getTitle = () => {
     if (isLoading) return undefined;
-    if (todayStats && todayStats.totalCost > 0) {
+    if (
+      preferences.showCostInMenuBar &&
+      todayStats &&
+      todayStats.totalCost > 0
+    ) {
       return formatCost(todayStats.totalCost);
     }
     return undefined;

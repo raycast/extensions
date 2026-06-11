@@ -43,14 +43,12 @@ export interface Mail {
   msgid: string;
   from: {
     address: string;
-    name: string;
+    name?: string | null;
   };
-  to: [
-    {
-      address: string;
-      name: string;
-    },
-  ];
+  to: Array<{
+    address: string;
+    name?: string | null;
+  }>;
   subject: string;
   intro: string;
   seen: boolean;
@@ -66,7 +64,7 @@ export interface Mail {
 
 export interface Message extends Mail {
   text: string;
-  html: string[];
+  html?: string[];
 }
 
 export type Interval = {

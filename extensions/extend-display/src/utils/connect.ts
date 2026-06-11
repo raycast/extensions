@@ -11,18 +11,30 @@ const execAsync = promisify(exec);
 
 const MIRROR_SECTION_NAME = "Mirror or extend to";
 
-// AppleScript using AXPress action instead of click
-// AXPress is a different accessibility action that may work better for AirPlay
 const connectScript = `
 do shell script "open -b com.apple.systempreferences /System/Library/PreferencePanes/Displays.prefPane"
 
 set device to (system attribute "Device_Name")
 set mirrorSectionName to (system attribute "Mirror_Section_Name")
 
+on cleanup()
+  try
+    tell application "System Settings" to quit
+  end try
+  do shell script "open raycast://"
+  delay 0.3
+end cleanup
+
 tell application "System Events"
-  repeat until (exists window 1 of application process "System Settings")
+  set windowWait to 0
+  repeat until (exists window 1 of application process "System Settings") or windowWait >= 50
     delay 0.1
+    set windowWait to windowWait + 1
   end repeat
+  if windowWait >= 50 then
+    my cleanup()
+    error "System Settings did not open in time"
+  end if
 
   tell process "System Settings"
     set frontmost to true
@@ -49,16 +61,31 @@ tell application "System Events"
     end repeat
     
     if popUpButton is missing value then
+      my cleanup()
       error "Could not find display menu button after " & maxAttempts & " attempts"
     end if
 
-    -- Click to open the menu
     click popUpButton
     delay 0.3
     
-    repeat until exists menu 1 of popUpButton
-      delay 0.1
+    -- Use try-based check instead of "exists" which throws -1700 on AXMenuButton
+    set menuWait to 0
+    set menuReady to false
+    repeat until menuReady or menuWait >= 30
+      try
+        set menuItemCount to count of menu items of menu 1 of popUpButton
+        if menuItemCount > 0 then set menuReady to true
+      end try
+      if not menuReady then
+        delay 0.1
+        set menuWait to menuWait + 1
+      end if
     end repeat
+    if not menuReady then
+      key code 53
+      my cleanup()
+      error "Display menu did not appear"
+    end if
 
     tell menu 1 of popUpButton
       set targetItem to missing value
@@ -79,15 +106,14 @@ tell application "System Events"
       end repeat
 
       if targetItem is missing value then
-        key code 53 -- Escape
+        key code 53
+        my cleanup()
         error "Display '" & device & "' not found in menu"
       end if
       
-      -- Use AXPress action instead of click
       perform action "AXPress" of targetItem
     end tell
     
-    -- Wait for connection to initiate
     delay 2
   end tell
 end tell
@@ -107,7 +133,6 @@ export async function getDisplayState(displayName: string): Promise<boolean> {
       "/usr/sbin/system_profiler SPDisplaysDataType",
       { shell: "/bin/zsh" },
     );
-    // Check if the display name appears in the connected displays output
     return stdout.toLowerCase().includes(displayName.toLowerCase());
   } catch (e) {
     console.error("Failed to get display state:", e);
@@ -126,7 +151,6 @@ export async function connectToDisplay(
   displayName: string,
   onProgress?: (progress: ConnectionProgress) => void,
 ) {
-  // 1. Get current audio source BEFORE connecting
   let currentAudio = "";
   try {
     currentAudio = await getCurrentAudioSource();
@@ -134,13 +158,11 @@ export async function connectToDisplay(
     console.error("Failed to get audio source", e);
   }
 
-  // 2. Get initial display state
   const initialState = await getDisplayState(displayName);
 
-  // 3. Connect via System Settings AppleScript and immediately lock audio
-  // Start both simultaneously to prevent audio from switching
   try {
     const connectPromise = execFileAsync("osascript", ["-e", connectScript], {
+      timeout: 15000,
       env: {
         ...process.env,
         Device_Name: displayName,
@@ -148,23 +170,18 @@ export async function connectToDisplay(
       },
     });
 
-    // 4. Start force-locking audio immediately (don't wait for AppleScript)
     let audioReverted = false;
     if (currentAudio) {
-      // Start aggressive audio lock immediately
       const audioLockPromise = forceAudioLock(currentAudio, 2000);
 
-      // Wait for connection script
       await connectPromise;
 
-      // Fire optimistic callback after menu click completes
       onProgress?.({
         phase: "clicked",
         success: true,
         connected: !initialState,
       });
 
-      // Continue watching and reverting
       audioReverted = await watchAndRevertAudio(currentAudio);
 
       if (audioReverted) {
@@ -175,7 +192,6 @@ export async function connectToDisplay(
     } else {
       await connectPromise;
 
-      // Fire optimistic callback after menu click completes
       onProgress?.({
         phase: "clicked",
         success: true,
@@ -183,11 +199,9 @@ export async function connectToDisplay(
       });
     }
 
-    // 5. Check final display state
     const newState = await getDisplayState(displayName);
     const connected = newState !== initialState ? newState : !initialState;
 
-    // Return the new state for feedback purposes
     return {
       success: true,
       connected,

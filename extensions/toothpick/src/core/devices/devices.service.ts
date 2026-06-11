@@ -6,6 +6,7 @@ export interface DevicesService {
   getDevices(): Device[];
   connectDevice(mac: string): boolean;
   disconnectDevice(mac: string): boolean;
+  refreshBluetooth(): boolean;
 }
 
 let currentServiceType: string;

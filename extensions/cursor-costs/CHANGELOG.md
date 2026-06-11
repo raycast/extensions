@@ -1,5 +1,9 @@
 # Cursor Costs Changelog
 
+## [Add Auto and API Usage] - 2026-04-11
+
+- Add auto and api usage information to the menu bar and list view
+
 ## [Initial Release] - 2026-01-30
 
 - Add menu bar command showing Cursor API usage and costs in real-time

@@ -58,6 +58,7 @@ export function clearCache(): void {
 export const CACHE_KEYS = {
   // Use same cache key for credentials and accounts since they both use data_snapshot
   dataSnapshot: () => "moneytree:data_snapshot",
+  categories: () => "moneytree:categories",
   transactions: (startDate: Date, endDate: Date, accountId?: number) => {
     // Normalize dates to start of day to ensure consistent cache keys
     const normalizeDate = (date: Date) => {

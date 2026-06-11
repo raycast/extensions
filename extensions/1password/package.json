@@ -15,7 +15,8 @@
     "lukah",
     "litomore",
     "vimtor",
-    "pavelas"
+    "pavelas",
+    "Logan-8f"
   ],
   "past_contributors": [
     "Davidwalser",
@@ -196,17 +197,17 @@
       "type": "textfield"
     },
     {
-      "description": "Enter your ZSH binary path",
+      "description": "Enter your shell binary path (macOS only, e.g., /bin/zsh)",
       "name": "zshPath",
       "placeholder": "e.g., /bin/zsh",
       "required": false,
-      "title": "1Password SHELL path",
+      "title": "1Password SHELL path (macOS)",
       "type": "textfield",
       "default": "/bin/zsh"
     }
   ],
   "dependencies": {
-    "@1password/sdk": "^0.4.0-beta.1",
+    "@1password/sdk": "^0.4.0",
     "@raycast/api": "^1.103.6",
     "@raycast/utils": "^2.2.2",
     "fast-glob": "^3.3.3"
@@ -228,6 +229,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

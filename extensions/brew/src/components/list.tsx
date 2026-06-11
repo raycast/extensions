@@ -16,6 +16,7 @@ export interface FormulaListProps {
   casks: Cask[];
   searchBarPlaceholder: string;
   searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
+  searchText?: string;
   onSearchTextChange?: (q: string) => void;
   isInstalled: (name: string) => boolean;
   onAction: () => void;
@@ -34,6 +35,7 @@ export function FormulaList(props: FormulaListProps) {
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
       searchBarAccessory={props.searchBarAccessory}
+      searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
       filtering={props.filtering ?? true}

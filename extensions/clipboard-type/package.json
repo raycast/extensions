@@ -35,6 +35,14 @@
       "default": true
     },
     {
+      "name": "softNewlines",
+      "type": "checkbox",
+      "label": "Soft Newlines (Shift+Enter)",
+      "required": false,
+      "description": "Use Shift+Enter for newlines instead of Enter. Useful for apps and websites that treat Enter as submit.",
+      "default": false
+    },
+    {
       "name": "humanCadenceSpeed",
       "type": "dropdown",
       "title": "Human Cadence Speed",

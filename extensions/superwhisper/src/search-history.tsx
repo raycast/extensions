@@ -1,11 +1,14 @@
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 import { format } from "date-fns";
-import { useRecordings } from "./hooks";
+import { getRecordingPrimaryText, Recording, useRecordings } from "./hooks";
 
 export default function Command() {
-  const { recordings, isLoading, error } = useRecordings();
+  const { recordingDir } = getPreferenceValues<Preferences.SearchHistory>();
+  const recordingsPath = recordingDir || join(homedir(), "Documents", "superwhisper", "recordings");
+  const { recordings, isLoading, pagination, error } = useRecordings(recordingsPath);
+  const latestHistoryText = recordings?.[0] ? getRecordingPrimaryText(recordings[0].meta) : "";
 
   if (error) {
     return (
@@ -20,62 +23,81 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail pagination={pagination}>
       {recordings?.map((recording) => (
-        <List.Item
+        <RecordingListItem
           key={recording.directory}
-          icon={Icon.Document}
-          title={format(recording.timestamp, "yyyy/MM/dd HH:mm:ss")}
-          detail={
-            <List.Item.Detail
-              markdown={`
-### Raw Result
-${recording.meta.rawResult}
-${
-  recording.meta.llmResult
-    ? `
-### LLM Result
-${recording.meta.llmResult}`
-    : ""
-}
-`}
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.Paste
-                title="Paste Result"
-                content={recording.meta.llmResult ? recording.meta.llmResult : recording.meta.rawResult}
-              />
-              <Action.CopyToClipboard
-                title="Copy Result"
-                content={recording.meta.llmResult ? recording.meta.llmResult : recording.meta.rawResult}
-              />
-              {recording.meta.llmResult ? (
-                <>
-                  <Action.Paste
-                    title="Paste Raw Result"
-                    content={recording.meta.rawResult}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Raw Result"
-                    content={recording.meta.rawResult}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
-                  />
-                </>
-              ) : (
-                <></>
-              )}
-              <Action.ShowInFinder
-                title="Show in Finder"
-                path={join(homedir(), "Documents", "superwhisper", "recordings", recording.directory)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              />
-            </ActionPanel>
-          }
+          recording={recording}
+          recordingsPath={recordingsPath}
+          latestHistoryText={latestHistoryText}
         />
       ))}
     </List>
+  );
+}
+
+function RecordingListItem({
+  recording,
+  recordingsPath,
+  latestHistoryText,
+}: {
+  recording: Recording;
+  recordingsPath: string;
+  latestHistoryText: string;
+}) {
+  const rawResult = recording.meta.rawResult?.trim() ?? "";
+  const llmResult = recording.meta.llmResult?.trim() ?? "";
+  const primaryResult = getRecordingPrimaryText(recording.meta);
+  const detailMarkdown = llmResult
+    ? `### LLM Result
+${llmResult}
+
+### Raw Result
+${rawResult || "_No raw result available._"}`
+    : `### Result
+${rawResult || "_No result available._"}`;
+
+  return (
+    <List.Item
+      icon={Icon.Document}
+      title={format(recording.timestamp, "yyyy/MM/dd HH:mm:ss")}
+      detail={<List.Item.Detail markdown={detailMarkdown} />}
+      actions={
+        <ActionPanel>
+          {latestHistoryText ? (
+            <Action.CopyToClipboard
+              title="Copy Last History"
+              content={latestHistoryText}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            />
+          ) : null}
+          {primaryResult ? (
+            <>
+              <Action.Paste title="Paste Result" content={primaryResult} />
+              <Action.CopyToClipboard title="Copy Result" content={primaryResult} />
+            </>
+          ) : null}
+          {llmResult ? (
+            <>
+              <Action.Paste
+                title="Paste Raw Result"
+                content={rawResult}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Raw Result"
+                content={rawResult}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+              />
+            </>
+          ) : null}
+          <Action.ShowInFinder
+            title="Show in Finder"
+            path={join(recordingsPath, recording.directory)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

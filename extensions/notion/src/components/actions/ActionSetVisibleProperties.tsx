@@ -17,7 +17,10 @@ export function ActionSetVisibleProperties(props: {
     <ActionPanel.Submenu
       title="Show/Hide Properties"
       icon={Icon.Eye}
-      shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "opt", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "opt", "shift"], key: "p" },
+      }}
     >
       <ActionPanel.Section>
         {selectedProperties.map(

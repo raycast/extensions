@@ -51,12 +51,60 @@
               "value": "supabase"
             },
             {
+              "title": "Tailwind",
+              "value": "tailwind"
+            },
+            {
+              "title": "OpenAI",
+              "value": "openai"
+            },
+            {
+              "title": "Mintlify",
+              "value": "mintlify"
+            },
+            {
+              "title": "Prisma",
+              "value": "prisma"
+            },
+            {
+              "title": "Clerk",
+              "value": "clerk"
+            },
+            {
+              "title": "ElevenLabs",
+              "value": "elevenlabs"
+            },
+            {
+              "title": "Resend",
+              "value": "resend"
+            },
+            {
+              "title": "Trigger.dev",
+              "value": "triggerdev"
+            },
+            {
               "title": "Nuxt",
               "value": "nuxt"
             },
             {
-              "title": "Tailwind",
-              "value": "tailwind"
+              "title": "Browserbase",
+              "value": "browserbase"
+            },
+            {
+              "title": "Cloudflare",
+              "value": "cloudflare"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Stripe",
+              "value": "stripe"
+            },
+            {
+              "title": "Firecrawl",
+              "value": "firecrawl"
             },
             {
               "title": "Bitmap",

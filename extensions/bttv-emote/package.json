@@ -33,5 +33,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

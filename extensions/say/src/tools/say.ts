@@ -1,4 +1,4 @@
-import { say } from "mac-say";
+import { say } from "../speech.js";
 import { getParsedSaySettings } from "../utils.js";
 
 type Input = {

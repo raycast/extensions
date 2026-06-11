@@ -1,4 +1,5 @@
 import { availabilityContrast, increaseContrast } from "../commands";
+import { adjustDisplayValue } from "./adjust-display-value";
 
 type Input = {
   /**
@@ -21,16 +22,5 @@ type Input = {
  * not support contrast changes.
  */
 export default async function toolIncreaseContrast(input: Input) {
-  if (!(await availabilityContrast(input.tagID))) {
-    return false;
-  }
-
-  const increment =
-    typeof input.increment === "number" && input.increment >= 0 && input.increment <= 1 ? input.increment : undefined;
-
-  try {
-    return await increaseContrast(input.tagID, increment);
-  } catch (error) {
-    return false;
-  }
+  return adjustDisplayValue(input, availabilityContrast, increaseContrast);
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { SimpleTranslateResult } from "./simple-translate";
 
 interface ActionsOpts {
@@ -14,7 +14,11 @@ export const ConfigurableCopyPasteActions = ({ defaultActionsPrefix, value }: Ac
     <Action.Paste title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`} content={value} />
   );
   const copyAction = (
-    <Action.CopyToClipboard title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`} content={value} />
+    <Action.CopyToClipboard
+      title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`}
+      content={value}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+    />
   );
 
   if (defaultPreference === "paste") {

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, environment } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, environment, LaunchProps, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "fs/promises";
 import path from "path";
@@ -18,7 +18,20 @@ type Client = {
   };
 };
 
-export default function Command() {
+type ClientSearchLaunchContext = {
+  syncError?: string;
+};
+
+function extractIpAddress(text: string): string | undefined {
+  const ipv4 = text.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/)?.[0];
+  if (ipv4) return ipv4;
+  // IPv6 — handle both full and compressed (::) forms
+  return text.match(/\b(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}\b/i)?.[0];
+}
+
+export default function Command(props: LaunchProps<{ launchContext?: ClientSearchLaunchContext }>) {
+  const syncError = props.launchContext?.syncError;
+  const syncErrorIp = syncError ? extractIpAddress(syncError) : undefined;
   const [clients, setClients] = useState<Client[]>([]);
   const [filtered, setFiltered] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +92,24 @@ export default function Command() {
       searchBarPlaceholder="Search by name, email, or company..."
       throttle
     >
-      {hasError ? (
+      {syncError ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Client Sync Failed"
+          description={syncError}
+          actions={
+            <ActionPanel>
+              {syncErrorIp && <Action.CopyToClipboard title="Copy IP Address" content={syncErrorIp} />}
+              <Action.CopyToClipboard title="Copy Error" content={syncError} />
+              <Action
+                title="Retry Sync"
+                icon={Icon.ArrowClockwise}
+                onAction={() => launchCommand({ name: "client-sync", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : hasError ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="No Clients Found"

@@ -1,7 +1,7 @@
 {
   "name": "vim-leader-key",
-  "title": "Vim Leader Key",
-  "description": "Vim-style leader key for launching apps, running commands, and triggering actions with key sequences",
+  "title": "Vim Leader Key - Keyboard Shortcut Sequences",
+  "description": "Vim-style keyboard shortcut sequences for launching apps, running commands, and triggering actions",
   "icon": "icon.png",
   "author": "akshay_k",
   "categories": [
@@ -14,6 +14,12 @@
       "name": "leader-key",
       "title": "Leader Key",
       "description": "Activate leader key mode to trigger actions with key sequences",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture the current app, URL, folder, or path as a Leader Key shortcut",
       "mode": "view"
     },
     {
@@ -46,24 +52,34 @@
       "title": "Timeout Duration",
       "description": "Seconds of inactivity before resetting (2.5 - 6 seconds)",
       "required": false
+    },
+    {
+      "name": "openUrlsInActiveBrowser",
+      "type": "checkbox",
+      "default": false,
+      "title": "Open URLs in Active Browser",
+      "description": "Open URL shortcuts in the active browser instead of the configured or default browser when a browser is active",
+      "label": "Open URLs in active browser",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.2",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --test --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON test/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

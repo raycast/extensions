@@ -15,7 +15,7 @@ export const getUser = async (id: string) => {
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -31,7 +31,7 @@ export const getUserLeagues = async (id: string) => {
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
     /* eslint-disable @typescript-eslint/no-explicit-any */
     return data.leagues.classic.filter((league: any) => league.league_type === "x");
   } catch (error) {
@@ -47,7 +47,7 @@ export const getLeague = async (id: string) => {
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -63,7 +63,7 @@ export const getUserTeamByGameweek = async (id: string, gameweek: number | undef
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -79,7 +79,7 @@ export const getAllPlayers = async () => {
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data.elements;
   } catch (error) {
@@ -95,7 +95,7 @@ export const getBootstrapStatic = async () => {
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {

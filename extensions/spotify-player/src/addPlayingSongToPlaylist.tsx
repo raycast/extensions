@@ -25,6 +25,7 @@ import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
 import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
 import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
+import { Like, OpenLibrary, OpenSearch } from "./shortcuts/shortcuts";
 
 type LaunchContextData = {
   playlistId?: string;
@@ -60,11 +61,13 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                 icon={Icon.Book}
                 title="Your Library"
                 onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                shortcut={OpenLibrary}
               />
               <Action
                 title="Search"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+                shortcut={OpenSearch}
               />
               <Action
                 icon={Icon.Repeat}
@@ -199,6 +202,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                         });
                       }
                     }}
+                    shortcut={Like}
                   />
                   {playlist.id && (
                     <CreateQuicklink

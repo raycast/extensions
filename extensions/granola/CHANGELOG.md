@@ -1,5 +1,36 @@
 # Granola Changelog
 
+## [Sortable date prefixes for exports] - 2026-05-29
+
+- Prefix exported note and transcript filenames with ISO-8601 creation date
+- Sorting files by name now yields chronological order
+
+## [2.1.4] - 2026-05-26
+
+### Bug Fixes
+
+- Automatically refresh expired WorkOS access tokens via Granola's `refresh-access-token` API and persist updated tokens locally, so Search Notes and other commands work again without requiring the Granola app to refresh the session first.
+
+### Enhancements
+
+- Added structured `[Granola]` dev-console logging across auth, fetch, and error UI paths to make troubleshooting easier during `npm run dev`.
+
+## [2.1.3] - 2026-05-08
+
+### New Features
+
+- Added the `manage-folders` AI tool to create, delete, and organize Granola folders.
+- Added a local stored-account authentication fallback so the extension can still fetch notes and transcripts when Granola no longer exposes a usable plaintext WorkOS/Cognito token.
+
+### Enhancements
+
+- Improved Granola API helpers for folder, recipe, note content, and transcript workflows.
+
+### Bug Fixes
+
+- Fixed Granola auth detection for users seeing empty note lists, "no search results", or missing transcript exports despite being logged in to the Granola desktop app. This addresses [#27740](https://github.com/raycast/extensions/issues/27740) and [#27744](https://github.com/raycast/extensions/issues/27744).
+
+
 ## [2.1.2] - 2026-02-03
 
 ### 🎨 Visual Updates

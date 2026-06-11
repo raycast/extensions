@@ -101,15 +101,16 @@ export default function EditTeamTimeFlags() {
         </ActionPanel>
       }
     >
-      {groups.map((group) => {
+      {groups.map((group, index) => {
         const timeLabel = `(${group.time}) ${group.cities.join(" / ")}`;
         const signature = group.signature;
         const currentValue = customMapping[signature] ?? group.combinedFlags;
+        const fieldId = `time-group-${index}-${signature.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 
         return (
           <Form.TextField
             key={signature}
-            id={signature}
+            id={fieldId}
             title={timeLabel}
             placeholder="Enter custom flag"
             value={currentValue}

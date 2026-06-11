@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 export default class CityType {
-  static parse(str, env) {
+  static parse(str: string, env: AnyObject) {
     let country = env.country;
     let matches;
     let abbreviation = str;

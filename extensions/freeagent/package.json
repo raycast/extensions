@@ -54,17 +54,418 @@
       "name": "list-bank-transactions",
       "title": "List Bank Transactions",
       "subtitle": "FreeAgent",
-      "description": "List all bank transactions from FreeAgent",
+      "description": "List all bank transactions from FreeAgent, including explained and unexplained",
       "mode": "view"
     },
     {
       "name": "list-unexplained-transactions",
       "title": "List Unexplained Transactions",
       "subtitle": "FreeAgent",
-      "description": "List unexplained bank transactions that need attention",
+      "description": "List unexplained bank transactions that need attention for bookkeeping",
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "analyze-financials",
+      "title": "Analyze Financials",
+      "description": "Analyze financial data and provide insights about invoices, cash flow, and business performance"
+    },
+    {
+      "name": "find-invoice", 
+      "title": "Find Invoice",
+      "description": "Find specific invoices using natural language search criteria like client name, reference, amount, or date"
+    },
+    {
+      "name": "create-invoice-ai",
+      "title": "Create Invoice with AI",
+      "description": "Create an invoice using natural language input for client name, services, and amount"
+    },
+    {
+      "name": "categorize-transactions",
+      "title": "Categorize Transactions", 
+      "description": "Analyze and categorize bank transactions to help understand spending patterns and identify unexplained transactions"
+    },
+    {
+      "name": "client-insights",
+      "title": "Client Insights",
+      "description": "Analyze client payment patterns, revenue contributions, and business relationships to provide insights about your customers"
+    },
+    {
+      "name": "cash-flow-summary",
+      "title": "Cash Flow Summary",
+      "description": "Analyze cash flow patterns, incoming and outgoing money, and provide forecasts to help with business financial planning"
+    },
+    {
+      "name": "search-explained-transactions",
+      "title": "Search Explained Transactions",
+      "description": "Search through previously explained bank transactions to find patterns and provide context for understanding transaction explanations"
+    },
+    {
+      "name": "match-file-to-transaction",
+      "title": "Match File to Transaction",
+      "description": "Match files (invoices, receipts, etc.) to bank transactions using date, amount, and description, then provide attachment and explanation suggestions"
+    },
+    {
+      "name": "add-bank-transaction-explanation",
+      "title": "Add Bank Transaction Explanation",
+      "description": "Add an explanation to a bank transaction in FreeAgent, including category assignment and tax details. Use for UNEXPLAINED transactions only."
+    },
+    {
+      "name": "update-bank-transaction-explanation",
+      "title": "Update Bank Transaction Explanation", 
+      "description": "Update an existing bank transaction explanation in FreeAgent. Use for MARKED_FOR_REVIEW transactions that already have auto-generated explanations."
+    },
+    {
+      "name": "upload-attachment",
+      "title": "Upload File Attachment",
+      "description": "Upload a file attachment (receipt, invoice, etc.) to FreeAgent that can be associated with bank transaction explanations"
+    },
+    {
+      "name": "list-categories",
+      "title": "List Categories",
+      "description": "List all available FreeAgent categories for transaction explanations and categorization"
+    },
+    {
+      "name": "update-bank-transaction",
+      "title": "Update Bank Transaction",
+      "description": "Update bank transaction properties, particularly to clear marked_for_review status after updating explanations"
+    },
+    {
+      "name": "get-all-bank-transactions",
+      "title": "List Bank Transactions",
+      "description": "List bank transactions across all or specific accounts. Filter by status (unexplained, marked_for_review, explained, etc.), date range, and account. Returns explanation URLs for transactions that have them — use these when calling update-bank-transaction-explanation."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List FreeAgent projects. Returns each project's URL — required by create-task-ai, list-tasks, list-timeslips-ai, delete-project, and create-timeslip-ai."
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new project in FreeAgent for a given contact. Requires confirmation."
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Permanently delete a FreeAgent project. Requires confirmation. Projects with attached invoices/tasks/timeslips cannot be deleted — mark them Hidden/Completed instead."
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "List tasks, optionally scoped to a project URL. Returns each task's URL — required by update-task, delete-task, and create-timeslip-ai."
+    },
+    {
+      "name": "create-task-ai",
+      "title": "Create Task",
+      "description": "Create a task inside a project (provide a project URL from list-projects). Requires confirmation."
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Edit a task's name, billing rate, billable flag, billing period, or status. Requires confirmation."
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "description": "Permanently delete a task. Requires confirmation. Tasks with timeslips cannot be deleted — use update-task with status=Hidden/Completed instead."
+    },
+    {
+      "name": "list-timeslips-ai",
+      "title": "List Timeslips",
+      "description": "List timeslips (timesheet entries) with optional filters by project, task, user, view, and date range. Returns each timeslip's URL — required by update-timeslip and delete-timeslip."
+    },
+    {
+      "name": "create-timeslip-ai",
+      "title": "Create Timeslip",
+      "description": "Log a timesheet entry against a task. Requires confirmation. Project is inferred from the task; user defaults to the authenticated user."
+    },
+    {
+      "name": "update-timeslip",
+      "title": "Update Timeslip",
+      "description": "Edit an existing timeslip — including switching it to a different task. Requires confirmation."
+    },
+    {
+      "name": "delete-timeslip",
+      "title": "Delete Timeslip",
+      "description": "Permanently delete a timeslip. Requires confirmation."
+    }
+  ],
+  "ai": {
+    "instructions": "You are an AI assistant that helps users manage their FreeAgent accounting data. Always provide clear, actionable insights and use emojis to make the output more readable. When analyzing financial data, focus on practical business insights and recommendations. Format currency amounts appropriately and highlight important information like overdue invoices or cash flow issues. If authentication is required, guide the user to authenticate with FreeAgent first.\n\nFor bank transactions:\n• Use get-all-bank-transactions for all listing queries — filter by view (unexplained, marked_for_review, explained, all, manual, imported), date range, or account. This tool also exposes each transaction's existing explanation URLs, which you'll need for the marked-for-review workflow below.\n• Use list-categories to show available categories before creating explanations.\n\n**IMPORTANT - Bank Transaction Explanation Workflow:**\n• For UNEXPLAINED transactions: Use add-bank-transaction-explanation to create new explanations.\n• For MARKED_FOR_REVIEW transactions:\n  1. Call get-all-bank-transactions with view='marked_for_review' to find the transaction and read its explanation URL from the output.\n  2. Use update-bank-transaction-explanation with that explanationUrl to modify the auto-generated explanation.\n  3. Use update-bank-transaction with markedForReview=false to clear the flag and finalize the transaction.\n• If add-bank-transaction-explanation returns a 422 error about 'already explained', the transaction is marked for review — use the 3-step process above.\n\n**File Attachments:**\n• Use upload-attachment to upload receipts, invoices, or supporting documents\n• The upload returns an attachment URL that can be used with explanation tools\n• Attachments can be added when creating new explanations or updating existing ones\n\nUse search-explained-transactions to find patterns in historical transactions. Use match-file-to-transaction to help users attach files (invoices, receipts) to the correct transactions with proper explanations. Always confirm before making changes to transaction explanations or file attachments.\n\n**Projects, Tasks & Timeslips Workflow:**\n• Always start by calling list-projects to resolve project URLs from a name. For task-scoped operations, then call list-tasks with the project URL.\n• Use create-project / delete-project to manage projects. Both require confirmation; delete fails if the project has invoices, tasks, or timeslips — mark it Hidden/Completed via update on the FreeAgent UI instead.\n• Use create-task-ai / update-task / delete-task to manage tasks. All require confirmation. Tasks with timeslips cannot be deleted — use update-task with status=Hidden or Completed instead.\n• For \"cleanup tasks and recreate from a structure\" requests: first list the project's tasks, then for each task call delete-task; if that fails because the task has timeslips, fall back to update-task status=Hidden. Then create the new tasks with create-task-ai.\n• Use list-timeslips-ai to find existing timesheet entries (filter by projectUrl, taskUrl, fromDate/toDate). Use create-timeslip-ai to log new time against a task — project and user are inferred automatically. Use update-timeslip to edit an entry (including switching it to a different task by passing taskUrl). Use delete-timeslip to remove an entry.",
+    "evals": [
+      {
+        "input": "@freeagent show me my financial overview",
+        "expected": [
+          {
+            "callsTool": "analyze-financials"
+          }
+        ]
+      },
+      {
+        "input": "@freeagent find invoice for ABC Company",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-invoice",
+              "arguments": {
+                "searchCriteria": "ABC Company"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent create invoice for John Smith for £500 consulting work",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-invoice-ai",
+              "arguments": {
+                "clientName": "John Smith",
+                "invoiceDetails": "£500 consulting work"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent analyze my spending patterns",
+        "expected": [
+          {
+            "callsTool": "categorize-transactions"
+          }
+        ]
+      },
+      {
+        "input": "@freeagent show me client insights for ABC Company",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "client-insights", 
+              "arguments": {
+                "clientName": "ABC Company"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent what's my cash flow looking like?",
+        "expected": [
+          {
+            "callsTool": "cash-flow-summary"
+          }
+        ]
+      },
+      {
+        "input": "@freeagent list my unexplained transactions",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-bank-transactions",
+              "arguments": {
+                "view": "unexplained"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent show me transactions marked for review",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-bank-transactions",
+              "arguments": {
+                "view": "marked_for_review"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent search for explained transactions from ABC Company",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-explained-transactions",
+              "arguments": {
+                "searchQuery": "ABC Company"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent find previous software subscription payments",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-explained-transactions",
+              "arguments": {
+                "searchQuery": "software subscription"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent match invoice file 'Invoice_ABC_500.pdf' with amount £500 dated 2024-01-15",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "match-file-to-transaction",
+              "arguments": {
+                "fileName": "Invoice_ABC_500.pdf",
+                "fileAmount": 500,
+                "fileDate": "2024-01-15",
+                "fileType": "invoice"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent attach receipt for £25 coffee expense from today",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "match-file-to-transaction",
+              "arguments": {
+                "fileAmount": 25,
+                "fileDescription": "coffee expense",
+                "fileType": "receipt"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent add explanation for transaction https://api.freeagent.com/v2/bank_transactions/123 as office supplies for £50",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-bank-transaction-explanation",
+              "arguments": {
+                "bankTransactionUrl": "https://api.freeagent.com/v2/bank_transactions/123",
+                "description": "office supplies",
+                "grossValue": "50"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent update explanation https://api.freeagent.com/v2/bank_transaction_explanations/456 to change description to 'updated office supplies'",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-bank-transaction-explanation",
+              "arguments": {
+                "explanationUrl": "https://api.freeagent.com/v2/bank_transaction_explanations/456",
+                "description": "updated office supplies"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent upload receipt file receipt.pdf with base64 data ABC123",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "upload-attachment",
+              "arguments": {
+                "fileName": "receipt.pdf",
+                "contentType": "application/pdf",
+                "fileData": "ABC123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent show me available categories for transactions",
+        "expected": [
+          {
+            "callsTool": "list-categories"
+          }
+        ]
+      },
+      {
+        "input": "@freeagent update transaction https://api.freeagent.com/v2/bank_transactions/123 to clear marked for review status",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-bank-transaction",
+              "arguments": {
+                "transactionUrl": "https://api.freeagent.com/v2/bank_transactions/123",
+                "markedForReview": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent show me all bank transactions from the last 30 days",
+        "expected": [
+          {
+            "callsTool": "get-all-bank-transactions"
+          }
+        ]
+      },
+      {
+        "input": "@freeagent finalise the marked-for-review transaction https://api.freeagent.com/v2/bank_transactions/123 — update its explanation https://api.freeagent.com/v2/bank_transaction_explanations/456 to 'office supplies' and clear the review flag",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-bank-transaction-explanation",
+              "arguments": {
+                "explanationUrl": "https://api.freeagent.com/v2/bank_transaction_explanations/456",
+                "description": "office supplies"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-bank-transaction",
+              "arguments": {
+                "transactionUrl": "https://api.freeagent.com/v2/bank_transactions/123",
+                "markedForReview": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@freeagent show me my projects",
+        "expected": [{ "callsTool": "list-projects" }]
+      },
+      {
+        "input": "@freeagent list tasks for the Acme website project",
+        "expected": [{ "callsTool": "list-projects" }, { "callsTool": "list-tasks" }]
+      },
+      {
+        "input": "@freeagent log 2 hours today on the Acme design task",
+        "expected": [{ "callsTool": "create-timeslip-ai" }]
+      },
+      {
+        "input": "@freeagent delete the timeslip https://api.freeagent.com/v2/timeslips/42",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-timeslip",
+              "arguments": {
+                "timeslipUrl": "https://api.freeagent.com/v2/timeslips/42"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "default_payment_terms_in_days",

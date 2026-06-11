@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Custom Files
+todo.md
+findings_and_bugs.md
+test-fetch.js
+result.json

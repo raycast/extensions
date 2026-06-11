@@ -1,11 +1,8 @@
 import { launchCommand, LaunchType } from "@raycast/api";
+import { debounce } from "./debounce";
 import isMenuBarAvailable from "./isMenuBarAvailable";
 
-/**
- * Triggers a refresh of the menu bar command in background.
- * Returns true if successful, false if not available or not activated.
- */
-export async function triggerMenuBarRefresh(): Promise<boolean> {
+async function doTriggerMenuBarRefresh(): Promise<boolean> {
   if (!isMenuBarAvailable()) {
     return false;
   }
@@ -25,3 +22,9 @@ export async function triggerMenuBarRefresh(): Promise<boolean> {
     throw error;
   }
 }
+
+/**
+ * Triggers a refresh of the menu bar command in background.
+ * Debounced to 5 seconds to prevent rapid successive refreshes.
+ */
+export const triggerMenuBarRefresh = debounce(doTriggerMenuBarRefresh, 5000);

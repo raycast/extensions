@@ -9,7 +9,8 @@
     "jelias",
     "xulobeats",
     "pernielsentikaer",
-    "taken"
+    "taken",
+    "eduardo_gomez"
   ],
   "categories": [
     "Fun"
@@ -30,7 +31,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.1",
+    "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {

@@ -3,7 +3,11 @@ import { ChannelsResponse, Station } from "../types/station";
 
 const SOMAFM_API_URL = "https://somafm.com/channels.json";
 
-export async function fetchStations(): Promise<Station[]> {
+interface FetchStationsOptions {
+  showErrorToast?: boolean;
+}
+
+export async function fetchStations(options: FetchStationsOptions = {}): Promise<Station[]> {
   try {
     const response = await fetch(SOMAFM_API_URL);
 
@@ -14,9 +18,11 @@ export async function fetchStations(): Promise<Station[]> {
     const data = (await response.json()) as ChannelsResponse;
     return data.channels;
   } catch (error) {
-    await showFailureToast(error instanceof Error ? error.message : "Unknown error occurred", {
-      title: "Failed to fetch stations",
-    });
+    if (options.showErrorToast !== false) {
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error occurred", {
+        title: "Failed to fetch stations",
+      });
+    }
     return [];
   }
 }

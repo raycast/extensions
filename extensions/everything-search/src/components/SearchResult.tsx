@@ -21,12 +21,18 @@ export function SearchResult({ preferences, searchText, onSearchTextChange }: Se
   const minChars: number = Number(preferences?.minCharsToSearch) || 3;
 
   const { data: searchResults = [], isLoading } = useCachedPromise(
-    (text: string, prefs: Preferences | null): Promise<FileInfo[]> => {
-      if (!prefs || text.length < minChars) return Promise.resolve([]);
-      return loadFilesList(text, prefs);
+    async (text: string) => {
+      const results = await loadFilesList(text, preferences);
+      return results;
     },
-    [searchText, preferences],
-    { initialData: [] as FileInfo[] },
+    [searchText],
+    {
+      execute: searchText.length >= minChars,
+      keepPreviousData: true,
+      onError: (error) => {
+        console.error("Search error:", error);
+      },
+    },
   );
 
   const onSelectionChange = useCallback(
@@ -81,7 +87,7 @@ export function SearchResult({ preferences, searchText, onSearchTextChange }: Se
             <FileActionPanel file={file} preferences={preferences} onToggleDetails={onToggleDetails}>
               {dirname(file.commandline) !== file.commandline && (
                 <Action.Push
-                  title="Navigate Up"
+                  title="Navigate Up" // eslint-disable-line @raycast/prefer-title-case
                   icon={Icon.ArrowUp}
                   target={
                     <DirectoryBrowser
@@ -94,7 +100,7 @@ export function SearchResult({ preferences, searchText, onSearchTextChange }: Se
                   }
                   shortcut={{
                     macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
-                    windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
                   }}
                 />
               )}
@@ -113,7 +119,7 @@ export function SearchResult({ preferences, searchText, onSearchTextChange }: Se
                   }
                   shortcut={{
                     macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
-                    windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
                   }}
                 />
               )}

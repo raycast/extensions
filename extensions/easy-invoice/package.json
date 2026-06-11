@@ -1,0 +1,203 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easy-invoice",
+  "title": "Easy Invoice",
+  "description": "Create and manage professional PDF invoices in seconds. Track clients, export records, and get paid faster.",
+  "icon": "command-icon.png",
+  "author": "davidosull",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "create-invoice",
+      "title": "Create Invoice",
+      "subtitle": "Easy Invoice",
+      "description": "Create and generate a new PDF invoice",
+      "mode": "view"
+    },
+    {
+      "name": "list-invoices",
+      "title": "List Invoices",
+      "subtitle": "Easy Invoice",
+      "description": "Browse and manage issued invoices",
+      "mode": "view"
+    },
+    {
+      "name": "export-invoices",
+      "title": "Export Invoices",
+      "subtitle": "Easy Invoice",
+      "description": "Export invoice history as CSV or PDF summary",
+      "mode": "view"
+    },
+    {
+      "name": "manage-clients",
+      "title": "Manage Clients",
+      "subtitle": "Easy Invoice",
+      "description": "Add, edit, and remove saved clients",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "businessName",
+      "title": "Business Name",
+      "description": "Your trading name shown on invoices",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "yourName",
+      "title": "Your Name",
+      "description": "Your full name for email correspondence",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "businessAddress",
+      "title": "Business Address",
+      "description": "Full address shown on invoices. Use commas to separate lines.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "businessEmail",
+      "title": "Business Email",
+      "description": "Contact email shown on invoices",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "businessPhone",
+      "title": "Business Phone",
+      "description": "Contact phone shown on invoices",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "bankName",
+      "title": "Bank Name",
+      "description": "Bank details are printed on invoices so clients can pay you directly",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "accountName",
+      "title": "Account Name",
+      "description": "Account holder name",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "sortCode",
+      "title": "Sort Code",
+      "description": "Sort code in XX-XX-XX format",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "accountNumber",
+      "title": "Account Number",
+      "description": "Bank account number",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "paymentTermsDays",
+      "title": "Payment Terms (Days)",
+      "description": "Default number of days until payment is due",
+      "type": "textfield",
+      "required": true,
+      "default": "30"
+    },
+    {
+      "name": "paymentTermsText",
+      "title": "Payment Terms Text",
+      "description": "Optional custom payment terms text. Leave blank to auto-generate from days.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "vatRegistered",
+      "title": "VAT Registered",
+      "description": "Whether VAT is applied by default on new invoices",
+      "type": "checkbox",
+      "required": true,
+      "default": false,
+      "label": "Apply VAT by default"
+    },
+    {
+      "name": "vatRate",
+      "title": "VAT Rate (%)",
+      "description": "VAT percentage rate",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    },
+    {
+      "name": "vatNumber",
+      "title": "VAT Number",
+      "description": "VAT registration number shown on invoices when VAT is applied",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "invoicePrefix",
+      "title": "Invoice Prefix",
+      "description": "Prefix before invoice number (e.g., INV)",
+      "type": "textfield",
+      "required": true,
+      "default": "INV"
+    },
+    {
+      "name": "startingInvoiceNumber",
+      "title": "Starting Invoice Number",
+      "description": "First invoice number to use. Set to continue an existing sequence (e.g., 24 if last invoice was INV-0023)",
+      "type": "textfield",
+      "required": true,
+      "default": "1"
+    },
+    {
+      "name": "currencyCode",
+      "title": "Currency",
+      "description": "ISO 4217 currency code for invoice amounts (e.g., GBP, EUR, USD)",
+      "type": "textfield",
+      "required": true,
+      "default": "GBP"
+    },
+    {
+      "name": "saveLocation",
+      "title": "Invoice Save Location",
+      "description": "Base directory for invoice files. Year subfolders are created automatically.",
+      "type": "directory",
+      "required": true,
+      "default": "~/Invoices"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "pdfkit": "^0.15.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/pdfkit": "^0.13.0",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "publish": "ray publish",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "postinstall": "cp node_modules/pdfkit/js/data/Helvetica.afm node_modules/pdfkit/js/data/Helvetica-Bold.afm assets/"
+  }
+}

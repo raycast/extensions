@@ -14,19 +14,12 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      setIconMenu({
-        source: Icon.ExclamationMark,
-        tintColor: Color.Red,
-      });
+      setIconMenu({ source: Icon.ExclamationMark, tintColor: Color.Red });
       setTitleMenu("Error fetching version");
-    }
-
-    if (isLoading) {
+    } else if (isLoading) {
       setIconMenu("loading.svg");
-      setTitleMenu("Loading version");
-    }
-
-    if (isThereNewVersion) {
+      setTitleMenu("Loading...");
+    } else if (isThereNewVersion) {
       setIconMenu("menu-bar-updates.svg");
       setTitleMenu(`New version available: ${version}`);
     } else {

@@ -1,13 +1,13 @@
 import {
   Action,
   ActionPanel,
-  Icon,
-  Toast,
-  showToast,
-  confirmAlert,
-  useNavigation,
   closeMainWindow,
+  confirmAlert,
   getPreferenceValues,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
 
 import { AttachmentList } from "./attachment-list";
@@ -15,16 +15,17 @@ import { ComposeMessage } from "./compose-message";
 import { MessageDetail } from "./message-detail";
 import { MessageProps, OutgoingMessageAction } from "../types";
 import {
-  openMessage,
-  toggleMessageRead,
-  moveMessageToJunk,
-  moveMessageToTrash,
   deleteMessage,
   moveMessageToArchive,
+  moveMessageToJunk,
+  moveMessageToTrash,
+  openMessage,
+  toggleMessageRead,
 } from "../scripts/messages";
 import { saveAllAttachments, saveAttachment } from "../scripts/attachments";
 import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { MailIcon, OutgoingMessageIcon } from "../utils/presets";
+import { MailboxTypeAction } from "./mailbox-type";
 
 const { primaryAction } = getPreferenceValues<Preferences>();
 
@@ -252,6 +253,9 @@ export const MessageActions = (props: MessageActionsProps) => {
           />
         </ActionPanel.Section>
       )}
+      <ActionPanel.Section>
+        <MailboxTypeAction mailbox={mailbox} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 };

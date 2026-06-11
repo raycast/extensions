@@ -1,7 +1,6 @@
 import { Action, Clipboard, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { play } from "../api/play";
 import { SimplifiedTrackObject } from "../helpers/spotify.api";
-import { addToQueue } from "../api/addTrackToQueue";
 import { getErrorMessage } from "../helpers/getError";
 import { showFailureToast } from "@raycast/utils";
 
@@ -18,7 +17,15 @@ export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: 
 
   const handlePlayAction = async () => {
     try {
-      await play({ id, type, contextUri: playingContext });
+      // If we have tracks to queue, pass them all as uris in a single play call
+      // instead of play() + N separate addToQueue() calls
+      if (tracksToQueue && tracksToQueue.length > 0) {
+        const mainUri = id && type ? `spotify:${type}:${id}` : undefined;
+        const uris = [...(mainUri ? [mainUri] : []), ...tracksToQueue.map((track) => track.uri as string)];
+        await play({ uris });
+      } else {
+        await play({ id, type, contextUri: playingContext });
+      }
       if (closeWindowOnAction) {
         await showHUD("Playing");
         await popToRoot();
@@ -27,11 +34,6 @@ export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: 
         if (onPlay) onPlay();
         toast.title = "Playing";
         toast.style = Toast.Style.Success;
-      }
-      if (tracksToQueue) {
-        for (const track of tracksToQueue) {
-          await addToQueue({ uri: track.uri as string });
-        }
       }
     } catch (error) {
       const message = getErrorMessage(error);

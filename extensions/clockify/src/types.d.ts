@@ -9,7 +9,7 @@ export interface TimeEntry {
   task: Task | undefined;
   timeInterval: {
     start: string;
-    end: string;
+    end: string | null;
   };
 }
 

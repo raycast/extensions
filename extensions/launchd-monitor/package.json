@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launchd-monitor",
+  "title": "Launchd Monitor",
+  "description": "Monitor your macOS launchd jobs from the menu bar. See job status, last run times, failures, and re-run jobs on demand.",
+  "icon": "command-icon.png",
+  "author": "wesbaker",
+  "categories": [
+    "Developer Tools",
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "launchd",
+    "launchctl",
+    "cron",
+    "scheduled",
+    "jobs",
+    "monitor",
+    "menubar"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "Launchd Job Status",
+      "subtitle": "Launchd Monitor",
+      "description": "Shows launchd job status in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "launchdLabels",
+      "type": "textfield",
+      "required": true,
+      "title": "Launchd Job Labels",
+      "description": "Comma-separated list of launchd job labels to monitor",
+      "placeholder": "com.example.job1, com.example.job2"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

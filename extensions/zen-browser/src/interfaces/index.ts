@@ -66,4 +66,11 @@ export interface WorkspaceModel {
   is_default: boolean;
 }
 
+export interface SessionSpace {
+  uuid: string;
+  name: string;
+  icon?: string;
+  position?: number;
+}
+
 export type GroupedEntries = Map<string, HistoryEntry[]>;

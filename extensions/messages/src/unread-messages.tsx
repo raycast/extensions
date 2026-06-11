@@ -1,5 +1,6 @@
 import { MenuBarExtra, Icon, open, openCommandPreferences, launchCommand, LaunchType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useEffect } from "react";
 
 import { getMessagesUrl, getAttachmentType } from "./helpers";
 import { useMessages } from "./hooks/useMessages";
@@ -9,11 +10,13 @@ export default function Command() {
 
   const unreadMessages = (messages?.filter((m) => !m.is_read) || []).slice(0, 50);
 
-  if (error && error.message.includes("authorization")) {
-    showFailureToast(error, {
-      title: "Raycast needs full disk access to read your messages.",
-    });
-  }
+  useEffect(() => {
+    if (error && error.message.includes("authorization")) {
+      showFailureToast(error, {
+        title: "Raycast needs full disk access to read your messages.",
+      });
+    }
+  }, [error]);
 
   return (
     <MenuBarExtra
@@ -30,7 +33,7 @@ export default function Command() {
               key={message.guid}
               title={message.senderName}
               subtitle={attachmentType ? attachmentType.text : message.body}
-              onAction={() => open(getMessagesUrl(message))}
+              onAction={async () => await open(getMessagesUrl(message))}
             />
           );
         })
@@ -42,13 +45,13 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Open Messages"
           icon={Icon.Message}
-          onAction={() => open("/System/Applications/Messages.app")}
+          onAction={async () => await open("/System/Applications/Messages.app")}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <MenuBarExtra.Item
           title="Send Message"
           icon={Icon.SpeechBubbleActive}
-          onAction={() => launchCommand({ name: "send-message", type: LaunchType.UserInitiated })}
+          onAction={async () => await launchCommand({ name: "send-message", type: LaunchType.UserInitiated })}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
         <MenuBarExtra.Item

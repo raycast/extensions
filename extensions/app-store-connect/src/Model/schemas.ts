@@ -429,3 +429,43 @@ export const preReleaseVersionSchemas = z.array(preReleaseVersionSchema);
 export type AppStoreVersion = z.infer<typeof appStoreVersionSchema>;
 
 export type PreReleaseVersion = z.infer<typeof preReleaseVersionSchema>;
+
+// Lenient schema used by the `appStatus` command. Apple occasionally returns
+// states that are not in `appStoreVersionSchema`'s enum (e.g.
+// PROCESSING_FOR_APP_STORE, PREORDER_READY_FOR_SALE, PENDING_CONTRACT), so we
+// keep the state as a string here and let the UI map it to a fallback label.
+export const appStatusVersionSchema = z.object({
+  type: z.literal("appStoreVersions"),
+  id: z.string(),
+  attributes: z.object({
+    platform: z.string(),
+    versionString: z.string(),
+    appStoreState: z.string(),
+    releaseType: z.string().nullable().optional(),
+    createdDate: z.string(),
+  }),
+});
+
+export type AppStatusVersion = z.infer<typeof appStatusVersionSchema>;
+
+export const appWithVersionsSchema = appSchema.extend({
+  relationships: z.object({
+    appStoreVersions: z.object({
+      data: z.array(
+        z.object({
+          type: z.literal("appStoreVersions"),
+          id: z.string(),
+        }),
+      ),
+    }),
+  }),
+});
+
+export type AppWithVersions = z.infer<typeof appWithVersionsSchema>;
+
+export const appsWithVersionsResponseSchema = z.object({
+  data: z.array(appWithVersionsSchema),
+  included: z.array(appStatusVersionSchema).optional(),
+});
+
+export type AppsWithVersionsResponse = z.infer<typeof appsWithVersionsResponseSchema>;

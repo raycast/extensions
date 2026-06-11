@@ -21,7 +21,8 @@ async function checkDependencies(): Promise<DependencyStatus> {
 }
 
 export function useDependencyCheck(): UseDependencyCheckResult {
-  const promptShownRef = useRef(false);
+  const invalidPathShownRef = useRef(false); // gates the invalid-path toast (once per mount)
+  const installPromptShownRef = useRef(false); // gates the install prompts (once per mount)
 
   const {
     data: status,
@@ -31,27 +32,40 @@ export function useDependencyCheck(): UseDependencyCheckResult {
     keepPreviousData: true,
   });
 
-  const isReady = Boolean(status?.bunInstalled && status?.qmdInstalled && status?.sqliteInstalled);
+  const isReady = Boolean(status?.qmdInstalled && status?.sqliteInstalled);
 
-  // Show prompts for missing deps (only once per session)
+  // Show prompts/toasts for dependency issues (each guarded to fire only once per mount)
   useEffect(() => {
-    if (isLoading || !status || promptShownRef.current) {
+    if (isLoading || !status) {
       return;
     }
-    if (isReady) {
-      return; // All deps installed, no prompts needed
+
+    // Warn about invalid custom paths once per mount, even when extension is ready
+    if (status.invalidCustomPaths?.length && !invalidPathShownRef.current) {
+      invalidPathShownRef.current = true;
+      depsLogger.warn("Invalid custom paths", { paths: status.invalidCustomPaths });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid custom path",
+        message: `${status.invalidCustomPaths.join(", ")} — check Extension Settings`,
+      });
     }
 
-    promptShownRef.current = true;
+    if (isReady || installPromptShownRef.current) {
+      return; // All deps installed, or install prompts already shown
+    }
+
+    installPromptShownRef.current = true;
 
     const promptForMissing = async () => {
-      if (!status.bunInstalled) {
-        depsLogger.warn("Bun not installed");
-        await promptBunInstall();
-        return;
-      }
       if (!status.qmdInstalled) {
         depsLogger.warn("QMD not installed");
+        if (!status.bunInstalled) {
+          // Bun is needed to install qmd via the built-in installer
+          depsLogger.warn("Bun not installed");
+          await promptBunInstall();
+          return;
+        }
         await promptQmdInstall(revalidate);
         return;
       }

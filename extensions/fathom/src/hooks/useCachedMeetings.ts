@@ -5,6 +5,10 @@ import { cacheManager } from "../utils/cacheManager";
 import { resetApiKeyValidation } from "../fathom/auth";
 import { logger } from "@chrismessina/raycast-logger";
 
+function toError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err));
+}
+
 interface UseCachedMeetingsOptions {
   filter?: MeetingFilter;
   enableCache?: boolean;
@@ -13,9 +17,11 @@ interface UseCachedMeetingsOptions {
 interface UseCachedMeetingsResult {
   meetings: Meeting[];
   isLoading: boolean;
+  isFetchingBackground: boolean;
   error: Error | undefined;
   searchMeetings: (query: string) => Meeting[];
   refreshCache: () => Promise<void>;
+  stopFetch: () => void;
   loadMore: () => Promise<void>;
   hasMore: boolean;
 }
@@ -41,6 +47,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
   const [cachedMeetings, setCachedMeetings] = useState<CachedMeetingData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingBackground, setIsFetchingBackground] = useState(() => cacheManager.isFetchingBackground());
   const [error, setError] = useState<Error | undefined>();
   const [hasMore, setHasMore] = useState(() => cacheManager.hasMore());
   const isLoadingMoreRef = useRef(false);
@@ -70,6 +77,12 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       setIsLoading(false);
     });
 
+    // Subscribe to background fetch state
+    const unsubscribeFetching = cacheManager.subscribeFetching((fetching) => {
+      if (cancelled) return;
+      setIsFetchingBackground(fetching);
+    });
+
     // Load cache on mount
     (async () => {
       try {
@@ -78,24 +91,22 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
         if (cancelled) return;
         setCachedMeetings(cached);
 
+        const cacheAge = cacheManager.getCacheAgeMinutes();
+
         // Only fetch fresh data if cache is stale (>5 min old)
         // This avoids the "Loading..." toast on every launch
         if (cacheManager.isCacheStale()) {
-          logger.log(
-            `[useCachedMeetings] Cache is stale (${cacheManager.getCacheAgeMinutes()} min old), fetching fresh data`,
-          );
+          logger.log(`[useCachedMeetings] Cache is stale (${cacheAge} min old), fetching fresh data`);
           await cacheManager.fetchAndCache(filterRef.current, { force: true });
-          setHasMore(cacheManager.hasMore());
         } else {
-          logger.log(
-            `[useCachedMeetings] Using fresh cache (${cacheManager.getCacheAgeMinutes()} min old), skipping API fetch`,
-          );
-          setHasMore(cacheManager.hasMore());
+          logger.log(`[useCachedMeetings] Using fresh cache (${cacheAge} min old), skipping API fetch`);
         }
+
+        setHasMore(cacheManager.hasMore());
       } catch (err) {
         if (cancelled) return;
         logger.error("[useCachedMeetings] Error loading cache:", err);
-        setError(err instanceof Error ? err : new Error(String(err)));
+        setError(toError(err));
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -106,6 +117,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       cancelled = true;
       logger.log("[useCachedMeetings] Unsubscribing from cache manager");
       unsubscribe();
+      unsubscribeFetching();
     };
   }, [filterKey, enableCache]);
 
@@ -140,7 +152,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       setHasMore(cacheManager.hasMore());
     } catch (error) {
       logger.error("[useCachedMeetings] Error refreshing cache:", error);
-      setError(error instanceof Error ? error : new Error(String(error)));
+      setError(toError(error));
     }
   }, [enableCache]);
 
@@ -154,18 +166,24 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       setHasMore(cacheManager.hasMore());
     } catch (error) {
       logger.error("[useCachedMeetings] Error loading more meetings:", error);
-      setError(error instanceof Error ? error : new Error(String(error)));
+      setError(toError(error));
     } finally {
       isLoadingMoreRef.current = false;
     }
   }, [enableCache]);
 
+  const stopFetch = useCallback(() => {
+    cacheManager.stopBackgroundFetch();
+  }, []);
+
   return {
     meetings,
     isLoading,
+    isFetchingBackground,
     error,
     searchMeetings,
     refreshCache,
+    stopFetch,
     loadMore,
     hasMore,
   };

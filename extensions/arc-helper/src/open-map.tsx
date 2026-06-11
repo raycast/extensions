@@ -31,6 +31,12 @@ const MAPS = [
     description: "Mountain region added in 1.4.0 update",
     icon: "https://cdn.metaforge.app/arc-raiders/custom/stella-montis.webp",
   },
+  {
+    id: "riven-tides",
+    name: "Riven Tides",
+    description: "Coastal map with beachcombing and night raid events",
+    icon: "https://cdn.metaforge.app/arc-raiders/ui/riventides.webp",
+  },
 ];
 
 export default function OpenMap() {

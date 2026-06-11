@@ -1,27 +1,17 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { CommandExitError, runCommand } from "./utilities/runCommand";
 
 function isInteger(str: string): boolean {
-  return Number.isInteger(parseInt(str, 10));
+  return /^\d+$/.test(str);
 }
 
-async function run(command: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(stderr.trimEnd());
-      } else {
-        resolve(stdout.trimEnd());
-      }
-    });
-  });
+function isLsofNoMatch(error: unknown) {
+  return (
+    error instanceof CommandExitError && error.exitCode === 1 && error.stdout.length === 0 && error.stderr.length === 0
+  );
 }
 
-export default async function Command(
-  // "Index" here refers to the "name" property of this command
-  // specified in package.json AND matches the name of this source file.
-  props: LaunchProps<{ arguments: Arguments.KillListeningProcess }>
-) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.KillListeningProcess }>) {
   const { port } = props.arguments;
   if (!isInteger(port)) {
     showToast({
@@ -32,21 +22,33 @@ export default async function Command(
     return;
   }
 
-  const command = `/usr/sbin/lsof -n -iTCP:${port} -sTCP:LISTEN -t`;
-
   try {
-    const pid = await run(command);
-    await run("kill " + pid);
+    let pids: string[];
+
+    try {
+      const { stdout } = await runCommand("/usr/sbin/lsof", ["-n", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"], {
+        timeout: 5_000,
+        killProcessGroup: true,
+      });
+      pids = stdout.split(/\s+/).filter(Boolean);
+    } catch (error) {
+      if (!isLsofNoMatch(error)) throw error;
+      pids = [];
+    }
+
+    if (pids.length === 0) throw new Error(`No process is listening on port ${port}.`);
+
+    await runCommand("/bin/kill", pids, { timeout: 2_000 });
     showToast({
       style: Toast.Style.Success,
       title: "Success",
-      message: `Process ${pid} was killed.`,
+      message: `Process ${pids.join(", ")} was killed.`,
     });
   } catch (error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: `No process is listening on port ${port}.`,
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

@@ -15,7 +15,7 @@ export interface Device {
   owner_id: string;
   product_id: string;
   product_name: string;
-  status: FunctionItem[];
+  status?: FunctionItem[];
   sub: boolean;
   time_zone: string;
   uid: string;

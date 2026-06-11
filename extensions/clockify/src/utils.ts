@@ -233,6 +233,67 @@ export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
   }
 }
 
+export async function getTodayTotalTimeForProject(projectId: string): Promise<number> {
+  try {
+    const workspaceId = await LocalStorage.getItem("workspaceId");
+    const userId = await LocalStorage.getItem("userId");
+
+    // Get today's date range in ISO format
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Fetch today's entries from API
+    // Note: page-size=500 limits to 500 entries per day. For users with heavy tracking,
+    // this could be insufficient. Consider implementing pagination if needed.
+    // The API projectId filter doesn't work correctly, so we filter client-side.
+    const { data, error } = await fetcher(
+      `/workspaces/${workspaceId}/user/${userId}/time-entries?` +
+        `start=${today.toISOString()}&` +
+        `end=${tomorrow.toISOString()}&` +
+        `projectId=${projectId}&` +
+        `hydrated=true&` +
+        `page-size=500`,
+    );
+
+    if (error || !data) {
+      console.error("Error fetching today's entries:", error);
+      return 0;
+    }
+
+    // Filter by projectId since API parameter doesn't work correctly
+    const filteredData = data.filter((entry: TimeEntry) => entry.projectId === projectId);
+
+    let totalMs = 0;
+
+    for (const entry of filteredData) {
+      // Skip the currently running entry; its elapsed time is added live in the UI
+      if (!entry.timeInterval.end) continue;
+      const entryStart = new Date(entry.timeInterval.start);
+      const entryEnd = new Date(entry.timeInterval.end);
+      totalMs += entryEnd.getTime() - entryStart.getTime();
+    }
+
+    return totalMs;
+  } catch (e) {
+    console.error("Error calculating today's total time:", e);
+    return 0;
+  }
+}
+
+export function millisecondsToDurationString(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
+
 export async function getProjects({ onError }: { onError?: (state: boolean) => void } = {}): Promise<Project[]> {
   const workspaceId = await LocalStorage.getItem("workspaceId");
 
@@ -273,14 +334,10 @@ export async function addNewTimeEntry(
   description: string | undefined | null,
   projectId: string,
   taskId: string | undefined | null,
-  callbackOrTagIds?: (() => void) | string[],
+  tagIds: string[] = [],
   startTime?: Date,
-): Promise<void> {
+): Promise<TimeEntry | null> {
   showToast(Toast.Style.Animated, "Starting…");
-
-  // Handle both callback-style (for restarting entries) and tagIds-style (for new entries form)
-  const tagIds = Array.isArray(callbackOrTagIds) ? callbackOrTagIds : [];
-  const callback = typeof callbackOrTagIds === "function" ? callbackOrTagIds : undefined;
 
   const workspaceId = await LocalStorage.getItem("workspaceId");
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
@@ -298,7 +355,7 @@ export async function addNewTimeEntry(
   if (!error && data?.id) {
     showToast(Toast.Style.Success, "Timer is running");
 
-    // Update the cache directly or call the callback to refetch
+    // Update the cache directly
     try {
       const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
       if (entriesString) {
@@ -311,11 +368,9 @@ export async function addNewTimeEntry(
       console.error("Error updating cache:", e);
     }
 
-    // Call the callback if provided to refetch the time entries
-    if (callback) {
-      callback();
-    }
+    return data as TimeEntry;
   } else {
     showToast(Toast.Style.Failure, "Timer could not be started");
+    return null;
   }
 }

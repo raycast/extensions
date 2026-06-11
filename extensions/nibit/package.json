@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nibit",
+  "title": "Nibit",
+  "description": "Push to and from your Android phone with Nibit, a Raycast-style productivity layer.",
+  "icon": "icon.png",
+  "author": "jfox",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "android",
+    "phone",
+    "push",
+    "send to phone",
+    "productivity",
+    "raycast",
+    "snippets",
+    "clipboard",
+    "quick links",
+    "nibit",
+    "ime",
+    "keyboard"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "description": "Browse recent encrypted pushes from your Nibit devices.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "send-push",
+      "title": "Send Push",
+      "description": "Send encrypted text or a URL to your Nibit devices.",
+      "icon": "icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "content",
+          "type": "text",
+          "placeholder": "Text or URL",
+          "required": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Optional title",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "send-file",
+      "title": "Send File",
+      "description": "Send an encrypted file to your Nibit devices.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "latest-push",
+      "title": "Latest Push",
+      "description": "Open the newest received push with context-aware actions.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "paste-latest-push",
+      "title": "Paste Latest Push",
+      "description": "Paste the newest text push directly.",
+      "icon": "icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-latest-push",
+      "title": "Copy Latest Push",
+      "description": "Copy the newest push directly.",
+      "icon": "icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-latest-push",
+      "title": "Open Latest Push",
+      "description": "Open the newest push directly.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-inbox",
+      "title": "Refresh Inbox",
+      "description": "Sync pending encrypted pushes into the local Raycast inbox.",
+      "icon": "icon.png",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign out",
+      "description": "Sign out of Nibit and clear local Raycast sync state.",
+      "icon": "icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3",
+    "@supabase/realtime-js": "^2.104.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.4",
+    "prettier": "^3.0.3",
+    "react": "^19.2.5",
+    "typescript": "^5.2.2",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run"
+  }
+}

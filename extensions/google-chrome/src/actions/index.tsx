@@ -243,6 +243,18 @@ export async function createNewGuestWindowToWebsite(website: string): Promise<vo
   `);
 }
 
+export async function nameCurrentWindow(): Promise<void> {
+  await checkAppInstalled();
+  await runAppleScript(`
+    tell application "Google Chrome" to activate
+    tell application "System Events"
+      tell process "Google Chrome"
+        click menu item "Name Window…" of menu "Window" of menu bar 1
+      end tell
+    end tell
+  `);
+}
+
 export async function getActiveTabURL(): Promise<string> {
   await checkAppInstalled();
 

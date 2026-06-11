@@ -1,5 +1,16 @@
 # 1Password Changelog
 
+## [Enhancements] - 2026-04-16
+
+- Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".
+
+## [Added Windows Support] - 2026-04-06
+
+- Added Windows platform support
+- Added Windows-compatible 1Password CLI path detection
+- Updated keyboard shortcuts for cross-platform compatibility
+- Updated setup guide for Windows (Windows Hello instead of Touch ID)
+
 ## [Chore] - 2025-11-15
 
 - Add stricter, opinionated eslint rules for clarity

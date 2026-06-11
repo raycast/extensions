@@ -49,11 +49,11 @@
     },
     {
       "name": "repositoryConfigurationPath",
-      "title": "Repository Path",
-      "description": "Path to the repository where the extension is located.",
+      "title": "Repository Directory",
+      "description": "Directory where the extension should create or reuse a `forked-extensions` repository.",
       "type": "directory",
       "required": true,
-      "default": "~/Documents/forked-extensions"
+      "default": "~/Developer"
     },
     {
       "name": "gitRemoteType",

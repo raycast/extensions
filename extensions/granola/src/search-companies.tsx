@@ -10,7 +10,7 @@ import { formatCompanyMeetingDate, sortCompanies, type CompanySortOption } from 
 import { mapColorToHex } from "./utils/iconMapper";
 
 export default function Command() {
-  const { companies, isLoading, hasError } = usePeople();
+  const { companies, isLoading, hasError, error } = usePeople();
   const [sortBy, setSortBy] = useState<CompanySortOption>("meeting-count");
 
   const sortedCompanies = useMemo(() => sortCompanies(companies, sortBy), [companies, sortBy]);
@@ -20,7 +20,7 @@ export default function Command() {
   }
 
   if (hasError) {
-    return <Unresponsive />;
+    return <Unresponsive context="search-companies" error={error} />;
   }
 
   return (

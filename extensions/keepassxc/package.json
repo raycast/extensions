@@ -96,7 +96,7 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^1.104.11",
     "@raycast/utils": "^1.19.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
@@ -106,9 +106,9 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.19.10",
-    "@types/react": "^19.2.13",
-    "eslint": "^9.39.2",
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.4",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },

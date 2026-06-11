@@ -16,6 +16,7 @@ import { usePromise } from "@raycast/utils";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
 import RenameFeedForm from "./rename-form";
+import DuplicateFeedForm from "./duplicate-form";
 
 export interface Feed {
   url: string;
@@ -110,6 +111,12 @@ function FeedsList() {
                   title="Rename Feed"
                   target={<RenameFeedForm feed={item} feeds={feeds} onRename={revalidate} />}
                   shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action.Push
+                  icon={Icon.Duplicate}
+                  title="Duplicate Feed"
+                  target={<DuplicateFeedForm feed={item} />}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                 />
               </ActionPanel.Section>
               {feeds.length > 1 && (

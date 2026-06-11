@@ -1,0 +1,357 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare-images",
+  "title": "Cloudflare Images",
+  "description": "Upload images to Cloudflare Images from your clipboard, Finder, or anywhere on your Mac. Includes a browser for your uploaded images. Unofficial.",
+  "icon": "icon.png",
+  "author": "miguel_caetano_dias",
+  "categories": [
+    "Developer Tools",
+    "Media"
+  ],
+  "keywords": [
+    "cloudflare",
+    "cloudflare images",
+    "image upload",
+    "cdn",
+    "image hosting"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "validate-credentials",
+      "title": "Validate Cloudflare Credentials",
+      "subtitle": "Cloudflare Images",
+      "description": "Pings the Cloudflare Images API to confirm your Account ID, API Token, and Account Hash are configured correctly.",
+      "mode": "view"
+    },
+    {
+      "name": "upload-clipboard",
+      "title": "Upload Clipboard Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Reads the image currently on your clipboard, uploads it to Cloudflare Images, and pastes the formatted URL at the cursor. Both dropdowns are optional. Leave them on 'Use my preference' to fall back to your settings, or pick a value to override format and/or signed-mode for this single invocation.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "format",
+          "type": "dropdown",
+          "placeholder": "Output format",
+          "required": false,
+          "data": [
+            { "title": "Use my preference", "value": "preference" },
+            { "title": "Markdown", "value": "markdown" },
+            { "title": "HTML", "value": "html" },
+            { "title": "Raw URL", "value": "raw" }
+          ]
+        },
+        {
+          "name": "signed",
+          "type": "dropdown",
+          "placeholder": "Signed mode",
+          "required": false,
+          "data": [
+            { "title": "Use my preference", "value": "preference" },
+            { "title": "Signed", "value": "signed" },
+            { "title": "Public", "value": "public" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "upload-clipboard-markdown",
+      "title": "Upload Clipboard as Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image and pastes the URL as Markdown, ![filename](url), regardless of your default output format. Bind a hotkey if you live in Markdown.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-html",
+      "title": "Upload Clipboard as HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image and pastes an HTML <img> tag, regardless of your default output format.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-url",
+      "title": "Upload Clipboard as URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image and pastes only the raw URL, no Markdown or HTML wrapping, regardless of your default output format. The 'just give me the link' path for Slack, JSON fields, CSS, etc.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed",
+      "title": "Upload Clipboard as Signed Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image with a Signed URL and copies the URL to the clipboard. Hotkey-friendly for the 'this one needs a signed link' case. Paste anywhere with ⌘V.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-public",
+      "title": "Upload Clipboard as Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the clipboard image with a public URL and copies the URL to the clipboard. Use this instead of 'Upload Clipboard Image' when you want the raw URL on the clipboard (no Markdown / HTML wrapping, no paste at cursor).",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-markdown",
+      "title": "Upload Clipboard as Signed Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes as Markdown at cursor, regardless of your Signed URLs preference. Hotkey-friendly for 'signed Markdown image, right here, right now'.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-html",
+      "title": "Upload Clipboard as Signed HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes as an HTML <img> tag at cursor, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-signed-url",
+      "title": "Upload Clipboard as Signed URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads with a Signed URL AND pastes the raw URL string at cursor (no Markdown / HTML wrapping), regardless of your Signed URLs preference. Differs from 'Upload Clipboard as Signed Image' (which copies to clipboard without pasting).",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder",
+      "title": "Upload Selected File",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads the image(s) currently selected in Finder to Cloudflare Images. Multiple images are joined newline-separated and copied to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-markdown",
+      "title": "Upload Selected File as Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) and copies the URL(s) as Markdown, regardless of your default output format.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-html",
+      "title": "Upload Selected File as HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) and copies HTML <img> tag(s), regardless of your default output format.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-url",
+      "title": "Upload Selected File as URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) and copies only the raw URL(s), regardless of your default output format. The 'just give me the link' path for Finder uploads.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed",
+      "title": "Upload Selected File as Signed Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) with Signed URLs and copies the URL(s) to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-public",
+      "title": "Upload Selected File as Image",
+      "subtitle": "Cloudflare Images",
+      "description": "Uploads selected Finder image(s) with public URLs and copies the raw URL(s) to the clipboard. Use this instead of 'Upload Selected File' when you want the raw URLs (no Markdown / HTML wrapping).",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-markdown",
+      "title": "Upload Selected File as Signed Markdown",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies as Markdown image references to the clipboard, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-html",
+      "title": "Upload Selected File as Signed HTML",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies as HTML <img> tags to the clipboard, regardless of your Signed URLs preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-signed-url",
+      "title": "Upload Selected File as Signed URL",
+      "subtitle": "Cloudflare Images",
+      "description": "Combo: uploads selected Finder image(s) with Signed URLs AND copies the raw URL(s) to the clipboard. Functionally equivalent to 'Upload Selected File as Signed Image' on Finder (the Finder pipeline always copies, never pastes), but kept for naming consistency with the clipboard family.",
+      "mode": "no-view"
+    },
+    {
+      "name": "my-images",
+      "title": "My Cloudflare Images",
+      "subtitle": "Cloudflare Images",
+      "description": "Browse, copy URLs from, and delete the images in your Cloudflare Images account.",
+      "mode": "view"
+    },
+    {
+      "name": "set-default-variant",
+      "title": "Set Default Variant",
+      "subtitle": "Cloudflare Images",
+      "description": "Pick the default variant for new uploads and URL formatting from a list fetched from your Cloudflare Images account. Overrides the Default Variant textfield in preferences.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accountId",
+      "title": "Cloudflare Account ID",
+      "description": "Your Cloudflare Account ID. Found in the URL of your Cloudflare dashboard (the long alphanumeric string after dash.cloudflare.com/).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "0abc1234def5678..."
+    },
+    {
+      "name": "apiToken",
+      "title": "Cloudflare API Token",
+      "description": "API Token with the 'Cloudflare Images: Edit' permission. Stored in Raycast's encrypted preferences. Create one at dash.cloudflare.com → My Profile → API Tokens.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Bearer-style token"
+    },
+    {
+      "name": "accountHash",
+      "title": "Cloudflare Account Hash",
+      "description": "The public hash that appears in your image URLs (imagedelivery.net/{hash}/...). Copy it from the Cloudflare Images dashboard.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "RkpY..."
+    },
+    {
+      "name": "defaultVariant",
+      "title": "Default Variant (fallback)",
+      "description": "Variant appended to delivery URLs. Conventionally /public. Run 'Set Default Variant' to pick from a live list of your account's variants. That selection takes precedence over this textfield.",
+      "type": "textfield",
+      "required": false,
+      "default": "/public",
+      "placeholder": "/public"
+    },
+    {
+      "name": "outputFormat",
+      "title": "Output Format",
+      "description": "How URLs are written back to your clipboard after upload.",
+      "type": "dropdown",
+      "required": false,
+      "default": "markdown",
+      "data": [
+        { "title": "Markdown (![name](url))", "value": "markdown" },
+        { "title": "HTML (<img src=\"url\" alt=\"name\" />)", "value": "html" },
+        { "title": "Raw URL", "value": "raw" }
+      ]
+    },
+    {
+      "name": "useSignedUrls",
+      "title": "Signed URLs",
+      "label": "Generate signed URLs for new uploads",
+      "description": "Requires a signing key. The extension fetches one automatically from the Cloudflare API the first time it's needed (and caches it). You can also override with a manual key below.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "signedUrlExpiration",
+      "title": "Signed URL Expiration (seconds)",
+      "description": "Set to 0 for no expiry. Only applies when Signed URLs are enabled.",
+      "type": "textfield",
+      "required": false,
+      "default": "0",
+      "placeholder": "0"
+    },
+    {
+      "name": "manualSigningKey",
+      "title": "Manual Signing Key (optional)",
+      "description": "Optional override. If set, this value is used directly for HMAC signing and the auto-fetch from the Cloudflare API is skipped entirely. Leave blank to use the automatic flow. Most users want that.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Leave blank for auto-fetch"
+    },
+    {
+      "name": "addMetadata",
+      "title": "Attach Metadata to Uploads",
+      "label": "Tag each uploaded image with metadata",
+      "description": "When on, the JSON template below is rendered and attached to every upload, surfacing in the Cloudflare Images dashboard and in My Cloudflare Images. When off, images upload with no metadata.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "metadataTemplate",
+      "title": "Metadata Template (JSON)",
+      "description": "JSON object of metadata key-value pairs. Dynamic placeholders: ${fileName}, ${timestamp} (ISO 8601), ${date} (YYYY-MM-DD), ${time} (HH:MM:SS), ${fileSize} (bytes), ${fileExtension}, ${surfaceVersion}, ${workspaceName}. Cloudflare caps total metadata at 1024 bytes after rendering. Leave blank to use the default. Invalid JSON silently falls back to the default with a toast warning.",
+      "type": "textfield",
+      "required": false,
+      "default": "{\"uploadedBy\":\"Raycast Extension: Cloudflare Images\",\"uploadedAt\":\"${timestamp}\",\"fileName\":\"${fileName}\",\"extensionVersion\":\"${surfaceVersion}\"}",
+      "placeholder": "{\"key\":\"value with ${fileName}\"}"
+    },
+    {
+      "name": "enableCompression",
+      "title": "Compression",
+      "label": "Compress images that exceed the max size",
+      "description": "Automatically compress images larger than the threshold using sharp before uploading.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "maxFileSizeMB",
+      "title": "Max File Size (MB)",
+      "description": "Compression target. Cloudflare's hard limit is 10 MB for the standard plan.",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "placeholder": "10"
+    },
+    {
+      "name": "compressionQuality",
+      "title": "Compression Quality",
+      "description": "1–100. Lower values produce smaller files at lower quality.",
+      "type": "textfield",
+      "required": false,
+      "default": "80",
+      "placeholder": "80"
+    },
+    {
+      "name": "preservePngFormat",
+      "title": "Preserve PNG Format",
+      "label": "Keep PNGs as PNGs when compressing",
+      "description": "Off: PNGs become JPEG when compressed (smaller, lossy). On: PNGs stay PNG (larger, lossless).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "avifConversionFormat",
+      "title": "AVIF Conversion Format",
+      "description": "AVIF inputs are converted to this format before upload (Cloudflare Images does not accept AVIF as input).",
+      "type": "dropdown",
+      "required": false,
+      "default": "webp",
+      "data": [
+        { "title": "WebP (recommended)", "value": "webp" },
+        { "title": "JPEG", "value": "jpeg" },
+        { "title": "PNG", "value": "png" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@mcdays/cloudflare-images-core": "^0.1.0",
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.0.8",
+    "eslint": "^9.39.4",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"Use 'npm run publish' to publish to the Raycast Store.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

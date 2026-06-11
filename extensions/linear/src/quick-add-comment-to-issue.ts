@@ -1,4 +1,3 @@
-import { LinearClient } from "@linear/sdk";
 import {
   Clipboard,
   closeMainWindow,
@@ -9,9 +8,9 @@ import {
   showHUD,
   Keyboard,
 } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { withAccessToken } from "@raycast/utils";
 
-import { linear } from "./api/linearClient";
+import { getLinearClient, linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
   const { issueId, comment } = props.arguments;
@@ -24,8 +23,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
   const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
-    const { token } = getAccessToken();
-    const linearClient = new LinearClient({ accessToken: token });
+    const { linearClient } = getLinearClient();
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -38,7 +36,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
 
     const newComment = await payload.comment;
 
-    if (!payload.success || !comment) {
+    if (!payload.success || !newComment) {
       throw Error("Something went wrong");
     }
 

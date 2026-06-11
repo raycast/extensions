@@ -1,6 +1,22 @@
 import { IssueLabel } from "@linear/sdk";
+import { getPreferenceValues } from "@raycast/api";
 
 import { getLinearClient } from "../api/linearClient";
+
+import { getPaginated, PageInfo } from "./pagination";
+
+const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_LABELS_LIMIT = 100;
+
+const preferences = getPreferenceValues<Preferences>();
+
+function getPageLimits() {
+  const parsed = Number(preferences.labelsLimit);
+  const limit = Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_LABELS_LIMIT;
+  const pageSize = Math.floor(Math.min(DEFAULT_PAGE_SIZE, limit));
+  const pageLimit = Math.ceil(limit / pageSize);
+  return { pageSize, pageLimit };
+}
 
 export type LabelResult = Pick<IssueLabel, "id" | "name" | "color">;
 
@@ -9,28 +25,38 @@ export async function getLabels(teamId?: string) {
     return [];
   }
 
+  const { pageSize, pageLimit } = getPageLimits();
+
   const { graphQLClient } = getLinearClient();
-  // Only the 100 first labels are returned in case a workspace has a lot of labels
-  // TODO: Implement label's name filtering when form fields support onSearchTextChange prop
-  const { data } = await graphQLClient.rawRequest<
-    { team: { labels: { nodes: LabelResult[] } } },
-    Record<string, unknown>
-  >(
-    `
-      query($teamId: String!) {
-        team(id: $teamId) {
-          labels(first: 100) {
-            nodes {
-              id
-              name
-              color
+
+  return getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<
+        { team: { labels: { nodes: LabelResult[]; pageInfo: PageInfo } } },
+        { teamId: string; cursor?: string }
+      >(
+        `
+          query($teamId: String!, $cursor: String) {
+            team(id: $teamId) {
+              labels(first: ${pageSize}, after: $cursor) {
+                nodes {
+                  id
+                  name
+                  color
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
             }
           }
-        }
-      }
-    `,
-    { teamId },
+        `,
+        { teamId, cursor },
+      ),
+    (response) => response.data?.team?.labels?.pageInfo,
+    (accumulator: LabelResult[], response) => accumulator.concat(response.data?.team?.labels?.nodes ?? []),
+    [],
+    pageLimit,
   );
-
-  return data?.team.labels.nodes;
 }

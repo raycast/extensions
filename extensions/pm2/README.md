@@ -12,13 +12,13 @@ Adavnced, producing process manager for Node.js.
 
 ## Requirements
 
-- Get Node.js and npm installed on your machine
+- Get Node.js installed on your machine
 - Get PM2 installed on your machine
 
 ## Principles
 
-Due to runtime reasons, the [pm2](https://npmjs.com/pm2) package won't work in Raycast extension. We used a PM2 wrapper application under the assets folder to bypass this problem.
-The extension will run `npm install` under the `pm2-wrapper` folder during the first run.
+The extension uses the [pm2](https://npmjs.com/pm2) package directly through PM2's programmatic API.
+Some optional PM2 CLI dependencies are marked as external for Raycast's build step because they are not used by this extension's list and process-management commands.
 
 ## API
 

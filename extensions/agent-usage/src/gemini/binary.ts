@@ -1,15 +1,11 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { cleanString } from "./utils";
 
 export const GEMINI_BINARY_NAME = "gemini";
 
 const GEMINI_PATH_ENV_KEYS = ["GEMINI_PATH", "GEMINI_CLI_PATH"];
-
-function cleanString(value: string | undefined): string | null {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-}
 
 function isExecutableFile(filePath: string): boolean {
   try {

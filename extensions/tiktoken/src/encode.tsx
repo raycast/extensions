@@ -5,7 +5,7 @@ import { encode } from "./tiktoken";
 export default function Command() {
   const { isLoading, data, error } = usePromise(async () => {
     const selectedText = await getSelectedText();
-    const { tokens, encoding } = encode(selectedText);
+    const { tokens, encoding } = await encode(selectedText);
     const encodedTokens: string = JSON.stringify(tokens) ?? "";
     const shouldTruncate = selectedText.length > 240;
 

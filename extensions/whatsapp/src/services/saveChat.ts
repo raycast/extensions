@@ -1,5 +1,5 @@
 import { isPhoneChat, WhatsAppChat, PhoneChat } from "../utils/types";
-import { phone as parsePhone } from "phone";
+import { parseUserPhone } from "../utils/parsePhone";
 import { nanoid as randomId } from "nanoid";
 
 interface SaveChatProps {
@@ -9,7 +9,7 @@ interface SaveChatProps {
 }
 
 export async function saveChat({ chat, chats, setChats }: SaveChatProps) {
-  const phoneInformation = parsePhone(chat.phone);
+  const phoneInformation = parseUserPhone(chat.phone);
 
   const isCreation = !chat.id;
 

@@ -46,7 +46,9 @@ export const parseArchivePage = (text: string): ArchiveItem[] => {
         const infoRaw = $info.text().split("TODO")[0].split(", ");
         const info = infoRaw.flatMap((s) => s.trim().split("·")).map((s) => s.replace("📕 ", "").trim());
 
-        const ext = info.find((item) => !isEmpty(item) && FILE_TYPES.includes(item.toLowerCase())) || "unknown";
+        const ext =
+          info.find((item) => !isEmpty(item) && (FILE_TYPES as readonly string[]).includes(item.toLowerCase())) ||
+          "unknown";
         const type =
           info.find(
             (item) => !isEmpty(item) && DOC_TYPES.find((type) => item.toLowerCase().includes(type.toLowerCase())),

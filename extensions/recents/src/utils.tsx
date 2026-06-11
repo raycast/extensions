@@ -1,6 +1,6 @@
 import { Alert, Icon, closeMainWindow, confirmAlert, popToRoot, showToast, trash } from "@raycast/api";
 
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 import { SpotlightResult } from "./types";
 

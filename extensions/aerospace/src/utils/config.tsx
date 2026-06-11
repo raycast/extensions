@@ -102,7 +102,7 @@ export function getConfig(): { config?: AppConfig; error?: string } {
   return { config };
 }
 
-export async function handleConfigError(error: string) {
+export function handleConfigError(error: string) {
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: "Config Error",
@@ -116,5 +116,5 @@ export async function handleConfigError(error: string) {
     },
   };
 
-  await showToast(options);
+  void showToast(options);
 }

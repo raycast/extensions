@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "node-fetch";
 import { filter } from "lodash";
 
 import SearchResults from "./SearchResults";
@@ -9,7 +8,11 @@ import InstanceForm from "./InstanceForm";
 import Actions from "./Actions";
 
 import useInstances from "../hooks/useInstances";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { serviceNowFetchRaw } from "../utils/serviceNowFetch";
 
 export default function SearchList() {
   const {
@@ -19,38 +22,28 @@ export default function SearchList() {
     isLoading: isLoadingInstances,
     selectedInstance,
     setSelectedInstance,
+    currentUserName,
   } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const {
-    id: instanceId = "",
-    alias = "",
-    name: instanceName = "",
-    username = "",
-    password = "",
-    full,
-  } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", username, full } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
+  const effectiveUserName = username || currentUserName || "";
 
-  const { isLoading, data, mutate, revalidate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
+  const { isLoading, data, error, mutate, revalidate } = useFetch(
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${effectiveUserName}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: selectedInstance && full == "true",
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && full == "true" && !!authHeader && !!effectiveUserName,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch History", message: error.message });
       },
 
       mapResult(response: HistoryResponse) {
-        setErrorFetching(false);
-
         return { data: response.result };
       },
       keepPreviousData: true,
@@ -65,14 +58,15 @@ export default function SearchList() {
   ) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
+      if (!selectedInstance) throw new Error("No instance selected");
       const response = await mutate(
-        fetch(`${instanceUrl}${request.endpoint}`, {
+        serviceNowFetchRaw(selectedInstance, request.endpoint, {
           method: request.method,
-          headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: request.body,
+          onRefresh: (updated) => {
+            if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+          },
         }),
         {
           optimisticUpdate(data) {
@@ -133,9 +127,9 @@ export default function SearchList() {
     _updateHistory(
       request,
       {
-        before: `Removing all items from history`,
-        success: `All terms removed from history`,
-        failure: "Failed removing all items from history",
+        before: "Removing all items from history",
+        success: "All items removed from history",
+        failure: "Failed to remove all items from history",
       },
       updateData,
     );
@@ -158,7 +152,7 @@ export default function SearchList() {
       {
         before: `Removing ${title} from history`,
         success: `${title} removed from history`,
-        failure: "Failed removing item from history",
+        failure: `Failed to remove ${title} from history`,
       },
       updateData,
     );
@@ -176,16 +170,16 @@ export default function SearchList() {
   }, [data, searchTerm, full]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
   return (
     <List
-      navigationTitle={`Search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Search${selectedInstance ? " > " + instanceLabel(selectedInstance) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
@@ -202,7 +196,7 @@ export default function SearchList() {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -240,7 +234,7 @@ export default function SearchList() {
             />
           )}
 
-          {errorFetching ? (
+          {error ? (
             <List.EmptyView
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
               title="Could Not Fetch History"

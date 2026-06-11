@@ -17,6 +17,8 @@ import {
   isRemoteWorkspaceEntry,
   isValidHexColor,
   isWorkspaceEntry,
+  getAntigravityProcessName,
+  openInAntigravity,
 } from "./utils";
 import {
   ListOrGrid,
@@ -123,9 +125,10 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
 async function openProject(uri: string, closeOtherWindows: boolean) {
   try {
     if (closeOtherWindows) {
+      const processName = getAntigravityProcessName();
       runAppleScriptSync(`
           tell application "System Events"
-            tell process "Antigravity"
+            tell process "${processName}"
               repeat while window 1 exists
                 click button 1 of window 1
               end repeat
@@ -133,7 +136,7 @@ async function openProject(uri: string, closeOtherWindows: boolean) {
           end tell
           `);
     }
-    await open(uri, "Antigravity");
+    await openInAntigravity(uri);
   } catch (error) {
     console.error("Error opening project:", error);
     await showToast(Toast.Style.Failure, "Failed to open project");

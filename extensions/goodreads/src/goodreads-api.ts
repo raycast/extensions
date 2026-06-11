@@ -2,7 +2,6 @@ import got from "got";
 import { environment } from "@raycast/api";
 import {
   extractEntitiesFromBookDetailsPage,
-  extractEntitiesFromBookSearchPage,
   extractEntitiesFromPeopleSearchPage,
   extractEntitiesFromPersonDetailsPage,
 } from "./utils";
@@ -10,6 +9,7 @@ import type { Person, Book, BookDetails, PersonDetails } from "./types";
 
 const GOODREADS_URL_BASE = "https://www.goodreads.com";
 const SEARCH_URL_BASE = `${GOODREADS_URL_BASE}/search`;
+const BOOK_AUTO_COMPLETE_URL_BASE = `${GOODREADS_URL_BASE}/book/auto_complete`;
 const HEADERS = {
   accept: "text/html,application/xhtml+xml,application/xml",
   "cache-control": "no-cache",
@@ -18,6 +18,7 @@ const HEADERS = {
   "sec-fetch-dest": "document",
   "sec-fetch-mode": "navigate",
 };
+const JSON_HEADERS = { ...HEADERS, accept: "application/json" };
 const RETRY_BASE_DELAY = 1000;
 
 export const getCacheKey = (url: string): string => {
@@ -50,17 +51,46 @@ interface ApiResponse<T> {
   data: T;
 }
 
+interface GoodreadsAutoCompleteBook {
+  imageUrl: string;
+  bookId: string;
+  bookUrl: string;
+  title: string;
+  avgRating?: string;
+  author?: {
+    name?: string;
+  };
+}
+
 const getSearchPageUrl = (query: string, searchType: SEARCH_TYPE) =>
   `${SEARCH_URL_BASE}?q=${encodeURIComponent(query)}&search_type=${searchType}&search%5Bfield%5D=on`;
 
+const getBookAutoCompleteUrl = (query: string) =>
+  `${BOOK_AUTO_COMPLETE_URL_BASE}?format=json&q=${encodeURIComponent(query)}`;
+
 export const getDetailsPageUrl = (path: string) => `${GOODREADS_URL_BASE}${path}`;
 
+const getDetailsPagePath = (url: string) => {
+  if (url.startsWith(GOODREADS_URL_BASE)) {
+    return url.slice(GOODREADS_URL_BASE.length);
+  }
+
+  return url;
+};
+
 export const fetchBooksByTitle = async (title: string): Promise<ApiResponse<Book[]>> => {
-  const url = getSearchPageUrl(title, SEARCH_TYPE.BOOKS);
+  const url = getBookAutoCompleteUrl(title);
 
   try {
-    const response = await fetchWithRetry(url);
-    const data = extractEntitiesFromBookSearchPage(response);
+    const response = await fetchJsonWithRetry<GoodreadsAutoCompleteBook[]>(url);
+    const data = response.map((book, index) => ({
+      id: `${book.bookId}-${index}`,
+      thumbnail: book.imageUrl,
+      title: book.title,
+      author: book.author?.name ?? "",
+      rating: book.avgRating,
+      contentUrl: { detailsPage: getDetailsPagePath(book.bookUrl) },
+    }));
 
     return { status: AsyncStatus.Success, data };
   } catch (error) {
@@ -114,6 +144,25 @@ export const fetchPersonDetails = async (urlSegment: string): Promise<ApiRespons
 };
 
 const sleep = (duration: number) => new Promise((resolve) => setTimeout(resolve, duration));
+
+const fetchJsonWithRetry = async <T>(url: string, limit = 2): Promise<T> => {
+  let retryCount = 0;
+
+  while (retryCount < limit) {
+    try {
+      return await got(url, { retry: { limit: 0 }, headers: JSON_HEADERS }).json<T>();
+    } catch (error) {
+      console.log(`Failed to fetch ${url}. ${error}`);
+
+      const delay = RETRY_BASE_DELAY + 750 * retryCount;
+      await sleep(delay);
+
+      retryCount++;
+    }
+  }
+
+  throw new Error(`Failed after ${limit} retries`);
+};
 
 const fetchWithRetry = async (url: string, limit = 2, validate?: (response: string) => boolean): Promise<string> => {
   let retryCount = 0;

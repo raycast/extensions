@@ -1,12 +1,15 @@
-import { ActionPanel, List, showToast, Action, Toast, Icon } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast, Icon, environment, LaunchType } from "@raycast/api";
 import convert from "xml-js";
 import { useCachedPromise } from "@raycast/utils";
 import { InDepthData, MatchItem, RSS } from "./types";
 
-export default function Command() {
-  const { isLoading, data } = useCachedPromise(
+export const useScores = () =>
+  useCachedPromise(
     async () => {
-      const toast = await showToast(Toast.Style.Animated, `Fetching latest scores`);
+      const toast =
+        environment.launchType === LaunchType.UserInitiated
+          ? await showToast(Toast.Style.Animated, `Fetching latest scores`)
+          : undefined;
 
       const r = await fetch("https://static.cricinfo.com/rss/livescores.xml");
       if (!r.ok) throw new Error("Error fetching scores");
@@ -20,7 +23,7 @@ export default function Command() {
         icon: "",
       }));
 
-      toast.title = "Fetching score details";
+      if (toast) toast.title = "Fetching score details";
       for (const matchIndex in matches) {
         const res = await fetch(`https://www.espncricinfo.com/matches/engine/match/${matches[matchIndex].id}.json`);
         if (!res.ok || res.headers.get("content-type")?.includes("text")) {
@@ -28,7 +31,7 @@ export default function Command() {
           matches[matchIndex].icon = Icon.Globe;
           continue;
         }
-        const indepthData: InDepthData = await res.json();
+        const indepthData = (await res.json()) as InDepthData;
         matches[matchIndex].summary =
           indepthData.match.current_summary == ""
             ? indepthData.live.status
@@ -48,12 +51,16 @@ export default function Command() {
     [],
     {
       async onData(data) {
-        await showToast(Toast.Style.Success, `Fetched ${data.length} scores`);
+        if (environment.launchType === LaunchType.UserInitiated)
+          await showToast(Toast.Style.Success, `Fetched ${data.length} scores`);
       },
       keepPreviousData: true,
       initialData: [],
     },
   );
+
+export default function Command() {
+  const { isLoading, data } = useScores();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search score">

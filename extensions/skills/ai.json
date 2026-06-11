@@ -1,0 +1,253 @@
+{
+  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.\n- **Install confirmation**: Always confirm with the user before calling `install-skill`. Never install without explicit approval.\n- **Agent selection**: Before installing or removing, ask which agents the user wants to target (e.g. Claude Code, Cursor). Pass the answer as `agents`. Only omit `agents` if the user explicitly says \"all\".\n- **Remove confirmation**: Always confirm with the user before calling `remove-skill`. Use `list-installed-skills` first if the user seems unsure of the exact skill name.",
+  "evals": [
+    {
+      "input": "@skills what skills are available for GraphQL?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-skills",
+            "arguments": {
+              "query": "GraphQL"
+            }
+          }
+        },
+        {
+          "includes": "npx skills add"
+        }
+      ],
+      "mocks": {
+        "search-skills": {
+          "skills": [
+            {
+              "name": "GraphQL Schema",
+              "skillId": "graphql-schema",
+              "source": "apollographql/skills",
+              "installs": 3800,
+              "installCommand": "npx skills add apollographql/skills@graphql-schema"
+            },
+            {
+              "name": "GraphQL Operations",
+              "skillId": "graphql-operations",
+              "source": "apollographql/skills",
+              "installs": 2900,
+              "installCommand": "npx skills add apollographql/skills@graphql-operations"
+            },
+            {
+              "name": "Apollo Client",
+              "skillId": "apollo-client",
+              "source": "apollographql/skills",
+              "installs": 5100,
+              "installCommand": "npx skills add apollographql/skills@apollo-client"
+            }
+          ],
+          "count": 3
+        }
+      }
+    },
+    {
+      "input": "@skills what does the apollo-client skill do?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-skills",
+            "arguments": {
+              "query": "apollo-client"
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "read-skill",
+            "arguments": {
+              "source": "apollographql/skills",
+              "skillId": "apollo-client"
+            }
+          }
+        },
+        {
+          "includes": "Apollo Client"
+        }
+      ],
+      "mocks": {
+        "search-skills": {
+          "skills": [
+            {
+              "name": "Apollo Client",
+              "skillId": "apollo-client",
+              "source": "apollographql/skills",
+              "installs": 5100,
+              "installCommand": "npx skills add apollographql/skills@apollo-client"
+            }
+          ],
+          "count": 1
+        },
+        "read-skill": {
+          "content": "# Apollo Client 4.x Guide\n\nGuide for building React applications with Apollo Client 4.x. Use this skill when setting up Apollo Client in a React project, writing GraphQL queries or mutations with hooks, configuring caching or cache policies, managing local state with reactive variables, or troubleshooting Apollo Client errors or performance issues."
+        }
+      }
+    },
+    {
+      "input": "@skills what skills do I have installed?",
+      "expected": [
+        {
+          "callsTool": "list-installed-skills"
+        },
+        {
+          "includes": "apollo-client"
+        }
+      ],
+      "mocks": {
+        "list-installed-skills": {
+          "skills": [
+            {
+              "name": "apollo-client",
+              "path": "~/.agents/skills/apollo-client",
+              "agents": ["Claude Code", "Cursor"],
+              "agentCount": 2,
+              "source": "apollographql/skills",
+              "installedAt": "2025-04-01T10:00:00Z",
+              "updatedAt": "2025-04-01T10:00:00Z"
+            },
+            {
+              "name": "graphql-schema",
+              "path": "~/.agents/skills/graphql-schema",
+              "agents": ["Claude Code"],
+              "agentCount": 1,
+              "source": "apollographql/skills",
+              "installedAt": "2025-03-15T08:30:00Z",
+              "updatedAt": "2025-03-15T08:30:00Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "input": "@skills install apollo-client for me, I confirm for Claude Code",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-skills",
+            "arguments": {
+              "query": "apollo-client"
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "install-skill",
+            "arguments": {
+              "source": "apollographql/skills",
+              "skillId": "apollo-client",
+              "agents": "Claude Code"
+            }
+          }
+        },
+        {
+          "includes": "Apollo Client"
+        }
+      ],
+      "mocks": {
+        "search-skills": {
+          "skills": [
+            {
+              "name": "Apollo Client",
+              "skillId": "apollo-client",
+              "source": "apollographql/skills",
+              "installs": 5100,
+              "installCommand": "npx skills add apollographql/skills@apollo-client"
+            }
+          ],
+          "count": 1
+        },
+        "install-skill": {
+          "success": true,
+          "installedSkill": "Apollo Client",
+          "agents": ["Claude Code"]
+        }
+      }
+    },
+    {
+      "input": "@skills remove apollo-client",
+      "expected": [
+        {
+          "callsTool": "list-installed-skills"
+        },
+        {
+          "callsTool": {
+            "name": "remove-skill",
+            "arguments": {
+              "skillName": "apollo-client",
+              "agents": "Claude Code"
+            }
+          }
+        },
+        {
+          "includes": "apollo-client"
+        }
+      ],
+      "mocks": {
+        "list-installed-skills": {
+          "skills": [
+            {
+              "name": "apollo-client",
+              "path": "~/.agents/skills/apollo-client",
+              "agents": ["Claude Code"],
+              "agentCount": 1,
+              "source": "apollographql/skills"
+            }
+          ]
+        },
+        "remove-skill": {
+          "success": true,
+          "removedSkill": "apollo-client",
+          "agents": ["Claude Code"]
+        }
+      }
+    },
+    {
+      "input": "@skills find me a skill for designing GraphQL APIs",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-skills",
+            "arguments": {
+              "query": "GraphQL API"
+            }
+          }
+        },
+        {
+          "includes": "npx skills add"
+        }
+      ],
+      "mocks": {
+        "search-skills": {
+          "skills": [
+            {
+              "name": "GraphQL Schema",
+              "skillId": "graphql-schema",
+              "source": "apollographql/skills",
+              "installs": 3800,
+              "installCommand": "npx skills add apollographql/skills@graphql-schema"
+            },
+            {
+              "name": "Apollo Server",
+              "skillId": "apollo-server",
+              "source": "apollographql/skills",
+              "installs": 4400,
+              "installCommand": "npx skills add apollographql/skills@apollo-server"
+            },
+            {
+              "name": "Apollo Federation",
+              "skillId": "apollo-federation",
+              "source": "apollographql/skills",
+              "installs": 2100,
+              "installCommand": "npx skills add apollographql/skills@apollo-federation"
+            }
+          ],
+          "count": 3
+        }
+      }
+    }
+  ]
+}

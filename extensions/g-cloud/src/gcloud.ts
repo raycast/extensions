@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { Project } from "./utils/CacheManager";
 
@@ -7,7 +7,8 @@ interface GCloudProject extends Omit<Project, "createTime"> {
   createTime?: string;
 }
 
-const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
+const EXEC_TIMEOUT = 15000; // 15s timeout for direct exec calls
 
 interface CommandCacheEntry<T> {
   result: T;
@@ -20,29 +21,31 @@ interface TimeoutPromise {
 }
 
 // Global cache for command results to reduce API calls
+const MAX_CACHE_SIZE = 200;
 const commandCache = new Map<string, CommandCacheEntry<unknown>>();
 const COMMAND_CACHE_TTL = 600000; // 10 minutes cache TTL
 const PROJECTS_CACHE_TTL = 1800000; // 30 minutes cache TTL
 const pendingRequests = new Map<string, Promise<unknown>>();
 
-/**
- * Executes a gcloud command and returns the result as JSON
- * @param gcloudPath Path to the gcloud executable
- * @param command The command to execute
- * @param projectId Optional project ID to use
- * @param options Additional options for the command
- * @returns The parsed JSON result
- */
-/**
- * Quote a path if it contains spaces (for Windows compatibility)
- */
-function quotePath(path: string): string {
-  return path.includes(" ") ? `"${path}"` : path;
+/** Evict oldest entries when cache exceeds max size */
+function evictCacheIfNeeded() {
+  while (commandCache.size > MAX_CACHE_SIZE) {
+    let oldestKey: string | null = null;
+    let oldestTime = Infinity;
+    for (const [key, entry] of commandCache) {
+      if (entry.timestamp < oldestTime) {
+        oldestTime = entry.timestamp;
+        oldestKey = key;
+      }
+    }
+    if (oldestKey) commandCache.delete(oldestKey);
+    else break;
+  }
 }
 
 export async function executeGcloudCommand(
   gcloudPath: string,
-  command: string,
+  commandArgs: string[],
   projectId?: string,
   options: {
     skipCache?: boolean;
@@ -56,26 +59,32 @@ export async function executeGcloudCommand(
     throw new Error("Invalid gcloud path: must be a non-empty string");
   }
 
-  if (!command || typeof command !== "string") {
-    throw new Error("Invalid command: must be a non-empty string");
+  if (!Array.isArray(commandArgs) || commandArgs.length === 0) {
+    throw new Error("Invalid command: must be a non-empty string array");
   }
 
   try {
     const { skipCache = false, cacheTTL = COMMAND_CACHE_TTL, maxRetries = 1, timeout = 25000 } = options;
 
-    const projectFlag =
-      projectId && typeof projectId === "string" && projectId.trim() !== "" ? ` --project=${projectId}` : "";
+    const args = [...commandArgs];
+    if (projectId && typeof projectId === "string" && projectId.trim() !== "") {
+      const hasProjectFlag = args.some((arg) => arg === "--project" || arg.startsWith("--project="));
+      if (!hasProjectFlag) {
+        args.push(`--project=${projectId}`);
+      }
+    }
+    const hasFormatFlag = args.some((arg) => arg === "--format" || arg.startsWith("--format="));
+    if (!hasFormatFlag) {
+      args.push("--format=json");
+    }
 
     // Use a longer timeout for VM operations
     let effectiveTimeout = timeout;
-    if (command.includes("compute instances") && (command.includes("start") || command.includes("stop"))) {
+    if (args.includes("compute") && args.includes("instances") && (args.includes("start") || args.includes("stop"))) {
       effectiveTimeout = 45000; // 45 seconds for VM operations
     }
 
-    // Quote path for Windows compatibility (paths with spaces)
-    const quotedPath = quotePath(gcloudPath);
-    const fullCommand = `${quotedPath} ${command}${projectFlag} --format=json`;
-    const cacheKey = fullCommand;
+    const cacheKey = [gcloudPath, ...args].join(" ");
 
     const pendingRequest = pendingRequests.get(cacheKey);
     if (pendingRequest) {
@@ -96,22 +105,25 @@ export async function executeGcloudCommand(
       let timeoutId: NodeJS.Timeout;
       const promise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          reject(new Error(`Command timed out after ${effectiveTimeout}ms: ${fullCommand}`));
+          reject(new Error(`Command timed out after ${effectiveTimeout}ms: ${cacheKey}`));
         }, effectiveTimeout);
       });
       return { promise, timeoutId: timeoutId! };
     };
 
     const timeoutPromise = createTimeoutPromise();
-    const requestPromise = Promise.race([executeCommand(fullCommand, cacheKey, maxRetries), timeoutPromise.promise]);
+    const requestPromise = Promise.race([
+      executeCommand(gcloudPath, args, cacheKey, maxRetries),
+      timeoutPromise.promise,
+    ]);
 
     pendingRequests.set(cacheKey, requestPromise);
 
     try {
       const result = await requestPromise;
-      clearTimeout(timeoutPromise.timeoutId);
       return result;
     } finally {
+      clearTimeout(timeoutPromise.timeoutId);
       pendingRequests.delete(cacheKey);
     }
   } catch (error: unknown) {
@@ -128,13 +140,14 @@ export async function executeGcloudCommand(
  * Private helper to execute the actual command
  */
 async function executeCommand(
-  fullCommand: string,
+  gcloudPath: string,
+  args: string[],
   cacheKey: string,
   maxRetries: number,
   currentRetry: number = 0,
 ): Promise<unknown> {
   try {
-    const { stdout, stderr } = await execPromise(fullCommand, {
+    const { stdout, stderr } = await execFilePromise(gcloudPath, args, {
       maxBuffer: 10 * 1024 * 1024,
     });
 
@@ -157,36 +170,39 @@ async function executeCommand(
       }
     }
 
+    // If stderr has content but not a recognized warning, and stdout is empty, treat as error
+    if (stderr && stderr.trim() !== "" && (!stdout || stdout.trim() === "")) {
+      console.error(`Command stderr (no stdout): ${stderr.substring(0, 300)}`);
+    }
+
     if (!stdout || stdout.trim() === "") {
+      evictCacheIfNeeded();
       commandCache.set(cacheKey, { result: [], timestamp: Date.now() });
       return [];
     }
 
+    let result: unknown;
     try {
-      const result = JSON.parse(stdout);
-
-      const expectsArray =
-        fullCommand.includes("list") || (fullCommand.endsWith("--format=json") && fullCommand.includes("list"));
-
-      if (expectsArray && !Array.isArray(result)) {
-        const parsedResult = [result];
-        commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
-        return parsedResult;
-      }
-
-      const parsedResult = Array.isArray(result) ? result : [result];
-      commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
-      return parsedResult;
-    } catch (error) {
-      console.error(`Error parsing JSON: ${error}`);
+      result = JSON.parse(stdout);
+    } catch (parseError) {
+      console.error(`Error parsing JSON: ${parseError}`);
       console.error(`Raw output: ${stdout.substring(0, 200)}...`);
-      throw new Error(`Failed to parse command output as JSON: ${error}`);
+      // Return empty array instead of crashing — caller sees "no results" and can retry
+      return [];
     }
+
+    const expectsArray = args.includes("list");
+
+    const parsedResult = expectsArray && !Array.isArray(result) ? [result] : Array.isArray(result) ? result : [result];
+
+    evictCacheIfNeeded();
+    commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
+    return parsedResult;
   } catch (error: unknown) {
     if (currentRetry < maxRetries) {
-      const backoffMs = 1000 * Math.pow(2, currentRetry);
+      const backoffMs = 1000 * Math.pow(2, currentRetry) * (0.5 + Math.random());
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
-      return executeCommand(fullCommand, cacheKey, maxRetries, currentRetry + 1);
+      return executeCommand(gcloudPath, args, cacheKey, maxRetries, currentRetry + 1);
     }
     throw error;
   }
@@ -215,8 +231,11 @@ export function clearCommandCache(pattern?: RegExp) {
  */
 export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
   try {
-    const quotedPath = quotePath(gcloudPath);
-    const { stdout } = await execPromise(`${quotedPath} auth list --format="value(account)" --filter="status=ACTIVE"`);
+    const { stdout } = await execFilePromise(
+      gcloudPath,
+      ["auth", "list", "--format=value(account)", "--filter=status=ACTIVE"],
+      { timeout: EXEC_TIMEOUT },
+    );
     return stdout.trim() !== "";
   } catch (error) {
     console.error("Error checking authentication status:", error);
@@ -231,8 +250,7 @@ export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
  */
 export async function authenticateWithBrowser(gcloudPath: string): Promise<void> {
   try {
-    const quotedPath = quotePath(gcloudPath);
-    await execPromise(`${quotedPath} auth login --launch-browser`);
+    await execFilePromise(gcloudPath, ["auth", "login", "--launch-browser"], { timeout: 120000 });
   } catch (error) {
     console.error("Error during browser authentication:", error);
     throw error;
@@ -252,8 +270,8 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
   }
 
   try {
-    const quotedPath = quotePath(gcloudPath);
-    const cacheKey = `${quotedPath} projects list --format=json`;
+    const args = ["projects", "list", "--format=json"];
+    const cacheKey = [gcloudPath, ...args].join(" ");
     const cachedResult = commandCache.get(cacheKey);
     const now = Date.now();
 
@@ -261,7 +279,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
       return cachedResult.result as Project[];
     }
 
-    const { stdout } = await execPromise(`${quotedPath} projects list --format=json`);
+    const { stdout } = await execFilePromise(gcloudPath, args, { timeout: 30000 });
 
     if (!stdout || stdout.trim() === "") {
       return [];
@@ -296,6 +314,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
       })
       .filter((project): project is GCloudProject => project !== null);
 
+    evictCacheIfNeeded();
     commandCache.set(cacheKey, { result: mappedProjects, timestamp: now });
 
     return mappedProjects;

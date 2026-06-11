@@ -2,6 +2,7 @@ import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { LocalStorage, environment } from "@raycast/api";
 import { Api } from "telegram/tl";
+import { computeCheck } from "telegram/Password";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -100,6 +101,11 @@ export interface SendMessageOptions {
   filePaths?: string | string[];
 }
 
+export interface AuthenticationResult {
+  needsCode: boolean;
+  needsPassword: boolean;
+}
+
 let clientInstance: TelegramClient | null = null;
 
 export async function getClient(config: TelegramConfig): Promise<TelegramClient> {
@@ -123,18 +129,40 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!sessionString;
 }
 
-export async function authenticate(config: TelegramConfig, code?: string): Promise<{ needsCode: boolean }> {
+async function completeAuthentication(client: TelegramClient): Promise<AuthenticationResult> {
+  const session = client.session.save() as unknown as string;
+  await LocalStorage.setItem(SESSION_KEY, session);
+
+  const me = await client.getMe();
+  await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
+
+  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+
+  return { needsCode: false, needsPassword: false };
+}
+
+export async function authenticate(
+  config: TelegramConfig,
+  options?: { code?: string; password?: string; forceResendCode?: boolean },
+): Promise<AuthenticationResult> {
   const client = await getClient(config);
+  const code = options?.code;
+  const password = options?.password;
+  const forceResendCode = options?.forceResendCode ?? false;
 
   if (!client.connected) {
     await client.connect();
   }
 
   if (await client.isUserAuthorized()) {
-    return { needsCode: false };
+    return { needsCode: false, needsPassword: false };
   }
 
-  if (!code) {
+  if (!code && !password) {
+    if (forceResendCode) {
+      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+    }
+
     const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
     if (!phoneCodeHash) {
       const result = await client.sendCode(
@@ -145,9 +173,20 @@ export async function authenticate(config: TelegramConfig, code?: string): Promi
         config.phoneNumber,
       );
       await LocalStorage.setItem(PHONE_CODE_HASH_KEY, result.phoneCodeHash);
-      return { needsCode: true };
+      return { needsCode: true, needsPassword: false };
     }
-    return { needsCode: true };
+    return { needsCode: true, needsPassword: false };
+  }
+
+  if (password) {
+    const accountPassword = await client.invoke(new Api.account.GetPassword());
+    await client.invoke(
+      new Api.auth.CheckPassword({
+        password: await computeCheck(accountPassword, password),
+      }),
+    );
+
+    return completeAuthentication(client);
   }
 
   const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
@@ -155,23 +194,33 @@ export async function authenticate(config: TelegramConfig, code?: string): Promi
     throw new Error("Phone code hash not found. Please restart authentication.");
   }
 
-  await client.invoke(
-    new Api.auth.SignIn({
-      phoneNumber: config.phoneNumber,
-      phoneCodeHash: phoneCodeHash,
-      phoneCode: code,
-    }),
-  );
+  try {
+    await client.invoke(
+      new Api.auth.SignIn({
+        phoneNumber: config.phoneNumber,
+        phoneCodeHash: phoneCodeHash,
+        phoneCode: code!,
+      }),
+    );
+  } catch (error) {
+    const errorText =
+      error instanceof Error
+        ? error.message
+        : String((error as { errorMessage?: string } | undefined)?.errorMessage || "");
+    const normalizedErrorText = errorText.toUpperCase();
 
-  const session = client.session.save() as unknown as string;
-  await LocalStorage.setItem(SESSION_KEY, session);
+    if (normalizedErrorText.includes("SESSION_PASSWORD_NEEDED")) {
+      return { needsCode: false, needsPassword: true };
+    }
 
-  const me = await client.getMe();
-  await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
+    if (normalizedErrorText.includes("PHONE_CODE_EXPIRED")) {
+      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+    }
 
-  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+    throw error;
+  }
 
-  return { needsCode: false };
+  return completeAuthentication(client);
 }
 
 function ensureMediaCacheDir(): void {

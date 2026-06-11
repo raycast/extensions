@@ -38,6 +38,7 @@ export default function Command() {
   const {
     data: [listDetail, customItems],
     isLoading: isLoadingItems,
+    error: itemsError,
     mutate,
   } = useCachedPromise(
     async (selectedList?: BringListInfo) => {
@@ -87,7 +88,6 @@ export default function Command() {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Adding ${item.name} to ${list.name}` });
       try {
         const bringApi = await getBringApi();
-        if (!bringApi) return;
         await mutate(bringApi.addItemToList(list.listUuid, item.itemId, specification), {
           optimisticUpdate: (data) => {
             const [list, customItems] = data as [BringList, BringCustomItem[]];
@@ -113,7 +113,6 @@ export default function Command() {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Removing ${item.name} from ${list.name}` });
       try {
         const bringApi = await getBringApi();
-        if (!bringApi) return;
         await mutate(bringApi.removeItemFromList(list.listUuid, item.itemId), {
           optimisticUpdate: (data) => {
             const [list, customItems] = data as [BringList, BringCustomItem[]];
@@ -131,6 +130,12 @@ export default function Command() {
       }
     };
   }
+
+  useEffect(() => {
+    if (itemsError) {
+      showToast({ style: Toast.Style.Failure, title: "Could not load list", message: itemsError.message });
+    }
+  }, [itemsError]);
 
   useEffect(() => {
     if (!selectedList && lists.length > 0) {

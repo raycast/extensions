@@ -1,5 +1,11 @@
 # World Cup Changelog
 
+## [Update for FIFA World Cup 2026] - 2026-05-26
+
+- Updated season and match count for the 2026 World Cup (48 teams, 104 matches)
+- Updated flags dictionary with all 48 qualified countries
+- Made the empty view logo theme-aware (light/dark)
+
 ## [Update] - 2023-01-05
 
 Updated dependencies

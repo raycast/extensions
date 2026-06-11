@@ -1,90 +1,76 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 
-import { Details } from "@/components/Details";
+import { ResultItem } from "@/components/ResultItem";
 import { useSearch } from "@/hooks/use-search";
+import { SUPPORTED_LANGUAGES, isSupportedLanguage } from "@/lib/mdn";
+import type { SupportedLanguage } from "@/lib/mdn";
 
-const locales = [
-  {
-    value: "en-US",
-    title: "English (US)",
-  },
-  {
-    value: "es",
-    title: "Español",
-  },
-  {
-    value: "fr",
-    title: "Français",
-  },
-  {
-    value: "ja",
-    title: "日本語",
-  },
-  {
-    value: "ko",
-    title: "한국어",
-  },
-  {
-    value: "pt-BR",
-    title: "Português (do Brasil)",
-  },
-  {
-    value: "ru",
-    title: "Русский",
-  },
-  {
-    value: "zh-CN",
-    title: "中文 (简体)",
-  },
-  {
-    value: "zh-TW",
-    title: "正體中文 (繁體)",
-  },
-];
+const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+  "en-US": "English (US)",
+  es: "Español",
+  fr: "Français",
+  ja: "日本語",
+  ko: "한국어",
+  "pt-BR": "Português (Brasil)",
+  ru: "Русский",
+  "zh-CN": "简体中文",
+  "zh-TW": "繁體中文",
+};
 
 export default function MDNSearchResultsList() {
-  const [query, setQuery] = useState<string>("");
-  const [locale, setLocale] = useState<string>("en-us");
-  const { data, isLoading } = useSearch(query, locale);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { preferredAction } = getPreferenceValues<Preferences.Index>();
+  const preferences = getPreferenceValues<Preferences.Index>();
+  const preferredAction = preferences.defaultAction === "open" ? "open" : "preview";
+  const defaultLanguage = isSupportedLanguage(preferences.language) ? preferences.language : "en-US";
+  const [language, setLanguage] = useState<SupportedLanguage>(defaultLanguage);
+
+  const { data, isLoading, revalidate } = useSearch(query, language);
+
+  const selectedResult = useMemo(() => {
+    return data.find((item) => item.id === selectedId) ?? data[0];
+  }, [data, selectedId]);
+
+  const handleReloadSearchResults = useCallback(() => {
+    void revalidate();
+  }, [revalidate]);
+
+  const handleLanguageChange = useCallback((value: string) => {
+    if (!isSupportedLanguage(value)) {
+      return;
+    }
+
+    setLanguage(value);
+  }, []);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Type to search MDN..."
+      isShowingDetail
+      filtering={false}
+      searchBarPlaceholder="Search MDN..."
       onSearchTextChange={setQuery}
-      throttle
+      onSelectionChange={setSelectedId}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Locale" storeValue={true} onChange={setLocale}>
-          {locales.map((loc) => (
-            <List.Dropdown.Item key={loc.value} title={loc.title} value={loc.value} keywords={[loc.title, loc.value]} />
+        <List.Dropdown tooltip="Language" value={language} onChange={handleLanguageChange}>
+          {SUPPORTED_LANGUAGES.map((locale) => (
+            <List.Dropdown.Item key={locale} title={LANGUAGE_LABELS[locale]} value={locale} />
           ))}
         </List.Dropdown>
       }
+      throttle
     >
-      {(data || []).map((result, idx) => (
-        <List.Item
-          key={idx}
-          title={result.title}
-          icon={{ source: "icon.png", mask: Image.Mask.RoundedRectangle }}
-          subtitle={result.summary}
-          actions={
-            <ActionPanel>
-              {[
-                <Action.Push
-                  key="read"
-                  icon={Icon.Document}
-                  title="Read Document"
-                  target={<Details result={result} locale={locale} />}
-                />,
-                <Action.OpenInBrowser key="open" url={result.url} />,
-                <Action.CopyToClipboard key="copy" content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />,
-              ].sort((a) => (a.key === preferredAction ? -1 : 1))}
-            </ActionPanel>
-          }
+      {data.map((result) => (
+        <ResultItem
+          key={result.id}
+          result={result}
+          locale={language}
+          preferredAction={preferredAction}
+          selected={result.id === selectedResult?.id}
+          onReloadSearchResults={handleReloadSearchResults}
         />
       ))}
     </List>

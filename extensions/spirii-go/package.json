@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spirii-go",
+  "title": "Spirii Go",
+  "description": "Find nearby Spirii Go chargers, view availability, and see prices for individual chargepoints.",
+  "icon": "extension-icon.png",
+  "author": "alexandervarney",
+  "license": "MIT",
+  "categories": [
+    "Applications"
+  ],
+  "preferences": [
+    {
+      "name": "favoriteEvseId",
+      "title": "My Chargepoint ID",
+      "description": "Used by the \"My Chargepoint\" command for quick lookup.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "DK.SPI.Z000000*1"
+    },
+    {
+      "name": "priceGranularity",
+      "title": "Price Granularity",
+      "description": "How upcoming prices are aggregated in the schedule.",
+      "type": "dropdown",
+      "required": false,
+      "default": "hour",
+      "data": [
+        {
+          "title": "Hourly (average)",
+          "value": "hour"
+        },
+        {
+          "title": "15 minutes (raw)",
+          "value": "15min"
+        }
+      ]
+    },
+    {
+      "name": "lat",
+      "title": "Latitude Override",
+      "description": "Optional. If set with Longitude, used instead of GPS.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "55.6761"
+    },
+    {
+      "name": "lon",
+      "title": "Longitude Override",
+      "description": "Optional. If set with Latitude, used instead of GPS.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "12.5683"
+    }
+  ],
+  "commands": [
+    {
+      "name": "nearby-locations",
+      "title": "Nearby Chargers",
+      "subtitle": "Spirii Go",
+      "description": "Find nearby EV charging locations.",
+      "mode": "view"
+    },
+    {
+      "name": "my-chargepoint",
+      "title": "My Chargepoint",
+      "subtitle": "Spirii Go",
+      "description": "View status and price schedule for your saved chargepoint.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.8.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

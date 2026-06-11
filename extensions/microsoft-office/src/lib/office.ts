@@ -49,22 +49,51 @@ export interface ExcelFiles {
   excelExecutable?: string;
 }
 
-export async function recentMSOfficeFiles() {
+export async function recentMSOfficeFiles(): Promise<Result> {
   try {
     const data = fs.readFileSync(environment.assetsPath + "/office.ps1", "utf8");
     const result = await runPowerShellScript(data);
     const j = JSON.parse(result) as OfficeResult;
-    const adalKey = Object.keys(j).filter((key) => key.startsWith("ADAL"));
-    if (!adalKey || adalKey.length <= 0) {
+    const adalKeys = Object.keys(j).filter((key) => key.startsWith("ADAL"));
+    if (!adalKeys || adalKeys.length <= 0) {
       throw new Error("No ADAL key found in the result");
     }
-    return j[adalKey[0]];
+
+    const combinedFiles: RecentPowerpointFile[] = [];
+    let PPTPath: string | undefined;
+    let WORDPath: string | undefined;
+    let EXCELPath: string | undefined;
+    let OfficeVersion = "";
+
+    for (const key of adalKeys) {
+      const item = j[key];
+      if (item.Files) {
+        if (Array.isArray(item.Files)) {
+          combinedFiles.push(...item.Files);
+        } else {
+          combinedFiles.push(item.Files as unknown as RecentPowerpointFile);
+        }
+      }
+      if (item.PPTPath) PPTPath = item.PPTPath;
+      if (item.WORDPath) WORDPath = item.WORDPath;
+      if (item.EXCELPath) EXCELPath = item.EXCELPath;
+      if (item.OfficeVersion) OfficeVersion = item.OfficeVersion;
+    }
+
+    return {
+      Files: combinedFiles,
+      PPTPath,
+      WORDPath,
+      EXCELPath,
+      OfficeVersion,
+    };
   } catch {
     throw new Error("Could not read Office files");
   }
 }
 
 function powershellDateStringToDate(dateString: string): Date {
+  if (!dateString) return new Date(0);
   const ms = parseInt(dateString.replace(/\D/g, ""), 10);
   const date = new Date(ms);
   return date;

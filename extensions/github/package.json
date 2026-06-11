@@ -42,7 +42,10 @@
     "brndnly",
     "oscmarb",
     "emergerrrd",
-    "ryo."
+    "ryo.",
+    "Undolog",
+    "wonbywondev",
+    "SandeepBaskaran"
   ],
   "pastContributors": [
     "Lemon",
@@ -369,6 +372,89 @@
       ]
     },
     {
+      "name": "my-stats-menu",
+      "title": "My GitHub Stats Menu Bar",
+      "description": "Display your GitHub profile stats (followers, stars received, PRs, issues, commits) in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "useAvatarAsIcon",
+          "description": "Show your GitHub avatar as the menu bar icon instead of the GitHub logo",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Avatar",
+          "title": "Menu Bar Icon"
+        },
+        {
+          "name": "notifyOnNewStars",
+          "description": "Show a badge in the menu bar title and a 'What's New' section when your repositories receive new stars",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Notify on new stars",
+          "title": "New Stars Notification"
+        },
+        {
+          "name": "refreshFrequency",
+          "description": "How often to refresh stats in the background. Lower values keep the data fresher but use more GitHub API quota.",
+          "type": "dropdown",
+          "required": false,
+          "default": "30m",
+          "title": "Refresh Frequency",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15m"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30m"
+            },
+            {
+              "title": "1 hour",
+              "value": "1h"
+            },
+            {
+              "title": "2 hours",
+              "value": "2h"
+            }
+          ]
+        },
+        {
+          "name": "titleMetric",
+          "description": "The metric shown next to the menu bar icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "followers",
+          "title": "Menu Bar Title",
+          "data": [
+            {
+              "title": "Followers",
+              "value": "followers"
+            },
+            {
+              "title": "Stars Received",
+              "value": "stars"
+            },
+            {
+              "title": "Open PRs",
+              "value": "prsOpen"
+            },
+            {
+              "title": "Open Issues",
+              "value": "issuesOpen"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
       "description": "Display My Pull Requests in the Menu Bar",
@@ -450,6 +536,13 @@
           "placeholder": "5"
         }
       ]
+    },
+    {
+      "name": "download-repository",
+      "title": "Download Repository",
+      "subtitle": "GitHub",
+      "description": "Download an entire repo or a specific directory inside a repo",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -472,6 +565,16 @@
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search github repositories"
+    },
+    {
+      "name": "enable-auto-merge",
+      "title": "Enable Auto-merge",
+      "description": "Enable auto-merge on a pull request"
+    },
+    {
+      "name": "disable-auto-merge",
+      "title": "Disable Auto-merge",
+      "description": "Disable auto-merge on a pull request"
     },
     {
       "name": "merge-pull-request",
@@ -752,6 +855,93 @@
         ]
       },
       {
+        "input": "@github enable auto-merge on the release PR in macos repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/macos"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "enable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_123"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/macos",
+              "nameWithOwner": "org/macos",
+              "name": "macos",
+              "id": "REPO_123"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Release",
+              "id": "pr_123"
+            }
+          ],
+          "enable-auto-merge": {}
+        }
+      },
+      {
+        "input": "@github disable auto-merge on the bugfix PR in backend repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/backend"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "disable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_456"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/backend",
+              "nameWithOwner": "org/backend",
+              "name": "backend",
+              "id": "REPO_456"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Fix timeout error",
+              "id": "pr_456",
+              "number": 42
+            }
+          ],
+          "disable-auto-merge": {}
+        }
+      },
+      {
         "input": "@github run release.yml in raycast-macos",
         "mocks": {
           "search-repositories": [
@@ -888,23 +1078,25 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^1.87.0",
+    "@raycast/api": "^1.104.17",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2"
+    "lodash": "^4.17.23",
+    "node-fetch": "^3.3.2",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^5.0.2",
-    "@graphql-codegen/typescript": "^4.0.7",
-    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
-    "@graphql-codegen/typescript-operations": "^4.2.1",
+    "@graphql-codegen/cli": "^7.0.0",
+    "@graphql-codegen/typescript": "^6.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^7.0.1",
+    "@graphql-codegen/typescript-operations": "^6.0.2",
     "@parcel/watcher": "^2.4.1",
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.5",
     "@types/node": "^22.1.0",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.0.10",
+    "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",

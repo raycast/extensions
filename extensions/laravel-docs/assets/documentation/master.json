@@ -23,6 +23,10 @@
       "url": "https://laravel.com/docs/master/configuration"
     },
     {
+      "title": "Agentic Development",
+      "url": "https://laravel.com/docs/master/ai"
+    },
+    {
       "title": "Directory Structure",
       "url": "https://laravel.com/docs/master/structure"
     },
@@ -189,6 +193,10 @@
       "url": "https://laravel.com/docs/master/rate-limiting"
     },
     {
+      "title": "Search",
+      "url": "https://laravel.com/docs/master/search"
+    },
+    {
       "title": "Strings",
       "url": "https://laravel.com/docs/master/strings"
     },
@@ -283,6 +291,20 @@
       "url": "https://laravel.com/docs/master/eloquent-factories"
     }
   ],
+  "AI": [
+    {
+      "title": "AI SDK",
+      "url": "https://laravel.com/docs/master/ai-sdk"
+    },
+    {
+      "title": "MCP",
+      "url": "https://laravel.com/docs/master/mcp"
+    },
+    {
+      "title": "Boost",
+      "url": "https://laravel.com/docs/master/boost"
+    }
+  ],
   "Testing": [
     {
       "title": "Getting Started",
@@ -310,10 +332,6 @@
     }
   ],
   "Packages": [
-    {
-      "title": "Breeze",
-      "url": "https://laravel.com/docs/master/starter-kits#laravel-breeze"
-    },
     {
       "title": "Cashier (Stripe)",
       "url": "https://laravel.com/docs/master/billing"
@@ -345,10 +363,6 @@
     {
       "title": "Horizon",
       "url": "https://laravel.com/docs/master/horizon"
-    },
-    {
-      "title": "Jetstream",
-      "url": "https://jetstream.laravel.com/"
     },
     {
       "title": "Mix",

@@ -47,7 +47,7 @@ export function PsView(): React.JSX.Element {
           />
           <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
           <Action
-            title="Unload Model From Memory"
+            title="Unload Model from Memory"
             icon={Icon.Eject}
             onAction={() => UnloadModel(prop.model, RevalidateModels)}
             shortcut={Shortcut.LoadUnloadModel}

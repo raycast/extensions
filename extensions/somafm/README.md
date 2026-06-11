@@ -9,12 +9,14 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 ### 🎯 Current Features (v1.0)
 
 ### 🚀 Quick Access
+
 - **Menu Bar Access**: Always-visible menu bar icon shows your favorite stations
   - Click the 🎵 icon in your menu bar
   - Play any favorite station with one click
   - Updates automatically when you add/remove favorites
 
 ### 🎵 Stream Playback
+
 - **Smart Player Detection**: Automatically plays streams in your preferred media player
   - Supports IINA, VLC, and Music.app
   - Falls back to system default if no supported player is found
@@ -26,12 +28,14 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
   - Auto-refreshes every 30 seconds
 
 ### 🎨 Beautiful Interface
+
 - **Grid View**: Visual 3-column layout with station artwork
 - **List View**: Compact view with listener counts
 - **Toggle Views**: Switch between grid and list with `⌘+Shift+V`
 - **Station Details**: See genre, current listeners, and descriptions
 
 ### ⭐ Favorites & History
+
 - **Favorites**: Star your favorite stations for quick access
   - Favorites appear at the top of the list
   - Toggle with `⌘+D` or the star action
@@ -43,18 +47,21 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
   - Helps you quickly return to stations you just discovered
 
 ### 🔍 Smart Search
+
 - Search by station name, genre, or description
 - Prioritizes name matches for better results
 - Real-time filtering as you type
 
 ### 📊 Organization & Sorting
-- **Sort Options**: 
+
+- **Sort Options**:
   - Sort by Name (`⌘+1`) - A-Z or Z-A
   - Sort by Listeners (`⌘+2`) - Least to most or most to least
 - **Genre Grouping**: Toggle genre groups with `⌘+G`
 - **Station Sections**: Favorites → Recently Played → All Stations
 
 ### ⌨️ Keyboard Shortcuts
+
 - `Enter` - Play selected station
 - `1-9` - Quick play stations 1-9
 - `⌘+D` - Toggle favorite
@@ -75,6 +82,7 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 ## Recommended Media Players
 
 For the best experience, install one of these media players:
+
 - [IINA](https://iina.io/) - Modern media player for macOS (recommended)
 - [VLC](https://www.videolan.org/vlc/) - Cross-platform media player
 
@@ -83,6 +91,7 @@ Without these, streams will open in Music.app or your default browser.
 ## Usage
 
 ### Browse & Play
+
 1. Open Raycast (`⌘+Space` by default)
 2. Type "soma" or "Browse SomaFM Stations"
 3. Browse stations in the grid or search for specific genres/stations
@@ -90,6 +99,7 @@ Without these, streams will open in Music.app or your default browser.
 5. Use `⌘+D` to favorite stations you love
 
 ### Menu Bar
+
 1. Look for the 🎵 icon in your menu bar
 2. Click to see all your favorite stations
 3. Click any station to play immediately
@@ -104,11 +114,13 @@ Consider [supporting SomaFM](https://somafm.com/support/) if you enjoy their sta
 ## Development
 
 This extension is built with:
+
 - [Raycast API](https://developers.raycast.com/)
 - TypeScript
 - React
 
 ### Project Structure
+
 ```
 src/
 ├── browse-stations.tsx # Main browse command
@@ -119,13 +131,13 @@ src/
 ```
 
 ### To Contribute
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Run `npm run lint` to ensure code quality
 5. Run `npm test` to ensure tests pass
 6. Submit a pull request
-
 
 ## License
 
@@ -135,4 +147,4 @@ MIT - See LICENSE file for details
 
 - Station data and streams provided by [SomaFM](https://somafm.com)
 - Extension icon and station artwork © SomaFM
-- Built with ❤️ using [Raycast](https://www.raycast.com/) 
+- Built with ❤️ using [Raycast](https://www.raycast.com/)

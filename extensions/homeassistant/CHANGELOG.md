@@ -1,9 +1,28 @@
 # Home Assistant Changelog
 
+## [Update] - 2026-04-20
+
+- Add custom headers on all request
+
+## [Update] - 2026-03-24
+
+- Show entity area/room names as subtitles in entity lists
+ 
+## [Fix] - 2026-03-24
+
+- Fix "Show Entity IDs" preference
+
+## [Fix] - 2026-03-15
+
+- Use translations for services if available
+  - Fallback to service slug when no translation is available
+
 ## [Fix] - 2026-02-01
+
 - Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
 
 ## [Update] - 2026-01-09
+
 - Added history chart to sensors inspired by the Home Assistant when viewing attributes of entity
 
 ## [Fix] - 2025-11-14

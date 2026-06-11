@@ -51,6 +51,13 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
   );
 }
 
+const LIST_COLUMNS =
+  "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, PinTime, Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content";
+
+function quoteSql(value: string) {
+  return value.replaceAll("'", "''");
+}
+
 function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined }): JSX.Element {
   return (
     <>
@@ -117,24 +124,40 @@ export function Directory(props: { elt?: OneNoteItem }) {
     if (props.elt) {
       const item = props.elt;
       if (props.elt.Type == PAGE) {
-        return (
-          <Detail
-            navigationTitle={getAncestorsStr(props.elt, " > ", false)}
-            markdown={"# " + props.elt.Content}
-            actions={
-              <ActionPanel>
-                <Action title="Open in OneNote" icon={Icon.Receipt} onAction={() => openNote(item)} />
-              </ActionPanel>
-            }
-          />
-        );
+        return <PageDetail item={item} />;
       } else {
-        const query = `SELECT * FROM Entities WHERE ParentGOID = "${props.elt.GOID}" ORDER BY RecentTime DESC;`;
+        const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
+          props.elt.GOID
+        )}' ORDER BY RecentTime DESC;`;
         return getListItems(query, props.elt);
       }
     }
   }
   // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
-  const query = "SELECT * FROM Entities ORDER BY RecentTime DESC;";
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities ORDER BY RecentTime DESC;`;
   return getListItems(query);
+}
+
+function PageDetail({ item }: { item: OneNoteItem }) {
+  const { data, isLoading } = useSQL<{ Content: string }>(
+    ONENOTE_MERGED_DB,
+    `SELECT Content FROM Entities WHERE GOID = '${quoteSql(item.GOID)}' LIMIT 1;`
+  );
+  const content =
+    data === undefined
+      ? item.Content
+      : data[0]?.Content ?? (data.length > 0 ? item.Content : "*Full content could not be loaded.*");
+
+  return (
+    <Detail
+      navigationTitle={getAncestorsStr(item, " > ", false)}
+      isLoading={isLoading}
+      markdown={"# " + content}
+      actions={
+        <ActionPanel>
+          <Action title="Open in OneNote" icon={Icon.Receipt} onAction={() => openNote(item)} />
+        </ActionPanel>
+      }
+    />
+  );
 }

@@ -4,29 +4,31 @@ import { format, startOfMonth, endOfMonth, addDays } from "date-fns";
 const TODAY = new Date();
 const CURRENCY = { code: "USD", symbol: "$", fixed: true, rate: 1, main_rate: 1 };
 
+const MOCK_MOD = "2012-09-04T13:55:15Z";
+
 export const MOCK_CATEGORIES: Category[] = [
-  { id: "c1", name: "🍔 Food", type: "expense", deleted: false },
-  { id: "c2", name: "🚗 Transport", type: "expense", deleted: false },
-  { id: "c3", name: "🏠 Rent", type: "expense", deleted: false },
-  { id: "c4", name: "🎬 Entertainment", type: "expense", deleted: false },
-  { id: "c5", name: "🛍️ Shopping", type: "expense", deleted: false },
-  { id: "c6", name: "💰 Salary", type: "income", deleted: false },
-  { id: "c7", name: "📈 Investments", type: "income", deleted: false },
+  { id: "c1", name: "🍔 Food", type: "expense", deleted: false, modified: MOCK_MOD },
+  { id: "c2", name: "🚗 Transport", type: "expense", deleted: false, modified: MOCK_MOD },
+  { id: "c3", name: "🏠 Rent", type: "expense", deleted: false, modified: MOCK_MOD },
+  { id: "c4", name: "🎬 Entertainment", type: "expense", deleted: false, modified: MOCK_MOD },
+  { id: "c5", name: "🛍️ Shopping", type: "expense", deleted: false, modified: MOCK_MOD },
+  { id: "c6", name: "💰 Salary", type: "income", deleted: false, modified: MOCK_MOD },
+  { id: "c7", name: "📈 Investments", type: "income", deleted: false, modified: MOCK_MOD },
 ];
 
 export const MOCK_TAGS: Tag[] = [
-  { id: "t1", name: "Lunch", type: "expense", category: "c1", deleted: false },
-  { id: "t2", name: "Dinner", type: "expense", category: "c1", deleted: false },
-  { id: "t3", name: "Uber", type: "expense", category: "c2", deleted: false },
-  { id: "t4", name: "Subway", type: "expense", category: "c2", deleted: false },
-  { id: "t5", name: "Grocery", type: "expense", category: "c1", deleted: false },
-  { id: "t6", name: "Freelance", type: "income", category: "c6", deleted: false },
+  { id: "t1", name: "Lunch", type: "expense", category: "c1", deleted: false, modified: MOCK_MOD },
+  { id: "t2", name: "Dinner", type: "expense", category: "c1", deleted: false, modified: MOCK_MOD },
+  { id: "t3", name: "Uber", type: "expense", category: "c2", deleted: false, modified: MOCK_MOD },
+  { id: "t4", name: "Subway", type: "expense", category: "c2", deleted: false, modified: MOCK_MOD },
+  { id: "t5", name: "Grocery", type: "expense", category: "c1", deleted: false, modified: MOCK_MOD },
+  { id: "t6", name: "Freelance", type: "income", category: "c6", deleted: false, modified: MOCK_MOD },
 ];
 
 export const MOCK_ACCOUNTS: Account[] = [
-  { id: "a1", name: "Wallet", order: 0, currency: CURRENCY },
-  { id: "a2", name: "Bank Account", order: 1, currency: CURRENCY },
-  { id: "a3", name: "Savings", order: 2, currency: CURRENCY },
+  { id: "a1", name: "Wallet", order: 0, currency: CURRENCY, modified: MOCK_MOD },
+  { id: "a2", name: "Bank Account", order: 1, currency: CURRENCY, modified: MOCK_MOD },
+  { id: "a3", name: "Savings", order: 2, currency: CURRENCY, modified: MOCK_MOD },
 ];
 
 // Generate some random transactions for the current month

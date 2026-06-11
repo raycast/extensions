@@ -14,6 +14,9 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Documentation"
+  ],
   "license": "MIT",
   "commands": [
     {

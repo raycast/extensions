@@ -22,6 +22,8 @@
 /personal-features/
 .env.local
 /experiments/
+AGENTS.md
 
 # Raycast
 .raycast/
+raycast-env.d.ts

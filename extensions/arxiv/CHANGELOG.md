@@ -1,10 +1,13 @@
 # arXiv Changelog
 
-## [Security Maintenance] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile] - 2026-03-27
+
+- Refreshed `package-lock.json` to update transitive `underscore` to `1.13.8` and address security advisories.
+
+## [Security Maintenance] - 2026-02-13
 
 - Removed unused `npm` dependency.
 - Reduced transitive dependency surface (including removal of transitive `tar` usage) to address security advisories.
-
 
 ## [Added viewing formats, publication year, and citation export] - 2025-09-09
 

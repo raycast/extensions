@@ -1,6 +1,6 @@
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
+import { addSignature, parseAttendeeEmails, toISO8601WithTimezoneOffset } from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -24,9 +24,9 @@ type Input = {
    */
   duration?: number;
   /**
-   * The email addresses of the attendees of the event
+   * Comma-separated email addresses of event attendees
    */
-  attendees?: string[];
+  attendees?: string;
   /**
    * The conferencing provider of the event
    */
@@ -80,7 +80,7 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
   }
   if (input.attendees) {
     const currentAttendees = event.data.attendees?.map((a) => a.email || "").join(", ") || "none";
-    changes.push({ name: "Attendees", value: `${currentAttendees} → ${input.attendees.join(", ")}` });
+    changes.push({ name: "Attendees", value: `${currentAttendees} → ${input.attendees}` });
   }
   if (input.description !== undefined) {
     changes.push({
@@ -102,6 +102,10 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 const tool = async (input: Input) => {
   const preferences = getPreferenceValues<Preferences>();
   const calendar = getCalendarClient();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const existingEvent = await calendar.events.get({
     calendarId: input.calendarId ?? "primary",
@@ -134,7 +138,7 @@ const tool = async (input: Input) => {
     end: {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
-    attendees: input.attendees ? input.attendees.map((email) => ({ email })) : existingEvent.data.attendees,
+    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : existingEvent.data.attendees,
     location: input.conferencingProvider ?? existingEvent.data.location ?? "",
   };
 

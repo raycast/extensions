@@ -1,13 +1,14 @@
 import { showToast, Toast, open, getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { generateMermaidDiagram } from "../utils/diagram";
 import { cleanupTempFile } from "../utils/files";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { pathToFileURL } from "url";
 import { Preferences } from "../types";
-
-const execPromise = promisify(exec);
+import { logOperationalError, logOperationalEvent } from "../utils/logger";
+import { showActionFailureToast } from "../utils/notifications";
+import { copyDiagramImage } from "../utils/preview-actions";
+import { resolveSvgCopyAsset } from "../utils/preview-assets";
+import { renderSvgPreviewRasterWithStrategy } from "../utils/svg-preview-raster";
+import { copyRasterImageToClipboard } from "../utils/macos-image-tools";
+import { generateAiDiagramArtifact } from "./ai-diagram-service";
 /**
  * Define the input parameters required by the AI tool
  */
@@ -19,13 +20,6 @@ type MermaidToolInput = {
    */
   mermaidSyntax: string;
 };
-/**
- * Copies an image to the clipboard based on the file format
- */
-async function copyImageToClipboard(imagePath: string): Promise<void> {
-  await execPromise(`osascript -e 'set the clipboard to (read (POSIX file "${imagePath}") as TIFF picture)'`);
-}
-
 /**
  * @raycast AI Tool
  * @name generateMermaidImageTool
@@ -53,37 +47,58 @@ export default async function generateMermaidImageTool(input?: MermaidToolInput)
     const preferences = getPreferenceValues<Preferences>();
     const rawScale = preferences.scale;
     const parsedScale = typeof rawScale === "number" ? rawScale : Number(rawScale);
-    const finalScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 2;
+    const finalScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 4;
 
-    const outputPath = await generateMermaidDiagram(mermaidSyntax, tempFileRef, "png", {
-      scale: finalScale,
-      width: 2400,
+    const result = await generateAiDiagramArtifact(
+      {
+        mermaidSyntax,
+        tempFileRef,
+        scale: finalScale,
+        width: 2400,
+      },
+      {
+        generateDiagram: generateMermaidDiagram,
+        copyGeneratedImage: async ({ format, imagePath, svgRasterStrategy }) =>
+          copyDiagramImage({
+            format,
+            imagePath,
+            previewRasterPath: null,
+            copyRasterImage: copyRasterImageToClipboard,
+            resolveSvgCopy: ({ svgPath, previewRasterPath }) =>
+              resolveSvgCopyAsset({
+                svgPath,
+                previewRasterPath,
+                baseName: `mermaid-ai-svg-copy-${Date.now()}`,
+                renderSvgPreview: ({ materializedSvgContent, baseName }) =>
+                  renderSvgPreviewRasterWithStrategy({
+                    strategy: svgRasterStrategy ?? "macos",
+                    materializedSvgContent,
+                    baseName,
+                  }),
+              }),
+            cleanupTempPath: cleanupTempFile,
+          }),
+        openInPreview: async (imagePath) => open(imagePath, "com.apple.Preview"),
+      },
+    );
+
+    logOperationalEvent("ai-diagram-generated", {
+      renderer: result.engine,
+      format: result.format,
     });
-
-    // Copy to clipboard
-    await copyImageToClipboard(outputPath);
-
-    // Auto-open in Preview
-    await open(outputPath, "com.apple.Preview");
 
     toast.style = Toast.Style.Success;
     toast.title = "Diagram ready!";
 
-    // Create file URL for the link
-    const fileUrl = pathToFileURL(outputPath).toString();
-
-    // Return minimal message with link
-    return `Mermaid diagram generated successfully.
-
-**Full size:** [Open in Preview](${fileUrl})`;
+    return result.message;
   } catch (error) {
-    console.error("Diagram generation failed:", error);
+    logOperationalError("ai-diagram-generation-failed", error, {
+      renderer: "auto",
+      format: "hybrid",
+    });
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    await showFailureToast(error, {
-      title: "Failed to generate diagram",
-      message: errorMessage,
-    });
+    await showActionFailureToast(error, "Failed to generate diagram", errorMessage);
 
     throw new Error(`Diagram generation failed: ${errorMessage}`);
   } finally {

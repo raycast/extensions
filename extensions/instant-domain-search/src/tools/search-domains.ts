@@ -1,5 +1,5 @@
 import type { BulkCheckResponse } from "../utils/types";
-import { ROOT_URL } from "../utils/config";
+import { API_URL } from "../utils/config";
 import getAnonymousUserID from "../utils/getAnonymousUserID";
 import getUserAgent from "../utils/getUserAgent";
 
@@ -17,7 +17,7 @@ export default async function tool(input: Input) {
     names: domains.join(","),
   });
   const anonymousUserID = await getAnonymousUserID();
-  const response = await fetch(`${ROOT_URL}/api/v1/bulk-check?${searchParams.toString()}`, {
+  const response = await fetch(`${API_URL}/bulk-check?${searchParams.toString()}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

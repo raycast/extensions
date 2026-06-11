@@ -1,6 +1,6 @@
 import { getPreferences, resizeEditorWindow } from "#/helpers/raycast";
 import { confirmAlert, open } from "@raycast/api";
-import { execa, type Options as ExecaOptions } from "execa";
+import { execa, ExecaError, type Options as ExecaOptions } from "execa";
 import { dirname } from "node:path";
 import parseUrl from "parse-url";
 
@@ -20,7 +20,11 @@ export const batchPromises = async <T, R>(
     const batchResults = await Promise.allSettled(batch.map(processFn));
 
     batchResults.forEach((result) => {
-      if (result.status === "rejected") return console.error({ result });
+      if (result.status === "rejected") {
+        if (result.reason instanceof ExecaError && result.reason.isCanceled) return;
+
+        return console.error("Batched Promise rejected:", { result });
+      }
 
       results.push(result.value);
     });

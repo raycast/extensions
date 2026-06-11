@@ -89,14 +89,21 @@ export interface DependencyStatus {
   sqliteInstalled: boolean;
   qmdVersion?: string;
   bunVersion?: string;
+  invalidCustomPaths?: string[];
 }
 
 // QMD command execution result
+export type QmdHint =
+  | { type: "stale_index"; daysAgo: string }
+  | { type: "needs_embeddings"; count: number }
+  | { type: "sqlite_vec_unavailable" };
+
 export interface QmdResult<T> {
   success: boolean;
   data?: T;
   error?: string;
   stderr?: string;
+  hint?: QmdHint;
 }
 
 // Background process state

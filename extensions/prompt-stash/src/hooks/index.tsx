@@ -1,8 +1,7 @@
 import { Alert, confirmAlert, Icon, LocalStorage, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Prompt, SuccessCallback, UseLocalPromptsReturn, UsePromptReturn } from "../types";
-
-const PROMPTS_KEY = "prompts";
+import { PROMPTS_KEY } from "../utils/transfer";
 
 const sortPrompts = (prompts: Prompt[]) => {
   return prompts.sort((a: Prompt, b: Prompt) => {

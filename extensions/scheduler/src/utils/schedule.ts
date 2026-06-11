@@ -2,6 +2,19 @@ import { ScheduledCommand } from "../types";
 import { isWithinExecutionWindow, convertScheduleDayToJSDay } from "./dateTime";
 import { CronExpressionParser } from "cron-parser";
 
+function getIntervalMs(type: ScheduledCommand["schedule"]["type"]): number | null {
+  switch (type) {
+    case "15mins":
+      return 15 * 60 * 1000;
+    case "30mins":
+      return 30 * 60 * 1000;
+    case "hourly":
+      return 60 * 60 * 1000;
+    default:
+      return null;
+  }
+}
+
 // Helper function to get the last execution time from the command itself
 function getLastExecutionTime(command: ScheduledCommand): Date | null {
   return command.lastExecutedAt ? new Date(command.lastExecutedAt) : null;
@@ -21,24 +34,13 @@ function getNextScheduledTime(command: ScheduledCommand, afterTime: Date): Date 
       return scheduledDateTime > afterTime ? scheduledDateTime : null;
     }
 
-    case "15mins": {
-      const lastExecution = getLastExecutionTime(command);
-      if (!lastExecution) return afterTime; // Never executed, due now
-      const nextTime = new Date(lastExecution.getTime() + 15 * 60 * 1000);
-      return nextTime > afterTime ? nextTime : afterTime;
-    }
-
-    case "30mins": {
-      const lastExecution = getLastExecutionTime(command);
-      if (!lastExecution) return afterTime; // Never executed, due now
-      const nextTime = new Date(lastExecution.getTime() + 30 * 60 * 1000);
-      return nextTime > afterTime ? nextTime : afterTime;
-    }
-
+    case "15mins":
+    case "30mins":
     case "hourly": {
+      const ms = getIntervalMs(schedule.type)!;
       const lastExecution = getLastExecutionTime(command);
       if (!lastExecution) return afterTime; // Never executed, due now
-      const nextTime = new Date(lastExecution.getTime() + 60 * 60 * 1000);
+      const nextTime = new Date(lastExecution.getTime() + ms);
       return nextTime > afterTime ? nextTime : afterTime;
     }
 
@@ -121,6 +123,13 @@ function getNextScheduledTime(command: ScheduledCommand, afterTime: Date): Date 
 }
 
 export function isCommandDue(command: ScheduledCommand, now: Date): boolean {
+  const intervalMs = getIntervalMs(command.schedule.type);
+  if (intervalMs !== null) {
+    const lastExecution = getLastExecutionTime(command);
+    if (!lastExecution) return true;
+    return now.getTime() - lastExecution.getTime() >= intervalMs;
+  }
+
   const nextScheduledTime = getNextScheduledTime(command, new Date(now.getTime() - 60000)); // Look back 1 minute
   if (!nextScheduledTime) return false;
   return isWithinExecutionWindow(nextScheduledTime, now);

@@ -3,6 +3,7 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
+import { Shortcut } from "./lib/shortcuts";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
 import {
   fileExists,
@@ -35,7 +36,7 @@ function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
   const title = c.category ? `${c.category}: ${c.title}` : c.title;
   return (
     <Action.CreateQuicklink
-      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      shortcut={Shortcut.CreateQuickLink}
       quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: `VSCode - ${title}` }}
     />
   );
@@ -96,11 +97,7 @@ function CommandListItem(props: { command: CommandMetadata }) {
             <CreateCommandQuickLinkAction command={c} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              title="Copy Command ID"
-              content={c.command}
-            />
+            <Action.CopyToClipboard shortcut={Shortcut.Copy} title="Copy Command ID" content={c.command} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -143,12 +140,7 @@ export default function CommandPaletteCommand() {
           icon="⚠️"
           actions={
             <ActionPanel>
-              <Action
-                title="Reload"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={refresh}
-              />
+              <Action title="Reload" icon={Icon.RotateClockwise} shortcut={Shortcut.Refresh} onAction={refresh} />
               <InstallRaycastForVSCodeAction />
             </ActionPanel>
           }

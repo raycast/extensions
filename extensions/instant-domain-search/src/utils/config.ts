@@ -1,5 +1,7 @@
 export const ROOT_URL = "https://instantdomainsearch.com";
 
+export const API_URL = "https://api.instantdomainsearch.com/v1";
+
 export const ANONYMOUS_USER_ID_KEY = "anonymous-user-id";
 
 export const POPULAR_TLDs = [

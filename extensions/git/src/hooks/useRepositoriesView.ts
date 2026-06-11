@@ -1,18 +1,27 @@
 import { useCachedState } from "@raycast/utils";
 import { Repository } from "../types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export type RepositoriesOrder = "visit-date" | "alphabetical";
 export type RepositoriesGroup = "none" | "language" | "parent";
 export type RepositoriesView = { order: RepositoriesOrder; group: RepositoriesGroup };
+export type RepositoriesViewOptions = {
+  groupBy: RepositoriesGroup;
+  orderBy: RepositoriesOrder;
+};
 
 export type StructuredRepositories = { groupTitle: string; repositories: Repository[] };
 
-export function useRepositoriesView(repositories: Repository[]) {
-  const [currentView, setCurrentView] = useCachedState<RepositoriesView>("repositories-list-view", {
-    order: "visit-date",
-    group: "parent",
-  });
+export function useRepositoriesView(repositories: Repository[], options?: RepositoriesViewOptions) {
+  const [currentView, setCurrentView] = options
+    ? useState<RepositoriesView>({
+        order: options.orderBy,
+        group: options.groupBy,
+      })
+    : useCachedState<RepositoriesView>("repositories-list-view", {
+        order: "visit-date",
+        group: "parent",
+      });
 
   const displayedRepositories = useMemo<StructuredRepositories[]>(() => {
     const sorted = [...repositories].sort((a: Repository, b: Repository) => {

@@ -1,27 +1,59 @@
 import { open, showToast, Toast, closeMainWindow } from "@raycast/api";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { getBrewPath } from "./brew";
 
 const execAsync = promisify(exec);
-export const BREW_MAX_BUFFER = 10 * 1024 * 1024;
+const execFileAsync = promisify(execFile);
 
 export const VESSLO_URL_SCHEME = "vesslo://";
+const MAX_TOAST_MESSAGE_LENGTH = 100;
+const NEW_TERMINAL_WINDOW_DELAY_SECONDS = 3;
 
-function escapeForAppleScript(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/'/g, "'\\'''");
+function truncateMessage(message: string): string {
+  return message.slice(0, MAX_TOAST_MESSAGE_LENGTH);
 }
 
-function isValidCaskToken(token: string): boolean {
-  return /^[A-Za-z0-9@._+-]+$/.test(token);
+function quoteShellArgument(value: string): string {
+  return `'${value.replace(/'/g, "'\"'\"'")}'`;
 }
 
-function normalizeAppStoreId(appStoreId: string): string | null {
-  const trimmed = appStoreId.trim();
-  return /^\d+$/.test(trimmed) ? trimmed : null;
+function quoteAppleScriptString(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function parseAppStoreId(appStoreId: string): string {
+  const normalizedId = appStoreId.trim();
+  if (!/^\d+$/.test(normalizedId)) {
+    throw new Error("Invalid App Store ID");
+  }
+  return normalizedId;
+}
+
+async function runCommandInTerminal(command: string) {
+  const quotedCommand = quoteAppleScriptString(command);
+  await execFileAsync("osascript", [
+    "-e",
+    'tell application "Terminal"',
+    "-e",
+    "activate",
+    "-e",
+    "if (count of windows) > 0 then",
+    "-e",
+    `do script ${quotedCommand} in front window`,
+    "-e",
+    "else",
+    "-e",
+    'do script ""',
+    "-e",
+    `delay ${NEW_TERMINAL_WINDOW_DELAY_SECONDS}`,
+    "-e",
+    `do script ${quotedCommand} in front window`,
+    "-e",
+    "end if",
+    "-e",
+    "end tell",
+  ]);
 }
 
 export async function openInVesslo(bundleId: string) {
@@ -32,7 +64,7 @@ export async function openInVesslo(bundleId: string) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to open in Vesslo",
-      message: String(error).slice(0, 100),
+      message: truncateMessage(String(error)),
     });
   }
 }
@@ -43,6 +75,7 @@ export function getAppStoreUrl(appStoreId: string): string {
 
 export async function runBrewUpgrade(caskName: string, appName: string) {
   const brewPath = getBrewPath();
+  const quotedCaskName = quoteShellArgument(caskName);
 
   try {
     await showToast({
@@ -51,8 +84,8 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
     });
 
     const { stdout, stderr } = await execAsync(
-      `${brewPath} upgrade --cask ${JSON.stringify(caskName)} 2>&1`,
-      { maxBuffer: BREW_MAX_BUFFER },
+      `${brewPath} upgrade --cask ${quotedCaskName} 2>&1`,
+      { maxBuffer: 1024 * 1024 * 10 },
     );
 
     const output = stdout + stderr;
@@ -88,12 +121,12 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
       await showToast({
         style: Toast.Style.Success,
         title: `${appName} updated!`,
-        message: output?.slice(0, 100) || "Update complete",
+        message: truncateMessage(output) || "Update complete",
       });
     }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message.slice(0, 100) : "Unknown error";
+      error instanceof Error ? truncateMessage(error.message) : "Unknown error";
 
     await showToast({
       style: Toast.Style.Failure,
@@ -104,77 +137,44 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
 }
 
 export async function runBrewUpgradeInTerminal(caskName: string) {
-  if (!isValidCaskToken(caskName)) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid cask name",
-      message: caskName.slice(0, 100),
-    });
-    return;
-  }
-
   const brewPath = getBrewPath();
-  const command = `${brewPath} upgrade --cask ${caskName}`;
-  const escapedCommand = escapeForAppleScript(command);
+  const command = `${brewPath} upgrade --cask ${quoteShellArgument(caskName)}`;
 
   try {
     await closeMainWindow();
-    // If Terminal window exists, run immediately; otherwise create new and wait
-    await execAsync(
-      `osascript -e 'tell application "Terminal"
-        activate
-        if (count of windows) > 0 then
-          do script "${escapedCommand}" in front window
-        else
-          do script ""
-          delay 3
-          do script "${escapedCommand}" in front window
-        end if
-      end tell'`,
-    );
+    await runCommandInTerminal(command);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to open Terminal",
-      message: String(error).slice(0, 100),
+      message: truncateMessage(String(error)),
     });
   }
 }
 
 export async function runMasUpgradeInTerminal(appStoreId: string) {
-  const normalizedAppStoreId = normalizeAppStoreId(appStoreId);
-  if (!normalizedAppStoreId) {
+  let validatedId: string;
+  try {
+    validatedId = parseAppStoreId(appStoreId);
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Invalid App Store ID",
-      message: appStoreId.slice(0, 100),
+      message: `"${truncateMessage(appStoreId)}" is not a valid numeric ID`,
     });
     return;
   }
 
-  const command = `mas upgrade ${normalizedAppStoreId}`;
-  const escapedCommand = escapeForAppleScript(command);
+  const command = `mas upgrade ${validatedId}`;
 
   try {
     await closeMainWindow();
-    // If Terminal window exists, run immediately; otherwise create new and wait
-    await execAsync(
-      `osascript -e 'tell application "Terminal"
-        activate
-        if (count of windows) > 0 then
-          do script "${escapedCommand}" in front window
-        else
-          do script ""
-          delay 3
-          do script "${escapedCommand}" in front window
-        end if
-      end tell'`,
-    );
+    await runCommandInTerminal(command);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to open Terminal",
-      message: String(error).slice(0, 100),
+      message: truncateMessage(String(error)),
     });
   }
 }

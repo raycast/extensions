@@ -44,6 +44,9 @@ type PageListItemProps = {
   users?: User[];
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
+  isPinned?: boolean;
+  setPinnedPage?: (page: Page) => Promise<void>;
+  removePinnedPage?: (id: string) => Promise<void>;
 };
 
 export function PageListItem({
@@ -57,6 +60,9 @@ export function PageListItem({
   icon = getPageIcon(page),
   users,
   mutate,
+  isPinned,
+  setPinnedPage,
+  removePinnedPage,
 }: PageListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
@@ -168,7 +174,10 @@ export function PageListItem({
               <ActionPanel.Submenu
                 title="Edit Property"
                 icon={Icon.BulletPoints}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                }}
               >
                 {quickEditProperties?.map((dp: DatabaseProperty) => (
                   <ActionEditPageProperty
@@ -197,6 +206,26 @@ export function PageListItem({
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
+              />
+            )}
+
+            {isPinned ? (
+              <Action
+                title="Unpin Page"
+                icon={Icon.PinDisabled}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={async () => {
+                  await removePinnedPage?.(page.id);
+                }}
+              />
+            ) : (
+              <Action
+                title="Pin Page"
+                icon={Icon.Pin}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={async () => {
+                  await setPinnedPage?.(page);
+                }}
               />
             )}
 
@@ -233,7 +262,10 @@ export function PageListItem({
                 <Action.Push
                   title="Set View Type"
                   icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
-                  shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "v" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt", "shift"], key: "v" },
+                    Windows: { modifiers: ["ctrl", "opt", "shift"], key: "v" },
+                  }}
                   target={
                     <DatabaseViewForm
                       databaseId={page.parent_database_id}
@@ -283,7 +315,10 @@ export function PageListItem({
               <Action.Paste
                 title={`Paste ${pageWord} URL`}
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                }}
               />
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} Title`}

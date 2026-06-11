@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-photos",
+  "title": "Apple Photos",
+  "description": "Browse your recent Apple Photos in a grid and paste the latest photo directly into any app.",
+  "icon": "command-icon.png",
+  "author": "wesbaker",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-photos",
+      "title": "Search Recent Photos",
+      "subtitle": "Apple Photos",
+      "description": "Browse your most recent photos in a grid",
+      "mode": "view"
+    },
+    {
+      "name": "paste-photo",
+      "title": "Paste Recent Photo",
+      "subtitle": "Apple Photos",
+      "description": "Paste the most recent photo into the frontmost app",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "photoCount",
+      "title": "Number of Photos",
+      "description": "How many recent photos to show in the grid",
+      "type": "textfield",
+      "required": false,
+      "default": "24",
+      "placeholder": "24"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

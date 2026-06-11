@@ -2,7 +2,6 @@ export const JWT_TOKEN_STORAGE_KEY = "aztu_jwt_token";
 export const JWT_TOKEN_TIMESTAMP_KEY = "aztu_jwt_token_time";
 export const LAST_LMS_LOGIN_LINK_KEY = "aztu_last_login_link";
 export const LAST_LMS_LOGIN_TIMESTAMP_KEY = "aztu_last_login_time";
-export const IS_LOGINED_USING_WEB = "aztu_is_logined_using_web";
 export const ONE_HOUR_IN_MS = 60 * 60 * 1000;
 export const LMS_BASE_URL = "https://lms.aztu.edu.az";
 

@@ -6,7 +6,7 @@ import { CustomResolutionsList } from "./CustomResolutionsList";
 import { DefaultResolutionsList } from "./DefaultResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { generateResolutionItemId } from "../utils/resolution";
 
 interface ResolutionListContainerProps {
@@ -34,33 +34,42 @@ export function ResolutionListContainer({
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
   const { starredResolutions, toggleStarResolution } = useStarredResolutions();
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
   const [isContentReady, setIsContentReady] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [initialSelectedItemId, setInitialSelectedItemId] = useState<string | undefined>(undefined);
+  const [accessorySelectedItemId, setAccessorySelectedItemId] = useState<string | undefined>(undefined);
 
   // Set content ready state when external loading is complete
   useEffect(() => {
     setIsContentReady(!externalIsLoading);
   }, [externalIsLoading]);
 
-  // Set selected item when content is ready
   useEffect(() => {
-    if (isContentReady && !isInitialized) {
-      if (starredResolutions.length > 0) {
-        const firstStarred = starredResolutions[0];
-        setSelectedItemId(
-          generateResolutionItemId(firstStarred, firstStarred.isCustom ? "custom" : "default", "Starred Sizes", 0),
-        );
-      } else if (customResolutions.length > 0) {
-        const firstCustom = customResolutions[0];
-        setSelectedItemId(generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0));
-      } else if (predefinedResolutions.length > 0) {
-        const firstDefault = predefinedResolutions[0];
-        setSelectedItemId(generateResolutionItemId(firstDefault, "default", "Default Sizes", 0));
-      }
-      setIsInitialized(true);
+    if (!isContentReady || initialSelectedItemId) {
+      return;
     }
-  }, [isContentReady, isInitialized, starredResolutions, customResolutions, predefinedResolutions]);
+
+    if (starredResolutions.length > 0) {
+      const firstStarred = starredResolutions[0];
+      const itemId = generateResolutionItemId(
+        firstStarred,
+        firstStarred.isCustom ? "custom" : "default",
+        "Starred Sizes",
+        0,
+      );
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    } else if (customResolutions.length > 0) {
+      const firstCustom = customResolutions[0];
+      const itemId = generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0);
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    } else if (predefinedResolutions.length > 0) {
+      const firstDefault = predefinedResolutions[0];
+      const itemId = generateResolutionItemId(firstDefault, "default", "Default Sizes", 0);
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    }
+  }, [customResolutions, initialSelectedItemId, isContentReady, predefinedResolutions, starredResolutions]);
 
   const handleAddCustomResolution = async () => {
     push(
@@ -77,8 +86,8 @@ export function ResolutionListContainer({
       isLoading={externalIsLoading || !isContentReady}
       searchBarPlaceholder="Search for sizes and commands..."
       navigationTitle="Resize Window"
-      selectedItemId={selectedItemId}
-      onSelectionChange={(id) => setSelectedItemId(id || undefined)}
+      selectedItemId={initialSelectedItemId}
+      onSelectionChange={(id) => setAccessorySelectedItemId(id || undefined)}
     >
       {isContentReady && (
         <>
@@ -86,7 +95,7 @@ export function ResolutionListContainer({
             starredResolutions={starredResolutions}
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <CustomResolutionsList
@@ -94,16 +103,16 @@ export function ResolutionListContainer({
             onResizeWindow={onResizeWindow}
             onDeleteResolution={onDeleteCustomResolution}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
             starredResolutions={starredResolutions}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <DefaultResolutionsList
             predefinedResolutions={predefinedResolutions}
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
             starredResolutions={starredResolutions}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <OptionsList
