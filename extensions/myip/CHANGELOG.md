@@ -1,6 +1,6 @@
 # MyIP Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-11
 
 - Remove unused ip dependency (clears CVE-2024-29415)
 
