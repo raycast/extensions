@@ -15,6 +15,9 @@ export default async function tool(input: Input) {
   const response = await fetch(
     hubSearchURL({ q: input.query, language: input.language, sort: input.sort, limit: input.limit ?? 20 }),
   );
+  if (!response.ok) {
+    throw new Error(`Hub search failed (HTTP ${response.status} ${response.statusText}).`);
+  }
   const json = (await response.json()) as HubListResponse;
   return (json.data ?? []).map((snippet) => ({
     id: snippet.id,
