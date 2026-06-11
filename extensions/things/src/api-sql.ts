@@ -17,52 +17,38 @@ import {
 } from './types';
 
 // Things stores its data in a SQLite database. Tries known locations in order:
-//   1. ThingsData-*/Things Database.thingsdatabase/main.sqlite
-//   2. Things Database.thingsdatabase/main.sqlite
-//   3. ~/Library/Containers/com.culturedcode.ThingsMac/.../Things.sqlite3
-//   4. Things Database.thingsSQLite
+//   1. ThingsData-*/Things Database.thingsdatabase/main.sqlite (modern)
+//   2. Things Database.thingsSQLite (legacy fallback)
 function findThingsDBPath(): string {
   const container = join(homedir(), 'Library', 'Group Containers', 'JLMPQHK86H.com.culturedcode.ThingsMac');
 
-  // 1. ThingsData-*/Things Database.thingsdatabase/main.sqlite
-  try {
-    const entries = readdirSync(container);
-    const dataDir = entries.find((e) => e.startsWith('ThingsData-'));
-    if (dataDir) {
-      const p = join(container, dataDir, 'Things Database.thingsdatabase', 'main.sqlite');
-      if (existsSync(p)) return p;
-    }
-  } catch {
-    // container doesn't exist or isn't readable — fall through
+  const notFoundError = new Error(
+    'Things database not found. Make sure Things is installed and Raycast has Full Disk Access in System Settings → Privacy & Security → Full Disk Access.',
+  );
+
+  if (!existsSync(container)) throw notFoundError;
+
+  // Collect all candidate paths. The modern path requires a dynamic directory
+  // name (ThingsData-*), so we resolve it via readdirSync.
+  const candidates: string[] = [];
+
+  const dataDir = readdirSync(container).find((e) => e.startsWith('ThingsData-'));
+  if (dataDir) {
+    candidates.push(join(container, dataDir, 'Things Database.thingsdatabase', 'main.sqlite'));
   }
 
-  // 2. Things Database.thingsdatabase/main.sqlite  (container root)
-  const p2 = join(container, 'Things Database.thingsdatabase', 'main.sqlite');
-  if (existsSync(p2)) return p2;
+  candidates.push(join(container, 'Things Database.thingsSQLite'));
 
-  // 3. Older sandbox container path
-  const p3 = join(
-    homedir(),
-    'Library',
-    'Containers',
-    'com.culturedcode.ThingsMac',
-    'Data',
-    'Library',
-    'Application Support',
-    'Cultured Code',
-    'Things',
-    'Things.sqlite3',
-  );
-  if (existsSync(p3)) return p3;
+  const found = candidates.find(existsSync);
+  if (found) return found;
 
-  // 4. Legacy fallback
-  return join(container, 'Things Database.thingsSQLite');
+  throw notFoundError;
 }
 
 function assertPackedDateEncoding(): void {
-  const packed = encodeThingsDate(2024, 6, 11);
+  const packed = encodeThingsDate(2026, 6, 11);
   const decoded = convertThingsDate(packed);
-  const expected = '2024-06-11';
+  const expected = '2026-06-11';
   if (decoded !== expected) {
     throw new Error(
       `Things date calculation has changed — dates may be incorrect. Expected "${expected}", got "${decoded}".`,
@@ -70,12 +56,13 @@ function assertPackedDateEncoding(): void {
   }
 }
 
+// Cached DB path. Re-resolved if the cached path no longer exists on disk
+// (e.g. Things was reinstalled or the database file was moved).
 let _thingsDBPath: string | undefined;
 function getThingsDBPath(): string {
-  if (!_thingsDBPath) {
-    _thingsDBPath = findThingsDBPath();
-    assertPackedDateEncoding();
-  }
+  if (_thingsDBPath && existsSync(_thingsDBPath)) return _thingsDBPath;
+  _thingsDBPath = findThingsDBPath();
+  assertPackedDateEncoding();
   return _thingsDBPath;
 }
 
