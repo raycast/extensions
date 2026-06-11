@@ -1,6 +1,6 @@
 # Sublime Changelog
 
-## [Migrate to v3 API] - {PR_MERGE_DATE}
+## [Migrate to v3 API] - 2026-06-11
 
 Migrated the extension to Sublime's new v3 endpoints. No changes to functionality.
 
