@@ -1,30 +1,45 @@
-# VPS Upload
+# ☁️ VPS Upload
 
-Upload files to your server over SSH and get the **remote path on your clipboard** — built for referencing local files inside a remote SSH session (for example, an AI coding agent running on your VPS, where a dragged-in macOS path doesn't exist on the server).
+> Upload files to your server over SSH and get the remote path on your clipboard.
 
-## Commands
+![VPS Upload](metadata/vps-upload-2.png)
 
-- **Upload Finder Selection** — select file(s) in Finder, trigger the command (give it a hotkey), and they upload immediately with a live progress toast. No window.
-- **Upload Files** — pick or drop files into a form, with a progress bar in the panel. Includes first-run onboarding and a **Test Connection** action.
+A Raycast extension for referencing local files inside a remote SSH session. When you work over SSH (say an AI coding agent on your VPS), a local macOS path means nothing on the server. VPS Upload sends the file across and hands you the remote path, ready to paste.
 
-Either way, the remote path is copied to your clipboard the instant the upload starts, so you can paste it straight into your remote session.
+## Features
+
+- **One hotkey, no window.** Select files in Finder and run *Upload Finder Selection*.
+- **Or pick and drop.** Use *Upload Files* for a form with a live progress bar.
+- **Clipboard, instantly.** The remote path is copied the moment the upload starts.
+- **In-app setup.** Configure your host inside Raycast, no Settings trip.
+- **No dependencies.** Streams over `ssh`, with accurate progress.
 
 ## Setup
 
-1. Set the **SSH Host** preference to an `~/.ssh/config` alias (e.g. `vps`) or `user@host`, and a **Remote Directory** (absolute path, created if missing — defaults to `/tmp/raycast-uploads`).
-2. Make sure **key-based, non-interactive login works**:
+1. Install from the Raycast Store (or run locally: `npm install && npm run dev`).
+2. On first run, enter your **SSH Host** (an `~/.ssh/config` alias like `vps`, or `user@host`) and a **Remote Directory**.
+3. Confirm key-based login works (no password prompt):
    ```sh
    ssh -o BatchMode=yes <host> true
    ```
-   If that prompts for a password or hangs, set up an SSH key first (`ssh-copy-id <host>`).
+   If that hangs or errors, set up an SSH key first with `ssh-copy-id <host>`.
+
+## Usage
+
+- **Fast path:** select file(s) in Finder, run *Upload Finder Selection* (give it a hotkey).
+- **Manual:** run *Upload Files*, then pick or drop files.
+
+Either way, paste the copied remote path into your SSH session.
 
 ## How it works
 
-Files are streamed through `ssh <host> "cat > <remote>"`, and progress is measured from the bytes piped locally (stream backpressure keeps the count tracking actual transmission). This needs **no pseudo-tty and no extra tools** — `scp` is intentionally avoided because it only prints a progress meter to a real terminal, which Raycast's runtime can't provide.
-
-Remote filenames are sanitised to `[A-Za-z0-9._-]`, so the pasted path never needs quoting.
+Files stream through `ssh <host> "cat > <remote>"`, and progress is measured from the bytes piped locally. There is no pseudo-tty and no extra tooling. `scp` is avoided on purpose because it only prints a progress meter to a real terminal, which Raycast's runtime cannot provide. Remote filenames are sanitized to `[A-Za-z0-9._-]`, so the pasted path never needs quoting.
 
 ## Requirements
 
-- macOS
-- An SSH host reachable with key-based, non-interactive login.
+- macOS with Raycast
+- A host reachable with key-based, non-interactive SSH login
+
+## License
+
+[MIT](LICENSE)
