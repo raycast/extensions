@@ -1,6 +1,6 @@
 # RUT Generator Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-11
 
 - Generate 10 valid Chilean RUTs.
 - Copy a single RUT or the full generated list.
