@@ -15,6 +15,11 @@ export type ChecklistItem = {
 export type TodoSummary = {
   id: string;
   name: string;
+  /**
+   * Present only for non-open items (logbook, trash). Absence implies 'open'.
+   * Use this to distinguish completed from cancelled without a follow-up get-todo-details call.
+   */
+  status?: 'completed' | 'canceled';
   /** ISO 8601 date string (YYYY-MM-DD), or undefined if no due date. */
   dueDate?: string;
   /**
@@ -34,7 +39,7 @@ export type TodoSummary = {
 };
 
 /** Full to-do details including notes, tags, and checklist. */
-export type TodoDetails = TodoSummary & {
+export type TodoDetails = Omit<TodoSummary, 'status'> & {
   status: 'open' | 'completed' | 'canceled';
   notes: string;
   tags: string[];

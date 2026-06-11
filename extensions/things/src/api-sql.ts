@@ -297,6 +297,7 @@ function todoToSummary(todo: Todo): TodoSummary {
   return {
     id: todo.id,
     name: todo.name,
+    status: todo.status !== 'open' ? todo.status : undefined,
     dueDate: todo.dueDate || undefined,
     dueDateIsRecurring: todo.dueDateIsRecurring ?? false,
     activationDate: todo.activationDate || undefined,
@@ -675,7 +676,7 @@ async function getAnytimeTodosFromDB(dbPath: string): Promise<Todo[]> {
 }
 
 // Open, start=2, has a concrete startDate OR is a recurring master with a known next instance date
-// (rt1_nextInstanceStartDate != 69760 placeholder). Things shows these in Upcoming via the next instance date.
+// (rt1_nextInstanceStartDate != NEXT_INSTANCE_PLACEHOLDER). Things shows these in Upcoming via the next instance date.
 // Includes todos (type=0) and projects (type=1). Sorted: todos first, then projects, each by index.
 async function getUpcomingTodosFromDB(dbPath: string): Promise<Todo[]> {
   return runListQuery(
@@ -693,11 +694,11 @@ async function getUpcomingTodosFromDB(dbPath: string): Promise<Todo[]> {
           t.rt1_recurrenceRule IS NOT NULL
           AND t.rt1_repeatingTemplate IS NULL
           AND t.rt1_nextInstanceStartDate IS NOT NULL
-          AND t.rt1_nextInstanceStartDate != 69760
+          AND t.rt1_nextInstanceStartDate != ${NEXT_INSTANCE_PLACEHOLDER}
         )
       )
     ORDER BY
-      COALESCE(t.startDate, NULLIF(t.rt1_nextInstanceStartDate, 69760)) ASC,
+      COALESCE(t.startDate, NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER})) ASC,
       CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
       p."index" ASC,
       CASE WHEN t.startDate IS NULL THEN 0 ELSE 1 END ASC,

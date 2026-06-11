@@ -178,9 +178,11 @@ export async function queryTodosJxa(
     const props = todo.properties();
     const projectRef = props.project;
     const areaRef = props.area;
+    const s = props.status;
     return {
       id: props.id,
       name: props.name,
+      status: s !== 'open' ? s : undefined,
       dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
       dueDateIsRecurring: false,
       activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
