@@ -25,7 +25,7 @@ export function formatSlurmDateTime(s: string): string {
   const [, y, mo, d, hh, mm, ss] = m;
   const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(hh), Number(mm), Number(ss));
   if (Number.isNaN(date.getTime())) return v;
-  const absolute = date.toLocaleString("en-GB", {
+  const absolute = date.toLocaleString(undefined, {
     weekday: "short",
     day: "numeric",
     month: "short",

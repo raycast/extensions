@@ -15,7 +15,6 @@ Manage [Slurm Workload Manager](https://github.com/schedmd/slurm) jobs across mu
 
 ## Commands
 
-
 | Command             | Description                                                                  |
 | ------------------- | ---------------------------------------------------------------------------- |
 | **My Slurm Jobs**   | Your jobs with status, elapsed time, resource usage, logs, and cancel option |
@@ -25,14 +24,11 @@ Manage [Slurm Workload Manager](https://github.com/schedmd/slurm) jobs across mu
 | **Slurm Menu Bar**  | Running and pending job counts in the macOS menu bar                         |
 | **Select Clusters** | Activate or deactivate SSH connections to your clusters                      |
 
-
 ## Preferences
-
 
 | Preference          | Default | Description                                                                               |
 | ------------------- | ------- | ----------------------------------------------------------------------------------------- |
 | **Control Persist** | `12h`   | How long the SSH connection stays alive after the last command (OpenSSH `ControlPersist`) |
-
 
 ## Multiple Clusters
 

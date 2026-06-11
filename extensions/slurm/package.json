@@ -6,7 +6,10 @@
   "icon": "icon.png",
   "author": "p-koenig",
   "license": "MIT",
-  "categories": ["Developer Tools", "System"],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
   "preferences": [
     {
       "name": "controlPersist",
@@ -63,19 +66,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^2.2.0",
-    "fast-glob": "^3.3.2",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "fast-glob": "^3.3.3",
     "ssh-config": "^5.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.10.0",
-    "@types/react": "^19.0.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.3.0",
-    "react": "^19.0.0",
-    "typescript": "^5.6.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -o dist",
