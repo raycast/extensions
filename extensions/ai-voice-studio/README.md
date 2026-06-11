@@ -12,28 +12,28 @@ The extension focuses on everyday reading and quick voice testing rather than fu
 
 ## Commands
 
-| Command | Provider | Purpose |
-| --- | --- | --- |
-| Quick Read | Default provider | Reads selected text, or clipboard text if no selection is available. Running it again stops playback. |
-| Setup Voice Defaults | All | Chooses the default provider and provider-specific model, voice, speed, and advanced defaults. |
-| Test Voice Setup | Default provider | Synthesizes and plays a short sample to check credentials, latency, and playback. |
-| Quick Read with Qwen-TTS | Qwen-TTS | Reads selected or clipboard text with the configured Qwen-TTS voice. |
-| Read with Qwen-TTS Voice | Qwen-TTS | Browses Qwen-TTS voices before reading. |
-| Set Qwen-TTS Quick Read Voice | Qwen-TTS | Sets the Qwen-TTS voice used by Quick Read. |
-| Qwen-TTS Reading Status | Qwen-TTS | Shows Qwen-TTS playback status and controls in the menu bar. |
-| TTS Studio | MiMo | Generates MiMo speech from typed, selected, or pasted text. |
-| Quick Read with MiMo | MiMo | Reads selected or clipboard text with the configured MiMo voice. |
-| Read with MiMo Voice | MiMo | Browses MiMo voices before reading. |
-| Set MiMo Quick Read Voice | MiMo | Sets the MiMo voice used by Quick Read. |
-| MiMo Reading Status | MiMo | Shows MiMo playback status and controls in the menu bar. |
-| OpenAI TTS Studio | OpenAI | Generates OpenAI speech with voice, tone, delivery, and style controls. |
-| Quick Read with OpenAI | OpenAI | Reads selected or clipboard text with the configured OpenAI voice. |
-| Read with OpenAI Voice | OpenAI | Browses OpenAI voices before reading. |
-| Set OpenAI Quick Read Voice | OpenAI | Sets the OpenAI voice used by Quick Read. |
-| OpenAI Reading Status | OpenAI | Shows OpenAI playback status and controls in the menu bar. |
-| Stop Reading | All | Stops current playback across providers. |
-| Increase Reading Speed | Default provider | Raises playback speed by one step. |
-| Decrease Reading Speed | Default provider | Lowers playback speed by one step. |
+| Command                       | Provider         | Purpose                                                                                               |
+| ----------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| Quick Read                    | Default provider | Reads selected text, or clipboard text if no selection is available. Running it again stops playback. |
+| Setup Voice Defaults          | All              | Chooses the default provider and provider-specific model, voice, speed, and advanced defaults.        |
+| Test Voice Setup              | Default provider | Synthesizes and plays a short sample to check credentials, latency, and playback.                     |
+| Quick Read with Qwen-TTS      | Qwen-TTS         | Reads selected or clipboard text with the configured Qwen-TTS voice.                                  |
+| Read with Qwen-TTS Voice      | Qwen-TTS         | Browses Qwen-TTS voices before reading.                                                               |
+| Set Qwen-TTS Quick Read Voice | Qwen-TTS         | Sets the Qwen-TTS voice used by Quick Read.                                                           |
+| Qwen-TTS Reading Status       | Qwen-TTS         | Shows Qwen-TTS playback status and controls in the menu bar.                                          |
+| TTS Studio                    | MiMo             | Generates MiMo speech from typed, selected, or pasted text.                                           |
+| Quick Read with MiMo          | MiMo             | Reads selected or clipboard text with the configured MiMo voice.                                      |
+| Read with MiMo Voice          | MiMo             | Browses MiMo voices before reading.                                                                   |
+| Set MiMo Quick Read Voice     | MiMo             | Sets the MiMo voice used by Quick Read.                                                               |
+| MiMo Reading Status           | MiMo             | Shows MiMo playback status and controls in the menu bar.                                              |
+| OpenAI TTS Studio             | OpenAI           | Generates OpenAI speech with voice, tone, delivery, and style controls.                               |
+| Quick Read with OpenAI        | OpenAI           | Reads selected or clipboard text with the configured OpenAI voice.                                    |
+| Read with OpenAI Voice        | OpenAI           | Browses OpenAI voices before reading.                                                                 |
+| Set OpenAI Quick Read Voice   | OpenAI           | Sets the OpenAI voice used by Quick Read.                                                             |
+| OpenAI Reading Status         | OpenAI           | Shows OpenAI playback status and controls in the menu bar.                                            |
+| Stop Reading                  | All              | Stops current playback across providers.                                                              |
+| Increase Reading Speed        | Default provider | Raises playback speed by one step.                                                                    |
+| Decrease Reading Speed        | Default provider | Lowers playback speed by one step.                                                                    |
 
 ## Credentials
 
