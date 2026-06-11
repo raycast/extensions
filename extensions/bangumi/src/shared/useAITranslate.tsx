@@ -12,7 +12,7 @@ export const useAITranslate = (cacheKey: string) => {
     setIsTranslating(true)
     try {
       const preferences = getPreferenceValues<Preferences>()
-      const targetLang = preferences.aiTranslationLanguage || "English"
+      const targetLang = preferences.aiTranslationLanguage
       const prompt = `Translate the following text into ${targetLang}. If it is already in ${targetLang}, return an empty string. Do not add any additional text or explanations.\n\n${text}`
       const answer = AI.ask(prompt, { creativity: "low" })
       let result = ""
