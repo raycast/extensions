@@ -1,0 +1,16 @@
+# Raycast
+.raycast/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
