@@ -209,7 +209,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     name: props.name,
     status: props.status,
     notes: props.notes || '',
-    tags: (todo.tagNames() || '').split(',').filter(t => t),
+    tags: (todo.tagNames() || '').split(', ').filter(t => t),
     dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
     dueDateIsRecurring: false,
     activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
@@ -224,6 +224,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     `Get todo details`,
   );
   if (!result) return null;
+  console.log(`result:${JSON.stringify(result)}`);
   return result as TodoDetails;
 }
 
@@ -244,7 +245,7 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
       name: props.name,
       status: props.status,
       notes: props.notes || '',
-      tags: (todo.tagNames() || '').split(',').filter(t => t),
+      tags: (todo.tagNames() || '').split(', ').filter(t => t),
       dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
       dueDateIsRecurring: false,
       activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
@@ -308,7 +309,7 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
     name: props.name,
     status: props.status,
     notes: props.notes || '',
-    tags: (project.tagNames() || '').split(',').filter(t => t),
+    tags: (project.tagNames() || '').split(', ').filter(t => t),
     dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
     activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
     areaId: areaRef ? areaRef.id() : undefined,
@@ -333,7 +334,7 @@ export async function queryAreaDetailsJxa(appId: string, areaId: string): Promis
   return {
     id: props.id,
     name: props.name,
-    tags: (area.tagNames() || '').split(',').filter(t => t),
+    tags: (area.tagNames() || '').split(', ').filter(t => t),
     projectCount: projects.length,
     todoCount: todos.length,
   };

@@ -285,7 +285,7 @@ export async function queryTodoDetailsSQL(todoId: string): Promise<TodoDetails |
     ...summary,
     status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
     notes: row.notes,
-    tags: row.tagList ? row.tagList.split(',').filter(Boolean) : [],
+    tags: row.tagList ? row.tagList.split(', ').filter(Boolean) : [],
     checklistItems,
   };
 }
@@ -303,7 +303,7 @@ export async function queryTodosDetailsSQL(todoIds: string[]): Promise<TodoDetai
       ...summary,
       status: row.status === 2 ? 'canceled' : row.status === 3 ? 'completed' : 'open',
       notes: row.notes,
-      tags: row.tagList ? row.tagList.split(',').filter(Boolean) : [],
+      tags: row.tagList ? row.tagList.split(', ').filter(Boolean) : [],
       checklistItems: allChecklist[row.id] ?? [],
     };
   });
@@ -383,7 +383,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
     name: r.name,
     status: r.status === 2 ? 'canceled' : r.status === 3 ? 'completed' : 'open',
     notes: r.notes,
-    tags: r.tagList ? r.tagList.split(',').filter(Boolean) : [],
+    tags: r.tagList ? r.tagList.split(', ').filter(Boolean) : [],
     dueDate: effectiveDeadline ?? undefined,
     activationDate: effectiveStartDate ?? undefined,
     areaId: r.areaId ?? undefined,
@@ -409,7 +409,7 @@ export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails |
   return {
     id: r.id,
     name: r.name,
-    tags: r.tagList ? r.tagList.split(',').filter(Boolean) : [],
+    tags: r.tagList ? r.tagList.split(', ').filter(Boolean) : [],
     projectCount: r.projectCount,
     todoCount: r.todoCount,
   };

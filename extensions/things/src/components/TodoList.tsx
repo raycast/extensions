@@ -21,7 +21,7 @@ const ALL_TAGS = 'all';
 const NO_TAG = 'none';
 
 function parseTags(tagString: string | null | undefined): string[] {
-  return tagString?.split(/,\s*/).filter(Boolean) ?? [];
+  return tagString?.split(', ').filter(Boolean) ?? [];
 }
 
 function buildTagHierarchy(tags: TagWithParent[]) {
