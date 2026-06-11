@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, open, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -141,7 +141,7 @@ function OpenInBrowser(account: undefined | User, item: Item) {
     );
   }
 
-  if (item.category !== "LOGIN") {
+  if (!getPreferenceValues<ExtensionPreferences>().reduceItemListMemoryUsage || item.category !== "LOGIN") {
     return null;
   }
 
