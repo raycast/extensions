@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Configurable Search Engine] - {PR_MERGE_DATE}
+## [Configurable Search Engine] - 2026-06-11
 
 - Added a search engine preference for Search Dia suggestions and web search fallback actions.
 
