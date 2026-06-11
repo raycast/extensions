@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import type { ReactNode } from "react";
 import { getFigaApiKeySettingsUrl } from "./api/links";
 import type { FigaWorkspaceContext } from "./api/types";
@@ -151,11 +151,17 @@ function CapabilityPermissionDetail({
       }
       actions={
         <ActionPanel>
-          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+          <Action
+            title="Retry"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onRetry}
+          />
           <Action.OpenInBrowser
             title="Open API Key Settings"
             icon={Icon.Key}
             url={getFigaApiKeySettingsUrl(context.workspace.id)}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
         </ActionPanel>

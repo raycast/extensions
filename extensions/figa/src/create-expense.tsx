@@ -23,7 +23,8 @@ import {
 } from "./format";
 import { ExpenseWriteGate, ReadCapabilityGate } from "./read-capability-gate";
 
-const { Action, ActionPanel, Color, Detail, Form, Icon, Toast, openExtensionPreferences, showToast } = Raycast;
+const { Action, ActionPanel, Color, Detail, Form, Icon, Keyboard, Toast, openExtensionPreferences, showToast } =
+  Raycast;
 const NO_RECIPIENT_VALUE = "__figa_no_recipient__";
 const NEW_CATEGORY_VALUE = "__figa_new_category__";
 const NEW_RECIPIENT_VALUE = "__figa_new_recipient__";
@@ -270,13 +271,20 @@ function CreateExpenseForm({
           <Action.SubmitForm<CreateExpenseFormValues>
             title={isSubmitting ? "Creating Expense" : "Create Expense"}
             icon={Icon.Receipt}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onSubmit={handleSubmit}
           />
-          <Action title="Refresh Reference Data" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+          <Action
+            title="Refresh Reference Data"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onRefresh}
+          />
           <Action.OpenInBrowser
             title="Open Expenses in Figa"
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
           <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
@@ -436,14 +444,30 @@ function CreatedExpenseDetail({
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Expense in Figa" icon={Icon.Link} url={expenseUrl} />
-          <Action title="Create Another Expense" icon={Icon.Receipt} onAction={onCreateAnother} />
+          <Action.OpenInBrowser
+            title="Open Expense in Figa"
+            icon={Icon.Link}
+            url={expenseUrl}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action
+            title="Create Another Expense"
+            icon={Icon.Receipt}
+            shortcut={Keyboard.Shortcut.Common.New}
+            onAction={onCreateAnother}
+          />
           <Action.OpenInBrowser
             title="Open Expenses in Figa"
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
-          <Action.CopyToClipboard title="Copy Expense Name" icon={Icon.CopyClipboard} content={expense.name} />
+          <Action.CopyToClipboard
+            title="Copy Expense Name"
+            icon={Icon.CopyClipboard}
+            content={expense.name}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
           <Action.CopyToClipboard title="Copy Expense ID" icon={Icon.Hashtag} content={expense.id} />
         </ActionPanel>
       }

@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 // fallow-ignore-next-line unresolved-import
 import { Toast, confirmAlert, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -238,15 +238,40 @@ function ExpenseActions({
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open Expense in Figa" icon={Icon.Link} url={expenseUrl} />
+      <Action.OpenInBrowser
+        title="Open Expense in Figa"
+        icon={Icon.Link}
+        url={expenseUrl}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
       <ExpensePaymentAction context={context} currency={currency} expense={expense} onRefresh={onRefresh} />
-      <Action.CopyToClipboard title="Copy Expense Name" icon={Icon.CopyClipboard} content={expense.name} />
+      <Action.CopyToClipboard
+        title="Copy Expense Name"
+        icon={Icon.CopyClipboard}
+        content={expense.name}
+        shortcut={Keyboard.Shortcut.Common.CopyName}
+      />
       <Action.Paste title="Paste Expense Name" icon={Icon.Clipboard} content={expense.name} />
-      <Action.CopyToClipboard title="Copy Amount" icon={Icon.Coins} content={formattedAmount} />
+      <Action.CopyToClipboard
+        title="Copy Amount"
+        icon={Icon.Coins}
+        content={formattedAmount}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
       <Action.Paste title="Paste Amount" icon={Icon.Coins} content={formattedAmount} />
       <Action.CopyToClipboard title="Copy Expense ID" icon={Icon.Hashtag} content={expense.id} />
-      <Action.OpenInBrowser title="Open Current Month Expenses" icon={Icon.List} url={expensesUrl} />
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+      <Action.OpenInBrowser
+        title="Open Current Month Expenses"
+        icon={Icon.List}
+        url={expensesUrl}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
     </ActionPanel>
   );
 }
@@ -399,12 +424,18 @@ function canOfferPaymentAction(expense: FigaExpense): boolean {
 function ListLevelActions({ data, onRefresh }: { data?: ExpenseCommandData; onRefresh: () => void }) {
   return (
     <ActionPanel>
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
       {data ? (
         <Action.OpenInBrowser
           title="Open Expenses in Figa"
           icon={Icon.List}
           url={getFigaExpensesUrl(data.context.workspace.id)}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       ) : null}
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />

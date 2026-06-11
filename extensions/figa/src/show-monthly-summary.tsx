@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getMonthlyTotals, getWorkspaceContext } from "./api/client";
@@ -68,7 +68,12 @@ function MonthlySummaryActions({ data, onRefresh }: { data: MonthlySummaryComman
 
   return (
     <ActionPanel>
-      <Action.CopyToClipboard title="Copy Current Month Summary" icon={Icon.CopyClipboard} content={currentSummary} />
+      <Action.CopyToClipboard
+        title="Copy Current Month Summary"
+        icon={Icon.CopyClipboard}
+        content={currentSummary}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
       <Action.CopyToClipboard
         title="Copy Summary Table"
         icon={Icon.CopyClipboard}
@@ -78,8 +83,14 @@ function MonthlySummaryActions({ data, onRefresh }: { data: MonthlySummaryComman
         title="Open Current Month Expenses"
         icon={Icon.List}
         url={getFigaExpensesUrl(data.context.workspace.id, current)}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
       <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
     </ActionPanel>

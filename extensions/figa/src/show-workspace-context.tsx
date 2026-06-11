@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getWorkspaceContext } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaApiKeySettingsUrl, getFigaWorkspaceSettingsUrl } from "./api/links";
@@ -47,17 +47,29 @@ function WorkspaceContextDetail({
 function WorkspaceActions({ context, onRefresh }: { context: FigaWorkspaceContext; onRefresh: () => void }) {
   return (
     <ActionPanel>
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-      <Action.CopyToClipboard title="Copy Workspace ID" icon={Icon.CopyClipboard} content={context.workspace.id} />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
+      <Action.CopyToClipboard
+        title="Copy Workspace ID"
+        icon={Icon.CopyClipboard}
+        content={context.workspace.id}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
       <Action.OpenInBrowser
         title="Open API Key Settings"
         icon={Icon.Key}
         url={getFigaApiKeySettingsUrl(context.workspace.id)}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
       <Action.OpenInBrowser
         title="Open Workspace Settings"
         icon={Icon.Gear}
         url={getFigaWorkspaceSettingsUrl(context.workspace.id)}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
       <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />

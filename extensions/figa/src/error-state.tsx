@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { toFriendlyError } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaApiKeySettingsUrl, getFigaBillingUrl } from "./api/links";
 import type { FigaFriendlyError } from "./api/types";
@@ -25,10 +25,15 @@ export function FigaCommandErrorDetail({ error, onRetry }: { error: unknown; onR
 function ErrorActions({ error, onRetry }: { error: FigaFriendlyError; onRetry: () => void }) {
   return (
     <ActionPanel>
-      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Retry" icon={Icon.ArrowClockwise} shortcut={Keyboard.Shortcut.Common.Refresh} onAction={onRetry} />
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
       {shouldShowApiKeySettings(error) ? (
-        <Action.OpenInBrowser title="Open API Key Settings" icon={Icon.Key} url={getFigaApiKeySettingsUrl()} />
+        <Action.OpenInBrowser
+          title="Open API Key Settings"
+          icon={Icon.Key}
+          url={getFigaApiKeySettingsUrl()}
+          shortcut={Keyboard.Shortcut.Common.Open}
+        />
       ) : null}
       {error.kind === "paid-plan-required" ? (
         <Action.OpenInBrowser title="Open Billing Settings" icon={Icon.CreditCard} url={getFigaBillingUrl()} />
