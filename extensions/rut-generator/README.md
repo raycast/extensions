@@ -1,47 +1,47 @@
-# Generador de RUT para Raycast
+# RUT Generator for Raycast
 
-Un generador de RUT chileno para Raycast.
+A Chilean RUT generator for Raycast.
 
-Genera RUTs chilenos válidos para desarrollo, pruebas, formularios, datos de seed y flujos de QA.
+Generates valid Chilean RUTs for development, testing, forms, seed data, and QA workflows.
 
 <img width="896" height="606" alt="image" src="https://github.com/user-attachments/assets/19d8ace9-6421-4f69-92e1-6390f17ffff8" />
 
-## Características
+## Features
 
-- Genera 10 RUTs chilenos válidos a la vez
-- Copia un RUT al portapapeles
-- Copia la lista completa de RUTs generados
-- Regenera la lista rápidamente
-- Permite elegir entre formatos comunes:
+- Generates 10 valid Chilean RUTs at a time
+- Copy a single RUT to the clipboard
+- Copy the full list of generated RUTs
+- Quickly regenerate the list
+- Choose from common formats:
   - `12.345.678-5`
   - `12345678-5`
   - `123456785`
 
-## Formato por defecto
+## Default Format
 
-El formato por defecto es:
+The default format is:
 
 ```txt
 12.345.678-5
 ```
 
-Puedes cambiar el formato desde las acciones del comando en Raycast.
+You can change the format from the command actions in Raycast.
 
-## Desarrollo
+## Development
 
-Instalar dependencias:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Ejecutar la extensión localmente:
+Run the extension locally:
 
 ```bash
 npm run dev
 ```
 
-Ejecutar validaciones:
+Run validations:
 
 ```bash
 npm test
@@ -49,6 +49,6 @@ npm run typecheck
 npm run lint
 ```
 
-## Licencia
+## License
 
 MIT

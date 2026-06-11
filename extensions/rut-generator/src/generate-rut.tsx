@@ -9,9 +9,9 @@ type RutItem = {
 };
 
 const FORMAT_LABELS: Record<RutFormat, string> = {
-  dots: "Con puntos y guion",
-  dash: "Sin puntos, con guion",
-  plain: "Sin puntos y sin guion",
+  dots: "With dots and dash (12.345.678-5)",
+  dash: "Without dots, with dash (12345678-5)",
+  plain: "Without dots or dash (123456785)",
 };
 
 const FORMATS: RutFormat[] = ["dots", "dash", "plain"];
