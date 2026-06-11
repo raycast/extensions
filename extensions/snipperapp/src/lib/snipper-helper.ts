@@ -189,7 +189,7 @@ let cached: SnipperHelper | null = null;
 let cachedPath: string | null = null;
 
 async function resolveHelperPath(): Promise<string> {
-  const override = getPreferenceValues<{ helperPath?: string }>().helperPath?.trim();
+  const override = getPreferenceValues<Preferences>().helperPath?.trim();
   if (override) return override;
   const apps = await getApplications();
   const app = apps.find((a) => a.bundleId != null && BUNDLE_IDS.includes(a.bundleId));

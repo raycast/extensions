@@ -29,6 +29,6 @@ Community (Hub) features use the public [SnipperApp Hub API](https://snipperapp.
 
 - **Primary / Secondary Action** — choose the default snippet actions (paste, copy, copy as markdown, open, details).
 - **Result Ranking** — rank by usage (frecency) or recency.
-- **List Accessories** — toggle workspace / language / tags in the list.
+- **List Accessories** — toggle workspace / language in the list.
 - **Hub Analytics** — opt out of anonymous Hub view/import events.
 - **Helper Path** — override the auto-detected `snipper-mcp` path (rarely needed).

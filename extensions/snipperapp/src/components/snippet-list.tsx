@@ -4,7 +4,7 @@ import { useState } from "react";
 import { displayNameFor } from "../lib/language";
 import { setLastSnippet } from "../lib/last-used";
 import { useLibraryMeta, workspaceOf, type LibraryMeta } from "../lib/meta";
-import { getPrefs, type Preferences } from "../lib/preferences";
+import { getPrefs } from "../lib/preferences";
 import { isHelperNotFound, searchSnippets } from "../lib/snipper-helper";
 import type { Snippet } from "../lib/types";
 import { AppNotInstalled } from "./app-not-installed";

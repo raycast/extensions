@@ -168,14 +168,6 @@
       "default": true
     },
     {
-      "name": "showTags",
-      "label": "Show tags",
-      "description": "Show tags as accessories in the snippet list.",
-      "type": "checkbox",
-      "required": false,
-      "default": true
-    },
-    {
       "name": "trackHubAnalytics",
       "title": "Hub Analytics",
       "label": "Send anonymous view/import events to the Hub",
