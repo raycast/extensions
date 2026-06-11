@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "author": "benbenbang",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "description": "Shorten a URL using your preferred service",
+      "mode": "view",
+      "name": "shorten-url",
+      "subtitle": "Shorten URLs",
+      "title": "Shorten URL"
+    },
+    {
+      "description": "View previously shortened URLs",
+      "mode": "view",
+      "name": "shorten-history",
+      "subtitle": "Browse history",
+      "title": "URL History"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "description": "Shorten URLs using multiple services (bit.ly, cutt.ly, tinyurl, is.gd, v.gd)",
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "vitest": "^4.0.18"
+  },
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "name": "raycast-clip",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "description": "API token from https://app.bitly.com/settings/api/",
+      "name": "bitlyApiKey",
+      "required": false,
+      "title": "Bit.ly API Key",
+      "type": "password"
+    },
+    {
+      "description": "API key from https://cutt.ly/edit",
+      "name": "cuttlyApiKey",
+      "required": false,
+      "title": "Cutt.ly API Key",
+      "type": "password"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "title": "Clip - URL Shortener"
+}

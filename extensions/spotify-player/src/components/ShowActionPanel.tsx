@@ -3,10 +3,13 @@ import { SimplifiedShowObject } from "../helpers/spotify.api";
 import { EpisodesList } from "./EpisodesList";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
+import { ShowContent } from "../shortcuts/shortcuts";
 
-type ShowActionPanelProps = { show: SimplifiedShowObject };
+type ShowActionPanelProps = { show?: SimplifiedShowObject | null };
 
 export function ShowActionPanel({ show }: ShowActionPanelProps) {
+  if (!show?.id) return null;
+
   const title = show.name;
 
   return (
@@ -15,10 +18,7 @@ export function ShowActionPanel({ show }: ShowActionPanelProps) {
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Episodes"
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "a" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-        }}
+        shortcut={ShowContent}
         target={<EpisodesList show={show} />}
       />
       <FooterAction url={show?.external_urls?.spotify} uri={show.uri} title={title} />

@@ -26,8 +26,6 @@ export const provider = new OAuthService({
   tokenUrl: TOKEN_URL,
   scope: SCOPES,
   onAuthorize: ({ token }) => {
-    cache.remove("previousRepositories");
-
     octokitInstance = new Octokit({ auth: token });
   },
   extraParameters: {
@@ -36,6 +34,7 @@ export const provider = new OAuthService({
 });
 
 export const reauthorize = async (): Promise<string> => {
+  cache.remove("previousRepositories");
   await client.removeTokens();
   return provider.authorize();
 };

@@ -334,17 +334,29 @@
           "description": "Sets the directory to open."
         }
       ]
+    },
+    {
+      "name": "trash",
+      "title": "Open Trash",
+      "description": "Open the Trash folder in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recentFolders",
+      "title": "Recent Folders",
+      "icon": "extension-icon-grid.png",
+      "description": "List of recently opened folders from this extension.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/api": "^1.72.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.12.7",
     "@types/react": "18.3.1",
-        "eslint": "^8.51.0",
+    "eslint": "^8.51.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },
@@ -354,5 +366,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -81,11 +81,18 @@ export function ShowListItem({
     if (isMyShow) {
       // For "My Shows", display unwatched episodes count
       const remaining = show.user?.remaining ?? 0;
+      const archivedAccessory = isArchived ? [{ icon: Icon.MinusCircle }] : [];
+
       if (remaining === 0) {
-        return [{ text: "All episodes watched" }, { icon: Icon.CheckCircle }];
+        return [
+          { text: "All episodes watched" },
+          { icon: Icon.CheckCircle },
+          ...archivedAccessory,
+        ];
       } else {
         return [
           { text: `${remaining} episode${remaining > 1 ? "s" : ""} to watch` },
+          ...archivedAccessory,
         ];
       }
     } else {
@@ -113,27 +120,6 @@ export function ShowListItem({
                 icon={Icon.List}
                 target={<ShowEpisodesList show={show} />}
               />
-              <Action.Paste
-                title="Paste Show Title"
-                content={show.title}
-                shortcut={{ modifiers: ["opt"], key: "v" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Show Title"
-                content={show.title}
-                shortcut={{ modifiers: ["opt"], key: "c" }}
-              />
-              <Action.OpenInBrowser
-                url={show.resource_url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-              />
-              {onLogout && (
-                <Action
-                  title="Logout"
-                  icon={Icon.XMarkCircle}
-                  onAction={onLogout}
-                />
-              )}
               <Action
                 title={isArchived ? "Unarchive Show" : "Archive Show"}
                 icon={isArchived ? Icon.ArrowCounterClockwise : Icon.Tray}
@@ -142,6 +128,33 @@ export function ShowListItem({
                 }
                 onAction={handleArchiveToggle}
               />
+              <ActionPanel.Section title="Copy">
+                <Action.Paste
+                  title="Paste Show Title"
+                  content={show.title}
+                  shortcut={{ modifiers: ["opt"], key: "v" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Show Title"
+                  content={show.title}
+                  shortcut={{ modifiers: ["opt"], key: "c" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Open">
+                <Action.OpenInBrowser
+                  url={show.resource_url}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                />
+              </ActionPanel.Section>
+              {onLogout && (
+                <ActionPanel.Section title="Account">
+                  <Action
+                    title="Logout"
+                    icon={Icon.XMarkCircle}
+                    onAction={onLogout}
+                  />
+                </ActionPanel.Section>
+              )}
             </>
           ) : (
             <>

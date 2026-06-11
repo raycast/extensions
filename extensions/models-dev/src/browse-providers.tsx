@@ -1,10 +1,14 @@
 import { List, Icon, useNavigation } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useModelsData } from "./hooks/useModelsData";
 import { ProviderListItem, ModelListSection } from "./components";
 import { filterByCapability, filterByProvider } from "./lib/filters";
 import { ALL_CAPABILITIES, CAPABILITIES } from "./lib/constants";
-import { Capability, Model } from "./lib/types";
+import { Capability, Model, Provider } from "./lib/types";
+
+// Stable empty arrays to avoid creating new instances
+const EMPTY_MODELS: Model[] = [];
+const EMPTY_PROVIDERS: Provider[] = [];
 
 function ProviderModels({ providerId, providerName }: { providerId: string; providerName: string }) {
   const { data, isLoading } = useModelsData();
@@ -60,7 +64,7 @@ export default function SearchAIProviders() {
 
   const modelsByProvider = useMemo(() => {
     const map = new Map<string, Model[]>();
-    for (const model of data?.models ?? []) {
+    for (const model of data?.models ?? EMPTY_MODELS) {
       const existing = map.get(model.providerId) ?? [];
       existing.push(model);
       map.set(model.providerId, existing);
@@ -68,12 +72,15 @@ export default function SearchAIProviders() {
     return map;
   }, [data?.models]);
 
-  const handleSelectProvider = (providerId: string) => {
-    const provider = data?.providers.find((p) => p.id === providerId);
-    if (provider) {
-      push(<ProviderModels providerId={providerId} providerName={provider.name} />);
-    }
-  };
+  const handleSelectProvider = useCallback(
+    (providerId: string) => {
+      const provider = data?.providers.find((p) => p.id === providerId);
+      if (provider) {
+        push(<ProviderModels providerId={providerId} providerName={provider.name} />);
+      }
+    },
+    [data?.providers, push],
+  );
 
   return (
     <List isLoading={isLoading && !data?.providers?.length} searchBarPlaceholder="Search providers...">
@@ -83,11 +90,11 @@ export default function SearchAIProviders() {
         icon={Icon.MagnifyingGlass}
       />
       <List.Section title={sectionTitle}>
-        {(data?.providers ?? []).map((provider) => (
+        {(data?.providers ?? EMPTY_PROVIDERS).map((provider) => (
           <ProviderListItem
             key={provider.id}
             provider={provider}
-            providerModels={modelsByProvider.get(provider.id) ?? []}
+            providerModels={modelsByProvider.get(provider.id) ?? EMPTY_MODELS}
             onSelect={handleSelectProvider}
           />
         ))}

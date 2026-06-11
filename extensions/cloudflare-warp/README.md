@@ -1,11 +1,11 @@
 # Cloudflare WARP
 
-This extensions allows you to manage Cloudflare WARP connection
+This extension allows you to manage the Cloudflare WARP application on your Mac.
 
 ## Features
 
-- Connect/Disconnect
-- Switch between VirtualNetworks
+- Toggle WARP connection
+- Switch between Virtual Networks
 - Switch between MDM profiles
 
 ## Requirements

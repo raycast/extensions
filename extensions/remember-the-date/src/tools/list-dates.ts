@@ -30,6 +30,7 @@ export default async function listDates(input: ListDatesInput = {}) {
       name: item.name,
       subtitle: item.subtitle,
       date: item.date,
+      repeat: item.repeat || "none",
     })),
   };
 }

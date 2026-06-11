@@ -35,8 +35,14 @@ export const mxroute = {
   getDomainVerificationKey: () => makeRequest<DomainVerificationKey>("verification-key"),
   domains: {
     create: (domain: string) => makeRequest("domains", { method: "POST", body: JSON.stringify({ domain }) }),
+    delete: (domain: string) => makeRequest(`domains/${domain}`, { method: "DELETE" }),
     get: (domain: string) => makeRequest<Domain>(`domains/${domain}`),
     list: () => makeRequest<string[]>("domains"),
+    setMailHostingStatus: (domain: string, values: { enabled: boolean }) =>
+      makeRequest<{ domain: string; mail_hosting: boolean }>(`domains/${domain}/mail-status`, {
+        method: "PATCH",
+        body: JSON.stringify(values),
+      }),
     accounts: {
       create: (domain: string, values: CreateEmailAccountRequest) =>
         makeRequest(`domains/${domain}/email-accounts`, { method: "POST", body: JSON.stringify(values) }),

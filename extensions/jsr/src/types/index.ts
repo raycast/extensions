@@ -13,13 +13,12 @@ export type RuntimeCompat = {
 
 export type DescriptionAndRuntimeCompat = {
   description: string;
-  runtimeCompat: RuntimeCompat;
+  runtimeCompat?: RuntimeCompat;
 };
 
 export type SearchResultDocument = NameAndScope &
   DescriptionAndRuntimeCompat & {
     score?: number;
-    _omc: number;
     id: string;
   };
 
@@ -56,9 +55,13 @@ export type Package = NameAndScope &
     updatedAt: string | null;
     createdAt: string | null;
     versionCount: number | null;
+    dependencyCount: number | null;
+    dependentCount: number | null;
     score: number | null;
     latestVersion: string | null;
     whenFeatured: string | null;
+    isArchived: boolean | null;
+    readmeSource: "readme" | "jsdoc" | null;
   };
 
 export type VersionPackageBase = {
@@ -67,11 +70,39 @@ export type VersionPackageBase = {
   version: string;
   yanked: boolean;
   usesNpm: boolean;
-  newerVersionsCount: number;
-  lifetimeDownloadCount: number;
-  readmePath: string;
+  newerVersionsCount?: number;
+  readmePath: string | null;
   updatedAt: string;
   createdAt: string;
+};
+
+export type VersionManifestEntry = {
+  size: number;
+  checksum: string;
+};
+
+export type VersionMeta = {
+  manifest: Record<string, VersionManifestEntry>;
+  exports: Record<string, string>;
+  moduleGraph2?: unknown;
+};
+
+export type DownloadKind = "jsr_meta" | "npm_tarball";
+
+export type DownloadDataPoint = {
+  timeBucket: string;
+  kind: DownloadKind;
+  count: number;
+};
+
+export type RecentVersionDownloads = {
+  version: string;
+  downloads: DownloadDataPoint[];
+};
+
+export type DownloadsResponse = {
+  total: DownloadDataPoint[];
+  recentVersions: RecentVersionDownloads[];
 };
 
 export type VersionPackage = VersionPackageBase & {
@@ -119,7 +150,6 @@ export type ApiResults<T> = {
 
 export type StatsData = {
   newest: Array<Package>;
-  updated: Array<VersionPackageBase>;
   featured: Array<Package>;
 };
 

@@ -5,6 +5,10 @@
   "description": "Search Goodreads books, authors and more",
   "icon": "goodreads-icon.png",
   "author": "puneeth",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Media",
     "Web"

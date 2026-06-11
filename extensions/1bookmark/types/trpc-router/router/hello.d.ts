@@ -6,7 +6,7 @@ export declare const schema: z.ZodObject<{
 }, {
     name: string;
 }>;
-export declare const helloRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const helloRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -18,25 +18,22 @@ export declare const helloRouter: import("@trpc/server/unstable-core-do-not-impo
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     get: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             name: string;
@@ -45,5 +42,6 @@ export declare const helloRouter: import("@trpc/server/unstable-core-do-not-impo
             success: boolean;
             message: string;
         };
+        meta: object;
     }>;
-}>;
+}>>;

@@ -12,6 +12,7 @@ import {
   confirmAlert,
   Keyboard,
   Alert,
+  closeMainWindow,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { PROJECT_ICON_NAMES, getIcon } from "./project-icons";
@@ -109,7 +110,13 @@ async function openInTerminal(project: Project, preferences: Preferences, onSucc
       throw new Error(`Unsupported terminal: ${preferences.terminalApp}`);
     }
 
-    await adapter.open(expandedPath);
+    const options = { ghosttyOpenBehavior: preferences.ghosttyOpenBehavior as "window" | "tab" | undefined };
+
+    if (preferences.terminalApp === "Ghostty" && options.ghosttyOpenBehavior === "tab") {
+      await closeMainWindow();
+    }
+
+    await adapter.open(expandedPath, options);
     onSuccess();
     showSuccessToast("Opened in Terminal", project.name || getDirectoryName(project.path));
   } catch (error) {

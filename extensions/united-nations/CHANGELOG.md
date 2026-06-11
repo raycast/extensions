@@ -1,5 +1,11 @@
 # United Nations Extension
 
+## [Enhancement] - 2026-04-12
+
+- Rebuild `UN Documents` around `documents.un.org` instead of the legacy RSS feeds
+- Add the current advanced search form fields from `documents.un.org`
+- Add live search results with document opening actions for public PDF and DOC files
+
 ## [Maintenance] - 2026-02-01
 
 - Resolve CVE-2026-25128

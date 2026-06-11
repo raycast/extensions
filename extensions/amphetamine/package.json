@@ -2,10 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amphetamine",
   "title": "Amphetamine",
-  "version": "1.0.2",
-  "description": "Controls Amphetamine using Raycast",
+  "version": "1.1.0",
+  "description": "Control Amphetamine sleep sessions from Raycast",
   "icon": "icon.png",
   "author": "gstvds",
+  "categories": [
+    "System"
+  ],
+  "contributors": [
+    "mike_dloss"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -51,9 +57,9 @@
     },
     {
       "name": "amp-duration",
-      "title": "Start New Session With Duration",
+      "title": "Configure New Session",
       "subtitle": "Amphetamine",
-      "description": "Start a new Session with a Duration",
+      "description": "Start a new session with a duration or until a specific time",
       "mode": "view",
       "keywords": [
         "interval",
@@ -61,29 +67,32 @@
         "amp interval",
         "amphetamine",
         "duration",
-        "amp duration"
+        "time",
+        "until",
+        "amp duration",
+        "amp time",
+        "amp until"
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.104.18",
+    "run-applescript": "^7.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

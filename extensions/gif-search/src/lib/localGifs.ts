@@ -27,9 +27,10 @@ export async function getAll(type: LocalType) {
 }
 
 export async function save(gif: IGif, service: ServiceName, type: LocalType) {
-  const gifs = new Set(await get(service, type));
-  gifs.add(gif.id.toString());
-  return LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(gifs)));
+  const id = gif.id.toString();
+  const existing = (await get(service, type)).filter((existingId) => existingId !== id);
+  const updated = type === "recent" ? [id, ...existing] : [...existing, id];
+  return LocalStorage.setItem(getKey(service, type), JSON.stringify(updated));
 }
 
 export async function remove(gif: IGif, service: ServiceName, type: LocalType) {

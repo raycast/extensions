@@ -31,6 +31,19 @@ const ListItem = ({
   );
 };
 
+const onSwitchProfile = async (profile: string) => {
+  const result = await setMDMProfile(profile);
+  await (result
+    ? showHUD("Switched MDM Profile", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      })
+    : showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to switch MDM Profile",
+      }));
+};
+
 export default () => {
   const [isLoading, setIsLoading] = useState(true);
   const [availableProfiles, setAvailableProfiles] = useState<string[]>([]);
@@ -45,21 +58,6 @@ export default () => {
       })
       .finally(() => setIsLoading(false));
   }, []);
-
-  const onSwitchProfile = async (profile: string) => {
-    const result = await setMDMProfile(profile);
-    if (result) {
-      await showHUD("Switched MDM Profile", {
-        clearRootSearch: true,
-        popToRootType: PopToRootType.Immediate,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to switch MDM Profile",
-      });
-    }
-  };
 
   if (!isLoading && availableProfiles.length === 0) {
     return (

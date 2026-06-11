@@ -1,5 +1,9 @@
 # Obsidian Tasks Changelog
 
+## [Add Quick Add Task command] - 2026-06-01
+
+- Add a no-view Quick Add Task command with inline reminder, date, and tags arguments.
+
 ## [Append priority instead of prepend] - 2025-10-16
 - Update taskFormatter to append priority icon instead of prepending it. Prepending causes Obsidian to treat it
   as part of the description rather than as the priority. Appending it resolves this, allowing for searching

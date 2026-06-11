@@ -1,5 +1,9 @@
 # Porkbun Changelog
 
+## [Retrieve Account Balance] - 2026-06-04
+
+- Add new command to check account credit balance
+
 ## [Mention "Opt In All Domains"] - 2026-01-23
 
 - Inform user they can use "Opt In All Domains" setting

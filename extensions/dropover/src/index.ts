@@ -32,7 +32,7 @@ export default async function main() {
   let files: FileSystemItem[];
   try {
     files = await getSelectedFinderItems();
-  } catch (error) {
+  } catch {
     files = [];
   }
 

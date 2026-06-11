@@ -320,3 +320,7 @@ export function shortify(text: string, maxLength: number): string {
   }
   return text.slice(0, maxLength - 3) + "...";
 }
+
+export function isNumber(value?: unknown): value is number {
+  return typeof value === "number" && !isNaN(value);
+}

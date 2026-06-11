@@ -14,12 +14,19 @@ export interface Product {
   // Additional detailed information
   makers?: User[];
   hunter?: User;
+  // The user who created/submitted the post (Post.user in the API: "User who created the Post").
+  // This is a documented, distinct role — NOT a maker and not a guaranteed "hunter" — so it is
+  // modeled and labeled separately ("Posted by") rather than conflated with maker/hunter.
+  submittedBy?: User;
   galleryImages?: string[];
-  shoutouts?: Shoutout[];
   weeklyRank?: number;
   dailyRank?: number;
   productHubUrl?: string;
   previousLaunches?: number;
+  // True when this product came from the token-free Atom feed (limited data: no real votes,
+  // comments, makers, or thumbnails). UI uses this to suppress empty stats and prefer opening
+  // the launch in the browser over the (thin) in-app detail view.
+  isFeedFallback?: boolean;
 }
 
 export interface Topic {
@@ -97,11 +104,3 @@ export interface LaunchArchiveResponse {
 }
 
 export type TimeRange = "daily" | "weekly" | "monthly" | "yearly";
-
-export interface Shoutout {
-  id: string;
-  name: string;
-  tagline?: string;
-  url: string;
-  thumbnail?: string;
-}

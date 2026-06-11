@@ -7,8 +7,8 @@ import {
   getProjects,
   getNote,
   withErrorHandling,
-  getApiToken,
   getProjectIcon,
+  getProjectIndent,
   getAPIDateString,
 } from "../api";
 import { parseNoteContent } from "../utils/delta-to-markdown";
@@ -35,12 +35,6 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
 
   useEffect(() => {
     async function load() {
-      const token = await getApiToken();
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
       if (!initialProjects) {
         const result = await withErrorHandling(() => getProjects(), "Failed to load projects");
         if (result) setProjects(result);
@@ -128,7 +122,7 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
             <Form.Dropdown.Item
               key={project.id}
               value={project.id}
-              title={`${getProjectIcon(project, true).source}  ${project.title}`}
+              title={`${getProjectIndent(project)}${getProjectIcon(project, true).source}  ${project.title}`}
             />
           ))}
         </Form.Dropdown>

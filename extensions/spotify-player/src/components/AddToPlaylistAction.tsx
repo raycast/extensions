@@ -2,6 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showHUD, sho
 import { addToPlaylist } from "../api/addToPlaylist";
 import { getError } from "../helpers/getError";
 import { PrivateUserObject, SimplifiedPlaylistObject } from "../helpers/spotify.api";
+import { AddToPlaylist } from "../shortcuts/shortcuts";
 
 type AddToPlaylistActionProps = {
   playlists: SimplifiedPlaylistObject[];
@@ -13,13 +14,13 @@ export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistAct
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   return (
-    <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
+    <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist" shortcut={AddToPlaylist}>
       {playlists
         ?.filter((playlist) => playlist.owner?.id === meData?.id)
-        .map((playlist) => {
+        .map((playlist, index) => {
           return (
             <Action
-              key={playlist.id}
+              key={`${playlist.id}-${index}`}
               title={playlist.name as string}
               onAction={async () => {
                 try {

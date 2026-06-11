@@ -9,10 +9,10 @@ import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import shuffle from "lodash.shuffle";
 import { useEffect, useState } from "react";
-import PokeProfile from "./components/profile";
+import Pokemon from "./components/pokemon";
 import TypeDropdown from "./components/type_dropdown";
 import pokedexData from "./statics/pokedex.json";
-import { getContentImg, localeName, nationalDexNumber } from "./utils";
+import { getPokemonImage, localeName, nationalDexNumber } from "./utils";
 
 const { language } = getPreferenceValues();
 
@@ -92,7 +92,7 @@ export default function NationalPokedex(props: {
                 return (
                   <Grid.Item
                     key={pokemon.id}
-                    content={getContentImg(pokemon.id)}
+                    content={getPokemonImage(pokemon.id)}
                     title={localeName(pokemon, language)}
                     subtitle={`${nationalDexNumber(pokemon.id)} ${statsString}`}
                     keywords={[pokemon.id.toString(), pokemon.name]}
@@ -102,7 +102,7 @@ export default function NationalPokedex(props: {
                           <Action.Push
                             title="Pokémon Profile"
                             icon={Icon.Sidebar}
-                            target={<PokeProfile id={pokemon.id} />}
+                            target={<Pokemon id={pokemon.id} />}
                           />
                         </ActionPanel.Section>
                         <ActionPanel.Section title="Randomize">

@@ -42,9 +42,14 @@ export default function Command({
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
   const [hoursError, setHoursError] = useState<string | undefined>();
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
-  const { showClient = false, timeFormat = "company" } = getPreferenceValues<{
+  const {
+    showClient = false,
+    timeFormat = "company",
+    showClientInProject = false,
+  } = getPreferenceValues<{
     showClient?: boolean;
     timeFormat?: "company" | "hours_minutes" | "decimal";
+    showClientInProject?: boolean;
   }>();
 
   // Use useLocalStorage for persisting last used project/task
@@ -76,9 +81,11 @@ export default function Command({
   }, [error]);
 
   const groupedProjects = useMemo(() => {
-    // return an array of arrays thats grouped by client to easily group them via a map function
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   useEffect(() => {
@@ -240,7 +247,9 @@ export default function Command({
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );

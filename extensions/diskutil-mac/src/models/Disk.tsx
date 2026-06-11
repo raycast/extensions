@@ -30,12 +30,10 @@ export default class Disk {
   mountPoint: string | null;
   fileSystem: string | null;
 
-  // Initialization state tracking
   initState: "pending" | "initializing" | "done" | "error" = "pending";
   initStartTime: number | null = null;
   initEndTime: number | null = null;
 
-  // Helper instances for delegated responsibilities
   private actions: DiskActions;
   private accessories: DiskAccessories;
   private detailsRenderer: DiskDetails;
@@ -60,7 +58,6 @@ export default class Disk {
     this.isWhole = false;
     this.initState = "pending";
 
-    // Initialize helper instances
     this.actions = new DiskActions(this);
     this.accessories = new DiskAccessories(this);
     this.actionPanel = new DiskActionPanel(this);
@@ -76,7 +73,6 @@ export default class Disk {
     return this.actionPanel.getActions(postFunction);
   }
 
-  // Delegate action methods to DiskActions
   async showDetailCustomTerminal() {
     return this.actions.showDetailCustomTerminal();
   }
@@ -97,72 +93,34 @@ export default class Disk {
     return this.actions.mount();
   }
 
-  /**
-   * Mark when disk initialization starts
-   */
   startInit(): void {
     this.initState = "initializing";
     this.initStartTime = Date.now();
   }
 
-  /**
-   * Mark when disk initialization finishes
-   */
   finishInit(success: boolean): void {
     this.initState = success ? "done" : "error";
     this.initEndTime = Date.now();
   }
 
-  /**
-   * Get how long initialization took in milliseconds
-   */
   get initDurationMs(): number | null {
     if (!this.initStartTime || !this.initEndTime) return null;
     return this.initEndTime - this.initStartTime;
   }
 
-  /**
-   * Check if disk is fully initialized
-   */
   get isInitialized(): boolean {
     return this.initState === "done";
   }
 
-  /**
-   * Initializes the disk by fetching its details using diskutil info commands.
-   * @returns Promise<void> as it sets all attributes inside the instance.
-   */
   async init(): Promise<void> {
     try {
-      const detailsPromise: Promise<string> = execDiskCommand(`diskutil info -plist ${this.identifier}`);
-      const detailsPlainPromise: Promise<string> = execDiskCommand(`diskutil info ${this.identifier}`);
-      const timeoutPromise: Promise<string> = new Promise((resolve: (value: string) => void) => {
-        setTimeout(() => {
-          resolve("ERROR: Initialization Timed Out " + this.identifier);
-        }, 5000);
-      });
-
-      // Load both the plain text and plist versions of the disk details in parallel
-      const [detailsTextValue, detailsPlistValue]: [string, string] = await Promise.all([
-        Promise.race([detailsPlainPromise, timeoutPromise]),
-        Promise.race([detailsPromise, timeoutPromise]),
+      const [detailsTextValue, detailsPlistValue] = await Promise.all([
+        execDiskCommand(`diskutil info ${this.identifier}`, { timeoutMs: 5000 }),
+        execDiskCommand(`diskutil info -plist ${this.identifier}`, { timeoutMs: 5000 }),
       ]);
 
-      // Handle timeout case first
-      if (
-        String(detailsPlistValue).includes("ERROR: Initialization Timed Out") ||
-        String(detailsTextValue).includes("ERROR: Initialization Timed Out")
-      ) {
-        this.isErrored = "Timed Out";
-        this.details = { error: "Timed Out" };
-        this.detailsDict = { Error: "Initialization Timed Out" };
-        this.mountStatus = "Timed Out";
-        return;
-      }
-
-      // Parse text to dictionary, handle potential errors
       try {
-        this.detailsDict = DiskParser.parseTextToDict(String(detailsTextValue));
+        this.detailsDict = DiskParser.parseTextToDict(detailsTextValue);
       } catch (parseError) {
         this.isErrored = "Error";
         this.detailsDict = { Error: `Failed to parse text: ${String(parseError)}` };
@@ -172,9 +130,8 @@ export default class Disk {
       }
 
       try {
-        this.details = plist.parse(String(detailsPlistValue)) as plist.PlistObject;
+        this.details = plist.parse(detailsPlistValue) as plist.PlistObject;
         this.initDetails();
-        // If details parsing succeeded, clear isErrored if previously set
         this.isErrored = null;
       } catch (plistError) {
         this.isErrored = "Error";
@@ -184,10 +141,12 @@ export default class Disk {
         return;
       }
     } catch (error: unknown) {
-      this.isErrored = "Error";
-      this.details = { error: String(error) };
-      this.detailsDict = { Error: String(error) };
-      this.mountStatus = "Error";
+      const message = error instanceof Error ? error.message : String(error);
+      const isTimeout = message.startsWith("Timed out:");
+      this.isErrored = isTimeout ? "Timed Out" : "Error";
+      this.details = { error: message };
+      this.detailsDict = { Error: message };
+      this.mountStatus = isTimeout ? "Timed Out" : "Error";
     }
   }
 
@@ -227,7 +186,6 @@ export default class Disk {
     sizeCalculator.initSizes(this.details, this.mountStatus, this.fileSystem);
   }
 
-  // Delegate accessor methods to DiskAccessories
   getTypeAccessory(): { tag: { value: string; color: Color } } {
     return this.accessories.getTypeAccessory();
   }

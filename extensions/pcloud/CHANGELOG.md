@@ -1,5 +1,13 @@
 # pcloud Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [1.0.2] - 2025-04-09
 Better and more robust approach to handle US server login
 

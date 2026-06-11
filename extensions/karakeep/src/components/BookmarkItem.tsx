@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
@@ -12,37 +12,73 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
+import { markdownImage } from "../utils/markdown";
+import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
+
+const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
+
 interface BookmarkItemProps {
   bookmark: Bookmark;
   config: Config;
   onRefresh: () => void;
   onCleanCache?: () => void;
   onVisit?: (bookmark: Bookmark) => void;
+  isSelected?: boolean;
 }
 
-function useBookmarkImages(bookmark: Bookmark, config: Config) {
-  // Construct authenticated image URLs using the screenshot utility format
-  // These URLs will work in markdown with Raycast's image handling
-  const images = {
-    screenshot: DEFAULT_SCREENSHOT_FILENAME,
-    asset: DEFAULT_SCREENSHOT_FILENAME,
-  };
+function getPreviewAssetIds(bookmark: Bookmark): { screenshotId?: string; imageAssetId?: string } {
+  const screenshotId = bookmark.assets?.find((asset) => asset.assetType === "screenshot")?.id;
+  const imageAssetId =
+    bookmark.content.type === "asset" && bookmark.content.assetType === "image" ? bookmark.content.assetId : undefined;
+  return { screenshotId, imageAssetId };
+}
 
-  const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
-  if (screenshot?.id) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${screenshot.id}`);
-    images.screenshot = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+function useAuthenticatedAssetUrl(assetId: string | undefined, enabled: boolean) {
+  const [url, setUrl] = useState<string>(DEFAULT_SCREENSHOT_FILENAME);
+  const lastAssetIdRef = useRef<string | undefined>(undefined);
 
-  if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
-    const encodedUrl = encodeURIComponent(`/api/assets/${bookmark.content.assetId}`);
-    images.asset = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
-  }
+  useEffect(() => {
+    // Reset when asset changes so we don't accidentally show a stale URL
+    // if the component gets enabled later.
+    if (assetId !== lastAssetIdRef.current) {
+      lastAssetIdRef.current = assetId;
+      setUrl(DEFAULT_SCREENSHOT_FILENAME);
+    }
+  }, [assetId]);
 
-  return images;
+  useEffect(() => {
+    if (!enabled || !assetId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const imageUrl = await getScreenshot(assetId);
+        if (!cancelled) {
+          setUrl(imageUrl);
+        }
+      } catch (error) {
+        log.error("Failed to get authenticated image", { assetId, error });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assetId, enabled]);
+
+  return url;
+}
+
+function useBookmarkImages(bookmark: Bookmark, enabled: boolean) {
+  const { screenshotId, imageAssetId } = getPreviewAssetIds(bookmark);
+  const screenshot = useAuthenticatedAssetUrl(screenshotId, enabled);
+  const asset = useAuthenticatedAssetUrl(imageAssetId, enabled);
+
+  return { screenshot, asset };
 }
 
 function useBookmarkHandlers({
@@ -64,7 +100,7 @@ function useBookmarkHandlers({
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      logger.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
+      log.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id, setBookmark]);
 
@@ -83,7 +119,7 @@ function useBookmarkHandlers({
           await fetchLatestBookmark();
         }
       } catch (error) {
-        logger.error(`Bookmark action '${action}' failed`, error);
+        log.error(`Bookmark action '${action}' failed`, error);
         toast.style = Toast.Style.Failure;
         toast.message = String(error);
         if (action !== "delete") {
@@ -96,6 +132,7 @@ function useBookmarkHandlers({
   );
 
   const handleDeleteBookmark = useCallback(async () => {
+    log.info("Deleting bookmark", { bookmarkId: bookmark.id });
     await handleToast("delete", async () => {
       await fetchDeleteBookmark(bookmark.id);
       onRefresh();
@@ -107,14 +144,18 @@ function useBookmarkHandlers({
   }, [fetchLatestBookmark]);
 
   const handleEdit = useCallback(() => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   }, [bookmark, handleEditUpdate, push]);
 
   const handleSummarize = useCallback(async () => {
     await handleToast("summarize", async () => {
       await fetchSummarizeBookmark(bookmark.id);
     });
-  }, [bookmark.id, handleToast, setBookmark, t]);
+  }, [bookmark.id, handleToast]);
 
   const handleUpdate = useCallback(
     async (options: { archived?: boolean; favourited?: boolean }) => {
@@ -122,7 +163,7 @@ function useBookmarkHandlers({
         await fetchUpdateBookmark(bookmark.id, options);
       });
     },
-    [bookmark.id, handleToast, setBookmark],
+    [bookmark.id, handleToast],
   );
 
   return {
@@ -177,6 +218,7 @@ function BookmarkMetadata({ bookmark, config, t }: { bookmark: Bookmark; config:
                 key={tag.id}
                 text={tag.name}
                 color={tag.attachedBy === "ai" ? TAG_AI_COLOR : TAG_HUMAN_COLOR}
+                icon={tag.attachedBy === "ai" ? Icon.Wand : undefined}
               />
             ))}
           </Metadata.TagList>
@@ -263,19 +305,25 @@ function BookmarkActions({
   t: (key: string) => string;
   onVisit?: (bookmark: Bookmark) => void;
 }) {
+  const isNote = bookmark.content.type === "text";
+  const editTitle = isNote ? t("notes.actions.edit") : t("bookmark.actions.edit");
+  const deleteTitle = isNote ? t("notes.actions.delete") : t("bookmarkItem.actions.delete");
+  const viewDetailTitle = isNote ? t("notes.actions.viewDetail") : t("bookmarkItem.actions.viewDetail");
+  const copyNoteTitle = t("notes.actions.copy");
+
   const getMainAction = () => {
     const pushDetailAction = (
       <Action.Push
         icon={Icon.Sidebar}
         target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
-        title={t("bookmarkItem.actions.viewDetail")}
+        title={viewDetailTitle}
       />
     );
 
     const editAction = (
       <Action
         icon={Icon.Pencil}
-        title={t("bookmark.actions.edit")}
+        title={editTitle}
         onAction={handlers.handleEdit}
         shortcut={{ modifiers: ["ctrl"], key: "e" }}
       />
@@ -310,7 +358,7 @@ function BookmarkActions({
           const copyAction = (
             <Action.CopyToClipboard
               content={bookmark.content.text}
-              title={t("bookmark.actions.copyContent")}
+              title={copyNoteTitle}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
               onCopy={() => onVisit?.(bookmark)}
             />
@@ -354,17 +402,17 @@ function BookmarkActions({
     <ActionPanel>
       <ActionPanel.Section>
         {mainAction}
-        {mainAction.props.title !== t("bookmarkItem.actions.viewDetail") && (
+        {mainAction.props.title !== viewDetailTitle && (
           <Action.Push
             icon={Icon.Sidebar}
             target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
-            title={t("bookmarkItem.actions.viewDetail")}
+            title={viewDetailTitle}
           />
         )}
-        {mainAction.props.title !== t("bookmark.actions.edit") && (
+        {mainAction.props.title !== editTitle && (
           <Action
             icon={Icon.Pencil}
-            title={t("bookmark.actions.edit")}
+            title={editTitle}
             onAction={handlers.handleEdit}
             shortcut={{ modifiers: ["ctrl"], key: "e" }}
           />
@@ -387,16 +435,14 @@ function BookmarkActions({
               />
             </>
           )}
-        {bookmark.content.type === "text" &&
-          bookmark.content.text &&
-          mainAction.props.title !== t("bookmark.actions.copyContent") && (
-            <Action.CopyToClipboard
-              content={bookmark.content.text}
-              title={t("bookmark.actions.copyContent")}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onCopy={() => onVisit?.(bookmark)}
-            />
-          )}
+        {bookmark.content.type === "text" && bookmark.content.text && mainAction.props.title !== copyNoteTitle && (
+          <Action.CopyToClipboard
+            content={bookmark.content.text}
+            title={copyNoteTitle}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            onCopy={() => onVisit?.(bookmark)}
+          />
+        )}
         {bookmark.content.type === "asset" &&
           bookmark.content.assetType === "image" &&
           images.asset !== DEFAULT_SCREENSHOT_FILENAME &&
@@ -406,12 +452,14 @@ function BookmarkActions({
       </ActionPanel.Section>
       <ActionPanel.Section>
         {bookmark.content.type === "link" && bookmark.content.url && (
-          <Action
-            title={t("bookmark.actions.aiSummary")}
-            onAction={handlers.handleSummarize}
-            icon={Icon.Wand}
-            shortcut={{ modifiers: ["ctrl"], key: "s" }}
-          />
+          <>
+            <Action
+              title={t("bookmark.actions.aiSummary")}
+              onAction={handlers.handleSummarize}
+              icon={Icon.Wand}
+              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+            />
+          </>
         )}
         <Action
           title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
@@ -440,10 +488,28 @@ function BookmarkActions({
           />
         )}
       </ActionPanel.Section>
+      <ActionPanel.Section title={t("bookmarkItem.actions.getBrowserExtension")}>
+        <Action.OpenInBrowser
+          title={t("bookmarkItem.actions.installChromeExtension")}
+          url="https://chromewebstore.google.com/detail/karakeep/kgcjekpmcjjogibpjebkhaanilehneje"
+          icon={Icon.Globe}
+        />
+        <Action.OpenInBrowser
+          title={t("bookmarkItem.actions.installFirefoxAddon")}
+          url="https://addons.mozilla.org/en-US/firefox/addon/karakeep/"
+          icon={Icon.Globe}
+        />
+        <Action.OpenInBrowser
+          title={t("bookmarkItem.actions.installSafariExtension")}
+          url="https://apps.apple.com/us/app/karakeeper-bookmarker/id6746722790"
+          icon={Icon.Globe}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
           icon={Icon.Trash}
-          title={t("bookmarkItem.actions.delete")}
+          title={deleteTitle}
+          style={Action.Style.Destructive}
           onAction={handlers.handleDeleteBookmark}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
         />
@@ -458,16 +524,23 @@ export function BookmarkItem({
   onRefresh,
   onCleanCache,
   onVisit,
+  isSelected,
 }: BookmarkItemProps) {
   const { t } = useTranslation();
-  const images = useBookmarkImages(initialBookmark, config);
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   useEffect(() => {
     setBookmark(initialBookmark);
   }, [initialBookmark]);
 
+  const shouldPrewarmPreview =
+    Boolean(isSelected) &&
+    ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
+      (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+
+  const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
+
   const handlers = useBookmarkHandlers({
-    bookmark: initialBookmark,
+    bookmark,
     setBookmark,
     onRefresh,
   });
@@ -522,7 +595,7 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={previewImage ? `<img src="${previewImage}" center width="300" />` : ""}
+          markdown={previewImage ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 300 }) : ""}
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }

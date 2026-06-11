@@ -24,8 +24,8 @@ export function StarredResolutionsList({
       onResizeWindow={onResizeWindow}
       sectionTitle="Starred Sizes"
       onToggleStar={onToggleStar}
-      selectedItemId={selectedItemId}
       starredResolutions={starredResolutions}
+      selectedItemId={selectedItemId}
     />
   );
 }

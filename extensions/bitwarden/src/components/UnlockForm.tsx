@@ -5,6 +5,7 @@ import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
+import { InvalidSessionTokenError } from "~/utils/errors";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
 import { platform } from "~/utils/platform";
@@ -25,21 +26,29 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
-  async function onSubmit() {
+  async function onSubmit(args?: { retryInvalidSessionToken?: boolean }) {
     if (password.length === 0) return;
 
-    const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
-      setLoading(true);
-      setUnlockError(undefined);
+      if (!args?.retryInvalidSessionToken) {
+        setLoading(true);
+        setUnlockError(undefined);
+      }
 
       await pendingAction;
+
+      const toast = await showToast({
+        title: args?.retryInvalidSessionToken ? "Clearing session and retrying..." : "Validating...",
+        message: "Please wait",
+        style: Toast.Style.Animated,
+      });
 
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
 
       if (vaultState.status === "unauthenticated") {
         try {
+          toast.title = "Logging in...";
           const { error: loginError } = await bitwarden.login();
           if (loginError) throw loginError;
         } catch (error) {
@@ -50,16 +59,23 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         }
       }
 
+      toast.title = "Unlocking vault...";
       const { error: unlockError } = await bitwarden.unlock(password);
       if (unlockError) {
+        if (unlockError instanceof InvalidSessionTokenError && !args?.retryInvalidSessionToken) {
+          return await onSubmit({ retryInvalidSessionToken: true });
+        }
         return handleUnlockError(unlockError, {
           title: "Failed to unlock vault",
           fallbackMessage: "Please check your credentials",
         });
       }
 
+      toast.title = "Vault unlocked";
+      toast.style = Toast.Style.Success;
+      toast.message = undefined;
+
       await clearLockReason();
-      await toast.hide();
     } catch (error) {
       await handleUnlockError(error, {
         title: "Failed to unlock vault",
@@ -104,7 +120,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         <ActionPanel>
           {!isLoading && (
             <>
-              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
+              <Action.SubmitForm icon={Icon.LockUnlocked} title="Submit" onSubmit={onSubmit} />
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
@@ -113,7 +129,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               />
             </>
           )}
-          {!!unlockError && (
+          {unlockError && (
             <Action
               onAction={copyUnlockError}
               title="Copy Last Error"

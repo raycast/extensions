@@ -8,6 +8,7 @@ import {
   completeTask,
   uncompleteTask,
   getProjectIcon,
+  getProjectIndent,
   getAPIDateString,
 } from "../api";
 import TaskUpdater from "./TaskUpdater";
@@ -170,8 +171,7 @@ export default function TaskActions({ task, projects, onTaskUpdated }: TaskActio
             {projects.map((project) => (
               <Action
                 key={project.id}
-                title={project.title}
-                icon={getProjectIcon(project)}
+                title={`${getProjectIndent(project)}${getProjectIcon(project, true).source}  ${project.title}`}
                 onAction={() => handleMoveToProject(project.id)}
               />
             ))}

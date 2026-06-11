@@ -35,3 +35,17 @@ export const provider = new OAuthService({
   refreshTokenUrl: "https://accounts.spotify.com/api/token",
   bodyEncoding: "url-encoded",
 });
+
+// Handle corrupted PKCE tokens: clear and retry on invalid_grant
+const _originalAuthorize = provider.authorize.bind(provider);
+provider.authorize = async () => {
+  try {
+    return await _originalAuthorize();
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("invalid_grant")) {
+      await oauthClient.removeTokens();
+      return await _originalAuthorize();
+    }
+    throw err;
+  }
+};

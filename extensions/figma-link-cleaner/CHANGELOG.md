@@ -1,5 +1,16 @@
 # Figma Link Cleaner Changelog
 
+## [1.1.0] - 2026-02-20
+
+### Fixed
+
+- Check clipboard first before attempting AppleScript, avoiding unnecessary accessibility permission prompts
+- Added `await` to synchronous AppleScript calls for consistent async patterns
+
+### Improved
+
+- Added hotkey setup instructions in README
+
 ## [1.0.0] - 2026-01-19
 
 ### Added
