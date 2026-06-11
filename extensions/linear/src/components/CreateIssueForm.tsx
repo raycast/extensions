@@ -273,7 +273,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   }, [teams]);
 
   useEffect(() => {
-    setValue("templateId", "");
+    applyTemplate("");
   }, [values.teamId]);
 
   function applyTemplate(templateId: string) {

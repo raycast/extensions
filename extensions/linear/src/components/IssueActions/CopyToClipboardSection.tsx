@@ -15,10 +15,14 @@ function escapeHtml(str: string) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+function escapeMarkdownLinkText(str: string) {
+  return str.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
+}
+
 function getTitleLink(issue: IssueResult) {
   return {
     html: `<a href="${issue.url}">${escapeHtml(issue.title)}</a>`,
-    text: `[${issue.title}](${issue.url})`,
+    text: `[${escapeMarkdownLinkText(issue.title)}](${issue.url})`,
   };
 }
 
