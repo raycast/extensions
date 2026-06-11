@@ -1,6 +1,6 @@
 # Lockdock Changelog
 
-## [IPC → CLI migration] - {PR_MERGE_DATE}
+## [IPC → CLI migration] - 2026-06-11
 
 - Direct use of IPC has been replaced by a command call
 
