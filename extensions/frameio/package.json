@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "frameio",
+  "title": "Frame.io",
+  "description": "Navigate and search your Frame.io v4 account",
+  "icon": "icons/extension-icon.png",
+  "author": "phileas",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse",
+      "subtitle": "Frame.io",
+      "description": "Navigate your Frame.io projects and files",
+      "mode": "view",
+      "icon": "icons/browse-icon.png"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Frame.io",
+      "description": "Search across your entire Frame.io account",
+      "mode": "view",
+      "icon": "icons/search-icon.png"
+    },
+    {
+      "name": "open-last-folder",
+      "title": "Open Last Folder",
+      "subtitle": "Frame.io",
+      "description": "Open the last browsed folder directly in the browser",
+      "mode": "view",
+      "icon": "icons/last-folder-icon.png"
+    },
+    {
+      "name": "recent-uploads",
+      "title": "Recent Uploads",
+      "subtitle": "Frame.io",
+      "description": "List the latest files uploaded to your workspace",
+      "mode": "view",
+      "icon": "icons/recent-uploads-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Adobe Developer Client ID",
+      "description": "Client ID from Adobe Developer Console (OAuth Single Page App)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultFolderId",
+      "title": "Browse Default Folder ID",
+      "description": "Browse opens directly at this folder. Copy a Folder / Project / Workspace ID from the Browse command (⌘K → Copy ID) and paste it here.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    },
+    {
+      "name": "signOut",
+      "title": "Account",
+      "label": "Sign out on next launch",
+      "description": "Disconnects from Frame.io. Uncheck after signing out.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.36.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
