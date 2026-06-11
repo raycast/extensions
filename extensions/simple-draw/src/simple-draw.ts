@@ -44,6 +44,10 @@ export default async function Command() {
 
   try {
     const { openViewer } = await import("swift:../swift/simple-draw");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Simple Draw Opened",
+    });
     await openViewer(htmlPath);
   } catch (error) {
     await showFailureToast(error, {
@@ -51,9 +55,4 @@ export default async function Command() {
     });
     return;
   }
-
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Simple Draw Opened",
-  });
 }

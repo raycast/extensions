@@ -85,9 +85,9 @@ class ViewerDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler {
             panel.allowedContentTypes = [.png]
             panel.begin { result in
                 if result == .OK, let url = panel.url {
-                    try? data.write(to: url)
+                    let saved = (try? data.write(to: url)) != nil
                     DispatchQueue.main.async {
-                        self.webView.evaluateJavaScript("window._onSaveResult(true)", completionHandler: nil)
+                        self.webView.evaluateJavaScript("window._onSaveResult(\(saved))", completionHandler: nil)
                     }
                 }
             }
