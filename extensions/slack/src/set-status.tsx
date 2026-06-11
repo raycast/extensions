@@ -1,16 +1,28 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { SlackClient, useMe } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, LaunchProps, List, popToRoot } from "@raycast/api";
 import { SLACK_EMOJI_CODE_MAP } from "./constants/emoji.constants";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type SlackStatusForm, StatusForm } from "./components/set-status/status-form.component";
 import { EmojiPicker } from "./components/set-status/emoji-picker.component";
 import { getDurationOptionFromTimestamp, getTextForExpiration } from "./utils/set-status/expiration.util";
 import { showToastWithPromise } from "./utils/toast.util";
 import SetAiStatusForm from "./components/set-status/set-ai-status-form.component";
 
-function SlackStatusList() {
+// Slack stores status emoji in `:name:` form. Accept either `rocket` or `:rocket:` from a deep link argument.
+function normalizeEmoji(emoji?: string): string | undefined {
+  const trimmed = emoji?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return `:${trimmed.replace(/^:+|:+$/g, "")}:`;
+}
+
+function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>) {
+  const { statusText: statusTextArgument, emoji: emojiArgument } = props.arguments;
+
   const { data: me, isLoading: isFetchMeLoading } = useMe();
   const {
     data: profile,
@@ -167,6 +179,51 @@ function SlackStatusList() {
       },
     );
   }, [mutate, profile]);
+
+  const hasLaunchArguments = Boolean(statusTextArgument?.trim() || normalizeEmoji(emojiArgument));
+  const didAutoSetStatus = useRef(false);
+
+  useEffect(() => {
+    // When launched via deep link or a Quicklink with arguments, set the status directly and close.
+    if (!hasLaunchArguments || didAutoSetStatus.current || isFetchMeLoading || isFetchProfileLoading) {
+      return;
+    }
+
+    const statusText = statusTextArgument?.trim() || undefined;
+    const emoji = normalizeEmoji(emojiArgument);
+
+    // Preserving the field that wasn't passed relies on the current profile. If it failed to
+    // load, setting only one field would clear the other, so bail with feedback instead.
+    if ((statusText === undefined || emoji === undefined) && !profile) {
+      didAutoSetStatus.current = true;
+      showFailureToast(new Error("Couldn't load your current Slack status."), { title: "Failed to set status" });
+      return;
+    }
+
+    didAutoSetStatus.current = true;
+
+    showToastWithPromise(
+      async () => {
+        await SlackClient.setStatus({
+          statusText,
+          emoji,
+          expiration: 0,
+          originProfile: profile,
+        });
+        await mutate();
+        await popToRoot();
+        await closeMainWindow();
+      },
+      {
+        loading: "The status is changing...",
+        error: "An error occurred while changing the state.",
+        success: () => ({
+          title: "Set status",
+          message: [emoji, statusText].filter(Boolean).join(" "),
+        }),
+      },
+    );
+  }, [hasLaunchArguments, isFetchMeLoading, isFetchProfileLoading, profile, mutate, statusTextArgument, emojiArgument]);
 
   return (
     <List isLoading={isLoading}>

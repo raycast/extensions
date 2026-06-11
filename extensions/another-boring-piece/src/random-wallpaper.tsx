@@ -17,7 +17,7 @@ export default async function Command() {
     const randomWallpaper = (await response.json()) as Wallpaper;
 
     toast.title = "Setting wallpaper...";
-    await setDesktopWallpaper(randomWallpaper.url, randomWallpaper.id);
+    await setDesktopWallpaper(randomWallpaper);
 
     toast.style = Toast.Style.Success;
     toast.title = "Wallpaper changed";

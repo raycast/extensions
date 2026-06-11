@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bookface",
+  "title": "Bookface",
+  "description": "Search Bookface and chat with the YC Agent from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "News"
+  ],
+  "keywords": [
+    "yc",
+    "ycombinator",
+    "y combinator",
+    "bookface",
+    "founder",
+    "startup"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search YC",
+      "description": "Search Bookface for companies, people, and posts.",
+      "mode": "view",
+      "subtitle": "Bookface"
+    },
+    {
+      "name": "ask",
+      "title": "Ask YC Agent",
+      "description": "Ask the YC agent questions about the network, investors, fundraising, and more.",
+      "mode": "view",
+      "subtitle": "Bookface"
+    },
+    {
+      "name": "account",
+      "title": "YC Account",
+      "description": "Show the currently logged-in Bookface account.",
+      "mode": "view",
+      "subtitle": "Bookface"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ycPath",
+      "type": "textfield",
+      "required": false,
+      "title": "yc CLI Path",
+      "description": "Optional absolute path to the yc binary. If empty, the extension searches $PATH for yc or ycp, then falls back to ~/.local/bin, /opt/homebrew/bin, and /usr/local/bin.",
+      "placeholder": "/Users/you/.local/bin/yc"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

@@ -1,10 +1,8 @@
 import { FrontpageContent } from "./components/FrontpageContent";
-import { configureFromRaycastPreferences, getLogger } from "./util/logger";
+import { logger } from "@chrismessina/raycast-logger";
 import { useEffect } from "react";
 
-// Initialize logger based on Raycast preferences at command entry
-configureFromRaycastPreferences();
-const log = getLogger("ui.frontpage");
+const log = logger.child("[ProductHuntFrontpage]");
 
 /**
  * Main command entry point for the Product Hunt extension
@@ -13,7 +11,7 @@ const log = getLogger("ui.frontpage");
 export default function Command() {
   // Emit a lightweight session start event after initial mount (avoid logging during render)
   useEffect(() => {
-    log.info("session:start", "Frontpage command opened");
+    log.info("Frontpage command opened");
   }, []);
   return <FrontpageContent />;
 }

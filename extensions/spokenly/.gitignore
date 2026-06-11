@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+.raycast
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Env
+.env
+.env.*

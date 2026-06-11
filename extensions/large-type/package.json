@@ -8,7 +8,8 @@
   "author": "gbarba",
   "contributors": [
     "FezVrasta",
-    "garrill"
+    "garrill",
+    "kalaschnik"
   ],
   "license": "MIT",
   "commands": [
@@ -22,6 +23,12 @@
       "name": "show-clipboard",
       "title": "Show Clipboard",
       "description": "Show the current clipboard in large type",
+      "mode": "view"
+    },
+    {
+      "name": "show-selected-text",
+      "title": "Show Selected Text",
+      "description": "Show the selected text of the frontmost application in large type",
       "mode": "view"
     }
   ],
@@ -62,14 +69,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "@types/react-dom": "^17.0.14",
-    "react-dom": "^17.0.2",
-    "graphemer": "^1.4.0"
+    "@raycast/api": "^1.104.19",
+    "@types/react-dom": "^19.2.3",
+    "graphemer": "^1.4.0",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^19.2.17",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -81,5 +88,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,55 +1,41 @@
 import { LocalhostItem } from "../types/LocalhostItem";
-import { findNodeProcesses, getProcessCommand, getWorkingDirectory } from "../utils/processUtils";
+import { findListeningServers, enrichHostServers } from "../utils/processUtils";
 import { detectFramework, getProjectPath } from "../utils/projectUtils";
-
-async function getProcessDetails(pid: string, cmdResult: string) {
-  try {
-    // Get project information
-    const workingDir = await getWorkingDirectory(pid);
-    const projectPath = workingDir || getProjectPath(cmdResult);
-    const framework = detectFramework(cmdResult);
-
-    return {
-      workingDir,
-      projectPath,
-      framework,
-    };
-  } catch {
-    return undefined;
-  }
-}
+import { respondsToHttp } from "../utils/probe";
 
 export async function getLocalhostItems(): Promise<LocalhostItem[]> {
-  const output = await findNodeProcesses();
-  const lines = output.split("\n").filter(Boolean);
-  const items: LocalhostItem[] = [];
+  const servers = await findListeningServers();
 
-  for (const line of lines) {
-    const [pid, port] = line.split(":");
-    if (!pid || !port) continue;
-
-    // Get the command for this process
-    const cmdResult = await getProcessCommand(pid);
-
-    // Skip non-Node.js processes
-    if (!cmdResult.includes("node")) continue;
-
-    const details = await getProcessDetails(pid, cmdResult);
-
-    if (!details) continue;
-
-    const { projectPath, framework } = details;
-    const url = `http://localhost:${port}`;
-
-    items.push({
-      id: pid,
-      projectPath,
-      framework,
-      port,
-      pid,
-      url,
-    });
+  // One row per port. Prefer the WSL entry on a collision since it carries command + cwd.
+  const byPort = new Map<string, (typeof servers)[number]>();
+  for (const server of servers) {
+    const existing = byPort.get(server.port);
+    if (!existing || (server.source === "wsl" && existing.source !== "wsl")) {
+      byPort.set(server.port, server);
+    }
   }
+  const candidates = [...byPort.values()];
 
-  return items;
+  // Keep only the ports that actually answer an HTTP request (i.e. open in a browser).
+  const reachable = await Promise.all(candidates.map((server) => respondsToHttp(server.port)));
+  const webServers = candidates.filter((_, index) => reachable[index]);
+
+  // Fill in command line + working dir for native-host survivors (WSL ones already have them).
+  await enrichHostServers(webServers);
+
+  return webServers
+    .map((server) => {
+      const projectPath = server.workingDir || getProjectPath(server.command);
+      return {
+        id: `${server.source}:${server.pid}:${server.port}`,
+        projectPath,
+        framework: detectFramework(server.command),
+        port: server.port,
+        pid: server.pid,
+        url: `http://localhost:${server.port}`,
+        source: server.source,
+        distro: server.distro,
+      };
+    })
+    .sort((a, b) => parseInt(a.port) - parseInt(b.port));
 }

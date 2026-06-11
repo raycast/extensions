@@ -21,6 +21,7 @@ import { Options } from "fast-glob/out/settings";
 import Channel, { ChannelDetail, Extension, Tool } from "./.channel.json";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { getGitBranch } from "./git";
 
 export const execPromise = promisify(exec);
 
@@ -31,6 +32,7 @@ interface prefs {
   toolsInstall: PreferenceValues;
   fallback: PreferenceValues;
   frecencySorting: PreferenceValues;
+  showGitBranch: PreferenceValues;
 }
 
 const preferences = getPreferenceValues<prefs>();
@@ -44,6 +46,7 @@ export const toolsInstall = String(preferences["toolsInstall"]).replace("~", hom
 export const toolsSupportDir = "~/Library/Application Support/JetBrains/Toolbox".replace("~", homedir());
 export const useUrl = Boolean(preferences["fallback"]);
 export const frecencySorting = Boolean(preferences["frecencySorting"]);
+export const showGitBranch = Boolean(preferences["showGitBranch"]);
 
 const CHANNEL_GLOB = resolve(toolsSupportDir, "channels/*.json");
 const SETTINGS_GLOB = resolve(toolsSupportDir, ".settings.json");
@@ -66,6 +69,7 @@ export interface recentEntry {
   opened: number;
   appName: string;
   exists?: boolean;
+  branch?: string;
   filter?: number;
   app: AppHistory;
   xmlFile: file;
@@ -165,11 +169,16 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
             )
             // check if the file actually exists to prevent breaking open with actions
             .map(async (recent: recentEntry) => {
-              return {
-                ...recent,
-                exists: await stat(recent.path)
+              const [exists, branch] = await Promise.all([
+                stat(recent.path)
                   .then(() => true)
                   .catch(() => false),
+                showGitBranch ? getGitBranch(recent.path) : Promise.resolve(undefined),
+              ]);
+              return {
+                ...recent,
+                exists,
+                branch,
               } as recentEntry;
             })
         );

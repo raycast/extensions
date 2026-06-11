@@ -17,10 +17,12 @@ dist/
 
 # Environment
 .env
-.env.local
 
 # Raycast
 .raycast/
 
-# Claude Code
 .claude/
+
+# Promptfoo local artifacts
+.promptfoo/
+evals/results/
