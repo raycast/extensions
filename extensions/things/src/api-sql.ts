@@ -179,7 +179,7 @@ const TODO_SELECT_SUMMARY = `
 const TODO_SELECT_DETAIL = `${TODO_SELECT_SUMMARY},
   t.status,
   COALESCE(t.notes, '') as notes,
-  (SELECT GROUP_CONCAT(tg.title, ',')
+  (SELECT GROUP_CONCAT(tg.title, ', ')
    FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
    WHERE tt.tasks = t.uuid) as tagList`;
 
@@ -349,7 +349,7 @@ export async function queryProjectDetailsSQL(projectId: string): Promise<Project
       NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as nextInstanceStartDate,
       p.rt1_recurrenceRule as recurrenceRule,
       a.uuid as areaId, a.title as areaName,
-      (SELECT GROUP_CONCAT(tg.title, ',')
+      (SELECT GROUP_CONCAT(tg.title, ', ')
        FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tagList,
       (SELECT COUNT(*) FROM TMTask t WHERE t.project = p.uuid AND t.type = 0 AND t.trashed = 0 AND t.status = 0) as todoCount
     FROM TMTask p
@@ -396,7 +396,7 @@ export async function queryAreaDetailsSQL(areaId: string): Promise<AreaDetails |
   const sql = `
     SELECT
       a.uuid as id, a.title as name,
-      (SELECT GROUP_CONCAT(tg.title, ',')
+      (SELECT GROUP_CONCAT(tg.title, ', ')
        FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tagList,
       (SELECT COUNT(*) FROM TMTask p WHERE p.area = a.uuid AND p.type = 1 AND p.trashed = 0 AND p.status = 0) as projectCount,
       (SELECT COUNT(*) FROM TMTask t WHERE t.area = a.uuid AND t.type = 0 AND t.project IS NULL AND t.trashed = 0 AND t.status = 0) as todoCount
@@ -427,7 +427,7 @@ const LIST_SELECT = `
       t.type,
       t.status,
       COALESCE(t.notes, '') as notes,
-      (SELECT GROUP_CONCAT(tg.title, ',')
+      (SELECT GROUP_CONCAT(tg.title, ', ')
        FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
        WHERE tt.tasks = t.uuid) as tagList,
       p.uuid as projectId,
@@ -438,14 +438,14 @@ const LIST_SELECT = `
       NULLIF(p.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER}) as projectNextInstanceStartDate,
       p.rt1_recurrenceRule as projectRecurrenceRule,
       COALESCE(p.notes, '') as projectNotes,
-      (SELECT GROUP_CONCAT(tg.title, ',')
+      (SELECT GROUP_CONCAT(tg.title, ', ')
        FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags
        WHERE tt.tasks = p.uuid) as projectTagList,
       pa.uuid as projectAreaId,
       pa.title as projectAreaName,
       a.uuid as areaId,
       a.title as areaName,
-      (SELECT GROUP_CONCAT(tg.title, ',')
+      (SELECT GROUP_CONCAT(tg.title, ', ')
        FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags
        WHERE at2.areas = COALESCE(a.uuid, pa.uuid)) as areaTagList,
       t.creationDate as creationDateRaw
@@ -782,10 +782,10 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       `SELECT p.uuid as id, p.title as name,
         CASE p.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
         COALESCE(p.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ',') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
+        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = p.uuid) as tags,
         NULL as dueDate, NULL as activationDate, -- dates not fetched in collection summary; use queryProjectDetailsSQL for full data
         a.uuid as areaId, a.title as areaName,
-        (SELECT GROUP_CONCAT(tg.title, ',') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
+        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as areaTags
       FROM TMTask p
       LEFT JOIN TMArea a ON a.uuid = p.area
       WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
@@ -807,7 +807,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       `SELECT t.uuid as id, t.title as name,
         CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
         COALESCE(t.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ',') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
         NULL as dueDate, NULL as activationDate,
         datetime(t.creationDate, 'unixepoch') as creationDate,
         t.project as projectId
@@ -851,7 +851,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
     const areaRows = await executeSQL<AreaRow>(
       getThingsDBPath(),
       `SELECT a.uuid as id, a.title as name,
-        (SELECT GROUP_CONCAT(tg.title, ',') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
+        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMAreaTag at2 JOIN TMTag tg ON tg.uuid = at2.tags WHERE at2.areas = a.uuid) as tags
       FROM TMArea a WHERE a.visible = 1`,
     );
 
@@ -871,7 +871,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
       `SELECT t.uuid as id, t.title as name,
         CASE t.status WHEN 2 THEN 'canceled' WHEN 3 THEN 'completed' ELSE 'open' END as status,
         COALESCE(t.notes, '') as notes,
-        (SELECT GROUP_CONCAT(tg.title, ',') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
+        (SELECT GROUP_CONCAT(tg.title, ', ') FROM TMTaskTag tt JOIN TMTag tg ON tg.uuid = tt.tags WHERE tt.tasks = t.uuid) as tags,
         NULL as dueDate, NULL as activationDate,
         datetime(t.creationDate, 'unixepoch') as creationDate,
         t.area as areaId
