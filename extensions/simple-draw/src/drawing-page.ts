@@ -587,9 +587,9 @@ export function generateDrawingPage(base64Image: string): string {
       if (e.target === ta && !textDragging) return; // Let textarea handle clicks
       e.preventDefault();
       textDragging = true;
-      const badgeRect = badge.getBoundingClientRect();
-      textDragOffset.x = e.clientX - badgeRect.left;
-      textDragOffset.y = e.clientY - badgeRect.top;
+      const overlayRectNow = textOverlay.getBoundingClientRect();
+      textDragOffset.x = e.clientX - overlayRectNow.left - parseFloat(badge.style.left);
+      textDragOffset.y = e.clientY - overlayRectNow.top - parseFloat(badge.style.top);
     });
 
     // Scroll wheel to scale
