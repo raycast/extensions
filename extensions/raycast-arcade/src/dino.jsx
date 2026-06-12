@@ -124,6 +124,14 @@ export default function ChromeDino() {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  function spawnCactus() {
+    activeCacti.current.push({
+      x: boardWidth,
+      shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
+      time: time.current,
+    });
+  }
+
   useEffect(() => {
     if (!isTicking.current) {
       tick();
@@ -141,27 +149,17 @@ export default function ChromeDino() {
     if (status.current === Status.PLAYING) {
       dinoStatus.current.y = Math.round(Math.max(dinoStatus.current.y + dinoStatus.current.gravity, 0));
       if (time.current === 60) {
-        activeCacti.current.push({
-          x: boardWidth,
-          shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
-          time: time.current,
-        });
+        spawnCactus();
       }
-      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 40) {
+      let lastCactus = activeCacti.current.at(-1);
+      if (time.current > 60 && lastCactus && time.current - lastCactus.time > 40) {
         if (Math.random() < 0.02) {
-          activeCacti.current.push({
-            x: boardWidth,
-            shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
-            time: time.current,
-          });
+          spawnCactus();
         }
       }
-      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 100) {
-        activeCacti.current.push({
-          x: boardWidth,
-          shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
-          time: time.current,
-        });
+      lastCactus = activeCacti.current.at(-1);
+      if (time.current > 60 && (!lastCactus || time.current - lastCactus.time > 100)) {
+        spawnCactus();
       }
 
       if (time.current % 70 === 0) {
