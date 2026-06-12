@@ -10,14 +10,34 @@ import { getDurationOptionFromTimestamp, getTextForExpiration } from "./utils/se
 import { showToastWithPromise } from "./utils/toast.util";
 import SetAiStatusForm from "./components/set-status/set-ai-status-form.component";
 
-// Slack stores status emoji in `:name:` form. Accept either `rocket` or `:rocket:` from a deep link argument.
+// Reverse of SLACK_EMOJI_CODE_MAP: raw emoji glyph -> `:name:`. Raycast's argument field attaches an
+// emoji auto-picker that inserts a raw Unicode glyph (e.g. 👈) rather than its name, so we map it back.
+// The variation-selector-stripped key is added as a fallback so e.g. both `☝️` and `☝` resolve.
+const EMOJI_NAME_BY_CHAR: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const [name, char] of Object.entries(SLACK_EMOJI_CODE_MAP)) {
+    if (!(char in map)) map[char] = name;
+    const stripped = char.replace(/️/g, "");
+    if (!(stripped in map)) map[stripped] = name;
+  }
+  return map;
+})();
+
+// Slack stores status emoji in `:name:` form. Accept `rocket`/`:rocket:` text or a raw emoji glyph
+// (👈) from a deep link argument; the latter must be mapped back to its name or Slack rejects it.
 function normalizeEmoji(emoji?: string): string | undefined {
   const trimmed = emoji?.trim();
   if (!trimmed) {
     return undefined;
   }
 
-  return `:${trimmed.replace(/^:+|:+$/g, "")}:`;
+  // ASCII input is already a Slack emoji name (with or without colons) — just normalize the colons.
+  if (/^[\x20-\x7E]+$/.test(trimmed)) {
+    return `:${trimmed.replace(/^:+|:+$/g, "")}:`;
+  }
+
+  // Otherwise it's a raw Unicode glyph; map it to its `:name:`, falling back to the FE0F-stripped form.
+  return EMOJI_NAME_BY_CHAR[trimmed] ?? EMOJI_NAME_BY_CHAR[trimmed.replace(/️/g, "")];
 }
 
 function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>) {
