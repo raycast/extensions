@@ -1,6 +1,6 @@
 # Word4you Changelog
 
-## [Add flash card command] - {PR_MERGE_DATE}
+## [Add flash card command] - 2026-06-12
 
 - Add new flash card command
 
