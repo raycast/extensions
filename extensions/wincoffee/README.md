@@ -5,7 +5,7 @@ WinCoffee is a Raycast extension designed specifically for Windows users to prev
 ## Commands
 
 <p align="center">
-  <img src="./metadata/wincoffee-1.png" alt="Raycast Command Palette with WinCoffee Commands">
+  <img src="wincoffee-1.png" alt="Raycast Command Palette with WinCoffee Commands">
 </p>
 
 - **Caffeinate**: Turn on indefinite caffeination.
