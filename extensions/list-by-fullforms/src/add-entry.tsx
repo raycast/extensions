@@ -296,7 +296,7 @@ export default function AddEntryCommand() {
     if (firstListId !== undefined && !values.listId) {
       setValue("listId", String(firstListId));
     }
-  }, [firstListId]);
+  }, [firstListId, setValue, values.listId]);
 
   // Clear staged tag selections and names when the list changes.
   // tagIds are per-list (a tag from list A doesn't exist on list B,
@@ -308,7 +308,7 @@ export default function AddEntryCommand() {
   useEffect(() => {
     setValue("tagIds", []);
     setValue("tagNames", "");
-  }, [values.listId]);
+  }, [values.listId, setValue]);
 
   // Look up the selected list to surface its tag set to the TagPicker
   // and (later) the duplicate-check URL. Inline find rather than

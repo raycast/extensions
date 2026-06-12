@@ -116,7 +116,7 @@ export default function SuggestEntryCommand() {
     if (firstListId !== undefined && !values.listId) {
       setValue("listId", String(firstListId));
     }
-  }, [firstListId]);
+  }, [firstListId, setValue, values.listId]);
 
   if (!isLoading && totalLists === 0) {
     return (
