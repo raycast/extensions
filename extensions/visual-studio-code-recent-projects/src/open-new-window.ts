@@ -20,6 +20,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.TraeCN]: 3,
   [VSCodeBuild.VSCodium]: 3,
   [VSCodeBuild.VSCodiumInsiders]: 3,
+  [VSCodeBuild.Devin]: 3,
   [VSCodeBuild.Windsurf]: 3,
   [VSCodeBuild.Lingma]: 3,
 };

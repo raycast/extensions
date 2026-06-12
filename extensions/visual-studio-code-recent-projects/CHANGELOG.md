@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2026-06-12
+
+- Added support for Devin Desktop.
+
 ## [Fix: macOS user Applications path] - 2026-06-05
 
 - Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.

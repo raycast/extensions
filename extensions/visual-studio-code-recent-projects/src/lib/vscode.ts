@@ -112,6 +112,7 @@ function cliPaths(): Record<string, string> {
       "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
       VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Devin: path.join(programsFolder, "Devin", "bin", "devin-desktop.cmd"),
       Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
       Lingma: path.join(programsFolder, "Lingma", "bin", "lingma.cmd"),
     };
@@ -145,6 +146,7 @@ function cliPaths(): Record<string, string> {
         "bin",
         "codium-insiders",
       ),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app", "bin", "devin-desktop"),
       Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app", "bin", "windsurf"),
       Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app", "bin", "code"),
     };
@@ -180,6 +182,7 @@ function programPaths(): Record<string, string> {
       "Trae CN": path.join(programsFolder, "Trae CN"),
       VSCodium: path.join(programsFolder, "VSCodium"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders"),
+      Devin: path.join(programsFolder, "Devin"),
       Windsurf: path.join(programsFolder, "Windsurf"),
       Lingma: path.join(programsFolder, "Lingma"),
     };
@@ -199,6 +202,7 @@ function programPaths(): Record<string, string> {
       "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app"),
       VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app"),
       "VSCodium - Insiders": macApplicationPath("VSCodium - Insiders.app", "Contents", "Resources", "app"),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app"),
       Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app"),
       Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app"),
     };
@@ -382,6 +386,7 @@ const buildSchemes: Record<string, string> = {
   VSCodium: "vscode-oss",
   Positron: "positron",
   Qoder: "qoder",
+  Devin: "devin",
   Windsurf: "windsurf",
   Trae: "trae",
   "Trae CN": "trae-cn",
