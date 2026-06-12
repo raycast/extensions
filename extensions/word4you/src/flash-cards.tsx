@@ -34,9 +34,7 @@ function FlashCardPage() {
   }
 
   if (savedMdDefinitions.length === 0) {
-    return (
-      <Detail markdown="# No Saved Words Found\n\nPlease learn and save some words/phrases first before using Flash Cards." />
-    );
+    return <Detail markdown="# No Saved Words Found" />;
   }
 
   if (!currentCard) {
