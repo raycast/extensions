@@ -113,7 +113,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6"
+    "@raycast/utils": "^2.2.6",
+    "@types/jest": "^30.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
