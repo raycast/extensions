@@ -3,7 +3,7 @@ import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
 import { Infobox } from "@/types"
 import { OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
-import { RelationsList } from "@/components/lists"
+import { CharacterRelationsList } from "@/components/lists"
 import { formatSummary, getImageUrl } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
 import { bangumi, bangumiAuth } from "@/api"
@@ -14,7 +14,6 @@ interface CharacterDetailProps {
 
 const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
   const abortable = useRef<AbortController>(null)
-  const subjectsAbortable = useRef<AbortController>(null)
 
   const { data, isLoading } = usePromise(
     async (id) => {
@@ -22,17 +21,6 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
     },
     [characterId],
     { abortable }
-  )
-
-  const { data: subjects, isLoading: isSubjectsLoading } = usePromise(
-    async (id) => {
-      return await bangumi.getRelatedSubjectsByCharacterId({
-        characterId: id,
-        signal: subjectsAbortable.current?.signal,
-      })
-    },
-    [characterId],
-    { abortable: subjectsAbortable }
   )
 
   const { isTranslating, translate, translationMarkdown } = useAITranslate(`char_summary_translation_${characterId}`, {
@@ -59,7 +47,8 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
 
   return (
     <Detail
-      isLoading={isLoading || isSubjectsLoading || isTranslating}
+      isLoading={isLoading || isTranslating}
+      navigationTitle="Character Detail"
       markdown={markdown}
       metadata={
         data ? (
@@ -92,25 +81,11 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {subjects?.length ? (
-              <Action.Push
-                title="Show Related Works"
-                icon={Icon.List}
-                target={
-                  <RelationsList
-                    title="Related Works"
-                    relations={subjects.map((sub) => ({
-                      id: sub.id,
-                      name: sub.name,
-                      name_cn: sub.name_cn,
-                      image: sub.image,
-                      relationType: sub.staff,
-                      subjectType: sub.type,
-                    }))}
-                  />
-                }
-              />
-            ) : null}
+            <Action.Push
+              title="Show Related Works"
+              icon={Icon.List}
+              target={<CharacterRelationsList title="Related Works" characterId={characterId} />}
+            />
             <AITranslateAction text={data?.summary} onTranslate={translate} isTranslating={isTranslating} />
             <OpenInBgmBrowser path={`character/${characterId}`} />
           </ActionPanel.Section>

@@ -1,6 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
 import { SubjectDetail } from "@/components/details"
 import { SubjectTypeName, SubjectType } from "@/shared/const"
+import { usePromise } from "@raycast/utils"
+import { bangumi } from "@/api"
+import { useRef } from "react"
 
 export interface RelationItem {
   id: number
@@ -11,9 +14,10 @@ export interface RelationItem {
   subjectType?: number
 }
 
-interface RelationsListProps {
-  relations: RelationItem[]
-  title?: string
+interface RelationsListBaseProps {
+  title: string
+  relations?: RelationItem[]
+  isLoading: boolean
 }
 
 const getRelationColor = (relation: string): Color => {
@@ -36,41 +40,98 @@ const getRelationColor = (relation: string): Color => {
   }
 }
 
-export default function RelationsList({ relations, title = "Related Subjects" }: RelationsListProps) {
+const RelationsListBase = ({ title, relations, isLoading }: RelationsListBaseProps) => {
   return (
-    <List navigationTitle={title} searchBarPlaceholder="Filter related items...">
-      {relations.map((relation) => (
-        <List.Item
-          key={relation.id}
-          icon={relation.image || Icon.Image}
-          title={relation.name_cn || relation.name}
-          subtitle={relation.name !== relation.name_cn ? relation.name : undefined}
-          accessories={[
-            ...(relation.relationType
-              ? [{ tag: { value: relation.relationType, color: getRelationColor(relation.relationType) } }]
-              : []),
-            ...(relation.subjectType && SubjectTypeName[relation.subjectType as SubjectType]
-              ? [
-                  {
-                    tag: {
-                      value: SubjectTypeName[relation.subjectType as SubjectType],
-                      color: Color.SecondaryText,
-                    },
-                  },
-                ]
-              : []),
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Show Details"
-                icon={Icon.Sidebar}
-                target={<SubjectDetail subjectId={relation.id} />}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Filter related items...">
+      {relations?.map((relation) => {
+        const accessories: List.Item.Accessory[] = []
+
+        if (relation.relationType) {
+          accessories.push({ tag: { value: relation.relationType, color: getRelationColor(relation.relationType) } })
+        }
+
+        if (relation.subjectType && SubjectTypeName[relation.subjectType as SubjectType]) {
+          accessories.push({
+            tag: { value: SubjectTypeName[relation.subjectType as SubjectType], color: Color.SecondaryText },
+          })
+        }
+
+        return (
+          <List.Item
+            key={relation.id}
+            icon={relation.image || Icon.Image}
+            title={relation.name_cn || relation.name}
+            subtitle={relation.name !== relation.name_cn ? relation.name : undefined}
+            accessories={accessories}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Show Details"
+                  icon={Icon.Sidebar}
+                  target={<SubjectDetail subjectId={relation.id} />}
+                />
+              </ActionPanel>
+            }
+          />
+        )
+      })}
     </List>
   )
+}
+
+interface SubjectRelationsListProps {
+  subjectId: number
+  title?: string
+}
+
+export const SubjectRelationsList = ({ subjectId, title = "Related Subjects" }: SubjectRelationsListProps) => {
+  const abortable = useRef<AbortController>(null)
+
+  const { data: relations, isLoading } = usePromise(
+    async (sId: number) => {
+      const res = await bangumi.getRelatedSubjectsBySubjectId({ subjectId: sId, signal: abortable.current?.signal })
+      return res.map((rel) => ({
+        id: rel.id,
+        name: rel.name,
+        name_cn: rel.name_cn,
+        image: rel.images?.grid,
+        relationType: rel.relation,
+        subjectType: rel.type,
+      }))
+    },
+    [subjectId],
+    { abortable }
+  )
+
+  return <RelationsListBase title={title} relations={relations} isLoading={isLoading} />
+}
+
+interface CharacterRelationsListProps {
+  characterId: number
+  title?: string
+}
+
+export const CharacterRelationsList = ({ characterId, title = "Related Works" }: CharacterRelationsListProps) => {
+  const abortable = useRef<AbortController>(null)
+
+  const { data: relations, isLoading } = usePromise(
+    async (cId: number) => {
+      const res = await bangumi.getRelatedSubjectsByCharacterId({
+        characterId: cId,
+        signal: abortable.current?.signal,
+      })
+      return res.map((sub) => ({
+        id: sub.id,
+        name: sub.name,
+        name_cn: sub.name_cn,
+        image: sub.image,
+        relationType: sub.staff,
+        subjectType: sub.type,
+      }))
+    },
+    [characterId],
+    { abortable }
+  )
+
+  return <RelationsListBase title={title} relations={relations} isLoading={isLoading} />
 }

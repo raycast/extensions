@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
 import { CollectionStatusActions, OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
-import { SubjectCharactersList, RelationsList } from "@/components/lists"
+import { SubjectCharactersList, SubjectRelationsList } from "@/components/lists"
 import { SubjectCollectionIcon } from "@/shared/const"
 import { formatSummary, getImageUrl, getCollectionTag } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
@@ -15,8 +15,6 @@ interface SubjectDetailProps {
 const SubjectDetail = ({ subjectId }: SubjectDetailProps) => {
   const abortable = useRef<AbortController>(null)
   const collectionAbortable = useRef<AbortController>(null)
-  const charactersAbortable = useRef<AbortController>(null)
-  const relatedSubjectsAbortable = useRef<AbortController>(null)
 
   const { data, isLoading } = usePromise(
     async (id) => {
@@ -40,32 +38,11 @@ const SubjectDetail = ({ subjectId }: SubjectDetailProps) => {
     { abortable: collectionAbortable }
   )
 
-  const { data: characters, isLoading: isCharactersLoading } = usePromise(
-    async (id) => {
-      const res = await bangumi.getSubjectCharacters({ subjectId: id, signal: charactersAbortable.current?.signal })
-      return res
-    },
-    [subjectId],
-    { abortable: charactersAbortable }
-  )
-
-  const { data: relatedSubjects, isLoading: isRelatedSubjectsLoading } = usePromise(
-    async (id) => {
-      const res = await bangumi.getRelatedSubjectsBySubjectId({
-        subjectId: id,
-        signal: relatedSubjectsAbortable.current?.signal,
-      })
-      return res
-    },
-    [subjectId],
-    { abortable: relatedSubjectsAbortable }
-  )
-
   const { isTranslating, translate, translationMarkdown } = useAITranslate(`subject_summary_translation_${subjectId}`, {
     formatFn: formatSummary,
   })
 
-  const coverUrl = getImageUrl(data?.images?.large)
+  const coverUrl = getImageUrl(data?.images.large)
   const name = data?.name_cn || data?.name || ""
   const subtitleName = data?.name && data.name !== name ? data.name : ""
 
@@ -82,7 +59,7 @@ ${formatSummary(data.summary)}${translationMarkdown}
 
   return (
     <Detail
-      isLoading={isLoading || isCollectionLoading || isCharactersLoading || isRelatedSubjectsLoading || isTranslating}
+      isLoading={isLoading || isCollectionLoading || isTranslating}
       markdown={markdown}
       metadata={
         data ? (
@@ -124,32 +101,16 @@ ${formatSummary(data.summary)}${translationMarkdown}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {relatedSubjects?.length ? (
-              <Action.Push
-                title="Show Related Subjects"
-                icon={Icon.List}
-                target={
-                  <RelationsList
-                    title="Related Subjects"
-                    relations={relatedSubjects.map((rel) => ({
-                      id: rel.id,
-                      name: rel.name,
-                      name_cn: rel.name_cn,
-                      image: rel.images?.grid,
-                      relationType: rel.relation,
-                      subjectType: rel.type,
-                    }))}
-                  />
-                }
-              />
-            ) : null}
-            {characters?.length ? (
-              <Action.Push
-                title="Show Characters & Voice Actors"
-                icon={Icon.List}
-                target={<SubjectCharactersList characters={characters} />}
-              />
-            ) : null}
+            <Action.Push
+              title="Show Related Subjects"
+              icon={Icon.List}
+              target={<SubjectRelationsList title="Related Subjects" subjectId={subjectId} />}
+            />
+            <Action.Push
+              title="Show Characters & Voice Actors"
+              icon={Icon.List}
+              target={<SubjectCharactersList subjectId={subjectId} />}
+            />
             <AITranslateAction text={data?.summary} onTranslate={translate} isTranslating={isTranslating} />
             <OpenInBgmBrowser path={`subject/${subjectId}`} />
           </ActionPanel.Section>
