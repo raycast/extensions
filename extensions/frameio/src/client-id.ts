@@ -1,14 +1,8 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 export const STORAGE_KEY_CLIENT_ID = "clientId";
 
-export function getClientIdFromPreferences(): string {
-  return getPreferenceValues<{ clientId?: string }>().clientId?.trim() ?? "";
-}
-
 export async function loadClientId(): Promise<string> {
-  const fromPrefs = getClientIdFromPreferences();
-  if (fromPrefs) return fromPrefs;
   const stored = await LocalStorage.getItem<string>(STORAGE_KEY_CLIENT_ID);
   return stored?.trim() ?? "";
 }

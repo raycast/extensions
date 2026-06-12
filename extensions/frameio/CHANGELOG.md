@@ -1,6 +1,6 @@
 # Frame.io Changelog
 
-## [Initial Release] - 2026-06-11
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Browse workspaces, projects, folders, and files with sorting and detail view
 - Search across your entire Frame.io account with type filters

@@ -1,12 +1,13 @@
-import { OAuth, showToast, Toast } from "@raycast/api";
+import { LocalStorage, OAuth, showToast, Toast } from "@raycast/api";
 import { debug } from "./debug";
-import { loadClientId } from "./client-id";
+import { loadClientId, STORAGE_KEY_CLIENT_ID } from "./client-id";
 
 const ADOBE_IMS_BASE = "https://ims-na1.adobelogin.com/ims";
 const SCOPES = "openid email profile offline_access additional_info.roles";
 
 let _client: OAuth.PKCEClient | null = null;
 let _authorizeInFlight: Promise<void> | null = null;
+let _refreshInFlight: Promise<string> | null = null;
 
 function getClient(): OAuth.PKCEClient {
   if (!_client) {
@@ -59,9 +60,6 @@ async function authorizeInternal(): Promise<void> {
       response_type: "code",
     },
   });
-
-  debug.info("Redirect URI to configure in Adobe Console", authRequest.redirectURI);
-  debug.info("Authorization URL", authRequest.toURL());
 
   try {
     const { authorizationCode } = await client.authorize(authRequest);
@@ -129,7 +127,6 @@ async function refreshAccessToken(refreshToken: string, clientId: string): Promi
 
 export async function getAccessToken(): Promise<string> {
   const client = getClient();
-  const clientId = await loadClientId();
 
   const tokenSet = await client.getTokens();
   if (!tokenSet?.accessToken) {
@@ -137,15 +134,26 @@ export async function getAccessToken(): Promise<string> {
   }
 
   if (tokenSet.refreshToken && tokenSet.isExpired()) {
-    const refreshed = await refreshAccessToken(tokenSet.refreshToken, clientId);
-    await client.setTokens(refreshed);
-    return refreshed.access_token;
+    if (!_refreshInFlight) {
+      const clientId = await loadClientId();
+      _refreshInFlight = refreshAccessToken(tokenSet.refreshToken, clientId)
+        .then(async (refreshed) => {
+          await client.setTokens(refreshed);
+          return refreshed.access_token;
+        })
+        .finally(() => {
+          _refreshInFlight = null;
+        });
+    }
+    return _refreshInFlight;
   }
 
   return tokenSet.accessToken;
 }
 
 export async function logout(): Promise<void> {
-  const client = getClient();
-  await client.removeTokens();
+  await LocalStorage.removeItem(STORAGE_KEY_CLIENT_ID);
+  // Tokens are intentionally kept: removing them while the command is active
+  // triggers Raycast's OAuth overlay automatically. They will expire on their own.
+  // If the user re-enters the same client ID, still-valid tokens avoid a redundant re-auth.
 }

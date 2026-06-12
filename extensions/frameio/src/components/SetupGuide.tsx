@@ -41,6 +41,8 @@ const STEPS = `## Steps
 5. Copy the **Client ID** and paste it on the next screen
 6. Sign in with your Adobe account and allow the extension to access your account
 
+**Works only on Frame.io v4 accounts (next.frame.io). Legacy accounts are not supported.**
+
 > This extension is not affiliated with Frame.io or Adobe. It is open source on [GitHub](https://github.com/phileas/frameio_raycast_extension). Contributions and issue reports are welcome.`;
 
 interface SetupGuideProps {

@@ -238,6 +238,23 @@ export async function listProjects(accountId: string, workspaceId: string): Prom
   return res.data;
 }
 
+export async function tryFindProjectById(
+  accountId: string,
+  projectId: string,
+  workspaces: Workspace[]
+): Promise<{ project: Project; workspace: Workspace } | null> {
+  for (const ws of workspaces) {
+    try {
+      const projects = await listProjects(accountId, ws.id);
+      const found = projects.find((p) => p.id === projectId);
+      if (found) return { project: found, workspace: ws };
+    } catch {
+      // try next workspace
+    }
+  }
+  return null;
+}
+
 // ─── Folders ──────────────────────────────────────────────────────────────────
 
 export interface ListFolderChildrenOptions {
@@ -365,7 +382,7 @@ export function sortFolderItems(items: FolderItem[], sort: SortOption): FolderIt
     let cmp = 0;
     switch (field) {
       case "name":
-        cmp = a.asset.name.localeCompare(b.asset.name, "fr", { sensitivity: "base" });
+        cmp = a.asset.name.localeCompare(b.asset.name, undefined, { sensitivity: "base" });
         break;
       case "updated_at":
         cmp = new Date(a.asset.updated_at).getTime() - new Date(b.asset.updated_at).getTime();

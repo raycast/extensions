@@ -315,7 +315,7 @@ export function FolderView({
 
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
-                    title={`Copy ${isFolder ? "Folder" : "File"} ID`}
+                    title={`Copy "${asset.name}" ID`}
                     content={asset.id}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onCopy={() =>

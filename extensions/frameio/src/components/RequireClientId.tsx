@@ -1,7 +1,6 @@
 import { JSX, useEffect, useState } from "react";
 import { List } from "@raycast/api";
 import { loadClientId } from "../client-id";
-import { applyPreferenceSideEffects } from "../default-navigation";
 import { SetupGuide } from "./SetupGuide";
 
 export function RequireClientId({ children }: { children: JSX.Element }): JSX.Element {
@@ -10,12 +9,6 @@ export function RequireClientId({ children }: { children: JSX.Element }): JSX.El
   useEffect(() => {
     loadClientId().then((id) => setReady(Boolean(id)));
   }, []);
-
-  useEffect(() => {
-    if (ready) {
-      applyPreferenceSideEffects();
-    }
-  }, [ready]);
 
   if (ready === null) {
     return <List isLoading />;

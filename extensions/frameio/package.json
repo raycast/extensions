@@ -46,28 +46,12 @@
   ],
   "preferences": [
     {
-      "name": "clientId",
-      "title": "Adobe Developer Client ID",
-      "description": "Client ID from Adobe Developer Console (OAuth Single Page App)",
-      "type": "textfield",
-      "required": false
-    },
-    {
       "name": "defaultFolderId",
       "title": "Browse Default Folder ID",
-      "description": "Browse opens directly at this folder. Copy a Folder / Project / Workspace ID from the Browse command (⌘K → Copy ID) and paste it here.",
+      "description": "Browse opens directly at this location. Copy a Folder / Project / Workspace ID from the Browse command (⌘K → Copy ID) and paste it here.",
       "type": "textfield",
       "required": false,
       "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    },
-    {
-      "name": "signOut",
-      "title": "Account",
-      "label": "Sign out on next launch",
-      "description": "Disconnects from Frame.io. Uncheck after signing out.",
-      "type": "checkbox",
-      "default": false,
-      "required": false
     }
   ],
   "dependencies": {

@@ -13,10 +13,20 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { authorize, logout } from "./auth";
+import { loadClientId } from "./client-id";
+import { SetupGuide } from "./components/SetupGuide";
 import { debug } from "./debug";
-import { listAccounts, listWorkspaces, listProjects, Account, Workspace, Project } from "./api/frameio";
+import {
+  listAccounts,
+  listWorkspaces,
+  listProjects,
+  tryGetFolder,
+  tryFindProjectById,
+  Account,
+  Workspace,
+  Project,
+} from "./api/frameio";
 import { FolderView } from "./components/FolderView";
-import { RequireClientId } from "./components/RequireClientId";
 
 type ViewState =
   | { stage: "loading" }
@@ -24,14 +34,19 @@ type ViewState =
   | { stage: "projects"; account: Account; workspace: Workspace; projects: Project[]; workspaces: Workspace[] };
 
 export default function BrowseCommand(): JSX.Element {
-  return (
-    <RequireClientId>
-      <BrowseCommandMain />
-    </RequireClientId>
-  );
+  const [ready, setReady] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    loadClientId().then((id) => setReady(Boolean(id)));
+  }, []);
+
+  if (ready === null) return <List isLoading />;
+  if (!ready) return <SetupGuide onComplete={() => setReady(true)} />;
+
+  return <BrowseCommandMain onDisconnect={() => setReady(false)} />;
 }
 
-function BrowseCommandMain(): JSX.Element {
+function BrowseCommandMain({ onDisconnect }: { onDisconnect: () => void }): JSX.Element {
   const { push } = useNavigation();
   const [state, setState] = useState<ViewState>({ stage: "loading" });
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -64,27 +79,71 @@ function BrowseCommandMain(): JSX.Element {
     init();
   }, []);
 
-  // Open default folder from extension preferences (once, after workspaces are ready)
+  // Open default location from extension preferences (once, after workspaces are ready).
+  // Supports workspace IDs, project IDs, and folder IDs.
   useEffect(() => {
     if (defaultOpenedRef.current || isAuthLoading || state.stage !== "workspaces") return;
 
-    const prefs = getPreferenceValues<{ defaultFolderId?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     const defaultId = (prefs.defaultFolderId ?? "").trim();
     if (!defaultId) return;
 
     defaultOpenedRef.current = true;
     const { account, workspaces } = state;
 
-    push(
-      <FolderView
-        accountId={account.id}
-        folderId={defaultId}
-        title="Default Location"
-        isPushedView={true}
-        onBrowseWorkspaces={() => showWorkspaces(account, workspaces)}
-      />
+    async function resolveAndOpen() {
+      // 1. Workspace ID — check against already-loaded list (no extra API call)
+      const matchedWorkspace = workspaces.find((w) => w.id === defaultId);
+      if (matchedWorkspace) {
+        const projects = await listProjects(account.id, matchedWorkspace.id);
+        setState({ stage: "projects", account, workspace: matchedWorkspace, projects, workspaces });
+        debug.info(`Opened default workspace: ${matchedWorkspace.name}`);
+        return;
+      }
+
+      // 2. Folder ID
+      const folder = await tryGetFolder(account.id, defaultId);
+      if (folder) {
+        push(
+          <FolderView
+            accountId={account.id}
+            folderId={defaultId}
+            title={folder.name}
+            isPushedView={true}
+            onBrowseWorkspaces={() => showWorkspaces(account, workspaces)}
+          />
+        );
+        debug.info(`Opened default folder: ${folder.name}`);
+        return;
+      }
+
+      // 3. Project ID — scan workspaces' project lists
+      const result = await tryFindProjectById(account.id, defaultId, workspaces);
+      if (result) {
+        push(
+          <FolderView
+            accountId={account.id}
+            folderId={result.project.root_folder_id}
+            title={result.project.name}
+            isPushedView={true}
+            onBrowseWorkspaces={() => showWorkspaces(account, workspaces)}
+          />
+        );
+        debug.info(`Opened default project: ${result.project.name}`);
+        return;
+      }
+
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Default Location Not Found",
+        message:
+          "The ID in Extension Preferences → Browse Default Folder ID is not a valid workspace, project, or folder.",
+      });
+    }
+
+    resolveAndOpen().catch((err) =>
+      showToast({ style: Toast.Style.Failure, title: "Default Location Error", message: String(err) })
     );
-    debug.info(`Opened default location from preference: ${defaultId}`);
   }, [isAuthLoading, state, push]);
 
   if (isAuthLoading || state.stage === "loading") return <List isLoading />;
@@ -94,6 +153,7 @@ function BrowseCommandMain(): JSX.Element {
       <WorkspaceList
         account={state.account}
         workspaces={state.workspaces}
+        onDisconnect={onDisconnect}
         onSelect={(workspace) => {
           listProjects(state.account.id, workspace.id)
             .then((projects) =>
@@ -149,18 +209,19 @@ interface WorkspaceListProps {
   account: Account;
   workspaces: Workspace[];
   onSelect: (workspace: Workspace) => void;
+  onDisconnect: () => void;
 }
 
-function WorkspaceList({ account, workspaces, onSelect }: WorkspaceListProps): JSX.Element {
+function WorkspaceList({ account, workspaces, onSelect, onDisconnect }: WorkspaceListProps): JSX.Element {
   const handleDisconnect = async () => {
     const confirmed = await confirmAlert({
       title: "Disconnect From Frame.io?",
-      message: "You will need to sign in with Adobe again the next time you use the extension.",
+      message: "You will need to go through the setup again the next time you use the extension.",
       primaryAction: { title: "Disconnect", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
     await logout();
-    await showToast({ style: Toast.Style.Success, title: "Disconnected From Frame.io" });
+    onDisconnect();
   };
 
   return (
@@ -184,7 +245,7 @@ function WorkspaceList({ account, workspaces, onSelect }: WorkspaceListProps): J
                 <Action title="Open Workspace" icon={Icon.ArrowRight} onAction={() => onSelect(ws)} />
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
-                    title="Copy Workspace ID"
+                    title={`Copy "${ws.name}" ID`}
                     content={ws.id}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onCopy={() =>
@@ -246,19 +307,17 @@ function ProjectList({ account, workspace, projects, onSelect, onBrowseWorkspace
                 <Action title="Open Project" icon={Icon.ArrowRight} onAction={() => onSelect(project)} />
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
-                    title="Copy Project Folder ID"
-                    content={project.root_folder_id}
+                    title={`Copy "${project.name}" ID`}
+                    content={project.id}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onCopy={() =>
                       showToast({
                         style: Toast.Style.Success,
-                        title: "Project Folder ID Copied",
+                        title: "Project ID Copied",
                         message: "Paste it in Extension Preferences → Browse Default Folder ID",
                       })
                     }
                   />
-                  <Action.CopyToClipboard title="Copy Project ID" content={project.id} />
-                  <Action.CopyToClipboard title="Copy Workspace ID" content={workspace.id} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action
