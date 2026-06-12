@@ -9,6 +9,8 @@ import { ErrorView } from "./components/ErrorView";
 import {
   authorAccessory,
   checksAccessories,
+  commentsAccessories,
+  dateAccessories,
   pullRequestStateIcon,
 } from "./components/accessories";
 import { getSearchScope } from "./preferences";
@@ -47,7 +49,12 @@ function ReviewRequests() {
               repoPullRequests={group.pullRequests}
               subtitle={`#${pr.number}`}
               icon={pullRequestStateIcon(pr)}
-              accessories={[authorAccessory(pr), ...checksAccessories(pr)]}
+              accessories={[
+                authorAccessory(pr),
+                ...checksAccessories(pr),
+                ...commentsAccessories(pr),
+                ...dateAccessories(pr),
+              ]}
             />
           ))}
         </List.Section>

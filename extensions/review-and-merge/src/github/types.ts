@@ -32,7 +32,9 @@ export interface PullRequest {
   mergeStateStatus: MergeStateStatus;
   checksState: ChecksState;
   autoMergeEnabled: boolean;
+  autoMergeAllowed: boolean;
   viewerHasApproved: boolean;
+  comments: number;
 }
 
 export interface PullRequestNode {
@@ -45,10 +47,15 @@ export interface PullRequestNode {
   updatedAt: string;
   headRefName: string;
   author: { login: string; avatarUrl: string } | null;
-  repository: { nameWithOwner: string; viewerDefaultMergeMethod: MergeMethod };
+  repository: {
+    nameWithOwner: string;
+    viewerDefaultMergeMethod: MergeMethod;
+    autoMergeAllowed: boolean;
+  };
   reviewDecision: ReviewDecision;
   mergeStateStatus: MergeStateStatus;
   autoMergeRequest: { enabledAt: string } | null;
+  comments: { totalCount: number };
   commits: {
     nodes: Array<{
       commit: { statusCheckRollup: { state: ChecksState } | null };

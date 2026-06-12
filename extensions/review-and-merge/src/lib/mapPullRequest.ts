@@ -21,9 +21,11 @@ export function mapPullRequest(
     mergeStateStatus: node.mergeStateStatus,
     checksState: node.commits.nodes[0]?.commit.statusCheckRollup?.state ?? null,
     autoMergeEnabled: node.autoMergeRequest !== null,
+    autoMergeAllowed: node.repository.autoMergeAllowed,
     viewerHasApproved: node.latestReviews.nodes.some(
       (review) =>
         review.author?.login === viewerLogin && review.state === "APPROVED",
     ),
+    comments: node.comments.totalCount,
   };
 }

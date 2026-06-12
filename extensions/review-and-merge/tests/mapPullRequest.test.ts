@@ -13,10 +13,15 @@ function node(overrides: Partial<PullRequestNode> = {}): PullRequestNode {
     updatedAt: "2026-06-12T10:00:00Z",
     headRefName: "feat/something",
     author: { login: "someone", avatarUrl: "https://avatars/someone.png" },
-    repository: { nameWithOwner: "acme/api", viewerDefaultMergeMethod: "SQUASH" },
+    repository: {
+      nameWithOwner: "acme/api",
+      viewerDefaultMergeMethod: "SQUASH",
+      autoMergeAllowed: true,
+    },
     reviewDecision: "REVIEW_REQUIRED",
     mergeStateStatus: "BLOCKED",
     autoMergeRequest: null,
+    comments: { totalCount: 3 },
     commits: { nodes: [{ commit: { statusCheckRollup: { state: "PENDING" } } }] },
     latestReviews: { nodes: [] },
     ...overrides,
@@ -43,7 +48,9 @@ describe("mapPullRequest", () => {
       mergeStateStatus: "BLOCKED",
       checksState: "PENDING",
       autoMergeEnabled: false,
+      autoMergeAllowed: true,
       viewerHasApproved: false,
+      comments: 3,
     });
   });
 

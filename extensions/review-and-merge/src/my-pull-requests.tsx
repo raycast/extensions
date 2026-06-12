@@ -9,7 +9,10 @@ import { ErrorView } from "./components/ErrorView";
 import {
   autoMergeAccessories,
   checksAccessories,
+  commentsAccessories,
+  dateAccessories,
   pullRequestStateIcon,
+  reviewDecisionAccessories,
 } from "./components/accessories";
 import { getSearchScope } from "./preferences";
 
@@ -42,8 +45,11 @@ function MyPullRequests() {
               subtitle={`#${pr.number}`}
               icon={pullRequestStateIcon(pr)}
               accessories={[
-                ...autoMergeAccessories(pr),
                 ...checksAccessories(pr),
+                ...autoMergeAccessories(pr),
+                ...reviewDecisionAccessories(pr),
+                ...commentsAccessories(pr),
+                ...dateAccessories(pr),
               ]}
             />
           ))}

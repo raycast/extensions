@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { PullRequest } from "../github/types";
-import { pullRequestAccessories } from "./accessories";
+import { pullRequestAccessories, pullRequestStateIcon } from "./accessories";
 import { ApproveAction } from "./ApproveAction";
 import { ApproveAllAction } from "./ApproveAllAction";
 import { MergeAction } from "./MergeAction";
@@ -15,7 +15,7 @@ interface Props {
   primaryMerge?: boolean;
   repoPullRequests?: PullRequest[];
   subtitle?: string;
-  icon?: Image.ImageLike;
+  icon?: List.Item.Props["icon"];
   accessories?: List.Item.Accessory[];
 }
 
@@ -27,7 +27,7 @@ export function PullRequestListItem({
   primaryMerge = false,
   repoPullRequests,
   subtitle = `${pr.repo}#${pr.number}`,
-  icon = pr.isDraft ? { source: Icon.CircleEllipsis } : { source: Icon.Circle },
+  icon = pullRequestStateIcon(pr),
   accessories = pullRequestAccessories(pr),
 }: Props) {
   const approve = (
@@ -39,7 +39,7 @@ export function PullRequestListItem({
     <List.Item
       key={pr.id}
       title={pr.title}
-      subtitle={subtitle}
+      subtitle={{ value: subtitle, tooltip: `Repository: ${pr.repo}` }}
       icon={icon}
       accessories={accessories}
       actions={

@@ -1,7 +1,8 @@
 import { Action, Icon } from "@raycast/api";
-import { ENABLE_AUTO_MERGE, MERGE_PULL_REQUEST } from "../github/queries";
+import { MERGE_PULL_REQUEST } from "../github/queries";
 import { PullRequest } from "../github/types";
 import { runMutation } from "../github/runMutation";
+import { enableAutoMerge } from "../github/enableAutoMerge";
 import { primaryMergeAction } from "../lib/primaryMergeAction";
 
 interface Props {
@@ -36,15 +37,7 @@ export function SmartMergeAction({ pr, onRefresh }: Props) {
       <Action
         title="Enable Auto-Merge"
         icon={Icon.Bolt}
-        onAction={() =>
-          runMutation(
-            "Enabling auto-merge…",
-            `Auto-merge enabled on ${label}`,
-            ENABLE_AUTO_MERGE,
-            { prId: pr.id, method: pr.defaultMergeMethod },
-            onRefresh,
-          )
-        }
+        onAction={() => enableAutoMerge(pr, onRefresh)}
       />
     );
   }

@@ -6,10 +6,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { ENABLE_AUTO_MERGE, MERGE_PULL_REQUEST } from "../github/queries";
+import { MERGE_PULL_REQUEST } from "../github/queries";
 import { PullRequest } from "../github/types";
 import { mergeReadiness } from "../lib/mergeReadiness";
 import { runMutation } from "../github/runMutation";
+import { enableAutoMerge } from "../github/enableAutoMerge";
 import { DisableAutoMergeAction } from "./DisableAutoMergeAction";
 
 interface Props {
@@ -51,13 +52,7 @@ export function MergeAction({ pr, onRefresh }: Props) {
         primaryAction: { title: "Enable Auto-Merge" },
       });
       if (enable) {
-        await runMutation(
-          "Enabling auto-merge…",
-          `Auto-merge enabled on ${label}`,
-          ENABLE_AUTO_MERGE,
-          { prId: pr.id, method: pr.defaultMergeMethod },
-          onRefresh,
-        );
+        await enableAutoMerge(pr, onRefresh);
       }
       return;
     }
