@@ -23,7 +23,7 @@ const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf
 const extName = pkg.name; // e.g. "vibelet-search"
 
 if (!fs.existsSync(distDir)) {
-  console.error(`dist/ not found — run "npm run build" first.`);
+  console.error(`dist/ not found — run "ray build -e dist -o dist" first.`);
   process.exit(1);
 }
 
@@ -58,7 +58,7 @@ function copyRecursive(src, dest) {
     }
   } else {
     fs.copyFileSync(src, dest);
-    // Preserve exec bit (matters for assets/rg).
+    // Preserve exec bits for any future helper binaries.
     if (stat.mode & 0o111) fs.chmodSync(dest, 0o755);
   }
 }

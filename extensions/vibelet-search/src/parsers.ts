@@ -3,6 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { ensureRipgrep } from "./ripgrep";
 import {
   claudeAdapter,
   codexAdapter,
@@ -488,10 +489,10 @@ export function loadAllSessionMetas(): SessionMeta[] {
  * Load all messages for a single session. Reads the entire JSONL file.
  * Called lazily when the user opens the detail view.
  */
-export function loadSessionMessages(meta: SessionMeta): SessionMessage[] {
+export async function loadSessionMessages(meta: SessionMeta): Promise<SessionMessage[]> {
   let content: string;
   try {
-    content = fs.readFileSync(meta.filePath, "utf-8");
+    content = await fs.promises.readFile(meta.filePath, "utf-8");
   } catch (e) {
     warn(`failed to read session ${meta.filePath}:`, e);
     return [];
@@ -534,58 +535,6 @@ function buildSnippet(text: string, lowerQuery: string, queryLength: number): st
 }
 
 /**
- * `null` = tried and failed; `undefined` = not yet tried.
- */
-let cachedRipgrepPath: string | undefined | null;
-
-/**
- * Locate a usable `rg` binary.
- *
- * Strategy: `prepare-assets` copies the postinstalled binary into `assets/rg`,
- * and `ray build` ships that next to the bundled JS — so the primary candidate
- * is `__dirname/assets/rg`. We then fall back to local `node_modules` (dev mode)
- * and a small fixed list of system locations.
- *
- * No subprocess probing per candidate: `fs.accessSync(X_OK)` keeps cold-start
- * under ~5ms even on the worst-case fall-through. We don't scan `$PATH` —
- * a typical `$PATH` has 20+ directories and the previous design did a child
- * spawn per miss (1s timeout each), which froze the worker for tens of seconds
- * when ripgrep was absent.
- */
-function resolveRipgrepPath(): string | undefined {
-  if (cachedRipgrepPath !== undefined) return cachedRipgrepPath ?? undefined;
-
-  const binaryName = process.platform === "win32" ? "rg.exe" : "rg";
-  const extensionDir = typeof __dirname === "string" ? __dirname : process.cwd();
-
-  const candidates = [
-    // Bundled with the extension (preferred — written here by scripts/copy-ripgrep.cjs
-    // and packaged into the .ray bundle by `ray build`).
-    path.join(extensionDir, "assets", binaryName),
-    path.join(process.cwd(), "assets", binaryName),
-    // Source location during local dev.
-    path.join(process.cwd(), "node_modules", "@vscode", "ripgrep", "bin", binaryName),
-    // System fallbacks: Apple-Silicon brew → Intel brew → /usr/local → /usr/bin.
-    "/opt/homebrew/bin/rg",
-    "/usr/local/bin/rg",
-    "/usr/bin/rg",
-  ];
-
-  for (const candidate of candidates) {
-    try {
-      fs.accessSync(candidate, fs.constants.X_OK);
-      cachedRipgrepPath = candidate;
-      return candidate;
-    } catch {
-      // try next
-    }
-  }
-
-  cachedRipgrepPath = null;
-  return undefined;
-}
-
-/**
  * Search content across all session files using ripgrep.
  * Returns a map of filePath -> snippet. Limited to `limit` matches.
  *
@@ -595,21 +544,19 @@ function resolveRipgrepPath(): string | undefined {
  */
 const execFileAsync = promisify(execFile);
 
-export async function searchSessionContent(query: string, limit: number): Promise<Map<string, string>> {
+// Returns tuples (not a Map) because the result flows through useCachedPromise's
+// JSON-serializing cache; a Map rehydrates as {} and breaks iteration.
+export async function searchSessionContent(query: string, limit: number): Promise<Array<[string, string]>> {
   const results = new Map<string, string>();
-  if (!query.trim() || query.length < 2) return results;
+  if (!query.trim() || query.length < 2) return [];
 
-  const rgPath = resolveRipgrepPath();
-  if (!rgPath) {
-    warn("ripgrep binary missing");
-    return results;
-  }
+  const rgPath = await ensureRipgrep();
 
   const homeDir = os.homedir();
   const searchDirs = [path.join(homeDir, ".claude", "projects"), path.join(homeDir, ".codex", "sessions")].filter((d) =>
     fs.existsSync(d),
   );
-  if (searchDirs.length === 0) return results;
+  if (searchDirs.length === 0) return [];
 
   let output: string;
   try {
@@ -641,10 +588,10 @@ export async function searchSessionContent(query: string, limit: number): Promis
     // ripgrep exits with code 1 when there are no matches — that's not an error.
     // Anything else (timeouts, OOM, ENOENT, code >= 2) IS an error and should be surfaced.
     const e = err as { code?: number; stderr?: string | Buffer; message?: string };
-    if (e.code === 1) return results;
+    if (e.code === 1) return [];
     const stderrText = typeof e.stderr === "string" ? e.stderr : e.stderr?.toString();
     warn(`ripgrep search failed (code=${e.code}):`, stderrText || e.message);
-    return results;
+    throw new Error(stderrText || e.message || "ripgrep search failed");
   }
 
   const lowerQuery = query.toLowerCase();
@@ -680,5 +627,5 @@ export async function searchSessionContent(query: string, limit: number): Promis
     results.set(filePath, snippet);
   }
 
-  return results;
+  return Array.from(results);
 }

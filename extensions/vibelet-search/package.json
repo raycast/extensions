@@ -75,23 +75,20 @@
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
     "@vitest/coverage-v8": "^4.1.4",
-    "@vscode/ripgrep": "^1.17.1",
     "eslint": "^8.57.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "vitest": "^4.1.4"
   },
   "scripts": {
-    "prepare-assets": "node scripts/copy-ripgrep.cjs",
-    "postinstall": "node scripts/copy-ripgrep.cjs",
-    "build": "npm run prepare-assets && ray build --skip-types -e dist -o dist",
+    "build": "ray build -e dist",
     "sync": "node scripts/sync-to-raycast.cjs",
-    "build:sync": "npm run build && npm run sync",
-    "dev": "npm run prepare-assets && ray develop",
+    "build:sync": "ray build -e dist -o dist && npm run sync",
+    "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "publish": "npm run prepare-assets && npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
