@@ -32,7 +32,10 @@ export default async function Command() {
   }
 
   const apps = await getApplications();
-  const desktopApp = apps.find((app) => app.bundleId === "com.figma.Desktop");
+  // bundleId is macOS-only; fall back to matching by name on Windows
+  const desktopApp = apps.find((app) =>
+    process.platform === "win32" ? app.name === "Figma" : app.bundleId === "com.figma.Desktop",
+  );
 
   if (desktopApp) {
     // The desktop app deep-links https://figma.com URLs into the right file
