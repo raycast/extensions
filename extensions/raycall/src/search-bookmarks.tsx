@@ -14,6 +14,13 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { API_URL } from "./config";
+import {
+  changeApiToken,
+  copyUrl,
+  manageSubscription,
+  refresh,
+  remove,
+} from "./shortcuts";
 import { Welcome, isConfigured } from "./welcome";
 
 function useDebounced<T>(value: T, delayMs: number): T {
@@ -143,14 +150,20 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
       await showToast({ style: Toast.Style.Success, title: "Deleted" });
       revalidate();
     } else {
-      await showToast({ style: Toast.Style.Failure, title: "Delete failed", message: `${res.status}` });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Delete failed",
+        message: `${res.status}`,
+      });
     }
   }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={trimmed ? "Searching…" : "Search your bookmarks in natural language"}
+      searchBarPlaceholder={
+        trimmed ? "Searching…" : "Search your bookmarks in natural language"
+      }
       onSearchTextChange={setQuery}
       throttle
     >
@@ -199,7 +212,11 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title={trimmed ? "No matches" : "No bookmarks yet"}
-          description={trimmed ? "Try a different query." : "Use the Save URL command to add one."}
+          description={
+            trimmed
+              ? "Try a different query."
+              : "Use the Save URL command to add one."
+          }
         />
       ) : (
         <>
@@ -211,15 +228,20 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
                   title={p.title ?? p.url}
                   subtitle={p.title ? p.url : undefined}
                   icon={p.faviconUrl ?? Icon.Hourglass}
-                  accessories={[{ tag: { value: "Indexing", color: Color.Purple } }]}
+                  accessories={[
+                    { tag: { value: "Indexing", color: Color.Purple } },
+                  ]}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser url={p.url} />
-                      <Action.CopyToClipboard title="Copy URL" content={p.url} />
+                      <Action.CopyToClipboard
+                        title="Copy URL"
+                        content={p.url}
+                      />
                       <Action
                         title="Refresh"
                         icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={refresh}
                         onAction={revalidate}
                       />
                     </ActionPanel>
@@ -236,7 +258,14 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
                 icon={item.faviconUrl ?? Icon.Bookmark}
                 accessories={
                   item.score != null
-                    ? [{ tag: { value: item.score.toFixed(2), color: scoreColor(item.score) } }]
+                    ? [
+                        {
+                          tag: {
+                            value: item.score.toFixed(2),
+                            color: scoreColor(item.score),
+                          },
+                        },
+                      ]
                     : []
                 }
                 actions={
@@ -245,31 +274,31 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
                     <Action.CopyToClipboard
                       title="Copy URL"
                       content={item.url}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      shortcut={copyUrl}
                     />
                     <Action
                       title="Delete Bookmark"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={remove}
                       onAction={() => deleteBookmark(item.id, item.title)}
                     />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={refresh}
                       onAction={revalidate}
                     />
                     <Action
                       title="Change API Token"
                       icon={Icon.Key}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={changeApiToken}
                       onAction={openExtensionPreferences}
                     />
                     <Action.OpenInBrowser
                       title="Manage Subscription"
                       icon={Icon.CreditCard}
-                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      shortcut={manageSubscription}
                       url={`${API_URL}/dashboard/billing`}
                     />
                   </ActionPanel>

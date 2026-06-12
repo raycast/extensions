@@ -10,15 +10,19 @@ import {
 } from "@raycast/api";
 import { useRef, useState } from "react";
 import { API_URL } from "./config";
+import { changeApiToken, manageSubscription } from "./shortcuts";
 import { Welcome, isConfigured } from "./welcome";
 
 function normalizeUrl(input: string): string | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
   try {
-    const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    const withScheme = /^https?:\/\//i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`;
     const parsed = new URL(withScheme);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+      return null;
     return parsed.toString();
   } catch {
     return null;
@@ -71,12 +75,15 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
       if (res.status === 402) {
         toast.style = Toast.Style.Failure;
         toast.title = "Subscription required";
-        toast.message = "Run Manage Subscription to start a trial or update billing.";
+        toast.message =
+          "Run Manage Subscription to start a trial or update billing.";
         return;
       }
       if (!res.ok) {
         const body = await res.text().catch(() => "");
-        throw new Error(`${res.status} ${res.statusText}${body ? ` - ${body.slice(0, 200)}` : ""}`);
+        throw new Error(
+          `${res.status} ${res.statusText}${body ? ` - ${body.slice(0, 200)}` : ""}`,
+        );
       }
       toast.style = Toast.Style.Success;
       toast.title = "Saved - indexing in background";
@@ -86,8 +93,13 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Save failed";
-      const cause = (err as { cause?: { code?: string; message?: string } }).cause;
-      const causeBit = cause?.code ? ` [${cause.code}]` : cause?.message ? ` - ${cause.message}` : "";
+      const cause = (err as { cause?: { code?: string; message?: string } })
+        .cause;
+      const causeBit = cause?.code
+        ? ` [${cause.code}]`
+        : cause?.message
+          ? ` - ${cause.message}`
+          : "";
       toast.message = `${err instanceof Error ? err.message : String(err)}${causeBit} (${endpoint})`;
     } finally {
       setSubmitting(false);
@@ -99,17 +111,21 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
       isLoading={submitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save URL" icon={Icon.Bookmark} onSubmit={submit} />
+          <Action.SubmitForm
+            title="Save URL"
+            icon={Icon.Bookmark}
+            onSubmit={submit}
+          />
           <Action
             title="Change API Token"
             icon={Icon.Key}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={changeApiToken}
             onAction={openExtensionPreferences}
           />
           <Action.OpenInBrowser
             title="Manage Subscription"
             icon={Icon.CreditCard}
-            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            shortcut={manageSubscription}
             url={`${API_URL}/dashboard/billing`}
           />
         </ActionPanel>

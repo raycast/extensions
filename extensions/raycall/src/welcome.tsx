@@ -6,6 +6,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { API_URL } from "./config";
+import { changeApiToken, generateToken, manageSubscription } from "./shortcuts";
 
 interface Props {
   reason?: "missing-token" | "manual";
@@ -49,24 +50,28 @@ That's it. **Save URL** and **Search Bookmarks** will start working immediately.
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl} icon={Icon.Globe} />
+          <Action.OpenInBrowser
+            title="Open Dashboard"
+            url={dashboardUrl}
+            icon={Icon.Globe}
+          />
           <Action
             title="Change API Token"
             icon={Icon.Key}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={changeApiToken}
             onAction={openExtensionPreferences}
           />
           <Action.OpenInBrowser
             title="Generate Token in Dashboard"
             url={tokensUrl}
             icon={Icon.PlusCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            shortcut={generateToken}
           />
           <Action.OpenInBrowser
             title="Manage Subscription"
             url={billingUrl}
             icon={Icon.CreditCard}
-            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            shortcut={manageSubscription}
           />
         </ActionPanel>
       }

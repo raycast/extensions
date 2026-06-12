@@ -7,7 +7,8 @@
   "author": "rithmic",
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -37,14 +38,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.17",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/react": "^19.2.14",
-    "react": "^19.2.6",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
