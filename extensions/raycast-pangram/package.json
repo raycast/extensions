@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-pangram",
+  "title": "Pangram AI Detection",
+  "description": "Detect AI-generated content in selected or clipboard text using the Pangram API",
+  "icon": "extension-icon.png",
+  "author": "ryansb",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "detect",
+      "title": "Detect AI Content",
+      "description": "Analyze selected or clipboard text for AI-generated content",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "AI Detection History",
+      "description": "Browse past AI detection results (stored for 7 days)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Pangram API Key",
+      "description": "Your Pangram API key from https://pangram.com",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@types/remove-markdown": "^0.3.4",
+    "remove-markdown": "^0.6.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "jiti": "^2.7.0",
+    "prettier": "^3.8.4",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.61.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
