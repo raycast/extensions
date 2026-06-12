@@ -1,5 +1,9 @@
 # Kobbe Changelog
 
+## [Unreleased]
+
+- Address Raycast review feedback: remove unused assets, use generated preferences type, fix locale formatting, and unify metadata screenshots.
+
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Add commands to search Kobbe sites, view overview metrics, inspect top pages, and review revenue.

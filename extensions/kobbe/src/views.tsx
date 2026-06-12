@@ -89,7 +89,7 @@ export function SiteListItem(props: {
     <List.Item
       title={props.site.name}
       subtitle={siteDomain(props.site)}
-      icon="assets/kobbe.svg"
+      icon="assets/kobbe-icon.png"
       accessories={[
         ...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : []),
       ]}
@@ -139,20 +139,22 @@ export function SitesPicker(props: {
           description="Create a site in Kobbe first, then come back to Raycast."
         />
       ) : null}
-      {sites.data?.map((site) => (
-        <List.Item
-          key={site.id}
-          title={site.name}
-          subtitle={siteDomain(site)}
-          icon="assets/kobbe.svg"
-          accessories={[
-            ...(siteCreatedDate(site)
-              ? [{ date: siteCreatedDate(site) as Date, tooltip: "Created" }]
-              : []),
-          ]}
-          actions={props.renderActions(site, sites.revalidate)}
-        />
-      ))}
+      {sites.data?.map((site) => {
+        const createdAt = siteCreatedDate(site);
+
+        return (
+          <List.Item
+            key={site.id}
+            title={site.name}
+            subtitle={siteDomain(site)}
+            icon="assets/kobbe-icon.png"
+            accessories={[
+              ...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : []),
+            ]}
+            actions={props.renderActions(site, sites.revalidate)}
+          />
+        );
+      })}
     </List>
   );
 }

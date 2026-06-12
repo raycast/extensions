@@ -210,7 +210,7 @@ export function formatRevenueAmount(
     return "Multiple currencies";
   }
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
     }).format(amount / 100);
@@ -220,5 +220,5 @@ export function formatRevenueAmount(
 }
 
 export function formatCompactNumber(value: number): string {
-  return new Intl.NumberFormat(undefined, { notation: "compact" }).format(value);
+  return new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
 }
