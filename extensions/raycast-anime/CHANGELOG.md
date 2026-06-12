@@ -1,6 +1,6 @@
 # AniMe Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-12
 
 - Add AniList anime search.
 - Add current season and today's episode listings.
