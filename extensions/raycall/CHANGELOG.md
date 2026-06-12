@@ -1,6 +1,6 @@
 # Raycall Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-12
 
 - Save any URL from Raycast with one keystroke (auto-detects active browser tab or clipboard)
 - Semantic search across saved bookmarks using vector embeddings + LLM rerank
