@@ -1,5 +1,9 @@
 # Raycast Arcade Changelog
 
+## [Fix Dino Cactus Spawning] - {PR_MERGE_DATE}
+
+- Fixed a Chrome Dinosaur crash that could happen when spawning a cactus after old cactus entries were cleaned up.
+
 ## [Snake and 2048 Update] - 2023-08-13
 
 ✨ It's update time! Get ready for new features, new games, fixes, and more...
