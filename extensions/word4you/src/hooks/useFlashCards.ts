@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MdDefinition } from "../types";
 import { getRandomCards } from "../utils/flashCardUtils";
 
 interface UseFlashCardsReturn {
-  currentCard: MdDefinition;
+  currentCard: MdDefinition | undefined;
   currentIndex: number;
   total: number;
   progress: string;
@@ -14,6 +14,7 @@ interface UseFlashCardsReturn {
   handlePrev: () => void;
   handleReshuffle: () => void;
   removeCurrentCard: () => void;
+  isDeckEmpty: boolean;
 }
 
 export function useFlashCards(definitions: MdDefinition[], isLoading: boolean): UseFlashCardsReturn {
@@ -34,13 +35,28 @@ export function useFlashCards(definitions: MdDefinition[], isLoading: boolean): 
 
   const currentCard = cards[currentIndex];
   const total = cards.length;
+  const isDeckEmpty = hasInitialized && total === 0;
   const progress = `${currentIndex + 1} / ${total}`;
 
+  const shimmerTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const shimmer = useCallback((fn: () => void) => {
+    if (shimmerTimeoutRef.current) {
+      clearTimeout(shimmerTimeoutRef.current);
+    }
     setIsShimmering(true);
-    setTimeout(() => {
+    shimmerTimeoutRef.current = setTimeout(() => {
       fn();
       setIsShimmering(false);
+      shimmerTimeoutRef.current = undefined;
     }, 250);
   }, []);
 
@@ -77,7 +93,9 @@ export function useFlashCards(definitions: MdDefinition[], isLoading: boolean): 
   const removeCurrentCard = useCallback(() => {
     setCards((prev) => {
       const updated = prev.filter((_, idx) => idx !== currentIndex);
-      if (currentIndex >= updated.length && currentIndex > 0) {
+      if (updated.length === 0) {
+        setCurrentIndex(0);
+      } else if (currentIndex >= updated.length) {
         setCurrentIndex(updated.length - 1);
       }
       setIsFlipped(false);
@@ -97,5 +115,6 @@ export function useFlashCards(definitions: MdDefinition[], isLoading: boolean): 
     handlePrev,
     handleReshuffle,
     removeCurrentCard,
+    isDeckEmpty,
   };
 }

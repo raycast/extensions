@@ -22,6 +22,7 @@ function FlashCardPage() {
     handlePrev,
     handleReshuffle,
     removeCurrentCard,
+    isDeckEmpty,
   } = useFlashCards(savedMdDefinitions, isLoadingSaved);
 
   const { handleDelete } = useMdDefinitionDelete(async () => {
@@ -35,6 +36,21 @@ function FlashCardPage() {
 
   if (savedMdDefinitions.length === 0) {
     return <Detail markdown="# No Saved Words Found" />;
+  }
+
+  if (isDeckEmpty) {
+    return (
+      <Detail
+        markdown="# Deck Empty\n\nAll cards have been removed from this session."
+        actions={
+          <ActionPanel>
+            {savedMdDefinitions.length > 0 && (
+              <Action title="Reshuffle Deck" icon={Icon.Shuffle} onAction={handleReshuffle} />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (!currentCard) {
