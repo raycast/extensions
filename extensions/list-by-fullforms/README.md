@@ -19,6 +19,7 @@ Results group by parent list under section headers; cross-workspace results suff
 The detail pane is on by default: split layout shows a markdown preview of the selected entry on the right side, with `## term ⭐` (star when starred) + short definition + horizontal-rule + long-form description + horizontal-rule + `### Your note` (each section only when present). The metadata panel beneath shows a clickable Open link to the web URL, Type, List (with colour-tinted icon), and Workspace.
 
 Shortcuts:
+
 - `Enter` opens the entry's list page in your browser with hash routing to the entry detail modal.
 - `Cmd+Shift+O` opens the parent list page.
 - `Cmd+I` toggles between detail view and compact-only layout (useful for scanning long result sets).
