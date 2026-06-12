@@ -8,11 +8,13 @@ export type Infobox = components["schemas"]["WikiV0"]
 interface BangumiErrorResponse {
   title: string
   description: string
+  request_id?: string
   details?:
     | string
     | {
         error?: string
         path?: string
+        method?: string
       }
 }
 
@@ -20,7 +22,27 @@ class BangumiApiError extends Error {
   readonly response: BangumiErrorResponse
 
   constructor(response: BangumiErrorResponse) {
-    super(response.description)
+    let message = response.description || response.title || "Unknown API Error"
+
+    if (response.details) {
+      if (typeof response.details === "string") {
+        message += ` - ${response.details}`
+      } else {
+        const parts = []
+        if (response.details.error) parts.push(response.details.error)
+        if (response.details.path) {
+          const method = response.details.method ? `${response.details.method} ` : ""
+          parts.push(`[${method}${response.details.path}]`)
+        }
+
+        if (parts.length > 0) {
+          message += ` - ${parts.join(" ")}`
+        } else {
+          message += ` - ${JSON.stringify(response.details)}`
+        }
+      }
+    }
+    super(message)
 
     this.name = "BangumiApiError"
     this.response = response
