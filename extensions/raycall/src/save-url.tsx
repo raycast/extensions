@@ -1,17 +1,44 @@
 import {
   Action,
   ActionPanel,
+  BrowserExtension,
+  Clipboard,
   Form,
   Icon,
   Toast,
+  environment,
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { API_URL } from "./config";
 import { changeApiToken, manageSubscription } from "./shortcuts";
 import { Welcome, isConfigured } from "./welcome";
+
+async function getInitialUrl(): Promise<string> {
+  if (environment.canAccess(BrowserExtension)) {
+    try {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active);
+      const normalized = activeTab?.url ? normalizeUrl(activeTab.url) : null;
+      if (normalized) return normalized;
+    } catch {
+      // Fall through to clipboard.
+    }
+  }
+
+  try {
+    const clipboard = await Clipboard.readText();
+    const normalized = normalizeUrl(clipboard ?? "");
+    if (normalized) return normalized;
+  } catch {
+    // No clipboard URL available.
+  }
+
+  return "";
+}
 
 function normalizeUrl(input: string): string | null {
   const trimmed = input.trim();
@@ -36,7 +63,11 @@ export default function SaveUrl() {
 }
 
 function SaveUrlForm({ apiToken }: { apiToken: string }) {
-  const [url, setUrl] = useState("");
+  const { data: initialUrl, isLoading: isLoadingInitialUrl } = usePromise(
+    getInitialUrl,
+    [],
+  );
+  const [url, setUrl] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
   const [submitting, setSubmitting] = useState(false);
   const urlFieldRef = useRef<Form.TextField>(null);
@@ -88,7 +119,7 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
       toast.style = Toast.Style.Success;
       toast.title = "Saved - indexing in background";
       toast.message = normalized;
-      setUrl("");
+      setUrl(undefined);
       urlFieldRef.current?.focus();
     } catch (err) {
       toast.style = Toast.Style.Failure;
@@ -108,7 +139,7 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
 
   return (
     <Form
-      isLoading={submitting}
+      isLoading={submitting || isLoadingInitialUrl}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -136,7 +167,7 @@ function SaveUrlForm({ apiToken }: { apiToken: string }) {
         id="url"
         title="URL"
         placeholder="https://example.com"
-        value={url}
+        value={url ?? initialUrl ?? ""}
         onChange={(value) => {
           setUrl(value);
           if (urlError) setUrlError(undefined);
