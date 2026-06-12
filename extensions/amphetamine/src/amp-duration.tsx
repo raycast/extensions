@@ -171,7 +171,7 @@ export default function SessionWithDuration() {
           error={targetError}
           onChange={(value) => {
             setTarget(value);
-            if (value && getSessionTime(value)) setTargetError(undefined);
+            validateTarget(value);
           }}
           onBlur={(event) => validateTarget(event.target.value ?? null)}
         />
