@@ -1,12 +1,11 @@
 import { Grid, Icon, ActionPanel, Action } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
-import { bangumi } from "@/api/bangumi"
-import { bangumiAuth } from "@/api/oauth"
-import SubjectDetail from "@/components/SubjectDetail"
+import { SubjectDetail } from "@/components/details"
 import { OpenInBgmBrowser } from "@/components/actions"
 import { getImageUrl } from "@/shared/utils"
 
 import { useRef, useState } from "react"
+import { bangumi, bangumiAuth } from "@/api"
 
 const Calendar = () => {
   const [selectedDay, setSelectedDay] = useState<string>("all")

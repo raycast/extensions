@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
-import { bangumi } from "@/api/bangumi"
 import { Infobox } from "@/types"
-import { bangumiAuth } from "@/api/oauth"
-import { OpenInBgmBrowser, AITranslateAction } from "./actions"
-import RelationsList from "./RelationsList"
+import { OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
+import { RelationsList } from "@/components/lists"
 import { formatSummary, getImageUrl } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
+import { bangumi, bangumiAuth } from "@/api"
 
 interface CharacterDetailProps {
   characterId: number

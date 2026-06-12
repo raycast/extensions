@@ -1,14 +1,12 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
-import { bangumi } from "@/api/bangumi"
-import { bangumiAuth } from "@/api/oauth"
-import { CollectionStatusActions, OpenInBgmBrowser, AITranslateAction } from "./actions"
-import SubjectCharactersList from "./SubjectCharactersList"
-import RelationsList from "./RelationsList"
+import { CollectionStatusActions, OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
+import { SubjectCharactersList, RelationsList } from "@/components/lists"
 import { SubjectCollectionIcon } from "@/shared/const"
 import { formatSummary, getImageUrl, getCollectionTag } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
+import { bangumi, bangumiAuth } from "@/api"
 
 interface SubjectDetailProps {
   subjectId: number

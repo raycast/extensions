@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
 import { components } from "@/types/generated"
-import CharacterDetail from "./CharacterDetail"
+import { CharacterDetail } from "@/components/details"
 
 type RelatedCharacter = components["schemas"]["RelatedCharacter"]
 
@@ -23,7 +23,7 @@ const getRelationColor = (relation: string): Color => {
 
 export default function SubjectCharactersList({ characters }: SubjectCharactersListProps) {
   return (
-    <List navigationTitle="Characters & Voice Actors" searchBarPlaceholder="Filter characters...">
+    <List searchBarPlaceholder="Filter characters...">
       {characters.map((char) => {
         const cvs = char.actors?.length ? char.actors.map((a) => a.name).join(", ") : "N/A"
         return (

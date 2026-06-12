@@ -1,7 +1,6 @@
-import { bangumi } from "@/api/bangumi"
 import { withAccessToken } from "@raycast/utils"
-import { bangumiAuth } from "@/api/oauth"
 import { formatCharacterToMarkdown } from "./utils"
+import { bangumi, bangumiAuth } from "@/api"
 
 type Input = {
   /**

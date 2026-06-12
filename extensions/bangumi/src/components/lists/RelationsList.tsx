@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
-import SubjectDetail from "./SubjectDetail"
+import { SubjectDetail } from "@/components/details"
 import { SubjectTypeName, SubjectType } from "@/shared/const"
 
 export interface RelationItem {

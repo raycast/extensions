@@ -1,8 +1,7 @@
 import { Tool } from "@raycast/api"
-import { bangumi } from "@/api/bangumi"
 import { getCollectionTag } from "@/shared/utils"
 import { withAccessToken } from "@raycast/utils"
-import { bangumiAuth } from "@/api/oauth"
+import { bangumi, bangumiAuth } from "@/api"
 
 type Input = {
   /**

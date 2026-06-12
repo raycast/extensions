@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef, useState } from "react"
-import { bangumi } from "@/api/bangumi"
 import { SubjectType, SubjectTypeName } from "@/shared/const"
-import { bangumiAuth } from "@/api/oauth"
-import SubjectDetail from "@/components/SubjectDetail"
+import { SubjectDetail } from "@/components/details"
 import { OpenInBgmBrowser } from "@/components/actions"
+import { bangumi, bangumiAuth } from "@/api"
 
 // Max to 20
 const PAGE_SIZE = 20

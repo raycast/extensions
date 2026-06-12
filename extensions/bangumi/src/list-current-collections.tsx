@@ -1,8 +1,8 @@
 import { withAccessToken } from "@raycast/utils"
-import { bangumiAuth } from "@/api/oauth"
-import MyCollection from "@/components/MyCollection"
+import { CollectionSubjectList } from "@/components/lists"
 import { SubjectCollectionType } from "@/shared/const"
+import { bangumiAuth } from "@/api"
 
-const Command = () => <MyCollection filterType={SubjectCollectionType.Doing} />
+const Command = () => <CollectionSubjectList filterType={SubjectCollectionType.Doing} />
 
 export default withAccessToken(bangumiAuth)(Command)

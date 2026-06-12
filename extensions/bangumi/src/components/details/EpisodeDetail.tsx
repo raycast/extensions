@@ -1,6 +1,6 @@
 import { ActionPanel, Detail } from "@raycast/api"
 import type { components } from "@/types/generated"
-import { OpenInBgmBrowser, AITranslateAction } from "./actions"
+import { OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
 import { useAITranslate } from "@/shared/useAITranslate"
 import { formatSummary } from "@/shared/utils"
 

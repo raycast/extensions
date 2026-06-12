@@ -1,12 +1,12 @@
 import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/api"
 import { usePromise } from "@raycast/utils"
 import { useRef, useState } from "react"
-import { bangumi } from "@/api/bangumi"
 import { SubjectCollectionType, SubjectType, SubjectTypeName } from "@/shared/const"
 import { getCollectionTag } from "@/shared/utils"
-import ProgressViewer from "./ProgressViewer"
-import SubjectDetail from "./SubjectDetail"
-import { CollectionStatusActions, OpenInBgmBrowser } from "./actions"
+import { ProgressGrid } from "@/components/lists"
+import { SubjectDetail } from "@/components/details"
+import { CollectionStatusActions, OpenInBgmBrowser } from "@/components/actions"
+import { bangumi } from "@/api"
 
 const preferences = getPreferenceValues<Preferences>()
 
@@ -22,11 +22,11 @@ const enabledTypes = new Set<SubjectType>(
 
 const PAGE_SIZE = 20
 
-interface MyCollectionProps {
+interface CollectionSubjectListProps {
   filterType?: SubjectCollectionType
 }
 
-export default function MyCollection({ filterType }: MyCollectionProps) {
+export default function CollectionSubjectList({ filterType }: CollectionSubjectListProps) {
   const [subjectType, setSubjectType] = useState<string>("all")
   const abortControllerRef = useRef<AbortController>(null)
 
@@ -97,7 +97,7 @@ export default function MyCollection({ filterType }: MyCollectionProps) {
                       title="View Progress"
                       icon={Icon.BarChart}
                       target={
-                        <ProgressViewer
+                        <ProgressGrid
                           subjectId={item.subject_id}
                           subjectName={item.subject?.name}
                           subjectNameCn={item.subject?.name_cn}

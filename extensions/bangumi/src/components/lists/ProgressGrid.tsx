@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api"
 import { usePromise, showFailureToast } from "@raycast/utils"
 import { useState } from "react"
-import { bangumi } from "@/api/bangumi"
 import { EpisodeCollectionType, EpisodeCollectionTypeName, EpisodeType, EpisodeTypePrefix } from "@/shared/const"
 import type { components } from "@/types/generated"
-import { EpisodeStatusActions } from "./actions"
-import EpisodeDetail from "./EpisodeDetail"
+import { EpisodeStatusActions } from "@/components/actions"
+import { EpisodeDetail } from "@/components/details"
+import { bangumi } from "@/api"
 
-interface ProgressViewerProps {
+interface ProgressGridProps {
   subjectId: number
   subjectName?: string
   subjectNameCn?: string
@@ -83,13 +83,7 @@ const fetchTotalMainEpisodes = async (subjectId: number): Promise<number | undef
   }
 }
 
-export default function ProgressViewer({
-  subjectId,
-  subjectName,
-  subjectNameCn,
-  epStatus,
-  totalEps,
-}: ProgressViewerProps) {
+export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, epStatus, totalEps }: ProgressGridProps) {
   const [fetchedTotalEps, setFetchedTotalEps] = useState<number | undefined>()
 
   const {
