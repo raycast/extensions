@@ -381,89 +381,90 @@ export default function SearchCommand() {
           }
           subtitle={String(bucket.entries.length)}
         >
-          {bucket.entries.map((e) => (
-            <List.Item
-              key={`entry-${e.id}`}
-              icon={iconForList(bucket.listIcon, bucket.listColor)}
-              title={e.entry}
-              subtitle={showingDetail ? undefined : e.definition}
-              accessories={accessoriesForEntry(e)}
-              detail={
-                <List.Item.Detail
-                  markdown={entryDetailMarkdown(e)}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Link
-                        title="Open"
-                        text={apiHost()}
-                        target={`${apiBase()}/${e.listId}#${e.id}`}
-                      />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label
-                        title="Type"
-                        text={TYPE_LABELS[e.type] ?? e.type}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="List"
-                        text={e.listName}
-                        icon={iconForList(e.listIcon, e.listColor)}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Visibility"
-                        text={
-                          listVisibility(e.listIsPublic, e.workspaceType).label
-                        }
-                        icon={
-                          listVisibility(e.listIsPublic, e.workspaceType).icon
-                        }
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Workspace"
-                        text={e.workspaceName}
-                      />
-                      {Array.isArray(e.tags) && e.tags.length > 0 && (
-                        <List.Item.Detail.Metadata.TagList title="Tags">
-                          {e.tags.map((tag) => (
-                            <List.Item.Detail.Metadata.TagList.Item
-                              key={tag}
-                              text={tag}
-                            />
-                          ))}
-                        </List.Item.Detail.Metadata.TagList>
-                      )}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open Entry"
-                    url={`${apiBase()}/${e.listId}#${e.id}`}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open List"
-                    url={`${apiBase()}/${e.listId}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                  />
-                  <Action
-                    title={e.isStarred ? "Unstar Entry" : "Star Entry"}
-                    icon={
-                      e.isStarred
-                        ? Icon.StarDisabled
-                        : { source: Icon.Star, tintColor: "#f59e0b" }
+          {bucket.entries.map((e) => {
+            const vis = listVisibility(e.listIsPublic, e.workspaceType);
+            return (
+              <List.Item
+                key={`entry-${e.id}`}
+                icon={iconForList(bucket.listIcon, bucket.listColor)}
+                title={e.entry}
+                subtitle={showingDetail ? undefined : e.definition}
+                accessories={accessoriesForEntry(e)}
+                detail={
+                  <List.Item.Detail
+                    markdown={entryDetailMarkdown(e)}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Link
+                          title="Open"
+                          text={apiHost()}
+                          target={`${apiBase()}/${e.listId}#${e.id}`}
+                        />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Type"
+                          text={TYPE_LABELS[e.type] ?? e.type}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="List"
+                          text={e.listName}
+                          icon={iconForList(e.listIcon, e.listColor)}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Visibility"
+                          text={vis.label}
+                          icon={vis.icon}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Workspace"
+                          text={e.workspaceName}
+                        />
+                        {Array.isArray(e.tags) && e.tags.length > 0 && (
+                          <List.Item.Detail.Metadata.TagList title="Tags">
+                            {e.tags.map((tag) => (
+                              <List.Item.Detail.Metadata.TagList.Item
+                                key={tag}
+                                text={tag}
+                              />
+                            ))}
+                          </List.Item.Detail.Metadata.TagList>
+                        )}
+                      </List.Item.Detail.Metadata>
                     }
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={() => toggleEntryStar(e)}
                   />
-                  {toggleDetailAction}
-                  <Action.CopyToClipboard title="Copy Term" content={e.entry} />
-                  <Action.CopyToClipboard
-                    title="Copy Definition"
-                    content={e.definition}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
-                  />
-                  {/* TTS via macOS's built-in `say`. Two granularities:
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="Open Entry"
+                      url={`${apiBase()}/${e.listId}#${e.id}`}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open List"
+                      url={`${apiBase()}/${e.listId}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    />
+                    <Action
+                      title={e.isStarred ? "Unstar Entry" : "Star Entry"}
+                      icon={
+                        e.isStarred
+                          ? Icon.StarDisabled
+                          : { source: Icon.Star, tintColor: "#f59e0b" }
+                      }
+                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      onAction={() => toggleEntryStar(e)}
+                    />
+                    {toggleDetailAction}
+                    <Action.CopyToClipboard
+                      title="Copy Term"
+                      content={e.entry}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Definition"
+                      content={e.definition}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                    />
+                    {/* TTS via macOS's built-in `say`. Two granularities:
                       Cmd+T speaks the full payload (term + definition +
                       description) which is the accessibility / glance-
                       replacement case, and Cmd+Shift+T speaks just the
@@ -473,32 +474,37 @@ export default function SearchCommand() {
                       multitasking). speakText kills the previous
                       playback before starting a new one so the two
                       actions don't overlap. */}
-                  <Action
-                    title="Speak Entry"
-                    icon={Icon.SpeakerHigh}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={() =>
-                      speakText(
-                        composeSpeakable(e.entry, e.definition, e.description),
-                      )
-                    }
-                  />
-                  <Action
-                    title="Speak Definition"
-                    icon={Icon.SpeakerHigh}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                    onAction={() => speakText(e.definition)}
-                  />
-                  <Action
-                    title="Stop Speaking"
-                    icon={Icon.SpeakerOff}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
-                    onAction={stopSpeaking}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+                    <Action
+                      title="Speak Entry"
+                      icon={Icon.SpeakerHigh}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={() =>
+                        speakText(
+                          composeSpeakable(
+                            e.entry,
+                            e.definition,
+                            e.description,
+                          ),
+                        )
+                      }
+                    />
+                    <Action
+                      title="Speak Definition"
+                      icon={Icon.SpeakerHigh}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                      onAction={() => speakText(e.definition)}
+                    />
+                    <Action
+                      title="Stop Speaking"
+                      icon={Icon.SpeakerOff}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+                      onAction={stopSpeaking}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
 
@@ -506,56 +512,59 @@ export default function SearchCommand() {
         title="Lists"
         subtitle={trimmed ? String(lists.length) : undefined}
       >
-        {lists.map((l) => (
-          <List.Item
-            key={`list-${l.id}`}
-            icon={iconForList(l.icon, l.color)}
-            title={l.name}
-            subtitle={showingDetail ? undefined : (l.description ?? "")}
-            accessories={
-              showWorkspaceInHeader && !showingDetail
-                ? [{ text: l.workspaceName }]
-                : undefined
-            }
-            detail={
-              <List.Item.Detail
-                markdown={[
-                  `## ${l.name}`,
-                  "",
-                  l.description ? l.description : "_No description._",
-                ].join("\n")}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Link
-                      title="Open"
-                      text={apiHost()}
-                      target={`${apiBase()}/${l.id}`}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Visibility"
-                      text={listVisibility(l.isPublic, l.workspaceType).label}
-                      icon={listVisibility(l.isPublic, l.workspaceType).icon}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Workspace"
-                      text={l.workspaceName}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open List"
-                  url={`${apiBase()}/${l.id}`}
+        {lists.map((l) => {
+          const vis = listVisibility(l.isPublic, l.workspaceType);
+          return (
+            <List.Item
+              key={`list-${l.id}`}
+              icon={iconForList(l.icon, l.color)}
+              title={l.name}
+              subtitle={showingDetail ? undefined : (l.description ?? "")}
+              accessories={
+                showWorkspaceInHeader && !showingDetail
+                  ? [{ text: l.workspaceName }]
+                  : undefined
+              }
+              detail={
+                <List.Item.Detail
+                  markdown={[
+                    `## ${l.name}`,
+                    "",
+                    l.description ? l.description : "_No description._",
+                  ].join("\n")}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Link
+                        title="Open"
+                        text={apiHost()}
+                        target={`${apiBase()}/${l.id}`}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Visibility"
+                        text={vis.label}
+                        icon={vis.icon}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Workspace"
+                        text={l.workspaceName}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
                 />
-                {toggleDetailAction}
-              </ActionPanel>
-            }
-          />
-        ))}
+              }
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser
+                    title="Open List"
+                    url={`${apiBase()}/${l.id}`}
+                  />
+                  {toggleDetailAction}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
 
       <List.EmptyView
