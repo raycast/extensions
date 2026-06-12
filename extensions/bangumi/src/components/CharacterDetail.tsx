@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
-import { bangumi, Infobox } from "@/api/bangumi"
+import { bangumi } from "@/api/bangumi"
+import { Infobox } from "@/types"
 import { bangumiAuth } from "@/api/oauth"
-import { OpenInBgmBrowser } from "./actions"
+import { OpenInBgmBrowser, AITranslateAction } from "./actions"
 import RelationsList from "./RelationsList"
 import { formatSummary, getImageUrl } from "@/shared/utils"
-import { useAITranslate, getTranslationMarkdown, AITranslateAction } from "@/shared/useAITranslate"
+import { useAITranslate } from "@/shared/useAITranslate"
 
 interface CharacterDetailProps {
   characterId: number
@@ -35,7 +36,9 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
     { abortable: subjectsAbortable }
   )
 
-  const { translatedText, isTranslating, translate } = useAITranslate(`char_summary_translation_${characterId}`)
+  const { isTranslating, translate, translationMarkdown } = useAITranslate(`char_summary_translation_${characterId}`, {
+    formatFn: formatSummary,
+  })
 
   const coverUrl = getImageUrl(data?.images?.large)
   const infobox = data?.infobox as Infobox | undefined
@@ -49,7 +52,7 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
 <table>
   <tr>
     <td width="100" valign="top">${coverUrl ? `<img src="${coverUrl}" width="100" />` : ""}</td>
-    <td valign="top">${formatSummary(data.summary)}${getTranslationMarkdown(isTranslating, translatedText, formatSummary)}</td>
+    <td valign="top">${formatSummary(data.summary)}${translationMarkdown}</td>
   </tr>
 </table>
 `

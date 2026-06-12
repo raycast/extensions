@@ -3,12 +3,12 @@ import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef } from "react"
 import { bangumi } from "@/api/bangumi"
 import { bangumiAuth } from "@/api/oauth"
-import { CollectionStatusActions, OpenInBgmBrowser } from "./actions"
+import { CollectionStatusActions, OpenInBgmBrowser, AITranslateAction } from "./actions"
 import SubjectCharactersList from "./SubjectCharactersList"
 import RelationsList from "./RelationsList"
-import { getCollectionTag, SubjectCollectionIcon } from "@/shared/const"
-import { formatSummary, getImageUrl } from "@/shared/utils"
-import { useAITranslate, getTranslationMarkdown, AITranslateAction } from "@/shared/useAITranslate"
+import { SubjectCollectionIcon } from "@/shared/const"
+import { formatSummary, getImageUrl, getCollectionTag } from "@/shared/utils"
+import { useAITranslate } from "@/shared/useAITranslate"
 
 interface SubjectDetailProps {
   subjectId: number
@@ -63,7 +63,9 @@ const SubjectDetail = ({ subjectId }: SubjectDetailProps) => {
     { abortable: relatedSubjectsAbortable }
   )
 
-  const { translatedText, isTranslating, translate } = useAITranslate(`subject_summary_translation_${subjectId}`)
+  const { isTranslating, translate, translationMarkdown } = useAITranslate(`subject_summary_translation_${subjectId}`, {
+    formatFn: formatSummary,
+  })
 
   const coverUrl = getImageUrl(data?.images?.large)
   const name = data?.name_cn || data?.name || ""
@@ -76,7 +78,7 @@ ${coverUrl ? `<img src="${coverUrl}" width="120%" />` : ""}
 ${name.length > 20 ? "###" : name.length > 15 ? "##" : "#"} ${name}
 ${subtitleName ? `\n<sup>${subtitleName}</sup>` : ""}
 
-${formatSummary(data.summary)}${getTranslationMarkdown(isTranslating, translatedText, formatSummary)}
+${formatSummary(data.summary)}${translationMarkdown}
 `
     : ""
 

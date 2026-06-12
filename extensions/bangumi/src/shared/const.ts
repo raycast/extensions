@@ -77,11 +77,6 @@ export const SubjectVerb: Record<SubjectType, { wish: string; collect: string; d
   [SubjectType.Real]: { wish: "Wishlist", collect: "Watched", doing: "Watching" },
 }
 
-export interface CollectionTag {
-  value: string
-  color: Color | string
-}
-
 export const SubjectCollectionColor: Record<SubjectCollectionType, Color | string> = {
   [SubjectCollectionType.Wish]: Color.Blue,
   [SubjectCollectionType.Collect]: Color.SecondaryText,
@@ -96,27 +91,4 @@ export const SubjectCollectionIcon: Record<SubjectCollectionType, Icon> = {
   [SubjectCollectionType.Doing]: Icon.Play,
   [SubjectCollectionType.OnHold]: Icon.Pause,
   [SubjectCollectionType.Dropped]: Icon.Xmark,
-}
-
-export const getCollectionTag = (
-  collectionType: SubjectCollectionType,
-  subjectType: SubjectType = SubjectType.Anime
-): CollectionTag => {
-  const verbs = SubjectVerb[subjectType]
-  const color = SubjectCollectionColor[collectionType]
-
-  switch (collectionType) {
-    case SubjectCollectionType.Wish:
-      return { value: verbs.wish, color }
-    case SubjectCollectionType.Collect:
-      return { value: verbs.collect, color }
-    case SubjectCollectionType.Doing:
-      return { value: verbs.doing, color }
-    case SubjectCollectionType.OnHold:
-      return { value: "On Hold", color }
-    case SubjectCollectionType.Dropped:
-      return { value: "Dropped", color }
-    default:
-      return { value: "Unknown", color }
-  }
 }

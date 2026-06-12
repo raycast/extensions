@@ -1,7 +1,7 @@
 import { ActionPanel, Detail } from "@raycast/api"
 import type { components } from "@/types/generated"
-import { OpenInBgmBrowser } from "./actions"
-import { useAITranslate, getTranslationMarkdown, AITranslateAction } from "@/shared/useAITranslate"
+import { OpenInBgmBrowser, AITranslateAction } from "./actions"
+import { useAITranslate } from "@/shared/useAITranslate"
 import { formatSummary } from "@/shared/utils"
 
 type Episode = components["schemas"]["Episode"]
@@ -11,7 +11,9 @@ interface EpisodeDetailProps {
 }
 
 export default function EpisodeDetail({ episode }: EpisodeDetailProps) {
-  const { translatedText, isTranslating, translate } = useAITranslate(`ep_desc_translation_${episode.id}`)
+  const { isTranslating, translate, translationMarkdown } = useAITranslate(`ep_desc_translation_${episode.id}`, {
+    formatFn: formatSummary,
+  })
 
   const title = episode.name_cn || episode.name || `Episode ${episode.sort}`
   const originalTitle = episode.name
@@ -21,7 +23,7 @@ export default function EpisodeDetail({ episode }: EpisodeDetailProps) {
 ${originalTitle && originalTitle !== title ? `<sup>${originalTitle}</sup>` : ""}
 
 ${episode.desc ? formatSummary(episode.desc) : "*No description provided.*"}
-${getTranslationMarkdown(isTranslating, translatedText, formatSummary)}
+${translationMarkdown}
   `
 
   return (

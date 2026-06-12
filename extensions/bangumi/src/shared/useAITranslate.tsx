@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { Action, Icon, environment, AI, Cache, getPreferenceValues } from "@raycast/api"
+import { AI, Cache, getPreferenceValues } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 
 const cache = new Cache()
 
-export const useAITranslate = (cacheKey: string) => {
+export const useAITranslate = (cacheKey: string, options?: { formatFn?: (text?: string) => string }) => {
   const [translatedText, setTranslatedText] = useState<string | undefined>(cache.get(cacheKey))
   const [isTranslating, setIsTranslating] = useState(false)
 
@@ -29,44 +29,15 @@ export const useAITranslate = (cacheKey: string) => {
     }
   }
 
-  return { translatedText, isTranslating, translate }
-}
-
-export const getTranslationMarkdown = (
-  isTranslating: boolean,
-  translatedText?: string,
-  formatFn?: (text?: string) => string
-) => {
+  let translationMarkdown = ""
   if (isTranslating || (translatedText !== undefined && translatedText !== "")) {
     const formattedContent = translatedText
-      ? formatFn
-        ? formatFn(translatedText)
+      ? options?.formatFn
+        ? options.formatFn(translatedText)
         : translatedText
       : "<p>Translating...</p>"
-    return `<br/><br/><b>[AI Translation]</b><br/>${formattedContent}`
+    translationMarkdown = `\n\n**[AI Translation]**\n${formattedContent}`
   }
-  return ""
-}
 
-export const AITranslateAction = ({
-  text,
-  onTranslate,
-  isTranslating,
-}: {
-  text?: string
-  onTranslate: (text: string) => void
-  isTranslating?: boolean
-}) => {
-  if (!text || !environment.canAccess(AI)) return null
-
-  return (
-    <Action
-      title={isTranslating ? "Translating…" : "AI Translate Summary"}
-      icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-      onAction={() => {
-        if (!isTranslating) onTranslate(text)
-      }}
-    />
-  )
+  return { translatedText, isTranslating, translate, translationMarkdown }
 }

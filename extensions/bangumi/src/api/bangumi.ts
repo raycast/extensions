@@ -1,9 +1,7 @@
 import createClient from "openapi-fetch"
-import type { components, paths } from "@/types/generated"
+import type { paths } from "@/types/generated"
 import { getAccessToken } from "@raycast/utils"
 import { EpisodeCollectionType, EpisodeType, SubjectCollectionType, SubjectType } from "@/shared/const"
-
-export type Infobox = components["schemas"]["WikiV0"]
 
 interface BangumiErrorResponse {
   title: string
