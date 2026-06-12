@@ -57,7 +57,7 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.8"
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "ray build",
@@ -66,5 +66,10 @@
     "fix-lint": "ray lint --fix",
     "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "engines": {
+    "node": ">=22.22.2",
+    "npm": ">=10.7.0"
+  },
+  "packageManager": "npm@10.9.3"
 }
