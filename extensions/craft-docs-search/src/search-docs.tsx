@@ -232,7 +232,7 @@ async function runTagSearch(
 }
 
 function getCraftConnection(): CraftConnection {
-  const preferences = getPreferenceValues<Preferences.SearchDocs>();
+  const preferences = getPreferenceValues<Preferences>();
 
   return {
     endpoint: preferences.apiEndpoint,
