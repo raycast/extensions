@@ -30,6 +30,8 @@ type LoadState = {
   error?: string;
 };
 
+let currentLoadGeneration = 0;
+
 export default function SearchDocs() {
   const [searchText, setSearchText] = useState("");
   const [state, setState] = useState<LoadState>({
@@ -121,6 +123,7 @@ async function loadResults(
   connection: CraftConnection,
   setState: (state: LoadState) => void,
 ): Promise<void> {
+  const generation = ++currentLoadGeneration;
   const query = searchText.trim();
   const isTagSearch = query.startsWith("#");
 
@@ -131,11 +134,19 @@ async function loadResults(
       ? await runTagSearch(connection, query)
       : await runTitleSearch(connection, query);
 
+    if (generation !== currentLoadGeneration) {
+      return;
+    }
+
     setState({
       isLoading: false,
       results: dedupeResults(results),
     });
   } catch (error) {
+    if (generation !== currentLoadGeneration) {
+      return;
+    }
+
     setState({
       isLoading: false,
       results: [],
