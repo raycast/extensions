@@ -1,0 +1,21 @@
+---
+description: "Tiptap HTML to Markdown conversion for Raycast"
+globs: src/shared.tsx
+alwaysApply: false
+---
+
+# HTML to Markdown
+
+`htmlToMarkdown()` in `src/shared.tsx` uses TurndownService with custom rules for Tiptap-specific elements:
+
+- Task items and task lists
+- Callouts, collapsibles
+- Link preview cards
+- Strikethrough, highlight
+
+When the Arca task editor gains a new extension or HTML output changes, update **both**:
+
+1. `arca-server/src/utils/html-to-md.ts` (reference implementation)
+2. `src/shared.tsx` `htmlToMarkdown()` (this file)
+
+Supported HTML patterns are documented at the top of `arca-server/src/utils/html-to-md.ts`.

@@ -1,0 +1,20 @@
+---
+description: "Raycast command implementations"
+globs: src/*.tsx
+alwaysApply: false
+---
+
+# Commands
+
+- `create-task.tsx` — Form-based task creation
+- `my-tasks.tsx` — List view of assigned tasks
+- `planned.tsx` — Planned/upcoming tasks view
+
+Shared patterns in `src/shared.tsx`:
+
+- API fetch helpers with preference-based API key
+- Type definitions matching Arca API responses
+- Raycast List/Form/ActionPanel idioms
+- Priority colors, status categories, done filtering
+
+Follow `@raycast/api` conventions for List items, Actions, and Toast feedback.

@@ -1,0 +1,12 @@
+---
+description: "Arca Raycast extension"
+alwaysApply: true
+---
+
+# Arca Raycast
+
+Raycast extension with three commands: create-task, my-tasks, planned. Uses `@raycast/api` and Arca v1 API (`https://api.getarca.app/api/v1`).
+
+API key stored in Raycast preferences. Shared utilities in `src/shared.tsx`.
+
+HTML-to-Markdown converter must stay in sync with `arca-server/src/utils/html-to-md.ts`.
