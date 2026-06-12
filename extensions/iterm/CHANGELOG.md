@@ -1,5 +1,9 @@
 # iTerm Changelog
 
+## [Bug Fixes] - {PR_MERGE_DATE}
+
+- Fixed `Open iTerm Profile` if parts of a user's iTerm preferences plist other than profiles cannot be converted to JSON
+
 ## [Add Edit in iTerm open behavior] - 2026-05-27
 
 - Added a preference to open `Edit in iTerm` in a new window or a new tab.
