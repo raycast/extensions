@@ -1,45 +1,30 @@
 import { Grid, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
 
-import {
-  AiringEpisode,
-  formatAiringClock,
-  formatAiringDay,
-  getAiringEpisodes,
-  getLastSevenDaysTimestamps,
-  hasStreamingPlatform,
-  StreamingPlatformFilter,
-} from "./anilist";
+import { AiringEpisode, formatAiringClock, formatAiringDay, getLastSevenDaysTimestamps } from "./anilist";
 import { AnimeGridItem, AnimeListItem } from "./anime-components";
 import { ErrorView } from "./error-view";
-import { getAnimePreferences, Onboarding } from "./preferences";
+import { formatCountSubtitle } from "./format-utils";
 import { GridStreamingFilterDropdown, ListStreamingFilterDropdown } from "./streaming-filter";
+import { useAiringEpisodesCommand } from "./use-filtered-airing-episodes";
 
 export default function Command() {
-  const [filter, setFilter] = useState<StreamingPlatformFilter>("all");
-  const { startTimestamp, endTimestamp } = getLastSevenDaysTimestamps();
+  const command = useAiringEpisodesCommand(getLastSevenDaysTimestamps());
+  if (command.status === "gate") {
+    return command.view;
+  }
+
   const {
-    data = [],
+    preferences,
+    revalidate,
+    isLoadingPreferences,
+    filter,
+    setFilter,
+    filteredEpisodes,
     error,
     isLoading,
-    revalidate: retryEpisodes,
-  } = useCachedPromise(getAiringEpisodes, [startTimestamp, endTimestamp]);
-  const { data: preferences, isLoading: isLoadingPreferences, revalidate } = useCachedPromise(getAnimePreferences);
-  const filteredEpisodes = data.filter((episode) => hasStreamingPlatform(episode.media, filter));
+    retryEpisodes,
+  } = command;
   const sections = groupByAiringDay(filteredEpisodes);
-
-  if (!preferences) {
-    if (!isLoadingPreferences) {
-      return <Onboarding onComplete={revalidate} />;
-    }
-
-    return (
-      <List isLoading searchBarPlaceholder="Loading preferences...">
-        <List.EmptyView title="Loading Preferences..." />
-      </List>
-    );
-  }
 
   if (preferences.preferredView === "gallery") {
     return (
@@ -60,7 +45,7 @@ export default function Command() {
             <Grid.Section
               key={section.title}
               title={section.title}
-              subtitle={formatSectionSubtitle(section.items.length)}
+              subtitle={formatCountSubtitle(section.items.length, "episode", "episodes")}
             >
               {section.items.map((episode) => (
                 <AnimeGridItem
@@ -93,7 +78,7 @@ export default function Command() {
           <List.Section
             key={section.title}
             title={section.title}
-            subtitle={formatSectionSubtitle(section.items.length)}
+            subtitle={formatCountSubtitle(section.items.length, "episode", "episodes")}
           >
             {section.items.map((episode) => (
               <AnimeListItem
@@ -121,8 +106,4 @@ function groupByAiringDay(episodes: AiringEpisode[]) {
   }
 
   return Array.from(sections.entries()).map(([title, items]) => ({ title, items }));
-}
-
-function formatSectionSubtitle(count: number) {
-  return `${count} ${count === 1 ? "episode" : "episodes"}`;
 }

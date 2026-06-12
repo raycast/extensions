@@ -1,44 +1,30 @@
 import { Grid, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
 
-import {
-  formatAiringClock,
-  getAiringEpisodes,
-  getLocalDayTimestamps,
-  hasStreamingPlatform,
-  StreamingPlatformFilter,
-} from "./anilist";
+import { formatAiringClock, getLocalDayTimestamps } from "./anilist";
 import { AnimeGridItem, AnimeListItem } from "./anime-components";
 import { ErrorView } from "./error-view";
-import { getAnimePreferences, Onboarding } from "./preferences";
 import { GridStreamingFilterDropdown, ListStreamingFilterDropdown } from "./streaming-filter";
+import { useAiringEpisodesCommand } from "./use-filtered-airing-episodes";
 
 export default function Command() {
-  const [filter, setFilter] = useState<StreamingPlatformFilter>("all");
-  const { startTimestamp, endTimestamp } = getLocalDayTimestamps();
-  const {
-    data = [],
-    error,
-    isLoading,
-    revalidate: retryEpisodes,
-  } = useCachedPromise(getAiringEpisodes, [startTimestamp, endTimestamp]);
-  const { data: preferences, isLoading: isLoadingPreferences, revalidate } = useCachedPromise(getAnimePreferences);
-  const filteredEpisodes = data.filter((episode) => hasStreamingPlatform(episode.media, filter));
-
-  if (!preferences) {
-    if (!isLoadingPreferences) {
-      return <Onboarding onComplete={revalidate} />;
-    }
-
-    return (
-      <List isLoading searchBarPlaceholder="Loading preferences...">
-        <List.EmptyView title="Loading Preferences..." />
-      </List>
-    );
+  const command = useAiringEpisodesCommand(getLocalDayTimestamps());
+  if (command.status === "gate") {
+    return command.view;
   }
 
-  if (preferences?.preferredView === "gallery") {
+  const {
+    preferences,
+    revalidate,
+    isLoadingPreferences,
+    filter,
+    setFilter,
+    filteredEpisodes,
+    error,
+    isLoading,
+    retryEpisodes,
+  } = command;
+
+  if (preferences.preferredView === "gallery") {
     return (
       <Grid
         isLoading={isLoading || isLoadingPreferences}

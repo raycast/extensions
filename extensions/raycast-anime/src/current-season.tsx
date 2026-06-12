@@ -13,10 +13,15 @@ import {
 } from "./anilist";
 import { AnimeGridItem, AnimeListItem } from "./anime-components";
 import { ErrorView } from "./error-view";
-import { getAnimePreferences, Onboarding } from "./preferences";
+import { formatCountSubtitle } from "./format-utils";
+import { PreferencesGate, ResolvedPreferences } from "./preferences";
 import { GridStreamingFilterDropdown, ListStreamingFilterDropdown } from "./streaming-filter";
 
 export default function Command() {
+  return <PreferencesGate>{(preferences) => <CurrentSeasonContent {...preferences} />}</PreferencesGate>;
+}
+
+function CurrentSeasonContent({ preferences, revalidate, isLoadingPreferences }: ResolvedPreferences) {
   const [filter, setFilter] = useState<StreamingPlatformFilter>("all");
   const { season, year } = getCurrentAnimeSeason();
   const {
@@ -25,23 +30,10 @@ export default function Command() {
     isLoading,
     revalidate: retryEpisodes,
   } = useCachedPromise(getCurrentSeasonAnime, [season, year]);
-  const { data: preferences, isLoading: isLoadingPreferences, revalidate } = useCachedPromise(getAnimePreferences);
   const filteredAnime = filterAnimeByStreamingPlatform(data, filter);
   const sections = groupByAiringDay(filteredAnime);
 
-  if (!preferences) {
-    if (!isLoadingPreferences) {
-      return <Onboarding onComplete={revalidate} />;
-    }
-
-    return (
-      <List isLoading searchBarPlaceholder="Loading preferences...">
-        <List.EmptyView title="Loading Preferences..." />
-      </List>
-    );
-  }
-
-  if (preferences?.preferredView === "gallery") {
+  if (preferences.preferredView === "gallery") {
     return (
       <Grid
         isLoading={isLoading || isLoadingPreferences}
@@ -65,7 +57,7 @@ export default function Command() {
             <Grid.Section
               key={section.title}
               title={formatSectionTitle(section.title)}
-              subtitle={formatSectionSubtitle(section.items.length)}
+              subtitle={formatCountSubtitle(section.items.length, "show", "shows")}
             >
               {section.items.map((anime) => (
                 <AnimeGridItem
@@ -100,7 +92,7 @@ export default function Command() {
           <List.Section
             key={section.title}
             title={formatSectionTitle(section.title)}
-            subtitle={formatSectionSubtitle(section.items.length)}
+            subtitle={formatCountSubtitle(section.items.length, "show", "shows")}
           >
             {section.items.map((anime) => (
               <AnimeListItem
@@ -122,10 +114,6 @@ export default function Command() {
 
 function formatSectionTitle(title: string) {
   return title === "Schedule Unknown" ? title.toUpperCase() : `AIRING ${title.toUpperCase()}`;
-}
-
-function formatSectionSubtitle(count: number) {
-  return `${count} ${count === 1 ? "show" : "shows"}`;
 }
 
 function groupByAiringDay(anime: Anime[]) {

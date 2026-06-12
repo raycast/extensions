@@ -4,33 +4,24 @@ import { useState } from "react";
 
 import { filterAnimeByStreamingPlatform, StreamingPlatformFilter } from "./anilist";
 import { AnimeGridItem, AnimeListItem } from "./anime-components";
-import { getAnimePreferences, Onboarding } from "./preferences";
+import { PreferencesGate, ResolvedPreferences } from "./preferences";
 import { GridStreamingFilterDropdown, ListStreamingFilterDropdown } from "./streaming-filter";
 import { getWatchlist } from "./watchlist-storage";
 
 export default function Command() {
+  return <PreferencesGate>{(preferences) => <WatchlistContent {...preferences} />}</PreferencesGate>;
+}
+
+function WatchlistContent({
+  preferences,
+  revalidate: revalidatePreferences,
+  isLoadingPreferences,
+}: ResolvedPreferences) {
   const [filter, setFilter] = useState<StreamingPlatformFilter>("all");
   const { data = [], isLoading, revalidate } = useCachedPromise(getWatchlist);
-  const {
-    data: preferences,
-    isLoading: isLoadingPreferences,
-    revalidate: revalidatePreferences,
-  } = useCachedPromise(getAnimePreferences);
   const filteredAnime = filterAnimeByStreamingPlatform(data, filter);
 
-  if (!preferences) {
-    if (!isLoadingPreferences) {
-      return <Onboarding onComplete={revalidatePreferences} />;
-    }
-
-    return (
-      <List isLoading searchBarPlaceholder="Loading preferences...">
-        <List.EmptyView title="Loading Preferences..." />
-      </List>
-    );
-  }
-
-  if (preferences?.preferredView === "gallery") {
+  if (preferences.preferredView === "gallery") {
     return (
       <Grid
         isLoading={isLoading || isLoadingPreferences}

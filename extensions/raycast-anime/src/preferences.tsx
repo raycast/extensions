@@ -1,4 +1,6 @@
-import { Action, ActionPanel, Form, LocalStorage, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, List, LocalStorage, popToRoot } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { ReactNode } from "react";
 
 const PREFERENCES_KEY = "anime-preferences";
 
@@ -21,6 +23,55 @@ export async function getAnimePreferences() {
 
 export async function saveAnimePreferences(preferences: AnimePreferences) {
   await LocalStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+}
+
+type PreferencesGateResult =
+  | { status: "ready"; preferences: AnimePreferences; revalidate: () => void; isLoadingPreferences: boolean }
+  | { status: "gate"; view: ReactNode };
+
+export function usePreferencesGate(): PreferencesGateResult {
+  const { data: preferences, isLoading: isLoadingPreferences, revalidate } = useCachedPromise(getAnimePreferences);
+
+  if (!preferences) {
+    if (!isLoadingPreferences) {
+      return { status: "gate", view: <Onboarding onComplete={revalidate} /> };
+    }
+
+    return {
+      status: "gate",
+      view: (
+        <List isLoading searchBarPlaceholder="Loading preferences...">
+          <List.EmptyView title="Loading Preferences..." />
+        </List>
+      ),
+    };
+  }
+
+  return { status: "ready", preferences, revalidate, isLoadingPreferences };
+}
+
+export type ResolvedPreferences = {
+  preferences: AnimePreferences;
+  revalidate: () => void;
+  isLoadingPreferences: boolean;
+};
+
+type PreferencesGateProps = {
+  children: (props: ResolvedPreferences) => ReactNode;
+};
+
+export function PreferencesGate({ children }: PreferencesGateProps) {
+  const gate = usePreferencesGate();
+
+  if (gate.status === "gate") {
+    return gate.view;
+  }
+
+  return children({
+    preferences: gate.preferences,
+    revalidate: gate.revalidate,
+    isLoadingPreferences: gate.isLoadingPreferences,
+  });
 }
 
 type OnboardingProps = {

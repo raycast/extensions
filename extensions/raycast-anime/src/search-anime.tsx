@@ -1,17 +1,20 @@
 import { Grid, List } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 
 import { filterAnimeByStreamingPlatform, searchAnime, StreamingPlatformFilter } from "./anilist";
 import { AnimeGridItem, AnimeListItem } from "./anime-components";
 import { ErrorView } from "./error-view";
-import { getAnimePreferences, Onboarding } from "./preferences";
+import { PreferencesGate, ResolvedPreferences } from "./preferences";
 import { GridStreamingFilterDropdown, ListStreamingFilterDropdown } from "./streaming-filter";
 
 export default function Command() {
+  return <PreferencesGate>{(preferences) => <SearchAnimeContent {...preferences} />}</PreferencesGate>;
+}
+
+function SearchAnimeContent({ preferences, revalidate, isLoadingPreferences }: ResolvedPreferences) {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<StreamingPlatformFilter>("all");
-  const { data: preferences, isLoading: isLoadingPreferences, revalidate } = useCachedPromise(getAnimePreferences);
   const query = searchText.trim();
   const {
     data = [],
@@ -23,19 +26,7 @@ export default function Command() {
   });
   const filteredAnime = filterAnimeByStreamingPlatform(data, filter);
 
-  if (!preferences) {
-    if (!isLoadingPreferences) {
-      return <Onboarding onComplete={revalidate} />;
-    }
-
-    return (
-      <List isLoading searchBarPlaceholder="Loading preferences...">
-        <List.EmptyView title="Loading Preferences..." />
-      </List>
-    );
-  }
-
-  if (preferences?.preferredView === "gallery") {
+  if (preferences.preferredView === "gallery") {
     return (
       <Grid
         isLoading={isLoading || isLoadingPreferences}
