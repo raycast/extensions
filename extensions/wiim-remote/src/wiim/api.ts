@@ -8,7 +8,6 @@ import {
   DeviceChannel,
   DeviceMode,
   LoopMode,
-  mapConstType,
   MetaInfo,
 } from "./types";
 import { WiiMAPIError } from "./errors";
@@ -74,9 +73,11 @@ export class WiiMAPI {
   async togglePlayPause(): Promise<void> {
     await this.command("setPlayerCmd:onepause");
   }
+
   async next(): Promise<void> {
     await this.command("setPlayerCmd:next");
   }
+
   async previous(): Promise<void> {
     await this.command("setPlayerCmd:prev");
   }
@@ -250,10 +251,10 @@ export class WiiMAPI {
     try {
       const json = JSON.parse(raw);
       return {
-        type: mapConstType(DeviceType, json.type, "MASTER"),
-        ch: mapConstType(DeviceChannel, json.ch, "STEREO"),
-        mode: mapConstType(DeviceMode, json.mode, "NONE"),
-        loop: mapConstType(LoopMode, json.loop, "ALL"),
+        type: (json.type as DeviceType) || DeviceType.MASTER,
+        ch: (json.ch as DeviceChannel) || DeviceChannel.STEREO,
+        mode: (json.mode as DeviceMode) || DeviceMode.NONE,
+        loop: (json.loop as LoopMode) || LoopMode.ALL,
         eq: Number(json.eq ?? 0),
         status: json.status ?? "stop",
         currentPosition: Number(json.curpos ?? 0),
