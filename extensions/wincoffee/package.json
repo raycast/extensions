@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wincoffee",
+  "description": "Prevent the sleep function on your PC",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "mode": "no-view",
+      "name": "caffeinate",
+      "title": "Caffeinate",
+      "description": "Turn on indefinite caffeination",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "decaffeinate",
+      "title": "Decaffeinate",
+      "description": "Turn off caffeination",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "toggle",
+      "title": "Toggle Caffeinate",
+      "description": "Toggle caffeination on or off",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "view",
+      "name": "caffeinateFor",
+      "title": "Caffeinate for",
+      "description": "Caffeinate your PC for a specific duration",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "view",
+      "name": "caffeinateWhile",
+      "title": "Caffeinate While",
+      "description": "Caffeinate your PC while an application is running",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "toggleLidSleep",
+      "title": "Toggle Lid Sleep",
+      "description": "Toggle whether lid close action puts computer to sleep",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "enableLidSleep",
+      "title": "Enable Lid Sleep",
+      "description": "Enable sleep action when closing the laptop lid",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "disableLidSleep",
+      "title": "Disable Lid Sleep",
+      "description": "Disable sleep action when closing the laptop lid",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "view",
+      "name": "lidSleepStatus",
+      "title": "Lid Sleep Status",
+      "description": "View and manage sleep settings when closing lid",
+      "subtitle": "WinCoffee"
+    },
+    {
+      "mode": "no-view",
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "subtitle": "WinCoffee",
+      "interval": "15s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keepDisplayAwake",
+      "type": "checkbox",
+      "required": false,
+      "label": "Keep display awake",
+      "title": "Display Settings",
+      "description": "Prevent the display from turning off while caffeinated",
+      "default": true
+    },
+    {
+      "name": "ignoreLidWhileCaffeinated",
+      "type": "checkbox",
+      "required": false,
+      "label": "Ignore closing the lid",
+      "title": "Lid Settings",
+      "description": "Prevent the computer from sleeping when the lid is closed while caffeinated",
+      "default": false
+    }
+  ],
+  "title": "WinCoffee",
+  "author": "confusedhello",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
+}
