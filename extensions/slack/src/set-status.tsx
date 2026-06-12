@@ -200,7 +200,10 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
     );
   }, [mutate, profile]);
 
-  const hasLaunchArguments = Boolean(statusTextArgument?.trim() || normalizeEmoji(emojiArgument));
+  // Gate on whether arguments were *passed*, not on whether the emoji resolves — an emoji we can't
+  // map still needs to reach the effect so it can report the failure instead of silently no-op-ing.
+  const hasEmojiArgument = Boolean(emojiArgument?.trim());
+  const hasLaunchArguments = Boolean(statusTextArgument?.trim() || hasEmojiArgument);
   const didAutoSetStatus = useRef(false);
 
   useEffect(() => {
@@ -211,6 +214,16 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
 
     const statusText = statusTextArgument?.trim() || undefined;
     const emoji = normalizeEmoji(emojiArgument);
+
+    // The emoji was provided but couldn't be mapped to a Slack `:name:` (e.g. a composite/ZWJ glyph
+    // absent from SLACK_EMOJI_CODE_MAP). Surface it rather than silently dropping the launch.
+    if (hasEmojiArgument && emoji === undefined) {
+      didAutoSetStatus.current = true;
+      showFailureToast(new Error(`"${emojiArgument?.trim()}" isn't a recognized Slack emoji.`), {
+        title: "Failed to set status",
+      });
+      return;
+    }
 
     // Preserving the field that wasn't passed relies on the current profile. If it failed to
     // load, setting only one field would clear the other, so bail with feedback instead.
@@ -243,7 +256,16 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
         }),
       },
     );
-  }, [hasLaunchArguments, isFetchMeLoading, isFetchProfileLoading, profile, mutate, statusTextArgument, emojiArgument]);
+  }, [
+    hasLaunchArguments,
+    hasEmojiArgument,
+    isFetchMeLoading,
+    isFetchProfileLoading,
+    profile,
+    mutate,
+    statusTextArgument,
+    emojiArgument,
+  ]);
 
   return (
     <List isLoading={isLoading}>
