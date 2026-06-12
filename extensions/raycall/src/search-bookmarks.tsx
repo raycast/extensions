@@ -142,18 +142,26 @@ function SearchBookmarksList({ apiToken }: { apiToken: string }) {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
-    const res = await fetch(`${API_URL}/api/bookmarks/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${apiToken}` },
-    });
-    if (res.ok) {
-      await showToast({ style: Toast.Style.Success, title: "Deleted" });
-      revalidate();
-    } else {
+    try {
+      const res = await fetch(`${API_URL}/api/bookmarks/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${apiToken}` },
+      });
+      if (res.ok) {
+        await showToast({ style: Toast.Style.Success, title: "Deleted" });
+        revalidate();
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Delete failed",
+          message: `${res.status}`,
+        });
+      }
+    } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Delete failed",
-        message: `${res.status}`,
+        message: err instanceof Error ? err.message : String(err),
       });
     }
   }
