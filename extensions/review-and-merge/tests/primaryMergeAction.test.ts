@@ -23,9 +23,9 @@ describe("primaryMergeAction", () => {
     );
   });
 
-  it("enables auto-merge while checks are still running", () => {
+  it("merges (with confirmation) when only non-required checks fail", () => {
     expect(primaryMergeAction(pr({ mergeStateStatus: "UNSTABLE" }))).toBe(
-      "enable-auto-merge",
+      "merge",
     );
   });
 

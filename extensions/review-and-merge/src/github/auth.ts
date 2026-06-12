@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
-interface Preferences {
-  githubToken?: string;
-}
-
 const personalAccessToken =
   getPreferenceValues<Preferences>().githubToken?.trim() || undefined;
 

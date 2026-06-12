@@ -8,7 +8,9 @@ export function primaryMergeAction(pr: PullRequest): PrimaryMerge {
     return "none";
   }
   const readiness = mergeReadiness(pr.mergeStateStatus);
-  if (readiness.kind === "ready") {
+  // "ready" merges directly; "confirm" (e.g. UNSTABLE — non-required checks
+  // failing) is mergeable too, but SmartMergeAction asks for confirmation first.
+  if (readiness.kind === "ready" || readiness.kind === "confirm") {
     return "merge";
   }
   if (pr.autoMergeEnabled) {

@@ -4,6 +4,7 @@ import { PullRequest } from "../src/github/types";
 
 const pr = (overrides: Partial<PullRequest> = {}): PullRequest =>
   ({
+    state: "OPEN",
     authorLogin: "someone",
     viewerHasApproved: false,
     ...overrides,
@@ -28,5 +29,10 @@ describe("canApprove", () => {
 
   it("rejects when the viewer login is unknown", () => {
     expect(canApprove(pr(), undefined)).toBe(false);
+  });
+
+  it("rejects closed and merged PRs (e.g. from the closed-review window)", () => {
+    expect(canApprove(pr({ state: "CLOSED" }), "octocat")).toBe(false);
+    expect(canApprove(pr({ state: "MERGED" }), "octocat")).toBe(false);
   });
 });
