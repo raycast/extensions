@@ -1,6 +1,6 @@
 # Craft Docs Search Changelog
 
-## [Original Release] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search Craft docs by title from Raycast.
 - Search Craft docs by tag prefix using `#`.

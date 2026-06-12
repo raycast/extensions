@@ -24,11 +24,6 @@ import {
   searchDocuments,
 } from "./craft-api";
 
-type Preferences = {
-  apiEndpoint: string;
-  apiToken?: string;
-};
-
 type LoadState = {
   isLoading: boolean;
   results: CraftDocumentResult[];
@@ -237,7 +232,7 @@ async function runTagSearch(
 }
 
 function getCraftConnection(): CraftConnection {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchDocs>();
 
   return {
     endpoint: preferences.apiEndpoint,
