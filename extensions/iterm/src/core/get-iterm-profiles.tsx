@@ -38,8 +38,8 @@ export function getItermProfiles(): ItermProfile[] {
     "-extract", PlistPreferences.Keys.PROFILES, "json",
     "-expect", "array",
     "-o", "-", // Output to stdout
-    join(homedir(), PlistPreferences.USER_REL_PATH)
-  ]
+    join(homedir(), PlistPreferences.USER_REL_PATH),
+  ];
 
   try {
     const output = execFileSync("/usr/bin/plutil", plutilArgs, {
