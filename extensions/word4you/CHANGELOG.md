@@ -1,5 +1,9 @@
 # Word4you Changelog
 
+## [Add flash card commmand] - {PR_MERGE_DATE}
+
+- Add new flash card command
+
 ## [Bump default model version] - 2026-01-06
 
 - Bump default model version to use more recent LLM models as default for better performance

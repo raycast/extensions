@@ -135,6 +135,24 @@
         "study",
         "learn"
       ]
+    },
+    {
+      "name": "flash-cards",
+      "title": "Flash Cards",
+      "subtitle": "Word4You",
+      "description": "Review saved words with flashcards (random 10 words)",
+      "mode": "view",
+      "keywords": [
+        "flashcard",
+        "flashcards",
+        "study",
+        "review",
+        "practice",
+        "memory",
+        "remember",
+        "word",
+        "vocabulary"
+      ]
     }
   ],
   "dependencies": {
