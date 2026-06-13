@@ -112,10 +112,15 @@ export default function ViewLogs() {
   const [showDetail, setShowDetail] = useState(true);
   const idCounter = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
+  const reqRef = useRef<http.ClientRequest | null>(null);
 
   const connectToLogs = useCallback(async () => {
     if (abortRef.current) {
       abortRef.current.abort();
+    }
+    if (reqRef.current) {
+      reqRef.current.destroy();
+      reqRef.current = null;
     }
 
     const controller = new AbortController();
@@ -180,6 +185,7 @@ export default function ViewLogs() {
           (res) => {
             if (res.statusCode! < 200 || res.statusCode! >= 300) {
               setIsConnected(false);
+              reqRef.current = null;
               return;
             }
             setIsConnected(true);
@@ -192,12 +198,15 @@ export default function ViewLogs() {
             res.on("end", () => {
               console.log("[Logs] Stream ended");
               setIsConnected(false);
+              reqRef.current = null;
             });
           },
         );
+        reqRef.current = req;
         req.on("error", (err: Error) => {
           console.error("[Logs] Request error:", err);
           setIsConnected(false);
+          reqRef.current = null;
         });
         req.end();
       } else {
@@ -240,6 +249,10 @@ export default function ViewLogs() {
     return () => {
       if (abortRef.current) {
         abortRef.current.abort();
+      }
+      if (reqRef.current) {
+        reqRef.current.destroy();
+        reqRef.current = null;
       }
     };
   }, [connectToLogs]);
