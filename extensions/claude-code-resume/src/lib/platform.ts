@@ -125,6 +125,16 @@ export function psArg(s: string): string {
 }
 
 /**
+ * AppleScript double-quoted string literal: backslash and double-quote are escaped.
+ * Used when interpolating a path/command into an osascript `-e` program (e.g. Ghostty's
+ * `command of cfg to "<...>"`). Backslash first, so the quote-escape's backslash isn't
+ * doubled.
+ */
+export function asStr(s: string): string {
+  return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+/**
  * For the copy fallback: a command the user can paste into the right shell.
  *  - native on Windows → PowerShell: `Set-Location -LiteralPath '<cwd>'; & claude <extra...>`
  *  - otherwise (wsl / mac / Linux) → POSIX: `cd '<cwd>' && claude <extra...>`
@@ -369,25 +379,51 @@ async function launchMacIterm(tmp: string): Promise<void> {
 }
 
 /**
- * Ghostty: no AppleScript dictionary, so drive it via `open`. `-n` forces a new instance
- * so we always get a fresh window; `--args` passes Ghostty CLI flags. `-e` sets
- * `initial-command`, which applies to the *first* surface only — unlike `--command=`,
- * which is the instance-wide `command` config and would re-run claude in every new tab
- * (and in any window macOS restores into the instance). `-e` also auto-enables
- * `quit-after-last-window-closed`, so the spare instance exits once the session ends.
+ * Ghostty: open a new window in the *running* instance via AppleScript (Ghostty 1.3+ ships
+ * a scripting dictionary), so it never spawns a second app process. The old `open -na`
+ * path forced a fresh instance with `-n` every launch, and each instance is its own dock
+ * icon — open ten sessions and ten Ghostty icons pile up in the dock (they only self-clean
+ * once each window closes, via the `quit-after-last-window-closed` that `-e` auto-enables).
+ *
+ * Instead we build a `surface configuration` whose `command` is the login shell sourcing
+ * our temp script, then `new window with configuration` — Ghostty reuses the existing
+ * process, so the dock keeps a single icon. We mirror launchMacIterm/launchMacTerminal,
+ * which already drive their terminals through osascript.
+ *
+ * The scripting dictionary is a preview API (Ghostty 1.3.x) and needs the one-time macOS
+ * Automation (Apple Events) consent the first time Raycast controls Ghostty. If the script
+ * fails — older Ghostty without the dictionary, or consent declined — we fall back to the
+ * old `open -na ... -e` path so launching still works (at the cost of an extra dock icon).
  */
 async function launchMacGhostty(tmp: string, shell: string): Promise<void> {
-  // -e takes an argv (run directly, no /bin/sh wrap since Ghostty 1.2), so pass the
-  // login shell and its -c body as separate arguments.
-  await run("open", [
-    "-na",
-    "Ghostty",
-    "--args",
-    "-e",
-    shell,
-    "-c",
-    `source ${tmp}`,
-  ]);
+  // `command` is a single shell invocation: the login shell sourcing our temp script
+  // (cd → claude → exec shell). -lic isn't needed — the script's `exec <login shell>`
+  // already lands the user in their normal interactive shell once claude exits.
+  const command = `${shArg(shell)} -lc ${shArg(`source ${tmp}`)}`;
+  const script = [
+    'tell application "Ghostty"',
+    "  set cfg to new surface configuration",
+    `  set command of cfg to ${asStr(command)}`,
+    "  new window with configuration cfg",
+    "  activate",
+    "end tell",
+  ].join("\n");
+  try {
+    await run("osascript", ["-e", script]);
+  } catch {
+    // Pre-1.3 Ghostty (no dictionary) or Automation consent declined: fall back to the
+    // legacy new-instance launch. -e takes an argv (run directly, no /bin/sh wrap since
+    // Ghostty 1.2), so pass the login shell and its -c body as separate arguments.
+    await run("open", [
+      "-na",
+      "Ghostty",
+      "--args",
+      "-e",
+      shell,
+      "-c",
+      `source ${tmp}`,
+    ]);
+  }
 }
 
 /** The Windows PowerShell executable to launch (pwsh 7 by default, or Windows PowerShell 5). */

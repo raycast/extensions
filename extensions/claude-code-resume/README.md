@@ -42,7 +42,7 @@
 | WSL Distro | — | e.g. `Ubuntu` (check with `wsl -l -q`) |
 | Windows Shell | — | `pwsh` (default) or `powershell` |
 
-> **Ghostty (known behavior):** Ghostty has no AppleScript interface, so each session opens as a separate app instance — one Dock icon per session. The instance quits on its own when the session's window closes, and new tabs you open inside it are normal shells.
+> **Ghostty:** sessions open as a new window in your running Ghostty (via its scripting interface, Ghostty 1.3+), so the Dock keeps a single icon. The first launch shows a one-time macOS Automation prompt to let Raycast control Ghostty; allow it. On older Ghostty (or if you decline), it falls back to opening a separate instance per session (one Dock icon each).
 
 ### Windows: two backends, auto-detected
 
