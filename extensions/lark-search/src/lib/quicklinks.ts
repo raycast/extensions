@@ -37,12 +37,17 @@ export async function exportQuicklinks(
       );
     })
     .slice(0, limit)
-    .map<Quicklink>((item) => ({
-      name: `飞书 ${typeLabels[item.type]} ${item.title}`,
-      link: item.url as string,
-      iconName: quicklinkIcons[item.type],
-      openWith: shouldOpenInLark(item) ? openWith : undefined,
-    }));
+    .map<Quicklink>((item) => {
+      const appName = item.appName ?? "Lark";
+      return {
+        name: `${appName} ${typeLabels[item.type]} ${item.title}`,
+        link: item.url as string,
+        iconName: quicklinkIcons[item.type],
+        openWith: shouldOpenInLark(item)
+          ? (item.applicationName ?? openWith)
+          : undefined,
+      };
+    });
 
   await mkdir(environment.supportPath, { recursive: true });
   const filePath = join(environment.supportPath, "lark-quicklinks.json");

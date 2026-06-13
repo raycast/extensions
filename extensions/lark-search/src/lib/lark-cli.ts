@@ -1,13 +1,15 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { getPreferenceValues } from "@raycast/api";
+import {
+  AppTarget,
+  getLarkCliIdentities,
+  getLarkCliPath,
+  getEnabledAppTargets,
+  withCliIdentity,
+} from "./preferences";
 import { LarkSearchItem, LarkSearchType, SearchScopeFilter } from "./types";
 
 const execFileAsync = promisify(execFile);
-
-type Preferences = {
-  larkCliPath?: string;
-};
 
 type LarkCommand = {
   type: LarkSearchType;
@@ -35,7 +37,7 @@ const commandByScope: Record<LarkSearchType, LarkCommand[]> = {
   doc: [
     {
       type: "doc",
-      args: ["docs", "+search", "--as", "user"],
+      args: ["docs", "+search"],
       pageSizeArgs: ["--page-size", "20"],
       pageTokenArg: "--page-token",
       maxPages: 5,
@@ -44,7 +46,7 @@ const commandByScope: Record<LarkSearchType, LarkCommand[]> = {
   wiki: [
     {
       type: "wiki",
-      args: ["docs", "+search", "--as", "user"],
+      args: ["docs", "+search"],
       pageSizeArgs: ["--page-size", "20"],
       pageTokenArg: "--page-token",
       maxPages: 5,
@@ -53,7 +55,7 @@ const commandByScope: Record<LarkSearchType, LarkCommand[]> = {
   sheet: [
     {
       type: "sheet",
-      args: ["docs", "+search", "--as", "user"],
+      args: ["docs", "+search"],
       pageSizeArgs: ["--page-size", "20"],
       pageTokenArg: "--page-token",
       maxPages: 5,
@@ -62,14 +64,14 @@ const commandByScope: Record<LarkSearchType, LarkCommand[]> = {
   message: [
     {
       type: "message",
-      args: ["im", "+messages-search", "--as", "user", "--no-reactions"],
+      args: ["im", "+messages-search", "--no-reactions"],
       pageAllArgs: ["--page-all", "--page-limit", "10", "--page-size", "50"],
     },
   ],
   chat: [
     {
       type: "chat",
-      args: ["im", "+chat-search", "--as", "user"],
+      args: ["im", "+chat-search"],
       pageSizeArgs: ["--page-size", "100"],
       pageTokenArg: "--page-token",
       maxPages: 3,
@@ -78,7 +80,7 @@ const commandByScope: Record<LarkSearchType, LarkCommand[]> = {
   contact: [
     {
       type: "contact",
-      args: ["contact", "+search-user", "--as", "user"],
+      args: ["contact", "+search-user"],
       pageSizeArgs: ["--page-size", "30"],
     },
   ],
@@ -94,42 +96,64 @@ export async function searchLark(
   }
 
   const commands = scopes.flatMap((scope) => commandByScope[scope]);
+  const targets = getEnabledAppTargets();
+  const searchTargets =
+    targets.length > 0
+      ? targets
+      : [
+          {
+            key: "lark" as const,
+            productName: "Lark" as const,
+            name: "Lark",
+            bundleId: "com.larksuite.larkApp",
+            cliIdentity: getLarkCliIdentities()[0] ?? "user",
+          },
+        ];
   const settled = await Promise.allSettled(
-    commands.map((command) => runSearchCommand(command, trimmed)),
+    searchTargets.flatMap((target) =>
+      commands.map((command) => runSearchCommand(command, trimmed, target)),
+    ),
   );
 
   const results = settled.flatMap((result) =>
     result.status === "fulfilled" ? result.value : [],
   );
-  return dedupe(results).sort((a, b) => b.rankScore - a.rankScore);
+  return results.sort((a, b) => b.rankScore - a.rankScore);
 }
 
 async function runSearchCommand(
   command: LarkCommand,
   query: string,
+  target: AppTarget,
 ): Promise<LarkSearchItem[]> {
   if (command.pageAllArgs) {
-    return runSingleSearchPage(command, query, command.pageAllArgs).then(
-      (page) => page.items,
-    );
+    return runSingleSearchPage(
+      command,
+      query,
+      target,
+      command.pageAllArgs,
+    ).then((page) => page.items);
   }
 
   if (command.pageTokenArg) {
-    return runPaginatedSearchCommand(command, query);
+    return runPaginatedSearchCommand(command, query, target);
   }
 
-  return runSingleSearchPage(command, query).then((page) => page.items);
+  return runSingleSearchPage(command, query, target).then((page) => page.items);
 }
 
 async function runSingleSearchPage(
   command: LarkCommand,
   query: string,
+  target: AppTarget,
   extraArgs: string[] = command.pageSizeArgs ?? [],
 ): Promise<SearchPage> {
-  const { larkCliPath } = getPreferenceValues<Preferences>();
   const { stdout } = await execFileAsync(
-    larkCliPath || "/opt/homebrew/bin/lark-cli",
-    [...command.args, ...extraArgs, "--query", query, "--json"],
+    getLarkCliPath(),
+    withCliIdentity(
+      [...command.args, ...extraArgs, "--query", query, "--json"],
+      target.cliIdentity,
+    ),
     {
       timeout: command.type === "message" ? 15000 : 10000,
       maxBuffer: 1024 * 1024 * 20,
@@ -144,7 +168,7 @@ async function runSingleSearchPage(
 
   return {
     items: extractItems(parsed.data, command.type).map((raw, index) =>
-      normalizeItem(raw, command.type, index),
+      normalizeItem(raw, command.type, index, target),
     ),
     nextPageToken: pickString(parsed.data, ["page_token"]),
     hasMore: pickString(parsed.data, ["has_more"]) === "true",
@@ -154,6 +178,7 @@ async function runSingleSearchPage(
 async function runPaginatedSearchCommand(
   command: LarkCommand,
   query: string,
+  target: AppTarget,
 ): Promise<LarkSearchItem[]> {
   const items: LarkSearchItem[] = [];
   let pageToken: string | undefined;
@@ -164,7 +189,12 @@ async function runPaginatedSearchCommand(
       ...(command.pageSizeArgs ?? []),
       ...(pageToken ? [command.pageTokenArg as string, pageToken] : []),
     ];
-    const searchPage = await runSingleSearchPage(command, query, extraArgs);
+    const searchPage = await runSingleSearchPage(
+      command,
+      query,
+      target,
+      extraArgs,
+    );
     items.push(...searchPage.items);
 
     if (!searchPage.hasMore || !searchPage.nextPageToken) {
@@ -206,6 +236,7 @@ function normalizeItem(
   raw: unknown,
   type: LarkSearchType,
   index: number,
+  target: AppTarget,
 ): LarkSearchItem {
   const titleHighlighted = pickString(raw, ["title_highlighted"]);
   const summaryHighlighted = pickString(raw, ["summary_highlighted"]);
@@ -276,7 +307,7 @@ function normalizeItem(
     );
 
   return {
-    id: `${type}:${id}`,
+    id: `${target.key}:${type}:${id}`,
     type: itemType,
     title: cleanText(title) ?? title,
     subtitle,
@@ -299,6 +330,10 @@ function normalizeItem(
       "message.create_time",
       "create_time",
     ]),
+    appTargetKey: target.key,
+    appName: target.productName,
+    applicationName: target.name,
+    bundleId: target.bundleId,
     openCount: 0,
     rankScore: 100 - index,
     source: "live",
@@ -443,18 +478,6 @@ function buildDetailMarkdown({
   }
 
   return rows.join("\n\n");
-}
-
-function dedupe(items: LarkSearchItem[]) {
-  const seen = new Set<string>();
-  return items.filter((item) => {
-    const key = item.url ?? item.id;
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
 }
 
 function pickString(value: unknown, paths: string[]) {

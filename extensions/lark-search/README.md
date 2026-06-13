@@ -16,6 +16,16 @@ Search Feishu/Lark docs, messages, chats, and contacts from Raycast.
 - macOS with Raycast installed.
 - `lark-cli` version `1.0.53` or later.
 - A configured `lark-cli` user login.
+- Lark and/or Feishu installed if you want chat, contact, and message results to open directly in the desktop app.
+
+Default application settings:
+
+| App           | App Picker Name    | Bundle ID               | lark-cli Identity |
+| ------------- | ------------------ | ----------------------- | ----------------- |
+| Lark          | `Lark`             | `com.larksuite.larkApp` | `user`            |
+| Feishu / 飞书 | `Feishu` or `飞书` | `com.electron.lark`     | `user`            |
+
+You can enable both desktop apps. If they use different `lark-cli --as` identities, set the identity for each app in extension preferences.
 
 Minimum scopes for the main search command:
 

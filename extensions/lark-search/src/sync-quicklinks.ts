@@ -7,22 +7,21 @@ import {
   showToast,
 } from "@raycast/api";
 import { exportQuicklinks } from "./lib/quicklinks";
+import { getQuicklinkApplicationName } from "./lib/preferences";
 import { getRecents } from "./lib/recent-cache";
 
 type Preferences = {
   quicklinkLimit: string;
-  larkApplicationName: string;
 };
 
 export default async function Command() {
-  const { larkApplicationName, quicklinkLimit } =
-    getPreferenceValues<Preferences>();
+  const { quicklinkLimit } = getPreferenceValues<Preferences>();
   const limit = Math.max(1, Number.parseInt(quicklinkLimit, 10) || 30);
   const recents = await getRecents();
   const { filePath, count } = await exportQuicklinks(
     recents,
     limit,
-    larkApplicationName,
+    getQuicklinkApplicationName(),
   );
 
   await Clipboard.copy(filePath);

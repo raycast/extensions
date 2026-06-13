@@ -1,0 +1,112 @@
+import { getPreferenceValues } from "@raycast/api";
+
+const DEFAULT_LARK_CLI_PATH = "/opt/homebrew/bin/lark-cli";
+const DEFAULT_LARK_BUNDLE_ID = "com.larksuite.larkApp";
+const DEFAULT_FEISHU_BUNDLE_ID = "com.electron.lark";
+const DEFAULT_LARK_APP_NAME = "Lark";
+const DEFAULT_FEISHU_APP_NAME = "Feishu";
+const DEFAULT_CLI_IDENTITY = "user";
+
+type Preferences = {
+  larkCliPath?: string;
+  enableLarkApplication?: boolean;
+  enableFeishuApplication?: boolean;
+  larkApplicationName?: string;
+  feishuApplicationName?: string;
+  larkBundleId?: string;
+  feishuBundleId?: string;
+  larkCliIdentity?: string;
+  feishuCliIdentity?: string;
+};
+
+export type AppTarget = {
+  key: "lark" | "feishu";
+  productName: "Lark" | "Feishu";
+  name: string;
+  bundleId: string;
+  cliIdentity: string;
+};
+
+export function getLarkCliPath() {
+  const { larkCliPath } = getPreferenceValues<Preferences>();
+  return nonEmpty(larkCliPath) ?? DEFAULT_LARK_CLI_PATH;
+}
+
+export function getLarkCliIdentity() {
+  return getEnabledAppTargets()[0]?.cliIdentity ?? DEFAULT_CLI_IDENTITY;
+}
+
+export function getLarkCliIdentities() {
+  const identities = getEnabledAppTargets()
+    .map((target) => target.cliIdentity)
+    .filter(Boolean);
+
+  return unique(identities.length > 0 ? identities : [DEFAULT_CLI_IDENTITY]);
+}
+
+export function getOpenBundleIds() {
+  const bundleIds = getEnabledAppTargets()
+    .map((target) => target.bundleId)
+    .filter(Boolean);
+
+  return bundleIds.length > 0 ? bundleIds : [DEFAULT_LARK_BUNDLE_ID];
+}
+
+export function getQuicklinkApplicationName() {
+  return getEnabledAppTargets()[0]?.name ?? DEFAULT_LARK_APP_NAME;
+}
+
+export function getEnabledAppTargets(): AppTarget[] {
+  const preferences = getPreferenceValues<Preferences>();
+  const targets: AppTarget[] = [];
+
+  if (preferences.enableLarkApplication ?? true) {
+    targets.push({
+      key: "lark",
+      productName: "Lark",
+      name: nonEmpty(preferences.larkApplicationName) ?? DEFAULT_LARK_APP_NAME,
+      bundleId: nonEmpty(preferences.larkBundleId) ?? DEFAULT_LARK_BUNDLE_ID,
+      cliIdentity:
+        nonEmpty(preferences.larkCliIdentity) ?? DEFAULT_CLI_IDENTITY,
+    });
+  }
+
+  if (preferences.enableFeishuApplication ?? false) {
+    targets.push({
+      key: "feishu",
+      productName: "Feishu",
+      name:
+        nonEmpty(preferences.feishuApplicationName) ?? DEFAULT_FEISHU_APP_NAME,
+      bundleId:
+        nonEmpty(preferences.feishuBundleId) ?? DEFAULT_FEISHU_BUNDLE_ID,
+      cliIdentity:
+        nonEmpty(preferences.feishuCliIdentity) ?? DEFAULT_CLI_IDENTITY,
+    });
+  }
+
+  return targets;
+}
+
+export function withCliIdentity(
+  args: string[],
+  identity = getLarkCliIdentity(),
+) {
+  if (args.includes("--as")) {
+    return args;
+  }
+
+  if (args.length < 2) {
+    return [...args, "--as", identity];
+  }
+
+  return [args[0], args[1], "--as", identity, ...args.slice(2)];
+}
+
+function nonEmpty(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function unique(values: string[]) {
+  return [...new Set(values)];
+}

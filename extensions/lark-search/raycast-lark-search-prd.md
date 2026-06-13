@@ -76,7 +76,7 @@ Hot Index 特性：
 - `@raycast.packageName` 和 `@raycast.description` 补充类型、更新时间、群消息更新时间、摘要、部门、邮箱等上下文。
 - `@raycast.icon` 使用脚本目录内 `.assets/*.png` 相对路径，避免绝对 SVG/远端头像导致 Raycast 回退为默认文档图标。
 - 文档类脚本使用 `open URL`，直接浏览器打开。
-- 群聊、私聊、消息脚本使用 `open -b com.larksuite.larkApp URL`，优先直达飞书客户端，减少浏览器中转。
+- 群聊、私聊、消息脚本按用户启用的应用目标依次尝试 `open -b bundleId URL`，支持 Lark 与 Feishu/飞书并存，减少浏览器中转。
 
 用户需要在 Raycast 设置中添加一次 Script Commands 目录：
 
@@ -137,7 +137,10 @@ Search Lark, append /doc /msg /im to filter
 当前支持：
 
 - 文档类结果直接浏览器打开。
-- 群聊、消息、联系人结果优先用飞书桌面端 bundle 打开。
+- 群聊、消息、联系人结果优先用用户启用的 Lark/Feishu 桌面端 bundle 打开。
+- Applications 偏好中提供两套目标：`Lark` 和 `Feishu / 飞书`。
+- Lark 默认 bundle id 为 `com.larksuite.larkApp`，Feishu 默认 bundle id 为 `com.electron.lark`。
+- Lark 与 Feishu 可以同时启用；两者按独立应用目标分别查询和展示，不跨应用合并。
 - 打开后调用 `closeMainWindow({ clearRootSearch: true })`，避免飞书已经跳转但 Raycast 仍停留在前台。
 - 打开结果会写入最近访问缓存，并即时更新 Hot Index。
 - 支持复制链接。
@@ -165,7 +168,9 @@ Search Lark, append /doc /msg /im to filter
 | 打开结果并记录点击             | 已实现                                            |
 | 点击结果后更新 Hot Index       | 已实现                                            |
 | 文档浏览器打开                 | 已实现                                            |
-| 群聊/消息/联系人飞书客户端打开 | 已实现                                            |
+| 群聊/消息/联系人飞书客户端打开 | 已实现，支持 Lark 与 Feishu 多目标                |
+| Lark/Feishu 应用目标配置       | 已实现                                            |
+| 多 lark-cli identity 独立查询  | 已实现                                            |
 | 打开后关闭 Raycast             | 已实现                                            |
 | 复制链接/标题/Raw JSON         | 已实现                                            |
 | 手动创建 Quicklink             | 已实现                                            |
@@ -181,9 +186,9 @@ Search Lark, append /doc /msg /im to filter
 Hot Index 数据来源分层：
 
 - Raycast 内打开过的 Lark 结果。
-- Feed 置顶会话：`lark-cli im +feed-shortcut-list --as user --json`。
-- 最近活跃群/私聊：`lark-cli im +chat-list --as user --types group,p2p --sort-type ByActiveTimeDesc --page-size 80 --json`。
-- 收藏消息：`lark-cli im +flag-list --as user --page-size 20 --json`。
+- Feed 置顶会话：`lark-cli im +feed-shortcut-list --as <identity> --json`。
+- 最近活跃群/私聊：`lark-cli im +chat-list --as <identity> --types group,p2p --sort-type ByActiveTimeDesc --page-size 80 --json`。
+- 收藏消息：`lark-cli im +flag-list --as <identity> --page-size 20 --json`。
 
 排序权重：
 
@@ -191,25 +196,25 @@ Hot Index 数据来源分层：
 - 最近活跃会话次之。
 - 收藏消息进入 Root Search。
 - 本地打开过的结果按点击次数和最近打开时间加权。
-- 最终去重后生成前 50 个可被 Raycast Root Search 索引的 Script Commands。
+- 最终按应用目标分别保留结果，再生成前 50 个可被 Raycast Root Search 索引的 Script Commands。
 
 ## 8. lark-cli Adapter
 
 当前搜索命令：
 
 ```bash
-lark-cli docs +search --as user --query "关键词" --page-size 20 --json
-lark-cli im +messages-search --as user --query "关键词" --no-reactions --page-all --page-limit 10 --page-size 50 --json
-lark-cli im +chat-search --as user --query "关键词" --page-size 100 --json
-lark-cli contact +search-user --as user --query "关键词" --page-size 30 --json
+lark-cli docs +search --as <identity> --query "关键词" --page-size 20 --json
+lark-cli im +messages-search --as <identity> --query "关键词" --no-reactions --page-all --page-limit 10 --page-size 50 --json
+lark-cli im +chat-search --as <identity> --query "关键词" --page-size 100 --json
+lark-cli contact +search-user --as <identity> --query "关键词" --page-size 30 --json
 ```
 
 当前 Hot Index 命令：
 
 ```bash
-lark-cli im +feed-shortcut-list --as user --json
-lark-cli im +chat-list --as user --types group,p2p --sort-type ByActiveTimeDesc --page-size 80 --json
-lark-cli im +flag-list --as user --page-size 20 --json
+lark-cli im +feed-shortcut-list --as <identity> --json
+lark-cli im +chat-list --as <identity> --types group,p2p --sort-type ByActiveTimeDesc --page-size 80 --json
+lark-cli im +flag-list --as <identity> --page-size 20 --json
 ```
 
 基础要求：
@@ -240,7 +245,7 @@ Lark Search Extension
   -> LocalStorage recent cache
   -> LocalStorage query cache
   -> lark-cli live search
-  -> result merge / dedupe / rank
+  -> result merge / rank
   -> open result
   -> record open
   -> update Hot Index

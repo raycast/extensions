@@ -11,20 +11,23 @@ import {
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { scriptIconFileNames, scriptIconForItem } from "./lark-icons";
+import {
+  AppTarget,
+  getEnabledAppTargets,
+  getLarkCliPath,
+  getOpenBundleIds,
+  withCliIdentity,
+} from "./preferences";
 import { getRecents } from "./recent-cache";
 import { LarkSearchItem, LarkSearchType } from "./types";
 
 const execFileAsync = promisify(execFile);
-const DEFAULT_LARK_BUNDLE_ID = "com.larksuite.larkApp";
-const DEFAULT_LARK_CLI_PATH = "/opt/homebrew/bin/lark-cli";
 const DEFAULT_HOT_INDEX_DIRECTORY =
   "~/Documents/Raycast Script Commands/Lark Hot Index";
 
 type Preferences = {
   hotIndexDirectory?: string;
   hotIndexLimit?: string;
-  larkBundleId?: string;
-  larkCliPath?: string;
 };
 
 type HotIndexItem = LarkSearchItem & {
@@ -58,11 +61,24 @@ export async function upsertOpenedItemInHotIndex(item: LarkSearchItem) {
 }
 
 async function collectHotIndexItems() {
+  const targets = getEnabledAppTargets();
+  const hotIndexTargets =
+    targets.length > 0
+      ? targets
+      : [
+          {
+            key: "lark" as const,
+            productName: "Lark" as const,
+            name: "Lark",
+            bundleId: "com.larksuite.larkApp",
+            cliIdentity: "user",
+          },
+        ];
   const [recents, activeChats, feedShortcuts, flags] = await Promise.all([
     getRecents().then((items) => items.map(toRecentHotItem)),
-    getActiveChats().catch(() => []),
-    getFeedShortcuts().catch(() => []),
-    getFlaggedMessages().catch(() => []),
+    collectForTargets(hotIndexTargets, getActiveChats),
+    collectForTargets(hotIndexTargets, getFeedShortcuts),
+    collectForTargets(hotIndexTargets, getFlaggedMessages),
   ]);
 
   return dedupeHotItems([
@@ -71,6 +87,19 @@ async function collectHotIndexItems() {
     ...activeChats,
     ...flags,
   ]).sort((a, b) => b.hotScore - a.hotScore);
+}
+
+async function collectForTargets(
+  targets: AppTarget[],
+  collector: (target: AppTarget) => Promise<HotIndexItem[]>,
+) {
+  const settled = await Promise.allSettled(
+    targets.map((target) => collector(target)),
+  );
+
+  return settled.flatMap((result) =>
+    result.status === "fulfilled" ? result.value : [],
+  );
 }
 
 function toRecentHotItem(item: LarkSearchItem): HotIndexItem {
@@ -85,20 +114,21 @@ function toRecentHotItem(item: LarkSearchItem): HotIndexItem {
   };
 }
 
-async function getActiveChats(): Promise<HotIndexItem[]> {
-  const output = await runLarkCli([
-    "im",
-    "+chat-list",
-    "--as",
-    "user",
-    "--types",
-    "group,p2p",
-    "--sort-type",
-    "ByActiveTimeDesc",
-    "--page-size",
-    "80",
-    "--json",
-  ]);
+async function getActiveChats(target: AppTarget): Promise<HotIndexItem[]> {
+  const output = await runLarkCli(
+    [
+      "im",
+      "+chat-list",
+      "--types",
+      "group,p2p",
+      "--sort-type",
+      "ByActiveTimeDesc",
+      "--page-size",
+      "80",
+      "--json",
+    ],
+    target.cliIdentity,
+  );
   const chats = extractArray(output, ["data.chats", "chats"]);
 
   return chats.map((raw, index) => {
@@ -113,7 +143,9 @@ async function getActiveChats(): Promise<HotIndexItem[]> {
       title: cleanText(title) ?? title,
       subtitle: cleanText(
         [
-          mode === "p2p" ? "最近活跃私聊" : "最近活跃群组",
+          mode === "p2p"
+            ? `${target.productName} 最近活跃私聊`
+            : `${target.productName} 最近活跃群组`,
           pickString(raw, ["description"]),
           pickString(raw, ["update_time", "updated_at", "active_time"]),
         ]
@@ -124,6 +156,10 @@ async function getActiveChats(): Promise<HotIndexItem[]> {
         ? `https://applink.feishu.cn/client/chat/open?openChatId=${encodeURIComponent(chatId)}`
         : undefined,
       updatedAt: undefined,
+      appTargetKey: target.key,
+      appName: target.productName,
+      applicationName: target.name,
+      bundleId: target.bundleId,
       openCount: 0,
       rankScore: 0,
       hotScore: 850 - index,
@@ -133,14 +169,11 @@ async function getActiveChats(): Promise<HotIndexItem[]> {
   });
 }
 
-async function getFeedShortcuts(): Promise<HotIndexItem[]> {
-  const output = await runLarkCli([
-    "im",
-    "+feed-shortcut-list",
-    "--as",
-    "user",
-    "--json",
-  ]);
+async function getFeedShortcuts(target: AppTarget): Promise<HotIndexItem[]> {
+  const output = await runLarkCli(
+    ["im", "+feed-shortcut-list", "--json"],
+    target.cliIdentity,
+  );
   const shortcuts = extractArray(output, [
     "data.shortcuts",
     "data.items",
@@ -163,7 +196,7 @@ async function getFeedShortcuts(): Promise<HotIndexItem[]> {
       type,
       title: cleanText(title) ?? title,
       subtitle: cleanText(
-        ["飞书置顶会话", pickString(detail, ["description"])]
+        [`${target.productName} 置顶会话`, pickString(detail, ["description"])]
           .filter(Boolean)
           .join(" · "),
       ),
@@ -171,6 +204,10 @@ async function getFeedShortcuts(): Promise<HotIndexItem[]> {
         ? `https://applink.feishu.cn/client/chat/open?openChatId=${encodeURIComponent(chatId)}`
         : undefined,
       updatedAt: undefined,
+      appTargetKey: target.key,
+      appName: target.productName,
+      applicationName: target.name,
+      bundleId: target.bundleId,
       openCount: 0,
       rankScore: 0,
       hotScore: 1200 - index,
@@ -204,17 +241,18 @@ function enrichWithActiveChats(
   });
 }
 
-async function getFlaggedMessages(): Promise<HotIndexItem[]> {
-  const output = await runLarkCli([
-    "im",
-    "+flag-list",
-    "--as",
-    "user",
-    "--page-size",
-    "20",
-    "--json",
-    "--enrich-feed-thread=false",
-  ]);
+async function getFlaggedMessages(target: AppTarget): Promise<HotIndexItem[]> {
+  const output = await runLarkCli(
+    [
+      "im",
+      "+flag-list",
+      "--page-size",
+      "20",
+      "--json",
+      "--enrich-feed-thread=false",
+    ],
+    target.cliIdentity,
+  );
   const flags = extractArray(output, [
     "data.items",
     "data.flags",
@@ -252,7 +290,7 @@ async function getFlaggedMessages(): Promise<HotIndexItem[]> {
       title: cleanText(title) ?? title,
       subtitle: cleanText(
         [
-          "收藏消息",
+          `${target.productName} 收藏消息`,
           pickString(raw, ["chat_name", "sender.name"]),
           pickString(raw, [
             "create_time",
@@ -268,6 +306,10 @@ async function getFlaggedMessages(): Promise<HotIndexItem[]> {
       ),
       url,
       updatedAt: undefined,
+      appTargetKey: target.key,
+      appName: target.productName,
+      applicationName: target.name,
+      bundleId: target.bundleId,
       openCount: 0,
       rankScore: 0,
       hotScore: 750 - index,
@@ -277,11 +319,10 @@ async function getFlaggedMessages(): Promise<HotIndexItem[]> {
   });
 }
 
-async function runLarkCli(args: string[]) {
-  const { larkCliPath } = getPreferenceValues<Preferences>();
+async function runLarkCli(args: string[], identity: string) {
   const { stdout } = await execFileAsync(
-    larkCliPath || DEFAULT_LARK_CLI_PATH,
-    args,
+    getLarkCliPath(),
+    withCliIdentity(args, identity),
     {
       timeout: 15000,
       maxBuffer: 1024 * 1024 * 5,
@@ -336,9 +377,8 @@ async function removeExistingScripts(directory: string) {
 }
 
 function scriptContent(item: HotIndexItem) {
-  const { larkBundleId } = getPreferenceValues<Preferences>();
   const command = shouldOpenInLark(item)
-    ? `open -b ${shellQuote(larkBundleId || DEFAULT_LARK_BUNDLE_ID)} ${shellQuote(item.url ?? "")}`
+    ? openInTargetAppCommand(item)
     : `open ${shellQuote(item.url ?? "")}`;
 
   return [
@@ -354,6 +394,19 @@ function scriptContent(item: HotIndexItem) {
     command,
     "",
   ].join("\n");
+}
+
+function openInTargetAppCommand(item: HotIndexItem) {
+  const url = item.url ?? "";
+  const bundleIds = item.bundleId ? [item.bundleId] : getOpenBundleIds();
+
+  return [
+    ...bundleIds.map(
+      (bundleId) =>
+        `/usr/bin/open -b ${shellQuote(bundleId)} ${shellQuote(url)}`,
+    ),
+    `open ${shellQuote(url)}`,
+  ].join(" || ");
 }
 
 function scriptTitle(item: HotIndexItem) {
@@ -394,6 +447,7 @@ function scriptDescription(item: HotIndexItem) {
 
 function scriptPackageName(item: HotIndexItem) {
   const context = scriptDescription(item);
+  const appName = item.appName ?? "Lark";
   const type =
     item.type === "message"
       ? "Msg"
@@ -402,8 +456,8 @@ function scriptPackageName(item: HotIndexItem) {
         : "Chat";
 
   return shorten(
-    cleanText([`Lark ${type}`, context].filter(Boolean).join(" · ")) ??
-      `Lark ${type}`,
+    cleanText([`${appName} ${type}`, context].filter(Boolean).join(" · ")) ??
+      `${appName} ${type}`,
     90,
   );
 }
@@ -417,7 +471,7 @@ function shouldOpenInLark(item: LarkSearchItem) {
 function dedupeHotItems(items: HotIndexItem[]) {
   const seen = new Set<string>();
   return items.filter((item) => {
-    const key = item.url ?? item.id;
+    const key = `${item.appTargetKey ?? item.appName ?? "lark"}:${item.url ?? item.id}`;
     if (seen.has(key) || !item.url) {
       return false;
     }

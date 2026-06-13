@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Clipboard,
   closeMainWindow,
-  getPreferenceValues,
   Icon,
   LaunchProps,
   List,
@@ -24,6 +23,10 @@ import {
   recordSearchResults,
 } from "./lib/recent-cache";
 import { upsertOpenedItemInHotIndex } from "./lib/hot-index";
+import {
+  getOpenBundleIds,
+  getQuicklinkApplicationName,
+} from "./lib/preferences";
 import { parseSearchPrefix } from "./lib/prefix";
 import {
   LarkSearchItem,
@@ -37,14 +40,7 @@ type SearchArguments = {
   query?: string;
 };
 
-type Preferences = {
-  larkBundleId?: string;
-  larkApplicationName?: string;
-};
-
 const execFileAsync = promisify(execFile);
-const DEFAULT_LARK_BUNDLE_ID = "com.larksuite.larkApp";
-const DEFAULT_LARK_APP_NAME = "飞书";
 const PEOPLE_GROUP_PREVIEW_LIMIT = 8;
 const sectionOrder = ["message", "doc", "wiki", "sheet"] as const;
 
@@ -69,10 +65,8 @@ export default function Command(
     [recents, parsed],
   );
   const visibleLiveResults = useMemo(() => {
-    const recentKeys = new Set(
-      visibleRecents.map((item) => item.url ?? item.id),
-    );
-    return liveResults.filter((item) => !recentKeys.has(item.url ?? item.id));
+    const recentKeys = new Set(visibleRecents.map(itemIdentityKey));
+    return liveResults.filter((item) => !recentKeys.has(itemIdentityKey(item)));
   }, [liveResults, visibleRecents]);
   const sections = useMemo(
     () =>
@@ -287,6 +281,7 @@ function SearchItem({
       title={item.title}
       subtitle={subtitle}
       accessories={[
+        item.appName ? { text: item.appName } : {},
         item.source === "recent" ? { text: "最近打开" } : {},
         item.updatedAt ? { text: item.updatedAt } : {},
       ]}
@@ -363,12 +358,12 @@ async function refreshRecents(setRecents: (items: LarkSearchItem[]) => void) {
 }
 
 function buildQuicklink(item: LarkSearchItem) {
-  const { larkApplicationName } = getPreferenceValues<Preferences>();
+  const appName = item.appName ?? "Lark";
   return {
-    name: `飞书 ${typeLabels[item.type]} ${item.title}`,
+    name: `${appName} ${typeLabels[item.type]} ${item.title}`,
     link: item.url ?? "",
     application: shouldOpenInLark(item)
-      ? larkApplicationName || DEFAULT_LARK_APP_NAME
+      ? (item.applicationName ?? getQuicklinkApplicationName())
       : undefined,
   };
 }
@@ -383,19 +378,24 @@ async function openLarkItem(item: LarkSearchItem) {
     return;
   }
 
-  const { larkBundleId } = getPreferenceValues<Preferences>();
+  const bundleIds = item.bundleId ? [item.bundleId] : getOpenBundleIds();
 
-  try {
-    await execFileAsync(
-      "/usr/bin/open",
-      ["-b", larkBundleId || DEFAULT_LARK_BUNDLE_ID, item.url],
-      {
+  for (const bundleId of bundleIds) {
+    try {
+      await execFileAsync("/usr/bin/open", ["-b", bundleId, item.url], {
         timeout: 5000,
-      },
-    );
-  } catch {
-    await open(item.url);
+      });
+      return;
+    } catch {
+      continue;
+    }
   }
+
+  await open(item.url);
+}
+
+function itemIdentityKey(item: LarkSearchItem) {
+  return `${item.appTargetKey ?? item.appName ?? "lark"}:${item.url ?? item.id}`;
 }
 
 function shouldOpenInLark(item: LarkSearchItem) {

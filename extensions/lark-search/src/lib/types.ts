@@ -19,6 +19,10 @@ export type LarkSearchItem = {
   detailMarkdown?: string;
   url?: string;
   updatedAt?: string;
+  appTargetKey?: "lark" | "feishu";
+  appName?: string;
+  applicationName?: string;
+  bundleId?: string;
   lastOpenedAt?: string;
   openCount: number;
   rankScore: number;

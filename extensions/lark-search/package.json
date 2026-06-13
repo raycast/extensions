@@ -57,7 +57,8 @@
       "description": "Path to the lark-cli executable.",
       "type": "textfield",
       "required": false,
-      "default": "/opt/homebrew/bin/lark-cli"
+      "default": "/opt/homebrew/bin/lark-cli",
+      "placeholder": "/opt/homebrew/bin/lark-cli"
     },
     {
       "name": "quicklinkLimit",
@@ -65,23 +66,78 @@
       "description": "Maximum number of recently opened items to export as Quicklinks.",
       "type": "textfield",
       "required": false,
-      "default": "30"
+      "default": "30",
+      "placeholder": "30"
+    },
+    {
+      "name": "enableLarkApplication",
+      "title": "Lark Application",
+      "description": "Enable Lark as a desktop app target for opening chats, contacts, and messages.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use Lark"
+    },
+    {
+      "name": "larkApplicationName",
+      "title": "Lark App",
+      "description": "Lark application used for Raycast Quicklinks.",
+      "type": "appPicker",
+      "required": false,
+      "default": "Lark"
     },
     {
       "name": "larkBundleId",
       "title": "Lark Bundle ID",
-      "description": "Bundle identifier used to open Lark/Feishu links directly in the desktop app.",
+      "description": "Bundle identifier used to open Lark links directly in the desktop app.",
       "type": "textfield",
       "required": false,
-      "default": "com.larksuite.larkApp"
+      "default": "com.larksuite.larkApp",
+      "placeholder": "com.larksuite.larkApp"
     },
     {
-      "name": "larkApplicationName",
-      "title": "Lark Application Name",
-      "description": "Application name used when creating Raycast Quicklinks.",
+      "name": "larkCliIdentity",
+      "title": "Lark lark-cli Identity",
+      "description": "lark-cli identity passed to --as when Lark is the selected target.",
       "type": "textfield",
       "required": false,
-      "default": "飞书"
+      "default": "user",
+      "placeholder": "user"
+    },
+    {
+      "name": "enableFeishuApplication",
+      "title": "Feishu Application",
+      "description": "Enable Feishu/飞书 as a desktop app target for opening chats, contacts, and messages.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Feishu / 飞书"
+    },
+    {
+      "name": "feishuApplicationName",
+      "title": "Feishu App",
+      "description": "Feishu/飞书 application used for Raycast Quicklinks.",
+      "type": "appPicker",
+      "required": false,
+      "default": "Feishu"
+    },
+    {
+      "name": "feishuBundleId",
+      "title": "Feishu Bundle ID",
+      "description": "Bundle identifier used to open Feishu/飞书 links directly in the desktop app.",
+      "type": "textfield",
+      "required": false,
+      "default": "com.electron.lark",
+      "placeholder": "com.electron.lark"
+    },
+    {
+      "name": "feishuCliIdentity",
+      "title": "Feishu lark-cli Identity",
+      "description": "lark-cli identity passed to --as when Feishu is the selected target.",
+      "type": "textfield",
+      "required": false,
+      "default": "user",
+      "placeholder": "user"
     },
     {
       "name": "hotIndexLimit",
@@ -89,7 +145,8 @@
       "description": "Maximum number of Script Commands generated for Raycast root search.",
       "type": "textfield",
       "required": false,
-      "default": "50"
+      "default": "50",
+      "placeholder": "50"
     },
     {
       "name": "hotIndexDirectory",
@@ -97,7 +154,8 @@
       "description": "Folder containing generated Lark Script Commands. Add this folder to Raycast Script Commands once.",
       "type": "textfield",
       "required": false,
-      "default": "~/Documents/Raycast Script Commands/Lark Hot Index"
+      "default": "~/Documents/Raycast Script Commands/Lark Hot Index",
+      "placeholder": "~/Documents/Raycast Script Commands/Lark Hot Index"
     }
   ],
   "scripts": {
