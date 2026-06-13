@@ -80,12 +80,8 @@ function profileTypeLabel(type: string): string {
 
 // --- Main Command ---
 
-interface Arguments {
-  shortcut?: string;
-}
-
 export default function ManageProfiles(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.ManageProfiles }>,
 ) {
   const [profiles, setProfiles] = useState<ProfilesConfig>({ items: [] });
   const [isLoading, setIsLoading] = useState(true);

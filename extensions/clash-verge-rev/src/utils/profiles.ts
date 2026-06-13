@@ -4,6 +4,17 @@ import * as os from "os";
 import * as yaml from "js-yaml";
 import { exec } from "child_process";
 
+/**
+ * Atomic file write: writes to a temp file first, then renames.
+ * fs.renameSync is atomic on the same filesystem, so the target
+ * file is never left empty or partial if the process is interrupted.
+ */
+function atomicWriteFileSync(filePath: string, data: string): void {
+  const tmpPath = filePath + ".tmp";
+  fs.writeFileSync(tmpPath, data, "utf-8");
+  fs.renameSync(tmpPath, filePath);
+}
+
 // --- Platform ---
 
 /** Returns true when running on macOS */
@@ -102,7 +113,7 @@ export function activateProfile(uid: string): void {
 
   profiles.current = uid;
   const yamlStr = yaml.dump(profiles, { lineWidth: -1 });
-  fs.writeFileSync(filePath, yamlStr, "utf-8");
+  atomicWriteFileSync(filePath, yamlStr);
 }
 
 /** Get the currently active profile */
@@ -182,10 +193,9 @@ export function saveShortcut(uid: string, shortcut: string): void {
   } else {
     delete shortcuts[uid];
   }
-  fs.writeFileSync(
+  atomicWriteFileSync(
     getShortcutsPath(),
     JSON.stringify(shortcuts, null, 2),
-    "utf-8",
   );
 }
 
@@ -278,7 +288,7 @@ export function switchProfileFast(profileFile: string): string {
       noRefs: true,
       sortKeys: false,
     });
-  fs.writeFileSync(clashVergePath, yamlStr, "utf-8");
+  atomicWriteFileSync(clashVergePath, yamlStr);
 
   // Return normalized path for Mihomo reload
   return clashVergePath.replace(/\\/g, "/");
@@ -497,7 +507,7 @@ export async function updateProfileContent(uid: string): Promise<void> {
   // Save profiles.yaml
   profiles.items[profileIndex] = profile;
   const yamlStr = yaml.dump(profiles, { lineWidth: -1 });
-  fs.writeFileSync(filePath, yamlStr, "utf-8");
+  atomicWriteFileSync(filePath, yamlStr);
 }
 
 /**
@@ -522,5 +532,5 @@ export function updateProfileMetadata(
   };
 
   const yamlStr = yaml.dump(profiles, { lineWidth: -1 });
-  fs.writeFileSync(filePath, yamlStr, "utf-8");
+  atomicWriteFileSync(filePath, yamlStr);
 }

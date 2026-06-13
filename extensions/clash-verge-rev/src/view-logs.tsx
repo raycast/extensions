@@ -169,7 +169,7 @@ export default function ViewLogs() {
       // On macOS with Unix socket, use http.request for streaming
       const parsedUrl = new URL(url);
       const socketPath = (() => {
-        const prefs = getPreferenceValues<{ controllerSocket: string }>();
+        const prefs = getPreferenceValues<Pick<Preferences, "controllerSocket">>();
         return prefs.controllerSocket || "/tmp/verge/verge-mihomo.sock";
       })();
       if (process.platform === "darwin" && fs.existsSync(socketPath)) {
