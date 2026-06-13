@@ -80,6 +80,7 @@ export default function ViewConnections() {
   const prevGlobalRef = useRef<{ down: number; up: number } | null>(null);
   const lastSnapshotTimeRef = useRef<number>(Date.now());
   const wsRef = useRef<WebSocket | null>(null);
+  const pollGenerationRef = useRef(0);
 
   // State for global traffic stats
   const [traffic, setTraffic] = useState({
@@ -109,6 +110,9 @@ export default function ViewConnections() {
         setErrorMsg(null);
         prevGlobalRef.current = null;
         lastSnapshotTimeRef.current = Date.now();
+
+        // Bump generation so any stale poll().then() self-exits
+        const generation = ++pollGenerationRef.current;
 
         const pollInterval = streamConfig.pollInterval || 1000;
         const pollUrl = streamConfig.url;
@@ -185,22 +189,15 @@ export default function ViewConnections() {
           }
         };
 
-        // Start polling loop
-        const pollLoop = () => {
-          let timer: ReturnType<typeof setTimeout>;
-          if (wsRef.current) {
-            // Reuse wsRef to track the polling timer
-            wsRef.current = { close: () => clearTimeout(timer) } as unknown as WebSocket;
-          }
-          const runPoll = () => {
-            poll().then(() => {
-              timer = setTimeout(runPoll, pollInterval);
-              wsRef.current = { close: () => clearTimeout(timer) } as unknown as WebSocket;
-            });
-          };
-          runPoll();
+        // Start polling loop — only continue if generation still matches
+        const runPoll = () => {
+          poll().then(() => {
+            if (pollGenerationRef.current === generation) {
+              setTimeout(runPoll, pollInterval);
+            }
+          });
         };
-        pollLoop();
+        runPoll();
         return;
       }
 
@@ -324,6 +321,7 @@ export default function ViewConnections() {
   useEffect(() => {
     connect();
     return () => {
+      pollGenerationRef.current++;
       if (wsRef.current) {
         wsRef.current.close();
       }
