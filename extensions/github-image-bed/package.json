@@ -1,0 +1,206 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-image-bed",
+  "title": "GitHub Image Bed",
+  "description": "Upload images to GitHub as an image hosting service with CDN acceleration support.",
+  "icon": "image.png",
+  "author": "zh_chen",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-from-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Upload image from clipboard to GitHub",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "imageName",
+          "type": "text",
+          "required": false,
+          "placeholder": "Image name"
+        }
+      ]
+    },
+    {
+      "name": "upload-from-clipboard-with-options",
+      "title": "Upload from Clipboard with Options",
+      "description": "Upload clipboard image and choose output format",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "imageName",
+          "type": "text",
+          "required": false,
+          "placeholder": "Image name"
+        }
+      ]
+    },
+    {
+      "name": "upload-screenshot",
+      "title": "Upload Screenshot",
+      "description": "Take screenshot and upload to GitHub",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "imageName",
+          "type": "text",
+          "required": false,
+          "placeholder": "Image name"
+        }
+      ]
+    },
+    {
+      "name": "upload-screenshot-with-options",
+      "title": "Upload Screenshot with Options",
+      "description": "Take screenshot, upload, and choose output format",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "imageName",
+          "type": "text",
+          "required": false,
+          "placeholder": "Image name"
+        }
+      ]
+    },
+    {
+      "name": "choose-format",
+      "title": "Choose Format",
+      "description": "Choose output format for uploaded image URL",
+      "mode": "view"
+    },
+    {
+      "name": "upload-from-file",
+      "title": "Upload from File",
+      "description": "Select image file and upload to GitHub",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "imageName",
+          "type": "text",
+          "required": false,
+          "placeholder": "Image name"
+        }
+      ]
+    },
+    {
+      "name": "switch-folder",
+      "title": "Switch Folder",
+      "description": "Switch the active upload folder",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "GitHub Token",
+      "type": "password",
+      "required": true,
+      "description": "Your GitHub Personal Access Token with repo scope."
+    },
+    {
+      "name": "owner",
+      "title": "Repository Owner",
+      "type": "textfield",
+      "required": true,
+      "description": "Owner of the GitHub repository (username or organization)."
+    },
+    {
+      "name": "repo",
+      "title": "Repository Name",
+      "type": "textfield",
+      "required": true,
+      "description": "Name of the GitHub repository."
+    },
+    {
+      "name": "branch",
+      "title": "Branch",
+      "type": "textfield",
+      "required": false,
+      "default": "main",
+      "description": "Branch to upload images to."
+    },
+    {
+      "name": "path",
+      "title": "Upload Path",
+      "type": "textfield",
+      "required": false,
+      "default": "images/",
+      "description": "Folder path(s) within the repository. Separate multiple paths with commas (e.g., images/, screenshots/). The first path is used by default."
+    },
+    {
+      "name": "email",
+      "title": "Committer Email",
+      "type": "textfield",
+      "required": true,
+      "description": "Email address for commit messages."
+    },
+    {
+      "name": "cdnUrl",
+      "title": "CDN URL Template",
+      "type": "textfield",
+      "required": false,
+      "default": "https://fastly.jsdelivr.net/gh/{owner}/{repo}@{branch}/{path}",
+      "description": "CDN URL template. Use {owner}, {repo}, {branch}, {path} as placeholders."
+    },
+    {
+      "name": "defaultFormat",
+      "title": "Default Output Format",
+      "type": "dropdown",
+      "required": false,
+      "default": "markdown",
+      "description": "Default format for copied URL.",
+      "data": [
+        {
+          "title": "Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "Direct URL",
+          "value": "url"
+        },
+        {
+          "title": "HTML",
+          "value": "html"
+        }
+      ]
+    },
+    {
+      "name": "filenameTemplate",
+      "title": "Filename Template",
+      "type": "textfield",
+      "required": false,
+      "default": "{yyyy}-{MM}-{dd}_{hh}{mm}{ss}_{name}",
+      "description": "Template for uploaded image filename. Placeholders: {yyyy}, {yy}, {MM}, {dd}, {hh}, {mm}, {ss}, {sss}, {name}. Leave {name} for argument input."
+    }
+  ],
+  "dependencies": {
+    "@octokit/core": "^4.0.5",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^2.2.2",
+    "dayjs": "^1.11.5",
+    "file-type": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
