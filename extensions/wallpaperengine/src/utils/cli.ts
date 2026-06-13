@@ -40,6 +40,7 @@ export async function execWallpaperEngine(args: string[]): Promise<string> {
 
   try {
     await execAsync(command);
+    return "";
   } catch (error) {
     if (error && typeof error === "object") {
       const err = error as {
