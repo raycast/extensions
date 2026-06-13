@@ -28,6 +28,29 @@ import {
 import ProfileForm from "./profile-form";
 import { reloadConfigs } from "./utils/api";
 
+// --- Update Subscription ---
+
+const handleUpdate = async (profile: ProfileItem) => {
+  if (profile.type !== "remote" || !profile.url) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Not a remote subscription",
+    });
+    return;
+  }
+  try {
+    await showToast({ style: Toast.Style.Animated, title: "Updating subscription..." });
+    await updateProfileContent(profile.uid);
+    await showToast({ style: Toast.Style.Success, title: "Subscription updated" });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to update subscription",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 // --- Type icons ---
 
 function profileTypeIcon(type: string): Icon {
@@ -211,6 +234,14 @@ export default function ManageProfiles(
                         />
                       }
                     />
+                    {profile.url && (
+                      <Action
+                        title="Update Subscription"
+                        icon={Icon.ArrowDown}
+                        shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
+                        onAction={() => handleUpdate(profile)}
+                      />
+                    )}
                     {profile.url && (
                       <Action
                         title="Copy Subscription URL"
