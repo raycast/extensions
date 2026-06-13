@@ -311,8 +311,9 @@ $conn.Close()
               try {
                 await fs.promises.rm(src, { recursive: true });
               } catch (rmError) {
+                await fs.promises.rm(destPath, { recursive: true }).catch(() => {});
                 throw new Error(
-                  `File copied, but failed to remove original: ${rmError instanceof Error ? rmError.message : String(rmError)}`,
+                  `Move failed (could not remove original file). Cleanup attempted. Error: ${rmError instanceof Error ? rmError.message : String(rmError)}`,
                 );
               }
             } else {
@@ -404,7 +405,14 @@ $conn.Close()
           const e = error as NodeJS.ErrnoException;
           if (e.code === "EXDEV") {
             await fs.promises.cp(src, destPath, { recursive: true });
-            await fs.promises.rm(src, { recursive: true });
+            try {
+              await fs.promises.rm(src, { recursive: true });
+            } catch (rmError) {
+              await fs.promises.rm(destPath, { recursive: true }).catch(() => {});
+              throw new Error(
+                `Rename failed (could not remove original file). Cleanup attempted. Error: ${rmError instanceof Error ? rmError.message : String(rmError)}`,
+              );
+            }
           } else {
             throw e;
           }

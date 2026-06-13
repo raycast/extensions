@@ -44,7 +44,7 @@ export default function HistoryCommand() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search past actions...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search past actions..." isShowingDetail>
       {history.length === 0 ? (
         <List.EmptyView
           title="No History"

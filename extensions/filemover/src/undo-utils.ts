@@ -82,7 +82,12 @@ export async function performUndo(specificId?: string) {
               const e = error as NodeJS.ErrnoException;
               if (e.code === "EXDEV") {
                 await fs.promises.cp(file.newPath, file.originalPath, { recursive: true });
-                await fs.promises.rm(file.newPath, { recursive: true });
+                try {
+                  await fs.promises.rm(file.newPath, { recursive: true });
+                } catch (rmError) {
+                  await fs.promises.rm(file.originalPath, { recursive: true }).catch(() => {});
+                  throw rmError;
+                }
               } else {
                 throw e;
               }
