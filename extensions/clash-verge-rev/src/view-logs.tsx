@@ -184,7 +184,7 @@ export default function ViewLogs() {
       };
 
       // Check if body is a Node.js Readable stream (node-fetch case)
-      if (body instanceof Readable || typeof (body as Record<string, unknown>).on === "function") {
+      if (body instanceof Readable || typeof (body as unknown as Record<string, unknown>).on === "function") {
         const nodeStream = body as Readable;
         nodeStream.setEncoding("utf-8");
         nodeStream.on("data", (chunk: string) => {
@@ -200,7 +200,7 @@ export default function ViewLogs() {
         });
       } else {
         // Web ReadableStream (browser-style fetch)
-        const reader = (body as ReadableStream).getReader();
+        const reader = (body as unknown as ReadableStream<Uint8Array>).getReader();
         if (!reader) {
           throw new Error("Cannot read response body");
         }

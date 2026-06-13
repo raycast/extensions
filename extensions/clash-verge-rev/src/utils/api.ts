@@ -79,12 +79,11 @@ function getUnixSocketAgent(): http.Agent | null {
   }
 
   if (!socketAgent) {
-    socketAgent = new http.Agent({
-      createConnection: () => {
-        const socket = net.createConnection(socketPath);
-        return socket;
-      },
-    });
+    socketAgent = new http.Agent();
+    const origCreateConnection = socketAgent.createConnection.bind(socketAgent);
+    socketAgent.createConnection = () => {
+      return net.createConnection(socketPath);
+    };
   }
   return socketAgent;
 }

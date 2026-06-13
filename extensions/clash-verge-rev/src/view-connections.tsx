@@ -133,7 +133,7 @@ export default function ViewConnections() {
             const res = await fetch(pollUrl, fetchOpts);
             if (!res.ok) return;
 
-            const data = await res.json();
+            const data = (await res.json()) as Record<string, unknown>;
             if (data.connections) {
               const newConnections = data.connections as ConnectionItem[];
               const now = Date.now();
@@ -159,8 +159,8 @@ export default function ViewConnections() {
               }
 
               // Calculate global speed
-              const currentTotalDown = data.downloadTotal || 0;
-              const currentTotalUp = data.uploadTotal || 0;
+              const currentTotalDown = (data.downloadTotal as number) || 0;
+              const currentTotalUp = (data.uploadTotal as number) || 0;
               let globalDownSpeed = 0;
               let globalUpSpeed = 0;
 
@@ -201,17 +201,18 @@ export default function ViewConnections() {
 
         // Start polling loop
         const pollLoop = () => {
-          poll().then(() => {
-            if (wsRef.current) {
-              // Reuse wsRef to track the polling timer
-              // @ts-expect-error - storing timer reference for cleanup
-              wsRef.current = { close: () => clearTimeout(timer) } as WebSocket;
-            }
-            const timer = setTimeout(pollLoop, pollInterval);
-            // Update ref with new timer for cleanup
-            // @ts-expect-error - storing timer reference for cleanup
-            wsRef.current = { close: () => clearTimeout(timer) } as WebSocket;
-          });
+          let timer: ReturnType<typeof setTimeout>;
+          if (wsRef.current) {
+            // Reuse wsRef to track the polling timer
+            wsRef.current = { close: () => clearTimeout(timer) } as unknown as WebSocket;
+          }
+          const runPoll = () => {
+            poll().then(() => {
+              timer = setTimeout(runPoll, pollInterval);
+              wsRef.current = { close: () => clearTimeout(timer) } as unknown as WebSocket;
+            });
+          };
+          runPoll();
         };
         pollLoop();
         return;
