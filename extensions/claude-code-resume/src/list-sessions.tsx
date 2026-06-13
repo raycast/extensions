@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { backendLabel, buildCommand, launchInteractive } from "./lib/platform";
-import { loadSessions, Session } from "./lib/sessions";
+import { clip, loadSessions, Session } from "./lib/sessions";
 
 /** One-line blockquote (callers pass already-clipped, single-line text). */
 const quote = (s: string) => `> ${s}`;
@@ -38,12 +38,6 @@ function detailMarkdown(
   parts.push(`**Directory** \`${s.cwd}\`\n\n${env}**Session** \`${s.id}\``);
   parts.push(`**Resume**\n\n\`\`\`bash\n${resumeCmd}\n\`\`\``);
   return parts.join("\n\n");
-}
-
-/** Collapse whitespace and truncate with an ellipsis. */
-function clip(s: string, n: number): string {
-  const t = s.replace(/\s+/g, " ").trim();
-  return t.length > n ? t.slice(0, n - 1) + "…" : t;
 }
 
 /**

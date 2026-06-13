@@ -29,7 +29,7 @@ function contentText(content: unknown): string {
 }
 
 /** Collapse whitespace and truncate with an ellipsis. */
-function clip(s: string, n: number): string {
+export function clip(s: string, n: number): string {
   const t = s.replace(/\s+/g, " ").trim();
   return t.length > n ? t.slice(0, n - 1) + "…" : t;
 }

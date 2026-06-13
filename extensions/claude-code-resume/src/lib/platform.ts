@@ -13,19 +13,13 @@ import * as os from "os";
 import * as path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Prefs {
-  claudeHome?: string;
-  claudeBin?: string;
-  wslDistro?: string;
-  winShell?: string;
-  macTerminal?: string;
-}
-
 export const isWindows = process.platform === "win32";
 export const isMac = process.platform === "darwin";
 
-export function prefs(): Prefs {
-  return getPreferenceValues<Prefs>();
+// Preference types are auto-generated from package.json into raycast-env.d.ts
+// (the global `Preferences` type), so a hand-written interface can't drift out of sync.
+export function prefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 /**
@@ -165,6 +159,33 @@ function run(file: string, args: string[]): Promise<void> {
   });
 }
 
+const TEMP_SCRIPT_PREFIX = "raycast-claude-";
+const TEMP_SCRIPT_TTL_MS = 60_000;
+
+/**
+ * Remove leftover launch scripts from previous runs.
+ *
+ * Each launch writes a temp `.sh`/`.ps1` that the terminal sources *after* we return, so we
+ * can't delete the one we just wrote (we'd race the read). Instead we sweep on every launch:
+ * any script older than the grace period has certainly been sourced already. This keeps the
+ * OS temp dir from accumulating raycast-claude-* files over time. Best-effort and silent.
+ */
+async function sweepOldTempScripts(): Promise<void> {
+  const dir = os.tmpdir();
+  const now = Date.now();
+  for (const name of await readDirSafe(dir)) {
+    if (!name.startsWith(TEMP_SCRIPT_PREFIX)) continue;
+    if (!name.endsWith(".sh") && !name.endsWith(".ps1")) continue;
+    const file = path.join(dir, name);
+    try {
+      const stat = await fs.stat(file);
+      if (now - stat.mtimeMs > TEMP_SCRIPT_TTL_MS) await fs.unlink(file);
+    } catch {
+      // ignore — already gone, or locked by a still-starting terminal
+    }
+  }
+}
+
 /**
  * Actually launch an interactive claude session (the primary action).
  * Throws on failure, so the caller can fall back to copying.
@@ -177,6 +198,7 @@ export async function launchInteractive(
   extra: string[] = [],
   backend: Backend = "native",
 ): Promise<void> {
+  await sweepOldTempScripts();
   if (isWindows && backend === "wsl") return launchWsl(cwd, extra);
   if (isWindows) return launchWindowsNative(cwd, extra);
   return launchMac(cwd, extra);
@@ -196,7 +218,10 @@ async function launchWsl(
   const inner = `${shArg(claudeBin())}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
   // cd to cwd → launch claude → exec the user's shell so the window stays open.
   const body = `${cwd ? `cd ${shArg(cwd)} && ` : ""}${inner}\nexec ${shArg(shell)}\n`;
-  const winTmp = path.join(os.tmpdir(), `raycast-claude-${Date.now()}.sh`);
+  const winTmp = path.join(
+    os.tmpdir(),
+    `${TEMP_SCRIPT_PREFIX}${Date.now()}.sh`,
+  );
   await fs.writeFile(winTmp, body, { encoding: "utf8" });
   const wslPath = winToWslPath(winTmp);
   // <shell> -lic = login + interactive init → .zprofile/.zshrc etc are read and
@@ -253,7 +278,7 @@ async function launchWindowsNative(
     cwd ? `Set-Location -LiteralPath ${psArg(cwd)}` : "",
     `& ${psArg(claudeBin())}${extra.length ? " " + extra.map(psArg).join(" ") : ""}`,
   ].filter(Boolean);
-  const tmp = path.join(os.tmpdir(), `raycast-claude-${Date.now()}.ps1`);
+  const tmp = path.join(os.tmpdir(), `${TEMP_SCRIPT_PREFIX}${Date.now()}.ps1`);
   await fs.writeFile(tmp, lines.join("\r\n") + "\r\n", { encoding: "utf8" });
   const shell = winShell();
   const shellArgs = [
@@ -290,7 +315,7 @@ async function launchMac(
   const inner = `${shArg(claudeBin())}${extra.length ? " " + extra.map(shArg).join(" ") : ""}`;
   const shell = process.env.SHELL || "/bin/zsh";
   const body = `${cwd ? `cd ${shArg(cwd)} && ` : ""}${inner}\nexec ${shArg(shell)}\n`;
-  const tmp = path.join(os.tmpdir(), `raycast-claude-${Date.now()}.sh`);
+  const tmp = path.join(os.tmpdir(), `${TEMP_SCRIPT_PREFIX}${Date.now()}.sh`);
   await fs.writeFile(tmp, body, { mode: 0o755 });
   switch (macTerminal()) {
     case "iterm":
