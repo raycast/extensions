@@ -8,15 +8,19 @@ export default async function Command() {
     return;
   }
 
-  const mappingStr = await LocalStorage.getItem<string>('latest_mapping');
+  const mappingStr = await LocalStorage.getItem<string>("latest_mapping");
   if (!mappingStr) {
     await showHUD("No active mapping found to rehydrate");
     return;
   }
 
-  const mapping = JSON.parse(mappingStr);
-  const restoredText = rehydrateText(clipboardText, mapping);
-  
-  await Clipboard.copy(restoredText);
-  await showHUD("Original Data Restored 💧");
+  try {
+    const mapping = JSON.parse(mappingStr);
+    const restoredText = rehydrateText(clipboardText, mapping);
+
+    await Clipboard.copy(restoredText);
+    await showHUD("Original Data Restored 💧");
+  } catch (error) {
+    await showHUD("Error: Failed to parse mapping data.");
+  }
 }
