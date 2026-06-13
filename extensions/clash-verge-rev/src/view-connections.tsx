@@ -15,14 +15,8 @@ import {
   getConnectionStreamConfig,
   closeConnection,
   closeAllConnections,
-  getProxies,
+  httpRequest,
 } from "./utils/api";
-import fetch from "node-fetch";
-
-interface Preferences {
-  secret?: string;
-  defaultSortOrder?: string;
-}
 
 interface ConnectionItem {
   id: string;
@@ -71,7 +65,7 @@ function formatSpeed(bytesPerSec: number): string {
 }
 
 export default function ViewConnections() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ViewConnections>();
   const [connections, setConnections] = useState<ConnectionItem[]>([]);
   const [speeds, setSpeeds] = useState<Record<string, Speed>>({});
   const [isConnected, setIsConnected] = useState(false);
@@ -119,18 +113,10 @@ export default function ViewConnections() {
         const pollInterval = streamConfig.pollInterval || 1000;
         const pollUrl = streamConfig.url;
         const pollHeaders = streamConfig.headers;
-        const pollAgent = streamConfig.agent;
 
         const poll = async () => {
           try {
-            const fetchOpts: Record<string, unknown> = {
-              method: "GET",
-              headers: pollHeaders,
-            };
-            if (pollAgent) {
-              fetchOpts.agent = pollAgent;
-            }
-            const res = await fetch(pollUrl, fetchOpts);
+            const res = await httpRequest(pollUrl, "GET", pollHeaders);
             if (!res.ok) return;
 
             const data = (await res.json()) as Record<string, unknown>;

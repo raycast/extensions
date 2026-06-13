@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import * as http from "http";
 import * as net from "net";
 import * as fs from "fs";
@@ -49,13 +48,9 @@ function isMacOS(): boolean {
   return process.platform === "darwin";
 }
 
-// --- Preferences ---
+// --- Preferences (auto-generated from raycast-env.d.ts) ---
 
-interface Preferences {
-  controllerPort: string;
-  controllerSocket: string;
-  secret: string;
-}
+type ApiPreferences = Pick<Preferences, "controllerPort" | "controllerSocket" | "secret">;
 
 // --- Unix Socket Agent for macOS ---
 
@@ -70,7 +65,7 @@ let socketAgent: http.Agent | null = null;
  * Returns null if Unix socket is not available.
  */
 function getUnixSocketAgent(): http.Agent | null {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ApiPreferences>();
   const socketPath = prefs.controllerSocket || DEFAULT_MACOS_SOCKET;
 
   // Check if socket file exists
@@ -80,7 +75,6 @@ function getUnixSocketAgent(): http.Agent | null {
 
   if (!socketAgent) {
     socketAgent = new http.Agent();
-    const origCreateConnection = socketAgent.createConnection.bind(socketAgent);
     socketAgent.createConnection = () => {
       return net.createConnection(socketPath);
     };
@@ -91,13 +85,13 @@ function getUnixSocketAgent(): http.Agent | null {
 // --- API Base & Headers ---
 
 function getApiBase(): string {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ApiPreferences>();
   const port = prefs.controllerPort || "9097";
   return `http://127.0.0.1:${port}`;
 }
 
 function getHeaders(): Record<string, string> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ApiPreferences>();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -108,31 +102,78 @@ function getHeaders(): Record<string, string> {
 }
 
 /**
- * Get fetch options with Unix socket agent on macOS, or plain options on Windows.
- * On macOS, if Unix socket is available, it is preferred over TCP.
+ * Make an HTTP request, routing through Unix socket on macOS or using native fetch otherwise.
+ * Returns a Response-like object with json() method.
  */
-function getFetchOptions(
+export async function httpRequest(
+  urlStr: string,
   method: string,
   headers: Record<string, string>,
   body?: string,
-): Record<string, unknown> {
-  const opts: Record<string, string | Record<string, string> | http.Agent> = {
-    method,
-    headers,
+): Promise<{ ok: boolean; status: number; statusText: string; json: () => Promise<unknown> }> {
+  const url = new URL(urlStr);
+
+  if (useUnixSocket()) {
+    return httpRequestViaSocket(url, method, headers, body);
+  }
+
+  const res = await fetch(urlStr, { method, headers, body });
+  return {
+    ok: res.ok,
+    status: res.status,
+    statusText: res.statusText,
+    json: () => res.json(),
   };
-  if (body) {
-    opts.body = body;
-  }
+}
 
-  // On macOS, try Unix socket agent first
-  if (isMacOS()) {
-    const agent = getUnixSocketAgent();
-    if (agent) {
-      opts.agent = agent;
+/** Whether macOS Unix socket is available */
+function useUnixSocket(): boolean {
+  return isMacOS() && getUnixSocketAgent() !== null;
+}
+
+/**
+ * Make an HTTP request via Unix socket using Node.js http module.
+ * Used on macOS when Unix socket is available (Bun fetch doesn't support agent).
+ */
+function httpRequestViaSocket(
+  url: URL,
+  method: string,
+  headers: Record<string, string>,
+  body?: string,
+): Promise<{ ok: boolean; status: number; statusText: string; json: () => Promise<unknown> }> {
+  const agent = getUnixSocketAgent()!;
+
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        hostname: url.hostname,
+        port: url.port,
+        path: url.pathname + url.search,
+        method,
+        headers,
+        agent,
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk: Buffer) => chunks.push(chunk));
+        res.on("end", () => {
+          const rawData = Buffer.concat(chunks).toString("utf-8");
+          resolve({
+            ok: res.statusCode! >= 200 && res.statusCode! < 300,
+            status: res.statusCode!,
+            statusText: res.statusMessage || "",
+            json: () => Promise.resolve(JSON.parse(rawData)),
+          });
+        });
+        res.on("error", reject);
+      },
+    );
+    req.on("error", reject);
+    if (body) {
+      req.write(body);
     }
-  }
-
-  return opts;
+    req.end();
+  });
 }
 
 // --- Log Streaming ---
@@ -141,60 +182,72 @@ function getFetchOptions(
 export function getLogStreamConfig(level = "info"): {
   url: string;
   headers: Record<string, string>;
-  agent?: http.Agent;
 } {
-  const headers = getHeaders();
-  const result: { url: string; headers: Record<string, string>; agent?: http.Agent } = {
+  return {
     url: `${getApiBase()}/logs?level=${level}`,
-    headers,
+    headers: getHeaders(),
   };
-
-  // On macOS, provide Unix socket agent for fetch-based log streaming
-  if (isMacOS()) {
-    const agent = getUnixSocketAgent();
-    if (agent) {
-      result.agent = agent;
-    }
-  }
-
-  return result;
 }
 
 // --- API Methods ---
 
 async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${getApiBase()}${path}`, getFetchOptions("GET", getHeaders()));
-  if (!res.ok) {
-    throw new Error(`API Error ${res.status}: ${res.statusText}`);
+  const url = new URL(`${getApiBase()}${path}`);
+  const headers = getHeaders();
+
+  if (useUnixSocket()) {
+    const res = await httpRequestViaSocket(url, "GET", headers);
+    if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    return (await res.json()) as T;
   }
+
+  const res = await fetch(url.toString(), { method: "GET", headers });
+  if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
   return (await res.json()) as T;
 }
 
 async function apiPut(path: string, body?: unknown): Promise<void> {
-  const res = await fetch(
-    `${getApiBase()}${path}`,
-    getFetchOptions("PUT", getHeaders(), body ? JSON.stringify(body) : undefined),
-  );
-  if (!res.ok) {
-    throw new Error(`API Error ${res.status}: ${res.statusText}`);
+  const url = new URL(`${getApiBase()}${path}`);
+  const headers = getHeaders();
+  const bodyStr = body ? JSON.stringify(body) : undefined;
+
+  if (useUnixSocket()) {
+    const res = await httpRequestViaSocket(url, "PUT", headers, bodyStr);
+    if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    return;
   }
+
+  const res = await fetch(url.toString(), { method: "PUT", headers, body: bodyStr });
+  if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
 }
 
 async function apiPatch(path: string, body: unknown): Promise<void> {
-  const res = await fetch(
-    `${getApiBase()}${path}`,
-    getFetchOptions("PATCH", getHeaders(), JSON.stringify(body)),
-  );
-  if (!res.ok) {
-    throw new Error(`API Error ${res.status}: ${res.statusText}`);
+  const url = new URL(`${getApiBase()}${path}`);
+  const headers = getHeaders();
+  const bodyStr = JSON.stringify(body);
+
+  if (useUnixSocket()) {
+    const res = await httpRequestViaSocket(url, "PATCH", headers, bodyStr);
+    if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    return;
   }
+
+  const res = await fetch(url.toString(), { method: "PATCH", headers, body: bodyStr });
+  if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
 }
 
 async function apiDelete(path: string): Promise<void> {
-  const res = await fetch(`${getApiBase()}${path}`, getFetchOptions("DELETE", getHeaders()));
-  if (!res.ok) {
-    throw new Error(`API Error ${res.status}: ${res.statusText}`);
+  const url = new URL(`${getApiBase()}${path}`);
+  const headers = getHeaders();
+
+  if (useUnixSocket()) {
+    const res = await httpRequestViaSocket(url, "DELETE", headers);
+    if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    return;
   }
+
+  const res = await fetch(url.toString(), { method: "DELETE", headers });
+  if (!res.ok) throw new Error(`API Error ${res.status}: ${res.statusText}`);
 }
 
 /** Get all proxies and proxy groups */
@@ -307,9 +360,8 @@ export function getConnectionStreamConfig(): {
   headers: Record<string, string>;
   usePolling?: boolean;
   pollInterval?: number;
-  agent?: http.Agent;
 } {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ApiPreferences>();
   const headers = getHeaders();
 
   // On macOS with Unix socket, use HTTP polling instead of WebSocket
@@ -321,7 +373,6 @@ export function getConnectionStreamConfig(): {
         headers,
         usePolling: true,
         pollInterval: CONNECTION_POLL_INTERVAL,
-        agent,
       };
     }
   }

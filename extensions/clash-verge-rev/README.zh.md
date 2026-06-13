@@ -4,33 +4,33 @@
 
 这是一个用于在 Raycast 中管理 Clash Verge Rev 和 Mihomo 的扩展。你可以不打开 Clash Verge Rev 桌面端，直接在 Raycast 中切换订阅配置、管理代理组和节点、切换代理模式、查看实时连接和实时日志。
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_222924_clash-raycast-1.png)
+![](metadata/clash-main.png)
 
 ## 功能特性
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223714_clash-raycast-4.png)
+![](metadata/clash-verge-rev-1.png)
 
 - 在 Raycast 中管理订阅配置。
 - 通过选择订阅或传入快捷指令参数快速切换订阅。
 - 编辑订阅名称、描述、订阅链接、更新间隔和 Raycast 专用快捷指令。
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223231_clash-raycast-2.png)
+![](metadata/clash-verge-rev-2.png)
 
 - 管理代理组并切换节点。
 - 支持按代理组或节点灵活搜索。
 - 支持单个节点测速，也支持对整个代理组批量测速。
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223424_clash-raycast-3.png)
+![](metadata/clash-verge-rev-3.png)
 
 - 在 Rule、Global、Direct 三种 Mihomo 模式之间切换。
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223828_clash-raycast-5.png)
+![](metadata/clash-verge-rev-4.png)
 
 - 查看实时连接的流量、速度、规则、链路、进程、源地址和目标地址等信息。
 - 按速度、流量、开始时间或主机名排序活动连接。
 - 关闭单个连接或全部活动连接。
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_224159_clash-image-5.png)
+![](metadata/clash-verge-rev-5.png)
 
 - 查看 Clash/Mihomo 实时日志，并复制可见日志。
 
@@ -39,7 +39,7 @@
 - 已安装 Raycast。
 - 已安装并正在运行 Clash Verge Rev。
 - Clash Verge Rev 中已启用 Mihomo external controller。
-- external controller 端口需要和扩展偏好设置一致，默认是 `9090`。
+- external controller 端口需要和扩展偏好设置一致，默认是 `9097`。
 - 如果 Mihomo controller 配置了 secret，需要在扩展偏好设置中填写相同的 API Secret。
 
 ## 安装与开发
@@ -80,8 +80,9 @@ npm run fix-lint
 
 | 配置项 | 说明 | 默认值 |
 | --- | --- | --- |
-| Controller Port | Mihomo external controller 端口。 | `9090` |
+| Controller Port | Mihomo external controller TCP 端口。macOS 下优先自动检测 Unix Socket。 | `9097` |
 | API Secret | Mihomo external controller secret。如果没有配置 secret，则留空。 | 空 |
+| Controller Socket | 仅 macOS：Mihomo Unix Socket 路径。默认自动检测，留空则使用 TCP 端口。 | `/tmp/verge/verge-mihomo.sock` |
 | Default Search Mode | Manage Proxies 命令中的默认搜索目标。 | Groups |
 | Default Sort Order | View Connections 命令中的默认排序方式。 | Download Speed |
 
@@ -96,9 +97,9 @@ npm run fix-lint
 - 直接输入关键词时，会按照扩展偏好设置中的默认搜索模式进行搜索。
 - 在搜索内容前加 `:` 可以搜索另一种类型。例如默认搜索 Groups 时，输入 `:hk` 会改为搜索节点。
 - 使用代理组下拉框可以只查看某个代理组。
-- 使用 `Ctrl + ←` 和 `Ctrl + →` 在代理组之间切换。
-- 使用 `Ctrl + Return` 测试当前选中节点的延迟。
-- 使用 `Ctrl + Shift + Return` 测试当前代理组中的所有节点。
+- macOS 使用 `Cmd + ←` / `Cmd + →`，Windows 使用 `Ctrl + ←` / `Ctrl + →` 在代理组之间切换。
+- macOS 使用 `Cmd + Return`，Windows 使用 `Ctrl + Return` 测试当前选中节点的延迟。
+- macOS 使用 `Cmd + Shift + Return`，Windows 使用 `Ctrl + Shift + Return` 测试当前代理组中的所有节点。
 - 可以通过命令参数 `query` 打开命令时自动带入初始搜索内容。
 
 ### Manage Subscriptions
@@ -112,7 +113,7 @@ npm run fix-lint
 - 选择订阅后执行 **Activate Profile** 可以切换到该订阅。
 - 执行 **Edit Profile** 可以编辑名称、描述、快捷指令、订阅链接或更新间隔。
 - 远程订阅可以执行 **Copy Subscription URL** 复制订阅链接。
-- 使用 `Cmd + R` 刷新订阅列表。
+- macOS 使用 `Cmd + R`，Windows 使用 `Ctrl + R` 刷新订阅列表。
 - 可以通过命令参数 `shortcut` 使用已保存的快捷指令快速切换订阅。
 
 订阅快捷指令由本扩展单独保存在 Clash Verge Rev 配置目录下的 `raycast-shortcuts.json` 中，不会写入 `profiles.yaml`。
@@ -129,7 +130,7 @@ npm run fix-lint
 
 ### View Connections
 
-通过 controller WebSocket 实时查看 Mihomo 活动连接。
+实时查看 Mihomo 活动连接。macOS 通过 Unix Socket HTTP 轮询，Windows 通过 WebSocket。
 
 展示内容包括：
 
@@ -140,10 +141,10 @@ npm run fix-lint
 使用技巧：
 
 - 使用下拉框按下载速度、上传速度、总下载、总上传、开始时间或主机名排序。
-- 使用 `Ctrl + ←` 和 `Ctrl + →` 循环切换排序方式。
+- macOS 使用 `Cmd + ←` / `Cmd + →`，Windows 使用 `Ctrl + ←` / `Ctrl + →` 循环切换排序方式。
 - 使用 **Detail View** / **List View** 切换展示样式。
-- 使用 `Ctrl + X` 关闭选中的连接。
-- 使用 `Ctrl + Shift + X` 关闭全部活动连接。
+- macOS 使用 `Cmd + X`，Windows 使用 `Ctrl + X` 关闭选中的连接。
+- macOS 使用 `Cmd + Shift + X`，Windows 使用 `Ctrl + Shift + X` 关闭全部活动连接。
 - 可以复制主机名或代理链路。
 
 ### View Logs
@@ -156,8 +157,8 @@ npm run fix-lint
 - 使用搜索框过滤当前可见日志。
 - 使用 **Detail View** 可以展示从常见连接日志中解析出的字段。
 - 可以复制单条日志或复制当前所有可见日志。
-- 使用 `Ctrl + X` 清空当前日志列表。
-- 使用 `Ctrl + R` 重新连接日志流。
+- macOS 使用 `Cmd + X`，Windows 使用 `Ctrl + X` 清空当前日志列表。
+- macOS 使用 `Cmd + R`，Windows 使用 `Ctrl + R` 重新连接日志流。
 
 ## 工作原理
 
@@ -165,14 +166,20 @@ npm run fix-lint
 
 1. Mihomo external controller API
    - 使用 REST 端点获取代理、配置、测速以及关闭连接。
-   - 使用 WebSocket 获取实时连接。
-   - 使用流式 HTTP 获取实时日志。
+   - macOS 使用 Unix Socket HTTP 轮询获取实时连接，Windows 使用 WebSocket。
+   - macOS 使用 Unix Socket 流式 HTTP 获取实时日志，Windows 使用原生 fetch 流式读取。
 
 2. Clash Verge Rev 本地配置文件
    - 读取 `profiles.yaml` 展示和激活订阅。
    - 快速切换订阅时会改写 `clash-verge.yaml`。
    - Clash Verge Rev `profiles` 目录中的 profile 文件作为订阅内容来源。
    - `raycast-shortcuts.json` 用于保存 Raycast 专用订阅快捷指令。
+
+在 macOS 上，Clash Verge Rev 配置目录通常位于：
+
+```text
+~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev
+```
 
 在 Windows 上，Clash Verge Rev 配置目录通常位于：
 

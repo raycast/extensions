@@ -7,10 +7,12 @@ import {
   ActionPanel,
   showToast,
   Toast,
+  getPreferenceValues,
 } from "@raycast/api";
 import { getLogStreamConfig } from "./utils/api";
-import fetch from "node-fetch";
-import { Readable } from "stream";
+import * as http from "http";
+import * as net from "net";
+import * as fs from "fs";
 
 interface LogEntry {
   id: number;
@@ -51,7 +53,7 @@ function logLevelTag(type: string): { value: string; color: Color } {
 
 function formatTimestamp(): string {
   const now = new Date();
-  return now.toLocaleTimeString("zh-CN", { hour12: false });
+  return now.toLocaleTimeString(undefined, { hour12: false });
 }
 
 /** Parse "match X using Y" into separate fields */
@@ -120,34 +122,10 @@ export default function ViewLogs() {
     abortRef.current = controller;
 
     try {
-      const { url, headers, agent } = getLogStreamConfig("info");
+      const { url, headers } = getLogStreamConfig("info");
       console.log("[Logs] Connecting to:", url);
 
-      const fetchOpts: Record<string, unknown> = {
-        signal: controller.signal,
-        headers,
-      };
-      if (agent) {
-        fetchOpts.agent = agent;
-      }
-
-      const response = await fetch(url, fetchOpts);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      setIsConnected(true);
-
-      const decoder = new TextDecoder();
       let buffer = "";
-
-      // node-fetch returns a Node.js PassThrough stream (not a Web ReadableStream).
-      // We need to handle both Node.js stream and Web ReadableStream APIs.
-      const body = response.body;
-      if (!body) {
-        throw new Error("No response body");
-      }
 
       // Helper to process a chunk of text into log entries
       const processChunk = (chunk: string) => {
@@ -183,32 +161,64 @@ export default function ViewLogs() {
         }
       };
 
-      // Check if body is a Node.js Readable stream (node-fetch case)
-      if (body instanceof Readable || typeof (body as unknown as Record<string, unknown>).on === "function") {
-        const nodeStream = body as Readable;
-        nodeStream.setEncoding("utf-8");
-        nodeStream.on("data", (chunk: string) => {
-          processChunk(chunk);
-        });
-        nodeStream.on("error", (err: Error) => {
-          console.error("[Logs] Stream error:", err);
+      // On macOS with Unix socket, use http.request for streaming
+      const parsedUrl = new URL(url);
+      const socketPath = (() => {
+        const prefs = getPreferenceValues<{ controllerSocket: string }>();
+        return prefs.controllerSocket || "/tmp/verge/verge-mihomo.sock";
+      })();
+      if (process.platform === "darwin" && fs.existsSync(socketPath)) {
+        const req = http.request(
+          {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port,
+            path: parsedUrl.pathname + parsedUrl.search,
+            method: "GET",
+            headers,
+            createConnection: () => net.createConnection(socketPath),
+          },
+          (res) => {
+            if (res.statusCode! < 200 || res.statusCode! >= 300) {
+              setIsConnected(false);
+              return;
+            }
+            setIsConnected(true);
+            res.setEncoding("utf-8");
+            res.on("data", (chunk: string) => processChunk(chunk));
+            res.on("error", (err: Error) => {
+              console.error("[Logs] Stream error:", err);
+              setIsConnected(false);
+            });
+            res.on("end", () => {
+              console.log("[Logs] Stream ended");
+              setIsConnected(false);
+            });
+          },
+        );
+        req.on("error", (err: Error) => {
+          console.error("[Logs] Request error:", err);
           setIsConnected(false);
         });
-        nodeStream.on("end", () => {
-          console.log("[Logs] Stream ended");
-          setIsConnected(false);
-        });
+        req.end();
       } else {
-        // Web ReadableStream (browser-style fetch)
-        const reader = (body as unknown as ReadableStream<Uint8Array>).getReader();
-        if (!reader) {
-          throw new Error("Cannot read response body");
+        // TCP: use native fetch with ReadableStream
+        const response = await fetch(url, { signal: controller.signal, headers });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
+        setIsConnected(true);
+
+        const body = response.body;
+        if (!body) {
+          throw new Error("No response body");
+        }
+
+        const reader = (body as ReadableStream<Uint8Array>).getReader();
+        const decoder = new TextDecoder();
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-
           const chunk = decoder.decode(value, { stream: true });
           processChunk(chunk);
         }

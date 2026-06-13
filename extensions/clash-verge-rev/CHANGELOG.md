@@ -1,6 +1,6 @@
 # Clash Verge Rev Changelog
 
-## [Initial Version] - 2026-05-15
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Manage Clash Verge Rev subscription profiles from Raycast.
 - Switch proxy groups and test node delays.

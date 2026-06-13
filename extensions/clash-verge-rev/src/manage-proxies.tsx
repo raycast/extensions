@@ -21,12 +21,6 @@ import {
   ProxyItem,
 } from "./utils/api";
 
-// --- Preferences ---
-
-interface ProxyPreferences {
-  defaultSearchMode: "groups" | "nodes";
-}
-
 // --- Delay color coding ---
 
 function delayColor(delay: number): Color {
@@ -95,7 +89,7 @@ function parseSearch(
 export default function ManageProxies(
   props: LaunchProps<{ arguments: { query?: string } }>,
 ) {
-  const prefs = getPreferenceValues<ProxyPreferences>();
+  const prefs = getPreferenceValues<Preferences.ManageProxies>();
   const defaultSearchMode = prefs.defaultSearchMode || "groups";
   const initialQuery = props.arguments.query || "";
 

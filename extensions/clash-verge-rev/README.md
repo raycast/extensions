@@ -4,33 +4,33 @@
 
 A Raycast extension for managing Clash Verge Rev and Mihomo from Raycast. It lets you switch subscription profiles, manage proxy groups and nodes, change proxy modes, inspect live connections, and view real-time logs without opening the Clash Verge Rev desktop app.
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_222924_clash-raycast-1.png)
+![](metadata/clash-main.png)
 
 ## Features
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223714_clash-raycast-4.png)
+![](metadata/clash-verge-rev-1.png)
 
 - Manage subscription profiles from Raycast.
 - Quickly switch profiles by selecting a profile or passing a custom shortcut argument.
 - Edit profile metadata, subscription URL, update interval, and Raycast-only shortcuts.
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223231_clash-raycast-2.png)
+![](metadata/clash-verge-rev-2.png)
 
 - Manage proxy groups and switch nodes.
 - Search proxy groups or nodes with flexible search modes.
 - Test node delay individually or test all nodes in a proxy group.
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223424_clash-raycast-3.png)
+![](metadata/clash-verge-rev-3.png)
 
 - Switch Mihomo mode between Rule, Global, and Direct.
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_223828_clash-raycast-5.png)
+![](metadata/clash-verge-rev-4.png)
 
 - View live connection traffic, speed, rule, chain, process, source, and destination details.
 - Sort active connections by speed, traffic, start time, or host.
 - Close one connection or all active connections.
 
-![](https://fastly.jsdelivr.net/gh/czh020110/image@main/images/2026-06-12_224159_clash-image-5.png)
+![](metadata/clash-verge-rev-5.png)
 
 - View real-time Clash/Mihomo logs and copy visible logs.
 
@@ -39,7 +39,7 @@ A Raycast extension for managing Clash Verge Rev and Mihomo from Raycast. It let
 - Raycast installed.
 - Clash Verge Rev installed and running.
 - Mihomo external controller enabled in Clash Verge Rev.
-- The external controller port must match the extension preference. The default is `9090`.
+- The external controller port must match the extension preference. The default is `9097`.
 - If your Mihomo controller uses a secret, configure the same secret in the extension preferences.
 
 ## Installation and Development
@@ -78,12 +78,13 @@ npm run fix-lint
 
 Open the extension preferences in Raycast and configure:
 
-| Preference          | Description                                                                | Default        |
-| ------------------- | -------------------------------------------------------------------------- | -------------- |
-| Controller Port     | Mihomo external controller port.                                           | `9090`         |
-| API Secret          | Mihomo external controller secret. Leave empty if no secret is configured. | Empty          |
-| Default Search Mode | Default search target in Manage Proxies.                                   | Groups         |
-| Default Sort Order  | Default sorting method in View Connections.                                | Download Speed |
+| Preference          | Description                                                                | Default                         |
+| ------------------- | -------------------------------------------------------------------------- | ------------------------------- |
+| Controller Port     | Mihomo external controller TCP port. On macOS, Unix socket is auto-detected first. | `9097`                          |
+| API Secret          | Mihomo external controller secret. Leave empty if no secret is configured. | Empty                           |
+| Controller Socket   | macOS only: Mihomo Unix socket path. Auto-detected by default. Leave empty to use TCP port instead. | `/tmp/verge/verge-mihomo.sock`  |
+| Default Search Mode | Default search target in Manage Proxies.                                   | Groups                          |
+| Default Sort Order  | Default sorting method in View Connections.                                | Download Speed                  |
 
 ## Commands
 
@@ -129,7 +130,7 @@ The command also shows selected current config values such as mixed port, LAN ac
 
 ### View Connections
 
-View active Mihomo connections in real time through the controller WebSocket.
+View active Mihomo connections in real time. On macOS, connections are fetched via Unix Socket HTTP polling; on Windows, via WebSocket.
 
 Displayed information includes:
 
@@ -165,14 +166,20 @@ This extension uses two integration paths:
 
 1. Mihomo external controller API
    - REST endpoints are used for proxies, configs, delay testing, and connection closing.
-   - WebSocket is used for live connections.
-   - Streaming HTTP is used for live logs.
+   - On macOS, Unix Socket HTTP polling is used for live connections; on Windows, WebSocket is used.
+   - On macOS, streaming HTTP via Unix Socket is used for live logs; on Windows, native fetch streaming is used.
 
 2. Clash Verge Rev local configuration files
    - `profiles.yaml` is read to list and activate profiles.
    - `clash-verge.yaml` is rewritten during fast profile switching.
    - Profile files under the Clash Verge Rev `profiles` directory are used as the source of subscription content.
    - `raycast-shortcuts.json` stores Raycast-only profile shortcuts.
+
+On macOS, the Clash Verge Rev config directory is expected at:
+
+```text
+~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev
+```
 
 On Windows, the Clash Verge Rev config directory is expected at:
 

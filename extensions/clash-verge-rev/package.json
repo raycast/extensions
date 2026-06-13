@@ -144,7 +144,6 @@
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

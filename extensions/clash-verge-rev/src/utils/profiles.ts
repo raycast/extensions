@@ -3,7 +3,6 @@ import * as path from "path";
 import * as os from "os";
 import * as yaml from "js-yaml";
 import { exec } from "child_process";
-import fetch from "node-fetch";
 
 // --- Platform ---
 
