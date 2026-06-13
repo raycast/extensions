@@ -15,6 +15,18 @@
       "mode": "no-view",
       "preferences": [
         {
+          "name": "scope",
+          "title": "Tile Scope",
+          "description": "App List: tile windows of the first matching app from the list below. All Windows: tile every tileable window on the active desktop.",
+          "type": "dropdown",
+          "required": false,
+          "default": "app",
+          "data": [
+            { "title": "App List (Priority Order)", "value": "app" },
+            { "title": "All Windows", "value": "all" }
+          ]
+        },
+        {
           "name": "appName",
           "title": "Target App Names (Comma-Separated)",
           "description": "Apps to tile, tried in order. Example: Ghostty, Terminal, iTerm2. Leave empty to auto-detect from the focused window.",

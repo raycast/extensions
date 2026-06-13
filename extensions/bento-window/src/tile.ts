@@ -54,6 +54,15 @@ function layoutFor(count: number): LayoutGrid {
   }
 }
 
+function isTileable(w: WindowManagement.Window): boolean {
+  return w.positionable && w.resizable && w.bounds !== "fullscreen";
+}
+
+function isRaycastWindow(w: WindowManagement.Window): boolean {
+  const name = w.application?.name?.toLowerCase();
+  return name === "raycast" || name === "raycast beta";
+}
+
 interface Frame {
   windowIndex: number;
   x: number;
@@ -122,7 +131,9 @@ export default async function Command() {
       WindowManagement.getDesktops(),
     ]);
 
-    const activeDesktop = desktops.find((d) => d.active);
+    // Beta 双屏下每个显示器各有一个 active 桌面，优先选含目标窗口的那个
+    const activeDesktop =
+      desktops.find((d) => d.active && windows.some((w) => w.desktopId === d.id)) ?? desktops.find((d) => d.active);
     if (!activeDesktop) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not detect active desktop";
@@ -130,55 +141,53 @@ export default async function Command() {
     }
 
     let targetAppName: string | undefined;
-    if (appNames.length > 0) {
-      for (const candidate of appNames) {
-        const lower = candidate.toLowerCase();
-        if (
-          windows.some(
-            (w) =>
-              w.application?.name?.toLowerCase() === lower &&
-              w.positionable &&
-              w.resizable &&
-              w.bounds !== "fullscreen",
-          )
-        ) {
-          targetAppName = candidate;
-          break;
-        }
+    let targetWindows: WindowManagement.Window[];
+
+    if (prefs.scope === "all") {
+      targetWindows = windows.filter((w) => isTileable(w) && !isRaycastWindow(w)).slice(0, MAX_WINDOWS);
+
+      if (targetWindows.length === 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "No tileable windows on the active desktop";
+        return;
       }
     } else {
-      try {
-        const active = await WindowManagement.getActiveWindow();
-        targetAppName = active.application?.name;
-      } catch {
-        /* no active window */
+      if (appNames.length > 0) {
+        for (const candidate of appNames) {
+          const lower = candidate.toLowerCase();
+          if (windows.some((w) => w.application?.name?.toLowerCase() === lower && isTileable(w))) {
+            targetAppName = candidate;
+            break;
+          }
+        }
+      } else {
+        try {
+          const active = await WindowManagement.getActiveWindow();
+          targetAppName = active.application?.name;
+        } catch {
+          /* no active window */
+        }
       }
-    }
 
-    if (!targetAppName) {
-      toast.style = Toast.Style.Failure;
-      toast.title =
-        appNames.length > 0
-          ? `No tileable windows found (looked for: ${appNames.join(", ")})`
-          : "No focused window to detect target app";
-      return;
-    }
+      if (!targetAppName) {
+        toast.style = Toast.Style.Failure;
+        toast.title =
+          appNames.length > 0
+            ? `No tileable windows found (looked for: ${appNames.join(", ")})`
+            : "No focused window to detect target app";
+        return;
+      }
 
-    const targetLower = targetAppName.toLowerCase();
-    const targetWindows = windows
-      .filter(
-        (w) =>
-          w.application?.name?.toLowerCase() === targetLower &&
-          w.positionable &&
-          w.resizable &&
-          w.bounds !== "fullscreen",
-      )
-      .slice(0, MAX_WINDOWS);
+      const targetLower = targetAppName.toLowerCase();
+      targetWindows = windows
+        .filter((w) => w.application?.name?.toLowerCase() === targetLower && isTileable(w))
+        .slice(0, MAX_WINDOWS);
 
-    if (targetWindows.length === 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `No tileable windows for ${targetAppName}`;
-      return;
+      if (targetWindows.length === 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `No tileable windows for ${targetAppName}`;
+        return;
+      }
     }
 
     const count = targetWindows.length;
@@ -200,7 +209,7 @@ export default async function Command() {
     );
 
     toast.style = Toast.Style.Success;
-    toast.title = `Tiled ${count} ${targetAppName} window${count === 1 ? "" : "s"}`;
+    toast.title = `Tiled ${count} ${targetAppName ? `${targetAppName} ` : ""}window${count === 1 ? "" : "s"}`;
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to tile windows";
