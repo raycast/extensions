@@ -4,7 +4,7 @@
 
 <h1 align="center">Bento Window</h1>
 
-<p align="center">A Raycast extension that tiles a single app's windows into a bento-box grid.</p>
+<p align="center">A Raycast extension that tiles your windows into a bento-box grid — one app's windows, or every window on the desktop.</p>
 
 <p align="center">
   <a href="https://github.com/raycast/extensions/pull/27877"><img src="https://img.shields.io/badge/Raycast_Store-pending_review-yellow?style=flat-square" alt="Raycast Store: pending review" /></a>
@@ -14,21 +14,22 @@
 
 ---
 
-A Raycast extension that tiles **a single app's windows** into a bento-box grid with one keystroke. The grid auto-adapts to how many windows you have open — 4 windows become 2×2, 6 become 3×2, 9 become 3×3, and so on.
+A Raycast extension that tiles your windows into a bento-box grid with one keystroke. The grid auto-adapts to how many windows you have open — 4 windows become 2×2, 6 become 3×2, 9 become 3×3, and so on.
 
-Built for the **vibe coding** workflow where you spin up several terminals (Ghostty, Terminal, iTerm2…) and want them snapped into place without dragging each one into a quarter.
+By default it tiles **a single app's windows** (great for the **vibe coding** workflow where you spin up several terminals — Ghostty, Terminal, iTerm2… — and want them snapped into place without dragging each one into a quarter). Switch the **Tile Scope** preference to **All Windows** and it tiles every window on the active desktop instead.
 
 ## How this differs from [Window Layouts](https://www.raycast.com/teemu_suvinen/window-layouts)
 
-Window Layouts is excellent and the auto-layout algorithm here is intentionally similar. **The one thing Bento Window does that Window Layouts doesn't: it filters by app.**
+Window Layouts is excellent and the auto-layout algorithm here is intentionally similar. **The thing Bento Window adds: it can filter by app.**
 
 | Scenario | Window Layouts | Bento Window |
 |---|---|---|
-| Tile only Ghostty windows, leave Chrome / VSCode untouched | ❌ all windows get tiled | ✅ only the target app |
-| Run from the focused window, auto-detect which app to tile | ❌ | ✅ leave preference empty |
+| Tile only Ghostty windows, leave Chrome / VSCode untouched | ❌ all windows get tiled | ✅ Tile Scope → App List |
+| Run from the focused window, auto-detect which app to tile | ❌ | ✅ leave the app list empty |
+| Tile every window on the desktop | ✅ | ✅ Tile Scope → All Windows |
 | Auto-pick a layout based on window count | ✅ | ✅ |
 
-If you only ever want to tile every window on the desktop, **use Window Layouts instead** — it's mature and has more layout options. Bento Window exists for the case where you want to tile *just one app's windows*.
+Window Layouts is mature and has more layout options. Reach for Bento Window when you want to tile *just one app's windows* — or want both modes from a single command.
 
 ## Layouts
 
@@ -89,17 +90,22 @@ npm run dev
 Then in Raycast:
 
 1. Open a few windows of your target app (Ghostty, Terminal, etc.)
-2. Run **Bento Tile**
+2. Run **Auto Tile**
 3. Optional: assign a global hotkey (Raycast Settings → Extensions → Bento Window → record hotkey)
 
 ## Configuration
 
 Raycast Settings → Extensions → **Bento Window**:
 
-- **Target app names** — comma-separated list, tried in order. The first app with windows on the active desktop gets tiled.
+- **Tile Scope** — what to tile.
+  - **App List** (default): tile the windows of the first matching app from the list below.
+  - **All Windows**: tile every tileable window on the active desktop (Raycast's own windows are skipped).
+- **Target app names** — comma-separated list, tried in order. The first app with windows on the active desktop gets tiled. Used only when Tile Scope is **App List**.
   - Default: `Ghostty, Terminal, iTerm2, Alacritty, WezTerm`
   - Leave **empty** for auto mode — the extension uses the currently focused window's app. Works for any app you're focused in.
 - **Gap** — pixels between tiles and screen edges. `0` (default) for flush tiles.
+
+On a multi-display setup the windows are tiled on the desktop they're already on, not moved to the built-in display.
 
 ## Requirements
 
