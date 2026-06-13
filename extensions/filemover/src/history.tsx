@@ -58,10 +58,11 @@ export default function HistoryCommand() {
           const dateString = date.toLocaleDateString();
           const fileCount = item.files.length;
 
-          let title = `Moved ${fileCount} file(s) to ${path.basename(item.destFolder)}`;
-          if (item.type === "copy") title = `Copied ${fileCount} file(s) to ${path.basename(item.destFolder)}`;
+          const fileWord = fileCount === 1 ? "file" : "files";
+          let title = `Moved ${fileCount} ${fileWord} to ${path.basename(item.destFolder)}`;
+          if (item.type === "copy") title = `Copied ${fileCount} ${fileWord} to ${path.basename(item.destFolder)}`;
           if (item.type === "rename")
-            title = `Renamed & Moved ${fileCount} file(s) to ${path.basename(item.destFolder)}`;
+            title = `Renamed & Moved ${fileCount} ${fileWord} to ${path.basename(item.destFolder)}`;
 
           return (
             <List.Item
@@ -69,7 +70,7 @@ export default function HistoryCommand() {
               title={title}
               subtitle={`${dateString} at ${timeString}`}
               icon={item.type === "copy" ? Icon.CopyClipboard : Icon.ArrowRight}
-              accessories={[{ text: `${fileCount} files` }]}
+              accessories={[{ text: `${fileCount} file${fileCount === 1 ? "" : "s"}` }]}
               detail={
                 <List.Item.Detail
                   markdown={`### Files\n\n${item.files.map((f) => `- **${path.basename(f.newPath)}**\n  \n  From: \`${path.dirname(f.originalPath)}\``).join("\n\n")}`}

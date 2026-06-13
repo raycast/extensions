@@ -865,7 +865,7 @@ function FolderActionPanel({
       <Action.Push
         title="Add to Favorites"
         icon={Icon.Star}
-        target={<AddFavoriteForm onAddFavorite={onAddFavorite} />}
+        target={<AddFavoriteForm onAddFavorite={onAddFavorite} initialFolder={folder.path} initialName={folder.name} />}
         shortcut={{ modifiers: [cmdModifier, "shift"], key: "a" }}
       />
       <Action
@@ -898,9 +898,11 @@ function FolderActionPanel({
 
 interface AddFavoriteFormProps {
   onAddFavorite: (name: string, folderPath: string) => Promise<void>;
+  initialFolder?: string;
+  initialName?: string;
 }
 
-function AddFavoriteForm({ onAddFavorite }: AddFavoriteFormProps) {
+function AddFavoriteForm({ onAddFavorite, initialFolder, initialName }: AddFavoriteFormProps) {
   const { pop } = useNavigation();
 
   return (
@@ -924,13 +926,14 @@ function AddFavoriteForm({ onAddFavorite }: AddFavoriteFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" placeholder="e.g. Work Projects" />
+      <Form.TextField id="name" title="Name" placeholder="e.g. Work Projects" defaultValue={initialName} />
       <Form.FilePicker
         id="folder"
         title="Folder"
         allowMultipleSelection={false}
         canChooseDirectories={true}
         canChooseFiles={false}
+        defaultValue={initialFolder ? [initialFolder] : undefined}
       />
     </Form>
   );
