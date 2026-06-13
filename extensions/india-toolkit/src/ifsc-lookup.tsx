@@ -47,7 +47,13 @@ export default function Command() {
 
   useEffect(() => {
     LocalStorage.getItem<string>("recentIFSC").then((val) => {
-      if (val) setRecentLookups(JSON.parse(val));
+      if (val) {
+        try {
+          setRecentLookups(JSON.parse(val));
+        } catch {
+          // ignore corrupted cache
+        }
+      }
     });
   }, []);
 

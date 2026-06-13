@@ -41,7 +41,13 @@ export default function Command() {
 
   useEffect(() => {
     LocalStorage.getItem<string>("recentPincode").then((val) => {
-      if (val) setRecentSearches(JSON.parse(val));
+      if (val) {
+        try {
+          setRecentSearches(JSON.parse(val));
+        } catch {
+          // ignore corrupted cache
+        }
+      }
     });
   }, []);
 
