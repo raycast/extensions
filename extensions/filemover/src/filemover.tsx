@@ -389,7 +389,7 @@ $conn.Close()
 
         if (src === destPath) continue;
 
-        let conflictCounter = forceNumbering ? index : 1;
+        let conflictCounter = forceNumbering ? index + 1 : 1;
         while (fs.existsSync(destPath)) {
           // If a file already exists, append an index to resolve the conflict
           safeName = `${newBase}${formatIndex(conflictCounter, options.numberFormat)}${ext}`;
@@ -1004,7 +1004,7 @@ function MoveToNewFolderForm({ onAction }: MoveToNewFolderFormProps) {
                   return;
                 }
                 const newFolderPath = path.join(values.parentFolder[0], safeName);
-                await onAction(newFolderPath, values.name, values.copy);
+                await onAction(newFolderPath, safeName, values.copy);
                 pop();
               } else {
                 await showToast({
