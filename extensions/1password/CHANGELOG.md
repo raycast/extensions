@@ -4,6 +4,7 @@
 
 - Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed. Opt in via **Reduce item list memory usage** in extension preferences.
 - When enabled, the item list uses the summary payload, so username/email subtitles and username/email search are unavailable until full item details are fetched by an action.
+- When enabled, the list renders the first 200 matching items to avoid Raycast worker memory limits on very large vaults.
 
 ## [Enhancements] - 2026-04-16
 
