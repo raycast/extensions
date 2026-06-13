@@ -1,4 +1,4 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage, showToast, Toast, trash } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -101,7 +101,7 @@ export async function performUndo(specificId?: string) {
         } else {
           // copy - so we delete the new file
           if (fs.existsSync(file.newPath)) {
-            await fs.promises.rm(file.newPath, { recursive: true });
+            await trash(file.newPath);
             didSucceed = true;
           }
         }
