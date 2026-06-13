@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-toolkit",
+  "title": "JSON Toolkit",
+  "description": "Format, escape, and unescape JSON without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "fungx",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "format-json",
+      "title": "Format JSON",
+      "description": "Format manually entered JSON or JSON-like text",
+      "mode": "view"
+    },
+    {
+      "name": "format-json-selected-text",
+      "title": "Format JSON from Selected Text",
+      "description": "Format the text selected in the frontmost application",
+      "mode": "view"
+    },
+    {
+      "name": "format-json-clipboard",
+      "title": "Format JSON from Clipboard",
+      "description": "Format the current text clipboard contents",
+      "mode": "view"
+    },
+    {
+      "name": "escape-json",
+      "title": "Escape JSON String",
+      "description": "Serialize text as a JSON string",
+      "mode": "view"
+    },
+    {
+      "name": "unescape-json",
+      "title": "Unescape JSON String",
+      "description": "Decode exactly one JSON string layer",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
+  }
+}
