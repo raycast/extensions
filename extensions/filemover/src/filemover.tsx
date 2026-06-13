@@ -44,6 +44,10 @@ function formatIndex(index: number, format: string): string {
 }
 
 const execFileAsync = promisify(execFile);
+const isWin = os.platform() === "win32";
+const fileManagerName = isWin ? "Explorer" : "Finder";
+const cmdModifier = (isWin ? "ctrl" : "cmd") as "ctrl" | "cmd";
+
 const DEFAULT_FOLDERS = [
   {
     name: "Desktop",
@@ -76,12 +80,43 @@ export default function Command() {
   useEffect(() => {
     async function fetchSelectedFiles() {
       try {
-        const items = await getSelectedFinderItems();
-        const paths = items.map((item) => item.path);
-        setSelectedFiles((prev) => {
-          if (JSON.stringify(prev) !== JSON.stringify(paths)) return paths;
-          return prev;
-        });
+        if (os.platform() === "win32") {
+          const psScript = `
+$shell = New-Object -ComObject Shell.Application
+$selected = @()
+foreach ($window in $shell.Windows()) {
+    if ($window.FullName -like "*explorer.exe") {
+        $items = $window.Document.SelectedItems()
+        if ($items -and $items.Count -gt 0) {
+            foreach ($item in $items) {
+                $selected += $item.Path
+            }
+        }
+    }
+}
+$selected | Select-Object -Unique
+`;
+          const { stdout } = await execFileAsync(
+            "powershell.exe",
+            ["-NoProfile", "-NonInteractive", "-Command", psScript],
+            { timeout: 2000 },
+          );
+          const paths = stdout
+            .split("\n")
+            .map((p) => p.trim())
+            .filter(Boolean);
+          setSelectedFiles((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(paths)) return paths;
+            return prev;
+          });
+        } else {
+          const items = await getSelectedFinderItems();
+          const paths = items.map((item) => item.path);
+          setSelectedFiles((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(paths)) return paths;
+            return prev;
+          });
+        }
       } catch {
         setSelectedFiles((prev) => (prev.length > 0 ? [] : prev));
       }
@@ -137,14 +172,50 @@ export default function Command() {
         const predicate = `kMDItemContentType == "public.folder" && kMDItemDisplayName == "*${safeQuery}*"cd`;
         let filteredPaths: string[] = [];
 
-        try {
-          const { stdout } = await execFileAsync("mdfind", ["-onlyin", os.homedir(), predicate], { timeout: 2000 });
-          const allPaths = stdout.split("\n").filter(Boolean);
-          filteredPaths = allPaths
-            .filter((p) => !p.includes("/Library/") && !p.includes("node_modules") && !p.includes(".git"))
-            .slice(0, 15);
-        } catch {
-          // Ignore mdfind errors or timeouts and rely on fallback
+        if (os.platform() === "darwin") {
+          try {
+            const { stdout } = await execFileAsync("mdfind", ["-onlyin", os.homedir(), predicate], { timeout: 2000 });
+            const allPaths = stdout.split("\n").filter(Boolean);
+            filteredPaths = allPaths
+              .filter((p) => !p.includes("/Library/") && !p.includes("node_modules") && !p.includes(".git"))
+              .slice(0, 15);
+          } catch {
+            // Ignore mdfind errors or timeouts and rely on fallback
+          }
+        } else if (os.platform() === "win32") {
+          try {
+            const psScript = `
+$searchStr = $env:FILEMOVER_SEARCH
+$conn = New-Object -ComObject ADODB.Connection
+$rs = New-Object -ComObject ADODB.Recordset
+$conn.Open("Provider=Search.CollatorDSO;Extended Properties='Application=Windows';")
+$query = "SELECT System.ItemPathDisplay FROM SYSTEMINDEX WHERE System.FileName LIKE '%$searchStr%' AND System.Kind = 'folder'"
+$rs.Open($query, $conn)
+$count = 0
+while (-not $rs.EOF -and $count -lt 30) {
+    $path = $rs.Fields.Item("System.ItemPathDisplay").Value
+    if ($path) { Write-Output $path }
+    $rs.MoveNext()
+    $count++
+}
+$rs.Close()
+$conn.Close()
+`;
+            const { stdout } = await execFileAsync(
+              "powershell.exe",
+              ["-NoProfile", "-NonInteractive", "-Command", psScript],
+              { timeout: 4000, env: { ...process.env, FILEMOVER_SEARCH: safeQuery } },
+            );
+            const allPaths = stdout
+              .split("\n")
+              .map((p) => p.trim())
+              .filter(Boolean);
+            filteredPaths = allPaths
+              .filter((p) => !p.includes("node_modules") && !p.includes(".git") && !p.includes("AppData"))
+              .slice(0, 15);
+          } catch {
+            // Ignore powershell errors and rely on fallback
+          }
         }
 
         // Fallback: If mdfind is broken, hangs, or lacks permissions, search common directories manually
@@ -357,7 +428,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "No files selected",
-        message: "Please select files in Finder first.",
+        message: `Please select files in ${fileManagerName} first.`,
       });
       return;
     }
@@ -465,7 +536,7 @@ export default function Command() {
       ? `### Files to Move / Copy\n\n${selectedFiles
           .map((f) => `- **${path.basename(f)}**\n  \n  \`${f}\``)
           .join("\n\n")}`
-      : `### No files selected.\n\nOpen Finder and select files to move or copy them, or use this extension to manage your favorites.`;
+      : `### No files selected.\n\nOpen ${fileManagerName} and select files to move or copy them, or use this extension to manage your favorites.`;
 
   function getFolderDetail(folderPath: string) {
     return (
@@ -497,7 +568,7 @@ export default function Command() {
       {fileCount === 0 && (
         <List.EmptyView
           title="No files selected"
-          description="Select files in Finder or on your Desktop to move them."
+          description={`Select files in ${fileManagerName} or on your Desktop to move them.`}
           icon={Icon.Document}
           actions={
             <ActionPanel>
@@ -505,7 +576,7 @@ export default function Command() {
                 title="Undo Last File Move"
                 icon={Icon.Undo}
                 onAction={performUndo}
-                shortcut={{ modifiers: ["cmd"], key: "z" }}
+                shortcut={{ modifiers: [cmdModifier], key: "z" }}
               />
             </ActionPanel>
           }
@@ -620,37 +691,37 @@ export default function Command() {
                           onRenameAction={handleRenameAction}
                         />
                       }
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={{ modifiers: [cmdModifier], key: "r" }}
                     />
                     <Action
                       title="Copy Files Here"
                       icon={Icon.CopyClipboard}
                       onAction={() => handleAction(folder.path, folder.name, true)}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={{ modifiers: [cmdModifier], key: "d" }}
                     />
                     <Action.Push
                       title="Move to New Folder…"
                       icon={Icon.NewFolder}
                       target={<MoveToNewFolderForm onAction={handleAction} />}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={{ modifiers: [cmdModifier], key: "n" }}
                     />
                     <Action.Push
                       title="Move to Custom Folder…"
                       icon={Icon.Folder}
                       target={<MoveToCustomFolderForm onAction={handleAction} />}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                      shortcut={{ modifiers: [cmdModifier, "shift"], key: "f" }}
                     />
                     <Action.Push
                       title="Add New Favorite…"
                       icon={Icon.Plus}
                       target={<AddFavoriteForm onAddFavorite={addFavorite} />}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                      shortcut={{ modifiers: [cmdModifier, "shift"], key: "n" }}
                     />
                     <Action
                       title="Undo Last File Move"
                       icon={Icon.Undo}
                       onAction={performUndo}
-                      shortcut={{ modifiers: ["cmd"], key: "z" }}
+                      shortcut={{ modifiers: [cmdModifier], key: "z" }}
                     />
                   </ActionPanel>
                 }
@@ -711,7 +782,7 @@ function FolderActionPanel({
           title="Undo Last File Move"
           icon={Icon.Undo}
           onAction={performUndo}
-          shortcut={{ modifiers: ["cmd"], key: "z" }}
+          shortcut={{ modifiers: [cmdModifier], key: "z" }}
         />
         <Action.Push
           title="Add to Favorites"
@@ -722,7 +793,7 @@ function FolderActionPanel({
           title="Move to Custom Folder…"
           icon={Icon.Folder}
           target={<MoveToCustomFolderForm onAction={onAction} />}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={{ modifiers: [cmdModifier, "shift"], key: "f" }}
         />
         {favorites.some((f) => f.path === folder.path) && (
           <Action
@@ -760,38 +831,38 @@ function FolderActionPanel({
           target={
             <RenameAndMoveForm destinationPath={folder.path} folderName={folder.name} onRenameAction={onRenameAction} />
           }
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={{ modifiers: [cmdModifier], key: "r" }}
         />
       )}
       <Action
         title="Copy Files Here"
         icon={Icon.CopyClipboard}
         onAction={() => onAction(folder.path, folder.name, true)}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={{ modifiers: [cmdModifier], key: "d" }}
       />
       <Action.Push
         title="Move to New Folder…"
         icon={Icon.NewFolder}
         target={<MoveToNewFolderForm onAction={onAction} />}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={{ modifiers: [cmdModifier], key: "n" }}
       />
       <Action.Push
         title="Move to Custom Folder…"
         icon={Icon.Folder}
         target={<MoveToCustomFolderForm onAction={onAction} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        shortcut={{ modifiers: [cmdModifier, "shift"], key: "f" }}
       />
       <Action.Push
         title="Add to Favorites"
         icon={Icon.Star}
         target={<AddFavoriteForm onAddFavorite={onAddFavorite} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={{ modifiers: [cmdModifier, "shift"], key: "a" }}
       />
       <Action
         title="Undo Last File Move"
         icon={Icon.Undo}
         onAction={performUndo}
-        shortcut={{ modifiers: ["cmd"], key: "z" }}
+        shortcut={{ modifiers: [cmdModifier], key: "z" }}
       />
       {favorites.some((f) => f.path === folder.path) && (
         <Action

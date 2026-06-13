@@ -46,7 +46,8 @@
   "title": "File Mover",
   "author": "robinwerner",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "System"
