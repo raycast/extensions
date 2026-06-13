@@ -1,0 +1,7 @@
+# Enforce LF as the canonical line ending for all text files,
+# both in the repository and on checkout (cross-platform: macOS + Windows).
+* text=auto eol=lf
+
+# Binary assets — never normalize.
+*.png binary
+*.ico binary
