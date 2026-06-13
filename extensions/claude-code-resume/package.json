@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-code-resume",
   "title": "Claude Code Resume",
-  "description": "Resume any past Claude Code session, not just the last one. Browse your full session history with recall (title, first and latest prompt, last reply) and jump back in — on macOS and Windows (WSL and native).",
+  "description": "Resume any past Claude Code session — not just the last one — by browsing your full session history with recall and jumping back in, on macOS and Windows (WSL and native).",
   "icon": "icon.png",
   "author": "izumiz",
   "categories": ["Developer Tools", "Productivity"],

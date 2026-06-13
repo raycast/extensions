@@ -5,3 +5,10 @@ raycast-env.d.ts
 *.log
 
 .serena/
+
+# Local-only dev tooling — kept on disk but excluded from the Raycast store submission
+CLAUDE.md
+mise.toml
+mise.lock
+docs/
+scripts/
