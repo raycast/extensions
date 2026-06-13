@@ -1,6 +1,6 @@
 # Lark Search Changelog
 
-## [Initial Version] - 2026-06-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search Feishu/Lark docs, messages, chats, and contacts from Raycast.
 - Add `/doc`, `/msg`, and `/im` filters for narrowing search scope.
