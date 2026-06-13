@@ -10,8 +10,8 @@
   "commands": [
     {
       "name": "tile",
-      "title": "Bento Tile",
-      "description": "Tile all windows of the target app into a grid that auto-adapts to the window count. Leave the preference empty to target the focused window's app.",
+      "title": "Auto Tile",
+      "description": "Tile windows into a grid that auto-adapts to the window count. Choose Tile Scope to target a single app (by priority list or the focused window) or every window on the active desktop.",
       "mode": "no-view",
       "preferences": [
         {
