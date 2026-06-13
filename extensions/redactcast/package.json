@@ -4,7 +4,7 @@
   "title": "RedactCast",
   "description": "Reversible PII Masker: Sanitize sensitive data before sending to AI, and restore it locally.",
   "icon": "extension-icon.png",
-  "author": "gt_itech",
+  "author": "Tomokisan",
   "categories": [
     "Developer Tools",
     "Security"
@@ -40,22 +40,24 @@
     }
   ],
   "dependencies": {
+    "@raycast/api": "^1.104.19",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.57.1",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2",
-    "vitest": "^1.0.0"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run"
   }
