@@ -1,16 +1,23 @@
 import { OAuth } from "@raycast/api";
 import axios from "axios";
-import { PostHogAccount, PostHogRegion, normalizeBaseUrl } from "./account-model";
-import { getAccounts, saveAccount } from "./accounts";
+import { PostHogAccount, PostHogRegion, normalizeBaseUrl, upsertAccount } from "./account-model";
+import { getAccounts, saveAccounts } from "./accounts";
 
 const CLIENT_METADATA_PATH = "/api/oauth/raycast/client-metadata";
 
 function getClientId(authBaseUrl: string): string {
   return `${authBaseUrl}${CLIENT_METADATA_PATH}`;
 }
-const SCOPES = ["openid", "profile", "email", "project:read", "feature_flag:read", "cohort:read", "dashboard:read", "person:read"].join(
-  " "
-);
+const SCOPES = [
+  "openid",
+  "profile",
+  "email",
+  "project:read",
+  "feature_flag:read",
+  "cohort:read",
+  "dashboard:read",
+  "person:read",
+].join(" ");
 
 type OAuthServerMetadata = {
   authorization_endpoint: string;
@@ -61,6 +68,9 @@ export async function connectPostHogAccount(region: PostHogRegion): Promise<Post
   const now = new Date().toISOString();
   const accountId = createAccountId(region);
   const providerId = `posthog-${accountId}`;
+  const existingAccount = (await getAccounts()).find(
+    (account) => account.id === accountId || account.region === region
+  );
   const client = createOAuthClient(providerId);
   const clientId = getClientId(POSTHOG_REGIONS[region].authBaseUrl);
   const metadata = await getOAuthServerMetadata(region);
@@ -89,11 +99,11 @@ export async function connectPostHogAccount(region: PostHogRegion): Promise<Post
     region,
     baseUrl: normalizeBaseUrl(metadata.posthog_base_url ?? POSTHOG_REGIONS[region].baseUrl),
     authBaseUrl: POSTHOG_REGIONS[region].authBaseUrl,
-    createdAt: now,
+    createdAt: existingAccount?.createdAt ?? now,
     updatedAt: now,
   };
 
-  await saveAccount(account);
+  await saveConnectedAccount(account);
 
   return account;
 }
@@ -203,6 +213,19 @@ async function fetchUserInfo(userInfoEndpoint: string, accessToken: string): Pro
   return response.data;
 }
 
+async function saveConnectedAccount(account: PostHogAccount): Promise<void> {
+  const accounts = await getAccounts();
+  const staleAccounts = accounts.filter(
+    (existingAccount) => existingAccount.region === account.region && existingAccount.id !== account.id
+  );
+  const retainedAccounts = accounts.filter(
+    (existingAccount) => existingAccount.region !== account.region || existingAccount.id === account.id
+  );
+
+  await saveAccounts(upsertAccount(retainedAccounts, account));
+  await Promise.all(staleAccounts.map(removeTokensForAccount));
+}
+
 function createAccountId(region: PostHogRegion): string {
-  return `${region}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return region;
 }
