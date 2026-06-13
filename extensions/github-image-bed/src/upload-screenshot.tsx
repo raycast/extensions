@@ -10,22 +10,16 @@ import {
 import * as os from "os";
 import * as path from "path";
 import { RequestError } from "@octokit/request-error";
-import {
-  Preferences,
-  Arguments,
-  formatUrl,
-  uploadImageBuffer,
-  takeScreenshot,
-} from "./utils";
+import { formatUrl, uploadImageBuffer, takeScreenshot } from "./utils";
 
 /**
  * Main command: Take screenshot and upload to GitHub
  * Uses macOS native screencapture command
  */
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.UploadScreenshot }>,
 ) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.UploadScreenshot>();
   const { imageName } = props.arguments;
 
   // Prepare temp file path for screenshot output

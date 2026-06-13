@@ -10,22 +10,6 @@ import { fileTypeFromBuffer } from "file-type";
 
 // ─── Shared Interfaces ────────────────────────────────────────────────
 
-export interface Preferences {
-  githubToken: string;
-  owner: string;
-  repo: string;
-  branch: string;
-  path: string;
-  email: string;
-  cdnUrl: string;
-  defaultFormat: "markdown" | "url" | "html";
-  filenameTemplate: string;
-}
-
-export interface Arguments {
-  imageName?: string;
-}
-
 export interface UploadResult {
   status: "loading" | "success" | "error" | "cancelled";
   url: string;

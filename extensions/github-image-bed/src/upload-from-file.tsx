@@ -13,21 +13,17 @@ import {
 import { useState, useRef } from "react";
 import * as fs from "fs";
 import { RequestError } from "@octokit/request-error";
-import {
-  Preferences,
-  Arguments,
-  UploadResult,
-  uploadImageBuffer,
-  detectImageType,
-} from "./utils";
+import { UploadResult, uploadImageBuffer, detectImageType } from "./utils";
 import ResultList from "./components/ResultList";
 
 /**
  * Main command: Select image file and upload to GitHub
  * Uses Raycast native Form.FilePicker for file selection
  */
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.UploadFromFile }>,
+) {
+  const preferences = getPreferenceValues<Preferences.UploadFromFile>();
   const { imageName } = props.arguments;
   const [phase, setPhase] = useState<"pick" | "result">("pick");
   const [result, setResult] = useState<UploadResult>({

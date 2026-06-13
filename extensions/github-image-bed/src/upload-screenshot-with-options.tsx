@@ -4,19 +4,14 @@ import {
   Clipboard,
   getPreferenceValues,
   closeMainWindow,
-  open,
-  environment,
+  launchCommand,
+  LaunchType,
   LaunchProps,
 } from "@raycast/api";
 import * as os from "os";
 import * as path from "path";
 import { RequestError } from "@octokit/request-error";
-import {
-  Preferences,
-  Arguments,
-  uploadImageBuffer,
-  takeScreenshot,
-} from "./utils";
+import { uploadImageBuffer, takeScreenshot } from "./utils";
 
 /**
  * Main command: Take screenshot, upload, then open format picker
@@ -24,12 +19,13 @@ import {
  * This is a no-view command that:
  * 1. Takes screenshot (same as upload-screenshot)
  * 2. Uploads to GitHub
- * 3. Opens the format picker via Deep Link
+ * 3. Opens the format picker via launchCommand
  */
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.UploadScreenshotWithOptions }>,
 ) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences =
+    getPreferenceValues<Preferences.UploadScreenshotWithOptions>();
   const { imageName } = props.arguments;
 
   // Prepare temp file path for screenshot output
@@ -71,12 +67,12 @@ export default async function Command(
     // Copy raw URL to clipboard first, then open format picker
     await Clipboard.copy(url);
 
-    // Open the format picker command via Deep Link, passing the URL
-    const context = JSON.stringify({ url });
-    const encodedContext = encodeURIComponent(context);
-    await open(
-      `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/choose-format?launchContext=${encodedContext}`,
-    );
+    // Open the format picker command via launchCommand, passing the URL
+    await launchCommand({
+      name: "choose-format",
+      type: LaunchType.UserInitiated,
+      context: { url },
+    });
   } catch (error) {
     toast.style = Toast.Style.Failure;
 

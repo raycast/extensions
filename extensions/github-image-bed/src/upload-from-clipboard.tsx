@@ -7,21 +7,15 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import { RequestError } from "@octokit/request-error";
-import {
-  Preferences,
-  Arguments,
-  formatUrl,
-  uploadImageBuffer,
-  getImageFromClipboard,
-} from "./utils";
+import { formatUrl, uploadImageBuffer, getImageFromClipboard } from "./utils";
 
 /**
  * Main command: Upload image from clipboard to GitHub (quick mode)
  */
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.UploadFromClipboard }>,
 ) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.UploadFromClipboard>();
   const { imageName } = props.arguments;
 
   const toast = await showToast({

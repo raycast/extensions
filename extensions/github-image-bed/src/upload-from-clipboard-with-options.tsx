@@ -10,8 +10,6 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { RequestError } from "@octokit/request-error";
 import {
-  Preferences,
-  Arguments,
   UploadResult,
   uploadImageBuffer,
   getImageFromClipboard,
@@ -21,8 +19,11 @@ import ResultList from "./components/ResultList";
 /**
  * Main command: Upload clipboard image and choose output format
  */
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.UploadFromClipboardWithOptions }>,
+) {
+  const preferences =
+    getPreferenceValues<Preferences.UploadFromClipboardWithOptions>();
   const { imageName } = props.arguments;
   const [result, setResult] = useState<UploadResult>({
     status: "loading",

@@ -4,21 +4,15 @@ import {
   ActionPanel,
   Action,
   Icon,
-  Clipboard,
   showToast,
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  Preferences,
-  parsePathList,
-  getActivePath,
-  setActivePath,
-} from "./utils";
+import { parsePathList, getActivePath, setActivePath } from "./utils";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SwitchFolder>();
   const paths = parsePathList(preferences.path);
   const [activePath, setActivePathState] = useState<string>("");
 
@@ -52,7 +46,6 @@ export default function Command() {
                 onAction={async () => {
                   await setActivePath(p);
                   setActivePathState(p);
-                  await Clipboard.copy(p);
                   await showToast({
                     style: Toast.Style.Success,
                     title: `Switched to ${p}`,
