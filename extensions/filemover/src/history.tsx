@@ -36,11 +36,10 @@ export default function HistoryCommand() {
   }, []);
 
   async function handleUndo(id: string) {
-    const success = await performUndo(id);
-    if (success) {
-      // Reload history to reflect the removed item
-      await loadHistory();
-    }
+    await performUndo(id);
+    // Reload history regardless of success: storage may have been
+    // updated on partial success or when files were already missing.
+    await loadHistory();
   }
 
   return (
