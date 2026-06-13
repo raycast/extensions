@@ -137,5 +137,6 @@ export type SuccessResponse = {
   pricing?: DomainPricing;
   yourIp?: string;
   id?: number;
+  display?: string;
 };
 export type Response = ErrorResponse | SuccessResponse;

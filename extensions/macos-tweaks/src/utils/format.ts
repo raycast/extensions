@@ -75,6 +75,17 @@ export function buildDetailMarkdown(tweak: TweakState, options?: { showCategory?
     lines.push(`**Requires restart:** ${tweak.requiresRestart}`);
   }
 
+  if (tweak.minMacOS || tweak.maxMacOS) {
+    lines.push("");
+    if (tweak.minMacOS && tweak.maxMacOS) {
+      lines.push(`**macOS:** ${tweak.minMacOS} – ${tweak.maxMacOS}`);
+    } else if (tweak.minMacOS) {
+      lines.push(`**macOS:** ${tweak.minMacOS}+`);
+    } else if (tweak.maxMacOS) {
+      lines.push(`**macOS:** up to ${tweak.maxMacOS}`);
+    }
+  }
+
   if (tweak.risk === "moderate") {
     lines.push("");
     lines.push("> **Warning:** This setting is marked as moderate risk.");

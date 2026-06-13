@@ -1,11 +1,14 @@
 import { List, ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { useCallback, useState } from "react";
 
+import { ensureSupportDir } from "./utils/ensure-support-dir";
 import { SkillListItem } from "./components/SkillListItem";
 import { useInstalledSkillMatches } from "./hooks/useInstalledSkillMatches";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
 import { buildGithubIssueUrl } from "./shared";
+
+ensureSupportDir();
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");

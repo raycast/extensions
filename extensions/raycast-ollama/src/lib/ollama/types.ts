@@ -1,7 +1,15 @@
 import * as Enum from "./enum";
 
+export type ThinkingEffort = boolean | "low" | "medium" | "high";
+
 export interface OllamaErrorResponse {
   error: string;
+}
+
+/* Type Guard for OllamaErrorResponse */
+export function isOllamaErrorResponse(obj: unknown): obj is OllamaErrorResponse {
+  if (!obj || typeof obj !== "object") return false;
+  return "error" in obj && typeof obj.error === "string";
 }
 
 export interface OllamaServer {
@@ -63,7 +71,7 @@ export interface OllamaApiGenerateRequestBody {
   template?: string;
   context?: number[];
   stream?: boolean;
-  think?: boolean;
+  think?: ThinkingEffort;
   raw?: boolean;
   format?: string;
   images?: string[];
@@ -87,14 +95,32 @@ export interface OllamaApiGenerateStats {
   done_reason?: string;
 }
 
+/* Type Guard for OllamaApiGenerateStats */
+export function isOllamaApiGenerateStats(obj: unknown): obj is OllamaApiGenerateStats {
+  if (!obj || typeof obj !== "object") return false;
+
+  const record = obj as Record<string, unknown>;
+  return typeof record.model === "string" && typeof record.created_at === "string" && typeof record.done === "boolean";
+}
+
 export interface OllamaApiGenerateResponse extends OllamaApiGenerateStats {
   thinking?: string;
   response: string;
   context?: number[];
 }
 
+/* Type Guard for OllamaApiGenerateResponse */
+export function isOllamaApiGenerateResponse(obj: unknown): obj is OllamaApiGenerateResponse {
+  return isOllamaApiGenerateStats(obj) && "response" in obj && typeof obj.response === "string";
+}
+
 export interface OllamaApiChatResponse extends OllamaApiGenerateStats {
   message?: OllamaApiChatMessage;
+}
+
+/* Type Guard for OllamaApiChatResponse */
+export function isOllamaApiChatResponse(obj: unknown): obj is OllamaApiChatResponse {
+  return isOllamaApiGenerateStats(obj) && "message" in obj && isOllamaApiChatMessage(obj.message);
 }
 
 export interface OllamaApiEmbeddingsResponse {
@@ -188,6 +214,7 @@ export interface OllamaApiChatRequestBody {
   tools?: OllamaApiTool[];
   stream?: boolean;
   format?: string;
+  think?: ThinkingEffort;
   keep_alive?: string;
 
   options?: OllamaApiGenerateOptionsRequestBody;
@@ -196,17 +223,29 @@ export interface OllamaApiChatRequestBody {
 export interface OllamaApiChatMessage {
   role: Enum.OllamaApiChatMessageRole;
   content: string;
+  thinking?: string;
   images?: string[];
+  tool_name?: string;
   tool_calls?: OllamaApiChatMessageToolCall[];
 }
 
+// Type Guard for OllamaApiChatMessage
+export function isOllamaApiChatMessage(obj: unknown): obj is OllamaApiChatMessage {
+  if (!obj || typeof obj !== "object") return false;
+
+  const record = obj as Record<string, unknown>;
+  if (typeof record.content !== "string" || typeof record.role !== "string") return false;
+
+  const validRoles = Object.values(Enum.OllamaApiChatMessageRole) as string[];
+  return validRoles.includes(record.role);
+}
+
 export interface OllamaApiChatMessageToolCall {
+  id: string;
   function: {
-    index?: number;
+    index: number;
     name: string;
-    arguments: {
-      [key: string]: unknown;
-    };
+    arguments: Record<string, unknown>;
   };
 }
 
@@ -218,15 +257,7 @@ export interface OllamaApiTool {
 export interface OllamaApiToolFunction {
   name: string;
   description: string;
-  parameters: OllamaApiToolFunctionParameters;
-}
-
-export interface OllamaApiToolFunctionParameters {
-  type: "object";
-  required: string[];
-  properties: {
-    [name: string]: OllamaApiToolFunctionParameter;
-  };
+  parameters: Record<string, unknown>;
 }
 
 export interface OllamaApiToolFunctionParameter {

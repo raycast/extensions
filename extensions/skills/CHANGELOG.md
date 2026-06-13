@@ -1,5 +1,47 @@
 # Skills Changelog
 
+## [Fix Skill Contents for Nested Skills] - 2026-06-09
+
+- Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree
+
+## [Copy Skill Contents] - 2026-06-06
+
+- Add a "Copy Skill Contents" action to copy a skill's full SKILL.md to the clipboard from search results, skill details, and installed skills, so it can be pasted into tools like ChatGPT or Claude without installing the skill
+- Move the "Copy Install Command" action to `⌘ ⇧ I` so the canonical copy shortcut (`⌘ ⇧ C`) copies the skill contents
+
+## [Fix Confirmation Dialog Icon] - 2026-06-05
+
+- Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
+
+## [Fix Global Skill Updates] - 2026-06-04
+
+- Run skill update actions against global installs, matching the global skill list shown in Manage Skills
+
+## [Default Agents Preference] - 2026-06-01
+
+- Add a "Default Agents" preference to pre-select agents when installing a skill, so frequently-used agents (e.g. Claude Code) are checked automatically without manual selection each time
+
+## [Show Installed Skill Audit Details] - 2026-05-20
+
+- Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
+- Show security audit statuses, audit links, and audit actions in installed skill details
+
+## [Ask Skills AI Extension] - 2026-05-12
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
+## [Fix Stale Search Results] - 2026-05-12
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
+## [Standardize Open Actions] - 2026-05-12
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
+## [Fix Support Directory Initialization] - 2026-05-11
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
 ## [Add Newly Supported Agents] - 2026-05-05
 
 - Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal

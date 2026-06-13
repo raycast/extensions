@@ -1,15 +1,21 @@
 import { useCallback, useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useArchive } from "@/hooks/use-archive";
+import { useCachedState } from "@raycast/utils";
+import { type ArchiveFilter, isArchiveFilter, useArchive } from "@/hooks/use-archive";
 import { useMirrorDomain } from "@/hooks/use-mirror-domain";
 import { isEmpty } from "@/utils";
 import { TestMirrors } from "@/screens/TestMirrors";
 import { ArchiveListItem } from "@/components/ArchiveListItem";
 import { TestMirrorsAction } from "@/components/TestMirrorsAction";
+import { FILE_TYPES } from "@/constants";
+import { rankArchiveItems } from "@/utils/ranking";
+
+const FILTER_STORAGE_KEY = "anna-s-archive-search-filter";
 
 const Command = () => {
   const { push } = useNavigation();
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useCachedState<ArchiveFilter>(FILTER_STORAGE_KEY, "all");
 
   const usedMirror = useMirrorDomain();
 
@@ -17,14 +23,21 @@ const Command = () => {
     push(<TestMirrors />);
   }, [push]);
 
-  const { data, error, isLoading } = useArchive(usedMirror.url, onErrorPrimaryAction, search);
+  const handleFilterChange = useCallback(
+    (value: string) => {
+      setFilter(isArchiveFilter(value) ? value : "all");
+    },
+    [setFilter],
+  );
+
+  const { data, error, isLoading } = useArchive(usedMirror.url, onErrorPrimaryAction, search, filter);
 
   const listData = useMemo(() => {
     if (!data || search.length === 0) {
       return [];
     }
-    return data;
-  }, [data, search]);
+    return rankArchiveItems(data, search, filter);
+  }, [data, filter, search]);
 
   const emptyViewTitle = useMemo(() => {
     if (isLoading) {
@@ -44,6 +57,14 @@ const Command = () => {
       throttle={true}
       filtering={false}
       isShowingDetail={listData.length > 0}
+      searchBarAccessory={
+        <List.Dropdown tooltip="File Type" value={filter} onChange={handleFilterChange}>
+          <List.Dropdown.Item title="All" value="all" />
+          {FILE_TYPES.map((fileType) => (
+            <List.Dropdown.Item key={fileType} title={fileType.toUpperCase()} value={fileType} />
+          ))}
+        </List.Dropdown>
+      }
     >
       {error && (
         <List.EmptyView

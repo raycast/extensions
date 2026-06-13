@@ -10,7 +10,6 @@ import { Show, Episode } from "../types/betaseries";
 import { EpisodeListItem } from "./EpisodeListItem";
 import { TokenRequiredView } from "./TokenRequiredView";
 import { useAuthToken } from "../hooks/useAuthToken";
-import { refreshNewEpisodesMenubar } from "../menubar";
 
 interface ShowEpisodesListProps {
   show: Show;
@@ -76,7 +75,6 @@ export function ShowEpisodesList({ show }: ShowEpisodesListProps) {
         style: Toast.Style.Success,
         title: "Episode marked as watched",
       });
-      await refreshNewEpisodesMenubar();
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {

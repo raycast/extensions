@@ -1,4 +1,5 @@
 import {
+  buildSkillUrl,
   buildGithubIssueUrl,
   SKILLS_BASE_URL,
   type AuditProvider,
@@ -55,7 +56,7 @@ function buildAuditErrorResult({
       message,
       skillSource: skill.source,
       skillId: skill.skillId,
-      detailUrl: `${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`,
+      detailUrl: buildSkillUrl(skill),
       timestamp: new Date().toISOString(),
     },
   };
@@ -265,7 +266,7 @@ function parseSecurityAuditsFromHtml(skill: Skill, html: string): SkillAuditsRes
  * @returns The security audits for the skill.
  */
 export async function fetchSkillAudits(skill: Skill): Promise<SkillAuditsResult> {
-  const detailUrl = `${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`;
+  const detailUrl = buildSkillUrl(skill);
   const timeoutSignal = typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(10_000) : undefined;
 
   let response: Response;

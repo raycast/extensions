@@ -7,6 +7,8 @@ import { addGameToFavourites } from "../modules/favourite-games";
 import { useGameDetails } from "../hooks/game-details";
 import { useEffect, useReducer } from "react";
 import { useIPInfo } from "../hooks/ip-info";
+import { useServerRegion } from "../hooks/server-region";
+import { formatDatacenterLocation } from "../modules/rovalra-api";
 
 type PlaceResponse = {
   previousPageCursor: string | null;
@@ -65,7 +67,7 @@ export function PlacesPage({ universeId }: RenderPlacesPageProps) {
               <ActionPanel>
                 <Action.OpenInBrowser url={placeUrl} />
                 <Action.CopyToClipboard
-                  title="Copy Place Id"
+                  title="Copy Place ID"
                   content={placeId}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
@@ -89,6 +91,7 @@ type GamePageOptions = {
   timeJoined: Date | null | undefined;
   serverIP: string | null | undefined;
   serverType: ServerType | null | undefined;
+  dataCenterId?: number;
 };
 
 function getSessionData(options?: GamePageOptions) {
@@ -111,13 +114,27 @@ function getSessionData(options?: GamePageOptions) {
     return () => clearInterval(intervalId);
   }, [joinTime]);
 
-  let serverLocationText = null;
+  let serverLocationText: string | null = null;
+  let serverLocationTitle: string | null = null;
+  let serverIPText: string | null = null;
+
+  const { data: serverRegion, isLoading: serverRegionLoading } = useServerRegion(options?.dataCenterId);
 
   const serverLocation = getIPLocation(serverIP);
-  if (serverLocation) {
+
+  if (serverRegion?.datacenter) {
+    serverLocationText = formatDatacenterLocation(serverRegion.datacenter);
+    serverLocationTitle = "Server Location (Datacenter)";
+    if (serverIP) {
+      const { region } = serverRegion.datacenter;
+      serverIPText = region === "OTHER" ? serverIP : `${serverIP} (${region})`;
+    }
+  } else if (serverLocation) {
     serverLocationText = `${serverLocation} (${serverIP})`;
-  } else if (serverIP) {
+    serverLocationTitle = "Server Location (Geolocation)";
+  } else if (serverIP && !serverRegionLoading) {
     serverLocationText = serverIP;
+    serverLocationTitle = "Server Location (IP)";
   }
 
   const serverTypeText = options?.serverType;
@@ -128,6 +145,8 @@ function getSessionData(options?: GamePageOptions) {
     hasSessionData,
     sessionPlayTimeText,
     serverLocationText,
+    serverLocationTitle,
+    serverIPText,
     serverTypeText,
   };
 }
@@ -141,7 +160,8 @@ export function GamePage({ universeId, options }: RenderGamePageProps) {
 
   const { data: thumbnailUrls, isLoading: thumbnailDataLoading } = useGameThumbnails(universeId);
 
-  const { hasSessionData, sessionPlayTimeText, serverLocationText, serverTypeText } = getSessionData(options);
+  const { hasSessionData, sessionPlayTimeText, serverLocationText, serverLocationTitle, serverIPText, serverTypeText } =
+    getSessionData(options);
 
   const isLoading = gameDataLoading || thumbnailDataLoading;
 
@@ -181,12 +201,12 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`)
         <ActionPanel>
           <Action.OpenInBrowser url={gameURL} />
           <Action.CopyToClipboard
-            title="Copy Universe Id"
+            title="Copy Universe ID"
             content={universeId}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
-            title="Copy Root Place Id"
+            title="Copy Root Place ID"
             content={rootPlaceId}
             shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
@@ -213,7 +233,10 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`)
       }
       metadata={
         <Detail.Metadata>
-          {serverLocationText && <Detail.Metadata.Label title="Server Location" text={serverLocationText} />}
+          {serverLocationText && serverLocationTitle && (
+            <Detail.Metadata.Label title={serverLocationTitle} text={serverLocationText} />
+          )}
+          {serverIPText && <Detail.Metadata.Label title="Server IP" text={serverIPText} />}
           {sessionPlayTimeText && <Detail.Metadata.Label title="Session Time" text={sessionPlayTimeText} />}
           {serverTypeText && <Detail.Metadata.Label title="Server Type" text={serverTypeText} />}
 

@@ -106,6 +106,14 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         onAction={() => openNewTab(SupportedBrowsers.Dia, url)}
       />
     ),
+    [SupportedBrowsers.Helium]: (
+      <Action
+        title={"Open in Helium"}
+        icon={"helium-logo.svg"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        onAction={() => openNewTab(SupportedBrowsers.Helium, url)}
+      />
+    ),
     [SupportedBrowsers.Comet]: (
       <Action
         title={"Open in Comet"}
@@ -151,6 +159,7 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         {actions[SupportedBrowsers.Orion]}
         {actions[SupportedBrowsers.Sidekick]}
         {actions[SupportedBrowsers.Dia]}
+        {actions[SupportedBrowsers.Helium]}
         {actions[SupportedBrowsers.Comet]}
         {actions[SupportedBrowsers.ChatGPTAtlas]}
       </ActionPanel.Section>

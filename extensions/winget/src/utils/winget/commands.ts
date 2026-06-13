@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { getPreferenceValues } from "@raycast/api";
+import { stripVTControlCharacters } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
@@ -10,10 +11,7 @@ const execFileAsync = promisify(execFile);
  * appears in winget output on some Windows builds.
  */
 function stripAnsi(str: string): string {
-  return str
-    .replace(/\x1B\[[0-9;]*[mGKHFJABCDEFnstu]/g, "")
-    .replace(/\x1B[=>]/g, "")
-    .replace(/\u200F/g, "");
+  return stripVTControlCharacters(str).replace(/\u200F/g, "");
 }
 
 function getWingetExecutable(): string {

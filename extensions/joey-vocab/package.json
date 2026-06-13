@@ -23,22 +23,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "email",
-      "title": "Email",
-      "description": "Your Joey account email",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "password",
-      "title": "Password",
-      "description": "Your Joey account password",
-      "type": "password",
-      "required": true
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.93.3",
     "@raycast/utils": "^2.2.3",

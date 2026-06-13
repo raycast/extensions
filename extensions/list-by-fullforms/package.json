@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "list-by-fullforms",
+  "title": "List by FullForms",
+  "description": "Search and add entries across your FullForms List glossaries from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "mithunmathew",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Entries",
+      "subtitle": "List by FullForms",
+      "description": "Search across your lists and entries.",
+      "mode": "view"
+    },
+    {
+      "name": "add-entry",
+      "title": "Quick Add Entry",
+      "subtitle": "List by FullForms",
+      "description": "Create a new entry on a list you can edit.",
+      "mode": "view"
+    },
+    {
+      "name": "suggest-entry",
+      "title": "Suggest Entry",
+      "subtitle": "List by FullForms",
+      "description": "Suggest a new entry on a list. The owner reviews before it appears.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "Generate one at list.fullforms.com/account under API tokens.",
+      "required": true,
+      "placeholder": "ffl_..."
+    },
+    {
+      "name": "apiBase",
+      "type": "textfield",
+      "title": "API Base URL",
+      "description": "Leave as default unless you've been given a custom endpoint.",
+      "default": "https://list.fullforms.com",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.2.17"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
