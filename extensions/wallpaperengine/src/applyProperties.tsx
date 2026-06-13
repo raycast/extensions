@@ -15,6 +15,17 @@ export default function ApplyProperties() {
       return;
     }
 
+    try {
+      JSON.parse(jsonText);
+    } catch (parseError) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid JSON",
+        message: String(parseError),
+      });
+      return;
+    }
+
     const escapedProperties = `RAW~(${jsonText})~END`;
     const args = ["applyProperties", "-properties", escapedProperties];
 
