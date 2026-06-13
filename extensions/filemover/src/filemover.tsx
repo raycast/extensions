@@ -464,6 +464,12 @@ $conn.Close()
           title: `Failed to ${isCopy ? "copy" : "move"} some files`,
           message: `Processed ${successCount} of ${selectedFiles.length} files. Errors: ${errorMsg}`,
         });
+      } else if (successCount === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No files moved",
+          message: "All selected files are already in the destination folder",
+        });
       } else {
         await showToast({
           style: Toast.Style.Success,
@@ -507,6 +513,12 @@ $conn.Close()
           style: Toast.Style.Failure,
           title: `Failed to rename some files`,
           message: `Processed ${successCount} files. Errors: ${errorMsg}`,
+        });
+      } else if (successCount === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No files renamed or moved",
+          message: "All selected files are already in the destination folder",
         });
       } else {
         await showToast({ style: Toast.Style.Success, title: `Files renamed and moved successfully` });
