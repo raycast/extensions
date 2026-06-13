@@ -369,7 +369,7 @@ async function removeExistingScripts(directory: string) {
   const entries = await readdir(directory).catch(() => []);
   await Promise.all(
     entries
-      .filter((entry) => entry.endsWith(".sh"))
+      .filter((entry) => /^lark-hot-index-\d+\.sh$/.test(entry))
       .map((entry) => rm(join(directory, entry), { force: true })),
   );
 }
