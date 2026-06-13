@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "@shared/*": [
+        "../web/shared/*",
+        "./shared/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
