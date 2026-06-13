@@ -10,10 +10,6 @@ import { exportQuicklinks } from "./lib/quicklinks";
 import { getQuicklinkApplicationName } from "./lib/preferences";
 import { getRecents } from "./lib/recent-cache";
 
-type Preferences = {
-  quicklinkLimit: string;
-};
-
 export default async function Command() {
   const { quicklinkLimit } = getPreferenceValues<Preferences>();
   const limit = Math.max(1, Number.parseInt(quicklinkLimit, 10) || 30);

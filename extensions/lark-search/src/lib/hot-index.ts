@@ -25,11 +25,6 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_HOT_INDEX_DIRECTORY =
   "~/Documents/Raycast Script Commands/Lark Hot Index";
 
-type Preferences = {
-  hotIndexDirectory?: string;
-  hotIndexLimit?: string;
-};
-
 type HotIndexItem = LarkSearchItem & {
   hotScore: number;
 };
@@ -410,11 +405,11 @@ function openInTargetAppCommand(item: HotIndexItem) {
 }
 
 function scriptTitle(item: HotIndexItem) {
-  return item.title;
+  return scriptCommentText(item.title);
 }
 
 function scriptDescription(item: HotIndexItem) {
-  return (
+  return scriptCommentText(
     cleanText(
       [
         item.subtitle,
@@ -441,7 +436,16 @@ function scriptDescription(item: HotIndexItem) {
       ]
         .filter(Boolean)
         .join(" · "),
-    ) ?? scriptTitle(item)
+    ) ?? scriptTitle(item),
+  );
+}
+
+function scriptCommentText(value: string) {
+  return (
+    cleanText(value)
+      ?.replace(/[\r\n]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim() ?? ""
   );
 }
 

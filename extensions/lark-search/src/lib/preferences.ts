@@ -7,18 +7,6 @@ const DEFAULT_LARK_APP_NAME = "Lark";
 const DEFAULT_FEISHU_APP_NAME = "Feishu";
 const DEFAULT_CLI_IDENTITY = "user";
 
-type Preferences = {
-  larkCliPath?: string;
-  enableLarkApplication?: boolean;
-  enableFeishuApplication?: boolean;
-  larkApplicationName?: string;
-  feishuApplicationName?: string;
-  larkBundleId?: string;
-  feishuBundleId?: string;
-  larkCliIdentity?: string;
-  feishuCliIdentity?: string;
-};
-
 export type AppTarget = {
   key: "lark" | "feishu";
   productName: "Lark" | "Feishu";
@@ -64,8 +52,13 @@ export function getEnabledAppTargets(): AppTarget[] {
     targets.push({
       key: "lark",
       productName: "Lark",
-      name: nonEmpty(preferences.larkApplicationName) ?? DEFAULT_LARK_APP_NAME,
-      bundleId: nonEmpty(preferences.larkBundleId) ?? DEFAULT_LARK_BUNDLE_ID,
+      name:
+        nonEmpty(preferences.larkApplicationName?.name) ??
+        DEFAULT_LARK_APP_NAME,
+      bundleId:
+        nonEmpty(preferences.larkBundleId) ??
+        nonEmpty(preferences.larkApplicationName?.bundleId) ??
+        DEFAULT_LARK_BUNDLE_ID,
       cliIdentity:
         nonEmpty(preferences.larkCliIdentity) ?? DEFAULT_CLI_IDENTITY,
     });
@@ -76,9 +69,12 @@ export function getEnabledAppTargets(): AppTarget[] {
       key: "feishu",
       productName: "Feishu",
       name:
-        nonEmpty(preferences.feishuApplicationName) ?? DEFAULT_FEISHU_APP_NAME,
+        nonEmpty(preferences.feishuApplicationName?.name) ??
+        DEFAULT_FEISHU_APP_NAME,
       bundleId:
-        nonEmpty(preferences.feishuBundleId) ?? DEFAULT_FEISHU_BUNDLE_ID,
+        nonEmpty(preferences.feishuBundleId) ??
+        nonEmpty(preferences.feishuApplicationName?.bundleId) ??
+        DEFAULT_FEISHU_BUNDLE_ID,
       cliIdentity:
         nonEmpty(preferences.feishuCliIdentity) ?? DEFAULT_CLI_IDENTITY,
     });
