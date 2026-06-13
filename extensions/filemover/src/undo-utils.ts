@@ -71,7 +71,11 @@ export async function performUndo(specificId?: string) {
     let successCount = 0;
     const errors: string[] = [];
 
-    for (const file of history.files) {
+    const successfulIndices: number[] = [];
+
+    for (let i = 0; i < history.files.length; i++) {
+      const file = history.files[i];
+      let didSucceed = false;
       try {
         if (history.type === "move" || history.type === "rename") {
           // move it back
@@ -92,26 +96,35 @@ export async function performUndo(specificId?: string) {
                 throw e;
               }
             }
-            successCount++;
+            didSucceed = true;
           }
         } else {
           // copy - so we delete the new file
           if (fs.existsSync(file.newPath)) {
             await fs.promises.rm(file.newPath, { recursive: true });
-            successCount++;
+            didSucceed = true;
           }
         }
       } catch {
         errors.push(`Failed to undo ${path.basename(file.newPath)}`);
       }
+
+      if (didSucceed) {
+        successCount++;
+        successfulIndices.push(i);
+      }
     }
 
-    // Remove the undone item from history
-    historyList.splice(indexToUndo, 1);
-    await LocalStorage.setItem("actionHistory", JSON.stringify(historyList));
-    if (legacyHistoryStr) {
-      await LocalStorage.removeItem("lastAction");
+    if (errors.length === 0) {
+      historyList.splice(indexToUndo, 1);
+      if (legacyHistoryStr) {
+        await LocalStorage.removeItem("lastAction");
+      }
+    } else if (successCount > 0) {
+      history.files = history.files.filter((_, i) => !successfulIndices.includes(i));
     }
+
+    await LocalStorage.setItem("actionHistory", JSON.stringify(historyList));
 
     if (errors.length > 0) {
       await showToast({
