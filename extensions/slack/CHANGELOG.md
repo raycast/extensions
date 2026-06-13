@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Set Status deep link with raw emoji] - {PR_MERGE_DATE}
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
 
 - Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
 
