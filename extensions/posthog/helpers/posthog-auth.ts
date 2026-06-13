@@ -3,7 +3,11 @@ import axios from "axios";
 import { PostHogAccount, PostHogRegion, normalizeBaseUrl } from "./account-model";
 import { getAccounts, saveAccount } from "./accounts";
 
-const CLIENT_ID = "https://posthog-x-raycast.fastapicloud.dev/posthog-raycast-v2";
+const CLIENT_METADATA_PATH = "/api/oauth/raycast/client-metadata";
+
+function getClientId(authBaseUrl: string): string {
+  return `${authBaseUrl}${CLIENT_METADATA_PATH}`;
+}
 const SCOPES = ["openid", "profile", "email", "project:read", "feature_flag:read", "cohort:read", "dashboard:read", "person:read"].join(
   " "
 );
@@ -58,15 +62,17 @@ export async function connectPostHogAccount(region: PostHogRegion): Promise<Post
   const accountId = createAccountId(region);
   const providerId = `posthog-${accountId}`;
   const client = createOAuthClient(providerId);
+  const clientId = getClientId(POSTHOG_REGIONS[region].authBaseUrl);
   const metadata = await getOAuthServerMetadata(region);
   const authorizationRequest = await client.authorizationRequest({
     endpoint: metadata.authorization_endpoint,
-    clientId: CLIENT_ID,
+    clientId,
     scope: SCOPES,
   });
   const authorizationResponse = await client.authorize(authorizationRequest);
   const tokenResponse = await exchangeAuthorizationCode(
     metadata.token_endpoint,
+    clientId,
     authorizationResponse.authorizationCode,
     authorizationRequest.codeVerifier,
     authorizationRequest.redirectURI
@@ -145,6 +151,7 @@ async function getOAuthServerMetadata(region: PostHogRegion): Promise<OAuthServe
 
 async function exchangeAuthorizationCode(
   tokenEndpoint: string,
+  clientId: string,
   authorizationCode: string,
   codeVerifier: string,
   redirectUri: string
@@ -154,7 +161,7 @@ async function exchangeAuthorizationCode(
     new URLSearchParams({
       grant_type: "authorization_code",
       code: authorizationCode,
-      client_id: CLIENT_ID,
+      client_id: clientId,
       code_verifier: codeVerifier,
       redirect_uri: redirectUri,
     }),
@@ -174,7 +181,7 @@ async function refreshAccessToken(account: PostHogAccount, refreshToken: string)
     new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      client_id: CLIENT_ID,
+      client_id: getClientId(account.authBaseUrl),
     }),
     {
       headers: {
