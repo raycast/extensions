@@ -115,7 +115,7 @@ export async function performUndo(specificId?: string) {
       }
     }
 
-    if (errors.length === 0) {
+    if (errors.length === 0 && successCount > 0) {
       historyList.splice(indexToUndo, 1);
       if (legacyHistoryStr) {
         await LocalStorage.removeItem("lastAction");
