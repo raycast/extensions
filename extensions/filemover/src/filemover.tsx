@@ -387,6 +387,8 @@ $conn.Close()
           : `${newBase}${ext}`;
         let destPath = path.join(destFolder, safeName);
 
+        if (src === destPath) continue;
+
         let conflictCounter = forceNumbering ? index : 1;
         while (fs.existsSync(destPath)) {
           // If a file already exists, append an index to resolve the conflict
