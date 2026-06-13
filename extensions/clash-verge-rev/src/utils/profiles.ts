@@ -482,8 +482,8 @@ export async function updateProfileContent(uid: string): Promise<void> {
 
   const profilePath = path.join(profileDir, filename);
 
-  // Write content
-  fs.writeFileSync(profilePath, content, "utf-8");
+  // Write content atomically
+  atomicWriteFileSync(profilePath, content);
   console.log(`[Profile] Saved content to ${profilePath}`);
 
   // Update headers info if available (Subscription-Userinfo)
