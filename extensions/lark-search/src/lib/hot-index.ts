@@ -139,8 +139,8 @@ async function getActiveChats(target: AppTarget): Promise<HotIndexItem[]> {
       subtitle: cleanText(
         [
           mode === "p2p"
-            ? `${target.productName} 最近活跃私聊`
-            : `${target.productName} 最近活跃群组`,
+            ? `${target.productName} recently active direct chat`
+            : `${target.productName} recently active group chat`,
           pickString(raw, ["description"]),
           pickString(raw, ["update_time", "updated_at", "active_time"]),
         ]
@@ -191,7 +191,10 @@ async function getFeedShortcuts(target: AppTarget): Promise<HotIndexItem[]> {
       type,
       title: cleanText(title) ?? title,
       subtitle: cleanText(
-        [`${target.productName} 置顶会话`, pickString(detail, ["description"])]
+        [
+          `${target.productName} pinned chat`,
+          pickString(detail, ["description"]),
+        ]
           .filter(Boolean)
           .join(" · "),
       ),
@@ -285,7 +288,7 @@ async function getFlaggedMessages(target: AppTarget): Promise<HotIndexItem[]> {
       title: cleanText(title) ?? title,
       subtitle: cleanText(
         [
-          `${target.productName} 收藏消息`,
+          `${target.productName} flagged message`,
           pickString(raw, ["chat_name", "sender.name"]),
           pickString(raw, [
             "create_time",
@@ -523,6 +526,12 @@ function cleanText(value?: string) {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 10)),
+    )
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16)),
+    )
     .replace(/\s+/g, " ")
     .trim();
 }

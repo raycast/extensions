@@ -187,7 +187,7 @@ function buildSections(
     const peopleAndGroups = interleavePeopleAndGroups(items);
     sections.push({
       type: "people-and-groups",
-      title: "联系人 / 群组",
+      title: "Contacts & Chats",
       items: hasTypeFilters
         ? peopleAndGroups
         : peopleAndGroups.slice(0, PEOPLE_GROUP_PREVIEW_LIMIT),
@@ -282,7 +282,7 @@ function SearchItem({
       subtitle={subtitle}
       accessories={[
         item.appName ? { text: item.appName } : {},
-        item.source === "recent" ? { text: "最近打开" } : {},
+        item.source === "recent" ? { text: "Recent" } : {},
         item.updatedAt ? { text: item.updatedAt } : {},
       ]}
       actions={<ItemActions item={item} onOpened={onOpened} />}

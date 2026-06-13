@@ -31,22 +31,22 @@ export type LarkSearchItem = {
 };
 
 export const scopeTitles: Record<SearchScope, string> = {
-  all: "全部",
-  doc: "云文档",
-  message: "消息",
-  chat: "群组",
-  contact: "联系人",
-  wiki: "知识库",
-  sheet: "表格",
+  all: "All",
+  doc: "Docs",
+  message: "Messages",
+  chat: "Chats",
+  contact: "Contacts",
+  wiki: "Wiki",
+  sheet: "Sheets",
 };
 
 export const typeLabels: Record<LarkSearchType, string> = {
-  doc: "文档",
-  message: "消息",
-  chat: "群",
-  contact: "人",
-  wiki: "知识库",
-  sheet: "表格",
+  doc: "Doc",
+  message: "Msg",
+  chat: "Chat",
+  contact: "Contact",
+  wiki: "Wiki",
+  sheet: "Sheet",
 };
 
 export const typeIcons: Record<LarkSearchType, Icon> = {

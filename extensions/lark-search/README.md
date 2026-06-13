@@ -20,10 +20,10 @@ Search Feishu/Lark docs, messages, chats, and contacts from Raycast.
 
 Default application settings:
 
-| App           | App Picker Name    | Bundle ID               | lark-cli Identity |
-| ------------- | ------------------ | ----------------------- | ----------------- |
-| Lark          | `Lark`             | `com.larksuite.larkApp` | `user`            |
-| Feishu / 飞书 | `Feishu` or `飞书` | `com.electron.lark`     | `user`            |
+| App    | App Picker Name | Bundle ID               | lark-cli Identity |
+| ------ | --------------- | ----------------------- | ----------------- |
+| Lark   | `Lark`          | `com.larksuite.larkApp` | `user`            |
+| Feishu | `Feishu`        | `com.electron.lark`     | `user`            |
 
 You can enable both desktop apps. If they use different `lark-cli --as` identities, set the identity for each app in extension preferences.
 

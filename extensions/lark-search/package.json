@@ -107,16 +107,16 @@
     {
       "name": "enableFeishuApplication",
       "title": "Feishu Application",
-      "description": "Enable Feishu/飞书 as a desktop app target for opening chats, contacts, and messages.",
+      "description": "Enable Feishu as a desktop app target for opening chats, contacts, and messages.",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "label": "Use Feishu / 飞书"
+      "label": "Use Feishu"
     },
     {
       "name": "feishuApplicationName",
       "title": "Feishu App",
-      "description": "Feishu/飞书 application used for Raycast Quicklinks.",
+      "description": "Feishu application used for Raycast Quicklinks.",
       "type": "appPicker",
       "required": false,
       "default": "Feishu"
@@ -124,7 +124,7 @@
     {
       "name": "feishuBundleId",
       "title": "Feishu Bundle ID",
-      "description": "Bundle identifier used to open Feishu/飞书 links directly in the desktop app.",
+      "description": "Bundle identifier used to open Feishu links directly in the desktop app.",
       "type": "textfield",
       "required": false,
       "default": "com.electron.lark",

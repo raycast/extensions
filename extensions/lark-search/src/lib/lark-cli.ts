@@ -468,13 +468,13 @@ function buildDetailMarkdown({
   if (context) {
     rows.push(
       "",
-      type === "message" ? "### 消息上下文" : "### 命中上下文",
+      type === "message" ? "### Message Context" : "### Matched Context",
       context,
     );
   }
 
   if (url) {
-    rows.push("", `[打开链接](${url})`);
+    rows.push("", `[Open Link](${url})`);
   }
 
   return rows.join("\n\n");
