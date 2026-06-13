@@ -1043,6 +1043,13 @@ function RenameAndMoveForm({ destinationPath, folderName, onRenameAction }: Rena
                 await showToast({ style: Toast.Style.Failure, title: "Please enter text to find" });
                 return;
               }
+              if (values.mode === "find_replace" && !values.text && values.appendDate === "none") {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Please enter replacement text or append a date to avoid empty filenames",
+                });
+                return;
+              }
               await onRenameAction(destinationPath, folderName, values);
               pop();
             }}

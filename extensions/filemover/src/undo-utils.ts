@@ -115,6 +115,13 @@ export async function performUndo(specificId?: string) {
         message: `Restored ${successCount} files. Errors: ${errors.join(", ")}`,
       });
       return false;
+    } else if (successCount === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Undo failed",
+        message: `No files could be found to revert.`,
+      });
+      return false;
     } else {
       await showToast({
         style: Toast.Style.Success,
