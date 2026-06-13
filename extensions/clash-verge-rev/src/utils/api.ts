@@ -59,10 +59,13 @@ const DEFAULT_MACOS_SOCKET = "/tmp/verge/verge-mihomo.sock";
 
 /** Cached Unix socket agent (reused across requests) */
 let socketAgent: http.Agent | null = null;
+/** The socket path the cached agent was created for */
+let cachedSocketPath: string | null = null;
 
 /**
  * Create or return cached HTTP agent that connects via Unix socket.
  * Returns null if Unix socket is not available.
+ * Recreates the agent if the socket path preference changes.
  */
 function getUnixSocketAgent(): http.Agent | null {
   const prefs = getPreferenceValues<ApiPreferences>();
@@ -73,11 +76,18 @@ function getUnixSocketAgent(): http.Agent | null {
     return null;
   }
 
+  // Recreate agent if socket path changed
+  if (socketAgent && cachedSocketPath !== socketPath) {
+    socketAgent.destroy();
+    socketAgent = null;
+  }
+
   if (!socketAgent) {
     socketAgent = new http.Agent();
     socketAgent.createConnection = () => {
       return net.createConnection(socketPath);
     };
+    cachedSocketPath = socketPath;
   }
   return socketAgent;
 }

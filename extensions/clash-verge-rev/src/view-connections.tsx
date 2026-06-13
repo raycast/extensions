@@ -581,7 +581,7 @@ export default function ViewConnections() {
                       onAction={() => setShowDetail(!showDetail)}
                     />
                     <Action
-                      title="Close Connection (Ctrl+X)"
+                      title="Close Connection"
                       icon={Icon.XMarkCircle}
                       style={Action.Style.Destructive}
                       shortcut={{ macOS: { modifiers: ["cmd"], key: "x" }, Windows: { modifiers: ["ctrl"], key: "x" } }}
