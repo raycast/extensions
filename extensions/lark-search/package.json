@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lark-search",
+  "title": "Lark Search",
+  "description": "Search Feishu/Lark docs, messages, chats, and contacts from Raycast.",
+  "icon": "icon.png",
+  "author": "jyufu_ko",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "lark",
+    "feishu",
+    "search",
+    "raycast"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-lark",
+      "title": "Lark Search",
+      "subtitle": "Lark",
+      "description": "Search Feishu/Lark docs, messages, chats, and contacts from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "sync-quicklinks",
+      "title": "Export Lark Quicklinks",
+      "subtitle": "Lark",
+      "description": "Export recently opened Lark results as Raycast Quicklinks JSON.",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-hot-index",
+      "title": "Refresh Lark Hot Index",
+      "subtitle": "Lark",
+      "description": "Refresh Script Commands hot index for Lark root search.",
+      "mode": "no-view",
+      "interval": "3m"
+    },
+    {
+      "name": "setup-hot-index",
+      "title": "Setup Lark Hot Index",
+      "subtitle": "Lark",
+      "description": "Initialize Lark Script Commands hot index and show setup instructions.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "larkCliPath",
+      "title": "lark-cli Path",
+      "description": "Path to the lark-cli executable.",
+      "type": "textfield",
+      "required": false,
+      "default": "/opt/homebrew/bin/lark-cli"
+    },
+    {
+      "name": "quicklinkLimit",
+      "title": "Quicklink Export Limit",
+      "description": "Maximum number of recently opened items to export as Quicklinks.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "larkBundleId",
+      "title": "Lark Bundle ID",
+      "description": "Bundle identifier used to open Lark/Feishu links directly in the desktop app.",
+      "type": "textfield",
+      "required": false,
+      "default": "com.larksuite.larkApp"
+    },
+    {
+      "name": "larkApplicationName",
+      "title": "Lark Application Name",
+      "description": "Application name used when creating Raycast Quicklinks.",
+      "type": "textfield",
+      "required": false,
+      "default": "飞书"
+    },
+    {
+      "name": "hotIndexLimit",
+      "title": "Hot Index Limit",
+      "description": "Maximum number of Script Commands generated for Raycast root search.",
+      "type": "textfield",
+      "required": false,
+      "default": "50"
+    },
+    {
+      "name": "hotIndexDirectory",
+      "title": "Hot Index Script Commands Directory",
+      "description": "Folder containing generated Lark Script Commands. Add this folder to Raycast Script Commands once.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Documents/Raycast Script Commands/Lark Hot Index"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}
