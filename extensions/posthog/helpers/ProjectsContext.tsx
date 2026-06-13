@@ -10,15 +10,9 @@ import {
   encodeProjectSelection,
   firstProjectSelectionValue,
   isProjectSelectionValueAvailable,
-  PostHogRegion,
 } from "./account-model";
 import { ConnectAccountActions } from "./ConnectAccountActions";
-import {
-  AuthenticatedPostHogAccount,
-  POSTHOG_REGIONS,
-  connectPostHogAccount,
-  getAuthenticatedAccounts,
-} from "./posthog-auth";
+import { AuthenticatedPostHogAccount, connectPostHogAccount, getAuthenticatedAccounts } from "./posthog-auth";
 
 type SearchResult = {
   count: number;
@@ -68,15 +62,15 @@ export function WithProjects({ children }: { children: ReactNode }) {
     setSelectedValue(firstProjectSelectionValue(data));
   }, [data, selectedValue]);
 
-  const connectAccount = async (region: PostHogRegion) => {
-    await showToast({ style: Toast.Style.Animated, title: `Connecting PostHog ${POSTHOG_REGIONS[region].title}` });
+  const connectAccount = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Connecting PostHog" });
 
     try {
-      const account = await connectPostHogAccount(region);
+      const account = await connectPostHogAccount();
       await showToast({
         style: Toast.Style.Success,
         title: "Connected PostHog account",
-        message: account.email ?? POSTHOG_REGIONS[region].title,
+        message: account.email ?? account.region.toUpperCase(),
       });
       revalidate();
     } catch (error) {

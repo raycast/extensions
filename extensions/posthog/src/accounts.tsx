@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { accountLabel, PostHogAccount, PostHogRegion } from "../helpers/account-model";
+import { accountLabel, PostHogAccount } from "../helpers/account-model";
 import { getAccounts, removeAccount } from "../helpers/accounts";
 import { ConnectAccountActions } from "../helpers/ConnectAccountActions";
-import { POSTHOG_REGIONS, connectPostHogAccount, removeTokensForAccount } from "../helpers/posthog-auth";
+import { connectPostHogAccount, removeTokensForAccount } from "../helpers/posthog-auth";
 
 type AccountState = {
   accounts: PostHogAccount[];
@@ -12,15 +12,15 @@ type AccountState = {
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadAccountState);
 
-  const connectAccount = async (region: PostHogRegion) => {
-    await showToast({ style: Toast.Style.Animated, title: `Connecting PostHog ${POSTHOG_REGIONS[region].title}` });
+  const connectAccount = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Connecting PostHog" });
 
     try {
-      const account = await connectPostHogAccount(region);
+      const account = await connectPostHogAccount();
       await showToast({
         style: Toast.Style.Success,
         title: "Connected PostHog account",
-        message: account.email ?? POSTHOG_REGIONS[region].title,
+        message: account.email ?? account.region.toUpperCase(),
       });
       revalidate();
     } catch (error) {
@@ -89,7 +89,7 @@ function AccountActions({
   onRemove,
 }: {
   account: PostHogAccount;
-  onConnect: (region: PostHogRegion) => void;
+  onConnect: () => void;
   onRemove: (account: PostHogAccount) => void;
 }) {
   return (
@@ -97,15 +97,9 @@ function AccountActions({
       <ActionPanel.Section title="Connect">
         <Action
           icon={Icon.Link}
-          title="Connect US Account"
-          onAction={() => onConnect("us")}
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
-        />
-        <Action
-          icon={Icon.Link}
-          title="Connect EU Account"
-          onAction={() => onConnect("eu")}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          title="Connect Account"
+          onAction={onConnect}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>

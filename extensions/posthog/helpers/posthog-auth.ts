@@ -4,6 +4,9 @@ import { PostHogAccount, PostHogRegion, normalizeBaseUrl, upsertAccount } from "
 import { getAccounts, saveAccounts } from "./accounts";
 
 const CLIENT_METADATA_PATH = "/api/oauth/raycast/client-metadata";
+const OAUTH_PROXY_BASE_URL = "https://oauth.posthog.com";
+// The OAuth proxy routes users to US/EU, but the Raycast CIMD document is hosted on the app domain.
+const RAYCAST_CLIENT_ID_BASE_URL = "https://us.posthog.com";
 
 function getClientId(authBaseUrl: string): string {
   return `${authBaseUrl}${CLIENT_METADATA_PATH}`;
@@ -23,11 +26,14 @@ type OAuthServerMetadata = {
   authorization_endpoint: string;
   token_endpoint: string;
   userinfo_endpoint: string;
+  posthog_region?: string;
   posthog_base_url?: string;
 };
 
 type PostHogTokenResponse = OAuth.TokenResponse & {
   token_type?: string;
+  posthog_region?: string;
+  posthog_base_url?: string;
 };
 
 type PostHogUserInfo = {
@@ -64,22 +70,19 @@ export function createOAuthClient(providerId: string): OAuth.PKCEClient {
   });
 }
 
-export async function connectPostHogAccount(region: PostHogRegion): Promise<PostHogAccount> {
+export async function connectPostHogAccount(): Promise<PostHogAccount> {
   const now = new Date().toISOString();
-  const accountId = createAccountId(region);
-  const providerId = `posthog-${accountId}`;
-  const existingAccount = (await getAccounts()).find(
-    (account) => account.id === accountId || account.region === region
-  );
-  const client = createOAuthClient(providerId);
-  const clientId = getClientId(POSTHOG_REGIONS[region].authBaseUrl);
-  const metadata = await getOAuthServerMetadata(region);
+  const client = createOAuthClient("posthog-connect");
+  const clientId = getClientId(RAYCAST_CLIENT_ID_BASE_URL);
+
+  const metadata = await getOAuthServerMetadata(OAUTH_PROXY_BASE_URL);
   const authorizationRequest = await client.authorizationRequest({
     endpoint: metadata.authorization_endpoint,
     clientId,
     scope: SCOPES,
   });
   const authorizationResponse = await client.authorize(authorizationRequest);
+
   const tokenResponse = await exchangeAuthorizationCode(
     metadata.token_endpoint,
     clientId,
@@ -87,22 +90,34 @@ export async function connectPostHogAccount(region: PostHogRegion): Promise<Post
     authorizationRequest.codeVerifier,
     authorizationRequest.redirectURI
   );
-
-  await client.setTokens(tokenResponse);
-
   const userInfo = await fetchUserInfo(metadata.userinfo_endpoint, tokenResponse.access_token).catch(() => null);
+
+  const region = resolvePostHogRegion(
+    tokenResponse.posthog_region ?? metadata.posthog_region,
+    tokenResponse.posthog_base_url
+  );
+  const accountId = createAccountId(region);
+  const providerId = `posthog-${accountId}`;
+  const existingAccount = (await getAccounts()).find(
+    (account) => account.id === accountId || account.region === region
+  );
+
   const account: PostHogAccount = {
     id: accountId,
     providerId,
+    clientId,
     email: userInfo?.email,
     name: userInfo?.name ?? userInfo?.preferred_username,
     region,
-    baseUrl: normalizeBaseUrl(metadata.posthog_base_url ?? POSTHOG_REGIONS[region].baseUrl),
-    authBaseUrl: POSTHOG_REGIONS[region].authBaseUrl,
+    baseUrl: normalizeBaseUrl(
+      tokenResponse.posthog_base_url ?? metadata.posthog_base_url ?? POSTHOG_REGIONS[region].baseUrl
+    ),
+    authBaseUrl: OAUTH_PROXY_BASE_URL,
     createdAt: existingAccount?.createdAt ?? now,
     updatedAt: now,
   };
 
+  await createOAuthClient(providerId).setTokens(tokenResponse);
   await saveConnectedAccount(account);
 
   return account;
@@ -151,10 +166,8 @@ export async function removeTokensForAccount(account: PostHogAccount): Promise<v
   await createOAuthClient(account.providerId).removeTokens();
 }
 
-async function getOAuthServerMetadata(region: PostHogRegion): Promise<OAuthServerMetadata> {
-  const response = await axios.get<OAuthServerMetadata>(
-    `${POSTHOG_REGIONS[region].authBaseUrl}/.well-known/oauth-authorization-server`
-  );
+async function getOAuthServerMetadata(authBaseUrl: string): Promise<OAuthServerMetadata> {
+  const response = await axios.get<OAuthServerMetadata>(`${authBaseUrl}/.well-known/oauth-authorization-server`);
 
   return response.data;
 }
@@ -191,7 +204,7 @@ async function refreshAccessToken(account: PostHogAccount, refreshToken: string)
     new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      client_id: getClientId(account.authBaseUrl),
+      client_id: account.clientId ?? getClientId(account.authBaseUrl),
     }),
     {
       headers: {
@@ -228,4 +241,22 @@ async function saveConnectedAccount(account: PostHogAccount): Promise<void> {
 
 function createAccountId(region: PostHogRegion): string {
   return region;
+}
+
+function resolvePostHogRegion(region: string | undefined, baseUrl: string | undefined): PostHogRegion {
+  if (region === "eu" || region === "us") {
+    return region;
+  }
+
+  if (baseUrl) {
+    try {
+      if (new URL(baseUrl).hostname === "eu.posthog.com") {
+        return "eu";
+      }
+    } catch {
+      return "us";
+    }
+  }
+
+  return "us";
 }

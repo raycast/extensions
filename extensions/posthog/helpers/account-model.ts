@@ -3,6 +3,7 @@ export type PostHogRegion = "us" | "eu";
 export type PostHogAccount = {
   id: string;
   providerId: string;
+  clientId?: string;
   email?: string;
   name?: string;
   region: PostHogRegion;
