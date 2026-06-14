@@ -5,10 +5,13 @@ import {
   showHUD,
   open,
 } from "@raycast/api";
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
-import { buildOutputPath } from "./utils";
+import { buildOutputPath, findBinary } from "./utils";
+
+const execFileAsync = promisify(execFile);
 
 const MEDIA_EXTS = new Set([
   "mp4",
@@ -40,7 +43,7 @@ export async function convertFinderMediaTo(
   } catch {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Aucun fichier sélectionné dans Finder",
+      title: "No file selected in Finder",
     });
     return;
   }
@@ -52,12 +55,24 @@ export async function convertFinderMediaTo(
   if (!valid.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Aucun fichier audio/vidéo compatible sélectionné",
+      title: "No compatible audio/video file selected",
     });
     return;
   }
 
-  const audioOnly = AUDIO_EXTS.has(targetExt) ? "-vn " : "";
+  let ffmpegBin: string;
+  try {
+    ffmpegBin = findBinary("ffmpeg");
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "ffmpeg not found",
+      message: "Install it with: brew install ffmpeg",
+    });
+    return;
+  }
+
+  const audioOnly = AUDIO_EXTS.has(targetExt);
   let converted = 0;
   let lastDir = "";
 
@@ -65,14 +80,15 @@ export async function convertFinderMediaTo(
     const outputPath = buildOutputPath(item.path, targetExt);
     await showToast({
       style: Toast.Style.Animated,
-      title: `Conversion en ${label}… (${converted + 1}/${valid.length})`,
+      title: `Converting to ${label}… (${converted + 1}/${valid.length})`,
     });
 
     try {
-      execSync(
-        `/opt/homebrew/bin/ffmpeg -y -i "${item.path}" ${audioOnly}"${outputPath}"`,
-        { timeout: 300_000 },
-      );
+      const args = ["-y", "-i", item.path];
+      if (audioOnly) args.push("-vn");
+      args.push(outputPath);
+
+      await execFileAsync(ffmpegBin, args, { timeout: 300_000 });
       if (fs.existsSync(outputPath)) {
         converted++;
         lastDir = path.dirname(outputPath);
@@ -80,7 +96,7 @@ export async function convertFinderMediaTo(
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Erreur sur ${path.basename(item.path)}`,
+        title: `Error converting ${path.basename(item.path)}`,
         message: e instanceof Error ? e.message : String(e),
       });
     }
@@ -88,7 +104,7 @@ export async function convertFinderMediaTo(
 
   if (converted > 0) {
     await showHUD(
-      `✅ ${converted} fichier${converted > 1 ? "s" : ""} converti${converted > 1 ? "s" : ""} en ${label}`,
+      `✅ ${converted} file${converted > 1 ? "s" : ""} converted to ${label}`,
     );
     await open(lastDir);
   }

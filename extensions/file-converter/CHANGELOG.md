@@ -1,6 +1,6 @@
 # File Converter Changelog
 
-## [1.0.0] - 2026-06-14
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 

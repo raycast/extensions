@@ -1,4 +1,6 @@
 import * as path from "path";
+import * as fs from "fs";
+import { execSync } from "child_process";
 
 export type FileCategory = "video" | "audio" | "image" | "document" | "unknown";
 
@@ -37,22 +39,14 @@ export function buildOutputPath(inputPath: string, targetExt: string): string {
   return path.join(dir, `${base}.${targetExt}`);
 }
 
-export function buildCommand(
-  inputPath: string,
-  outputPath: string,
-  category: FileCategory,
-): string {
-  const esc = (p: string) => `"${p}"`;
-
-  switch (category) {
-    case "video":
-    case "audio":
-      return `/opt/homebrew/bin/ffmpeg -y -i ${esc(inputPath)} ${esc(outputPath)}`;
-    case "image":
-      return `/opt/homebrew/bin/magick ${esc(inputPath)} ${esc(outputPath)}`;
-    case "document":
-      return `/opt/homebrew/bin/pandoc ${esc(inputPath)} -o ${esc(outputPath)}`;
-    default:
-      throw new Error("Format non supporté");
+export function findBinary(name: string): string {
+  try {
+    return execSync(`which ${name}`, { encoding: "utf8" }).trim();
+  } catch {
+    const fallbacks = [`/opt/homebrew/bin/${name}`, `/usr/local/bin/${name}`];
+    for (const p of fallbacks) {
+      if (fs.existsSync(p)) return p;
+    }
+    throw new Error(`${name} not found. Install it with: brew install ${name}`);
   }
 }

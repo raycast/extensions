@@ -5,10 +5,13 @@ import {
   showHUD,
   open,
 } from "@raycast/api";
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
-import { buildOutputPath } from "./utils";
+import { buildOutputPath, findBinary } from "./utils";
+
+const execFileAsync = promisify(execFile);
 
 const IMAGE_EXTS = new Set([
   "jpg",
@@ -35,7 +38,7 @@ export async function convertFinderImageTo(
   } catch {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Aucun fichier sélectionné dans Finder",
+      title: "No file selected in Finder",
     });
     return;
   }
@@ -47,13 +50,27 @@ export async function convertFinderImageTo(
   if (!valid.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Aucune image compatible sélectionnée",
+      title: "No compatible image selected",
     });
     return;
   }
 
-  const icoFlags =
-    targetExt === "ico" ? "-define icon:auto-resize=256,128,64,48,32,16 " : "";
+  let magickBin: string;
+  try {
+    magickBin = findBinary("magick");
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "ImageMagick not found",
+      message: "Install it with: brew install imagemagick",
+    });
+    return;
+  }
+
+  const icoArgs =
+    targetExt === "ico"
+      ? ["-define", "icon:auto-resize=256,128,64,48,32,16"]
+      : [];
   let converted = 0;
   let lastDir = "";
 
@@ -61,14 +78,13 @@ export async function convertFinderImageTo(
     const outputPath = buildOutputPath(item.path, targetExt);
     await showToast({
       style: Toast.Style.Animated,
-      title: `Conversion en ${label}… (${converted + 1}/${valid.length})`,
+      title: `Converting to ${label}… (${converted + 1}/${valid.length})`,
     });
 
     try {
-      execSync(
-        `/opt/homebrew/bin/magick "${item.path}" ${icoFlags}"${outputPath}"`,
-        { timeout: 60_000 },
-      );
+      await execFileAsync(magickBin, [item.path, ...icoArgs, outputPath], {
+        timeout: 60_000,
+      });
       if (fs.existsSync(outputPath)) {
         converted++;
         lastDir = path.dirname(outputPath);
@@ -76,7 +92,7 @@ export async function convertFinderImageTo(
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Erreur sur ${path.basename(item.path)}`,
+        title: `Error converting ${path.basename(item.path)}`,
         message: e instanceof Error ? e.message : String(e),
       });
     }
@@ -84,7 +100,7 @@ export async function convertFinderImageTo(
 
   if (converted > 0) {
     await showHUD(
-      `✅ ${converted} fichier${converted > 1 ? "s" : ""} converti${converted > 1 ? "s" : ""} en ${label}`,
+      `✅ ${converted} file${converted > 1 ? "s" : ""} converted to ${label}`,
     );
     await open(lastDir);
   }

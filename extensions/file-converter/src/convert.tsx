@@ -9,15 +9,18 @@ import {
   getSelectedFinderItems,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
 import {
-  buildCommand,
   buildOutputPath,
   getCategory,
   getTargetFormats,
+  findBinary,
 } from "./utils";
+
+const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const [filePath, setFilePath] = useState<string[]>([]);
@@ -33,9 +36,7 @@ export default function Command() {
           setFilePath([items[0].path]);
         }
       })
-      .catch(() => {
-        // Finder n'est pas au premier plan, on laisse le picker vide
-      });
+      .catch(() => undefined);
   }, []);
 
   const selectedFile = filePath[0] ?? null;
@@ -55,25 +56,37 @@ export default function Command() {
     const outputPath = buildOutputPath(selectedFile, targetFormat);
 
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Conversion en cours…",
-      });
+      await showToast({ style: Toast.Style.Animated, title: "Converting…" });
 
-      const cmd = buildCommand(selectedFile, outputPath, category);
-      execSync(cmd, { timeout: 120_000 });
+      let bin: string;
+      let args: string[];
+
+      if (category === "video" || category === "audio") {
+        bin = findBinary("ffmpeg");
+        args = ["-y", "-i", selectedFile, outputPath];
+      } else if (category === "image") {
+        bin = findBinary("magick");
+        args = [selectedFile, outputPath];
+      } else if (category === "document") {
+        bin = findBinary("pandoc");
+        args = [selectedFile, "-o", outputPath];
+      } else {
+        throw new Error("Unsupported format");
+      }
+
+      await execFileAsync(bin, args, { timeout: 120_000 });
 
       if (!fs.existsSync(outputPath)) {
-        throw new Error("Le fichier de sortie n'a pas été créé.");
+        throw new Error("Output file was not created.");
       }
 
       setResultPath(outputPath);
       await showToast({
         style: Toast.Style.Success,
-        title: "Conversion réussie",
+        title: "Conversion Successful",
         message: path.basename(outputPath),
         primaryAction: {
-          title: "Ouvrir le fichier",
+          title: "Open File",
           onAction: () => open(outputPath),
         },
       });
@@ -82,7 +95,7 @@ export default function Command() {
       setError(msg);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Erreur",
+        title: "Error",
         message: msg,
       });
     } finally {
@@ -93,19 +106,16 @@ export default function Command() {
   if (resultPath) {
     return (
       <Detail
-        markdown={`## Conversion réussie ✅\n\n**Fichier :** \`${path.basename(resultPath)}\`\n\n**Dossier :** \`${path.dirname(resultPath)}\``}
+        markdown={`## Conversion Successful ✅\n\n**File:** \`${path.basename(resultPath)}\`\n\n**Folder:** \`${path.dirname(resultPath)}\``}
         actions={
           <ActionPanel>
+            <Action title="Open File" onAction={() => open(resultPath)} />
             <Action
-              title="Ouvrir Le Fichier"
-              onAction={() => open(resultPath)}
-            />
-            <Action
-              title="Ouvrir Le Dossier"
+              title="Open Folder"
               onAction={() => open(path.dirname(resultPath))}
             />
             <Action
-              title="Nouvelle Conversion"
+              title="New Conversion"
               onAction={() => setResultPath(null)}
             />
           </ActionPanel>
@@ -120,7 +130,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title={isConverting ? "Conversion…" : "Convertir"}
+            title={isConverting ? "Converting…" : "Convert"}
             onAction={handleConvert}
           />
         </ActionPanel>
@@ -128,7 +138,7 @@ export default function Command() {
     >
       <Form.FilePicker
         id="file"
-        title="Fichier source"
+        title="Source File"
         allowMultipleSelection={false}
         value={filePath}
         onChange={(v) => {
@@ -141,24 +151,24 @@ export default function Command() {
 
       {selectedFile && category === "unknown" && (
         <Form.Description
-          title="Format non supporté"
-          text="Ce type de fichier n'est pas pris en charge. Formats supportés : vidéo, audio, image, document."
+          title="Unsupported Format"
+          text="This file type is not supported. Supported formats: video, audio, image, document."
         />
       )}
 
       {selectedFile && category !== "unknown" && (
         <>
           <Form.Description
-            title="Type détecté"
+            title="Detected Type"
             text={`${category.charAt(0).toUpperCase() + category.slice(1)} (.${ext})`}
           />
           <Form.Dropdown
             id="format"
-            title="Convertir en"
+            title="Convert To"
             value={targetFormat}
             onChange={setTargetFormat}
           >
-            <Form.Dropdown.Item value="" title="— Choisir un format —" />
+            <Form.Dropdown.Item value="" title="— Select a Format —" />
             {formats.map((f) => (
               <Form.Dropdown.Item
                 key={f}
@@ -170,7 +180,7 @@ export default function Command() {
         </>
       )}
 
-      {error && <Form.Description title="Erreur" text={error} />}
+      {error && <Form.Description title="Error" text={error} />}
     </Form>
   );
 }
