@@ -118,7 +118,43 @@ export async function searchLark(
   const results = settled.flatMap((result) =>
     result.status === "fulfilled" ? result.value : [],
   );
+
+  if (results.length === 0 && settled.every(isRejected)) {
+    throw new Error(
+      formatSearchFailure(settled.map((result) => result.reason)),
+    );
+  }
+
   return results.sort((a, b) => b.rankScore - a.rankScore);
+}
+
+function isRejected<T>(
+  result: PromiseSettledResult<T>,
+): result is PromiseRejectedResult {
+  return result.status === "rejected";
+}
+
+function formatSearchFailure(reasons: unknown[]) {
+  const messages = unique(
+    reasons.map(errorMessage).filter((message) => message.length > 0),
+  );
+  const detail = messages.slice(0, 2).join("; ");
+
+  return detail
+    ? `Lark-cli search failed: ${detail}`
+    : "Lark-cli search failed";
+}
+
+function errorMessage(reason: unknown) {
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+
+  return typeof reason === "string" ? reason : "";
+}
+
+function unique(values: string[]) {
+  return [...new Set(values)];
 }
 
 async function runSearchCommand(
