@@ -4,7 +4,7 @@
   "title": "Lark Search",
   "description": "Search Feishu/Lark docs, messages, chats, and contacts from Raycast.",
   "icon": "icon.png",
-  "author": "jyufu_ko",
+  "author": "jyufu",
   "license": "MIT",
   "categories": [
     "Productivity",
