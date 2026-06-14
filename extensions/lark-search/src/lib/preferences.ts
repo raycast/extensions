@@ -45,8 +45,10 @@ export function getOpenBundleIds() {
 export function getEnabledAppTargets(): AppTarget[] {
   const preferences = getPreferenceValues<Preferences>();
   const appTarget = (preferences.appTarget ?? "lark") as AppTargetPreference;
-  const identity =
+  const larkIdentity =
     nonEmpty(preferences.larkCliIdentity) ?? DEFAULT_CLI_IDENTITY;
+  const feishuIdentity =
+    nonEmpty(preferences.feishuCliIdentity) ?? DEFAULT_CLI_IDENTITY;
   const targets: AppTarget[] = [];
 
   if (appTarget === "feishu" || appTarget === "both") {
@@ -55,7 +57,7 @@ export function getEnabledAppTargets(): AppTarget[] {
       productName: "Feishu",
       name: DEFAULT_FEISHU_APP_NAME,
       bundleId: DEFAULT_FEISHU_BUNDLE_ID,
-      cliIdentity: identity,
+      cliIdentity: feishuIdentity,
     });
   }
 
@@ -65,11 +67,11 @@ export function getEnabledAppTargets(): AppTarget[] {
       productName: "Lark",
       name: DEFAULT_LARK_APP_NAME,
       bundleId: DEFAULT_LARK_BUNDLE_ID,
-      cliIdentity: identity,
+      cliIdentity: larkIdentity,
     });
   }
 
-  return targets.length > 0 ? targets : [larkTarget(identity)];
+  return targets.length > 0 ? targets : [larkTarget(larkIdentity)];
 }
 
 export function withCliIdentity(

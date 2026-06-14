@@ -26,7 +26,7 @@ Application target options:
 | `Feishu`          | Feishu desktop app                           |
 | `Feishu and Lark` | Both desktop apps as separate result sources |
 
-Bundle IDs are built in: Lark uses `com.larksuite.larkApp`, and Feishu uses `com.electron.lark`. The default `lark-cli` identity is `user`.
+Bundle IDs are built in: Lark uses `com.larksuite.larkApp`, and Feishu uses `com.electron.lark`. The default `lark-cli` identity is `user`; configure separate Lark and Feishu identities only when the two apps use different `lark-cli --as` accounts.
 
 Minimum scopes for the main search command:
 

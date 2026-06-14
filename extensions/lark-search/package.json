@@ -78,7 +78,16 @@
     {
       "name": "larkCliIdentity",
       "title": "Lark-cli Identity",
-      "description": "Identity passed to lark-cli --as.",
+      "description": "Identity passed to lark-cli --as when searching Lark.",
+      "type": "textfield",
+      "required": false,
+      "default": "user",
+      "placeholder": "user"
+    },
+    {
+      "name": "feishuCliIdentity",
+      "title": "Feishu Lark-cli Identity",
+      "description": "Identity passed to lark-cli --as when searching Feishu.",
       "type": "textfield",
       "required": false,
       "default": "user",

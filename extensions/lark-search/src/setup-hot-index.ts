@@ -24,7 +24,7 @@ export default async function Command() {
       "Application preferences:",
       "Choose Application Target: Lark, Feishu, or Feishu and Lark.",
       "Bundle IDs are built in and do not need manual configuration.",
-      "Use Lark-cli Identity only if your lark-cli --as value is not `user`.",
+      "Use Lark-cli Identity fields only if Lark and Feishu use different lark-cli --as accounts.",
       "",
       "Minimum scopes for Lark Search:",
       "search:docs:read search:message im:chat:read contact:user.base:readonly",
