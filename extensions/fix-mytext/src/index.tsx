@@ -10,21 +10,13 @@ import {
   openCommandPreferences,
   showToast,
   Toast,
-} from '@raycast/api';
-import { memo, useMemo, useReducer, useRef } from 'react';
-import { PRESETS, PresetId, getPreset } from './presets';
-import { RawPreferences, resolveRevisionRequest, reviseText } from './model';
-
-type Preferences = RawPreferences & {
-  concealClipboard: boolean;
-};
-
-type CommandArguments = {
-  text?: string;
-};
+} from "@raycast/api";
+import { memo, useMemo, useReducer, useRef } from "react";
+import { PRESETS, PresetId, getPreset } from "./presets";
+import { resolveRevisionRequest, reviseText } from "./model";
 
 type CommandProps = LaunchProps<{
-  arguments: CommandArguments;
+  arguments: Arguments.Index;
 }>;
 
 type ResultState = {
@@ -44,21 +36,21 @@ type CommandState = {
 };
 
 type CommandAction =
-  | { type: 'sourceTextChanged'; value: string }
-  | { type: 'presetChanged'; value: PresetId }
-  | { type: 'customInstructionsChanged'; value: string }
-  | { type: 'revisionStarted' }
-  | { type: 'revisionSucceeded'; result: ResultState }
-  | { type: 'revisionFailed' }
-  | { type: 'startOver'; sourceText: string };
+  | { type: "sourceTextChanged"; value: string }
+  | { type: "presetChanged"; value: PresetId }
+  | { type: "customInstructionsChanged"; value: string }
+  | { type: "revisionStarted" }
+  | { type: "revisionSucceeded"; result: ResultState }
+  | { type: "revisionFailed" }
+  | { type: "startOver"; sourceText: string };
 
-const DEFAULT_PRESET: PresetId = 'grammar';
+const DEFAULT_PRESET: PresetId = "grammar";
 
 function createInitialState(sourceText: string): CommandState {
   return {
     sourceText,
     preset: DEFAULT_PRESET,
-    customInstructions: '',
+    customInstructions: "",
     isLoading: false,
     result: null,
   };
@@ -66,19 +58,19 @@ function createInitialState(sourceText: string): CommandState {
 
 function commandReducer(state: CommandState, action: CommandAction): CommandState {
   switch (action.type) {
-    case 'sourceTextChanged':
+    case "sourceTextChanged":
       return { ...state, sourceText: action.value };
-    case 'presetChanged':
+    case "presetChanged":
       return { ...state, preset: action.value };
-    case 'customInstructionsChanged':
+    case "customInstructionsChanged":
       return { ...state, customInstructions: action.value };
-    case 'revisionStarted':
+    case "revisionStarted":
       return { ...state, isLoading: true };
-    case 'revisionSucceeded':
+    case "revisionSucceeded":
       return { ...state, isLoading: false, result: action.result };
-    case 'revisionFailed':
+    case "revisionFailed":
       return { ...state, isLoading: false };
-    case 'startOver':
+    case "startOver":
       return { ...state, sourceText: action.sourceText, result: null };
   }
 }
@@ -88,13 +80,13 @@ async function handlePaste(text: string) {
     await Clipboard.paste(text);
     await showToast({
       style: Toast.Style.Success,
-      title: 'Pasted revised text',
+      title: "Pasted revised text",
     });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: 'Paste failed',
-      message: error instanceof Error ? error.message : 'Could not paste the revised text.',
+      title: "Paste failed",
+      message: error instanceof Error ? error.message : "Could not paste the revised text.",
     });
   }
 }
@@ -104,13 +96,13 @@ async function handleCopy(text: string, concealClipboard: boolean) {
     await Clipboard.copy(text, { concealed: concealClipboard });
     await showToast({
       style: Toast.Style.Success,
-      title: 'Copied revised text',
+      title: "Copied revised text",
     });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: 'Copy failed',
-      message: error instanceof Error ? error.message : 'Could not copy the revised text.',
+      title: "Copy failed",
+      message: error instanceof Error ? error.message : "Could not copy the revised text.",
     });
   }
 }
@@ -125,10 +117,7 @@ const ResultMetadata = memo(function ResultMetadata({ result }: ResultMetadataPr
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Preset" text={presetInfo.title} />
-      <Detail.Metadata.Label
-        title="Custom Instructions"
-        text={result.customInstructions || 'None'}
-      />
+      <Detail.Metadata.Label title="Custom Instructions" text={result.customInstructions || "None"} />
       <Detail.Metadata.Label title="Model" text={result.model} />
     </Detail.Metadata>
   );
@@ -155,16 +144,8 @@ function ResultView({ concealClipboard, onStartOver, result }: ResultViewProps) 
             icon={Icon.Clipboard}
             onAction={() => handleCopy(result.revisedText, concealClipboard)}
           />
-          <Action
-            title="Paste Revised Text"
-            icon={Icon.ArrowRight}
-            onAction={() => handlePaste(result.revisedText)}
-          />
-          <Action
-            title="Edit Revised Text"
-            icon={Icon.Pencil}
-            onAction={() => onStartOver(result.revisedText)}
-          />
+          <Action title="Paste Revised Text" icon={Icon.ArrowRight} onAction={() => handlePaste(result.revisedText)} />
+          <Action title="Edit Revised Text" icon={Icon.Pencil} onAction={() => onStartOver(result.revisedText)} />
           <Action
             title="Back to Original"
             icon={Icon.RotateAntiClockwise}
@@ -179,12 +160,8 @@ function ResultView({ concealClipboard, onStartOver, result }: ResultViewProps) 
 
 export default function Command(props: CommandProps) {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, dispatch] = useReducer(
-    commandReducer,
-    props.arguments.text?.trim() ?? '',
-    createInitialState,
-  );
-  const lastSubmittedText = useRef('');
+  const [state, dispatch] = useReducer(commandReducer, props.arguments.text?.trim() ?? "", createInitialState);
+  const lastSubmittedText = useRef("");
 
   const { sourceText, preset, customInstructions, isLoading, result } = state;
   const selectedPreset = getPreset(preset);
@@ -199,8 +176,8 @@ export default function Command(props: CommandProps) {
     if (!trimmedText) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Text is required',
-        message: 'Paste or type something to revise.',
+        title: "Text is required",
+        message: "Paste or type something to revise.",
       });
       return;
     }
@@ -211,14 +188,14 @@ export default function Command(props: CommandProps) {
       customInstructions,
     });
 
-    dispatch({ type: 'revisionStarted' });
+    dispatch({ type: "revisionStarted" });
     lastSubmittedText.current = trimmedText;
 
     try {
       const revisedText = await reviseText(request);
 
       dispatch({
-        type: 'revisionSucceeded',
+        type: "revisionSucceeded",
         result: {
           originalText: trimmedText,
           revisedText,
@@ -230,14 +207,14 @@ export default function Command(props: CommandProps) {
 
       await showToast({
         style: Toast.Style.Success,
-        title: 'Text revised',
+        title: "Text revised",
       });
     } catch (error) {
-      dispatch({ type: 'revisionFailed' });
-      const message = error instanceof Error ? error.message : 'The request failed.';
+      dispatch({ type: "revisionFailed" });
+      const message = error instanceof Error ? error.message : "The request failed.";
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Revision failed',
+        title: "Revision failed",
         message,
       });
     }
@@ -249,39 +226,33 @@ export default function Command(props: CommandProps) {
       if (!clipboardText?.trim()) {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'Clipboard is empty',
-          message: 'Copy some text first.',
+          title: "Clipboard is empty",
+          message: "Copy some text first.",
         });
         return;
       }
 
-      dispatch({ type: 'sourceTextChanged', value: clipboardText });
+      dispatch({ type: "sourceTextChanged", value: clipboardText });
       await showToast({
         style: Toast.Style.Success,
-        title: 'Loaded from clipboard',
+        title: "Loaded from clipboard",
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not read the clipboard.';
+      const message = error instanceof Error ? error.message : "Could not read the clipboard.";
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Clipboard read failed',
+        title: "Clipboard read failed",
         message,
       });
     }
   }
 
   function handleStartOver(nextText?: string) {
-    dispatch({ type: 'startOver', sourceText: nextText ?? lastSubmittedText.current });
+    dispatch({ type: "startOver", sourceText: nextText ?? lastSubmittedText.current });
   }
 
   if (result) {
-    return (
-      <ResultView
-        concealClipboard={preferences.concealClipboard}
-        onStartOver={handleStartOver}
-        result={result}
-      />
-    );
+    return <ResultView concealClipboard={preferences.concealClipboard} onStartOver={handleStartOver} result={result} />;
   }
 
   return (
@@ -301,7 +272,7 @@ export default function Command(props: CommandProps) {
         id="preset"
         title="Preset"
         value={preset}
-        onChange={(newValue) => dispatch({ type: 'presetChanged', value: newValue as PresetId })}
+        onChange={(newValue) => dispatch({ type: "presetChanged", value: newValue as PresetId })}
       >
         {PRESETS.map((item) => (
           <Form.Dropdown.Item key={item.id} value={item.id} title={item.title} />
@@ -312,14 +283,14 @@ export default function Command(props: CommandProps) {
         title="Text"
         placeholder="Paste or type the text you want to revise"
         value={sourceText}
-        onChange={(value) => dispatch({ type: 'sourceTextChanged', value })}
+        onChange={(value) => dispatch({ type: "sourceTextChanged", value })}
       />
       <Form.TextArea
         id="customInstructions"
         title="Custom Instructions"
         placeholder="Optional: keep my voice, make it more direct, simplify technical jargon..."
         value={customInstructions}
-        onChange={(value) => dispatch({ type: 'customInstructionsChanged', value })}
+        onChange={(value) => dispatch({ type: "customInstructionsChanged", value })}
       />
       <Form.Description text={selectedPreset.description} />
       <Form.Description text="Click the Revise Text action in the bottom bar, or press Cmd+Enter." />
@@ -328,23 +299,14 @@ export default function Command(props: CommandProps) {
 }
 
 function buildResultMarkdown(revisedText: string, originalText: string): string {
-  return [
-    '## Revised',
-    '',
-    buildCodeBlock(revisedText),
-    '',
-    '## Original',
-    '',
-    buildCodeBlock(originalText),
-  ].join('\n');
+  return ["## Revised", "", buildCodeBlock(revisedText), "", "## Original", "", buildCodeBlock(originalText)].join(
+    "\n",
+  );
 }
 
 function buildCodeBlock(text: string): string {
-  const longestBacktickRun = Math.max(
-    0,
-    ...Array.from(text.matchAll(/`+/g), (match) => match[0].length),
-  );
-  const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
+  const longestBacktickRun = Math.max(0, ...Array.from(text.matchAll(/`+/g), (match) => match[0].length));
+  const fence = "`".repeat(Math.max(3, longestBacktickRun + 1));
 
-  return [fence + 'text', text, fence].join('\n');
+  return [fence + "text", text, fence].join("\n");
 }

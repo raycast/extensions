@@ -31,14 +31,11 @@ type OpenAIResponse = {
   }>;
 };
 
-export const DEFAULT_BASE_URL = 'http://127.0.0.1:11434/v1';
-export const DEFAULT_MODEL = 'local-model';
+export const DEFAULT_BASE_URL = "http://127.0.0.1:11434/v1";
+export const DEFAULT_MODEL = "local-model";
 export const DEFAULT_TIMEOUT_MS = 120_000;
 
-export function resolveRevisionRequest(
-  preferences: RawPreferences,
-  input: RevisionInput,
-): RevisionRequest {
+export function resolveRevisionRequest(preferences: RawPreferences, input: RevisionInput): RevisionRequest {
   return {
     baseUrl: preferences.baseUrl.trim() || DEFAULT_BASE_URL,
     model: preferences.model.trim() || DEFAULT_MODEL,
@@ -52,7 +49,7 @@ export function resolveRevisionRequest(
 }
 
 export function buildInstruction(presetInstruction: string, customInstructions: string): string {
-  return [presetInstruction, customInstructions.trim()].filter(Boolean).join(' ');
+  return [presetInstruction, customInstructions.trim()].filter(Boolean).join(" ");
 }
 
 export async function reviseText(request: RevisionRequest): Promise<string> {
@@ -60,7 +57,7 @@ export async function reviseText(request: RevisionRequest): Promise<string> {
   const prompt = buildPrompt(request.sourceText, request.instruction);
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 
   const apiKey = request.apiKey?.trim();
@@ -78,24 +75,22 @@ export async function reviseText(request: RevisionRequest): Promise<string> {
   let response: Response;
   try {
     response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify({
         model: request.model,
         stream: false,
         temperature: normalizeTemperature(request.temperature),
         messages: [
-          { role: 'system', content: request.systemPrompt },
-          { role: 'user', content: prompt },
+          { role: "system", content: request.systemPrompt },
+          { role: "user", content: prompt },
         ],
       }),
       signal: controller.signal,
     });
   } catch (error) {
     if (timedOut) {
-      throw new Error(
-        'The request timed out. Check that the local server is running and reachable.',
-      );
+      throw new Error("The request timed out. Check that the local server is running and reachable.");
     }
     throw error;
   } finally {
@@ -106,31 +101,28 @@ export async function reviseText(request: RevisionRequest): Promise<string> {
   const content = data.choices?.[0]?.message?.content?.trim();
 
   if (!response.ok) {
-    throw new Error(
-      extractErrorMessage(data) ??
-        `OpenAI-compatible request failed with status ${response.status}`,
-    );
+    throw new Error(extractErrorMessage(data) ?? `OpenAI-compatible request failed with status ${response.status}`);
   }
 
   if (!content) {
-    throw new Error('The local model returned an empty response.');
+    throw new Error("The local model returned an empty response.");
   }
 
   return content;
 }
 
 export function buildChatCompletionsUrl(baseUrl: string): string {
-  const normalizedBaseUrl = baseUrl.trim().replace(/\/+$/, '');
+  const normalizedBaseUrl = baseUrl.trim().replace(/\/+$/, "");
 
   if (!normalizedBaseUrl) {
-    throw new Error('Base URL is required.');
+    throw new Error("Base URL is required.");
   }
 
-  if (normalizedBaseUrl.endsWith('/chat/completions')) {
+  if (normalizedBaseUrl.endsWith("/chat/completions")) {
     return normalizedBaseUrl;
   }
 
-  if (normalizedBaseUrl.endsWith('/v1')) {
+  if (normalizedBaseUrl.endsWith("/v1")) {
     return `${normalizedBaseUrl}/chat/completions`;
   }
 
@@ -138,14 +130,7 @@ export function buildChatCompletionsUrl(baseUrl: string): string {
 }
 
 export function buildPrompt(sourceText: string, instruction: string): string {
-  return [
-    `Instruction: ${instruction}`,
-    '',
-    'Return only the revised text.',
-    '',
-    'Text:',
-    sourceText,
-  ].join('\n');
+  return [`Instruction: ${instruction}`, "", "Return only the revised text.", "", "Text:", sourceText].join("\n");
 }
 
 export function normalizeTemperature(value: number): number {
@@ -165,25 +150,25 @@ async function parseJson(response: Response): Promise<unknown> {
 }
 
 function extractErrorMessage(payload: unknown): string | undefined {
-  if (!payload || typeof payload !== 'object') {
+  if (!payload || typeof payload !== "object") {
     return undefined;
   }
 
-  if ('error' in payload && typeof payload.error === 'string') {
+  if ("error" in payload && typeof payload.error === "string") {
     return payload.error;
   }
 
   if (
-    'error' in payload &&
+    "error" in payload &&
     payload.error &&
-    typeof payload.error === 'object' &&
-    'message' in payload.error &&
-    typeof payload.error.message === 'string'
+    typeof payload.error === "object" &&
+    "message" in payload.error &&
+    typeof payload.error.message === "string"
   ) {
     return payload.error.message;
   }
 
-  if ('message' in payload && typeof payload.message === 'string') {
+  if ("message" in payload && typeof payload.message === "string") {
     return payload.message;
   }
 
