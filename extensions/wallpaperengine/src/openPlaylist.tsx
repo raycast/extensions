@@ -108,7 +108,7 @@ function PlaylistPicker({
           const args = [
             "openPlaylist",
             "-playlist",
-            playlist,
+            `"${playlist}"`,
             "-monitor",
             m.index.toString(),
           ];
@@ -119,7 +119,7 @@ function PlaylistPicker({
           title: `Playlist opened on ${allMonitors.length} monitors`,
         });
       } else {
-        const args = ["openPlaylist", "-playlist", playlist];
+        const args = ["openPlaylist", "-playlist", `"${playlist}"`];
         if (monitor) {
           args.push("-monitor", monitor.index.toString());
         }

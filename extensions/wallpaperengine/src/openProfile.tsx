@@ -41,7 +41,7 @@ export default function OpenProfile() {
 
   async function handleOpen(profile: string) {
     try {
-      await execWallpaperEngine(["openProfile", "-profile", profile]);
+      await execWallpaperEngine(["openProfile", "-profile", `"${profile}"`]);
       await showToast({ style: Toast.Style.Success, title: "Profile applied" });
     } catch (error) {
       await showToast({

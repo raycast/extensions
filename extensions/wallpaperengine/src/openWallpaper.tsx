@@ -108,7 +108,7 @@ function WallpaperPicker({
           const args = [
             "openWallpaper",
             "-file",
-            wallpaper.filePath,
+            `"${wallpaper.filePath}"`,
             "-monitor",
             m.index.toString(),
           ];
@@ -119,7 +119,7 @@ function WallpaperPicker({
           title: `Wallpaper opened on ${allMonitors.length} monitors`,
         });
       } else {
-        const args = ["openWallpaper", "-file", wallpaper.filePath];
+        const args = ["openWallpaper", "-file", `"${wallpaper.filePath}"`];
         if (monitor) {
           args.push("-monitor", monitor.index.toString());
         }
