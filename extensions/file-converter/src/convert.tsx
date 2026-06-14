@@ -74,7 +74,15 @@ export default function Command() {
         throw new Error("Unsupported format");
       }
 
-      await execFileAsync(bin, args, { timeout: 120_000 });
+      // Match the timeouts of the dedicated quick-convert commands:
+      // media 5 min (convert-media.ts), image 1 min (convert-image.ts).
+      const timeout =
+        category === "video" || category === "audio"
+          ? 300_000
+          : category === "image"
+            ? 60_000
+            : 120_000;
+      await execFileAsync(bin, args, { timeout });
 
       if (!fs.existsSync(outputPath)) {
         throw new Error("Output file was not created.");
