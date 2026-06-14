@@ -6,7 +6,6 @@
 
 一个全功能的 Bangumi([bangumi.tv](https://bangumi.tv)) Raycast 客户端。管理收藏、追踪进度、搜索条目和角色、查看每日放送。提供 AI 工具集成。
 
-
 ## 功能
 
 * **收藏管理 (Collections Management)**: 列出并浏览你所有的 Bangumi 收藏。
@@ -16,7 +15,6 @@
 * **搜索角色 (Search Characters)**: 发现并搜索角色资料。
 * **AI 工具集成 (AI Tools Integration)**: 全面接入 Raycast AI，直接在对话中管理进度和搜索内容。
 * **AI 翻译 (AI Translation)**: 使用 Raycast AI 翻译条目和角色简介。
-
 
 | 详情页 | 每日放送 |
 | - | - |
@@ -30,7 +28,6 @@
 | 查看进度 | 每日放送 | 搜索 | 状态更新 |
 | - | - | - | - |
 | ![](https://github.com/user-attachments/assets/ebfba7e3-7b0f-4324-92e1-f37637cf2755) | ![](https://github.com/user-attachments/assets/b2d4e85c-0224-411c-bc8f-1ed6b3acd14c) | ![](https://github.com/user-attachments/assets/1665953f-ca15-460e-bb30-45b32a968101) | ![](https://github.com/user-attachments/assets/46f8d7e6-f35b-43f7-9025-3f2d19dd9284) |
-
 
 ## 安装指南
 

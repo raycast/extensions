@@ -6,7 +6,6 @@
 
 A full-featured Bangumi([bangumi.tv](https://bangumi.tv)) client for Raycast. Manage collections, track progress, search subjects and characters, view daily schedules. Includes AI tools for Raycast AI.
 
-
 ## Features
 
 * **Collections Management**: List and browse all your Bangumi collections.
@@ -30,7 +29,6 @@ A full-featured Bangumi([bangumi.tv](https://bangumi.tv)) client for Raycast. Ma
 | View Progress | Daily Airing | Search | Update Status |
 | - | - | - | - |
 | ![](https://github.com/user-attachments/assets/ebfba7e3-7b0f-4324-92e1-f37637cf2755) | ![](https://github.com/user-attachments/assets/b2d4e85c-0224-411c-bc8f-1ed6b3acd14c) | ![](https://github.com/user-attachments/assets/1665953f-ca15-460e-bb30-45b32a968101) | ![](https://github.com/user-attachments/assets/46f8d7e6-f35b-43f7-9025-3f2d19dd9284) |
-
 
 ## Installation Guide
 
