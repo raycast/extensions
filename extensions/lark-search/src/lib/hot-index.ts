@@ -329,7 +329,7 @@ async function runLarkCli(args: string[], identity: string) {
   );
   const parsed = JSON.parse(stdout) as { ok?: boolean; data?: unknown };
   if (parsed.ok === false) {
-    throw new Error("lark-cli command failed");
+    throw new Error("Lark-cli command failed");
   }
   return parsed;
 }

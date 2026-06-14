@@ -18,9 +18,9 @@ export default async function Command() {
   await showInFinder(directory);
 
   if (count === 0) {
-    await showHUD("Lark hot index is empty. Folder path copied.");
+    await showHUD("Lark Root Search shortcuts are empty. Folder path copied.");
     return;
   }
 
-  await showHUD(`Refreshed ${count} Lark hot index script commands.`);
+  await showHUD(`Refreshed ${count} Lark Root Search shortcuts.`);
 }

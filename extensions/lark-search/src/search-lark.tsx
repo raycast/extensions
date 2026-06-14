@@ -23,31 +23,21 @@ import {
   recordSearchResults,
 } from "./lib/recent-cache";
 import { upsertOpenedItemInHotIndex } from "./lib/hot-index";
-import {
-  getOpenBundleIds,
-  getQuicklinkApplicationName,
-} from "./lib/preferences";
+import { getOpenBundleIds } from "./lib/preferences";
 import { parseSearchPrefix } from "./lib/prefix";
 import {
   LarkSearchItem,
   SearchScope,
   SearchScopeFilter,
   scopeTitles,
-  typeLabels,
 } from "./lib/types";
-
-type SearchArguments = {
-  query?: string;
-};
 
 const execFileAsync = promisify(execFile);
 const PEOPLE_GROUP_PREVIEW_LIMIT = 8;
 const sectionOrder = ["message", "doc", "wiki", "sheet"] as const;
 
-export default function Command(
-  props: LaunchProps<{ arguments: SearchArguments }>,
-) {
-  const initialQuery = props.fallbackText ?? props.arguments?.query ?? "";
+export default function Command(props: LaunchProps) {
+  const initialQuery = props.fallbackText ?? "";
   const [searchText, setSearchText] = useState(initialQuery);
   const [scope, setScope] = useState<SearchScope>("all");
   const [recents, setRecents] = useState<LarkSearchItem[]>([]);
@@ -319,13 +309,6 @@ function ItemActions({
         }}
       />
       {item.url ? (
-        <Action.CreateQuicklink
-          title="Add to Root Search Quicklink"
-          quicklink={buildQuicklink(item)}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-        />
-      ) : null}
-      {item.url ? (
         <Action.CopyToClipboard
           title="Copy Link"
           content={item.url}
@@ -355,17 +338,6 @@ function ItemActions({
 
 async function refreshRecents(setRecents: (items: LarkSearchItem[]) => void) {
   setRecents(await getRecents());
-}
-
-function buildQuicklink(item: LarkSearchItem) {
-  const appName = item.appName ?? "Lark";
-  return {
-    name: `${appName} ${typeLabels[item.type]} ${item.title}`,
-    link: item.url ?? "",
-    application: shouldOpenInLark(item)
-      ? (item.applicationName ?? getQuicklinkApplicationName())
-      : undefined,
-  };
 }
 
 async function openLarkItem(item: LarkSearchItem) {

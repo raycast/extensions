@@ -7,6 +7,8 @@ const DEFAULT_LARK_APP_NAME = "Lark";
 const DEFAULT_FEISHU_APP_NAME = "Feishu";
 const DEFAULT_CLI_IDENTITY = "user";
 
+type AppTargetPreference = "lark" | "feishu" | "both";
+
 export type AppTarget = {
   key: "lark" | "feishu";
   productName: "Lark" | "Feishu";
@@ -40,47 +42,34 @@ export function getOpenBundleIds() {
   return bundleIds.length > 0 ? bundleIds : [DEFAULT_LARK_BUNDLE_ID];
 }
 
-export function getQuicklinkApplicationName() {
-  return getEnabledAppTargets()[0]?.name ?? DEFAULT_LARK_APP_NAME;
-}
-
 export function getEnabledAppTargets(): AppTarget[] {
   const preferences = getPreferenceValues<Preferences>();
+  const appTarget = (preferences.appTarget ?? "lark") as AppTargetPreference;
+  const identity =
+    nonEmpty(preferences.larkCliIdentity) ?? DEFAULT_CLI_IDENTITY;
   const targets: AppTarget[] = [];
 
-  if (preferences.enableLarkApplication ?? true) {
-    targets.push({
-      key: "lark",
-      productName: "Lark",
-      name:
-        nonEmpty(preferences.larkApplicationName?.name) ??
-        DEFAULT_LARK_APP_NAME,
-      bundleId:
-        nonEmpty(preferences.larkBundleId) ??
-        nonEmpty(preferences.larkApplicationName?.bundleId) ??
-        DEFAULT_LARK_BUNDLE_ID,
-      cliIdentity:
-        nonEmpty(preferences.larkCliIdentity) ?? DEFAULT_CLI_IDENTITY,
-    });
-  }
-
-  if (preferences.enableFeishuApplication ?? false) {
+  if (appTarget === "feishu" || appTarget === "both") {
     targets.push({
       key: "feishu",
       productName: "Feishu",
-      name:
-        nonEmpty(preferences.feishuApplicationName?.name) ??
-        DEFAULT_FEISHU_APP_NAME,
-      bundleId:
-        nonEmpty(preferences.feishuBundleId) ??
-        nonEmpty(preferences.feishuApplicationName?.bundleId) ??
-        DEFAULT_FEISHU_BUNDLE_ID,
-      cliIdentity:
-        nonEmpty(preferences.feishuCliIdentity) ?? DEFAULT_CLI_IDENTITY,
+      name: DEFAULT_FEISHU_APP_NAME,
+      bundleId: DEFAULT_FEISHU_BUNDLE_ID,
+      cliIdentity: identity,
     });
   }
 
-  return targets;
+  if (appTarget === "lark" || appTarget === "both") {
+    targets.push({
+      key: "lark",
+      productName: "Lark",
+      name: DEFAULT_LARK_APP_NAME,
+      bundleId: DEFAULT_LARK_BUNDLE_ID,
+      cliIdentity: identity,
+    });
+  }
+
+  return targets.length > 0 ? targets : [larkTarget(identity)];
 }
 
 export function withCliIdentity(
@@ -105,4 +94,14 @@ function nonEmpty(value?: string) {
 
 function unique(values: string[]) {
   return [...new Set(values)];
+}
+
+function larkTarget(cliIdentity: string): AppTarget {
+  return {
+    key: "lark",
+    productName: "Lark",
+    name: DEFAULT_LARK_APP_NAME,
+    bundleId: DEFAULT_LARK_BUNDLE_ID,
+    cliIdentity,
+  };
 }

@@ -163,7 +163,7 @@ async function runSingleSearchPage(
 
   const parsed = JSON.parse(stdout) as SearchResponse;
   if (parsed.ok === false) {
-    throw new Error(parsed.error ?? parsed.message ?? "lark-cli search failed");
+    throw new Error(parsed.error ?? parsed.message ?? "Lark-cli search failed");
   }
 
   return {

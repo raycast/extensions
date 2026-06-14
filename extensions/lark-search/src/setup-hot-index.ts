@@ -7,37 +7,36 @@ export default async function Command() {
   await showInFinder(directory);
 
   await confirmAlert({
-    title: "Lark Hot Index Ready",
+    title: "Lark Root Search Ready",
     message: [
-      `Generated ${count} Script Commands in:`,
+      `Generated ${count} shortcut files in:`,
       directory,
       "",
-      "Add this folder once in Raycast:",
+      "To use these from Raycast Root Search, add this folder once in Raycast:",
       "Raycast Settings > Extensions > Script Commands > Add Directories",
       "",
       "After that, Root Search can find high-frequency Lark items by their original Lark titles.",
-      "Run `Refresh Lark Hot Index` anytime to rebuild the local index.",
+      "Run `Refresh Lark Root Search` anytime to rebuild the local shortcuts.",
       "",
       "Requirements:",
-      "lark-cli >= 1.0.53",
+      "Lark-cli >= 1.0.53",
       "",
       "Application preferences:",
-      "Enable Lark and/or Feishu in extension settings.",
-      "Default Lark bundle ID: com.larksuite.larkApp",
-      "Default Feishu bundle ID: com.electron.lark",
-      "Set each app's lark-cli identity if they use different accounts.",
+      "Choose Application Target: Lark, Feishu, or Feishu and Lark.",
+      "Bundle IDs are built in and do not need manual configuration.",
+      "Use Lark-cli Identity only if your lark-cli --as value is not `user`.",
       "",
       "Minimum scopes for Lark Search:",
       "search:docs:read search:message im:chat:read contact:user.base:readonly",
-      "Optional scopes for pinned chats and flagged messages in Hot Index:",
+      "Optional scopes for pinned chats and flagged messages in Root Search:",
       "im:feed.shortcut:read im:feed.flag:read",
       "",
       "Check scopes with:",
       'lark-cli auth check --scope "search:docs:read search:message im:chat:read contact:user.base:readonly"',
-      "The folder path has been copied.",
+      "The folder path has been copied and opened in Finder. You can change it later with the Root Search Shortcut Folder preference.",
     ].join("\n"),
     primaryAction: { title: "Got It" },
   });
 
-  await showHUD("Lark hot index folder path copied.");
+  await showHUD("Lark Root Search folder path copied.");
 }
