@@ -163,7 +163,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "local-install": "node scripts/local-install.mjs",
+    "publish": "npm run local-install && ray publish"
   },
   "dependencies": {
     "@raycast/api": "^1.104.19",

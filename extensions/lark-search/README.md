@@ -49,9 +49,12 @@ npm run dev
 Run checks before publishing changes:
 
 ```bash
+npm run local-install
 npm run lint
 npm run build
 ```
+
+`npm run publish` also runs `npm run local-install` first, so the local Raycast extension is refreshed before each Store submission.
 
 ## Hot Index Setup
 
