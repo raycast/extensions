@@ -36,7 +36,15 @@ export function getTargetFormats(
 export function buildOutputPath(inputPath: string, targetExt: string): string {
   const dir = path.dirname(inputPath);
   const base = path.basename(inputPath, path.extname(inputPath));
-  return path.join(dir, `${base}.${targetExt}`);
+  let candidate = path.join(dir, `${base}.${targetExt}`);
+  // Avoid silently overwriting an existing file: append " (n)" on collision,
+  // mirroring Finder's behaviour. Clean name is kept when there is no conflict.
+  let counter = 1;
+  while (fs.existsSync(candidate)) {
+    candidate = path.join(dir, `${base} (${counter}).${targetExt}`);
+    counter++;
+  }
+  return candidate;
 }
 
 export function findBinary(name: string): string {
