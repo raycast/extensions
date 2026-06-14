@@ -1,4 +1,5 @@
 import { toDidaDate } from "./date.js";
+import { didaTimeZone, nowInTimeZone } from "./timezone.js";
 
 export type SmartDateResult = {
   date?: Date;
@@ -10,15 +11,17 @@ export function toTaskDatePayload(result?: SmartDateResult): {
   dueDate?: string;
   isAllDay?: boolean;
 } {
+  const timeZone = didaTimeZone();
+
   return {
-    dueDate: toDidaDate(result?.date),
+    dueDate: toDidaDate(result?.date, timeZone),
     isAllDay: result?.date ? !result.hasTime : undefined,
   };
 }
 
 export function parseSmartDate(input: string): SmartDateResult {
   const text = input.trim();
-  const now = new Date();
+  const now = nowInTimeZone();
   const dateMatch = matchDate(text, now);
   const timeMatch = matchTime(text);
 
@@ -59,7 +62,7 @@ export function dateFromPreset(
   customDate?: string,
   customTime?: string,
 ): SmartDateResult {
-  const now = new Date();
+  const now = nowInTimeZone();
   let date: Date | undefined;
 
   switch (preset) {

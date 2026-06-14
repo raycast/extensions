@@ -1,9 +1,14 @@
-export function toDidaDate(date?: Date | null): string | undefined {
+import { didaTimeZone, timeZoneOffsetMinutes } from "./timezone.js";
+
+export function toDidaDate(
+  date?: Date | null,
+  timeZone = didaTimeZone(),
+): string | undefined {
   if (!date) {
     return undefined;
   }
 
-  const offsetMinutes = -date.getTimezoneOffset();
+  const offsetMinutes = timeZoneOffsetMinutes(date, timeZone);
   const sign = offsetMinutes >= 0 ? "+" : "-";
   const abs = Math.abs(offsetMinutes);
   const hours = String(Math.floor(abs / 60)).padStart(2, "0");
@@ -14,7 +19,10 @@ export function toDidaDate(date?: Date | null): string | undefined {
   )}:${pad(date.getSeconds())}${sign}${hours}${minutes}`;
 }
 
-export function formatTaskDate(value?: string): string {
+export function formatTaskDate(
+  value?: string,
+  timeZone = didaTimeZone(),
+): string {
   if (!value) {
     return "No date";
   }
@@ -27,6 +35,7 @@ export function formatTaskDate(value?: string): string {
   }
 
   return new Intl.DateTimeFormat("en-US", {
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

@@ -62,6 +62,52 @@
       "description": "Generate it in Dida365 Web -> Settings -> Account & Security -> API Token / Bearer Token.",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "timeZone",
+      "title": "Time Zone",
+      "description": "Used to create and compare due dates. Choose Asia/Shanghai for Dida365 China accounts.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Asia/Shanghai",
+      "data": [
+        {
+          "title": "China Standard Time",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "System Default",
+          "value": "system"
+        },
+        {
+          "title": "UTC",
+          "value": "UTC"
+        },
+        {
+          "title": "US Eastern",
+          "value": "America/New_York"
+        },
+        {
+          "title": "US Pacific",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Central Europe",
+          "value": "Europe/Berlin"
+        },
+        {
+          "title": "United Kingdom",
+          "value": "Europe/London"
+        },
+        {
+          "title": "Japan",
+          "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Singapore",
+          "value": "Asia/Singapore"
+        }
+      ]
     }
   ],
   "scripts": {

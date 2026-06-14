@@ -1,27 +1,16 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import {
   completeTask,
   describeApiError,
   listOpenTasks,
+  updateTask,
 } from "./api/dida365.js";
+import { TaskListItem } from "./components/task-list-item.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
 import type { Task } from "./types.js";
-import { formatTaskDate } from "./utils/date.js";
-import {
-  priorityAccessory,
-  priorityLabel,
-  taskSearchText,
-} from "./utils/task.js";
+import { taskSearchText } from "./utils/task.js";
 
 export default function Command() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -84,6 +73,42 @@ export default function Command() {
     }
   }
 
+  async function handleUpdateChecklistItem(
+    task: Task,
+    itemIndex: number,
+    status: number,
+  ) {
+    const items = task.items?.map((item, index) =>
+      index === itemIndex ? { ...item, status } : item,
+    );
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title:
+        status === 2
+          ? "Completing checklist item..."
+          : "Reopening checklist item...",
+    });
+
+    try {
+      const updatedTask = await updateTask({ ...task, items });
+      setTasks((current) =>
+        current.map((item) =>
+          item.id === task.id && item.projectId === task.projectId
+            ? { ...item, ...updatedTask, projectId: task.projectId }
+            : item,
+        ),
+      );
+      toast.style = Toast.Style.Success;
+      toast.title =
+        status === 2 ? "Checklist item completed" : "Checklist item reopened";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to update checklist item";
+      toast.message = describeApiError(error);
+    }
+  }
+
   if (needsSetup) {
     return <SetupTokenView />;
   }
@@ -96,66 +121,14 @@ export default function Command() {
       throttle
     >
       {filteredTasks.map((task) => (
-        <TaskItem
+        <TaskListItem
           key={`${task.projectId}:${task.id}`}
           task={task}
           onComplete={handleComplete}
+          onUpdateChecklistItem={handleUpdateChecklistItem}
           onRefresh={loadTasks}
         />
       ))}
     </List>
-  );
-}
-
-function TaskItem({
-  task,
-  onComplete,
-  onRefresh,
-}: {
-  task: Task;
-  onComplete: (task: Task) => Promise<void>;
-  onRefresh: () => Promise<void>;
-}) {
-  const priority = priorityAccessory(task.priority);
-  const accessories: List.Item.Accessory[] = [
-    ...(priority ? [priority] : []),
-    task.dueDate
-      ? {
-          text: formatTaskDate(task.dueDate),
-          icon: { source: Icon.Calendar, tintColor: Color.Blue },
-        }
-      : { text: "No date" },
-  ];
-
-  return (
-    <List.Item
-      icon={Icon.Circle}
-      title={task.title}
-      subtitle={task.content || task.desc}
-      accessories={accessories}
-      detail={<List.Item.Detail markdown={task.content || task.desc || ""} />}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Complete Task"
-            icon={Icon.CheckCircle}
-            onAction={() => onComplete(task)}
-          />
-          <Action.CopyToClipboard
-            title="Copy Task Title"
-            content={task.title}
-          />
-          <Action.CopyToClipboard
-            title="Copy Task ID"
-            content={`taskId=${task.id}\nprojectId=${task.projectId}\npriority=${priorityLabel(task.priority)}`}
-          />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={onRefresh}
-          />
-        </ActionPanel>
-      }
-    />
   );
 }

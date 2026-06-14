@@ -17,7 +17,7 @@ import {
   stripSmartDateText,
   toTaskDatePayload,
 } from "./utils/smart-date.js";
-import { systemTimeZone } from "./utils/timezone.js";
+import { didaTimeZone } from "./utils/timezone.js";
 
 type Values = {
   tasksText: string;
@@ -94,6 +94,8 @@ export default function Command() {
     });
 
     try {
+      const timeZone = didaTimeZone();
+
       await Promise.all(
         parsedTasks.map((task) =>
           createTask({
@@ -103,7 +105,7 @@ export default function Command() {
             dueDate: task.dueDate,
             isAllDay: task.isAllDay,
             priority: Number(values.priority) as TaskPriority,
-            timeZone: systemTimeZone(),
+            timeZone,
           }),
         ),
       );

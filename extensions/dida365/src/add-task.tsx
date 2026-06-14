@@ -12,7 +12,7 @@ import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
 import type { Project, TaskPriority } from "./types.js";
 import { reminderTrigger, toDidaDate } from "./utils/date.js";
-import { systemTimeZone } from "./utils/timezone.js";
+import { didaTimeZone, nowInTimeZone } from "./utils/timezone.js";
 
 type Values = {
   title: string;
@@ -68,6 +68,7 @@ export default function Command() {
     });
 
     try {
+      const timeZone = didaTimeZone();
       const dueDate = resolveDueDate(values.duePreset, values.customDueDate);
       const hasDueTime = values.dueTimePreset !== "none";
       applyDueTime(dueDate, values.dueTimePreset, values.customDueTime);
@@ -94,8 +95,8 @@ export default function Command() {
         title,
         projectId: values.projectId || undefined,
         content: values.content?.trim() || undefined,
-        dueDate: toDidaDate(dueDate),
-        timeZone: systemTimeZone(),
+        dueDate: toDidaDate(dueDate, timeZone),
+        timeZone,
         isAllDay: Boolean(dueDate && !hasDueTime),
         priority: Number(values.priority) as TaskPriority,
         reminders: reminderTrigger(values.reminder),
@@ -210,7 +211,7 @@ function parseChecklist(value?: string) {
 }
 
 function resolveDueDate(preset: string, customDate?: string): Date | undefined {
-  const now = new Date();
+  const now = nowInTimeZone();
 
   switch (preset) {
     case "today":
@@ -325,7 +326,7 @@ function parseCustomDate(value?: string): Date | undefined {
 
   const shortDate = text.match(/^(\d{1,2})[-/](\d{1,2})$/);
   if (shortDate) {
-    const now = new Date();
+    const now = nowInTimeZone();
     return startOfDay(
       new Date(
         now.getFullYear(),

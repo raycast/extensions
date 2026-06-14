@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import type { Task, TaskPriority } from "../types.js";
+import type { ChecklistItem, Task, TaskPriority } from "../types.js";
 
 export function priorityLabel(priority?: TaskPriority): string {
   switch (priority) {
@@ -31,7 +31,17 @@ export function priorityAccessory(priority?: TaskPriority) {
 }
 
 export function taskSearchText(task: Task): string {
-  return [task.title, task.content, task.desc, task.dueDate]
+  return [
+    task.title,
+    task.content,
+    task.desc,
+    task.dueDate,
+    ...(task.items?.map((item) => item.title) ?? []),
+  ]
     .filter(Boolean)
     .join(" ");
+}
+
+export function isChecklistItemCompleted(item: ChecklistItem): boolean {
+  return item.status === 2;
 }

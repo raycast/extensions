@@ -4,6 +4,7 @@ import {
   completeTask,
   describeApiError,
   listOpenTasks,
+  updateTask,
 } from "./api/dida365.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
@@ -44,7 +45,7 @@ export default function Command() {
 
   const todayTasks = useMemo(() => {
     const query = searchText.trim().toLowerCase();
-    const filtered = tasks.filter(isTodayTask);
+    const filtered = tasks.filter((task) => isTodayTask(task));
 
     if (!query) {
       return filtered;
@@ -73,6 +74,42 @@ export default function Command() {
     }
   }
 
+  async function handleUpdateChecklistItem(
+    task: Task,
+    itemIndex: number,
+    status: number,
+  ) {
+    const items = task.items?.map((item, index) =>
+      index === itemIndex ? { ...item, status } : item,
+    );
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title:
+        status === 2
+          ? "Completing checklist item..."
+          : "Reopening checklist item...",
+    });
+
+    try {
+      const updatedTask = await updateTask({ ...task, items });
+      setTasks((current) =>
+        current.map((item) =>
+          item.id === task.id && item.projectId === task.projectId
+            ? { ...item, ...updatedTask, projectId: task.projectId }
+            : item,
+        ),
+      );
+      toast.style = Toast.Style.Success;
+      toast.title =
+        status === 2 ? "Checklist item completed" : "Checklist item reopened";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to update checklist item";
+      toast.message = describeApiError(error);
+    }
+  }
+
   if (needsSetup) {
     return <SetupTokenView />;
   }
@@ -90,6 +127,7 @@ export default function Command() {
             key={`${task.projectId}:${task.id}`}
             task={task}
             onComplete={handleComplete}
+            onUpdateChecklistItem={handleUpdateChecklistItem}
           />
         ))}
       </List.Section>

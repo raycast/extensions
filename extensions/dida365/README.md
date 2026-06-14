@@ -5,8 +5,8 @@ A Windows-only Raycast extension for controlling 滴答清单 / Dida365 tasks.
 ## Commands
 
 - `Add Task`: create a task with project, due date, priority, notes, and reminder.
-- `Tasks`: view open tasks and mark them as complete.
-- `Today Tasks`: view tasks due today.
+- `Tasks`: view open tasks, complete tasks, and complete or reopen checklist items.
+- `Today Tasks`: view tasks due today, including checklist item actions.
 - `Postpone Task`: move an existing task to another date and optional time.
 - `Clipboard to Task`: create one or multiple tasks from clipboard text, with simple date/time parsing.
 
@@ -26,6 +26,8 @@ To set it up manually:
 
 The token is stored locally by Raycast and is only used to call the Dida365 API.
 
+The extension also has a `Time Zone` preference. It defaults to `Asia/Shanghai` for Dida365 China accounts, and can be changed if your tasks should use another time zone.
+
 ## Clipboard Date Parsing
 
 `Clipboard to Task` treats each non-empty line as a task. It recognizes simple dates and times such as:
@@ -38,4 +40,4 @@ The token is stored locally by Raycast and is only used to call the Dida365 API.
 ## Notes
 
 This extension targets the China-region Dida365 service at `https://api.dida365.com/open/v1`.
-Due dates with times use the system time zone configured on the user's device.
+Due dates with times use the configured extension time zone.
