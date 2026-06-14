@@ -2,10 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-converter",
   "title": "File Converter",
-  "description": "Convert any file to another format (video, audio, image, document)",
+  "description": "Convert images, audio, and video files to any format instantly from your Finder selection — supports WebP, PNG, JPEG, TIFF, ICO, MP4, MP3, WAV and more.",
   "icon": "extension-icon.png",
   "author": "rimodev74",
-  "categories": ["Productivity"],
+  "categories": ["Media"],
   "license": "MIT",
   "commands": [
     {
