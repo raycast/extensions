@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Color,
-  Detail,
   Icon,
   List,
   environment,
@@ -43,21 +42,6 @@ type AgentStatus = {
 };
 
 type AgentId = "claude" | "codex" | "gemini" | "opencode";
-
-type Preferences = {
-  customConfigPath?: string;
-  claudeFiveHourLimit: string;
-  codexFiveHourLimit: string;
-  geminiFiveHourLimit: string;
-  opencodeFiveHourLimit: string;
-  claudeWeeklyLimit: string;
-  codexWeeklyLimit: string;
-  geminiWeeklyLimit: string;
-  opencodeWeeklyLimit: string;
-  claudeMonthlyLimit: string;
-  geminiMonthlyLimit: string;
-  opencodeMonthlyLimit: string;
-};
 
 type AgentConfig = {
   paths?: Partial<Record<AgentId, { auth?: string[]; logs?: string[] }>>;
@@ -131,7 +115,11 @@ export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadAgentStatuses);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search agents">
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder="Search..."
+    >
       {data?.map((agent) => (
         <List.Item
           key={agent.id}
@@ -146,6 +134,7 @@ export default function Command() {
             tintColor: agent.connected ? Color.Green : Color.SecondaryText,
           }}
           accessories={agentAccessories(agent)}
+          detail={<AgentDetail agent={agent} />}
           actions={<AgentActions agent={agent} onRefresh={revalidate} />}
         />
       ))}
@@ -162,11 +151,6 @@ function AgentActions({
 }) {
   return (
     <ActionPanel>
-      <Action.Push
-        title="Show Details"
-        icon={Icon.Sidebar}
-        target={<AgentDetail agent={agent} />}
-      />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
       <Action
         title="Open Login in Terminal"
@@ -188,60 +172,51 @@ function AgentActions({
 
 function AgentDetail({ agent }: { agent: AgentStatus }) {
   const markdown = [
-    `# ${agent.name}`,
+    agent.connected
+      ? `### ${agent.name} is connected`
+      : `### ${agent.name} is not running`,
+    agent.connected
+      ? "Local usage is read from CLI logs."
+      : agent.connectionHint,
     "",
-    `**Status:** ${agent.connected ? "Connected" : "Not connected"}`,
-    `**CLI:** \`${agent.cli}\``,
-    `**Auth:** \`${agent.authPath ?? "unknown"}\``,
-    "",
-    "## Usage",
-    ...Object.values(agent.windows).map((window) => {
-      if (!window.supported)
-        return `- **${window.title}:** not provided for this agent`;
-      const percent =
-        window.percent === undefined
-          ? "limit not set"
-          : `${window.percent.toFixed(1)}%`;
-      return `- **${window.title}:** ${formatTokens(window.usedTokens)} / ${formatTokens(window.limitTokens)} (${percent}), resets ${timeUntil(window.resetAt)}`;
-    }),
-    "",
-    "## Data Paths",
-    ...agent.dataPaths.map((dataPath) => `- \`${dataPath}\``),
-    "",
-    "## Notes",
     ...agent.notes.map((note) => `- ${note}`),
-    "",
-    "## Connect",
-    agent.connectionHint,
   ].join("\n");
 
   return (
-    <Detail
+    <List.Item.Detail
       markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Open Login in Terminal"
-            icon={Icon.Terminal}
-            onAction={() => openTerminal(agent.loginCommand)}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label
+            title="Plan"
+            text={agent.connected ? "Connected" : "Not Running"}
           />
-          <Action
-            title="Open Config File"
-            icon={Icon.Gear}
-            onAction={openConfigFile}
+          <List.Item.Detail.Metadata.Label title="CLI" text={agent.cli} />
+          <List.Item.Detail.Metadata.Label
+            title="Auth"
+            text={agent.authPath ?? "unknown"}
           />
-          <Action.CopyToClipboard
-            title="Copy Login Command"
-            content={agent.loginCommand}
+          <List.Item.Detail.Metadata.Separator />
+          {detailRows(agent).map((row) => (
+            <List.Item.Detail.Metadata.Label
+              key={row.title}
+              title={row.title}
+              text={row.text}
+            />
+          ))}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Config"
+            text="Actions -> Open Config File"
           />
-        </ActionPanel>
+        </List.Item.Detail.Metadata>
       }
     />
   );
 }
 
 async function loadAgentStatuses(): Promise<AgentStatus[]> {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.AgentUsage>();
   const config = await readConfig(preferences);
   await ensureConfigFile(preferences, config);
 
@@ -251,7 +226,7 @@ async function loadAgentStatuses(): Promise<AgentStatus[]> {
 
 async function loadAgent(
   id: AgentId,
-  preferences: Preferences,
+  preferences: Preferences.AgentUsage,
   config: AgentConfig,
 ): Promise<AgentStatus> {
   const agent = AGENTS[id];
@@ -462,7 +437,7 @@ function buildWindows(
   return Object.fromEntries(
     (Object.keys(WINDOW_DEFS) as WindowKey[]).map((key) => {
       const def = WINDOW_DEFS[key];
-      const resetAt = new Date(now + def.ms);
+      const unsupportedResetAt = new Date(now + def.ms);
       if (!supported[id].includes(key)) {
         return [
           key,
@@ -470,15 +445,28 @@ function buildWindows(
             title: def.title,
             usedTokens: 0,
             limitTokens: 0,
-            resetAt,
+            resetAt: unsupportedResetAt,
             supported: false,
           },
         ];
       }
       const start = now - def.ms;
-      const usedTokens = events
-        .filter((event) => event.at.getTime() >= start)
-        .reduce((sum, event) => sum + event.tokens, 0);
+      const windowEvents = events.filter(
+        (event) => event.at.getTime() >= start,
+      );
+      const usedTokens = windowEvents.reduce(
+        (sum, event) => sum + event.tokens,
+        0,
+      );
+      const oldestEventTime = windowEvents.reduce(
+        (oldest, event) => Math.min(oldest, event.at.getTime()),
+        Number.POSITIVE_INFINITY,
+      );
+      const resetAt = new Date(
+        Number.isFinite(oldestEventTime)
+          ? oldestEventTime + def.ms
+          : now + def.ms,
+      );
       const limitTokens = limits[key];
       return [
         key,
@@ -500,7 +488,7 @@ function buildWindows(
 
 function limitsFor(
   id: AgentId,
-  preferences: Preferences,
+  preferences: Preferences.AgentUsage,
   config: AgentConfig,
 ): Record<WindowKey, number> {
   const prefLimits: Record<AgentId, Record<WindowKey, number>> = {
@@ -533,15 +521,35 @@ function agentAccessories(agent: AgentStatus): List.Item.Accessory[] {
     .filter((key) => agent.windows[key].supported)
     .map((key) => {
       const window = agent.windows[key];
+      const remaining = remainingPercent(window);
       const text =
-        window.percent === undefined
+        remaining === undefined
           ? `${window.title}: ${formatTokens(window.usedTokens)}`
-          : `${window.title}: ${window.percent.toFixed(0)}%`;
+          : `${remaining.toFixed(0)}%`;
       return {
         text,
-        icon: { source: Icon.BarChart, tintColor: colorFor(window.percent) },
+        icon: {
+          source: Icon.CircleProgress,
+          tintColor: colorForRemaining(remaining),
+        },
       };
     });
+}
+
+function detailRows(agent: AgentStatus): { title: string; text: string }[] {
+  return (Object.keys(agent.windows) as WindowKey[]).flatMap((key) => {
+    const window = agent.windows[key];
+    if (!window.supported) return [];
+    const remaining = remainingPercent(window);
+    const limitText =
+      remaining === undefined
+        ? `${formatTokens(window.usedTokens)} used, limit not set`
+        : `${usageBar(remaining)} ${remaining.toFixed(1)}% remaining (${formatTokens(window.usedTokens)} / ${formatTokens(window.limitTokens)})`;
+    return [
+      { title: limitTitle(key), text: limitText },
+      { title: "Resets In", text: timeUntil(window.resetAt) },
+    ];
+  });
 }
 
 function usageSubtitle(agent: AgentStatus): string {
@@ -549,20 +557,37 @@ function usageSubtitle(agent: AgentStatus): string {
     .filter((key) => agent.windows[key].supported)
     .map((key) => {
       const window = agent.windows[key];
-      const percent =
-        window.percent === undefined
+      const remaining = remainingPercent(window);
+      const percentText =
+        remaining === undefined
           ? "limit unset"
-          : `${window.percent.toFixed(1)}%`;
-      return `${window.title} ${percent}, ${timeUntil(window.resetAt)} left`;
+          : `${remaining.toFixed(1)}% remaining`;
+      return `${window.title} ${percentText}, ${timeUntil(window.resetAt)} left`;
     });
   return parts.join(" · ");
 }
 
-function colorFor(percent?: number): Color {
+function remainingPercent(window: UsageWindow): number | undefined {
+  if (window.percent === undefined) return undefined;
+  return Math.max(0, Math.min(100, 100 - window.percent));
+}
+
+function colorForRemaining(percent?: number): Color {
   if (percent === undefined) return Color.SecondaryText;
-  if (percent >= 90) return Color.Red;
-  if (percent >= 70) return Color.Orange;
+  if (percent <= 10) return Color.Red;
+  if (percent <= 30) return Color.Orange;
   return Color.Green;
+}
+
+function usageBar(remaining: number): string {
+  const filled = Math.round((remaining / 100) * 14);
+  return `${"/".repeat(filled)}${"-".repeat(14 - filled)}`;
+}
+
+function limitTitle(key: WindowKey): string {
+  if (key === "fiveHour") return "5h Limit";
+  if (key === "weekly") return "Weekly Limit";
+  return "Monthly Limit";
 }
 
 function notesFor(id: AgentId, eventCount: number): string[] {
@@ -607,13 +632,15 @@ async function openTerminal(command: string) {
 }
 
 async function openConfigFile() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.AgentUsage>();
   const configPath = getConfigPath(preferences);
   await ensureConfigFile(preferences, await readConfig(preferences));
   await open(configPath);
 }
 
-async function readConfig(preferences: Preferences): Promise<AgentConfig> {
+async function readConfig(
+  preferences: Preferences.AgentUsage,
+): Promise<AgentConfig> {
   const configPath = getConfigPath(preferences);
   try {
     return JSON.parse(
@@ -624,7 +651,10 @@ async function readConfig(preferences: Preferences): Promise<AgentConfig> {
   }
 }
 
-async function ensureConfigFile(preferences: Preferences, config: AgentConfig) {
+async function ensureConfigFile(
+  preferences: Preferences.AgentUsage,
+  config: AgentConfig,
+) {
   const configPath = getConfigPath(preferences);
   if (fs.existsSync(configPath)) return;
   await fs.promises.mkdir(path.dirname(configPath), { recursive: true });
@@ -651,7 +681,7 @@ async function ensureConfigFile(preferences: Preferences, config: AgentConfig) {
   );
 }
 
-function getConfigPath(preferences: Preferences): string {
+function getConfigPath(preferences: Preferences.AgentUsage): string {
   return expandHome(
     preferences.customConfigPath?.trim() ||
       path.join(environment.supportPath, "config.json"),
