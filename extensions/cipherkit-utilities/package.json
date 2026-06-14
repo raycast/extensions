@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cipherkit-utilities",
+  "title": "CipherKit Utilities",
+  "description": "Developer tools that run 100% locally — JWT decoder, Base64, hashing, and more. Your data never leaves your device.",
+  "icon": "extension-icon.png",
+  "author": "karthick_ajan_g_s",
+  "categories": ["Developer Tools", "Security"],
+  "license": "MIT",
+  "keywords": ["jwt", "decode", "token", "base64", "hash", "developer", "security", "cipherkit"],
+  "commands": [
+    {
+      "name": "decode-jwt",
+      "title": "Decode JWT",
+      "subtitle": "CipherKit",
+      "description": "Decode and inspect JSON Web Tokens locally with expiration tracking.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
