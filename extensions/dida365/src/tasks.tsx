@@ -10,7 +10,7 @@ import { TaskListItem } from "./components/task-list-item.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
 import type { Task } from "./types.js";
-import { taskSearchText } from "./utils/task.js";
+import { groupTasksByProject, taskSearchText } from "./utils/task.js";
 
 export default function Command() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -54,6 +54,11 @@ export default function Command() {
       taskSearchText(task).toLowerCase().includes(query),
     );
   }, [searchText, tasks]);
+
+  const taskGroups = useMemo(
+    () => groupTasksByProject(filteredTasks),
+    [filteredTasks],
+  );
 
   async function handleComplete(task: Task) {
     const toast = await showToast({
@@ -120,14 +125,22 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      {filteredTasks.map((task) => (
-        <TaskListItem
-          key={`${task.projectId}:${task.id}`}
-          task={task}
-          onComplete={handleComplete}
-          onUpdateChecklistItem={handleUpdateChecklistItem}
-          onRefresh={loadTasks}
-        />
+      {taskGroups.map((group) => (
+        <List.Section
+          key={group.key}
+          title={group.title}
+          subtitle={`${group.tasks.length}`}
+        >
+          {group.tasks.map((task) => (
+            <TaskListItem
+              key={`${task.projectId}:${task.id}`}
+              task={task}
+              onComplete={handleComplete}
+              onUpdateChecklistItem={handleUpdateChecklistItem}
+              onRefresh={loadTasks}
+            />
+          ))}
+        </List.Section>
       ))}
     </List>
   );

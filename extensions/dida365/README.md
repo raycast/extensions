@@ -5,8 +5,8 @@ A Windows-only Raycast extension for controlling 滴答清单 / Dida365 tasks.
 ## Commands
 
 - `Add Task`: create a task with project, due date, priority, notes, and reminder.
-- `Tasks`: view open tasks, complete tasks, and complete or reopen checklist items.
-- `Today Tasks`: view tasks due today, including checklist item actions.
+- `Tasks`: view open tasks grouped by list, complete tasks, and complete or reopen checklist items.
+- `Today Tasks`: view tasks due today grouped by list, including checklist item actions.
 - `Postpone Task`: move an existing task to another date and optional time.
 - `Clipboard to Task`: create one or multiple tasks from clipboard text, with simple date/time parsing.
 

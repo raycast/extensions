@@ -76,6 +76,8 @@ export async function listOpenTasks(): Promise<Task[]> {
     (data.tasks ?? []).map((task) => ({
       ...task,
       projectId: task.projectId || data.project.id,
+      projectName: data.project.name,
+      projectColor: data.project.color,
     })),
   );
 }
@@ -90,7 +92,7 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
 export async function updateTask(task: Task): Promise<Task> {
   return request<Task>(`/task/${encodeURIComponent(task.id)}`, {
     method: "POST",
-    body: JSON.stringify(task),
+    body: JSON.stringify(toApiTask(task)),
   });
 }
 
@@ -116,4 +118,12 @@ export function describeApiError(error: unknown): string {
   }
 
   return "Unknown error";
+}
+
+function toApiTask(task: Task): Task {
+  const apiTask = { ...task };
+  delete apiTask.projectName;
+  delete apiTask.projectColor;
+
+  return apiTask;
 }

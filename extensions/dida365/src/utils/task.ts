@@ -36,6 +36,7 @@ export function taskSearchText(task: Task): string {
     task.content,
     task.desc,
     task.dueDate,
+    task.projectName,
     ...(task.items?.map((item) => item.title) ?? []),
   ]
     .filter(Boolean)
@@ -44,4 +45,66 @@ export function taskSearchText(task: Task): string {
 
 export function isChecklistItemCompleted(item: ChecklistItem): boolean {
   return item.status === 2;
+}
+
+export type TaskGroup = {
+  key: string;
+  title: string;
+  tasks: Task[];
+};
+
+export function groupTasksByProject(tasks: Task[]): TaskGroup[] {
+  const groups = new Map<string, TaskGroup>();
+
+  for (const task of tasks) {
+    const title = projectSectionTitle(task);
+    const key = task.projectId || title;
+    const group = groups.get(key);
+
+    if (group) {
+      group.tasks.push(task);
+    } else {
+      groups.set(key, { key, title, tasks: [task] });
+    }
+  }
+
+  return [...groups.values()].sort(compareTaskGroups);
+}
+
+function projectSectionTitle(task: Task): string {
+  const projectName = task.projectName?.trim();
+
+  if (!projectName || isInboxProject(projectName)) {
+    return "Inbox";
+  }
+
+  return projectName;
+}
+
+function isInboxProject(projectName: string): boolean {
+  return ["inbox", "收集箱", "收件箱"].includes(projectName.toLowerCase());
+}
+
+function compareTaskGroups(a: TaskGroup, b: TaskGroup): number {
+  const aIndex = preferredSectionOrder(a.title);
+  const bIndex = preferredSectionOrder(b.title);
+
+  if (aIndex !== bIndex) {
+    return aIndex - bIndex;
+  }
+
+  return a.title.localeCompare(b.title, "zh-Hans-CN");
+}
+
+function preferredSectionOrder(title: string): number {
+  switch (title) {
+    case "Inbox":
+      return 0;
+    case "个人备忘":
+      return 1;
+    case "学习安排":
+      return 2;
+    default:
+      return 10;
+  }
 }

@@ -17,6 +17,8 @@ export type ChecklistItem = {
 export type Task = {
   id: string;
   projectId: string;
+  projectName?: string;
+  projectColor?: string;
   title: string;
   content?: string;
   desc?: string;

@@ -11,7 +11,7 @@ import { isMissingApiToken } from "./setup.js";
 import { TaskListItem } from "./components/task-list-item.js";
 import type { Task } from "./types.js";
 import { isTodayTask } from "./utils/task-dates.js";
-import { taskSearchText } from "./utils/task.js";
+import { groupTasksByProject, taskSearchText } from "./utils/task.js";
 
 export default function Command() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -55,6 +55,11 @@ export default function Command() {
       taskSearchText(task).toLowerCase().includes(query),
     );
   }, [searchText, tasks]);
+
+  const taskGroups = useMemo(
+    () => groupTasksByProject(todayTasks),
+    [todayTasks],
+  );
 
   async function handleComplete(task: Task) {
     const toast = await showToast({
@@ -121,16 +126,22 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      <List.Section title="Today" subtitle={`${todayTasks.length}`}>
-        {todayTasks.map((task) => (
-          <TaskListItem
-            key={`${task.projectId}:${task.id}`}
-            task={task}
-            onComplete={handleComplete}
-            onUpdateChecklistItem={handleUpdateChecklistItem}
-          />
-        ))}
-      </List.Section>
+      {taskGroups.map((group) => (
+        <List.Section
+          key={group.key}
+          title={group.title}
+          subtitle={`${group.tasks.length}`}
+        >
+          {group.tasks.map((task) => (
+            <TaskListItem
+              key={`${task.projectId}:${task.id}`}
+              task={task}
+              onComplete={handleComplete}
+              onUpdateChecklistItem={handleUpdateChecklistItem}
+            />
+          ))}
+        </List.Section>
+      ))}
     </List>
   );
 }
