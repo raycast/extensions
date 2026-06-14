@@ -1,6 +1,7 @@
 import { Image } from "@raycast/api";
 import { join } from "node:path";
 import { LarkSearchItem } from "./types";
+import { cleanText, pickString } from "./object-utils";
 
 type LarkIconKind =
   | "doc"
@@ -160,37 +161,4 @@ function getAvatarUrl(raw: unknown) {
 
 function assetIconPath(file: LarkIconKind) {
   return join(__dirname, "assets", iconFiles[file]);
-}
-
-function pickString(value: unknown, paths: string[]) {
-  for (const path of paths) {
-    const picked = pick(value, path);
-    if (typeof picked === "string" && picked.trim()) {
-      return picked;
-    }
-    if (typeof picked === "number" || typeof picked === "boolean") {
-      return String(picked);
-    }
-  }
-  return undefined;
-}
-
-function pick(value: unknown, path: string): unknown {
-  return path.split(".").reduce<unknown>((current, key) => {
-    if (!current || typeof current !== "object") {
-      return undefined;
-    }
-    return (current as Record<string, unknown>)[key];
-  }, value);
-}
-
-function cleanText(value?: string) {
-  return value
-    ?.replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
 }

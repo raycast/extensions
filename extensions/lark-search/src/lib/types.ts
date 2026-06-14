@@ -1,5 +1,3 @@
-import { Icon } from "@raycast/api";
-
 export type LarkSearchType =
   | "doc"
   | "message"
@@ -16,7 +14,6 @@ export type LarkSearchItem = {
   title: string;
   subtitle?: string;
   snippet?: string;
-  detailMarkdown?: string;
   url?: string;
   updatedAt?: string;
   appTargetKey?: "lark" | "feishu";
@@ -38,22 +35,4 @@ export const scopeTitles: Record<SearchScope, string> = {
   contact: "Contacts",
   wiki: "Wiki",
   sheet: "Sheets",
-};
-
-export const typeLabels: Record<LarkSearchType, string> = {
-  doc: "Doc",
-  message: "Msg",
-  chat: "Chat",
-  contact: "Contact",
-  wiki: "Wiki",
-  sheet: "Sheet",
-};
-
-export const typeIcons: Record<LarkSearchType, Icon> = {
-  doc: Icon.Document,
-  message: Icon.Message,
-  chat: Icon.TwoPeople,
-  contact: Icon.Person,
-  wiki: Icon.Book,
-  sheet: Icon.BarChart,
 };

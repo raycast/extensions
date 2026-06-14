@@ -20,6 +20,14 @@ import {
 } from "./preferences";
 import { getRecents } from "./recent-cache";
 import { LarkSearchItem, LarkSearchType } from "./types";
+import {
+  cleanText,
+  extractArray,
+  parseJsonOrThrow,
+  parsePositiveLimit,
+  pick,
+  pickString,
+} from "./object-utils";
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_HOT_INDEX_DIRECTORY =
@@ -36,7 +44,7 @@ export function getHotIndexDirectory() {
 
 export async function refreshHotIndex() {
   const { hotIndexLimit } = getPreferenceValues<Preferences>();
-  const limit = Math.max(1, Number.parseInt(hotIndexLimit ?? "", 10) || 50);
+  const limit = parsePositiveLimit(hotIndexLimit, 50);
   const items = await collectHotIndexItems();
   await writeHotIndex(items.slice(0, limit));
   return {
@@ -51,7 +59,7 @@ export async function upsertOpenedItemInHotIndex(item: LarkSearchItem) {
   const opened = toRecentHotItem(item);
   const merged = dedupeHotItems([opened, ...existing]);
   const { hotIndexLimit } = getPreferenceValues<Preferences>();
-  const limit = Math.max(1, Number.parseInt(hotIndexLimit ?? "", 10) || 50);
+  const limit = parsePositiveLimit(hotIndexLimit, 50);
   await writeHotIndex(merged.slice(0, limit));
 }
 
@@ -327,7 +335,10 @@ async function runLarkCli(args: string[], identity: string) {
       env: process.env,
     },
   );
-  const parsed = JSON.parse(stdout) as { ok?: boolean; data?: unknown };
+  const parsed = parseJsonOrThrow<{ ok?: boolean; data?: unknown }>(
+    stdout,
+    "Lark-cli hot index",
+  );
   if (parsed.ok === false) {
     throw new Error("Lark-cli command failed");
   }
@@ -485,55 +496,6 @@ function dedupeHotItems(items: HotIndexItem[]) {
     seen.add(key);
     return true;
   });
-}
-
-function extractArray(data: unknown, paths: string[]) {
-  for (const path of paths) {
-    const value = pick(data, path);
-    if (Array.isArray(value)) {
-      return value;
-    }
-  }
-  return [];
-}
-
-function pickString(value: unknown, paths: string[]) {
-  for (const path of paths) {
-    const picked = pick(value, path);
-    if (typeof picked === "string" && picked.trim()) {
-      return picked;
-    }
-    if (typeof picked === "number" || typeof picked === "boolean") {
-      return String(picked);
-    }
-  }
-  return undefined;
-}
-
-function pick(value: unknown, path: string): unknown {
-  return path.split(".").reduce<unknown>((current, key) => {
-    if (!current || typeof current !== "object") {
-      return undefined;
-    }
-    return (current as Record<string, unknown>)[key];
-  }, value);
-}
-
-function cleanText(value?: string) {
-  return value
-    ?.replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#(\d+);/g, (_, code: string) =>
-      String.fromCodePoint(Number.parseInt(code, 10)),
-    )
-    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
-      String.fromCodePoint(Number.parseInt(code, 16)),
-    )
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function shellQuote(value: string) {

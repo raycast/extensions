@@ -117,6 +117,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "acceptance": "node scripts/acceptance-check.mjs",
     "local-install": "node scripts/local-install.mjs",
     "publish": "npm run local-install && ray publish"
   },
