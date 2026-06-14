@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api"
 import { usePromise, showFailureToast } from "@raycast/utils"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { EpisodeCollectionType, EpisodeCollectionTypeName, EpisodeType, EpisodeTypePrefix } from "@/shared/const"
 import type { components } from "@/types/generated"
 import { EpisodeStatusActions } from "@/components/actions"
@@ -71,11 +71,42 @@ const buildEpisodeIcon = (text: string, appearance: EpAppearance): string => {
   return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
-const fetchTotalMainEpisodes = async (subjectId: number): Promise<number | undefined> => {
+const getEpisodeTooltip = (statusType: EpisodeCollectionType, airdate?: string): string | undefined => {
+  const statusName = EpisodeCollectionTypeName[statusType]
+  if (!airdate || statusType === EpisodeCollectionType.Watched) return statusName
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const [y, m, d] = airdate.split("-").map(Number)
+  if (!y || !m || !d) {
+    return statusName ? `${statusName} · ${airdate}` : airdate
+  }
+  const airDateObj = new Date(y, m - 1, d)
+
+  const diffTime = airDateObj.getTime() - today.getTime()
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+  let dateText = airdate
+  if (diffDays === 0) {
+    dateText = "Today"
+  } else if (diffDays === 1) {
+    dateText = "Tomorrow"
+  } else if (diffDays > 1 && diffDays <= 7) {
+    dateText = `In ${diffDays} days`
+  } else if (diffDays === -1) {
+    dateText = "Yesterday"
+  }
+
+  return statusName ? `${statusName} · ${dateText}` : dateText
+}
+
+const fetchTotalMainEpisodes = async (subjectId: number, signal?: AbortSignal): Promise<number | undefined> => {
   try {
     const response = await bangumi.getUserSubjectEpisodeCollection({
       subjectId,
       query: { limit: 1, offset: 0, episode_type: EpisodeType.Main },
+      signal,
     })
     return response.total
   } catch {
@@ -85,6 +116,7 @@ const fetchTotalMainEpisodes = async (subjectId: number): Promise<number | undef
 
 export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, epStatus, totalEps }: ProgressGridProps) {
   const [fetchedTotalEps, setFetchedTotalEps] = useState<number | undefined>()
+  const abortable = useRef<AbortController>(null)
 
   const {
     data: episodes = [],
@@ -95,19 +127,25 @@ export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, ep
     (id: number, eps?: number) => async (options: { page: number }) => {
       const limit = 100
       const offset = options.page * limit
+      const signal = abortable.current?.signal
       const { data = [], total } = await bangumi.getUserSubjectEpisodeCollection({
         subjectId: id,
         query: { limit, offset },
+        signal,
       })
       if (options.page === 0 && !eps) {
-        fetchTotalMainEpisodes(id).then(setFetchedTotalEps)
+        fetchTotalMainEpisodes(id, signal).then((totalEps) => {
+          if (signal?.aborted) return
+          setFetchedTotalEps(totalEps)
+        })
       }
       return {
         data,
         hasMore: offset + limit < total,
       }
     },
-    [subjectId, totalEps]
+    [subjectId, totalEps],
+    { abortable }
   )
 
   const handleUpdateStatus = async (episodeId: number, status: EpisodeCollectionType) => {
@@ -211,7 +249,7 @@ export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, ep
                 key={ep.episode.id}
                 content={{
                   source: buildEpisodeIcon(epNum, getEpisodeAppearance(ep.episode, statusType)),
-                  tooltip: EpisodeCollectionTypeName[statusType as EpisodeCollectionType],
+                  tooltip: getEpisodeTooltip(statusType, ep.episode.airdate),
                 }}
                 keywords={[epLabel, epTitle]}
                 actions={
