@@ -1,0 +1,118 @@
+{
+  "name": "fix-mytext",
+  "version": "0.1.0",
+  "description": "Revise text in Raycast with a local OpenAI-compatible model.",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "saminnet",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "oxlint && npm run format:check",
+    "lint:fix": "oxlint --fix && npm run format",
+    "format": "oxfmt --write README.md CHANGELOG.md package.json tsconfig.json src",
+    "format:check": "oxfmt --check README.md CHANGELOG.md package.json tsconfig.json src",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "oxfmt": "^0.54.0",
+    "oxlint": "^1.69.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "icon": "fix-mytext-icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Fix My Text",
+      "description": "Revise text with a local model",
+      "icon": "fix-mytext-icon.png",
+      "mode": "view",
+      "keywords": [
+        "grammar",
+        "proofread",
+        "rewrite",
+        "tone",
+        "clipboard",
+        "local ai"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Optional starting text"
+        }
+      ]
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "Base URL for the OpenAI-compatible chat completions server you want to use.",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:11434/v1",
+      "placeholder": "http://127.0.0.1:11434/v1"
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "The model name to send with requests.",
+      "type": "textfield",
+      "required": true,
+      "default": "local-model",
+      "placeholder": "llama3.2"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional token for local runtimes that require one.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Optional"
+    },
+    {
+      "name": "systemPrompt",
+      "title": "System Prompt",
+      "description": "High-level editing policy applied to every request.",
+      "type": "textfield",
+      "required": true,
+      "default": "You are a text revision engine, not a chatbot. Revise the user's text according to the selected instruction. Preserve meaning, facts, names, dates, numbers, URLs, code terms, and voice unless explicitly asked to change tone. If the text contains a question or request, revise it as text; do not answer it. Return only the revised text.",
+      "placeholder": "You are an expert editor..."
+    },
+    {
+      "name": "temperature",
+      "title": "Temperature",
+      "description": "Lower values produce steadier edits. Values are clamped between 0 and 2.",
+      "type": "textfield",
+      "required": true,
+      "default": "0.2",
+      "placeholder": "0.2"
+    },
+    {
+      "name": "concealClipboard",
+      "title": "Privacy",
+      "description": "Prevent copied output from being saved in Raycast clipboard history.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Conceal copied output",
+      "default": true
+    }
+  ],
+  "title": "Fix My Text"
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fix My Text icon">
+  <defs>
+    <linearGradient id="background" x1="72" y1="32" x2="440" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111827" />
+      <stop offset="1" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="check" x1="316" y1="222" x2="452" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34d399" />
+      <stop offset="1" stop-color="#2dd4bf" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="118" fill="url(#background)" />
+  <rect x="18" y="18" width="476" height="476" rx="100" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="2" />
+
+  <g fill="#f8fafc">
+    <rect x="94" y="156" width="240" height="38" rx="8" />
+    <rect x="94" y="236" width="304" height="38" rx="8" opacity="0.96" />
+    <rect x="94" y="316" width="216" height="38" rx="8" opacity="0.92" />
+  </g>
+
+  <path
+    d="M326 184 L368 226 L448 134"
+    fill="none"
+    stroke="url(#check)"
+    stroke-width="36"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
