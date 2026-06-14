@@ -31,10 +31,19 @@ Before you start, make sure you have installed:
    ```
 
 3. **Start development mode:**
+
    ```bash
    npm run dev
    ```
+
    This will start the local development server. Open Raycast, and you will see the local version of the Bangumi extension available for testing. Changes to the source code will hot-reload automatically.
+
+4. **Agent Skills Setup (Optional):**
+   If you are using AI agents for development, run the following command to sync local skills:
+   ```bash
+   npx skills experimental_install
+   ```
+   _Note: This project uses Claude Code as its primary agent folder (`.claude`). If you use other agents that rely on the `.agents` directory, please create a symlink: `ln -s .claude .agents`._
 
 ## Type Generation
 

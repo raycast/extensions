@@ -30,10 +30,19 @@
    ```
 
 3. **启动开发模式：**
+
    ```bash
    npm run dev
    ```
+
    这将启动本地开发服务器。打开 Raycast，你将看到可供测试的本地版本 Bangumi 插件。对源代码的更改将会自动热重载。
+
+4. **Agent Skills 配置 (可选)：**
+   如果你使用 AI Agent 辅助开发，请运行以下命令同步本地的 Skills：
+   ```bash
+   npx skills experimental_install
+   ```
+   _注意：本项目主要使用 Claude Code 作为默认目录（`.claude` 文件夹）。如果你使用其他依赖 `.agents` 目录的 Agent 工具，请创建一个软链接：`ln -s .claude .agents`。_
 
 ## 类型生成 (Type Generation)
 

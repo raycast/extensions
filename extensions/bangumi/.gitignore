@@ -15,3 +15,6 @@ compiled_raycast_rust
 .DS_Store
 .agents
 .claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/bangumi/

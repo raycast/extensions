@@ -10,7 +10,9 @@ This repository contains the Bangumi extension for Raycast. It integrates with B
 - **UI/UX Consistency:** Relies strictly on Raycast UI components (`List`, `Grid`, `Detail`, `Form`, `ActionPanel`). Adheres to Raycast's design patterns (e.g., loading states, empty views, metadata).
 - **Authentication & Data:** Manages user authentication securely. Uses Raycast's built-in preference and caching mechanisms instead of custom implementations.
 
-When contributing to or modifying this extension, always adhere to the following code guidelines to ensure consistency, stability, and compliance with the Raycast Store requirements. For general guidance, see the [Extension Guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store.md) and [Publishing Extensions](https://developers.raycast.com/basics/publish-an-extension.md).
+## Agent Skills
+
+Apply the `bangumi` and `raycast-extension` skills when needed.
 
 ## Code Guidelines
 
@@ -18,31 +20,4 @@ When contributing to or modifying this extension, always adhere to the following
 
 - **Strict Schema Usage:** Treat the OpenAPI-generated types (`src/types/generated.ts`) as the source of truth. Do not add unnecessary optional chaining (`?.`) or fallback operators (`??`, `||`) to properties that the schema marks as required (e.g., `data.collection.doing`, `data.tags`, `data.rating`). Trust the generated types: redundant null checks reduce readability, weaken type guarantees, and can hide data contract violations that should be addressed explicitly.
 
-### Preferences & Configuration
-
-- **Preference Types:** Do not use the `number` type in preference configurations within `package.json`. Use `textfield` with validation instead, as Raycast lacks a primitive number preference type.
 - **TypeScript Interfaces:** Do not manually define `Preferences` or `Argument` interfaces. Use `getPreferenceValues<Preferences>()` as types are auto-generated in `raycast-env.d.ts`.
-- **Preference Encryption:** Treat all preferences as securely encrypted data. Raycast encrypts them natively; do not build custom encryption layers.
-- **Localization:** Raycast strictly supports US English. Do not implement custom translation wrappers. Use the preferences API dropdown for locale-dependent settings (e.g., units).
-
-### APIs & Built-in Utilities
-
-- **Favicons:** Use `@raycast/utils`'s `getFavicon("url")` instead of manually constructing custom favicon URLs (like Google S2). It handles caching and parallel racing optimally.
-- **Global Fetch:** Do not import `fetch` or `node-fetch`. Node 21+ has it built-in.
-- **File Deletion:** Use `@raycast/api`'s `trash()` API to safely move items to the system Trash/Bin instead of using `rm` or `fs.unlink()`.
-
-### UI & UX Best Practices
-
-- **Loading States:** Always use the `isLoading` prop on `<List>` or `<Grid>` components during asynchronous operations to prevent empty state flickers. ([Reference](https://developers.raycast.com/basics/prepare-an-extension-for-store#empty-states.md))
-- **Metadata for View Commands:** Verify that extensions with view-type commands include a `metadata/` folder containing Raycast-styled screenshots for the Store.
-
-### Error Handling
-
-- **launchCommand:** Always wrap `launchCommand` calls in a `try-catch` block to handle missing arguments or permission failures without crashing.
-- **getSelectedText():** Always wrap `getSelectedText()` in a `try-catch` block and gracefully handle cases where no text is selected or system focus fails.
-- **Toasts:** Use `showFailureToast` from `@raycast/utils` to simplify error presentation boilerplate instead of manually configuring `Toast.Style.Failure`.
-
-### Tooling & Ecosystem
-
-- **ESLint:** For ESLint v9+, ensure the flat configuration pattern uses `import { defineConfig } from "eslint/config"`.
-- **Lock Files:** Exclusively use `package-lock.json` and fetch dependencies strictly from `https://registry.npmjs.org`. Check `.npmrc` to block scoped/alternative registries, and do not use `yarn.lock`, `bun.lock`, or `pnpm-lock.yaml`.
