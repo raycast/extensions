@@ -1,10 +1,4 @@
-import {
-  MenuBarExtra,
-  getPreferenceValues,
-  open,
-  Icon,
-  Image,
-} from "@raycast/api";
+import { MenuBarExtra, getPreferenceValues, open, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 interface ContributionDay {
@@ -45,10 +39,7 @@ const MILESTONES: Milestone[] = [
 ];
 
 function getMilestone(days: number): Milestone | null {
-  return (
-    MILESTONES.find((m) => (m.exactOnly ? days === m.days : days >= m.days)) ??
-    null
-  );
+  return MILESTONES.find((m) => (m.exactOnly ? days === m.days : days >= m.days)) ?? null;
 }
 
 const CONTRIBUTIONS_QUERY = `
@@ -68,9 +59,7 @@ const CONTRIBUTIONS_QUERY = `
   }
 `;
 
-function calculateStreak(
-  weeks: { contributionDays: ContributionDay[] }[],
-): StreakResult {
+function calculateStreak(weeks: { contributionDays: ContributionDay[] }[]): StreakResult {
   const allDays: ContributionDay[] = weeks
     .flatMap((w) => w.contributionDays)
     .sort((a, b) => b.date.localeCompare(a.date));
@@ -91,9 +80,7 @@ function calculateStreak(
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toLocaleDateString("sv");
   const yesterdayEntry = allDays.find((d) => d.date === yesterdayStr);
-  const hadCommitYesterday = yesterdayEntry
-    ? yesterdayEntry.contributionCount > 0
-    : false;
+  const hadCommitYesterday = yesterdayEntry ? yesterdayEntry.contributionCount > 0 : false;
 
   if (hasCommitToday) {
     let streak = 0;
@@ -159,10 +146,7 @@ export default function CommitStreak() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function fetchYear(
-    from: Date,
-    to: Date,
-  ): Promise<{ contributionDays: ContributionDay[] }[]> {
+  async function fetchYear(from: Date, to: Date): Promise<{ contributionDays: ContributionDay[] }[]> {
     const response = await fetch("https://api.github.com/graphql", {
       method: "POST",
       headers: {
@@ -191,12 +175,9 @@ export default function CommitStreak() {
         };
       };
     };
-    if (data.errors)
-      throw new Error(data.errors[0]?.message ?? "Unknown error");
-    const weeks =
-      data.data?.user?.contributionsCollection?.contributionCalendar?.weeks;
-    if (!weeks)
-      throw new Error("Could not read contribution data. Check your username.");
+    if (data.errors) throw new Error(data.errors[0]?.message ?? "Unknown error");
+    const weeks = data.data?.user?.contributionsCollection?.contributionCalendar?.weeks;
+    if (!weeks) throw new Error("Could not read contribution data. Check your username.");
     return weeks;
   }
 
@@ -244,10 +225,7 @@ export default function CommitStreak() {
       <MenuBarExtra icon={Icon.ExclamationMark} title="!">
         <MenuBarExtra.Item title={`Error: ${error}`} />
         <MenuBarExtra.Item title="Refresh" onAction={fetchContributions} />
-        <MenuBarExtra.Item
-          title="Open Token Settings"
-          onAction={() => open("https://github.com/settings/tokens")}
-        />
+        <MenuBarExtra.Item title="Open Token Settings" onAction={() => open("https://github.com/settings/tokens")} />
       </MenuBarExtra>
     );
   }
@@ -267,10 +245,7 @@ export default function CommitStreak() {
     if (m.exactLabel && count !== m.days) return `${count}`;
     return m.label ?? `${count}`;
   };
-  const label =
-    displayCount !== null
-      ? resolveLabel(milestone, displayCount)
-      : `${streak.count}`;
+  const label = displayCount !== null ? resolveLabel(milestone, displayCount) : `${streak.count}`;
 
   const statusTitle = streak.hasCommitToday
     ? `🔥 ${streak.count}-day streak`
@@ -288,14 +263,9 @@ export default function CommitStreak() {
     <MenuBarExtra icon={icon} title={label}>
       <MenuBarExtra.Item title={statusTitle} />
       <MenuBarExtra.Item title={todayTitle} />
-      <MenuBarExtra.Item
-        title={`Last 7 days: ${streak.totalLastWeek} contributions`}
-      />
+      <MenuBarExtra.Item title={`Last 7 days: ${streak.totalLastWeek} contributions`} />
       <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title="Open Profile"
-        onAction={() => open(`https://github.com/${preferences.username}`)}
-      />
+      <MenuBarExtra.Item title="Open Profile" onAction={() => open(`https://github.com/${preferences.username}`)} />
       <MenuBarExtra.Item title="Refresh" onAction={fetchContributions} />
     </MenuBarExtra>
   );
