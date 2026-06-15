@@ -203,7 +203,6 @@ export default function SearchSessions() {
       }
     },
     [searchText, !!allMetas],
-    { keepPreviousData: true },
   );
 
   // O(1) filePath -> meta lookup, used for merging content-search results into the list
