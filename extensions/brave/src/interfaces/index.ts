@@ -75,6 +75,12 @@ export interface BookmarkDirectory {
   [key: string]: unknown;
 }
 
+export interface BookmarkFolder {
+  id: string;
+  name: string;
+  children: BookmarkDirectory[];
+}
+
 export interface RawBookmarkRoot {
   [key: string]: BookmarkDirectory;
 }

@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor-recent-projects",
   "title": "Cursor",
-  "description": "Control Cursor, Cursor & Codium directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Control Cursor directly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "cursor-icon.png",
   "author": "degouville",
   "contributors": [
     "pernielsentikaer",
     "escwxyz",
     "litomore",
-    "michalzuch"
+    "michalzuch",
+    "alexi.build"
   ],
   "categories": [
     "Applications",

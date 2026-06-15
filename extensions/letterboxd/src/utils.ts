@@ -1,4 +1,3 @@
-import got from "got";
 import { environment } from "@raycast/api";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
@@ -6,7 +5,7 @@ export function sleep(duration: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
-const HEADERS = {
+const HEADERS: Record<string, string> = {
   accept: "text/html,application/xhtml+xml,application/xml",
   "cache-control": "no-cache",
   pragma: "no-cache",
@@ -34,11 +33,15 @@ export async function fetchWithRetry(
 
   while (retryCount < limit) {
     try {
-      const response = await got(url, {
-        retry: { limit },
+      const response = await fetch(url, {
         headers: HEADERS,
       });
-      const result = response.body;
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.text();
 
       if (validate?.(result) === false) {
         throw new Error("Validation failed");

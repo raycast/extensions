@@ -1,7 +1,11 @@
-import { Tool, open } from "@raycast/api";
+import { Tool } from "@raycast/api";
+import { openUrl } from "../utils/open";
 import fs from "fs";
 import { applyTemplates } from "../api/templating/templating.service";
 import { Obsidian, ObsidianTargetType } from "@/obsidian";
+import { Logger } from "@/api/logger/logger.service";
+
+const logger = new Logger("Append Note Tool");
 
 type Input = {
   /**
@@ -109,7 +113,9 @@ export default async function tool(input: Input) {
       silent: input.silent ?? true,
     });
 
-    await open(target);
+    logger.debug(`Opening target: "${target}"`);
+
+    await openUrl(target, { background: input.silent ?? true });
 
     return `Successfully ${input.prepend ? "prepended" : "appended"} content to daily note in vault "${
       targetVault.name

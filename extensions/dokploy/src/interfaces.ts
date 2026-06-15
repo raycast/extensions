@@ -7,6 +7,8 @@ export interface DockerContainer {
   status: string;
 }
 
+export type ProjectId = string;
+
 export interface Service {
   name: string;
   appName: string;
@@ -17,37 +19,32 @@ export interface Application extends Service {
   applicationId: string;
   applicationStatus: "idle";
 }
-interface Mariadb extends Service {
+export interface Mariadb extends Service {
   mariadbId: string;
   applicationStatus: "idle";
 }
-interface Mongo extends Service {
+export interface Mongo extends Service {
   mongoId: string;
   applicationStatus: "idle";
 }
-interface Mysql extends Service {
+export interface Mysql extends Service {
   mysqlId: string;
   applicationStatus: "idle";
 }
-interface Postgres extends Service {
+export interface Postgres extends Service {
   postgresId: string;
   applicationStatus: "idle";
 }
-interface Redis extends Service {
+export interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
-interface Compose extends Service {
+export interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
 }
-export interface Project {
-  projectId: string;
-  name: string;
-  description: string;
-  createdAt: string;
-  organizationId: string;
-  env: string;
+
+export interface ServiceCollections {
   applications: Application[];
   mariadb: Mariadb[];
   mongo: Mongo[];
@@ -56,6 +53,32 @@ export interface Project {
   redis: Redis[];
   compose: Compose[];
 }
+
+export interface Environment extends ServiceCollections {
+  environmentId: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  env: string;
+  projectId: ProjectId;
+}
+
+export interface ProjectBase {
+  projectId: ProjectId;
+  name: string;
+  description: string;
+  createdAt: string;
+  organizationId: string;
+  env: string;
+}
+
+export interface ModernProject extends ProjectBase {
+  environments: Environment[];
+}
+
+export interface LegacyProject extends ProjectBase, ServiceCollections {}
+
+export type Project = ModernProject | LegacyProject;
 
 export interface Destination {
   destinationId: string;

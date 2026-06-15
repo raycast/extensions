@@ -1,4 +1,5 @@
 import { bookmarkNote, unbookmarkNote } from "./internal/bookmarks";
+import { renderCallouts } from "./internal/callouts";
 import { appendText, createProperties, deleteNote, Note, writeMarkdown } from "./internal/notes";
 import {
   getVaultsFromPreferences,
@@ -18,11 +19,13 @@ import {
   getCanvasFilePaths,
   ObsidianVault,
 } from "./internal/vault";
+import { getWorkspaces } from "./internal/workspaces";
 import { inlineTagsForString, tagsForString, yamlPropertyForString, yamlTagsForString } from "./internal/yaml";
 
 export type { Note, NoteWithContent } from "./internal/notes";
 export type { ObsidianVault } from "./internal/vault";
 export { ObsidianTargetType } from "./internal/obsidian";
+export type { WorkspacesJson, Workspace } from "./internal/workspaces";
 
 export const Vault = {
   readMarkdown(path: string, filter?: (input: string) => string) {
@@ -90,6 +93,10 @@ export const Vault = {
   appendToNote(note: Note, content: string) {
     appendText(note.path, content);
   },
+
+  getWorkspaces(vaultPath: string, configPath: string) {
+    return getWorkspaces(vaultPath, configPath);
+  },
 };
 
 /**
@@ -119,7 +126,7 @@ export const Obsidian = {
 
 export const ObsidianUtils = {
   createProperties(tags: string[]) {
-    createProperties(tags);
+    return createProperties(tags);
   },
 
   getInlineTags(str: string) {
@@ -136,5 +143,9 @@ export const ObsidianUtils = {
 
   getAllTags(str: string) {
     return tagsForString(str);
+  },
+
+  renderCallouts(str: string) {
+    return renderCallouts(str);
   },
 };

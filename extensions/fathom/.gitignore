@@ -11,5 +11,6 @@ compiled_raycast_rust
 # misc
 .DS_Store
 .vscode
-AGENTS.md
-WARP.md
+.agents/AGENTS.md
+.agents/WARP.md
+CLAUDE.md

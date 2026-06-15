@@ -10,10 +10,12 @@ const getTitle = (name: string, multiplier: number | undefined) => {
   }
 };
 
-export function ModelDropdown(props: {
-  itemProps: Form.ItemProps<string>;
-  onLoadingChange?: (isLoading: boolean) => void;
-}) {
+export function ModelDropdown(
+  props: Readonly<{
+    itemProps: Form.ItemProps<string>;
+    onLoadingChange?: (isLoading: boolean) => void;
+  }>,
+) {
   const { models, isLoading } = useModels();
 
   const { onChange, value, ...restItemProps } = props.itemProps;

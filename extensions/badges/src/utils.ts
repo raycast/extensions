@@ -15,7 +15,7 @@ export const encodeBadgeContentParameters = (params: string[]) =>
   params.map((p) => encodeURIComponent(p.replace(/-/g, "--").replace(/_/g, "__"))).join("-");
 
 export const getTagColor = (active: boolean, activeColor?: Color.ColorLike) =>
-  active ? (activeColor ?? Color.Green) : Color.SecondaryText;
+  active ? (activeColor ?? Color.Blue) : Color.SecondaryText;
 
 export const pickColor = async ({ field }: { field: string }) =>
   crossLaunchCommand(

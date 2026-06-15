@@ -1,7 +1,9 @@
-import { Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { build } from "./preferences";
-import { VSCodeBuild } from "./types";
+import { build } from "./lib/preferences";
+import { VSCodeBuild } from "./lib/types";
+import { isMac, isWin } from "./lib/utils";
+import { getEditorApplication } from "./utils/editor";
 
 /**
  * The index of the `New Window` menu item in the `File` menu.
@@ -11,6 +13,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.Code]: 3,
   [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,
+  [VSCodeBuild.IBMBob]: 3,
   [VSCodeBuild.Kiro]: 3,
   [VSCodeBuild.Positron]: 3,
   [VSCodeBuild.Trae]: 3,
@@ -18,6 +21,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.VSCodium]: 3,
   [VSCodeBuild.VSCodiumInsiders]: 3,
   [VSCodeBuild.Windsurf]: 3,
+  [VSCodeBuild.Lingma]: 3,
 };
 
 /**
@@ -34,7 +38,7 @@ const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
  * However, for Cursor, which does not have a `New File` menu item, `New Window` is in the second position.
  * We need to handle this case specially.
  */
-const makeNewWindow = async () => {
+const makeNewWindowMacOs = async () => {
   await runAppleScript(`
     tell application "${build}"
 	    activate
@@ -61,7 +65,13 @@ const makeNewWindow = async () => {
 export default async function command() {
   try {
     await closeMainWindow();
-    await makeNewWindow();
+    if (isMac) {
+      await makeNewWindowMacOs();
+    }
+    if (isWin) {
+      const editorApp = await getEditorApplication(build);
+      open("", editorApp);
+    }
   } catch (error) {
     await showToast({
       title: "Failed opening new window",

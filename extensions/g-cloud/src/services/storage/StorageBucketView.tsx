@@ -9,6 +9,7 @@ import {
   confirmAlert,
   Form,
   Color,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import StorageObjectsView from "./StorageObjectsView";
@@ -18,10 +19,12 @@ import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
-import { showFailureToast } from "@raycast/utils";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
 import { LogsView } from "../logs-service";
+import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface StorageBucketViewProps {
   projectId: string;
@@ -37,6 +40,7 @@ interface Bucket {
 }
 
 export default function StorageBucketView({ projectId, gcloudPath }: StorageBucketViewProps) {
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isLoading, setIsLoading] = useState(true);
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +50,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     initializeQuickLink(projectId);
 
     fetchBuckets();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   function generateUniqueBucketName(purpose: string = "storage"): string {
     const randomSuffix = Math.random().toString(36).substring(2, 8);
@@ -91,11 +95,8 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         message: `Found ${mappedBuckets.length} buckets`,
       });
     } catch (error: unknown) {
-      setError(`Failed to list buckets: ${error instanceof Error ? error.message : String(error)}`);
-      showFailureToast("Failed to list buckets", {
-        title: "Failed to list buckets",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      const friendly = friendlyErrorMessage(error, "Failed to list buckets");
+      setError(friendly.message);
     } finally {
       setIsLoading(false);
     }
@@ -115,9 +116,10 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       fetchBuckets();
     } catch (error: unknown) {
       console.error("Error creating bucket:", error);
-      showFailureToast("Failed to create bucket", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create bucket",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -154,9 +156,10 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       } catch (error: unknown) {
         console.error("Error deleting bucket:", error);
         deletingToast.hide();
-        showFailureToast("Failed to delete bucket", {
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to delete bucket",
-          message: error instanceof Error ? error.message : String(error),
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
@@ -264,7 +267,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         <Form.Dropdown
           id="location"
           title="Location"
-          defaultValue="us-central1"
+          defaultValue={defaultRegion}
           info="Select the geographic location for your bucket"
         >
           <Form.Dropdown.Section title="Multi-Region">
@@ -299,16 +302,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Buckets"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="storage" onRetry={fetchBuckets} />
       </List>
     );
   }
@@ -333,6 +327,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           <Action title="View Storage Statistics" icon={Icon.BarChart} onAction={() => viewBucketStats("")} />
           <Action title="View Iam Members" icon={Icon.Person} onAction={viewIAMMembers} />
           <Action title="View Iam Members by Principal" icon={Icon.PersonCircle} onAction={viewIAMMembersByPrincipal} />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -345,6 +342,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
             <ActionPanel>
               <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -375,13 +375,13 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
                 <ActionPanel.Section title="Bucket Actions">
                   <Action title="View Objects" icon={Icon.List} onAction={() => viewBucketObjects(bucket.name)} />
                   <Action
-                    title="View Iam Permissions (storage)"
+                    title="View Iam Permissions (Storage)"
                     icon={Icon.Key}
                     onAction={() => viewBucketIAM(bucket.name)}
                   />
-                  <Action title="View Iam Members (storage)" icon={Icon.Person} onAction={() => viewIAMMembers()} />
+                  <Action title="View Iam Members (Storage)" icon={Icon.Person} onAction={() => viewIAMMembers()} />
                   <Action
-                    title="View Iam Members by Principal (storage)"
+                    title="View Iam Members by Principal (Storage)"
                     icon={Icon.PersonCircle}
                     onAction={() => viewIAMMembersByPrincipal()}
                   />
@@ -396,6 +396,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
                   <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
                   <Action title="Delete Bucket" icon={Icon.Trash} onAction={() => deleteBucket(bucket.name)} />
                   <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Cloud Shell">
+                  <CloudShellAction projectId={projectId} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

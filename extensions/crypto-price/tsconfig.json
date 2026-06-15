@@ -3,9 +3,8 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "#/*": ["src/*"]
+      "#/*": ["./src/*"]
     },
     "lib": ["es2021"],
     "module": "commonjs",
@@ -16,6 +15,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "react", "jest"]
   }
 }

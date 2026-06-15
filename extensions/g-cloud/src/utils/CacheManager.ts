@@ -15,16 +15,25 @@ export const CACHE_KEYS = {
   RECENTLY_USED_PROJECTS: "recently-used-projects",
   RECENT_RESOURCES: "recent-resources",
   SERVICE_COUNTS: "service-counts",
+  SERVICE_USAGE: "service-usage",
 };
 
 export const CACHE_TTL = {
-  AUTH: 72 * 60 * 60 * 1000,
-  PROJECT: 72 * 60 * 60 * 1000,
+  AUTH: 6 * 60 * 60 * 1000, // 6 hours
+  PROJECT: 6 * 60 * 60 * 1000, // 6 hours
   PROJECTS_LIST: 6 * 60 * 60 * 1000,
   SERVICE_COUNTS: 5 * 60 * 1000, // 5 minutes
 };
 
-export type ResourceType = "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "logs";
+export type ResourceType =
+  | "compute"
+  | "storage"
+  | "iam"
+  | "network"
+  | "secrets"
+  | "cloudrun"
+  | "cloudfunctions"
+  | "logs";
 
 export interface RecentResource {
   id: string;
@@ -43,6 +52,8 @@ export interface ServiceCounts {
   network: number;
   secrets: number;
   cloudrun: number;
+  cloudfunctions: number;
+  cloudbuild: number;
   timestamp: number;
 }
 
@@ -129,7 +140,14 @@ export class CacheManager {
 
     const cacheLimit = CacheManager.getCacheLimit();
     const recentlyUsedStr = cache.get(CACHE_KEYS.RECENTLY_USED_PROJECTS);
-    let recentlyUsed: string[] = recentlyUsedStr ? JSON.parse(recentlyUsedStr) : [];
+    let recentlyUsed: string[] = [];
+    if (recentlyUsedStr) {
+      try {
+        recentlyUsed = JSON.parse(recentlyUsedStr);
+      } catch {
+        recentlyUsed = [];
+      }
+    }
 
     recentlyUsed = recentlyUsed.filter((id) => id !== projectId);
 
@@ -322,7 +340,7 @@ export class CacheManager {
 
       try {
         const { executeGcloudCommand } = await import("../gcloud");
-        const result = await executeGcloudCommand(gcloudPath, `projects describe ${projectId}`);
+        const result = await executeGcloudCommand(gcloudPath, ["projects", "describe", projectId]);
 
         if (result && Array.isArray(result) && result.length > 0) {
           const projectDetails = result[0];
@@ -510,5 +528,24 @@ export class CacheManager {
       cache.remove(`${CACHE_KEYS.SERVICE_COUNTS}-${projectId}`);
     }
     // Note: Can't clear all service counts without knowing all project IDs
+  }
+
+  // Service usage tracking for sorting services by frequency
+  static trackServiceUsage(serviceId: ResourceType): void {
+    const usage = CacheManager.getServiceUsage();
+    usage[serviceId] = (usage[serviceId] || 0) + 1;
+    cache.set(CACHE_KEYS.SERVICE_USAGE, JSON.stringify(usage));
+  }
+
+  static getServiceUsage(): Record<ResourceType, number> {
+    const usageStr = cache.get(CACHE_KEYS.SERVICE_USAGE);
+    if (!usageStr) {
+      return {} as Record<ResourceType, number>;
+    }
+    try {
+      return JSON.parse(usageStr);
+    } catch {
+      return {} as Record<ResourceType, number>;
+    }
   }
 }

@@ -7,8 +7,9 @@ import {
   Clipboard,
   Icon,
   Keyboard,
+  getFrontmostApplication,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   fetchOpenRouterModels,
   OpenRouterModel,
@@ -21,6 +22,7 @@ export default function FindModels() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [targetAppName, setTargetAppName] = useState("Active App");
 
   async function loadModels(forceRefresh = false) {
     // If not force refresh, try to load cache first
@@ -35,8 +37,8 @@ export default function FindModels() {
           .then((fetchedModels) => {
             setModels(fetchedModels);
           })
-          .catch((error) => {
-            console.error("Background update failed:", error);
+          .catch(() => {
+            // Ignore silent refresh failures and keep cached data visible.
           });
         return;
       }
@@ -87,7 +89,6 @@ export default function FindModels() {
           onAction: () => loadModels(true),
         },
       });
-      console.error("Error loading models:", error);
 
       // Try to use cache if loading fails
       const cachedModels = getCachedModels();
@@ -108,24 +109,65 @@ export default function FindModels() {
     loadModels();
   }, []);
 
-  const filteredModels = models
-    .filter(
-      (model) =>
-        model.id.toLowerCase().includes(searchText.toLowerCase()) ||
-        model.name.toLowerCase().includes(searchText.toLowerCase()),
-    )
-    .sort((a, b) => {
-      // Sort by release date, newest first
-      return b.created - a.created;
+  useEffect(() => {
+    async function loadTargetApp() {
+      try {
+        const application = await getFrontmostApplication();
+        if (application.bundleId === "com.raycast.macos") {
+          return;
+        }
+
+        setTargetAppName(application.localizedName || application.name);
+      } catch {
+        // Keep the generic fallback label when the target app name is unavailable.
+      }
+    }
+
+    loadTargetApp();
+  }, []);
+
+  const fuzzyMatch = (text: string, query: string): boolean => {
+    let queryIndex = 0;
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (text[i] === query[queryIndex]) {
+        queryIndex++;
+      }
+    }
+    return queryIndex === query.length;
+  };
+
+  // Multi-term fuzzy search
+  const filteredModels = useMemo(() => {
+    if (!searchText.trim()) {
+      return [...models].sort((a, b) => b.created - a.created);
+    }
+
+    const searchTerms = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+
+    const filtered = models.filter((model) => {
+      const idLower = model.id.toLowerCase();
+      const nameLower = (model.name || "").toLowerCase();
+
+      // All search terms must fuzzy match in id or name
+      for (const term of searchTerms) {
+        if (!fuzzyMatch(idLower, term) && !fuzzyMatch(nameLower, term)) {
+          return false;
+        }
+      }
+
+      return true;
     });
 
-  async function copyToClipboard(modelId: string) {
+    return filtered.sort((a, b) => b.created - a.created);
+  }, [searchText, models]);
+
+  async function copyToClipboard(value: string, label: string) {
     try {
-      await Clipboard.copy(modelId);
+      await Clipboard.copy(value);
       showToast({
         style: Toast.Style.Success,
         title: "Copied to Clipboard",
-        message: `Model ID: ${modelId}`,
+        message: `${label}: ${value}`,
       });
     } catch {
       showToast({
@@ -155,19 +197,23 @@ export default function FindModels() {
           ]}
           actions={
             <ActionPanel>
+              <Action.Paste
+                title={`Paste Model ID in ${targetAppName}`}
+                content={model.id}
+              />
               <Action
                 title="Copy Model ID"
                 icon={Icon.Clipboard}
-                onAction={() => copyToClipboard(model.id)}
+                onAction={() => copyToClipboard(model.id, "Model ID")}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
               />
               <Action
                 title="Copy Model Name"
                 icon={Icon.Text}
-                onAction={() => copyToClipboard(model.name)}
+                onAction={() => copyToClipboard(model.name, "Model Name")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               />
               <Action.OpenInBrowser
-                // Preserve brand capitalization; ignore title-case rule for brand names
-                // eslint-disable-next-line @raycast/prefer-title-case
                 title="View on OpenRouter"
                 shortcut={Keyboard.Shortcut.Common.Open}
                 url={`https://openrouter.ai/models/${model.id}`}

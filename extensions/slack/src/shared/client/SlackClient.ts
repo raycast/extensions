@@ -1,6 +1,7 @@
 import { Icon, Image } from "@raycast/api";
-import { SlackConversation, SlackMember, getSlackWebClient } from "./WebClient";
+import { getSlackWebClient, SlackConversation, SlackMember } from "./WebClient";
 import { formatRelative } from "date-fns";
+import { Profile } from "@slack/web-api/dist/types/response/UsersProfileGetResponse";
 
 interface Item {
   id: string;
@@ -295,5 +296,83 @@ export class SlackClient {
     const id = authResponse.user_id;
     const username = authResponse.user;
     return { id, username };
+  }
+
+  public static async getUserProfileById(userId: string): Promise<Profile> {
+    const slackWebClient = getSlackWebClient();
+    const result = await slackWebClient.users.profile.get({
+      user: userId,
+    });
+
+    if (!result.profile) {
+      throw new Error(`${userId} does not have a profile.`);
+    }
+
+    return result.profile;
+  }
+
+  public static async getWorkspaceEmojis() {
+    const slackWebClient = getSlackWebClient();
+    const { emoji: rawEmojis } = await slackWebClient.emoji.list();
+
+    if (!rawEmojis) {
+      return {};
+    }
+
+    const resolveAlias = (name: string, visited = new Set()): string | null => {
+      if (visited.has(name)) return null;
+
+      const value = rawEmojis[name];
+      if (!value) return null;
+
+      return value.startsWith("alias:")
+        ? resolveAlias(value.replace("alias:", ""), new Set([...visited, name]))
+        : value;
+    };
+
+    return Object.fromEntries(
+      Object.keys(rawEmojis)
+        .map((key) => [key, resolveAlias(key)] as const)
+        .filter((entry): entry is readonly [string, string] => typeof entry[1] === "string")
+        .map(([key, value]) => [`:${key}:`, value] as const),
+    );
+  }
+
+  public static async setStatus({
+    statusText,
+    emoji,
+    expiration,
+    originProfile,
+  }: {
+    statusText?: string;
+    emoji?: string;
+    expiration?: number;
+    originProfile?: Profile;
+  }) {
+    const slackWebClient = getSlackWebClient();
+
+    const profile = {
+      status_text: originProfile?.status_text,
+      status_emoji: originProfile?.status_emoji,
+      status_expiration: originProfile?.status_expiration,
+    };
+
+    if (statusText !== undefined) {
+      profile.status_text = statusText;
+    }
+
+    if (emoji !== undefined) {
+      profile.status_emoji = emoji;
+    }
+
+    if (expiration !== undefined) {
+      profile.status_expiration = expiration;
+    }
+
+    const result = await slackWebClient.users.profile.set({
+      profile: profile,
+    });
+
+    return result.profile;
   }
 }

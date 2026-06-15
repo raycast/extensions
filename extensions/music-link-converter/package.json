@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "Quentin23Soleil",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "clins1994"
   ],
   "categories": [
     "Media"
@@ -26,20 +27,43 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-providers",
+      "title": "Manage Providers",
+      "description": "Manage the music providers for this extension. You can enable or disable providers, and search for providers.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-providers",
+      "title": "Search Providers",
+      "description": "Returns the list of supported music providers for this extension. The extension supports 12 providers: Spotify, Apple Music, YouTube Music, Amazon Music, YouTube, Deezer, SoundCloud, Tidal, Anghami, iTunes, Yandex Music, and Amazon Store."
+    },
+    {
+      "name": "update-providers",
+      "title": "Update Providers",
+      "description": "Enable or disable music providers. You can reference providers by their name (e.g., 'Spotify', 'Apple Music') or key (e.g., 'spotify', 'appleMusic'). Supports multiple providers at once. Examples: 'disable Spotify and Deezer', 'enable Apple Music', 'disable YouTube Music and Tidal'."
+    },
+    {
+      "name": "convert-music-link",
+      "title": "Convert Music Link",
+      "description": "Converts a music link to other providers. Takes url (required) and providers array (required - extract from user prompt, use [] if user says 'to other providers' or doesn't mention specific providers). When user mentions providers (e.g., 'to Spotify and Apple Music', 'for Deezer', 'convert to YouTube Music'), extract them into providers array. Examples: 'convert [url] to Spotify and Apple Music' → {url: '[url]', providers: ['Spotify', 'Apple Music']}. 'convert [url] to other providers' → {url: '[url]', providers: []}."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "@raycast/utils": "^1.12.0",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -47,5 +71,258 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "@music-link-converter What are the available music providers?",
+        "mocks": {
+          "search-providers": [
+            {
+              "enabled": true,
+              "key": "spotify",
+              "label": "Spotify",
+              "urlPatterns": [
+                "spotify:",
+                "https://open.spotify.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "appleMusic",
+              "label": "Apple Music",
+              "urlPatterns": [
+                "https://music.apple.com/",
+                "https://geo.music.apple.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "youtubeMusic",
+              "label": "Youtube Music",
+              "urlPatterns": [
+                "https://music.youtube.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "amazonMusic",
+              "label": "Amazon Music",
+              "urlPatterns": [
+                "https://music.amazon.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "youtube",
+              "label": "Youtube",
+              "urlPatterns": [
+                "https://www.youtube.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "deezer",
+              "label": "Deezer",
+              "urlPatterns": [
+                "https://www.deezer.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "soundcloud",
+              "label": "Soundcloud",
+              "urlPatterns": [
+                "https://www.soundcloud.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "tidal",
+              "label": "Tidal",
+              "urlPatterns": [
+                "https://listen.tidal.com/",
+                "https://tidal.com/"
+              ]
+            },
+            {
+              "enabled": true,
+              "key": "anghami",
+              "label": "Anghami",
+              "urlPatterns": [
+                "https://play.anghami.com/"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "search-providers"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@music-link-converter Disable Deezer, Tidal and Anghami providers",
+        "mocks": {
+          "update-providers": {
+            "notFound": [],
+            "success": true,
+            "updated": [
+              {
+                "enabled": false,
+                "key": "deezer",
+                "label": "Deezer"
+              },
+              {
+                "enabled": false,
+                "key": "tidal",
+                "label": "Tidal"
+              },
+              {
+                "enabled": false,
+                "key": "anghami",
+                "label": "Anghami"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "action": "disable",
+                "providers": {
+                  "eq": [
+                    "Deezer",
+                    "Tidal",
+                    "Anghami"
+                  ]
+                }
+              },
+              "name": "update-providers"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@music-link-converter Convert this link https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+        "mocks": {
+          "convert-music-link": [
+            {
+              "label": "Spotify",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
+                "nativeAppUriDesktop": "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
+                "url": "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
+              }
+            },
+            {
+              "label": "Apple Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "ITUNES_SONG::1739659141",
+                "nativeAppUriDesktop": "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
+                "nativeAppUriMobile": "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
+                "url": "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
+              }
+            },
+            {
+              "label": "Youtube Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "YOUTUBE_VIDEO::zYEKeEOKNi0",
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0"
+              }
+            },
+            {
+              "label": "Amazon Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "AMAZON_SONG::B0CZVV137Q",
+                "url": "https://music.amazon.com/albums/B0CZVW38Y1?trackAsin=B0CZVV137Q"
+              }
+            },
+            {
+              "label": "Youtube",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "YOUTUBE_VIDEO::zYEKeEOKNi0",
+                "url": "https://www.youtube.com/watch?v=zYEKeEOKNi0"
+              }
+            },
+            {
+              "label": "Soundcloud",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SOUNDCLOUD_SONG::1822834335",
+                "url": "https://soundcloud.com/billieeilish/chihiro?utm_medium=api&utm_campaign=social_sharing&utm_source=id_314547"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+                "providers": []
+              },
+              "name": "convert-music-link"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@music-link-converter Convert this link to Spotify and Apple Music https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw",
+        "mocks": {
+          "convert-music-link": [
+            {
+              "label": "Spotify",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "SPOTIFY_SONG::7BRD7x5pt8Lqa1eGYC4dzj",
+                "nativeAppUriDesktop": "spotify:track:7BRD7x5pt8Lqa1eGYC4dzj",
+                "url": "https://open.spotify.com/track/7BRD7x5pt8Lqa1eGYC4dzj"
+              }
+            },
+            {
+              "label": "Apple Music",
+              "link": {
+                "country": "US",
+                "entityUniqueId": "ITUNES_SONG::1739659141",
+                "nativeAppUriDesktop": "itmss://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_d&itscg=30200&itsct=odsl_m",
+                "nativeAppUriMobile": "music://itunes.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_uri_m&itscg=30200&itsct=odsl_m",
+                "url": "https://geo.music.apple.com/us/album/_/1739659134?i=1739659141&mt=1&app=music&ls=1&at=1000lHKX&ct=api_http&itscg=30200&itsct=odsl_m"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "providers": {
+                  "eq": [
+                    "Spotify",
+                    "Apple Music"
+                  ]
+                },
+                "url": "https://music.youtube.com/watch?v=zYEKeEOKNi0&si=mtD07UrhLG4yj0Pw"
+              },
+              "name": "convert-music-link"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

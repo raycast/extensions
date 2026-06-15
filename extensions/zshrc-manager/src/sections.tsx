@@ -1,18 +1,19 @@
-import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import type React from "react";
 import { useState } from "react";
-import type { ReactElement } from "react";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { getZshrcPath } from "./lib/zsh";
 import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
 import { SectionDetail } from "./section-detail";
 import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { generateSectionAccessories, calculateTotalEntries } from "./utils/section-accessories";
+import BrowseAliases from "./browse-aliases";
 
 /**
  * Sections management command for zshrc content
  */
 interface SectionsProps {
-  searchBarAccessory?: ReactElement | null;
+  searchBarAccessory?: React.ReactElement;
 }
 
 export default function Sections({ searchBarAccessory }: SectionsProps) {
@@ -27,9 +28,8 @@ export default function Sections({ searchBarAccessory }: SectionsProps) {
   return (
     <List
       navigationTitle="Sections"
-      searchBarPlaceholder="Search sections..."
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      searchBarAccessory={searchBarAccessory as ReactElement<any> | undefined}
+      searchBarPlaceholder="Search Sections..."
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       isShowingDetail={true}
@@ -48,7 +48,7 @@ export default function Sections({ searchBarAccessory }: SectionsProps) {
       <List.Section title="Overview">
         <List.Item
           title="Section Summary"
-          subtitle={`${sections.length} total sections (${labeledSections.length} labeled, ${unlabeledSections.length} unlabeled)`}
+          subtitle={`${sections.length}`}
           icon={{ source: Icon.Folder, tintColor: MODERN_COLORS.primary }}
           detail={
             <List.Item.Detail
@@ -134,6 +134,12 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                       target={<SectionDetail section={section} />}
                       icon={Icon.Eye}
                     />
+                    <Action.Push
+                      title="Browse Related Aliases"
+                      target={<BrowseAliases filterBySection={section.label} />}
+                      icon={Icon.Book}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    />
                     <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                     <Action
                       title="Refresh"
@@ -212,6 +218,14 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
             );
           })}
         </List.Section>
+      )}
+
+      {filteredSections.length === 0 && !isLoading && (
+        <List.EmptyView
+          title="No Sections Found"
+          description={searchText ? "Try a different search term" : "Your zshrc file appears to be empty"}
+          icon={{ source: Icon.Folder, tintColor: MODERN_COLORS.neutral }}
+        />
       )}
     </List>
   );

@@ -5,6 +5,9 @@
   "description": "Self-hosted photo and video management solution",
   "icon": "immich_new.png",
   "author": "xmok",
+  "contributors": [
+    "julien-wff"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -29,6 +32,14 @@
       "description": "Immich API Key",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "download_folder",
+      "title": "Download Folder",
+      "placeholder": "~/Downloads",
+      "description": "Folder to save photos and videos. Default is the system's Downloads folder.",
+      "type": "directory",
+      "required": false
     }
   ],
   "commands": [

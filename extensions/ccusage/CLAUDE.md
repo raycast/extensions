@@ -17,6 +17,7 @@ ccusage CLI tool → useCCUsage*Cli hooks → use*Usage hooks → Pure Functions
 ```
 
 #### Hook Layer Separation
+
 - **CLI Layer**: Direct command execution (`useCCUsageDailyCli`, `useCCUsageMonthlyCli`, etc.)
 - **Data Layer**: Data transformation and business logic (`useDailyUsage`, `useMonthlyUsage`, etc.)
 - **Availability Layer**: System dependency checking (`useCCUsageAvailability`)
@@ -111,14 +112,16 @@ The extension uses `date +%Y-%m-%d` command via `useCurrentDate` hook for simpli
 Each major UI section is a focused component with shared common utilities:
 
 #### Core Components
+
 - `DailyUsage`: Today's usage with intensity visualization
-- `SessionUsage`: Recent sessions with model-specific icons  
+- `SessionUsage`: Recent sessions with model-specific icons
 - `CostAnalysis`: Cost breakdown and projections with inline calculations
 - `ModelBreakdown`: Model-wise usage analysis with tier grouping
 - `ErrorState`: Initial configuration guidance for ccusage setup
 - `ErrorMetadata`: Error state metadata and categorization handling
 
 #### Common Utilities
+
 - `StandardActions`: Shared external link and action management
 - `accessories`: Standardized accessory configurations for consistent UI patterns
 
@@ -189,7 +192,7 @@ src/
 #### Pre-Modification Investigation
 
 - **Impact Analysis**: Comprehensive search to identify all affected files and usage patterns
-- **Dependency Mapping**: Create relationship maps for schemas, types, and cross-file dependencies  
+- **Dependency Mapping**: Create relationship maps for schemas, types, and cross-file dependencies
 - **Test Strategy**: Plan validation approach before beginning modifications
 - **Scope Documentation**: Document expected changes with concrete examples
 
@@ -258,11 +261,17 @@ src/
 ```typescript
 // ❌ Over-abstracted
 const getTrendIcon = (): Icon => Icon.Calendar;
-const useStandardAccessories = (error, data, formatter, icon) => { /* logic */ };
+const useStandardAccessories = (error, data, formatter, icon) => {
+  /* logic */
+};
 
 // ✅ Direct and clear
 const icon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
-const accessories = error ? STANDARD_ACCESSORIES.ERROR : !data ? STANDARD_ACCESSORIES.NO_DATA : [{ text: formatCost(data.cost), icon: Icon.Coins }];
+const accessories = error
+  ? STANDARD_ACCESSORIES.ERROR
+  : !data
+    ? STANDARD_ACCESSORIES.NO_DATA
+    : [{ text: formatCost(data.cost), icon: Icon.Coins }];
 
 // ❌ Centralized config far from usage
 // utils/component-config.ts
@@ -271,7 +280,7 @@ export const CONFIGS = { daily: { message: "..." } };
 // ✅ Colocated with usage
 // components/DailyUsage.tsx
 const externalLinks: ExternalLink[] = [
-  { title: "View CCUsage Repository", url: "https://github.com/...", icon: Icon.Code }
+  { title: "View CCUsage Repository", url: "https://github.com/...", icon: Icon.Code },
 ];
 ```
 
@@ -324,6 +333,7 @@ The extension includes a simplified preference system for user customization:
 - **No Debug Code**: Remove console.log statements before commits
 
 ### Quality Verification Commands
+
 ```bash
 # Complete quality check pipeline
 npm run typecheck && npm run lint && npm run build
@@ -350,3 +360,7 @@ Before committing React component changes:
 - **Under Development**: Extension is actively being developed with experimental features
 - **Unofficial**: Not affiliated with Anthropic or ccusage maintainers
 - **Raycast Store**: Use `npm run publish` to submit to Raycast Store (not npm publish)
+
+## Conventions
+
+- **Changelog dates**: Use `{PR_MERGE_DATE}` as the date placeholder in `CHANGELOG.md` entries. The Raycast extensions repo tooling substitutes it automatically when the PR is merged.

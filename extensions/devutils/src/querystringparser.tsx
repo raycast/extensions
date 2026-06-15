@@ -1,6 +1,5 @@
-import { open } from "@raycast/api";
+import { openDevUtilsTool } from "./open-devutils";
 
 export default async () => {
-  const url = "devutils://querystringparser?clipboard";
-  open(url);
+  await openDevUtilsTool("querystringparser");
 };

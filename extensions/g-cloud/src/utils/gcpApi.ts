@@ -22,6 +22,7 @@ export const IAM_API = "https://iam.googleapis.com/v1";
 export const CRM_API = "https://cloudresourcemanager.googleapis.com/v1";
 export const SECRETS_API = "https://secretmanager.googleapis.com/v1";
 export const CLOUDRUN_API = "https://run.googleapis.com/v2";
+export const CLOUDFUNCTIONS_API = "https://cloudfunctions.googleapis.com/v2";
 export const LOGGING_API = "https://logging.googleapis.com/v2";
 
 // Persistent cache for token (survives extension reloads)
@@ -228,16 +229,22 @@ export async function listComputeInstances(
   gcloudPath: string,
   projectId: string,
   zone?: string,
+  options?: { fields?: string; maxResults?: number },
 ): Promise<ComputeInstance[]> {
+  const params = new URLSearchParams();
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+
   if (zone) {
     // Single zone query
-    const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances`;
+    const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances${qs}`;
     const response = await gcpFetch<InstanceListResponse>(gcloudPath, url);
     return response.items || [];
   }
 
   // Aggregated query (all zones)
-  const url = `${COMPUTE_API}/projects/${projectId}/aggregated/instances`;
+  const url = `${COMPUTE_API}/projects/${projectId}/aggregated/instances${qs}`;
   const response = await gcpFetch<AggregatedInstancesResponse>(gcloudPath, url);
 
   const instances: ComputeInstance[] = [];
@@ -350,8 +357,15 @@ export interface StorageBucket {
   };
 }
 
-export async function listStorageBuckets(gcloudPath: string, projectId: string): Promise<StorageBucket[]> {
-  const url = `${STORAGE_API}/b?project=${projectId}`;
+export async function listStorageBuckets(
+  gcloudPath: string,
+  projectId: string,
+  options?: { fields?: string; maxResults?: number },
+): Promise<StorageBucket[]> {
+  const params = new URLSearchParams({ project: projectId });
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const url = `${STORAGE_API}/b?${params.toString()}`;
   const response = await gcpFetch<{ items?: StorageBucket[] }>(gcloudPath, url);
   return response.items || [];
 }
@@ -460,8 +474,16 @@ export interface VpcNetwork {
   mtu?: number;
 }
 
-export async function listVpcNetworks(gcloudPath: string, projectId: string): Promise<VpcNetwork[]> {
-  const url = `${COMPUTE_API}/projects/${projectId}/global/networks`;
+export async function listVpcNetworks(
+  gcloudPath: string,
+  projectId: string,
+  options?: { fields?: string; maxResults?: number },
+): Promise<VpcNetwork[]> {
+  const params = new URLSearchParams();
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${COMPUTE_API}/projects/${projectId}/global/networks${qs}`;
   const response = await gcpFetch<{ items?: VpcNetwork[] }>(gcloudPath, url);
   return response.items || [];
 }
@@ -576,8 +598,15 @@ export interface Secret {
   };
 }
 
-export async function listSecrets(gcloudPath: string, projectId: string): Promise<Secret[]> {
-  const url = `${SECRETS_API}/projects/${projectId}/secrets`;
+export async function listSecrets(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<Secret[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${SECRETS_API}/projects/${projectId}/secrets${qs}`;
   const response = await gcpFetch<{ secrets?: Secret[] }>(gcloudPath, url);
   return response.secrets || [];
 }
@@ -750,9 +779,16 @@ export interface CloudRunRevision {
   service?: string;
 }
 
-export async function listCloudRunServices(gcloudPath: string, projectId: string): Promise<CloudRunService[]> {
+export async function listCloudRunServices(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<CloudRunService[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
   // Use "-" for location to list from all regions
-  const url = `${CLOUDRUN_API}/projects/${projectId}/locations/-/services`;
+  const url = `${CLOUDRUN_API}/projects/${projectId}/locations/-/services${qs}`;
   const response = await gcpFetch<{ services?: CloudRunService[] }>(gcloudPath, url);
   return response.services || [];
 }
@@ -993,3 +1029,577 @@ export const LOG_RESOURCE_TYPES = [
   { value: "bigquery_resource", label: "BigQuery" },
   { value: "pubsub_topic", label: "Pub/Sub" },
 ] as const;
+
+// ============================================================================
+// Cloud Build API
+// ============================================================================
+
+export const CLOUDBUILD_API = "https://cloudbuild.googleapis.com/v1";
+
+export type BuildStatus =
+  | "STATUS_UNKNOWN"
+  | "PENDING"
+  | "QUEUED"
+  | "WORKING"
+  | "SUCCESS"
+  | "FAILURE"
+  | "INTERNAL_ERROR"
+  | "TIMEOUT"
+  | "CANCELLED"
+  | "EXPIRED";
+
+export interface BuildStep {
+  name: string;
+  args?: string[];
+  env?: string[];
+  dir?: string;
+  id?: string;
+  waitFor?: string[];
+  entrypoint?: string;
+  timeout?: string;
+  status?: BuildStatus;
+  timing?: {
+    startTime?: string;
+    endTime?: string;
+  };
+}
+
+export interface BuildTrigger {
+  id: string;
+  name: string;
+  description?: string;
+  disabled?: boolean;
+  createTime: string;
+  substitutions?: Record<string, string>;
+  filename?: string;
+  includedFiles?: string[];
+  ignoredFiles?: string[];
+  triggerTemplate?: {
+    projectId?: string;
+    repoName?: string;
+    branchName?: string;
+    tagName?: string;
+  };
+  github?: {
+    owner?: string;
+    name?: string;
+    push?: { branch?: string; tag?: string };
+    pullRequest?: { branch?: string };
+  };
+  sourceToBuild?: {
+    uri: string;
+    ref: string;
+    repoType: "GITHUB" | "CLOUD_SOURCE_REPOSITORIES" | "BITBUCKET_SERVER" | "GITLAB";
+  };
+  tags?: string[];
+}
+
+export interface Build {
+  id: string;
+  projectId: string;
+  status: BuildStatus;
+  statusDetail?: string;
+  source?: {
+    storageSource?: {
+      bucket: string;
+      object: string;
+      generation?: string;
+    };
+    repoSource?: {
+      projectId?: string;
+      repoName?: string;
+      branchName?: string;
+      tagName?: string;
+      commitSha?: string;
+    };
+    gitSource?: {
+      url: string;
+      revision?: string;
+    };
+  };
+  steps?: BuildStep[];
+  results?: {
+    images?: Array<{ name: string; digest: string }>;
+    buildStepImages?: string[];
+    artifactManifest?: string;
+  };
+  createTime: string;
+  startTime?: string;
+  finishTime?: string;
+  timeout?: string;
+  logUrl?: string;
+  logsBucket?: string;
+  options?: {
+    machineType?: string;
+    diskSizeGb?: string;
+    logging?: string;
+  };
+  substitutions?: Record<string, string>;
+  tags?: string[];
+  buildTriggerId?: string;
+}
+
+export interface BuildOperation {
+  name: string;
+  done: boolean;
+  metadata?: {
+    "@type": string;
+    build?: Build;
+  };
+  response?: Build;
+  error?: {
+    code: number;
+    message: string;
+  };
+}
+
+export async function listBuildTriggers(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<BuildTrigger[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/triggers${qs}`;
+  const response = await gcpFetch<{ triggers?: BuildTrigger[] }>(gcloudPath, url);
+  return response.triggers || [];
+}
+
+export async function getBuildTrigger(gcloudPath: string, projectId: string, triggerId: string): Promise<BuildTrigger> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/triggers/${triggerId}`;
+  return gcpFetch<BuildTrigger>(gcloudPath, url);
+}
+
+export interface CreateBuildTriggerRequest {
+  name: string;
+  description?: string;
+  github?: {
+    owner: string;
+    name: string;
+    push?: { branch: string };
+    pullRequest?: { branch: string };
+  };
+  triggerTemplate?: {
+    projectId?: string;
+    repoName?: string;
+    branchName?: string;
+    tagName?: string;
+  };
+  filename?: string;
+  build?: {
+    steps: BuildStep[];
+    images?: string[];
+    timeout?: string;
+  };
+  substitutions?: Record<string, string>;
+  includedFiles?: string[];
+  ignoredFiles?: string[];
+  disabled?: boolean;
+  tags?: string[];
+}
+
+export async function createBuildTrigger(
+  gcloudPath: string,
+  projectId: string,
+  trigger: CreateBuildTriggerRequest,
+  location: string = "global",
+): Promise<BuildTrigger> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/locations/${location}/triggers`;
+  return gcpPost<BuildTrigger>(gcloudPath, url, trigger);
+}
+
+export async function deleteBuildTrigger(
+  gcloudPath: string,
+  projectId: string,
+  triggerId: string,
+  location: string = "global",
+): Promise<void> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/locations/${location}/triggers/${triggerId}`;
+  await gcpFetch<Record<string, never>>(gcloudPath, url, { method: "DELETE" });
+}
+
+export async function updateBuildTrigger(
+  gcloudPath: string,
+  projectId: string,
+  triggerId: string,
+  trigger: Partial<CreateBuildTriggerRequest>,
+  location: string = "global",
+): Promise<BuildTrigger> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/locations/${location}/triggers/${triggerId}`;
+  return gcpFetch<BuildTrigger>(gcloudPath, url, {
+    method: "PATCH",
+    body: JSON.stringify(trigger),
+  });
+}
+
+export async function runBuildTrigger(
+  gcloudPath: string,
+  projectId: string,
+  triggerId: string,
+  options?: {
+    branchName?: string;
+    tagName?: string;
+    commitSha?: string;
+    substitutions?: Record<string, string>;
+  },
+): Promise<BuildOperation> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/triggers/${triggerId}:run`;
+  const body: {
+    projectId: string;
+    triggerId: string;
+    source?: {
+      branchName?: string;
+      tagName?: string;
+      commitSha?: string;
+    };
+    substitutions?: Record<string, string>;
+  } = {
+    projectId,
+    triggerId,
+  };
+
+  if (options?.branchName || options?.tagName || options?.commitSha) {
+    body.source = {};
+    if (options.branchName) body.source.branchName = options.branchName;
+    if (options.tagName) body.source.tagName = options.tagName;
+    if (options.commitSha) body.source.commitSha = options.commitSha;
+  }
+
+  if (options?.substitutions) {
+    body.substitutions = options.substitutions;
+  }
+
+  return gcpPost<BuildOperation>(gcloudPath, url, body);
+}
+
+export interface ListBuildsOptions {
+  pageSize?: number;
+  pageToken?: string;
+  filter?: string;
+}
+
+export async function listBuilds(
+  gcloudPath: string,
+  projectId: string,
+  options?: ListBuildsOptions,
+): Promise<{ builds: Build[]; nextPageToken?: string }> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  if (options?.pageToken) params.set("pageToken", options.pageToken);
+  if (options?.filter) params.set("filter", options.filter);
+
+  const queryString = params.toString();
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/builds${queryString ? `?${queryString}` : ""}`;
+  const response = await gcpFetch<{ builds?: Build[]; nextPageToken?: string }>(gcloudPath, url);
+  return {
+    builds: response.builds || [],
+    nextPageToken: response.nextPageToken,
+  };
+}
+
+export async function getBuild(gcloudPath: string, projectId: string, buildId: string): Promise<Build> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/builds/${buildId}`;
+  return gcpFetch<Build>(gcloudPath, url);
+}
+
+export async function cancelBuild(gcloudPath: string, projectId: string, buildId: string): Promise<Build> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/builds/${buildId}:cancel`;
+  return gcpPost<Build>(gcloudPath, url, {});
+}
+
+export interface CreateBuildConfig {
+  source?: {
+    storageSource?: { bucket: string; object: string };
+    repoSource?: {
+      projectId?: string;
+      repoName?: string;
+      branchName?: string;
+      tagName?: string;
+      commitSha?: string;
+    };
+    gitSource?: { url: string; revision?: string };
+  };
+  steps?: BuildStep[];
+  timeout?: string;
+  substitutions?: Record<string, string>;
+  tags?: string[];
+}
+
+export async function createBuild(
+  gcloudPath: string,
+  projectId: string,
+  config: CreateBuildConfig,
+): Promise<BuildOperation> {
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/builds`;
+  return gcpPost<BuildOperation>(gcloudPath, url, config);
+}
+
+// ============================================================================
+// GKE (Google Kubernetes Engine) API
+// ============================================================================
+
+export const GKE_API = "https://container.googleapis.com/v1";
+
+export interface GKENodePool {
+  name: string;
+  status: string;
+  config?: {
+    machineType: string;
+    diskSizeGb: number;
+    diskType?: string;
+    imageType?: string;
+  };
+  initialNodeCount: number;
+  autoscaling?: {
+    enabled: boolean;
+    minNodeCount: number;
+    maxNodeCount: number;
+  };
+  management?: {
+    autoUpgrade: boolean;
+    autoRepair: boolean;
+  };
+  version?: string;
+}
+
+export interface GKECluster {
+  name: string;
+  location: string;
+  status: string;
+  currentMasterVersion: string;
+  currentNodeVersion?: string;
+  currentNodeCount: number;
+  endpoint: string;
+  createTime: string;
+  network: string;
+  subnetwork: string;
+  nodePools?: GKENodePool[];
+  ipAllocationPolicy?: {
+    useIpAliases: boolean;
+    clusterIpv4CidrBlock?: string;
+    servicesIpv4CidrBlock?: string;
+  };
+  masterAuthorizedNetworksConfig?: {
+    enabled: boolean;
+  };
+  privateClusterConfig?: {
+    enablePrivateNodes: boolean;
+    enablePrivateEndpoint: boolean;
+  };
+  releaseChannel?: {
+    channel: "UNSPECIFIED" | "RAPID" | "REGULAR" | "STABLE";
+  };
+}
+
+export async function listGKEClusters(gcloudPath: string, projectId: string): Promise<GKECluster[]> {
+  const url = `${GKE_API}/projects/${projectId}/locations/-/clusters`;
+  const response = await gcpFetch<{ clusters?: GKECluster[] }>(gcloudPath, url);
+  return response.clusters || [];
+}
+
+export async function getGKECluster(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  clusterName: string,
+): Promise<GKECluster> {
+  const url = `${GKE_API}/projects/${projectId}/locations/${location}/clusters/${clusterName}`;
+  return gcpFetch<GKECluster>(gcloudPath, url);
+}
+
+export async function listGKENodePools(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  clusterName: string,
+): Promise<GKENodePool[]> {
+  const url = `${GKE_API}/projects/${projectId}/locations/${location}/clusters/${clusterName}/nodePools`;
+  const response = await gcpFetch<{ nodePools?: GKENodePool[] }>(gcloudPath, url);
+  return response.nodePools || [];
+}
+
+export interface GKEWorkload {
+  name: string;
+  namespace: string;
+  kind: "Deployment" | "StatefulSet" | "DaemonSet" | "Job" | "CronJob" | "Pod";
+  replicas?: {
+    desired: number;
+    ready: number;
+    available?: number;
+  };
+  images: string[];
+  creationTimestamp: string;
+  status?: string;
+}
+
+// Note: Workload listing requires kubectl or Kubernetes API directly
+// This is a placeholder for future implementation using kubectl commands
+export async function getGKECredentials(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  clusterName: string,
+): Promise<void> {
+  const quotedPath = gcloudPath.includes(" ") ? `"${gcloudPath}"` : gcloudPath;
+  await execPromise(
+    `${quotedPath} container clusters get-credentials ${clusterName} --zone=${location} --project=${projectId}`,
+    { timeout: 30000 },
+  );
+}
+
+// ============================================================================
+// Cloud Functions v2 API
+// ============================================================================
+
+export type CloudFunctionState = "ACTIVE" | "FAILED" | "DEPLOYING" | "DELETING" | "UNKNOWN" | "STATE_UNSPECIFIED";
+
+export interface CloudFunction {
+  /** Full resource name: projects/{project}/locations/{location}/functions/{function} */
+  name: string;
+  /** User-provided description */
+  description?: string;
+  /** Current state of the function */
+  state: CloudFunctionState;
+  /** Build configuration */
+  buildConfig?: {
+    runtime?: string;
+    entryPoint?: string;
+    source?: {
+      storageSource?: {
+        bucket: string;
+        object: string;
+        generation?: string;
+      };
+      repoSource?: {
+        projectId?: string;
+        repoName?: string;
+        branchName?: string;
+        tagName?: string;
+        commitSha?: string;
+        dir?: string;
+      };
+    };
+    workerPool?: string;
+    environmentVariables?: Record<string, string>;
+    dockerRepository?: string;
+  };
+  /** Service configuration (runtime settings) */
+  serviceConfig?: {
+    uri?: string;
+    service?: string;
+    serviceAccountEmail?: string;
+    timeoutSeconds?: number;
+    availableMemory?: string;
+    availableCpu?: string;
+    minInstanceCount?: number;
+    maxInstanceCount?: number;
+    maxInstanceRequestConcurrency?: number;
+    environmentVariables?: Record<string, string>;
+    secretEnvironmentVariables?: Array<{
+      key: string;
+      projectId?: string;
+      secret: string;
+      version?: string;
+    }>;
+    vpcConnector?: string;
+    vpcConnectorEgressSettings?: string;
+    ingressSettings?: string;
+    allTrafficOnLatestRevision?: boolean;
+    revision?: string;
+  };
+  /** Event trigger configuration (for non-HTTP triggers) */
+  eventTrigger?: {
+    trigger?: string;
+    triggerRegion?: string;
+    eventType?: string;
+    pubsubTopic?: string;
+    serviceAccountEmail?: string;
+    retryPolicy?: string;
+    eventFilters?: Array<{
+      attribute: string;
+      value: string;
+      operator?: string;
+    }>;
+    channel?: string;
+  };
+  labels?: Record<string, string>;
+  createTime?: string;
+  updateTime?: string;
+  url?: string;
+  kmsKeyName?: string;
+  environment?: string;
+  satisfiesPzs?: boolean;
+  upgradeInfo?: {
+    upgradeState?: string;
+  };
+}
+
+/**
+ * List all Cloud Functions in a project
+ * Use "-" for location to list from all regions
+ */
+export async function listCloudFunctions(
+  gcloudPath: string,
+  projectId: string,
+  location?: string,
+  options?: { pageSize?: number },
+): Promise<CloudFunction[]> {
+  const loc = location || "-";
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${CLOUDFUNCTIONS_API}/projects/${projectId}/locations/${loc}/functions${qs}`;
+  const response = await gcpFetch<{ functions?: CloudFunction[] }>(gcloudPath, url);
+  return response.functions || [];
+}
+
+/**
+ * Get a specific Cloud Function
+ */
+export async function getCloudFunction(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  functionName: string,
+): Promise<CloudFunction> {
+  const url = `${CLOUDFUNCTIONS_API}/projects/${projectId}/locations/${location}/functions/${functionName}`;
+  return gcpFetch<CloudFunction>(gcloudPath, url);
+}
+
+/**
+ * Delete a Cloud Function
+ */
+export async function deleteCloudFunction(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  functionName: string,
+): Promise<void> {
+  const url = `${CLOUDFUNCTIONS_API}/projects/${projectId}/locations/${location}/functions/${functionName}`;
+  await gcpDelete(gcloudPath, url);
+}
+
+/**
+ * Invoke an HTTP-triggered Cloud Function
+ * Note: This calls the function's HTTP URL directly
+ */
+export async function invokeCloudFunction(
+  gcloudPath: string,
+  functionUrl: string,
+  data?: unknown,
+): Promise<{ statusCode: number; body: string }> {
+  const token = await getAccessToken(gcloudPath);
+
+  const response = await fetch(functionUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+  const body = await response.text();
+  return { statusCode: response.status, body };
+}

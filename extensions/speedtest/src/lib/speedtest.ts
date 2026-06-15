@@ -127,48 +127,77 @@ export function runSpeedTest(
     }
   });
 
-  pro.stdout.on("data", (data: string) => {
-    try {
-      const speedtestEventData = JSON.parse(data) as SpeedtestResultResponse;
-      const { type } = speedtestEventData;
+  const handleSpeedtestEvent = (speedtestEventData: SpeedtestResultResponse) => {
+    const { type } = speedtestEventData;
 
-      if (type) {
-        if (type === "download" || type === "upload") {
-          const speed = speedtestEventData[type];
-          result[type] = speed;
+    if (type) {
+      if (type === "download" || type === "upload") {
+        const speed = speedtestEventData[type];
+        result[type] = speed;
 
-          sendProgress(type, speed.progress);
-          partialUpdateCallback(result);
-        } else if (type === "testStart") {
-          result.interface = {
-            isp: speedtestEventData.isp,
-            ...speedtestEventData.interface,
-          };
-          result.isp = speedtestEventData.isp;
-          result.server = speedtestEventData.server;
+        sendProgress(type, speed.progress);
+        partialUpdateCallback(result);
+      } else if (type === "testStart") {
+        result.interface = {
+          isp: speedtestEventData.isp,
+          ...speedtestEventData.interface,
+        };
+        result.isp = speedtestEventData.isp;
+        result.server = speedtestEventData.server;
 
-          partialUpdateCallback(result);
-        } else if (type === "ping") {
-          result.ping = speedtestEventData.ping;
+        partialUpdateCallback(result);
+      } else if (type === "ping") {
+        result.ping = speedtestEventData.ping;
 
-          partialUpdateCallback(result);
-          sendProgress(type, speedtestEventData.ping.progress);
-        } else if (type === "result") {
-          result.ping = speedtestEventData.ping;
-          result.download = speedtestEventData.download;
-          result.upload = speedtestEventData.upload;
-          result.interface = {
-            isp: speedtestEventData.isp,
-            ...speedtestEventData.interface,
-          };
+        partialUpdateCallback(result);
+        sendProgress(type, speedtestEventData.ping.progress);
+      } else if (type === "result") {
+        result.ping = speedtestEventData.ping;
+        result.download = speedtestEventData.download;
+        result.upload = speedtestEventData.upload;
+        result.interface = {
+          isp: speedtestEventData.isp,
+          ...speedtestEventData.interface,
+        };
 
-          result.result = speedtestEventData.result;
+        result.result = speedtestEventData.result;
 
-          resultCallback(result);
-          progressCallback({ download: undefined, upload: undefined, ping: undefined });
-        }
+        resultCallback(result);
+        progressCallback({ download: undefined, upload: undefined, ping: undefined });
       }
-    } catch (error) {
+    }
+  };
+
+  let stdoutBuffer = "";
+
+  pro.stdout.on("data", (data: Buffer) => {
+    stdoutBuffer += data.toString();
+    const lines = stdoutBuffer.split(/\r?\n/);
+    stdoutBuffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
+      }
+
+      try {
+        handleSpeedtestEvent(JSON.parse(line) as SpeedtestResultResponse);
+      } catch {
+        errorCallback(Error("Could not read data from Speedtest"));
+        return;
+      }
+    }
+  });
+
+  pro.stdout.on("end", () => {
+    const line = stdoutBuffer.trim();
+    if (!line) {
+      return;
+    }
+
+    try {
+      handleSpeedtestEvent(JSON.parse(line) as SpeedtestResultResponse);
+    } catch {
       errorCallback(Error("Could not read data from Speedtest"));
     }
   });

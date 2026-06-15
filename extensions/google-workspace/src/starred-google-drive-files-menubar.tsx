@@ -1,4 +1,4 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, launchCommand, open, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getStarredFiles } from "./api/getFiles";
 import { withGoogleAuth } from "./components/withGoogleAuth";
@@ -6,6 +6,7 @@ import { createDocFromUrl } from "./helpers/docs";
 import { getFileIconLink } from "./helpers/files";
 
 function StarredFiles() {
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
   const { data, isLoading } = useCachedPromise(async () => {
     try {
       return await getStarredFiles();
@@ -27,7 +28,7 @@ function StarredFiles() {
             <MenuBarExtra.Item
               title="Open Starred Files in Google Drive"
               icon="google-drive.png"
-              onAction={() => open("https://drive.google.com/drive/starred", "com.google.Chrome")}
+              onAction={() => open("https://drive.google.com/drive/starred", preferredBrowser || undefined)}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               alternate={
                 <MenuBarExtra.Item
@@ -47,7 +48,7 @@ function StarredFiles() {
                 icon={getFileIconLink(file.mimeType)}
                 onAction={() => {
                   console.log(file);
-                  open(file.webViewLink);
+                  open(file.webViewLink, preferredBrowser || undefined);
                 }}
               />
             ))}

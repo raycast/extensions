@@ -11,9 +11,9 @@ import {
   Form,
   confirmAlert,
   Alert,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { showFailureToast } from "@raycast/utils";
 import {
   listCloudRunServices,
   listCloudRunRevisions,
@@ -26,6 +26,9 @@ import {
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
+import { ApiErrorView } from "../../components/ApiErrorView";
+import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 const CLOUD_RUN_REGIONS = [
   { value: "us-central1", title: "Iowa (us-central1)" },
@@ -94,10 +97,8 @@ export default function CloudRunView({ projectId, gcloudPath }: CloudRunViewProp
       }
     } catch (err) {
       console.error("Error fetching Cloud Run services:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch services");
-      showFailureToast("Failed to load Cloud Run services", {
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
+      const friendly = friendlyErrorMessage(err, "Failed to fetch services");
+      setError(friendly.message);
     } finally {
       setIsLoading(false);
     }
@@ -246,16 +247,7 @@ ${
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Cloud Run Services"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchServices} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="run" onRetry={fetchServices} />
       </List>
     );
   }
@@ -279,6 +271,9 @@ ${
             title="Open Cloud Run Console"
             url={`https://console.cloud.google.com/run?project=${projectId}`}
           />
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -300,6 +295,9 @@ ${
                 url={`https://console.cloud.google.com/run?project=${projectId}`}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchServices} />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -378,6 +376,9 @@ ${
                   <ActionPanel.Section>
                     <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchServices} />
                   </ActionPanel.Section>
+                  <ActionPanel.Section title="Cloud Shell">
+                    <CloudShellAction projectId={projectId} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -421,9 +422,6 @@ function RevisionsView({ projectId, gcloudPath, location, serviceName }: Revisio
     } catch (err) {
       console.error("Error fetching revisions:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch revisions");
-      showFailureToast("Failed to load revisions", {
-        message: err instanceof Error ? err.message : "Unknown error",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -448,16 +446,7 @@ function RevisionsView({ projectId, gcloudPath, location, serviceName }: Revisio
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Error Loading Revisions"
-          description={error}
-          icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchRevisions} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="run" onRetry={fetchRevisions} />
       </List>
     );
   }
@@ -519,17 +508,26 @@ interface CreateServiceFormValues {
 }
 
 function CreateServiceForm({ projectId, gcloudPath, onCreated }: CreateServiceFormProps) {
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
 
   async function handleSubmit(values: CreateServiceFormValues) {
     if (!values.serviceName.trim()) {
-      showFailureToast("Service name is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Service name is required",
+      });
       return;
     }
 
     if (!values.image.trim()) {
-      showFailureToast("Container image is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Container image is required",
+      });
       return;
     }
 
@@ -592,7 +590,7 @@ function CreateServiceForm({ projectId, gcloudPath, onCreated }: CreateServiceFo
         info="Full path to your container image"
       />
 
-      <Form.Dropdown id="region" title="Region" defaultValue="us-central1">
+      <Form.Dropdown id="region" title="Region" defaultValue={defaultRegion}>
         {CLOUD_RUN_REGIONS.map((region) => (
           <Form.Dropdown.Item key={region.value} value={region.value} title={region.title} />
         ))}

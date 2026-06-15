@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web-converter",
   "title": "Web Converter",
-  "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla and the shows closest Tailwind CSS color.",
+  "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl, hsla, oklch and shows the closest Tailwind CSS color.",
   "icon": "icon.png",
   "author": "nielsvanrijn",
   "contributors": [
-    "yusifaliyevpro"
+    "yusifaliyevpro",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -22,7 +23,7 @@
     {
       "name": "convert",
       "title": "Convert Unit",
-      "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla and the shows closest Tailwind CSS color.",
+      "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl, hsla, oklch and shows the closest Tailwind CSS color.",
       "mode": "view",
       "preferences": [
         {

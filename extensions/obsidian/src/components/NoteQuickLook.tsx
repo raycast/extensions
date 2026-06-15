@@ -1,4 +1,4 @@
-import { Note, ObsidianVault } from "@/obsidian";
+import { Note, ObsidianUtils, ObsidianVault } from "@/obsidian";
 import { ActionPanel, Detail } from "@raycast/api";
 import { NoteActions, OpenNoteActions } from "../utils/actions";
 import { useNoteContent } from "../utils/hooks";
@@ -14,7 +14,7 @@ export function NoteQuickLook(props: { showTitle: boolean; note: Note; vault: Ob
     <Detail
       isLoading={isLoading}
       navigationTitle={showTitle ? note.title : ""}
-      markdown={markdownContent}
+      markdown={ObsidianUtils.renderCallouts(markdownContent)}
       actions={
         noteContent !== null ? (
           <ActionPanel>

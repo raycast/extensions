@@ -5,6 +5,9 @@
   "description": "Manage Oracle Cloud Infrastructure",
   "icon": "red-cloud-white-bg-blue-b.png",
   "author": "xmok",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -30,13 +33,20 @@
       "subtitle": "Oracle Cloud",
       "description": "Manage Object Storage & Archive Storage",
       "mode": "view"
+    },
+    {
+      "name": "vault",
+      "title": "Manage Vaults",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage Vaults",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "filesize": "^11.0.2",
-    "oci-sdk": "^2.112.1"
+    "oci-sdk": "^2.122.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

@@ -12,6 +12,7 @@ import {
   List,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { Task } from "attio-js/dist/commonjs/models/components/task";
 import { differenceInDays, format, formatDistanceToNow, isBefore, isToday } from "date-fns";
@@ -130,7 +131,14 @@ export default function Tasks() {
             title={task.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
             onAction={() => toggleTask(task)}
           />
-          <Action.Push icon={Icon.Plus} title="New Task" target={<NewTask />} onPop={mutate} />
+          <Action.Push icon={Icon.Pencil} title="Update Task" target={<UpdateTask task={task} />} onPop={mutate} />
+          <Action.Push
+            icon={Icon.Plus}
+            title="New Task"
+            target={<NewTask />}
+            onPop={mutate}
+            shortcut={Keyboard.Shortcut.Common.New}
+          />
           <Action
             icon={Icon.Trash}
             title="Delete Task"
@@ -181,6 +189,55 @@ export default function Tasks() {
         </>
       )}
     </List>
+  );
+}
+
+function UpdateTask({ task }: { task: Task }) {
+  type FormValues = {
+    deadlineAt: Date | null;
+    isCompleted: boolean;
+  };
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Updating");
+      try {
+        await attio.tasks.update({
+          taskId: task.id.taskId,
+          requestBody: {
+            data: {
+              isCompleted: values.isCompleted,
+              deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
+            },
+          },
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Updated";
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = parseErrorMessage(error);
+      }
+    },
+    initialValues: {
+      deadlineAt: task.deadlineAt ? new Date(task.deadlineAt) : null,
+      isCompleted: task.isCompleted,
+    },
+  });
+  return (
+    <Form
+      navigationTitle={`Tasks / ${task.id.taskId} / Update`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Check} title="Update Task" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Content" text={task.contentPlaintext} />
+      <Form.DatePicker title="Deadline" {...itemProps.deadlineAt} />
+      <Form.Checkbox label="Completed" {...itemProps.isCompleted} />
+    </Form>
   );
 }
 

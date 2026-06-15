@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { API, Quest, PaginatedResponse } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 function QuestDetail({ quest }: { quest: Quest }) {
   const objectivesList = quest.objectives.map((obj) => `- ${obj}`).join("\n");
@@ -13,6 +14,8 @@ function QuestDetail({ quest }: { quest: Quest }) {
   const markdown = `
 # ${quest.name}
 
+${quest.image ? `![](${quest.image})\n` : ""}
+${quest.trader_name ? `**Trader:** ${quest.trader_name}\n` : ""}
 ## Objectives
 
 ${objectivesList}
@@ -48,7 +51,7 @@ ${
     ? `
 ## Locations
 
-${quest.locations.map((loc) => `- ${loc}`).join("\n")}
+${quest.locations.map((loc) => `- ${loc.map}`).join("\n")}
 `
     : ""
 }
@@ -62,17 +65,21 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
           <Detail.Metadata.Label title="Objectives" text={`${quest.objectives.length} objective(s)`} />
           {quest.xp > 0 && <Detail.Metadata.Label title="XP" text={String(quest.xp)} />}
           <Detail.Metadata.Label title="Rewards" text={`${quest.rewards.length} item(s)`} />
+          {quest.trader_name && <Detail.Metadata.Label title="Trader" text={quest.trader_name} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/quests/${quest.id}`}
+            target={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
+          {quest.guide_links?.map((link) => (
+            <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+          ))}
           <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
         </ActionPanel>
       }
@@ -83,8 +90,22 @@ ${quest.locations.map((loc) => `- ${loc}`).join("\n")}
 export default function SearchQuests() {
   const [searchText, setSearchText] = useState("");
 
+  const cachedPages = useRef<Map<number, Quest[]>>(new Map());
+
+  // Load cached pages on mount
+  useEffect(() => {
+    for (let i = 1; i <= 10; i++) {
+      const cached = getCached<Quest[]>(CacheKeys.quests(i));
+      if (cached) cachedPages.current.set(i, cached);
+    }
+  }, []);
+
   const { isLoading, data, pagination } = useFetch((options) => `${API.quests}?page=${options.page + 1}`, {
     mapResult(result: PaginatedResponse<Quest>) {
+      const page = result.pagination.page;
+      // Cache each page
+      setCache(CacheKeys.quests(page), result.data);
+      cachedPages.current.set(page, result.data);
       return {
         data: result.data,
         hasMore: result.pagination.hasNextPage,
@@ -92,6 +113,13 @@ export default function SearchQuests() {
     },
     keepPreviousData: true,
     initialData: [],
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load quests",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
   const quests = data || [];
@@ -123,6 +151,7 @@ export default function SearchQuests() {
           title={quest.name}
           subtitle={`${quest.objectives.length} objective(s)`}
           accessories={[
+            ...(quest.trader_name ? [{ icon: Icon.Person, text: quest.trader_name }] : []),
             {
               icon: Icon.Gift,
               text: `${quest.rewards.length} rewards`,
@@ -132,7 +161,10 @@ export default function SearchQuests() {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<QuestDetail quest={quest} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/quests/${quest.id}`} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
+              {quest.guide_links?.map((link) => (
+                <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+              ))}
               <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
             </ActionPanel>
           }

@@ -68,6 +68,13 @@ type FileData = {
   parents: string[];
 };
 
+type DriveFilesResponse = {
+  files?: File[];
+  error?: {
+    message?: string;
+  };
+};
+
 // For the whole list of properties, look at: https://developers.google.com/drive/api/reference/rest/v3/files
 
 const EXTENSION_SEARCH_PARAMS =
@@ -98,6 +105,7 @@ interface BaseGetFilesParams {
 interface StandardGetFilesParams extends BaseGetFilesParams {
   queryType: QueryTypes;
   queryText?: string;
+  parentId?: string;
 }
 
 interface AIGetFilesParams extends BaseGetFilesParams {
@@ -110,16 +118,38 @@ function getSearchParams({ scope, useAIParams = false, ...params }: StandardGetF
   // Build the query string
   if ("queryType" in params) {
     const escapedText = params.queryText?.replace(/[\\']/g, "\\$&") ?? "";
+    const hasSearchText = escapedText.length > 0;
+
+    // When navigating (has parentId), always filter by parent
+    // When searching (has query text), search everywhere
+    // When neither, show only root files
+    const parentClause =
+      "parentId" in params && params.parentId
+        ? `'${params.parentId}' in parents`
+        : !hasSearchText && params.queryType !== QueryTypes.starred
+          ? "'root' in parents"
+          : null;
+
+    // Default query
+    let q = "trashed = false";
 
     if (params.queryType === QueryTypes.fileName) {
-      urlParams.append("q", `name contains '${escapedText}' and trashed = false`);
+      q = escapedText ? `name contains '${escapedText}' and trashed = false` : "trashed = false";
     } else if (params.queryType === QueryTypes.fullText) {
-      urlParams.append("q", `name contains '${escapedText}' or fullText contains '${escapedText}' and trashed = false`);
+      q = escapedText
+        ? `(name contains '${escapedText}' or fullText contains '${escapedText}') and trashed = false`
+        : "trashed = false";
     } else if (params.queryType === QueryTypes.starred) {
-      urlParams.append("q", "starred and trashed = false");
+      q = "starred and trashed = false";
     } else {
-      urlParams.append("q", "trashed = false");
+      q = "trashed = false";
     }
+
+    if (parentClause) {
+      q = `${parentClause} and ${q}`;
+    }
+
+    urlParams.append("q", q);
 
     // Add sorting for specific query types
     if (params.queryType === QueryTypes.fileName || params.queryType === QueryTypes.starred) {
@@ -149,7 +179,15 @@ async function baseGetFiles(params: StandardGetFilesParams | AIGetFilesParams) {
       Authorization: `Bearer ${getOAuthToken()}`,
     },
   });
-  const data = (await response.json()) as { files: File[] };
+  const data = (await response.json()) as DriveFilesResponse;
+
+  if (!response.ok) {
+    throw new Error(data.error?.message ?? `Google Drive request failed: ${response.status} ${response.statusText}`);
+  }
+
+  if (!Array.isArray(data.files)) {
+    throw new Error(data.error?.message ?? "Google Drive response did not include files.");
+  }
 
   const { displayFilePath } = getPreferenceValues<Preferences>();
   if (displayFilePath) {
@@ -160,7 +198,7 @@ async function baseGetFiles(params: StandardGetFilesParams | AIGetFilesParams) {
     );
   }
 
-  return data;
+  return data as DriveFilesResponse & { files: File[] };
 }
 
 // Standard search using predefined query types
@@ -204,6 +242,18 @@ async function getFilePath(fileId: string): Promise<string> {
 
   // Build path for parent folder only (excluding the file itself)
   return await getParentPath(fileData.parents[0]);
+}
+
+export async function getFileParentsById(fileId: string): Promise<string[]> {
+  const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
+  const response = await fetch(getFileUrl, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
+  });
+  const data = (await response.json()) as { parents?: string[] };
+  return data.parents ?? [];
 }
 
 export function getStarredFiles() {

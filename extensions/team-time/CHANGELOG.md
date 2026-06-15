@@ -1,5 +1,18 @@
 # Team Time Changelog
 
+## [Fix Hong Kong and Macau Flags] - 2026-06-01
+
+- Split Hong Kong SAR and Macau SAR out of the China entry into their own country entries with ISO codes `HK` and `MO`, so they show their own flags instead of the China flag.
+- Switched Hong Kong SAR to the `Asia/Hong_Kong` time zone and Macau SAR to `Asia/Macau`.
+
+## [Fix Edit Label input] - 2026-05-19
+
+- Fixed the Edit Label command so custom flag fields accept typed input reliably.
+
+## [Add China Special Administrative Regions as Cities in China Timezone] - 2026-04-30
+
+- Added two records (Hong Kong SAR, Macau SAR) to [src/world_cities_timezones.json].
+
 ## [Menu Bar Title Group Count Preference and Team Time Menu Bar Functionality] - 2025-11-21
 
 - Added a new preference for the number of time groups to display in the menu bar title.

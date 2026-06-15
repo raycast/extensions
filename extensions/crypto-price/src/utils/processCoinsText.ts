@@ -8,7 +8,7 @@ export function processCoinsText(coinsText: string): { symbols: string[]; primar
       return part;
     }
     const symbol = part.toUpperCase();
-    if (COINS[symbol]) {
+    if (/^[A-Z0-9]+$/.test(symbol)) {
       return symbol;
     }
   });

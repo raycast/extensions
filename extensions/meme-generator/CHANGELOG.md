@@ -1,5 +1,11 @@
 # Meme generator Changelog
 
+## [Added Memegen API provider] - 2026-01-28
+
+- Refactor Imgflip API provider
+- Add Memegen API provider
+- Update dependencies
+
 ## [✨AI Enhancements 🫧] - 2025-04-29
 
 - Add AI-generated meme tool

@@ -4,7 +4,7 @@
  * Tests section detection, alias/export parsing, edge cases, and category inference.
  */
 
-import { parseZshrc, toLogicalSections, AliasEntry, ExportEntry } from "../lib/parse-zshrc";
+import { parseZshrc, toLogicalSections, type AliasEntry, type ExportEntry } from "../lib/parse-zshrc";
 import { getPreferenceValues } from "@raycast/api";
 import { vi } from "vitest";
 

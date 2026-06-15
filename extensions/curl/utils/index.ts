@@ -133,7 +133,7 @@ export function buildUrlFromParameters(baseUrl: string, params: Parameter[]) {
     });
 
     return queryParts.length > 0 ? `${baseUrlOnly}?${queryParts.join("&")}` : baseUrlOnly;
-  } catch (e) {
+  } catch {
     return baseUrl;
   }
 };

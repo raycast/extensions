@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { API, Arc, PaginatedResponse } from "./api";
+import { getCached, setCache, CacheKeys } from "./cache";
 
 function ArcDetail({ arc }: { arc: Arc }) {
   const markdown = `
@@ -21,14 +22,14 @@ ${arc.description || "No description available."}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/arcs/${arc.id}`}
+            target={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
           <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
         </ActionPanel>
       }
@@ -39,11 +40,27 @@ ${arc.description || "No description available."}
 export default function SearchArcs() {
   const [searchText, setSearchText] = useState("");
 
+  const cachedArcs = getCached<Arc[]>(CacheKeys.arcs);
+
   const { isLoading, data } = useFetch<PaginatedResponse<Arc>>(API.arcs, {
     keepPreviousData: true,
+    onError() {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load ARCs",
+        message: "Server temporarily unavailable. Please try again.",
+      });
+    },
   });
 
-  const arcs = data?.data || [];
+  // Update cache when data changes
+  useEffect(() => {
+    if (data?.data && data.data.length > 0) {
+      setCache(CacheKeys.arcs, data.data);
+    }
+  }, [data]);
+
+  const arcs = data?.data || cachedArcs || [];
 
   const filteredArcs = useMemo(() => {
     return arcs.filter((arc) => {
@@ -69,7 +86,7 @@ export default function SearchArcs() {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<ArcDetail arc={arc} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
               <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
             </ActionPanel>
           }

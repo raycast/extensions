@@ -1,8 +1,7 @@
 import { gmail as gmailclient, auth, gmail_v1 } from "@googleapis/gmail";
 import { authorize, client, OAuthClientId } from "./oauth";
-import { GaxiosResponse } from "googleapis-common";
 
-let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
+let profile: { data: gmail_v1.Schema$Profile } | undefined;
 
 export async function getAuthorizedGmailClient() {
   await authorize();
@@ -39,17 +38,14 @@ export async function getGMailLabels(gmail: gmail_v1.Gmail) {
   return res.data.labels;
 }
 
-export async function getGMailMessageIds(
-  gmail: gmail_v1.Gmail,
-  query?: string,
-): Promise<GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> | undefined> {
+export async function getGMailMessageIds(gmail: gmail_v1.Gmail, query?: string) {
   const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 50 });
   return messages;
 }
 
 export async function getGMailMessages(gmail: gmail_v1.Gmail, query?: string) {
   const messages = await getGMailMessageIds(gmail, query);
-  const ids = messages?.data?.messages?.map((m) => m.id as string).filter((m) => m);
+  const ids = messages?.data?.messages?.map((m: gmail_v1.Schema$Message) => m.id as string).filter((m: string) => m);
   const details = await getMailDetails(gmail, ids);
   return details;
 }
@@ -63,8 +59,9 @@ export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefi
 }
 
 export function gmailWebUrlBase(currentProfile: gmail_v1.Schema$Profile | undefined) {
-  const address = currentProfile?.emailAddress;
-  return address ? `https://mail.google.com/mail/u/${address}` : undefined;
+  // Gmail no longer supports `/mail/u/{email}` selectors. The browser account index
+  // cannot be derived from the Gmail API profile, so use the first browser account.
+  return currentProfile?.emailAddress ? "https://mail.google.com/mail/u/0" : undefined;
 }
 
 export function inlineNewMailWebUrl(currentProfile: gmail_v1.Schema$Profile) {

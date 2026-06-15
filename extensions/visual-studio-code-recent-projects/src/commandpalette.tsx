@@ -3,8 +3,16 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
+import { Shortcut } from "./lib/shortcuts";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
-import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
+import {
+  fileExists,
+  getErrorMessage,
+  isWin,
+  openURIinVSCode,
+  raycastForVSCodeURI,
+  waitForFileExists,
+} from "./lib/utils";
 
 interface CommandMetadata {
   command: string;
@@ -14,10 +22,12 @@ interface CommandMetadata {
 
 function transitFolder(): string {
   const build = getBuildNamePreference();
-  const ts = path.join(
-    os.homedir(),
-    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`,
-  );
+
+  let ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
+
+  if (isWin) {
+    ts = path.join(os.homedir(), `AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
+  }
   return ts;
 }
 
@@ -26,7 +36,7 @@ function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
   const title = c.category ? `${c.category}: ${c.title}` : c.title;
   return (
     <Action.CreateQuicklink
-      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      shortcut={Shortcut.CreateQuickLink}
       quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: `VSCode - ${title}` }}
     />
   );
@@ -87,11 +97,7 @@ function CommandListItem(props: { command: CommandMetadata }) {
             <CreateCommandQuickLinkAction command={c} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              title="Copy Command ID"
-              content={c.command}
-            />
+            <Action.CopyToClipboard shortcut={Shortcut.Copy} title="Copy Command ID" content={c.command} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -130,15 +136,11 @@ export default function CommandPaletteCommand() {
       {error && (
         <List.EmptyView
           title="No Response from Raycast for VSCode extension"
+          description="Please ensure the Raycast for VSCode extension is installed and running"
           icon="⚠️"
           actions={
             <ActionPanel>
-              <Action
-                title="Reload"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={refresh}
-              />
+              <Action title="Reload" icon={Icon.RotateClockwise} shortcut={Shortcut.Refresh} onAction={refresh} />
               <InstallRaycastForVSCodeAction />
             </ActionPanel>
           }

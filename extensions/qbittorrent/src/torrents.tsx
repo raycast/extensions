@@ -1,41 +1,135 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Keyboard } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { ActionPanel, Action, Color, Icon, Keyboard, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbittorrent";
 import { filesize } from "filesize";
 import { filterStates } from "./types/filterStates";
 import { sentenceCase } from "change-case";
 
-const iconMap: Record<TorrentState, string | undefined> = {
-  [TorrentState.Downloading]: "../assets/downloading.svg",
-  [TorrentState.Uploading]: "../assets/uploading.svg",
-  [TorrentState.Error]: "../assets/error.svg",
-  [TorrentState.MissingFiles]: "../assets/error.svg",
-  [TorrentState.PausedUP]: "../assets/completed.svg",
-  [TorrentState.QueuedUP]: "../assets/stalledUP.svg",
-  [TorrentState.StalledUP]: "../assets/stalledUP.svg",
-  [TorrentState.CheckingUP]: "../assets/stalledUP.svg",
-  [TorrentState.ForcedUP]: "../assets/stalledUP.svg",
-  [TorrentState.Allocating]: "../assets/checking.svg",
-  [TorrentState.MetaDL]: "../assets/downloading.svg",
-  [TorrentState.PausedDL]: "../assets/paused.svg",
-  [TorrentState.QueuedDL]: "../assets/stalledDL.svg",
-  [TorrentState.StalledDL]: "../assets/stalledDL.svg",
-  [TorrentState.CheckingDL]: "../assets/checking.svg",
-  [TorrentState.ForcedDL]: "../assets/stalledDL.svg",
-  [TorrentState.CheckingResumeData]: "../assets/checking.svg",
-  [TorrentState.Moving]: "../assets/checking.svg",
-  [TorrentState.StoppedDL]: "../assets/paused.svg",
-  [TorrentState.StoppedUP]: "../assets/paused.svg",
-  [TorrentState.ForcedMetaDL]: "../assets/downloading.svg",
-  [TorrentState.QueuedForChecking]: "../assets/checking.svg",
-  [TorrentState.Unknown]: undefined,
-};
-
 enum TorrentActionType {
   RESUME,
   PAUSE,
+  RECHECK,
+  REANNOUNCE,
   DELETE,
   DELETE_INCLUDING_DATA,
+}
+
+function getProgressIcon(progress: number) {
+  if (progress >= 1) {
+    return Icon.CircleProgress100;
+  }
+
+  if (progress >= 0.75) {
+    return Icon.CircleProgress75;
+  }
+
+  if (progress >= 0.5) {
+    return Icon.CircleProgress50;
+  }
+
+  if (progress >= 0.25) {
+    return Icon.CircleProgress25;
+  }
+
+  return Icon.CircleProgress;
+}
+
+function getProgressColor(state: TorrentState) {
+  switch (state) {
+    case TorrentState.Downloading:
+    case TorrentState.MetaDL:
+    case TorrentState.ForcedDL:
+    case TorrentState.ForcedMetaDL:
+      return Color.Green;
+    case TorrentState.Uploading:
+    case TorrentState.ForcedUP:
+    case TorrentState.PausedUP:
+    case TorrentState.StalledUP:
+    case TorrentState.QueuedUP:
+    case TorrentState.CheckingUP:
+      return Color.Blue;
+    case TorrentState.Error:
+    case TorrentState.MissingFiles:
+      return Color.Red;
+    case TorrentState.Allocating:
+    case TorrentState.CheckingDL:
+    case TorrentState.CheckingResumeData:
+    case TorrentState.Moving:
+    case TorrentState.QueuedDL:
+    case TorrentState.QueuedForChecking:
+    case TorrentState.StalledDL:
+      return Color.Orange;
+    case TorrentState.PausedDL:
+    case TorrentState.StoppedDL:
+    case TorrentState.StoppedUP:
+    case TorrentState.Unknown:
+    default:
+      return Color.SecondaryText;
+  }
+}
+
+function formatProgressTooltip(torrent: Torrent) {
+  const progressPercent = Math.round(torrent.progress * 100);
+  const completedSize = filesize(Math.round(torrent.size * torrent.progress));
+
+  return `${progressPercent}% • ${completedSize} of ${filesize(torrent.size)}`;
+}
+
+function formatProgressIcon(torrent: Torrent) {
+  return {
+    value: {
+      source: getProgressIcon(torrent.progress),
+      tintColor: getProgressColor(torrent.state),
+    },
+    tooltip: formatProgressTooltip(torrent),
+  };
+}
+
+function formatTorrentSubtitle(torrent: Torrent) {
+  return torrent.category || undefined;
+}
+
+function formatSizeAccessory(torrent: Torrent): List.Item.Accessory {
+  return {
+    tag: { value: filesize(torrent.size), color: Color.SecondaryText },
+    icon: Icon.HardDrive,
+    tooltip: "Total size",
+  };
+}
+
+function formatTagsAccessory(torrent: Torrent): List.Item.Accessory | null {
+  const tags = torrent.tags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+  if (!tags.length) {
+    return null;
+  }
+
+  const label = tags.length === 1 ? tags[0] : `${tags[0]} +${tags.length - 1}`;
+
+  return {
+    tag: { value: label, color: Color.SecondaryText },
+    icon: Icon.Tag,
+    tooltip: tags.join(", "),
+  };
+}
+
+function formatSpeedAccessory(
+  label: "Download" | "Upload",
+  speed: number,
+  color: Color,
+  icon: Icon,
+): List.Item.Accessory {
+  return {
+    tag: {
+      value: `${filesize(speed)}/s`,
+      color: speed > 0 ? color : undefined,
+    },
+    icon: { source: icon, tintColor: speed > 0 ? color : Color.SecondaryText },
+    tooltip: `${label} speed`,
+  };
 }
 
 export default function Torrents() {
@@ -43,7 +137,7 @@ export default function Torrents() {
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [loading, setLoading] = useState(true);
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
-  let updateTimeout: NodeJS.Timeout;
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { address, username, password, timeout } = getPreferenceValues<Preferences.Torrents>();
 
@@ -56,7 +150,10 @@ export default function Torrents() {
   }, [address, username, password]);
 
   const updateTorrents = async () => {
-    +timeout && updateTimeout && clearTimeout(updateTimeout);
+    if (+timeout && updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+
     setLoading(true);
     try {
       await qbit.login();
@@ -72,7 +169,7 @@ export default function Torrents() {
     } finally {
       setLoading(false);
       if (+timeout) {
-        updateTimeout = setTimeout(() => {
+        updateTimeoutRef.current = setTimeout(() => {
           setUpdateTimestamp(+new Date());
         }, +timeout * 1000);
       }
@@ -83,10 +180,16 @@ export default function Torrents() {
     try {
       switch (actionType) {
         case TorrentActionType.RESUME:
-          await qbit.resumeTorrent(hash);
+          await qbit.startTorrent(hash);
           break;
         case TorrentActionType.PAUSE:
-          await qbit.pauseTorrent(hash);
+          await qbit.stopTorrent(hash);
+          break;
+        case TorrentActionType.RECHECK:
+          await qbit.recheckTorrent(hash);
+          break;
+        case TorrentActionType.REANNOUNCE:
+          await qbit.reannounceTorrent(hash);
           break;
         case TorrentActionType.DELETE:
           await qbit.removeTorrent(hash);
@@ -112,6 +215,14 @@ export default function Torrents() {
     updateTorrents();
   }, [updateTimestamp, filter]);
 
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <List
       isLoading={loading}
@@ -132,22 +243,24 @@ export default function Torrents() {
       }
     >
       {torrents.map((torrent) => {
+        const tagsAccessory = formatTagsAccessory(torrent);
+
         return (
           <List.Item
-            icon={iconMap[torrent.state]}
-            title={`${torrent.name} (${filesize(torrent.size)})`}
+            icon={formatProgressIcon(torrent)}
+            title={torrent.name}
+            subtitle={formatTorrentSubtitle(torrent)}
             key={torrent.hash}
             accessories={[
-              {
-                text: `↑${filesize(torrent.upspeed)}/s`,
-              },
-              {
-                text: `↓${filesize(torrent.dlspeed)}/s`,
-              },
+              formatSizeAccessory(torrent),
+              ...(tagsAccessory ? [tagsAccessory] : []),
+              formatSpeedAccessory("Download", torrent.dlspeed, Color.Green, Icon.Download),
+              formatSpeedAccessory("Upload", torrent.upspeed, Color.Blue, Icon.Upload),
             ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Torrent Magnet Link" content={torrent.magnet_uri} />
+                <Action.CopyToClipboard title="Copy Save Path" content={torrent.save_path} />
                 <Action
                   icon={Icon.Play}
                   title="Resume Torrent"
@@ -157,6 +270,16 @@ export default function Torrents() {
                   icon={Icon.Pause}
                   title="Pause Torrent"
                   onAction={() => torrentAction(TorrentActionType.PAUSE, torrent.hash)}
+                />
+                <Action
+                  icon={Icon.ArrowClockwise}
+                  title="Recheck Torrent"
+                  onAction={() => torrentAction(TorrentActionType.RECHECK, torrent.hash)}
+                />
+                <Action
+                  icon={Icon.Globe}
+                  title="Reannounce Torrent"
+                  onAction={() => torrentAction(TorrentActionType.REANNOUNCE, torrent.hash)}
                 />
                 <ActionPanel.Submenu
                   icon={Icon.Trash}

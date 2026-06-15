@@ -1,5 +1,13 @@
 # Capacities Changelog
 
+## [Fix space dropdown selection] - 2026-05-20
+
+- Fixed space dropdown selection in the task, weblink, and daily note commands.
+
+## [Version 2.0.1] - 2026-01-09
+
+- Fix: Space selection for task, weblink and save to daily note.
+
 ## [Version 2.0.0] - 2025-12-16
 
 - Offline support: The Raycast extension now communicates with the Capacities desktop app via a communication token. This means you can use the extension even if you're offline.

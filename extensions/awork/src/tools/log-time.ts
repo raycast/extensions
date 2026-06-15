@@ -27,9 +27,9 @@ type Input = {
 };
 
 export default async (input: Input) => {
-  const tokens = await getTokens();
+  const tokens = await getTokens({ allowUserInteraction: false });
   if (!tokens) {
-    return undefined;
+    throw new Error("awork authentication required. Open an awork command in Raycast and sign in first.");
   }
   const tasks = await getTasks(tokens.accessToken, input.taskId, 50)({ page: 0 });
   const task = tasks.data.find((t) => t.id === input.taskId);

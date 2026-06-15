@@ -1,5 +1,10 @@
 # Password Generator Changelog
 
+## [Remember numbers and characters] - 2026-01-08
+
+- Added `README.md`
+- Added `Preference` to remember the last used settings for "Use numbers?" and "Use special characters?" in `Generate Random Password` (ref: [Issue #24199](https://github.com/raycast/extensions/issues/24199))
+
 ## [Windows Support & Dependency Updates] - 2025-09-02
 
 - Added support for Raycast on Windows.

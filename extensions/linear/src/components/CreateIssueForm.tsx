@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
+  Keyboard,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -148,7 +149,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
           toast.primaryAction = {
             title: "Open Issue",
-            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: async () => {
               push(<IssueDetail issue={issue} priorities={props.priorities} me={props.me} />);
               await toast.hide();
@@ -156,7 +157,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           };
 
           toast.secondaryAction = {
-            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             ...getCopyToastAction(copyToastAction, issue),
           };
 
@@ -290,13 +291,13 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       enableDrafts={props.enableDrafts}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
+          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Issue" />
           <ActionPanel.Section>
             <Action
               title="Focus Title"
               icon={Icon.TextInput}
               onAction={() => focus("title")}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title="Focus Description"
@@ -308,46 +309,61 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
               title="Focus Status"
               icon={Icon.Circle}
               onAction={() => focus("stateId")}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+              }}
             />
             <Action
               title="Focus Priority"
               icon={Icon.LevelMeter}
               onAction={() => focus("priority")}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              shortcut={Keyboard.Shortcut.Common.Pin}
             />
             <Action
               title="Focus Assignee"
               icon={Icon.AddPerson}
               onAction={() => focus("assigneeId")}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+              }}
             />
             {scale ? (
               <Action
                 title="Focus Estimate"
                 icon={{ source: { light: "light/estimate.svg", dark: "dark/estimate.svg" } }}
                 onAction={() => focus("estimate")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                }}
               />
             ) : null}
             <Action
               title="Focus Due Date"
               icon={Icon.Calendar}
               onAction={() => focus("dueDate")}
-              shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["opt", "shift"], key: "d" },
+                Windows: { modifiers: ["alt", "shift"], key: "d" },
+              }}
             />
             <Action
               title="Focus Labels"
               icon={Icon.Tag}
               onAction={() => focus("labelIds")}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+              }}
             />
             {hasCycles ? (
               <Action
                 title="Focus Cycle"
                 icon={{ source: { light: "light/cycle.svg", dark: "dark/cycle.svg" } }}
                 onAction={() => focus("cycleId")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             ) : null}
             {hasProjects ? (
@@ -363,7 +379,10 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title="Focus Milestone"
                 icon={{ source: { light: "light/milestone.svg", dark: "dark/milestone.svg" } }}
                 onAction={() => focus("milestoneId")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "m" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+                }}
               />
             ) : null}
             {hasIssues ? (
@@ -371,20 +390,29 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title="Focus Parent Issue"
                 icon={{ source: { light: "light/backlog.svg", dark: "dark/backlog.svg" } }}
                 onAction={() => focus("parentId")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "i" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+                }}
               />
             ) : null}
             <Action
               title="Focus Attachments"
               icon={Icon.NewDocument}
               onAction={() => focus("attachments")}
-              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt", "shift"], key: "a" },
+                Windows: { modifiers: ["ctrl", "alt", "shift"], key: "a" },
+              }}
             />
             <Action
               title="Focus Links"
               icon={Icon.Link}
               onAction={() => focus("links")}
-              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt", "shift"], key: "l" },
+                Windows: { modifiers: ["ctrl", "alt", "shift"], key: "l" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

@@ -1,35 +1,87 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { HowLongToBeatService, HowLongToBeatEntry } from "howlongtobeat";
 import { Details } from "./details";
 import { pluralize } from "./helpers";
 import { HltbSearch } from "./hltbsearch";
+import { useCachedPromise } from "@raycast/utils";
+import { useGameDetailFetch } from "./useGameDetailFetch";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const { data: results, isLoading } = useSearch(searchText);
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search games..." throttle>
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search games..."
+      throttle
+      isShowingDetail={isShowingDetail && (results?.length ?? 0) > 0}
+    >
+      <List.Section title="Results" subtitle={results ? results.length + "" : "0"}>
+        {results?.map((searchResult) => (
+          <SearchListItem
+            key={searchResult.id}
+            searchResult={searchResult}
+            isShowingDetail={isShowingDetail}
+            onToggleDetail={() => setIsShowingDetail(!isShowingDetail)}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) {
+function SearchListItem({
+  searchResult,
+  isShowingDetail,
+  onToggleDetail,
+}: {
+  searchResult: HowLongToBeatEntry;
+  isShowingDetail: boolean;
+  onToggleDetail: () => void;
+}) {
   const url = `${HltbSearch.DETAIL_URL}${searchResult.id}`;
   const { push } = useNavigation();
+  const { data: result, isLoading, markdown } = useGameDetailFetch(searchResult.id, isShowingDetail);
 
   const mainStoryHours = searchResult.gameplayMain || 0;
   const mainStoryText = mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
+  const mainExtraHours = result?.gameplayMainExtra || 0;
+  const mainExtraText = mainExtraHours >= 1 ? `${result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
+
+  const completionistsHours = result?.gameplayCompletionist || 0;
+  const completionistsText =
+    completionistsHours >= 1 ? `${result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
+
   return (
     <List.Item
       title={searchResult.name}
-      accessoryTitle={`Main Story: ${mainStoryText}`}
+      subtitle={!isShowingDetail ? `Main Story: ${mainStoryText}` : undefined}
+      detail={
+        <List.Item.Detail
+          isLoading={isLoading}
+          markdown={markdown}
+          metadata={
+            result && (
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Main Story" text={mainStoryText} />
+                <List.Item.Detail.Metadata.Label title="Main + Extras" text={mainExtraText} />
+                <List.Item.Detail.Metadata.Label title="Completionists" text={completionistsText} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.TagList title="Platforms">
+                  {result.playableOn.map((platform) => (
+                    <List.Item.Detail.Metadata.TagList.Item key={platform} text={platform} />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            )
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -37,6 +89,12 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
               title="Show Details"
               icon={Icon.Sidebar}
               onAction={() => push(<Details id={searchResult.id} name={searchResult.name} />)}
+            />
+            <Action
+              title="Toggle Details"
+              icon={Icon.AppWindowSidebarLeft}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={onToggleDetail}
             />
             <Action.OpenInBrowser title="Open in Browser" url={url} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "." }} />
@@ -47,20 +105,13 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+function useSearch(searchText: string) {
+  const hltb = useMemo(() => new HltbSearch(), []);
 
-  const search = useCallback(
-    async function search(searchText: string) {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-
+  return useCachedPromise(
+    async (text: string) => {
       try {
-        const searchTerms = searchText.split(" ");
-
-        const hltb = new HltbSearch();
+        const searchTerms = text.split(" ");
         const searchResult = await hltb.search(searchTerms);
 
         const hltbEntries = new Array<HowLongToBeatEntry>();
@@ -68,9 +119,9 @@ function useSearch() {
         for (const resultEntry of searchResult.data) {
           hltbEntries.push(
             new HowLongToBeatEntry(
-              "" + resultEntry.game_id, // game id is now a number, but I want to keep the model stable
+              "" + resultEntry.game_id,
               resultEntry.game_name,
-              "", // no description
+              "",
               resultEntry.profile_platform ? resultEntry.profile_platform.split(", ") : [],
               HltbSearch.IMAGE_URL + resultEntry.game_image,
               [
@@ -81,41 +132,19 @@ function useSearch() {
               Math.round(resultEntry.comp_main / 3600),
               Math.round(resultEntry.comp_plus / 3600),
               Math.round(resultEntry.comp_100 / 3600),
-              HowLongToBeatService.calcDistancePercentage(resultEntry.game_name, searchText),
-              searchText,
+              HowLongToBeatService.calcDistancePercentage(resultEntry.game_name, text),
+              text,
             ),
           );
         }
 
-        setState((oldState) => ({
-          ...oldState,
-          results: hltbEntries,
-          isLoading: false,
-        }));
+        return hltbEntries;
       } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
         console.error("search error", error);
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        throw error;
       }
     },
-    [setState],
+    [searchText],
   );
-
-  useEffect(() => {
-    search("");
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-interface SearchState {
-  results: HowLongToBeatEntry[];
-  isLoading: boolean;
 }

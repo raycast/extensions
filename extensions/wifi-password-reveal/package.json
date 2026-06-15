@@ -1,10 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wifi-password-reveal",
-  "title": "Wifi Password Reveal",
-  "description": "Reveal any saved WIFI Password on macOS",
+  "title": "WiFi Password Reveal",
+  "description": "Reveal any saved WiFi Password on macOS or Windows",
   "icon": "extension_icon.png",
   "author": "louishuyng",
+  "contributors": ["xmok"],
   "categories": [
     "Developer Tools"
   ],
@@ -13,12 +14,12 @@
     {
       "name": "index",
       "title": "Wifi Password Reveal",
-      "description": "Show All Wifi Name currently connected to our Mac Network Card",
+      "description": "Show All WiFi Name currently connected to Mac or Win Network Card",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.4"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

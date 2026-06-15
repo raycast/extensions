@@ -10,6 +10,10 @@
     "Productivity",
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "fork-repositories",
@@ -37,6 +41,7 @@
     }
   ],
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "@raycast/api": "1.53.4",
     "@raycast/utils": "1.8.0"
   },

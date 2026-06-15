@@ -18,7 +18,7 @@ import { SearchNotePreferences } from "./preferences";
 import { updateNoteInCache, deleteNoteFromCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
 import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vault } from "@/obsidian";
-import { getCodeBlocks } from "./utils";
+import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
 
@@ -36,6 +36,17 @@ export function ShowPathInFinderAction(props: { path: string }) {
       icon={Icon.Finder}
       path={path}
       shortcut={{ modifiers: ["opt"], key: "enter" }}
+    />
+  );
+}
+
+export function CopyPathAction(props: { path: string }) {
+  const { path } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
     />
   );
 }
@@ -114,6 +125,47 @@ export function CopyNoteTitleAction(props: { note: Note }) {
   const { note } = props;
   return (
     <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+  );
+}
+
+export function CopyNotePathAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={note.path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+    />
+  );
+}
+
+export function CopyWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt"], key: "w" },
+        Windows: { modifiers: ["alt"], key: "w" },
+      }}
+    />
+  );
+}
+
+export function PasteWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.Paste
+      title="Paste Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt", "shift"], key: "w" },
+        Windows: { modifiers: ["alt", "shift"], key: "w" },
+      }}
+    />
   );
 }
 
@@ -255,6 +307,8 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
+  const relativePath = normalizeRelativePath(note.path, vault.path);
+
   return (
     <Action.Open
       title="Open in New Obsidian Tab"
@@ -262,7 +316,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
         "&filepath=" +
-        encodeURIComponent(note.path.replace(vault.path, "")) +
+        encodeURIComponent(relativePath) +
         "&newpane=true"
       }
       icon={ObsidianIcon}
@@ -273,6 +327,17 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
 export function ShowVaultInFinderAction(props: { vault: ObsidianVault }) {
   const { vault } = props;
   return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
+}
+
+export function CopyVaultPathAction(props: { vault: ObsidianVault }) {
+  const { vault } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy File Path"
+      content={vault.path}
+      shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+    />
+  );
 }
 
 // export function ShowMentioningNotesAction(props: { vault: Vault; str: string; notes: Note[] }) {
@@ -371,11 +436,14 @@ export function NoteActions(props: {
       <AppendSelectedTextToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
       <CopyNoteAction note={note} />
       <CopyNoteTitleAction note={note} />
+      <CopyNotePathAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
       <AppendTaskAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      <CopyWikilinkAction note={note} />
+      <PasteWikilinkAction note={note} />
     </>
   );
 }

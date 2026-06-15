@@ -23,8 +23,8 @@ export default function Plugins({ searchBarAccessory }: PluginsProps) {
     <ListViewController<PluginItem>
       commandName="Plugins"
       navigationTitle="Plugins"
-      searchPlaceholder="Search plugins..."
-      icon={Icon.Box}
+      searchPlaceholder="Search Plugins..."
+      icon={Icon.Plug}
       tintColor={MODERN_COLORS.warning}
       itemType="plugin"
       itemTypePlural="plugins"
@@ -98,7 +98,7 @@ Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc"
             title="Plugin Name"
             text={plugin.name}
             icon={{
-              source: Icon.Box,
+              source: Icon.Plug,
               tintColor: MODERN_COLORS.warning,
             }}
           />

@@ -1,16 +1,14 @@
-import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, Keyboard } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 
 import { getTeams } from "./api/getTeams";
-import { linear } from "./api/linearClient";
+import { getLinearClient, linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
-    const { token } = getAccessToken();
-    const linearClient = new LinearClient({ accessToken: token });
+    const { linearClient } = getLinearClient();
 
     const preferences = getPreferenceValues<Preferences.CreateIssueForMyself>();
 
@@ -74,7 +72,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.title = `Created issue • ${issue.identifier}`;
     toast.primaryAction = {
       title: "Open Issue",
-      shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+      shortcut: Keyboard.Shortcut.Common.OpenWith,
       onAction: async () => {
         await open(issue.url);
         await toast.hide();
@@ -83,7 +81,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
 
     toast.secondaryAction = {
       title: "Copy Issue ID",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(issue.identifier),
     };
   } catch (e) {
@@ -92,7 +90,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.message = e instanceof Error ? e.message : String(e);
     toast.primaryAction = {
       title: "Copy Error Log",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }

@@ -1,87 +1,137 @@
-# Memorable Password Generator Extension for Raycast
+# Memorable Password Generator
 
-Generate Password is an extension for Raycast that allows you to generate strong and memorable passwords.
+<p align="center">
+  <img src="./metadata/memorable-generate-password-1.png" alt="Memorable Password Generator Screenshot" width="800">
+</p>
 
-![screenshot](./metadata/memorable-generate-password-1.png)
+A powerful Raycast extension that generates strong, memorable passwords using meaningful word combinations. Balance security with memorability through customizable word lists, intelligent character substitution, and flexible configuration options.
 
-During the process of designing and generating passwords, we aim to balance two main factors: memorability and robustness.
+## ✨ Features
 
-1. **Memorability**: A memorable password means that it is easy for users to remember without the need to write it down or rely on a password manager. To make passwords more memorable, we can use techniques such as using phrases or combinations of related words, such as using the Oxford 3000 word list. This approach generates passwords that are easy to remember because they are composed of actual, meaningful words.
+### 🌏 Multi-Language Support
 
-2. **Robustness**: A robust password should be sufficiently complex to resist guessing or brute-force attacks. This typically means that passwords should be long enough and include a variety of characters, such as uppercase and lowercase letters, numbers, and symbols. For example, we can enhance password robustness by using Leetspeak rules and randomly selecting symbols.
+- **Bilingual Interface**: Seamlessly switch between English and Chinese
+- **Auto-Detection**: Automatically adapts to your system language
 
-However, memorability and robustness are often trade-offs: a highly robust password may be difficult to remember, while an easily memorable password may lack robustness. This is why it is important to find a balance between these two factors when designing a password generation strategy.
+### 📚 Diverse Word Lists
 
-## The Oxford 3000
+Choose from 6 curated word sources to match your preferences:
 
-```
-a
-abandon
-abandoned
-……
-youth
-zero
-zone
-```
+- **Oxford 3000**: Core English vocabulary for maximum memorability
+- **Chinese Idioms (成语)**: Traditional four-character expressions
+- **Chinese Poetry (诗词)**: Classical Chinese poetic phrases
+- **Technology**: Tech-related terms for developers
+- **Nature & Geography**: Natural world vocabulary
+- **Custom**: Use your own word list file
 
-## Leetspeak
+### 🔄 Smart Character Processing
 
-Original letter | Proximity number | Shape proximity character
----------|----------|----------
-a        | 4        | @
-b        | 8        |
-c        |          | (
-e        | 3        | &
-g        | 9        | 
-i        | 1        | !
-l        | 1        | |
-o        | 0        |
-q        | 9        |
-s        | 5        | $
-t        | 7        | +
-z        | 2        | 
+- **Pinyin Conversion**: Automatically converts Chinese characters to Pinyin for universal compatibility
+- **Leet Speak**: Optional character substitution for enhanced security (e.g., `a→@`, `e→3`, `s→$`)
 
-## Features
+### 🎨 Advanced Configuration
 
-- [x] Generate multiple passwords with customizable options.
-- [ ] Write the generated word group into a sentence that is smooth, grammatical and meaningful.
+- **Flexible Separators**: Customize word separators (`-`, `_`, `.`, etc.)
+- **Casing Modes**:
+  - Lowercase: `word-word-word`
+  - Uppercase: `WORD-WORD-WORD`
+  - PascalCase: `Word-Word-Word`
+  - Random: `WoRd-wOrD-WoRd`
+- **Prefix/Suffix**: Add custom strings to all generated passwords
+- **Batch Generation**: Create multiple password options at once
 
-## Installation
+### 🔒 Security Indicators
 
-### Store
+- **Entropy Display**: Visual strength indicators with bit entropy calculation
+- **Color Coding**: Instant visual feedback on password strength
+- **Detailed Metadata**: Word count, total length, and security metrics
 
-[Memorable Password Generator Extension for Raycast]()
+## 📖 Usage
 
-### Manual
+1. **Launch**: Open Raycast and type "Memorable Password Generator"
+2. **Configure**:
+   - Set word count (default: 3)
+   - Choose number of passwords to generate (default: 6)
+   - Select word list from dropdown
+   - Optionally specify separator
+3. **Generate**: Press Enter to create passwords
+4. **Copy**: Click any password to copy it to clipboard
+5. **Customize**: Access preferences (⌘,) for advanced options
 
-```shell
-git clone https://github.com/gandli/generate-password-raycast-extension
-cd generate-password-raycast-extension
-npm install && npm run dev
-```
+### Quick Tips
 
-## Usage
+- Use **⌘R** to regenerate passwords
+- Use **⌘⇧C** to copy plaintext word sequence
+- Switch word lists on-the-fly using the dropdown menu
 
-1. 🚀 Launch Raycast and open the Command Palette.
-2. 🖋️ Type "Generate Password" and select the corresponding command.
-3. ⚙️ Customize the password options, such as word count and password length.
-4. 🔑 Press Enter to generate passwords.
-5. 📋✅ Copy the generated password by clicking the copy button.
+## 🔐 Security Philosophy
 
-## Notes
+We balance two critical factors in password design:
 
-📝🔒 Please note that the generated passwords are strong and secure, but it is always recommended to use a password manager for storing and managing passwords.
+### Memorability
 
-## Author
+Passwords composed of actual words are easier to remember than random character strings. By using curated word lists like Oxford 3000, users can create passwords that stick in memory without needing to write them down.
 
-gandli
+### Robustness
 
-## GitHub
+Strong passwords resist brute-force attacks through:
 
-[GitHub Repository](https://github.com/gandli/generate-password-raycast-extension)
+- **Length**: Multiple words create longer passwords
+- **Complexity**: Leet speak and mixed casing add character variety
+- **Entropy**: High bit entropy ensures cryptographic strength
 
-🐞🛠️ Feel free to contribute, report issues, or suggest improvements on GitHub.
+**Example**: `Sunset-Mountain-River` → `Suns3t@M0unt@in-R1ver!`
 
-## License
+## 📊 Technical Details
 
-📜🔓 This extension is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+### Leet Speak Character Mapping
+
+| Original | Number | Symbol |
+|----------|--------|--------|
+| a        | 4      | @      |
+| b        | 8      | -      |
+| c        | -      | (      |
+| e        | 3      | &      |
+| g        | 9      | -      |
+| i        | 1      | !      |
+| l        | 1      | -      |
+| o        | 0      | -      |
+| s        | 5      | $      |
+| t        | 7      | +      |
+| z        | 2      | -      |
+
+### Word List Caching
+
+Word lists are cached in memory for optimal performance, ensuring fast password generation even with large vocabularies.
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs or issues
+- Suggest new features or word lists
+- Submit pull requests
+- Improve documentation
+
+Visit the [GitHub Repository](https://github.com/gandli/extensions) to get started.
+
+## 📝 Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history and updates.
+
+## 👤 Author
+
+**gandli**
+
+- GitHub: [@gandli](https://github.com/gandli)
+
+## 📜 License
+
+This extension is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+<p align="center">
+  <strong>⚠️ Security Note</strong><br>
+  While this extension generates strong passwords, always use a password manager for storing and managing your credentials.
+</p>

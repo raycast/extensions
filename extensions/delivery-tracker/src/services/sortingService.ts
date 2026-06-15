@@ -148,5 +148,7 @@ export function groupDeliveriesByStatus(
     }
   }
 
+  groups.inTransit = sortTracking(groups.inTransit, packages);
+
   return groups;
 }

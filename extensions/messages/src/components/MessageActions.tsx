@@ -1,8 +1,7 @@
 import { Action, ActionPanel, AI, Icon, Keyboard, open, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 
 import { extractOTP, getAttachmentType, getMessagesUrl } from "../helpers";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { Message } from "../hooks/useMessages";
 
 import Details from "./Details";
@@ -47,7 +46,7 @@ export default function MessageActions({ message, mutate, showDetails = true }: 
 
     prompt += `\n\nMessage: ${message.body}\n\nAnswer:`;
 
-    const reply = await AI.ask(prompt, { model: AI.Model["OpenAI_GPT4o-mini"] });
+    const reply = await AI.ask(prompt);
     toast.hide();
     return reply;
   }
@@ -121,10 +120,8 @@ export default function MessageActions({ message, mutate, showDetails = true }: 
       <ActionPanel.Section>
         {otp ? (
           <>
-            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.Paste title="Paste OTP Code" content={otp} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }} />
             <Action.CopyToClipboard
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy OTP Code"
               content={otp}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}

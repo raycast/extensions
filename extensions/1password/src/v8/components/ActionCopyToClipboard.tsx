@@ -2,7 +2,7 @@ import { Action, Clipboard, Icon, Keyboard, showHUD, showToast, Toast } from "@r
 import { execFileSync } from "node:child_process";
 
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
-import { ExtensionError, getCliPath, handleErrors, titleCaseWord } from "../utils";
+import { ExtensionError, getCliPath, handleErrors, titleCaseWord, windowsEnv } from "../utils";
 
 export function CopyToClipboard({
   attribute,
@@ -37,12 +37,12 @@ export function CopyToClipboard({
           let stdout;
           if (attribute === "otp") {
             // based on OTP-type not field name
-            stdout = execFileSync(cliPath, ["item", "get", id, "--otp"]);
+            stdout = execFileSync(cliPath, ["item", "get", id, "--otp"], windowsEnv ? { env: windowsEnv } : {});
           } else {
             const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
             const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
 
-            stdout = execFileSync(cliPath, ["read", uri]);
+            stdout = execFileSync(cliPath, ["read", uri], windowsEnv ? { env: windowsEnv } : {});
           }
 
           const value = stdout.toString().trim();

@@ -147,15 +147,7 @@
       "title": "Named Variable",
       "subtitle": "Easy Variable",
       "description": "Generate variable name according to the input text",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "queryText",
-          "placeholder": "Enter text to convert",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

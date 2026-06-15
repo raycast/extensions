@@ -1,0 +1,105 @@
+{
+  "valueDomains": {
+    "imageOutputFormat": [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"],
+    "percentageStep5": [
+      "100",
+      "95",
+      "90",
+      "85",
+      "80",
+      "75",
+      "70",
+      "65",
+      "60",
+      "55",
+      "50",
+      "45",
+      "40",
+      "35",
+      "30",
+      "25",
+      "20",
+      "15",
+      "10",
+      "5",
+      "0"
+    ],
+    "webpQuality": [
+      "lossless",
+      "100",
+      "95",
+      "90",
+      "85",
+      "80",
+      "75",
+      "70",
+      "65",
+      "60",
+      "55",
+      "50",
+      "45",
+      "40",
+      "35",
+      "30",
+      "25",
+      "20",
+      "15",
+      "10",
+      "5",
+      "0"
+    ],
+    "pngVariant": ["png-24", "png-8"],
+    "tiffCompression": ["deflate", "lzw"]
+  },
+  "preferences": [
+    {
+      "name": "defaultImageOutputFormat",
+      "title": "Default Image Output Format",
+      "description": "Default output format for image conversions.",
+      "default": ".jpg",
+      "domain": "imageOutputFormat"
+    },
+    {
+      "name": "defaultJpgQuality",
+      "title": "Default JPG Quality",
+      "description": "Default quality for JPG conversions (0-100).",
+      "default": "80",
+      "domain": "percentageStep5"
+    },
+    {
+      "name": "defaultWebpQuality",
+      "title": "Default WEBP Quality",
+      "description": "Default quality for WEBP conversions (Lossless or 0-100).",
+      "default": "80",
+      "domain": "webpQuality"
+    },
+    {
+      "name": "defaultPngVariant",
+      "title": "Default PNG Variant",
+      "description": "Default variant for PNG conversions.",
+      "default": "png-24",
+      "domain": "pngVariant"
+    },
+    {
+      "name": "defaultHeicQuality",
+      "title": "Default HEIC Quality (macOS only)",
+      "description": "Default quality for HEIC conversions (0-100).",
+      "default": "80",
+      "domain": "percentageStep5"
+    },
+    {
+      "name": "defaultTiffCompression",
+      "title": "Default TIFF Compression",
+      "description": "Default compression for TIFF conversions.",
+      "default": "deflate",
+      "domain": "tiffCompression"
+    },
+    {
+      "name": "defaultAvifQuality",
+      "title": "Default AVIF Quality",
+      "description": "Default quality for AVIF conversions (0-100).",
+      "default": "80",
+      "domain": "percentageStep5"
+    }
+  ]
+}

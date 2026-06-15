@@ -35,15 +35,29 @@ export default async function tool(input: Input) {
 
     // If no meetingId provided, search by title
     if (!meetingId && input.title) {
-      const searchFilter: { cursor?: string } = {};
-      const result = await listMeetings(searchFilter);
-
       const titleLower = input.title.toLowerCase();
-      const matchingMeeting = result.items.find((meeting) => {
-        const title = (meeting.title || "").toLowerCase();
-        const meetingTitle = (meeting.meetingTitle || "").toLowerCase();
-        return title.includes(titleLower) || meetingTitle.includes(titleLower);
-      });
+      let matchingMeeting: Meeting | undefined;
+      let cursor: string | undefined;
+      const maxPages = input.limit ? Math.ceil(input.limit / 100) : 10; // Limit pagination
+      let pagesSearched = 0;
+
+      // Paginate through all meetings to find a match
+      while (!matchingMeeting && pagesSearched < maxPages) {
+        const result = await listMeetings({ cursor });
+        pagesSearched++;
+
+        matchingMeeting = result.items.find((meeting) => {
+          const title = (meeting.title || "").toLowerCase();
+          const meetingTitle = (meeting.meetingTitle || "").toLowerCase();
+          return title.includes(titleLower) || meetingTitle.includes(titleLower);
+        });
+
+        if (matchingMeeting) break;
+
+        // Check if there are more pages
+        if (!result.nextCursor) break;
+        cursor = result.nextCursor;
+      }
 
       if (!matchingMeeting) {
         throw new Error(`No meeting found with title containing "${input.title}"`);

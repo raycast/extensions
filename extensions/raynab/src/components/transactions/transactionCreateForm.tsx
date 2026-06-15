@@ -147,7 +147,7 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
   // Form hook - always called
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
-      date: transaction?.date ? new Date(transaction.date) : new Date(new Date().toLocaleDateString()),
+      date: transaction?.date ? new Date(transaction.date) : new Date(),
       account_id: transaction?.account_id || accountId || '',
       amount: transaction?.amount?.toString() || '',
       payee_name: transaction?.payee_name || '',

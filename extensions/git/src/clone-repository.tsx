@@ -15,7 +15,7 @@ import { join } from "path";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { GitManager } from "./utils/git-manager";
 import { existsSync } from "fs";
-import { resolveTildePath } from "./utils/path-utils";
+import { extractRepoNameFromUrl } from "./utils/url-utils";
 
 interface CloneRepositoryArguments {
   url: string;
@@ -24,30 +24,34 @@ interface CloneRepositoryArguments {
 export default function CloneRepository(props: LaunchProps<{ arguments: CloneRepositoryArguments }>) {
   const [url, setUrl] = useState(props.arguments.url);
   const [parentDirectory, setParentDirectory] = useCachedState<string | undefined>("clone-parent-directory", undefined);
+  const [targetDirectoryName, setTargetDirectoryName] = useState<string>();
   const { addRepository } = useRepositoriesList();
 
-  const targetDirectory = useMemo(() => {
+  const resolvedTargetDirectory = useMemo(() => {
     if (!parentDirectory) {
       return undefined;
     }
-    const repoName = extractRepoNameFromUrl(url);
-    return join(parentDirectory, repoName);
-  }, [url, parentDirectory]);
 
-  const validateRepositoryPath = useMemo(() => {
-    if (!parentDirectory) {
+    if (!targetDirectoryName) {
+      return join(parentDirectory, extractRepoNameFromUrl(url));
+    }
+
+    return join(parentDirectory, targetDirectoryName);
+  }, [parentDirectory, targetDirectoryName]);
+
+  const validateRepositoryPath = (): string | undefined => {
+    if (!resolvedTargetDirectory) {
       return "Required";
     }
-    // Check if repository already exists
-    if (targetDirectory && existsSync(targetDirectory)) {
-      return `Directory "${targetDirectory}" already exists`;
+    if (existsSync(resolvedTargetDirectory)) {
+      return `Already exists`;
     }
 
     return undefined;
-  }, [url, targetDirectory]);
+  };
 
   const handleSubmit = async () => {
-    if (!targetDirectory) {
+    if (!resolvedTargetDirectory) {
       return;
     }
 
@@ -57,7 +61,6 @@ export default function CloneRepository(props: LaunchProps<{ arguments: CloneRep
     });
 
     try {
-      const resolvedTargetDirectory = resolveTildePath(targetDirectory);
       // Start non-blocking clone process (init + fetch via GitManager)
       const cloningProcess = await GitManager.startCloneRepository(url, resolvedTargetDirectory);
 
@@ -97,33 +100,24 @@ export default function CloneRepository(props: LaunchProps<{ arguments: CloneRep
         id="parentDirectory"
         title="Parent Directory"
         value={parentDirectory ? [parentDirectory] : []}
-        error={validateRepositoryPath}
+        error={parentDirectory ? undefined : "Required"}
         onChange={(paths) => setParentDirectory(paths[0] || undefined)}
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
       />
 
-      {targetDirectory && <Form.Description title="Target Directory" text={targetDirectory} />}
+      {parentDirectory && (
+        <Form.TextField
+          id="targetDirectory"
+          title="Target Directory Name"
+          value={targetDirectoryName}
+          onChange={(value) => setTargetDirectoryName(value)}
+          error={validateRepositoryPath()}
+          placeholder={extractRepoNameFromUrl(url)}
+          info="Optional"
+        />
+      )}
     </Form>
   );
-}
-
-/**
- * Extracts repository name from git URL.
- * Handles both HTTPS and SSH URLs.
- */
-function extractRepoNameFromUrl(url: string): string {
-  // Regular expression to extract repository name from URL
-  // Supports HTTPS and SSH formats URLs
-  const repoNameRegex = /(?:\/|:)(?<repoName>[^/]+?)(?:\.git)?$/;
-  const match = url.match(repoNameRegex);
-
-  // Extract repository name from named capture group
-  if (match && match.groups && match.groups.repoName) {
-    return match.groups.repoName;
-  }
-
-  // Default value if not found
-  return "repository";
 }

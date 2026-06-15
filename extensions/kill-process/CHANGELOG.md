@@ -1,17 +1,52 @@
 # Kill Process Changelog
 
+## [Bugfix] - 2026-05-27
+
+- Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.
+
+## [Added Restart Action] - 2026-04-08
+
+- Added `Restart` and `Force Restart` actions for restartable processes
+
+## [Added Kill All action] - 2026-04-01
+
+- Added action to kill all processes with the same name
+- Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
+
+## [UX Improvements] - 2026-02-11
+
+- Removed the redundant **Default Sort By** preference (sorting is now persisted via the command dropdown)
+
+## [UX Improvements] - 2026-02-10
+
+- Reorganized preferences into clearer sections
+- Avoid showing a redundant subtitle when it matches the process name
+
+## [Preferences] - 2026-02-04
+
+- Added preference to skip kill confirmation dialogs
+
+## [Fixes and Improvements] - 2026-01-13
+
+- Added shortcut for the **Copy Path** action
+- Added shortcut for the **Reload** action to the Windows version
+
+## [Windows Fix] - 2026-01-12
+
+- Fix powershell command on Windows by adding -NoProfile
+
 ## [Fixed Force Kill in MacOS] - 2025-12-16
 
 - Fixed force kill for MacOS by encapsulating the kill command within a zsh shell
 
 ## [Windows Fix] - 2025-12-02
 
- - Fix CPU and Memory values on Windows
+- Fix CPU and Memory values on Windows
 
 ## [AI Updates] - 2025-11-27
 
- - Extract AI instructions from package.json into dedicated `ai.yaml` file
- - Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
+- Extract AI instructions from package.json into dedicated `ai.yaml` file
+- Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
 
 ## [Windows Support] - 2025-08-29
 

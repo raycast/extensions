@@ -5,10 +5,12 @@ export type Todo = {
   name: string;
   status: 'open' | 'completed' | 'canceled';
   tags: string;
+  areaTags: string | null;
   project?: Project;
   area?: Area;
   dueDate: string;
   activationDate: string;
+  creationDate: string;
   notes: string;
   isProject?: boolean;
 };
@@ -28,7 +30,7 @@ export type Project = {
 export type Area = {
   id: string;
   name: string;
-  tags: string;
+  tags?: string;
   todos?: Todo[];
 };
 

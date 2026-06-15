@@ -1,3 +1,4 @@
+import { Logger } from "@/api/logger/logger.service";
 import { showToast, Toast } from "@raycast/api";
 
 import fs from "fs";
@@ -13,6 +14,8 @@ export interface Note {
 export interface NoteWithContent extends Note {
   content: string;
 }
+
+const logger = new Logger("Notes");
 
 export function appendText(notePath: string, content: string) {
   fs.appendFileSync(notePath, "\n" + content);
@@ -44,6 +47,7 @@ export function writeMarkdown(
   try {
     fs.mkdirSync(filePath, { recursive: true });
   } catch {
+    logger.warning("Failed to create directory structure");
     onDirectoryCreationFailed?.(filePath);
     return;
   }
@@ -52,9 +56,11 @@ export function writeMarkdown(
   try {
     fs.writeFileSync(path.join(filePath, fileName + ".md"), text);
   } catch {
+    logger.warning("Failed to write file");
     onFileWriteFailed?.(filePath, fileName);
     return;
   }
+  logger.success(`Note created at "${filePath}/${fileName}" with content "${text}"`);
   showToast({ title: "Note created", style: Toast.Style.Success });
 }
 
@@ -64,8 +70,10 @@ export function isNote(note: Note | undefined): note is Note {
 
 export function deleteNote(note: Note) {
   if (!fs.existsSync(note.path)) {
+    logger.warning(`Could not delete note ${note.path}. This path does not exist`);
     return false;
   }
   fs.unlinkSync(note.path);
+  logger.success(`Deleted note ${note.path}`);
   return true;
 }

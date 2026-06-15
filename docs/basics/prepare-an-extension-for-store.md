@@ -15,7 +15,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
-- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions-guidelines) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -103,7 +103,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 | Fun             | [8 Ball](https://www.raycast.com/rocksack/8-ball) – Returns an 8 ball like answer to questions.                                                                 |
 | Media           | [Unsplash](https://www.raycast.com/eggsy/unsplash) – Search images or collections on Unsplash, download, copy or set them as wallpaper without leaving Raycast. |
 | News            | [Hacker News](https://www.raycast.com/thomas/hacker-news) – Read the latest stories of Hacker News.                                                             |
-| Productivity    | [Todoist](https://www.raycast.com/doist/todoist) – Check your Todoist tasks and quickly create new ones.                                                |
+| Productivity    | [Todoist](https://www.raycast.com/thomaslombart/todoist) – Check your Todoist tasks and quickly create new ones.                                                |
 | Security        | [1Password 7](https://www.raycast.com/khasbilegt/1password7) – Search, open or edit your 1Password 7 passwords from Raycast.                                    |
 | System          | [Coffee](https://www.raycast.com/mooxl/coffee) – Prevent the sleep function on your mac.                                                                        |
 | Web             | [Wikipedia](https://www.raycast.com/vimtor/wikipedia) – Search Wikipedia articles and view them.                                                                |

@@ -10,7 +10,7 @@ interface AddHeartbeatFormValues {
   grace: string;
 }
 
-export default function Command(): JSX.Element {
+export default function AddHeartbeatCommand() {
   const preferences = getPreferenceValues<Preferences>();
   const { handleSubmit } = useForm<AddHeartbeatFormValues>({
     async onSubmit(values) {

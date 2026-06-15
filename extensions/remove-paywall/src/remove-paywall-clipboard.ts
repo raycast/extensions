@@ -1,6 +1,6 @@
-import { Clipboard, closeMainWindow, showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
+import { Clipboard, closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
 import { getRemovePaywallURL } from "./utils";
 
 export default async function Command() {

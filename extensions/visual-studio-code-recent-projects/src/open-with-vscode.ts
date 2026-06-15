@@ -1,7 +1,10 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { bundleIdentifier } from "./preferences";
+import { build } from "./lib/preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
+import { isMac, isWin } from "./lib/utils";
+import { getCurrentExplorerPath } from "./utils/win-scripts";
+import { getEditorApplication } from "./utils/editor";
 
 // Function to get selected Path Finder items
 const getSelectedPathFinderItems = async () => {
@@ -22,22 +25,43 @@ const getSelectedPathFinderItems = async () => {
 export default async function main() {
   try {
     let selectedItems: { path: string }[] = [];
-    const currentApp = await getFrontmostApplication();
+    const editor = await getEditorApplication(build);
 
-    if (currentApp.name === "Finder") {
-      selectedItems = await getSelectedFinderItems();
-    } else if (currentApp.name === "Path Finder") {
-      const paths = await getSelectedPathFinderItems();
-      selectedItems = paths.map((p) => ({ path: p }));
+    if (isMac) {
+      const currentApp = await getFrontmostApplication();
+      if (currentApp.name === "Finder") {
+        selectedItems = await getSelectedFinderItems();
+      } else if (currentApp.name === "Path Finder") {
+        const paths = await getSelectedPathFinderItems();
+        selectedItems = paths.map((p) => ({ path: p }));
+      }
+
+      if (selectedItems.length === 0) {
+        const currentPath = await getCurrentFinderPath();
+        if (currentPath.length === 0) throw new Error("Not a valid directory");
+        selectedItems = [{ path: currentPath }];
+      }
+
+      for (const item of selectedItems) {
+        await open(item.path, editor);
+      }
     }
 
-    if (selectedItems.length === 0) {
-      const currentPath = await getCurrentFinderPath();
-      if (currentPath.length === 0) throw new Error("Not a valid directory");
-      await open(currentPath, bundleIdentifier);
-    } else {
+    if (isWin) {
+      selectedItems = await getSelectedFinderItems();
+
+      if (selectedItems.length === 0) {
+        const currentPath = await getCurrentExplorerPath();
+
+        if (currentPath.length === 0) {
+          throw new Error("Not a valid directory.");
+        }
+
+        selectedItems = [{ path: currentPath }];
+      }
+
       for (const item of selectedItems) {
-        await open(item.path, bundleIdentifier);
+        open(item.path, editor);
       }
     }
 

@@ -83,20 +83,42 @@
       "placeholder": "^#\\s*end\\s+(.+)$"
     },
     {
+      "name": "configFileType",
+      "type": "dropdown",
+      "required": false,
+      "default": "zshrc",
+      "title": "Config File",
+      "description": "Select which shell configuration file to manage",
+      "data": [
+        {
+          "title": ".zshrc (Interactive shells)",
+          "value": "zshrc"
+        },
+        {
+          "title": ".zprofile (Login shells)",
+          "value": "zprofile"
+        },
+        {
+          "title": ".zshenv (All shells)",
+          "value": "zshenv"
+        }
+      ]
+    },
+    {
       "name": "enableCustomZshrcPath",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "label": "Use Custom Zshrc Path",
-      "title": "Use Custom Zshrc Path",
-      "description": "Specify a custom location for your zshrc file"
+      "label": "Use Custom Path",
+      "title": "Use Custom Path",
+      "description": "Specify a custom location for your shell config file (overrides above selection)"
     },
     {
       "name": "customZshrcPath",
       "type": "textfield",
       "required": false,
-      "title": "Custom Zshrc Path",
-      "description": "Full path to your zshrc file (e.g., /Users/username/.config/zshrc)",
+      "title": "Custom Path",
+      "description": "Full path to your config file (e.g., /Users/username/.config/zshrc)",
       "placeholder": "~/.zshrc"
     }
   ],
@@ -118,7 +140,7 @@
     "@vitest/ui": "^3.2.4",
     "eslint": "^9.22.0",
     "jsdom": "^27.0.1",
-    "prettier": "^3.5.3",
+    "prettier": "^3.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-test-renderer": "^19.0.0",

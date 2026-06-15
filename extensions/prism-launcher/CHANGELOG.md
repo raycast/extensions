@@ -1,5 +1,13 @@
 # Prism Launcher Changelog
 
+## [New Addition] - 2026-04-01
+
+- Added support for showing live server status in the servers list
+
+## [Fix] - 2026-01-09
+
+- Removed workaround and moved to using app picker
+
 ## [Fix] - 2025-12-01
 
 - Actual temp fix for windows

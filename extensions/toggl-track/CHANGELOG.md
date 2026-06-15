@@ -1,5 +1,38 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2026-05-15
+
+- Fixed "Resume Time Entry" on recent entries: use `Action` with `onAction` instead of `Action.SubmitForm`, which is for form submission and was incorrect in the list action panel
+
+## [Fix] - 2026-04-17
+
+- Clarified Low Data Mode documentation in README — activation takes effect on next command launch, and framed sync behavior as a user contract (up to 1 hour delay) rather than implementation details
+
+## [New Feature] - 2026-04-16
+
+- Add Low Data Mode for free-tier users: serves reads from local cache with hourly auto-sync (3 requests/hour), leaving 27 requests/hour for active use
+- Add manual sync action (Cmd+Shift+R) to force-refresh cached data on demand
+
+## [Bug Fixes] - 2026-04-15
+
+- Consolidated 5 parallel resource API calls into a single `/me?with_related_data=true` bootstrap request, reducing API usage from 5 calls to 1 when opening time entry forms
+- Reduced Menu Bar background refresh interval from 3 minutes to 10 minutes to further reduce API consumption for free-tier users (30 calls/hour limit)
+- Added optimistic caching for the running time entry after start/stop actions, eliminating a redundant API call per timer interaction
+
+## [New Feature] - 2026-03-10
+
+- Add optional Script Triggers preferences to run local shell scripts when a timer starts, stops, or is fetched, enabling integration with tools like Sketchybar or Hammerspoon without independent API polling
+
+## [Bug Fixes] - 2026-02-23
+
+- Reduced Menu Bar background refresh interval from 10 seconds to 3 minutes to prevent API rate limit exhaustion (240 calls/hour limit)
+- Changed default cache TTL from 0 to 30 seconds to reduce redundant API calls for project/client/tag data
+
+## [Bug Fixes] - 2026-01-05
+
+- Fixed `Toast` causing error when MenuBar refreshed (ref: [Issue #23821](https://github.com/raycast/extensions/issues/23821))
+- Modernized extension to use latest Raycast API
+
 ## [Enhancements] - 2025-11-24
 
 - Add Windows support
@@ -38,7 +71,7 @@
 
 ## [Bug Fixes] - 2024-08-02
 
-- Resolve issue when stopping a running time entry doesn't work
+- Resolve issue when stopping a running time entry doesn't work.
 
 ## [Bug Fixes] - 2024-07-31
 

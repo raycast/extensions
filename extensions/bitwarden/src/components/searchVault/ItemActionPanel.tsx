@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, getPreferenceValues } from "@raycast/api";
-import ComponentReverser from "~/components/ComponentReverser";
+import ComponentOrderer from "~/components/ComponentOrderer";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import {
   CopyPasswordAction,
@@ -7,15 +7,15 @@ import {
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
-  ShowCardDetailsAction,
+  PasteUsernameAction,
   ShowNotesAction,
-  ShowIdentityDetailsAction,
   CopyCardFieldsActions,
   CopyIdentityFieldsActions,
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
   CopyPublicKeyAction,
+  ShowItemDetailsAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
@@ -29,17 +29,21 @@ const { primaryAction } = getPreferenceValues<Preferences.Search>();
 const VaultItemActionPanel = () => {
   const { type, id } = useSelectedVaultItem();
 
+  const showDetailsAction = <ShowItemDetailsAction data-order-key="showDetails" />;
+
   return (
     <ActionPanel>
       {type === ItemType.LOGIN && (
         <ActionPanel.Section>
-          <ComponentReverser reverse={primaryAction === "paste"}>
-            <CopyPasswordAction />
-            <PastePasswordAction />
-          </ComponentReverser>
+          <ComponentOrderer first={primaryAction}>
+            {showDetailsAction}
+            <CopyPasswordAction data-order-key="copy" />
+            <PastePasswordAction data-order-key="paste" />
+          </ComponentOrderer>
           <CopyTotpAction />
           <PasteTotpAction />
           <CopyUsernameAction />
+          <PasteUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />
           <ShowNotesAction />
@@ -47,9 +51,7 @@ const VaultItemActionPanel = () => {
       )}
       {type === ItemType.CARD && (
         <>
-          <ActionPanel.Section>
-            <ShowCardDetailsAction />
-          </ActionPanel.Section>
+          {showDetailsAction}
           <ActionPanel.Section title="Card Fields">
             <CopyCardFieldsActions />
           </ActionPanel.Section>
@@ -60,9 +62,7 @@ const VaultItemActionPanel = () => {
       )}
       {type === ItemType.IDENTITY && (
         <>
-          <ActionPanel.Section>
-            <ShowIdentityDetailsAction />
-          </ActionPanel.Section>
+          {showDetailsAction}
           <ActionPanel.Section title="Identity Fields">
             <CopyIdentityFieldsActions />
           </ActionPanel.Section>
@@ -72,16 +72,22 @@ const VaultItemActionPanel = () => {
         </>
       )}
       {type === ItemType.NOTE && (
-        <ActionPanel.Section>
-          <ShowNotesAction />
-        </ActionPanel.Section>
+        <>
+          {showDetailsAction}
+          <ActionPanel.Section>
+            <ShowNotesAction />
+          </ActionPanel.Section>
+        </>
       )}
       {type === ItemType.SSH_KEY && (
-        <ActionPanel.Section>
-          <CopyPublicKeyAction />
-          <CopyKeyFingerprintAction />
-          <CopyPrivateKeyAction />
-        </ActionPanel.Section>
+        <>
+          <ActionPanel.Section>
+            {showDetailsAction}
+            <CopyPublicKeyAction />
+            <CopyKeyFingerprintAction />
+            <CopyPrivateKeyAction />
+          </ActionPanel.Section>
+        </>
       )}
       <ActionPanel.Section title="Custom Fields">
         <CopyCustomFieldsActions />

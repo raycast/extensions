@@ -70,7 +70,7 @@ export function buildSearchQuery(searchText: string, searchSize: number) {
 /**
  * Parses the Elasticsearch response and transforms it into SearchResult objects
  */
-export async function parseSearchResponse(response: Response): Promise<SearchResult[]> {
+export async function parseSearchResponse(response: Response, branchName: string): Promise<SearchResult[]> {
   const json = (await response.json()) as ElasticsearchResponse | ElasticsearchError | ElasticsearchCodeError;
 
   if ("code" in json) {
@@ -81,6 +81,8 @@ export async function parseSearchResponse(response: Response): Promise<SearchRes
     throw new Error(response.statusText);
   }
 
+  const githubBaseUrl = `${API_CONFIG.githubNixpkgsBase}/nixos-${branchName}`;
+
   return json.hits.hits.map(({ _source: result, _id: id }) => {
     return {
       id,
@@ -89,8 +91,7 @@ export async function parseSearchResponse(response: Response): Promise<SearchRes
       description: result.package_description,
       version: result.package_pversion,
       homepage: result.package_homepage,
-      source:
-        result.package_position && `${API_CONFIG.githubBaseUrl}/${result.package_position.replace(/:([0-9]+)$/, "")}`,
+      source: result.package_position && `${githubBaseUrl}/${result.package_position.replace(/:([0-9]+)$/, "")}`,
       outputs: result.package_outputs,
       defaultOutput: result.package_default_output,
       platforms: result.package_platforms.filter((platform) =>

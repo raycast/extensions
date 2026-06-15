@@ -5,16 +5,17 @@ import {
   Icon,
   List,
   Toast,
+  getPreferenceValues,
   launchCommand,
   LaunchType,
   showToast,
   open,
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
 import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
+import { useCarriers } from "./hooks/useCarriers";
 
 /**
  * Placeholder value returned by some carriers when the date is unknown.
@@ -22,13 +23,22 @@ import { useDeliveries } from "./hooks/useDeliveries";
  */
 const UNKNOWN_DATE_PLACEHOLDER = "--//--";
 
-/**
- * Supported date formats for parsing delivery dates.
- */
-const DATE_FORMATS = [
-  "dd.MM.yyyy HH:mm:ss", // European with seconds
-  "dd.MM.yyyy HH:mm", // European without seconds
-  "MMMM dd, yyyy HH:mm", // American
+const NUMERIC_DOT_FORMATS_MONTH_FIRST = [
+  "MM.dd.yyyy HH:mm:ss",
+  "MM.dd.yyyy HH:mm",
+  "dd.MM.yyyy HH:mm:ss",
+  "dd.MM.yyyy HH:mm",
+] as const;
+
+const NUMERIC_DOT_FORMATS_DAY_FIRST = [
+  "dd.MM.yyyy HH:mm:ss",
+  "dd.MM.yyyy HH:mm",
+  "MM.dd.yyyy HH:mm:ss",
+  "MM.dd.yyyy HH:mm",
+] as const;
+
+const REST_DATE_FORMATS = [
+  "MMMM dd, yyyy HH:mm", // American written format
   "yyyy-MM-dd HH:mm:ss", // ISO 8601
   "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
   "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
@@ -36,9 +46,67 @@ const DATE_FORMATS = [
   "EEEE d MMMM", // Portuguese format without time (e.g. "domingo 24 agosto")
 ] as const;
 
+/**
+ * Parse carrier/API date strings; ambiguous `dd.MM` vs `MM.dd` follows extension preference `ambiguousDotDateOrder`.
+ */
+function parseDeliveryDate(dateString: string, ambiguousNumericMonthFirst: boolean): Date | null {
+  const dateFormats = [
+    ...(ambiguousNumericMonthFirst ? NUMERIC_DOT_FORMATS_MONTH_FIRST : NUMERIC_DOT_FORMATS_DAY_FIRST),
+    ...REST_DATE_FORMATS,
+  ];
+
+  const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (dotSeparatedMatch) {
+    const [, first, second, , , , sec] = dotSeparatedMatch;
+    const firstNum = parseInt(first, 10);
+    const secondNum = parseInt(second, 10);
+    const hasSeconds = sec !== undefined;
+
+    if (firstNum > 12) {
+      const fmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+      const date = parse(dateString, fmt, new Date());
+      if (isValid(date)) return date;
+    } else if (secondNum > 12) {
+      const fmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+      const date = parse(dateString, fmt, new Date());
+      if (isValid(date)) return date;
+    } else {
+      const americanFmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+      const europeanFmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+      const [primaryFmt, secondaryFmt] = ambiguousNumericMonthFirst
+        ? [americanFmt, europeanFmt]
+        : [europeanFmt, americanFmt];
+      const primary = parse(dateString, primaryFmt, new Date());
+      if (isValid(primary)) return primary;
+      const secondary = parse(dateString, secondaryFmt, new Date());
+      if (isValid(secondary)) return secondary;
+    }
+  }
+
+  for (const fmt of dateFormats) {
+    const date = parse(dateString, fmt, new Date());
+    if (isValid(date)) return date;
+  }
+  return null;
+}
+
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
+  const { ambiguousDotDateOrder } = getPreferenceValues<Preferences>();
+  const ambiguousNumericMonthFirst = ambiguousDotDateOrder !== "day_month";
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
+  const { carriers } = useCarriers();
+
+  /**
+   * Get the carrier name from the carrier code.
+   *
+   * @param carrierCode The carrier code to look up
+   * @returns The carrier name, or the uppercase carrier code if not found
+   */
+  const getCarrierName = (carrierCode: string): string => {
+    const carrier = carriers.find((c) => c.code === carrierCode);
+    return carrier?.name || carrierCode.toUpperCase();
+  };
 
   /**
    * Calculate the number of days until the expected delivery date.
@@ -48,7 +116,9 @@ export default function Command() {
    */
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
     if (!delivery.date_expected) return null;
-    const deliveryDate = new Date(delivery.date_expected);
+    const parsed = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
+    if (!parsed) return null;
+    const deliveryDate = parsed;
     const today = new Date();
     deliveryDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
@@ -57,21 +127,7 @@ export default function Command() {
   };
 
   /**
-   * Try to parse a date string using a set of known formats.
-   *
-   * @param dateString The date string to parse
-   * @returns Date object if valid, otherwise null
-   */
-  const parseDate = (dateString: string): Date | null => {
-    for (const fmt of DATE_FORMATS) {
-      const date = parse(dateString, fmt, new Date(), { locale: ptBR });
-      if (isValid(date)) return date;
-    }
-    return null;
-  };
-
-  /**
-   * Format a date string as 'Feb 26, 14:30' or 'Feb 26' if no time.
+   * Format a date string as 'Wednesday 09:00' for recent dates or '30 December at 11:15' for older dates.
    *
    * @param dateString The date string to format
    * @returns Formatted date and time or 'Not available' if invalid
@@ -82,27 +138,42 @@ export default function Command() {
     // Check if the original string contains time information
     const hasTimeInfo = /[0-9]{1,2}:[0-9]{2}/.test(dateString) || /[0-9]{1,2}:[0-9]{2} [AP]M/i.test(dateString);
 
-    const date = parseDate(dateString);
+    const date = parseDeliveryDate(dateString, ambiguousNumericMonthFirst);
     if (!date) {
       console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
     }
-    const dateFormatted = date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
 
-    // Only show time if the original string had time information
-    if (!hasTimeInfo) {
-      return dateFormatted;
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    // For dates within the last 14 days (2 weeks), show day name with time
+    // This covers recent tracking events that are still relevant
+    if (daysDiff >= 0 && daysDiff < 14) {
+      const dayName = date.toLocaleDateString(undefined, { weekday: "long" });
+      if (hasTimeInfo) {
+        const timeFormatted = date.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        return `${dayName} ${timeFormatted}`;
+      }
+      return dayName;
     }
 
-    const timeFormatted = date.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-    return `${dateFormatted}, ${timeFormatted}`;
+    // For older dates, show "DD Month at HH:mm"
+    const day = date.getDate();
+    const month = date.toLocaleDateString(undefined, { month: "long" });
+    if (hasTimeInfo) {
+      const timeFormatted = date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      return `${day} ${month} at ${timeFormatted}`;
+    }
+    return `${day} ${month}`;
   };
 
   /**
@@ -121,8 +192,10 @@ export default function Command() {
    */
   const formatExpectedDelivery = (delivery: Delivery): string => {
     if (!delivery.date_expected) return "Not available";
-    const start = parseDate(delivery.date_expected);
-    const end = delivery.date_expected_end ? parseDate(delivery.date_expected_end) : null;
+    const start = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
+    const end = delivery.date_expected_end
+      ? parseDeliveryDate(delivery.date_expected_end, ambiguousNumericMonthFirst)
+      : null;
     if (!start) return "Not available";
 
     const now = new Date();
@@ -207,17 +280,41 @@ export default function Command() {
    * @returns JSX element for metadata panel
    */
   const generateDetailMetadata = (delivery: Delivery, daysUntil: number | null) => {
-    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
-    const deliveryDate = delivery.date_expected
-      ? `${formatExpectedDelivery(delivery)} ${daysUntil !== null ? (daysUntil < 0 ? `(${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)` : daysUntil === 0 ? "(Today)" : `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`) : ""}`
-      : "Not available";
+    const carrierName = getCarrierName(delivery.carrier_code);
+    const packageName = delivery.description || `From ${carrierName}`;
+    const formattedDate = delivery.date_expected ? formatExpectedDelivery(delivery) : null;
+    let deliveryDate: string;
+
+    if (!formattedDate) {
+      deliveryDate = "Not available";
+    } else if (daysUntil !== null) {
+      // Avoid redundant labels: if formatted date already says "Today" or "Tomorrow", don't repeat it
+      const isToday = formattedDate.startsWith("Today");
+      const isTomorrow = formattedDate.startsWith("Tomorrow");
+
+      if (isToday && daysUntil === 0) {
+        // Already says "Today", no need to add "(Today)"
+        deliveryDate = formattedDate;
+      } else if (isTomorrow && daysUntil === 1) {
+        // Already says "Tomorrow", no need to add "(in 1 day)"
+        deliveryDate = formattedDate;
+      } else if (daysUntil < 0) {
+        deliveryDate = `${formattedDate} (${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)`;
+      } else if (daysUntil === 0) {
+        deliveryDate = `${formattedDate} (Today)`;
+      } else {
+        deliveryDate = `${formattedDate} (in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`;
+      }
+    } else {
+      deliveryDate = formattedDate;
+    }
 
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Package" text={packageName} />
         <List.Item.Detail.Metadata.Label title="Expected Delivery Date" text={deliveryDate} />
         <List.Item.Detail.Metadata.Label title="Status" text={STATUS_DESCRIPTIONS[delivery.status_code]} />
-        <List.Item.Detail.Metadata.Label title="Carrier" text={delivery.carrier_code} />
+        <List.Item.Detail.Metadata.Label title="Carrier" text={carrierName} />
         <List.Item.Detail.Metadata.Label title="Tracking Number" text={delivery.tracking_number} />
         {delivery.extra_information && (
           <List.Item.Detail.Metadata.Label title="Additional Info" text={delivery.extra_information} />
@@ -310,11 +407,12 @@ export default function Command() {
       ) : (
         deliveries.map((delivery) => {
           const daysUntil = getDaysUntilDelivery(delivery);
+          const carrierName = getCarrierName(delivery.carrier_code);
 
           return (
             <List.Item
               key={`${delivery.tracking_number}-${delivery.extra_information || ""}`}
-              title={delivery.description || `Package from ${delivery.carrier_code.toUpperCase()}`}
+              title={delivery.description || `Package from ${carrierName}`}
               accessories={
                 [
                   {

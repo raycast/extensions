@@ -1,5 +1,13 @@
 # Kill Node Modules Changelog
 
+## [Multi-Folder Support] - 2026-02-11
+
+- Add folder list view to manage multiple scan directories with individual settings.
+- Add "Delete All" action to batch delete all node_modules in a folder.
+- Add configurable scan depth per folder with "Unlimited" option.
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Overhauled Extension for Performance and Configurability] - 2025-05-12
 
 This major update addresses key performance issues, introduces essential configuration options, and significantly refactors the codebase for better readability and modularity.

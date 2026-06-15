@@ -40,7 +40,7 @@ export const EditButton = ({
 export const BaseInput = ({ fieldName, badge, onChange }: ParameterProps & { fieldName: FieldName }) => {
   return (
     <Detail.Metadata.TagList title={fieldName}>
-      <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Green} />
+      <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Blue} />
       <EditButton fieldName={fieldName} badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
@@ -189,11 +189,11 @@ export const Logo = ({ badge, onChange }: ParameterProps) => {
             }
           />
         )}
-        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Green} />
+        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Blue} />
         {$icon && (
           <Detail.Metadata.TagList.Item
             text="base64"
-            color={isBase64Logo ? Colour.Green : Colour.SecondaryText}
+            color={isBase64Logo ? Colour.Blue : Colour.SecondaryText}
             onAction={async () => {
               if (isBase64Logo) {
                 onChange({ ...badge, logo: $icon.slug });

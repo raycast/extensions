@@ -324,7 +324,8 @@ export function CommitChangesAction(context: RepositoryContext) {
     case "regular":
     case "squash": {
       const hasStagedFiles = context.status.data?.files.some((f) => f.status === "staged");
-      if (!context.branches.data.currentBranch) return undefined;
+      // Only show if current branch exists or if repository is empty
+      if (!context.branches.data.currentBranch && context.branches.data.detachedHead) return undefined;
 
       return (
         <>

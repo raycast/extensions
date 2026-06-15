@@ -1,115 +1,140 @@
-import path from "path";
-import { execa } from "execa";
-import { environment } from "@raycast/api";
-import fs from "fs";
+import { TransportType, type AudioDevice, type IOType, isMacOS, isWindows, getAudioAPI } from "./platform";
 
-export enum TransportType {
-  Avb = "avb",
-  Aggregate = "aggregate",
-  Airplay = "airplay",
-  Autoaggregate = "autoaggregate",
-  Bluetooth = "bluetooth",
-  BluetoothLowEnergy = "bluetoothle",
-  "Built-In" = "builtin",
-  DisplayPort = "displayport",
-  Firewire = "firewire",
-  HDMI = "hdmi",
-  PCI = "pci",
-  Thunderbolt = "thunderbolt",
-  Usb = "usb",
-  Virtual = "virtual",
-  Unknown = "unknown",
-}
-
-export type AudioDevice = {
-  name: string;
-  isInput: boolean;
-  isOutput: boolean;
-  id: string;
-  uid: string;
-  transportType: TransportType;
-};
-
-const binaryAsset = path.join(environment.assetsPath, "audio-devices");
-const binary = path.join(environment.supportPath, "audio-devices");
-
-async function ensureBinary() {
-  if (!fs.existsSync(binary)) {
-    await execa("cp", [binaryAsset, binary]);
-    await execa("chmod", ["+x", binary]);
-  }
-}
-
-function throwIfStderr({ stderr }: { stderr: string }) {
-  if (stderr) {
-    throw new Error(stderr);
-  }
-}
-
-function parseStdout({ stdout, stderr }: { stderr: string; stdout: string }) {
-  throwIfStderr({ stderr });
-  return JSON.parse(stdout);
-}
+export { TransportType, type AudioDevice, type IOType, isMacOS, isWindows, getAudioAPI };
 
 export async function getAllDevices(): Promise<AudioDevice[]> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["list", "--json"]));
+  const api = await getAudioAPI();
+  return api.getAllDevices();
 }
 
 export async function getInputDevices(): Promise<AudioDevice[]> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["list", "--input", "--json"]));
+  const api = await getAudioAPI();
+  return api.getInputDevices();
 }
 
 export async function getOutputDevices(): Promise<AudioDevice[]> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["list", "--output", "--json"]));
-}
-
-export async function getDevice(deviceId: string): Promise<AudioDevice> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["get", "--json", deviceId]));
+  const api = await getAudioAPI();
+  return api.getOutputDevices();
 }
 
 export async function getDefaultOutputDevice(): Promise<AudioDevice> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["output", "get", "--json"]));
+  const api = await getAudioAPI();
+  return api.getDefaultOutputDevice();
 }
 
 export async function getDefaultInputDevice(): Promise<AudioDevice> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["input", "get", "--json"]));
+  const api = await getAudioAPI();
+  return api.getDefaultInputDevice();
 }
 
 export async function getDefaultSystemDevice(): Promise<AudioDevice> {
-  await ensureBinary();
-  return parseStdout(await execa(binary, ["system", "get", "--json"]));
+  const api = await getAudioAPI();
+  if (api.getDefaultSystemDevice) {
+    return api.getDefaultSystemDevice();
+  }
+  throw new Error("System device is not supported on this platform");
 }
 
 export async function setDefaultOutputDevice(deviceId: string) {
-  await ensureBinary();
-  return throwIfStderr(await execa(binary, ["output", "set", deviceId]));
+  const api = await getAudioAPI();
+  return api.setDefaultOutputDevice(deviceId);
 }
 
 export async function setDefaultInputDevice(deviceId: string) {
-  await ensureBinary();
-  return throwIfStderr(await execa(binary, ["input", "set", deviceId]));
+  const api = await getAudioAPI();
+  return api.setDefaultInputDevice(deviceId);
 }
 
 export async function setDefaultSystemDevice(deviceId: string) {
-  await ensureBinary();
-  return throwIfStderr(await execa(binary, ["system", "set", deviceId]));
+  const api = await getAudioAPI();
+  if (api.setDefaultSystemDevice) {
+    return api.setDefaultSystemDevice(deviceId);
+  }
+  return Promise.resolve();
 }
 
 export async function getOutputDeviceVolume(deviceId: string) {
-  await ensureBinary();
-  const { stdout, stderr } = await execa(binary, ["volume", "get", deviceId]);
-  return stderr ? undefined : parseFloat(stdout);
+  const api = await getAudioAPI();
+  if (api.getOutputDeviceVolume) {
+    return api.getOutputDeviceVolume(deviceId);
+  }
+  return undefined;
 }
 
 export async function setOutputDeviceVolume(deviceId: string, volume: number) {
-  await ensureBinary();
-  return throwIfStderr(await execa(binary, ["volume", "set", deviceId, `${volume}`]));
+  const api = await getAudioAPI();
+  if (api.setOutputDeviceVolume) {
+    return api.setOutputDeviceVolume(deviceId, volume);
+  }
+}
+
+export async function getOutputDeviceMute(deviceId: string) {
+  const api = await getAudioAPI();
+  if (api.getOutputDeviceMute) {
+    return api.getOutputDeviceMute(deviceId);
+  }
+  return undefined;
+}
+
+export async function setOutputDeviceMute(deviceId: string, muted: boolean) {
+  const api = await getAudioAPI();
+  if (api.setOutputDeviceMute) {
+    return api.setOutputDeviceMute(deviceId, muted);
+  }
+}
+
+export async function toggleOutputDeviceMute(deviceId: string) {
+  const api = await getAudioAPI();
+  if (api.toggleOutputDeviceMute) {
+    return api.toggleOutputDeviceMute(deviceId);
+  }
+  return false;
+}
+
+export async function getInputDeviceVolume(deviceId: string) {
+  const api = await getAudioAPI();
+  if (api.getInputDeviceVolume) {
+    return api.getInputDeviceVolume(deviceId);
+  }
+  return undefined;
+}
+
+export async function setInputDeviceVolume(deviceId: string, volume: number) {
+  const api = await getAudioAPI();
+  if (api.setInputDeviceVolume) {
+    return api.setInputDeviceVolume(deviceId, volume);
+  }
+}
+
+export async function getInputDeviceMute(deviceId: string) {
+  const api = await getAudioAPI();
+  if (api.getInputDeviceMute) {
+    return api.getInputDeviceMute(deviceId);
+  }
+  return undefined;
+}
+
+export async function setInputDeviceMute(deviceId: string, muted: boolean) {
+  const api = await getAudioAPI();
+  if (api.setInputDeviceMute) {
+    return api.setInputDeviceMute(deviceId, muted);
+  }
+}
+
+export async function toggleInputDeviceMute(deviceId: string) {
+  const api = await getAudioAPI();
+  if (api.toggleInputDeviceMute) {
+    return api.toggleInputDeviceMute(deviceId);
+  }
+  return false;
+}
+
+export async function getAllVolumeInfo(
+  type: "input" | "output",
+): Promise<Record<string, { volume?: number; muted?: boolean }>> {
+  const api = await getAudioAPI();
+  const fn = type === "output" ? api.getAllOutputVolumeInfo : api.getAllInputVolumeInfo;
+  return fn ? fn.call(api) : {};
 }
 
 export async function createAggregateDevice(
@@ -118,24 +143,17 @@ export async function createAggregateDevice(
   otherDeviceIds?: string[],
   options?: { multiOutput?: boolean },
 ): Promise<AudioDevice> {
-  await ensureBinary();
-  return parseStdout(
-    await execa(
-      binary,
-      [
-        "aggregate",
-        "create",
-        "--json",
-        options?.multiOutput ? "--multi-output" : "",
-        name,
-        mainDeviceId,
-        ...(otherDeviceIds || []),
-      ].filter(Boolean),
-    ),
-  );
+  const api = await getAudioAPI();
+  if (api.createAggregateDevice) {
+    return api.createAggregateDevice(name, mainDeviceId, otherDeviceIds, options);
+  }
+  throw new Error("Aggregate devices are not supported on this platform");
 }
 
 export async function destroyAggregateDevice(deviceId: string) {
-  await ensureBinary();
-  return throwIfStderr(await execa(binary, ["aggregate", "destroy", deviceId]));
+  const api = await getAudioAPI();
+  if (api.destroyAggregateDevice) {
+    return api.destroyAggregateDevice(deviceId);
+  }
+  throw new Error("Aggregate devices are not supported on this platform");
 }

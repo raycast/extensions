@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
 import { File } from "../api/getFiles";
 import { downloadFile, getFileIconLink, getMimeTypeLabel, humanFileSize } from "../helpers/files";
 import { formatDateTime, formatDuration } from "../helpers/formatters";
@@ -6,9 +6,20 @@ import { formatDateTime, formatDuration } from "../helpers/formatters";
 type FileListItemProps = {
   file: File;
   email?: string;
+  preferredBrowser?: string;
+  onEnterDirectory?: (file: File) => void;
+  goToParent?: () => void;
+  currentParentId?: string | undefined;
 };
 
-export default function FileListItem({ file, email }: FileListItemProps) {
+export default function FileListItem({
+  file,
+  email,
+  preferredBrowser,
+  onEnterDirectory,
+  goToParent,
+  currentParentId,
+}: FileListItemProps) {
   const createdTime = file.createdTime ? new Date(file.createdTime) : null;
   const modifiedByMeTime = file.modifiedByMeTime ? new Date(file.modifiedByMeTime) : null;
   const viewedByMeTime = file.viewedByMeTime ? new Date(file.viewedByMeTime) : null;
@@ -141,18 +152,26 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       detail={detail}
       actions={
         <ActionPanel title={file.name}>
-          <Action.OpenInBrowser
-            url={`${file.webViewLink}${
-              email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
-            }`}
+          <Action
+            title="Open in Browser"
+            icon={Icon.Globe}
+            onAction={() =>
+              open(
+                `${file.webViewLink}${email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""}`,
+                preferredBrowser || undefined,
+              )
+            }
           />
           {file.parents && file.parents.length > 0 && (
-            <Action.OpenInBrowser
+            <Action
               title="Reveal in Google Drive"
+              icon={Icon.Globe}
               // As of September 2020, a file can have exactly one parent folder
               // It's safe to assume the corresponding folder will be the first one
               // https://developers.google.com/drive/api/guides/ref-single-parent
-              url={`https://drive.google.com/drive/folders/${file.parents[0]}`}
+              onAction={() =>
+                open(`https://drive.google.com/drive/folders/${file.parents![0]}`, preferredBrowser || undefined)
+              }
             />
           )}
           <Action.OpenWith
@@ -163,6 +182,32 @@ export default function FileListItem({ file, email }: FileListItemProps) {
             }`}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
+
+          {((file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory) ||
+            (currentParentId && goToParent)) && (
+            <ActionPanel.Section>
+              {file.mimeType === "application/vnd.google-apps.folder" && onEnterDirectory && (
+                <Action
+                  title="Enter Directory"
+                  icon={Icon.ArrowRight}
+                  onAction={() => onEnterDirectory(file)}
+                  shortcut={{ modifiers: [], key: "tab" }}
+                />
+              )}
+
+              {currentParentId && goToParent && (
+                <Action
+                  title="Go to Parent Directory"
+                  icon={Icon.ArrowLeft}
+                  onAction={goToParent}
+                  shortcut={{
+                    macOS: { modifiers: ["shift"], key: "tab" },
+                    Windows: { modifiers: ["shift"], key: "tab" },
+                  }}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
 
           {file.webContentLink && (
             <Action

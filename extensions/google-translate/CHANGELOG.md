@@ -1,5 +1,26 @@
 # Google Translate Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Add Keyboard Shortcuts] - 2026-05-13
+
+- Added common Raycast keyboard shortcuts for language set management actions
+- Added common Raycast keyboard shortcuts for copy actions
+- Updated Raycast API and utils dependencies
+
+## [Feature] - 2026-04-15
+
+ - Added pronunciation text to quick translate command
+
+## [Cross Platform Shortcuts + Modernize] - 2025-12-24
+
+- Make `Shortcut`s cross-platform
+- Modernize to latest Raycast configuration with updated `React` (ref: [Issue #23410](https://github.com/raycast/extensions/issues/23410))
+- Fix "Javanese" language code
+- Add README.md
+
 ## [Feature] - 2025-10-02
 
  - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`

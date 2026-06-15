@@ -6,6 +6,8 @@ Spotify's most common features, now at your fingertips. Search for music and pod
 
 ## Commands
 
+> Commands with "💸" require Spotify Premium
+
 ### Search
 
 A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
@@ -121,6 +123,10 @@ Use this to skip ahead 15 seconds.
 ### Back 15 Seconds
 
 Use this to go back 15 seconds.
+
+### Queue (💸)
+
+Use this to see your queue.
 
 ---
 

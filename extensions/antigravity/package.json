@@ -5,7 +5,9 @@
   "description": "Control Antigravity directly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "antigravity-icon.png",
   "author": "meshal",
-  "contributors": [],
+  "contributors": [
+    "almoce"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",
@@ -50,6 +52,13 @@
       "name": "install-extension",
       "title": "Install Extension",
       "description": "Install Extensions from the Antigravity Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "antigravity-quota",
+      "title": "Antigravity Quota",
+      "subtitle": "Antigravity Quota Usage",
+      "description": "Antigravity quotas usage detail",
       "mode": "view"
     }
   ],

@@ -79,8 +79,8 @@ export default function Command({
           message: values.text,
           primaryAction: {
             title: `Open Chat in Messages`,
-            onAction() {
-              open(getMessagesUrl(chat));
+            async onAction() {
+              await open(getMessagesUrl(chat));
             },
           },
         });

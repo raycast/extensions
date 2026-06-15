@@ -19,6 +19,18 @@
       "title": "Prompt Builder",
       "description": "Design clear, consistent prompts in seconds",
       "mode": "view"
+    },
+    {
+      "name": "export",
+      "title": "Export Templates",
+      "description": "Save all templates as a JSON file",
+      "mode": "view"
+    },
+    {
+      "name": "import",
+      "title": "Import Templates",
+      "description": "Import templates from a JSON file",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -60,6 +60,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "circleback",
+    title: "Circleback",
+    description:
+      "Circleback's Model Context Protocol (MCP) server provides AI agents access to your Circleback data. It has tools available for searching and accessing meetings, transcripts, calendar events, emails, people, companies, and more.",
+    icon: "circleback.svg",
+    homepage: "https://circleback.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+    },
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
@@ -289,6 +301,24 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "razuna",
+    title: "Razuna",
+    description:
+      "AI-powered digital asset management for teams. Connect your AI assistant to Razuna's platform to search, organize, and manage your files using natural language commands.",
+    icon: {
+      source: {
+        light:
+          "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+        dark: "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+      },
+    },
+    homepage: "https://help.razuna.com/p/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
@@ -301,6 +331,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "sanity",
+    title: "Sanity",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    icon: "sanity.svg",
+    homepage: "https://www.sanity.io/docs/ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
     },
   },
   {
@@ -597,14 +638,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "anytype",
     title: "Anytype",
     description:
-      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
     icon: "anytype.png",
     homepage: "https://github.com/anyproto/anytype-mcp",
     configuration: {
       command: "npx",
       args: ["-y", "@anyproto/anytype-mcp"],
       env: {
-        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
       },
     },
   },
@@ -630,6 +671,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
+    },
+  },
+  {
+    name: "routemesh",
+    title: "RouteMesh",
+    description:
+      "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
+    icon: "https://routeme.sh/icon.png",
+    homepage: "https://github.com/routemesh/routemesh-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@routemesh/mcp"],
+      env: {
+        ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
+      },
     },
   },
 ];
@@ -671,6 +727,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         AIRTABLE_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "alai",
+    title: "Alai",
+    description:
+      "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
+    homepage: "https://getalai.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://slides-api.getalai.com/mcp/"],
     },
   },
   {
@@ -836,6 +904,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "vc-deal-flow-signal",
+    title: "VC Deal Flow Signal",
+    description:
+      "GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required.",
+    icon: "https://signals.gitdealflow.com/icon.png",
+    homepage: "https://github.com/kindrat86/vc-deal-flow-signal",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
 ];

@@ -25,7 +25,7 @@ function OpenUrlInBrowserAction() {
       title="Open in Browser"
       onAction={handleOpenUrlInBrowser}
       icon={Icon.Globe}
-      shortcut={{ macOS: { key: "o", modifiers: ["opt"] }, windows: { key: "o", modifiers: ["alt"] } }}
+      shortcut={{ macOS: { key: "o", modifiers: ["opt"] }, Windows: { key: "o", modifiers: ["alt"] } }}
     />
   );
 }

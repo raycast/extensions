@@ -19,8 +19,12 @@ export default function Command() {
           subtitle={template.description}
           icon={{ source: template.iconURL ?? "extension-icon.png", fallback: "extension-icon.png" }}
           accessories={[
-            { tag: { value: template.services.length.toString() + " services" }, tooltip: "Service Count" },
-            { tag: { value: template.deploymentCnt.toString() }, icon: Icon.Download, tooltip: "Deployment Count" },
+            { tag: { value: (template.services?.length ?? 0).toString() + " services" }, tooltip: "Service Count" },
+            {
+              tag: { value: (template.deploymentCnt ?? 0).toString() },
+              icon: Icon.Download,
+              tooltip: "Deployment Count",
+            },
           ]}
           actions={
             <ActionPanel>

@@ -20,6 +20,7 @@ import {
   getNumberFieldValidations,
   isEmoji,
 } from "../../utils";
+import { ObjectPropertyDropdown } from "../ObjectPropertyDropdown";
 
 export interface CreateObjectFormValues {
   spaceId?: string;
@@ -55,7 +56,6 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     types,
     templates,
     lists,
-    objects,
     selectedSpaceId,
     setSelectedSpaceId,
     selectedTypeId,
@@ -66,8 +66,6 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     setSelectedListId,
     listSearchText,
     setListSearchText,
-    objectSearchText,
-    setObjectSearchText,
     isLoadingData,
   } = useCreateObjectData(draftValues);
 
@@ -289,7 +287,6 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
           setSelectedTemplateId("");
           setSelectedListId("");
           setListSearchText("");
-          setObjectSearchText("");
         }}
         storeValue={true}
         placeholder="Search channels..."
@@ -507,28 +504,15 @@ It supports:
                 );
               case PropertyFormat.Objects:
                 return (
-                  // TODO: TagPicker would be the more appropriate component, but it does not support onSearchTextChange
-                  <Form.Dropdown
-                    {...restItemProps}
+                  <ObjectPropertyDropdown
                     key={property.id}
+                    propertyKey={property.key}
                     title={title}
                     value={String(value ?? "")}
-                    onSearchTextChange={setObjectSearchText}
-                    throttle={true}
-                    placeholder={`Search objects in '${spaces.find((space) => space.id === selectedSpaceId)?.name}'...`}
-                  >
-                    {!objectSearchText && (
-                      <Form.Dropdown.Item
-                        key="none"
-                        value=""
-                        title="No Object"
-                        icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
-                      />
-                    )}
-                    {objects.map((object) => (
-                      <Form.Dropdown.Item key={object.id} value={object.id} title={object.name} icon={object.icon} />
-                    ))}
-                  </Form.Dropdown>
+                    spaceId={selectedSpaceId}
+                    spaceName={spaces.find((space) => space.id === selectedSpaceId)?.name || ""}
+                    restItemProps={restItemProps}
+                  />
                 );
               default:
                 console.warn(`Unsupported property format: ${property.format}`);

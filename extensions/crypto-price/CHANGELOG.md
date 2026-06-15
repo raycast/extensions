@@ -1,5 +1,10 @@
 # Crypto Price
 
+## [Support any coin] - 2026-06-15
+
+- Remove the built-in allowlist so any coin symbol supported by the data source can be added (e.g. TRX, DOGE, ADA)
+- Fall back to the symbol itself as the display name for coins without a preset name
+
 ## [Configure coins with text] - 2024-03-25
 
 - Configure coins with text: default coins value is 'BTC | ETH BNB SOL XRP'

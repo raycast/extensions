@@ -11,11 +11,13 @@ export function useMdDefinitionSearch(
   const [searchText, setSearchText] = useState(initialText || "");
   const [aiResult, setAiResult] = useState<MdDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = useCallback(
     async (searchTerm: string) => {
       if (!searchTerm.trim()) {
         setAiResult(null);
+        setError(null);
         return;
       }
 
@@ -27,11 +29,13 @@ export function useMdDefinitionSearch(
       if (localMdDefinition) {
         // Text exists locally, no need to query AI
         setAiResult(null);
+        setError(null);
         return;
       }
 
-      // Clear previous AI result when starting a new search
+      // Clear previous AI result and error when starting a new search
       setAiResult(null);
+      setError(null);
 
       // Only query AI if text doesn't exist locally
       setIsLoading(true);
@@ -43,14 +47,17 @@ export function useMdDefinitionSearch(
 
       const result = await getMdDefinitionExplanation(searchTerm.trim());
 
-      if (result) {
+      if (result.definition) {
         toast.style = Toast.Style.Success;
         toast.title = "Query completed!";
-        setAiResult(result);
+        setAiResult(result.definition);
+        setError(null);
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to get explanation";
+        toast.message = result.error || undefined;
         setAiResult(null);
+        setError(result.error);
       }
 
       setIsLoading(false);
@@ -75,6 +82,7 @@ export function useMdDefinitionSearch(
 
   const clearAiResult = () => {
     setAiResult(null);
+    setError(null);
   };
 
   return {
@@ -82,6 +90,7 @@ export function useMdDefinitionSearch(
     setSearchText,
     aiResult,
     isLoading,
+    error,
     handleSearch,
     clearAiResult,
   };

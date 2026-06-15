@@ -4,27 +4,19 @@ import ini from "ini";
 import { join } from "path";
 
 import browsers from "./supported-browsers.json";
-import { sortProfiles } from "./utils";
+import { sortProfiles, isBrowserEnabled } from "./utils";
+import { BrowserProfile } from "./types";
 
-type FirefoxProfiles = {
+type BrowserProfiles = {
   name: string;
-  profiles: FirefoxProfile[];
+  profiles: BrowserProfile[];
 };
 
-type FirefoxProfile = {
-  type: string;
-  browser: string;
-  app: string;
-  path: string;
-  name: string;
-  icon: string;
-};
-
-export const getFirefoxProfiles = () => {
-  const profiles: FirefoxProfiles[] = [];
+export const getFirefoxProfiles = (filter: string[]) => {
+  const profiles: BrowserProfiles[] = [];
 
   browsers.firefox
-    .filter((browser) => fs.existsSync(browser.app))
+    .filter((browser) => fs.existsSync(browser.app) && isBrowserEnabled(filter, browser))
     .forEach((browser) => {
       const path = join(os.homedir(), browser.path, "profiles.ini");
       const exists = fs.existsSync(path);
@@ -36,7 +28,7 @@ export const getFirefoxProfiles = () => {
       const file = fs.readFileSync(path, "utf-8");
       const config = ini.parse(file);
 
-      const browserProfiles: FirefoxProfile[] = [];
+      const browserProfiles: BrowserProfile[] = [];
 
       Object.values(config).forEach((profile) => {
         if (!profile.Name) {
@@ -50,6 +42,8 @@ export const getFirefoxProfiles = () => {
           path: profile.Name,
           name: profile.Name,
           icon: browser.icon,
+          label: profile.Name,
+          uid: profile.Name,
         });
       });
 

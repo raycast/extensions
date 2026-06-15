@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memorable-generate-password",
   "title": "Memorable Password Generator",
-  "description": "Generate a set of passwords that are easy to remember and use·",
+  "description": "Generate a set of passwords that are easy to remember and use",
   "icon": "extension_icon.png",
   "author": "gandli",
   "contributors": [
@@ -22,31 +22,152 @@
       "arguments": [
         {
           "name": "wordCount",
-          "placeholder": "Number of word(3)",
+          "placeholder": "Number of words",
           "type": "text",
           "required": false
         },
         {
           "name": "passwordCount",
-          "placeholder": "Number of password(9)",
+          "placeholder": "Number of passwords",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "separator",
+          "placeholder": "Separator (e.g. -)",
           "type": "text",
           "required": false
         }
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultWordCount",
+      "title": "Default Word Count",
+      "description": "Default number of words to use",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "defaultPasswordCount",
+      "title": "Default Password Count",
+      "description": "Default number of passwords to generate",
+      "type": "textfield",
+      "default": "6",
+      "required": false
+    },
+    {
+      "name": "separator",
+      "title": "Default Separator",
+      "description": "Character used to join words",
+      "type": "textfield",
+      "default": "-",
+      "required": false
+    },
+    {
+      "name": "casing",
+      "title": "Casing Mode",
+      "description": "How to case the words",
+      "type": "dropdown",
+      "default": "lowercase",
+      "required": false,
+      "data": [
+        {
+          "title": "Lowercase",
+          "value": "lowercase"
+        },
+        {
+          "title": "Uppercase",
+          "value": "uppercase"
+        },
+        {
+          "title": "Pascal Case",
+          "value": "pascalcase"
+        },
+        {
+          "title": "Random",
+          "value": "random"
+        }
+      ]
+    },
+    {
+      "name": "wordList",
+      "title": "Preferred Word List",
+      "description": "Source of words for generation",
+      "type": "dropdown",
+      "default": "oxford",
+      "required": false,
+      "data": [
+        {
+          "title": "Oxford 3000 (English)",
+          "value": "oxford"
+        },
+        {
+          "title": "Chinese Idioms (成语)",
+          "value": "idioms"
+        },
+        {
+          "title": "Chinese Poetry (诗词)",
+          "value": "poetry"
+        },
+        {
+          "title": "Technology",
+          "value": "tech"
+        },
+        {
+          "title": "Nature",
+          "value": "nature"
+        },
+        {
+          "title": "Custom File",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customWordListPath",
+      "title": "Custom Word List Path",
+      "description": "Absolute path to a .txt file (one word per line)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "useLeetSpeak",
+      "label": "Enable Leet Speak",
+      "description": "Randomly replace letters with numbers/symbols",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "prefix",
+      "title": "Global Prefix",
+      "description": "Statically added prefix",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "suffix",
+      "title": "Global Suffix",
+      "description": "Statically added suffix",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.51.1"
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^2.2.2",
+    "pinyin-pro": "^3.27.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/lodash": "^4.14.194",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3",
-    "lodash": "^4.17.21"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -54,5 +175,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

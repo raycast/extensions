@@ -1,5 +1,66 @@
 # Apple Reminders Changelog
 
+## [Fix Create Reminder close shortcut] - 2026-05-19
+
+- Restored the Shift+Command+Enter shortcut for creating a reminder and closing the window.
+
+## [Customize Create Reminder Form and Manage Create Actions] - 2026-04-22
+
+- Add a new "Customize Create Reminder Form" command to control which field groups appear in the Create Reminder form.
+- Allow field groups to be turned on or off and moved up or down into a preferred order.
+- Add support for separators in the customizable layout so sections can be added, moved, and removed.
+- Add a "Customize Create Reminder Form" action directly inside the Create Reminder form.
+- Add a new "Manage Create Actions" command to configure Apple Shortcuts that run after reminders are created.
+- Allow shortcuts to be searched from the local `shortcuts` CLI and added as post-create actions.
+- Add support for enabling, disabling, reordering, renaming, and removing configured create actions.
+- Add per-action scope so shortcuts can run for "Create Reminder", "Quick Add Reminder", or both.
+- Add a "Manage Create Actions" action directly inside the Create Reminder form.
+- Run configured shortcuts after reminder creation without passing any input.
+- Preserve location-based alarms when updating a reminder due date.
+
+## [Fix Quick Add Reminder scheduling for past time-only input] - 2026-03-15
+
+- In `Quick Add Reminder` (non-AI mode), when a time is provided without an explicit date and that time has already passed, schedule the reminder for the next day instead of earlier today.
+- Resolves: https://github.com/raycast/extensions/issues/26334
+
+## [Prevent accidental recurring reminders from AI] - 2026-02-26
+
+- Add tool confirmations for recurring reminder creation and recurrence updates so users can approve recurrence changes.
+- Tighten AI instructions to explicitly avoid recurrence unless the user asks for it.
+- Add an AI eval for one-off reminder prompts to prevent recurrence regressions.
+- Resolves: https://github.com/raycast/extensions/issues/25489
+
+## [Fix Quick Add Reminder AI model selection] - 2026-02-10
+
+- Fix Quick Add Reminder to use user's selected AI model instead of hardcoded OpenAI GPT-4o
+- Fix date formatting bug in non-AI path when displaying success messages
+- Resolves: https://github.com/raycast/extensions/issues/23932
+
+## [Improve search results ordering] - 2026-02-06
+
+- Keep incomplete reminders above completed ones when filtering in My Reminders
+
+## [Fix crashes when reminder data is undefined] - 2026-01-28
+
+- Fix crash in menu bar when `data.reminders` is undefined or not an array
+- Add defensive checks in `getAttachedUrls` to handle undefined `attachedUrls` property
+- Resolves: https://github.com/raycast/extensions/issues/24450
+- Resolves: https://github.com/raycast/extensions/issues/24454
+
+## [Fix crash when attachedUrls is undefined] - 2026-01-13
+
+- Handle reminders where `attachedUrls` may be undefined to prevent runtime errors
+
+## [Open all attached reminder URLs] - 2026-01-13
+
+- Detect all URLs in reminder notes (and Reminder URL when available) and expose an “Open Attached URL(s)” action in the list and menu bar.
+
+## [Simplify AI schema for locations] - 2026-01-09
+
+- Constrain location icons to a small string enum and map back to Raycast icons to reduce AI tool schema branching (Gemini 2.5 fix)
+- Tighten proximity/icon enums for the location tool while keeping legacy values falling back to default icons
+- Resolves: [apple-reminders] Apple Reminders Extension Fails with Gemini 2.5 Pro #20635
+
 ## [Fix Day Grouping option displays duplicate days] - 2025-11-30
 
 - Fix an issue where enabling `Use Time of Day Grouping` would cause duplicate day sections to appear in the `My Reminders` view (Today and Scheduled)

@@ -19,6 +19,20 @@
       "subtitle": "Pipedrive",
       "description": "Search Pipedrive deals, people and organizations",
       "mode": "view"
+    },
+    {
+      "name": "add-contact",
+      "title": "Add Contact",
+      "subtitle": "Pipedrive",
+      "description": "Add a new contact",
+      "mode": "view"
+    },
+    {
+      "name": "add-deal",
+      "title": "Create Deal",
+      "subtitle": "Pipedrive",
+      "description": "Create a new deal",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -48,12 +62,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.8",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.13.10",
+    "@types/node": "^25.0.3",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",

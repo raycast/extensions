@@ -7,6 +7,7 @@ A Raycast Extension that instantly pastes rich text or HTML content into Markdow
 ## Features
 
 - **Instant Conversion**: Convert HTML clipboard content to Markdown with a single command
+- **GitHub Flavored Markdown Support**: Full GitHub Flavored Markdown (GFM) support including tables, strikethroughs, and tasklists
 - **Smart Detection**: Automatically detects HTML content in clipboard and provides helpful feedback for plain text
 - **Customizable Output**: Configure Markdown formatting through Raycast preferences
 - **Comprehensive Options**: Full control over Markdown formatting with all Turndown options
@@ -75,6 +76,7 @@ Customize the Markdown output through Raycast's Preferences pane:
 
 - Built with TypeScript for Raycast
 - Uses the [Turndown](https://github.com/mixmark-io/turndown) library for HTML-to-Markdown conversion
+- Enhanced with [@joplin/turndown-plugin-gfm](https://www.npmjs.com/package/@joplin/turndown-plugin-gfm) for GitHub Flavored Markdown support including tables, strikethroughs, and tasklists
 - Supports all Turndown configuration options for maximum customization
 - Follows Raycast extension best practices and conventions
 

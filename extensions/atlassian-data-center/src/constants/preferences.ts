@@ -21,7 +21,7 @@ const DEFAULT_WORKING_DAYS_PER_WEEK = 5;
 const DEFAULT_WORKING_HOURS_PER_DAY = 8;
 export const WORKING_DAYS_PER_WEEK = formatWorkingDaysPerWeek(preferences.jiraWorkingDaysPerWeek);
 export const WORKING_HOURS_PER_DAY = formatWorkingHoursPerDay(preferences.jiraWorkingHoursPerDay);
-export const WORKING_SERCONDS_PER_DAY = WORKING_HOURS_PER_DAY * 3600;
+export const WORKING_SECONDS_PER_DAY = WORKING_HOURS_PER_DAY * 3600;
 
 function formatPaginationSize(paginationSize: string) {
   const size = parseInt(paginationSize);

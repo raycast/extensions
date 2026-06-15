@@ -21,9 +21,9 @@ function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
       if (typeof props.tabOrUrl === "string") {
         await open(props.tabOrUrl, "company.thebrowser.Browser");
       } else {
-        await closeMainWindow();
         try {
           await selectTab(props.tabOrUrl);
+          closeMainWindow();
         } catch (e) {
           if (props.tabOrUrl.url) {
             await open(props.tabOrUrl.url, "company.thebrowser.Browser");
@@ -44,8 +44,8 @@ function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
 function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewWindow({ url: props.url });
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in new window" });
     }
@@ -64,8 +64,8 @@ function OpenInNewWindowAction(props: { url: string }) {
 function OpenInNewIncognitoWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewWindow({ incognito: true, url: props.url });
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in new incognito window" });
     }
@@ -84,8 +84,8 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
 function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewLittleArcWindow(props.url);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
     }
@@ -100,8 +100,8 @@ function OpenInSpaceAction(props: { url: string }) {
 
   async function openSpace(space: Space) {
     try {
-      await closeMainWindow();
       await makeNewTabWithinSpace(props.url, space);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in space" });
     }
@@ -123,8 +123,8 @@ function OpenInSpaceAction(props: { url: string }) {
 export function OpenSpaceAction(props: { space: Space }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await selectSpace(props.space);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening Space" });
     }
@@ -192,8 +192,8 @@ export function SearchWithGoogleAction(props: { searchText: string }) {
     try {
       const openTab = await findTab(searchUrl);
       if (openTab) {
-        await closeMainWindow();
         await selectTab(openTab);
+        closeMainWindow();
       } else {
         await open(searchUrl, "company.thebrowser.Browser");
       }

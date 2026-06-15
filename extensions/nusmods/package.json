@@ -35,18 +35,29 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "disqus_api_key",
+      "title": "Disqus API Key",
+      "description": "Your Disqus Public API Key.\nGet one by registering an application at https://disqus.com/api/applications/register/",
+      "type": "password",
+      "placeholder": "Enter your Disqus API Key",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0",
-    "@zod/mini": "^4.0.0-beta.20250420T053007"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "turndown": "^7.2.2",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

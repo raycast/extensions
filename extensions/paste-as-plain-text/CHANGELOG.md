@@ -1,5 +1,9 @@
 # Paste as Plain text Changelog
 
+## [Enhance Clean Line Breaks] - 2026-02-23
+
+- Collapse whitespace surrounding line breaks to produce a single space instead of preserving trailing/leading spaces
+
 ## [Maintenance] - 2025-10-23
 
 - Add support for Windows platform.

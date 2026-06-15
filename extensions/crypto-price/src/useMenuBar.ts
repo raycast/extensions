@@ -13,16 +13,23 @@ export function useMenuBar() {
   let items: string[] = [];
   let sections: { title: string; items: string[] }[] = [];
 
-  if (!isLoading && coins) {
+  if (!isLoading && !coins) {
+    title = "Unavailable";
+  } else if (!isLoading && coins) {
     const primarySymbols = coinsConfig.symbols.slice(0, coinsConfig.primaryCount);
     const secondarySymbols = coinsConfig.symbols.slice(coinsConfig.primaryCount);
-    title = primarySymbols.map((symbol) => genTitle(coins[symbol], style, currency)).join(" | ");
-    items = secondarySymbols.map((symbol) => {
+    const primaryCoins = primarySymbols.flatMap((symbol) => {
       const coin = coins[symbol];
-      return `${coin.symbol}: ${coin.priceDisplay}`;
+      return coin ? [coin] : [];
     });
-    sections = primarySymbols.map((symbol) => {
+    const secondaryCoins = secondarySymbols.flatMap((symbol) => {
       const coin = coins[symbol];
+      return coin ? [coin] : [];
+    });
+
+    title = primaryCoins.map((coin) => genTitle(coin, style, currency)).join(" | ");
+    items = secondaryCoins.map((coin) => `${coin.symbol}: ${coin.priceDisplay}`);
+    sections = primaryCoins.map((coin) => {
       return {
         title: coin.name,
         items: Object.entries(coin.more).map(([name, value]) => `${name}: ${value}`),

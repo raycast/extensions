@@ -1,5 +1,15 @@
 # Addy Changelog
 
+## [AI Alias Creation] - 2026-05-07
+
+### Added
+- New "Create Alias with AI" command: describe a purpose in plain language and AI generates a meaningful alias name and description
+
+## [Self-hosted Support] - 2026-01-15
+
+### Added
+- Support for self-hosted Addy instances via the Custom URL preference
+
 ## [Send Email from Alias & Improvements] - 2025-12-09
 
 ### Added

@@ -226,7 +226,7 @@ export interface ServerInfo {
     console: string;
     homepage: string;
     name: string;
-  };
+  } | null;
   ip: string;
   sshPort: number;
   sshUsername: string;
@@ -258,4 +258,111 @@ export interface ServerWithStatusInfo {
     __typename: string;
   };
   __typename: string;
+}
+
+// AI Hub Types
+export interface AIHubKey {
+  keyID: string;
+  alias: string;
+  cost: number;
+  __typename: string;
+}
+
+export interface AIHubTenantInfo {
+  balance: number;
+  keys: AIHubKey[];
+  providerCustomerID: string;
+  provider: string;
+  autoRechargeThreshold: number;
+  autoRechargeAmount: number;
+  __typename: string;
+}
+
+export interface AIHubTenant {
+  data: {
+    aihubTenant: AIHubTenantInfo;
+  };
+}
+
+export interface AIHubDailyUsage {
+  date: string;
+  spend: number;
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsageInfo {
+  totalSpend: number;
+  dailyUsage: AIHubDailyUsage[];
+  __typename: string;
+}
+
+export interface AIHubMonthlyUsage {
+  data: {
+    aihubMonthlyUsage: AIHubMonthlyUsageInfo;
+  };
+}
+
+// AIHub Spend Logs Types
+export interface AIHubSpendLog {
+  timestamp: string;
+  cost: number;
+  totalTokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  model: string;
+  keyAlias: string;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginatedInfo {
+  data: AIHubSpendLog[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  __typename: string;
+}
+
+export interface AIHubSpendLogsPaginated {
+  data: {
+    aihubSpendLogsPaginated: AIHubSpendLogsPaginatedInfo;
+  };
+}
+
+// Zeabur Email Types
+export interface ZeaburEmailAttachment {
+  filename: string;
+  content: string; // base64 encoded
+  content_type: string;
+}
+
+export interface ZeaburEmailPayload {
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  reply_to?: string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  attachments?: ZeaburEmailAttachment[];
+  headers?: Record<string, string>;
+  tags?: Record<string, string>;
+  scheduled_at?: string; // ISO 8601, only for scheduled endpoint
+}
+
+export interface ZeaburEmailResponse {
+  id: string;
+  message_id?: string;
+  status: string;
+}
+
+export interface ZeaburEmailScheduleResponse {
+  id: string;
+  status: string;
+}
+
+export interface ZeaburEmailErrorResponse {
+  error: string;
+  message?: string;
 }

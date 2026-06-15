@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "shorten-url-from-clipboard",
       "title": "Shorten URL Using Clipboard",
       "subtitle": "U301.com",
       "description": "Shorten URLs in Clipboard",
@@ -23,8 +23,62 @@
       "subtitle": "U301.com",
       "description": "Shorten selected URL to u301.com",
       "mode": "no-view"
+    },
+    {
+      "name": "index",
+      "title": "Shorten URL",
+      "subtitle": "U301.com",
+      "description": "Shorten original URL using U301 URL Shortener",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        },
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text"
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "create-short-link",
+      "title": "Create Short Link",
+      "description": "Create a new shortened link with u301.com"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@u301 create shortlink for www.raycast.com",
+        "mocks": {
+          "create-short-link": "https://u301.co/ai"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": {
+                  "includes": "www.raycast.com"
+                }
+              },
+              "name": "create-short-link"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "accessToken",
@@ -43,16 +97,44 @@
       "required": false,
       "default": "u301.co",
       "placeholder": "Leave empty to use default domain"
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "Workspace ID for shortened URL",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Leave empty to use your default workspace"
+    },
+    {
+      "name": "generateShortKeyByAI",
+      "title": "AI (Experimental)",
+      "description": "Slow down the process, but generate a more meaningful short key",
+      "label": "Generate default short key by AI",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "ShortKeyPrompt",
+      "title": "Prompt for Short Key Generation",
+      "description": "Use this prompt to generate any style of short key you want",
+      "label": "prompt for short key generation",
+      "type": "textfield",
+      "required": true,
+      "default": "Generate a key for shorten URL. The key should be meaningful and easy to remember, only contain letters and numbers, prefer lowercase and can't be too long. "
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.19.1",
+    "u301": "^0.0.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -63,5 +145,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

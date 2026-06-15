@@ -1,9 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import { AttributeValue } from "./types";
 import { queryRecords } from "./attio";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
 import { getObjectTitle } from "./objects";
+import OpenInAttio from "./open-in-attio";
 
 const getValue = (val: AttributeValue[]) => {
   if (!val.length) return "-";
@@ -85,7 +86,7 @@ export default function Records({ object }: { object: ObjectT }) {
             detail={<List.Item.Detail markdown={buildMarkdown(record.values)} />}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={record.web_url} />
+                <OpenInAttio url={record.web_url} />
               </ActionPanel>
             }
           />

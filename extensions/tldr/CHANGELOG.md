@@ -1,5 +1,9 @@
 # TLDR
 
+## [Fix] - 2026-01-05
+
+- Fixes https://github.com/raycast/extensions/issues/23848
+
 ## [Refactor and Add Windows Support] - 2025-12-17
 
 - Refactored the entire codebase to improve maintainability and readability.

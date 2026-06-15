@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ns-nl-search",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "title": "Netherlands Railways Train Search",
   "description": "With the Raycast extension for Netherlands Railways, you can easily find train schedules, routes, and real-time updates for the Dutch railway system. This extension simplifies the process of planning your journey by providing quick access to essential information directly from your Raycast interface. Whether you're commuting or traveling, stay informed with the latest train updates and ensure a smooth trip with just a few clicks.",
   "icon": "ns.png",

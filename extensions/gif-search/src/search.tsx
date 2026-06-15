@@ -96,6 +96,11 @@ export default function GifSearch() {
               icon={{ source: "tenor-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
+              title="Klipy"
+              value={GIF_SERVICE.KLIPY}
+              icon={{ source: "klipy-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
               title="Finer Gifs Club"
               value={GIF_SERVICE.FINER_GIFS}
               icon={{ source: "finergifs-logo.svg", tintColor: Color.PrimaryText }}

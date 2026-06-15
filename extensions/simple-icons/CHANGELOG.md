@@ -1,5 +1,25 @@
 # Brand Icons Changelog
 
+## [Enhancement] - 2026-05-27
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2026-04-08
+
+- Fix `raycast-tint-color` value
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2026-03-07
+
+- We reached 3400+ icons!
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-01
+
+- Add support for changing copy action to paste
+- Bump all dependencies to the latest
+
 ## [New Feature] - 2025-12-07
 
 - Add support for shuffling icons on start

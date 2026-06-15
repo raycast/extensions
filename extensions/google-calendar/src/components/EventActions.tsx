@@ -14,7 +14,7 @@ import { getCalendarClient } from "../lib/google";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 
-const preferences: Preferences.ListEvents = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 const EventActions = ({
   event,

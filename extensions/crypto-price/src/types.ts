@@ -21,5 +21,5 @@ export type SourceName = (typeof sourceNames)[number];
 
 export type UseSource = (
   currency: string,
-  symbols: string[]
+  symbols: string[],
 ) => { isLoading: boolean; coins: Record<string, Coin> | undefined };

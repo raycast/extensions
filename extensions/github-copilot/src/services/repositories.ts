@@ -70,6 +70,22 @@ export const fetchRepositoriesByOwner = async (owner: string, repoFilter?: strin
   }
 };
 
+export const fetchRepositoryById = async (id: number): Promise<Repository | null> => {
+  const octokit = getOctokit();
+
+  try {
+    const { data } = await octokit.request("GET /repositories/{id}", { id });
+    return {
+      id: data.id.toString(),
+      name: data.name,
+      owner: { login: data.owner.login },
+      nameWithOwner: data.full_name,
+    };
+  } catch (error) {
+    throw handleGitHubError(error);
+  }
+};
+
 export const fetchRepositoryByNwo = async (nwo: string): Promise<Repository | null> => {
   if (!nwo) {
     return null;

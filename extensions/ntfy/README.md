@@ -15,6 +15,10 @@ I suggest generating a random id with [nanoid][nanoid-gen]
 
 Then install the [ntfy app][ntfy-app] and subscribe to the topic on your phone.
 
+## Security
+
+If your topic is protected, please enter the "Access Token" in `Preferences`.
+
 ## Privacy and self-hosting
 
 Ntfy.sh is a public service, but you can also [host your own server][ntfy-self-host].

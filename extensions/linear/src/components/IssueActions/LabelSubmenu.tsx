@@ -75,7 +75,10 @@ export default function LabelSubmenu({
       <ActionPanel.Submenu
         title="Add Label"
         icon={Icon.Tag}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "l" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+        }}
         onOpen={() => setLoad(true)}
       >
         {availableLabels.map((label) => (
@@ -89,7 +92,14 @@ export default function LabelSubmenu({
       </ActionPanel.Submenu>
 
       {issue.labels.nodes.length > 0 ? (
-        <ActionPanel.Submenu title="Remove Label" icon={Icon.Tag} shortcut={{ modifiers: ["ctrl", "shift"], key: "l" }}>
+        <ActionPanel.Submenu
+          title="Remove Label"
+          icon={Icon.Tag}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "l" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+          }}
+        >
           {issue.labels.nodes.map((label) => (
             <Action
               key={label.id}

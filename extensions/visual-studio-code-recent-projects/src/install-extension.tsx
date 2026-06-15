@@ -6,26 +6,11 @@ import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
-} from "./extension-actions";
+} from "./lib/extension-actions";
+import { Shortcut } from "./lib/shortcuts";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
-import { compactNumberFormat } from "./utils";
-
-function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }) {
-  return (
-    <InstallExtensionByIDAction extensionID={getFullExtensionID(props.extension)} afterInstall={props.afterInstall} />
-  );
-}
-
-function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }) {
-  return (
-    <UninstallExtensionByIDAction
-      extensionID={getFullExtensionID(props.extension)}
-      extensionName={props.extension.displayName}
-      afterUninstall={props.afterUninstall}
-    />
-  );
-}
+import { compactNumberFormat } from "./lib/utils";
 
 export interface GalleryQueryResult {
   results: Result[];
@@ -148,9 +133,16 @@ function GalleryExtensionListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             {alreadyInstalled ? (
-              <UninstallExtensionAction extension={e} afterUninstall={props.reloadLocalExtensions} />
+              <UninstallExtensionByIDAction
+                extensionID={getFullExtensionID(props.extension)}
+                extensionName={props.extension.displayName}
+                afterUninstall={props.reloadLocalExtensions}
+              />
             ) : (
-              <InstallExtensionAction extension={e} afterInstall={props.reloadLocalExtensions} />
+              <InstallExtensionByIDAction
+                extensionID={getFullExtensionID(e)}
+                afterInstall={props.reloadLocalExtensions}
+              />
             )}
             <OpenExtensionByIDInVSCodeAction extensionID={getFullExtensionID(e)} />
           </ActionPanel.Section>
@@ -159,7 +151,7 @@ function GalleryExtensionListItem(props: {
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
               title="Copy Extension ID"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={Shortcut.Copy}
             />
           </ActionPanel.Section>
         </ActionPanel>

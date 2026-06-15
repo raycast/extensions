@@ -1,5 +1,9 @@
 # Browser Tabs Changelog
 
+## [Add Dia Browser Support] - 2026-01-04
+
+- Add Dia Browser support
+
 ## [New Icon Style] - 2025-07-07
 
 - Optimize extension icons for macOS Tahoe

@@ -1,5 +1,22 @@
 # 1Password Changelog
 
+## [Bug Fix] - 2026-06-15
+
+- Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed. Opt in via **Reduce item list memory usage** in extension preferences.
+- When enabled, the item list uses the summary payload, so username/email subtitles and username/email search are unavailable until full item details are fetched by an action.
+- When enabled, the list renders the first 200 matching items to avoid Raycast worker memory limits on very large vaults.
+
+## [Enhancements] - 2026-04-16
+
+- Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".
+
+## [Added Windows Support] - 2026-04-06
+
+- Added Windows platform support
+- Added Windows-compatible 1Password CLI path detection
+- Updated keyboard shortcuts for cross-platform compatibility
+- Updated setup guide for Windows (Windows Hello instead of Touch ID)
+
 ## [Chore] - 2025-11-15
 
 - Add stricter, opinionated eslint rules for clarity

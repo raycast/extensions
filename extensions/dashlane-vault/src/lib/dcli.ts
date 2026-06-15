@@ -5,6 +5,7 @@ import PQueue from "p-queue";
 import { safeParse } from "valibot";
 
 import {
+  AuthError,
   CLINotFoundError,
   CLINotLoggedInError,
   CLIVersionNotSupportedError,
@@ -17,12 +18,18 @@ import {
   getErrorString,
 } from "@/helper/error";
 import { Device, VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
+import os from "os";
+import path from "path";
 
 const preferences = getPreferenceValues<Preferences>();
 const cliQueue = new PQueue({ concurrency: 1 });
 
 const CLI_PATH = preferences.cliPath;
 const CLI_VERSION = getCLIVersion();
+
+const IS_WIN = process.platform === "win32";
+const IS_MAC = process.platform === "darwin";
+const CLI_TIMEOUT_MS = 15_000;
 
 async function dcli(...args: string[]) {
   if (!CLI_PATH) {
@@ -35,16 +42,10 @@ async function dcli(...args: string[]) {
 
   return cliQueue.add<string>(async () => {
     try {
-      const { stdout } = await execa(CLI_PATH, args, {
-        timeout: 15_000,
-        ...(preferences.masterPassword && {
-          env: {
-            DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
-          },
-        }),
-      });
+      const env = buildDashlaneEnv(preferences);
+      const { stdout } = await execa(CLI_PATH, args, { timeout: CLI_TIMEOUT_MS, env });
 
-      if (preferences.biometrics) {
+      if (preferences.biometrics && IS_MAC) {
         execaCommand("open -a Raycast.app");
       }
 
@@ -63,6 +64,17 @@ async function dcli(...args: string[]) {
 
           if (stderr.includes("Touch ID verification failed")) {
             throw new TouchIDVerificationFailed(error.stack ?? error.message);
+          }
+
+          if (stderr.includes("Error during authentication")) {
+            throw new AuthError(
+              {
+                title: "Logout",
+                shortcut: { modifiers: ["cmd"], key: "l" },
+                onAction: () => logout(),
+              },
+              error.stack ?? error.message,
+            );
           }
 
           throw new TimeoutError(error.stack ?? error.message);
@@ -164,6 +176,15 @@ export async function getOtpSecret(id: string) {
   }
 }
 
+export async function logout() {
+  try {
+    await dcli("logout");
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
+}
+
 function parseVaultCredentials(jsonString: string): VaultCredential[] {
   try {
     const parsed = JSON.parse(jsonString);
@@ -240,4 +261,20 @@ async function getCLIVersion() {
   } catch {
     return undefined;
   }
+}
+
+function buildDashlaneEnv(preferences: Preferences): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    ...(preferences.masterPassword ? { DASHLANE_MASTER_PASSWORD: preferences.masterPassword } : {}),
+  };
+
+  if (IS_WIN) {
+    const home = env.USERPROFILE ?? os.homedir();
+    env.USERPROFILE ??= home;
+    env.APPDATA ??= path.join(home, "AppData", "Roaming");
+    env.LOCALAPPDATA ??= path.join(home, "AppData", "Local");
+  }
+
+  return env;
 }

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
-import { Creativity } from "./lib/enum";
+import { Creativity, ThinkingEffort } from "./lib/enum";
 import { GetModels } from "./lib/ui/function";
 import * as React from "react";
 import { ValidationKeepAlive } from "./lib/ui/valitadion";
@@ -14,10 +14,11 @@ interface FormData {
   server: string;
   model: string;
   creativity: string;
+  thinking: string;
   keep_alive: string;
 }
 
-export default function Command() {
+export default function Command(): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
     onSubmit() {
@@ -27,6 +28,7 @@ export default function Command() {
     },
     initialValues: {
       creativity: String(Creativity.Medium),
+      thinking: String(ThinkingEffort.None),
       keep_alive: "5m",
     },
     validation: {
@@ -34,6 +36,7 @@ export default function Command() {
       model: FormValidation.Required,
       prompt: FormValidation.Required,
       creativity: FormValidation.Required,
+      thinking: FormValidation.Required,
       keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
     },
   });
@@ -49,6 +52,7 @@ export default function Command() {
 - Medium: 0.8 (Ollama Default)
 - High: 1.5
 - Maximum: 2`;
+  const InfoThinking = "Thinking Effort";
   const InfoPrompt = `Prompt Template, you can download public prompt form prompts.ray.so.
 The following tags are supported:
 - {selection}: Add selected text or clipboard to the prompt.
@@ -65,9 +69,10 @@ The following tags are supported:
               model: `${itemProps.server.value}:${itemProps.model.value}`,
               parameters: JSON.stringify({
                 creativity: itemProps.creativity.value,
+                thinking: itemProps.thinking.value,
                 keep_alive: CheckboxAdvanced && itemProps.keep_alive.value,
               }),
-            })
+            }),
           )}`,
         }}
       />
@@ -113,6 +118,27 @@ The following tags are supported:
           icon={Icon.StackedBars4}
           value={String(Creativity.Maximum)}
           key={Creativity.Maximum}
+        />
+      </Form.Dropdown>
+      <Form.Dropdown title="Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
+        <Form.Dropdown.Item title="None" value={String(ThinkingEffort.None)} key={ThinkingEffort.None} />
+        <Form.Dropdown.Item
+          title="Low"
+          icon={Icon.StackedBars1}
+          value={String(ThinkingEffort.Low)}
+          key={ThinkingEffort.Low}
+        />
+        <Form.Dropdown.Item
+          title="Medium"
+          icon={Icon.StackedBars2}
+          value={String(ThinkingEffort.Medium)}
+          key={ThinkingEffort.Medium}
+        />
+        <Form.Dropdown.Item
+          title="High"
+          icon={Icon.StackedBars3}
+          value={String(ThinkingEffort.High)}
+          key={ThinkingEffort.High}
         />
       </Form.Dropdown>
       <Form.TextArea title="Prompt" placeholder="Enter your prompt" info={InfoPrompt} {...itemProps.prompt} />
