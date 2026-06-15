@@ -404,7 +404,7 @@ export async function getOpenSessions(): Promise<OpenSession[]> {
 
   if (processIds.length === 0) return [];
 
-  const cutoff = Math.floor(Date.now() / 1000) - 60;
+  const cutoff = Date.now() - 60_000;
   const inClause = processIds.map((id) => `'${escapeSql(id)}'`).join(",");
 
   const [recentRows, todoRows] = await Promise.all([

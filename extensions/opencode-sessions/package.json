@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "search-sessions",
-      "title": "List Sessions",
+      "title": "Search Sessions",
       "subtitle": "OpenCode",
       "description": "Browse sessions with search, see active status, resume in terminal",
       "mode": "view"
