@@ -90,17 +90,15 @@ export async function connectPostHogAccount(): Promise<PostHogAccount> {
     authorizationRequest.codeVerifier,
     authorizationRequest.redirectURI
   );
-  const userInfo = await fetchUserInfo(metadata.userinfo_endpoint, tokenResponse.access_token).catch(() => null);
+  const userInfo = await fetchUserInfo(metadata.userinfo_endpoint, tokenResponse.access_token);
 
   const region = resolvePostHogRegion(
     tokenResponse.posthog_region ?? metadata.posthog_region,
     tokenResponse.posthog_base_url
   );
-  const accountId = createAccountId(region);
+  const accountId = createAccountId(region, userInfo);
   const providerId = `posthog-${accountId}`;
-  const existingAccount = (await getAccounts()).find(
-    (account) => account.id === accountId || account.region === region
-  );
+  const existingAccount = (await getAccounts()).find((account) => account.id === accountId);
 
   const account: PostHogAccount = {
     id: accountId,
@@ -131,8 +129,13 @@ export async function getAuthenticatedAccounts(): Promise<AuthenticatedPostHogAc
       accessToken: await getAccessToken(account),
     }))
   );
+  const authenticatedAccounts = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 
-  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  if (accounts.length > 0 && authenticatedAccounts.length === 0) {
+    throw firstRejectedError(results, "Could not authenticate any connected PostHog accounts.");
+  }
+
+  return authenticatedAccounts;
 }
 
 export async function getAccessToken(account: PostHogAccount): Promise<string> {
@@ -228,19 +231,18 @@ async function fetchUserInfo(userInfoEndpoint: string, accessToken: string): Pro
 
 async function saveConnectedAccount(account: PostHogAccount): Promise<void> {
   const accounts = await getAccounts();
-  const staleAccounts = accounts.filter(
-    (existingAccount) => existingAccount.region === account.region && existingAccount.id !== account.id
-  );
-  const retainedAccounts = accounts.filter(
-    (existingAccount) => existingAccount.region !== account.region || existingAccount.id === account.id
-  );
 
-  await saveAccounts(upsertAccount(retainedAccounts, account));
-  await Promise.all(staleAccounts.map(removeTokensForAccount));
+  await saveAccounts(upsertAccount(accounts, account));
 }
 
-function createAccountId(region: PostHogRegion): string {
-  return region;
+function createAccountId(region: PostHogRegion, userInfo: PostHogUserInfo): string {
+  const identity = userInfo.sub ?? userInfo.email ?? userInfo.preferred_username ?? userInfo.name;
+
+  if (!identity) {
+    throw new Error("PostHog did not return an account identity. Try reconnecting.");
+  }
+
+  return `${region}-${Buffer.from(identity, "utf8").toString("base64url")}`;
 }
 
 function resolvePostHogRegion(region: string | undefined, baseUrl: string | undefined): PostHogRegion {
@@ -259,4 +261,14 @@ function resolvePostHogRegion(region: string | undefined, baseUrl: string | unde
   }
 
   return "us";
+}
+
+function firstRejectedError(results: PromiseSettledResult<unknown>[], fallbackMessage: string): Error {
+  const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+
+  if (!rejected) {
+    return new Error(fallbackMessage);
+  }
+
+  return rejected.reason instanceof Error ? rejected.reason : new Error(String(rejected.reason));
 }

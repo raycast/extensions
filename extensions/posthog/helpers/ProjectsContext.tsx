@@ -132,7 +132,7 @@ export function ProjectSelector() {
   };
 
   return (
-    <List.Dropdown tooltip="Switch Project" value={selectedValue ?? undefined} onChange={handleChange} storeValue>
+    <List.Dropdown tooltip="Switch Account or Project" value={selectedValue ?? undefined} onChange={handleChange} storeValue>
       {projectGroups.map((group) => (
         <List.Dropdown.Section key={group.account.id} title={accountLabel(group.account)}>
           {group.projects.map((project) => (
@@ -157,6 +157,21 @@ async function loadProjectGroups(): Promise<ProjectGroup[]> {
       return { account, projects: data.results };
     })
   );
+  const projectGroups = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 
-  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  if (accounts.length > 0 && projectGroups.length === 0) {
+    throw firstRejectedError(results, "Could not load projects for any connected PostHog accounts.");
+  }
+
+  return projectGroups;
+}
+
+function firstRejectedError(results: PromiseSettledResult<unknown>[], fallbackMessage: string): Error {
+  const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+
+  if (!rejected) {
+    return new Error(fallbackMessage);
+  }
+
+  return rejected.reason instanceof Error ? rejected.reason : new Error(String(rejected.reason));
 }

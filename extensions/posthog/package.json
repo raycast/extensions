@@ -54,7 +54,7 @@
     {
       "name": "accounts",
       "title": "Manage Accounts",
-      "description": "Connect, switch, and remove PostHog accounts.",
+      "description": "Connect and remove PostHog accounts.",
       "mode": "view"
     }
   ],
