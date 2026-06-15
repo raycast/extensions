@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Open in Trello Desktop on Windows + default-target preference] - {PR_MERGE_DATE}
+## [Open in Trello Desktop on Windows + default-target preference] - 2026-06-15
 
 - Open boards and cards directly in the Trello desktop app on Windows via the `trello://` URL scheme (previously only worked on macOS).
 - New `Default Open Target` preference to choose whether pressing Enter opens links on Trello Web or in the Trello desktop app.
