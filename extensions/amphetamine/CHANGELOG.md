@@ -1,6 +1,6 @@
 # Changelog
 
-## [Require a fresh until-time on each launch] - {PR_MERGE_DATE}
+## [Require a fresh until-time on each launch] - 2026-06-15
 
 - The configurable session command no longer restores a past until-time. The Until Time mode
   now starts empty and requires you to choose a future time.
