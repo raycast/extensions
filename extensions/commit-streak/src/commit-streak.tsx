@@ -24,6 +24,8 @@ interface Milestone {
 }
 
 const SVG_TINT = { light: "#000000", dark: "#ffffff" };
+const GITHUB_CONTRIBUTIONS_START_YEAR = 2008;
+const HISTORICAL_FETCH_BATCH_SIZE = 3;
 
 const MILESTONES: Milestone[] = [
   { days: 365, icon: Icon.Rocket, label: "1y", exactLabel: true },
@@ -148,6 +150,23 @@ function calculateStreak(weeks: { contributionDays: ContributionDay[] }[]): Stre
   }
 }
 
+function getPreviousYearRange(from: Date): { from: Date; to: Date } | null {
+  const to = new Date(from);
+  to.setDate(to.getDate() - 1);
+
+  if (to.getFullYear() < GITHUB_CONTRIBUTIONS_START_YEAR) {
+    return null;
+  }
+
+  const rangeFrom = new Date(to);
+  rangeFrom.setDate(rangeFrom.getDate() - 364);
+
+  return {
+    from: rangeFrom,
+    to,
+  };
+}
+
 export default function CommitStreak() {
   const preferences = getPreferenceValues<Preferences.CommitStreak>();
   const [streak, setStreak] = useState<StreakResult | null>(null);
@@ -194,7 +213,7 @@ export default function CommitStreak() {
     setError(null);
 
     try {
-      let to = new Date();
+      const to = new Date();
       let from = new Date();
       from.setDate(from.getDate() - 364);
 
@@ -202,12 +221,22 @@ export default function CommitStreak() {
       let result = calculateStreak(allWeeks);
 
       while (result.capped) {
-        to = new Date(from);
-        to.setDate(to.getDate() - 1);
-        from = new Date(to);
-        from.setDate(from.getDate() - 364);
-        const prevWeeks = await fetchYear(from, to);
+        const ranges: { from: Date; to: Date }[] = [];
+
+        for (let i = 0; i < HISTORICAL_FETCH_BATCH_SIZE; i++) {
+          const range = getPreviousYearRange(from);
+          if (!range) break;
+
+          ranges.push(range);
+          from = range.from;
+        }
+
+        if (ranges.length === 0) break;
+
+        const previousYears = await Promise.all(ranges.map((range) => fetchYear(range.from, range.to)));
+        const prevWeeks = previousYears.flat();
         if (prevWeeks.length === 0) break;
+
         allWeeks = [...prevWeeks, ...allWeeks];
         result = calculateStreak(allWeeks);
       }
