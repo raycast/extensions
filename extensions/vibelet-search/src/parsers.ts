@@ -616,6 +616,28 @@ function buildSnippet(text: string, lowerQuery: string, queryLength: number): st
  */
 const execFileAsync = promisify(execFile);
 
+export function buildRipgrepArgs(query: string, searchDirs: string[]): string[] {
+  return [
+    "--fixed-strings",
+    "--ignore-case",
+    "--max-count",
+    "1",
+    "--max-columns",
+    "2048",
+    "--max-columns-preview",
+    "--max-filesize",
+    "20M",
+    "--glob",
+    "*.jsonl",
+    "--no-heading",
+    "--with-filename",
+    "--line-number",
+    "--",
+    query,
+    ...searchDirs,
+  ];
+}
+
 // Returns tuples (not a Map) because the result flows through useCachedPromise's
 // JSON-serializing cache; a Map rehydrates as {} and breaks iteration.
 export async function searchSessionContent(query: string, limit: number): Promise<Array<[string, string]>> {
@@ -632,32 +654,11 @@ export async function searchSessionContent(query: string, limit: number): Promis
 
   let output: string;
   try {
-    const { stdout } = await execFileAsync(
-      rgPath,
-      [
-        "--fixed-strings",
-        "--ignore-case",
-        "--max-count",
-        "1",
-        "--max-columns",
-        "2048",
-        "--max-columns-preview",
-        "--max-filesize",
-        "20M",
-        "--glob",
-        "*.jsonl",
-        "--no-heading",
-        "--with-filename",
-        "--line-number",
-        query,
-        ...searchDirs,
-      ],
-      {
-        encoding: "utf-8",
-        maxBuffer: 2 * 1024 * 1024,
-        timeout: 15000,
-      },
-    );
+    const { stdout } = await execFileAsync(rgPath, buildRipgrepArgs(query, searchDirs), {
+      encoding: "utf-8",
+      maxBuffer: 2 * 1024 * 1024,
+      timeout: 15000,
+    });
     output = stdout;
   } catch (err) {
     // ripgrep exits with code 1 when there are no matches — that's not an error.
