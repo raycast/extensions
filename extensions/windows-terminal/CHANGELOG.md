@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Fix SSH Profiles] - {PR_MERGE_DATE}
+## [Fix SSH Profiles] - 2026-06-15
 
 - Fixed SSH profiles by preserving the Windows OpenSSH path when launching Windows Terminal
 
