@@ -1,6 +1,6 @@
 # HTTP Status Codes Changelog
 
-## [Fix Section Labels] - {PR_MERGE_DATE}
+## [Fix Section Labels] - 2026-06-15
 
 - Shorten status-code section subtitles so they do not overflow in the list header
 
