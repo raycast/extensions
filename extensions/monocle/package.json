@@ -25,7 +25,7 @@
     },
     {
       "name": "on",
-      "title": "Turn Overlay on",
+      "title": "Turn Overlay On",
       "subtitle": "Enable the overlay",
       "description": "Turn the Monocle overlay on",
       "mode": "no-view",
@@ -33,7 +33,7 @@
     },
     {
       "name": "off",
-      "title": "Turn Overlay off",
+      "title": "Turn Overlay Off",
       "subtitle": "Disable the overlay",
       "description": "Turn the Monocle overlay off",
       "mode": "no-view",
@@ -125,7 +125,7 @@
     },
     {
       "name": "monochrome-on",
-      "title": "Turn Monochrome on",
+      "title": "Turn Monochrome On",
       "subtitle": "Enable monochrome",
       "description": "Turn the Monocle monochrome effect on",
       "mode": "no-view",
@@ -133,7 +133,7 @@
     },
     {
       "name": "monochrome-off",
-      "title": "Turn Monochrome off",
+      "title": "Turn Monochrome Off",
       "subtitle": "Disable monochrome",
       "description": "Turn the Monocle monochrome effect off",
       "mode": "no-view",
@@ -168,16 +168,46 @@
           "type": "dropdown",
           "required": true,
           "data": [
-            { "title": "System", "value": "system" },
-            { "title": "Blue", "value": "blue" },
-            { "title": "Purple", "value": "purple" },
-            { "title": "Pink", "value": "pink" },
-            { "title": "Red", "value": "red" },
-            { "title": "Orange", "value": "orange" },
-            { "title": "Yellow", "value": "yellow" },
-            { "title": "Green", "value": "green" },
-            { "title": "Graphite", "value": "graphite" },
-            { "title": "Black", "value": "black" }
+            {
+              "title": "System",
+              "value": "system"
+            },
+            {
+              "title": "Blue",
+              "value": "blue"
+            },
+            {
+              "title": "Purple",
+              "value": "purple"
+            },
+            {
+              "title": "Pink",
+              "value": "pink"
+            },
+            {
+              "title": "Red",
+              "value": "red"
+            },
+            {
+              "title": "Orange",
+              "value": "orange"
+            },
+            {
+              "title": "Yellow",
+              "value": "yellow"
+            },
+            {
+              "title": "Green",
+              "value": "green"
+            },
+            {
+              "title": "Graphite",
+              "value": "graphite"
+            },
+            {
+              "title": "Black",
+              "value": "black"
+            }
           ]
         }
       ]
@@ -239,7 +269,7 @@
     },
     {
       "name": "app-wide-focus-on",
-      "title": "Turn App-Wide Focus on",
+      "title": "Turn App-Wide Focus On",
       "subtitle": "Enable showing all windows",
       "description": "Turn app-wide focus on (show all windows from the focused app)",
       "mode": "no-view",
@@ -247,7 +277,7 @@
     },
     {
       "name": "app-wide-focus-off",
-      "title": "Turn App-Wide Focus off",
+      "title": "Turn App-Wide Focus Off",
       "subtitle": "Disable showing all windows",
       "description": "Turn app-wide focus off",
       "mode": "no-view",
