@@ -32,7 +32,7 @@
       "type": "password",
       "required": true,
       "title": "UniRate API Key",
-      "description": "Free API key from https://unirateapi.com/dashboard. The free tier covers latest-rate endpoints; historical and commodities require a Pro key.",
+      "description": "Free API key from https://unirateapi.com/register. The free tier covers latest-rate endpoints; historical and commodities require a Pro key.",
       "placeholder": "Your UniRate API key"
     },
     {

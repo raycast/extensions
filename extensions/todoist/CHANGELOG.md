@@ -8,6 +8,10 @@
 - **AI tools** accept comma-separated or JSON-array strings for labels, resource types, and comment notification user IDs.
 - **Windows**: Fixed the Create View Quicklink keyboard shortcut (`Ctrl` + `Shift` + `N`).
 
+## [Fix Create Task tool paid fields] - 2026-05-28
+
+- The Create Task tool now omits empty or invalid `deadline` and `duration` fields so standard task creation works for Todoist Free plan users.
+
 ## [Include deadlines in Today] - 2026-05-20
 
 - Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.

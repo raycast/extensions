@@ -5,6 +5,7 @@ import { Board } from "./Board";
 import { List as TrelloList } from "./List";
 import { TrelloCard } from "./trelloResponse.model";
 import { CardListItem } from "./TrelloListItem";
+import { getDefaultOpenTarget, toTrelloAppUrl } from "./utils/openInTrello";
 
 export default function CardsForList() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -44,6 +45,15 @@ export default function CardsForList() {
     [boards, selectedBoard],
   );
 
+  const selectedBoardUrl = boards.find((b) => b.id === selectedBoard)?.shortUrl ?? "";
+  const appFirst = getDefaultOpenTarget() === "app";
+  const openWebAction = (
+    <Action.OpenInBrowser title="Open Board on Trello Web" icon={Icon.Globe} url={selectedBoardUrl} />
+  );
+  const openAppAction = (
+    <Action.Open title="Open Board in Trello Desktop" icon={Icon.AppWindow} target={toTrelloAppUrl(selectedBoardUrl)} />
+  );
+
   return (
     <List
       isLoading={loading}
@@ -65,10 +75,8 @@ export default function CardsForList() {
             actions={
               <ActionPanel>
                 <Action.Push title="View Cards" icon={Icon.Eye} target={<CardsList list={list} />} />
-                <Action.OpenInBrowser
-                  title="Open Board"
-                  url={boards.find((b) => b.id === selectedBoard)?.shortUrl ?? ""}
-                />
+                {appFirst ? openAppAction : openWebAction}
+                {appFirst ? openWebAction : openAppAction}
               </ActionPanel>
             }
           />

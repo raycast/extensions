@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
+
+- Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
+
 ## [Add deep link arguments to Set Status] - 2026-06-09
 
 - The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
