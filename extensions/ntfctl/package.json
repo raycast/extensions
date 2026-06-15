@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ntfctl",
+  "title": "Ntfctl",
+  "description": "ntfctl — control macOS Notification Center from the keyboard \u2014 plus toggle Do Not Disturb \u2014 all from the keyboard via Raycast.",
+  "icon": "bell.png",
+  "author": "ahnopologetic",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clear-notifications",
+      "title": "Clear All Notifications",
+      "subtitle": "ntfctl",
+      "description": "Dismiss every visible notification banner in Notification Center.",
+      "mode": "no-view",
+      "icon": "clear-icon.png"
+    },
+    {
+      "name": "latest-notification",
+      "title": "Peek at Latest Notification",
+      "subtitle": "ntfctl",
+      "description": "Show the newest notification's app, title, and body.",
+      "mode": "view",
+      "icon": "latest-icon.png"
+    },
+    {
+      "name": "dismiss-notification",
+      "title": "Dismiss Latest Notification",
+      "subtitle": "ntfctl",
+      "description": "Dismiss only the top-most notification banner.",
+      "mode": "no-view",
+      "icon": "dismiss-icon.png"
+    },
+    {
+      "name": "notification-count",
+      "title": "Count Notifications",
+      "subtitle": "ntfctl",
+      "description": "Show how many notification banners are waiting.",
+      "mode": "view",
+      "icon": "count-icon.png"
+    },
+    {
+      "name": "toggle-dnd",
+      "title": "Toggle Do Not Disturb",
+      "subtitle": "ntfctl",
+      "description": "Flip Do Not Disturb / Focus mode on or off.",
+      "mode": "no-view",
+      "icon": "dnd-icon.png"
+    },
+    {
+      "name": "toggle-notification-center",
+      "title": "Toggle Notification Center",
+      "subtitle": "ntfctl",
+      "description": "Open or close the Notification Center panel.",
+      "mode": "no-view",
+      "icon": "center-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "postbuild": "mkdir -p dist/scripts && cp ../*.applescript dist/scripts/",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
