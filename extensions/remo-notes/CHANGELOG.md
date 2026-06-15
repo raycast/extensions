@@ -1,6 +1,6 @@
 # Remo Changelog
 
-## [Note editing, AI Extension and performance] - {PR_MERGE_DATE}
+## [Note editing, AI Extension and performance] - 2026-06-15
 
 - Added a Raycast AI Extension: Raycast AI can now search your notes and answer questions from them
 - Edit a note's title, tags and folder directly from Raycast
