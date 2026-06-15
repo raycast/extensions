@@ -1,6 +1,6 @@
 # Azure DevOps Repository Search
 
-## [Add Windows support] - {PR_MERGE_DATE}
+## [Add Windows support] - 2026-06-15
 Declared the extension as cross-platform (macOS and Windows). All commands rely only on cross-platform APIs; the work item "Show in Finder" action now reads "Show in Explorer" on Windows.
 
 ## [Add My Work Items command] - 2026-06-04
