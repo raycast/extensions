@@ -15,6 +15,8 @@ import { useSkillContent } from "../hooks/useSkillContent";
 import { useInstalledSkillMatches } from "../hooks/useInstalledSkillMatches";
 import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-display";
 import { showSkillAuditErrorToast } from "../utils/skill-audit-error-toast";
+import { fetchSkillContent } from "../hooks/skill-content";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { joinMetadataSections, type MetadataSection } from "./_common/metadata";
@@ -27,7 +29,7 @@ interface SkillDetailViewProps {
 export function SkillDetailView({ skill, onSkillInstalled }: SkillDetailViewProps) {
   const { getInstalledMatch, revalidate: revalidateInstalledSkillMatches } = useInstalledSkillMatches();
   const installedMatch = getInstalledMatch(skill);
-  const { content, frontmatter, isLoading } = useSkillContent(skill, true);
+  const { content, rawContent, frontmatter, isLoading } = useSkillContent(skill, true);
   const { stats } = useRepoStats(skill, true);
   const audits = useSkillAudits(skill, {
     shouldFetch: true,
@@ -235,11 +237,15 @@ ${installCommand}
             prefetchedAuditResult={audits.result}
             onSkillInstalled={refreshSkillStatus}
           />
+          <CopySkillContentsAction
+            content={rawContent}
+            loadContent={() => fetchSkillContent(skill).then((result) => result?.raw)}
+          />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
           <Action.OpenInBrowser
             title="Open on skills.sh"

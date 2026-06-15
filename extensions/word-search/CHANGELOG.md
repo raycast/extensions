@@ -1,5 +1,9 @@
 # Word Search Changelog
 
+## [Bugfix] - 2026-06-04
+
+- Avoided reading selected text when the Use Selection preference is disabled.
+
 ## [History] - 2026-05-22
 
 - Added History Section

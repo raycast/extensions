@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix opening GitHub URLs on Windows] - 2026-05-28
+
+- Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

@@ -906,4 +906,16 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "vc-deal-flow-signal",
+    title: "VC Deal Flow Signal",
+    description:
+      "GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required.",
+    icon: "https://signals.gitdealflow.com/icon.png",
+    homepage: "https://github.com/kindrat86/vc-deal-flow-signal",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@gitdealflow/mcp-signal@latest"],
+    },
+  },
 ];

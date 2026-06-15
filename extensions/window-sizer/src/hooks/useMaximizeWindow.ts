@@ -1,6 +1,7 @@
 import { closeMainWindow, showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
 import { maximizeActiveWindow } from "../swift-app";
 import { useWindowStateManager } from "./useWindowStateManager";
+import { isTimeoutError, TIMEOUT_ERROR_MESSAGE, TIMEOUT_ERROR_TOAST_TITLE, withTimeout } from "../utils/timeout";
 
 export function useMaximizeWindow() {
   const { saveWindowState } = useWindowStateManager();
@@ -12,7 +13,7 @@ export function useMaximizeWindow() {
       await saveWindowState();
 
       // Then check if the window is already maximized
-      const result = await maximizeActiveWindow();
+      const result = await withTimeout(maximizeActiveWindow(), "Maximize window");
 
       // If window is already maximized, just show toast and return
       if (result === "Already maximized") {
@@ -43,6 +44,15 @@ export function useMaximizeWindow() {
       }
     } catch (error) {
       console.error("Error maximizing window:", error);
+
+      if (isTimeoutError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: TIMEOUT_ERROR_TOAST_TITLE,
+          message: TIMEOUT_ERROR_MESSAGE,
+        });
+        return;
+      }
 
       // Check error type and provide specific message
       const errorStr = String(error);

@@ -9,6 +9,25 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 - Set your presence status
 - Set your status
 
+## Set your status from a deep link
+
+The **Set Status** command accepts two optional arguments, `statusText` and `emoji`, so you can build a deep link (or a [Quicklink](https://manual.raycast.com/quicklinks)) that sets your status in one step:
+
+```
+raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D
+```
+
+The `arguments` query parameter is a URL-encoded JSON object, for example:
+
+```json
+{ "statusText": "Lunch", "emoji": ":hamburger:" }
+```
+
+- Either argument may be omitted; only the one you provide is changed.
+- `emoji` accepts a Slack emoji name with or without colons (`hamburger` or `:hamburger:`).
+
+Statuses set this way don't auto-expire. To pick an expiration, open the command and use the **Set New Status** form.
+
 ## How to get an access token?
 
 If you don't want to log in through OAuth, you can use an access token instead. Here's how to get one:

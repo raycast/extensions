@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slurm",
+  "title": "Slurm",
+  "description": "Manage Slurm jobs across multiple clusters and inspect utilization from Raycast",
+  "icon": "icon.png",
+  "author": "p-koenig",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "preferences": [
+    {
+      "name": "controlPersist",
+      "title": "Session Timeout",
+      "description": "SSH timeout value (e.g. 10m, 1h, 24h).",
+      "type": "textfield",
+      "required": false,
+      "default": "12h"
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-jobs",
+      "title": "My Slurm Jobs",
+      "subtitle": "Slurm",
+      "description": "List your Slurm jobs for all active clusters.",
+      "mode": "view"
+    },
+    {
+      "name": "resources",
+      "title": "HPC Info",
+      "subtitle": "Slurm",
+      "description": "Hardware information for all active clusters.",
+      "mode": "view"
+    },
+    {
+      "name": "node-utilization",
+      "title": "HPC Util",
+      "subtitle": "Slurm",
+      "description": "Live per-node CPU load, memory utilization and GPU availability.",
+      "mode": "view"
+    },
+    {
+      "name": "all-jobs",
+      "title": "All Slurm Jobs",
+      "subtitle": "Slurm",
+      "description": "List all Slurm jobs for all active clusters.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Slurm Menu Bar",
+      "subtitle": "Slurm",
+      "description": "Show running and pending job counts in the macOS menu bar for all active clusters.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "select-cluster",
+      "title": "Select Clusters",
+      "subtitle": "Slurm",
+      "description": "Select the active SSH hosts and authenticate.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "fast-glob": "^3.3.3",
+    "ssh-config": "^5.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

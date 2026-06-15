@@ -85,7 +85,11 @@ export async function setBrightness(tagID: string, brightnessIntensity?: number)
   }
 }
 
-export async function increaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
+async function adjustBrightness(
+  tagID: string,
+  direction: "increase" | "decrease",
+  brightnessIncrement?: number,
+): Promise<string> {
   if (typeof brightnessIncrement !== "number") {
     const { brightnessIncrement: prefIncrement } = getPreferenceValues<{ brightnessIncrement: string }>();
     brightnessIncrement = Number(prefIncrement) || 0.05;
@@ -97,7 +101,10 @@ export async function increaseBrightness(tagID: string, brightnessIncrement?: nu
     console.error(`Failed to set brightness for tagID ${tagID}, the current value is not a number`);
     return "";
   }
-  const newValue = Math.min(1, currentValue + brightnessIncrement);
+  const newValue =
+    direction === "increase"
+      ? Math.min(1, currentValue + brightnessIncrement)
+      : Math.max(0, currentValue - brightnessIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
   try {
     return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
@@ -107,21 +114,12 @@ export async function increaseBrightness(tagID: string, brightnessIncrement?: nu
   }
 }
 
+export async function increaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
+  return adjustBrightness(tagID, "increase", brightnessIncrement);
+}
+
 export async function decreaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
-  if (typeof brightnessIncrement !== "number") {
-    const { brightnessIncrement: prefIncrement } = getPreferenceValues<{ brightnessIncrement: string }>();
-    brightnessIncrement = Number(prefIncrement) || 0.05;
-  }
-  const getCmd = `${cmdPath} get -tagID=${tagID} -feature=brightness`;
-  const currStr = await runCommand(getCmd, `Error getting current brightness for tagID ${tagID}`);
-  const currentValue = parseFloat(currStr);
-  const newValue = Math.max(0, currentValue - brightnessIncrement);
-  const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
-  try {
-    return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
-  } catch (error) {
-    return "";
-  }
+  return adjustBrightness(tagID, "decrease", brightnessIncrement);
 }
 
 export async function setContrast(tagID: string, contrastIntensity?: number): Promise<string> {
@@ -134,7 +132,11 @@ export async function setContrast(tagID: string, contrastIntensity?: number): Pr
   }
 }
 
-export async function increaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
+async function adjustContrast(
+  tagID: string,
+  direction: "increase" | "decrease",
+  contrastIncrement?: number,
+): Promise<string> {
   if (typeof contrastIncrement !== "number") {
     const { contrastIncrement: prefIncrement } = getPreferenceValues<{ contrastIncrement: string }>();
     contrastIncrement = Number(prefIncrement) || 0.05;
@@ -142,30 +144,24 @@ export async function increaseContrast(tagID: string, contrastIncrement?: number
   const getCmd = `${cmdPath} get -tagID=${tagID} -feature=contrast`;
   const currStr = await runCommand(getCmd, `Error getting current contrast for tagID ${tagID}`);
   const currentValue = parseFloat(currStr);
-  const newValue = Math.min(0.9, currentValue + contrastIncrement);
+  const newValue =
+    direction === "increase"
+      ? Math.min(0.9, currentValue + contrastIncrement)
+      : Math.max(-0.9, currentValue - contrastIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
   try {
     return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
-  } catch (error) {
+  } catch {
     return "";
   }
 }
 
+export async function increaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
+  return adjustContrast(tagID, "increase", contrastIncrement);
+}
+
 export async function decreaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
-  if (typeof contrastIncrement !== "number") {
-    const { contrastIncrement: prefIncrement } = getPreferenceValues<{ contrastIncrement: string }>();
-    contrastIncrement = Number(prefIncrement) || 0.05;
-  }
-  const getCmd = `${cmdPath} get -tagID=${tagID} -feature=contrast`;
-  const currStr = await runCommand(getCmd, `Error getting current contrast for tagID ${tagID}`);
-  const currentValue = parseFloat(currStr);
-  const newValue = Math.max(-0.9, currentValue - contrastIncrement);
-  const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
-  try {
-    return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
-  } catch (error) {
-    return "";
-  }
+  return adjustContrast(tagID, "decrease", contrastIncrement);
 }
 
 export async function fetchDisplays(): Promise<string> {
@@ -199,6 +195,50 @@ export async function fetchDisplayResolution(tagID: string): Promise<string> {
     console.error(`Failed to fetch display resolution for tagID ${tagID}`, error);
     return "";
   }
+}
+
+export type InputSource = {
+  vcpValue: string;
+  label: string;
+  ddc2ab: boolean;
+  enabled: boolean;
+};
+
+export async function fetchInputSources(tagID: string): Promise<InputSource[]> {
+  try {
+    const { stdout } = await execPromise(
+      `defaults read pro.betterdisplay.BetterDisplay ddcCustomInputSources@Display:${tagID}`,
+    );
+    const sources = JSON.parse(stdout.trim()) as {
+      value: number;
+      description: string;
+      ddc2ab: boolean;
+      priority: number;
+    }[];
+
+    const withEnabled = sources.map((s) => ({
+      vcpValue: String(s.value),
+      label: s.description,
+      ddc2ab: s.ddc2ab,
+      enabled: s.priority > 0,
+    }));
+
+    withEnabled.sort((a, b) => {
+      if (a.enabled !== b.enabled) return a.enabled ? -1 : 1;
+      return a.label.localeCompare(b.label);
+    });
+
+    return withEnabled;
+  } catch {
+    return [];
+  }
+}
+
+export async function setInputSource(tagID: string, vcpValue: string, ddc2ab: boolean): Promise<string> {
+  const ddcFlag = ddc2ab ? "ddcAlt" : "ddc";
+  const vcpCode = ddc2ab ? "inputSelectAlt" : "inputSelect";
+  const command = `${cmdPath} set -tagID=${tagID} -${ddcFlag} -vcp=${vcpCode} -value=${vcpValue}`;
+  return runCommand(command, `Error setting input source for tagID ${tagID}`);
 }
 
 export async function fetchMainDisplay(): Promise<Display | null> {

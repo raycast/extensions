@@ -40,7 +40,7 @@ export default async function ({ bpm, accents }: Input) {
   setTimeout(() => clearInterval(timer), 60000); // Stop after 1 minute
 
   // Open the deeplink
-  const deeplink = `raycast://extensions/Visual-Studio-Coder/metronome/index?arguments=${encodeURIComponent(
+  const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Visual-Studio-Coder/metronome/index?arguments=${encodeURIComponent(
     JSON.stringify({ bpm: bpm.toString(), group: accents.toString() })
   )}`;
   open(deeplink).catch((error) => {

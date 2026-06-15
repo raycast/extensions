@@ -1,8 +1,15 @@
 # 42 API Changelog
 
-## [Security Maintenance] - 2026-05-21
+## OAuth Token Refresh - 2026-06-10
 
-- Updated the extension to address security advisories.
+### Features
+
+- Added OAuth login flow so that users don't have to manually generate and input tokens
+
+### Fix
+
+- Replaced official 42 logo with a custom one to avoid trademark issues
+- Implemented OAuth token refresh to prevent users from being logged out
 
 ## [Initial Version] - 2026-01-26
 

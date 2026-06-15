@@ -45,7 +45,7 @@ ${summary || ""}
         <ActionPanel>
           <Action.Open
             title={"Chat"}
-            target={`raycast://extensions/raycast/raycast-ai/ai-chat?fallbackText=${summary}`}
+            target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast-ai/ai-chat?fallbackText=${summary}`}
           />
           <Action.CopyToClipboard
             content={summary || ""}

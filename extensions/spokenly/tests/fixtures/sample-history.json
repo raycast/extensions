@@ -1,0 +1,67 @@
+{
+  "content" : {
+    "dictation" : {
+      "_0" : {
+        "success" : {
+          "_0" : {
+            "aiPrompt" : {
+              "bashScript" : "",
+              "customSystemPrompt" : "",
+              "description" : "",
+              "disableAgentSystemTools" : false,
+              "enabledTools" : [
+
+              ],
+              "id" : "00000000-0000-0000-0000-000000000000",
+              "includeBrowserURLContext" : false,
+              "includeClipboardContext" : false,
+              "includeCursorContext" : false,
+              "includeFocusedAppContext" : false,
+              "mode" : "autoInsert",
+              "name" : "Main Prompt",
+              "postAIPromptScript" : "",
+              "preAIPromptScript" : "",
+              "prompt" : "",
+              "reasoningEffort" : "default",
+              "shortcut" : {
+                "activationMode" : "automatic",
+                "id" : "00000000-0000-0000-0000-000000000000",
+                "keys" : {
+                  "keyCode" : 15,
+                  "rawFlags" : 1310720
+                },
+                "visionEnabled" : false
+              }
+            },
+            "result" : {
+              "audioFile" : {
+                "duration" : 11.148375,
+                "fileBookmark" : {
+                  "bookmarkData" : "",
+                  "createdAt" : 800716737.432943,
+                  "url" : "file:///tmp/example.wav"
+                },
+                "fileSize" : 360448
+              },
+              "id" : "C7746F81-6015-4B72-B651-089EAE652D7F",
+              "transcriptionData" : {
+                "modelId" : "gpt-4o-mini-transcribe",
+                "segments" : [
+                  {
+                    "end" : 1,
+                    "id" : "476D3A46-EA77-419F-AF6A-8F0BF9875E0B",
+                    "start" : 0,
+                    "text" : "Hello world, this is a sample transcript used as a test fixture."
+                  }
+                ]
+              },
+              "transcriptionDuration" : 1.1611089706420898
+            }
+          }
+        }
+      }
+    }
+  },
+  "creationDate" : 800716737.405469,
+  "id" : "C7746F81-6015-4B72-B651-089EAE652D7F"
+}

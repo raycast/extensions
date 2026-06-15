@@ -142,7 +142,11 @@ export function shouldResolveActiveBrowser(
   url: string,
   openUrlsInActiveBrowser: boolean | undefined,
 ): boolean {
-  return Boolean(openUrlsInActiveBrowser) && !url.startsWith("raycast://");
+  return (
+    Boolean(openUrlsInActiveBrowser) &&
+    !url.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) &&
+    !url.startsWith("raycast://")
+  );
 }
 
 function delay(ms: number): Promise<void> {

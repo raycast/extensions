@@ -321,7 +321,7 @@ export function ModelView(): React.JSX.Element {
           return (
             <List.Item
               title={item.detail.name}
-              icon={Icon.Box}
+              icon={item.detail.name.endsWith(":cloud") ? Icon.Cloud : Icon.Box}
               key={`${item.server.name}_${item.detail.name}`}
               id={`${item.server.name}_${item.detail.name}`}
               actions={<ModelAction model={item} />}

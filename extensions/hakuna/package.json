@@ -5,6 +5,9 @@
   "description": "Raycast extention for hakuna.ch. Get your personal API token from app.hakuna.ch/token.",
   "icon": "icon.png",
   "author": "fratoro",
+  "contributors": [
+    "cmdr"
+  ],
   "license": "MIT",
   "categories": [
     "Web",
@@ -12,33 +15,59 @@
   ],
   "commands": [
     {
-      "name": "start-timer",
-      "title": "Start Timer",
-      "description": "Start a Hakuna timer",
-      "mode": "no-view"
+      "name": "timer",
+      "title": "Timer",
+      "description": "Start, update or stop the Hakuna timer",
+      "mode": "view"
     },
     {
-      "name": "stop-timer",
-      "title": "Stop Timer",
-      "description": "Stop the running Hakuna timer",
-      "mode": "no-view"
+      "name": "time-entry",
+      "title": "Enter Time",
+      "description": "Add a new time entry or start a timer",
+      "mode": "view"
     },
     {
-      "name": "get-worktime",
-      "title": "Get Today's Time Balance",
-      "description": "Get today's total worktime, including active timer",
-      "mode": "no-view"
+      "name": "projects",
+      "title": "Projects",
+      "description": "List projects",
+      "mode": "view"
     },
     {
-      "name": "get-overtime",
-      "title": "Get Overtime",
-      "description": "Get total overtime",
-      "mode": "no-view"
+      "name": "tasks",
+      "title": "Tasks",
+      "description": "List all tasks",
+      "mode": "view"
     },
     {
-      "name": "get-vacation-days",
-      "title": "Get Vacation Days",
-      "description": "Get used and remaining vacation days",
+      "name": "time-entries",
+      "title": "Time Entries",
+      "description": "View today's time entries",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Hakuna Overview",
+      "description": "Show today's worktime and overall overview in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "profile",
+      "title": "Profiles",
+      "description": "View your overtime and remaining vacation days",
+      "mode": "view"
+    },
+    {
+      "name": "absences",
+      "title": "Absences",
+      "description": "List your absences for the current year",
+      "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "subtitle": "Hakuna",
+      "description": "Clears locally cached data (projects, tasks, users, etc.). Use this if data appears outdated after changes made directly in Hakuna.",
       "mode": "no-view"
     }
   ],
@@ -49,32 +78,19 @@
       "required": true,
       "title": "Hakuna API Token",
       "description": "Your Hakuna API token"
-    },
-    {
-      "name": "defaultTaskId",
-      "type": "textfield",
-      "required": true,
-      "title": "Default Task ID",
-      "description": "The default task ID to use when starting a timer"
-    },
-    {
-      "name": "defaultProjectId",
-      "type": "textfield",
-      "required": false,
-      "title": "Default Project ID (optional)",
-      "description": "The default project ID to use when starting a timer"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "axios": "^1.8.4",
+    "axios-rate-limit": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
@@ -85,5 +101,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -12,7 +12,8 @@
     "elwin_liu",
     "pernielsentikaer",
     "kayo_timoteo",
-    "alexi.build"
+    "alexi.build",
+    "alastair_scheuermann"
   ],
   "platforms": [
     "macOS",
@@ -87,6 +88,14 @@
       "label": "Opt out of Skills CLI telemetry",
       "description": "Opt out of anonymous usage data collected by the underlying Skills CLI for commands run through this extension. The extension itself does not collect telemetry data.",
       "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "defaultAgents",
+      "title": "Default Agents",
+      "description": "Agents pre-selected when installing a skill. Enter comma-separated display names exactly as shown in the agent picker, e.g. \"Claude Code, Windsurf\". Leave empty to start with no agents pre-selected.",
+      "placeholder": "e.g., Claude Code, Windsurf",
+      "type": "textfield",
       "required": false
     }
   ],

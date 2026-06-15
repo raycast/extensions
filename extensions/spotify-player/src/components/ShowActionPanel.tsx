@@ -5,9 +5,11 @@ import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
 import { ShowContent } from "../shortcuts/shortcuts";
 
-type ShowActionPanelProps = { show: SimplifiedShowObject };
+type ShowActionPanelProps = { show?: SimplifiedShowObject | null };
 
 export function ShowActionPanel({ show }: ShowActionPanelProps) {
+  if (!show?.id) return null;
+
   const title = show.name;
 
   return (
