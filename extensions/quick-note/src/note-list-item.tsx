@@ -9,8 +9,8 @@ export type Note = {
   backgroundColor: Color;
   created: string;
   modified: string;
-  folderName: string;
-  folderId: string;
+  folderName: string | null;
+  folderId: string | null;
 };
 
 export function NoteListItem({ note }: { note: Note }) {

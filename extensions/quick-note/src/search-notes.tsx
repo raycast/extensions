@@ -19,6 +19,11 @@ export default function Command() {
     let cancelled = false;
 
     async function fetchNotes() {
+      if (searchText === "") {
+        setNotes([]);
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       try {
         const foldersResult = await runAppleScript('tell application "Quick Note" to get json of every folder');
@@ -104,7 +109,15 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search notes...">
-      {shouldRenderSectionedList(notes) ? renderSectionedNotesList(notes, folders) : renderFlatNotesList(notes)}
+      {searchText === "" ? (
+        <List.EmptyView title="Search Your Notes" description="Type something to find notes" />
+      ) : notes.length === 0 && !isLoading ? (
+        <List.EmptyView title="No notes were found" description={`No notes match "${searchText}"`} />
+      ) : shouldRenderSectionedList(notes) ? (
+        renderSectionedNotesList(notes, folders)
+      ) : (
+        renderFlatNotesList(notes)
+      )}
     </List>
   );
 }
