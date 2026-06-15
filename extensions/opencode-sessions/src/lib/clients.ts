@@ -23,11 +23,13 @@ function ensurePath(): void {
     // Fallback to known paths
   }
 
+  let accumulated = current;
   for (const p of extraPaths) {
-    if (!current.includes(p)) {
-      process.env.PATH = `${p}:${current}`;
+    if (!accumulated.includes(p)) {
+      accumulated = `${p}:${accumulated}`;
     }
   }
+  process.env.PATH = accumulated;
 }
 
 function isOpencodeInstalled(): boolean {
