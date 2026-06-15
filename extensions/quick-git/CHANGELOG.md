@@ -1,5 +1,9 @@
 # Quick Git Changelog
 
+## [Bug fixes] - {PR_MERGE_DATE}
+
+Fixes a bug todo with certain forms not submitting correctly
+
 ## [Submodule Selection] - 2026-04-18
 
 Added functionality to view and select submodules in a repo
