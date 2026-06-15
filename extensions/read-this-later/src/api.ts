@@ -158,11 +158,15 @@ export async function fetchPageTitle(url: string): Promise<string | null> {
 
     const og =
       html.match(
-        /<meta[^>]+property=["']og:title["'][^>]*content=["']([^"']+)["']/i,
+        /<meta[^>]+property=["']og:title["'][^>]*content="([^"]+)"/i,
       ) ??
       html.match(
-        /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']/i,
-      );
+        /<meta[^>]+property=["']og:title["'][^>]*content='([^']+)'/i,
+      ) ??
+      html.match(
+        /<meta[^>]+content="([^"]+)"[^>]+property=["']og:title["']/i,
+      ) ??
+      html.match(/<meta[^>]+content='([^']+)'[^>]+property=["']og:title["']/i);
     if (og?.[1]) return decodeEntities(og[1].trim());
 
     const t = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
