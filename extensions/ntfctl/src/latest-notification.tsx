@@ -1,4 +1,11 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "./ntfctl-utils";
@@ -151,8 +158,20 @@ export default function Command() {
             title="Dismiss This Notification"
             icon={Icon.Trash}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={() => {
-              runAppleScript("ntfctl-dismiss.applescript");
+            onAction={async () => {
+              const toast = await showToast({
+                style: Toast.Style.Animated,
+                title: "Dismissing…",
+              });
+              try {
+                runAppleScript("ntfctl-dismiss.applescript");
+                toast.style = Toast.Style.Success;
+                toast.title = "Notification dismissed";
+              } catch (e) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed to dismiss";
+                toast.message = String(e);
+              }
             }}
           />
         </ActionPanel>
