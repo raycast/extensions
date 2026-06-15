@@ -127,7 +127,7 @@ export default function Command() {
               icon={Icon.Clock}
               actions={
                 <ActionPanel>
-                  <Action title="Look Up" onAction={() => setSearchText(code)} />
+                  <Action title="Look up" onAction={() => setSearchText(code)} />
                 </ActionPanel>
               }
             />
@@ -140,7 +140,7 @@ export default function Command() {
           const val = data![key];
           if (!val) return [];
 
-          const mapsUrl = key === "ADDRESS" ? `https://maps.apple.com/?q=${encodeURIComponent(val)}` : null;
+          const mapsUrl = key === "ADDRESS" ? `maps://?q=${encodeURIComponent(val)}` : null;
 
           return (
             <List.Item
@@ -151,7 +151,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Value" content={val} />
-                  {mapsUrl && <Action.OpenInBrowser title="Open in Maps" url={mapsUrl} icon={Icon.Map} />}
+                  {mapsUrl && <Action.Open title="Open in Maps" target={mapsUrl} icon={Icon.Map} />}
                   <Action.CopyToClipboard
                     title="Copy All as Text"
                     content={allText}

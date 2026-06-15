@@ -151,7 +151,7 @@ export default function Command() {
               ? [{ text: po.District }, { text: po.State }]
               : [{ text: po.Pincode }, { text: po.BranchType }];
             const addressLine = `${po.Name}, ${po.District}, ${po.State} - ${po.Pincode}`;
-            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(`${po.Name}, ${po.District}, ${po.State}`)}`;
+            const mapsUrl = `maps://?q=${encodeURIComponent(`${po.Name}, ${po.District}, ${po.State}`)}`;
 
             return (
               <List.Item
@@ -165,7 +165,7 @@ export default function Command() {
                     <Action.CopyToClipboard title="Copy PIN Code" content={po.Pincode} />
                     <Action.CopyToClipboard title="Copy Address" content={addressLine} />
                     <Action.CopyToClipboard title="Copy All Details" content={formatAllDetails(po)} />
-                    <Action.OpenInBrowser title="Open in Maps" url={mapsUrl} icon={Icon.Map} />
+                    <Action.Open title="Open in Maps" target={mapsUrl} icon={Icon.Map} />
                   </ActionPanel>
                 }
               />
