@@ -2,15 +2,22 @@ import { execSync } from "child_process";
 import * as path from "path";
 import * as fs from "fs";
 
+let _scriptsDir: string | null = null;
+
 /**
  * Find the directory containing the .applescript files.
  * Looks in dist/scripts/ (bundled) first, then falls back to
  * APPLESCRIPTS_DIR environment variable.
+ * Lazily resolved on first call so a missing directory doesn't
+ * crash the extension at module load.
  */
 export function findApplescriptsDir(): string {
+  if (_scriptsDir) return _scriptsDir;
+
   const envDir = process.env.APPLESCRIPTS_DIR;
   if (envDir && fs.existsSync(envDir)) {
-    return envDir;
+    _scriptsDir = envDir;
+    return _scriptsDir;
   }
 
   const candidates = [
@@ -22,7 +29,8 @@ export function findApplescriptsDir(): string {
   for (const dir of candidates) {
     const testFile = path.join(dir, "ntfctl-clear.applescript");
     if (fs.existsSync(testFile)) {
-      return dir;
+      _scriptsDir = dir;
+      return _scriptsDir;
     }
   }
 
@@ -31,14 +39,12 @@ export function findApplescriptsDir(): string {
   );
 }
 
-/** Find scripts dir once at module load. */
-const SCRIPTS_DIR = findApplescriptsDir();
-
 /**
  * Run an AppleScript file and return stdout.
  */
 export function runAppleScript(scriptName: string): string {
-  const scriptPath = path.join(SCRIPTS_DIR, scriptName);
+  const dir = findApplescriptsDir();
+  const scriptPath = path.join(dir, scriptName);
   if (!fs.existsSync(scriptPath)) {
     throw new Error(`Script not found: ${scriptPath}`);
   }
@@ -46,11 +52,4 @@ export function runAppleScript(scriptName: string): string {
     encoding: "utf-8",
     timeout: 15_000,
   }).trim();
-}
-
-/**
- * Run the unified ntfctl.applescript with an action.
- */
-export function runControlAction(action: string): string {
-  return runAppleScript(action);
 }
