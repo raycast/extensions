@@ -1,24 +1,7 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { execSync } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
-
-function findApplescriptsDir(): string {
-  const envDir = process.env.APPLESCRIPTS_DIR;
-  if (envDir && fs.existsSync(envDir)) return envDir;
-  const home = process.env.HOME || "/Users/" + (process.env.USER || "taeahn");
-  const candidates = [
-    path.resolve(__dirname, "scripts"),
-    path.resolve(__dirname, "..", ".."),
-    path.resolve(home, "devs/personal/2026/settings/macscripts/ntfctl"),
-  ];
-  for (const dir of candidates) {
-    if (fs.existsSync(path.join(dir, "ntfctl-count.applescript"))) {
-      return dir;
-    }
-  }
-  throw new Error("Cannot find ntfctl applescripts. Set APPLESCRIPTS_DIR.");
-}
+import { useEffect, useState } from "react";
+import { runAppleScript } from "./ntfctl-utils";
 
 interface NotifSummary {
   count: number;
@@ -93,11 +76,7 @@ function fetchNotificationSummary(): NotifSummary | null {
   ).trim();
 
   if (raw === "NO_NOTIFS" || raw === "") return null;
-
-  // Check for error responses from the AppleScript
-  if (raw.startsWith("ERR:")) {
-    throw new Error(raw);
-  }
+  if (raw.startsWith("ERR:")) throw new Error(raw);
 
   const firstSeparator = raw.indexOf("|||");
   if (firstSeparator === -1) return null;
@@ -122,14 +101,18 @@ function fetchNotificationSummary(): NotifSummary | null {
 }
 
 export default function Command() {
-  let summary: NotifSummary | null = null;
-  let error: string | null = null;
+  const [summary, setSummary] = useState<NotifSummary | null | undefined>(
+    undefined,
+  );
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    summary = fetchNotificationSummary();
-  } catch (e) {
-    error = String(e);
-  }
+  useEffect(() => {
+    try {
+      setSummary(fetchNotificationSummary());
+    } catch (e) {
+      setError(String(e));
+    }
+  }, []);
 
   if (error) {
     const md =
@@ -137,9 +120,14 @@ export default function Command() {
     return <Detail markdown={md} />;
   }
 
-  if (!summary || summary.count === 0) {
-    const md = "# 🔔 No Notifications\n\nNotification Center is empty.";
-    return <Detail markdown={md} />;
+  if (summary === undefined) {
+    return <Detail isLoading />;
+  }
+
+  if (summary === null || summary.count === 0) {
+    return (
+      <Detail markdown="# 🔔 No Notifications\n\nNotification Center is empty." />
+    );
   }
 
   let md =
@@ -193,11 +181,7 @@ export default function Command() {
             icon={Icon.Trash}
             shortcut={{ modifiers: ["cmd"], key: "x" }}
             onAction={() => {
-              const scriptPath = path.join(
-                findApplescriptsDir(),
-                "ntfctl-clear.applescript",
-              );
-              execSync(`osascript "${scriptPath}"`, { timeout: 15_000 });
+              runAppleScript("ntfctl-clear.applescript");
             }}
           />
         </ActionPanel>
