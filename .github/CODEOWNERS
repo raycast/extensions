@@ -439,6 +439,7 @@
 /extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
 /extensions/commit-message-generator                                @rokartur @dphelan
+/extensions/commit-streak                                           @aundurraga
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
 /extensions/comodoro                                                @jesse-c
