@@ -148,11 +148,20 @@ export default function Command() {
       <Form.Description title="Base Amount" text={isValid ? formatIndian(base) : "—"} />
       {taxType === "intra" ? (
         <>
-          <Form.Description title={`CGST (${formatRateValue(effectiveRate / 2)}%)`} text={isValid ? formatIndian(cgst) : "—"} />
-          <Form.Description title={`SGST (${formatRateValue(effectiveRate / 2)}%)`} text={isValid ? formatIndian(sgst) : "—"} />
+          <Form.Description
+            title={`CGST (${formatRateValue(effectiveRate / 2)}%)`}
+            text={isValid ? formatIndian(cgst) : "—"}
+          />
+          <Form.Description
+            title={`SGST (${formatRateValue(effectiveRate / 2)}%)`}
+            text={isValid ? formatIndian(sgst) : "—"}
+          />
         </>
       ) : (
-        <Form.Description title={`IGST (${formatRateValue(effectiveRate)}%)`} text={isValid ? formatIndian(gst) : "—"} />
+        <Form.Description
+          title={`IGST (${formatRateValue(effectiveRate)}%)`}
+          text={isValid ? formatIndian(gst) : "—"}
+        />
       )}
       <Form.Description title="Total Amount" text={isValid ? formatIndian(total) : "—"} />
     </Form>
