@@ -16,19 +16,18 @@ type Input = {
  */
 export default async function tool(input: Input = {}) {
   const questions = await getQuestions();
-  const dueQuestions = questions.filter((question) => {
-    const summary = summarizeQuestion(question);
-    return summary.due;
-  });
   const limit = input.limit && input.limit > 0 ? input.limit : 25;
-  const flashcards = dueQuestions.slice(0, limit).map((question) =>
-    summarizeQuestion(question, {
-      includeAnswer: input.includeAnswers,
-    }),
-  );
+  const dueFlashcards = questions
+    .map((question) =>
+      summarizeQuestion(question, {
+        includeAnswer: input.includeAnswers,
+      }),
+    )
+    .filter((summary) => summary.due);
+  const flashcards = dueFlashcards.slice(0, limit);
 
   return {
-    totalDue: dueQuestions.length,
+    totalDue: dueFlashcards.length,
     returned: flashcards.length,
     flashcards,
   };
