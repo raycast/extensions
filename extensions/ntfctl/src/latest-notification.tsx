@@ -30,20 +30,24 @@ function fetchLatestNotification(): NotifInfo | null {
   const raw = execSync(
     `osascript -e '
     tell application "System Events"
-      tell process "ControlCenter"
-        click menu bar item 2 of menu bar 1
-      end tell
-      delay 0.6
+      try
+        tell process "ControlCenter"
+          click menu bar item 2 of menu bar 1
+        end tell
+      on error errMsg
+        return "ERR:ControlCenter:" & errMsg
+      end try
+      delay 0.8
       tell process "NotificationCenter"
         try
           set ncWindow to item 1 of (every window)
-        on error
-          return "NO_NOTIFS"
+        on error errMsg
+          return "ERR:NoWindow:" & errMsg
         end try
         try
           set allEls to entire contents of ncWindow
-        on error
-          return "NO_NOTIFS"
+        on error errMsg
+          return "ERR:EntireContents:" & errMsg
         end try
         set appName to ""
         set notifTitle to ""
@@ -87,6 +91,11 @@ function fetchLatestNotification(): NotifInfo | null {
 
   if (raw === "NO_NOTIFS" || raw === "") return null;
 
+  // Check for error responses from the AppleScript
+  if (raw.startsWith("ERR:")) {
+    throw new Error(raw);
+  }
+
   const parts = raw.split("|||");
   if (parts.length >= 3) {
     return { app: parts[0], title: parts[1], body: parts[2] };
@@ -112,7 +121,7 @@ export default function Command() {
 
   if (!notif) {
     const md =
-      "# 🔔 No Notifications\n\nNotification Center is empty or not accessible.\n\nGrant **Accessibility** permission to the app running Raycast in:\n\n**System Settings → Privacy & Security → Accessibility**";
+      "# 🔔 No Notifications\n\nNotification Center is empty.";
     return <Detail markdown={md} />;
   }
 
