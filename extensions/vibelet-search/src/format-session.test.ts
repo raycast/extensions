@@ -76,6 +76,12 @@ describe("highlightMatch", () => {
     expect(highlightMatch("foo bar foo", "foo")).toBe("**foo** bar **foo**");
   });
 
+  it("does not highlight inside fenced code blocks", () => {
+    const input = ["before foo", "```ts", "const foo = 1;", "```", "after foo"].join("\n");
+    const expected = ["before **foo**", "```ts", "const foo = 1;", "```", "after **foo**"].join("\n");
+    expect(highlightMatch(input, "foo")).toBe(expected);
+  });
+
   it("returns text unchanged for empty query", () => {
     expect(highlightMatch("hello", "")).toBe("hello");
   });
