@@ -1,5 +1,9 @@
 # HTTP Status Codes Changelog
 
+## [Fix Section Labels] - {PR_MERGE_DATE}
+
+- Shorten status-code section subtitles so they do not overflow in the list header
+
 ## [Windows Support] - 2026-03-12
 
 - Add support for Windows
