@@ -1,6 +1,6 @@
 # List by FullForms Changelog
 
-## [Windows Support and Listing Refresh] - {PR_MERGE_DATE}
+## [Windows Support and Listing Refresh] - 2026-06-15
 
 - The extension now runs on Windows in addition to macOS
 - Text-to-speech (Speak Entry / Speak Definition) remains macOS-only, since it uses the built-in `say` binary
