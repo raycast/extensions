@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Fix Library Album Search] - {PR_MERGE_DATE}
+## [Fix Library Album Search] - 2026-06-15
 
 - Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
 
