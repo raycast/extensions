@@ -32,17 +32,17 @@ function fetchNotificationSummary(): NotifSummary | null {
       tell process "ControlCenter"
         click menu bar item 2 of menu bar 1
       end tell
-      delay 0.6
+      delay 0.8
       tell process "NotificationCenter"
         try
           set ncWindow to item 1 of (every window)
-        on error
-          return "NO_NOTIFS"
+        on error errMsg
+          return "ERR:NoWindow:" & errMsg
         end try
         try
           set allEls to entire contents of ncWindow
-        on error
-          return "NO_NOTIFS"
+        on error errMsg
+          return "ERR:EntireContents:" & errMsg
         end try
         set output to ""
         set appName to ""
@@ -94,6 +94,11 @@ function fetchNotificationSummary(): NotifSummary | null {
 
   if (raw === "NO_NOTIFS" || raw === "") return null;
 
+  // Check for error responses from the AppleScript
+  if (raw.startsWith("ERR:")) {
+    throw new Error(raw);
+  }
+
   const firstSeparator = raw.indexOf("|||");
   if (firstSeparator === -1) return null;
 
@@ -134,7 +139,7 @@ export default function Command() {
 
   if (!summary || summary.count === 0) {
     const md =
-      "# 🔔 No Notifications\n\nNotification Center is empty or not accessible.\n\nGrant **Accessibility** permission in:\n**System Settings → Privacy & Security → Accessibility**";
+      "# 🔔 No Notifications\n\nNotification Center is empty.";
     return <Detail markdown={md} />;
   }
 
