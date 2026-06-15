@@ -58,6 +58,13 @@
       "description": "Open or close the Notification Center panel.",
       "mode": "no-view",
       "icon": "center-icon.png"
+    },
+    {
+      "name": "diagnostics",
+      "title": "Diagnostics",
+      "subtitle": "ntfctl",
+      "description": "Run diagnostics to check Accessibility permissions and Notification Center access.",
+      "mode": "view"
     }
   ],
   "dependencies": {
