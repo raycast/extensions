@@ -1,6 +1,6 @@
 # Ntfctl Changelog
 
-## [Initial Version] - 2026-06-15
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### ✨ New
 
@@ -10,5 +10,6 @@
 - **Count Notifications** — List all pending notifications with app names and titles in a Detail view
 - **Toggle Do Not Disturb** — Flip Focus / Do Not Disturb mode via Shortcuts.app
 - **Toggle Notification Center** — Open or close the Notification Center panel
+- **Diagnostics** — Check Accessibility permissions and Notification Center access
 - Beautiful custom icons in 6 colors
 - macOS 15+ (Sequoia) support, tested on macOS 26 (Tahoe)
