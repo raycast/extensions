@@ -101,9 +101,22 @@ export default function Command() {
 
   const sorted = sortItems(items);
 
-  function mutate(next: Item[]) {
+  // Persist first, then update the UI — that way a failed write leaves the
+  // on-disk file and the displayed state in sync. Returns false (with a
+  // failure toast) so callers can skip their own success feedback.
+  function mutate(next: Item[]): boolean {
+    try {
+      persist(next);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't save shelf",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
     setItems(next);
-    persist(next);
+    return true;
   }
 
   function togglePin(item: Item) {
@@ -113,8 +126,9 @@ export default function Command() {
   }
 
   function remove(item: Item) {
-    mutate(items.filter((i) => i.id !== item.id));
-    showToast({ style: Toast.Style.Success, title: "Removed" });
+    if (mutate(items.filter((i) => i.id !== item.id))) {
+      showToast({ style: Toast.Style.Success, title: "Removed" });
+    }
   }
 
   async function clearAll() {
@@ -126,8 +140,7 @@ export default function Command() {
         style: Alert.ActionStyle.Destructive,
       },
     });
-    if (ok) {
-      mutate([]);
+    if (ok && mutate([])) {
       showToast({ style: Toast.Style.Success, title: "Shelf cleared" });
     }
   }
