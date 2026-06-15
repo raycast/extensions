@@ -1,6 +1,6 @@
 # Monocle Changelog
 
-## [Expanded Monocle 3.5.1 commands] - {PR_MERGE_DATE}
+## [Expanded Monocle 3.5.1 commands] - 2026-06-15
 
 - Added blur, grain, monochrome, and tint opacity commands (0–100 argument)
 - Added tint preset dropdown and custom hex color commands
