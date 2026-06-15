@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-15
 
 - Fix sending composed messages when the subject or other message fields contain double quotes.
 
