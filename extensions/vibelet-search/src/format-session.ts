@@ -97,7 +97,20 @@ export function findMatchIndex(messages: SessionMessage[], query: string): numbe
 export function highlightMatch(text: string, query: string): string {
   if (!query) return text;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text.replace(new RegExp(escaped, "gi"), (m) => `**${m}**`);
+  const re = new RegExp(escaped, "gi");
+  let inFence = false;
+
+  return text
+    .split("\n")
+    .map((line) => {
+      const isFence = /^\s*(`{3,}|~{3,})/.test(line);
+      if (isFence) {
+        inFence = !inFence;
+        return line;
+      }
+      return inFence ? line : line.replace(re, (m) => `**${m}**`);
+    })
+    .join("\n");
 }
 
 /**
