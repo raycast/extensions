@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { loadSessionMessages, parseCodexSessionMetaLine } from "./parsers";
+import { buildRipgrepArgs, loadSessionMessages, parseCodexSessionMetaLine } from "./parsers";
 import type { CodexConversationLine, SessionMeta } from "./types";
 
 describe("parseCodexSessionMetaLine", () => {
@@ -58,6 +58,15 @@ describe("parseCodexSessionMetaLine", () => {
       payload: { id: "abc" },
     };
     expect(parseCodexSessionMetaLine(line)?.projectPath).toBe("");
+  });
+});
+
+describe("buildRipgrepArgs", () => {
+  it("terminates options before the user query", () => {
+    const args = buildRipgrepArgs("--help", ["/tmp/sessions"]);
+    const terminatorIndex = args.indexOf("--");
+    expect(terminatorIndex).toBeGreaterThan(-1);
+    expect(args.slice(terminatorIndex)).toEqual(["--", "--help", "/tmp/sessions"]);
   });
 });
 
