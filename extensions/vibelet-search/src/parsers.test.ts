@@ -240,8 +240,8 @@ describe("loadSessionMessages", () => {
 
   it("handles a session_meta line with a very long instructions field (regression test)", async () => {
     // Reproduce the bug where Codex session_meta lines exceeded the 4 KB read buffer.
-    // The first line is intentionally large; if loadSessionMessages reads the whole file
-    // (which it does), it should still parse subsequent message lines correctly.
+    // The first line is intentionally large; loadSessionMessages streams line-by-line and
+    // should still parse subsequent message lines correctly.
     const longInstructions = "x".repeat(20000);
     const filePath = writeFile("codex-long.jsonl", [
       JSON.stringify({
@@ -268,5 +268,81 @@ describe("loadSessionMessages", () => {
     const messages = await loadSessionMessages(meta);
     expect(messages).toHaveLength(1);
     expect(messages[0].content).toBe("after long meta");
+  });
+
+  it("caps loaded messages to avoid unbounded detail rendering", async () => {
+    const filePath = writeFile("many.jsonl", [
+      JSON.stringify({ type: "user", timestamp: "2026-04-10T10:00:00Z", message: { role: "user", content: "one" } }),
+      JSON.stringify({ type: "user", timestamp: "2026-04-10T10:00:01Z", message: { role: "user", content: "two" } }),
+      JSON.stringify({
+        type: "assistant",
+        timestamp: "2026-04-10T10:00:02Z",
+        message: { role: "assistant", content: "three" },
+      }),
+    ]);
+
+    const meta: SessionMeta = {
+      id: "test",
+      title: "t",
+      source: "claude-cli",
+      projectPath: "/tmp",
+      timestamp: 0,
+      filePath,
+    };
+
+    const messages = await loadSessionMessages(meta, { maxMessages: 2 });
+    expect(messages.map((m) => m.content)).toEqual(["one", "two"]);
+  });
+
+  it("truncates oversized message content before storing it", async () => {
+    const filePath = writeFile("long-message.jsonl", [
+      JSON.stringify({
+        type: "assistant",
+        timestamp: "2026-04-10T10:00:00Z",
+        message: { role: "assistant", content: "abcdefghijklmnopqrstuvwxyz" },
+      }),
+    ]);
+
+    const meta: SessionMeta = {
+      id: "test",
+      title: "t",
+      source: "claude-cli",
+      projectPath: "/tmp",
+      timestamp: 0,
+      filePath,
+    };
+
+    const messages = await loadSessionMessages(meta, { maxMessageChars: 5 });
+    expect(messages).toHaveLength(1);
+    expect(messages[0].content).toContain("abcde");
+    expect(messages[0].content).toContain("Message truncated");
+  });
+
+  it("skips raw JSONL lines above the configured safety limit", async () => {
+    const filePath = writeFile("huge-line.jsonl", [
+      JSON.stringify({
+        type: "assistant",
+        timestamp: "2026-04-10T10:00:00Z",
+        message: { role: "assistant", content: "x".repeat(300) },
+      }),
+      JSON.stringify({
+        type: "assistant",
+        timestamp: "2026-04-10T10:00:01Z",
+        message: { role: "assistant", content: "kept" },
+      }),
+    ]);
+
+    const meta: SessionMeta = {
+      id: "test",
+      title: "t",
+      source: "claude-cli",
+      projectPath: "/tmp",
+      timestamp: 0,
+      filePath,
+    };
+
+    const messages = await loadSessionMessages(meta, { maxLineBytes: 180 });
+    expect(messages).toHaveLength(1);
+    expect(messages[0].content).toBe("kept");
   });
 });
