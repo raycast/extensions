@@ -59,10 +59,18 @@ const CONTRIBUTIONS_QUERY = `
   }
 `;
 
+function flattenWeeks(weeks: { contributionDays: ContributionDay[] }[]): ContributionDay[] {
+  const byDate = new Map<string, ContributionDay>();
+  for (const week of weeks) {
+    for (const day of week.contributionDays) {
+      byDate.set(day.date, day);
+    }
+  }
+  return [...byDate.values()].sort((a, b) => b.date.localeCompare(a.date));
+}
+
 function calculateStreak(weeks: { contributionDays: ContributionDay[] }[]): StreakResult {
-  const allDays: ContributionDay[] = weeks
-    .flatMap((w) => w.contributionDays)
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const allDays = flattenWeeks(weeks);
 
   const today = new Date().toLocaleDateString("sv");
   const todayEntry = allDays.find((d) => d.date === today);
