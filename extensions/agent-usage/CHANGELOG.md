@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Support Claude Config Directory] - {PR_MERGE_DATE}
+
+- Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
+
 ## [Add OpenCode Go Provider] - 2026-05-15
 
 - Add OpenCode Go plan usage display
