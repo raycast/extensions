@@ -6,7 +6,6 @@ import {
   Toast,
   environment,
   Icon,
-  open,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { homedir } from "os";
@@ -78,6 +77,9 @@ export default function Command() {
   async function install() {
     try {
       if (target.mustCreate) mkdirSync(target.dir, { recursive: true });
+      // Copy (not symlink) on purpose: the installed CLI must survive the
+      // extension being updated, moved, or uninstalled, rather than dangling
+      // at Raycast's internal assetsPath.
       copyFileSync(SOURCE, dest);
       chmodSync(dest, 0o755);
       setInstalledAt(dest);
@@ -144,11 +146,7 @@ so it lands on my Ten Four shelf with clean formatting.
             icon={Icon.Download}
             onAction={install}
           />
-          <Action
-            title="Reveal in Finder"
-            icon={Icon.Finder}
-            onAction={() => open(target.dir)}
-          />
+          <Action.ShowInFinder path={target.dir} />
         </ActionPanel>
       }
     />
