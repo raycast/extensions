@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-06-15
 
 - Fix channel icons not loading from the local gateway after it started requiring authentication
 - Fix channel type filter and fallback icons in the Browse Channels command for renamed space kinds
