@@ -26,10 +26,9 @@
     {
       "name": "location",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "title": "Location",
       "description": "Select your country to apply specific calculation rules.",
-      "default": "US",
       "data": [
         { "title": "United States", "value": "US" },
         { "title": "Canada", "value": "CA" },
