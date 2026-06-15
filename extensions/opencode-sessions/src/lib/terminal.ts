@@ -65,24 +65,26 @@ function findTtyForSession(sessionId: string): string | null {
 async function focusITermByTty(tty: string): Promise<boolean> {
   const result = await runAppleScript(`
     tell application "iTerm2"
-      tell current window
-        repeat with i from 1 to (count of tabs)
-          tell tab i
-            tell current session
-              if tty is "${esc(tty)}" then
-                tell current window of application "iTerm2"
-                  select tab i
-                  if is hotkey window then
-                    reveal hotkey window
-                  end if
-                end tell
-                activate
-                return "found"
-              end if
+      repeat with w in (every window)
+        tell w
+          repeat with i from 1 to (count of tabs)
+            tell tab i
+              tell current session
+                if tty is "${esc(tty)}" then
+                  tell w
+                    select tab i
+                    if is hotkey window then
+                      reveal hotkey window
+                    end if
+                  end tell
+                  activate
+                  return "found"
+                end if
+              end tell
             end tell
-          end tell
-        end repeat
-      end tell
+          end repeat
+        end tell
+      end repeat
     end tell
     return "not_found"
   `);
