@@ -1,6 +1,6 @@
 # LeitnerBox Changelog
 
-## [Add Windows support and AI tools] - {PR_MERGE_DATE}
+## [Add Windows support and AI tools] - 2026-06-15
 
 - Add Windows support
 - Add AI tools
