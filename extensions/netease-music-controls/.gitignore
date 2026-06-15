@@ -1,0 +1,9 @@
+node_modules
+.raycast
+.DS_Store
+dist
+*.log
+*.tgz
+/*.js
+/*.js.map
+!/eslint.config.js

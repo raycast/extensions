@@ -1,0 +1,219 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "netease-music-controls",
+  "title": "NetEase Music Controls",
+  "description": "Control playback, volume, likes, repeat, shuffle, and lyrics in NetEase Music.",
+  "icon": "netease-music.png",
+  "author": "yitiansong4",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "netease",
+    "netease music",
+    "cloud music",
+    "music",
+    "player"
+  ],
+  "commands": [
+    {
+      "name": "controls",
+      "title": "Controls",
+      "subtitle": "NetEase Music",
+      "description": "Open a control panel for NetEase Music.",
+      "mode": "view",
+      "keywords": [
+        "menu",
+        "controls",
+        "control"
+      ]
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "NetEase Music",
+      "description": "Play the current track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "start",
+        "resume"
+      ]
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "subtitle": "NetEase Music",
+      "description": "Stop playback by pausing NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "pause"
+      ]
+    },
+    {
+      "name": "toggle-play",
+      "title": "Toggle Play/Pause",
+      "subtitle": "NetEase Music",
+      "description": "Toggle play or pause in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "toggle",
+        "play pause"
+      ]
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "NetEase Music",
+      "description": "Skip to the next track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "next track",
+        "skip"
+      ]
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "NetEase Music",
+      "description": "Go to the previous track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "previous track",
+        "back"
+      ]
+    },
+    {
+      "name": "turn-up-volume",
+      "title": "Increase Volume",
+      "subtitle": "NetEase Music",
+      "description": "Increase NetEase Music volume.",
+      "mode": "no-view",
+      "keywords": [
+        "volume up",
+        "louder"
+      ]
+    },
+    {
+      "name": "turn-down-volume",
+      "title": "Decrease Volume",
+      "subtitle": "NetEase Music",
+      "description": "Decrease NetEase Music volume.",
+      "mode": "no-view",
+      "keywords": [
+        "volume down",
+        "quieter"
+      ]
+    },
+    {
+      "name": "like",
+      "title": "Like Track",
+      "subtitle": "NetEase Music",
+      "description": "Like the current track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "love",
+        "favorite",
+        "heart"
+      ]
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike Track",
+      "subtitle": "NetEase Music",
+      "description": "Dislike or unlike the current track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "unlike",
+        "remove favorite"
+      ]
+    },
+    {
+      "name": "repeat-off",
+      "title": "Turn Repeat off",
+      "subtitle": "NetEase Music",
+      "description": "Set repeat mode to off in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "repeat off",
+        "loop off"
+      ]
+    },
+    {
+      "name": "repeat-one",
+      "title": "Repeat One",
+      "subtitle": "NetEase Music",
+      "description": "Set repeat mode to one track in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "repeat one",
+        "single loop"
+      ]
+    },
+    {
+      "name": "repeat-all",
+      "title": "Repeat All",
+      "subtitle": "NetEase Music",
+      "description": "Set repeat mode to all tracks in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "repeat all",
+        "playlist loop"
+      ]
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Shuffle",
+      "subtitle": "NetEase Music",
+      "description": "Toggle shuffle in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "random",
+        "shuffle"
+      ]
+    },
+    {
+      "name": "toggle-lyrics",
+      "title": "Show/Hide Lyrics",
+      "subtitle": "NetEase Music",
+      "description": "Show or hide lyrics in NetEase Music.",
+      "mode": "no-view",
+      "keywords": [
+        "lyrics",
+        "lyric"
+      ]
+    },
+    {
+      "name": "customize-touch-bar",
+      "title": "Customize Touch Bar",
+      "subtitle": "NetEase Music",
+      "description": "Open NetEase Music's Customize Touch Bar command.",
+      "mode": "no-view",
+      "keywords": [
+        "touch bar",
+        "touchbar"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist && cp dist/*.js dist/*.js.map .",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
