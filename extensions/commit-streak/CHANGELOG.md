@@ -1,6 +1,6 @@
 # Commit Streak Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-15
 
 - Shows your contribution streak in the menu bar with a bolt icon
 - Shows snowflake icon when no contributions today
