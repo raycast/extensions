@@ -2,7 +2,7 @@
 
 Calculate your mortgage payments instantly from Raycast! This extension provides a sleek interface to estimate your monthly payments, supporting common United States mortgage types and various international compounding calculation methods.
 
-![Mortgage Calculator UI](metadata/mortgage-calculator-1.png)
+![Mortgage Calculator UI](assets/readme-screenshot.png)
 
 ## Features
 
