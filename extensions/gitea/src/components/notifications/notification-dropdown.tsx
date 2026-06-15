@@ -3,17 +3,19 @@ import type { Option } from "../../domain/options";
 
 type NotificationDropdownProps<TValue extends string> = {
   options: readonly Option<TValue>[];
+  value: TValue;
   onFilterChange: (newValue: TValue) => void;
 };
 
 export default function NotificationDropdown<TValue extends string>({
   options,
+  value,
   onFilterChange,
 }: NotificationDropdownProps<TValue>) {
   return (
     <List.Dropdown
       tooltip="Filter notifications"
-      storeValue={true}
+      value={value}
       onChange={(newValue) => {
         onFilterChange(newValue as TValue);
       }}

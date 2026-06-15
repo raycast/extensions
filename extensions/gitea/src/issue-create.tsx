@@ -5,9 +5,14 @@ import { LabelPicker } from "./components/issues";
 import { useCreateIssueMetadata } from "./hooks/useCreateIssueMetadata";
 import { useCreateIssueMutation } from "./hooks/useCreateIssueMutation";
 import { useUserRepositories } from "./hooks/useUserRepositories";
+import type { CreateIssueMetadata } from "./services/issues";
 import type { Repository } from "./types/api";
 import { buildCreateIssueParams, parseRepo, type CreateIssueFormValues } from "./utils/create-issue";
 
+// Raycast Form.Dropdown doesn't support loading additional pages while scrolling,
+// so preload a bounded number of repository pages to keep the picker useful
+// without eagerly fetching every repository.
+// With DEFAULT_PAGE_SIZE = 30, this loads up to 60 repositories.
 const MAX_REPOSITORY_PREFETCH_PAGES = 2;
 
 export default function Command(props: { initialRepo?: Repository }) {
@@ -31,7 +36,8 @@ export default function Command(props: { initialRepo?: Repository }) {
   }, [repositories]);
 
   const { owner, repo } = useMemo(() => parseRepo(selectedRepo), [selectedRepo]);
-  const { labels, milestones, assignees } = useCreateIssueMetadata(owner, repo);
+  const { metadata, isLoading: isLoadingMetadata } = useCreateIssueMetadata(owner, repo);
+  const { labels, milestones, assignees } = metadata;
 
   const isRepoSelected = Boolean(selectedRepo);
 
@@ -49,7 +55,10 @@ export default function Command(props: { initialRepo?: Repository }) {
       enableDrafts={initialRepo === undefined}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Issue" onSubmit={(values) => handleSubmit(values, createIssue, resetForm)} />
+          <Action.SubmitForm
+            title="Create Issue"
+            onSubmit={(values) => handleSubmit(values, createIssue, resetForm, metadata, isLoadingMetadata)}
+          />
         </ActionPanel>
       }
     >
@@ -92,12 +101,17 @@ export default function Command(props: { initialRepo?: Repository }) {
 
           {labels.length > 0 && (
             <>
-              <LabelPicker labels={labels} selectedRepo={isRepoSelected} />
+              <LabelPicker key={`labels-${selectedRepo}`} labels={labels} selectedRepo={isRepoSelected} />
               <Form.Separator />
             </>
           )}
 
-          <Form.TagPicker id="assignees" title="Assignees" placeholder="Select assignees">
+          <Form.TagPicker
+            key={`assignees-${selectedRepo}`}
+            id="assignees"
+            title="Assignees"
+            placeholder="Select assignees"
+          >
             {assignees.map((user) => (
               <Form.TagPicker.Item
                 key={user.login ?? user.id ?? "user"}
@@ -107,7 +121,12 @@ export default function Command(props: { initialRepo?: Repository }) {
               />
             ))}
           </Form.TagPicker>
-          <Form.Dropdown id="milestone" title="Milestone" placeholder="Select a milestone">
+          <Form.Dropdown
+            key={`milestone-${selectedRepo}`}
+            id="milestone"
+            title="Milestone"
+            placeholder="Select a milestone"
+          >
             <Form.Dropdown.Item value="" title="No milestone" />
             {milestones.map((milestone) => (
               <Form.Dropdown.Item
@@ -133,10 +152,23 @@ async function handleSubmit(
   values: Form.Values,
   createIssue: ReturnType<typeof useCreateIssueMutation>["createIssue"],
   resetForm: () => void,
+  metadata: CreateIssueMetadata,
+  isLoadingMetadata: boolean,
 ) {
   const formValues = values as CreateIssueFormValues;
   if (!formValues.repository || !formValues.title?.trim()) {
     await showToast({ style: Toast.Style.Failure, title: "Repository and title are required" });
+    return;
+  }
+
+  if (isLoadingMetadata) {
+    await showToast({ style: Toast.Style.Failure, title: "Issue metadata is still loading" });
+    return;
+  }
+
+  const metadataError = validateSelectedMetadata(formValues, metadata);
+  if (metadataError) {
+    await showToast({ style: Toast.Style.Failure, title: metadataError });
     return;
   }
 
@@ -152,4 +184,48 @@ async function handleSubmit(
   if (didCreate) {
     resetForm();
   }
+}
+
+function validateSelectedMetadata(values: CreateIssueFormValues, metadata: CreateIssueMetadata): string | undefined {
+  const failedFields = new Set(metadata.metadataFailures.map((failure) => failure.field));
+  const selectedLabels = [
+    ...(values.labels ?? []),
+    ...Object.entries(values)
+      .filter(([key, value]) => key.startsWith("label.") && typeof value === "string" && value.length > 0)
+      .map(([, value]) => value as string),
+  ];
+
+  if (selectedLabels.length > 0) {
+    if (failedFields.has("labels")) {
+      return "Selected labels could not be validated";
+    }
+
+    const labelIds = new Set(metadata.labels.map((label) => String(label.id)));
+    if (selectedLabels.some((label) => !labelIds.has(label))) {
+      return "Selected labels are not available for this repository";
+    }
+  }
+
+  if (values.milestone) {
+    if (failedFields.has("milestones")) {
+      return "Selected milestone could not be validated";
+    }
+
+    if (!metadata.milestones.some((milestone) => String(milestone.id) === values.milestone)) {
+      return "Selected milestone is not available for this repository";
+    }
+  }
+
+  if ((values.assignees ?? []).length > 0) {
+    if (failedFields.has("assignees")) {
+      return "Selected assignees could not be validated";
+    }
+
+    const assigneeLogins = new Set(metadata.assignees.map((assignee) => assignee.login).filter(Boolean));
+    if (values.assignees?.some((assignee) => !assigneeLogins.has(assignee))) {
+      return "Selected assignees are not available for this repository";
+    }
+  }
+
+  return undefined;
 }

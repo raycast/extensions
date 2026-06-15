@@ -9,8 +9,8 @@ let cachedClient: ReturnType<typeof createClient<paths>> | null = null;
 let cachedKey: string | null = null;
 
 function normalizeBaseUrl(baseUrl: string): string {
-  // Remove trailing slash
-  let normalized = baseUrl.replace(/\/$/, "");
+  // Remove trailing slashes
+  let normalized = baseUrl.trim().replace(/\/+$/, "");
 
   // Add /api/v1 if not present
   if (!normalized.endsWith(API_BASE)) {

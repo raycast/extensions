@@ -3,16 +3,19 @@ import type { Option } from "../../domain/options";
 
 type RepositoryDropdownProps<TValue extends string> = {
   repoFilter: readonly Option<TValue>[];
+  value?: TValue;
   onFilterChange: (newValue: TValue) => void;
 };
 
 export default function RepositoryDropdown<TValue extends string>({
   repoFilter,
+  value,
   onFilterChange,
 }: RepositoryDropdownProps<TValue>) {
   return (
     <List.Dropdown
       tooltip="Filter repositories"
+      value={value}
       onChange={(newValue) => {
         onFilterChange(newValue as TValue);
       }}

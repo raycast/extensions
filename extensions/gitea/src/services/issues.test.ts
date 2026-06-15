@@ -44,6 +44,7 @@ describe("issue services", () => {
       owner: "alice",
       repo: "app",
       state: "open",
+      type: "issues",
       q: "bug",
       page: undefined,
       limit: undefined,
@@ -62,6 +63,7 @@ describe("issue services", () => {
       owner: "alice",
       repo: "app",
       state: undefined,
+      type: "issues",
       q: undefined,
       page: 2,
       limit: 1,
@@ -142,6 +144,7 @@ describe("issue services", () => {
       labels: [],
       milestones: [],
       assignees: [],
+      metadataFailures: [],
     });
     expect(issueApi.listLabels).not.toHaveBeenCalled();
   });
@@ -158,6 +161,23 @@ describe("issue services", () => {
       labels,
       milestones,
       assignees,
+      metadataFailures: [],
+    });
+  });
+
+  it("returns available create issue metadata and reports failed metadata requests", async () => {
+    const labels = [{ id: 1, name: "bug" }] as Label[];
+    const assignees = [{ id: 3, login: "alice" }] as User[];
+    const milestonesError = new Error("Forbidden");
+    issueApi.listLabels.mockResolvedValue(labels);
+    issueApi.listMilestones.mockRejectedValue(milestonesError);
+    issueApi.listAssignees.mockResolvedValue(assignees);
+
+    await expect(getCreateIssueMetadata({ owner: "alice", repo: "app" })).resolves.toEqual({
+      labels,
+      milestones: [],
+      assignees,
+      metadataFailures: [{ field: "milestones", reason: milestonesError }],
     });
   });
 });

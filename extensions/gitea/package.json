@@ -88,6 +88,24 @@
       "label": "IntelliJ IDEA",
       "default": true,
       "required": false
+    },
+    {
+      "name": "cloneProtocol",
+      "title": "Clone Protocol",
+      "description": "Protocol to use for clone-with-editor actions",
+      "type": "dropdown",
+      "default": "https",
+      "required": false,
+      "data": [
+        {
+          "title": "SSH",
+          "value": "ssh"
+        },
+        {
+          "title": "HTTPS",
+          "value": "https"
+        }
+      ]
     }
   ],
   "commands": [
@@ -125,10 +143,10 @@
         },
         {
           "name": "includeRecentlyClosed",
-          "description": "Show recently closed issues",
+          "description": "Include closed issues in selected categories",
           "type": "checkbox",
           "required": false,
-          "label": "Recently Closed",
+          "label": "Include Closed",
           "default": false
         }
       ]
@@ -165,19 +183,27 @@
           "default": true
         },
         {
+          "name": "includeOwnedRepositories",
+          "description": "Show pull requests in repositories you own",
+          "type": "checkbox",
+          "required": false,
+          "label": "Owned Repositories",
+          "default": true
+        },
+        {
+          "name": "includeAccessibleRepositories",
+          "description": "Show pull requests in all repositories your account can access",
+          "type": "checkbox",
+          "required": false,
+          "label": "Accessible Repositories",
+          "default": false
+        },
+        {
           "name": "includeAssigned",
           "description": "Show pull requests assigned to you",
           "type": "checkbox",
           "required": false,
           "label": "Assigned",
-          "default": true
-        },
-        {
-          "name": "includeMentioned",
-          "description": "Show pull requests where you are mentioned",
-          "type": "checkbox",
-          "required": false,
-          "label": "Mentioned",
           "default": true
         },
         {
@@ -197,20 +223,20 @@
           "default": false
         },
         {
-          "name": "includeRecentlyClosed",
-          "description": "Show recently closed pull requests",
+          "name": "includeMentioned",
+          "description": "Show pull requests where you are mentioned",
           "type": "checkbox",
           "required": false,
-          "label": "Recently Closed",
-          "default": false
+          "label": "Mentioned",
+          "default": true
         },
         {
-          "name": "includeOwnedRepositories",
-          "description": "Show pull requests in repositories you own",
+          "name": "includeRecentlyClosed",
+          "description": "Include closed pull requests in selected categories",
           "type": "checkbox",
           "required": false,
-          "label": "Owned Repositories",
-          "default": true
+          "label": "Include Closed",
+          "default": false
         }
       ]
     },

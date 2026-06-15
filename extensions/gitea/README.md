@@ -54,15 +54,15 @@ View issues across all your repositories. Shows issues created by you, assigned 
 **Command Preferences:**
 
 - Choose which categories to display by default (Created, Assigned, Mentioned)
-- Option to include recently closed issues
+- Option to include closed issues in selected categories
 
 ### My Pull Requests
 
-View pull requests across all your repositories. Shows PRs created by you, assigned to you, mentioning you, or requesting your review.
+View pull requests across your repositories. Shows PRs created by you, in repositories you own, assigned to you, requesting your review, reviewed by you, or mentioning you. You can optionally include PRs from all repositories your account can access.
 
 **Features:**
 
-- **Category Filter**: Use the dropdown to filter by All, Created, Assigned, Mentioned, Review Requested, or Reviewed
+- **Category Filter**: Use the dropdown to filter by All, Created by you, Repositories you own, Accessible repositories, Assigned to you, Review requested, Reviewed by you, or Mentioning you
 - **Search**: Type in the search bar to filter PRs by text
 - **Smart Sorting**: Automatically sorts by state (open first) and then by update time
 - **Actions on PRs**:
@@ -73,8 +73,9 @@ View pull requests across all your repositories. Shows PRs created by you, assig
 
 **Command Preferences:**
 
-- Choose which categories to display by default
-- Option to include recently closed PRs
+- Choose which categories to display by default, including owned repositories
+- Optionally include pull requests from all repositories your account can access
+- Option to include closed PRs in selected categories
 
 ### Search Issues
 
@@ -140,10 +141,11 @@ Shows your unread notification count in the menu bar with quick access to recent
 
 ### My Repositories
 
-Browse your personal repositories.
+Browse repositories your account owns or contributes to.
 
 **Features:**
 
+- **Search**: Type in the search bar to search your repositories
 - **Sorting Options**: Use dropdown to sort by:
   - Recently Updated (default)
   - Least Recently Updated
@@ -163,25 +165,29 @@ Browse your personal repositories.
   - Website link if available
 - **Actions**:
   - Open repository in browser (↵)
-  - Clone with editor (VS Code, Cursor, Zed, IntelliJ) - ⌘⇧C for first editor
-  - Copy repository URL (⌘C)
+  - Clone with editor (VS Code, Cursor, Zed, IntelliJ) - ⌘⇧1 for first editor
+  - Copy HTML URL (⌘⇧H)
+  - Copy clone URL (⌘⇧C)
   - Copy SSH URL (⌘⇧S)
   - Create issue in repository (⌘N)
+  - Search issues in repository
   - Toggle details view (⌘⇧D)
 
 **Extension Preferences:**
 
 - Choose which editors to show in clone actions
+- Choose the clone protocol used by clone-with-editor actions (HTTPS or SSH)
 
 ### Explore Repositories
 
-Discover public repositories on your Gitea instance.
+Discover repositories your account can access on your Gitea instance.
 
 **Features:**
 
+- **Search**: Type in the search bar to search accessible repositories
 - Same sorting options as "My Repositories"
 - Same details view and actions
-- Shows all public repositories you have access to browse
+- Shows repositories your account has access to browse
 - Pagination support for browsing large numbers of repositories
 
 ## Keyboard Shortcuts
@@ -196,5 +202,6 @@ Common shortcuts across commands:
 | Toggle details    | ⌘⇧D   | Ctrl+Shift+D |
 | Mark as read      | ⌘⇧R   | Ctrl+Shift+R |
 | Pin/unpin         | ⌘⇧P   | Ctrl+Shift+P |
+| Copy HTML URL     | ⌘⇧H   | Ctrl+Shift+H |
 | Copy SSH URL      | ⌘⇧S   | Ctrl+Shift+S |
-| Clone with editor | ⌘⇧C   | Ctrl+Shift+C |
+| Clone with editor | ⌘⇧1   | Ctrl+Shift+1 |
