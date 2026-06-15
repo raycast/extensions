@@ -24,6 +24,10 @@ import type {
 
 /** Marker that the Codex desktop app writes in `payload.originator` of session_meta. */
 const CODEX_APP_ORIGINATOR = "Codex Desktop";
+const DEFAULT_MAX_LOADED_MESSAGES = 500;
+const DEFAULT_MAX_MESSAGE_CHARS = 12000;
+const DEFAULT_MAX_JSONL_LINE_BYTES = 2 * 1024 * 1024;
+const TRUNCATED_MESSAGE_SUFFIX = "\n\n[Message truncated to keep Raycast responsive.]";
 
 /** Internal logging — surfaces in `ray develop` console without breaking the user. */
 function warn(...args: unknown[]): void {
@@ -485,37 +489,105 @@ export function loadAllSessionMetas(): SessionMeta[] {
 
 // --- Content loading (on demand) ---
 
+export interface LoadSessionMessagesOptions {
+  /**
+   * Upper bound for rendered/copied messages. Large sessions can contain tens of
+   * thousands of turns; keeping a bounded preview avoids Raycast's 100 MB worker heap.
+   */
+  maxMessages?: number;
+  /** Upper bound for each parsed message body before it is stored in React state. */
+  maxMessageChars?: number;
+  /** Upper bound for a raw JSONL line. Lines above this are skipped while streaming. */
+  maxLineBytes?: number;
+}
+
+function truncateMessageContent(msg: SessionMessage, maxChars: number): SessionMessage {
+  if (msg.content.length <= maxChars) return msg;
+  return { ...msg, content: msg.content.slice(0, maxChars) + TRUNCATED_MESSAGE_SUFFIX };
+}
+
+async function* readJsonlLines(filePath: string, maxLineBytes: number): AsyncGenerator<string> {
+  const stream = fs.createReadStream(filePath, { encoding: "utf-8", highWaterMark: 64 * 1024 });
+  let buffered = "";
+  let bufferedBytes = 0;
+  let skippingLongLine = false;
+
+  try {
+    for await (const chunk of stream) {
+      const text = String(chunk);
+      let start = 0;
+
+      while (start < text.length) {
+        const newlineIndex = text.indexOf("\n", start);
+        const segmentEnd = newlineIndex === -1 ? text.length : newlineIndex;
+        const segment = text.slice(start, segmentEnd);
+
+        if (!skippingLongLine) {
+          buffered += segment;
+          bufferedBytes += Buffer.byteLength(segment, "utf-8");
+          if (bufferedBytes > maxLineBytes) {
+            buffered = "";
+            bufferedBytes = 0;
+            skippingLongLine = true;
+          }
+        }
+
+        if (newlineIndex === -1) break;
+
+        if (skippingLongLine) {
+          skippingLongLine = false;
+        } else {
+          yield buffered.endsWith("\r") ? buffered.slice(0, -1) : buffered;
+        }
+        buffered = "";
+        bufferedBytes = 0;
+        start = newlineIndex + 1;
+      }
+    }
+
+    if (!skippingLongLine && buffered) {
+      yield buffered.endsWith("\r") ? buffered.slice(0, -1) : buffered;
+    }
+  } finally {
+    stream.destroy();
+  }
+}
+
 /**
- * Load all messages for a single session. Reads the entire JSONL file.
+ * Load messages for a single session without reading the whole JSONL file into memory.
  * Called lazily when the user opens the detail view.
  */
-export async function loadSessionMessages(meta: SessionMeta): Promise<SessionMessage[]> {
-  let content: string;
-  try {
-    content = await fs.promises.readFile(meta.filePath, "utf-8");
-  } catch (e) {
-    warn(`failed to read session ${meta.filePath}:`, e);
-    return [];
-  }
-
+export async function loadSessionMessages(
+  meta: SessionMeta,
+  options: LoadSessionMessagesOptions = {},
+): Promise<SessionMessage[]> {
   const adapter = getAdapter(getFormatForSource(meta.source));
   const messages: SessionMessage[] = [];
+  const maxMessages = options.maxMessages ?? DEFAULT_MAX_LOADED_MESSAGES;
+  const maxMessageChars = options.maxMessageChars ?? DEFAULT_MAX_MESSAGE_CHARS;
+  const maxLineBytes = options.maxLineBytes ?? DEFAULT_MAX_JSONL_LINE_BYTES;
 
-  for (const line of content.split("\n")) {
-    if (!line.trim()) continue;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(line);
-    } catch {
-      continue;
+  try {
+    for await (const line of readJsonlLines(meta.filePath, maxLineBytes)) {
+      if (!line.trim()) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(line);
+      } catch {
+        continue;
+      }
+      const msg = adapter.parseLine(parsed);
+      if (!msg) continue;
+      // Suppress auto-injected user-role events (system reminders, hook output, slash-command
+      // wrappers, interrupted-by-user markers, ...) so the conversation view shows only what
+      // the user actually typed and the assistant actually said.
+      if (msg.role === "user" && !isMeaningfulUserMessage(msg.content)) continue;
+      messages.push(truncateMessageContent(msg, maxMessageChars));
+      if (messages.length >= maxMessages) break;
     }
-    const msg = adapter.parseLine(parsed);
-    if (!msg) continue;
-    // Suppress auto-injected user-role events (system reminders, hook output, slash-command
-    // wrappers, interrupted-by-user markers, ...) so the conversation view shows only what
-    // the user actually typed and the assistant actually said.
-    if (msg.role === "user" && !isMeaningfulUserMessage(msg.content)) continue;
-    messages.push(msg);
+  } catch (e) {
+    warn(`failed to read session ${meta.filePath}:`, e);
+    return messages;
   }
 
   return messages;
@@ -567,6 +639,9 @@ export async function searchSessionContent(query: string, limit: number): Promis
         "--ignore-case",
         "--max-count",
         "1",
+        "--max-columns",
+        "2048",
+        "--max-columns-preview",
         "--max-filesize",
         "20M",
         "--glob",
@@ -579,7 +654,7 @@ export async function searchSessionContent(query: string, limit: number): Promis
       ],
       {
         encoding: "utf-8",
-        maxBuffer: 16 * 1024 * 1024,
+        maxBuffer: 2 * 1024 * 1024,
         timeout: 15000,
       },
     );
