@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Podcast Episode Navigation] - 2026-05-28
+
+- Prevent podcast episode navigation from crashing when Spotify omits show details in search results
+
 ## [Add Keyboard Shortcuts] - 2026-05-17
 
 - Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist

@@ -54,13 +54,12 @@ export default function Command() {
 
   const { results: searchedResults, markAsSearched } = useSearchedResults();
   const filteredSearchedResults = useMemo(() => {
-    if (typeFilter.toLowerCase() === "all") {
-      return searchedResults;
-    }
+    const byType =
+      typeFilter.toLowerCase() === "all"
+        ? searchedResults
+        : searchedResults?.filter((result) => result.type.toLowerCase() === typeFilter.toLowerCase());
 
-    const filteredResults = searchedResults?.filter((result) => result.type.toLowerCase() === typeFilter.toLowerCase());
-
-    return filteredResults?.filter(
+    return byType?.filter(
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchedResults, searchText, typeFilter]);

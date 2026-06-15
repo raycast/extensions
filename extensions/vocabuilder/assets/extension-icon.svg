@@ -1,85 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3730A3"/>
-      <stop offset="100%" style="stop-color:#6D28D9"/>
+    <linearGradient id="greenCard" x1="206" y1="84" x2="390" y2="346" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5EF0B0"/>
+      <stop offset="1" stop-color="#23C875"/>
     </linearGradient>
-    <linearGradient id="pageL" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#EEF2FF"/>
-      <stop offset="100%" style="stop-color:#E0E7FF"/>
+    <linearGradient id="coralCard" x1="162" y1="122" x2="346" y2="384" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF7E8A"/>
+      <stop offset="1" stop-color="#F45B73"/>
     </linearGradient>
-    <linearGradient id="pageR" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#EDE9FE"/>
-      <stop offset="100%" style="stop-color:#DDD6FE"/>
+    <linearGradient id="frontCard" x1="116" y1="150" x2="344" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F7F9FC"/>
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1E1B4B" flood-opacity="0.4"/>
-    </filter>
   </defs>
 
-  <!-- Background rounded rect -->
-  <rect width="512" height="512" rx="110" ry="110" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="110" ry="110" fill="#FFFFFF"/>
 
-  <!-- Subtle inner glow -->
-  <rect width="512" height="512" rx="110" ry="110"
-        fill="none" stroke="white" stroke-width="3" opacity="0.12"/>
+  <g transform="translate(5 -13)">
+    <g transform="translate(256 256) scale(1.3) translate(-256 -256)">
+      <g transform="rotate(7 300 228)">
+        <rect x="208" y="94" width="188" height="252" rx="42" fill="url(#greenCard)"/>
+      </g>
 
-  <!-- Book group with shadow -->
-  <g filter="url(#shadow)">
+      <g transform="rotate(2 262 260)">
+        <rect x="162" y="132" width="200" height="258" rx="42" fill="url(#coralCard)"/>
+      </g>
 
-    <!-- Left page -->
-    <path d="M256 148
-             C256 148 168 158 136 174
-             L136 354
-             C136 354 196 340 256 342 Z"
-          fill="url(#pageL)"/>
+      <g transform="rotate(-5 226 292)">
+        <rect x="108" y="164" width="232" height="270" rx="48" fill="url(#frontCard)"/>
+        <rect x="108" y="164" width="232" height="270" rx="48" fill="none" stroke="#CBD5E1" stroke-width="8"/>
+      </g>
 
-    <!-- Right page -->
-    <path d="M256 148
-             C256 148 344 158 376 174
-             L376 354
-             C376 354 316 340 256 342 Z"
-          fill="url(#pageR)"/>
+      <g transform="rotate(-5 226 292)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M232 258H168" stroke="#475569" stroke-width="26"/>
+        <path d="M188 229L156 258L188 287" stroke="#475569" stroke-width="26"/>
 
-    <!-- Book spine shadow line -->
-    <line x1="256" y1="148" x2="256" y2="342"
-          stroke="#A5B4FC" stroke-width="3" opacity="0.7"/>
-
-    <!-- Left page lines (ruled) -->
-    <line x1="162" y1="218" x2="245" y2="214" stroke="#C7D2FE" stroke-width="5" stroke-linecap="round"/>
-    <line x1="158" y1="242" x2="245" y2="238" stroke="#C7D2FE" stroke-width="5" stroke-linecap="round"/>
-    <line x1="156" y1="266" x2="244" y2="262" stroke="#C7D2FE" stroke-width="5" stroke-linecap="round"/>
-
-    <!-- Right page lines (ruled) -->
-    <line x1="267" y1="214" x2="350" y2="218" stroke="#C4B5FD" stroke-width="5" stroke-linecap="round"/>
-    <line x1="267" y1="238" x2="354" y2="242" stroke="#C4B5FD" stroke-width="5" stroke-linecap="round"/>
-    <line x1="267" y1="262" x2="356" y2="266" stroke="#C4B5FD" stroke-width="5" stroke-linecap="round"/>
-
+        <path d="M226 330H292" stroke="#2F6BFF" stroke-width="26"/>
+        <path d="M272 301L304 330L272 359" stroke="#2F6BFF" stroke-width="26"/>
+      </g>
+    </g>
   </g>
-
-  <!-- "A" Latin letter on left page -->
-  <text x="196" y="316" font-family="Georgia, 'Times New Roman', serif"
-        font-size="84" fill="#3730A3" text-anchor="middle"
-        font-weight="bold" opacity="0.85">A</text>
-
-  <!-- "Я" Cyrillic letter on right page -->
-  <text x="316" y="316" font-family="Georgia, 'Times New Roman', serif"
-        font-size="84" fill="#5B21B6" text-anchor="middle"
-        font-weight="bold" opacity="0.85">Я</text>
-
-  <!-- Small arrow between pages at top -->
-  <path d="M238 170 L274 170" stroke="#A5B4FC" stroke-width="6"
-        stroke-linecap="round" marker-end="url(#arr)"/>
-  <defs>
-    <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 Z" fill="#A5B4FC"/>
-    </marker>
-  </defs>
-
-  <!-- Bottom cover strip -->
-  <path d="M136 354 C136 366 144 374 156 378
-           L256 368 L356 378
-           C368 374 376 366 376 354
-           L256 342 Z"
-        fill="#312E81" opacity="0.6"/>
 </svg>

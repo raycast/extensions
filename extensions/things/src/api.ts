@@ -187,6 +187,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       tags: todo.tagNames(),
       dueDate: props.dueDate ? props.dueDate.toISOString() : null,
       activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+      creationDate: props.creationDate ? props.creationDate.toISOString() : null,
       isProject: props.pcls === "project",
       areaTags: areaTags || null,
       project,
@@ -270,6 +271,7 @@ const mapProjectTodoJxa = `todo => {
     tags: todo.tagNames(),
     dueDate: props.dueDate ? props.dueDate.toISOString() : null,
     activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    creationDate: props.creationDate ? props.creationDate.toISOString() : null,
   };
 }`;
 
@@ -304,6 +306,7 @@ const mapAreaTodoJxa = `todo => {
     tags: todo.tagNames(),
     dueDate: props.dueDate ? props.dueDate.toISOString() : null,
     activationDate: props.activationDate ? props.activationDate.toISOString() : null,
+    creationDate: props.creationDate ? props.creationDate.toISOString() : null,
     isProject: props.pcls === "project",
   };
 }`;

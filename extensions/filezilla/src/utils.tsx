@@ -5,6 +5,45 @@ import { homedir } from "os";
 import { readFile } from "fs/promises";
 import { ContentToCheck, Server, Folder, XMLFileContent } from "./types";
 
+interface FileZillaVariant {
+  bundleId: string;
+  appName: string;
+  configDir: string;
+}
+
+const VARIANTS: FileZillaVariant[] = [
+  {
+    bundleId: "org.filezilla-project.filezilla",
+    appName: "FileZilla",
+    configDir: `${homedir()}/.config/filezilla`,
+  },
+  {
+    bundleId: "org.filezilla-project.filezilla.sandbox",
+    appName: "FileZilla Pro",
+    configDir: `${homedir()}/Library/Containers/org.filezilla-project.filezilla.sandbox/Data/.config/filezilla`,
+  },
+];
+
+let installedVariantPromise: Promise<FileZillaVariant | null> | null = null;
+/**
+ * Finds the installed FileZilla variant (standard or Pro from the Mac App Store)
+ * @returns The installed variant, or null if neither is installed
+ */
+async function getInstalledVariant(): Promise<FileZillaVariant | null> {
+  if (installedVariantPromise) return installedVariantPromise;
+  installedVariantPromise = (async () => {
+    try {
+      const applications = await getApplications();
+      const installedBundleIds = new Set(applications.map((app) => app.bundleId));
+      return VARIANTS.find((variant) => installedBundleIds.has(variant.bundleId)) ?? null;
+    } catch (error) {
+      handleError(error);
+      return null;
+    }
+  })();
+  return installedVariantPromise;
+}
+
 /**
  * Checks if FileZilla is installed on the device
  * @returns True if FileZilla is installed, false if it isn't;
@@ -13,22 +52,18 @@ export async function isFileZillaInstalled(): Promise<boolean> {
   // I wanted to make custom hook out of it, but for some reason I get
   // TypeError: Cannot read properties of null (reading 'useState') error
   // Hence, I just use this function in every Command component
-  try {
-    const applications = await getApplications();
-    return applications.some(({ bundleId }) => bundleId === "org.filezilla-project.filezilla");
-  } catch (error) {
-    handleError(error);
-    return false;
-  }
+  return (await getInstalledVariant()) !== null;
 }
 
 /**
  * Opens FileZilla's site manager
  */
-export function openSiteManager(): void {
+export async function openSiteManager(): Promise<void> {
+  const variant = await getInstalledVariant();
+  if (!variant) return;
   // Unfortunatelly FileZilla does not provide a way to change current state of the working app via it's API.
   // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec("(pkill -x filezilla; open /Applications/FileZilla.app --args -s)");
+  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args -s)`);
 }
 
 /**
@@ -136,10 +171,13 @@ function getAvailableServers(content: ContentToCheck, folderPath?: string): Cont
  */
 export async function getServers(location: "sitemanager" | "recentservers"): Promise<Server[]> {
   try {
+    const variant = await getInstalledVariant();
+    if (!variant) return [];
+
     const serversFolder = location === "sitemanager" ? "Servers" : "RecentServers";
     const parser = new XMLParser();
     const xmlFileContent = parser.parse(
-      await readFile(homedir() + `/.config/filezilla/${location}.xml`, {
+      await readFile(`${variant.configDir}/${location}.xml`, {
         flag: "r",
       }),
     );
@@ -164,8 +202,10 @@ export async function getServers(location: "sitemanager" | "recentservers"): Pro
  * Connects to the specified server
  * @param server Server to which we want to connect
  */
-export function connectToTheServer(server: Server): void {
+export async function connectToTheServer(server: Server): Promise<void> {
+  const variant = await getInstalledVariant();
+  if (!variant) return;
   // Unfortunatelly FileZilla does not provide a way to change connections inside a currently working app via it's API.
   // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec(`(pkill -x filezilla; open /Applications/FileZilla.app --args --site=${server.Path})`);
+  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args --site=${server.Path})`);
 }

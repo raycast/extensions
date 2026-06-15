@@ -1,44 +1,6 @@
 import { executeSQL } from "@raycast/utils";
 
-import { escapeSQLString, getOpenNoteURL, NOTES_DB } from "../helpers";
-
-type Link = {
-  id: string;
-  text: string | null;
-  url: string | null;
-  notePk: number;
-};
-
-type Backlink = {
-  id: string;
-  title: string;
-  url: string;
-};
-
-type Tag = {
-  id: string;
-  text: string | null;
-  notePk: number;
-};
-
-type NoteItem = {
-  id: string;
-  pk: number;
-  UUID: string;
-  title: string;
-  modifiedAt?: Date;
-  folder: string;
-  snippet: string;
-  account: string;
-  invitationLink: string | null;
-  links: Link[];
-  backlinks: Backlink[];
-  tags: Tag[];
-  locked: boolean;
-  pinned: boolean;
-  checklist: boolean;
-  checklistInProgress: boolean;
-};
+import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
 export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
   const trimmedSearchText = searchText?.trim();
@@ -85,7 +47,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
   const data = await executeSQL<NoteItem>(NOTES_DB, query);
 
   if (!data || data.length === 0) {
-    return { pinnedNotes: [], unpinnedNotes: [], deletedNotes: [], allNotes: [] };
+    return [];
   }
 
   let invitations: { invitationLink: string | null; noteId: string }[] = [];
@@ -152,7 +114,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
 
   let notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
-    const noteLinks = links?.filter((link) => link.notePk == note.pk);
+    const noteLinks = links?.filter((link) => link.notePk === note.pk);
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
@@ -168,7 +130,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
       }
     });
 
-    const noteTags = tags?.filter((tag) => tag.notePk == note.pk);
+    const noteTags = tags?.filter((tag) => tag.notePk === note.pk);
 
     return {
       ...note,

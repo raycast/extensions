@@ -135,19 +135,37 @@
         "study",
         "learn"
       ]
+    },
+    {
+      "name": "flash-cards",
+      "title": "Flash Cards",
+      "subtitle": "Word4You",
+      "description": "Review saved words with flashcards (random 10 words)",
+      "mode": "view",
+      "keywords": [
+        "flashcard",
+        "flashcards",
+        "study",
+        "review",
+        "practice",
+        "memory",
+        "remember",
+        "word",
+        "vocabulary"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -158,6 +176,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

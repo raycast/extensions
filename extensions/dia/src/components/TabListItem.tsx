@@ -1,6 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon, showFailureToast } from "@raycast/utils";
 import { focusTab, type Tab } from "../dia";
+import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getAccessories, getSubtitle } from "../utils";
 
 interface TabListItemProps {
@@ -9,12 +10,9 @@ interface TabListItemProps {
   onTabAction?: () => void;
 }
 
-interface Preferences {
-  defaultTabAction: "focus" | "open";
-}
-
 export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) {
-  const { defaultTabAction } = getPreferenceValues<Preferences>();
+  const { defaultTabAction } = getPreferenceValues<Preferences.Search>();
+  const searchEngine = searchText ? getSearchEngine() : undefined;
 
   const focusAction = (
     <Action
@@ -63,8 +61,8 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
           {secondaryAction}
           {searchText && (
             <Action.OpenInBrowser
-              title="Search Google"
-              url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+              title={getSearchActionTitle(searchEngine)}
+              url={getSearchUrl(searchText, searchEngine)}
               icon={Icon.MagnifyingGlass}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               onOpen={() => {

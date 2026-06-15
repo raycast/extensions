@@ -1,5 +1,10 @@
 # Window Sizer Changelog
 
+## [Fixes] - 2026-06-09
+
+- Fixed list selection behavior while preserving selected item action icons
+- Added timeout handling for unresponsive window operations
+
 ## [Chore] - 2026-05-16
 
 - Updated screenshots to new Raycast

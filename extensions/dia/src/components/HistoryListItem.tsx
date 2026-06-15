@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { type HistoryItem } from "../dia";
+import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getSubtitle } from "../utils";
 
 interface HistoryListItemProps {
@@ -10,6 +11,8 @@ interface HistoryListItemProps {
 }
 
 export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryListItemProps) {
+  const searchEngine = searchText ? getSearchEngine() : undefined;
+
   return (
     <List.Item
       icon={getFavicon(item.url, { mask: Image.Mask.Circle })}
@@ -37,8 +40,8 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
             />
             {searchText && (
               <Action.OpenInBrowser
-                title="Search Google"
-                url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+                title={getSearchActionTitle(searchEngine)}
+                url={getSearchUrl(searchText, searchEngine)}
                 icon={Icon.MagnifyingGlass}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
                 onOpen={() => {

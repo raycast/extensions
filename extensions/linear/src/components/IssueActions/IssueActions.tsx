@@ -395,7 +395,14 @@ export default function IssueActions({
         <StateSubmenu issue={issue} updateIssue={updateIssue} />
 
         {priorities && priorities.length > 0 ? (
-          <ActionPanel.Submenu icon={Icon.LevelMeter} title="Set Priority" shortcut={Keyboard.Shortcut.Common.Pin}>
+          <ActionPanel.Submenu
+            icon={Icon.LevelMeter}
+            title="Set Priority"
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "p" },
+              Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+            }}
+          >
             {priorities.map((priority) => (
               <Action
                 key={priority.priority}

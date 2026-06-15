@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { exists, getOpenWindowIds, shellEscape } from "./utils";
 import path from "path";
+import { isPosixShell } from "./shell";
 
 describe("shellEscape", () => {
   it("should wrap simple strings in single quotes", () => {
@@ -68,5 +69,40 @@ describe("exists", () => {
     const dbPath = path.resolve(__dirname, "../../test/fixtures/gram-db-v30.sqlite");
     const fileUrl = `file://${dbPath}`;
     expect(exists(fileUrl)).toBe(true);
+  });
+});
+
+describe("isPosixShell", () => {
+  it("recognises common POSIX shells by absolute path", () => {
+    expect(isPosixShell("/bin/sh")).toBe(true);
+    expect(isPosixShell("/bin/bash")).toBe(true);
+    expect(isPosixShell("/bin/zsh")).toBe(true);
+    expect(isPosixShell("/bin/dash")).toBe(true);
+    expect(isPosixShell("/bin/ksh")).toBe(true);
+    expect(isPosixShell("/bin/ash")).toBe(true);
+  });
+
+  it("recognises POSIX shells installed in non-standard locations", () => {
+    expect(isPosixShell("/usr/local/bin/bash")).toBe(true);
+    expect(isPosixShell("/opt/homebrew/bin/zsh")).toBe(true);
+  });
+
+  it("rejects non-POSIX shells", () => {
+    expect(isPosixShell("/usr/local/bin/fish")).toBe(false);
+    expect(isPosixShell("/opt/homebrew/bin/fish")).toBe(false);
+    expect(isPosixShell("/opt/homebrew/bin/nu")).toBe(false);
+    expect(isPosixShell("/usr/local/bin/elvish")).toBe(false);
+    expect(isPosixShell("/opt/homebrew/bin/xonsh")).toBe(false);
+    expect(isPosixShell("/usr/local/bin/pwsh")).toBe(false);
+  });
+
+  it("matches on the basename, not substring of the path", () => {
+    expect(isPosixShell("/opt/catfish/bin/nu")).toBe(false);
+    expect(isPosixShell("/opt/bash-experiments/bin/fish")).toBe(false);
+  });
+
+  it("treats unknown or empty shells as non-POSIX", () => {
+    expect(isPosixShell("")).toBe(false);
+    expect(isPosixShell("/some/unknown/shell")).toBe(false);
   });
 });
