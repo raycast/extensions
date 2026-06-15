@@ -12,10 +12,6 @@ const OFFLINE_MESSAGE =
 const AUTH_MESSAGE =
   "Sync token rejected. Set or update it in this extension's settings (⌘,).";
 
-interface Preferences {
-  syncToken: string;
-}
-
 export interface ReadLaterItem {
   url: string;
   title: string;
@@ -78,10 +74,12 @@ export async function saveItem(url: string, title: string): Promise<void> {
   await sync([newItem]);
 }
 
-export async function setRead(url: string, read: boolean): Promise<void> {
-  const items = await sync([]);
-  const item = items.find((i) => i.url === url);
-  if (!item) return;
+// The caller already holds the full item (from the list), so we can update it
+// in a single request — last-write-wins merge by url applies it server-side.
+export async function setRead(
+  item: ReadLaterItem,
+  read: boolean,
+): Promise<void> {
   await sync([{ ...item, read, updatedAt: Date.now() }]);
 }
 

@@ -30,22 +30,12 @@ async function getActiveTabViaExtension(): Promise<ActiveTab | null> {
   let tabs: Awaited<ReturnType<typeof BrowserExtension.getTabs>>;
   try {
     tabs = await BrowserExtension.getTabs();
-  } catch (e) {
-    console.log(
-      "[save] BrowserExtension.getTabs() failed (extension not connected?):",
-      e instanceof Error ? e.message : e,
-    );
+  } catch {
+    // Browser extension not connected — fall back to AppleScript.
     return null;
   }
-  console.log(
-    "[save] tabs from browser extension:",
-    tabs.map((t) => ({ active: t.active, url: t.url })),
-  );
   const active = tabs.find((t) => t.active);
-  if (!active?.url) {
-    console.log("[save] browser extension returned no active tab");
-    return null;
-  }
+  if (!active?.url) return null;
   return { url: active.url, title: (active.title ?? "").trim() };
 }
 
@@ -107,11 +97,6 @@ export default async function Command() {
     return;
   }
   const { tab, source } = result;
-  console.log("[save] detected tab:", {
-    source,
-    url: tab.url,
-    title: tab.title,
-  });
 
   // The AppleScript path on Dia only returns the bare host, not the article
   // URL. If we landed there, the browser extension isn't feeding us tabs.

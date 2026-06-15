@@ -6,6 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   getItems,
@@ -41,9 +42,9 @@ export default function Command() {
     refresh();
   }, []);
 
-  async function markRead(url: string) {
+  async function markRead(item: ReadLaterItem) {
     try {
-      await setRead(url, true);
+      await setRead(item, true);
       await refresh();
       await showToast({ style: Toast.Style.Success, title: "Marked as read" });
     } catch (e) {
@@ -93,19 +94,19 @@ export default function Command() {
           key={item.url}
           title={item.title}
           subtitle={hostname(item.url)}
-          icon={Icon.Bookmark}
+          icon={getFavicon(item.url, { fallback: Icon.Bookmark })}
           accessories={[{ text: relativeDate(item.savedAt) }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
                 url={item.url}
-                onOpen={() => markRead(item.url)}
+                onOpen={() => markRead(item)}
               />
               <Action
                 title="Mark as Read"
                 icon={Icon.Check}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={() => markRead(item.url)}
+                onAction={() => markRead(item)}
               />
               <Action.CopyToClipboard
                 title="Copy URL"
