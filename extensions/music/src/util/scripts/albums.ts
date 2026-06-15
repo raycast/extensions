@@ -45,7 +45,7 @@ export const search = (search: string) => {
 			set results to (every track of library playlist 1 whose (album contains "${escapedSearch}" or artist contains "${escapedSearch}"))
 			repeat with aTrack in results
 				set albumName to the album of aTrack
-				set trackCount to count (every track of library playlist 1 whose album contains albumName)
+				set trackCount to count (every track of library playlist 1 whose album is albumName)
 				tell album of aTrack to if albumList does not contain it then
 					set end of albumList to it
 					set trackId to the id of aTrack
