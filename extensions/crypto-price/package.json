@@ -99,8 +99,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6",
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
     "jest": "^30.4.2",
     "lodash": "^4.18.1",
     "ts-jest": "^29.4.11"
