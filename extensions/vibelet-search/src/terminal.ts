@@ -72,13 +72,18 @@ export async function openInApp(meta: SessionMeta): Promise<void> {
  * Build a full shell command line: cd to project, then run resume.
  * Used by terminal apps that send a single string into an interactive shell.
  */
-function buildFullResumeShellCommand(meta: SessionMeta, prefs: Preferences): string {
-  return getResumeCommand(meta, prefs, { withCwd: true });
+export function buildFullResumeShellCommand(meta: SessionMeta, prefs: Preferences): string {
+  const resumeCommand = getResumeCommand(meta, prefs, { withCwd: false });
+  return meta.projectPath ? `cd ${shellDoubleQuote(meta.projectPath)} && ${resumeCommand}` : resumeCommand;
 }
 
 function shellQuote(s: string): string {
   if (/^[A-Za-z0-9_\-./]+$/.test(s)) return s;
   return "'" + s.replace(/'/g, "'\\''") + "'";
+}
+
+function shellDoubleQuote(s: string): string {
+  return `"${s.replace(/(["\\$`])/g, "\\$1")}"`;
 }
 
 function escapeAppleScript(s: string): string {
