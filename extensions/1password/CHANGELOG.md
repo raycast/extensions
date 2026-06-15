@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-06-15
 
 - Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed. Opt in via **Reduce item list memory usage** in extension preferences.
 - When enabled, the item list uses the summary payload, so username/email subtitles and username/email search are unavailable until full item details are fetched by an action.
