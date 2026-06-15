@@ -42,7 +42,7 @@ export const search = (search: string) => {
 		set output to ""
 		set albumList to {}
 		tell application "Music"
-			set results to (every track of library playlist 1 whose album contains "${escapedSearch}" or artist contains "${escapedSearch}")
+			set results to (every track of library playlist 1 whose (album contains "${escapedSearch}" or artist contains "${escapedSearch}"))
 			repeat with aTrack in results
 				set albumName to the album of aTrack
 				set trackCount to count (every track of library playlist 1 whose album contains albumName)
