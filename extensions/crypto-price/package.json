@@ -101,9 +101,7 @@
   "dependencies": {
     "@raycast/api": "^1.85.2",
     "@raycast/utils": "^1.19.1",
-    "jest": "^30.4.2",
-    "lodash": "^4.18.1",
-    "ts-jest": "^29.4.11"
+    "lodash": "^4.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -115,7 +113,9 @@
     "@typescript-eslint/parser": "^8.61.0",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.4.2",
     "prettier": "^3.8.4",
+    "ts-jest": "^29.4.11",
     "typescript": "^6.0.3"
   },
   "scripts": {
