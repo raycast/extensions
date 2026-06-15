@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ntfctl",
   "title": "Ntfctl",
-  "description": "ntfctl — control macOS Notification Center from the keyboard \u2014 plus toggle Do Not Disturb \u2014 all from the keyboard via Raycast.",
+  "description": "ntfctl \u2014 control macOS Notification Center from the keyboard \u2014 plus toggle Do Not Disturb \u2014 all from the keyboard via Raycast.",
   "icon": "bell.png",
   "author": "ahnopologetic",
   "categories": [
@@ -80,11 +80,25 @@
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
-    "postbuild": "mkdir -p dist/scripts && cp ../*.applescript dist/scripts/",
+    "postbuild": "mkdir -p dist/scripts && cp assets/scripts/*.applescript dist/scripts/",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "screenshots": [
+    {
+      "path": "metadata/ntfctl-1.png",
+      "title": "Peek at Latest Notification"
+    },
+    {
+      "path": "metadata/ntfctl-2.png",
+      "title": "Count Notifications"
+    },
+    {
+      "path": "metadata/ntfctl-3.png",
+      "title": "Diagnostics"
+    }
+  ]
 }
