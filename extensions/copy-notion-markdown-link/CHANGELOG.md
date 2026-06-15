@@ -1,6 +1,6 @@
 # Copy Notion Markdown Link Changelog
 
-## [Support notion.com domain] - {PR_MERGE_DATE}
+## [Support notion.com domain] - 2026-06-15
 
 - Fix URL validation to accept `notion.com`, as Notion migrated to the new domain.
 
