@@ -1,6 +1,6 @@
 import { processCoinsText } from "../processCoinsText";
 
-const fixtures: [string, any][] = [
+const fixtures: [string, ReturnType<typeof processCoinsText>][] = [
   ["SOL DOGE BTC | ETH ADA XRP", { symbols: ["SOL", "DOGE", "BTC", "ETH", "ADA", "XRP"], primaryCount: 3 }],
   ["sol doge eth", { symbols: ["SOL", "DOGE", "ETH"], primaryCount: 1 }],
   ["sol eth |", { symbols: ["SOL", "ETH"], primaryCount: 2 }],
