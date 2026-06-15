@@ -17,6 +17,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
+  parseList,
   getMyWorkItems,
   getWorkItemStates,
   getWorkItemTypes,
@@ -130,6 +131,8 @@ interface AppSettings {
   project: string;
   states: string[];
   types: string[];
+  /** Comma-separated states to float to the top of the list, in order. */
+  stateOrder: string;
   defaultRepo: string;
   defaultBaseBranch: string;
 }
@@ -138,6 +141,7 @@ const EMPTY_SETTINGS: AppSettings = {
   project: "",
   states: [],
   types: [],
+  stateOrder: "",
   defaultRepo: "",
   defaultBaseBranch: "",
 };
@@ -146,6 +150,7 @@ const STORAGE_KEYS = {
   project: "app.project",
   states: "app.states",
   types: "app.types",
+  stateOrder: "app.stateOrder",
   defaultRepo: "app.defaultRepo",
   defaultBaseBranch: "app.defaultBaseBranch",
   onboarded: "app.onboarded",
@@ -155,10 +160,11 @@ async function readAppSettings(): Promise<{
   settings: AppSettings;
   onboarded: boolean;
 }> {
-  const [p, s, t, r, b, o] = await Promise.all([
+  const [p, s, t, so, r, b, o] = await Promise.all([
     LocalStorage.getItem<string>(STORAGE_KEYS.project),
     LocalStorage.getItem<string>(STORAGE_KEYS.states),
     LocalStorage.getItem<string>(STORAGE_KEYS.types),
+    LocalStorage.getItem<string>(STORAGE_KEYS.stateOrder),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultRepo),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultBaseBranch),
     LocalStorage.getItem<string>(STORAGE_KEYS.onboarded),
@@ -176,6 +182,7 @@ async function readAppSettings(): Promise<{
       project: tryParse<string>(p, ""),
       states: tryParse<string[]>(s, []),
       types: tryParse<string[]>(t, []),
+      stateOrder: tryParse<string>(so, ""),
       defaultRepo: tryParse<string>(r, ""),
       defaultBaseBranch: tryParse<string>(b, ""),
     },
@@ -188,6 +195,7 @@ async function writeAppSettings(settings: AppSettings): Promise<void> {
     LocalStorage.setItem(STORAGE_KEYS.project, JSON.stringify(settings.project)),
     LocalStorage.setItem(STORAGE_KEYS.states, JSON.stringify(settings.states)),
     LocalStorage.setItem(STORAGE_KEYS.types, JSON.stringify(settings.types)),
+    LocalStorage.setItem(STORAGE_KEYS.stateOrder, JSON.stringify(settings.stateOrder)),
     LocalStorage.setItem(STORAGE_KEYS.defaultRepo, JSON.stringify(settings.defaultRepo)),
     LocalStorage.setItem(STORAGE_KEYS.defaultBaseBranch, JSON.stringify(settings.defaultBaseBranch)),
     LocalStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(true)),
@@ -240,6 +248,7 @@ export default function Command() {
   const appProject = settings.project;
   const appStates = settings.states;
   const appTypes = settings.types;
+  const appStateOrder = settings.stateOrder;
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
     async (projectArg: string, statesArg: string, typesArg: string) =>
@@ -281,7 +290,14 @@ export default function Command() {
     list.push(item);
     groups.set(item.state, list);
   }
-  const stateOrder = (appStates ?? []).map(normalizeState);
+  // Section order: user's "Preferred state order" first (in that order), then
+  // any remaining selected states (TagPicker order), then everything else
+  // alphabetically (handled by stateOrderIndex returning the array length).
+  const preferredOrder = parseList(appStateOrder).map(normalizeState);
+  const stateOrder = [
+    ...preferredOrder,
+    ...(appStates ?? []).map(normalizeState).filter((s) => !preferredOrder.includes(s)),
+  ];
   const groupKeys = Array.from(groups.keys()).sort((a, b) => {
     const ai = stateOrderIndex(a, stateOrder);
     const bi = stateOrderIndex(b, stateOrder);
@@ -606,7 +622,7 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
   });
 
   const richHtmls = [current.description, current.acceptanceCriteria, current.reproSteps, ...(comments ?? [])];
-  const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join(" ")).digest("hex")}`;
+  const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join("\u0000")).digest("hex")}`;
   const media = useProcessedHtmlList(richHtmls, richKey);
 
   const {
@@ -954,6 +970,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
 
   const [project, setProject] = useState("");
   const [states, setStates] = useState<string[]>([]);
+  const [stateOrder, setStateOrder] = useState("");
   const [types, setTypes] = useState<string[]>([]);
   const [defaultRepo, setDefaultRepo] = useState("");
   const [defaultBaseBranch, setDefaultBaseBranch] = useState("");
@@ -966,6 +983,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
       if (cancelled) return;
       setProject(settings.project);
       setStates(settings.states);
+      setStateOrder(settings.stateOrder);
       setTypes(settings.types);
       setDefaultRepo(settings.defaultRepo);
       setDefaultBaseBranch(settings.defaultBaseBranch);
@@ -1018,6 +1036,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
       project: project.trim(),
       states,
       types,
+      stateOrder: stateOrder.trim(),
       defaultRepo: defaultRepo.trim(),
       defaultBaseBranch: defaultBaseBranch.trim(),
     };
@@ -1112,7 +1131,7 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
         info={
           projectIsEmpty
             ? "Pick a project first to see its states."
-            : "Select which work item states appear in the list. Empty = all except Closed, Done, Removed. Selection order also determines the order of grouped sections in the list."
+            : "Select which work item states appear in the list. Empty = all except Closed, Done, Removed. Use “Preferred State Order” below to control the order of the grouped sections."
         }
         value={safeStates}
         onChange={handleStatesChange}
@@ -1121,6 +1140,14 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
           <Form.TagPicker.Item key={s} value={s} title={s} />
         ))}
       </Form.TagPicker>
+      <Form.TextField
+        id="stateOrder"
+        title="Preferred State Order"
+        placeholder="Doing, In Progress, Code Review"
+        info="Comma-separated states to pin to the top of the list, in this order (e.g. 'Doing, In Progress'). Matching is case-insensitive. States not listed here follow afterwards. Leave empty for the default order."
+        value={stateOrder}
+        onChange={setStateOrder}
+      />
       <Form.TagPicker
         id="types"
         title="Types to Show"
