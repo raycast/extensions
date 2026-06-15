@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Unified search across Claude Code (`~/.claude`) and Codex CLI (`~/.codex`) sessions
 - Claude Desktop app source — surfaces sessions from `~/Library/Application Support/Claude/claude-code-sessions/`, with PR metadata, deduped against the CLI source
