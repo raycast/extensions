@@ -6,7 +6,6 @@
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "esModuleInterop": true
   },
   "include": ["src", "raycast-env.d.ts"]
