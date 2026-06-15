@@ -1,6 +1,6 @@
 # Kalshi Changelog
 
-## [Improve Market Discovery and Details] - {PR_MERGE_DATE}
+## [Improve Market Discovery and Details] - 2026-06-15
 
 - Added market and event logos with fallback icons.
 - Added favorites for events, markets, filters, and topics, with pinned favorites at the top of the list.
