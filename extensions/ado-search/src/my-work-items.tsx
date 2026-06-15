@@ -803,7 +803,7 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
                     />
                   )}
                   <Action.ShowInFinder
-                    title="Show in Finder"
+                    title={process.platform === "win32" ? "Show in Explorer" : "Show in Finder"}
                     path={img.localPath}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   />

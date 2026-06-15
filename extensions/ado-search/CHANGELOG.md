@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Add Windows support] - {PR_MERGE_DATE}
+Declared the extension as cross-platform (macOS and Windows). All commands rely only on cross-platform APIs; the work item "Show in Finder" action now reads "Show in Explorer" on Windows.
+
 ## [Add My Work Items command] - 2026-06-04
 Added a "My Work Items" command: browse work items assigned to you across projects, filter and group by state/type/project, change state on single or multiple items, view descriptions with inline images plus acceptance criteria, repro steps, comments and attachments, create new work items, and create branches linked to a work item.
 
