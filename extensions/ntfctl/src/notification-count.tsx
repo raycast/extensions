@@ -1,4 +1,11 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { execSync } from "child_process";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "./ntfctl-utils";
@@ -180,8 +187,20 @@ export default function Command() {
             title="Clear All Notifications"
             icon={Icon.Trash}
             shortcut={{ modifiers: ["cmd"], key: "x" }}
-            onAction={() => {
-              runAppleScript("ntfctl-clear.applescript");
+            onAction={async () => {
+              const toast = await showToast({
+                style: Toast.Style.Animated,
+                title: "Clearing notifications…",
+              });
+              try {
+                runAppleScript("ntfctl-clear.applescript");
+                toast.style = Toast.Style.Success;
+                toast.title = "All notifications cleared";
+              } catch (e) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed to clear";
+                toast.message = String(e);
+              }
             }}
           />
         </ActionPanel>
