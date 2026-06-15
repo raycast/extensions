@@ -1,4 +1,5 @@
 import { execFile } from "child_process";
+import { createHash } from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -6,6 +7,10 @@ import { promisify } from "util";
 
 const REPOSITORY = "microsoft/ripgrep-prebuilt";
 const VERSION = "v13.0.0-10";
+const EXPECTED_SHA256_BY_TARGET: Record<string, string> = {
+  "aarch64-apple-darwin.tar.gz": "de44338ca53677968bdd7403ddc1cf9c735e708f7b63e3b34367f9411010a7db",
+  "x86_64-apple-darwin.tar.gz": "3b501c05ff9b1d24ae8897dd1c6b5bf842fd12a6f7114264407ac42bc222b25b",
+};
 
 const execFileAsync = promisify(execFile);
 
@@ -19,13 +24,24 @@ function getTarget(): string {
   return os.arch() === "arm64" ? "aarch64-apple-darwin.tar.gz" : "x86_64-apple-darwin.tar.gz";
 }
 
-async function downloadFile(url: string, outFile: string): Promise<void> {
+function sha256(data: Buffer): string {
+  return createHash("sha256").update(data).digest("hex");
+}
+
+async function downloadFile(url: string, outFile: string, expectedSha256: string): Promise<void> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download ripgrep: ${response.status} ${response.statusText}`);
   }
 
   const data = Buffer.from(await response.arrayBuffer());
+  const actualSha256 = sha256(data);
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(
+      `Downloaded ripgrep checksum mismatch for ${path.basename(outFile)}: expected ${expectedSha256}, got ${actualSha256}`,
+    );
+  }
+
   await fs.promises.mkdir(path.dirname(outFile), { recursive: true });
   await fs.promises.writeFile(outFile, data);
 }
@@ -54,11 +70,16 @@ async function installRipgrep(): Promise<string> {
   }
 
   const target = getTarget();
+  const expectedSha256 = EXPECTED_SHA256_BY_TARGET[target];
+  if (!expectedSha256) {
+    throw new Error(`Missing ripgrep checksum for target: ${target}`);
+  }
+
   const url = `https://github.com/${REPOSITORY}/releases/download/${VERSION}/ripgrep-${VERSION}-${target}`;
   const tempFilePath = path.join(environment.supportPath, ".tmp", `ripgrep-${VERSION}-${target}`);
 
   try {
-    await downloadFile(url, tempFilePath);
+    await downloadFile(url, tempFilePath, expectedSha256);
     await untarGz(tempFilePath, binDir);
     await fs.promises.chmod(rgPath, 0o755);
     return rgPath;
