@@ -161,7 +161,7 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           {/* eslint-enable @raycast/prefer-title-case */}
-          <Action.CopyToClipboard content={meta.projectPath} title="Copy Project Path" />
+          {meta.projectPath ? <Action.CopyToClipboard content={meta.projectPath} title="Copy Project Path" /> : null}
         </ActionPanel>
       }
     />
@@ -408,7 +408,7 @@ function SessionItem({ meta, matchSnippet, query }: { meta: SessionMeta; matchSn
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           {/* eslint-enable @raycast/prefer-title-case */}
-          <Action.CopyToClipboard title="Copy Project Path" content={meta.projectPath} />
+          {meta.projectPath ? <Action.CopyToClipboard title="Copy Project Path" content={meta.projectPath} /> : null}
         </ActionPanel>
       }
     />
