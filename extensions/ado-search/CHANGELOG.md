@@ -1,6 +1,6 @@
 # Azure DevOps Repository Search
 
-## [Customisable work item state order] - {PR_MERGE_DATE}
+## [Customisable work item state order] - 2026-06-15
 Added a "Preferred State Order" setting to My Work Items so you can pin states (e.g. "Doing, In Progress") to the top of the list in your own order; unlisted states follow afterwards.
 
 ## [Add Windows support] - 2026-06-15
