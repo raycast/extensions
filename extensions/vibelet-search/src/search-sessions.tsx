@@ -48,7 +48,8 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
       `${sourceLabel} · \`${meta.projectPath}\` · ${new Date(meta.timestamp).toLocaleString()} · ${messages?.length ?? "…"} messages${prSuffix}\n\n` +
       `---\n\n`;
 
-    if (!messages || messages.length === 0) return headerOnly + "*Loading conversation…*";
+    if (!messages) return headerOnly + (isLoading ? "*Loading conversation…*" : "*No conversation messages found.*");
+    if (messages.length === 0) return headerOnly + "*No conversation messages found.*";
 
     const matchIdx = query ? findMatchIndex(messages, query) : -1;
 
@@ -79,7 +80,7 @@ function SessionDetail({ meta, query }: { meta: SessionMeta; query?: string }) {
     }
 
     return formatSessionMarkdown(meta, messages, { query, truncate: DETAIL_TRUNCATE_BYTES });
-  }, [meta, messages, query]);
+  }, [isLoading, meta, messages, query]);
 
   // Full untruncated markdown for "Copy Full Conversation"
   const fullMarkdown = useMemo(
