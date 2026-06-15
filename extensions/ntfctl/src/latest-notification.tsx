@@ -120,8 +120,7 @@ export default function Command() {
   }
 
   if (!notif) {
-    const md =
-      "# 🔔 No Notifications\n\nNotification Center is empty.";
+    const md = "# 🔔 No Notifications\n\nNotification Center is empty.";
     return <Detail markdown={md} />;
   }
 
