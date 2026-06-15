@@ -7,19 +7,31 @@ export default function Command() {
   // Check 1: Can osascript run at all?
   try {
     execSync("osascript -e 'return \"OK\"'", { timeout: 5000 });
-    checks.push({ name: "osascript available", status: "✅", detail: "osascript binary works" });
+    checks.push({
+      name: "osascript available",
+      status: "✅",
+      detail: "osascript binary works",
+    });
   } catch (e) {
-    checks.push({ name: "osascript available", status: "❌", detail: String(e) });
+    checks.push({
+      name: "osascript available",
+      status: "❌",
+      detail: String(e),
+    });
   }
 
   // Check 2: Can we access System Events?
   try {
     execSync(
       `osascript -e 'tell application "System Events" to return name of first process whose name contains "Finder"'`,
-      { timeout: 5000 }
+      { timeout: 5000 },
     );
-    checks.push({ name: "System Events access", status: "✅", detail: "Can query processes" });
-  } catch (e) {
+    checks.push({
+      name: "System Events access",
+      status: "✅",
+      detail: "Can query processes",
+    });
+  } catch {
     checks.push({
       name: "System Events access",
       status: "❌",
@@ -31,11 +43,19 @@ export default function Command() {
   try {
     const result = execSync(
       `osascript -e 'tell application "System Events" to return name of first process whose name contains "Notification"'`,
-      { timeout: 5000, encoding: "utf-8" }
+      { timeout: 5000, encoding: "utf-8" },
     ).trim();
-    checks.push({ name: "NotificationCenter process", status: "✅", detail: `Found: ${result}` });
+    checks.push({
+      name: "NotificationCenter process",
+      status: "✅",
+      detail: `Found: ${result}`,
+    });
   } catch (e) {
-    checks.push({ name: "NotificationCenter process", status: "❌", detail: String(e) });
+    checks.push({
+      name: "NotificationCenter process",
+      status: "❌",
+      detail: String(e),
+    });
   }
 
   // Check 4: Can we read UI elements from NotificationCenter?
@@ -57,9 +77,13 @@ export default function Command() {
           end try
         end tell
       end tell'`,
-      { timeout: 10000, encoding: "utf-8" }
+      { timeout: 10000, encoding: "utf-8" },
     ).trim();
-    checks.push({ name: "Notification Center UI access", status: "✅", detail: result });
+    checks.push({
+      name: "Notification Center UI access",
+      status: "✅",
+      detail: result,
+    });
   } catch (e) {
     checks.push({
       name: "Notification Center UI access",
@@ -105,9 +129,13 @@ export default function Command() {
           click menu bar item 2 of menu bar 1
         end tell
       end tell'`,
-      { timeout: 10000, encoding: "utf-8" }
+      { timeout: 10000, encoding: "utf-8" },
     ).trim();
-    checks.push({ name: "Read notification text", status: "✅", detail: result });
+    checks.push({
+      name: "Read notification text",
+      status: "✅",
+      detail: result,
+    });
   } catch (e) {
     checks.push({
       name: "Read notification text",
