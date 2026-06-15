@@ -165,7 +165,7 @@
     }
   },
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^1.85.2",
     "html-to-text": "^9.0.5",
     "openai": "^4.77.0"
   },
