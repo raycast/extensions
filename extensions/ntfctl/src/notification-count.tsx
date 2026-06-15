@@ -138,8 +138,7 @@ export default function Command() {
   }
 
   if (!summary || summary.count === 0) {
-    const md =
-      "# 🔔 No Notifications\n\nNotification Center is empty.";
+    const md = "# 🔔 No Notifications\n\nNotification Center is empty.";
     return <Detail markdown={md} />;
   }
 
