@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix sending composed messages when the subject or other message fields contain double quotes.
+
 ## [Improvement] - 2026-06-10
 
 - Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
