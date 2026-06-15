@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 
 const GST_RATES = ["0", "3", "5", "12", "18", "28"];
 
+function formatRateValue(rate: number): string {
+  if (isNaN(rate) || !isFinite(rate)) return "—";
+  return String(rate);
+}
+
 function formatIndian(num: number): string {
   if (isNaN(num) || !isFinite(num)) return "—";
   const [intPart, decPart] = num.toFixed(2).split(".");
@@ -60,8 +65,8 @@ export default function Command() {
 
   const breakdown =
     taxType === "intra"
-      ? `Base Amount: ${formatIndian(base)}\nCGST (${effectiveRate / 2}%): ${formatIndian(cgst)}\nSGST (${effectiveRate / 2}%): ${formatIndian(sgst)}\nTotal: ${formatIndian(total)}`
-      : `Base Amount: ${formatIndian(base)}\nIGST (${effectiveRate}%): ${formatIndian(gst)}\nTotal: ${formatIndian(total)}`;
+      ? `Base Amount: ${formatIndian(base)}\nCGST (${formatRateValue(effectiveRate / 2)}%): ${formatIndian(cgst)}\nSGST (${formatRateValue(effectiveRate / 2)}%): ${formatIndian(sgst)}\nTotal: ${formatIndian(total)}`
+      : `Base Amount: ${formatIndian(base)}\nIGST (${formatRateValue(effectiveRate)}%): ${formatIndian(gst)}\nTotal: ${formatIndian(total)}`;
 
   return (
     <Form
@@ -143,11 +148,11 @@ export default function Command() {
       <Form.Description title="Base Amount" text={isValid ? formatIndian(base) : "—"} />
       {taxType === "intra" ? (
         <>
-          <Form.Description title={`CGST (${effectiveRate / 2}%)`} text={isValid ? formatIndian(cgst) : "—"} />
-          <Form.Description title={`SGST (${effectiveRate / 2}%)`} text={isValid ? formatIndian(sgst) : "—"} />
+          <Form.Description title={`CGST (${formatRateValue(effectiveRate / 2)}%)`} text={isValid ? formatIndian(cgst) : "—"} />
+          <Form.Description title={`SGST (${formatRateValue(effectiveRate / 2)}%)`} text={isValid ? formatIndian(sgst) : "—"} />
         </>
       ) : (
-        <Form.Description title={`IGST (${effectiveRate}%)`} text={isValid ? formatIndian(gst) : "—"} />
+        <Form.Description title={`IGST (${formatRateValue(effectiveRate)}%)`} text={isValid ? formatIndian(gst) : "—"} />
       )}
       <Form.Description title="Total Amount" text={isValid ? formatIndian(total) : "—"} />
     </Form>
