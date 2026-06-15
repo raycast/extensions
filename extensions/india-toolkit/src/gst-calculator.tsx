@@ -31,6 +31,7 @@ export default function Command() {
   const [calcMode, setCalcMode] = useState("exclusive");
   const [taxType, setTaxType] = useState("intra");
   const [amountError, setAmountError] = useState<string | undefined>();
+  const [customRateError, setCustomRateError] = useState<string | undefined>();
 
   useEffect(() => {
     async function loadPrefs() {
@@ -42,9 +43,15 @@ export default function Command() {
     loadPrefs();
   }, []);
 
-  const effectiveRate = gstRate === "custom" ? parseFloat(customRate) || 0 : parseFloat(gstRate);
+  const parsedCustomRate = parseFloat(customRate);
+  const effectiveRate = gstRate === "custom" ? parsedCustomRate : parseFloat(gstRate);
   const parsedAmount = parseFloat(amount);
-  const isValid = amount.trim() !== "" && !isNaN(parsedAmount) && parsedAmount >= 0;
+  const isValidAmount = amount.trim() !== "" && !isNaN(parsedAmount) && parsedAmount >= 0;
+  const isValidRate =
+    gstRate !== "custom"
+      ? !isNaN(effectiveRate) && effectiveRate >= 0
+      : customRate.trim() !== "" && !isNaN(parsedCustomRate) && parsedCustomRate >= 0;
+  const isValid = isValidAmount && isValidRate;
 
   const { base, gst, total } = isValid ? calcGST(parsedAmount, effectiveRate, calcMode) : { base: 0, gst: 0, total: 0 };
 
@@ -104,7 +111,16 @@ export default function Command() {
           title="Custom Rate (%)"
           placeholder="e.g. 6"
           value={customRate}
-          onChange={setCustomRate}
+          onChange={(v) => {
+            setCustomRate(v);
+            if (customRateError) setCustomRateError(undefined);
+          }}
+          onBlur={() => {
+            if (customRate.trim() && (isNaN(parsedCustomRate) || parsedCustomRate < 0)) {
+              setCustomRateError("Enter a valid rate of 0 or higher");
+            }
+          }}
+          error={customRateError}
         />
       )}
       <Form.Dropdown id="calcMode" title="Calculation Mode" value={calcMode} onChange={setCalcMode}>

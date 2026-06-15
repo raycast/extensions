@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Icon, List, LocalStorage } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { mapsSearchUrl } from "./maps-url";
 
 const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
@@ -140,7 +141,7 @@ export default function Command() {
           const val = data![key];
           if (!val) return [];
 
-          const mapsUrl = key === "ADDRESS" ? `maps://?q=${encodeURIComponent(val)}` : null;
+          const mapsUrl = key === "ADDRESS" ? mapsSearchUrl(val) : null;
 
           return (
             <List.Item

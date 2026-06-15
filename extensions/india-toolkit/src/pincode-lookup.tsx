@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Icon, List, LocalStorage } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { mapsSearchUrl } from "./maps-url";
 
 interface PostOffice {
   Name: string;
@@ -151,7 +152,7 @@ export default function Command() {
               ? [{ text: po.District }, { text: po.State }]
               : [{ text: po.Pincode }, { text: po.BranchType }];
             const addressLine = `${po.Name}, ${po.District}, ${po.State} - ${po.Pincode}`;
-            const mapsUrl = `maps://?q=${encodeURIComponent(`${po.Name}, ${po.District}, ${po.State}`)}`;
+            const mapsUrl = mapsSearchUrl(`${po.Name}, ${po.District}, ${po.State}`);
 
             return (
               <List.Item
