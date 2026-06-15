@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Windows project opening] - {PR_MERGE_DATE}
+
+- Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
+
 ## [Fix: macOS user Applications path] - 2026-06-05
 
 - Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
