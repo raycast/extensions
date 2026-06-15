@@ -1,18 +1,5 @@
-import type { SessionMessage, SessionMeta, SessionSource } from "./types";
-
-const SOURCE_LABEL: Record<SessionSource, string> = {
-  "claude-cli": "Claude Code",
-  "claude-app": "Claude App",
-  "codex-cli": "Codex CLI",
-  "codex-app": "Codex App",
-};
-
-const SOURCE_BADGE: Record<SessionSource, string> = {
-  "claude-cli": "🟠",
-  "claude-app": "🟣",
-  "codex-cli": "🟢",
-  "codex-app": "🔵",
-};
+import { SOURCE_BADGE, SOURCE_LABEL } from "./source-display";
+import type { SessionMessage, SessionMeta } from "./types";
 
 /**
  * Format a single message as a markdown chunk.
