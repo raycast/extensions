@@ -155,16 +155,21 @@ async function focusKittyByTty(tty: string): Promise<boolean> {
       id: number;
       tabs: Array<{
         id: number;
-        windows: Array<{ id: number; foreground_processes: Array<{ cwd: string; cmdline: string[] }> }>;
+        windows: Array<{ id: number; foreground_processes: Array<{ pid: number; cwd: string; cmdline: string[] }> }>;
       }>;
     }>;
     for (const win of windows) {
       for (const tab of win.tabs) {
         for (const pane of tab.windows) {
           for (const proc of pane.foreground_processes) {
-            if (proc.cmdline.some((arg) => arg.includes(tty.replace("/dev/", "")))) {
-              execSync(`kitty @ focus-window --match id:${pane.id} 2>/dev/null`);
-              return true;
+            try {
+              const procTty = execSync(`ps -o tty= -p ${proc.pid}`, { encoding: "utf-8" }).trim();
+              if (tty === `/dev/tty${procTty}`) {
+                execSync(`kitty @ focus-window --match id:${pane.id} 2>/dev/null`);
+                return true;
+              }
+            } catch {
+              // Process may have exited
             }
           }
         }
