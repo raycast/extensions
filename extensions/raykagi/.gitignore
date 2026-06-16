@@ -4,5 +4,7 @@ dist
 *.log
 .raycast
 
-# local screenshot sources kept on disk but not committed (store crops live in metadata/)
+# local screenshot sources/captures kept on disk but not committed (store images live in metadata/)
 /screen-*.png
+/Raycast*.png
+/raykagi*.png
