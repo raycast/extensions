@@ -28,7 +28,7 @@
     {
       "name": "documentationSourceMode",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Documentation Source",
       "description": "Choose where the extension should load NumPy documentation from",
       "default": "online",

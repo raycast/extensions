@@ -22,9 +22,9 @@ jobs:
         id: get_pr_number
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           else
-            echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
           fi
       - name: Get changed extensions
         id: get_changed_extensions
@@ -39,7 +39,7 @@ jobs:
           # Remove the repository path from each path and convert to JSON array
           relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
           json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n")[:-1]')
-          echo "extension_dirs=$json_array" >> $GITHUB_OUTPUT
+          echo "extension_dirs=$json_array" >> "$GITHUB_OUTPUT"
   check-extensions:
     name: ${{ matrix.extension_dir }}
     needs: setup

@@ -27,6 +27,12 @@ import {
   TaskResponse,
   TimeslipCreateData,
   TimeslipResponse,
+  TimeslipResponseSingle,
+  TimeslipUpdateData,
+  TaskUpdateData,
+  ProjectCreateData,
+  ProjectUpdateData,
+  ProjectResponse,
   Category,
   CategoriesResponse,
   BankTransactionExplanation,
@@ -66,6 +72,10 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
 
   if (!response.ok) {
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json();
@@ -269,6 +279,99 @@ export async function updateBankTransaction(
     body: JSON.stringify({ bank_transaction: transactionData }),
   });
   return data.bank_transaction;
+}
+
+export async function fetchProject(accessToken: string, projectId: string): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken);
+  return data.project;
+}
+
+export async function createProject(accessToken: string, projectData: ProjectCreateData): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>("/projects", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ project: projectData }),
+  });
+  return data.project;
+}
+
+export async function updateProject(
+  accessToken: string,
+  projectId: string,
+  projectData: ProjectUpdateData,
+): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ project: projectData }),
+  });
+  return data.project;
+}
+
+export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
+  await makeRequest<void>(`/projects/${projectId}`, accessToken, { method: "DELETE" });
+}
+
+export async function fetchTask(accessToken: string, taskId: string): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken);
+  return data.task;
+}
+
+export async function updateTask(accessToken: string, taskId: string, taskData: TaskUpdateData): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ task: taskData }),
+  });
+  return data.task;
+}
+
+export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
+  await makeRequest<void>(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
+}
+
+export async function fetchTimeslip(accessToken: string, timeslipId: string): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponseSingle>(`/timeslips/${timeslipId}`, accessToken);
+  return data.timeslip;
+}
+
+export async function updateTimeslip(
+  accessToken: string,
+  timeslipId: string,
+  timeslipData: TimeslipUpdateData,
+): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponseSingle>(`/timeslips/${timeslipId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ timeslip: timeslipData }),
+  });
+  return data.timeslip;
+}
+
+export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
+  await makeRequest<void>(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
+}
+
+export async function fetchTimeslipsFiltered(
+  accessToken: string,
+  options: {
+    view?: "all" | "unbilled" | "running";
+    project?: string;
+    task?: string;
+    user?: string;
+    fromDate?: string;
+    toDate?: string;
+    nested?: boolean;
+  } = {},
+): Promise<Timeslip[]> {
+  const params = new URLSearchParams();
+  params.set("view", options.view ?? "all");
+  params.set("sort", "-dated_on");
+  if (options.project) params.set("project", options.project);
+  if (options.task) params.set("task", options.task);
+  if (options.user) params.set("user", options.user);
+  if (options.fromDate) params.set("from_date", options.fromDate);
+  if (options.toDate) params.set("to_date", options.toDate);
+  if (options.nested) params.set("nested", "true");
+
+  const data = await makeRequest<TimeslipsResponse>(`/timeslips?${params.toString()}`, accessToken);
+  return data.timeslips || [];
 }
 
 export { FreeAgentError };

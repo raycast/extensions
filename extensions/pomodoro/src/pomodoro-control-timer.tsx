@@ -139,7 +139,7 @@ const EndOfInterval = ({ intervalType }: { intervalType?: Interval["type"] }) =>
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
-    exec("open raycast://extensions/raycast/raycast/confetti", function (err) {
+    exec(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`, function (err) {
       if (err) {
         // handle error
         console.error(err);

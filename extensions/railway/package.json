@@ -11,7 +11,8 @@
   "contributors": [
     "nagauta",
     "xmok",
-    "danieldeichfuss"
+    "danieldeichfuss",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -20,17 +21,24 @@
       "title": "Search Projects",
       "subtitle": "Railway",
       "description": "Search and navigate to your Railway projects",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "railwayApiKey",
+          "type": "password",
+          "title": "Railway API Key",
+          "required": true,
+          "description": "type your Railway api key for auth",
+          "placeholder": "xxxxxxxxxx"
+        }
+      ]
+    },
     {
-      "name": "railwayApiKey",
-      "type": "password",
-      "title": "Railway API Key",
-      "required": true,
-      "description": "type your Railway api key for auth",
-      "placeholder": "xxxxxxxxxx"
+      "name": "railway-templates",
+      "title": "Search Templates",
+      "subtitle": "Railway",
+      "description": "Search Railway templates and deploy them with one click",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -55,5 +63,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

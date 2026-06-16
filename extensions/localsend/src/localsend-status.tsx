@@ -57,37 +57,37 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Send Files"
           icon={Icon.Document}
-          onAction={async () => await open("raycast://extensions/kud/localsend/send-files")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/send-files`)}
         />
         <MenuBarExtra.Item
           title="Send Media"
           icon={Icon.Image}
-          onAction={async () => await open("raycast://extensions/kud/localsend/send-media")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/send-media`)}
         />
         <MenuBarExtra.Item
           title="Send Text"
           icon={Icon.Text}
-          onAction={async () => await open("raycast://extensions/kud/localsend/send-text")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/send-text`)}
         />
         <MenuBarExtra.Item
           title="Send Clipboard"
           icon={Icon.Clipboard}
-          onAction={async () => await open("raycast://extensions/kud/localsend/send-clipboard")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/send-clipboard`)}
         />
         <MenuBarExtra.Item
           title="Send Folder"
           icon={Icon.Folder}
-          onAction={async () => await open("raycast://extensions/kud/localsend/send-folder")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/send-folder`)}
         />
         <MenuBarExtra.Item
           title="Receive"
           icon={Icon.Download}
-          onAction={async () => await open("raycast://extensions/kud/localsend/receive")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/receive`)}
         />
         <MenuBarExtra.Item
           title="Discover Devices"
           icon={Icon.MagnifyingGlass}
-          onAction={async () => await open("raycast://extensions/kud/localsend/discover-devices")}
+          onAction={async () => await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/kud/localsend/discover-devices`)}
         />
       </MenuBarExtra.Section>
 

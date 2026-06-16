@@ -6,7 +6,6 @@ import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
 import React, { useMemo, useState } from "react";
-import "./helpers/arrayExtensions";
 import { getColorsFromScene } from "./helpers/hueResources";
 
 import { getTransitionTimeInMs } from "./helpers/raycast";

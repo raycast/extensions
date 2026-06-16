@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Color, showToast, Toast, showInFinder } from "@raycast/api";
+import { Action, ActionPanel, Grid, Color, Keyboard, showToast, Toast, showInFinder } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { writeFile } from "fs/promises";
@@ -139,7 +139,10 @@ export default function Command() {
                     title="Copy Filled SVG"
                     content={filled}
                     icon={Filled + tablerIcon.name + ".svg"}
-                    shortcut={{ modifiers: ["opt"], key: "return" }}
+                    shortcut={{
+                      macOS: { modifiers: ["opt"], key: "return" },
+                      Windows: { modifiers: ["alt"], key: "return" },
+                    }}
                   />
                 )}
                 {filled && (
@@ -147,24 +150,35 @@ export default function Command() {
                     title="Download Filled SVG"
                     icon={Filled + tablerIcon.name + ".svg"}
                     onAction={() => downloadSVG(filled, tablerIcon.name)}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "return" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "return" },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "return" },
+                    }}
                   />
                 )}
                 <Action.CopyToClipboard
                   title="Copy Name"
                   content={tablerIcon.name}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                  shortcut={Keyboard.Shortcut.Common.CopyName}
                 />
                 {tablerIcon.styles?.outline?.unicode && (
                   <Action.CopyToClipboard
                     title="Copy Outline HTML Char"
                     content={`&#x${tablerIcon.styles.outline.unicode};`}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "." },
+                      Windows: { modifiers: ["ctrl"], key: "." },
+                    }}
                   />
                 )}
                 {tablerIcon.styles?.filled?.unicode && (
                   <Action.CopyToClipboard
                     title="Copy Filled HTML Char"
                     content={`&#x${tablerIcon.styles.filled.unicode};`}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "." },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "." },
+                    }}
                   />
                 )}
               </ActionPanel>

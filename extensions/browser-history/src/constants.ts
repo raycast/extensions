@@ -12,6 +12,7 @@ export const defaultProfilePathIridium = ["Application Support", "Iridium", "Def
 export const defaultProfilePathOrion = ["Application Support", "Orion", "Defaults", "history"];
 export const defaultProfilePathSidekick = ["Application Support", "Sidekick", "Default", "History"];
 export const defaultProfilePathDia = ["Application Support", "Dia", "User Data", "Default", "History"];
+export const defaultProfilePathHelium = ["Application Support", "Helium", "Default", "History"];
 export const defaultProfilePathComet = ["Application Support", "Comet", "Default", "History"];
 export const defaultProfilePathChatGPTAtlas = [
   "Application Support",
@@ -131,6 +132,13 @@ const DownloadTextDia = `
   [Click here](https://www.diabrowser.com) if you want to download manually.
 `;
 
+const DownloadTextHelium = `
+  # 🚨Error: Helium browser is not installed
+  ## This extension depends on Helium browser. You must install it to continue.
+
+  [Click here](https://github.com/imputnet/helium) if you want to download manually.
+`;
+
 const DownloadTextComet = `
   # 🚨Error: Comet browser is not installed
   ## This extension depends on Comet browser. You must install it to continue.
@@ -158,6 +166,7 @@ export const DOWNLOAD_TEXT = {
   [SupportedBrowsers.Orion]: DownloadTextOrion,
   [SupportedBrowsers.Sidekick]: DownloadTextSidekick,
   [SupportedBrowsers.Dia]: DownloadTextDia,
+  [SupportedBrowsers.Helium]: DownloadTextHelium,
   [SupportedBrowsers.Comet]: DownloadTextComet,
   [SupportedBrowsers.ChatGPTAtlas]: DownloadTextChatGPTAtlas,
 };
@@ -175,6 +184,7 @@ export const INSTALL_COMMAND = {
   [SupportedBrowsers.Orion]: "brew cask install orion",
   [SupportedBrowsers.Sidekick]: "brew install --cask pushplaylabs-sidekick",
   [SupportedBrowsers.Dia]: undefined,
+  [SupportedBrowsers.Helium]: undefined,
   [SupportedBrowsers.Comet]: undefined,
   [SupportedBrowsers.ChatGPTAtlas]: undefined,
 };

@@ -11,11 +11,11 @@ Winget comes pre-installed on Windows 11 and recent Windows 10 builds. If it is 
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **Search Packages** | Search the winget repository and install packages |
+| Command                | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| **Search Packages**    | Search the winget repository and install packages      |
 | **Installed Packages** | List all installed packages; upgrade or uninstall them |
-| **Upgrade Packages** | View outdated packages and upgrade one or all at once |
+| **Upgrade Packages**   | View outdated packages and upgrade one or all at once  |
 
 ## Preferences
 
@@ -24,6 +24,7 @@ Winget comes pre-installed on Windows 11 and recent Windows 10 builds. If it is 
 By default the extension calls `winget` from your system `PATH`. If Raycast cannot find winget, enter the full path to the executable here.
 
 Common locations:
+
 - `C:\Users\<you>\AppData\Local\Microsoft\WindowsApps\winget.exe`
 - `C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*\winget.exe`
 

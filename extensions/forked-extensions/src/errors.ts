@@ -58,7 +58,7 @@ export const handleHttpError = async (error: HTTPError, handlerOptions?: Handler
               // Remove the stored tokens to force re-authorization.
               await api.githubOauthService.client.removeTokens();
               // Due to Raycast `launchCommand` cannot launch itself, we need to use the URL scheme to open the extension as a workaround.
-              await open("raycast://extensions/litomore/forked-extensions/manage-forked-extensions");
+              await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/forked-extensions/manage-forked-extensions`);
             },
           }
         : handlerOptions?.primaryAction,

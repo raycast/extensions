@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import { CalSchedule, updateSchedule, useEventTypes, useSchedules } from "@api/cal.com";
+import { appBaseUrl, CalSchedule, updateSchedule, useEventTypes, useSchedules } from "@api/cal.com";
 import { ScheduleDetail } from "@components/schedule-detail";
 import {
   formatDayRanges,
@@ -140,7 +140,7 @@ export default function ViewAvailability() {
               <Action.Push title="View Schedule" icon={Icon.Eye} target={<ScheduleDetail scheduleId={schedule.id} />} />
               <Action.OpenInBrowser
                 title="Open Schedule in Browser"
-                url={`https://app.cal.com/availability/${schedule.id}`}
+                url={`${appBaseUrl}/availability/${schedule.id}`}
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
               />
               <Action
@@ -162,7 +162,7 @@ export default function ViewAvailability() {
               )}
               <Action.OpenInBrowser
                 title="Open All Availabilities in Browser"
-                url="https://app.cal.com/availability"
+                url={`${appBaseUrl}/availability`}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             </ActionPanel>

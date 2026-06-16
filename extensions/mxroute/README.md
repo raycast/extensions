@@ -4,7 +4,7 @@
 
 # MXroute
 
-This is a [Raycast](https://raycast.com/) extension for managing [MXroute](https://mxroute.com/) using the newly introduced API.
+This is a [Raycast](https://raycast.com/) extension for managing [MXroute](https://mxroute.com/) using the newly introduced [API](https://api.mxroute.com/docs).
 
 ## 🚀 Getting Started
 

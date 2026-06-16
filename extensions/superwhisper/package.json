@@ -14,6 +14,16 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "recordingDir",
+      "title": "Recording Directory",
+      "description": "Directory configured to store recording files",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/superwhisper/recordings"
+    }
+  ],
   "commands": [
     {
       "name": "toggle-record",
@@ -29,17 +39,7 @@
       "subtitle": "superwhisper",
       "description": "Search through your recording history",
       "mode": "view",
-      "icon": "superwhisper-light-icon.png",
-      "preferences": [
-        {
-          "name": "recordingDir",
-          "title": "Recording Directory",
-          "description": "Directory configured to store recording files",
-          "type": "directory",
-          "required": false,
-          "default": "~/Documents/superwhisper/recordings"
-        }
-      ]
+      "icon": "superwhisper-light-icon.png"
     },
     {
       "name": "copy-last-history",

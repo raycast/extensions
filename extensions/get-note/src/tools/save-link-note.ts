@@ -10,7 +10,7 @@ type Input = {
 };
 
 export default async function saveLinkNoteTool(input: Input) {
-  const task = await saveLinkNote(input.url);
+  const task = await saveLinkNote({ url: input.url });
   const noteId = await waitForTask(task.task_id);
   const note = await getNoteDetail(noteId);
 

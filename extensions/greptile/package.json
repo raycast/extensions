@@ -1,0 +1,321 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "greptile",
+  "description": "Browse Greptile pull requests, code reviews, and review comments from Raycast.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "greptile-icon.png",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Greptile API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "mode": "view",
+      "name": "list-pull-requests",
+      "title": "List Pull Requests",
+      "description": "Browse pull requests known to Greptile.",
+      "keywords": ["prs", "merge requests", "reviews"]
+    },
+    {
+      "mode": "view",
+      "name": "list-code-reviews",
+      "title": "List Code Reviews",
+      "description": "Browse Greptile code review runs.",
+      "keywords": ["runs", "reviews", "code reviews"]
+    },
+    {
+      "mode": "view",
+      "name": "search-comments",
+      "title": "Search Comments",
+      "description": "Search Greptile review comments.",
+      "keywords": ["comments", "feedback", "reviews"],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "includeAddressed",
+          "title": "Search Options",
+          "label": "Include addressed comments",
+          "description": "Include comments that have already been addressed.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-pull-requests",
+      "title": "List Pull Requests",
+      "description": "List pull requests or merge requests known to Greptile, optionally filtered by repository, state, limit, and offset."
+    },
+    {
+      "name": "list-code-reviews",
+      "title": "List Code Reviews",
+      "description": "List Greptile code review runs, optionally filtered by repository, pull request number, status, limit, and offset."
+    },
+    {
+      "name": "search-comments",
+      "title": "Search Comments",
+      "description": "Search Greptile-generated review comments and feedback across the organization."
+    }
+  ],
+  "ai": {
+    "instructions": "Greptile exposes readonly code review data. Use list-pull-requests for PR metadata, list-code-reviews for Greptile review runs, and search-comments for Greptile feedback. For questions about review status, recent reviews, failed reviews, completed reviews, pending reviews, or review lists, use list-code-reviews only; do not call search-comments unless the user explicitly asks for comments, review feedback, or comment content. Omit unknown optional arguments entirely; never pass empty strings, zero PR numbers, or default repository fields as placeholders. When the user names a repository, pass it as name in owner/repo format. Only include remote or defaultBranch if the user explicitly provides them. Prefer concise Markdown summaries with links when a GitHub URL can be inferred.",
+    "evals": [
+      {
+        "input": "@greptile show me recent open pull requests",
+        "mocks": {
+          "list-pull-requests": [
+            {
+              "id": "mr_101",
+              "number": 101,
+              "title": "Fix login redirect loop",
+              "state": "open",
+              "isDraft": false,
+              "authorLogin": "alex",
+              "repository": {
+                "name": "example-org/web",
+                "remote": "github"
+              },
+              "sourceRepoUrl": "https://github.com/example-org/web/pull/101",
+              "commentsCount": 3,
+              "reviewsCount": 1,
+              "createdAt": "2026-06-08T10:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-pull-requests",
+              "arguments": {
+                "state": [
+                  {
+                    "includes": "open"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Fix login redirect loop"
+          }
+        ]
+      },
+      {
+        "input": "@greptile list completed code reviews",
+        "mocks": {
+          "list-code-reviews": [
+            {
+              "id": "review_202",
+              "status": "COMPLETED",
+              "createdAt": "2026-06-08T11:00:00Z",
+              "completedAt": "2026-06-08T11:04:00Z",
+              "mergeRequest": {
+                "id": "mr_202",
+                "prNumber": 202,
+                "title": "Add billing webhook validation",
+                "sourceRepoUrl": "https://github.com/example-org/api/pull/202",
+                "repository": {
+                  "name": "example-org/api",
+                  "remote": "github"
+                }
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-code-reviews",
+              "arguments": {
+                "status": [
+                  {
+                    "includes": "COMPLETED"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Add billing webhook validation"
+          }
+        ]
+      },
+      {
+        "input": "@greptile search comments about pagination",
+        "mocks": {
+          "search-comments": [
+            {
+              "id": "comment_303",
+              "commentId": "github_comment_303",
+              "body": "Use paginated loading here so the first Raycast render stays fast.",
+              "authorLogin": "greptile-bot",
+              "filePath": "src/hooks/usePaginatedResults.ts",
+              "lineStart": 42,
+              "lineEnd": 45,
+              "addressed": false,
+              "createdAt": "2026-06-08T12:00:00Z",
+              "mergeRequest": {
+                "id": "mr_303",
+                "prNumber": 303,
+                "title": "Improve review list pagination",
+                "sourceRepoUrl": "https://github.com/example-org/raycast/pull/303",
+                "repository": {
+                  "name": "example-org/raycast",
+                  "remote": "github"
+                }
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-comments",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "pagination"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Use paginated loading"
+          }
+        ]
+      },
+      {
+        "input": "@greptile do we have failed reviews?",
+        "usedAsExample": false,
+        "mocks": {
+          "list-code-reviews": [
+            {
+              "id": "review_404",
+              "status": "FAILED",
+              "createdAt": "2026-06-08T13:00:00Z",
+              "mergeRequest": {
+                "id": "mr_404",
+                "prNumber": 404,
+                "title": "Refactor settings routes",
+                "sourceRepoUrl": "https://github.com/example-org/web/pull/404",
+                "repository": {
+                  "name": "example-org/web",
+                  "remote": "github"
+                }
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-code-reviews",
+              "arguments": {
+                "status": [
+                  {
+                    "includes": "FAILED"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Refactor settings routes"
+          }
+        ]
+      },
+      {
+        "input": "@greptile what were my recently failed code reviews?",
+        "usedAsExample": false,
+        "mocks": {
+          "list-code-reviews": [
+            {
+              "id": "review_505",
+              "status": "FAILED",
+              "createdAt": "2026-06-08T15:00:00Z",
+              "mergeRequest": {
+                "id": "mr_505",
+                "prNumber": 505,
+                "title": "Harden webhook retry queue",
+                "sourceRepoUrl": "https://github.com/example-org/api/pull/505",
+                "repository": {
+                  "name": "example-org/api",
+                  "remote": "github"
+                }
+              }
+            }
+          ],
+          "search-comments": []
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-code-reviews",
+              "arguments": {
+                "status": [
+                  {
+                    "includes": "FAILED"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "search-comments"
+            }
+          },
+          {
+            "includes": "Harden webhook retry queue"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Greptile",
+  "author": "clins1994",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ]
+}

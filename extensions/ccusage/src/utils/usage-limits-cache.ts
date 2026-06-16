@@ -20,6 +20,7 @@ type Listener = (state: CacheState) => void;
 
 const raycastCache = new Cache();
 const LIMITS_CACHE_KEY = "usage-limits-data";
+const RATE_LIMITED_UNTIL_KEY = "usage-limits-rate-limited-until";
 
 const restoredData = ((): UsageLimitData | null => {
   const cached = raycastCache.get(LIMITS_CACHE_KEY);
@@ -31,24 +32,38 @@ const restoredData = ((): UsageLimitData | null => {
   }
 })();
 
+const restoredRateLimitedUntil = ((): number | null => {
+  const cached = raycastCache.get(RATE_LIMITED_UNTIL_KEY);
+  if (!cached) return null;
+  const parsed = parseInt(cached, 10);
+  if (Number.isNaN(parsed) || parsed <= Date.now()) return null;
+  return parsed;
+})();
+
 let cacheState: CacheState = {
   data: restoredData,
   error: null,
-  isLoading: true,
+  isLoading: restoredRateLimitedUntil === null,
   isStale: restoredData !== null,
-  isRateLimited: false,
+  isRateLimited: restoredRateLimitedUntil !== null,
   isUsageLimitsAvailable: false,
   lastFetched: null,
-  rateLimitedUntil: null,
+  rateLimitedUntil: restoredRateLimitedUntil,
   nextRefreshAt: null,
 };
 
 const RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
+const RATE_LIMIT_MAX_BACKOFF_MS = 60 * 60 * 1000;
+
+const clampBackoff = (retryAfterMs: number | null): number => {
+  const requested = retryAfterMs ?? RATE_LIMIT_BACKOFF_MS;
+  return Math.min(RATE_LIMIT_MAX_BACKOFF_MS, Math.max(RATE_LIMIT_BACKOFF_MS, requested));
+};
 
 const listeners = new Set<Listener>();
 let fetchInterval: NodeJS.Timeout | null = null;
 let isFetching = false;
-let rateLimitedUntil: number | null = null;
+let rateLimitedUntil: number | null = restoredRateLimitedUntil;
 let fetchIntervalMs = 60 * 1000;
 
 const notifyListeners = (): void => {
@@ -86,6 +101,7 @@ const fetchUsageLimits = async (): Promise<void> => {
 
     if (result.status === "ok") {
       rateLimitedUntil = null;
+      raycastCache.remove(RATE_LIMITED_UNTIL_KEY);
       raycastCache.set(LIMITS_CACHE_KEY, JSON.stringify(result.data));
       cacheState = {
         data: result.data,
@@ -99,7 +115,8 @@ const fetchUsageLimits = async (): Promise<void> => {
         nextRefreshAt: Date.now() + fetchIntervalMs,
       };
     } else if (result.status === "rate_limited") {
-      rateLimitedUntil = Date.now() + RATE_LIMIT_BACKOFF_MS;
+      rateLimitedUntil = Date.now() + clampBackoff(result.retryAfterMs);
+      raycastCache.set(RATE_LIMITED_UNTIL_KEY, String(rateLimitedUntil));
       cacheState = {
         ...cacheState,
         data: previousData,
@@ -189,5 +206,6 @@ export const getUsageLimitsState = (): CacheState => cacheState;
 
 export const revalidateUsageLimits = async (): Promise<void> => {
   rateLimitedUntil = null;
+  raycastCache.remove(RATE_LIMITED_UNTIL_KEY);
   await fetchUsageLimits();
 };
