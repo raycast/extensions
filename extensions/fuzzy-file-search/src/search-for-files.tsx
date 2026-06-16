@@ -2,8 +2,9 @@ import { ActionPanel, List, Action, getPreferenceValues, environment, showToast,
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
+import { FdIndexType, parseSearchQuery } from "./lib/parse-search-query";
 import os from "os";
 import fs from "fs";
 import afs from "fs/promises";
@@ -29,6 +30,10 @@ export default function Command() {
 
   const [searchText, setSearchText] = useState("");
   const [searchRoot, setSearchRoot] = useCachedState<string>("searchRootKey", os.homedir());
+  const parsedSearch = useMemo(
+    () => parseSearchQuery(searchText, prefs.ignoreSpacesInSearch, os.homedir()),
+    [searchText, prefs.ignoreSpacesInSearch],
+  );
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -85,9 +90,10 @@ export default function Command() {
 
   // Get fdOutput filepath
   const { data: fdOutput, isLoading: isFdOutputLoading } = useCachedPromise(
-    async (searchRoot?: string, fdPath?: string) => {
+    async (searchRoot?: string, fdPath?: string, indexType?: FdIndexType) => {
       assert(searchRoot !== undefined);
       assert(fdPath !== undefined);
+      assert(indexType !== undefined);
 
       const ignoreFile = path.join(os.homedir(), ".config", "fd", "ignore");
       if (!fs.existsSync(ignoreFile)) {
@@ -108,7 +114,11 @@ export default function Command() {
       }
 
       let optionalArgs: string[] = [];
-      if (!prefs.includeDirectories) {
+      if (indexType === "directory") {
+        optionalArgs = [...optionalArgs, "--type", "d"];
+      } else if (indexType === "file") {
+        optionalArgs = [...optionalArgs, "--type", "f"];
+      } else if (!prefs.includeDirectories) {
         optionalArgs = [...optionalArgs, "--type", "file"];
       }
       if (prefs.includeHidden) {
@@ -121,7 +131,7 @@ export default function Command() {
       const searchDirs = searchRoot.split(" ");
 
       // Final file fzf is reading from
-      const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
+      const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}-${indexType}.txt`);
       // File to write to during the indexing
       const fdOutputTemp = `${fdOutput}.${Date.now()}${randomInt(10000)}.temp`;
 
@@ -175,7 +185,7 @@ export default function Command() {
       console.log(`finished renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       return { filepath: fdOutput, randomUUID: randomUUID() };
     },
-    [searchRoot, fdPath],
+    [searchRoot, fdPath, parsedSearch.indexType],
     {
       execute: searchRoot !== undefined && fdPath !== undefined,
       abortable: abortableFd,
@@ -185,22 +195,15 @@ export default function Command() {
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
-    async (searchText: string, fzfPath?: string, fdOutput?: string, _?: string) => {
+    async (query: string, fzfPath?: string, fdOutput?: string, _?: string) => {
       assert(fzfPath !== undefined);
       assert(fdOutput !== undefined);
       assert(_ !== undefined); // required by linter
 
-      // sanitize input
-      let searchTerm = searchText;
-      if (prefs.ignoreSpacesInSearch) {
-        searchTerm = searchTerm.replaceAll(" ", "");
-      }
-      searchTerm = searchTerm.replaceAll("~", os.homedir());
-
       const filteredResults: string[] = [];
       const fdOutputFD = fs.openSync(fdOutput, "r");
       try {
-        const fzf = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
+        const fzf = spawn(fzfPath, ["--read0", "-e", "--filter", query], {
           stdio: [fdOutputFD, "pipe", "pipe"],
           signal: abortableFzf.current?.signal,
         });
@@ -244,7 +247,7 @@ export default function Command() {
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
-    [searchText, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
+    [parsedSearch.query, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
       execute: fzfPath !== undefined && fdOutput !== undefined,
       abortable: abortableFzf,
@@ -255,7 +258,7 @@ export default function Command() {
     <List
       navigationTitle="Search Files"
       isLoading={isFdLoading || isFdOutputLoading || isFzfCliLoading || isFilteredPathsLoading}
-      searchBarPlaceholder={"Search for your files"}
+      searchBarPlaceholder={"Search files — use -d or -f for directories/files only"}
       onSearchTextChange={setSearchText}
       filtering={false} // disable builtin filtering as we use a custom one
       searchBarAccessory={
@@ -277,6 +280,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Open title="Open" target={filepath} />
+                <Action.OpenWith path={filepath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 <Action.ShowInFinder title="Show in Finder" path={filepath} />
                 <Action.CopyToClipboard
                   title="Copy Path to Clipboard"
