@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Add contributor] - {PR_MERGE_DATE}
+## [Add contributor] - 2026-06-16
 
 - Added stefan.imbesi to the contributors list
 
