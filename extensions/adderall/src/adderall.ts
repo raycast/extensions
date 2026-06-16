@@ -8,10 +8,6 @@ export const INSTALL_HINT = "Install: brew install carlos-err406/tap/adderall";
  * minimal PATH, so check common locations explicitly). Returns null if not found.
  */
 export function adderallBin(): string | null {
-  const candidates = [
-    `${homedir()}/.local/bin/adderall`,
-    "/opt/homebrew/bin/adderall",
-    "/usr/local/bin/adderall",
-  ];
+  const candidates = [`${homedir()}/.local/bin/adderall`, "/opt/homebrew/bin/adderall", "/usr/local/bin/adderall"];
   return candidates.find((p) => existsSync(p)) ?? null;
 }

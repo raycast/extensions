@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  closeMainWindow,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useState } from "react";
@@ -35,10 +28,7 @@ export default function Command() {
   const showCustom = custom.length > 0 && !PRESETS.includes(custom);
 
   return (
-    <List
-      searchBarPlaceholder="Pick a duration, or type one (2h, 45m, 90s)…"
-      onSearchTextChange={setText}
-    >
+    <List searchBarPlaceholder="Pick a duration, or type one (2h, 45m, 90s)…" onSearchTextChange={setText}>
       {showCustom && (
         <List.Section title="Custom">
           <List.Item
@@ -47,11 +37,7 @@ export default function Command() {
             subtitle="Keep awake for this duration"
             actions={
               <ActionPanel>
-                <Action
-                  title={`Keep Awake for ${custom}`}
-                  icon={Icon.Clock}
-                  onAction={() => arm(custom)}
-                />
+                <Action title={`Keep Awake for ${custom}`} icon={Icon.Clock} onAction={() => arm(custom)} />
               </ActionPanel>
             }
           />
@@ -66,11 +52,7 @@ export default function Command() {
             subtitle="auto-off after"
             actions={
               <ActionPanel>
-                <Action
-                  title={`Keep Awake for ${p}`}
-                  icon={Icon.Clock}
-                  onAction={() => arm(p)}
-                />
+                <Action title={`Keep Awake for ${p}`} icon={Icon.Clock} onAction={() => arm(p)} />
               </ActionPanel>
             }
           />
