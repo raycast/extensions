@@ -23,6 +23,9 @@ type Prefs = {
   customSearchDirs: string;
 };
 
+const MAX_FZF_RESULTS = 200;
+const FZF_DEBOUNCE_MS = 200;
+
 export default function Command() {
   const abortableFd = useRef<AbortController>(new AbortController());
   const abortableFzf = useRef<AbortController>(new AbortController());
@@ -34,6 +37,11 @@ export default function Command() {
     () => parseSearchQuery(searchText, prefs.ignoreSpacesInSearch, os.homedir()),
     [searchText, prefs.ignoreSpacesInSearch],
   );
+  const [debouncedQuery, setDebouncedQuery] = useState(parsedSearch.query);
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedQuery(parsedSearch.query), FZF_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [parsedSearch.query]);
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -201,6 +209,10 @@ export default function Command() {
       assert(_ !== undefined); // required by linter
 
       const filteredResults: string[] = [];
+      if (!query) {
+        return filteredResults;
+      }
+
       const fdOutputFD = fs.openSync(fdOutput, "r");
       try {
         const fzf = spawn(fzfPath, ["--read0", "--filter", query], {
@@ -208,15 +220,19 @@ export default function Command() {
           signal: abortableFzf.current?.signal,
         });
         await new Promise<void>((resolve, reject) => {
-          let stoppedIntentionally = false;
+          let hitResultLimit = false;
+          let aborted = false;
           const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
           rl.on("line", (line) => {
+            if (aborted) {
+              return;
+            }
             // Limit results, as otherwise they will exceed memory limits,
             // raycast will terminate the extension. Issue #21580
-            if (filteredResults.length >= 1000) {
-              // It sends the kill signal when reaching 1000,
-              // so results will be larger than 1000
-              stoppedIntentionally = true;
+            if (filteredResults.length >= MAX_FZF_RESULTS) {
+              // It sends the kill signal when reaching the cap,
+              // so results may be slightly larger than MAX_FZF_RESULTS
+              hitResultLimit = true;
               fzf.kill();
             } else {
               filteredResults.push(line);
@@ -229,19 +245,20 @@ export default function Command() {
           });
 
           fzf.on("error", () => {
-            stoppedIntentionally = true;
+            aborted = true;
             console.log("aborting fzf");
           });
 
           fzf.on("close", (code, signal) => {
             rl.close();
-            // Aborted by a newer search or killed after hitting the result cap — not an error
-            if (stoppedIntentionally || signal) {
-              resolve();
+            if (aborted) {
+              const error = new Error("Aborted");
+              error.name = "AbortError";
+              reject(error);
               return;
             }
             // Fzf returns error code 1 if output is empty
-            if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
+            if (code === 0 || code === null || hitResultLimit || (code === 1 && stderr.length === 0)) {
               resolve();
             } else {
               reject(`Exit code of 'fzf' = ${code}:\n${stderr}`);
@@ -255,13 +272,14 @@ export default function Command() {
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
-    [parsedSearch.query, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
+    [debouncedQuery, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
       execute:
         fzfPath !== undefined &&
         fdOutput !== undefined &&
         !isFdOutputLoading &&
-        fdOutput.indexType === parsedSearch.indexType,
+        fdOutput.indexType === parsedSearch.indexType &&
+        debouncedQuery.length > 0,
       abortable: abortableFzf,
     },
   );
@@ -281,7 +299,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredPaths?.map((filepath) => {
+      {(debouncedQuery ? filteredPaths : undefined)?.map((filepath) => {
         const filename = basename(filepath);
         return (
           <List.Item
