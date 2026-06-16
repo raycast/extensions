@@ -183,7 +183,7 @@ export default function Command() {
       console.log(`renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       await afs.rename(fdOutputTemp, fdOutput);
       console.log(`finished renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
-      return { filepath: fdOutput, randomUUID: randomUUID() };
+      return { filepath: fdOutput, randomUUID: randomUUID(), indexType };
     },
     [searchRoot, fdPath, parsedSearch.indexType],
     {
@@ -203,7 +203,7 @@ export default function Command() {
       const filteredResults: string[] = [];
       const fdOutputFD = fs.openSync(fdOutput, "r");
       try {
-        const fzf = spawn(fzfPath, ["--read0", "-e", "--filter", query], {
+        const fzf = spawn(fzfPath, ["--read0", "--filter", query], {
           stdio: [fdOutputFD, "pipe", "pipe"],
           signal: abortableFzf.current?.signal,
         });
@@ -247,9 +247,20 @@ export default function Command() {
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
-    [parsedSearch.query, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
+    [
+      parsedSearch.query,
+      parsedSearch.indexType,
+      fzfPath,
+      fdOutput?.filepath,
+      fdOutput?.randomUUID,
+      fdOutput?.indexType,
+    ],
     {
-      execute: fzfPath !== undefined && fdOutput !== undefined,
+      execute:
+        fzfPath !== undefined &&
+        fdOutput !== undefined &&
+        !isFdOutputLoading &&
+        fdOutput.indexType === parsedSearch.indexType,
       abortable: abortableFzf,
     },
   );
