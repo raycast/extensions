@@ -15,6 +15,7 @@ import {
 import { useCachedState } from "@raycast/utils";
 import {
   FileAsset,
+  FolderAsset,
   FolderItem,
   SortOption,
   listFolderChildren,
@@ -261,22 +262,31 @@ export function FolderView({
               <ActionPanel>
                 <ActionPanel.Section>
                   {isFolder ? (
-                    <Action
-                      title="Open Folder"
-                      icon={Icon.ArrowRight}
-                      onAction={() =>
-                        push(
-                          <FolderView
-                            accountId={accountId}
-                            folderId={asset.id}
-                            title={asset.name}
-                            navigationContext={navigationContext}
-                            onBrowseWorkspaces={onBrowseWorkspaces}
-                            isPushedView={true}
-                          />
-                        )
-                      }
-                    />
+                    <>
+                      <Action
+                        title="Open Folder"
+                        icon={Icon.ArrowRight}
+                        onAction={() =>
+                          push(
+                            <FolderView
+                              accountId={accountId}
+                              folderId={asset.id}
+                              title={asset.name}
+                              navigationContext={navigationContext}
+                              onBrowseWorkspaces={onBrowseWorkspaces}
+                              isPushedView={true}
+                            />
+                          )
+                        }
+                      />
+                      {buildFolderBrowserUrl(asset as FolderAsset) && (
+                        <Action.OpenInBrowser
+                          title="Open in Frame.io"
+                          url={buildFolderBrowserUrl(asset as FolderAsset)!}
+                          shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        />
+                      )}
+                    </>
                   ) : fileAsset?.view_url ? (
                     <>
                       <Action.OpenInBrowser

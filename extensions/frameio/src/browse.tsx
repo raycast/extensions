@@ -22,6 +22,7 @@ import {
   listProjects,
   tryGetFolder,
   tryFindProjectById,
+  buildProjectBrowserUrl,
   Account,
   Workspace,
   Project,
@@ -296,42 +297,52 @@ function ProjectList({ account, workspace, projects, onSelect, onBrowseWorkspace
         />
       )}
       <List.Section title={`${account.display_name} / ${workspace.name}`}>
-        {projects.map((project) => (
-          <List.Item
-            key={project.id}
-            title={project.name}
-            icon={Icon.Folder}
-            accessories={[{ date: new Date(project.updated_at), tooltip: "Last modified" }]}
-            actions={
-              <ActionPanel>
-                <Action title="Open Project" icon={Icon.ArrowRight} onAction={() => onSelect(project)} />
-                <ActionPanel.Section title="Copy">
-                  <Action.CopyToClipboard
-                    title={`Copy "${project.name}" ID`}
-                    content={project.id}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-                    onCopy={() =>
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Project ID Copied",
-                        message: "Paste it in Extension Preferences → Browse Default Folder ID",
-                      })
-                    }
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Browse Workspaces"
-                    icon={Icon.Building}
-                    onAction={onBrowseWorkspaces}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                  />
-                  <Action title="Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+        {projects.map((project) => {
+          const projectUrl = buildProjectBrowserUrl(project);
+          return (
+            <List.Item
+              key={project.id}
+              title={project.name}
+              icon={Icon.Folder}
+              accessories={[{ date: new Date(project.updated_at), tooltip: "Last modified" }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Open Project" icon={Icon.ArrowRight} onAction={() => onSelect(project)} />
+                  {projectUrl && (
+                    <Action.OpenInBrowser
+                      title="Open in Frame.io"
+                      url={projectUrl}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    />
+                  )}
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard
+                      title={`Copy "${project.name}" ID`}
+                      content={project.id}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                      onCopy={() =>
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Project ID Copied",
+                          message: "Paste it in Extension Preferences → Browse Default Folder ID",
+                        })
+                      }
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Browse Workspaces"
+                      icon={Icon.Building}
+                      onAction={onBrowseWorkspaces}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    />
+                    <Action title="Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

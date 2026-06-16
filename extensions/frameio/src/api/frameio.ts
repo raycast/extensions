@@ -445,12 +445,20 @@ export async function tryGetVersionStack(accountId: string, stackId: string): Pr
   }
 }
 
-/** URL navigateur fiable pour un dossier (évite les view_url qui pointent vers l'accueil) */
 export function buildFolderBrowserUrl(folder: FolderAsset): string | undefined {
   const url = folder.view_url?.trim();
   if (url && !isFrameioHomeUrl(url)) return url;
   if (folder.project_id && folder.id) {
     return `https://next.frame.io/project/${folder.project_id}/${folder.id}`;
+  }
+  return url || undefined;
+}
+
+export function buildProjectBrowserUrl(project: Project): string | undefined {
+  const url = project.view_url?.trim();
+  if (url && !isFrameioHomeUrl(url)) return url;
+  if (project.id && project.root_folder_id) {
+    return `https://next.frame.io/project/${project.id}/${project.root_folder_id}`;
   }
   return url || undefined;
 }
