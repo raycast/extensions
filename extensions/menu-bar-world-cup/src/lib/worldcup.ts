@@ -110,10 +110,6 @@ function kickoff(iso: string): string {
   });
 }
 
-export function stateIcon(state: MatchState): string {
-  return state === "in" ? "🔴" : state === "post" ? "✅" : "🕐";
-}
-
 // --- ESPN response shapes (only the fields we read) ---
 interface EspnEvent {
   id: string;

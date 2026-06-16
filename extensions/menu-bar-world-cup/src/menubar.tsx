@@ -11,7 +11,6 @@ import {
   liveMatch,
   formatLine,
   menuBarTitle,
-  stateIcon,
   goalsEnabled,
   setGoalsEnabled,
   type Match,
@@ -91,7 +90,6 @@ function Section({ heading, matches }: { heading: string; matches: Match[] }) {
       {matches.map((m) => (
         <MenuBarExtra.Item
           key={m.id}
-          icon={stateIcon(m.state)}
           title={formatLine(m)}
           onAction={() => open(SCOREBOARD_URL)}
         />
