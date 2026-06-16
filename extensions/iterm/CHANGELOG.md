@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-06-16
 
 - Fixed `Open iTerm Profile` if parts of a user's iTerm preferences plist other than profiles cannot be converted to JSON
 
