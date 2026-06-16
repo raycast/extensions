@@ -1,0 +1,6 @@
+{
+    "printWidth": 100,
+    "singleQuote": false,
+    "tabWidth": 4,
+    "plugins": ["react", "jest"]
+}

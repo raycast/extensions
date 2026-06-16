@@ -1,0 +1,21 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+raycast-env.d.ts
+
+# misc
+.DS_Store
+logs/
+
+# local-only planning / agent files
+CLAUDE.md
+docs/
+tasks/
+STARLINE_API_IMPLEMENTATION_PLAN.md
+.githooks/
