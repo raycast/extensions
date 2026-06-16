@@ -4,8 +4,95 @@ import { XMLParser } from "fast-xml-parser";
 import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";
+import { getDocumentsUnAuthorizationHeader } from "./documents-un-auth.js";
 import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode, RssResponse } from "./types.js";
 import { arrayifyRssItem, stripSpecialEscapedCharacters } from "./utils.js";
+
+const DOCUMENTS_UN_ORIGIN = "https://documents.un.org";
+
+type DocumentsUnSubjectsResponse = {
+  status: number;
+  body: {
+    language: string;
+    data: Record<string, string>;
+  };
+};
+
+type DocumentsUnSearchResponse = {
+  status: number;
+  message?: string;
+  body: {
+    data: DocumentsUnSearchResult[];
+    meta: {
+      matches: number | string;
+      numberOfGroups: number | string;
+    };
+  };
+};
+
+export type DocumentsUnSearchResult = {
+  id: string;
+  symbol: string;
+  symbols: string[];
+  publication_date: string;
+  area: string;
+  distribution: string;
+  agendas?: string[];
+  sessions?: string[];
+  job_numbers: string[];
+  release_dates: string[];
+  sizes: number[];
+  title: string;
+  subjects?: string[];
+};
+
+export type DocumentsUnSearchResults = {
+  items: DocumentsUnSearchResult[];
+  totalMatches: number;
+  totalGroups: number;
+};
+
+const parseDocumentsUnCount = (value: number | string) => {
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+};
+
+export const fetchDocumentsUnSubjects = async () => {
+  const authorization = await getDocumentsUnAuthorizationHeader();
+  const response = await got(`${DOCUMENTS_UN_ORIGIN}/api/search/subjects?l=en`, {
+    headers: {
+      Authorization: authorization,
+      "Content-Type": "application/json",
+    },
+  }).json<DocumentsUnSubjectsResponse>();
+
+  return Object.entries(response.body.data)
+    .map(([code, title]) => ({ code, title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+};
+
+export const fetchDocumentsUnSearch = async (payload: Record<string, unknown>): Promise<DocumentsUnSearchResults> => {
+  const authorization = await getDocumentsUnAuthorizationHeader();
+  const response = await got
+    .post(`${DOCUMENTS_UN_ORIGIN}/api/search?l=en&rid=${Date.now()}`, {
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json",
+      },
+      json: payload,
+    })
+    .json<DocumentsUnSearchResponse>();
+
+  if (response.status !== 1) {
+    throw new Error(response.message ?? "documents.un.org search failed");
+  }
+
+  return {
+    items: response.body.data,
+    totalMatches: parseDocumentsUnCount(response.body.meta.matches),
+    totalGroups: parseDocumentsUnCount(response.body.meta.numberOfGroups),
+  };
+};
 
 export const fetchUnDocuments = async () => {
   const [ga, sc, hrc, esc] = await Promise.all([

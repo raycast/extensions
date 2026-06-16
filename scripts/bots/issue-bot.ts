@@ -20,6 +20,7 @@ const newMatchGitHub =
   /### Extension\s*(?:https:\/\/)?(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatchGithub =
   /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+const osVersionMatch = /### OS Version\s*\n+\s*(\S+)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 const closeIssueAsNotPlannedMatch = /@raycastbot close as not planned/;
@@ -200,6 +201,53 @@ export default async ({ github, context }: API) => {
     repo: context.repo.repo,
     labels: [extensionLabel(extension, extensionName2Folder)],
   });
+
+  // Extract platform from OS Version field (first word: macOS or Windows)
+  const osVersionLineMatch = context.payload.issue.body && osVersionMatch.exec(context.payload.issue.body);
+  const os =
+    osVersionLineMatch?.[1] === "macOS" || osVersionLineMatch?.[1] === "Windows" ? osVersionLineMatch[1] : null;
+  if (os) {
+    const platformLabel = `platform: ${os}`;
+    const oppositePlatformLabel = os === "macOS" ? "platform: Windows" : "platform: macOS";
+
+    if (context.payload.action === "edited") {
+      try {
+        await github.rest.issues.removeLabel({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          name: oppositePlatformLabel,
+        });
+      } catch {
+        // ignore, it might not be there
+      }
+    }
+
+    console.log(`Adding platform label: ${platformLabel}`);
+    try {
+      await github.rest.issues.addLabels({
+        issue_number: context.payload.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: [platformLabel],
+      });
+    } catch (error) {
+      console.error(`Failed to add platform label ${platformLabel}:`, error);
+    }
+  } else if (context.payload.action === "edited") {
+    for (const label of ["platform: macOS", "platform: Windows"]) {
+      try {
+        await github.rest.issues.removeLabel({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          name: label,
+        });
+      } catch {
+        // ignore, it might not be there
+      }
+    }
+  }
 
   try {
     await github.rest.issues.removeLabel({

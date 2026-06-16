@@ -17,6 +17,8 @@ export default function Command() {
         campaigns.reverse().map((planet) => {
           const progress = (planet.info.maxHealth - planet.status.health) / planet.info.maxHealth;
 
+          if (!planet.planet) return null;
+
           return (
             <List.Item
               icon={getProgressIcon(progress, Color.Blue, {

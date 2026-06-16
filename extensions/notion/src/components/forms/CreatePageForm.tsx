@@ -12,8 +12,8 @@ import {
   PopToRootType,
   Keyboard,
 } from "@raycast/api";
-import { useForm, FormValidation, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   useDatabaseProperties,
@@ -65,10 +65,15 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     databaseId || "__no_id__",
     launchContext?.visiblePropIds,
   );
+  const visibleDatabaseProperties = useMemo(
+    () => databaseProperties.filter((dp) => !visiblePropIds || visiblePropIds.includes(dp.id)),
+    [databaseProperties, visiblePropIds],
+  );
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
-  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
+  const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(visibleDatabaseProperties);
   const { setRecentPage } = useRecentPages();
+  const hasShownNoDatabasesToast = useRef(false);
 
   const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
 
@@ -82,28 +87,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     if (type == "date" && value) value = new Date(value as string);
     initialValues[key] = value;
   }
-
-  usePromise(
-    async () => {
-      if (!preferences.useClipboard) return;
-      const text = await Clipboard.readText();
-      if (!text) return;
-      switch (preferences.useClipboard) {
-        case "title":
-          setValue("property::title::title", text);
-          break;
-        case "content":
-          setValue("content", text);
-          break;
-      }
-    },
-    [],
-    {
-      failureToastOptions: {
-        title: "Failed to read clipboard",
-      },
-    },
-  );
 
   const { itemProps, values, handleSubmit, reset, focus, setValue } = useForm<CreatePageFormValues>({
     initialValues,
@@ -127,13 +110,19 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           title: "Page created",
           primaryAction: {
             title: "Open Page",
-            shortcut: { modifiers: ["cmd"], key: "o" },
+            shortcut: {
+              macOS: { modifiers: ["cmd"], key: "o" },
+              Windows: { modifiers: ["ctrl"], key: "o" },
+            },
             onAction: () => handleOnOpenPage(page, setRecentPage),
           },
           secondaryAction: page.url
             ? {
                 title: "Copy URL",
-                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                shortcut: {
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                },
                 onAction: () => {
                   Clipboard.copy(page.url as string);
                 },
@@ -158,9 +147,35 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     },
   });
 
-  function filterProperties(dp: DatabaseProperty) {
-    return !visiblePropIds || visiblePropIds.includes(dp.id);
-  }
+  useEffect(() => {
+    if (!preferences.useClipboard) return;
+
+    let canceled = false;
+
+    async function prefillFromClipboard() {
+      try {
+        const text = await Clipboard.readText();
+        if (!text || canceled) return;
+        switch (preferences.useClipboard) {
+          case "title":
+            setValue("property::title::title", text);
+            break;
+          case "content":
+            setValue("content", text);
+            break;
+        }
+      } catch {
+        if (canceled) return;
+        await showToast({ style: Toast.Style.Failure, title: "Failed to read clipboard" });
+      }
+    }
+
+    void prefillFromClipboard();
+
+    return () => {
+      canceled = true;
+    };
+  }, [preferences.useClipboard, setValue]);
 
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
     if (!visiblePropIds) {
@@ -177,7 +192,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   function getQuicklink(): Quicklink {
-    const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
+    const url = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HenriChabrand/notion/create-database-page`;
     const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? databasePropertyIds };
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
@@ -185,17 +200,24 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     return { name, link: url + "?launchContext=" + encodeURIComponent(JSON.stringify(launchContext)) };
   }
 
-  if (!isLoadingDatabases && !databases.length) {
-    showToast({
+  useEffect(() => {
+    if (isLoadingDatabases || databases.length || hasShownNoDatabasesToast.current) return;
+    hasShownNoDatabasesToast.current = true;
+    void showToast({
       style: Toast.Style.Failure,
       title: "No databases found",
       message: "Please make sure you have access to at least one database",
     });
-  }
+  }, [databases.length, isLoadingDatabases]);
 
   const renderSubmitAction = (type: "main" | "second") => {
     const shortcut: Keyboard.Shortcut | undefined =
-      type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
+      type === "second"
+        ? {
+            macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+          }
+        : undefined;
 
     if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
       return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
@@ -283,22 +305,19 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         </>
       )}
 
-      {databaseProperties
-        ?.filter(filterProperties)
-        .sort(sortProperties)
-        .map((dp) => {
-          const id = createPropertyId(dp);
-          return (
-            <PagePropertyField
-              type={dp.type}
-              databaseProperty={dp}
-              itemProps={itemProps[id]}
-              relationPages={relationPages}
-              users={users}
-              key={id}
-            />
-          );
-        })}
+      {[...visibleDatabaseProperties].sort(sortProperties).map((dp) => {
+        const id = createPropertyId(dp);
+        return (
+          <PagePropertyField
+            type={dp.type}
+            databaseProperty={dp}
+            itemProps={itemProps[id]}
+            relationPages={relationPages}
+            users={users}
+            key={id}
+          />
+        );
+      })}
       <Form.Separator />
       <Form.TextArea
         {...itemProps["content"]}

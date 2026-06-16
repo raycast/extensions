@@ -13,12 +13,12 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function OutdatedContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { isLoading, data, revalidate } = useBrewOutdated();
+  const { isLoading, isRefreshing, data, revalidate } = useBrewOutdated();
 
   return (
     <OutdatedList
       outdated={data}
-      isLoading={isLoading}
+      isLoading={isLoading || isRefreshing}
       filterType={filter}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       onAction={() => revalidate()}

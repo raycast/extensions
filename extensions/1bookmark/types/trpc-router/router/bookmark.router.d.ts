@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,25 +11,22 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     hello: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             text: string;
@@ -37,6 +34,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
         output: {
             greeting: string;
         };
+        meta: object;
     }>;
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -59,6 +57,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             deletedAt: Date | null;
             updatedAt: Date;
         };
+        meta: object;
     }>;
     listAll: import("@trpc/server").TRPCQueryProcedure<{
         input: {
@@ -77,6 +76,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             createdAt: Date;
             updatedAt: Date;
         }[];
+        meta: object;
     }>;
     listRecent: import("@trpc/server").TRPCQueryProcedure<{
         input: void;
@@ -93,10 +93,12 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             deletedAt: Date | null;
             updatedAt: Date;
         }[];
+        meta: object;
     }>;
     delete: import("@trpc/server").TRPCMutationProcedure<{
         input: string;
         output: void;
+        meta: object;
     }>;
     exists: import("@trpc/server").TRPCQueryProcedure<{
         input: {
@@ -104,6 +106,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             url: string;
         };
         output: boolean;
+        meta: object;
     }>;
     update: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -126,6 +129,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             deletedAt: Date | null;
             updatedAt: Date;
         };
+        meta: object;
     }>;
     import: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -139,5 +143,6 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             browserName: string;
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

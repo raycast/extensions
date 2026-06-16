@@ -1043,7 +1043,7 @@ function EmailActions({
           title="Save Current View as Quicklink"
           quicklink={{
             name: `Proton Mail - ${folder}${filter !== "all" ? ` (${filter})` : ""}`,
-            link: `raycast://extensions/NormC/proton-mail/list-emails?arguments=${encodeURIComponent(JSON.stringify({ folder, filter }))}`,
+            link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/NormC/proton-mail/list-emails?arguments=${encodeURIComponent(JSON.stringify({ folder, filter }))}`,
           }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
         />

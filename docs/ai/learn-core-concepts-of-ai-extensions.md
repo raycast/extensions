@@ -258,21 +258,9 @@ Expectations are used to check if the AI response matches the expected behavior.
 
 ## AI File
 
-If your instructions or evals start getting too long and clutter your `package.json` file, you can move them to a separate file. It can be either a `ai.json`, `ai.yaml`, or `ai.json5` file in the root of your extension next to the `package.json` file.
-
-The structure of the AI file is the same as in the `package.json` file.
+Your instructions or evals can start to become rather long and clutter your `package.json` file, for this reason, we recommend you to use a `ai.yaml` file in the root of your extension next to the `package.json` file.
 
 {% tabs %}
-{% tab title="ai.json" %}
-
-```json
-{
-  "instructions": "When you don't know the user's first name, ask for it."
-}
-```
-
-{% endtab %}
-
 {% tab title="ai.yaml" %}
 
 ```yaml
@@ -281,18 +269,4 @@ instructions: |
 ```
 
 {% endtab %}
-
-{% tab title="ai.json5" %}
-
-```json5
-{
-  instructions: "When you don't know the user's first name, ask for it.",
-}
-```
-
-{% endtab %}
 {% endtabs %}
-
-{% hint style="info" %}
-The AI file is optional. If you don't provide it, Raycast will use the instructions and evals from the `package.json` file. We found that [`yaml`](https://yaml.org/) and [`json5`](https://json5.org/) can be more readable for long instructions.
-{% endhint %}

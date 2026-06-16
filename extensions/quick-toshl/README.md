@@ -1,69 +1,89 @@
 # Quick Toshl
 
-A powerful Raycast extension for managing your [Toshl Finance](https://toshl.com) expenses, income, and budgets with both manual commands and AI-powered natural language interactions.
+A Raycast extension for [Toshl Finance](https://toshl.com): add expenses, income, and transfers, browse and search entries, manage categories/tags/accounts/budgets, and use **Raycast AI** tools for natural-language workflows.
 
 ![Raycast](https://img.shields.io/badge/Raycast-Extension-FF6154)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## ✨ Features
+## Features
 
-### Manual Commands
+### Commands
 
 | Command | Description |
 | ------- | ----------- |
-| **Add Expense** | Quick form to add expenses with category, tags, account, and recurring options |
-| **Add Income** | Quick form to add income entries |
-| **Add Transfer** | Transfer money between accounts |
-| **Recent Transactions** | View, edit, and delete recent transactions (beautifully grouped by date with summary headers) |
-| **Search Entries** | Advanced filtering by date range, type, category, tags, account, and description |
-| **View Planning** | View monthly/yearly spending plan and predictions (Pro feature) |
-| **Budgets** | View your budget progress and spending limits |
+| **Add Expense** | Form to add an expense (category, tags, account, recurrence). |
+| **Add Income** | Form to add income. |
+| **View Transactions** | Recent transactions: view, edit, delete, grouped by date. |
+| **Add Transfer** | Move money between accounts. |
+| **View Budgets** | Budget progress and limits. |
+| **Search Entries** | Filter by date, type, category, tags, account, description. |
+| **View Planning** | Spending plan and predictions (Pro; may 403 on free accounts). |
+| **Manage Categories** | Create, rename, or delete expense/income categories. |
+| **Manage Tags** | Create, edit, or delete tags. |
+| **Manage Accounts** | Create, edit, or delete accounts. |
+| **Manage Budgets** | Create, edit, or delete budgets (respects Toshl plan limits). |
+| **My Profile** | Profile from `/me`: currency, locale, timezone, API-related limits. |
 
-### AI Tools (Raycast AI Chat)
+### Raycast AI tools
 
-Chat naturally with Raycast AI to manage your finances:
+Use **Raycast AI** (extension tools) for prompts like “add 50k lunch” or “search expenses last month”.
 
-```text
-"Add $50 for lunch today"
-"Show my expenses this month"  
-"What's my food budget?"
-"List my categories"
-```
+| Tool | Purpose |
+| ---- | ------- |
+| `add-expense` / `add-income` | Add entries; supports Vietnamese amount shortcuts (`50k`, `triệu`, …). |
+| `add-transfer` | Record transfers between accounts. |
+| `search-entries` | Search and summarize transactions. |
+| `get-budgets` | Budget status. |
+| `get-planning` | Planning outlook (Pro). |
+| `list-categories-tags` | Categories, tags, and accounts (always use IDs from here). |
+| `update-entry` / `delete-entry` | Update or delete an entry (not transfers—use `update-transfer`). |
+| `update-transfer` | Update a transfer by `entryId`. |
+| `create-category` / `update-category` / `delete-category` | Category CRUD. |
+| `create-tag` / `update-tag` / `delete-tag` | Tag CRUD. |
+| `create-account` / `update-account` / `delete-account` | Account CRUD. |
+| `create-budget` / `update-budget` / `delete-budget` | Budget CRUD. |
+| `get-me` | User profile from `/me`. |
+| `get-tag-sums` | Aggregated sums per tag (`/tags/sums`; currency defaults from `/me`). |
+| `list-entry-locations` | Saved entry locations for a range (`/entries/locations`). |
 
-| AI Tool | Description |
-| ------- | ----------- |
-| `add-expense` | Add expenses using natural language (e.g., "50k lunch") |
-| `add-income` | Add income entries |
-| `search-entries` | Search and filter transactions |
-| `get-planning` | Get monthly/yearly financial plan and outlook |
-| `get-budgets` | Check budget status |
-| `list-categories-tags` | List categories, tags, and accounts |
+### Highlights
 
-### Special Features
+- **Vietnamese-friendly**: Parses amounts like `50k`, `3tr`, `5 triệu`.
+- **Default currency**: Taken from Toshl (`/me`), not hard-coded.
+- **Caching**: Categories, tags, accounts, and currencies use ETag / `If-Modified-Since` where applicable.
+- **Transfers**: Shown distinctly in lists; use `update-transfer` for AI edits to transfers.
 
-- 🇻🇳 **Vietnamese Support**: AI understands shortcuts like "50k", "3tr", "5 triệu"
-- 📅 **Smart Dates**: AI automatically detects dates like "today", "yesterday", "last Friday"
-- 🔄 **Recurring Entries**: Daily, weekly, monthly, yearly repeats
-- 💱 **Currency Symbols**: Automatic support for 50+ currency symbols ($, €, ₫, etc.)
-- 🎯 **Auto-Currency**: Default currency is auto-detected from your Toshl settings
-- 🔵 **Transfer Detection**: Blue icons for account-to-account transfers
-- ⚡ **HTTP Caching**: Optimized performance using ETag and Last-Modified headers
-
----
-
-## ⚙️ Configuration
+## Configuration
 
 ### Required
 
-- **Toshl API Key**: Get from [Toshl Developer Settings](https://developer.toshl.com/)
+- **Toshl API key** – Create a **Personal token** in [Toshl Developer settings](https://developer.toshl.com/) and paste it into the extension preference **Toshl API Key**.
 
 ### Optional
 
-- **Force Refresh Cache**: Clear cached data manually to force fresh fetch from API
+- **Force Refresh Cache** – Each load uses conditional requests; if the API fails, the last successful metadata may be reused for up to **24 hours**. Enable, run any command once, then disable to clear the in-memory cache (e.g. after edits in Toshl elsewhere).
+- **Enable Demo Data** – Uses mock data instead of the API (for UI development).
 
----
+## Development
 
-## 📄 License
+From the extension directory:
 
-MIT License - see [LICENSE](LICENSE) for details.
+```bash
+npm install
+npm run build    # production bundle
+npm run lint     # ESLint + Prettier
+npm run dev      # ray develop (watch mode)
+```
+
+Optional **live API smoke test** — **manual only** (not part of `npm test` or CI). Calls the real Toshl API with your token; creates disposable `QTT-TEST-*` data and removes it at the end.
+
+```bash
+node scripts/toshl-integration-test.cjs
+```
+
+If `TOSHL_API_KEY` is unset, the script tries `op read "op://Code/Toshl API/credential"` when the [1Password CLI](https://developer.1password.com/docs/cli/) is installed and signed in.
+
+## License
+
+MIT – see [LICENSE](LICENSE).

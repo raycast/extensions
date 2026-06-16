@@ -1,7 +1,8 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { returnBoards } from "./utils/fetchBoards";
 import { Board } from "./Board";
+import { getDefaultOpenTarget, toTrelloAppUrl } from "./utils/openInTrello";
 
 export default function BoardsList() {
   const [allBoards, setAllBoards] = useState<Board[]>([]);
@@ -25,6 +26,8 @@ export default function BoardsList() {
     setBoards(allBoards.filter((x) => x.name.toLowerCase().includes(text.toLowerCase())));
     setLoading(false);
   };
+
+  const appFirst = getDefaultOpenTarget() === "app";
   return (
     <List
       isShowingDetail={false}
@@ -35,6 +38,16 @@ export default function BoardsList() {
     >
       {boards?.length > 0
         ? boards.map((board) => {
+            const openWebAction = (
+              <Action.OpenInBrowser title="Open on Trello Web" icon={Icon.Globe} url={board.shortUrl} />
+            );
+            const openAppAction = (
+              <Action.Open
+                title="Open in Trello Desktop"
+                icon={Icon.AppWindow}
+                target={toTrelloAppUrl(board.shortUrl)}
+              />
+            );
             return (
               <List.Item
                 icon={board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[0].url : ""}
@@ -49,7 +62,9 @@ export default function BoardsList() {
                 }
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={board.shortUrl} />
+                    {appFirst ? openAppAction : openWebAction}
+                    {appFirst ? openWebAction : openAppAction}
+                    <Action.CopyToClipboard title="Copy URL" content={board.shortUrl} />
                   </ActionPanel>
                 }
               />

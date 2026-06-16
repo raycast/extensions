@@ -7,8 +7,8 @@ Search for and create Apple Notes directly within Raycast.
 There are various ways to search for a note in Apple Notes. You can search a note by its title, folder name, account name, snippet (1st few lines of a note), or accessories. The latter means there are special keywords to search for some notes:
 
 - Use `checklist`, `todo`, and `task` to view your tasks with a checklist. `progress` and `active` show your checklists in progress, while `done` and `completed` display your completed checklists.
--  Use `locked`, `password`, or `protected` to access your password-protected notes.
--  Use `shared` to view notes you have shared with someone.
+- Use `locked`, `password`, or `protected` to access your password-protected notes.
+- Use `shared` to view notes you have shared with someone.
 
 ## Create notes
 

@@ -32,6 +32,12 @@ export interface PlanUsage {
     bonus: number; // cents
     total: number; // cents
   };
+  // Auto (included total usage) — from usage-summary API
+  autoPercentUsed?: number;
+  // Named / API (included API usage) — from usage-summary API
+  apiPercentUsed?: number;
+  // Combined included usage — from usage-summary API
+  totalPercentUsed?: number;
 }
 
 // On-demand usage details from usage-summary API

@@ -2,6 +2,16 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import * as cheerio from "cheerio";
 import { useMemo } from "react";
+import {
+  WordReferenceErrorResponse,
+  getErrorMarkdown,
+  getWordReferenceUrl,
+  wordReferenceRequestHeaders,
+} from "./wordreference";
+
+const notFoundMarkdown = `# Translation not found
+
+No translation entries were found for this word.`;
 
 export function WordTranslation({ word, lang, baseUrl }: { word: string; lang: string; baseUrl: string }) {
   const { isLoading, markdown, url } = useWordTranslation({ word, lang, baseUrl });
@@ -21,53 +31,70 @@ export function WordTranslation({ word, lang, baseUrl }: { word: string; lang: s
 }
 
 function useWordTranslation({ word, baseUrl }: { word: string; lang: string; baseUrl: string }) {
-  const url = `https://www.wordreference.com/${baseUrl}/${word}`;
+  const url = getWordReferenceUrl(baseUrl, word);
 
-  const { data: rawData, isLoading } = useFetch<string>(url, {
+  const { data: response, isLoading } = useFetch<TranslationResponse>(url, {
     method: "GET",
+    headers: wordReferenceRequestHeaders,
     keepPreviousData: true,
+    parseResponse: async (response) => {
+      const body = await response.text();
+
+      if (response.status >= 400) {
+        return {
+          type: "error",
+          status: response.status,
+          statusText: response.statusText,
+        };
+      }
+
+      return {
+        type: "success",
+        body,
+      };
+    },
   });
 
   const markdown = useMemo(() => {
     if (isLoading) {
       return "Loading...";
     }
-    if (!rawData) {
-      return "Not found";
+    if (!response) {
+      return notFoundMarkdown;
     }
-    const data = parseRawData(rawData);
-    let markdown = "";
-    markdown += `# ${word}\n\n`;
-
-    data.forEach((item) => {
-      const firstTranslation = item.to.shift();
-      if (!firstTranslation) {
-        return;
-      }
-      // Add word
-      markdown += `## **${item.from.word}** *${item.from.type}*\n`;
-      markdown += `*${item.from.definition}*\n\n`;
-
-      // Add translations
-      markdown += `- **${firstTranslation.word}** (${firstTranslation.type})\n`;
-      if (firstTranslation.definition) {
-        markdown += `  *${firstTranslation.definition}*\n`;
-      }
-      item.to.forEach((toItem) => {
-        markdown += `- **${toItem.word}** (${toItem.type})`;
-        if (toItem.definition) {
-          markdown += `  *${toItem.definition}*`;
+    if (response.type === "error") {
+      return getErrorMarkdown(response.status, response.statusText);
+    }
+    const data = parseRawData(response.body);
+    if (!data.length) {
+      return notFoundMarkdown;
+    }
+    const translationBlocks = data
+      .map((item) => {
+        const [firstTranslation, ...otherTranslations] = item.to;
+        if (!firstTranslation) {
+          return "";
         }
-        markdown += "\n";
-      });
 
-      if (item.example && Object.keys(item.example).length) {
-        markdown += `> ${item.example.from}\n\n`;
-        markdown += `> ${item.example.to}\n\n`;
-      }
-    });
-    return markdown;
-  }, [rawData, isLoading]);
+        const translations = [
+          `- **${firstTranslation.word}** (${firstTranslation.type})${
+            firstTranslation.definition ? `\n  *${firstTranslation.definition}*` : ""
+          }`,
+          ...otherTranslations.map(
+            (toItem) => `- **${toItem.word}** (${toItem.type})${toItem.definition ? `\n  *${toItem.definition}*` : ""}`
+          ),
+        ].join("\n");
+
+        const example = item.example ? `\n\n> ${item.example.from}\n\n> ${item.example.to}` : "";
+
+        return `## **${item.from.word}** *${item.from.type}*\n${
+          item.from.definition ? `*${item.from.definition}*\n\n` : ""
+        }${translations}${example}`;
+      })
+      .filter(Boolean);
+
+    return `# ${word}\n\n${translationBlocks.join("\n\n")}`;
+  }, [response, isLoading]);
 
   return { url, isLoading, markdown };
 }
@@ -186,3 +213,10 @@ interface Example {
   from: string;
   to: string;
 }
+
+type TranslationResponse =
+  | {
+      type: "success";
+      body: string;
+    }
+  | WordReferenceErrorResponse;

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leave-time-calculator",
+  "title": "Leave Time Calculator",
+  "description": "Calculate your leave time based on start time and break duration",
+  "icon": "command-icon.png",
+  "author": "harunonsystem",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-leave-time",
+      "title": "Calculate Leave Time",
+      "description": "Main command. Auto-updates subtitle and opens the editor view",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "defaultWorkHours",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Work Hours",
+          "description": "Default work hours per day (e.g., 8, 9)",
+          "default": "8"
+        },
+        {
+          "name": "defaultBreakMinutes",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Break Minutes",
+          "description": "Default break time in minutes (e.g., 60)",
+          "default": "60"
+        }
+      ]
+    },
+    {
+      "name": "calculate-leave-time-view",
+      "title": "Calculate Leave Time",
+      "description": "Internal editor view opened from the main command",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultWorkHours",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Work Hours",
+          "description": "Default work hours per day (e.g., 8, 9)",
+          "default": "8"
+        },
+        {
+          "name": "defaultBreakMinutes",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Break Minutes",
+          "description": "Default break time in minutes (e.g., 60)",
+          "default": "60"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/bun": "latest",
+    "@types/node": "^20.17.6",
+    "@types/react": "^19.2.7",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.17"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

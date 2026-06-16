@@ -1,7 +1,6 @@
-import ClearCache from "#/components/actions/clear-cache";
 import { getPreferences } from "#/helpers/raycast";
 import { useDebounce } from "#/hooks/use-debounce";
-import { useProjects } from "#/hooks/use-projects";
+import { useProjectsWithWorktrees } from "#/hooks/use-projects-with-worktrees";
 import { useViewingWorktreesStore } from "#/stores/viewing-worktrees";
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { relative } from "node:path";
@@ -13,7 +12,7 @@ import { Worktree } from "./components/worktree";
 import type { BareRepository, Project } from "./config/types";
 import { formatPath } from "./helpers/file";
 
-export default function Command({ projectId }: { projectId?: string }) {
+export default function Command() {
   const { directory } = useDirectory();
 
   const preferences = getPreferences();
@@ -27,7 +26,7 @@ export default function Command({ projectId }: { projectId?: string }) {
     revalidateProjects,
     visitProject,
     resetProjectRanking,
-  } = useProjects();
+  } = useProjectsWithWorktrees();
 
   const enableWorktreesGrouping = preferences.enableWorktreesGrouping;
 
@@ -43,28 +42,6 @@ export default function Command({ projectId }: { projectId?: string }) {
     return [projects, worktrees];
   }, [directory, incomingProjects, preferences.enableProjectsFrequencySorting, enableWorktreesGrouping]);
 
-  if (projectId) {
-    const project = incomingProjects?.find((p) => p.id === projectId);
-    if (!project) return null;
-
-    if (!project.worktrees.length)
-      return (
-        <List>
-          <EmptyWorktreeList
-            directory={project.fullPath}
-            actions={{ addWorktree: true }}
-            revalidateProjects={revalidateProjects}
-          />
-        </List>
-      );
-
-    return (
-      <List isLoading={isLoadingProjects}>
-        <Worktree.List project={project} worktrees={project.worktrees} revalidateProjects={revalidateProjects} />
-      </List>
-    );
-  }
-
   if (groupedOrUngroupedWorktrees.length === 0 && isLoadingProjects)
     return (
       <List>
@@ -72,8 +49,7 @@ export default function Command({ projectId }: { projectId?: string }) {
           title="Loading Worktrees..."
           description="Please wait while we load your worktrees"
           directory={directory}
-          actions={{ addWorktree: false, cloneProject: false, clearCache: false }}
-          revalidateProjects={revalidateProjects}
+          actions={{ addWorktree: false, cloneProject: false }}
         />
       </List>
     );
@@ -88,11 +64,7 @@ export default function Command({ projectId }: { projectId?: string }) {
         directory &&
         (groupedOrUngroupedWorktrees as Project[]).length === 1 &&
         (groupedOrUngroupedWorktrees as Project[]).at(0)?.worktrees.length === 0 ? (
-          <EmptyWorktreeList
-            directory={directory}
-            actions={{ cloneProject: true }}
-            revalidateProjects={revalidateProjects}
-          />
+          <EmptyWorktreeList directory={directory} actions={{ cloneProject: true }} />
         ) : (
           (groupedOrUngroupedWorktrees as Project[]).map((project) => (
             <List.Section title={project.displayPath} key={project.id} subtitle={project.worktrees.length.toString()}>
@@ -118,8 +90,7 @@ export const EmptyWorktreeList = ({
   title,
   description,
   directory,
-  actions = { cloneProject: false, addWorktree: false, openPreferences: true, clearCache: true },
-  revalidateProjects,
+  actions = { cloneProject: false, addWorktree: false, openPreferences: true },
 }: {
   title?: string;
   description?: string;
@@ -128,9 +99,7 @@ export const EmptyWorktreeList = ({
     cloneProject?: boolean;
     addWorktree?: boolean;
     openPreferences?: boolean;
-    clearCache?: boolean;
   };
-  revalidateProjects?: () => void;
 }) => {
   const preferences = getPreferences();
 
@@ -151,8 +120,6 @@ export const EmptyWorktreeList = ({
           {actions.openPreferences && (
             <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           )}
-
-          {actions.clearCache && !!revalidateProjects && <ClearCache revalidateProjects={revalidateProjects} />}
         </ActionPanel>
       }
     />

@@ -1,15 +1,41 @@
 import plist, { PlistArray, PlistObject } from "plist";
+import { Cache } from "@raycast/api";
 import { BatteryDataInterface } from "../Interfaces";
-import { convertMsToTime, execp } from "../utils";
+import { convertMsToTime, execf } from "../utils";
+
+const cache = new Cache();
+const CONDITION_KEY = "battery-condition";
+const CAPACITY_KEY = "battery-max-capacity";
 
 export const getBatteryData = async (): Promise<BatteryDataInterface> => {
-  const smartBatteryOutput = await execp("/usr/sbin/ioreg -arn AppleSmartBattery");
-  const systemProfilerOutput = await execp(
-    `/usr/sbin/system_profiler SPPowerDataType | /usr/bin/grep -e 'Condition' -e 'Maximum Capacity'| /usr/bin/awk '{print $NF}'`,
-  );
+  const [smartBatteryOutput, pmsetOutput] = await Promise.all([
+    execf("/usr/sbin/ioreg", ["-arn", "AppleSmartBattery"]),
+    execf("/usr/bin/pmset", ["-g", "batt"]),
+  ]);
+
   const smartBattery = (plist.parse(smartBatteryOutput) as PlistArray)[0] as PlistObject;
-  const [condition, maximumCapacity] = systemProfilerOutput.split("\n");
-  const batteryLevel = await execp("/usr/bin/pmset -g batt | /usr/bin/grep -Eo '\\d+%' | /usr/bin/tr -d '%'");
+
+  const batteryLevelMatch = pmsetOutput.match(/(\d+)%/);
+  const batteryLevel = batteryLevelMatch ? batteryLevelMatch[1] : "0";
+
+  // Condition & Maximum Capacity rarely change. Fetch system_profiler only
+  // when not cached, and await it so the child process is properly reaped.
+  let condition = cache.get(CONDITION_KEY);
+  let maximumCapacity = cache.get(CAPACITY_KEY);
+  if (!condition || !maximumCapacity) {
+    try {
+      const output = await execf("/usr/sbin/system_profiler", ["SPPowerDataType"]);
+      const condMatch = output.match(/Condition:\s*(.+)/);
+      const capMatch = output.match(/Maximum Capacity:\s*(.+)/);
+      condition = condMatch ? condMatch[1].trim() : "Normal";
+      maximumCapacity = capMatch ? capMatch[1].trim() : "Unknown";
+      cache.set(CONDITION_KEY, condition);
+      cache.set(CAPACITY_KEY, maximumCapacity);
+    } catch {
+      condition = condition ?? "Unknown";
+      maximumCapacity = maximumCapacity ?? "Unknown";
+    }
+  }
 
   return {
     batteryLevel,
@@ -24,17 +50,24 @@ export const getBatteryData = async (): Promise<BatteryDataInterface> => {
 };
 
 export const getTimeOnBattery = async (): Promise<string> => {
-  const lastChargeDate = await execp(
-    '/usr/bin/pmset -g log | grep "Using AC" | tail -n 1 | awk \'{print $1 " " $2 " " $3}\'',
-  );
-  const startTime = new Date(Date.parse(lastChargeDate));
+  const logOutput = await execf("/usr/bin/pmset", ["-g", "log"], 10 * 1024 * 1024);
+  const lines = logOutput.split("\n");
+  let lastACLine = "";
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].includes("Using AC")) {
+      lastACLine = lines[i];
+      break;
+    }
+  }
+  const dateStr = lastACLine.split(/\s+/).slice(0, 3).join(" ");
+  const startTime = new Date(Date.parse(dateStr));
   const endTime = new Date();
 
   return convertMsToTime(endTime.valueOf() - startTime.valueOf());
 };
 
 export const hasBattery = async (): Promise<boolean> => {
-  const output = await execp("/usr/sbin/ioreg -arn AppleSmartBattery");
+  const output = await execf("/usr/sbin/ioreg", ["-arn", "AppleSmartBattery"]);
 
   return !!output;
 };

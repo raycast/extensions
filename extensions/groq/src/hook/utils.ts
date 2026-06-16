@@ -4,7 +4,6 @@ export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "GPT OSS 120B 131k", id: "openai/gpt-oss-120b" },
   { name: "GPT OSS 20B 131k", id: "openai/gpt-oss-20b" },
-  { name: "Kimi K2 0905 263k", id: "moonshotai/kimi-k2-instruct-0905" },
   { name: "Qwen 3 32B 128k", id: "qwen/qwen3-32b" },
   { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
   { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
@@ -20,7 +19,6 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "llama-3.3-70b-versatile": { input: 0.59, output: 0.79 },
   "llama-3.1-8b-instant": { input: 0.05, output: 0.08 },
   "qwen/qwen3-32b": { input: 0.29, output: 0.59 },
-  "moonshotai/kimi-k2-instruct-0905": { input: 1.0, output: 3.0 },
 };
 
 export const THINKING_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3-32b"] as const;

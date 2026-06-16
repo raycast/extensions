@@ -99,23 +99,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
-    "jest": "^29.7.0",
-    "lodash": "^4.17.21",
-    "ts-jest": "^29.1.2"
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
+    "lodash": "^4.18.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/lodash": "^4.17.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "~25.9.3",
+    "@types/react": "^19.2.17",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.4.2",
+    "prettier": "^3.8.4",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "test": "jest",
@@ -124,5 +125,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

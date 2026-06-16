@@ -48,6 +48,38 @@ export interface MetadataData {
   metaTags?: Array<{ name?: string; property?: string; content?: string }>;
 }
 
+/** Parsed Content-Signal directive values from robots.txt */
+export interface ContentSignalsData {
+  /** Whether content can be indexed by search engines */
+  search?: "yes" | "no";
+  /** Whether content can be used as AI input (RAG, grounding, etc.) */
+  aiInput?: "yes" | "no";
+  /** Whether content can be used for AI model training */
+  aiTrain?: "yes" | "no";
+  /** Raw unparsed signal pairs for any unrecognized keys */
+  raw?: string;
+}
+
+/**
+ * Payment signal data derived from x402 protocol evidence.
+ * Sources: HTTP 402 status code, PAYMENT-REQUIRED header, PAYMENT-RESPONSE header.
+ * Spec: https://www.x402.org / https://docs.cdp.coinbase.com/x402
+ */
+export interface PaymentSignalsData {
+  /** Whether any x402 payment-required signal was detected */
+  detected: boolean;
+  /** HTTP 402 status code was returned */
+  statusCode402?: boolean;
+  /** PAYMENT-REQUIRED header was present (server advertises payment terms) */
+  paymentRequired?: boolean;
+  /** PAYMENT-RESPONSE header was present (server confirmed a prior payment) */
+  paymentResponse?: boolean;
+  /** Raw value of the PAYMENT-REQUIRED header, if present */
+  paymentRequiredRaw?: string;
+  /** Raw value of the PAYMENT-RESPONSE header, if present */
+  paymentResponseRaw?: string;
+}
+
 export interface DiscoverabilityData {
   robots?: string;
   robotsTxt?: boolean;
@@ -56,6 +88,10 @@ export interface DiscoverabilityData {
   alternates?: Array<{ href: string; hreflang?: string; type?: string }>;
   sitemap?: string;
   llmsTxt?: boolean;
+  /** Parsed Content-Signal directives from robots.txt (IETF aipref / Cloudflare Content Signals) */
+  contentSignals?: ContentSignalsData;
+  /** x402 payment-required signals detected from HTTP response */
+  paymentSignals?: PaymentSignalsData;
 }
 
 /** Image asset type indicating the source of the image */

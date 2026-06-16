@@ -3,6 +3,7 @@ import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type PlaylistActionPanelProps = {
   title: string;
@@ -16,10 +17,7 @@ export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProp
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "a" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-        }}
+        shortcut={ShowContent}
         target={<TracksList playlist={playlist} />}
       />
       <FooterAction url={playlist?.external_urls?.spotify} uri={playlist.uri} title={title} />

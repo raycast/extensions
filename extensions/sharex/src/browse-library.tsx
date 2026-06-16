@@ -15,6 +15,7 @@ import {
 import { homedir } from "os";
 import { join } from "path";
 import { readdir, stat } from "fs/promises";
+import { pathToFileURL } from "url";
 
 interface Screenshot {
   path: string;
@@ -193,7 +194,7 @@ export default function Command() {
                   ? { source: Icon.PlayFilled }
                   : /\.tiff?$/i.test(screenshot.path)
                     ? { source: Icon.Image }
-                    : { source: screenshot.path }
+                    : { source: pathToFileURL(screenshot.path).href }
               }
               title={screenshot.name}
               actions={

@@ -27,6 +27,114 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "description": "Search for Luma events by keyword, topic, or interest. Use this to find events matching a specific query such as 'AI meetup', 'design workshop', 'hackathon', etc."
+    },
+    {
+      "name": "get-place-events",
+      "title": "Get Place Events",
+      "description": "Get upcoming events for a specific city or place on Luma. Use this when the user asks about events in a specific location like 'San Francisco', 'Tokyo', 'Taipei', 'London', etc."
+    }
+  ],
+  "ai": {
+    "instructions": "You help users discover events on Luma. If a user asks about events in a specific city or place, call the `get-place-events` tool ONCE; if the user asks about events by topic or keyword, call the `search-events` tool. If the user's query contains multiple distinct topics or locations, call the appropriate tool for EACH topic or location to ensure complete results. Use the specific keywords or place names for each individual call. The tools return structured JSON with event details including a `startAt` ISO 8601 timestamp. IMPORTANT: If the user asks for events on a specific timeframe (e.g., 'today', 'tomorrow', 'next week', 'this weekend', or a specific date), you MUST first identify the current date from the context, then parse the `startAt` timestamp of each event from the tool response, and filter the results to include ONLY events that fall within the requested timeframe. You must EXCLUDE all other events from the output. Always output results as a Markdown table with appropriate columns such as Event Name, Date, Time, Location, and Link (if available). If no events match the filtered criteria, simply state that there are no events for that specific timeframe and do not output a table. Output ONLY the Markdown table or the no-events message, with no other text.",
+    "evals": [
+      {
+        "input": "@luma What events are happening in Tokyo next week?",
+        "mocks": {
+          "get-place-events": "{\"place\":\"Tokyo\",\"total\":4,\"events\":[{\"name\":\"Tokyo Tech Meetup\",\"url\":\"https://luma.com/tokyo-tech-meetup\",\"startAt\":\"2026-03-22T19:00:00+09:00\",\"timezone\":\"Asia/Tokyo\",\"locationType\":\"physical\",\"location\":\"Tokyo, Japan\",\"organizer\":{\"name\":\"Tokyo Tech Community\",\"slug\":\"tokyo-tech\"},\"hosts\":[{\"name\":\"Yuki Tanaka\",\"bio\":\"Tech organizer\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":40,\"price\":null,\"maxPrice\":null},\"guestCount\":60,\"coverUrl\":\"https://example.com/cover1.jpg\"},{\"name\":\"Startup Pitch Night\",\"url\":\"https://luma.com/startup-pitch-tokyo\",\"startAt\":\"2026-03-24T18:30:00+09:00\",\"timezone\":\"Asia/Tokyo\",\"locationType\":\"physical\",\"location\":\"Tokyo, Japan\",\"organizer\":{\"name\":\"Tokyo Ventures\",\"slug\":\"tokyo-ventures\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":false,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":25,\"price\":20,\"maxPrice\":20},\"guestCount\":35,\"coverUrl\":\"https://example.com/cover2.jpg\"},{\"name\":\"Web Development Workshop\",\"url\":\"https://luma.com/web-dev-tokyo\",\"startAt\":\"2026-03-28T14:00:00+09:00\",\"timezone\":\"Asia/Tokyo\",\"locationType\":\"physical\",\"location\":\"Tokyo, Japan\",\"organizer\":{\"name\":\"Code Academy Tokyo\",\"slug\":\"code-academy-tokyo\"},\"hosts\":[{\"name\":\"Sakura Yamamoto\",\"bio\":\"Full-stack developer\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":true,\"requireApproval\":false,\"spotsRemaining\":5,\"price\":null,\"maxPrice\":null},\"guestCount\":45,\"coverUrl\":\"https://example.com/cover3.jpg\"},{\"name\":\"AI Conference Tokyo\",\"url\":\"https://luma.com/ai-conference-tokyo\",\"startAt\":\"2026-04-02T10:00:00+09:00\",\"timezone\":\"Asia/Tokyo\",\"locationType\":\"physical\",\"location\":\"Tokyo, Japan\",\"organizer\":{\"name\":\"AI Japan\",\"slug\":\"ai-japan\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":false,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":100,\"price\":50,\"maxPrice\":50},\"guestCount\":150,\"coverUrl\":\"https://example.com/cover4.jpg\"}]}"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-place-events",
+              "arguments": {
+                "place": {
+                  "includes": "tokyo"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@luma What events are happening in Taipei today?",
+        "mocks": {
+          "get-place-events": "{\"place\":\"Taipei\",\"total\":3,\"events\":[{\"name\":\"Startup Networking Night\",\"url\":\"https://luma.com/startup-night-taipei\",\"startAt\":\"2026-03-15T19:00:00+08:00\",\"timezone\":\"Asia/Taipei\",\"locationType\":\"physical\",\"location\":\"Taipei, Taiwan\",\"organizer\":{\"name\":\"Taipei Startup Hub\",\"slug\":\"taipei-startup-hub\"},\"hosts\":[{\"name\":\"Kevin Lin\",\"bio\":\"Entrepreneur\"},{\"name\":\"Alice Wang\",\"bio\":\"Investor\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":33,\"price\":null,\"maxPrice\":null},\"guestCount\":67,\"coverUrl\":\"https://example.com/cover7.jpg\"},{\"name\":\"Web3 Developer Meetup\",\"url\":\"https://luma.com/web3-dev-taipei\",\"startAt\":\"2026-03-16T18:00:00+08:00\",\"timezone\":\"Asia/Taipei\",\"locationType\":\"physical\",\"location\":\"Taipei, Taiwan\",\"organizer\":{\"name\":\"Blockchain Taiwan\",\"slug\":\"blockchain-taiwan\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":false,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":true,\"spotsRemaining\":12,\"price\":0,\"maxPrice\":0},\"guestCount\":28,\"coverUrl\":\"https://example.com/cover8.jpg\"},{\"name\":\"Coffee & Code\",\"url\":\"https://luma.com/coffee-code-taipei\",\"startAt\":\"2026-03-17T10:00:00+08:00\",\"timezone\":\"Asia/Taipei\",\"locationType\":\"physical\",\"location\":\"Taipei, Taiwan\",\"organizer\":{\"name\":\"Developer Community\",\"slug\":\"developer-community\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":null,\"price\":null,\"maxPrice\":null},\"guestCount\":15,\"coverUrl\":\"https://example.com/cover9.jpg\"}]}"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-place-events",
+              "arguments": {
+                "place": {
+                  "includes": "taipei"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@luma Search for Raycast events.",
+        "mocks": {
+          "search-events": "{\"query\":\"Raycast meetup\",\"total\":2,\"events\":[{\"name\":\"Raycast Community Meetup SF\",\"url\":\"https://luma.com/raycast-meetup-sf\",\"startAt\":\"2026-03-20T18:00:00-07:00\",\"timezone\":\"America/Los_Angeles\",\"locationType\":\"physical\",\"location\":\"San Francisco, CA\",\"organizer\":{\"name\":\"Raycast Community\",\"slug\":\"raycast-community\"},\"hosts\":[{\"name\":\"Thomas Paul Mann\",\"bio\":\"Raycast founder\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":30,\"price\":null,\"maxPrice\":null},\"guestCount\":70,\"coverUrl\":\"https://example.com/cover5.jpg\"},{\"name\":\"Raycast Extension Builders Meetup\",\"url\":\"https://luma.com/raycast-builders-nyc\",\"startAt\":\"2026-03-27T19:00:00-04:00\",\"timezone\":\"America/New_York\",\"locationType\":\"physical\",\"location\":\"New York, NY\",\"organizer\":{\"name\":\"Raycast Developers\",\"slug\":\"raycast-developers\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":true,\"requireApproval\":false,\"spotsRemaining\":8,\"price\":null,\"maxPrice\":null},\"guestCount\":42,\"coverUrl\":\"https://example.com/cover6.jpg\"}]}"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-events",
+              "arguments": {
+                "query": {
+                  "includes": "raycast"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@luma Search for Raycast Glaze Sessions events and Raycafé events.",
+        "mocks": {
+          "search-events": [
+            {
+              "arguments": { "query": "Raycast Glaze Sessions" },
+              "response": "{\"query\":\"Raycast Glaze Sessions\",\"total\":1,\"events\":[{\"name\":\"Raycast Glaze Sessions\",\"url\":\"https://luma.com/raycast-glaze-sessions\",\"startAt\":\"2026-03-20T18:00:00-07:00\",\"timezone\":\"America/Los_Angeles\",\"locationType\":\"physical\",\"location\":\"San Francisco, CA\",\"organizer\":{\"name\":\"Raycast Glaze Sessions\",\"slug\":\"raycast-glaze-sessions\"},\"hosts\":[{\"name\":\"Thomas Paul Mann\",\"bio\":\"Raycast Glaze Sessions founder\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":30,\"price\":null,\"maxPrice\":null},\"guestCount\":70,\"coverUrl\":\"https://example.com/cover5.jpg\"}]}"
+            },
+            {
+              "arguments": { "query": "Raycafé" },
+              "response": "{\"query\":\"Raycafé\",\"total\":1,\"events\":[{\"name\":\"Raycafé Morning Coffee\",\"url\":\"https://luma.com/raycafe-coffee\",\"startAt\":\"2026-03-21T09:00:00-07:00\",\"timezone\":\"America/Los_Angeles\",\"locationType\":\"physical\",\"location\":\"San Francisco, CA\",\"organizer\":{\"name\":\"Raycast Team\",\"slug\":\"raycast-team\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":20,\"price\":null,\"maxPrice\":null},\"guestCount\":15,\"coverUrl\":\"https://example.com/cover13.jpg\"}]}"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-events",
+              "arguments": {
+                "query": {
+                  "includes": "Raycast Glaze Sessions"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "search-events",
+              "arguments": {
+                "query": {
+                  "includes": "raycafé"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2"

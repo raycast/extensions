@@ -161,7 +161,11 @@ export const LibraryListItem = ({
       }}
       title={library.github.name}
       keywords={library.github.topics}
-      subtitle={{ tooltip: library.github.description }}
+      subtitle={
+        !isShowingDetail && library.github.description
+          ? { value: library.github.description, tooltip: library.github.description }
+          : undefined
+      }
       accessories={accessories}
       detail={<LibraryDetail library={library} />}
       actions={<Actions library={library} isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />}

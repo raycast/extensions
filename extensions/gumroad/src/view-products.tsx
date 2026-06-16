@@ -20,18 +20,22 @@ function Command() {
           title={product.name}
           subtitle={product.formatted_price}
           icon={
-            product.thumbnail_url ? { source: product.thumbnail_url } : { source: Icon.Image, tintColor: Color.Magenta }
+            product.thumbnail_url
+              ? { source: product.thumbnail_url }
+              : { source: Icon.Image, tintColor: Color.SecondaryText }
           }
           accessories={[
             {
-              text: `${formatNumber(product.sales_count)} Sales`,
+              text: `${String(formatNumber(product.sales_count))} Sales`,
               icon: { source: Icon.Cart, tintColor: Color.Green },
             },
           ]}
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" target={<ProductDetails product={product} />} icon={Icon.Sidebar} />
+              <Action.CopyToClipboard title="Copy Product URL" content={product.short_url} />
               <Action.OpenInBrowser
+                title="Open in Browser"
                 icon={{ source: product.thumbnail_url, fallback: Icon.Globe }}
                 url={product.short_url}
               />

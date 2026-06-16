@@ -51,7 +51,52 @@ export const LANGUAGE_STRINGS = [
   "Tamil [ta]",
 ];
 
-export const FILE_TYPES = ["pdf", "epub", "cbr", "mobi", "fb2", "cbz", "azw3", "djvu", "fb2.zip", "rar", "zip"];
+export const FILE_TYPES = [
+  "pdf",
+  "epub",
+  "zip",
+  "mobi",
+  "fb2",
+  "cbr",
+  "cbz",
+  "txt",
+  "djvu",
+  "azw3",
+  "doc",
+  "lit",
+  "rtf",
+  "rar",
+  "htm",
+  "html",
+  "docx",
+  "mht",
+  "lrf",
+  "jpg",
+  "chm",
+  "azw",
+  "pdb",
+  "odt",
+  "ppt",
+  "kfx",
+  "xls",
+  "xlsx",
+  "json",
+  "prc",
+  "tar",
+  "tif",
+  "snb",
+  "updb",
+  "htmlz",
+  "7z",
+  "cb7",
+  "gz",
+  "pptx",
+  "exe",
+  "ai",
+  "fb2.zip",
+] as const;
+
+export type FileType = (typeof FILE_TYPES)[number];
 
 export const DOC_TYPES = [
   "Book (non-fiction)",
@@ -64,12 +109,13 @@ export const DOC_TYPES = [
 ];
 
 export const MIRROR_LIST = [
-  "https://annas-archive.li",
-  "https://annas-archive.pm",
-  "https://annas-archive.in",
+  "https://annas-archive.gl",
+  "https://annas-archive.pk",
+  "https://annas-archive.vg",
+  "https://annas-archive.gd",
 ] as const;
 
-export const DEFAULT_MIRROR = "https://annas-archive.li";
+export const DEFAULT_MIRROR = "https://annas-archive.gl";
 
 export const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36";

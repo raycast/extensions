@@ -1,6 +1,6 @@
 import { Detail, List } from "@raycast/api";
 import { PokemonType } from "../../types";
-import { typeColor } from "../../utils";
+import { getLocalizedName, typeColor } from "../../utils";
 
 export default function TypeMetadata(props: {
   types: PokemonType[];
@@ -17,7 +17,7 @@ export default function TypeMetadata(props: {
         return (
           <TagListComponent.Item
             key={type.type.name}
-            text={type.type.typenames[0]?.name || type.type.name}
+            text={getLocalizedName(type.type.typenames, type.type.name)}
             color={typeColor[type.type.name]}
             icon={`types/${type.type.name.toLowerCase()}.svg`}
           />

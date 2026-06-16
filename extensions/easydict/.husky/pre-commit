@@ -1,2 +1,2 @@
 npm run build
-npx lint-staged
+npx nano-staged

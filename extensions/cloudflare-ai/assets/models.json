@@ -1,0 +1,110 @@
+[
+  {
+    "title": "Llama 3.3 70B Instruct",
+    "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+  },
+  {
+    "title": "Llama 3.1 70B Instruct",
+    "value": "@cf/meta/llama-3.1-70b-instruct"
+  },
+  {
+    "title": "Llama 3.1 8B Instruct",
+    "value": "@cf/meta/llama-3.1-8b-instruct"
+  },
+  {
+    "title": "Llama 3.1 8B Instruct FP8",
+    "value": "@cf/meta/llama-3.1-8b-instruct-fp8"
+  },
+  {
+    "title": "Llama 3 8B Instruct",
+    "value": "@cf/meta/llama-3-8b-instruct"
+  },
+  {
+    "title": "Llama 3 8B Instruct AWQ",
+    "value": "@cf/meta/llama-3-8b-instruct-awq"
+  },
+  {
+    "title": "Llama 2 7B Chat FP16",
+    "value": "@cf/meta/llama-2-7b-chat-fp16"
+  },
+  {
+    "title": "Llama 2 7B Chat Int8",
+    "value": "@cf/meta/llama-2-7b-chat-int8"
+  },
+  {
+    "title": "Mistral 7B Instruct v0.1",
+    "value": "@cf/mistral/mistral-7b-instruct-v0.1"
+  },
+  {
+    "title": "Mistral 7B Instruct v0.2",
+    "value": "@cf/mistral/mistral-7b-instruct-v0.2-lora"
+  },
+  {
+    "title": "Mistral Nemo 12B Instruct",
+    "value": "@cf/mistral/mistral-nemo-12b-instruct-2407-lora"
+  },
+  {
+    "title": "Qwen 1.5 0.5B Chat",
+    "value": "@cf/qwen/qwen1.5-0.5b-chat"
+  },
+  {
+    "title": "Qwen 1.5 1.8B Chat",
+    "value": "@cf/qwen/qwen1.5-1.8b-chat"
+  },
+  {
+    "title": "Qwen 1.5 7B Chat AWQ",
+    "value": "@cf/qwen/qwen1.5-7b-chat-awq"
+  },
+  {
+    "title": "Qwen 1.5 14B Chat AWQ",
+    "value": "@cf/qwen/qwen1.5-14b-chat-awq"
+  },
+  {
+    "title": "GPT OSS 120B",
+    "value": "@cf/openai/gpt-oss-120b"
+  },
+  {
+    "title": "Gemma 2B Instruct",
+    "value": "@cf/google/gemma-2b-it-lora"
+  },
+  {
+    "title": "Gemma 7B Instruct",
+    "value": "@cf/google/gemma-7b-it-lora"
+  },
+  {
+    "title": "Phi 2",
+    "value": "@cf/microsoft/phi-2"
+  },
+  {
+    "title": "Granite 8B Code Instruct 128K",
+    "value": "@cf/ibm/granite-8b-code-instruct-128k"
+  },
+  {
+    "title": "DeepSeek Coder 6.7B Base AWQ",
+    "value": "@cf/deepseek-ai/deepseek-coder-6.7b-base-awq"
+  },
+  {
+    "title": "DeepSeek Coder 6.7B Instruct AWQ",
+    "value": "@cf/deepseek-ai/deepseek-coder-6.7b-instruct-awq"
+  },
+  {
+    "title": "DeepSeek Math 7B Instruct",
+    "value": "@cf/deepseek-ai/deepseek-math-7b-instruct"
+  },
+  {
+    "title": "Hermes 2 Pro Mistral 7B",
+    "value": "@hf/nousresearch/hermes-2-pro-mistral-7b"
+  },
+  {
+    "title": "OpenChat 3.5",
+    "value": "@hf/openchat/openchat-3.5-0106"
+  },
+  {
+    "title": "Neural Chat 7B v3.1",
+    "value": "@hf/nexusflow/starling-lm-7b-beta"
+  },
+  {
+    "title": "Starling LM 7B Beta",
+    "value": "@hf/thebloke/neural-chat-7b-v3-1-awq"
+  }
+]

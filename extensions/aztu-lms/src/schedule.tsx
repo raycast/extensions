@@ -19,7 +19,7 @@ const DAY_TRANSLATION: Record<string, string> = {
 const getLectureTypeColor = (lectureType: string): Color => {
   if (lectureType === "Mühazirə") return Color.Green;
   if (lectureType === "Məşğələ") return Color.Blue;
-  if (lectureType === "Laboratoriya") return Color.Orange;
+  if (lectureType === "Laboratoriya") return Color.Purple;
   return Color.SecondaryText;
 };
 

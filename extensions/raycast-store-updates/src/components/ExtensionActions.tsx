@@ -46,49 +46,78 @@ export function ExtensionActions({
 
   return (
     <ActionPanel>
-      {item.extensionSlug && (
-        <ActionPanel.Section title="Changelog">
-          <Action.Push
-            title="View Changelog"
-            icon={Icon.Document}
-            target={
-              <ChangelogDetail slug={item.extensionSlug} title={item.title} items={items} currentIndex={currentIndex} />
-            }
-          />
-          {latestChanges && (
-            <Action.CopyToClipboard
-              title="Copy Recent Changes"
-              content={latestChanges}
-              icon={Icon.Clipboard}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-          )}
-          {changelogBrowserUrl && (
+      {item.type === "removed" ? (
+        <>
+          {item.prUrl && (
             <Action.OpenInBrowser
-              title="Open Changelog in Browser"
-              url={changelogBrowserUrl}
+              title="Open Pull Request"
+              url={item.prUrl}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
-        </ActionPanel.Section>
+        </>
+      ) : (
+        <>
+          {item.extensionSlug && (
+            <ActionPanel.Section title="Changelog">
+              <Action.Push
+                title="View Changelog"
+                icon={Icon.Document}
+                target={
+                  <ChangelogDetail
+                    slug={item.extensionSlug}
+                    title={item.title}
+                    items={items}
+                    currentIndex={currentIndex}
+                  />
+                }
+              />
+              {latestChanges && (
+                <Action.CopyToClipboard
+                  title="Copy Recent Changes"
+                  content={latestChanges}
+                  icon={Icon.Clipboard}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+              )}
+              {changelogBrowserUrl && (
+                <Action.OpenInBrowser
+                  title="Open Changelog in Browser"
+                  url={changelogBrowserUrl}
+                  icon={Icon.Globe}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
+
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={item.url}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open in Raycast Store"
+              url={storeDeeplink}
+              icon={Icon.RaycastLogoNeg}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+              }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Extension URL"
+              content={item.url}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              icon={Icon.Clipboard}
+            />
+          </ActionPanel.Section>
+        </>
       )}
-
-      <Action.OpenInBrowser
-        title="Open in Browser"
-        url={item.url}
-        icon={Icon.Globe}
-        shortcut={Keyboard.Shortcut.Common.Open}
-      />
-
-      <ActionPanel.Section>
-        <Action.OpenInBrowser title="Open in Raycast Store" url={storeDeeplink} icon={Icon.RaycastLogoNeg} />
-        <Action.CopyToClipboard
-          title="Copy Extension URL"
-          content={item.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        />
-      </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action
@@ -104,12 +133,20 @@ export function ExtensionActions({
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showMacOS ? "Hide macOS-only Extensions" : "Show macOS-only Extensions"}
           icon={{ source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
           onAction={onToggleMacOS}
         />
         <Action
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showWindows ? "Hide Windows-only Extensions" : "Show Windows-only Extensions"}
           icon={{ source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "w" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+          }}
           onAction={onToggleWindows}
         />
       </ActionPanel.Section>

@@ -1,6 +1,6 @@
 import { Action, Icon } from "@raycast/api";
 import { GitBranches } from "../GitBranches.js";
-import { useCheckStatus } from "../../hooks/useCheckStatus.js";
+import { useCheckStatus } from "../../hooks/useGitStatus.js";
 
 export function ChangeCurrentBranch() {
   const checkStatus = useCheckStatus();

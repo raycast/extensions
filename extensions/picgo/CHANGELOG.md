@@ -1,5 +1,19 @@
 # Picgo Changelog
 
+## [Image Preview Grid View] - 2026-04-06
+
+- Add a new `Image Grid` view for uploaded image results.
+- Add new preference `Upload Result View`, you can pick the former `Format List` or newly added `Image Grid` view as the default view to display uploaded image results.
+
+## [Bugfix: Plugin Search Error] - 2026-04-01
+
+- Fix error when a plugin package data has no `description` field.
+
+## [New Preferences] - 2026-02-21
+
+- Add preference `Auto Copy URLs` to control whether to copy right after uploads complete.
+- Add preference `Custom Format` to customize your result format with placeholders `$url`, `$fileName` and `$extName`.
+
 ## [New Commands and Preferences] - 2026-02-11
 
 - The config you selected in command `Uploader Images` now will only be remember in **Raycast LocalStorage** once you use this config to conduct an upload.

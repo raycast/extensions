@@ -279,10 +279,10 @@ function Body(props: { onlyPop?: boolean }) {
   );
 }
 
-export default function AddBookmark(props: { onlyPop?: boolean }) {
+export default function AddBookmark(props: { onlyPop?: boolean; launchContext?: { token?: string } }) {
   const { onlyPop = false } = props;
   return (
-    <CachedQueryClientProvider>
+    <CachedQueryClientProvider launchContext={props.launchContext}>
       <Body onlyPop={onlyPop} />
     </CachedQueryClientProvider>
   );

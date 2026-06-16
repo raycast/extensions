@@ -1,5 +1,7 @@
 # Change Case Changelog
 
+## [Add Create Quicklink shortcut] - 2026-04-30
+
 ## [Fix Swap Case] - 2026-02-09
 
 - Prevents pre-lowercasing of input for case-sensitive transforms: Swap Case, Alternating Case, Random Case, Lower First, and Upper First

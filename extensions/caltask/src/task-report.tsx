@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List, Icon, Color, Form, useNavigation, LocalStorage } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { getCalendarsWithColors, getCalendarEvents } from "./calendar";
+import { getCalendarEvents } from "./calendar";
+import { getVisibleCalendars } from "./preferences";
 import { formatDuration } from "./utils";
 import { CalendarEvent, CalendarStats, CalendarInfo } from "./types";
 
@@ -121,7 +122,7 @@ export default function TaskReport() {
     let cancelled = false;
 
     async function loadCalendars() {
-      const calendarList = await getCalendarsWithColors();
+      const calendarList = await getVisibleCalendars();
 
       if (cancelled) return;
 
@@ -377,6 +378,7 @@ function CalendarSelectionList({
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder="Search calendars..."
       searchBarAccessory={
         <List.Dropdown tooltip="Time Range" value={timeRange} onChange={(v) => setTimeRange(v as TimeRangeOption)}>
           {Object.entries(TIME_RANGES).map(([key, range]) => (

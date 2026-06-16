@@ -11,6 +11,8 @@ import {
   OverviewData,
   MetadataData,
   DiscoverabilityData,
+  ContentSignalsData,
+  PaymentSignalsData,
   BotProtectionData,
   ImageAsset,
   FontAsset,
@@ -120,6 +122,65 @@ function getCategoryDescription(category: FetchCategory): string {
     llmsTxt: "llms.txt",
   };
   return descriptions[category];
+}
+
+/**
+ * Parses Content-Signal directives from robots.txt content.
+ * Looks for lines matching: Content-Signal: key=value[, key=value...]
+ * Merges all matching directives found (last value wins per key).
+ */
+function parseContentSignals(robotsTxtContent: string): ContentSignalsData | undefined {
+  const signalLineRegex = /^Content-Signal\s*:\s*(.+)$/gim;
+  const result: ContentSignalsData = {};
+  const rawParts: string[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = signalLineRegex.exec(robotsTxtContent)) !== null) {
+    const rawValue = match[1].trim();
+    rawParts.push(rawValue);
+
+    const pairs = rawValue.split(/\s*,\s*/);
+    for (const pair of pairs) {
+      const [key, val] = pair.split("=").map((s) => s.trim().toLowerCase());
+      const normalized = val === "yes" || val === "no" ? (val as "yes" | "no") : undefined;
+      if (!normalized) continue;
+      if (key === "search") result.search = normalized;
+      else if (key === "ai-input") result.aiInput = normalized;
+      else if (key === "ai-train") result.aiTrain = normalized;
+    }
+  }
+
+  const hasRecognized = result.search !== undefined || result.aiInput !== undefined || result.aiTrain !== undefined;
+  if (!hasRecognized) return undefined;
+  result.raw = rawParts.length > 0 ? rawParts.join(", ") : undefined;
+  return result;
+}
+
+/**
+ * Detects x402 payment-required signals from HTTP response evidence.
+ * Checks for HTTP 402 status code and x402 protocol headers:
+ * - PAYMENT-REQUIRED: server advertises payment terms (sent with 402)
+ * - PAYMENT-RESPONSE: server confirms a prior payment (sent with 200)
+ */
+function detectPaymentSignals(statusCode: number, headers: Record<string, string>): PaymentSignalsData | undefined {
+  const paymentRequiredRaw = headers["payment-required"];
+  const paymentResponseRaw = headers["payment-response"];
+
+  const statusCode402 = statusCode === 402;
+  const paymentRequired = !!paymentRequiredRaw;
+  const paymentResponse = !!paymentResponseRaw;
+
+  const detected = statusCode402 || paymentRequired || paymentResponse;
+  if (!detected) return undefined;
+
+  return {
+    detected,
+    statusCode402: statusCode402 || undefined,
+    paymentRequired: paymentRequired || undefined,
+    paymentResponse: paymentResponse || undefined,
+    paymentRequiredRaw,
+    paymentResponseRaw,
+  };
 }
 
 export interface LoadingProgress {
@@ -432,6 +493,22 @@ export function useFetchSite(url?: string) {
         updateProgress("dataFeeds", 0.5);
         updateData({ metadata });
 
+        const robotsTxtContent =
+          robotsTxtResult.status === "fulfilled" &&
+          robotsTxtResult.value?.exists &&
+          typeof robotsTxtResult.value.content === "string"
+            ? robotsTxtResult.value.content
+            : null;
+
+        const contentSignals = robotsTxtContent ? parseContentSignals(robotsTxtContent) : undefined;
+        const paymentSignals = detectPaymentSignals(status, headers);
+        log.log("parse:payment-signals", {
+          detected: paymentSignals?.detected ?? false,
+          statusCode402: paymentSignals?.statusCode402 ?? false,
+          paymentRequired: paymentSignals?.paymentRequired ?? false,
+          paymentResponse: paymentSignals?.paymentResponse ?? false,
+        });
+
         const discoverability: DiscoverabilityData = {
           robots: $('meta[name="robots"]').attr("content"),
           robotsTxt:
@@ -445,6 +522,8 @@ export function useFetchSite(url?: string) {
               ? sitemapUrl
               : undefined,
           llmsTxt: llmsTxtResult.status === "fulfilled" && !!llmsTxtResult.value && llmsTxtResult.value.exists === true,
+          contentSignals,
+          paymentSignals,
         };
 
         // Collect alternates, excluding feed types (those go to DataFeedsData)

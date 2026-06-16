@@ -4,7 +4,6 @@ import {
   closeMainWindow,
   LaunchProps,
   List,
-  open,
   popToRoot,
   showToast,
   Toast,
@@ -14,6 +13,7 @@ import {
   Alert,
   Clipboard,
 } from "@raycast/api";
+import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import { CustomAction } from "./api/custom-actions/custom-actions.types";
 import {
@@ -92,7 +92,7 @@ function ActionInput({ action }: ComponentProps) {
       silent: action.silent,
     });
 
-    await open(target);
+    await openUrl(target, { background: action.silent });
     await closeMainWindow();
     await popToRoot();
   }
@@ -221,7 +221,7 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
               <Action.Push title="Run Action" target={<ActionInput action={a} />} icon={Icon.Play} />
               <Action.CopyToClipboard
                 title="Copy Quicklink URL"
-                content={`raycast://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
+                content={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
                   JSON.stringify({ actionId: a.id })
                 )}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}

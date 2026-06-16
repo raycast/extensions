@@ -1,7 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import type { AudioDevice } from "./audio-device";
-
-type IOType = "input" | "output";
+import type { IOType } from "./audio-device";
 
 const LEGACY_DISABLED_DEVICES_KEY = "disabledDevices";
 const LEGACY_HIDDEN_DEVICES_KEY = "hiddenDevices";
@@ -14,8 +12,14 @@ const SHOW_HIDDEN_KEYS = {
   input: "showHiddenDevicesInput",
   output: "showHiddenDevicesOutput",
 } as const;
-const INPUT_ORDER_KEY = "deviceOrderInput";
-const OUTPUT_ORDER_KEY = "deviceOrderOutput";
+const DEFAULT_DEVICE_UID_KEYS = {
+  input: "defaultDeviceUidInput",
+  output: "defaultDeviceUidOutput",
+} as const;
+const DEFAULT_DEVICE_NAME_KEYS = {
+  input: "defaultDeviceNameInput",
+  output: "defaultDeviceNameOutput",
+} as const;
 
 function parseStoredList(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -85,23 +89,122 @@ export async function setShowHiddenDevices(type: IOType, show: boolean) {
   await LocalStorage.setItem(SHOW_HIDDEN_KEYS[type], show ? "true" : "false");
 }
 
-export async function getDeviceOrder(type: "input" | "output"): Promise<string[]> {
-  return readList(type === "input" ? INPUT_ORDER_KEY : OUTPUT_ORDER_KEY);
+export async function getDefaultDeviceUid(type: IOType): Promise<string | undefined> {
+  return (await LocalStorage.getItem<string>(DEFAULT_DEVICE_UID_KEYS[type])) || undefined;
 }
 
-export async function setDeviceOrder(type: "input" | "output", order: string[]) {
-  await writeList(type === "input" ? INPUT_ORDER_KEY : OUTPUT_ORDER_KEY, order);
+export async function getDefaultDeviceName(type: IOType): Promise<string | undefined> {
+  return (await LocalStorage.getItem<string>(DEFAULT_DEVICE_NAME_KEYS[type])) || undefined;
 }
 
-export function normalizeDeviceOrder(order: string[], devices: AudioDevice[]): string[] {
-  const deviceIds = devices.map((device) => device.uid);
-  const filtered = order.filter((id) => deviceIds.includes(id));
-  const missing = deviceIds.filter((id) => !filtered.includes(id));
-  return [...filtered, ...missing];
+export async function setDefaultDevicePreference(type: IOType, uid: string, name: string) {
+  await LocalStorage.setItem(DEFAULT_DEVICE_UID_KEYS[type], uid);
+  await LocalStorage.setItem(DEFAULT_DEVICE_NAME_KEYS[type], name);
 }
 
-export function applyDeviceOrder(order: string[], devices: AudioDevice[]): AudioDevice[] {
-  const normalized = normalizeDeviceOrder(order, devices);
-  const deviceMap = new Map(devices.map((device) => [device.uid, device]));
-  return normalized.map((id) => deviceMap.get(id)).filter(Boolean) as AudioDevice[];
+export async function clearDefaultDevicePreference(type: IOType) {
+  await LocalStorage.removeItem(DEFAULT_DEVICE_UID_KEYS[type]);
+  await LocalStorage.removeItem(DEFAULT_DEVICE_NAME_KEYS[type]);
+}
+
+// --- Pinned Volume ---
+
+function pinnedVolumeKey(type: IOType, deviceUid: string): string {
+  return `pinnedVolume_${type}_${deviceUid}`;
+}
+
+export async function getPinnedVolume(type: IOType, deviceUid: string): Promise<number | undefined> {
+  const raw = await LocalStorage.getItem<string>(pinnedVolumeKey(type, deviceUid));
+  if (raw == null) return undefined;
+  const val = Number(raw);
+  return Number.isFinite(val) ? val : undefined;
+}
+
+export async function setPinnedVolume(type: IOType, deviceUid: string, level: number) {
+  await LocalStorage.setItem(pinnedVolumeKey(type, deviceUid), String(Math.round(Math.max(0, Math.min(100, level)))));
+}
+
+export async function clearPinnedVolume(type: IOType, deviceUid: string) {
+  await LocalStorage.removeItem(pinnedVolumeKey(type, deviceUid));
+}
+
+export async function getAllPinnedVolumes(type: IOType): Promise<Map<string, number>> {
+  const allItems = await LocalStorage.allItems();
+  const prefix = `pinnedVolume_${type}_`;
+  const map = new Map<string, number>();
+  for (const [key, value] of Object.entries(allItems)) {
+    if (key.startsWith(prefix)) {
+      const uid = key.slice(prefix.length);
+      const val = Number(value);
+      if (Number.isFinite(val)) {
+        map.set(uid, val);
+      }
+    }
+  }
+  return map;
+}
+
+// --- Grace period (skip enforcement after manual switch) ---
+
+const GRACE_KEYS = {
+  input: "graceUntil_input",
+  output: "graceUntil_output",
+} as const;
+
+export async function setGraceUntil(type: IOType, until: number) {
+  await LocalStorage.setItem(GRACE_KEYS[type], String(until));
+}
+
+export async function getGraceUntil(type: IOType): Promise<number> {
+  const raw = await LocalStorage.getItem<string>(GRACE_KEYS[type]);
+  return raw ? Number(raw) : 0;
+}
+
+// --- One-time migration from old priority-ordering system ---
+
+const ORPHANED_KEYS = [
+  "autoSwitchInputEnabled",
+  "autoSwitchOutputEnabled",
+  "autoSwitchLastRunInput",
+  "autoSwitchLastRunOutput",
+  "deviceOrderInput",
+  "deviceOrderOutput",
+];
+const MIGRATION_SENTINEL = "_migrated_v3";
+let migrationDone = false;
+
+export async function migrateFromPriorityOrder(
+  getInputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
+  getOutputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
+) {
+  if (migrationDone) return;
+  const sentinel = await LocalStorage.getItem<string>(MIGRATION_SENTINEL);
+  if (sentinel) {
+    migrationDone = true;
+    return;
+  }
+
+  // Migrate: pick first device from old priority list as new default
+  for (const ioType of ["input", "output"] as const) {
+    const existingDefault = await getDefaultDeviceUid(ioType);
+    if (existingDefault) continue; // User already set a default, don't overwrite
+
+    const orderKey = ioType === "input" ? "deviceOrderInput" : "deviceOrderOutput";
+    const orderRaw = await LocalStorage.getItem<string>(orderKey);
+    const order = parseStoredList(orderRaw);
+    if (order.length === 0) continue;
+
+    const firstUid = order[0];
+    const getDevices = ioType === "input" ? getInputDevicesFn : getOutputDevicesFn;
+    const devices = await getDevices();
+    const device = devices.find((d) => d.uid === firstUid);
+    await setDefaultDevicePreference(ioType, firstUid, device?.name ?? firstUid);
+  }
+
+  // Clean up all orphaned keys
+  for (const key of ORPHANED_KEYS) {
+    await LocalStorage.removeItem(key);
+  }
+  await LocalStorage.setItem(MIGRATION_SENTINEL, "true");
+  migrationDone = true;
 }

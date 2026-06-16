@@ -2,6 +2,7 @@ import { provider } from "../api/oauth";
 import * as api from "../helpers/spotify.api";
 import nodeFetch from "node-fetch";
 import { withAccessToken } from "@raycast/utils";
+import { withRateLimitRetry } from "./rateLimitRetry";
 
 export let spotifyClient: typeof api | undefined;
 
@@ -11,9 +12,9 @@ provider.onAuthorize = ({ token }) => {
     Authorization: `Bearer ${token}`,
   };
 
-  // Use this instead of the global fetch
+  // Use this instead of the global fetch, with rate limit retry
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = withRateLimitRetry(nodeFetch as any) as any;
 
   spotifyClient = api;
 };
@@ -38,9 +39,9 @@ export async function setSpotifyClient() {
     Authorization: `Bearer ${accessToken}`,
   };
 
-  // Use this instead of the global fetch
+  // Use this instead of the global fetch, with rate limit retry
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = withRateLimitRetry(nodeFetch as any) as any;
 
   spotifyClient = api;
 }

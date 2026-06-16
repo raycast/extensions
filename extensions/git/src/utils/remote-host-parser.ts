@@ -12,7 +12,7 @@ type RemoteHostParserResult = Pick<
  * @param url - The URL to parse.
  * @returns The parsed remote host info.
  */
-export function remoteHostParser(url: string): RemoteHostParserResult {
+export function remoteHostParser(url: string, providerOverride?: RemoteProvider): RemoteHostParserResult {
   const parsed = parse(url);
 
   if (!parsed) {
@@ -20,19 +20,19 @@ export function remoteHostParser(url: string): RemoteHostParserResult {
   }
 
   const hostname = parsed.hostname.toLowerCase();
-  if (hostname.includes("github")) {
+  if (hostname.includes("github") || providerOverride === RemoteProvider.GitHub) {
     return githubParser(url, parsed);
   }
-  if (hostname.includes("gitlab")) {
+  if (hostname.includes("gitlab") || providerOverride === RemoteProvider.GitLab) {
     return gitlabParser(url, parsed);
   }
-  if (hostname.includes("bitbucket")) {
+  if (hostname.includes("bitbucket") || providerOverride === RemoteProvider.Bitbucket) {
     return bitbucketParser(url, parsed);
   }
-  if (hostname.includes("azure-devops")) {
+  if (hostname.includes("azure-devops") || providerOverride === RemoteProvider.AzureDevOps) {
     return azureDevopsParser(url, parsed);
   }
-  if (hostname.includes("gitea")) {
+  if (hostname.includes("gitea") || providerOverride === RemoteProvider.Gitea) {
     return giteaParser(url, parsed);
   }
   return unknownParser(url, parsed);
@@ -54,7 +54,7 @@ function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResu
   })();
 
   return {
-    provider: "GitHub" as RemoteProvider,
+    provider: RemoteProvider.GitHub,
     organizationName,
     repositoryName,
     get avatarUrl() {
@@ -186,7 +186,7 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
   const { protocol: scheme, hostname, path } = parsed;
 
   return {
-    provider: "GitLab" as RemoteProvider,
+    provider: RemoteProvider.GitLab,
     organizationName: (() => {
       const match = path.match(/^([^/]+)/);
       return match ? match[1] : undefined;
@@ -264,7 +264,7 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
           },
           {
             title: "Members",
-            url: `${scheme}://${hostname}/${path}/-/members`,
+            url: `${scheme}://${hostname}/${path}/-/project_members`,
             icon: { source: `https://api.iconify.design/tdesign/member.svg`, fallback: Icon.Person },
           },
           {
@@ -304,7 +304,7 @@ function gitlabParser(_url: string, parsed: URLComponents): RemoteHostParserResu
           },
           {
             title: "Settings",
-            url: `${scheme}://${hostname}/${path}/-/settings`,
+            url: `${scheme}://${hostname}/${path}/-/edit`,
             icon: Icon.Gear,
           },
         ];
@@ -317,7 +317,7 @@ function giteaParser(_url: string, parsed: URLComponents): RemoteHostParserResul
   const { protocol: scheme, hostname, path } = parsed;
 
   return {
-    provider: "Gitea" as RemoteProvider,
+    provider: RemoteProvider.Gitea,
     organizationName: (() => {
       const match = path.match(/^([^/]+)/);
       return match ? match[1] : undefined;
@@ -450,7 +450,7 @@ function bitbucketParser(_url: string, parsed: URLComponents): RemoteHostParserR
   })();
 
   return {
-    provider: "Bitbucket" as RemoteProvider,
+    provider: RemoteProvider.Bitbucket,
     organizationName: (() => {
       const match = path.match(/^([^/]+)/);
       return match ? match[1] : undefined;
@@ -586,7 +586,7 @@ function azureDevopsParser(_url: string, parsed: URLComponents): RemoteHostParse
   })();
 
   return {
-    provider: "Azure DevOps" as RemoteProvider,
+    provider: RemoteProvider.AzureDevOps,
     organizationName: (() => {
       if (hostname === "ssh.dev.azure.com" || hostname === "vs-ssh.visualstudio.com") {
         const pathPattern = path.startsWith("v3/")
@@ -676,7 +676,7 @@ function azureDevopsParser(_url: string, parsed: URLComponents): RemoteHostParse
 
 function unknownParser(_url: string, _parsed?: URLComponents): RemoteHostParserResult {
   return {
-    provider: undefined as RemoteProvider,
+    provider: undefined,
     organizationName: undefined,
     repositoryName: undefined,
     avatarUrl: undefined,
@@ -700,7 +700,7 @@ type URLComponents = {
 
 function parse(url: string): URLComponents | undefined {
   // Try SCP-like: user@host:path OR host:path (ssh principal)
-  const scpMatch = url.match(/^[^@\s]+@([^:/]+)[:/](.+)$/);
+  const scpMatch = url.match(/^[^@:/\s]+@([^:/]+)[:/](.+)$/);
   if (scpMatch) {
     const normalizedPath = scpMatch[2]
       .replace(/^\//, "")
@@ -720,7 +720,7 @@ function parse(url: string): URLComponents | undefined {
       .replace(/^scm\//, "")
       .replace(/\.git$/i, "");
     return {
-      protocol: parsed.protocol.replace(":", ""),
+      protocol: parsed.protocol === "ssh:" ? "https" : parsed.protocol.replace(":", ""),
       hostname: parsed.hostname,
       path: normalizedPath,
     };

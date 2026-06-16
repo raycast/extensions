@@ -4,7 +4,7 @@ import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
 import { Shortcut } from "../shortcut";
 import { CommandAnswer } from "../../settings/enum";
-import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel } from "../../ollama/types";
+import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
 import { Creativity } from "../../enum";
 import { RaycastImage } from "../../types";
@@ -17,6 +17,7 @@ interface props {
   model?: string;
   capabilities?: OllamaApiModelCapability[];
   creativity?: Creativity;
+  thinking?: ThinkingEffort;
   keep_alive?: string;
 }
 
@@ -44,10 +45,11 @@ export function AnswerView(props: props): React.JSX.Element {
   const query: React.MutableRefObject<undefined | string> = React.useRef(undefined);
   const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef(undefined);
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
+  const [thinking, setThinking]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
     OllamaApiGenerateResponse,
-    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>
+    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   ] = React.useState({} as OllamaApiGenerateResponse);
   const [showAnswerMetadata, setShowAnswerMetadata] = React.useState(false);
 
@@ -60,10 +62,12 @@ export function AnswerView(props: props): React.JSX.Element {
         images,
         setLoading,
         setImageView,
+        setThinking,
         setAnswer,
         setAnswerMetadata,
         props.creativity,
-        props.keep_alive ? props.keep_alive : Model.keep_alive
+        props.thinking ? props.thinking : Model.thinking,
+        props.keep_alive ? props.keep_alive : Model.keep_alive,
       ).catch(async (e) => {
         await showToast({ style: Toast.Style.Failure, title: "Error", message: e });
         setLoading(false);
@@ -87,6 +91,7 @@ export function AnswerView(props: props): React.JSX.Element {
         capabilities={props.capabilities}
         server={!IsLoadingModel && Model ? Model.server.name : undefined}
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
+        thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
       />
     );
@@ -117,7 +122,16 @@ export function AnswerView(props: props): React.JSX.Element {
             title="Continue as Chat"
             icon={Icon.SpeechBubble}
             onAction={async () =>
-              await convertAnswerToChat(Model, query.current, images.current, answer, answerMetadata)
+              await convertAnswerToChat(
+                Model,
+                query.current,
+                images.current,
+                thinking,
+                answer,
+                answerMetadata,
+                true,
+                props.thinking,
+              )
             }
             shortcut={Shortcut.New}
           />
@@ -183,7 +197,7 @@ export function AnswerView(props: props): React.JSX.Element {
     );
   }
 
-  if (answer === "")
+  if (thinking === "" && answer === "")
     return (
       <List isLoading={loading || IsLoadingModel} actions={!loading && !IsLoadingModel && <AnswerAction />}>
         {""}
@@ -193,7 +207,20 @@ export function AnswerView(props: props): React.JSX.Element {
 
   return (
     <Detail
-      markdown={`${imageView}${answer}`}
+      markdown={`${imageView}
+${
+  thinking !== ""
+    ? `
+<details>
+<summary><b>💡 Thinking... (click to expand)</b></summary>
+
+${thinking}
+
+</details>
+`
+    : ``
+}
+${answer}`}
       isLoading={loading || IsLoadingModel}
       actions={!loading && !IsLoadingModel && <AnswerAction />}
       metadata={

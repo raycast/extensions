@@ -168,6 +168,32 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (discoverability.sitemap) {
       markdown += `- **Sitemap**: ${discoverability.sitemap}\n`;
     }
+    if (discoverability.robotsTxt !== undefined) {
+      markdown += `- **robots.txt**: ${discoverability.robotsTxt ? "Found" : "Not found"}\n`;
+    }
+    if (discoverability.llmsTxt !== undefined) {
+      markdown += `- **llms.txt**: ${discoverability.llmsTxt ? "Found" : "Not found"}\n`;
+    }
+    if (discoverability.contentSignals) {
+      const cs = discoverability.contentSignals;
+      const parts: string[] = [];
+      if (cs.search !== undefined) parts.push(`search=${cs.search}`);
+      if (cs.aiInput !== undefined) parts.push(`ai-input=${cs.aiInput}`);
+      if (cs.aiTrain !== undefined) parts.push(`ai-train=${cs.aiTrain}`);
+      if (parts.length > 0) {
+        markdown += `- **Content Signals**: ${parts.join(", ")}\n`;
+      }
+    }
+    if (discoverability.paymentSignals?.detected) {
+      const ps = discoverability.paymentSignals;
+      const parts: string[] = [];
+      if (ps.statusCode402) parts.push("HTTP 402");
+      if (ps.paymentRequired) parts.push("PAYMENT-REQUIRED header");
+      if (ps.paymentResponse) parts.push("PAYMENT-RESPONSE header");
+      if (parts.length > 0) {
+        markdown += `- **Payment Required (x402)**: ${parts.join(", ")}\n`;
+      }
+    }
     markdown += `\n`;
   }
 

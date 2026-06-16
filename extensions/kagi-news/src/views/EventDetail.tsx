@@ -1,3 +1,5 @@
+// Display view for a single historical event from Today in History
+
 import { Detail } from "@raycast/api";
 import { HistoricalEvent } from "../interfaces";
 import { stripHtml } from "../utils";

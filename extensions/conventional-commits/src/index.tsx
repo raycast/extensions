@@ -1,17 +1,10 @@
-import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Color } from "@raycast/api";
 
-class CommitItem {
+interface CommitItem {
   prefix: string;
   title: string;
   subtitle: string;
   icon: string;
-
-  constructor(prefix: string, title: string, subtitle: string, icon: string) {
-    this.prefix = prefix;
-    this.title = title;
-    this.subtitle = subtitle;
-    this.icon = icon;
-  }
 }
 
 const listItems: CommitItem[] = [
@@ -86,13 +79,13 @@ const listItems: CommitItem[] = [
 export default function Command() {
   return (
     <List>
-      {listItems.map((item, index) => (
+      {listItems.map((item) => (
         <List.Item
-          key={index}
+          key={item.prefix}
           icon={item.icon}
           title={item.title}
           subtitle={item.subtitle}
-          accessories={[{ tag: { value: `${item.prefix}`, color: Color.Green } }]}
+          accessories={[{ tag: { value: item.prefix, color: Color.Green } }]}
           keywords={[item.prefix]}
           actions={
             <ActionPanel>
