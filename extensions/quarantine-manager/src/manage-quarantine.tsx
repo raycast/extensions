@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  existingPaths,
   getFileName,
   getFinderSelections,
   getQuarantineStatus,
@@ -138,9 +139,12 @@ async function readLastSelection(): Promise<string[]> {
     const raw = await LocalStorage.getItem<string>(LAST_SELECTION_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed)
+    const strings = Array.isArray(parsed)
       ? parsed.filter((p): p is string => typeof p === "string")
       : [];
+    // Drop paths that have since moved/been deleted (mirrors getFinderSelections)
+    // so ghost paths never reach the picker default or "Re-scan Last Selection".
+    return existingPaths(strings);
   } catch {
     return [];
   }
@@ -362,8 +366,14 @@ export default function ManageQuarantine() {
         : "Scanning for quarantined files…",
     });
     try {
-      void LocalStorage.setItem(LAST_SELECTION_KEY, JSON.stringify(paths));
-      setLastSelection(paths);
+      // Best-effort persistence: keep in-memory and stored selection in sync,
+      // but never let a storage failure abort the scan.
+      try {
+        await LocalStorage.setItem(LAST_SELECTION_KEY, JSON.stringify(paths));
+        setLastSelection(paths);
+      } catch {
+        // ignore — last-selection memory is a convenience, not critical
+      }
 
       if (inspectingFile) {
         const status = getQuarantineStatus(paths[0]);

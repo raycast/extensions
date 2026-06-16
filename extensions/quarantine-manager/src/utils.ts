@@ -358,6 +358,11 @@ export function getFinderSelections(): string[] {
     .filter((p) => p.length > 0 && fs.existsSync(p));
 }
 
+/** Keeps only the paths that still exist on disk. */
+export function existingPaths(paths: string[]): string[] {
+  return paths.filter((p) => fs.existsSync(p));
+}
+
 export interface ParsedQuarantine {
   source: string;
   date: string;
