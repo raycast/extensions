@@ -253,7 +253,7 @@ export default function Command() {
             console.log("aborting fzf");
           });
 
-          fzf.on("close", (code, signal) => {
+          fzf.on("close", (code) => {
             rl.close();
             if (aborted) {
               const error = new Error("Aborted");
@@ -316,7 +316,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {(displayPaths)?.map((filepath) => {
+      {displayPaths?.map((filepath) => {
         const filename = basename(filepath);
         return (
           <List.Item
