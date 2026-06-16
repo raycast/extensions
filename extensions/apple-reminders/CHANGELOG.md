@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Tighten AI reminder defaults] - {PR_MERGE_DATE}
+## [Tighten AI reminder defaults] - 2026-06-16
 
 - Prevent AI tool calls from defaulting title-only reminders to dated, prioritized, or recurring reminders.
 - Add AI eval coverage for title-only Backlog/default-list reminder creation.
