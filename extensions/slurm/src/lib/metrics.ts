@@ -4,7 +4,7 @@
 // tick per second in this line-oriented format:
 //
 //   T <epochMillis>
-//   G <index>, <util%>, <memUsedMiB>, <memTotalMiB>   (one per GPU, job-scoped)
+//   G <index>, <name>, <util%>, <memUsedMiB>, <memTotalMiB>   (one per GPU, job-scoped)
 //   C <cpu%|-> <memCurrentBytes> <memMaxBytes>        (job cgroup)
 //   E
 //
@@ -44,11 +44,13 @@ export function parseMetricStream(buffer: string): { samples: MetricSample[]; re
     } else if (line.startsWith("G ") && cur) {
       // "G <index>, <name>, <util>, <memUsedMiB>, <memTotalMiB>"
       const parts = line.slice(2).split(",");
-      const idx = Number(parts[0]);
-      const name = (parts[1] ?? "").trim();
-      const util = Number(parts[2]);
-      const used = Number(parts[3]);
-      const total = Number(parts[4]);
+      const [idxS, ...rest] = parts;
+      const [totalS, usedS, utilS, ...namePartsReversed] = rest.reverse();
+      const idx = Number(idxS);
+      const name = namePartsReversed.reverse().join(",").trim();
+      const util = Number(utilS);
+      const used = Number(usedS);
+      const total = Number(totalS);
       if (Number.isFinite(idx) && Number.isFinite(util) && total > 0) {
         cur.gpus.push({ index: idx, name, util, memPct: (used / total) * 100, memTotalMiB: total });
       }
@@ -71,15 +73,6 @@ export function parseMetricStream(buffer: string): { samples: MetricSample[]; re
 export function gpuCount(samples: MetricSample[]): number {
   for (let i = samples.length - 1; i >= 0; i--) if (samples[i].gpus.length) return samples[i].gpus.length;
   return 0;
-}
-
-// Most recent sample for a given GPU index (for its static name / VRAM).
-export function latestGpu(samples: MetricSample[], index: number): GpuSample | null {
-  for (let i = samples.length - 1; i >= 0; i--) {
-    const g = samples[i].gpus.find((x) => x.index === index);
-    if (g) return g;
-  }
-  return null;
 }
 
 // Average of `pick` over samples no older than `sinceMs` (use 0 for "all").

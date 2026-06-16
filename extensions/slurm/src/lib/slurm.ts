@@ -1,7 +1,6 @@
 import { ChildProcess } from "node:child_process";
 import { runSsh, spawnSsh } from "./ssh";
 import { shellQuote } from "./shell";
-import { parseSlurmDurationSeconds } from "./format";
 
 function splitOnSentinel(s: string, sentinel: string): [string, string] {
   const idx = s.indexOf(sentinel);
@@ -92,18 +91,7 @@ export async function listJobs(host: string, user: string): Promise<Job[]> {
     `echo '---ALLOC---'; ` +
     `squeue -h -u ${shellQuote(user)} -O ${shellQuote(allocFmt)}`;
   const out = await runSsh(host, cmd);
-  const [primary, allocBlock = ""] = splitOnSentinel(out, "---ALLOC---");
-  const allocByJob = parseAllocTres(allocBlock, 64);
-  const jobs = primary
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map(parseJobRow);
-  for (const j of jobs) {
-    const a = allocByJob.get(j.jobId);
-    if (a) j.tres = a;
-  }
-  return jobs;
+  return parseJobsWithAllocTres(out, parseJobRow);
 }
 
 // Lightweight variant for the menu bar's background refresh. Skips the second
@@ -143,13 +131,17 @@ export async function listAllJobs(host: string): Promise<Job[]> {
   const allocFmt = "JobID:64,tres-alloc:512";
   const cmd = `squeue -h -o ${shellQuote(fmt)}; ` + `echo '---ALLOC---'; ` + `squeue -h -O ${shellQuote(allocFmt)}`;
   const out = await runSsh(host, cmd);
+  return parseJobsWithAllocTres(out, parseAllJobRow);
+}
+
+function parseJobsWithAllocTres(out: string, parseRow: (row: string) => Job): Job[] {
   const [primary, allocBlock = ""] = splitOnSentinel(out, "---ALLOC---");
   const allocByJob = parseAllocTres(allocBlock, 64);
   const jobs = primary
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
-    .map(parseAllJobRow);
+    .map(parseRow);
   for (const j of jobs) {
     const a = allocByJob.get(j.jobId);
     if (a) j.tres = a;
@@ -172,105 +164,6 @@ function parseAllJobRow(row: string): Job {
     user: p[9] ?? "",
     tres: p[10] ?? "",
   };
-}
-
-export type QueueEntry = {
-  jobId: string;
-  name: string;
-  user: string;
-  cpus: string;
-  mem: string; // requested memory as squeue prints it (%m), e.g. "64G"
-  timeLimit: string; // requested wallclock (%l), e.g. "1-00:00:00" / "UNLIMITED"
-  tres: string; // AllocTRES (running) or the `%b` GPU shorthand fallback
-};
-
-// A running job additionally carries its remaining wallclock (%L, "time left").
-export type RunningEntry = QueueEntry & { timeLeft: string };
-
-export type PartitionActivity = { pending: QueueEntry[]; running: RunningEntry[] };
-
-// Everything competing for `partition`, in one SSH round trip:
-//   • pending jobs in Slurm's scheduling order (priority desc, then JobID asc —
-//     the FIFO tie-break the scheduler walks). The caller finds its own JobID;
-//     everything before it is "ahead in the queue".
-//   • running jobs, sorted by remaining time so the soonest to free resources
-//     comes first.
-// Each list mirrors listAllJobs' resource routine: a primary `-o` row plus a
-// second `-O tres-alloc` call joined by JobID, so GPUs/mem parse the same way
-// they do in the All Jobs view (gpuLabelFromTres / memFromTres over `tres`).
-export async function listPartitionActivity(host: string, partition: string): Promise<PartitionActivity> {
-  const p = shellQuote(partition);
-  const allocFmt = "JobID:64,tres-alloc:512";
-  const pendFmt = "%i|%j|%u|%C|%m|%l|%b";
-  const runFmt = "%i|%j|%u|%C|%m|%l|%L|%b";
-  const cmd =
-    `squeue -h -t PENDING -p ${p} --sort=-p,i -o ${shellQuote(pendFmt)}; echo '---PALLOC---'; ` +
-    `squeue -h -t PENDING -p ${p} --sort=-p,i -O ${shellQuote(allocFmt)}; echo '---RUN---'; ` +
-    `squeue -h -t RUNNING -p ${p} -o ${shellQuote(runFmt)}; echo '---RALLOC---'; ` +
-    `squeue -h -t RUNNING -p ${p} -O ${shellQuote(allocFmt)}`;
-  const out = await runSsh(host, cmd);
-
-  const [pendPrimary, afterPP] = splitOnSentinel(out, "---PALLOC---");
-  const [pendAlloc, afterPA] = splitOnSentinel(afterPP, "---RUN---");
-  const [runPrimary, runAlloc = ""] = splitOnSentinel(afterPA, "---RALLOC---");
-
-  const pending = joinAlloc(parseRows(pendPrimary, parsePendingRow), pendAlloc);
-  const running = joinAlloc(parseRows(runPrimary, parseRunningRow), runAlloc).sort(
-    (a, b) => timeLeftSeconds(a.timeLeft) - timeLeftSeconds(b.timeLeft),
-  );
-  return { pending, running };
-}
-
-function parseRows<T>(block: string, parse: (row: string) => T): T[] {
-  return block
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map(parse);
-}
-
-// Overwrite each entry's `tres` with its AllocTRES (when present) the same way
-// listAllJobs does; pending jobs keep the `%b` shorthand from the primary row.
-function joinAlloc<T extends { jobId: string; tres: string }>(entries: T[], allocBlock: string): T[] {
-  const allocByJob = parseAllocTres(allocBlock, 64);
-  for (const e of entries) {
-    const a = allocByJob.get(e.jobId);
-    if (a) e.tres = a;
-  }
-  return entries;
-}
-
-function parsePendingRow(row: string): QueueEntry {
-  const p = row.split("|");
-  return {
-    jobId: p[0] ?? "",
-    name: p[1] ?? "",
-    user: p[2] ?? "",
-    cpus: p[3] ?? "",
-    mem: p[4] ?? "",
-    timeLimit: p[5] ?? "",
-    tres: p[6] ?? "",
-  };
-}
-
-function parseRunningRow(row: string): RunningEntry {
-  const p = row.split("|");
-  return {
-    jobId: p[0] ?? "",
-    name: p[1] ?? "",
-    user: p[2] ?? "",
-    cpus: p[3] ?? "",
-    mem: p[4] ?? "",
-    timeLimit: p[5] ?? "",
-    timeLeft: p[6] ?? "",
-    tres: p[7] ?? "",
-  };
-}
-
-// "1-04:23:11" / "23:45:00" → seconds for sorting; UNLIMITED sinks to the end.
-function timeLeftSeconds(v: string): number {
-  if (!v || v.toUpperCase() === "UNLIMITED") return Number.MAX_SAFE_INTEGER;
-  return parseSlurmDurationSeconds(v) ?? Number.MAX_SAFE_INTEGER;
 }
 
 export async function showJob(host: string, jobId: string): Promise<JobDetail> {

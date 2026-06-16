@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Color, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { listJobs, listNodes, type Job, type SlurmNode } from "./lib/slurm";
 import { formatBytesMB, formatPercent, gpuCountFromGres, gpuCountFromTres } from "./lib/format";
@@ -13,6 +13,7 @@ import {
   applyClusterFilter,
   partitionsByCluster,
 } from "./lib/components/ClusterFilter";
+import { NoHostView } from "./lib/components/NoHostView";
 
 // A large cluster can expose thousands of nodes. Render in bounded pages so the
 // List.Item tree can't exhaust the Raycast worker heap.
@@ -291,25 +292,4 @@ function splitTopLevel(s: string, sep: string): string[] {
   }
   out.push(s.slice(start));
   return out;
-}
-
-function NoHostView() {
-  return (
-    <List>
-      <List.EmptyView
-        title="No active clusters"
-        description="Select one or more clusters first."
-        icon={Icon.Plug}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Open Select Clusters"
-              icon={Icon.List}
-              onAction={() => launchCommand({ name: "select-cluster", type: LaunchType.UserInitiated })}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
 }

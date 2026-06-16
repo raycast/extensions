@@ -51,7 +51,7 @@ export function formatSlurmDateTime(s: string): string {
 }
 
 // Compact datetime for metadata label values: "Tue 14:25" when it falls on
-// today, otherwise "Tue 13 Jun, 14:25". Returns "—" for empty/sentinel values.
+// today, otherwise "Tue Jun 13, 14:25". Returns "—" for empty/sentinel values.
 export function formatShortDateTime(s: string): string {
   const date = parseSlurmDateTime(s);
   return date ? formatShortDateTimeFor(date) : "—";
@@ -61,10 +61,10 @@ function formatShortDateTimeFor(date: Date): string {
   const now = new Date();
   const sameDay =
     date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
-  const time = date.toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-  const weekday = date.toLocaleString("en-GB", { weekday: "short" });
+  const time = date.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const weekday = date.toLocaleString("en-US", { weekday: "short" });
   if (sameDay) return `${weekday} ${time}`;
-  const day = date.toLocaleString("en-GB", { day: "numeric", month: "short" });
+  const day = date.toLocaleString("en-US", { day: "numeric", month: "short" });
   return `${weekday} ${day}, ${time}`;
 }
 

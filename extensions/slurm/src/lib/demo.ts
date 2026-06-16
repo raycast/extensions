@@ -1054,60 +1054,6 @@ function buildAllResponse(jobs: MockJob[]): string {
   return `${primary}\n---ALLOC---\n${alloc}\n`;
 }
 
-// Four blocks mirroring listPartitionActivity:
-//   pending primary: squeue -o "%i|%j|%u|%C|%m|%l|%b"       (%l = req time, %b = req GPU)
-//   ---PALLOC---     squeue -O tres-alloc                   (empty for pending)
-//   ---RUN---        running primary: "%i|%j|%u|%C|%m|%l|%L|%b"
-//   ---RALLOC---     running squeue -O tres-alloc           (full AllocTRES)
-// Demo jobs share one priority, so the scheduler order collapses to JobID asc.
-function buildPartitionActivityResponse(jobs: MockJob[], partition: string): string {
-  const parts = partition.split(",").filter(Boolean);
-  const inPart = (j: MockJob) => parts.length === 0 || parts.includes(j.partition);
-  const pending = jobs.filter((j) => j.state === "PENDING" && inPart(j)).sort((a, b) => a.jobId.localeCompare(b.jobId));
-  const running = jobs.filter((j) => j.state === "RUNNING" && inPart(j));
-
-  const pendPrimary = pending.map((j) =>
-    [j.jobId, j.name, j.user, j.cpus, tresMem(j.tres), j.timeLimit, tresGpu(j.tres)].join("|"),
-  );
-  const runPrimary = running.map((j) =>
-    [j.jobId, j.name, j.user, j.cpus, tresMem(j.tres), j.timeLimit, timeLeft(j), tresGpu(j.tres)].join("|"),
-  );
-  // Running jobs are allocated, so their tres-alloc carries the full TRES.
-  const runAlloc = running.map((j) => j.jobId.padEnd(64) + j.tres);
-
-  return (
-    [
-      pendPrimary.join("\n"),
-      "---PALLOC---",
-      "",
-      "---RUN---",
-      runPrimary.join("\n"),
-      "---RALLOC---",
-      runAlloc.join("\n"),
-    ].join("\n") + "\n"
-  );
-}
-
-function tresMem(tres: string): string {
-  const m = /(?:^|,)mem=([^,]+)/.exec(tres);
-  return m ? m[1] : "0";
-}
-
-function tresGpu(tres: string): string {
-  const m = /gres\/gpu:[^,]+/.exec(tres);
-  return m ? m[0] : "";
-}
-
-// Remaining wallclock (TimeLimit − elapsed) as a Slurm duration, e.g. "3:21:48"
-// or "2-08:14:22" — the %L format the real squeue prints.
-function timeLeft(j: MockJob): string {
-  const sec = Math.max(0, durationSeconds(j.timeLimit) - durationSeconds(j.elapsed));
-  const p = (n: number) => String(n).padStart(2, "0");
-  const d = Math.floor(sec / 86_400);
-  const hms = `${p(Math.floor((sec % 86_400) / 3600))}:${p(Math.floor((sec % 3600) / 60))}:${p(sec % 60)}`;
-  return d > 0 ? `${d}-${hms}` : hms;
-}
-
 function buildNodesResponse(nodes: MockNode[]): string {
   return nodes.map(nodeToLine).join("\n") + "\n";
 }
@@ -1273,13 +1219,6 @@ export async function mockRunSsh(host: string, cmd: string): Promise<string> {
   // "All" jobs: squeue -h -o ...; echo '---ALLOC---'; squeue -h -O ...
   if (cmd.startsWith("squeue -h -o ")) {
     return buildAllResponse(jobsForHost(host));
-  }
-
-  // Partition activity for the Schedule view: a chain of pending + running
-  // squeue calls. The whole command starts with the pending one.
-  if (cmd.startsWith("squeue -h -t PENDING")) {
-    const m = /-p\s+(?:'([^']*)'|(\S+))/.exec(cmd);
-    return buildPartitionActivityResponse(jobsForHost(host), m ? (m[1] ?? m[2] ?? "") : "");
   }
 
   if (cmd === "scontrol show node --oneliner") {
