@@ -10,14 +10,7 @@ const EXEC_TIMEOUT_MS = 60_000;
 // instead so nothing is lost.
 const Q_MAX_CHARS = 1000;
 
-interface Preferences {
-  autoSubmit: boolean;
-  preserveClipboard: boolean;
-  submitDelay?: string;
-  macAppName?: string;
-}
-
-type Props = LaunchProps<{ arguments: { prompt?: string } }>;
+type Props = LaunchProps<{ arguments: Arguments.AskClaude }>;
 
 export default async function Command(props: Props) {
   const prefs = getPreferenceValues<Preferences>();
