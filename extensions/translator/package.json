@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translator",
+  "version": "1.0.0",
+  "title": "AI Text & Voice Translator",
+  "description": "Translate typed text or speech with OpenAI-compatible models, then paste the result into any app.",
+  "icon": "translator.png",
+  "author": "publi0",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "translate",
+    "translation",
+    "traduzir",
+    "translator"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "OpenAI-Compatible Base URL",
+      "description": "Base URL for an API that implements the OpenAI-compatible translation and transcription endpoints.",
+      "default": "https://api.openai.com/v1"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key. Raycast stores it as a protected password preference.",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "required": true,
+      "title": "Translation Model",
+      "description": "Exact model identifier used after typed or recorded text is ready to translate.",
+      "placeholder": "Enter the model identifier"
+    },
+    {
+      "name": "showSpanish",
+      "type": "checkbox",
+      "required": false,
+      "title": "Target Languages",
+      "label": "Spanish",
+      "description": "Choose which target languages appear in Translate and Record and Translate.",
+      "default": true
+    },
+    {
+      "name": "showEnglish",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "English",
+      "description": "Show English as a target language.",
+      "default": true
+    },
+    {
+      "name": "showBrazilianPortuguese",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Brazilian Portuguese",
+      "description": "Show Brazilian Portuguese as a target language.",
+      "default": true
+    },
+    {
+      "name": "showFrench",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "French",
+      "description": "Show French as a target language.",
+      "default": false
+    },
+    {
+      "name": "showGerman",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "German",
+      "description": "Show German as a target language.",
+      "default": false
+    },
+    {
+      "name": "showItalian",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Italian",
+      "description": "Show Italian as a target language.",
+      "default": false
+    },
+    {
+      "name": "showJapanese",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Japanese",
+      "description": "Show Japanese as a target language.",
+      "default": false
+    },
+    {
+      "name": "showKorean",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Korean",
+      "description": "Show Korean as a target language.",
+      "default": false
+    },
+    {
+      "name": "showSimplifiedChinese",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Simplified Chinese",
+      "description": "Show Simplified Chinese as a target language.",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "AI Translator",
+      "description": "Type text, choose the target language, and paste the translation into the active app.",
+      "mode": "view",
+      "keywords": [
+        "traduzir",
+        "translate",
+        "translation",
+        "espanhol",
+        "inglês",
+        "português",
+        "pt-br"
+      ]
+    },
+    {
+      "name": "record-and-translate",
+      "title": "Record and Translate",
+      "subtitle": "AI Translator",
+      "description": "Record your voice, transcribe it with gpt-4o-transcribe, choose a language, and paste the translation.",
+      "mode": "view",
+      "keywords": [
+        "voice",
+        "record",
+        "speech",
+        "microphone",
+        "gravar",
+        "voz",
+        "ditado"
+      ]
+    },
+    {
+      "name": "translation-history",
+      "title": "Translation History",
+      "subtitle": "AI Translator",
+      "description": "Search, reuse, copy, or remove previous translations.",
+      "mode": "view",
+      "keywords": [
+        "histórico",
+        "history",
+        "translations"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "eslint src tests --fix && prettier --write .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src tests && npm run format:check && npm run typecheck",
+    "lint:store": "npm run lint && ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}
