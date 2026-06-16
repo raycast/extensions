@@ -19,7 +19,7 @@ export default function Command() {
 
   // Cache the mute flag so the last known value paints instantly — no "goals
   // on" flash before the async read settles.
-  const { data: goals, mutate: mutateGoals } = useCachedPromise(goalsEnabled);
+  const { data: goals = true, mutate: mutateGoals } = useCachedPromise(goalsEnabled);
 
   const live = liveMatch(matches);
   const title = live ? menuBarTitle(live) : undefined;

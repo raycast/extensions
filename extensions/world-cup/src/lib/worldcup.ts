@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import fetch from "cross-fetch";
 import flags from "../flags";
 
 const ENDPOINT = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
