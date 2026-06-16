@@ -1,6 +1,6 @@
 # TXTodo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-16
 
 - Show Tasks: view, complete, prioritize, edit tasks from `todo.txt`
 - View presets: Active, Today, This week, Overdue, Inbox, All, Completed — pickable from the command's argument dropdown and switchable in-view
