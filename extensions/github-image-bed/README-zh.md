@@ -4,7 +4,7 @@
 
 强大的 Raycast 扩展，将图片上传到 GitHub 作为图床，支持 CDN 加速。
 
-![main](<CleanShot 2026-06-13 at 13.37.23@2x.png>)
+![](metadata/ghimage-main.png)
 
 ## 功能
 
@@ -13,11 +13,17 @@
 - 📂 **文件上传** - 从电脑中选择图片文件上传
 - ⚡ **CDN 加速** - 支持 jsDelivr 或自定义 CDN 模板，加速图片加载
 - 🏷️ **自定义文件名** - 通过命令参数或可配置的模板设置图片名称，支持时间/日期占位符
+
+![formats](metadata/github-image-bed-1.png)
+
+![](metadata/github-image-bed-3.png)
+
 - 🎨 **多种格式** - 复制结果为 Markdown、HTML 或直链 URL
 - ⚙️ **可配置** - 自定义仓库、分支、路径、CDN 模板和文件名模式
-- 📁 **文件夹切换** - 配置多个上传文件夹，快速切换
 
-![setting](<CleanShot 2026-06-13 at 13.38.22@2x.png>)
+![folder](metadata/github-image-bed-2.png)
+
+- 📁 **文件夹切换** - 配置多个上传文件夹，快速切换
 
 ## 命令
 
@@ -34,17 +40,17 @@
 
 使用前，在 Raycast 中配置扩展偏好设置：
 
-| 偏好项           | 描述                                                    | 必填 |
-| ---------------- | ------------------------------------------------------- | ---- |
-| GitHub Token     | 具有 `repo` 权限的 Personal Access Token                | ✅   |
-| Repository Owner | 你的 GitHub 用户名或组织名                              | ✅   |
-| Repository Name  | 用于上传图片的仓库名                                    | ✅   |
-| Branch           | 分支名（默认：`main`）                                  | ❌   |
-| Upload Path      | 文件夹路径，用逗号分隔（如 `images/, screenshots/`）    | ❌   |
-| Committer Email  | 用于提交记录的邮箱                                      | ✅   |
-| CDN URL Template | 自定义 CDN URL（默认：jsDelivr）                        | ❌   |
-| Default Format   | 默认输出格式（Markdown/URL/HTML）                       | ❌   |
-| Filename Template| 上传图片的命名模板                                      | ❌   |
+| 偏好项            | 描述                                                    | 必填 |
+| ----------------- | ------------------------------------------------------- | ---- |
+| GitHub Token      | 具有 `repo` 权限的 Personal Access Token                | ✅   |
+| Repository Owner  | 你的 GitHub 用户名或组织名                              | ✅   |
+| Repository Name   | 用于上传图片的仓库名                                    | ✅   |
+| Branch            | 分支名（默认：`main`）                                  | ❌   |
+| Upload Path       | 文件夹路径，用逗号分隔（如 `images/, screenshots/`）    | ❌   |
+| Committer Email   | 用于提交记录的邮箱                                      | ✅   |
+| CDN URL Template  | 自定义 CDN URL（默认：jsDelivr）                        | ❌   |
+| Default Format    | 默认输出格式（Markdown/URL/HTML）                       | ❌   |
+| Filename Template | 上传图片的命名模板                                      | ❌   |
 
 ### 文件名模板
 
