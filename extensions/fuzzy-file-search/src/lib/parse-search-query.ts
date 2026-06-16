@@ -28,7 +28,7 @@ export function parseSearchQuery(searchText: string, ignoreSpacesInSearch: boole
   }
 
   let query = queryParts.join(" ");
-  if (ignoreSpacesInSearch && !hasDirectives) {
+  if (ignoreSpacesInSearch) {
     query = query.replaceAll(" ", "");
   }
   query = query.replaceAll("~", homeDir);
