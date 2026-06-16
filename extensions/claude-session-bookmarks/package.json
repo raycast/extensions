@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-session-bookmarks",
+  "title": "Claude Session Bookmarks",
+  "description": "Save and quickly open your Claude Code session links without keeping a pile of browser tabs around.",
+  "icon": "command-icon.png",
+  "author": "eaescob",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-sessions",
+      "title": "Browse Sessions",
+      "subtitle": "Claude",
+      "description": "Browse, open, and manage your saved Claude session links.",
+      "mode": "view"
+    },
+    {
+      "name": "add-session",
+      "title": "Add Session",
+      "subtitle": "Claude",
+      "description": "Save a Claude session link from its URL.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
