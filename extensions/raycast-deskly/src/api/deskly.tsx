@@ -31,6 +31,10 @@ export async function fetchInformation(): Promise<Information> {
     },
   });
 
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`${response.status} ${response.statusText}: ${body}`);
+  }
   const information = (await response.json()) as Information;
   await LocalStorage.setItem("information", JSON.stringify({ information, fetchedAt: new Date().getTime() }));
   return information;
@@ -74,6 +78,10 @@ export async function fetchFavoriteSeats(): Promise<BookingSeat[]> {
     },
   });
 
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`${response.status} ${response.statusText}: ${body}`);
+  }
   return (await response.json()) as BookingSeat[];
 }
 
