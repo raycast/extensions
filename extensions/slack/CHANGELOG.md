@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add Slack thread reader AI tool] - 2026-06-16
+
+- Add a `read-thread` AI tool to fetch the messages in a Slack thread using the channel ID and parent message timestamp.
+
 ## [Fix Set Status deep link with raw emoji] - 2026-06-13
 
 - Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
