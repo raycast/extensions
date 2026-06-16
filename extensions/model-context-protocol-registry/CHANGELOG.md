@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Olostep MCP Server] - {PR_MERGE_DATE}
+## [Add Olostep MCP Server] - 2026-06-16
 
 Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.
 
