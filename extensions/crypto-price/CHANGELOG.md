@@ -1,6 +1,6 @@
 # Crypto Price
 
-## [Add source failover] - {PR_MERGE_DATE}
+## [Add source failover] - 2026-06-16
 
 - Default source is now Binance — CryptoCompare's free API now requires an API key
 - Automatically fall back across sources (Binance → CoinGecko → OKX → Coinbase → Kraken) so one unavailable or region-blocked source no longer breaks the menu bar
