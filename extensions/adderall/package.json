@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adderall",
+  "title": "Adderall",
+  "description": "Keep your Mac awake, even with the lid closed.",
+  "icon": "command-icon.png",
+  "author": "carlos_daniel_vilaseca",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "on",
+      "title": "Adderall on",
+      "subtitle": "Adderall",
+      "description": "Keep the Mac awake (no timer).",
+      "mode": "no-view"
+    },
+    {
+      "name": "off",
+      "title": "Adderall off",
+      "subtitle": "Adderall",
+      "description": "Restore normal sleep.",
+      "mode": "no-view"
+    },
+    {
+      "name": "timer",
+      "title": "Adderall on with Timer",
+      "subtitle": "Adderall",
+      "description": "Keep the Mac awake for a chosen duration, then auto-off.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "typescript": "^6.0.3"
+  }
+}
