@@ -17,15 +17,10 @@ type FormValues = {
   path?: string;
 };
 
-type CodexPreferences = {
-  defaultProjectDirectory?: string;
-  projectsDirectory?: string;
-};
-
 const USE_DEFAULT_PROJECT_VALUE = "__codex_use_default_project__";
 
 export default function Command() {
-  const preferences = getPreferenceValues<CodexPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedProjectPath, setSelectedProjectPath] = useState(
     USE_DEFAULT_PROJECT_VALUE,
   );

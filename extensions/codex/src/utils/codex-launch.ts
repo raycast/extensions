@@ -4,10 +4,6 @@ import { stat } from "node:fs/promises";
 import nodePath from "node:path";
 import { expandTildePath } from "./shell";
 
-type CodexPreferences = {
-  defaultProjectDirectory?: string;
-};
-
 type NewThreadInput = {
   prompt?: string;
   path?: string;
@@ -23,7 +19,7 @@ export async function openCodexApp(): Promise<void> {
 export async function openNewCodexThread(
   input: NewThreadInput = {},
 ): Promise<void> {
-  const preferences = getPreferenceValues<CodexPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const projectPath = await resolveProjectDirectory(
     input.path ?? preferences.defaultProjectDirectory,
   );

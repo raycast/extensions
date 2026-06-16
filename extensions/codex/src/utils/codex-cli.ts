@@ -20,10 +20,6 @@ const COMMON_CODEX_CLI_PATHS = [
   "/opt/homebrew/bin/codex",
   "/usr/local/bin/codex",
 ];
-type CodexPreferences = {
-  codexCliPath?: string;
-};
-
 let cachedCodexCliPath: string | undefined;
 
 class CodexCliResolutionError extends Error {
@@ -34,7 +30,7 @@ class CodexCliResolutionError extends Error {
 }
 
 function getPreferredCodexCliPath(): string {
-  const preferences = getPreferenceValues<CodexPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.codexCliPath?.trim();
   return configuredPath
     ? expandTildePath(configuredPath)
@@ -42,7 +38,7 @@ function getPreferredCodexCliPath(): string {
 }
 
 export function getCodexCliCommandForShell(): string {
-  const preferences = getPreferenceValues<CodexPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.codexCliPath?.trim();
   if (configuredPath) {
     return expandTildePath(configuredPath);
