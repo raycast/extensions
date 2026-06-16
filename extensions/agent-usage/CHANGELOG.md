@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Support Claude Config Directory] - {PR_MERGE_DATE}
+## [Support Claude Config Directory] - 2026-06-16
 
 - Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
 
