@@ -10,11 +10,11 @@ Shows:
 - OpenCode
 - connected/not connected state
 - 5 hour, weekly, and monthly windows when agent supports them
-- percent used when you set limits
+- automatically observed local token usage
 - time left in each rolling window
-- one-click login command in Terminal
+- direct connect actions that open login commands in Terminal
 
-No cloud API calls. Extension reads local CLI auth files and local usage/session logs.
+No manual usage limits. Extension reads local CLI auth files and local usage/session logs. ChatGPT/Codex and Claude consumer account allowances are not exposed through public account-usage APIs; provider API billing/rate-limit APIs are separate from those subscriptions.
 
 ## Use Locally
 
@@ -24,8 +24,7 @@ No cloud API calls. Extension reads local CLI auth files and local usage/session
 4. Run `npm run dev`.
 5. Raycast opens extension in development mode.
 6. Search Raycast or SuperCMD for `BubbleUsage`.
-7. Open Raycast extension preferences and set token limits for each agent/window.
-8. Use `Open Login in Terminal` action for any disconnected agent.
+7. Use `Connect an AI Agent` when none are connected, or `Connect More` when adding another agent.
 
 ## Configure Paths
 
@@ -40,15 +39,9 @@ Config shape:
     "codex": { "logs": ["~/.codex/sessions"], "auth": ["~/.codex/auth.json"] },
     "gemini": { "logs": ["~/.gemini"], "auth": ["~/.gemini/oauth_creds.json"] },
     "opencode": { "logs": ["~/.local/share/opencode"], "auth": ["~/.config/opencode", "~/.local/share/opencode"] }
-  },
-  "limits": {
-    "codex": { "fiveHour": 1000000, "weekly": 10000000 },
-    "claude": { "fiveHour": 1000000, "weekly": 10000000, "monthly": 40000000 }
   }
 }
 ```
-
-Preference limits win by default. Config limits override preferences.
 
 ## Data Caveats
 
@@ -56,6 +49,7 @@ Preference limits win by default. Config limits override preferences.
 - Codex commonly has 5 hour and weekly windows, so monthly is hidden.
 - Gemini CLI local log shape varies. Add custom log paths if your install stores usage elsewhere.
 - OpenCode tries `opencode stats --json` first, then local logs.
+- OpenCode Go publishes dollar-denominated limits and exposes current usage in the Zen console, but the CLI docs expose local `stats`, not a public remaining-allowance endpoint.
 
 ## Submit To Raycast Store
 
