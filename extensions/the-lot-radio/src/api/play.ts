@@ -7,14 +7,26 @@ function streamPathSuffix(streamUrl: string): string {
   return streamUrl.replace(/^[a-z]+:\/\/[^/]+\//, "").replace(/\//g, ":");
 }
 
-function isStreamOpenExpression(streamUrl: string): string {
-  return `(exists document 1) and ((file of document 1 as text) ends with "${streamPathSuffix(streamUrl)}")`;
+// Scans all open documents (not just `document 1`, since QuickTime may have other,
+// unrelated documents open) for one whose file path matches the stream. Sets
+// `matchedDocument` to that document, or to `missing value` if none match.
+function findMatchingDocumentScript(streamUrl: string): string {
+  return `set matchedDocument to missing value
+        repeat with currentDocument in documents
+          if (file of currentDocument) is not missing value then
+            if (file of currentDocument as text) ends with "${streamPathSuffix(streamUrl)}" then
+              set matchedDocument to currentDocument
+              exit repeat
+            end if
+          end if
+        end repeat`;
 }
 
 export async function isPlaying(streamUrl: string): Promise<boolean> {
   const result = await runAppleScript(`
     tell application "QuickTime Player"
-      if ${isStreamOpenExpression(streamUrl)} then
+      ${findMatchingDocumentScript(streamUrl)}
+      if matchedDocument is not missing value then
         return "true"
       else
         return "false"
@@ -26,9 +38,10 @@ export async function isPlaying(streamUrl: string): Promise<boolean> {
 export async function play(streamUrl: string): Promise<string> {
   return runAppleScript(`try
       tell application "QuickTime Player"
-        if ${isStreamOpenExpression(streamUrl)} then
+        ${findMatchingDocumentScript(streamUrl)}
+        if matchedDocument is not missing value then
           -- The Lot Radio stream is already open, close it to stop playback
-          tell document 1 to close
+          tell matchedDocument to close
           return "Closed The Lot Radio stream"
         end if
 
