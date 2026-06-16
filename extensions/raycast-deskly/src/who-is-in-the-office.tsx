@@ -28,7 +28,8 @@ export default function Command() {
   const { data: information, isLoading: infoLoading } = useCachedPromise(fetchInformation);
 
   const primaryLocation = information?.user?.primaryRoom?.location ?? undefined;
-  const effectiveLocation = selectedLocation ?? primaryLocation;
+  const locations = information?.availableLocations ?? [];
+  const effectiveLocation = selectedLocation ?? primaryLocation ?? locations[0]?.id;
 
   const dateStr = toISODate(new Date());
 
@@ -37,8 +38,6 @@ export default function Command() {
     isLoading: peopleLoading,
     revalidate,
   } = useCachedPromise(fetchPresentResources, [effectiveLocation ?? "", dateStr], { execute: !!effectiveLocation });
-
-  const locations = information?.availableLocations ?? [];
 
   const byRoom = new Map<string, PresentPerson[]>();
   for (const person of presentPeople ?? []) {
@@ -82,8 +81,8 @@ export default function Command() {
     <List
       isLoading={infoLoading || peopleLoading}
       searchBarAccessory={
-        primaryLocation ? (
-          <List.Dropdown tooltip="Filter by Location" defaultValue={primaryLocation} onChange={setSelectedLocation}>
+        locations.length > 0 ? (
+          <List.Dropdown tooltip="Filter by Location" defaultValue={effectiveLocation} onChange={setSelectedLocation}>
             {locations.map((loc) => (
               <List.Dropdown.Item key={loc.id} value={loc.id} title={loc.name} />
             ))}

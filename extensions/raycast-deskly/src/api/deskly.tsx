@@ -199,8 +199,8 @@ export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<s
       };
       const [cr, cg, cb] = colorMap[preferences.seatIndicatorColor] ?? colorMap.blue;
       const color = rgbaToInt(cr, cg, cb, 255);
-      for (let y = seat.locationY - r; y <= seat.locationY + r; y++) {
-        for (let x = seat.locationX - r; x <= seat.locationX + r; x++) {
+      for (let y = Math.max(0, seat.locationY - r); y <= Math.min(image.height - 1, seat.locationY + r); y++) {
+        for (let x = Math.max(0, seat.locationX - r); x <= Math.min(image.width - 1, seat.locationX + r); x++) {
           if ((x - seat.locationX) ** 2 + (y - seat.locationY) ** 2 <= r * r) {
             image.setPixelColor(color, x, y);
           }
@@ -212,6 +212,7 @@ export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<s
     return `data:image/png;base64,${outBuffer.toString("base64")}`;
   })();
 
+  promise.catch(() => roomPlanImageCache.delete(cacheKey));
   roomPlanImageCache.set(cacheKey, promise);
   return promise;
 }

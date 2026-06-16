@@ -71,7 +71,7 @@ export default function Command(props: LaunchProps) {
     const today = new Date();
     const todayBooking = bookings.find((b) => isSameDay(b.date, today));
     if (todayBooking) push(<BookingDetail booking={todayBooking} onDeleted={popToRoot} />);
-  }, [isLoading]);
+  }, [isLoading, bookings, openTodayBooking]);
 
   if (props.launchType === LaunchType.Background) {
     return;
