@@ -97,8 +97,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.9.3",
-    "@types/react": "19.2.17",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.0.10",
     "eslint": "^10.5.0",
     "prettier": "^3.8.4",
     "typescript": "^6.0.3"
