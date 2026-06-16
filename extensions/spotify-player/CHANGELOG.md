@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [See Which Playlists Contain the Current Song] - {PR_MERGE_DATE}
+## [See Which Playlists Contain the Current Song] - 2026-06-16
 
 - All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song
 - Selecting a playlist that already has the song removes it instead of adding a duplicate
