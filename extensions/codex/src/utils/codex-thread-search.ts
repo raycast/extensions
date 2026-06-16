@@ -112,10 +112,10 @@ export async function indexMissingThreadSearchRecords(
       continue;
     }
 
-    const record = buildThreadSearchRecord(thread, result.conversation);
-    await writeThreadSearchRecord(record);
-    records.push(record);
+    records.push(buildThreadSearchRecord(thread, result.conversation));
   }
+
+  await Promise.all(records.map((record) => writeThreadSearchRecord(record)));
 
   return records;
 }
@@ -432,8 +432,19 @@ async function writeThreadSearchRecord(
   await rename(temporaryPath, path);
 }
 
+let searchIndexDirectoryPromise: Promise<void> | undefined;
 async function ensureSearchIndexDirectory(): Promise<void> {
-  await mkdir(SEARCH_INDEX_DIRECTORY, { recursive: true });
+  if (!searchIndexDirectoryPromise) {
+    searchIndexDirectoryPromise = mkdir(SEARCH_INDEX_DIRECTORY, {
+      recursive: true,
+    })
+      .then(() => undefined)
+      .catch((error) => {
+        searchIndexDirectoryPromise = undefined;
+        throw error;
+      });
+  }
+  return searchIndexDirectoryPromise;
 }
 
 function getThreadSearchRecordPath(threadId: string): string {

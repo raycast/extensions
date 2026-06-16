@@ -8,6 +8,7 @@ import { cleanCodexUserMessage } from "./codex-message-cleaning";
 import { getCodexSourceDescriptor } from "./codex-thread-display";
 import {
   formatTimestampSeconds,
+  getErrorMessage,
   getProjectName,
   getThreadDisplayTitle,
   tildeifyPath,
@@ -230,10 +231,6 @@ function isRaycastAiRateLimitError(error: unknown): boolean {
     message.includes("HTTP Status: 429") ||
     message.toLowerCase().includes("rate limited")
   );
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 function wait(ms: number): Promise<void> {

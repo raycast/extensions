@@ -64,6 +64,7 @@ import {
 import { exportThreadToMarkdown } from "./utils/export-thread";
 import {
   formatTimestampSeconds,
+  getErrorMessage,
   getProjectName,
   getThreadDisplayTitle,
   tildeifyPath,
@@ -106,6 +107,8 @@ const LATEST_TURN_PRESENTATION = {
 } as const;
 
 const SUBAGENT_COLOR = "#94D2BC";
+const BRANCH_MAIN_COLOR = "#4A78A4";
+const BRANCH_FEATURE_COLOR = "#FF7F7F";
 const AUTO_RENAME_BATCH_SIZES = [5, 10, 25, 50] as const;
 const ALL_PROJECTS_FILTER_VALUE = "__all_projects__";
 const EMPTY_THREADS: CodexThread[] = [];
@@ -201,12 +204,11 @@ export default function CodexThreadsCommand() {
     () => displayedThreadResults.map((result) => result.thread),
     [displayedThreadResults],
   );
-  const selectedThreadIsDisplayed = selectedThreadId
-    ? displayedThreads.some((thread) => thread.id === selectedThreadId)
-    : false;
-  const effectiveSelectedThreadId = selectedThreadIsDisplayed
-    ? selectedThreadId
-    : (displayedThreads[0]?.id ?? null);
+  const effectiveSelectedThreadId =
+    selectedThreadId &&
+    displayedThreads.some((thread) => thread.id === selectedThreadId)
+      ? selectedThreadId
+      : (displayedThreads[0]?.id ?? null);
   const {
     data: latestSelectedThreadMessages,
     error: latestSelectedThreadMessagesError,
@@ -223,8 +225,8 @@ export default function CodexThreadsCommand() {
           <ActionPanel>
             <Action
               title="Retry"
-              onAction={async () => {
-                await revalidate();
+              onAction={() => {
+                revalidate();
               }}
             />
           </ActionPanel>
@@ -317,11 +319,11 @@ export default function CodexThreadsCommand() {
                 showSubagents={showSubagents}
                 onArchiveFilterChange={setThreadScope}
                 onThreadsChanged={revalidate}
-                onToggleDetail={async () => {
-                  await setIsShowingDetail(!isShowingDetail);
+                onToggleDetail={() => {
+                  setIsShowingDetail(!isShowingDetail);
                 }}
-                onToggleShowSubagents={async () => {
-                  await setShowSubagents(!showSubagents);
+                onToggleShowSubagents={() => {
+                  setShowSubagents(!showSubagents);
                 }}
                 autoRenameCandidates={displayedThreads}
                 latestMessages={selectedLatestMessages}
@@ -395,8 +397,6 @@ function useThreadSearchIndex(
         return;
       }
 
-      setStatus(EMPTY_SEARCH_INDEX_STATUS);
-
       try {
         const cachedRecords = await loadCachedThreadSearchRecords(threads);
         if (isCancelled) return;
@@ -429,7 +429,7 @@ function useThreadSearchIndex(
         setStatus(EMPTY_SEARCH_INDEX_STATUS);
       } catch (error) {
         if (isCancelled) return;
-        setStatus({ isIndexing: false, error: getUnknownErrorMessage(error) });
+        setStatus({ isIndexing: false, error: getErrorMessage(error) });
       }
     }
 
@@ -550,8 +550,8 @@ function ThreadActions({
   showSubagents: boolean;
   onArchiveFilterChange: (scope: ThreadScope) => Promise<void> | void;
   onThreadsChanged: () => Promise<unknown> | void;
-  onToggleDetail: () => Promise<void>;
-  onToggleShowSubagents: () => Promise<void>;
+  onToggleDetail: () => void;
+  onToggleShowSubagents: () => void;
   autoRenameCandidates: CodexThread[];
   latestMessages?: CodexThreadLatestMessages;
   projectFilter: ProjectFilter;
@@ -601,6 +601,7 @@ function ThreadActions({
               },
               loadingTitle: "Compacting Thread",
               successTitle: "Thread Compacted",
+              failureTitle: "Compact Failed",
               mutate: async () => {
                 await compactThread(thread.id);
                 return thread;
@@ -622,6 +623,7 @@ function ThreadActions({
             const unarchivedThread = await performThreadMutation({
               loadingTitle: "Unarchiving Thread",
               successTitle: "Thread Restored",
+              failureTitle: "Restore Failed",
               mutate: async () => {
                 await unarchiveThread(thread.id);
                 return thread;
@@ -652,6 +654,7 @@ function ThreadActions({
               },
               loadingTitle: "Archiving Thread",
               successTitle: "Thread Archived",
+              failureTitle: "Archive Failed",
               mutate: async () => {
                 await archiveThread(thread.id);
                 return thread;
@@ -665,12 +668,10 @@ function ThreadActions({
         />
       )}
       <Action
-        title={isShowingDetail ? "Hide Details" : "Toggle Details"}
+        title={isShowingDetail ? "Hide Details" : "Show Details"}
         icon={isShowingDetail ? Icon.AppWindowList : Icon.AppWindowSidebarRight}
         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-        onAction={async () => {
-          await onToggleDetail();
-        }}
+        onAction={onToggleDetail}
       />
 
       <ActionPanel.Section title="Manage">
@@ -738,6 +739,7 @@ function ThreadActions({
               () => forkThread(thread.id),
               (result) => getThreadToastLabel(result),
               {
+                failureTitle: "Fork Failed",
                 primaryAction: {
                   title: "Open Thread",
                   shortcut: { modifiers: ["cmd"], key: "t" },
@@ -846,9 +848,7 @@ function ThreadActions({
           }
           icon={showSubagents ? Icon.EyeDisabled : Icon.Livestream}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onAction={async () => {
-            await onToggleShowSubagents();
-          }}
+          onAction={onToggleShowSubagents}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -1037,7 +1037,7 @@ async function renameThreadWithFeedback(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Rename Failed";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getErrorMessage(error);
     return false;
   }
 }
@@ -1094,15 +1094,14 @@ async function autoRenameVisibleThreads(
     });
   }
 
-  const renamedCount = results.filter(
-    (result) => result.status === "renamed",
-  ).length;
-  const skippedCount = results.filter(
-    (result) => result.status === "skipped",
-  ).length;
-  const failedCount = results.filter(
-    (result) => result.status === "failed",
-  ).length;
+  let renamedCount = 0;
+  let skippedCount = 0;
+  let failedCount = 0;
+  for (const result of results) {
+    if (result.status === "renamed") renamedCount += 1;
+    else if (result.status === "skipped") skippedCount += 1;
+    else if (result.status === "failed") failedCount += 1;
+  }
 
   toast.style =
     failedCount > 0 && renamedCount === 0
@@ -1133,10 +1132,10 @@ function getRenameSuccessMessage(
 async function exportThreadWithFeedback(thread: CodexThread) {
   if (!thread.path) {
     await showFailureToast(
-      "No rollout file",
       new Error(
         "This thread hasn't been written to disk yet. Try again once the thread has activity.",
       ),
+      { title: "No rollout file" },
     );
     return;
   }
@@ -1167,7 +1166,7 @@ async function exportThreadWithFeedback(thread: CodexThread) {
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Export failed";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getErrorMessage(error);
   }
 }
 
@@ -1206,6 +1205,7 @@ async function runThreadMutation<T>(
   action: () => Promise<T>,
   getSuccessMessage: (result: T) => string,
   options?: {
+    failureTitle?: string;
     primaryAction?: {
       title: string;
       shortcut?: Toast.ActionOptions["shortcut"];
@@ -1228,15 +1228,19 @@ async function runThreadMutation<T>(
         title: options.primaryAction.title,
         shortcut: options.primaryAction.shortcut,
         onAction: () => {
-          void options.primaryAction?.onAction(result);
+          void Promise.resolve(options.primaryAction?.onAction(result)).catch(
+            (actionError) => {
+              void showFailureToast(actionError, { title: "Action failed" });
+            },
+          );
         },
       };
     }
     return result;
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = loadingTitle;
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.title = options?.failureTitle ?? "Action failed";
+    toast.message = getErrorMessage(error);
     return undefined;
   }
 }
@@ -1245,14 +1249,11 @@ function getThreadToastLabel(thread: CodexThread): string {
   return truncate(getThreadDisplayTitle(thread), 110);
 }
 
-function getUnknownErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 async function performThreadMutation(opts: {
   confirm?: Parameters<typeof confirmAlert>[0];
   loadingTitle: string;
   successTitle: string;
+  failureTitle?: string;
   mutate: () => Promise<CodexThread>;
 }): Promise<CodexThread | undefined> {
   if (opts.confirm) {
@@ -1266,6 +1267,7 @@ async function performThreadMutation(opts: {
     opts.mutate,
     getThreadToastLabel,
     {
+      failureTitle: opts.failureTitle,
       primaryAction: {
         title: "Open Thread",
         shortcut: { modifiers: ["cmd"], key: "t" },
@@ -1526,7 +1528,7 @@ async function copyLatestTurns(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Copy Failed";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getErrorMessage(error);
   }
 }
 
@@ -1635,7 +1637,7 @@ function getBranchAccessory(
     icon: branch === "main" ? Icon.House : Icon.WrenchScrewdriver,
     tag: {
       value: branch,
-      color: branch === "main" ? "#4A78A4" : "#FF7F7F",
+      color: branch === "main" ? BRANCH_MAIN_COLOR : BRANCH_FEATURE_COLOR,
     },
     tooltip: `Git branch: ${branch}`,
   };

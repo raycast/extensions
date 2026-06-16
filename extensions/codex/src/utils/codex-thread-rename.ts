@@ -4,7 +4,7 @@ import {
   setThreadName,
 } from "./codex-app-server";
 import { generateCodexThreadTitle } from "./codex-thread-summary";
-import { getThreadDisplayTitle } from "./format";
+import { getErrorMessage, getThreadDisplayTitle } from "./format";
 
 export type AutoRenameResult = {
   id: string;
@@ -113,7 +113,7 @@ export async function autoRenameCodexThreads({
         previousTitle,
         nextTitle: null,
         status: "failed",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       } satisfies AutoRenameResult;
     }
   });

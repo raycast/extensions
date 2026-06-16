@@ -1,10 +1,10 @@
 import { execFile } from "node:child_process";
-import { constants } from "node:fs";
-import { existsSync } from "node:fs";
+import { constants, existsSync } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import nodePath from "node:path";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
+import { getErrorMessage } from "./format";
 import { expandTildePath } from "./shell";
 
 const execFileAsync = promisify(execFile);
@@ -21,6 +21,7 @@ const COMMON_CODEX_CLI_PATHS = [
   "/usr/local/bin/codex",
 ];
 let cachedCodexCliPath: string | undefined;
+let codexCliResolution: Promise<string> | undefined;
 
 class CodexCliResolutionError extends Error {
   constructor(message: string) {
@@ -58,7 +59,22 @@ export async function resolveCodexCliPath(): Promise<string> {
   if (cachedCodexCliPath) {
     return cachedCodexCliPath;
   }
+  if (!codexCliResolution) {
+    codexCliResolution = resolveCodexCliPathUncached().then(
+      (resolvedPath) => {
+        cachedCodexCliPath = resolvedPath;
+        return resolvedPath;
+      },
+      (error) => {
+        codexCliResolution = undefined;
+        throw error;
+      },
+    );
+  }
+  return codexCliResolution;
+}
 
+async function resolveCodexCliPathUncached(): Promise<string> {
   const searchedPaths: string[] = [];
   const rejectedPaths: string[] = [];
   const preferredPath = getPreferredCodexCliPath();
@@ -74,7 +90,6 @@ export async function resolveCodexCliPath(): Promise<string> {
 
     const probeResult = await probeCodexAppServerSupport(candidatePath);
     if (probeResult.supported) {
-      cachedCodexCliPath = candidatePath;
       return candidatePath;
     }
 
@@ -87,7 +102,6 @@ export async function resolveCodexCliPath(): Promise<string> {
 
     const probeResult = await probeCodexAppServerSupport(shellResolvedPath);
     if (probeResult.supported) {
-      cachedCodexCliPath = shellResolvedPath;
       return shellResolvedPath;
     }
 
@@ -150,7 +164,7 @@ async function probeCodexAppServerSupport(
   } catch (error) {
     return {
       supported: false,
-      reason: error instanceof Error ? error.message : String(error),
+      reason: getErrorMessage(error),
     };
   }
 }

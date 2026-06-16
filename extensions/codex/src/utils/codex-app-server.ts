@@ -126,10 +126,6 @@ type ThreadForkResponse = {
   thread: CodexThread;
 };
 
-type ThreadReadResponse = {
-  thread: CodexThread;
-};
-
 type ThreadTurn = {
   id: string;
   items: unknown[];
@@ -352,6 +348,7 @@ export class CodexAppServerSession {
     const response = await this.request<InitializeResponse>("initialize", {
       clientInfo: {
         name: "raycast-codex",
+        // Protocol client version, not the npm package version.
         version: "1.0.0",
       },
       capabilities: {
@@ -412,7 +409,9 @@ export class CodexAppServerSession {
 
     for (const pendingRequest of this.pendingRequests.values()) {
       clearTimeout(pendingRequest.timeoutHandle);
+      pendingRequest.reject(new Error("codex app-server session disposed"));
     }
+    this.pendingRequests.clear();
 
     this.child.kill("SIGTERM");
 
@@ -671,20 +670,6 @@ export async function readThreadConversations(
   });
 }
 
-export async function readThread(
-  threadId: string,
-  includeTurns = false,
-): Promise<CodexThread> {
-  return withCodexAppServerSession(async (session) => {
-    const response = await session.request<ThreadReadResponse>("thread/read", {
-      threadId,
-      includeTurns,
-    });
-
-    return response.thread;
-  });
-}
-
 export async function setThreadName(
   threadId: string,
   name: string,
@@ -719,11 +704,8 @@ async function setArchivedThreadName(
   threadId: string,
   name: string,
   directError: unknown,
-  existingSession?: CodexAppServerSession,
 ): Promise<SetThreadNameResult> {
-  const work = async (
-    session: CodexAppServerSession,
-  ): Promise<SetThreadNameResult> => {
+  return withCodexAppServerSession(async (session) => {
     try {
       await session.request<ThreadUnarchiveResponse>("thread/unarchive", {
         threadId,
@@ -783,12 +765,7 @@ async function setArchivedThreadName(
       strategy: "archivedFallback",
       directError: getErrorMessage(directError),
     };
-  };
-
-  if (existingSession) {
-    return work(existingSession);
-  }
-  return withCodexAppServerSession(work);
+  });
 }
 
 export async function compactThread(threadId: string): Promise<void> {
@@ -827,7 +804,6 @@ async function listThreadTurns(
   options: {
     limit: number;
     sortDirection: "asc" | "desc";
-    stopWhen?: (turns: ThreadTurn[]) => boolean;
   },
 ): Promise<ThreadTurn[]> {
   const turns: ThreadTurn[] = [];
@@ -846,7 +822,7 @@ async function listThreadTurns(
 
     turns.push(...response.data);
     cursor = response.nextCursor;
-  } while (cursor && !options.stopWhen?.(turns));
+  } while (cursor);
 
   return turns;
 }
@@ -895,9 +871,7 @@ function extractLatestThreadMessagesFromNewestTurns(
   let lastAgentMessageOrder: number | null = null;
   let messageOrder = 0;
 
-  for (let turnIndex = 0; turnIndex < turns.length; turnIndex += 1) {
-    const turn = turns[turnIndex];
-
+  for (const turn of turns) {
     for (
       let itemIndex = turn.items.length - 1;
       itemIndex >= 0;

@@ -153,9 +153,9 @@ function buildOutputPath(thread: CodexThread): string {
   const safeId = thread.id.replace(/[^a-zA-Z0-9-]/g, "");
   const timestamp = new Date()
     .toISOString()
+    .split(".")[0]
     .replace(/[:.]/g, "-")
-    .replace("T", "_")
-    .split(".")[0];
+    .replace("T", "_");
   const filename = `codex-thread-${safeId}-${timestamp}.md`;
   return join(homedir(), "Downloads", filename);
 }

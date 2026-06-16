@@ -13,8 +13,9 @@ export function getProjectName(path: string): string {
 
 export function tildeifyPath(absolutePath: string): string {
   const home = homedir();
-  return absolutePath.startsWith(home)
-    ? absolutePath.replace(home, "~")
+  if (absolutePath === home) return "~";
+  return absolutePath.startsWith(home + "/")
+    ? "~" + absolutePath.slice(home.length)
     : absolutePath;
 }
 
@@ -36,4 +37,8 @@ export function getThreadDisplayTitle(thread: {
     .find(Boolean);
 
   return firstPreviewLine ?? thread.id;
+}
+
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

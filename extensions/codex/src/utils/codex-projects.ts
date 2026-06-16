@@ -7,7 +7,7 @@ import {
   type CodexThread,
   listThreads,
 } from "./codex-app-server";
-import { getProjectName, tildeifyPath } from "./format";
+import { getErrorMessage, getProjectName, tildeifyPath } from "./format";
 import { expandTildePath } from "./shell";
 
 type ProjectRecordSource = "recent" | "projects-folder";
@@ -200,7 +200,7 @@ async function loadRecentProjectRecords(): Promise<{
       warning: null,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = getErrorMessage(error);
     return {
       records: [],
       warning: `Recent projects unavailable: ${message}`,
@@ -248,7 +248,7 @@ async function loadProjectsDirectoryRecords(
 
     return { records, warning: null };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = getErrorMessage(error);
     return {
       records: [],
       warning: `Projects Folder unavailable: ${message}`,
