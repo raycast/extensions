@@ -38,10 +38,14 @@ export default function Command() {
     [searchText, prefs.ignoreSpacesInSearch],
   );
   const [debouncedQuery, setDebouncedQuery] = useState(parsedSearch.query);
+  const [resultsIndexType, setResultsIndexType] = useState<FdIndexType | null>(null);
   useEffect(() => {
     const handle = setTimeout(() => setDebouncedQuery(parsedSearch.query), FZF_DEBOUNCE_MS);
     return () => clearTimeout(handle);
   }, [parsedSearch.query]);
+  useEffect(() => {
+    setResultsIndexType(null);
+  }, [parsedSearch.indexType]);
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -281,13 +285,26 @@ export default function Command() {
         fdOutput.indexType === parsedSearch.indexType &&
         debouncedQuery.length > 0,
       abortable: abortableFzf,
+      onData: () => {
+        setResultsIndexType(parsedSearch.indexType);
+      },
     },
   );
+
+  const isIndexReady = fdOutput !== undefined && fdOutput.indexType === parsedSearch.indexType;
+  const isResultsCurrent = resultsIndexType === parsedSearch.indexType;
+  const displayPaths = debouncedQuery && isIndexReady && isResultsCurrent ? filteredPaths : undefined;
 
   return (
     <List
       navigationTitle="Search Files"
-      isLoading={isFdLoading || isFdOutputLoading || isFzfCliLoading || isFilteredPathsLoading}
+      isLoading={
+        isFdLoading ||
+        isFzfCliLoading ||
+        isFdOutputLoading ||
+        isFilteredPathsLoading ||
+        (debouncedQuery.length > 0 && (!isIndexReady || !isResultsCurrent))
+      }
       searchBarPlaceholder={"Search files — use -d or -f for directories/files only"}
       onSearchTextChange={setSearchText}
       filtering={false} // disable builtin filtering as we use a custom one
@@ -299,7 +316,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {(debouncedQuery ? filteredPaths : undefined)?.map((filepath) => {
+      {(displayPaths)?.map((filepath) => {
         const filename = basename(filepath);
         return (
           <List.Item
