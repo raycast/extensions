@@ -1,12 +1,6 @@
-import { getPreferenceValues, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { getSlotEntry } from "./storage";
 import { performReplacement } from "./replacements";
-
-type ResultType = "copy" | "paste";
-
-interface QuickSlotPreferences {
-  resultType?: ResultType;
-}
 
 /**
  * Runs the entry assigned to a quick slot. Used by the no-view `quick-slot-*`
@@ -17,8 +11,7 @@ interface QuickSlotPreferences {
  * `updateCommandMetadata` only updates the command it is called from, which is
  * why assignment happens in the list view but the subtitle syncs here on run.
  */
-export async function runQuickSlot(slot: number) {
-  const { resultType } = getPreferenceValues<QuickSlotPreferences>();
+export async function runQuickSlot(slot: number, { resultType }: Preferences.QuickSlot1) {
   const entry = await getSlotEntry(slot);
 
   if (!entry) {
@@ -32,5 +25,5 @@ export async function runQuickSlot(slot: number) {
   }
 
   await updateCommandMetadata({ subtitle: entry.title });
-  await performReplacement(entry, resultType ?? "paste");
+  await performReplacement(entry, resultType);
 }
