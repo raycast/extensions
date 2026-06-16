@@ -12,7 +12,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { attachLinkUrl, createAttachment } from "../api/attachments";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
@@ -272,7 +272,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     }
   }, [teams]);
 
+  const isMounted = useRef(false);
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     applyTemplate("");
   }, [values.teamId]);
 
