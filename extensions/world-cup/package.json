@@ -7,7 +7,8 @@
   "author": "isma",
   "contributors": [
     "djpowers",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "brunocbreis"
   ],
   "categories": [
     "News",
@@ -21,6 +22,84 @@
       "subtitle": "FIFA World Cup",
       "description": "See all matches calendar and results",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "World Cup Menu Bar",
+      "subtitle": "FIFA World Cup",
+      "description": "Shows the live match score in the menu bar with a dropdown of every fixture",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "score-subtitle",
+      "title": "World Cup Live Score",
+      "subtitle": "FIFA World Cup",
+      "description": "Shows the live score under the command name, and alerts you when a goal is scored",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "country",
+          "title": "Your Country",
+          "description": "Goals are celebratory (⚽🎉) unless scored against this team (⚽😭)",
+          "type": "dropdown",
+          "required": false,
+          "default": "",
+          "data": [
+            { "title": "None", "value": "" },
+            { "title": "Argentina", "value": "ARG" },
+            { "title": "Australia", "value": "AUS" },
+            { "title": "Austria", "value": "AUT" },
+            { "title": "Belgium", "value": "BEL" },
+            { "title": "Brazil", "value": "BRA" },
+            { "title": "Canada", "value": "CAN" },
+            { "title": "Cape Verde", "value": "CPV" },
+            { "title": "Chile", "value": "CHI" },
+            { "title": "Colombia", "value": "COL" },
+            { "title": "Costa Rica", "value": "CRC" },
+            { "title": "Croatia", "value": "CRO" },
+            { "title": "Côte d'Ivoire", "value": "CIV" },
+            { "title": "Czechia", "value": "CZE" },
+            { "title": "Denmark", "value": "DEN" },
+            { "title": "Ecuador", "value": "ECU" },
+            { "title": "Egypt", "value": "EGY" },
+            { "title": "England", "value": "ENG" },
+            { "title": "France", "value": "FRA" },
+            { "title": "Germany", "value": "GER" },
+            { "title": "Ghana", "value": "GHA" },
+            { "title": "Iran", "value": "IRN" },
+            { "title": "Italy", "value": "ITA" },
+            { "title": "Japan", "value": "JPN" },
+            { "title": "Jordan", "value": "JOR" },
+            { "title": "Mexico", "value": "MEX" },
+            { "title": "Morocco", "value": "MAR" },
+            { "title": "Netherlands", "value": "NED" },
+            { "title": "New Zealand", "value": "NZL" },
+            { "title": "Nigeria", "value": "NGA" },
+            { "title": "Norway", "value": "NOR" },
+            { "title": "Panama", "value": "PAN" },
+            { "title": "Paraguay", "value": "PAR" },
+            { "title": "Peru", "value": "PER" },
+            { "title": "Poland", "value": "POL" },
+            { "title": "Portugal", "value": "POR" },
+            { "title": "Qatar", "value": "QAT" },
+            { "title": "Saudi Arabia", "value": "KSA" },
+            { "title": "Scotland", "value": "SCO" },
+            { "title": "Senegal", "value": "SEN" },
+            { "title": "Serbia", "value": "SRB" },
+            { "title": "South Africa", "value": "RSA" },
+            { "title": "South Korea", "value": "KOR" },
+            { "title": "Spain", "value": "ESP" },
+            { "title": "Switzerland", "value": "SUI" },
+            { "title": "Tunisia", "value": "TUN" },
+            { "title": "United States", "value": "USA" },
+            { "title": "Uruguay", "value": "URU" },
+            { "title": "Uzbekistan", "value": "UZB" },
+            { "title": "Wales", "value": "WAL" }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
