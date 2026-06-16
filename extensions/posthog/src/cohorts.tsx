@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
+import { buildAppUrl } from "../helpers/appUrl";
 import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
 
@@ -52,7 +52,7 @@ function Cohorts() {
 
 const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
   const { selectedAccount } = useContext(ProjectsContext);
-  const appUrl = useUrl(`cohorts/${cohort.id}`, selectedAccount);
+  const appUrl = buildAppUrl(`cohorts/${cohort.id}`, selectedAccount);
 
   return (
     <List.Item

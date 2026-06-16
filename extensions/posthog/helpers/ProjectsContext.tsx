@@ -1,8 +1,8 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useContext, useEffect, useMemo } from "react";
 import { fetchPostHogApi } from "./usePostHogClient";
-import { Icon, List, Toast, showToast } from "@raycast/api";
+import { Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
 import ErrorHandler from "../src/error-handler";
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import {
   AccountProjectGroup,
   accountLabel,
@@ -12,7 +12,9 @@ import {
   isProjectSelectionValueAvailable,
 } from "./account-model";
 import { ConnectAccountActions } from "./ConnectAccountActions";
-import { AuthenticatedPostHogAccount, connectPostHogAccount, getAuthenticatedAccounts } from "./posthog-auth";
+import { AccountFailure, AuthenticatedPostHogAccount, getAuthenticatedAccounts } from "./posthog-auth";
+import { useAutoConnectOnEmpty, useConnectAccount } from "./useConnectAccount";
+import { firstRejectedError, toError } from "./promise-utils";
 
 type SearchResult = {
   count: number;
@@ -28,6 +30,11 @@ type Project = {
 
 type ProjectGroup = AccountProjectGroup<Project> & {
   account: AuthenticatedPostHogAccount;
+};
+
+type ProjectsData = {
+  groups: ProjectGroup[];
+  failures: AccountFailure[];
 };
 
 type ProjectContextType = {
@@ -48,53 +55,49 @@ export const ProjectsContext = createContext<ProjectContextType>({
 
 export function WithProjects({ children }: { children: ReactNode }) {
   const { data, isLoading, error, revalidate } = usePromise(loadProjectGroups);
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  // Cached so the chosen account/project persists across command launches; the effect below
+  // resets it whenever the stored selection is no longer available in the loaded data.
+  const [selectedValue, setSelectedValue] = useCachedState<string | null>("posthog-selected-project", null);
+  const connectAccount = useConnectAccount(revalidate);
 
   useEffect(() => {
     if (!data) {
       return;
     }
 
-    if (isProjectSelectionValueAvailable(data, selectedValue)) {
+    if (isProjectSelectionValueAvailable(data.groups, selectedValue)) {
       return;
     }
 
-    setSelectedValue(firstProjectSelectionValue(data));
+    setSelectedValue(firstProjectSelectionValue(data.groups));
   }, [data, selectedValue]);
 
-  const connectAccount = async () => {
-    await showToast({ style: Toast.Style.Animated, title: "Connecting PostHog" });
-
-    try {
-      const account = await connectPostHogAccount();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Connected PostHog account",
-        message: account.email ?? account.region.toUpperCase(),
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not connect PostHog account",
-        message: error instanceof Error ? error.message : String(error),
-      });
+  useEffect(() => {
+    if (data && data.failures.length > 0) {
+      void notifyAccountFailures(data.failures);
     }
-  };
+  }, [data]);
+
+  useAutoConnectOnEmpty(!isLoading && !!data, data?.groups.length === 0, connectAccount);
 
   const selection = selectedValue ? decodeProjectSelection(selectedValue) : null;
-  const selectedGroup = selection ? data?.find((group) => group.account.id === selection.accountId) : null;
+  const selectedGroup = selection ? data?.groups.find((group) => group.account.id === selection.accountId) : null;
   const selectedAccount =
     selectedGroup?.projects.some((project) => project.id.toString() === selection?.projectId) && selectedGroup.account
       ? selectedGroup.account
       : null;
   const selectedId = selectedAccount ? selection?.projectId ?? null : null;
 
+  const value = useMemo(
+    () => ({ projectGroups: data?.groups ?? [], selectedAccount, selectedId, selectedValue, setSelectedValue }),
+    [data, selectedAccount, selectedId, selectedValue]
+  );
+
   if (!data && isLoading) {
     return <List isLoading={true}></List>;
   }
 
-  if (data?.length === 0) {
+  if (data?.groups.length === 0) {
     return (
       <List>
         <List.EmptyView
@@ -109,17 +112,7 @@ export function WithProjects({ children }: { children: ReactNode }) {
 
   return (
     <ErrorHandler error={error}>
-      <ProjectsContext.Provider
-        value={{
-          projectGroups: data ?? [],
-          selectedAccount,
-          selectedId,
-          selectedValue,
-          setSelectedValue,
-        }}
-      >
-        {children}
-      </ProjectsContext.Provider>
+      <ProjectsContext.Provider value={value}>{children}</ProjectsContext.Provider>
     </ErrorHandler>
   );
 }
@@ -132,7 +125,7 @@ export function ProjectSelector() {
   };
 
   return (
-    <List.Dropdown tooltip="Switch Account or Project" value={selectedValue ?? undefined} onChange={handleChange} storeValue>
+    <List.Dropdown tooltip="Switch Account or Project" value={selectedValue ?? undefined} onChange={handleChange}>
       {projectGroups.map((group) => (
         <List.Dropdown.Section key={group.account.id} title={accountLabel(group.account)}>
           {group.projects.map((project) => (
@@ -148,8 +141,8 @@ export function ProjectSelector() {
   );
 }
 
-async function loadProjectGroups(): Promise<ProjectGroup[]> {
-  const accounts = await getAuthenticatedAccounts();
+async function loadProjectGroups(): Promise<ProjectsData> {
+  const { accounts, failures: authFailures } = await getAuthenticatedAccounts();
   const results = await Promise.allSettled(
     accounts.map(async (account) => {
       const data = await fetchPostHogApi<SearchResult>(account.baseUrl, account.accessToken, "projects");
@@ -157,21 +150,40 @@ async function loadProjectGroups(): Promise<ProjectGroup[]> {
       return { account, projects: data.results };
     })
   );
-  const projectGroups = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 
-  if (accounts.length > 0 && projectGroups.length === 0) {
+  const groups: ProjectGroup[] = [];
+  const fetchFailures: AccountFailure[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      groups.push(result.value);
+    } else {
+      fetchFailures.push({ account: accounts[index], error: toError(result.reason) });
+    }
+  });
+
+  if (accounts.length > 0 && groups.length === 0) {
     throw firstRejectedError(results, "Could not load projects for any connected PostHog accounts.");
   }
 
-  return projectGroups;
+  return { groups, failures: [...authFailures, ...fetchFailures] };
 }
 
-function firstRejectedError(results: PromiseSettledResult<unknown>[], fallbackMessage: string): Error {
-  const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+async function notifyAccountFailures(failures: AccountFailure[]): Promise<void> {
+  const [first, ...rest] = failures;
 
-  if (!rejected) {
-    return new Error(fallbackMessage);
-  }
-
-  return rejected.reason instanceof Error ? rejected.reason : new Error(String(rejected.reason));
+  await showToast({
+    style: Toast.Style.Failure,
+    title:
+      failures.length === 1
+        ? `Couldn't load ${accountLabel(first.account)}`
+        : `${failures.length} accounts couldn't be loaded`,
+    message: rest.length > 0 ? "Reconnect them from Manage Accounts." : first.error.message,
+    primaryAction: {
+      title: "Manage Accounts",
+      onAction: () => {
+        void launchCommand({ name: "accounts", type: LaunchType.UserInitiated });
+      },
+    },
+  });
 }

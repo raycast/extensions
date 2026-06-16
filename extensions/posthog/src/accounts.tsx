@@ -3,7 +3,8 @@ import { usePromise } from "@raycast/utils";
 import { accountLabel, PostHogAccount } from "../helpers/account-model";
 import { getAccounts, removeAccount } from "../helpers/accounts";
 import { ConnectAccountActions } from "../helpers/ConnectAccountActions";
-import { connectPostHogAccount, removeTokensForAccount } from "../helpers/posthog-auth";
+import { removeTokensForAccount } from "../helpers/posthog-auth";
+import { useAutoConnectOnEmpty, useConnectAccount } from "../helpers/useConnectAccount";
 
 type AccountState = {
   accounts: PostHogAccount[];
@@ -11,26 +12,9 @@ type AccountState = {
 
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadAccountState);
+  const connectAccount = useConnectAccount(revalidate);
 
-  const connectAccount = async () => {
-    await showToast({ style: Toast.Style.Animated, title: "Connecting PostHog" });
-
-    try {
-      const account = await connectPostHogAccount();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Connected PostHog account",
-        message: account.email ?? account.region.toUpperCase(),
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not connect PostHog account",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
-  };
+  useAutoConnectOnEmpty(!isLoading && !!data, data?.accounts.length === 0, connectAccount);
 
   const remove = async (account: PostHogAccount) => {
     const confirmed = await confirmAlert({
@@ -94,6 +78,9 @@ function AccountActions({
 }) {
   return (
     <ActionPanel>
+      <ActionPanel.Section title="Account">
+        <Action.OpenInBrowser title="Open Account" url={account.baseUrl} />
+      </ActionPanel.Section>
       <ActionPanel.Section title="Connect">
         <Action
           icon={Icon.Link}

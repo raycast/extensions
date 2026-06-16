@@ -2,6 +2,7 @@ import { OAuth } from "@raycast/api";
 import axios from "axios";
 import { PostHogAccount, PostHogRegion, normalizeBaseUrl, upsertAccount } from "./account-model";
 import { getAccounts, saveAccounts } from "./accounts";
+import { firstRejectedError, toError } from "./promise-utils";
 
 const CLIENT_METADATA_PATH = "/api/oauth/raycast/client-metadata";
 const OAUTH_PROXY_BASE_URL = "https://oauth.posthog.com";
@@ -60,6 +61,11 @@ export type AuthenticatedPostHogAccount = PostHogAccount & {
   accessToken: string;
 };
 
+export type AccountFailure = {
+  account: PostHogAccount;
+  error: Error;
+};
+
 export function createOAuthClient(providerId: string): OAuth.PKCEClient {
   return new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -111,6 +117,7 @@ export async function connectPostHogAccount(): Promise<PostHogAccount> {
       tokenResponse.posthog_base_url ?? metadata.posthog_base_url ?? POSTHOG_REGIONS[region].baseUrl
     ),
     authBaseUrl: OAUTH_PROXY_BASE_URL,
+    tokenEndpoint: metadata.token_endpoint,
     createdAt: existingAccount?.createdAt ?? now,
     updatedAt: now,
   };
@@ -121,7 +128,10 @@ export async function connectPostHogAccount(): Promise<PostHogAccount> {
   return account;
 }
 
-export async function getAuthenticatedAccounts(): Promise<AuthenticatedPostHogAccount[]> {
+export async function getAuthenticatedAccounts(): Promise<{
+  accounts: AuthenticatedPostHogAccount[];
+  failures: AccountFailure[];
+}> {
   const accounts = await getAccounts();
   const results = await Promise.allSettled(
     accounts.map(async (account) => ({
@@ -129,13 +139,23 @@ export async function getAuthenticatedAccounts(): Promise<AuthenticatedPostHogAc
       accessToken: await getAccessToken(account),
     }))
   );
-  const authenticatedAccounts = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 
-  if (accounts.length > 0 && authenticatedAccounts.length === 0) {
+  const authenticated: AuthenticatedPostHogAccount[] = [];
+  const failures: AccountFailure[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      authenticated.push(result.value);
+    } else {
+      failures.push({ account: accounts[index], error: toError(result.reason) });
+    }
+  });
+
+  if (accounts.length > 0 && authenticated.length === 0) {
     throw firstRejectedError(results, "Could not authenticate any connected PostHog accounts.");
   }
 
-  return authenticatedAccounts;
+  return { accounts: authenticated, failures };
 }
 
 export async function getAccessToken(account: PostHogAccount): Promise<string> {
@@ -175,6 +195,16 @@ async function getOAuthServerMetadata(authBaseUrl: string): Promise<OAuthServerM
   return response.data;
 }
 
+async function postForm<T>(url: string, params: Record<string, string>): Promise<T> {
+  const response = await axios.post<T>(url, new URLSearchParams(params), {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  return response.data;
+}
+
 async function exchangeAuthorizationCode(
   tokenEndpoint: string,
   clientId: string,
@@ -182,41 +212,25 @@ async function exchangeAuthorizationCode(
   codeVerifier: string,
   redirectUri: string
 ): Promise<PostHogTokenResponse> {
-  const response = await axios.post<PostHogTokenResponse>(
-    tokenEndpoint,
-    new URLSearchParams({
-      grant_type: "authorization_code",
-      code: authorizationCode,
-      client_id: clientId,
-      code_verifier: codeVerifier,
-      redirect_uri: redirectUri,
-    }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
-  return response.data;
+  return postForm<PostHogTokenResponse>(tokenEndpoint, {
+    grant_type: "authorization_code",
+    code: authorizationCode,
+    client_id: clientId,
+    code_verifier: codeVerifier,
+    redirect_uri: redirectUri,
+  });
 }
 
 async function refreshAccessToken(account: PostHogAccount, refreshToken: string): Promise<PostHogTokenResponse> {
-  const response = await axios.post<PostHogTokenResponse>(
-    `${account.authBaseUrl}/oauth/token/`,
-    new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: account.clientId ?? getClientId(account.authBaseUrl),
-    }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
+  // Prefer the token endpoint advertised by the OAuth server metadata (matching the initial code
+  // exchange); fall back to the conventional path for accounts connected before it was persisted.
+  const tokenEndpoint = account.tokenEndpoint ?? `${account.authBaseUrl}/oauth/token/`;
 
-  return response.data;
+  return postForm<PostHogTokenResponse>(tokenEndpoint, {
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    client_id: account.clientId ?? getClientId(account.authBaseUrl),
+  });
 }
 
 async function fetchUserInfo(userInfoEndpoint: string, accessToken: string): Promise<PostHogUserInfo> {
@@ -256,19 +270,9 @@ function resolvePostHogRegion(region: string | undefined, baseUrl: string | unde
         return "eu";
       }
     } catch {
-      return "us";
+      // Ignore invalid URLs and fall back to the default region below.
     }
   }
 
   return "us";
-}
-
-function firstRejectedError(results: PromiseSettledResult<unknown>[], fallbackMessage: string): Error {
-  const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
-
-  if (!rejected) {
-    return new Error(fallbackMessage);
-  }
-
-  return rejected.reason instanceof Error ? rejected.reason : new Error(String(rejected.reason));
 }

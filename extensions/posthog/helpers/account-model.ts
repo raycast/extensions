@@ -9,6 +9,7 @@ export type PostHogAccount = {
   region: PostHogRegion;
   baseUrl: string;
   authBaseUrl: string;
+  tokenEndpoint?: string;
   createdAt: string;
   updatedAt: string;
 };

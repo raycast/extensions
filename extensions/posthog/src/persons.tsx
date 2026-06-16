@@ -1,7 +1,7 @@
 import { LaunchProps } from "@raycast/api";
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
+import { buildAppUrl } from "../helpers/appUrl";
 import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
 
@@ -50,7 +50,7 @@ function Persons({ searchTerm }: { searchTerm: string }) {
 const ResultsListSection = ({ person }: { person: Person }) => {
   const { selectedAccount } = useContext(ProjectsContext);
   const originalId = person.distinct_ids[person.distinct_ids.length - 1];
-  const appUrl = useUrl(`person/${originalId}`, selectedAccount);
+  const appUrl = buildAppUrl(`person/${originalId}`, selectedAccount);
 
   return (
     <List.Item

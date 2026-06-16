@@ -1,6 +1,5 @@
 import { List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useCachedState } from "@raycast/utils";
 import { useContext, useState } from "react";
 import { ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
 import { accountLabel, encodeProjectSelection } from "../helpers/account-model";
@@ -25,14 +24,6 @@ type ProjectDetail = {
 function Projects() {
   const { projectGroups } = useContext(ProjectsContext);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
-  const [projectDetail, setProjectDetail] = useCachedState<{ [selection: string]: ProjectDetail }>(
-    "project-details",
-    {}
-  );
-
-  const handleOnDetailUpdated = (selection: string, detail: ProjectDetail) => {
-    setProjectDetail((prev) => ({ ...prev, [selection]: detail }));
-  };
 
   return (
     <List
@@ -52,9 +43,7 @@ function Projects() {
                 account={group.account}
                 project={project}
                 selection={selection}
-                detail={projectDetail[selection]}
                 isSelected={selectedValue === selection}
-                onDetailUpdated={(detail) => handleOnDetailUpdated(selection, detail)}
               />
             );
           })}
@@ -76,21 +65,18 @@ const Project = ({
   account,
   project,
   selection,
-  detail,
   isSelected,
-  onDetailUpdated,
 }: {
   account: AuthenticatedPostHogAccount;
   project: Project;
   selection: string;
-  detail: ProjectDetail;
   isSelected: boolean;
-  onDetailUpdated: (data: ProjectDetail) => void;
 }) => {
-  usePostHogClient<ProjectDetail>(`projects/${project.id}`, {
+  // useCachedPromise caches the detail per project across re-selections and command runs,
+  // so we fetch lazily on selection and read the result directly.
+  const { data: detail, isLoading } = usePostHogClient<ProjectDetail>(`projects/${project.id}`, {
     account,
-    execute: !detail && isSelected,
-    onData: onDetailUpdated,
+    execute: isSelected,
   });
 
   return (
@@ -99,7 +85,7 @@ const Project = ({
       id={selection}
       detail={
         <List.Item.Detail
-          isLoading={!detail}
+          isLoading={isLoading}
           metadata={
             detail && (
               <List.Item.Detail.Metadata>

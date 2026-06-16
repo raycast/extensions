@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
+import { buildAppUrl } from "../helpers/appUrl";
 import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
 
@@ -43,7 +43,7 @@ function FeatureFlags() {
 
 const ResultsListSection = ({ featureFlag }: { featureFlag: FeatureFlag }) => {
   const { selectedAccount } = useContext(ProjectsContext);
-  const appUrl = useUrl(`feature_flags/${featureFlag.id}`, selectedAccount);
+  const appUrl = buildAppUrl(`feature_flags/${featureFlag.id}`, selectedAccount);
 
   return (
     <List.Item

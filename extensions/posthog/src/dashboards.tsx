@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
+import { buildAppUrl } from "../helpers/appUrl";
 import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
 
@@ -24,7 +24,7 @@ type Dashboard = {
   };
 };
 
-function Cohorts() {
+function Dashboards() {
   const { selectedAccount, selectedId } = useContext(ProjectsContext);
   const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/dashboards", {
     account: selectedAccount,
@@ -52,7 +52,7 @@ function Cohorts() {
 
 const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
   const { selectedAccount } = useContext(ProjectsContext);
-  const appUrl = useUrl(`dashboard/${dashboard.id}`, selectedAccount);
+  const appUrl = buildAppUrl(`dashboard/${dashboard.id}`, selectedAccount);
 
   return (
     <List.Item
@@ -108,7 +108,7 @@ const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
 export default function Command() {
   return (
     <WithProjects>
-      <Cohorts />
+      <Dashboards />
     </WithProjects>
   );
 }
