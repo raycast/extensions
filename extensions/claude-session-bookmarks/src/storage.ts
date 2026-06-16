@@ -100,6 +100,9 @@ export async function updateBookmark(id: string, patch: Partial<BookmarkInput>):
     }
     target.url = parsed.url;
     target.sessionId = parsed.sessionId;
+    // Keep id in sync with sessionId (id is seeded from sessionId at creation),
+    // otherwise a later re-add of the old session can collide on id.
+    target.id = parsed.sessionId ?? target.id;
   }
   if (patch.label !== undefined) target.label = patch.label.trim() || target.label;
   if (patch.repo !== undefined) target.repo = patch.repo.trim() || undefined;
