@@ -155,15 +155,18 @@ export function raycastForVSCodeURI(uri: string) {
 
 export function vscodeFileURI(filePath: string) {
   const normalizedPath = filePath.replace(/\\/g, "/");
-  const encodedPath = normalizedPath
+  const isUncPath = normalizedPath.startsWith("//");
+  const pathToEncode = isUncPath ? normalizedPath.slice(2) : normalizedPath;
+  const encodedPath = pathToEncode
     .split("/")
     .map((segment, index) => {
       const encodedSegment = encodeURIComponent(segment);
       return index === 0 && /^[A-Za-z]%3A$/.test(encodedSegment) ? encodedSegment.replace("%3A", ":") : encodedSegment;
     })
     .join("/");
+  const uriPath = isUncPath ? `/${encodedPath}` : encodedPath;
 
-  return `${getBuildScheme()}://file/${encodedPath}`;
+  return `${getBuildScheme()}://file/${uriPath}`;
 }
 
 export async function openURIinVSCode(uri: string) {

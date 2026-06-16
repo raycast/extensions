@@ -211,7 +211,11 @@ function LocalItem(
       }
 
       if (isWin) {
-        await openPathInVSCode(path);
+        if (isWorkspaceEntry(props.entry)) {
+          open(props.uri, editorApp);
+        } else {
+          await openPathInVSCode(path);
+        }
       } else {
         open(props.uri, editorApp);
       }
