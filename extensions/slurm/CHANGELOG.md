@@ -1,6 +1,6 @@
 # Slurm Changelog
 
-## [Live Job View & Utilization] - {PR_MERGE_DATE}
+## [Live Job View & Utilization] - 2026-06-16
 
 - New **Live Job View**: press `↵` on any job to open a detail view with live per-job **GPU, CPU, and memory utilization** (sampled once per second via a persistent `srun --overlap` step) alongside run and trailing-window averages
 - Job detail is organized into navigable sections — Info (GPUs / VRAM / CPUs allocation), Schedule, Utilization, Output (stdout), and Error (stderr)
