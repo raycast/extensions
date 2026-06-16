@@ -596,7 +596,7 @@ export function CreateQueryQuickLinkAction(props: { searchText: string | undefin
   return (
     <Action.CreateQuicklink
       title="Save Query as Quicklink"
-      quicklink={{ link: `raycast://extensions/tonka3000/gmail/mails?arguments=${encodeURI(JSON.stringify(args))}` }}
+      quicklink={{ link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/tonka3000/gmail/mails?arguments=${encodeURI(JSON.stringify(args))}` }}
     />
   );
 }

@@ -12,17 +12,17 @@ Developers and power users frequently need to check and clear this flag — for 
 
 ---
 
-## Commands
+## Command
 
-### Remove Quarantine
+### Manage Quarantine
 
-Opens a file picker (or uses your current Finder selection), then shows a full breakdown of the file's quarantine status and extended attributes. From there you can remove the quarantine flag in one action.
+A single command that does it all. Opens a file picker (or uses your current Finder selection), scans the target, and lets you inspect **and** clear quarantine from the same place — no switching commands.
 
 **What it shows:**
 
 - Quarantine status (quarantined / clean) with color-coded badge
 - Parsed quarantine data: download source app + timestamp + flags
-- All extended attributes with raw and parsed values
+- All extended attributes with raw and parsed values — tap any attribute to see its full value
 - File metadata: size, type, last modified, path
 
 **Actions available via ⌘K:**
@@ -31,20 +31,16 @@ Opens a file picker (or uses your current Finder selection), then shows a full b
 - **Remove All Attributes** — clears all xattr data on the file
 - **Select Different File** `⌘O` — pick another file without relaunching
 - **Copy File Path** `⌘⇧C`
-- **Copy Xattr Command** `⌘⇧X` — copies the terminal equivalent to clipboard
+- **Copy Remove Command** `⌘⇧X` — copies the terminal equivalent to clipboard
 
-### Check Quarantine Status
+### Apps & folders — select & batch-remove
 
-Lists every extended attribute on a file in a searchable list view. Tap any attribute to see its full value — useful for understanding exactly what metadata macOS has attached to a file.
+Point it at a directory and you get an uninstaller-style checklist:
 
-### Apps & folders
-
-Both commands also accept directories:
-
-- **Apps (`.app`)** are scanned **recursively** — bundles often hold many internal quarantined files, and you'll see each one listed (and can clear them all at once).
+- **Apps (`.app`)** are scanned **recursively** — bundles often hold many internal quarantined files, and each one is listed.
 - **Plain folders** are scanned **one level deep** (immediate contents only), so large directories like Downloads stay fast.
 
-When removing on a directory, the extension runs the recursive `xattr -dr` after a confirmation that tells you how many items are affected.
+Every quarantined item is shown as a **selectable row** (all selected by default). Toggle individual files with `⌘S`, **Select All** `⌘⇧A` / **Deselect All** `⌘⇧D`, sort by path / source / date, then press **Enter** on **Remove Quarantine from Selected** to clear exactly the files you picked in one pass — or remove just one. The section header tracks `N of M selected`.
 
 ---
 
@@ -52,7 +48,7 @@ When removing on a directory, the extension runs the recursive `xattr -dr` after
 
 - **Select a file in Finder first** — if you already have a file selected, the command skips the picker entirely and loads it immediately
 - **Protected files** — if the file requires elevated permissions, the extension will prompt for your admin password via a standard macOS dialog
-- **The xattr command** — use "Copy Xattr Command" to get the terminal equivalent if you prefer to run it manually or use it in a script
+- **The xattr command** — use "Copy Remove Command" to get the terminal equivalent if you prefer to run it manually or use it in a script
 
 ---
 

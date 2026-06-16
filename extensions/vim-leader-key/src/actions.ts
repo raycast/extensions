@@ -74,7 +74,10 @@ async function openUrl(
   browser?: string,
   useActiveBrowser = false,
 ): Promise<void> {
-  if (url.startsWith("raycast://")) {
+  if (
+    url.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) ||
+    url.startsWith("raycast://")
+  ) {
     await open(url);
     return;
   }

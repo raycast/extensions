@@ -40,6 +40,36 @@
           "value": "open"
         }
       ]
+    },
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "title": "Search Engine",
+      "description": "Search engine used for Search Dia suggestions and query fallback actions.",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "Kagi",
+          "value": "kagi"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        }
+      ]
     }
   ],
   "commands": [
@@ -97,7 +127,7 @@
       "name": "open-url",
       "title": "Open URL in Dia",
       "subtitle": "Dia",
-      "description": "Open a URL in a new Dia tab. Falls back to clipboard or Google search.",
+      "description": "Open a URL in a new Dia tab. Falls back to clipboard or the configured search engine.",
       "mode": "no-view",
       "arguments": [
         {

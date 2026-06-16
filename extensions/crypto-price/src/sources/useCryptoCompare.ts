@@ -4,17 +4,33 @@ import { useFetch } from "@raycast/utils";
 import { formatLargeNumber, formatCurrency } from "#/utils";
 import { COINS } from "#/constants";
 
+interface CryptoCompareCurrencyData {
+  PRICE: number;
+  HIGH24HOUR: number;
+  LOW24HOUR: number;
+  VOLUME24HOURTO: number;
+  CIRCULATINGSUPPLY: number;
+  CIRCULATINGSUPPLYMKTCAP: number;
+}
+
+interface CryptoCompareResponse {
+  RAW: Record<string, Record<string, CryptoCompareCurrencyData>>;
+}
+
 export const useCryptoCompare: UseSource = (currency, coinSymbols) => {
   const fsyms = coinSymbols.join(",");
   const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${fsyms}&tsyms=${currency}`;
-  const { isLoading, data } = useFetch<any>(url);
+  const { isLoading, data, error } = useFetch<CryptoCompareResponse>(url);
   if (isLoading) {
     return { isLoading, coins: undefined };
   }
-  const coins = mapValues(data.RAW, (currencies: any, symbol: string) => {
+  if (error || !data) {
+    return { isLoading: false, coins: undefined };
+  }
+  const coins = mapValues(data.RAW, (currencies, symbol: string) => {
     const d = currencies[currency];
     const coin: Coin = {
-      ...COINS[symbol],
+      name: COINS[symbol]?.name ?? symbol,
       symbol,
       price: d.PRICE,
       high24h: d.HIGH24HOUR,

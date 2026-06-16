@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Skill Contents for Nested Skills] - 2026-06-09
+
+- Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree
+
 ## [Copy Skill Contents] - 2026-06-06
 
 - Add a "Copy Skill Contents" action to copy a skill's full SKILL.md to the clipboard from search results, skill details, and installed skills, so it can be pasted into tools like ChatGPT or Claude without installing the skill

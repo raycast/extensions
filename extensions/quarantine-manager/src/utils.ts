@@ -217,6 +217,77 @@ export function removeQuarantine(filePath: string): {
   }
 }
 
+/**
+ * Removes com.apple.quarantine from a specific set of paths in a single pass
+ * (non-recursive `xattr -d`, so only the named paths are touched). Tries without
+ * elevated privileges first, then falls back to ONE administrator prompt that
+ * covers every path, so a batch removal never chains multiple password dialogs.
+ */
+export function removeQuarantineFromPaths(paths: string[]): {
+  success: boolean;
+  usedAdmin: boolean;
+  error?: string;
+} {
+  if (paths.length === 0) return { success: true, usedAdmin: false };
+
+  // Fast path: clear everything in one call.
+  try {
+    execFileSync("xattr", ["-d", "com.apple.quarantine", ...paths], {
+      timeout: 30000,
+    });
+    return { success: true, usedAdmin: false };
+  } catch {
+    // `xattr -d` aborts the whole batch if ANY path lacks the attribute (already
+    // cleared, removed between scan and action, etc.). Retry each path on its own
+    // so one already-clean file doesn't force the entire selection to escalate —
+    // only paths that fail for a real reason (e.g. permissions) need admin.
+    const needsAdmin: string[] = [];
+    for (const p of paths) {
+      const res = spawnSync("xattr", ["-d", "com.apple.quarantine", p], {
+        encoding: "utf8",
+        timeout: 10000,
+      });
+      if (res.status === 0) continue;
+      // Nothing to remove (attribute or file already gone) — treat as cleared.
+      if (/No such xattr|No such file/i.test(res.stderr ?? "")) continue;
+      needsAdmin.push(p);
+    }
+
+    if (needsAdmin.length === 0) return { success: true, usedAdmin: false };
+
+    // One admin prompt covering only the paths that were genuinely blocked,
+    // quoting each one safely inside AppleScript.
+    try {
+      execFileSync(
+        "osascript",
+        [
+          "-e",
+          "on run argv",
+          "-e",
+          'set cmd to "xattr -d com.apple.quarantine"',
+          "-e",
+          "repeat with p in argv",
+          "-e",
+          'set cmd to cmd & " " & quoted form of (contents of p)',
+          "-e",
+          "end repeat",
+          "-e",
+          "do shell script cmd with administrator privileges",
+          "-e",
+          "end run",
+          ...needsAdmin,
+        ],
+        { timeout: 60000 },
+      );
+      return { success: true, usedAdmin: true };
+    } catch (adminErr) {
+      const error =
+        adminErr instanceof Error ? adminErr.message : String(adminErr);
+      return { success: false, usedAdmin: false, error };
+    }
+  }
+}
+
 export function removeAllAttributes(
   filePath: string,
   recursive = false,
@@ -288,6 +359,8 @@ export interface ParsedQuarantine {
   flags: string[];
   uuid: string;
   rawFlags: string;
+  /** Unix epoch (seconds) of the download, for sorting; null if unparseable */
+  epoch: number | null;
 }
 
 export function parseQuarantineData(rawValue: string): ParsedQuarantine | null {
@@ -309,11 +382,13 @@ export function parseQuarantineData(rawValue: string): ParsedQuarantine | null {
   if (flags.length === 0) flags.push("Quarantined");
 
   let dateStr = "Unknown";
+  let epoch: number | null = null;
   if (timestamp.length === 8) {
     const mac2001Epoch = 978307200;
     const ts = parseInt(timestamp, 16);
     if (!isNaN(ts)) {
-      dateStr = new Date((ts + mac2001Epoch) * 1000).toLocaleString("en-US");
+      epoch = ts + mac2001Epoch;
+      dateStr = new Date(epoch * 1000).toLocaleString("en-US");
     }
   }
 
@@ -323,6 +398,7 @@ export function parseQuarantineData(rawValue: string): ParsedQuarantine | null {
     flags,
     uuid,
     rawFlags: flagHex,
+    epoch,
   };
 }
 
@@ -351,7 +427,31 @@ export interface DirectoryScan {
   rootQuarantineData: string | null;
   /** Quarantined items found inside the directory (excludes the root itself) */
   entries: DirEntry[];
+  /** How many items were examined for quarantine (immediate for shallow, all descendants for recursive) */
+  scannedCount: number;
   lastModified: string;
+}
+
+/**
+ * Counts filesystem entries under a directory. Shallow counts immediate children;
+ * recursive descends the whole tree (not following symlinks). Used only to report
+ * the scan scope, so failures are swallowed and counted as zero.
+ */
+function countEntries(dirPath: string, recursive: boolean): number {
+  let count = 0;
+  let children: fs.Dirent[];
+  try {
+    children = fs.readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return 0;
+  }
+  for (const child of children) {
+    count++;
+    if (recursive && child.isDirectory() && !child.isSymbolicLink()) {
+      count += countEntries(path.join(dirPath, child.name), true);
+    }
+  }
+  return count;
 }
 
 /**
@@ -402,7 +502,9 @@ export function scanDirectory(dirPath: string): DirectoryScan {
 
   // List candidate paths in a single batched call.
   let quarantinedPaths: string[] = [];
+  let scannedCount = 0;
   if (scanMode === "recursive") {
+    scannedCount = countEntries(dirPath, true);
     const res = spawnSync("xattr", ["-r", dirPath], {
       encoding: "utf8",
       timeout: 60000,
@@ -416,6 +518,7 @@ export function scanDirectory(dirPath: string): DirectoryScan {
     } catch {
       children = [];
     }
+    scannedCount = children.length;
     // Process children in chunks to stay well under ARG_MAX, and append dirPath
     // as a sentinel so every call has >= 2 path arguments. With a single path,
     // xattr prints bare attribute names (no "<path>: " prefix); the extra arg
@@ -456,6 +559,7 @@ export function scanDirectory(dirPath: string): DirectoryScan {
     scanMode,
     rootQuarantineData,
     entries,
+    scannedCount,
     lastModified,
   };
 }

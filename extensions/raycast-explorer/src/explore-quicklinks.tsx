@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, LaunchProps } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
@@ -13,14 +13,17 @@ export default function ExploreSnippets(props: Props) {
   const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
 
   const categories = useMemo(() => {
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
+    // External quicklink data from ray.so always uses the public "raycast://" prefix.
+    // Rewrite it to the current build's scheme (supports internal/alpha/dev builds).
+    const publicRaycastPrefix = "raycast://";
     return rawCategories?.map((category) => {
       return {
         ...category,
         quicklinks: category.quicklinks.map((quicklink) => {
           return {
             ...quicklink,
-            link: quicklink.link.replace("raycast://", protocol),
+            link: quicklink.link.replace(publicRaycastPrefix, protocol),
           };
         }),
       };
@@ -40,7 +43,7 @@ export default function ExploreSnippets(props: Props) {
       ?.flatMap((category) => category.quicklinks)
       .filter((quicklink) => selectedIds.includes(quicklink.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const queryString = quicklinks
       ?.map((quicklink) => {

@@ -13,22 +13,34 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { existsSync } from "fs";
 
+import { OpenSession } from "../hooks/useSessions";
 import { deleteAllProjectSessions, deleteSession as deleteSessionFromDisk, loadTranscript } from "../lib/storage";
+import { openOpenCode, resumeSession } from "../lib/terminal";
 import { Project, Session } from "../types";
 import { buildTranscriptMarkdown, repoName, shellEscape } from "../utils";
+import { SessionActivity } from "./SessionActivity";
 import { SessionDetail } from "./SessionDetail";
 import { SessionSummary } from "./SessionSummary";
 
 interface SessionActionsProps {
   session: Session;
   project: Project | undefined;
+  liveness?: OpenSession["liveness"];
   mutate: () => Promise<void>;
   isDetail?: boolean;
   isSummary?: boolean;
   children?: React.ReactNode;
 }
 
-export function SessionActions({ session, project, mutate, isDetail, isSummary, children }: SessionActionsProps) {
+export function SessionActions({
+  session,
+  project,
+  liveness,
+  mutate,
+  isDetail,
+  isSummary,
+  children,
+}: SessionActionsProps) {
   const { pop } = useNavigation();
 
   const dir = shellEscape(session.directory);
@@ -58,9 +70,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
       icon: { source: Icon.Trash, tintColor: "#FF0000" },
     });
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting session..." });
 
@@ -69,9 +79,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
       toast.style = Toast.Style.Success;
       toast.title = "Session deleted";
 
-      if (isDetail) {
-        pop();
-      }
+      if (isDetail) pop();
 
       await mutate();
     } catch (error) {
@@ -87,9 +95,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
       icon: { source: Icon.Trash, tintColor: "#FF0000" },
     });
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting all project sessions..." });
 
@@ -99,9 +105,7 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
       toast.style = Toast.Style.Success;
       toast.title = `All sessions in "${projectName}" deleted`;
 
-      if (isDetail) {
-        pop();
-      }
+      if (isDetail) pop();
 
       await mutate();
     } catch (error) {
@@ -112,13 +116,25 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action
+          title="Resume in Terminal"
+          icon={Icon.Terminal}
+          onAction={() => resumeSession(session.directory, session.id, liveness !== undefined)}
+        />
         {!isDetail && (
           <Action.Push
             title="View Transcript"
             icon={Icon.Eye}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
             target={<SessionDetail session={session} project={project} mutate={mutate} />}
           />
         )}
+        <Action.Push
+          title="View Activity"
+          icon={Icon.List}
+          shortcut={{ modifiers: ["cmd"], key: "a" }}
+          target={<SessionActivity session={session} />}
+        />
         {!isSummary && (
           <Action.Push
             title="Summarize"
@@ -128,6 +144,15 @@ export function SessionActions({ session, project, mutate, isDetail, isSummary, 
           />
         )}
         {children}
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          title="New Session"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={() => openOpenCode(session.directory)}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

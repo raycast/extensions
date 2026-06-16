@@ -1,5 +1,18 @@
 # Quarantine Manager
 
+## [Single command with batch select] - 2026-06-10
+
+### Changed
+
+- Merged **Check Quarantine Status** and **Remove Quarantine** into a single **Manage Quarantine** command — inspect attributes and clear quarantine from the same view, no command switching
+
+### Added
+
+- Uninstaller-style multi-select for directory scans: every quarantined item is a selectable row (all selected by default), with per-row toggle (`⌘S`), **Select All** `⌘⇧A` / **Deselect All** `⌘⇧D`, and a `N of M selected` counter
+- **Remove Quarantine from Selected** (the primary Enter action) clears the chosen files in a single pass (one admin prompt at most), instead of all-or-nothing recursive removal
+- Sort scanned items by path, source, or download date
+- Clean folders/apps now report scan scope (e.g. "Scanned 248 items (immediate contents only) · 0 quarantined") instead of a bare "nothing found"
+
 ## [Scan apps and folders] - 2026-06-08
 
 ### Added

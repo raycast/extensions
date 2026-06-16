@@ -66,6 +66,71 @@ def _bbox_is_sane(top: int, left: int, bottom: int, right: int, h: int, w: int) 
     return area_frac > 0.05 and all_in_range
 
 
+def _padding_is_expected(top: int, left: int, bottom: int, right: int, h: int, w: int) -> bool:
+    pad_top = top / h
+    pad_bottom = (h - bottom - 1) / h
+    pad_left = left / w
+    pad_right = (w - right - 1) / w
+    lo = EXPECTED_PAD - PAD_TOLERANCE
+    hi = EXPECTED_PAD + PAD_TOLERANCE
+    return (
+        lo <= pad_top <= hi
+        and lo <= pad_bottom <= hi
+        and lo <= pad_left <= hi
+        and lo <= pad_right <= hi
+        and abs(pad_left - pad_right) <= MAX_ASYMMETRY
+        and abs(pad_top - pad_bottom) <= MAX_ASYMMETRY
+    )
+
+
+def _find_wide_horizontal_bbox(
+    arr: np.ndarray,
+    top: int,
+    bottom: int,
+    grad_threshold: float,
+    verbose: bool = False,
+) -> tuple[int, int, int, int] | None:
+    h, w = arr.shape[:2]
+    left_band = (int(w * 0.08), int(w * 0.22))
+    right_band = (int(w * 0.78), int(w * 0.92))
+    row_candidates = [
+        top + int((bottom - top) * ratio)
+        for ratio in (0.03, 0.08, 0.20, 0.50, 0.80)
+    ]
+    row_candidates.extend([h // 2, int(h * 0.16), int(h * 0.84)])
+
+    left_edges: list[int] = []
+    right_edges: list[int] = []
+
+    for y in sorted(set(y for y in row_candidates if 0 <= y < h)):
+        row = arr[y, :].astype(np.int32)
+        grad = np.max(np.abs(np.diff(row, axis=0)), axis=1)
+
+        left_slice = grad[left_band[0] : left_band[1]]
+        left_hits = np.where(left_slice > grad_threshold)[0]
+        if left_hits.size:
+            left_edges.append(left_band[0] + int(left_hits[0]) + 1)
+
+        right_slice = grad[right_band[0] : right_band[1]]
+        right_hits = np.where(right_slice > grad_threshold)[0]
+        if right_hits.size:
+            right_edges.append(right_band[0] + int(right_hits[-1]))
+
+    if verbose:
+        print(
+            f"       Wide horizontal fallback (grad>{grad_threshold}) — "
+            f"left:{left_edges[:8]} right:{right_edges[:8]}"
+        )
+
+    if len(left_edges) < 2 or len(right_edges) < 2:
+        return None
+
+    result = (top, int(np.median(left_edges)), bottom, int(np.median(right_edges)))
+    if _bbox_is_sane(*result, h, w):
+        return result
+    return None
+
+
 def _find_bbox_variance(
     arr: np.ndarray, std_threshold: float = 22.0, verbose: bool = False
 ) -> tuple[int, int, int, int] | None:
@@ -222,6 +287,22 @@ def find_window_bbox(
         if med_top is not None and med_bot is not None:
             result = (med_top, med_left, med_bot, med_right)
             if _bbox_is_sane(*result, h, w):
+                if not _padding_is_expected(*result, h, w):
+                    wide_result = _find_wide_horizontal_bbox(
+                        arr, med_top, med_bot, grad_low, verbose=verbose
+                    )
+                    if wide_result and _padding_is_expected(*wide_result, h, w):
+                        if verbose:
+                            print("       Detection method: gradient + wide horizontal fallback")
+                        return wide_result
+                    elif verbose:
+                        reason = (
+                            "did not improve padding"
+                            if wide_result
+                            else "found no sane edge candidate"
+                        )
+                        print(f"       Wide horizontal fallback tried but {reason}")
+
                 if verbose:
                     top_src = "Phase-2" if top_p2 else "Phase-1 min"
                     bot_src = "Phase-2" if bot_p2 else "Phase-1 prelim"

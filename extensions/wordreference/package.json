@@ -3,9 +3,12 @@
   "name": "wordreference",
   "title": "WordReference Dictionary Translation",
   "description": "Quickly find a word translation using WordReference",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "icon": "icon.png",
   "author": "Katatsu",
+  "contributors": [
+    "eddieb"
+  ],
   "categories": [
     "Productivity",
     "Web",

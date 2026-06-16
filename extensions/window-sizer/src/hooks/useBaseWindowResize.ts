@@ -3,6 +3,7 @@ import { useWindowInfo } from "./useWindowInfo";
 import { useWindowStateManager } from "./useWindowStateManager";
 import { resizeWindow } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
+import { isTimeoutError, withTimeout } from "../utils/timeout";
 
 interface WindowResizeOptions {
   onNoWindow: () => Promise<void>;
@@ -42,7 +43,7 @@ export function useBaseWindowResize() {
 
       try {
         // Call the Swift resizeWindow function
-        const result = await resizeWindow(width, height, currentX, currentY);
+        const result = await withTimeout(resizeWindow(width, height, currentX, currentY), "Resize window");
 
         // Log basic size information
         log(`Size comparison - Requested: ${width}×${height}, Actual: ${result.width}×${result.height}`);
@@ -58,7 +59,10 @@ export function useBaseWindowResize() {
 
         // Call the completion handler with the result
         await options.onResizeComplete(result.width, result.height, sizeWasRestricted);
-      } catch {
+      } catch (error) {
+        if (isTimeoutError(error)) {
+          throw error;
+        }
         throw new Error("Failed to set window size");
       }
     } catch (err) {

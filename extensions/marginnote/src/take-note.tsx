@@ -126,7 +126,7 @@ export default function (props: { draftValues?: FormType }) {
         willOpenNote
       )
       if (error) throw new Error("Parent note not found")
-      preferences.showConfetti && open("raycast://confetti")
+      preferences.showConfetti && open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`)
       showHUD("Creat Note Successfully")
       popToRoot()
       closeMainWindow()

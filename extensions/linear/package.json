@@ -17,7 +17,8 @@
     "joeb",
     "itsmingjie",
     "xmok",
-    "0xdhrv"
+    "0xdhrv",
+    "erikjs"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -1583,6 +1584,14 @@
       "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
       "type": "textfield",
       "default": "50",
+      "required": false
+    },
+    {
+      "name": "labelsLimit",
+      "title": "API Label Limit",
+      "description": "The maximum number of labels to fetch from the Linear API per team. Increase this value if some labels are missing when creating or editing issues.",
+      "type": "textfield",
+      "default": "100",
       "required": false
     },
     {

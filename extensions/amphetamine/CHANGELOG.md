@@ -1,5 +1,10 @@
 # Changelog
 
+## [Require a fresh until-time on each launch] - 2026-06-15
+
+- The configurable session command no longer restores a past until-time. The Until Time mode
+  now starts empty and requires you to choose a future time.
+
 ## [Add until-time option for configurable sessions] - 2026-05-25
 
 - Add an until-time option to the configurable session command.

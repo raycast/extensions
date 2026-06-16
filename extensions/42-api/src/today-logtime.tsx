@@ -16,7 +16,7 @@ import { formatTime, calculateGoalTimes, formatDateString } from "./lib/utils";
 
 async function triggerConfetti() {
   try {
-    await open("raycast://extensions/raycast/raycast/confetti");
+    await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
   } catch (error) {
     console.error("Failed to trigger confetti:", error);
   }

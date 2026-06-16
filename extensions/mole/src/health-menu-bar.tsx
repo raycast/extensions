@@ -99,7 +99,7 @@ function HealthMenuBarView({ molePath }: { molePath: string }) {
             <MenuBarExtra.Item
               icon={Icon.Monitor}
               title="Open System Status"
-              onAction={() => open("raycast://extensions/jlrochin/mole/system-status")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/jlrochin/mole/system-status`)}
             />
           </MenuBarExtra.Section>
         </>

@@ -15,7 +15,7 @@ export const Colors = {
 };
 
 export function createActionDeepLink(id: string) {
-  return `raycast://extensions/quiknull/alice-ai/commands?arguments=${encodeURIComponent(`{"id":"${id}"}`)}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/quiknull/alice-ai/commands?arguments=${encodeURIComponent(`{"id":"${id}"}`)}`;
 }
 
 export function getPreference(key: keyof Preferences): string {

@@ -1,4 +1,4 @@
-import { Image, Icon } from "@raycast/api";
+import { Image, Icon, Color } from "@raycast/api";
 import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
 import { ListOrGridItem } from "./ListOrGridItem";
 import { PlaylistActionPanel } from "./PlaylistActionPanel";
@@ -7,9 +7,10 @@ type PlaylistItemProps = {
   type: "grid" | "list";
   playlist: SimplifiedPlaylistObject;
   actions?: React.JSX.Element;
+  alreadyAdded?: boolean;
 };
 
-export default function PlaylistItem({ type, playlist, actions }: PlaylistItemProps) {
+export default function PlaylistItem({ type, playlist, actions, alreadyAdded }: PlaylistItemProps) {
   const title = playlist.name as string;
   const subtitle = playlist?.owner?.display_name ?? undefined;
   const imageURL = playlist?.images?.[playlist.images.length - 1]?.url;
@@ -18,6 +19,13 @@ export default function PlaylistItem({ type, playlist, actions }: PlaylistItemPr
   };
   actions = actions ?? <PlaylistActionPanel title={title} playlist={playlist} />;
 
+  const accessories = [
+    ...(alreadyAdded
+      ? [{ icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: "Already in playlist" }]
+      : []),
+    { text: `${playlist?.tracks?.total} songs` },
+  ];
+
   return (
     <ListOrGridItem
       type={type}
@@ -25,7 +33,7 @@ export default function PlaylistItem({ type, playlist, actions }: PlaylistItemPr
       title={title}
       subtitle={subtitle}
       content={icon}
-      accessories={[{ text: `${playlist?.tracks?.total} songs` }]}
+      accessories={accessories}
       actions={actions}
     />
   );

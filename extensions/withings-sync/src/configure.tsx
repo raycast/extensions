@@ -155,7 +155,7 @@ ${prefs.includeBloodPressure ? "Blood pressure measurements will be included whe
           )}
           <Action.Open
             title="Open Preferences"
-            target="raycast://extensions/preferences"
+            target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
             icon={Icon.Gear}
           />
           <Action.OpenInBrowser

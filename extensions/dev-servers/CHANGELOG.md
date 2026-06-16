@@ -1,5 +1,28 @@
 # Dev Servers Changelog
 
+## [Shopify support, faster polling, new actions] - 2026-06-10
+
+### Shopify
+
+- Detect running Shopify CLI dev servers launched globally, including `shopify theme dev`, `shopify app dev`, and `shopify hydrogen dev`, so they appear in the dashboard even when the process is outside `node_modules`. Shopify-specific tool tags: Shopify Theme, Shopify App, and Hydrogen.
+- **Start Dev Server now works for Shopify themes**, which have no `package.json` at all. A folder containing `layout/theme.liquid` (or `shopify.theme.toml`) resolves as a theme root and starts with `shopify theme dev`; a folder with `shopify.app.toml` and no dev script falls back to `shopify app dev`. Restart on a detected theme server works through the same path. Scaffolded Shopify apps and Hydrogen storefronts already start via their `dev` scripts, so all three project types are now coherent across detect → start → restart.
+- The Start picker tags Shopify projects (theme, app, Hydrogen) so they're recognizable among your recents.
+- First-run note: the Shopify CLI prompts for login and store selection when it has no remembered state, which a detached spawn can't answer; run `shopify theme dev --store <store>` once in a terminal and the extension starts it cleanly from then on. The captured startup log shows the prompt if this happens.
+
+### Performance
+
+- The portless lookup no longer spawns a zsh login shell (re-sourcing `~/.zshrc`) on every refresh. The portless binary and login PATH are resolved once, persisted in Raycast's cache, and the binary is executed directly from then on: roughly 1s → 100ms per poll on a typical nvm setup, and the dominant cost of every refresh cycle.
+- Per-process metadata (working directory, framework, runtime) is now cached for the lifetime of each PID, so steady-state polls skip the second `lsof` query and the tool-detection regexes entirely. Guarded against PID reuse via process start time.
+- Git project info is cached per directory and invalidated by the `HEAD` file's mtime (which changes on every checkout, per worktree), replacing a `git rev-parse` spawn per project per poll with a single `stat`.
+- Branch switches now show up in the dashboard immediately: the change-detection that skips redundant re-renders compares branches too, instead of waiting for a PID change.
+
+### New actions and preferences
+
+- **Open in Editor** (`⌘E`): a new shared **Editor App** preference (VS Code, Cursor, Zed, …) adds an Open in Editor action to dashboard rows and recent-project rows. Hidden until the preference is set.
+- **Copy Network URL** (`⌘⌥C`): when a server is bound beyond loopback and your Mac has a LAN address, copy `http://<lan-ip>:<port>` for testing on a phone or another machine. Only offered when the server is actually reachable that way.
+- **Copy Port** (`⌘⌥P`): copy just the port number, for env files and config.
+- The startup log view now follows the file while open (live tail every 2s), so a slow boot or crash loop streams in without mashing refresh.
+
 ## [Start Dev Server] - 2026-06-01
 
 Adds a `Start Dev Server` command for spinning up dev servers without leaving Raycast. Works from a Finder selection, from a list of recently-seen projects, or from a native folder picker.

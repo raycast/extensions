@@ -7,6 +7,7 @@ import {
   popToRoot,
   showHUD,
   Color,
+  Image,
   showToast,
   getPreferenceValues,
   launchCommand,
@@ -26,6 +27,7 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
@@ -50,6 +52,14 @@ function NowPlayingCommand() {
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
+
+  const ownedPlaylists = myPlaylistsData?.items?.filter((p) => p.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: hasTrackData && ownedPlaylists.length > 0 },
+  });
+
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -114,6 +124,8 @@ function NowPlayingCommand() {
       albumImage ? `![${name}](${albumImage}?raycast-width=250&raycast-height=250)` : "",
     ].join("\n");
 
+    const inPlaylists = ownedPlaylists.filter((p) => p.id && playlistsContainingTrack.includes(p.id));
+
     metadata = (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Track" text={name} />
@@ -123,6 +135,17 @@ function NowPlayingCommand() {
         )}
         {artists && artists.length === 1 && <Detail.Metadata.Label title="Artist" text={artistName} />}
         <Detail.Metadata.Label title="Album" text={albumName} />
+        {inPlaylists.length > 0 && (
+          <Detail.Metadata.TagList title="In Playlists">
+            {inPlaylists.map((p) => (
+              <Detail.Metadata.TagList.Item
+                key={p.id}
+                text={p.name ?? ""}
+                icon={p.images?.[0]?.url ? { source: p.images[0].url, mask: Image.Mask.RoundedRectangle } : undefined}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+        )}
       </Detail.Metadata>
     );
 
