@@ -19,6 +19,13 @@
       "title": "Review Requests",
       "description": "Pull requests awaiting your review, plus ones closed without it.",
       "mode": "view"
+    },
+    {
+      "name": "pull-requests-menu-bar",
+      "title": "Pull Requests Menu Bar",
+      "description": "Your PRs and review requests in the menu bar; approve and merge from there.",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [

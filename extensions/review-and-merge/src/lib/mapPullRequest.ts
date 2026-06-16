@@ -1,4 +1,5 @@
 import { PullRequest, PullRequestNode } from "../github/types";
+import { buildReviewers } from "./reviewers";
 
 export function mapPullRequest(
   node: PullRequestNode,
@@ -27,5 +28,9 @@ export function mapPullRequest(
         review.author?.login === viewerLogin && review.state === "APPROVED",
     ),
     comments: node.comments.totalCount,
+    reviewers: buildReviewers(
+      node.reviewRequests.nodes,
+      node.latestReviews.nodes,
+    ),
   };
 }

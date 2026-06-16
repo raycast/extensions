@@ -8,6 +8,7 @@ It's organization-agnostic: by default it covers every pull request you have acc
 
 - **My Pull Requests** — your open pull requests, **grouped by repository**. Each row shows the PR state (via the icon color) and checks status, plus an auto-merge indicator when armed. The primary action (Enter) is smart: **Merge** when the PR is mergeable now, **Enable Auto-Merge** when checks/gates are still pending, or **Open in browser** when it's stuck (conflicts, draft).
 - **Review Requests** — pull requests where you're a requested reviewer and haven't reviewed yet, **grouped by repository**: open PRs awaiting your review, plus PRs closed/merged without your review in the last 30 days. Each row shows the PR state, author avatar, and checks status.
+- **Pull Requests Menu Bar** — a macOS menu-bar entry that polls GitHub in the background and shows, in one dropdown, the PRs **awaiting your review** and **your own** open PRs. When you have PRs awaiting your review the menu-bar icon turns yellow and shows a `● N` badge with the count; otherwise it stays neutral (adapting to the light/dark menu bar). Each PR opens a submenu where you can **Approve**, **Merge** / **Enable Auto-Merge** (the smart action is highlighted first), open it in the browser, or copy its URL/branch. Rows are labelled `repo #number · title` (the title is truncated to keep them compact), and the submenu header shows the checks/review status. It refreshes in the background every minute; you can turn that background refresh on or off from Raycast's command settings.
 
 ## Actions
 

@@ -24,6 +24,7 @@ function node(overrides: Partial<PullRequestNode> = {}): PullRequestNode {
     comments: { totalCount: 3 },
     commits: { nodes: [{ commit: { statusCheckRollup: { state: "PENDING" } } }] },
     latestReviews: { nodes: [] },
+    reviewRequests: { nodes: [] },
     ...overrides,
   };
 }
@@ -51,15 +52,66 @@ describe("mapPullRequest", () => {
       autoMergeAllowed: true,
       viewerHasApproved: false,
       comments: 3,
+      reviewers: [],
     });
   });
 
   it("detects an existing APPROVED review by the viewer", () => {
     const pr = mapPullRequest(
-      node({ latestReviews: { nodes: [{ author: { login: "octocat" }, state: "APPROVED" }] } }),
+      node({
+        latestReviews: {
+          nodes: [
+            {
+              author: { login: "octocat", avatarUrl: "https://avatars/octocat.png" },
+              state: "APPROVED",
+            },
+          ],
+        },
+      }),
       "octocat",
     );
     expect(pr.viewerHasApproved).toBe(true);
+  });
+
+  it("builds the reviewers list from requests and submitted reviews", () => {
+    const pr = mapPullRequest(
+      node({
+        reviewRequests: {
+          nodes: [
+            {
+              requestedReviewer: {
+                __typename: "User",
+                login: "alice",
+                avatarUrl: "https://avatars/alice.png",
+              },
+            },
+          ],
+        },
+        latestReviews: {
+          nodes: [
+            {
+              author: { login: "bob", avatarUrl: "https://avatars/bob.png" },
+              state: "APPROVED",
+            },
+          ],
+        },
+      }),
+      "octocat",
+    );
+    expect(pr.reviewers).toEqual([
+      {
+        type: "user",
+        login: "alice",
+        avatarUrl: "https://avatars/alice.png",
+        status: "pending",
+      },
+      {
+        type: "user",
+        login: "bob",
+        avatarUrl: "https://avatars/bob.png",
+        status: "approved",
+      },
+    ]);
   });
 
   it("handles missing author, rollup, and commits", () => {

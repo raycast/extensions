@@ -15,7 +15,16 @@ const PR_FIELDS = `
     autoMergeRequest { enabledAt }
     comments { totalCount }
     commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
-    latestReviews(first: 50) { nodes { author { login } state } }
+    latestReviews(first: 50) { nodes { author { login avatarUrl } state } }
+    reviewRequests(first: 20) {
+      nodes {
+        requestedReviewer {
+          __typename
+          ... on User { login avatarUrl }
+          ... on Mannequin { login avatarUrl }
+        }
+      }
+    }
   }
 `;
 

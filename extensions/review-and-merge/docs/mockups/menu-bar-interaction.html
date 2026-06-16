@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Review &amp; Merge · Menu bar — variantes de interacción</title>
+<style>
+  :root {
+    /* Raycast Color enum approximations (dark mode system colors) */
+    --green: #30d158;
+    --red: #ff453a;
+    --yellow: #ffd60a;
+    --purple: #bf5af2;
+    --orange: #ff9f0a;
+    --blue: #0a84ff;
+    --secondary: #8e8e93;
+
+    --menu-bg: rgba(40, 40, 42, 0.72);
+    --menu-border: rgba(255, 255, 255, 0.12);
+    --menu-text: #f2f2f2;
+    --menu-sep: rgba(255, 255, 255, 0.10);
+    --accent: #0a84ff;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "SF Pro Text", "SF Pro", Helvetica, Arial, sans-serif;
+    color: #1d1d1f;
+    background:
+      radial-gradient(1200px 800px at 80% -10%, #5b4b8a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 0% 110%, #1c6e8c 0%, transparent 55%),
+      linear-gradient(160deg, #2a2a33 0%, #14141a 100%);
+    min-height: 100vh;
+    padding: 0 0 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- macOS menu bar ---- */
+  .menubar {
+    height: 28px;
+    background: rgba(20, 20, 22, 0.55);
+    backdrop-filter: saturate(160%) blur(20px);
+    -webkit-backdrop-filter: saturate(160%) blur(20px);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    padding: 0 14px;
+    color: #f2f2f2;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .menubar .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.16);
+  }
+  .menubar .glyph { font-weight: 700; letter-spacing: -0.3px; }
+  .badge-count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    background: var(--red);
+    color: #fff;
+    border-radius: 9px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .menubar .clock { opacity: 0.85; }
+
+  /* ---- page chrome ---- */
+  header.page {
+    max-width: 980px;
+    margin: 34px auto 0;
+    padding: 0 24px;
+    color: #ececf0;
+  }
+  header.page h1 { font-size: 22px; margin: 0 0 6px; font-weight: 650; }
+  header.page p { margin: 0; color: #b6b6c0; font-size: 14px; line-height: 1.5; }
+
+  .locked {
+    max-width: 980px;
+    margin: 16px auto 0;
+    padding: 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .locked .chip {
+    font-size: 12px;
+    color: #d9d9e3;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+    padding: 5px 11px;
+  }
+  .locked .chip b { color: #fff; font-weight: 600; }
+
+  /* ---- tabs ---- */
+  .tabs {
+    max-width: 980px;
+    margin: 26px auto 0;
+    padding: 0 24px;
+    display: flex;
+    gap: 8px;
+  }
+  .tab {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: #d9d9e3;
+    font-size: 13px;
+    font-family: inherit;
+    padding: 9px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .tab:hover { background: rgba(255, 255, 255, 0.12); }
+  .tab.active {
+    background: #fff;
+    color: #14141a;
+    border-color: #fff;
+    font-weight: 600;
+  }
+
+  /* ---- stage: menu + notes side by side ---- */
+  .stage {
+    max-width: 980px;
+    margin: 22px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 34px;
+    align-items: start;
+  }
+
+  .menu-anchor { position: relative; }
+  .menu-anchor::before {
+    content: "▾ clic en el icono de la barra";
+    position: absolute;
+    top: -22px;
+    left: 6px;
+    font-size: 11px;
+    color: #9a9aa6;
+  }
+
+  /* ---- the dropdown menu ---- */
+  .menu {
+    width: 320px;
+    background: var(--menu-bg);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    border: 0.5px solid var(--menu-border);
+    border-radius: 11px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(0,0,0,0.4);
+    padding: 5px;
+    color: var(--menu-text);
+    font-size: 13px;
+    user-select: none;
+  }
+
+  .section-title {
+    font-size: 11px;
+    color: var(--secondary);
+    padding: 7px 10px 3px;
+    display: flex;
+    justify-content: space-between;
+    letter-spacing: 0.2px;
+  }
+  .sep { height: 0.5px; background: var(--menu-sep); margin: 5px 8px; }
+
+  .item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1.25;
+    cursor: default;
+  }
+  .item .ic {
+    width: 16px; text-align: center; flex: 0 0 16px;
+    font-size: 13px;
+  }
+  .item .body { flex: 1 1 auto; min-width: 0; }
+  .item .title {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .item .sub {
+    font-size: 11px; color: var(--secondary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .item .trailing {
+    flex: 0 0 auto; color: var(--secondary); font-size: 11px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .item .chevron { color: var(--secondary); font-size: 11px; flex: 0 0 auto; }
+
+  /* highlight (hover / selected) — macOS accent */
+  .item.hl, .item:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  .item.hl .sub, .item:hover .sub,
+  .item.hl .trailing, .item:hover .trailing,
+  .item.hl .chevron, .item:hover .chevron { color: rgba(255,255,255,0.85); }
+
+  .plain { color: var(--menu-text); }
+  .plain .ic { color: var(--secondary); }
+  .plain:hover .ic { color: #fff; }
+
+  /* status dot colors */
+  .c-green { color: var(--green); }
+  .c-red { color: var(--red); }
+  .c-yellow { color: var(--yellow); }
+  .c-purple { color: var(--purple); }
+  .c-orange { color: var(--orange); }
+  .c-sec { color: var(--secondary); }
+
+  /* ---- submenu flyout ---- */
+  .has-sub .submenu {
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: 100%;
+    margin-left: 4px;
+    width: 230px;
+    background: var(--menu-bg);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    border: 0.5px solid var(--menu-border);
+    border-radius: 11px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    padding: 5px;
+    z-index: 20;
+  }
+  .has-sub:hover > .submenu { display: block; }
+  .submenu .item { font-size: 13px; }
+  .submenu .primary {
+    font-weight: 600;
+  }
+  .kbd { color: var(--secondary); font-size: 11px; }
+  .item:hover .kbd { color: rgba(255,255,255,0.8); }
+
+  /* ---- notes ---- */
+  .notes { color: #e6e6ec; padding-top: 4px; }
+  .notes h2 { font-size: 16px; margin: 0 0 10px; color: #fff; }
+  .notes .pro, .notes .con { display: flex; gap: 8px; margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
+  .notes .pro::before { content: "＋"; color: var(--green); font-weight: 700; }
+  .notes .con::before { content: "－"; color: var(--orange); font-weight: 700; }
+  .notes .rec {
+    margin-top: 16px; font-size: 13px; color: #cfcfe0;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .notes .rec b { color: #fff; }
+
+  .footnote {
+    max-width: 980px; margin: 30px auto 0; padding: 0 24px;
+    color: #9a9aa6; font-size: 12px; line-height: 1.5;
+  }
+  .footnote code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; color: #e0e0e8; }
+
+  .hide { display: none !important; }
+</style>
+</head>
+<body>
+
+  <!-- macOS menu bar -->
+  <div class="menubar">
+    <span class="pill"><span class="glyph">⑃</span><span class="badge-count">3</span></span>
+    <span class="clock">vie 16 jun · 9:41</span>
+  </div>
+
+  <header class="page">
+    <h1>Review &amp; Merge — entrada en la barra de menús</h1>
+    <p>Tres formas de accionar cada PR desde el desplegable. El icono de la barra muestra un <b>badge con las PRs por revisar</b> (aquí, 3). Compara y elige.</p>
+  </header>
+
+  <div class="locked">
+    <span class="chip"><b>Badge:</b> nº de PRs por revisar</span>
+    <span class="chip"><b>Lista:</b> pasiva (sin notificaciones push)</span>
+    <span class="chip"><b>Menú:</b> 2 secciones planas — Por revisar / Mías</span>
+    <span class="chip"><b>Refresco:</b> en 2º plano por intervalo</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-variant="A">A · Submenú por PR</button>
+    <button class="tab" data-variant="B">B · Clic = acción inteligente</button>
+    <button class="tab" data-variant="C">C · Híbrido</button>
+  </div>
+
+  <!-- ============ VARIANT A ============ -->
+  <div class="stage variant" data-variant="A">
+    <div class="menu-anchor">
+      <div class="menu">
+        <div class="section-title"><span>POR REVISAR</span><span>3</span></div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body">
+            <div class="title">Fix flaky retry on token refresh</div>
+            <div class="sub">argus #482 · checks ✓</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic c-green">✓</span><div class="body"><div class="title">Approve</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+            <div class="item plain"><span class="ic">⌥</span><div class="body"><div class="title">Copiar rama</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body">
+            <div class="title">Add segment naming cache</div>
+            <div class="sub">insights #1203 · checks ⏳</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic c-green">✓</span><div class="body"><div class="title">Approve</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+            <div class="item plain"><span class="ic">⌥</span><div class="body"><div class="title">Copiar rama</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body">
+            <div class="title">Bump vostok client to 2.1</div>
+            <div class="sub">segmentation #77 · checks ✗</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic c-green">✓</span><div class="body"><div class="title">Approve</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div class="section-title"><span>MÍAS</span><span>3</span></div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body">
+            <div class="title">Refactor merge readiness</div>
+            <div class="sub">argus #485 · ✓ aprobada · checks ✓</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary"><span class="ic c-purple">⛙</span><div class="body"><div class="title">Merge</div></div></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body">
+            <div class="title">Pin toolchain for reproducible installs</div>
+            <div class="sub">insights #1210 · checks ⏳</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary"><span class="ic c-purple">⚡</span><div class="body"><div class="title">Enable auto-merge</div></div></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-sec">⑃</span>
+          <div class="body">
+            <div class="title">WIP: spike audience overlap</div>
+            <div class="sub">cosmos-audiences #34 · borrador</div>
+          </div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div class="item plain"><span class="ic">↻</span><div class="body"><div class="title">Refrescar ahora</div></div><span class="trailing">hace 2 min</span></div>
+        <div class="item plain"><span class="ic">☰</span><div class="body"><div class="title">Abrir “My Pull Requests”…</div></div></div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h2>A · Submenú por PR</h2>
+      <div class="pro">Todas las acciones disponibles por PR (Abrir, Approve, Merge/Auto-merge, Copiar).</div>
+      <div class="pro">Patrón uniforme: cada fila se comporta igual.</div>
+      <div class="con">Toda acción cuesta 2 pasos (desplegar el submenú → clic). Abrir en navegador también.</div>
+      <div class="con">Más “buceo” cuando solo quieres aprobar rápido.</div>
+      <div class="rec">Bueno si valoras <b>control y consistencia</b> sobre velocidad.</div>
+    </div>
+  </div>
+
+  <!-- ============ VARIANT B ============ -->
+  <div class="stage variant hide" data-variant="B">
+    <div class="menu-anchor">
+      <div class="menu">
+        <div class="section-title"><span>POR REVISAR</span><span>3</span></div>
+
+        <div class="item">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Fix flaky retry on token refresh</div><div class="sub">argus #482 · checks ✓</div></div>
+          <span class="trailing c-green">✓ Approve</span>
+        </div>
+        <div class="item">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Add segment naming cache</div><div class="sub">insights #1203 · checks ⏳</div></div>
+          <span class="trailing c-green">✓ Approve</span>
+        </div>
+        <div class="item">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Bump vostok client to 2.1</div><div class="sub">segmentation #77 · checks ✗</div></div>
+          <span class="trailing c-green">✓ Approve</span>
+        </div>
+
+        <div class="sep"></div>
+        <div class="section-title"><span>MÍAS</span><span>3</span></div>
+
+        <div class="item">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Refactor merge readiness</div><div class="sub">argus #485 · ✓ aprobada</div></div>
+          <span class="trailing c-purple">⛙ Merge</span>
+        </div>
+        <div class="item">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Pin toolchain for reproducible installs</div><div class="sub">insights #1210 · checks ⏳</div></div>
+          <span class="trailing c-purple">⚡ Auto-merge</span>
+        </div>
+        <div class="item">
+          <span class="ic c-sec">⑃</span>
+          <div class="body"><div class="title">WIP: spike audience overlap</div><div class="sub">cosmos-audiences #34 · borrador</div></div>
+          <span class="trailing c-sec">↗ Abrir</span>
+        </div>
+
+        <div class="sep"></div>
+        <div class="item plain"><span class="ic">↻</span><div class="body"><div class="title">Refrescar ahora</div></div><span class="trailing">hace 2 min</span></div>
+        <div class="item plain"><span class="ic">☰</span><div class="body"><div class="title">Abrir “My Pull Requests”…</div></div></div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h2>B · Clic = acción inteligente</h2>
+      <div class="pro">Un solo clic ejecuta la acción primaria (la etiqueta de la derecha la anticipa).</div>
+      <div class="pro">Máxima velocidad: aprobar/mergear es inmediato.</div>
+      <div class="con">No hay acciones secundarias por PR (Copiar URL/rama solo desde el comando completo).</div>
+      <div class="con">Riesgo de clic accidental → conviene confirmación para Merge (ver nota al pie).</div>
+      <div class="rec">Bueno si tu flujo es <b>“entro, apruebo/mergeo, salgo”</b> y las secundarias casi no las usas.</div>
+    </div>
+  </div>
+
+  <!-- ============ VARIANT C ============ -->
+  <div class="stage variant hide" data-variant="C">
+    <div class="menu-anchor">
+      <div class="menu">
+        <div class="section-title"><span>POR REVISAR</span><span>3</span></div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Fix flaky retry on token refresh</div><div class="sub">argus #482 · checks ✓</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">✓</span><div class="body"><div class="title">Approve</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+            <div class="item plain"><span class="ic">⌥</span><div class="body"><div class="title">Copiar rama</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Add segment naming cache</div><div class="sub">insights #1203 · checks ⏳</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">✓</span><div class="body"><div class="title">Approve</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Bump vostok client to 2.1</div><div class="sub">segmentation #77 · checks ✗</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">✓</span><div class="body"><div class="title">Approve</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div class="section-title"><span>MÍAS</span><span>3</span></div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Refactor merge readiness</div><div class="sub">argus #485 · ✓ aprobada · checks ✓</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">⛙</span><div class="body"><div class="title">Merge</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-green">⑃</span>
+          <div class="body"><div class="title">Pin toolchain for reproducible installs</div><div class="sub">insights #1210 · checks ⏳</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">⚡</span><div class="body"><div class="title">Enable auto-merge</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="item has-sub">
+          <span class="ic c-sec">⑃</span>
+          <div class="body"><div class="title">WIP: spike audience overlap</div><div class="sub">cosmos-audiences #34 · borrador</div></div>
+          <span class="chevron">›</span>
+          <div class="submenu">
+            <div class="item plain primary hl"><span class="ic">↗</span><div class="body"><div class="title">Abrir en el navegador</div></div><span class="kbd">↩</span></div>
+            <div class="sep"></div>
+            <div class="item plain"><span class="ic">⧉</span><div class="body"><div class="title">Copiar URL</div></div></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div class="item plain"><span class="ic">↻</span><div class="body"><div class="title">Refrescar ahora</div></div><span class="trailing">hace 2 min</span></div>
+        <div class="item plain"><span class="ic">☰</span><div class="body"><div class="title">Abrir “My Pull Requests”…</div></div></div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h2>C · Híbrido</h2>
+      <div class="pro">Submenú con la <b>acción inteligente arriba y resaltada</b> (Approve / Merge / Auto-merge / Abrir según contexto).</div>
+      <div class="pro">Acciones secundarias siempre a un paso (Copiar URL/rama, Abrir).</div>
+      <div class="pro">Sin clic accidental: la acción fuerte vive dentro del submenú.</div>
+      <div class="con">Sigue siendo 2 pasos para la acción primaria (vs. 1 en la variante B).</div>
+      <div class="rec"><b>Recomendada:</b> equilibra rapidez (la acción correcta ya está resaltada) y disponibilidad de todas las opciones, dentro de los límites de un MenuBarExtra.</div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Nota técnica: en Raycast, cada fila de <code>MenuBarExtra.Item</code> admite <b>un icono + título + subtítulo</b>; no la fila de “accessories” múltiples de los comandos <i>view</i>. Por eso el estado de checks/aprobación se pliega en el subtítulo (<code>checks ✓ / ⏳ / ✗</code>). El icono principal (⑃) reutiliza el glyph de estado de la PR de la app: verde = abierta, gris = borrador, morado = merged. Los submenús se representan con <code>MenuBarExtra.Submenu</code>. Pendiente de decidir: confirmación para Merge y el intervalo de refresco.
+  </p>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const variants = document.querySelectorAll('.stage.variant');
+  tabs.forEach((t) => t.addEventListener('click', () => {
+    tabs.forEach((x) => x.classList.remove('active'));
+    t.classList.add('active');
+    const v = t.dataset.variant;
+    variants.forEach((s) => s.classList.toggle('hide', s.dataset.variant !== v));
+  }));
+</script>
+</body>
+</html>

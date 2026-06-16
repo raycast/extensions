@@ -1,5 +1,6 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { PullRequest } from "../github/types";
+import { Reviewer, ReviewerStatus } from "../lib/reviewers";
 
 const CHECKS_ACCESSORY: Record<string, List.Item.Accessory> = {
   SUCCESS: {
@@ -134,6 +135,87 @@ export function autoMergeAccessories(pr: PullRequest): List.Item.Accessory[] {
         },
       ]
     : [];
+}
+
+const REVIEWER_STATUS_ICON: Record<ReviewerStatus, Image.ImageLike> = {
+  changes_requested: { source: Icon.Pencil, tintColor: Color.Orange },
+  pending: { source: Icon.Clock, tintColor: Color.Yellow },
+  approved: { source: Icon.CheckCircle, tintColor: Color.Green },
+  commented: { source: Icon.Bubble, tintColor: Color.SecondaryText },
+};
+
+const REVIEWER_STATUS_LABEL: Record<ReviewerStatus, string> = {
+  changes_requested: "Requested changes",
+  pending: "Review pending",
+  approved: "Approved",
+  commented: "Commented",
+};
+
+/** Reviewer groups are shown most-actionable first. */
+const REVIEWER_STATUS_ORDER: ReviewerStatus[] = [
+  "changes_requested",
+  "pending",
+  "approved",
+  "commented",
+];
+
+const MAX_REVIEWER_AVATARS = 5;
+
+function reviewerAvatar(reviewer: Reviewer): Image.ImageLike {
+  if (reviewer.type === "team") {
+    return { source: Icon.TwoPeople, tintColor: Color.SecondaryText };
+  }
+  return reviewer.avatarUrl
+    ? { source: reviewer.avatarUrl, mask: Image.Mask.Circle }
+    : { source: Icon.Person };
+}
+
+/**
+ * Requested + submitted reviewers as avatars, grouped by status behind a tinted
+ * marker (✎ changes, ⏳ pending, ✓ approved, 💬 commented). Falls back to the
+ * overall review-decision icon when there are no individual reviewers.
+ */
+export function reviewersAccessories(pr: PullRequest): List.Item.Accessory[] {
+  // `reviewers` may be missing on data restored from an older cache (it predates
+  // this field), so tolerate undefined instead of crashing the first render.
+  const reviewers = pr.reviewers ?? [];
+  if (reviewers.length === 0) {
+    return reviewDecisionAccessories(pr);
+  }
+
+  const accessories: List.Item.Accessory[] = [];
+  let shown = 0;
+  let overflow = 0;
+
+  for (const status of REVIEWER_STATUS_ORDER) {
+    const group = reviewers.filter((reviewer) => reviewer.status === status);
+    if (group.length === 0) continue;
+
+    const visible = group.slice(0, Math.max(0, MAX_REVIEWER_AVATARS - shown));
+    overflow += group.length - visible.length;
+    if (visible.length === 0) continue;
+    shown += visible.length;
+
+    accessories.push({
+      icon: REVIEWER_STATUS_ICON[status],
+      tooltip: REVIEWER_STATUS_LABEL[status],
+    });
+    for (const reviewer of visible) {
+      accessories.push({
+        icon: reviewerAvatar(reviewer),
+        tooltip: `${reviewer.login} — ${REVIEWER_STATUS_LABEL[status]}`,
+      });
+    }
+  }
+
+  if (overflow > 0) {
+    accessories.push({
+      text: `+${overflow}`,
+      tooltip: `${overflow} more reviewer${overflow === 1 ? "" : "s"}`,
+    });
+  }
+
+  return accessories;
 }
 
 export function pullRequestAccessories(pr: PullRequest): List.Item.Accessory[] {

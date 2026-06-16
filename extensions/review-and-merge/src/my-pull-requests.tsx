@@ -12,7 +12,7 @@ import {
   commentsAccessories,
   dateAccessories,
   pullRequestStateIcon,
-  reviewDecisionAccessories,
+  reviewersAccessories,
 } from "./components/accessories";
 import { getSearchScope } from "./preferences";
 
@@ -47,7 +47,7 @@ function MyPullRequests() {
               accessories={[
                 ...checksAccessories(pr),
                 ...autoMergeAccessories(pr),
-                ...reviewDecisionAccessories(pr),
+                ...reviewersAccessories(pr),
                 ...commentsAccessories(pr),
                 ...dateAccessories(pr),
               ]}

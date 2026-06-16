@@ -1,4 +1,5 @@
 import { MergeStateStatus } from "../lib/mergeReadiness";
+import { Reviewer, ReviewNode, ReviewRequestNode } from "../lib/reviewers";
 
 export type PullRequestState = "OPEN" | "CLOSED" | "MERGED";
 export type ReviewDecision =
@@ -35,6 +36,8 @@ export interface PullRequest {
   autoMergeAllowed: boolean;
   viewerHasApproved: boolean;
   comments: number;
+  /** Requested reviewers (pending) plus those who have already reviewed. */
+  reviewers: Reviewer[];
 }
 
 export interface PullRequestNode {
@@ -61,7 +64,6 @@ export interface PullRequestNode {
       commit: { statusCheckRollup: { state: ChecksState } | null };
     }>;
   };
-  latestReviews: {
-    nodes: Array<{ author: { login: string } | null; state: string }>;
-  };
+  latestReviews: { nodes: ReviewNode[] };
+  reviewRequests: { nodes: ReviewRequestNode[] };
 }
