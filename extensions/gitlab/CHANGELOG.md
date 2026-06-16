@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Reduce MR list detail memory usage] - {PR_MERGE_DATE}
+## [Reduce MR list detail memory usage] - 2026-06-16
 
 - Reduce extra detail fetching in merge request list previews
 
