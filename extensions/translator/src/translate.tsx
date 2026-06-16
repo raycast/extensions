@@ -9,16 +9,12 @@ import {
   Toast,
 } from "@raycast/api";
 import { useRef, useState } from "react";
-import { translateText, TranslationError, type OpenAICompatiblePreferences } from "./openai-compatible";
+import { translateText, TranslationError } from "./openai-compatible";
 import { deliverTranslation, TranslationDeliveryError } from "./translation-delivery";
-import {
-  enabledTranslationOptions,
-  type TranslationLanguagePreferences,
-  type TranslationOption,
-} from "./translation-options";
+import { enabledTranslationOptions, type TranslationOption } from "./translation-options";
 
 export default function Command() {
-  const preferences = getPreferenceValues<OpenAICompatiblePreferences & TranslationLanguagePreferences>();
+  const preferences = getPreferenceValues<Preferences.Translate>();
   const [sourceText, setSourceText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
   const translationInFlight = useRef(false);

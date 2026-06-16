@@ -1,16 +1,4 @@
-export interface TranslationLanguagePreferences {
-  showSpanish: boolean;
-  showEnglish: boolean;
-  showBrazilianPortuguese: boolean;
-  showFrench: boolean;
-  showGerman: boolean;
-  showItalian: boolean;
-  showJapanese: boolean;
-  showKorean: boolean;
-  showSimplifiedChinese: boolean;
-}
-
-const LANGUAGE_PREFERENCE_KEYS: Array<keyof TranslationLanguagePreferences> = [
+const LANGUAGE_PREFERENCE_KEYS = [
   "showSpanish",
   "showEnglish",
   "showBrazilianPortuguese",
@@ -20,10 +8,13 @@ const LANGUAGE_PREFERENCE_KEYS: Array<keyof TranslationLanguagePreferences> = [
   "showJapanese",
   "showKorean",
   "showSimplifiedChinese",
-];
+] as const satisfies ReadonlyArray<keyof Preferences>;
+
+export type TranslationLanguagePreference = (typeof LANGUAGE_PREFERENCE_KEYS)[number];
+export type TranslationLanguagePreferences = Pick<Preferences, TranslationLanguagePreference>;
 
 export function enabledLanguagePreferences(
   preferences: TranslationLanguagePreferences,
-): Array<keyof TranslationLanguagePreferences> {
+): TranslationLanguagePreference[] {
   return LANGUAGE_PREFERENCE_KEYS.filter((preference) => preferences[preference]);
 }

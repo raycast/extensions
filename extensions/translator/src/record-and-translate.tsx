@@ -11,20 +11,16 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatRecordingDuration, removeAudioFile } from "./audio";
-import { translateText, type OpenAICompatiblePreferences, type TranslationTarget } from "./openai-compatible";
+import { translateText, type TranslationTarget } from "./openai-compatible";
 import { transcribeAudioFile, TRANSCRIPTION_MODEL } from "./transcription";
 import { deliverTranslation, TranslationDeliveryError } from "./translation-delivery";
-import {
-  enabledTranslationOptions,
-  type TranslationLanguagePreferences,
-  translationTargetTitle,
-} from "./translation-options";
+import { enabledTranslationOptions, translationTargetTitle } from "./translation-options";
 import { useAudioRecorder } from "./use-audio-recorder";
 
 type VoiceStage = "starting" | "recording" | "transcribing" | "choosing" | "translating" | "error";
 
 export default function Command() {
-  const preferences = getPreferenceValues<OpenAICompatiblePreferences & TranslationLanguagePreferences>();
+  const preferences = getPreferenceValues<Preferences.RecordAndTranslate>();
   const {
     isRecording,
     duration,

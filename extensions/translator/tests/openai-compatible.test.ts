@@ -23,6 +23,10 @@ test("rejects unsupported URL protocols", () => {
   assert.throws(() => buildChatCompletionsUrl("file:///tmp/model"), /HTTP or HTTPS/);
 });
 
+test("rejects cleartext remote API URLs", () => {
+  assert.throws(() => buildChatCompletionsUrl("http://api.example.com/v1"), /HTTPS unless it points to localhost/);
+});
+
 test("validates stored translation target identifiers", () => {
   assert.equal(isTranslationTargetId("spanish"), true);
   assert.equal(isTranslationTargetId("english"), true);

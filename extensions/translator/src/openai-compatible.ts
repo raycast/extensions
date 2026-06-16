@@ -1,8 +1,4 @@
-export interface OpenAICompatiblePreferences {
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-}
+export type OpenAICompatiblePreferences = Pick<Preferences, "baseUrl" | "apiKey" | "model">;
 
 export interface TranslationTarget {
   id:
@@ -179,11 +175,25 @@ export function buildChatCompletionsUrl(baseUrl: string): string {
     throw new TranslationError("The Base URL must use HTTP or HTTPS.");
   }
 
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new TranslationError("The Base URL must use HTTPS unless it points to localhost.");
+  }
+
   const path = url.pathname.replace(/\/+$/, "");
   url.pathname = path.endsWith("/chat/completions") ? path : `${path}/chat/completions`;
   url.hash = "";
 
   return url.toString();
+}
+
+export function isLoopbackHostname(hostname: string): boolean {
+  const normalizedHostname = hostname.toLowerCase();
+  return (
+    normalizedHostname === "localhost" ||
+    normalizedHostname.endsWith(".localhost") ||
+    normalizedHostname === "[::1]" ||
+    normalizedHostname.startsWith("127.")
+  );
 }
 
 export function isTranslationTargetId(value: unknown): value is TranslationTarget["id"] {

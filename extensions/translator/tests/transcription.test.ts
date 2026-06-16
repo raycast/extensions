@@ -22,6 +22,7 @@ test("builds an audio transcriptions URL", () => {
     "http://localhost:8080/v1/audio/transcriptions",
   );
   assert.throws(() => buildAudioTranscriptionsUrl("file:///tmp/audio"), /HTTP or HTTPS/);
+  assert.throws(() => buildAudioTranscriptionsUrl("http://api.example.com/v1"), /HTTPS unless it points to localhost/);
 });
 
 test("requires an OpenAI API key before reading or uploading audio", async () => {

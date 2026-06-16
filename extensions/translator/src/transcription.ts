@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
-import type { OpenAICompatiblePreferences } from "./openai-compatible";
+import { isLoopbackHostname, type OpenAICompatiblePreferences } from "./openai-compatible.ts";
 
 export const TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 export const TRANSCRIPTION_PROMPT =
@@ -98,6 +98,10 @@ export function buildAudioTranscriptionsUrl(baseUrl: string): string {
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new TranscriptionError("The Base URL must use HTTP or HTTPS.");
+  }
+
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new TranscriptionError("The Base URL must use HTTPS unless it points to localhost.");
   }
 
   const path = url.pathname.replace(/\/+$/, "");

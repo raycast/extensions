@@ -190,9 +190,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint src tests && npm run format:check && npm run typecheck",
-    "lint:store": "npm run lint && ray lint",
+    "lint:store": "npm run lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "ray build && tsc --noEmit"
   }
 }
