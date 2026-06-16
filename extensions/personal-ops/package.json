@@ -1,0 +1,182 @@
+{
+  "name": "personal-ops",
+  "title": "Personal Ops",
+  "description": "Daily brief for Calendar, Gmail, Linear, and personal action items.",
+  "icon": "extension-icon.png",
+  "author": "diptayan_jash",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "calendar",
+    "gmail",
+    "linear",
+    "brief",
+    "morning"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "brief",
+      "title": "Good Morning",
+      "subtitle": "Day at a glance",
+      "description": "Show today's Calendar, Gmail, Linear, and attention list.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "envPath",
+      "title": "Env File Path",
+      "description": "Optional local .env file path. Leave empty if you configure credentials directly in preferences.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "Timezone used to calculate today's brief window.",
+      "type": "textfield",
+      "required": false,
+      "default": "Asia/Kolkata"
+    },
+    {
+      "name": "linearApiKey",
+      "title": "Linear API Key",
+      "description": "Optional override. If empty, the extension reads LINEAR_API_KEY from the env file.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "linearDefaultTeam",
+      "title": "Linear Default Team",
+      "description": "Optional override for the default team used when creating Linear issues.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "googleClientId",
+      "title": "Google Client ID",
+      "description": "Optional override. If empty, the extension reads GOOGLE_CLIENT_ID from the env file.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "googleClientSecret",
+      "title": "Google Client Secret",
+      "description": "Optional override. If empty, the extension reads GOOGLE_CLIENT_SECRET from the env file.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "googleRefreshToken",
+      "title": "Google Refresh Token",
+      "description": "Optional override. If empty, the extension reads GOOGLE_REFRESH_TOKEN from the env file.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Optional override. If empty, the extension reads GEMINI_API_KEY from the env file.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiModel",
+      "title": "Gemini Model",
+      "description": "Model used only to write the four short brief lines.",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-3.1-flash-lite",
+      "data": [
+        {
+          "title": "Fastest: Gemini 2.5 Flash-Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Balanced: Gemini 3.1 Flash-Lite",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "Best Writing: Gemini 3.5 Flash",
+          "value": "gemini-3.5-flash"
+        },
+        {
+          "title": "Preview: Gemini 3 Flash",
+          "value": "gemini-3-flash-preview"
+        }
+      ]
+    },
+    {
+      "name": "briefTone",
+      "title": "Brief Tone",
+      "description": "Writing style for the Gemini summary lines.",
+      "type": "dropdown",
+      "required": false,
+      "default": "crisp",
+      "data": [
+        {
+          "title": "Crisp",
+          "value": "crisp"
+        },
+        {
+          "title": "Friendly",
+          "value": "friendly"
+        },
+        {
+          "title": "Savage",
+          "value": "savage"
+        },
+        {
+          "title": "Founder Mode",
+          "value": "founder"
+        }
+      ]
+    },
+    {
+      "name": "summaryMode",
+      "title": "Summary Mode",
+      "description": "Choose whether to show a fast deterministic summary while Gemini refreshes, or rely only on Gemini.",
+      "type": "dropdown",
+      "required": false,
+      "default": "hybrid",
+      "data": [
+        {
+          "title": "Hybrid: Fast fallback + Gemini",
+          "value": "hybrid"
+        },
+        {
+          "title": "Gemini Only",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "name": "useGeminiCache",
+      "title": "Use Gemini Cache",
+      "label": "Use cached Gemini summaries",
+      "description": "Show cached Gemini summaries while a fresh one loads.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@google/genai": "^2.8.0",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3"
+  }
+}
