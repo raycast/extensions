@@ -15,8 +15,9 @@ export default function Command() {
   useEffect(() => {
     if (!data) return;
 
+    const briefData = data;
     let cancelled = false;
-    const cacheKey = briefCacheKey(data);
+    const cacheKey = briefCacheKey(briefData);
 
     async function refreshAiSummary() {
       setIsGeminiLoading(true);
@@ -30,7 +31,7 @@ export default function Command() {
 
       let fresh: GeminiBriefSummary | null = null;
       try {
-        fresh = await getGeminiBriefSummary(data);
+        fresh = await getGeminiBriefSummary(briefData);
       } catch (error) {
         if (cancelled) return;
         const message = error instanceof Error ? error.message : "Gemini summary failed. Showing deterministic brief.";
@@ -103,7 +104,7 @@ export default function Command() {
           </List.Section>
 
           <List.Section title="Calendar">
-            {data.calendar.length === 0 ? <List.Item title="No calendar events found" icon={Icon.Calendar} /> : data.calendar.map((event) => <CalendarItem key={event.id} event={event} onRespond={revalidate} />)}
+            {data.calendar.length === 0 ? <List.Item title="No calendar events found" icon={Icon.Calendar} /> : data.calendar.map((event) => <CalendarItem key={event.id} event={event} onRespond={() => revalidate().then(() => undefined)} />)}
           </List.Section>
 
           <List.Section title="Important Unread Email">
