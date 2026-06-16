@@ -1,0 +1,229 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raykagi",
+  "title": "RayKagi",
+  "description": "Search Kagi from Raycast, plus quick access to Kagi Translate, Summarizer, News, Small Web, Assistant and bang shortcuts.",
+  "icon": "icon.png",
+  "author": "Shabablinchikow",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "keywords": [
+    "kagi",
+    "search",
+    "translate",
+    "summarizer",
+    "bang",
+    "small web",
+    "news",
+    "assistant"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Kagi API Token",
+      "description": "Optional. Needed only for the Search command (Kagi v1 Search API, billed per query, Bearer token). Generate one at kagi.com/api/keys. All other commands work without it.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Kagi",
+      "description": "Autocomplete as you type (free); press Enter to run a Kagi search. Falls back to opening the browser when no API token is set.",
+      "mode": "view",
+      "icon": "search.png"
+    },
+    {
+      "name": "bang",
+      "title": "Create Kagi Bang Shortcut",
+      "description": "Pick a Kagi !bang and bind it to a Quicklink so you can give it an alias or hotkey.",
+      "mode": "view",
+      "icon": "bang.png"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Kagi",
+      "description": "Open Kagi Translate for the given text. Configure languages/quality in preferences, or bind a Quicklink with an alias.",
+      "mode": "view",
+      "icon": "translate.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to translate",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "translateFrom",
+          "title": "Translate From",
+          "description": "Source language code (e.g. auto, en, ru, ja).",
+          "type": "textfield",
+          "required": false,
+          "default": "auto"
+        },
+        {
+          "name": "translateTo",
+          "title": "Translate To",
+          "description": "Target language code (e.g. en, ru, de, fr).",
+          "type": "textfield",
+          "required": false,
+          "default": "en"
+        },
+        {
+          "name": "translateQuality",
+          "title": "Quality",
+          "description": "Translation quality.",
+          "type": "dropdown",
+          "required": false,
+          "default": "standard",
+          "data": [
+            {
+              "title": "Standard",
+              "value": "standard"
+            },
+            {
+              "title": "Best",
+              "value": "best"
+            }
+          ]
+        },
+        {
+          "name": "translateStyle",
+          "title": "Style",
+          "description": "Translation style.",
+          "type": "dropdown",
+          "required": false,
+          "default": "natural",
+          "data": [
+            {
+              "title": "Natural",
+              "value": "natural"
+            },
+            {
+              "title": "Literal",
+              "value": "literal"
+            }
+          ]
+        },
+        {
+          "name": "translateFormality",
+          "title": "Formality",
+          "description": "Tone of the translation.",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "More formal",
+              "value": "more"
+            },
+            {
+              "title": "Less formal",
+              "value": "less"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize URL",
+      "subtitle": "Kagi",
+      "description": "Open the Kagi Universal Summarizer for a URL. Bind a Quicklink to give it an alias or hotkey.",
+      "mode": "view",
+      "icon": "summarize.png",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL to summarize",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "summaryType",
+          "title": "Summary Type",
+          "description": "Prose summary or bulleted key takeaways.",
+          "type": "dropdown",
+          "required": false,
+          "default": "summary",
+          "data": [
+            {
+              "title": "Summary",
+              "value": "summary"
+            },
+            {
+              "title": "Key Takeaways",
+              "value": "takeaway"
+            }
+          ]
+        },
+        {
+          "name": "summaryLanguage",
+          "title": "Summary Language",
+          "description": "Target language code (e.g. EN, RU, DE). Leave empty to keep the document's language.",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "news",
+      "title": "Open Kagi News",
+      "description": "Open Kagi News in your browser.",
+      "mode": "no-view",
+      "icon": "news.png"
+    },
+    {
+      "name": "smallweb",
+      "title": "Random Small Web Page",
+      "subtitle": "Kagi",
+      "description": "Open a random page from the Kagi Small Web in your browser.",
+      "mode": "no-view",
+      "icon": "smallweb.png"
+    },
+    {
+      "name": "assistant",
+      "title": "Open Kagi Assistant",
+      "description": "Open the Kagi Assistant in your browser.",
+      "mode": "no-view",
+      "icon": "assistant.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

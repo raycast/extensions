@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+*.log
+.raycast
+
+# local screenshot sources kept on disk but not committed (store crops live in metadata/)
+/screen-*.png
