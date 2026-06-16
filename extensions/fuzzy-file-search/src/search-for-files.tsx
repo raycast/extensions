@@ -208,6 +208,7 @@ export default function Command() {
           signal: abortableFzf.current?.signal,
         });
         await new Promise<void>((resolve, reject) => {
+          let stoppedIntentionally = false;
           const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
           rl.on("line", (line) => {
             // Limit results, as otherwise they will exceed memory limits,
@@ -215,6 +216,7 @@ export default function Command() {
             if (filteredResults.length >= 1000) {
               // It sends the kill signal when reaching 1000,
               // so results will be larger than 1000
+              stoppedIntentionally = true;
               fzf.kill();
             } else {
               filteredResults.push(line);
@@ -227,11 +229,17 @@ export default function Command() {
           });
 
           fzf.on("error", () => {
+            stoppedIntentionally = true;
             console.log("aborting fzf");
           });
 
-          fzf.on("close", (code) => {
+          fzf.on("close", (code, signal) => {
             rl.close();
+            // Aborted by a newer search or killed after hitting the result cap — not an error
+            if (stoppedIntentionally || signal) {
+              resolve();
+              return;
+            }
             // Fzf returns error code 1 if output is empty
             if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
               resolve();
@@ -247,14 +255,7 @@ export default function Command() {
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
-    [
-      parsedSearch.query,
-      parsedSearch.indexType,
-      fzfPath,
-      fdOutput?.filepath,
-      fdOutput?.randomUUID,
-      fdOutput?.indexType,
-    ],
+    [parsedSearch.query, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
       execute:
         fzfPath !== undefined &&
