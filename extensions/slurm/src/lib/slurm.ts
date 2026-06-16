@@ -1,6 +1,7 @@
 import { ChildProcess } from "node:child_process";
 import { runSsh, spawnSsh } from "./ssh";
 import { shellQuote } from "./shell";
+import { parseSlurmDurationSeconds } from "./format";
 
 function splitOnSentinel(s: string, sentinel: string): [string, string] {
   const idx = s.indexOf(sentinel);
@@ -105,6 +106,22 @@ export async function listJobs(host: string, user: string): Promise<Job[]> {
   return jobs;
 }
 
+// Lightweight variant for the menu bar's background refresh. Skips the second
+// `squeue -O tres-alloc` call and the AllocTRES map join from listJobs, because
+// the menu bar only renders state counts + basic job fields and never reads
+// `tres`. `tres` is left as the `%b` GPU shorthand from parseJobRow. Keeping this
+// tick cheap is what lets the background refresh land the title/color reliably
+// without doing (and buffering) work the menu bar throws away.
+export async function listJobsBrief(host: string, user: string): Promise<Job[]> {
+  const fmt = "%i|%P|%j|%T|%M|%l|%D|%C|%R|%b";
+  const out = await runSsh(host, `squeue -h -u ${shellQuote(user)} -o ${shellQuote(fmt)}`);
+  return out
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map(parseJobRow);
+}
+
 function parseJobRow(row: string): Job {
   const p = row.split("|");
   return {
@@ -155,6 +172,105 @@ function parseAllJobRow(row: string): Job {
     user: p[9] ?? "",
     tres: p[10] ?? "",
   };
+}
+
+export type QueueEntry = {
+  jobId: string;
+  name: string;
+  user: string;
+  cpus: string;
+  mem: string; // requested memory as squeue prints it (%m), e.g. "64G"
+  timeLimit: string; // requested wallclock (%l), e.g. "1-00:00:00" / "UNLIMITED"
+  tres: string; // AllocTRES (running) or the `%b` GPU shorthand fallback
+};
+
+// A running job additionally carries its remaining wallclock (%L, "time left").
+export type RunningEntry = QueueEntry & { timeLeft: string };
+
+export type PartitionActivity = { pending: QueueEntry[]; running: RunningEntry[] };
+
+// Everything competing for `partition`, in one SSH round trip:
+//   • pending jobs in Slurm's scheduling order (priority desc, then JobID asc —
+//     the FIFO tie-break the scheduler walks). The caller finds its own JobID;
+//     everything before it is "ahead in the queue".
+//   • running jobs, sorted by remaining time so the soonest to free resources
+//     comes first.
+// Each list mirrors listAllJobs' resource routine: a primary `-o` row plus a
+// second `-O tres-alloc` call joined by JobID, so GPUs/mem parse the same way
+// they do in the All Jobs view (gpuLabelFromTres / memFromTres over `tres`).
+export async function listPartitionActivity(host: string, partition: string): Promise<PartitionActivity> {
+  const p = shellQuote(partition);
+  const allocFmt = "JobID:64,tres-alloc:512";
+  const pendFmt = "%i|%j|%u|%C|%m|%l|%b";
+  const runFmt = "%i|%j|%u|%C|%m|%l|%L|%b";
+  const cmd =
+    `squeue -h -t PENDING -p ${p} --sort=-p,i -o ${shellQuote(pendFmt)}; echo '---PALLOC---'; ` +
+    `squeue -h -t PENDING -p ${p} --sort=-p,i -O ${shellQuote(allocFmt)}; echo '---RUN---'; ` +
+    `squeue -h -t RUNNING -p ${p} -o ${shellQuote(runFmt)}; echo '---RALLOC---'; ` +
+    `squeue -h -t RUNNING -p ${p} -O ${shellQuote(allocFmt)}`;
+  const out = await runSsh(host, cmd);
+
+  const [pendPrimary, afterPP] = splitOnSentinel(out, "---PALLOC---");
+  const [pendAlloc, afterPA] = splitOnSentinel(afterPP, "---RUN---");
+  const [runPrimary, runAlloc = ""] = splitOnSentinel(afterPA, "---RALLOC---");
+
+  const pending = joinAlloc(parseRows(pendPrimary, parsePendingRow), pendAlloc);
+  const running = joinAlloc(parseRows(runPrimary, parseRunningRow), runAlloc).sort(
+    (a, b) => timeLeftSeconds(a.timeLeft) - timeLeftSeconds(b.timeLeft),
+  );
+  return { pending, running };
+}
+
+function parseRows<T>(block: string, parse: (row: string) => T): T[] {
+  return block
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map(parse);
+}
+
+// Overwrite each entry's `tres` with its AllocTRES (when present) the same way
+// listAllJobs does; pending jobs keep the `%b` shorthand from the primary row.
+function joinAlloc<T extends { jobId: string; tres: string }>(entries: T[], allocBlock: string): T[] {
+  const allocByJob = parseAllocTres(allocBlock, 64);
+  for (const e of entries) {
+    const a = allocByJob.get(e.jobId);
+    if (a) e.tres = a;
+  }
+  return entries;
+}
+
+function parsePendingRow(row: string): QueueEntry {
+  const p = row.split("|");
+  return {
+    jobId: p[0] ?? "",
+    name: p[1] ?? "",
+    user: p[2] ?? "",
+    cpus: p[3] ?? "",
+    mem: p[4] ?? "",
+    timeLimit: p[5] ?? "",
+    tres: p[6] ?? "",
+  };
+}
+
+function parseRunningRow(row: string): RunningEntry {
+  const p = row.split("|");
+  return {
+    jobId: p[0] ?? "",
+    name: p[1] ?? "",
+    user: p[2] ?? "",
+    cpus: p[3] ?? "",
+    mem: p[4] ?? "",
+    timeLimit: p[5] ?? "",
+    timeLeft: p[6] ?? "",
+    tres: p[7] ?? "",
+  };
+}
+
+// "1-04:23:11" / "23:45:00" → seconds for sorting; UNLIMITED sinks to the end.
+function timeLeftSeconds(v: string): number {
+  if (!v || v.toUpperCase() === "UNLIMITED") return Number.MAX_SAFE_INTEGER;
+  return parseSlurmDurationSeconds(v) ?? Number.MAX_SAFE_INTEGER;
 }
 
 export async function showJob(host: string, jobId: string): Promise<JobDetail> {
@@ -245,4 +361,64 @@ function tokenizeKv(line: string): Record<string, string> {
 
 export function tailFile(host: string, filePath: string): ChildProcess {
   return spawnSsh(host, `tail -n 200 -F ${shellQuote(filePath)}`);
+}
+
+// One-shot read of the *bottom* of a log file for the embedded Output/Error
+// detail panes. We never read the whole file — ML run logs are routinely
+// gigabytes — so this is bounded twice: `tail -c` caps the bytes pulled over the
+// wire (a CR-redraw progress bar can make a single "line" enormous, see the
+// tailview-cr-buffer-leak note), then CR redraws are flattened to newlines and
+// `tail -n` keeps the last `lines`. The newest content ends up at the bottom.
+const LOG_TAIL_BYTES = 128 * 1024;
+
+export async function readLogTail(host: string, filePath: string, lines: number): Promise<string> {
+  const n = Math.max(1, Math.floor(lines));
+  const cmd = `tail -c ${LOG_TAIL_BYTES} -- ${shellQuote(filePath)} | tr '\\r' '\\n' | tail -n ${n}`;
+  return runSsh(host, cmd);
+}
+
+// ---------- live job metrics ----------
+
+// Portable collector that joins a RUNNING job's allocation via `srun --overlap`
+// and streams one tick per second: per-GPU utilization/memory from nvidia-smi
+// (device-scoped to the job) plus job-wide CPU%/RAM% from the job cgroup
+// (cgroup v2 primary, v1 fallback). Single-quoted JS strings keep the shell
+// `${...}` expansions literal; see parseMetricStream for the output format.
+const METRICS_SCRIPT = [
+  "NCPU=${SLURM_CPUS_ON_NODE:-1}",
+  "if [ -f /sys/fs/cgroup/cgroup.controllers ]; then",
+  '  rel=$(sed -n "s/^0:://p" /proc/self/cgroup); job=${rel%%/step_*}; CG=/sys/fs/cgroup$job; MODE=v2',
+  "else",
+  '  crel=$(grep -m1 -E ":cpuacct:|:cpu,cpuacct:|:cpu:" /proc/self/cgroup | cut -d: -f3); cjob=${crel%%/step_*}',
+  '  mrel=$(grep -m1 ":memory:" /proc/self/cgroup | cut -d: -f3); mjob=${mrel%%/step_*}',
+  "  CPUF=/sys/fs/cgroup/cpu,cpuacct$cjob/cpuacct.usage; MEMC=/sys/fs/cgroup/memory$mjob/memory.usage_in_bytes; MEMM=/sys/fs/cgroup/memory$mjob/memory.limit_in_bytes; MODE=v1",
+  "fi",
+  'prev=""; ptime=""',
+  "while true; do",
+  '  now=$(date +%s%3N); echo "T $now"',
+  '  nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits | sed "s/^/G /"',
+  '  if [ "$MODE" = v2 ]; then',
+  '    usage=$(grep usage_usec "$CG/cpu.stat" 2>/dev/null | cut -d" " -f2)',
+  '    memc=$(cat "$CG/memory.current" 2>/dev/null); memm=$(cat "$CG/memory.max" 2>/dev/null)',
+  "  else",
+  '    raw=$(cat "$CPUF" 2>/dev/null); usage=$(( ${raw:-0} / 1000 ))',
+  '    memc=$(cat "$MEMC" 2>/dev/null); memm=$(cat "$MEMM" 2>/dev/null)',
+  "  fi",
+  '  cpu="-"',
+  '  if [ -n "$prev" ] && [ -n "$usage" ]; then',
+  "    dt=$(( now - ptime )); dus=$(( usage - prev ))",
+  '    cpu=$(awk -v dus=$dus -v dt=$dt -v n=$NCPU "BEGIN{printf \\"%.1f\\", (dus/1000.0)/dt/n*100}")',
+  "  fi",
+  "  prev=$usage; ptime=$now",
+  '  echo "C $cpu $memc $memm"; echo "E"; sleep 1',
+  "done",
+].join("\n");
+
+export function streamJobMetrics(host: string, jobId: string): ChildProcess {
+  // Ship the script base64-encoded so its quoting survives the ssh → srun → bash
+  // hops untouched (base64 has no shell-special characters).
+  const b64 = Buffer.from(METRICS_SCRIPT).toString("base64");
+  const inner = `echo ${b64} | base64 -d | bash`;
+  const cmd = `srun --jobid=${shellQuote(jobId)} --overlap -n1 bash -c ${shellQuote(inner)}`;
+  return spawnSsh(host, cmd);
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Color, Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { listJobs, type Job } from "./lib/slurm";
+import { listJobsBrief, type Job } from "./lib/slurm";
 import { useActiveHosts, useSlurmUsers } from "./lib/session";
 import { fetchPerCluster } from "./lib/multi";
 import { openMasterInTerminal } from "./lib/ssh";
@@ -21,15 +21,18 @@ export default function MenuBar() {
     async (key: string) => {
       const pairs = JSON.parse(key) as Array<[string, string]>;
       const list = pairs.map(([h]) => h).filter(Boolean);
-      return fetchPerCluster<Job[]>(list, (h) => listJobs(h, users[h] ?? ""));
+      return fetchPerCluster<Job[]>(list, (h) => listJobsBrief(h, users[h] ?? ""));
     },
     [usersKey],
     { execute: ready, keepPreviousData: true },
   );
 
+  // Only ticks while the dropdown is open (Raycast suspends the menu-bar process
+  // otherwise). Background refresh of the title/color is driven by the manifest
+  // `interval`, which Raycast caps at a 1-minute minimum.
   useEffect(() => {
     if (!ready) return;
-    const t = setInterval(() => revalidate(), 30_000);
+    const t = setInterval(() => revalidate(), 20_000);
     return () => clearInterval(t);
   }, [ready, usersKey, revalidate]);
 

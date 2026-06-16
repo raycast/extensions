@@ -18,29 +18,31 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { cancelJob, listJobs, showJob, tailFile, type Job, type JobDetail } from "./lib/slurm";
+import { consumeStreamChunk } from "./lib/logstream";
+import { matchesQuery } from "./lib/search";
 import { useActiveHosts, useSlurmUsers } from "./lib/session";
 import { fetchPerCluster, type ClusterResult } from "./lib/multi";
 import { ClusterAuthRow } from "./lib/components/ClusterAuthRow";
-import { classifySshError, showSshErrorToast } from "./lib/errors";
+import { JobDetailView } from "./lib/components/JobDetailView";
+import { showSshErrorToast } from "./lib/errors";
 import {
   ClusterFilterDropdown,
   FILTER_ALL,
   applyClusterFilter,
   partitionsByCluster,
 } from "./lib/components/ClusterFilter";
-import {
-  formatSlurmDateTime,
-  formatSlurmDuration,
-  gpuLabelFromTres,
-  memFromTres,
-  shortReason,
-  stateColor,
-} from "./lib/format";
+import { fitSubtitleToRow, gpuLabelFromTres, memFromTres, stateColor } from "./lib/format";
+
+// Render jobs in bounded pages so a large queue (e.g. a big array-job fan-out)
+// can't instantiate enough List.Items at once to exhaust the Raycast worker heap.
+const PAGE_SIZE = 100;
 
 export default function ManageJobs() {
   const { hosts, isLoading: hostsLoading } = useActiveHosts();
   const { users, isLoading: usersLoading } = useSlurmUsers(hosts);
   const [filter, setFilter] = useState<string>(FILTER_ALL);
+  const [searchText, setSearchText] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const usersKey = useMemo(() => JSON.stringify(hosts.map((h) => [h, users[h] ?? ""])), [hosts, users]);
   const ready = hosts.length > 0 && hosts.every((h) => !!users[h]);
@@ -88,19 +90,52 @@ export default function ManageJobs() {
     [results, filter],
   );
 
+  // Reset to the first page whenever the dataset, filter, or search changes.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [usersKey, filter, searchText]);
+
   if (!hostsLoading && hosts.length === 0) {
     return <NoHostView />;
   }
 
   const isLoading = hostsLoading || usersLoading || jobsLoading;
   const allFailures = (results ?? []).filter((r) => !r.ok);
-  const filteredSuccesses = filtered.filter((r) => r.ok);
+  const okClusters = filtered.filter((r): r is Extract<ClusterResult<Job[]>, { ok: true }> => r.ok);
+
+  // We filter the full in-memory dataset ourselves (List filtering disabled) so
+  // search spans every job, not just the currently-paginated rows. Flatten the
+  // matches in cluster order, then slice to the visible page and regroup into
+  // sections — this bounds how many List.Items exist in the tree at once.
+  const flat: { host: string; job: Job }[] = [];
+  const matchesPerHost = new Map<string, number>();
+  for (const r of okClusters) {
+    for (const job of r.data) {
+      if (!matchesQuery(jobHaystack(r.host, job), searchText)) continue;
+      flat.push({ host: r.host, job });
+      matchesPerHost.set(r.host, (matchesPerHost.get(r.host) ?? 0) + 1);
+    }
+  }
+  const totalJobs = flat.length;
+  const shownByHost = new Map<string, Job[]>();
+  for (const { host, job } of flat.slice(0, visibleCount)) {
+    const arr = shownByHost.get(host);
+    if (arr) arr.push(job);
+    else shownByHost.set(host, [job]);
+  }
 
   return (
     <List
       isLoading={isLoading}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search jobs across clusters…"
       navigationTitle={hosts.length ? `My Jobs — ${hosts.join(", ")}` : "My Jobs"}
+      pagination={{
+        pageSize: PAGE_SIZE,
+        hasMore: visibleCount < totalJobs,
+        onLoadMore: () => setVisibleCount((c) => c + PAGE_SIZE),
+      }}
       searchBarAccessory={
         <ClusterFilterDropdown tooltip="Filter" value={filter} onChange={setFilter} clusters={partitionsPerCluster} />
       }
@@ -109,7 +144,7 @@ export default function ManageJobs() {
         !r.ok ? <ClusterAuthRow key={`err:${r.host}`} host={r.host} info={r.error} onReauth={revalidate} /> : null,
       )}
 
-      {filteredSuccesses.length === 0 && allFailures.length === 0 && !isLoading ? (
+      {totalJobs === 0 && allFailures.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No jobs"
           description="No queued or running jobs on any active cluster."
@@ -117,70 +152,62 @@ export default function ManageJobs() {
         />
       ) : null}
 
-      {filteredSuccesses.map((r) =>
-        r.ok ? (
-          <List.Section key={r.host} title={r.host} subtitle={`${r.data.length} jobs`}>
-            {r.data.map((job) => (
+      {okClusters.map((r) => {
+        const jobs = shownByHost.get(r.host);
+        if (!jobs || jobs.length === 0) return null;
+        return (
+          <List.Section key={r.host} title={r.host} subtitle={`${matchesPerHost.get(r.host) ?? 0} jobs`}>
+            {jobs.map((job) => (
               <JobItem key={`${r.host}:${job.jobId}`} job={job} host={r.host} onCancelled={revalidate} />
             ))}
           </List.Section>
-        ) : null,
-      )}
+        );
+      })}
     </List>
   );
+}
+
+// Fields the search bar matches against — mirrors the old List.Item `keywords`.
+function jobHaystack(host: string, job: Job): string {
+  return [host, job.jobId, job.partition, job.state, job.name, job.user ?? "", job.reasonOrNodeList].join(" ");
 }
 
 function JobItem({ job, host, onCancelled }: { job: Job; host: string; onCancelled: () => void }) {
   const { push } = useNavigation();
 
+  const rowTexts = [job.jobId, job.partition, `${job.elapsed} / ${job.timeLimit}`, `${job.cpus} CPU`];
   const accessories: List.Item.Accessory[] = [
     { tag: { value: job.partition, color: Color.SecondaryText } },
     { text: `${job.elapsed} / ${job.timeLimit}` },
   ];
   accessories.push({ text: `${job.cpus} CPU` });
   const mem = memFromTres(job.tres);
-  if (mem) accessories.push({ text: mem });
+  if (mem) {
+    accessories.push({ text: mem });
+    rowTexts.push(mem);
+  }
   const gpu = gpuLabelFromTres(job.tres);
-  if (gpu) accessories.push({ text: gpu });
+  if (gpu) {
+    accessories.push({ text: gpu });
+    rowTexts.push(gpu);
+  }
 
   return (
     <List.Item
       title={job.jobId}
-      subtitle={job.name.length > 30 ? `${job.name.slice(0, 29)}…` : job.name}
+      // The job name is the only element Raycast lets overflow, so truncate it
+      // against the row's character budget (title + accessories). This keeps the
+      // accessories (e.g. the GPU tag) visible and shortens the name instead.
+      subtitle={fitSubtitleToRow(job.name, rowTexts)}
       keywords={[host, job.partition, job.state, job.name, job.reasonOrNodeList]}
       icon={{ source: Icon.Hammer, tintColor: stateColor(job.state) }}
       accessories={accessories}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Cluster" text={host} />
-              <List.Item.Detail.Metadata.Label title="Job ID" text={job.jobId} />
-              <List.Item.Detail.Metadata.Label title="Name" text={job.name} />
-              <List.Item.Detail.Metadata.TagList title="State">
-                <List.Item.Detail.Metadata.TagList.Item text={job.state} color={stateColor(job.state)} />
-              </List.Item.Detail.Metadata.TagList>
-              <List.Item.Detail.Metadata.Label title="Partition" text={job.partition} />
-              <List.Item.Detail.Metadata.Label title="Nodes" text={job.nodes} />
-              <List.Item.Detail.Metadata.Label title="CPUs" text={job.cpus} />
-              <List.Item.Detail.Metadata.Label title="Elapsed" text={`${job.elapsed} / ${job.timeLimit}`} />
-              {job.tres ? <List.Item.Detail.Metadata.Label title="TRES" text={job.tres} /> : null}
-              {shortReason(job.reasonOrNodeList) ? (
-                <List.Item.Detail.Metadata.Label
-                  title={job.state === "RUNNING" ? "Node List" : "Reason"}
-                  text={job.reasonOrNodeList}
-                />
-              ) : null}
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
       actions={
         <ActionPanel>
           <Action
             title="View Details"
             icon={Icon.Eye}
-            onAction={() => push(<JobDetailView host={host} jobId={job.jobId} />)}
+            onAction={() => push(<JobDetailView host={host} jobId={job.jobId} owned />)}
           />
           <Action
             title="Tail StdOut"
@@ -257,73 +284,6 @@ async function safeShowJob(host: string, jobId: string): Promise<JobDetail | nul
   }
 }
 
-function JobDetailView({ host, jobId }: { host: string; jobId: string }) {
-  const { data, isLoading, error } = useCachedPromise((h: string, id: string) => showJob(h, id), [host, jobId]);
-
-  const md = useMemo(() => {
-    if (error) {
-      const info = classifySshError(error, host);
-      const hint = info.hint ? `> ${info.hint}\n\n` : "";
-      return `# ${info.title}\n\n${info.message}\n\n${hint}\`\`\`\n${info.raw}\n\`\`\``;
-    }
-    if (!data) return "Loading…";
-    const f = data.fields;
-    const sections: string[] = [];
-    sections.push(`# Job ${f.JobId ?? jobId}`);
-    sections.push(`**${f.JobName ?? ""}** — \`${f.JobState ?? ""}\` · cluster \`${host}\``);
-    sections.push("");
-    sections.push("## Resources");
-    sections.push(`- Partition: \`${f.Partition ?? ""}\``);
-    sections.push(`- NumNodes: ${f.NumNodes ?? ""}, NumCPUs: ${f.NumCPUs ?? ""}`);
-    if (f.TRES) sections.push(`- TRES: \`${f.TRES}\``);
-    if (f.NodeList) sections.push(`- NodeList: \`${f.NodeList}\``);
-    sections.push("");
-    sections.push("## Time");
-    sections.push("");
-    sections.push("|        |                                       |");
-    sections.push("| ------ | ------------------------------------- |");
-    sections.push(`| Submit | ${formatSlurmDateTime(f.SubmitTime ?? "")} |`);
-    sections.push(`| Start  | ${formatSlurmDateTime(f.StartTime ?? "")} |`);
-    sections.push(`| End    | ${formatSlurmDateTime(f.EndTime ?? "")} |`);
-    sections.push(`| Limit  | ${formatSlurmDuration(f.TimeLimit ?? "")} |`);
-    sections.push("");
-    sections.push("## Paths");
-    if (f.WorkDir) sections.push(`- WorkDir: \`${f.WorkDir}\``);
-    if (f.StdOut) sections.push(`- StdOut:  \`${f.StdOut}\``);
-    if (f.StdErr) sections.push(`- StdErr:  \`${f.StdErr}\``);
-    if (f.Command) {
-      sections.push("");
-      sections.push("## Command");
-      sections.push("```sh");
-      sections.push(f.Command);
-      sections.push("```");
-    }
-    sections.push("");
-    sections.push("## Raw");
-    sections.push("```");
-    sections.push(data.raw.trim());
-    sections.push("```");
-    return sections.join("\n");
-  }, [data, error, jobId, host]);
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={md}
-      navigationTitle={`Job ${jobId} — ${host}`}
-      actions={
-        <ActionPanel>
-          {data?.fields.StdOut ? (
-            <Action.CopyToClipboard title="Copy StdOut Path" content={data.fields.StdOut} />
-          ) : null}
-          {data?.fields.WorkDir ? <Action.CopyToClipboard title="Copy WorkDir" content={data.fields.WorkDir} /> : null}
-          {data ? <Action.CopyToClipboard title="Copy Raw Scontrol Output" content={data.raw} /> : null}
-        </ActionPanel>
-      }
-    />
-  );
-}
-
 function TailView({ host, path, title }: { host: string; path: string; title: string }) {
   const [lines, setLines] = useState<string[]>([]);
   const [stopped, setStopped] = useState(false);
@@ -332,9 +292,8 @@ function TailView({ host, path, title }: { host: string; path: string; title: st
     const proc = tailFile(host, path);
     let buffer = "";
     proc.stdout?.on("data", (chunk: Buffer) => {
-      buffer += chunk.toString();
-      const parts = buffer.split("\n");
-      buffer = parts.pop() ?? "";
+      const { lines: parts, buffer: rest } = consumeStreamChunk(buffer, chunk.toString());
+      buffer = rest;
       if (parts.length) setLines((prev) => [...prev, ...parts].slice(-500));
     });
     proc.stderr?.on("data", (chunk: Buffer) => {
