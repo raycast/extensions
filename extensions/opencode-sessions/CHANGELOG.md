@@ -1,6 +1,6 @@
 # OpenCode Sessions Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-16
 
 - Added content search across session titles and message bodies
 - Added "New Session" command to start fresh OpenCode conversations from Raycast
