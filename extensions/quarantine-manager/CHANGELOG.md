@@ -1,6 +1,6 @@
 # Quarantine Manager
 
-## [Multi-target selection] - {PR_MERGE_DATE}
+## [Multi-target selection] - 2026-06-16
 
 ### Fixed
 
