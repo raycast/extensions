@@ -18,6 +18,12 @@
       "title": "Play or Pause the Lot Radio",
       "description": "Toggle play/pause on The Lot Radio audio stream",
       "mode": "no-view"
+    },
+    {
+      "name": "schedule",
+      "title": "View Today's Lineup",
+      "description": "See who's playing on The Lot Radio today",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -27,7 +33,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
