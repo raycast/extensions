@@ -46,6 +46,7 @@ function ReviewRequests() {
               viewerLogin={data?.viewerLogin}
               onRefresh={revalidate}
               approveFirst
+              approveAnyState
               repoPullRequests={group.pullRequests}
               subtitle={`#${pr.number}`}
               icon={pullRequestStateIcon(pr)}

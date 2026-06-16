@@ -7,10 +7,17 @@ interface Props {
   pr: PullRequest;
   viewerLogin: string | undefined;
   onRefresh: () => void;
+  /** Offer Approve regardless of PR state (used by Review Requests). */
+  anyState?: boolean;
 }
 
-export function ApproveAction({ pr, viewerLogin, onRefresh }: Props) {
-  if (!canApprove(pr, viewerLogin)) {
+export function ApproveAction({
+  pr,
+  viewerLogin,
+  onRefresh,
+  anyState = false,
+}: Props) {
+  if (!canApprove(pr, viewerLogin, { ignoreState: anyState })) {
     return null;
   }
 

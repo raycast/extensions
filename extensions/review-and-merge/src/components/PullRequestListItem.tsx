@@ -12,6 +12,8 @@ interface Props {
   viewerLogin: string | undefined;
   onRefresh: () => void;
   approveFirst?: boolean;
+  /** Allow the Approve action even when the PR is closed/merged. */
+  approveAnyState?: boolean;
   primaryMerge?: boolean;
   repoPullRequests?: PullRequest[];
   subtitle?: string;
@@ -24,6 +26,7 @@ export function PullRequestListItem({
   viewerLogin,
   onRefresh,
   approveFirst = false,
+  approveAnyState = false,
   primaryMerge = false,
   repoPullRequests,
   subtitle = `${pr.repo}#${pr.number}`,
@@ -31,7 +34,12 @@ export function PullRequestListItem({
   accessories = pullRequestAccessories(pr),
 }: Props) {
   const approve = (
-    <ApproveAction pr={pr} viewerLogin={viewerLogin} onRefresh={onRefresh} />
+    <ApproveAction
+      pr={pr}
+      viewerLogin={viewerLogin}
+      onRefresh={onRefresh}
+      anyState={approveAnyState}
+    />
   );
   const open = <Action.OpenInBrowser url={pr.url} />;
 
