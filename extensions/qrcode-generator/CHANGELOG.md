@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Add contributor] - {PR_MERGE_DATE}
+
+- Added stefan.imbesi to the contributors list
+
 ## [Custom colors, distinct icons, link shortening & UTM] - 2026-06-07
 
 - Fixed error toasts showing "[object Object]" instead of the actual error message (#27569)
