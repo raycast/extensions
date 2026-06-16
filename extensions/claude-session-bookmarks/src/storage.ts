@@ -31,8 +31,10 @@ export function parseSessionUrl(input: string): ParsedUrl {
   } catch {
     return { valid: false, url: trimmed };
   }
-  const isClaude = url.hostname === "claude.ai" && url.pathname.startsWith("/code");
+  // Require an actual session id segment — a bare https://claude.ai/code landing
+  // page is not a session and shouldn't be bookmarkable.
   const match = url.pathname.match(/\/code\/((?:session|cse)_[A-Za-z0-9]+)/);
+  const isClaude = url.hostname === "claude.ai" && match !== null;
   return { valid: isClaude, url: url.toString(), sessionId: match?.[1] };
 }
 
@@ -92,6 +94,10 @@ export async function updateBookmark(id: string, patch: Partial<BookmarkInput>):
   if (!target) return;
   if (patch.url !== undefined) {
     const parsed = parseSessionUrl(patch.url);
+    // Don't let an edit point this bookmark at a session another bookmark already holds.
+    if (parsed.sessionId && bookmarks.some((b) => b.id !== id && b.sessionId === parsed.sessionId)) {
+      throw new Error("Another saved session already uses that link.");
+    }
     target.url = parsed.url;
     target.sessionId = parsed.sessionId;
   }
