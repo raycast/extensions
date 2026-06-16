@@ -1,13 +1,29 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Perferences, Coin } from "#/types";
-import { useSource } from "#/sources";
+import { useCachedPromise } from "@raycast/utils";
+import type { Preferences, Coin } from "#/types";
+import { fetchPrices } from "#/sources";
 import { formatCurrency, formatNumber, formatPercent, processCoinsText } from "./utils";
 
 export function useMenuBar() {
-  const { source, currency, style, coins: coinsText } = getPreferenceValues<Perferences>();
+  const { source, currency, style, coins: coinsText, cryptoCompareApiKey } = getPreferenceValues<Preferences>();
 
   const coinsConfig = processCoinsText(coinsText);
-  const { isLoading, coins } = useSource(source, currency, coinsConfig.symbols);
+  const { isLoading, data } = useCachedPromise(
+    fetchPrices,
+    [source, currency, coinsConfig.symbols, cryptoCompareApiKey ?? ""],
+    {
+      keepPreviousData: true,
+      // Menu-bar commands can't show a toast — without onError, @raycast/utils tries to
+      // (showFailureToast) on an interactive open and crashes the command ("Something went
+      // wrong"). Handling the error here keeps the last cached prices and stays silent.
+      onError: (error) => {
+        console.error("crypto-price: price fetch failed", error);
+      },
+    },
+  );
+
+  const coins = data?.coins;
+  const activeSource = data?.source;
 
   let title = "Loading...";
   let items: string[] = [];
@@ -15,7 +31,7 @@ export function useMenuBar() {
 
   if (!isLoading && !coins) {
     title = "Unavailable";
-  } else if (!isLoading && coins) {
+  } else if (coins) {
     const primarySymbols = coinsConfig.symbols.slice(0, coinsConfig.primaryCount);
     const secondarySymbols = coinsConfig.symbols.slice(coinsConfig.primaryCount);
     const primaryCoins = primarySymbols.flatMap((symbol) => {
@@ -27,7 +43,7 @@ export function useMenuBar() {
       return coin ? [coin] : [];
     });
 
-    title = primaryCoins.map((coin) => genTitle(coin, style, currency)).join(" | ");
+    title = primaryCoins.map((coin) => genTitle(coin, style)).join(" | ");
     items = secondaryCoins.map((coin) => `${coin.symbol}: ${coin.priceDisplay}`);
     sections = primaryCoins.map((coin) => {
       return {
@@ -42,27 +58,31 @@ export function useMenuBar() {
     title,
     items,
     sections,
+    activeSource,
   };
 }
 
-function genTitle(coin: Coin, style: string, currency: string) {
-  const { price, high24h, low24h, priceDisplay } = coin;
-  switch (style) {
-    case "price": {
-      return formatCurrency(price, currency);
+function genTitle(coin: Coin, style: string) {
+  const { price, high24h, low24h, priceDisplay, quoteCurrency } = coin;
+  // Never throw from here: a render-time throw in a menu-bar command shows "Something went wrong".
+  try {
+    switch (style) {
+      case "down24h-price-up24h": {
+        const down = price - low24h;
+        const up = high24h - price;
+        return `${formatNumber(down)} ${priceDisplay} ${formatNumber(up)}`;
+      }
+      case "down24hPercent-price-up24hPercent": {
+        const down = -(low24h - price) / price;
+        const up = (high24h - price) / price;
+        return `${formatPercent(down)} ${priceDisplay} ${formatPercent(up)}`;
+      }
+      case "price":
+      default: {
+        return formatCurrency(price, quoteCurrency);
+      }
     }
-    case "down24h-price-up24h": {
-      const down = price - low24h;
-      const up = high24h - price;
-      return `${formatNumber(down)} ${priceDisplay} ${formatNumber(up)}`;
-    }
-    case "down24hPercent-price-up24hPercent": {
-      const down = -(low24h - price) / price;
-      const up = (high24h - price) / price;
-      return `${formatPercent(down)} ${priceDisplay} ${formatPercent(up)}`;
-    }
-    default: {
-      throw new Error(`Invalid style: ${style}`);
-    }
+  } catch {
+    return priceDisplay;
   }
 }
