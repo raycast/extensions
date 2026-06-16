@@ -845,7 +845,7 @@ function TaskItem({
           )}
 
           <ActionPanel.Section>
-            <Action.Open title="Open todo.txt" target={prefs.todoPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.Open title="Open Todo.txt" target={prefs.todoPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <Action
               title="Reload"
               icon={Icon.ArrowClockwise}
@@ -893,7 +893,7 @@ function ArchivedTaskItem({
       actions={
         <ActionPanel>
           <Action title="Unarchive" icon={Icon.ArrowCounterClockwise} onAction={onUnarchive} />
-          <Action.Open title="Open done.txt" target={prefs.donePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <Action.Open title="Open Done.txt" target={prefs.donePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }

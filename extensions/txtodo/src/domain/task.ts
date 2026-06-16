@@ -108,8 +108,12 @@ function dedupe(arr: string[]): string[] {
 
 export function setDue(task: Task, due: string | undefined): Task {
   // Build updated metadata: spread existing, override or omit `due`
-  const { due: _removed, ...rest } = task.metadata;
-  const metadata: Record<string, string> = due ? { ...rest, due } : { ...rest };
+  const metadata: Record<string, string> = { ...task.metadata };
+  if (due) {
+    metadata.due = due;
+  } else {
+    delete metadata.due;
+  }
   // Rebuild description: strip all existing metadata tags, then re-append from metadata map
   const baseDescription = stripMetadataFromDescription(task.description);
   const metaTokens = Object.entries(metadata).map(([k, v]) => `${k}:${v}`);
