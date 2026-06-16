@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Menu bar, category and author filters, GitHub token, and reliability fixes] - {PR_MERGE_DATE}
+## [Menu bar, category and author filters, GitHub token, and reliability fixes] - 2026-06-16
 
 - Add an optional menu-bar command with a badge showing the number of new and updated extensions since you last checked, a dropdown of recent items, "Mark All as Seen", and hourly background refresh
 - Add category and author filters: filter by any category present in the list, or "Show Only This Author" from any item, with a "Clear Filters" action
