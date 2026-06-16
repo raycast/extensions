@@ -1,6 +1,6 @@
 # WordReference Dictionary Translation Changelog
 
-## [Windows support and storage migration] - {PR_MERGE_DATE}
+## [Windows support and storage migration] - 2026-06-16
 
 - Add Windows support
 - Migrate preferences and recent searches from legacy LocalStorage
