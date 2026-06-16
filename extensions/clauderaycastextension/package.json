@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clauderaycastextension",
+  "title": "Ask Claude Desktop",
+  "description": "Type a prompt in Raycast, press Tab, and it opens the Claude desktop app, pastes your prompt, and submits it.",
+  "icon": "icon.png",
+  "author": "ahmed_khilji",
+  "license": "MIT",
+  "categories": ["Productivity", "Applications"],
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "ask-claude",
+      "title": "Ask Claude",
+      "subtitle": "Claude Desktop",
+      "description": "Opens Claude Desktop, pastes your prompt, and submits it.",
+      "mode": "no-view",
+      "keywords": ["claude", "ai", "ask", "prompt"],
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoSubmit",
+      "type": "checkbox",
+      "required": false,
+      "title": "Behavior",
+      "label": "Submit automatically (Enter)",
+      "default": true,
+      "description": "Presses Enter so Claude starts answering immediately. Turn off to review the prompt in the chat before sending."
+    },
+    {
+      "name": "preserveClipboard",
+      "type": "checkbox",
+      "required": false,
+      "label": "Restore previous clipboard text afterwards",
+      "default": true,
+      "description": "Puts your old clipboard text back once the prompt has been delivered."
+    },
+    {
+      "name": "submitDelay",
+      "type": "textfield",
+      "required": false,
+      "title": "Submit Delay (ms)",
+      "default": "1500",
+      "placeholder": "1500",
+      "description": "How long to wait for the chat to open before pressing Enter. Raise it if a cold start sometimes opens the chat without sending."
+    },
+    {
+      "name": "macAppName",
+      "type": "textfield",
+      "required": false,
+      "title": "App Name (macOS)",
+      "default": "Claude",
+      "description": "The macOS application name of the Claude desktop app."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
