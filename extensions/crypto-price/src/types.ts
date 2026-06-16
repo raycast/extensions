@@ -1,3 +1,6 @@
+// Hand-written rather than the generated `Preferences` global: this extension's tsconfig
+// scopes the compile to `src/**` (for the `#/*` alias + ts-jest tests) and doesn't include
+// the generated `raycast-env.d.ts`, so the global isn't in scope here.
 export interface Preferences {
   source: string;
   currency: string;
