@@ -14,11 +14,22 @@ type Input = {
    * @example "1718899200.000100"
    */
   threadTs: string;
+  /**
+   * The maximum number of thread messages to return. Defaults to 50 and is capped at 100 to avoid returning too much context.
+   */
+  limit?: number;
+  /**
+   * The pagination cursor from a previous response. Use this to read more messages when `hasMore` is true.
+   */
+  cursor?: string;
 };
 
 type ThreadMessage = NonNullable<
   Awaited<ReturnType<ReturnType<typeof getSlackWebClient>["conversations"]["replies"]>>["messages"]
 >[number];
+
+const DEFAULT_LIMIT = 50;
+const MAX_LIMIT = 100;
 
 function getMessageText(message: ThreadMessage) {
   if (message.text) {
@@ -50,34 +61,45 @@ function timestampToIsoDate(ts?: string) {
   return new Date(Number(ts) * 1000).toISOString();
 }
 
+function getLimit(limit?: number) {
+  if (limit == null || Number.isNaN(limit)) {
+    return DEFAULT_LIMIT;
+  }
+
+  return Math.min(Math.max(Math.floor(limit), 1), MAX_LIMIT);
+}
+
 async function readThread(input: Input) {
   const slackWebClient = getSlackWebClient();
-  const messages: ThreadMessage[] = [];
-  let cursor: string | undefined = undefined;
+  const limit = getLimit(input.limit);
 
-  do {
-    const response = await slackWebClient.conversations.replies({
-      channel: input.channel,
-      ts: input.threadTs,
-      limit: 200,
-      cursor,
-    });
+  const response = await slackWebClient.conversations.replies({
+    channel: input.channel,
+    ts: input.threadTs,
+    limit,
+    cursor: input.cursor,
+  });
 
-    if (response.error) {
-      throw new Error(response.error);
-    }
+  if (response.error) {
+    throw new Error(response.error);
+  }
 
-    messages.push(...(response.messages ?? []));
-    cursor = response.response_metadata?.next_cursor;
-  } while (cursor);
+  const nextCursor = response.response_metadata?.next_cursor || undefined;
+  const hasMore = Boolean(response.has_more || nextCursor);
 
-  return messages.map((message) => ({
-    text: getMessageText(message),
-    user: message.user ?? message.bot_profile?.name,
-    ts: message.ts,
-    date: timestampToIsoDate(message.ts),
-    isParentMessage: message.ts === input.threadTs,
-  }));
+  return {
+    messages: response.messages?.map((message) => ({
+      text: getMessageText(message),
+      user: message.user ?? message.bot_profile?.name,
+      ts: message.ts,
+      date: timestampToIsoDate(message.ts),
+      isParentMessage: message.ts === input.threadTs,
+    })),
+    hasMore,
+    nextCursor,
+    returnedCount: response.messages?.length ?? 0,
+    limit,
+  };
 }
 
 export default withSlackClient(readThread);

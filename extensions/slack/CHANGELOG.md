@@ -2,7 +2,7 @@
 
 ## [Add Slack thread reader AI tool] - 2026-06-16
 
-- Add a `read-thread` AI tool to fetch the messages in a Slack thread using the channel ID and parent message timestamp.
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
 
 ## [Fix Set Status deep link with raw emoji] - 2026-06-13
 

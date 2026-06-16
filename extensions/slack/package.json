@@ -178,7 +178,7 @@
     {
       "title": "Read Thread",
       "name": "read-thread",
-      "description": "Read the messages in a Slack thread. Use this when the user asks to summarize, inspect, or answer questions about a specific threaded conversation. Requires the channel ID and the parent message timestamp, which can come from Get Channel History or Search Messages."
+      "description": "Read a bounded page of messages in a Slack thread. Use this when the user asks to summarize, inspect, or answer questions about a specific threaded conversation. Requires the channel ID and the parent message timestamp, which can come from Get Channel History or Search Messages. The response includes hasMore and nextCursor so more messages can be fetched when needed."
     }
   ],
   "ai": {
