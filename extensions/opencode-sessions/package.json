@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "mike182uk",
   "contributors": [
-    "mormubis"
+    "mormubis",
+    "0xdhrv"
   ],
   "platforms": [
     "macOS"
@@ -62,18 +63,36 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Auto-detect", "value": "auto" },
-        { "title": "iTerm2", "value": "iterm2" },
-        { "title": "Terminal.app", "value": "terminal" },
-        { "title": "Warp", "value": "warp" },
-        { "title": "Ghostty", "value": "ghostty" },
-        { "title": "Kitty", "value": "kitty" }
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iterm2"
+        },
+        {
+          "title": "Terminal.app",
+          "value": "terminal"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Kitty",
+          "value": "kitty"
+        }
       ]
     }
   ],
   "dependencies": {
     "@opencode-ai/sdk": "^1.14.28",
-    "@raycast/api": "^1.104.13",
+    "@raycast/api": "^1.85.2",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
