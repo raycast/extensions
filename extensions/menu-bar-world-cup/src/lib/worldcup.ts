@@ -30,20 +30,15 @@ export interface Match {
   date: string;
 }
 
-interface Prefs {
-  league: string;
-  country?: string;
-}
-
 function endpoint(): string {
-  const { league } = getPreferenceValues<Prefs>();
+  const { league } = getPreferenceValues<Preferences>();
   const slug = league || "fifa.world";
   return `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard`;
 }
 
 /** The user's team tricode (e.g. "BRA"), or "" if they haven't picked one. */
 export function userCountry(): string {
-  return getPreferenceValues<Prefs>().country ?? "";
+  return getPreferenceValues<Preferences>().country ?? "";
 }
 
 /**

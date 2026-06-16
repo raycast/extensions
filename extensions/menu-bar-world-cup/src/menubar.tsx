@@ -5,7 +5,6 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
 import {
   getMatches,
   liveMatch,
@@ -23,19 +22,16 @@ export default function Command() {
   // then revalidates against ESPN.
   const { data: matches = [], isLoading } = useCachedPromise(getMatches);
 
-  // Read the mute flag fresh on every launch so the label is always accurate.
-  const [goals, setGoals] = useState(true);
-  useEffect(() => {
-    goalsEnabled().then(setGoals);
-  }, []);
+  // Cache the mute flag so the last known value paints instantly — no "goals
+  // on" flash before the async read settles.
+  const { data: goals, mutate: mutateGoals } = useCachedPromise(goalsEnabled);
 
   const live = liveMatch(matches);
   const title = live ? menuBarTitle(live) : undefined;
 
   async function toggleGoals() {
     const next = !goals;
-    await setGoalsEnabled(next);
-    setGoals(next);
+    await mutateGoals(setGoalsEnabled(next), { optimisticUpdate: () => next });
     // The menu closes on click, so confirm the new state with a HUD.
     await showHUD(next ? "🔔 Goal alerts on" : "🔕 Goal alerts muted");
   }
