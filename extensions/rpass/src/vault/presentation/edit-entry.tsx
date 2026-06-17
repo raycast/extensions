@@ -13,8 +13,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   generateSecret,
   listEntries,
-  moveEntry,
   OPTIMISTIC_AGENT_UNLOCK_TIMEOUT_MS,
+  removeEntry,
   RpassError,
   showEntryContent,
   writeEntry,
@@ -431,10 +431,10 @@ export default function EditEntry({ storepath, entry, passphrase }: Props) {
       const content = [password, additionalLines.trim()]
         .filter(Boolean)
         .join("\n");
-      if (isMoving) {
-        await moveEntry(entry, newEntry, storepath);
-      }
       await writeEntry(newEntry, storepath, content, { force: true });
+      if (isMoving) {
+        await removeEntry(entry, storepath);
+      }
       await showToast(
         Toast.Style.Success,
         isMoving ? "Entry Moved and Updated" : "Entry Updated",
