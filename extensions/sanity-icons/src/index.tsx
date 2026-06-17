@@ -3,7 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import iconMetadata from "./sanity-icons.json";
 
 type Styles = {
@@ -146,19 +146,53 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [styleFilter, setStyleFilter] = useState<StyleFilter>("all");
 
-  const { isLoading, data: iconNames } = useFetch<string[], string[]>(
-    "https://api.github.com/repos/sanity-io/icons/contents/export",
-    {
-      keepPreviousData: true,
-      initialData: [],
-      parseResponse: async (response) => {
-        const items: GitHubItem[] = (await response.json()) as GitHubItem[];
-        return items
-          .filter((item) => item.type === "file" && item.name.endsWith(".svg"))
-          .map((item) => item.name.replace(/\.svg$/, ""));
-      },
+  const {
+    isLoading,
+    data: iconNames,
+    error,
+  } = useFetch<string[], string[]>("https://api.github.com/repos/sanity-io/icons/contents/export", {
+    keepPreviousData: true,
+    initialData: [],
+    parseResponse: async (response) => {
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        let message = `${response.status} ${response.statusText}`;
+        if (body !== null && typeof body === "object" && !Array.isArray(body) && "message" in body) {
+          const maybeMessage = (body as Record<string, unknown>).message;
+          if (typeof maybeMessage === "string") {
+            message = maybeMessage;
+          }
+        }
+        if (message.toLowerCase().includes("rate limit")) {
+          throw new Error("GitHub API rate limit exceeded. Authenticate or try again later.");
+        }
+        throw new Error(`GitHub API error: ${message}`);
+      }
+
+      if (!Array.isArray(body)) {
+        return [];
+      }
+      const items = (body as Array<unknown>).filter(
+        (item): item is GitHubItem =>
+          typeof item === "object" &&
+          item !== null &&
+          "type" in item &&
+          typeof (item as Record<string, unknown>).type === "string" &&
+          "name" in item &&
+          typeof (item as Record<string, unknown>).name === "string",
+      );
+
+      return items
+        .filter((item) => item.type === "file" && item.name.endsWith(".svg"))
+        .map((item) => item.name.replace(/\.svg$/, ""));
     },
-  );
+  });
+
+  useEffect(() => {
+    if (error) {
+      void showFailureToast(error, { title: "Failed to fetch icons" });
+    }
+  }, [error]);
 
   const icons = useMemo(() => {
     return groupIcons(iconNames).sort((a, b) => a.name.localeCompare(b.name));
