@@ -17,9 +17,7 @@ Look up English irregular verbs and their three forms — **base**, **past simpl
 
 Each verb can show a translation in one of **16 languages**: French, Spanish, Italian, German, Brazilian Portuguese, Dutch, Swedish, Polish, Russian, Greek, Turkish, Arabic, Hindi, Chinese (Simplified), Japanese and Korean. The translation also feeds the fuzzy search (type `aller` to find `go`).
 
-By default the language is **Auto**, which follows your operating system's UI language (e.g. `fr` → French, `de` → German, `ja` → Japanese; an unsupported language shows no translation). Detection works on **macOS, Windows and Linux** — it reads the OS language preference (`defaults` on macOS, `CurrentUICulture` on Windows, POSIX `LANG`/`LC_*` variables on Linux), falling back to the runtime locale.
-
-To change it, open **Raycast → Settings → Extensions → English Irregular Verbs → Translation Language** and pick **Auto**, **None**, or any of the 16 languages.
+The translation language defaults to **Français**. To change it, open **Raycast → Settings → Extensions → English Irregular Verbs → Translation Language** and pick **None** (to hide the translation row) or any of the 16 languages.
 
 ## Data
 
