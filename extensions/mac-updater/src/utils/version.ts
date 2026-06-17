@@ -118,6 +118,29 @@ export function hasUpdate(
   return compareVersion(lat.version, cur.version) > 0;
 }
 
+/**
+ * True if going from current → latest crosses a major version (e.g. 22 → 23,
+ * 4.x → 5.0). Used by "Update All Safe" to hold back the updates most likely to
+ * carry breaking changes. Conservative: if either major can't be parsed, we
+ * treat it as NOT a major bump (don't hold back what we can't reason about).
+ */
+export function isMajorBump(
+  currentVersion: string,
+  latestVersion: string,
+): boolean {
+  const curMajor = leadingMajor(parseVersion(currentVersion, "").version);
+  const latMajor = leadingMajor(parseVersion(latestVersion, "").version);
+  if (curMajor === null || latMajor === null) return false;
+  return latMajor > curMajor;
+}
+
+function leadingMajor(v: string): number | null {
+  const m = v.match(/\d+/);
+  if (!m) return null;
+  const n = parseInt(m[0], 10);
+  return Number.isNaN(n) ? null : n;
+}
+
 export function shortenVersion(v: string, max = 14): string {
   if (!v) return "";
   if (v.length <= max) return v;

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import * as assert from "node:assert/strict";
-import { compareVersion, hasUpdate, parseVersion, shortenVersion } from "../src/utils/version";
+import { compareVersion, hasUpdate, isMajorBump, parseVersion, shortenVersion } from "../src/utils/version";
 
 test("parseVersion strips v-prefix and noise suffixes", () => {
   assert.equal(parseVersion("v1.2.3", "").version, "1.2.3");
@@ -66,4 +66,13 @@ test("shortenVersion truncates long strings with ellipsis", () => {
   assert.equal(shortenVersion("1.0.0"), "1.0.0");
   assert.equal(shortenVersion("very.long.version.string", 10), "very.long…");
   assert.equal(shortenVersion(""), "");
+});
+
+test("isMajorBump flags major version crossings only", () => {
+  assert.equal(isMajorBump("22.1.0", "23.0.0"), true);
+  assert.equal(isMajorBump("4.3", "5.0"), true);
+  assert.equal(isMajorBump("126.0.4", "126.0.5"), false);
+  assert.equal(isMajorBump("22.1", "22.9"), false);
+  // unparseable major → not held back
+  assert.equal(isMajorBump("stable", "latest"), false);
 });

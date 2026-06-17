@@ -22,7 +22,7 @@ import { downloadAndInstall } from "./utils/updater";
 import { openAppForSparkleUpdate } from "./utils/sources/sparkle";
 import { scanAll, ScanResult } from "./utils/coordinator";
 import { recordHistory } from "./utils/update-history";
-import { shortenVersion } from "./utils/version";
+import { isMajorBump, shortenVersion } from "./utils/version";
 import { progressBar } from "./utils/format";
 
 type TaskStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -72,7 +72,12 @@ const SOURCE_COLOR: Record<Source, Color> = {
 const KICKOFF_TITLE = "Updating everything…";
 const DONE_TITLE = "All done";
 
-export default function UpdateEverything() {
+export default function UpdateEverything(props: {
+  launchContext?: { safe?: boolean };
+}) {
+  // "Update All Safe" launches us with { safe: true } and we hold back
+  // major-version bumps (the updates most likely to carry breaking changes).
+  const safeOnly = props.launchContext?.safe === true;
   const [isScanning, setIsScanning] = useState(true);
   const [tasks, setTasks] = useState<QueueTask[]>([]);
   const [running, setRunning] = useState(false);
@@ -87,7 +92,7 @@ export default function UpdateEverything() {
     });
     try {
       const result = await scanAll();
-      setTasks(await buildQueue(result));
+      setTasks(await buildQueue(result, { safeOnly }));
       toast.style = Toast.Style.Success;
       toast.title = "Scan complete";
     } catch (e) {
@@ -407,7 +412,24 @@ export default function UpdateEverything() {
 
 // -------------------------------------------------------------------------------------------------
 
-async function buildQueue(scan: ScanResult): Promise<QueueTask[]> {
+async function buildQueue(
+  rawScan: ScanResult,
+  opts: { safeOnly?: boolean } = {},
+): Promise<QueueTask[]> {
+  // "Safe" mode holds back major-version bumps. Filtering them out of the scan
+  // here means every source below (casks, MAS, Sparkle, npm, pip, gems…)
+  // respects it from one place — no per-source special-casing.
+  const scan: ScanResult = opts.safeOnly
+    ? {
+        ...rawScan,
+        apps: rawScan.apps.filter(
+          (a) => !(a.hasUpdate && isMajorBump(a.app.version, a.latestVersion)),
+        ),
+        cliPackages: rawScan.cliPackages.filter(
+          (p) => !isMajorBump(p.currentVersion, p.latestVersion),
+        ),
+      }
+    : rawScan;
   const tasks: QueueTask[] = [];
 
   // ── Apps via Homebrew: ONE TASK PER CASK.

@@ -29,7 +29,7 @@ import {
   upgradePip,
 } from "./utils/sources/cli-managers";
 import { downloadAndInstall } from "./utils/updater";
-import { shortenVersion } from "./utils/version";
+import { isMajorBump, shortenVersion } from "./utils/version";
 import {
   appBundleSize,
   buildAppDetailMarkdown,
@@ -164,11 +164,12 @@ export default function MacUpdater() {
     push(<Onboarding onDone={() => undefined} />);
   }
 
-  async function openUpdateEverything() {
+  async function openUpdateEverything(safe = false) {
     try {
       await launchCommand({
         name: "update-everything",
         type: LaunchType.UserInitiated,
+        context: { safe },
       });
     } catch (e) {
       await showToast({
@@ -509,6 +510,15 @@ export default function MacUpdater() {
     (scan?.apps.filter((a) => a.hasUpdate).length ?? 0) +
     (scan?.cliPackages.length ?? 0);
 
+  // Major-version bumps — the ones "Update All Safe" holds back.
+  const isMajorAppUpdate = (info: UpdateInfo) =>
+    info.hasUpdate && isMajorBump(info.app.version, info.latestVersion);
+  const majorCount =
+    (scan?.apps.filter(isMajorAppUpdate).length ?? 0) +
+    (scan?.cliPackages.filter((p) =>
+      isMajorBump(p.currentVersion, p.latestVersion),
+    ).length ?? 0);
+
   // Counts for the three views.
   const counts: Record<Filter, number> = {
     updates: updatesCount,
@@ -669,23 +679,41 @@ export default function MacUpdater() {
             ? `${updates.length} app${updates.length === 1 ? "" : "s"}`
             : `${scan.cliPackages.length} package${scan.cliPackages.length === 1 ? "" : "s"}`;
       // The thoughtful bit: tell the user up front how many will ask for a
-      // password, so the prompt during the run isn't a surprise.
-      const summary =
-        adminCount > 0 ? `${base} · ${adminCount} need your password` : base;
+      // password and how many major bumps are held back, so nothing during the
+      // run is a surprise.
+      const extras: string[] = [];
+      if (adminCount > 0) extras.push(`${adminCount} need your password`);
+      if (majorCount > 0) extras.push(`${majorCount} major held`);
+      const summary = extras.length ? `${base} · ${extras.join(" · ")}` : base;
       banners.push(
         <List.Item
           key="update-all-banner"
           icon={{ source: Icon.Rocket, tintColor: Color.Blue }}
-          title="Update everything"
+          title={majorCount > 0 ? "Update all safe" : "Update everything"}
           subtitle={summary}
-          accessories={[{ tag: { value: "⌘⇧U", color: Color.Blue } }]}
+          accessories={[{ tag: { value: "⌘↵", color: Color.Blue } }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Update Everything"
-                icon={Icon.Rocket}
-                onAction={openUpdateEverything}
-              />
+              {majorCount > 0 ? (
+                <>
+                  <Action
+                    title={`Update All Safe (holds ${majorCount} major)`}
+                    icon={Icon.Rocket}
+                    onAction={() => openUpdateEverything(true)}
+                  />
+                  <Action
+                    title="Update Everything (incl. major)"
+                    icon={Icon.Bolt}
+                    onAction={() => openUpdateEverything(false)}
+                  />
+                </>
+              ) : (
+                <Action
+                  title="Update Everything"
+                  icon={Icon.Rocket}
+                  onAction={() => openUpdateEverything(false)}
+                />
+              )}
               {adoptable.length > 0 && (
                 <Action
                   title={`Adopt ${adoptable.length} App${adoptable.length === 1 ? "" : "s"} to Homebrew`}
@@ -1051,6 +1079,12 @@ export default function MacUpdater() {
     if (isBusy) {
       accessories.push({ icon: Icon.ArrowClockwise, tooltip: "Working…" });
     } else if (info.hasUpdate) {
+      if (isMajorAppUpdate(info)) {
+        accessories.push({
+          tag: { value: "major", color: Color.Orange },
+          tooltip: "Major version — held back by Update All Safe",
+        });
+      }
       if (info.needsAdmin) {
         accessories.push({
           icon: { source: Icon.Key, tintColor: Color.SecondaryText },
@@ -1214,13 +1248,32 @@ export default function MacUpdater() {
         )}
 
         <ActionPanel.Section>
-          {/* Update All is first-class: reachable with ⌘↵ from any row. */}
-          <Action
-            title="Update All"
-            icon={Icon.Rocket}
-            onAction={openUpdateEverything}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
+          {/* Update All is first-class (⌘↵ from any row). When some updates are
+              major-version bumps, the safe variant is primary and "everything"
+              is one keystroke deeper. */}
+          {majorCount > 0 ? (
+            <>
+              <Action
+                title={`Update All Safe (holds ${majorCount} major)`}
+                icon={Icon.Rocket}
+                onAction={() => openUpdateEverything(true)}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
+              <Action
+                title="Update Everything (incl. major)"
+                icon={Icon.Bolt}
+                onAction={() => openUpdateEverything(false)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              />
+            </>
+          ) : (
+            <Action
+              title="Update All"
+              icon={Icon.Rocket}
+              onAction={() => openUpdateEverything(false)}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+            />
+          )}
           <Action
             title="Refresh"
             icon={Icon.RotateClockwise}
