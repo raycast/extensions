@@ -15,6 +15,7 @@ type ClassItem = {
 interface JavaTypeEntry {
   p: string;
   l: string;
+  signature: string;
 }
 
 interface JavaMemberEntry {
@@ -63,6 +64,7 @@ async function getDocumentation() {
           path,
           methods: members.map((m) => ({
             name: m.l,
+            signature: m.l,
             url: `${BASE_URL}${path}#${m.l}`,
           })),
         };
