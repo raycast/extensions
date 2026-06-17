@@ -49,6 +49,7 @@ interface ITunesResult {
   releaseNotes?: string;
   trackViewUrl?: string;
   minimumOsVersion?: string;
+  currentVersionReleaseDate?: string;
 }
 
 async function itunesLookup(
@@ -83,13 +84,20 @@ export async function checkAppStore(
     (await itunesLookup(app.bundleId, "desktopSoftware")) ??
     (await itunesLookup(app.bundleId, "macSoftware"));
   if (!result) return null;
+  const released = result.currentVersionReleaseDate
+    ? Date.parse(result.currentVersionReleaseDate)
+    : NaN;
   return {
     app,
     source: "mas",
     latestVersion: result.version,
     hasUpdate: hasUpdate(app.version, app.buildNumber, result.version),
     masId: result.trackId,
-    releaseNotesHtml: result.releaseNotes,
+    // iTunes "What's New" is plain text, not HTML — keep it as text so it's
+    // rendered with its line breaks intact, not mangled by the HTML converter.
+    releaseNotesText: result.releaseNotes,
+    releasedAt: Number.isNaN(released) ? undefined : released,
+    releaseNotesUrl: result.trackViewUrl,
     downloadUrl: result.trackViewUrl,
     checkedAt: Date.now(),
   };

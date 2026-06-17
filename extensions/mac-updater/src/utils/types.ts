@@ -38,7 +38,14 @@ export interface UpdateInfo {
   latestBuild?: string;
   hasUpdate: boolean;
   releaseNotesUrl?: string;
+  /** HTML release notes (Sparkle appcast). */
   releaseNotesHtml?: string;
+  /** Already-Markdown release notes (e.g. a GitHub release body). */
+  releaseNotesMarkdown?: string;
+  /** Plain-text release notes (e.g. the Mac App Store "What's New"). */
+  releaseNotesText?: string;
+  /** When the latest version was published, if the source tells us (epoch ms). */
+  releasedAt?: number;
   downloadUrl?: string;
   caskToken?: string;
   masId?: number;

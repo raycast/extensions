@@ -37,12 +37,21 @@ export async function checkGitHub(
     const data = JSON.parse(stdout);
     if (!data?.tag_name) return null;
     const version = String(data.tag_name).replace(/^v/i, "");
+    // GitHub release bodies are Markdown — the real changelog. Keep it so the
+    // detail pane can show "What's new" inline instead of just a link.
+    const body =
+      typeof data.body === "string" && data.body.trim()
+        ? data.body.trim()
+        : undefined;
+    const publishedAt = data.published_at ? Date.parse(data.published_at) : NaN;
     return {
       app,
       source: "github",
       latestVersion: version,
       hasUpdate: hasUpdate(app.version, app.buildNumber, version),
       releaseNotesUrl: data.html_url,
+      releaseNotesMarkdown: body,
+      releasedAt: Number.isNaN(publishedAt) ? undefined : publishedAt,
       downloadUrl: data.assets?.[0]?.browser_download_url ?? data.html_url,
       checkedAt: Date.now(),
     };

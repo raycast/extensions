@@ -92,34 +92,101 @@ export function buildAppDetailMarkdown(info: UpdateInfo): string {
     lines.push(
       `**Update available** · \`${info.app.version}\` → \`${info.latestVersion}\``,
     );
+    const rel = relativeReleased(info.releasedAt);
+    if (rel) lines.push("", `_New version released ${rel}._`);
   } else {
     lines.push(`**Up to date** · \`${info.app.version}\``);
   }
   lines.push("");
 
-  if (info.releaseNotesHtml) {
-    lines.push(`## What's new in ${info.latestVersion}`);
-    lines.push("");
-    lines.push(htmlToMarkdown(info.releaseNotesHtml).slice(0, 4000));
-  } else if (info.releaseNotesUrl) {
-    lines.push(`## Release notes`);
-    lines.push("");
-    lines.push(
-      `Read the full notes at [${shortHost(info.releaseNotesUrl)}](${info.releaseNotesUrl}).`,
-    );
-  } else {
-    lines.push(`_No release notes provided by the source._`);
-  }
+  for (const line of notesBlock(info)) lines.push(line);
 
   return lines.join("\n");
 }
 
-function shortHost(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
+const MAX_NOTES = 4000;
+
+/**
+ * The release-notes block — the thoughtful part. We prefer real, inline notes
+ * in whatever form the source gives us (GitHub Markdown → Sparkle HTML → App
+ * Store plain text), render each correctly, and always offer a link to the
+ * full notes. When a source has none (Homebrew, a quiet App Store release), we
+ * say so honestly and point somewhere useful rather than dead-ending on
+ * "no notes."
+ */
+export function notesBlock(info: UpdateInfo): string[] {
+  const out: string[] = [];
+  const url = info.releaseNotesUrl ?? info.downloadUrl;
+  const heading = info.hasUpdate
+    ? `## What's new in ${info.latestVersion}`
+    : `## Release notes`;
+
+  let body: string | null = null;
+  if (info.releaseNotesMarkdown) {
+    body = info.releaseNotesMarkdown; // already Markdown (GitHub release body)
+  } else if (info.releaseNotesHtml) {
+    body = htmlToMarkdown(info.releaseNotesHtml); // Sparkle appcast
+  } else if (info.releaseNotesText) {
+    // Plain text (App Store): single newlines don't break in Markdown, so make
+    // each line a hard break to preserve the author's structure.
+    body = info.releaseNotesText
+      .replace(/\r\n?/g, "\n")
+      .trim()
+      .split("\n")
+      .map((l) => l.trimEnd())
+      .join("  \n");
   }
+
+  if (body && body.trim()) {
+    const truncated = body.length > MAX_NOTES;
+    out.push(heading, "");
+    out.push(truncated ? body.slice(0, MAX_NOTES).trimEnd() + "…" : body, "");
+    if (info.releaseNotesUrl) {
+      out.push(`[Read the full release notes →](${info.releaseNotesUrl})`);
+    }
+    return out;
+  }
+
+  // No inline notes — a graceful, source-aware pointer.
+  switch (info.source) {
+    case "mas":
+      out.push(
+        url
+          ? `The App Store didn't publish a changelog for this version. [View on the App Store →](${url})`
+          : `The App Store didn't publish a changelog for this version.`,
+      );
+      break;
+    case "homebrew-cask":
+    case "homebrew-formula":
+      out.push(
+        url
+          ? `Homebrew doesn't carry release notes — [visit the project page →](${url}) for what changed.`
+          : `Homebrew doesn't carry release notes for this app.`,
+      );
+      break;
+    default:
+      out.push(
+        url
+          ? `[Read the release notes →](${url})`
+          : `No release notes available for this version.`,
+      );
+  }
+  return out;
+}
+
+/** "today" / "yesterday" / "5 days ago" / "3 months ago" — null if unknown/future. */
+function relativeReleased(epochMs?: number): string | null {
+  if (!epochMs) return null;
+  const diff = Date.now() - epochMs;
+  if (diff < 0) return null;
+  const days = Math.floor(diff / 86_400_000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return months === 1 ? "1 month ago" : `${months} months ago`;
+  const years = Math.floor(days / 365);
+  return years === 1 ? "1 year ago" : `${years} years ago`;
 }
 
 /** Format a file size into a human readable string. */
