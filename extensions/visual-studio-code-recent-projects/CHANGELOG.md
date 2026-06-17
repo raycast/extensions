@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Windows project opening] - {PR_MERGE_DATE}
+## [Fix: Windows project opening] - 2026-06-17
 
 - Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
 
