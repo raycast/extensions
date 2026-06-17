@@ -1,6 +1,6 @@
 # Fuzzy File Search Changelog
 
-## [Directory and File Search Directives] - {PR_MERGE_DATE}
+## [Directory and File Search Directives] - 2026-06-17
 
 - Add `-d` / `-f` query directives to search directories or files only
 - Parse directives before filtering so they are not passed to `fzf` as search terms
