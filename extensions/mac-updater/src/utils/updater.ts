@@ -9,6 +9,8 @@ export interface ReplaceResult {
   success: boolean;
   error?: string;
   needsAdmin?: boolean;
+  /** On a successful non-admin swap, the retained previous .app (for rollback). */
+  backupPath?: string;
 }
 
 export type ProgressFn = (label: string) => void;
@@ -282,15 +284,13 @@ async function swapApps(
     return { success: false, error: "Code signature verification failed" };
   }
 
-  // Success — remove backup
-  if (fs.existsSync(backupPath)) {
-    try {
-      fs.rmSync(backupPath, { recursive: true, force: true });
-    } catch {
-      // ignore
-    }
-  }
-  return { success: true };
+  // Success — RETAIN the backup and hand it back so the caller can register a
+  // rollback point. (The old code deleted it here.) If there's no backup (fresh
+  // install), success with no rollback.
+  return {
+    success: true,
+    backupPath: fs.existsSync(backupPath) ? backupPath : undefined,
+  };
 }
 
 async function swapWithAdmin(

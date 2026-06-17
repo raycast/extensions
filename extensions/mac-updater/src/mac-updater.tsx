@@ -34,6 +34,12 @@ import {
   upgradePip,
 } from "./utils/sources/cli-managers";
 import { downloadAndInstall } from "./utils/updater";
+import {
+  getRollbackMap,
+  performRollback,
+  RollbackPoint,
+  saveRollbackPoint,
+} from "./utils/rollback";
 import { isMajorBump, shortenVersion } from "./utils/version";
 import {
   appBundleSize,
@@ -104,16 +110,51 @@ export default function MacUpdater() {
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [systemUpdates, setSystemUpdates] = useState<SystemUpdate[]>([]);
+  const [rollbacks, setRollbacks] = useState<Record<string, RollbackPoint>>({});
 
   // macOS system updates load independently of the app scan: the cache makes
   // this instant when fresh, and a stale cache triggers a slow background
   // `softwareupdate -l` that fills the section in when it finishes — never
-  // blocking the apps list.
+  // blocking the apps list. Rollback points load alongside it.
   useEffect(() => {
     checkSystemUpdates()
       .then(setSystemUpdates)
       .catch(() => undefined);
+    getRollbackMap()
+      .then(setRollbacks)
+      .catch(() => undefined);
   }, []);
+
+  async function rollBack(info: UpdateInfo) {
+    const point = rollbacks[info.app.bundleId];
+    if (!point) return;
+    const confirmed = await confirmAlert({
+      title: `Roll back ${info.app.name}?`,
+      message: `Restores the previous version (${point.previousVersion}). The app will quit and be swapped back; it's verified before the current copy is removed, so you can't be left without a working app.`,
+      primaryAction: {
+        title: `Restore ${point.previousVersion}`,
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+    setBusyId(info.app.appPath);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Rolling ${info.app.name} back to ${point.previousVersion}…`,
+    });
+    const r = await performRollback(point);
+    if (r.success) {
+      toast.style = Toast.Style.Success;
+      toast.title = `${info.app.name} restored to ${point.previousVersion}`;
+      await getRollbackMap().then(setRollbacks);
+      await load();
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't roll back";
+      toast.message = r.error;
+    }
+    setBusyId(null);
+  }
 
   function toggleSelected(appPath: string) {
     setSelected((prev) => {
@@ -362,6 +403,18 @@ export default function MacUpdater() {
               toast.title = `${info.app.name}: ${label}`;
             },
           });
+          // Keep the previous version as a restore point (in-place updates only).
+          if (r.success && r.backupPath) {
+            await saveRollbackPoint({
+              bundleId: info.app.bundleId,
+              appName: info.app.name,
+              appPath: info.app.appPath,
+              previousVersion: info.app.version,
+              newVersion: info.latestVersion,
+              backupPath: r.backupPath,
+            });
+            getRollbackMap().then(setRollbacks);
+          }
           result = { success: r.success, error: r.error };
           break;
         }
@@ -604,11 +657,11 @@ export default function MacUpdater() {
       {!isLoading && updatesCount === 0 && filter === "updates" && (
         <List.EmptyView
           icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-          title="Up to date"
+          title="You're all caught up"
           description={
             adoptable.length > 0
-              ? `${adoptable.length} app${adoptable.length === 1 ? "" : "s"} could be adopted to Homebrew · ⌘⇧A`
-              : `${scan?.apps.length ?? 0} apps managed · last scanned ${scan ? timeOfDay(scan.scannedAt) : "—"}`
+              ? `Everything's current. ${adoptable.length} app${adoptable.length === 1 ? "" : "s"} can join Homebrew for auto-updates · ⌘⇧A`
+              : `Apps, packages, and macOS are current · ${scan?.apps.length ?? 0} apps watched · checked ${scan ? timeOfDay(scan.scannedAt) : "—"}`
           }
           actions={
             <ActionPanel>
@@ -1308,6 +1361,17 @@ export default function MacUpdater() {
           icon={Icon.AppWindow}
           onAction={() => openAppForSparkleUpdate(info.app.appPath)}
         />
+
+        {/* Roll back — only when we kept a restore point from a prior in-place
+            update of this app. */}
+        {rollbacks[info.app.bundleId] && (
+          <Action
+            title={`Roll Back to ${rollbacks[info.app.bundleId].previousVersion}`}
+            icon={Icon.ArrowCounterClockwise}
+            onAction={() => rollBack(info)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+          />
+        )}
 
         {/* Surface adopt-to-Homebrew when there's a cask AND we're not already using it */}
         {info.app.suggestedCask && !info.app.managedByBrew && (
