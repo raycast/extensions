@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "english-irregular-verbs",
+  "title": "English Irregular Verbs",
+  "description": "Quickly look up English irregular verbs (base, past simple, past participle) with fuzzy search, UK/US variants and optional translations in 16 languages.",
+  "icon": "icon.png",
+  "author": "oward",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oward-Studio/raycast-extension-english-irregular-verbs.git"
+  },
+  "categories": ["Productivity", "Documentation"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Irregular Verbs",
+      "subtitle": "English Irregular Verbs",
+      "description": "Search English irregular verbs and copy any of their forms.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "language",
+          "title": "Translation Language",
+          "description": "Language shown in the translation row. \"Auto\" follows your macOS system language.",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            { "title": "Auto (system language)", "value": "auto" },
+            { "title": "None", "value": "none" },
+            { "title": "Français", "value": "fr" },
+            { "title": "Español", "value": "es" },
+            { "title": "Italiano", "value": "it" },
+            { "title": "Deutsch", "value": "de" },
+            { "title": "Português (Brasil)", "value": "pt" },
+            { "title": "Nederlands", "value": "nl" },
+            { "title": "Svenska", "value": "sv" },
+            { "title": "Polski", "value": "pl" },
+            { "title": "Русский", "value": "ru" },
+            { "title": "Ελληνικά", "value": "el" },
+            { "title": "Türkçe", "value": "tr" },
+            { "title": "العربية", "value": "ar" },
+            { "title": "हिन्दी", "value": "hi" },
+            { "title": "中文 (简体)", "value": "zh" },
+            { "title": "日本語", "value": "ja" },
+            { "title": "한국어", "value": "ko" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
