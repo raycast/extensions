@@ -1,44 +1,38 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
 import groupBy from "lodash.groupby";
 import FilterDropdown from "./FilterDropdown";
-import flags from "./flags";
-import { Goal, Match, Player, Team } from "./types";
+import {
+  getMatches,
+  getMatchCenterUrl,
+  getMatchLiveData,
+  getPlayerName,
+  getTeamGoals,
+  isFinishedMatch,
+  isLiveMatch,
+  isUpcomingMatch,
+  matchScore,
+  matchStage,
+  matchVenue,
+  teamCode,
+  teamFlag,
+  teamLabel,
+  teamName,
+  type Goal,
+  type Match,
+  type Team,
+} from "./lib/worldcup";
 import { capitalizeFirstLetter } from "./utils";
-import fetch from "cross-fetch";
-
-const BASE_URL = `https://api.fifa.com/api/v3`;
-const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
-// languages "lt" and "ru" are listed on fifa.com, but did not work when constructing URL
-const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
-const LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : `en`;
-const ID_SEASON = `285023`; // world cup 2026 (2022 - 255711)
-const COUNT = 104; // all matches (2022 - 64)
-
-type Data = {
-  [key: string]: Match[];
-};
-
-type LiveData = {
-  HomeTeam: Team;
-  AwayTeam: Team;
-};
 
 function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
-  const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
-  const { isLoading, data } = useFetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
+  const { isLoading, data } = useCachedPromise(getMatchLiveData, [match]);
 
   if (!data) return null;
 
-  const team = (data as LiveData)[side === "home" ? "HomeTeam" : "AwayTeam"];
-  const goals = team?.Goals?.filter((goal: Goal) => goal.IdTeam === team.IdTeam) || [];
-
-  const getPlayerName = (playerId: string): string => {
-    const player = team?.Players?.find((p: Player) => p.IdPlayer === playerId);
-    return player?.PlayerName[0]?.Description || playerId;
-  };
+  const team = side === "home" ? data.HomeTeam : data.AwayTeam;
+  const goals = getTeamGoals(team);
 
   if (isLoading) {
     return null;
@@ -51,7 +45,7 @@ function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
           <List.Item.Detail.Metadata.Label
             key={goal.IdGoal || i}
             title=""
-            text={`${getPlayerName(goal.IdPlayer)} ${goal.Minute}`}
+            text={`${getPlayerName(team, goal.IdPlayer)} ${goal.Minute}`}
           />
         );
       })}
@@ -59,24 +53,32 @@ function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
   );
 }
 
+function countryDetail(team: Team | null): string | undefined {
+  if (!team) return undefined;
+
+  const name = teamName(team);
+  const code = teamCode(team);
+  if (!name || name === "TBD" || name === code) return undefined;
+
+  return `${teamFlag(team)} ${name}${code ? ` (${code})` : ""}`;
+}
+
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch(
-    `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`,
-  );
+  const { isLoading, data = [], revalidate } = useCachedPromise(getMatches);
   const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", false);
 
-  const [time, setTime] = useCachedState("time", null);
+  const [time, setTime] = useCachedState<string | null>("time", null);
   const [score, setScore] = useCachedState("score", "");
 
-  const [time2, setTime2] = useCachedState("time", null);
+  const [time2, setTime2] = useCachedState<string | null>("time2", null);
   const [score2, setScore2] = useCachedState("score2", "");
 
   const [refresh, setRefresh] = useState<number | null>(null);
 
-  let matches: Match[] = (data as Data)?.Results || [];
+  let matches: Match[] = data;
 
-  const currentMatches = matches.filter((match) => match.MatchStatus === 3);
+  const currentMatches = matches.filter(isLiveMatch);
 
   const match1 = currentMatches[0];
   const match2 = currentMatches[1];
@@ -95,11 +97,9 @@ export default function Command() {
 
   useEffect(() => {
     const fetchCurrentMatch = async (match: Match) => {
-      const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
-      const res = await fetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
-      const data = await res.json();
+      const data = await getMatchLiveData(match);
       setTime(data?.MatchTime || null);
-      setScore(`${data?.HomeTeam?.Score} : ${data?.AwayTeam?.Score}`);
+      setScore(`${data?.HomeTeam?.Score ?? 0} : ${data?.AwayTeam?.Score ?? 0}`);
     };
 
     if (match1) {
@@ -109,11 +109,9 @@ export default function Command() {
 
   useEffect(() => {
     const fetchCurrentMatch = async (match: Match) => {
-      const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
-      const res = await fetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
-      const data = await res.json();
+      const data = await getMatchLiveData(match);
       setTime2(data?.MatchTime || null);
-      setScore2(`${data?.HomeTeam?.Score} : ${data?.AwayTeam?.Score}`);
+      setScore2(`${data?.HomeTeam?.Score ?? 0} : ${data?.AwayTeam?.Score ?? 0}`);
     };
 
     if (match2) {
@@ -126,11 +124,11 @@ export default function Command() {
   };
 
   if (filter === "next") {
-    matches = matches.filter((match) => match.MatchStatus !== 0);
+    matches = matches.filter((match) => !isFinishedMatch(match));
   }
 
   if (filter === "prev") {
-    matches = matches.filter((match) => match.MatchStatus === 0).reverse();
+    matches = matches.filter(isFinishedMatch).reverse();
   }
 
   const matchesByDay = groupBy(matches, (match: { Date: string }) => startOfDay(new Date(match.Date)));
@@ -143,7 +141,7 @@ export default function Command() {
     const matchDate = new Date(match.Date);
 
     // not started or starts soon
-    if (match.MatchStatus === 1 || match.MatchStatus === 12) {
+    if (isUpcomingMatch(match)) {
       if (isToday(matchDate)) {
         return formatDistanceToNowStrict(matchDate, { addSuffix: true });
       } else {
@@ -152,12 +150,12 @@ export default function Command() {
     }
 
     // finished
-    if (match.MatchStatus === 0) {
+    if (isFinishedMatch(match)) {
       return "Finished";
     }
 
     // live
-    if (match.MatchStatus === 3) {
+    if (isLiveMatch(match)) {
       return (match?.IdMatch === match2?.IdMatch ? time2 : time) || "Now";
     }
 
@@ -177,25 +175,13 @@ export default function Command() {
         return (
           <List.Section title={dayString} key={dayString}>
             {matchesByDay[day].map((match: Match) => {
-              const {
-                IdCompetition,
-                IdSeason,
-                IdStage,
-                Attendance,
-                IdMatch,
-                GroupName,
-                StageName,
-                HomeTeamScore,
-                AwayTeamScore,
-                MatchStatus,
-                Home,
-                Away,
-                Stadium,
-                Officials,
-              } = match;
+              const { Attendance, IdMatch, StageName, Home, Away, Officials } = match;
 
-              const home = `${flags[Home?.Abbreviation || ""] || ""} ${Home?.Abbreviation || "Unknown"}`;
-              const away = `${flags[Away?.Abbreviation || ""] || ""} ${Away?.Abbreviation || "Unknown"}`;
+              const home = teamLabel(Home);
+              const away = teamLabel(Away);
+              const homeCountry = countryDetail(Home);
+              const awayCountry = countryDetail(Away);
+              const score = matchScore(match);
 
               return (
                 <List.Item
@@ -211,11 +197,7 @@ export default function Command() {
                       <Action
                         title="See Match on FIFA.com"
                         icon={Icon.SoccerBall}
-                        onAction={() =>
-                          open(
-                            `https://www.fifa.com/fifaplus/${LANG}/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`,
-                          )
-                        }
+                        onAction={() => open(getMatchCenterUrl(match))}
                       />
                       <Action
                         title="Reload"
@@ -227,21 +209,17 @@ export default function Command() {
                   }
                   icon={{
                     source: Icon.Dot,
-                    tintColor: MatchStatus === 0 ? Color.Green : MatchStatus === 3 ? Color.Yellow : Color.Red,
+                    tintColor: isFinishedMatch(match) ? Color.Green : isLiveMatch(match) ? Color.Yellow : Color.Red,
                   }}
-                  subtitle={MatchStatus !== 0 ? capitalizeFirstLetter(getTime(match)) : ""}
-                  keywords={[Home?.TeamName[0]?.Description || "", Away?.TeamName[0]?.Description || ""]}
+                  subtitle={!isFinishedMatch(match) ? capitalizeFirstLetter(getTime(match)) : ""}
+                  keywords={[teamName(Home), teamName(Away)]}
                   title={`${home}  vs  ${away}`}
                   accessories={[
-                    MatchStatus === 3 || MatchStatus === 0
-                      ? { text: MatchStatus === 3 ? getScore(match) : `${HomeTeamScore} : ${AwayTeamScore}` }
+                    isLiveMatch(match) || isFinishedMatch(match)
+                      ? { text: isLiveMatch(match) ? getScore(match) : `${score.home ?? 0} : ${score.away ?? 0}` }
                       : {},
                     {
-                      text: !showingDetail
-                        ? GroupName[0]?.Description
-                          ? GroupName[0]?.Description
-                          : StageName[0]?.Description
-                        : "",
+                      text: !showingDetail ? matchStage(match) : "",
                     },
                   ]}
                   detail={
@@ -249,25 +227,25 @@ export default function Command() {
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="Stage" text={StageName[0]?.Description} />
-                          {GroupName[0]?.Description && (
-                            <List.Item.Detail.Metadata.Label title="Group" text={GroupName[0]?.Description} />
+                          {match.GroupName[0]?.Description && (
+                            <List.Item.Detail.Metadata.Label title="Group" text={match.GroupName[0]?.Description} />
                           )}
-                          <List.Item.Detail.Metadata.Label title="Stadium" text={Stadium.Name[0].Description} />
+                          <List.Item.Detail.Metadata.Label title="Stadium" text={matchVenue(match)} />
                           {Attendance && <List.Item.Detail.Metadata.Label title="Attendance" text={Attendance} />}
 
-                          {home.trim() != "Unknown" && MatchStatus !== 1 && (
+                          {Home && !isUpcomingMatch(match) && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={home} text={HomeTeamScore?.toString()} />
+                              <List.Item.Detail.Metadata.Label title={home} text={score.home?.toString()} />
                               <Goals match={match} side="home" />
                               {Home?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Home?.Tactics} />}
                             </>
                           )}
 
-                          {away.trim() != "Unknown" && MatchStatus !== 1 && (
+                          {Away && !isUpcomingMatch(match) && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={away} text={AwayTeamScore?.toString()} />
+                              <List.Item.Detail.Metadata.Label title={away} text={score.away?.toString()} />
                               <Goals match={match} side="away" />
                               {Away?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Away?.Tactics} />}
                             </>
@@ -287,9 +265,16 @@ export default function Command() {
                             </>
                           )}
 
-                          {home.trim() === "Unknown" && away.trim() === "Unknown" && (
-                            <List.Item.Detail.Metadata.Label title="TBD" />
+                          {(homeCountry || awayCountry) && (
+                            <>
+                              <List.Item.Detail.Metadata.Separator />
+                              <List.Item.Detail.Metadata.Label title="Countries" />
+                              {homeCountry && <List.Item.Detail.Metadata.Label title="" text={homeCountry} />}
+                              {awayCountry && <List.Item.Detail.Metadata.Label title="" text={awayCountry} />}
+                            </>
                           )}
+
+                          {!Home && !Away && <List.Item.Detail.Metadata.Label title="TBD" />}
                         </List.Item.Detail.Metadata>
                       }
                     />

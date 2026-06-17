@@ -7,6 +7,9 @@ import {
   menuBarTitle,
   goalsEnabled,
   setGoalsEnabled,
+  isFinishedMatch,
+  isLiveMatch,
+  isUpcomingMatch,
   type Match,
 } from "./lib/worldcup";
 
@@ -35,9 +38,9 @@ export default function Command() {
     <MenuBarExtra icon={live ? undefined : "⚽"} title={title} isLoading={isLoading} tooltip="World Cup">
       {matches.length === 0 && <MenuBarExtra.Item title="No fixtures today" />}
 
-      <Section heading="Live" matches={matches.filter((m) => m.state === "in")} />
-      <Section heading="Upcoming" matches={matches.filter((m) => m.state === "pre")} />
-      <Section heading="Finished" matches={matches.filter((m) => m.state === "post")} />
+      <Section heading="Live" matches={matches.filter(isLiveMatch)} />
+      <Section heading="Upcoming" matches={matches.filter(isUpcomingMatch)} />
+      <Section heading="Finished" matches={matches.filter(isFinishedMatch)} />
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
@@ -65,7 +68,7 @@ function Section({ heading, matches }: { heading: string; matches: Match[] }) {
   return (
     <MenuBarExtra.Section title={heading}>
       {matches.map((m) => (
-        <MenuBarExtra.Item key={m.id} title={formatLine(m)} onAction={() => open(SCOREBOARD_URL)} />
+        <MenuBarExtra.Item key={m.IdMatch} title={formatLine(m)} onAction={() => open(SCOREBOARD_URL)} />
       ))}
     </MenuBarExtra.Section>
   );

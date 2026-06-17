@@ -1,5 +1,12 @@
 # World Cup Changelog
 
+## [AI Match Questions] - {PR_MERGE_DATE}
+
+- Added AI tools for asking about World Cup schedules, country matchups, and goal totals by country or player
+- Added full country names to the match detail pane when FIFA provides them
+- Shared FIFA match fetching and formatting across the match list, menu bar, live subtitle, and AI tools
+- Added AI evals for next-match, head-to-head schedule, team goal, and player goal questions
+
 ## [Menu Bar & Live Score] - 2026-06-17
 
 - Added a **World Cup Menu Bar** command showing the live score in the menu bar with a dropdown of every fixture, and a quick toggle to mute goal alerts

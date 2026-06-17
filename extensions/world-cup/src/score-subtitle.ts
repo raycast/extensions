@@ -1,5 +1,15 @@
 import { updateCommandMetadata, LocalStorage, showHUD, getPreferenceValues } from "@raycast/api";
-import { getMatches, liveMatch, formatLine, goalsEnabled, goalHud, type Match } from "./lib/worldcup";
+import {
+  getMatches,
+  liveMatch,
+  formatLine,
+  goalsEnabled,
+  goalHud,
+  isUpcomingMatch,
+  matchScore,
+  teamCode,
+  type Match,
+} from "./lib/worldcup";
 
 const STORE_KEY = "scores";
 type ScoreMap = Record<string, { h: number; a: number }>;
@@ -15,7 +25,7 @@ export default async function Command() {
 
   // 1. Subtitle
   const live = liveMatch(matches);
-  const next = matches.find((m) => m.state === "pre");
+  const next = matches.find(isUpcomingMatch);
   const subtitle = live ? formatLine(live) : next ? `Next: ${formatLine(next)}` : "No live match";
   await updateCommandMetadata({ subtitle });
 
@@ -25,12 +35,13 @@ export default async function Command() {
   const country = getPreferenceValues<Preferences.ScoreSubtitle>().country ?? "";
 
   for (const m of matches) {
-    if (m.state === "pre") continue; // nothing to diff before kickoff
-    const a = Number(m.awayScore);
-    const h = Number(m.homeScore);
-    current[m.id] = { a, h };
+    if (isUpcomingMatch(m)) continue; // nothing to diff before kickoff
+    const score = matchScore(m);
+    const a = score.away ?? 0;
+    const h = score.home ?? 0;
+    current[m.IdMatch] = { a, h };
 
-    const was = prev[m.id];
+    const was = prev[m.IdMatch];
     if (!was || !enabled) continue; // skip first sighting to avoid a flood
 
     if (a > was.a) await notifyGoal(m, "away", country);
@@ -41,7 +52,7 @@ export default async function Command() {
 }
 
 async function notifyGoal(m: Match, side: "home" | "away", country: string) {
-  const scorerCode = side === "home" ? m.home : m.away;
+  const scorerCode = side === "home" ? teamCode(m.Home) : teamCode(m.Away);
   // showHUD is the store-safe way to surface a background event: a brief overlay
   // that appears even when Raycast isn't focused, no external binary required.
   await showHUD(goalHud(m, scorerCode, country));
