@@ -22,12 +22,11 @@
         {
           "name": "language",
           "title": "Translation Language",
-          "description": "Language shown in the translation row. \"Auto\" follows your macOS system language.",
+          "description": "Language shown in the translation row.",
           "type": "dropdown",
           "required": false,
-          "default": "auto",
+          "default": "fr",
           "data": [
-            { "title": "Auto (system language)", "value": "auto" },
             { "title": "None", "value": "none" },
             { "title": "Français", "value": "fr" },
             { "title": "Español", "value": "es" },
@@ -51,8 +50,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.83.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
