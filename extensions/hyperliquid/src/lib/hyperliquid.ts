@@ -180,57 +180,109 @@ export async function fetchClearinghouseState(wallet: Wallet, signal?: AbortSign
   return client.clearinghouseState({ user: wallet.address }, signal);
 }
 
-export async function fetchPositionStates(wallets: Wallet[], signal?: AbortSignal): Promise<PerpsClearinghouseState[]> {
-  return Promise.all(wallets.map((wallet) => fetchClearinghouseState(wallet, signal)));
+/**
+ * Clearinghouse state for a single builder-deployed perp dex (HIP-3). The `dex`
+ * field isn't typed by the SDK yet, so the call goes through the transport
+ * directly, mirroring `fetchDexMetaAndAssetCtxs`.
+ */
+async function fetchDexClearinghouseState(
+  user: string,
+  dex: string,
+  signal?: AbortSignal,
+): Promise<PerpsClearinghouseState> {
+  return transport.request(
+    "info",
+    { type: "clearinghouseState", user, dex },
+    signal,
+  ) as Promise<PerpsClearinghouseState>;
 }
 
-export function aggregatePositionRows(wallets: Wallet[], states: PerpsClearinghouseState[]): AggregatedPositions {
+/**
+ * A wallet's perps state across the main account and every builder-deployed dex
+ * (HIP-3). Builder-dex positions (e.g. on "xyz" or "cash") are absent from the
+ * main `clearinghouseState`, so each dex is queried separately. A failing dex is
+ * skipped rather than dropping the whole wallet, hence allSettled.
+ */
+export async function fetchClearinghouseStates(
+  wallet: Wallet,
+  signal?: AbortSignal,
+): Promise<PerpsClearinghouseState[]> {
+  const dexNames = await fetchPerpDexs(signal);
+  const results = await Promise.allSettled([
+    fetchClearinghouseState(wallet, signal),
+    ...dexNames.map((dex) => fetchDexClearinghouseState(wallet.address, dex, signal)),
+  ]);
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+}
+
+export async function fetchPositionStates(
+  wallets: Wallet[],
+  signal?: AbortSignal,
+): Promise<PerpsClearinghouseState[][]> {
+  return Promise.all(wallets.map((wallet) => fetchClearinghouseStates(wallet, signal)));
+}
+
+export function aggregatePositionRows(wallets: Wallet[], states: PerpsClearinghouseState[][]): AggregatedPositions {
   const positions: PositionRow[] = [];
+  const usedIds = new Set<string>();
   let accountValue = 0;
   let unrealizedPnl = 0;
   let marginUsed = 0;
   let maintenanceMarginUsed = 0;
 
-  states.forEach((state, stateIndex) => {
+  states.forEach((walletStates, stateIndex) => {
     const wallet = wallets[stateIndex];
     if (!wallet) {
       return;
     }
 
-    accountValue += parseNumber(state.marginSummary.accountValue);
-    marginUsed += parseNumber(state.marginSummary.totalMarginUsed);
-    maintenanceMarginUsed += parseNumber(state.crossMaintenanceMarginUsed);
+    // Each entry is the wallet's main account plus its builder-deployed dexes
+    // (HIP-3); their collateral and positions are summed into one account view.
+    walletStates.forEach((state) => {
+      accountValue += parseNumber(state.marginSummary.accountValue);
+      marginUsed += parseNumber(state.marginSummary.totalMarginUsed);
+      maintenanceMarginUsed += parseNumber(state.crossMaintenanceMarginUsed);
 
-    state.assetPositions.forEach((assetPosition) => {
-      const position = assetPosition.position;
-      const size = parseNumber(position.szi);
-      if (size === 0) {
-        return;
-      }
+      state.assetPositions.forEach((assetPosition) => {
+        const position = assetPosition.position;
+        const size = parseNumber(position.szi);
+        if (size === 0) {
+          return;
+        }
 
-      const pnl = parseNumber(position.unrealizedPnl);
-      unrealizedPnl += pnl;
+        const pnl = parseNumber(position.unrealizedPnl);
+        unrealizedPnl += pnl;
 
-      const entryPrice = parseNumber(position.entryPx);
-      const positionValue = parseNumber(position.positionValue);
-      const markPrice = size === 0 ? entryPrice : positionValue / Math.abs(size);
+        const entryPrice = parseNumber(position.entryPx);
+        const positionValue = parseNumber(position.positionValue);
+        const markPrice = size === 0 ? entryPrice : positionValue / Math.abs(size);
 
-      positions.push({
-        id: `${wallet.id}-${position.coin}`,
-        walletId: wallet.id,
-        walletLabel: wallet.label,
-        coin: position.coin,
-        side: size > 0 ? "Long" : "Short",
-        size,
-        leverage: position.leverage.value,
-        leverageType: position.leverage.type,
-        entryPrice,
-        markPrice,
-        positionValue,
-        unrealizedPnl: pnl,
-        returnOnEquity: parseNumber(position.returnOnEquity),
-        liquidationPrice: position.liquidationPx === null ? null : parseNumber(position.liquidationPx),
-        marginUsed: parseNumber(position.marginUsed),
+        // Coins are unique within a dex but could repeat across them, so ensure a
+        // stable unique key for the row.
+        let id = `${wallet.id}-${position.coin}`;
+        let suffix = 2;
+        while (usedIds.has(id)) {
+          id = `${wallet.id}-${position.coin}-${suffix++}`;
+        }
+        usedIds.add(id);
+
+        positions.push({
+          id,
+          walletId: wallet.id,
+          walletLabel: wallet.label,
+          coin: position.coin,
+          side: size > 0 ? "Long" : "Short",
+          size,
+          leverage: position.leverage.value,
+          leverageType: position.leverage.type,
+          entryPrice,
+          markPrice,
+          positionValue,
+          unrealizedPnl: pnl,
+          returnOnEquity: parseNumber(position.returnOnEquity),
+          liquidationPrice: position.liquidationPx === null ? null : parseNumber(position.liquidationPx),
+          marginUsed: parseNumber(position.marginUsed),
+        });
       });
     });
   });

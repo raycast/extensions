@@ -98,56 +98,60 @@ describe("Hyperliquid data helpers", () => {
       { id: "vault", label: "Vault", address: "0x0000000000000000000000000000000000000002" },
     ];
     const rows = aggregatePositionRows(wallets, [
-      {
-        marginSummary: { accountValue: "1000", totalNtlPos: "300", totalRawUsd: "1000", totalMarginUsed: "100" },
-        crossMarginSummary: { accountValue: "1000", totalNtlPos: "300", totalRawUsd: "1000", totalMarginUsed: "100" },
-        crossMaintenanceMarginUsed: "0",
-        withdrawable: "900",
-        time: 1,
-        assetPositions: [
-          {
-            type: "oneWay",
-            position: {
-              coin: "BTC",
-              szi: "0.01",
-              leverage: { type: "cross", value: 10 },
-              entryPx: "65000",
-              positionValue: "670",
-              unrealizedPnl: "20",
-              returnOnEquity: "0.2",
-              liquidationPx: "50000",
-              marginUsed: "67",
-              maxLeverage: 50,
-              cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+      [
+        {
+          marginSummary: { accountValue: "1000", totalNtlPos: "300", totalRawUsd: "1000", totalMarginUsed: "100" },
+          crossMarginSummary: { accountValue: "1000", totalNtlPos: "300", totalRawUsd: "1000", totalMarginUsed: "100" },
+          crossMaintenanceMarginUsed: "0",
+          withdrawable: "900",
+          time: 1,
+          assetPositions: [
+            {
+              type: "oneWay",
+              position: {
+                coin: "BTC",
+                szi: "0.01",
+                leverage: { type: "cross", value: 10 },
+                entryPx: "65000",
+                positionValue: "670",
+                unrealizedPnl: "20",
+                returnOnEquity: "0.2",
+                liquidationPx: "50000",
+                marginUsed: "67",
+                maxLeverage: 50,
+                cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+              },
             },
-          },
-        ],
-      },
-      {
-        marginSummary: { accountValue: "500", totalNtlPos: "200", totalRawUsd: "500", totalMarginUsed: "50" },
-        crossMarginSummary: { accountValue: "500", totalNtlPos: "200", totalRawUsd: "500", totalMarginUsed: "50" },
-        crossMaintenanceMarginUsed: "0",
-        withdrawable: "450",
-        time: 1,
-        assetPositions: [
-          {
-            type: "oneWay",
-            position: {
-              coin: "ETH",
-              szi: "-0.5",
-              leverage: { type: "isolated", value: 5, rawUsd: "50" },
-              entryPx: "3600",
-              positionValue: "1750",
-              unrealizedPnl: "-25",
-              returnOnEquity: "-0.1",
-              liquidationPx: null,
-              marginUsed: "350",
-              maxLeverage: 50,
-              cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+          ],
+        },
+      ],
+      [
+        {
+          marginSummary: { accountValue: "500", totalNtlPos: "200", totalRawUsd: "500", totalMarginUsed: "50" },
+          crossMarginSummary: { accountValue: "500", totalNtlPos: "200", totalRawUsd: "500", totalMarginUsed: "50" },
+          crossMaintenanceMarginUsed: "0",
+          withdrawable: "450",
+          time: 1,
+          assetPositions: [
+            {
+              type: "oneWay",
+              position: {
+                coin: "ETH",
+                szi: "-0.5",
+                leverage: { type: "isolated", value: 5, rawUsd: "50" },
+                entryPx: "3600",
+                positionValue: "1750",
+                unrealizedPnl: "-25",
+                returnOnEquity: "-0.1",
+                liquidationPx: null,
+                marginUsed: "350",
+                maxLeverage: 50,
+                cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+              },
             },
-          },
-        ],
-      },
+          ],
+        },
+      ],
     ]);
 
     expect(rows.summary).toMatchObject({ accountValue: 1500, unrealizedPnl: -5, marginUsed: 150 });
@@ -255,35 +259,103 @@ describe("Hyperliquid data helpers", () => {
   it("derives mark price and maintenance margin for positions", () => {
     const wallets: Wallet[] = [{ id: "m", label: "Main", address: "0x0000000000000000000000000000000000000001" }];
     const rows = aggregatePositionRows(wallets, [
-      {
-        marginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
-        crossMarginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
-        crossMaintenanceMarginUsed: "20",
-        withdrawable: "900",
-        time: 1,
-        assetPositions: [
-          {
-            type: "oneWay",
-            position: {
-              coin: "BTC",
-              szi: "0.01",
-              leverage: { type: "cross", value: 10 },
-              entryPx: "65000",
-              positionValue: "670",
-              unrealizedPnl: "20",
-              returnOnEquity: "0.2",
-              liquidationPx: "50000",
-              marginUsed: "67",
-              maxLeverage: 50,
-              cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+      [
+        {
+          marginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
+          crossMarginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
+          crossMaintenanceMarginUsed: "20",
+          withdrawable: "900",
+          time: 1,
+          assetPositions: [
+            {
+              type: "oneWay",
+              position: {
+                coin: "BTC",
+                szi: "0.01",
+                leverage: { type: "cross", value: 10 },
+                entryPx: "65000",
+                positionValue: "670",
+                unrealizedPnl: "20",
+                returnOnEquity: "0.2",
+                liquidationPx: "50000",
+                marginUsed: "67",
+                maxLeverage: 50,
+                cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+              },
             },
-          },
-        ],
-      },
+          ],
+        },
+      ],
     ]);
 
     expect(rows.summary.maintenanceMarginUsed).toBe(20);
     expect(rows.positions[0].markPrice).toBeCloseTo(67000);
+  });
+
+  it("merges main-account and builder-dex (HIP-3) positions into one wallet view", () => {
+    const wallets: Wallet[] = [{ id: "m", label: "Main", address: "0x0000000000000000000000000000000000000001" }];
+    const rows = aggregatePositionRows(wallets, [
+      [
+        {
+          marginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
+          crossMarginSummary: { accountValue: "1000", totalNtlPos: "670", totalRawUsd: "1000", totalMarginUsed: "67" },
+          crossMaintenanceMarginUsed: "10",
+          withdrawable: "900",
+          time: 1,
+          assetPositions: [
+            {
+              type: "oneWay",
+              position: {
+                coin: "BTC",
+                szi: "0.01",
+                leverage: { type: "cross", value: 10 },
+                entryPx: "65000",
+                positionValue: "670",
+                unrealizedPnl: "20",
+                returnOnEquity: "0.2",
+                liquidationPx: "50000",
+                marginUsed: "67",
+                maxLeverage: 50,
+                cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+              },
+            },
+          ],
+        },
+        {
+          marginSummary: { accountValue: "200", totalNtlPos: "100", totalRawUsd: "200", totalMarginUsed: "50" },
+          crossMarginSummary: { accountValue: "200", totalNtlPos: "100", totalRawUsd: "200", totalMarginUsed: "50" },
+          crossMaintenanceMarginUsed: "5",
+          withdrawable: "150",
+          time: 1,
+          assetPositions: [
+            {
+              type: "oneWay",
+              position: {
+                coin: "GOLD",
+                szi: "2",
+                leverage: { type: "isolated", value: 4, rawUsd: "50" },
+                entryPx: "30",
+                positionValue: "100",
+                unrealizedPnl: "-15",
+                returnOnEquity: "-0.3",
+                liquidationPx: "20",
+                marginUsed: "50",
+                maxLeverage: 10,
+                cumFunding: { allTime: "0", sinceOpen: "0", sinceChange: "0" },
+              },
+            },
+          ],
+        },
+      ],
+    ]);
+
+    expect(rows.summary).toMatchObject({
+      accountValue: 1200,
+      unrealizedPnl: 5,
+      marginUsed: 117,
+      maintenanceMarginUsed: 15,
+    });
+    expect(rows.positions.map((position) => position.coin)).toEqual(["BTC", "GOLD"]);
   });
 });
 

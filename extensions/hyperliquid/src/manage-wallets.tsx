@@ -87,6 +87,12 @@ export default function Command() {
                   icon={Icon.Pencil}
                   target={<WalletForm wallet={wallet} wallets={wallets} onSaved={walletsState.revalidate} />}
                 />
+                <Action.Push
+                  title="Add Wallet"
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  target={<WalletForm wallets={wallets} onSaved={walletsState.revalidate} />}
+                />
                 <Action.CopyToClipboard title="Copy Address" content={wallet.address} />
                 <Action
                   title="Delete Wallet"
