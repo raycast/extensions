@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-17
 
 - Added support for Devin Desktop.
 
