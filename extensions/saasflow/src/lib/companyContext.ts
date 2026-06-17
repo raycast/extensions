@@ -1,7 +1,7 @@
-import { LocalStorage } from '@raycast/api';
-import { getClient } from './client.js';
+import { LocalStorage } from "@raycast/api";
+import { getClient } from "./client.js";
 
-const SELECTED_COMPANY_KEY = 'saasflow.selectedCompanyId';
+const SELECTED_COMPANY_KEY = "saasflow.selectedCompanyId";
 
 export interface CompanySummary {
     id: string;
@@ -29,7 +29,7 @@ export async function getSelectedCompanyId(): Promise<string | null> {
  */
 export async function resolveCompany(explicitId?: string): Promise<CompanySummary | null> {
     const client = await getClient();
-    const { data } = await client.GET('/companies', {});
+    const { data } = await client.GET("/companies", {});
     const companies = (data ?? []) as CompanySummary[];
     if (companies.length === 0) return null;
     const pickById = (id: string): CompanySummary | undefined => companies.find((c) => c.id === id);

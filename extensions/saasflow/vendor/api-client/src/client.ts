@@ -1,7 +1,7 @@
-import createOpenApiFetch, { type Client, type Middleware } from 'openapi-fetch';
-import type { paths } from './generated/types.js';
-import { authHeaderValue, type Auth } from './auth.js';
-import { ApiError } from './errors.js';
+import createOpenApiFetch, { type Client, type Middleware } from "openapi-fetch";
+import type { paths } from "./generated/types.js";
+import { authHeaderValue, type Auth } from "./auth.js";
+import { ApiError } from "./errors.js";
 
 export type SaasflowClient = Client<paths>;
 
@@ -26,7 +26,7 @@ export interface CreateClientOptions {
  */
 export function createClient(opts: CreateClientOptions): SaasflowClient {
     const client = createOpenApiFetch<paths>({
-        baseUrl: opts.baseUrl.replace(/\/$/, ''),
+        baseUrl: opts.baseUrl.replace(/\/$/, ""),
         fetch: opts.fetch ?? fetch,
         headers: {
             Authorization: authHeaderValue(opts.auth),

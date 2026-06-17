@@ -2,7 +2,7 @@
 // Do not edit by hand.
 
 export interface paths {
-    '/companies': {
+    "/companies": {
         parameters: {
             query?: never;
             header?: never;
@@ -24,42 +24,42 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The base currency for the company.
                              * @enum {string}
                              */
                             baseCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** Format: date-time */
                             createdTime: string | null;
                             createdUserId: string | null;
@@ -78,24 +78,24 @@ export interface paths {
                             name: string;
                             permissions:
                                 | (
-                                      | 'subscriptions:read'
-                                      | 'subscriptions:write'
-                                      | 'customers:read'
-                                      | 'customers:write'
-                                      | 'vendors:read'
-                                      | 'vendors:write'
-                                      | 'accounts:read'
-                                      | 'accounts:write'
-                                      | 'transactions:read'
-                                      | 'transactions:write'
-                                      | 'balances:read'
-                                      | 'balances:write'
-                                      | 'financials:read'
-                                      | 'financials:write'
-                                      | 'users:manage'
-                                      | 'api_keys:manage'
-                                      | 'integrations:manage'
-                                      | 'company:manage'
+                                      | "subscriptions:read"
+                                      | "subscriptions:write"
+                                      | "customers:read"
+                                      | "customers:write"
+                                      | "vendors:read"
+                                      | "vendors:write"
+                                      | "accounts:read"
+                                      | "accounts:write"
+                                      | "transactions:read"
+                                      | "transactions:write"
+                                      | "balances:read"
+                                      | "balances:write"
+                                      | "financials:read"
+                                      | "financials:write"
+                                      | "users:manage"
+                                      | "api_keys:manage"
+                                      | "integrations:manage"
+                                      | "company:manage"
                                   )[]
                                 | null;
                             /** @description Whether to show all categories in P&L, including empty ones. */
@@ -103,7 +103,7 @@ export interface paths {
                             /** @description Whether to show planning percentages for past months in P&L. */
                             plShowPlanningPercentageForPastMonths: boolean;
                             /** @enum {string} */
-                            role: 'owner' | 'editor' | 'viewer';
+                            role: "owner" | "editor" | "viewer";
                             /** Format: date-time */
                             systemDeletionScheduledTime: string | null;
                             systemDeletionWarning: number | null;
@@ -115,14 +115,7 @@ export interface paths {
                              * @description The status of the company.
                              * @enum {string}
                              */
-                            systemStatus:
-                                | 'sandbox'
-                                | 'trial'
-                                | 'free'
-                                | 'paid'
-                                | 'cancelled'
-                                | 'expired'
-                                | 'beta';
+                            systemStatus: "sandbox" | "trial" | "free" | "paid" | "cancelled" | "expired" | "beta";
                             systemStripe?: {
                                 customerId: string;
                                 subscription?: {
@@ -131,7 +124,7 @@ export interface paths {
                                     currentPeriodStart: string;
                                     id: string;
                                     /** @enum {string} */
-                                    interval: 'monthly' | 'yearly';
+                                    interval: "monthly" | "yearly";
                                     limits: {
                                         maxARR: number;
                                         minARR: number;
@@ -141,15 +134,15 @@ export interface paths {
                                         value: number;
                                     };
                                     /** @enum {string} */
-                                    productName: 'starter' | 'pro';
+                                    productName: "starter" | "pro";
                                     /** @enum {string} */
                                     status:
-                                        | 'active'
-                                        | 'incomplete'
-                                        | 'incomplete_expired'
-                                        | 'past_due'
-                                        | 'unpaid'
-                                        | 'canceled';
+                                        | "active"
+                                        | "incomplete"
+                                        | "incomplete_expired"
+                                        | "past_due"
+                                        | "unpaid"
+                                        | "canceled";
                                 };
                             } | null;
                             /** Format: date-time */
@@ -167,7 +160,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}': {
+    "/companies/{companyId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -191,42 +184,42 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The base currency for the company.
                              * @enum {string}
                              */
                             baseCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** Format: date-time */
                             createdTime: string | null;
                             createdUserId: string | null;
@@ -234,12 +227,7 @@ export interface paths {
                             /** Format: uuid */
                             id: string;
                             /** @description Distinct integration types currently active for this company. Used by the UI to gate features that depend on a specific integration being installed (e.g. show DATEV personnel-number input only when a datevLohnjournal integration exists). Avoids loading the full /integrations list — that endpoint is owner-only. */
-                            integrationTypes: (
-                                | 'stripe'
-                                | 'slack'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
-                            )[];
+                            integrationTypes: ("stripe" | "slack" | "hubspot" | "datevLohnjournal")[];
                             /**
                              * Format: date-time
                              * @description When any data within the company was last updated.
@@ -265,14 +253,7 @@ export interface paths {
                              * @description The status of the company.
                              * @enum {string}
                              */
-                            systemStatus:
-                                | 'sandbox'
-                                | 'trial'
-                                | 'free'
-                                | 'paid'
-                                | 'cancelled'
-                                | 'expired'
-                                | 'beta';
+                            systemStatus: "sandbox" | "trial" | "free" | "paid" | "cancelled" | "expired" | "beta";
                             systemStripe?: {
                                 customerId: string;
                                 subscription?: {
@@ -281,7 +262,7 @@ export interface paths {
                                     currentPeriodStart: string;
                                     id: string;
                                     /** @enum {string} */
-                                    interval: 'monthly' | 'yearly';
+                                    interval: "monthly" | "yearly";
                                     limits: {
                                         maxARR: number;
                                         minARR: number;
@@ -291,15 +272,15 @@ export interface paths {
                                         value: number;
                                     };
                                     /** @enum {string} */
-                                    productName: 'starter' | 'pro';
+                                    productName: "starter" | "pro";
                                     /** @enum {string} */
                                     status:
-                                        | 'active'
-                                        | 'incomplete'
-                                        | 'incomplete_expired'
-                                        | 'past_due'
-                                        | 'unpaid'
-                                        | 'canceled';
+                                        | "active"
+                                        | "incomplete"
+                                        | "incomplete_expired"
+                                        | "past_due"
+                                        | "unpaid"
+                                        | "canceled";
                                 };
                             } | null;
                             /** Format: date-time */
@@ -313,29 +294,29 @@ export interface paths {
                                 name: string | null;
                                 permissions:
                                     | (
-                                          | 'subscriptions:read'
-                                          | 'subscriptions:write'
-                                          | 'customers:read'
-                                          | 'customers:write'
-                                          | 'vendors:read'
-                                          | 'vendors:write'
-                                          | 'accounts:read'
-                                          | 'accounts:write'
-                                          | 'transactions:read'
-                                          | 'transactions:write'
-                                          | 'balances:read'
-                                          | 'balances:write'
-                                          | 'financials:read'
-                                          | 'financials:write'
-                                          | 'users:manage'
-                                          | 'api_keys:manage'
-                                          | 'integrations:manage'
-                                          | 'company:manage'
+                                          | "subscriptions:read"
+                                          | "subscriptions:write"
+                                          | "customers:read"
+                                          | "customers:write"
+                                          | "vendors:read"
+                                          | "vendors:write"
+                                          | "accounts:read"
+                                          | "accounts:write"
+                                          | "transactions:read"
+                                          | "transactions:write"
+                                          | "balances:read"
+                                          | "balances:write"
+                                          | "financials:read"
+                                          | "financials:write"
+                                          | "users:manage"
+                                          | "api_keys:manage"
+                                          | "integrations:manage"
+                                          | "company:manage"
                                       )[]
                                     | null;
                                 photoURL: string | null;
                                 /** @enum {string} */
-                                role: 'owner' | 'editor' | 'viewer';
+                                role: "owner" | "editor" | "viewer";
                                 userId: string;
                             }[];
                         };
@@ -347,7 +328,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -365,7 +346,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         baseCurrency?: string;
                         name?: string;
                         plShowAllCategories?: boolean;
@@ -380,42 +361,42 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The base currency for the company.
                              * @enum {string}
                              */
                             baseCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** Format: date-time */
                             createdTime: string | null;
                             createdUserId: string | null;
@@ -447,14 +428,7 @@ export interface paths {
                              * @description The status of the company.
                              * @enum {string}
                              */
-                            systemStatus:
-                                | 'sandbox'
-                                | 'trial'
-                                | 'free'
-                                | 'paid'
-                                | 'cancelled'
-                                | 'expired'
-                                | 'beta';
+                            systemStatus: "sandbox" | "trial" | "free" | "paid" | "cancelled" | "expired" | "beta";
                             systemStripe?: {
                                 customerId: string;
                                 subscription?: {
@@ -463,7 +437,7 @@ export interface paths {
                                     currentPeriodStart: string;
                                     id: string;
                                     /** @enum {string} */
-                                    interval: 'monthly' | 'yearly';
+                                    interval: "monthly" | "yearly";
                                     limits: {
                                         maxARR: number;
                                         minARR: number;
@@ -473,15 +447,15 @@ export interface paths {
                                         value: number;
                                     };
                                     /** @enum {string} */
-                                    productName: 'starter' | 'pro';
+                                    productName: "starter" | "pro";
                                     /** @enum {string} */
                                     status:
-                                        | 'active'
-                                        | 'incomplete'
-                                        | 'incomplete_expired'
-                                        | 'past_due'
-                                        | 'unpaid'
-                                        | 'canceled';
+                                        | "active"
+                                        | "incomplete"
+                                        | "incomplete_expired"
+                                        | "past_due"
+                                        | "unpaid"
+                                        | "canceled";
                                 };
                             } | null;
                             /** Format: date-time */
@@ -495,7 +469,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -509,7 +483,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/account_groups': {
+    "/companies/{companyId}/account_groups": {
         parameters: {
             query?: never;
             header?: never;
@@ -533,7 +507,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description Flag indicating if the account group is archived. */
                             archived: boolean;
                             /** Format: uuid */
@@ -567,7 +541,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /** @default false */
                         archived?: boolean;
                         name: string;
@@ -582,7 +556,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description Flag indicating if the account group is archived. */
                             archived: boolean;
                             /** Format: uuid */
@@ -610,7 +584,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/account_groups/{accountGroupId}': {
+    "/companies/{companyId}/account_groups/{accountGroupId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -635,7 +609,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description Flag indicating if the account group is archived. */
                             archived: boolean;
                             /** Format: uuid */
@@ -661,7 +635,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -680,7 +654,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         archived?: boolean;
                         name?: string;
                         order?: number;
@@ -694,7 +668,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description Flag indicating if the account group is archived. */
                             archived: boolean;
                             /** Format: uuid */
@@ -720,7 +694,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -746,7 +720,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -758,7 +732,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/account_groups/merge': {
+    "/companies/{companyId}/account_groups/merge": {
         parameters: {
             query?: never;
             header?: never;
@@ -778,7 +752,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountGroupIds: string[];
                         newAccountGroup: {
                             /** @default false */
@@ -796,7 +770,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description Flag indicating if the account group is archived. */
                             archived: boolean;
                             /** Format: uuid */
@@ -824,7 +798,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/account_groups/reorder': {
+    "/companies/{companyId}/account_groups/reorder": {
         parameters: {
             query?: never;
             header?: never;
@@ -843,7 +817,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountGroupIds: string[];
                     };
                 };
@@ -855,7 +829,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -869,7 +843,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts': {
+    "/companies/{companyId}/accounts": {
         parameters: {
             query?: never;
             header?: never;
@@ -893,7 +867,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -947,9 +921,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1001,21 +975,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1040,14 +1008,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1072,7 +1040,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -1081,7 +1049,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1106,9 +1074,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -1122,36 +1090,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -1163,7 +1131,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** @description The integration managing this account (null for manual accounts or when the bank connection has no integrationId). */
@@ -1208,17 +1176,17 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The mode of the Stripe integration (test or live).
                                        * @enum {string}
                                        */
-                                      stripeMode?: 'test' | 'live';
+                                      stripeMode?: "test" | "live";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /**
@@ -1258,12 +1226,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'slack';
+                                      type: "slack";
                                   }
                                 | {
                                       /**
@@ -1302,12 +1270,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'hubspot';
+                                      type: "hubspot";
                                   }
                                 | {
                                       /**
@@ -1344,12 +1312,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   }
                                 | null;
                             /**
@@ -1372,7 +1340,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         }[];
                     };
                 };
@@ -1390,7 +1358,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountGroupId?: string | null;
                         accountNumber?: string | null;
                         /** @default false */
@@ -1399,7 +1367,7 @@ export interface paths {
                         defaultCurrency: string;
                         expectedAnnualReturn?: number | null;
                         /** @enum {string} */
-                        importType: 'manual' | 'automated';
+                        importType: "manual" | "automated";
                         includeInCashBalance: boolean;
                         initialBalance?: {
                             currency: string;
@@ -1409,7 +1377,7 @@ export interface paths {
                         name: string;
                         order: number;
                         /** @enum {string} */
-                        type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                        type: "bank" | "cash" | "creditCard" | "loan" | "other";
                     };
                 };
             };
@@ -1420,7 +1388,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -1474,9 +1442,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1528,21 +1496,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1567,14 +1529,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1599,7 +1561,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -1608,7 +1570,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1633,9 +1595,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -1649,36 +1611,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -1690,7 +1652,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -1704,7 +1666,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -1716,7 +1678,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}': {
+    "/companies/{companyId}/accounts/{accountId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1741,7 +1703,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -1795,9 +1757,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1849,21 +1811,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1888,14 +1844,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1920,7 +1876,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -1929,7 +1885,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -1954,9 +1910,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -1970,36 +1926,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -2011,7 +1967,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** @description The integration managing this account (null for manual accounts or when the bank connection has no integrationId). */
@@ -2056,17 +2012,17 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The mode of the Stripe integration (test or live).
                                        * @enum {string}
                                        */
-                                      stripeMode?: 'test' | 'live';
+                                      stripeMode?: "test" | "live";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /**
@@ -2106,12 +2062,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'slack';
+                                      type: "slack";
                                   }
                                 | {
                                       /**
@@ -2150,12 +2106,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'hubspot';
+                                      type: "hubspot";
                                   }
                                 | {
                                       /**
@@ -2192,12 +2148,12 @@ export interface paths {
                                        * @default active
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'error';
+                                      status: "active" | "error";
                                       /**
                                        * @description The type of integration.
                                        * @enum {string}
                                        */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   }
                                 | null;
                             /**
@@ -2220,7 +2176,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -2230,7 +2186,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -2249,7 +2205,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountGroupId?: string | null;
                         accountNumber?: string | null;
                         archived?: boolean;
@@ -2258,12 +2214,12 @@ export interface paths {
                         expectedAnnualReturn?: number | null;
                         importSettings?: unknown;
                         /** @enum {string} */
-                        importType?: 'manual' | 'automated';
+                        importType?: "manual" | "automated";
                         includeInCashBalance?: boolean;
                         name?: string;
                         order?: number;
                         /** @enum {string} */
-                        type?: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                        type?: "bank" | "cash" | "creditCard" | "loan" | "other";
                     };
                 };
             };
@@ -2274,7 +2230,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -2328,9 +2284,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2382,21 +2338,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2421,14 +2371,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2453,7 +2403,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -2462,7 +2412,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2487,9 +2437,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -2503,36 +2453,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -2544,7 +2494,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -2558,7 +2508,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -2568,7 +2518,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -2594,7 +2544,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -2606,7 +2556,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}/archive': {
+    "/companies/{companyId}/accounts/{accountId}/archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -2632,7 +2582,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -2686,9 +2636,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2740,21 +2690,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2779,14 +2723,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2811,7 +2755,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -2820,7 +2764,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -2845,9 +2789,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -2861,36 +2805,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -2902,7 +2846,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -2916,7 +2860,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -2926,7 +2870,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -2940,7 +2884,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}/change_group': {
+    "/companies/{companyId}/accounts/{accountId}/change_group": {
         parameters: {
             query?: never;
             header?: never;
@@ -2960,7 +2904,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountGroupId: string | null;
                     };
                 };
@@ -2972,7 +2916,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -3026,9 +2970,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3080,21 +3024,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3119,14 +3057,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3151,7 +3089,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -3160,7 +3098,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3185,9 +3123,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -3201,36 +3139,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -3242,7 +3180,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -3256,7 +3194,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -3266,7 +3204,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -3280,7 +3218,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}/remove_history': {
+    "/companies/{companyId}/accounts/{accountId}/remove_history": {
         parameters: {
             query?: never;
             header?: never;
@@ -3301,7 +3239,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         beforeDate: string;
                     };
                 };
@@ -3313,7 +3251,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -3324,7 +3262,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -3337,7 +3275,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}/switch_to_manual': {
+    "/companies/{companyId}/accounts/{accountId}/switch_to_manual": {
         parameters: {
             query?: never;
             header?: never;
@@ -3363,7 +3301,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -3417,9 +3355,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3471,21 +3409,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3510,14 +3442,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3542,7 +3474,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -3551,7 +3483,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3576,9 +3508,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -3592,36 +3524,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -3633,7 +3565,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -3647,7 +3579,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -3657,7 +3589,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -3671,7 +3603,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/{accountId}/unarchive': {
+    "/companies/{companyId}/accounts/{accountId}/unarchive": {
         parameters: {
             query?: never;
             header?: never;
@@ -3697,7 +3629,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account group this account belongs to. Null if not part of any group.
@@ -3751,9 +3683,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'finApi';
+                                      type: "finApi";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3805,21 +3737,15 @@ export interface paths {
                                            * @description The type of the account.
                                            * @enum {string}
                                            */
-                                          type:
-                                              | 'investment'
-                                              | 'credit'
-                                              | 'depository'
-                                              | 'loan'
-                                              | 'brokerage'
-                                              | 'other';
+                                          type: "investment" | "credit" | "depository" | "loan" | "brokerage" | "other";
                                       };
                                       /**
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'plaid';
+                                      type: "plaid";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3844,14 +3770,14 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe connected account, if applicable. Null otherwise. */
                                       stripeAccount: {
                                           /** @description The Stripe account ID. */
                                           id: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripe';
+                                      type: "stripe";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3876,7 +3802,7 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @description Details of the Stripe Capital Flex Loan account. */
                                       stripeLoanAccount: {
                                           /** @description The Stripe Capital Flex Loan ID. */
@@ -3885,7 +3811,7 @@ export interface paths {
                                           stripeAccountId: string;
                                       };
                                       /** @enum {string} */
-                                      type: 'stripeLoan';
+                                      type: "stripeLoan";
                                   }
                                 | {
                                       /** @description The balance derived from summing all transactions when a balance mismatch occurred. Only present when status is 'balanceMismatch'. */
@@ -3910,9 +3836,9 @@ export interface paths {
                                        * @description The current status of the bank connection.
                                        * @enum {string}
                                        */
-                                      status: 'active' | 'balanceMismatch' | 'expired' | 'error';
+                                      status: "active" | "balanceMismatch" | "expired" | "error";
                                       /** @enum {string} */
-                                      type: 'datevLohnjournal';
+                                      type: "datevLohnjournal";
                                   };
                             /** Format: uuid */
                             companyId: string;
@@ -3926,36 +3852,36 @@ export interface paths {
                              * @enum {string}
                              */
                             defaultCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The expected annual return percentage for this account, if applicable. */
                             expectedAnnualReturn: number | null;
                             /** Format: uuid */
@@ -3967,7 +3893,7 @@ export interface paths {
                              * @description Whether transactions are imported manually or via bank connection.
                              * @enum {string}
                              */
-                            importType: 'manual' | 'automated';
+                            importType: "manual" | "automated";
                             /** @description Whether this account should be included in cash balance calculations and cash flow reports. */
                             includeInCashBalance: boolean;
                             /** Format: date-time */
@@ -3981,7 +3907,7 @@ export interface paths {
                              * @description The type of account: bank, cash, creditCard, loan, or other.
                              * @enum {string}
                              */
-                            type: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                            type: "bank" | "cash" | "creditCard" | "loan" | "other";
                         };
                     };
                 };
@@ -3991,7 +3917,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4005,7 +3931,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/balances': {
+    "/companies/{companyId}/accounts/balances": {
         parameters: {
             query?: never;
             header?: never;
@@ -4036,7 +3962,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             [key: string]: {
                                 /** @description The default currency of the account. */
                                 defaultCurrency: string;
@@ -4062,7 +3988,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/accounts/daily_balance': {
+    "/companies/{companyId}/accounts/daily_balance": {
         parameters: {
             query?: never;
             header?: never;
@@ -4093,7 +4019,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': [string, number][];
+                        "application/json": [string, number][];
                     };
                 };
             };
@@ -4106,7 +4032,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/background_tasks': {
+    "/companies/{companyId}/background_tasks": {
         parameters: {
             query?: never;
             header?: never;
@@ -4130,7 +4056,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /** Format: uuid */
                             companyId: string;
@@ -4159,22 +4085,22 @@ export interface paths {
                              * @description The current status of the task.
                              * @enum {string}
                              */
-                            status: 'open' | 'running' | 'failed' | 'succeeded';
+                            status: "open" | "running" | "failed" | "succeeded";
                             /**
                              * @description The type of background task.
                              * @enum {string}
                              */
                             type:
-                                | 'resolveTransfers'
-                                | 'autoCategorizeTransactions'
-                                | 'finapiRefreshAccountTransactions'
-                                | 'plaidRefreshAccountTransactions'
-                                | 'stripeRefreshAccountTransactions'
-                                | 'stripeRefreshSubscriptions'
-                                | 'stripeFullSync'
-                                | 'stripeDeltaSync'
-                                | 'hubspotRefreshSubscriptions'
-                                | 'resolveHubSpotCategorizations';
+                                | "resolveTransfers"
+                                | "autoCategorizeTransactions"
+                                | "finapiRefreshAccountTransactions"
+                                | "plaidRefreshAccountTransactions"
+                                | "stripeRefreshAccountTransactions"
+                                | "stripeRefreshSubscriptions"
+                                | "stripeFullSync"
+                                | "stripeDeltaSync"
+                                | "hubspotRefreshSubscriptions"
+                                | "resolveHubSpotCategorizations";
                             visible: boolean;
                         }[];
                     };
@@ -4189,7 +4115,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/background_tasks/{id}': {
+    "/companies/{companyId}/background_tasks/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4214,7 +4140,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /** Format: uuid */
                             companyId: string;
@@ -4243,22 +4169,22 @@ export interface paths {
                              * @description The current status of the task.
                              * @enum {string}
                              */
-                            status: 'open' | 'running' | 'failed' | 'succeeded';
+                            status: "open" | "running" | "failed" | "succeeded";
                             /**
                              * @description The type of background task.
                              * @enum {string}
                              */
                             type:
-                                | 'resolveTransfers'
-                                | 'autoCategorizeTransactions'
-                                | 'finapiRefreshAccountTransactions'
-                                | 'plaidRefreshAccountTransactions'
-                                | 'stripeRefreshAccountTransactions'
-                                | 'stripeRefreshSubscriptions'
-                                | 'stripeFullSync'
-                                | 'stripeDeltaSync'
-                                | 'hubspotRefreshSubscriptions'
-                                | 'resolveHubSpotCategorizations';
+                                | "resolveTransfers"
+                                | "autoCategorizeTransactions"
+                                | "finapiRefreshAccountTransactions"
+                                | "plaidRefreshAccountTransactions"
+                                | "stripeRefreshAccountTransactions"
+                                | "stripeRefreshSubscriptions"
+                                | "stripeFullSync"
+                                | "stripeDeltaSync"
+                                | "hubspotRefreshSubscriptions"
+                                | "resolveHubSpotCategorizations";
                             visible: boolean;
                         };
                     };
@@ -4269,7 +4195,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4284,7 +4210,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/categories': {
+    "/companies/{companyId}/categories": {
         parameters: {
             query?: never;
             header?: never;
@@ -4308,7 +4234,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4326,15 +4252,7 @@ export interface paths {
                             /** @description A number used for ordering categories in the UI. */
                             order: number;
                             /** @description The P&L types that the category can be used for. */
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                             /** @description Flag indicating if this is a system-defined category. */
                             system: boolean;
                             /** @description Semantic key for system categories (e.g., revRecurring, paymentFees). */
@@ -4356,11 +4274,11 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         emoji?: string | null;
                         name: string;
                         order: number;
-                        plTypes: ('revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral')[];
+                        plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                         /** @default false */
                         system?: boolean;
                     };
@@ -4373,7 +4291,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4391,15 +4309,7 @@ export interface paths {
                             /** @description A number used for ordering categories in the UI. */
                             order: number;
                             /** @description The P&L types that the category can be used for. */
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                             /** @description Flag indicating if this is a system-defined category. */
                             system: boolean;
                             /** @description Semantic key for system categories (e.g., revRecurring, paymentFees). */
@@ -4415,7 +4325,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/categories/{categoryId}': {
+    "/companies/{companyId}/categories/{categoryId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4440,7 +4350,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4458,15 +4368,7 @@ export interface paths {
                             /** @description A number used for ordering categories in the UI. */
                             order: number;
                             /** @description The P&L types that the category can be used for. */
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                             /** @description Flag indicating if this is a system-defined category. */
                             system: boolean;
                             /** @description Semantic key for system categories (e.g., revRecurring, paymentFees). */
@@ -4480,7 +4382,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4499,11 +4401,11 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         emoji?: string | null;
                         name?: string;
                         order?: number;
-                        plTypes?: ('revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral')[];
+                        plTypes?: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                     };
                 };
             };
@@ -4514,7 +4416,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4532,15 +4434,7 @@ export interface paths {
                             /** @description A number used for ordering categories in the UI. */
                             order: number;
                             /** @description The P&L types that the category can be used for. */
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                             /** @description Flag indicating if this is a system-defined category. */
                             system: boolean;
                             /** @description Semantic key for system categories (e.g., revRecurring, paymentFees). */
@@ -4554,7 +4448,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4580,7 +4474,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -4591,7 +4485,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4603,7 +4497,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/categories/batch_delete': {
+    "/companies/{companyId}/categories/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -4623,7 +4517,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         categoryIds: string[];
                     };
                 };
@@ -4635,7 +4529,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -4646,7 +4540,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4659,7 +4553,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/categories/merge': {
+    "/companies/{companyId}/categories/merge": {
         parameters: {
             query?: never;
             header?: never;
@@ -4679,21 +4573,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         categoryIds: string[];
                         newCategory: {
                             emoji?: string | null;
                             name: string;
                             order: number;
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                         };
                     };
                 };
@@ -4705,7 +4591,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4723,15 +4609,7 @@ export interface paths {
                             /** @description A number used for ordering categories in the UI. */
                             order: number;
                             /** @description The P&L types that the category can be used for. */
-                            plTypes: (
-                                | 'revenue'
-                                | 'cogs'
-                                | 'cac'
-                                | 'pd'
-                                | 'ga'
-                                | 'no'
-                                | 'neutral'
-                            )[];
+                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                             /** @description Flag indicating if this is a system-defined category. */
                             system: boolean;
                             /** @description Semantic key for system categories (e.g., revRecurring, paymentFees). */
@@ -4747,7 +4625,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/categories/reorder': {
+    "/companies/{companyId}/categories/reorder": {
         parameters: {
             query?: never;
             header?: never;
@@ -4766,7 +4644,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         categoryIds: string[];
                     };
                 };
@@ -4778,7 +4656,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -4792,7 +4670,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/comments': {
+    "/companies/{companyId}/comments": {
         parameters: {
             query?: never;
             header?: never;
@@ -4818,7 +4696,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4854,7 +4732,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         taggedUserIds?: string[];
                         text: string;
                         transactionId: string;
@@ -4868,7 +4746,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4898,7 +4776,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/comments/{commentId}': {
+    "/companies/{companyId}/comments/{commentId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4923,7 +4801,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -4951,7 +4829,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -4970,7 +4848,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         taggedUserIds?: string[];
                         text?: string;
                     };
@@ -4983,7 +4861,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -5011,7 +4889,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -5037,7 +4915,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -5049,7 +4927,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/comments/{commentId}/like': {
+    "/companies/{companyId}/comments/{commentId}/like": {
         parameters: {
             query?: never;
             header?: never;
@@ -5075,7 +4953,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -5089,7 +4967,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/comments/{commentId}/unlike': {
+    "/companies/{companyId}/comments/{commentId}/unlike": {
         parameters: {
             query?: never;
             header?: never;
@@ -5115,7 +4993,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -5129,7 +5007,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/counterparties/search': {
+    "/companies/{companyId}/counterparties/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -5157,7 +5035,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -5170,7 +5048,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/customers': {
+    "/companies/{companyId}/customers": {
         parameters: {
             query?: never;
             header?: never;
@@ -5182,7 +5060,7 @@ export interface paths {
                 query?: {
                     limit?: number;
                     offset?: number | null;
-                    onlyActive?: '0' | '1' | 'true' | 'false';
+                    onlyActive?: "0" | "1" | "true" | "false";
                     q?: string;
                 };
                 header?: never;
@@ -5199,7 +5077,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -5216,7 +5094,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         countryCode?: string | null;
                         defaultCategorization?: {
                             categoryId: string;
@@ -5239,16 +5117,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this customer was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -5284,21 +5162,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this customer. */
@@ -5325,7 +5203,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/customers/{customerId}': {
+    "/companies/{companyId}/customers/{customerId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5350,16 +5228,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this customer was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -5395,21 +5273,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this customer. */
@@ -5434,7 +5312,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -5453,7 +5331,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         countryCode?: string | null;
                         defaultCategorization?: {
                             categoryId: string;
@@ -5476,16 +5354,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this customer was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -5521,21 +5399,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this customer. */
@@ -5560,7 +5438,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -5586,7 +5464,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -5598,7 +5476,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/customers/{customerId}/external-ids': {
+    "/companies/{companyId}/customers/{customerId}/external-ids": {
         parameters: {
             query?: never;
             header?: never;
@@ -5623,7 +5501,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -5642,7 +5520,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         externalIds: string[];
                     };
                 };
@@ -5654,7 +5532,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -5665,7 +5543,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -5679,7 +5557,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/customers/batch_delete': {
+    "/companies/{companyId}/customers/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -5699,13 +5577,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         selection:
                             | {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -5719,7 +5597,7 @@ export interface paths {
                                       q?: string;
                                   };
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -5731,7 +5609,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -5743,10 +5621,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -5759,7 +5637,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/customers/merge': {
+    "/companies/{companyId}/customers/merge": {
         parameters: {
             query?: never;
             header?: never;
@@ -5779,7 +5657,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         customerIds: string[];
                         newCustomer: {
                             countryCode?: string | null;
@@ -5805,16 +5683,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this customer was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -5850,21 +5728,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this customer. */
@@ -5891,7 +5769,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/accountBalanceByAccount': {
+    "/companies/{companyId}/data/accountBalanceByAccount": {
         parameters: {
             query?: never;
             header?: never;
@@ -5911,7 +5789,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountIds?: string[];
                         endDate: string;
                         startDate: string;
@@ -5925,7 +5803,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             [key: string]: {
                                 accountId: string;
                                 accountName: string;
@@ -5942,7 +5820,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -5951,7 +5829,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -5962,7 +5840,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/accountBalanceKpis': {
+    "/companies/{companyId}/data/accountBalanceKpis": {
         parameters: {
             query?: never;
             header?: never;
@@ -5982,7 +5860,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountIds?: string[];
                         endDate: string;
                         startDate: string;
@@ -5996,7 +5874,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             total: number;
                             totalChange: number;
                             totalPreviousPeriod: number;
@@ -6009,7 +5887,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6018,7 +5896,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6029,7 +5907,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/analytics': {
+    "/companies/{companyId}/data/analytics": {
         parameters: {
             query?: never;
             header?: never;
@@ -6049,14 +5927,14 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         metricNames: string[];
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate: string;
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
@@ -6070,7 +5948,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             [key: string]: {
                                 format: string;
                                 subTitle: string;
@@ -6088,7 +5966,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6097,7 +5975,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6108,7 +5986,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/balanceByCashType': {
+    "/companies/{companyId}/data/balanceByCashType": {
         parameters: {
             query?: never;
             header?: never;
@@ -6128,7 +6006,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountIds?: string[];
                         endDate: string;
                         startDate: string;
@@ -6142,7 +6020,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             cash: {
                                 date: string;
                                 value: number;
@@ -6160,7 +6038,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6169,7 +6047,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6180,7 +6058,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/balanceTimeSeries': {
+    "/companies/{companyId}/data/balanceTimeSeries": {
         parameters: {
             query?: never;
             header?: never;
@@ -6200,7 +6078,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountIds?: string[];
                         endDate: string;
                         startDate: string;
@@ -6214,7 +6092,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             date: string;
                             value: number;
                         }[];
@@ -6226,7 +6104,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6235,7 +6113,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6246,7 +6124,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/batch': {
+    "/companies/{companyId}/data/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -6266,7 +6144,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         slices: unknown[];
                         timeZone?: string;
                     };
@@ -6279,7 +6157,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description One or more slices have invalid params */
@@ -6288,7 +6166,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for one of the requested slices */
@@ -6297,7 +6175,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6308,7 +6186,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/cashFlowByCategory': {
+    "/companies/{companyId}/data/cashFlowByCategory": {
         parameters: {
             query?: never;
             header?: never;
@@ -6328,7 +6206,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         startDate: string;
                     };
@@ -6341,7 +6219,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             categories: {
                                 id: string;
                                 inflow: {
@@ -6370,7 +6248,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6379,7 +6257,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6390,7 +6268,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/cashFlowTimeSeries': {
+    "/companies/{companyId}/data/cashFlowTimeSeries": {
         parameters: {
             query?: never;
             header?: never;
@@ -6410,7 +6288,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountIds?: string[];
                         endDate: string;
                         startDate?: string;
@@ -6424,7 +6302,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             inflow: {
                                 date: string;
                                 value: number;
@@ -6442,7 +6320,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6451,7 +6329,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6462,7 +6340,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/cohorts': {
+    "/companies/{companyId}/data/cohorts": {
         parameters: {
             query?: never;
             header?: never;
@@ -6482,13 +6360,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate?: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate?: string;
                     };
                 };
@@ -6500,7 +6378,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Invalid params */
@@ -6509,7 +6387,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6518,7 +6396,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6529,7 +6407,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/customerChanges': {
+    "/companies/{companyId}/data/customerChanges": {
         parameters: {
             query?: never;
             header?: never;
@@ -6549,13 +6427,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate: string;
                     };
                 };
@@ -6567,7 +6445,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown[];
+                        "application/json": unknown[];
                     };
                 };
                 /** @description Invalid params */
@@ -6576,7 +6454,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6585,7 +6463,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6596,7 +6474,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/customerMonthlyData': {
+    "/companies/{companyId}/data/customerMonthlyData": {
         parameters: {
             query?: never;
             header?: never;
@@ -6616,7 +6494,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         dataType?: string;
                         dataTypes?: string[];
                         endDate: string;
@@ -6624,7 +6502,7 @@ export interface paths {
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate: string;
                     };
                 };
@@ -6636,7 +6514,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             customer?: {
                                 externalIds?: unknown;
                                 name: string;
@@ -6652,7 +6530,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6661,7 +6539,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6672,7 +6550,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/customerMrr': {
+    "/companies/{companyId}/data/customerMrr": {
         parameters: {
             query?: never;
             header?: never;
@@ -6692,14 +6570,14 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         date: string;
                         limit?: number;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         offset?: number;
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
@@ -6713,7 +6591,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             customers: {
                                 customer: {
                                     countryCode: string | null;
@@ -6733,7 +6611,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6742,7 +6620,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6753,7 +6631,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/monthlyData': {
+    "/companies/{companyId}/data/monthlyData": {
         parameters: {
             query?: never;
             header?: never;
@@ -6773,13 +6651,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate?: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate?: string;
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
@@ -6793,7 +6671,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             cancel: number;
                             cancelCount: number;
                             currency: number;
@@ -6820,7 +6698,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6829,7 +6707,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6840,7 +6718,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/mrrAtDate': {
+    "/companies/{companyId}/data/mrrAtDate": {
         parameters: {
             query?: never;
             header?: never;
@@ -6860,14 +6738,14 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /** @description Snapshot date (YYYY-MM-DD). */
                         date: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
                     };
@@ -6880,7 +6758,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             customerCount: number;
                             mrr: number;
                         };
@@ -6892,7 +6770,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6901,7 +6779,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6912,7 +6790,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/mrrByProduct': {
+    "/companies/{companyId}/data/mrrByProduct": {
         parameters: {
             query?: never;
             header?: never;
@@ -6932,13 +6810,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate: string;
                     };
                 };
@@ -6950,7 +6828,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Invalid params */
@@ -6959,7 +6837,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -6968,7 +6846,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -6979,7 +6857,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/mrrChangeEvents': {
+    "/companies/{companyId}/data/mrrChangeEvents": {
         parameters: {
             query?: never;
             header?: never;
@@ -6999,14 +6877,14 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         limit?: number;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         offset?: number;
                         startDate: string;
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
@@ -7021,7 +6899,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             events: unknown[];
                             totalCount: number;
                         };
@@ -7033,7 +6911,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7042,7 +6920,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7053,7 +6931,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/mrrData': {
+    "/companies/{companyId}/data/mrrData": {
         parameters: {
             query?: never;
             header?: never;
@@ -7073,14 +6951,14 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate?: string;
                         filterCustomerIds?: string[];
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         startDate?: string;
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
@@ -7094,7 +6972,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': [
+                        "application/json": [
                             string,
                             {
                                 customerCount: number;
@@ -7109,7 +6987,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7118,7 +6996,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7129,7 +7007,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/periodDetails': {
+    "/companies/{companyId}/data/periodDetails": {
         parameters: {
             query?: never;
             header?: never;
@@ -7149,15 +7027,15 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /** @enum {string} */
-                        dateDefinition: 'distributed' | 'cash';
+                        dateDefinition: "distributed" | "cash";
                         endDate: string;
                         filter?: {
                             [key: string]: unknown;
                         };
                         /** @enum {string} */
-                        splitBy: 'account' | 'counterparty';
+                        splitBy: "account" | "counterparty";
                         startDate: string;
                     };
                 };
@@ -7169,7 +7047,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             amountBySplitId: {
                                 [key: string]: number;
                             };
@@ -7186,7 +7064,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7195,7 +7073,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7206,7 +7084,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/profitLossData': {
+    "/companies/{companyId}/data/profitLossData": {
         parameters: {
             query?: never;
             header?: never;
@@ -7226,7 +7104,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         startDate: string;
                     };
@@ -7239,7 +7117,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             currencyChangeEffect: {
                                 [key: string]: number;
                             };
@@ -7261,7 +7139,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7270,7 +7148,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7281,7 +7159,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/retentionCohortDetail': {
+    "/companies/{companyId}/data/retentionCohortDetail": {
         parameters: {
             query?: never;
             header?: never;
@@ -7301,15 +7179,15 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /** @enum {string} */
-                        horizon?: 'monthly' | 'annual';
+                        horizon?: "monthly" | "annual";
                         month: string;
                         /**
                          * @description MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR.
                          * @enum {string}
                          */
-                        mrrType: 'cmrr' | 'mrr';
+                        mrrType: "cmrr" | "mrr";
                         /** @description IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
                         timeZone?: string;
                     };
@@ -7322,7 +7200,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             customerId: string;
                             customerName: string | null;
                             mrrEnd: number;
@@ -7336,7 +7214,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7345,7 +7223,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7356,7 +7234,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/revenueExpenses': {
+    "/companies/{companyId}/data/revenueExpenses": {
         parameters: {
             query?: never;
             header?: never;
@@ -7376,7 +7254,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /** @description Common filter shared by P&L slices. */
                         filter?: {
@@ -7394,7 +7272,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             kpis: {
                                 expenses: number;
                                 expensesChange: number;
@@ -7434,7 +7312,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7443,7 +7321,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7454,7 +7332,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/revenueExpensesBar': {
+    "/companies/{companyId}/data/revenueExpensesBar": {
         parameters: {
             query?: never;
             header?: never;
@@ -7474,7 +7352,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /** @description Common filter shared by P&L slices. */
                         filter?: {
@@ -7492,7 +7370,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             cac: number;
                             cogs: number;
                             ga: number;
@@ -7511,7 +7389,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7520,7 +7398,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7531,7 +7409,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/revenueExpensesByCategory': {
+    "/companies/{companyId}/data/revenueExpensesByCategory": {
         parameters: {
             query?: never;
             header?: never;
@@ -7551,7 +7429,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /** @description Common filter shared by P&L slices. */
                         filter?: {
@@ -7569,7 +7447,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             categories: {
                                 id: string;
                                 name: string;
@@ -7585,7 +7463,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7594,7 +7472,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7605,7 +7483,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/data/topExpenseVendors': {
+    "/companies/{companyId}/data/topExpenseVendors": {
         parameters: {
             query?: never;
             header?: never;
@@ -7625,7 +7503,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         endDate: string;
                         /** @description Common filter shared by P&L slices. */
                         filter?: {
@@ -7644,7 +7522,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             amount: number;
                             vendorId: string;
                             vendorName: string;
@@ -7657,7 +7535,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
                 /** @description Caller lacks permission for this slice */
@@ -7666,7 +7544,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -7677,7 +7555,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/files': {
+    "/companies/{companyId}/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -7689,7 +7567,7 @@ export interface paths {
                 query?: {
                     limit?: string;
                     offset?: string;
-                    unassignedOnly?: 'true' | 'false';
+                    unassignedOnly?: "true" | "false";
                 };
                 header?: never;
                 path: {
@@ -7705,7 +7583,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             items: {
                                 /** Format: uuid */
                                 companyId: string;
@@ -7729,19 +7607,13 @@ export interface paths {
                                     } | null;
                                     date: string | null;
                                     /** @enum {string|null} */
-                                    type:
-                                        | 'invoice'
-                                        | 'creditNote'
-                                        | 'contract'
-                                        | 'receipt'
-                                        | 'other'
-                                        | null;
+                                    type: "invoice" | "creditNote" | "contract" | "receipt" | "other" | null;
                                 } | null;
                                 /**
                                  * @description The status of automated document parsing.
                                  * @enum {string}
                                  */
-                                parseStatus: 'open' | 'running' | 'failed' | 'succeeded';
+                                parseStatus: "open" | "running" | "failed" | "succeeded";
                                 /** @description The file size in bytes. */
                                 size: number;
                                 /** @description The storage path in cloud storage. */
@@ -7763,7 +7635,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/files/{fileId}': {
+    "/companies/{companyId}/files/{fileId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -7788,7 +7660,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -7811,19 +7683,13 @@ export interface paths {
                                 } | null;
                                 date: string | null;
                                 /** @enum {string|null} */
-                                type:
-                                    | 'invoice'
-                                    | 'creditNote'
-                                    | 'contract'
-                                    | 'receipt'
-                                    | 'other'
-                                    | null;
+                                type: "invoice" | "creditNote" | "contract" | "receipt" | "other" | null;
                             } | null;
                             /**
                              * @description The status of automated document parsing.
                              * @enum {string}
                              */
-                            parseStatus: 'open' | 'running' | 'failed' | 'succeeded';
+                            parseStatus: "open" | "running" | "failed" | "succeeded";
                             /** @description The file size in bytes. */
                             size: number;
                             /** @description The storage path in cloud storage. */
@@ -7839,7 +7705,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -7858,7 +7724,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         filename?: string;
                         parseData?: {
                             amount?: {
@@ -7879,7 +7745,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -7902,19 +7768,13 @@ export interface paths {
                                 } | null;
                                 date: string | null;
                                 /** @enum {string|null} */
-                                type:
-                                    | 'invoice'
-                                    | 'creditNote'
-                                    | 'contract'
-                                    | 'receipt'
-                                    | 'other'
-                                    | null;
+                                type: "invoice" | "creditNote" | "contract" | "receipt" | "other" | null;
                             } | null;
                             /**
                              * @description The status of automated document parsing.
                              * @enum {string}
                              */
-                            parseStatus: 'open' | 'running' | 'failed' | 'succeeded';
+                            parseStatus: "open" | "running" | "failed" | "succeeded";
                             /** @description The file size in bytes. */
                             size: number;
                             /** @description The storage path in cloud storage. */
@@ -7930,7 +7790,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -7956,7 +7816,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -7968,7 +7828,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/files/{fileId}/download': {
+    "/companies/{companyId}/files/{fileId}/download": {
         parameters: {
             query?: never;
             header?: never;
@@ -7993,7 +7853,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             url: string;
                         };
                     };
@@ -8004,7 +7864,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -8019,7 +7879,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/files/batch_delete': {
+    "/companies/{companyId}/files/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -8039,13 +7899,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         selection:
                             | {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -8058,7 +7918,7 @@ export interface paths {
                                       unassignedOnly?: boolean;
                                   };
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -8070,7 +7930,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -8082,10 +7942,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -8098,7 +7958,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/files/upload': {
+    "/companies/{companyId}/files/upload": {
         parameters: {
             query?: never;
             header?: never;
@@ -8118,7 +7978,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         contentType: string;
                         fileBase64: string;
                         fileName: string;
@@ -8134,7 +7994,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             fileId: string;
                         };
                     };
@@ -8147,7 +8007,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/integrations': {
+    "/companies/{companyId}/integrations": {
         parameters: {
             query?: never;
             header?: never;
@@ -8171,7 +8031,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': (
+                        "application/json": (
                             | {
                                   /**
                                    * Format: date-time
@@ -8212,17 +8072,17 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The mode of the Stripe integration (test or live).
                                    * @enum {string}
                                    */
-                                  stripeMode?: 'test' | 'live';
+                                  stripeMode?: "test" | "live";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'stripe';
+                                  type: "stripe";
                               }
                             | {
                                   /**
@@ -8262,12 +8122,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'slack';
+                                  type: "slack";
                               }
                             | {
                                   /**
@@ -8306,12 +8166,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'hubspot';
+                                  type: "hubspot";
                               }
                             | {
                                   /**
@@ -8348,12 +8208,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'datevLohnjournal';
+                                  type: "datevLohnjournal";
                               }
                         )[];
                     };
@@ -8368,7 +8228,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/integrations/{integrationId}': {
+    "/companies/{companyId}/integrations/{integrationId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -8393,7 +8253,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json':
+                        "application/json":
                             | {
                                   /**
                                    * Format: date-time
@@ -8434,17 +8294,17 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The mode of the Stripe integration (test or live).
                                    * @enum {string}
                                    */
-                                  stripeMode?: 'test' | 'live';
+                                  stripeMode?: "test" | "live";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'stripe';
+                                  type: "stripe";
                               }
                             | {
                                   /**
@@ -8484,12 +8344,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'slack';
+                                  type: "slack";
                               }
                             | {
                                   /**
@@ -8528,12 +8388,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'hubspot';
+                                  type: "hubspot";
                               }
                             | {
                                   /**
@@ -8570,12 +8430,12 @@ export interface paths {
                                    * @default active
                                    * @enum {string}
                                    */
-                                  status: 'active' | 'error';
+                                  status: "active" | "error";
                                   /**
                                    * @description The type of integration.
                                    * @enum {string}
                                    */
-                                  type: 'datevLohnjournal';
+                                  type: "datevLohnjournal";
                               };
                     };
                 };
@@ -8585,7 +8445,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -8597,7 +8457,7 @@ export interface paths {
         delete: {
             parameters: {
                 query?: {
-                    convertToManual?: 'true' | 'false';
+                    convertToManual?: "true" | "false";
                 };
                 header?: never;
                 path: {
@@ -8614,7 +8474,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -8626,7 +8486,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/notifications': {
+    "/companies/{companyId}/notifications": {
         parameters: {
             query?: never;
             header?: never;
@@ -8654,7 +8514,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             items: {
                                 /** Format: uuid */
                                 companyId: string;
@@ -8698,7 +8558,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         payload?: {
                             [key: string]: unknown;
                         };
@@ -8714,7 +8574,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -8749,7 +8609,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/notifications/{notificationId}/read': {
+    "/companies/{companyId}/notifications/{notificationId}/read": {
         parameters: {
             query?: never;
             header?: never;
@@ -8775,7 +8635,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -8808,7 +8668,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -8822,7 +8682,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/notifications/{notificationId}/unread': {
+    "/companies/{companyId}/notifications/{notificationId}/unread": {
         parameters: {
             query?: never;
             header?: never;
@@ -8848,7 +8708,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -8881,7 +8741,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -8895,7 +8755,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/notifications/batch_delete': {
+    "/companies/{companyId}/notifications/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -8915,7 +8775,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         notificationIds: string[];
                     };
                 };
@@ -8927,7 +8787,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -8940,7 +8800,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/notifications/read-all': {
+    "/companies/{companyId}/notifications/read-all": {
         parameters: {
             query?: never;
             header?: never;
@@ -8965,7 +8825,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             updatedCount: number;
                         };
                     };
@@ -8979,7 +8839,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/plan_items': {
+    "/companies/{companyId}/plan_items": {
         parameters: {
             query?: never;
             header?: never;
@@ -9003,7 +8863,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description The amount configuration (fixed, average, or reference). */
                             amount:
                                 | {
@@ -9013,47 +8873,47 @@ export interface paths {
                                            * @enum {string}
                                            */
                                           currency:
-                                              | 'EUR'
-                                              | 'AUD'
-                                              | 'BRL'
-                                              | 'CAD'
-                                              | 'CHF'
-                                              | 'CNY'
-                                              | 'CZK'
-                                              | 'DKK'
-                                              | 'GBP'
-                                              | 'HKD'
-                                              | 'HUF'
-                                              | 'IDR'
-                                              | 'ILS'
-                                              | 'INR'
-                                              | 'ISK'
-                                              | 'JPY'
-                                              | 'KRW'
-                                              | 'MXN'
-                                              | 'MYR'
-                                              | 'NOK'
-                                              | 'NZD'
-                                              | 'PHP'
-                                              | 'PLN'
-                                              | 'RON'
-                                              | 'SEK'
-                                              | 'SGD'
-                                              | 'THB'
-                                              | 'TRY'
-                                              | 'USD'
-                                              | 'ZAR';
+                                              | "EUR"
+                                              | "AUD"
+                                              | "BRL"
+                                              | "CAD"
+                                              | "CHF"
+                                              | "CNY"
+                                              | "CZK"
+                                              | "DKK"
+                                              | "GBP"
+                                              | "HKD"
+                                              | "HUF"
+                                              | "IDR"
+                                              | "ILS"
+                                              | "INR"
+                                              | "ISK"
+                                              | "JPY"
+                                              | "KRW"
+                                              | "MXN"
+                                              | "MYR"
+                                              | "NOK"
+                                              | "NZD"
+                                              | "PHP"
+                                              | "PLN"
+                                              | "RON"
+                                              | "SEK"
+                                              | "SGD"
+                                              | "THB"
+                                              | "TRY"
+                                              | "USD"
+                                              | "ZAR";
                                           value: number;
                                       };
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'fixed';
+                                      type: "fixed";
                                   }
                                 | {
                                       referencePeriod: number;
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'average';
+                                      type: "average";
                                   }
                                 | {
                                       ref: {
@@ -9062,20 +8922,13 @@ export interface paths {
                                            * @description The different Profit & Loss (P&L) types for creating a typical SaaS Profit & Loss statement.
                                            * @enum {string}
                                            */
-                                          plType:
-                                              | 'revenue'
-                                              | 'cogs'
-                                              | 'cac'
-                                              | 'pd'
-                                              | 'ga'
-                                              | 'no'
-                                              | 'neutral';
+                                          plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                                       };
                                       /** @enum {string} */
-                                      referenceMonth: 'same' | 'previous';
+                                      referenceMonth: "same" | "previous";
                                       share: number;
                                       /** @enum {string} */
-                                      type: 'reference';
+                                      type: "reference";
                                   };
                             /** @description The category ID for this plan item. */
                             categoryId: string;
@@ -9099,7 +8952,7 @@ export interface paths {
                              * @description The P&L type of the item.
                              * @enum {string}
                              */
-                            plType: 'revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral';
+                            plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                         }[];
                     };
                 };
@@ -9117,7 +8970,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         amount?: unknown;
                         categoryId: string;
                         duration?: number | null;
@@ -9134,7 +8987,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description The amount configuration (fixed, average, or reference). */
                             amount:
                                 | {
@@ -9144,47 +8997,47 @@ export interface paths {
                                            * @enum {string}
                                            */
                                           currency:
-                                              | 'EUR'
-                                              | 'AUD'
-                                              | 'BRL'
-                                              | 'CAD'
-                                              | 'CHF'
-                                              | 'CNY'
-                                              | 'CZK'
-                                              | 'DKK'
-                                              | 'GBP'
-                                              | 'HKD'
-                                              | 'HUF'
-                                              | 'IDR'
-                                              | 'ILS'
-                                              | 'INR'
-                                              | 'ISK'
-                                              | 'JPY'
-                                              | 'KRW'
-                                              | 'MXN'
-                                              | 'MYR'
-                                              | 'NOK'
-                                              | 'NZD'
-                                              | 'PHP'
-                                              | 'PLN'
-                                              | 'RON'
-                                              | 'SEK'
-                                              | 'SGD'
-                                              | 'THB'
-                                              | 'TRY'
-                                              | 'USD'
-                                              | 'ZAR';
+                                              | "EUR"
+                                              | "AUD"
+                                              | "BRL"
+                                              | "CAD"
+                                              | "CHF"
+                                              | "CNY"
+                                              | "CZK"
+                                              | "DKK"
+                                              | "GBP"
+                                              | "HKD"
+                                              | "HUF"
+                                              | "IDR"
+                                              | "ILS"
+                                              | "INR"
+                                              | "ISK"
+                                              | "JPY"
+                                              | "KRW"
+                                              | "MXN"
+                                              | "MYR"
+                                              | "NOK"
+                                              | "NZD"
+                                              | "PHP"
+                                              | "PLN"
+                                              | "RON"
+                                              | "SEK"
+                                              | "SGD"
+                                              | "THB"
+                                              | "TRY"
+                                              | "USD"
+                                              | "ZAR";
                                           value: number;
                                       };
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'fixed';
+                                      type: "fixed";
                                   }
                                 | {
                                       referencePeriod: number;
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'average';
+                                      type: "average";
                                   }
                                 | {
                                       ref: {
@@ -9193,20 +9046,13 @@ export interface paths {
                                            * @description The different Profit & Loss (P&L) types for creating a typical SaaS Profit & Loss statement.
                                            * @enum {string}
                                            */
-                                          plType:
-                                              | 'revenue'
-                                              | 'cogs'
-                                              | 'cac'
-                                              | 'pd'
-                                              | 'ga'
-                                              | 'no'
-                                              | 'neutral';
+                                          plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                                       };
                                       /** @enum {string} */
-                                      referenceMonth: 'same' | 'previous';
+                                      referenceMonth: "same" | "previous";
                                       share: number;
                                       /** @enum {string} */
-                                      type: 'reference';
+                                      type: "reference";
                                   };
                             /** @description The category ID for this plan item. */
                             categoryId: string;
@@ -9230,7 +9076,7 @@ export interface paths {
                              * @description The P&L type of the item.
                              * @enum {string}
                              */
-                            plType: 'revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral';
+                            plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                         };
                     };
                 };
@@ -9242,7 +9088,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/plan_items/{planItemId}': {
+    "/companies/{companyId}/plan_items/{planItemId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -9267,7 +9113,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description The amount configuration (fixed, average, or reference). */
                             amount:
                                 | {
@@ -9277,47 +9123,47 @@ export interface paths {
                                            * @enum {string}
                                            */
                                           currency:
-                                              | 'EUR'
-                                              | 'AUD'
-                                              | 'BRL'
-                                              | 'CAD'
-                                              | 'CHF'
-                                              | 'CNY'
-                                              | 'CZK'
-                                              | 'DKK'
-                                              | 'GBP'
-                                              | 'HKD'
-                                              | 'HUF'
-                                              | 'IDR'
-                                              | 'ILS'
-                                              | 'INR'
-                                              | 'ISK'
-                                              | 'JPY'
-                                              | 'KRW'
-                                              | 'MXN'
-                                              | 'MYR'
-                                              | 'NOK'
-                                              | 'NZD'
-                                              | 'PHP'
-                                              | 'PLN'
-                                              | 'RON'
-                                              | 'SEK'
-                                              | 'SGD'
-                                              | 'THB'
-                                              | 'TRY'
-                                              | 'USD'
-                                              | 'ZAR';
+                                              | "EUR"
+                                              | "AUD"
+                                              | "BRL"
+                                              | "CAD"
+                                              | "CHF"
+                                              | "CNY"
+                                              | "CZK"
+                                              | "DKK"
+                                              | "GBP"
+                                              | "HKD"
+                                              | "HUF"
+                                              | "IDR"
+                                              | "ILS"
+                                              | "INR"
+                                              | "ISK"
+                                              | "JPY"
+                                              | "KRW"
+                                              | "MXN"
+                                              | "MYR"
+                                              | "NOK"
+                                              | "NZD"
+                                              | "PHP"
+                                              | "PLN"
+                                              | "RON"
+                                              | "SEK"
+                                              | "SGD"
+                                              | "THB"
+                                              | "TRY"
+                                              | "USD"
+                                              | "ZAR";
                                           value: number;
                                       };
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'fixed';
+                                      type: "fixed";
                                   }
                                 | {
                                       referencePeriod: number;
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'average';
+                                      type: "average";
                                   }
                                 | {
                                       ref: {
@@ -9326,20 +9172,13 @@ export interface paths {
                                            * @description The different Profit & Loss (P&L) types for creating a typical SaaS Profit & Loss statement.
                                            * @enum {string}
                                            */
-                                          plType:
-                                              | 'revenue'
-                                              | 'cogs'
-                                              | 'cac'
-                                              | 'pd'
-                                              | 'ga'
-                                              | 'no'
-                                              | 'neutral';
+                                          plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                                       };
                                       /** @enum {string} */
-                                      referenceMonth: 'same' | 'previous';
+                                      referenceMonth: "same" | "previous";
                                       share: number;
                                       /** @enum {string} */
-                                      type: 'reference';
+                                      type: "reference";
                                   };
                             /** @description The category ID for this plan item. */
                             categoryId: string;
@@ -9363,7 +9202,7 @@ export interface paths {
                              * @description The P&L type of the item.
                              * @enum {string}
                              */
-                            plType: 'revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral';
+                            plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                         };
                     };
                 };
@@ -9373,7 +9212,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -9392,7 +9231,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         amount?: unknown;
                         categoryId?: string;
                         duration?: number | null;
@@ -9409,7 +9248,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description The amount configuration (fixed, average, or reference). */
                             amount:
                                 | {
@@ -9419,47 +9258,47 @@ export interface paths {
                                            * @enum {string}
                                            */
                                           currency:
-                                              | 'EUR'
-                                              | 'AUD'
-                                              | 'BRL'
-                                              | 'CAD'
-                                              | 'CHF'
-                                              | 'CNY'
-                                              | 'CZK'
-                                              | 'DKK'
-                                              | 'GBP'
-                                              | 'HKD'
-                                              | 'HUF'
-                                              | 'IDR'
-                                              | 'ILS'
-                                              | 'INR'
-                                              | 'ISK'
-                                              | 'JPY'
-                                              | 'KRW'
-                                              | 'MXN'
-                                              | 'MYR'
-                                              | 'NOK'
-                                              | 'NZD'
-                                              | 'PHP'
-                                              | 'PLN'
-                                              | 'RON'
-                                              | 'SEK'
-                                              | 'SGD'
-                                              | 'THB'
-                                              | 'TRY'
-                                              | 'USD'
-                                              | 'ZAR';
+                                              | "EUR"
+                                              | "AUD"
+                                              | "BRL"
+                                              | "CAD"
+                                              | "CHF"
+                                              | "CNY"
+                                              | "CZK"
+                                              | "DKK"
+                                              | "GBP"
+                                              | "HKD"
+                                              | "HUF"
+                                              | "IDR"
+                                              | "ILS"
+                                              | "INR"
+                                              | "ISK"
+                                              | "JPY"
+                                              | "KRW"
+                                              | "MXN"
+                                              | "MYR"
+                                              | "NOK"
+                                              | "NZD"
+                                              | "PHP"
+                                              | "PLN"
+                                              | "RON"
+                                              | "SEK"
+                                              | "SGD"
+                                              | "THB"
+                                              | "TRY"
+                                              | "USD"
+                                              | "ZAR";
                                           value: number;
                                       };
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'fixed';
+                                      type: "fixed";
                                   }
                                 | {
                                       referencePeriod: number;
                                       relativeChange: number;
                                       /** @enum {string} */
-                                      type: 'average';
+                                      type: "average";
                                   }
                                 | {
                                       ref: {
@@ -9468,20 +9307,13 @@ export interface paths {
                                            * @description The different Profit & Loss (P&L) types for creating a typical SaaS Profit & Loss statement.
                                            * @enum {string}
                                            */
-                                          plType:
-                                              | 'revenue'
-                                              | 'cogs'
-                                              | 'cac'
-                                              | 'pd'
-                                              | 'ga'
-                                              | 'no'
-                                              | 'neutral';
+                                          plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                                       };
                                       /** @enum {string} */
-                                      referenceMonth: 'same' | 'previous';
+                                      referenceMonth: "same" | "previous";
                                       share: number;
                                       /** @enum {string} */
-                                      type: 'reference';
+                                      type: "reference";
                                   };
                             /** @description The category ID for this plan item. */
                             categoryId: string;
@@ -9505,7 +9337,7 @@ export interface paths {
                              * @description The P&L type of the item.
                              * @enum {string}
                              */
-                            plType: 'revenue' | 'cogs' | 'cac' | 'pd' | 'ga' | 'no' | 'neutral';
+                            plType: "revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral";
                         };
                     };
                 };
@@ -9515,7 +9347,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -9541,7 +9373,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -9553,7 +9385,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/planned_transaction_occurrences': {
+    "/companies/{companyId}/planned_transaction_occurrences": {
         parameters: {
             query?: never;
             header?: never;
@@ -9570,8 +9402,8 @@ export interface paths {
                     endDate: string;
                     limit?: number;
                     offset?: number | null;
-                    showUnassignedCounterparty?: '0' | '1' | 'true' | 'false';
-                    showUncategorized?: '0' | '1' | 'true' | 'false';
+                    showUnassignedCounterparty?: "0" | "1" | "true" | "false";
+                    showUncategorized?: "0" | "1" | "true" | "false";
                     startDate: string;
                     vendorId?: string;
                 };
@@ -9589,7 +9421,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             items: {
                                 accountId: string | null;
                                 amount: {
@@ -9602,7 +9434,7 @@ export interface paths {
                                 counterparty: {
                                     id: string;
                                     /** @enum {string} */
-                                    type: 'customer' | 'vendor';
+                                    type: "customer" | "vendor";
                                 } | null;
                                 counterpartyLogoUrl: string | null;
                                 counterpartyName: string | null;
@@ -9636,7 +9468,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/planned_transactions': {
+    "/companies/{companyId}/planned_transactions": {
         parameters: {
             query?: never;
             header?: never;
@@ -9660,43 +9492,43 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /**
                              * @description The currency of the planned amount.
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the planned amount. */
                             amountValue: string;
                             categoryId: string | null;
@@ -9705,7 +9537,7 @@ export interface paths {
                             counterparty: {
                                 id: string;
                                 /** @enum {string} */
-                                type: 'customer' | 'vendor';
+                                type: "customer" | "vendor";
                             } | null;
                             /** Format: date-time */
                             createdTime: string | null;
@@ -9730,16 +9562,16 @@ export interface paths {
                                     | {
                                           date: string;
                                           /** @enum {string} */
-                                          type: 'date';
+                                          type: "date";
                                       }
                                     | {
                                           count: number;
                                           /** @enum {string} */
-                                          type: 'count';
+                                          type: "count";
                                       }
                                     | null;
                                 /** @enum {string} */
-                                frequency: 'day' | 'week' | 'month' | 'year';
+                                frequency: "day" | "week" | "month" | "year";
                                 interval: number;
                                 lastDayOfMonth?: boolean;
                             } | null;
@@ -9751,21 +9583,21 @@ export interface paths {
                             usingDateRule:
                                 | {
                                       /** @enum {string} */
-                                      type: 'transactionDate';
+                                      type: "transactionDate";
                                   }
                                 | {
                                       /** @enum {string} */
-                                      frequency: 'day' | 'week' | 'month' | 'year';
+                                      frequency: "day" | "week" | "month" | "year";
                                       interval: number;
                                       /** @enum {string} */
-                                      type: 'spread';
+                                      type: "spread";
                                   }
                                 | {
                                       offset: number;
                                       /** @enum {string} */
-                                      period: 'month' | 'year';
+                                      period: "month" | "year";
                                       /** @enum {string} */
-                                      type: 'calendarPeriod';
+                                      type: "calendarPeriod";
                                   };
                         }[];
                     };
@@ -9784,7 +9616,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountId?: string | null;
                         amountCurrency: string;
                         amountValue: string;
@@ -9805,43 +9637,43 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /**
                              * @description The currency of the planned amount.
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the planned amount. */
                             amountValue: string;
                             categoryId: string | null;
@@ -9850,7 +9682,7 @@ export interface paths {
                             counterparty: {
                                 id: string;
                                 /** @enum {string} */
-                                type: 'customer' | 'vendor';
+                                type: "customer" | "vendor";
                             } | null;
                             /** Format: date-time */
                             createdTime: string | null;
@@ -9875,16 +9707,16 @@ export interface paths {
                                     | {
                                           date: string;
                                           /** @enum {string} */
-                                          type: 'date';
+                                          type: "date";
                                       }
                                     | {
                                           count: number;
                                           /** @enum {string} */
-                                          type: 'count';
+                                          type: "count";
                                       }
                                     | null;
                                 /** @enum {string} */
-                                frequency: 'day' | 'week' | 'month' | 'year';
+                                frequency: "day" | "week" | "month" | "year";
                                 interval: number;
                                 lastDayOfMonth?: boolean;
                             } | null;
@@ -9896,21 +9728,21 @@ export interface paths {
                             usingDateRule:
                                 | {
                                       /** @enum {string} */
-                                      type: 'transactionDate';
+                                      type: "transactionDate";
                                   }
                                 | {
                                       /** @enum {string} */
-                                      frequency: 'day' | 'week' | 'month' | 'year';
+                                      frequency: "day" | "week" | "month" | "year";
                                       interval: number;
                                       /** @enum {string} */
-                                      type: 'spread';
+                                      type: "spread";
                                   }
                                 | {
                                       offset: number;
                                       /** @enum {string} */
-                                      period: 'month' | 'year';
+                                      period: "month" | "year";
                                       /** @enum {string} */
-                                      type: 'calendarPeriod';
+                                      type: "calendarPeriod";
                                   };
                         };
                     };
@@ -9923,7 +9755,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/planned_transactions/{plannedTransactionId}': {
+    "/companies/{companyId}/planned_transactions/{plannedTransactionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -9948,43 +9780,43 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /**
                              * @description The currency of the planned amount.
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the planned amount. */
                             amountValue: string;
                             categoryId: string | null;
@@ -9993,7 +9825,7 @@ export interface paths {
                             counterparty: {
                                 id: string;
                                 /** @enum {string} */
-                                type: 'customer' | 'vendor';
+                                type: "customer" | "vendor";
                             } | null;
                             /** Format: date-time */
                             createdTime: string | null;
@@ -10018,16 +9850,16 @@ export interface paths {
                                     | {
                                           date: string;
                                           /** @enum {string} */
-                                          type: 'date';
+                                          type: "date";
                                       }
                                     | {
                                           count: number;
                                           /** @enum {string} */
-                                          type: 'count';
+                                          type: "count";
                                       }
                                     | null;
                                 /** @enum {string} */
-                                frequency: 'day' | 'week' | 'month' | 'year';
+                                frequency: "day" | "week" | "month" | "year";
                                 interval: number;
                                 lastDayOfMonth?: boolean;
                             } | null;
@@ -10039,21 +9871,21 @@ export interface paths {
                             usingDateRule:
                                 | {
                                       /** @enum {string} */
-                                      type: 'transactionDate';
+                                      type: "transactionDate";
                                   }
                                 | {
                                       /** @enum {string} */
-                                      frequency: 'day' | 'week' | 'month' | 'year';
+                                      frequency: "day" | "week" | "month" | "year";
                                       interval: number;
                                       /** @enum {string} */
-                                      type: 'spread';
+                                      type: "spread";
                                   }
                                 | {
                                       offset: number;
                                       /** @enum {string} */
-                                      period: 'month' | 'year';
+                                      period: "month" | "year";
                                       /** @enum {string} */
-                                      type: 'calendarPeriod';
+                                      type: "calendarPeriod";
                                   };
                         };
                     };
@@ -10064,7 +9896,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10083,7 +9915,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountId?: string | null;
                         amountCurrency?: string;
                         amountValue?: string;
@@ -10104,43 +9936,43 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accountId: string | null;
                             /**
                              * @description The currency of the planned amount.
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the planned amount. */
                             amountValue: string;
                             categoryId: string | null;
@@ -10149,7 +9981,7 @@ export interface paths {
                             counterparty: {
                                 id: string;
                                 /** @enum {string} */
-                                type: 'customer' | 'vendor';
+                                type: "customer" | "vendor";
                             } | null;
                             /** Format: date-time */
                             createdTime: string | null;
@@ -10174,16 +10006,16 @@ export interface paths {
                                     | {
                                           date: string;
                                           /** @enum {string} */
-                                          type: 'date';
+                                          type: "date";
                                       }
                                     | {
                                           count: number;
                                           /** @enum {string} */
-                                          type: 'count';
+                                          type: "count";
                                       }
                                     | null;
                                 /** @enum {string} */
-                                frequency: 'day' | 'week' | 'month' | 'year';
+                                frequency: "day" | "week" | "month" | "year";
                                 interval: number;
                                 lastDayOfMonth?: boolean;
                             } | null;
@@ -10195,21 +10027,21 @@ export interface paths {
                             usingDateRule:
                                 | {
                                       /** @enum {string} */
-                                      type: 'transactionDate';
+                                      type: "transactionDate";
                                   }
                                 | {
                                       /** @enum {string} */
-                                      frequency: 'day' | 'week' | 'month' | 'year';
+                                      frequency: "day" | "week" | "month" | "year";
                                       interval: number;
                                       /** @enum {string} */
-                                      type: 'spread';
+                                      type: "spread";
                                   }
                                 | {
                                       offset: number;
                                       /** @enum {string} */
-                                      period: 'month' | 'year';
+                                      period: "month" | "year";
                                       /** @enum {string} */
-                                      type: 'calendarPeriod';
+                                      type: "calendarPeriod";
                                   };
                         };
                     };
@@ -10220,7 +10052,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10246,7 +10078,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -10258,7 +10090,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/products': {
+    "/companies/{companyId}/products": {
         parameters: {
             query?: never;
             header?: never;
@@ -10282,7 +10114,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             cmrrByCurrency: {
                                 [key: string]: number;
                             };
@@ -10318,7 +10150,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         name: string;
                     };
                 };
@@ -10330,7 +10162,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -10356,7 +10188,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/products/{productId}': {
+    "/companies/{companyId}/products/{productId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -10381,7 +10213,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -10405,7 +10237,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10424,7 +10256,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         name?: string;
                     };
                 };
@@ -10436,7 +10268,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -10460,7 +10292,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10486,7 +10318,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -10498,7 +10330,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/products/{productId}/external-ids': {
+    "/companies/{companyId}/products/{productId}/external-ids": {
         parameters: {
             query?: never;
             header?: never;
@@ -10523,7 +10355,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -10542,7 +10374,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         externalIds: string[];
                     };
                 };
@@ -10554,7 +10386,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -10565,7 +10397,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10579,7 +10411,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/search': {
+    "/companies/{companyId}/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -10605,21 +10437,21 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             accounts: {
                                 /** @enum {string} */
-                                accountType: 'bank' | 'cash' | 'creditCard' | 'loan' | 'other';
+                                accountType: "bank" | "cash" | "creditCard" | "loan" | "other";
                                 id: string;
                                 name: string;
                                 /** @enum {string} */
-                                type: 'account';
+                                type: "account";
                             }[];
                             customers: {
                                 id: string;
                                 logo: boolean;
                                 name: string;
                                 /** @enum {string} */
-                                type: 'customer';
+                                type: "customer";
                             }[];
                             transactions: {
                                 accountId: string;
@@ -10631,14 +10463,14 @@ export interface paths {
                                 fromTo: string | null;
                                 id: string;
                                 /** @enum {string} */
-                                type: 'transaction';
+                                type: "transaction";
                             }[];
                             vendors: {
                                 id: string;
                                 logo: boolean;
                                 name: string;
                                 /** @enum {string} */
-                                type: 'vendor';
+                                type: "vendor";
                             }[];
                         };
                     };
@@ -10653,7 +10485,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/subscription_events': {
+    "/companies/{companyId}/subscription_events": {
         parameters: {
             query?: never;
             header?: never;
@@ -10680,12 +10512,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The billing interval (day, week, month, year).
                              * @enum {string}
                              */
-                            billingInterval: 'day' | 'week' | 'month' | 'year';
+                            billingInterval: "day" | "week" | "month" | "year";
                             /** @description The number of billing intervals per cycle. */
                             billingIntervalCount: number;
                             /**
@@ -10733,7 +10565,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         billingInterval: string;
                         billingIntervalCount: number;
                         committedTime: string;
@@ -10752,12 +10584,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The billing interval (day, week, month, year).
                              * @enum {string}
                              */
-                            billingInterval: 'day' | 'week' | 'month' | 'year';
+                            billingInterval: "day" | "week" | "month" | "year";
                             /** @description The number of billing intervals per cycle. */
                             billingIntervalCount: number;
                             /**
@@ -10797,7 +10629,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10810,7 +10642,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/subscription_events/{eventId}': {
+    "/companies/{companyId}/subscription_events/{eventId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -10830,7 +10662,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         billingInterval?: string;
                         billingIntervalCount?: number;
                         committedTime?: string;
@@ -10848,12 +10680,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The billing interval (day, week, month, year).
                              * @enum {string}
                              */
-                            billingInterval: 'day' | 'week' | 'month' | 'year';
+                            billingInterval: "day" | "week" | "month" | "year";
                             /** @description The number of billing intervals per cycle. */
                             billingIntervalCount: number;
                             /**
@@ -10893,7 +10725,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10919,7 +10751,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -10930,7 +10762,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -10942,7 +10774,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/subscriptions': {
+    "/companies/{companyId}/subscriptions": {
         parameters: {
             query?: never;
             header?: never;
@@ -10968,7 +10800,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -10979,36 +10811,36 @@ export interface paths {
                              * @enum {string}
                              */
                             currency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /**
                              * Format: uuid
                              * @description The ID of the customer this subscription belongs to.
@@ -11040,7 +10872,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         currency: string;
                         customerId: string;
                         externalId?: string | null;
@@ -11055,7 +10887,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -11066,36 +10898,36 @@ export interface paths {
                              * @enum {string}
                              */
                             currency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /**
                              * Format: uuid
                              * @description The ID of the customer this subscription belongs to.
@@ -11119,7 +10951,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -11132,7 +10964,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/subscriptions/{subscriptionId}': {
+    "/companies/{companyId}/subscriptions/{subscriptionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -11157,7 +10989,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -11168,36 +11000,36 @@ export interface paths {
                              * @enum {string}
                              */
                             currency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /**
                              * Format: uuid
                              * @description The ID of the customer this subscription belongs to.
@@ -11221,7 +11053,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -11240,7 +11072,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         currency?: string;
                         name?: string | null;
                     };
@@ -11253,7 +11085,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** Format: uuid */
                             companyId: string;
                             /** Format: date-time */
@@ -11264,36 +11096,36 @@ export interface paths {
                              * @enum {string}
                              */
                             currency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /**
                              * Format: uuid
                              * @description The ID of the customer this subscription belongs to.
@@ -11317,7 +11149,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -11343,7 +11175,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -11354,7 +11186,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -11366,7 +11198,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions': {
+    "/companies/{companyId}/transactions": {
         parameters: {
             query?: never;
             header?: never;
@@ -11397,7 +11229,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             items: {
                                 /**
                                  * Format: uuid
@@ -11409,36 +11241,36 @@ export interface paths {
                                  * @enum {string}
                                  */
                                 amountCurrency:
-                                    | 'EUR'
-                                    | 'AUD'
-                                    | 'BRL'
-                                    | 'CAD'
-                                    | 'CHF'
-                                    | 'CNY'
-                                    | 'CZK'
-                                    | 'DKK'
-                                    | 'GBP'
-                                    | 'HKD'
-                                    | 'HUF'
-                                    | 'IDR'
-                                    | 'ILS'
-                                    | 'INR'
-                                    | 'ISK'
-                                    | 'JPY'
-                                    | 'KRW'
-                                    | 'MXN'
-                                    | 'MYR'
-                                    | 'NOK'
-                                    | 'NZD'
-                                    | 'PHP'
-                                    | 'PLN'
-                                    | 'RON'
-                                    | 'SEK'
-                                    | 'SGD'
-                                    | 'THB'
-                                    | 'TRY'
-                                    | 'USD'
-                                    | 'ZAR';
+                                    | "EUR"
+                                    | "AUD"
+                                    | "BRL"
+                                    | "CAD"
+                                    | "CHF"
+                                    | "CNY"
+                                    | "CZK"
+                                    | "DKK"
+                                    | "GBP"
+                                    | "HKD"
+                                    | "HUF"
+                                    | "IDR"
+                                    | "ILS"
+                                    | "INR"
+                                    | "ISK"
+                                    | "JPY"
+                                    | "KRW"
+                                    | "MXN"
+                                    | "MYR"
+                                    | "NOK"
+                                    | "NZD"
+                                    | "PHP"
+                                    | "PLN"
+                                    | "RON"
+                                    | "SEK"
+                                    | "SGD"
+                                    | "THB"
+                                    | "TRY"
+                                    | "USD"
+                                    | "ZAR";
                                 /** @description The numerical value of the transaction amount. */
                                 amountValue: string;
                                 /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -11463,7 +11295,7 @@ export interface paths {
                                             /** @description The ID of the customer or vendor. */
                                             id: string;
                                             /** @enum {string} */
-                                            type: 'customer' | 'vendor';
+                                            type: "customer" | "vendor";
                                         } | null;
                                         /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                         passThroughTax: number;
@@ -11495,21 +11327,21 @@ export interface paths {
                                         usingDateRule:
                                             | {
                                                   /** @enum {string} */
-                                                  type: 'transactionDate';
+                                                  type: "transactionDate";
                                               }
                                             | {
                                                   /** @enum {string} */
-                                                  frequency: 'day' | 'week' | 'month' | 'year';
+                                                  frequency: "day" | "week" | "month" | "year";
                                                   interval: number;
                                                   /** @enum {string} */
-                                                  type: 'spread';
+                                                  type: "spread";
                                               }
                                             | {
                                                   offset: number;
                                                   /** @enum {string} */
-                                                  period: 'month' | 'year';
+                                                  period: "month" | "year";
                                                   /** @enum {string} */
-                                                  type: 'calendarPeriod';
+                                                  type: "calendarPeriod";
                                               }
                                             | {
                                                   /** Format: date */
@@ -11517,7 +11349,7 @@ export interface paths {
                                                   /** Format: date */
                                                   startDate: string;
                                                   /** @enum {string} */
-                                                  type: 'custom';
+                                                  type: "custom";
                                               };
                                     };
                                 };
@@ -11589,7 +11421,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountId: string;
                         amountCurrency: string;
                         amountValue: string;
@@ -11615,7 +11447,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account associated with this transaction.
@@ -11626,36 +11458,36 @@ export interface paths {
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the transaction amount. */
                             amountValue: string;
                             /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -11680,7 +11512,7 @@ export interface paths {
                                         /** @description The ID of the customer or vendor. */
                                         id: string;
                                         /** @enum {string} */
-                                        type: 'customer' | 'vendor';
+                                        type: "customer" | "vendor";
                                     } | null;
                                     /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                     passThroughTax: number;
@@ -11712,21 +11544,21 @@ export interface paths {
                                     usingDateRule:
                                         | {
                                               /** @enum {string} */
-                                              type: 'transactionDate';
+                                              type: "transactionDate";
                                           }
                                         | {
                                               /** @enum {string} */
-                                              frequency: 'day' | 'week' | 'month' | 'year';
+                                              frequency: "day" | "week" | "month" | "year";
                                               interval: number;
                                               /** @enum {string} */
-                                              type: 'spread';
+                                              type: "spread";
                                           }
                                         | {
                                               offset: number;
                                               /** @enum {string} */
-                                              period: 'month' | 'year';
+                                              period: "month" | "year";
                                               /** @enum {string} */
-                                              type: 'calendarPeriod';
+                                              type: "calendarPeriod";
                                           }
                                         | {
                                               /** Format: date */
@@ -11734,7 +11566,7 @@ export interface paths {
                                               /** Format: date */
                                               startDate: string;
                                               /** @enum {string} */
-                                              type: 'custom';
+                                              type: "custom";
                                           };
                                 };
                             };
@@ -11797,7 +11629,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/{transactionId}': {
+    "/companies/{companyId}/transactions/{transactionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -11822,7 +11654,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             account: {
                                 accountGroup: {
                                     name: string;
@@ -11832,7 +11664,7 @@ export interface paths {
                                 };
                                 id: string;
                                 /** @enum {string} */
-                                importType: 'manual' | 'automated';
+                                importType: "manual" | "automated";
                                 name: string;
                             };
                             /**
@@ -11845,36 +11677,36 @@ export interface paths {
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the transaction amount. */
                             amountValue: string;
                             /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -11899,7 +11731,7 @@ export interface paths {
                                         /** @description The ID of the customer or vendor. */
                                         id: string;
                                         /** @enum {string} */
-                                        type: 'customer' | 'vendor';
+                                        type: "customer" | "vendor";
                                     } | null;
                                     /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                     passThroughTax: number;
@@ -11931,21 +11763,21 @@ export interface paths {
                                     usingDateRule:
                                         | {
                                               /** @enum {string} */
-                                              type: 'transactionDate';
+                                              type: "transactionDate";
                                           }
                                         | {
                                               /** @enum {string} */
-                                              frequency: 'day' | 'week' | 'month' | 'year';
+                                              frequency: "day" | "week" | "month" | "year";
                                               interval: number;
                                               /** @enum {string} */
-                                              type: 'spread';
+                                              type: "spread";
                                           }
                                         | {
                                               offset: number;
                                               /** @enum {string} */
-                                              period: 'month' | 'year';
+                                              period: "month" | "year";
                                               /** @enum {string} */
-                                              type: 'calendarPeriod';
+                                              type: "calendarPeriod";
                                           }
                                         | {
                                               /** Format: date */
@@ -11953,7 +11785,7 @@ export interface paths {
                                               /** Format: date */
                                               startDate: string;
                                               /** @enum {string} */
-                                              type: 'custom';
+                                              type: "custom";
                                           };
                                 };
                             };
@@ -12015,19 +11847,13 @@ export interface paths {
                                     } | null;
                                     date: string | null;
                                     /** @enum {string|null} */
-                                    type:
-                                        | 'invoice'
-                                        | 'creditNote'
-                                        | 'contract'
-                                        | 'receipt'
-                                        | 'other'
-                                        | null;
+                                    type: "invoice" | "creditNote" | "contract" | "receipt" | "other" | null;
                                 } | null;
                                 /**
                                  * @description The status of automated document parsing.
                                  * @enum {string}
                                  */
-                                parseStatus: 'open' | 'running' | 'failed' | 'succeeded';
+                                parseStatus: "open" | "running" | "failed" | "succeeded";
                                 /** @description The file size in bytes. */
                                 size: number;
                                 /** @description The storage path in cloud storage. */
@@ -12077,7 +11903,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -12096,7 +11922,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         accountId?: string;
                         amountCurrency?: string;
                         amountValue?: string;
@@ -12120,7 +11946,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account associated with this transaction.
@@ -12131,36 +11957,36 @@ export interface paths {
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the transaction amount. */
                             amountValue: string;
                             /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -12185,7 +12011,7 @@ export interface paths {
                                         /** @description The ID of the customer or vendor. */
                                         id: string;
                                         /** @enum {string} */
-                                        type: 'customer' | 'vendor';
+                                        type: "customer" | "vendor";
                                     } | null;
                                     /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                     passThroughTax: number;
@@ -12217,21 +12043,21 @@ export interface paths {
                                     usingDateRule:
                                         | {
                                               /** @enum {string} */
-                                              type: 'transactionDate';
+                                              type: "transactionDate";
                                           }
                                         | {
                                               /** @enum {string} */
-                                              frequency: 'day' | 'week' | 'month' | 'year';
+                                              frequency: "day" | "week" | "month" | "year";
                                               interval: number;
                                               /** @enum {string} */
-                                              type: 'spread';
+                                              type: "spread";
                                           }
                                         | {
                                               offset: number;
                                               /** @enum {string} */
-                                              period: 'month' | 'year';
+                                              period: "month" | "year";
                                               /** @enum {string} */
-                                              type: 'calendarPeriod';
+                                              type: "calendarPeriod";
                                           }
                                         | {
                                               /** Format: date */
@@ -12239,7 +12065,7 @@ export interface paths {
                                               /** Format: date */
                                               startDate: string;
                                               /** @enum {string} */
-                                              type: 'custom';
+                                              type: "custom";
                                           };
                                 };
                             };
@@ -12300,7 +12126,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -12326,7 +12152,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -12338,7 +12164,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/batch_delete': {
+    "/companies/{companyId}/transactions/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -12358,13 +12184,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         selection:
                             | {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -12379,18 +12205,15 @@ export interface paths {
                                              * @description "all" = no filter, "open" = uncategorized or partially categorized, "transfersWithoutCounterTransaction" = transfers missing a counter position.
                                              * @enum {string}
                                              */
-                                            status:
-                                                | 'all'
-                                                | 'open'
-                                                | 'transfersWithoutCounterTransaction';
+                                            status: "all" | "open" | "transfersWithoutCounterTransaction";
                                             /** @enum {string} */
-                                            type: 'status';
+                                            type: "status";
                                         }
                                       | {
                                             /** @description Account IDs to include. */
                                             accounts: string[];
                                             /** @enum {string} */
-                                            type: 'account';
+                                            type: "account";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -12398,25 +12221,25 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'date';
+                                            type: "date";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'text';
+                                            type: "text";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'fromTo';
+                                            type: "fromTo";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'description';
+                                            type: "description";
                                         }
                                       | {
                                             /** @description Omit for no upper bound. */
@@ -12430,7 +12253,7 @@ export interface paths {
                                                 value: number;
                                             };
                                             /** @enum {string} */
-                                            type: 'amount';
+                                            type: "amount";
                                         }
                                       | {
                                             /**
@@ -12439,7 +12262,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'assignedUser';
+                                            type: "assignedUser";
                                             /** @description User IDs to filter by. Omit to match any user. */
                                             userIds?: string[];
                                         }
@@ -12457,21 +12280,13 @@ export interface paths {
                                             /** @description Searches fromTo, description, notes, and account name. */
                                             text?: string;
                                             /** @enum {string} */
-                                            type: 'quickSearch';
+                                            type: "quickSearch";
                                         }
                                       | {
                                             /** @description P&L types to filter for. */
-                                            plTypes: (
-                                                | 'revenue'
-                                                | 'cogs'
-                                                | 'cac'
-                                                | 'pd'
-                                                | 'ga'
-                                                | 'no'
-                                                | 'neutral'
-                                            )[];
+                                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                                             /** @enum {string} */
-                                            type: 'plType';
+                                            type: "plType";
                                         }
                                       | {
                                             /** @description Category IDs to include. */
@@ -12482,13 +12297,13 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'category';
+                                            type: "category";
                                         }
                                       | {
                                             /** @description Category IDs to exclude. */
                                             categories: string[];
                                             /** @enum {string} */
-                                            type: 'excludeCategory';
+                                            type: "excludeCategory";
                                         }
                                       | {
                                             /** @description Counterparty IDs to include. */
@@ -12499,7 +12314,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'counterparty';
+                                            type: "counterparty";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -12507,26 +12322,26 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'usingDate';
+                                            type: "usingDate";
                                         }
                                       | {
                                             /**
                                              * @description "inflow" = positive amounts, "outflow" = negative amounts.
                                              * @enum {string}
                                              */
-                                            direction: 'inflow' | 'outflow';
+                                            direction: "inflow" | "outflow";
                                             /** @enum {string} */
-                                            type: 'cashFlowDirection';
+                                            type: "cashFlowDirection";
                                         }
                                       | {
                                             /** @description Array of transaction IDs to match (max 100). */
                                             ids: string[];
                                             /** @enum {string} */
-                                            type: 'transactionIds';
+                                            type: "transactionIds";
                                         }
                                   )[];
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -12538,7 +12353,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -12550,10 +12365,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -12564,10 +12379,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'integration_managed';
+                            error: "integration_managed";
                         };
                     };
                 };
@@ -12579,7 +12394,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/batch_edit': {
+    "/companies/{companyId}/transactions/batch_edit": {
         parameters: {
             query?: never;
             header?: never;
@@ -12599,7 +12414,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         patch: {
                             /** @description Set the assigned user for every selected transaction. Null clears the field. Omit to leave unchanged. */
                             assignedUserId?: string | null;
@@ -12612,7 +12427,7 @@ export interface paths {
                                     /** @description The ID of the customer or vendor. */
                                     id: string;
                                     /** @enum {string} */
-                                    type: 'customer' | 'vendor';
+                                    type: "customer" | "vendor";
                                 } | null;
                                 /** @description The pass-through tax (e.g. VAT) that comes on top of the amount covered by the P&L split. */
                                 passThroughTax: number;
@@ -12637,21 +12452,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             };
                             /** @description Set notes on every selected transaction. Null clears the field. Omit to leave unchanged. */
@@ -12662,7 +12477,7 @@ export interface paths {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -12677,18 +12492,15 @@ export interface paths {
                                              * @description "all" = no filter, "open" = uncategorized or partially categorized, "transfersWithoutCounterTransaction" = transfers missing a counter position.
                                              * @enum {string}
                                              */
-                                            status:
-                                                | 'all'
-                                                | 'open'
-                                                | 'transfersWithoutCounterTransaction';
+                                            status: "all" | "open" | "transfersWithoutCounterTransaction";
                                             /** @enum {string} */
-                                            type: 'status';
+                                            type: "status";
                                         }
                                       | {
                                             /** @description Account IDs to include. */
                                             accounts: string[];
                                             /** @enum {string} */
-                                            type: 'account';
+                                            type: "account";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -12696,25 +12508,25 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'date';
+                                            type: "date";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'text';
+                                            type: "text";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'fromTo';
+                                            type: "fromTo";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'description';
+                                            type: "description";
                                         }
                                       | {
                                             /** @description Omit for no upper bound. */
@@ -12728,7 +12540,7 @@ export interface paths {
                                                 value: number;
                                             };
                                             /** @enum {string} */
-                                            type: 'amount';
+                                            type: "amount";
                                         }
                                       | {
                                             /**
@@ -12737,7 +12549,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'assignedUser';
+                                            type: "assignedUser";
                                             /** @description User IDs to filter by. Omit to match any user. */
                                             userIds?: string[];
                                         }
@@ -12755,21 +12567,13 @@ export interface paths {
                                             /** @description Searches fromTo, description, notes, and account name. */
                                             text?: string;
                                             /** @enum {string} */
-                                            type: 'quickSearch';
+                                            type: "quickSearch";
                                         }
                                       | {
                                             /** @description P&L types to filter for. */
-                                            plTypes: (
-                                                | 'revenue'
-                                                | 'cogs'
-                                                | 'cac'
-                                                | 'pd'
-                                                | 'ga'
-                                                | 'no'
-                                                | 'neutral'
-                                            )[];
+                                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                                             /** @enum {string} */
-                                            type: 'plType';
+                                            type: "plType";
                                         }
                                       | {
                                             /** @description Category IDs to include. */
@@ -12780,13 +12584,13 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'category';
+                                            type: "category";
                                         }
                                       | {
                                             /** @description Category IDs to exclude. */
                                             categories: string[];
                                             /** @enum {string} */
-                                            type: 'excludeCategory';
+                                            type: "excludeCategory";
                                         }
                                       | {
                                             /** @description Counterparty IDs to include. */
@@ -12797,7 +12601,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'counterparty';
+                                            type: "counterparty";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -12805,26 +12609,26 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'usingDate';
+                                            type: "usingDate";
                                         }
                                       | {
                                             /**
                                              * @description "inflow" = positive amounts, "outflow" = negative amounts.
                                              * @enum {string}
                                              */
-                                            direction: 'inflow' | 'outflow';
+                                            direction: "inflow" | "outflow";
                                             /** @enum {string} */
-                                            type: 'cashFlowDirection';
+                                            type: "cashFlowDirection";
                                         }
                                       | {
                                             /** @description Array of transaction IDs to match (max 100). */
                                             ids: string[];
                                             /** @enum {string} */
-                                            type: 'transactionIds';
+                                            type: "transactionIds";
                                         }
                                   )[];
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -12836,7 +12640,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -12848,10 +12652,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -12864,7 +12668,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/create_counter_transaction': {
+    "/companies/{companyId}/transactions/create_counter_transaction": {
         parameters: {
             query?: never;
             header?: never;
@@ -12884,7 +12688,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         sourceCategorizationId: string;
                         sourceTransactionId: string;
                         targetAccountId: string;
@@ -12898,7 +12702,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * Format: uuid
                              * @description The ID of the account associated with this transaction.
@@ -12909,36 +12713,36 @@ export interface paths {
                              * @enum {string}
                              */
                             amountCurrency:
-                                | 'EUR'
-                                | 'AUD'
-                                | 'BRL'
-                                | 'CAD'
-                                | 'CHF'
-                                | 'CNY'
-                                | 'CZK'
-                                | 'DKK'
-                                | 'GBP'
-                                | 'HKD'
-                                | 'HUF'
-                                | 'IDR'
-                                | 'ILS'
-                                | 'INR'
-                                | 'ISK'
-                                | 'JPY'
-                                | 'KRW'
-                                | 'MXN'
-                                | 'MYR'
-                                | 'NOK'
-                                | 'NZD'
-                                | 'PHP'
-                                | 'PLN'
-                                | 'RON'
-                                | 'SEK'
-                                | 'SGD'
-                                | 'THB'
-                                | 'TRY'
-                                | 'USD'
-                                | 'ZAR';
+                                | "EUR"
+                                | "AUD"
+                                | "BRL"
+                                | "CAD"
+                                | "CHF"
+                                | "CNY"
+                                | "CZK"
+                                | "DKK"
+                                | "GBP"
+                                | "HKD"
+                                | "HUF"
+                                | "IDR"
+                                | "ILS"
+                                | "INR"
+                                | "ISK"
+                                | "JPY"
+                                | "KRW"
+                                | "MXN"
+                                | "MYR"
+                                | "NOK"
+                                | "NZD"
+                                | "PHP"
+                                | "PLN"
+                                | "RON"
+                                | "SEK"
+                                | "SGD"
+                                | "THB"
+                                | "TRY"
+                                | "USD"
+                                | "ZAR";
                             /** @description The numerical value of the transaction amount. */
                             amountValue: string;
                             /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -12963,7 +12767,7 @@ export interface paths {
                                         /** @description The ID of the customer or vendor. */
                                         id: string;
                                         /** @enum {string} */
-                                        type: 'customer' | 'vendor';
+                                        type: "customer" | "vendor";
                                     } | null;
                                     /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                     passThroughTax: number;
@@ -12995,21 +12799,21 @@ export interface paths {
                                     usingDateRule:
                                         | {
                                               /** @enum {string} */
-                                              type: 'transactionDate';
+                                              type: "transactionDate";
                                           }
                                         | {
                                               /** @enum {string} */
-                                              frequency: 'day' | 'week' | 'month' | 'year';
+                                              frequency: "day" | "week" | "month" | "year";
                                               interval: number;
                                               /** @enum {string} */
-                                              type: 'spread';
+                                              type: "spread";
                                           }
                                         | {
                                               offset: number;
                                               /** @enum {string} */
-                                              period: 'month' | 'year';
+                                              period: "month" | "year";
                                               /** @enum {string} */
-                                              type: 'calendarPeriod';
+                                              type: "calendarPeriod";
                                           }
                                         | {
                                               /** Format: date */
@@ -13017,7 +12821,7 @@ export interface paths {
                                               /** Format: date */
                                               startDate: string;
                                               /** @enum {string} */
-                                              type: 'custom';
+                                              type: "custom";
                                           };
                                 };
                             };
@@ -13078,7 +12882,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -13091,7 +12895,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/import': {
+    "/companies/{companyId}/transactions/import": {
         parameters: {
             query?: never;
             header?: never;
@@ -13111,7 +12915,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         transactions: {
                             accountId: string;
                             amountCurrency: string;
@@ -13130,7 +12934,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             success: boolean;
                         };
@@ -13144,7 +12948,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/link_transfer': {
+    "/companies/{companyId}/transactions/link_transfer": {
         parameters: {
             query?: never;
             header?: never;
@@ -13164,7 +12968,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         sourceCategorizationId: string;
                         sourceTransactionId: string;
                         targetTransactionId: string;
@@ -13178,7 +12982,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -13189,7 +12993,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -13202,7 +13006,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/search': {
+    "/companies/{companyId}/transactions/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -13222,7 +13026,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /**
                          * @description Array of filter objects. Each filter is active by its presence.
                          * @default []
@@ -13233,15 +13037,15 @@ export interface paths {
                                    * @description "all" = no filter, "open" = uncategorized or partially categorized, "transfersWithoutCounterTransaction" = transfers missing a counter position.
                                    * @enum {string}
                                    */
-                                  status: 'all' | 'open' | 'transfersWithoutCounterTransaction';
+                                  status: "all" | "open" | "transfersWithoutCounterTransaction";
                                   /** @enum {string} */
-                                  type: 'status';
+                                  type: "status";
                               }
                             | {
                                   /** @description Account IDs to include. */
                                   accounts: string[];
                                   /** @enum {string} */
-                                  type: 'account';
+                                  type: "account";
                               }
                             | {
                                   /** @description YYYY-MM-DD */
@@ -13249,25 +13053,25 @@ export interface paths {
                                   /** @description YYYY-MM-DD */
                                   startDate: string;
                                   /** @enum {string} */
-                                  type: 'date';
+                                  type: "date";
                               }
                             | {
                                   /** @description Search terms (OR logic). */
                                   texts: string[];
                                   /** @enum {string} */
-                                  type: 'text';
+                                  type: "text";
                               }
                             | {
                                   /** @description Search terms (OR logic). */
                                   texts: string[];
                                   /** @enum {string} */
-                                  type: 'fromTo';
+                                  type: "fromTo";
                               }
                             | {
                                   /** @description Search terms (OR logic). */
                                   texts: string[];
                                   /** @enum {string} */
-                                  type: 'description';
+                                  type: "description";
                               }
                             | {
                                   /** @description Omit for no upper bound. */
@@ -13281,7 +13085,7 @@ export interface paths {
                                       value: number;
                                   };
                                   /** @enum {string} */
-                                  type: 'amount';
+                                  type: "amount";
                               }
                             | {
                                   /**
@@ -13290,7 +13094,7 @@ export interface paths {
                                    */
                                   showUnassigned?: boolean;
                                   /** @enum {string} */
-                                  type: 'assignedUser';
+                                  type: "assignedUser";
                                   /** @description User IDs to filter by. Omit to match any user. */
                                   userIds?: string[];
                               }
@@ -13308,21 +13112,13 @@ export interface paths {
                                   /** @description Searches fromTo, description, notes, and account name. */
                                   text?: string;
                                   /** @enum {string} */
-                                  type: 'quickSearch';
+                                  type: "quickSearch";
                               }
                             | {
                                   /** @description P&L types to filter for. */
-                                  plTypes: (
-                                      | 'revenue'
-                                      | 'cogs'
-                                      | 'cac'
-                                      | 'pd'
-                                      | 'ga'
-                                      | 'no'
-                                      | 'neutral'
-                                  )[];
+                                  plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                                   /** @enum {string} */
-                                  type: 'plType';
+                                  type: "plType";
                               }
                             | {
                                   /** @description Category IDs to include. */
@@ -13333,13 +13129,13 @@ export interface paths {
                                    */
                                   showUnassigned?: boolean;
                                   /** @enum {string} */
-                                  type: 'category';
+                                  type: "category";
                               }
                             | {
                                   /** @description Category IDs to exclude. */
                                   categories: string[];
                                   /** @enum {string} */
-                                  type: 'excludeCategory';
+                                  type: "excludeCategory";
                               }
                             | {
                                   /** @description Counterparty IDs to include. */
@@ -13350,7 +13146,7 @@ export interface paths {
                                    */
                                   showUnassigned?: boolean;
                                   /** @enum {string} */
-                                  type: 'counterparty';
+                                  type: "counterparty";
                               }
                             | {
                                   /** @description YYYY-MM-DD */
@@ -13358,22 +13154,22 @@ export interface paths {
                                   /** @description YYYY-MM-DD */
                                   startDate: string;
                                   /** @enum {string} */
-                                  type: 'usingDate';
+                                  type: "usingDate";
                               }
                             | {
                                   /**
                                    * @description "inflow" = positive amounts, "outflow" = negative amounts.
                                    * @enum {string}
                                    */
-                                  direction: 'inflow' | 'outflow';
+                                  direction: "inflow" | "outflow";
                                   /** @enum {string} */
-                                  type: 'cashFlowDirection';
+                                  type: "cashFlowDirection";
                               }
                             | {
                                   /** @description Array of transaction IDs to match (max 100). */
                                   ids: string[];
                                   /** @enum {string} */
-                                  type: 'transactionIds';
+                                  type: "transactionIds";
                               }
                         )[];
                         /**
@@ -13391,13 +13187,13 @@ export interface paths {
                          * @default date
                          * @enum {string}
                          */
-                        sortBy?: 'date' | 'amountValue' | 'fromTo';
+                        sortBy?: "date" | "amountValue" | "fromTo";
                         /**
                          * @description Sort direction.
                          * @default desc
                          * @enum {string}
                          */
-                        sortDirection?: 'asc' | 'desc';
+                        sortDirection?: "asc" | "desc";
                     };
                 };
             };
@@ -13408,7 +13204,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /** @description End-of-day account balance per visible date, in the company`s base currency. Populated only when the page rows all belong to a single account and sortBy=date. */
                             balanceByDate?: {
                                 [key: string]: {
@@ -13427,36 +13223,36 @@ export interface paths {
                                  * @enum {string}
                                  */
                                 amountCurrency:
-                                    | 'EUR'
-                                    | 'AUD'
-                                    | 'BRL'
-                                    | 'CAD'
-                                    | 'CHF'
-                                    | 'CNY'
-                                    | 'CZK'
-                                    | 'DKK'
-                                    | 'GBP'
-                                    | 'HKD'
-                                    | 'HUF'
-                                    | 'IDR'
-                                    | 'ILS'
-                                    | 'INR'
-                                    | 'ISK'
-                                    | 'JPY'
-                                    | 'KRW'
-                                    | 'MXN'
-                                    | 'MYR'
-                                    | 'NOK'
-                                    | 'NZD'
-                                    | 'PHP'
-                                    | 'PLN'
-                                    | 'RON'
-                                    | 'SEK'
-                                    | 'SGD'
-                                    | 'THB'
-                                    | 'TRY'
-                                    | 'USD'
-                                    | 'ZAR';
+                                    | "EUR"
+                                    | "AUD"
+                                    | "BRL"
+                                    | "CAD"
+                                    | "CHF"
+                                    | "CNY"
+                                    | "CZK"
+                                    | "DKK"
+                                    | "GBP"
+                                    | "HKD"
+                                    | "HUF"
+                                    | "IDR"
+                                    | "ILS"
+                                    | "INR"
+                                    | "ISK"
+                                    | "JPY"
+                                    | "KRW"
+                                    | "MXN"
+                                    | "MYR"
+                                    | "NOK"
+                                    | "NZD"
+                                    | "PHP"
+                                    | "PLN"
+                                    | "RON"
+                                    | "SEK"
+                                    | "SGD"
+                                    | "THB"
+                                    | "TRY"
+                                    | "USD"
+                                    | "ZAR";
                                 /** @description The numerical value of the transaction amount. */
                                 amountValue: string;
                                 /** @description The ID of the user to whom this transaction is assigned for review. */
@@ -13481,7 +13277,7 @@ export interface paths {
                                             /** @description The ID of the customer or vendor. */
                                             id: string;
                                             /** @enum {string} */
-                                            type: 'customer' | 'vendor';
+                                            type: "customer" | "vendor";
                                         } | null;
                                         /** @description The amount of the pass-through tax (e.g. VAT) that is not important for a profit & loss calculation. */
                                         passThroughTax: number;
@@ -13513,21 +13309,21 @@ export interface paths {
                                         usingDateRule:
                                             | {
                                                   /** @enum {string} */
-                                                  type: 'transactionDate';
+                                                  type: "transactionDate";
                                               }
                                             | {
                                                   /** @enum {string} */
-                                                  frequency: 'day' | 'week' | 'month' | 'year';
+                                                  frequency: "day" | "week" | "month" | "year";
                                                   interval: number;
                                                   /** @enum {string} */
-                                                  type: 'spread';
+                                                  type: "spread";
                                               }
                                             | {
                                                   offset: number;
                                                   /** @enum {string} */
-                                                  period: 'month' | 'year';
+                                                  period: "month" | "year";
                                                   /** @enum {string} */
-                                                  type: 'calendarPeriod';
+                                                  type: "calendarPeriod";
                                               }
                                             | {
                                                   /** Format: date */
@@ -13535,7 +13331,7 @@ export interface paths {
                                                   /** Format: date */
                                                   startDate: string;
                                                   /** @enum {string} */
-                                                  type: 'custom';
+                                                  type: "custom";
                                               };
                                     };
                                 };
@@ -13603,7 +13399,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/uncategorize': {
+    "/companies/{companyId}/transactions/uncategorize": {
         parameters: {
             query?: never;
             header?: never;
@@ -13623,13 +13419,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         selection:
                             | {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -13644,18 +13440,15 @@ export interface paths {
                                              * @description "all" = no filter, "open" = uncategorized or partially categorized, "transfersWithoutCounterTransaction" = transfers missing a counter position.
                                              * @enum {string}
                                              */
-                                            status:
-                                                | 'all'
-                                                | 'open'
-                                                | 'transfersWithoutCounterTransaction';
+                                            status: "all" | "open" | "transfersWithoutCounterTransaction";
                                             /** @enum {string} */
-                                            type: 'status';
+                                            type: "status";
                                         }
                                       | {
                                             /** @description Account IDs to include. */
                                             accounts: string[];
                                             /** @enum {string} */
-                                            type: 'account';
+                                            type: "account";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -13663,25 +13456,25 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'date';
+                                            type: "date";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'text';
+                                            type: "text";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'fromTo';
+                                            type: "fromTo";
                                         }
                                       | {
                                             /** @description Search terms (OR logic). */
                                             texts: string[];
                                             /** @enum {string} */
-                                            type: 'description';
+                                            type: "description";
                                         }
                                       | {
                                             /** @description Omit for no upper bound. */
@@ -13695,7 +13488,7 @@ export interface paths {
                                                 value: number;
                                             };
                                             /** @enum {string} */
-                                            type: 'amount';
+                                            type: "amount";
                                         }
                                       | {
                                             /**
@@ -13704,7 +13497,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'assignedUser';
+                                            type: "assignedUser";
                                             /** @description User IDs to filter by. Omit to match any user. */
                                             userIds?: string[];
                                         }
@@ -13722,21 +13515,13 @@ export interface paths {
                                             /** @description Searches fromTo, description, notes, and account name. */
                                             text?: string;
                                             /** @enum {string} */
-                                            type: 'quickSearch';
+                                            type: "quickSearch";
                                         }
                                       | {
                                             /** @description P&L types to filter for. */
-                                            plTypes: (
-                                                | 'revenue'
-                                                | 'cogs'
-                                                | 'cac'
-                                                | 'pd'
-                                                | 'ga'
-                                                | 'no'
-                                                | 'neutral'
-                                            )[];
+                                            plTypes: ("revenue" | "cogs" | "cac" | "pd" | "ga" | "no" | "neutral")[];
                                             /** @enum {string} */
-                                            type: 'plType';
+                                            type: "plType";
                                         }
                                       | {
                                             /** @description Category IDs to include. */
@@ -13747,13 +13532,13 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'category';
+                                            type: "category";
                                         }
                                       | {
                                             /** @description Category IDs to exclude. */
                                             categories: string[];
                                             /** @enum {string} */
-                                            type: 'excludeCategory';
+                                            type: "excludeCategory";
                                         }
                                       | {
                                             /** @description Counterparty IDs to include. */
@@ -13764,7 +13549,7 @@ export interface paths {
                                              */
                                             showUnassigned?: boolean;
                                             /** @enum {string} */
-                                            type: 'counterparty';
+                                            type: "counterparty";
                                         }
                                       | {
                                             /** @description YYYY-MM-DD */
@@ -13772,26 +13557,26 @@ export interface paths {
                                             /** @description YYYY-MM-DD */
                                             startDate: string;
                                             /** @enum {string} */
-                                            type: 'usingDate';
+                                            type: "usingDate";
                                         }
                                       | {
                                             /**
                                              * @description "inflow" = positive amounts, "outflow" = negative amounts.
                                              * @enum {string}
                                              */
-                                            direction: 'inflow' | 'outflow';
+                                            direction: "inflow" | "outflow";
                                             /** @enum {string} */
-                                            type: 'cashFlowDirection';
+                                            type: "cashFlowDirection";
                                         }
                                       | {
                                             /** @description Array of transaction IDs to match (max 100). */
                                             ids: string[];
                                             /** @enum {string} */
-                                            type: 'transactionIds';
+                                            type: "transactionIds";
                                         }
                                   )[];
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -13803,7 +13588,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -13815,10 +13600,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -13831,7 +13616,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/transactions/unlink_transfer': {
+    "/companies/{companyId}/transactions/unlink_transfer": {
         parameters: {
             query?: never;
             header?: never;
@@ -13851,7 +13636,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         categorizationId: string;
                         transactionId: string;
                     };
@@ -13864,7 +13649,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -13875,7 +13660,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -13888,7 +13673,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/users': {
+    "/companies/{companyId}/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -13912,7 +13697,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             email: string;
                             firebaseUserId: string | null;
                             id: string;
@@ -13921,7 +13706,7 @@ export interface paths {
                             name: string | null;
                             photoURL: string | null;
                             /** @enum {string} */
-                            role: 'owner' | 'editor' | 'viewer';
+                            role: "owner" | "editor" | "viewer";
                             userId: string;
                         }[];
                     };
@@ -13936,7 +13721,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/users/{userId}': {
+    "/companies/{companyId}/users/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -13964,7 +13749,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -13975,7 +13760,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -13987,7 +13772,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/users/{userId}/role': {
+    "/companies/{companyId}/users/{userId}/role": {
         parameters: {
             query?: never;
             header?: never;
@@ -14007,34 +13792,34 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         permissions?:
                             | (
-                                  | 'subscriptions:read'
-                                  | 'subscriptions:write'
-                                  | 'customers:read'
-                                  | 'customers:write'
-                                  | 'vendors:read'
-                                  | 'vendors:write'
-                                  | 'accounts:read'
-                                  | 'accounts:write'
-                                  | 'transactions:read'
-                                  | 'transactions:write'
-                                  | 'balances:read'
-                                  | 'balances:write'
-                                  | 'financials:read'
-                                  | 'financials:write'
-                                  | 'users:manage'
-                                  | 'api_keys:manage'
-                                  | 'integrations:manage'
-                                  | 'company:manage'
+                                  | "subscriptions:read"
+                                  | "subscriptions:write"
+                                  | "customers:read"
+                                  | "customers:write"
+                                  | "vendors:read"
+                                  | "vendors:write"
+                                  | "accounts:read"
+                                  | "accounts:write"
+                                  | "transactions:read"
+                                  | "transactions:write"
+                                  | "balances:read"
+                                  | "balances:write"
+                                  | "financials:read"
+                                  | "financials:write"
+                                  | "users:manage"
+                                  | "api_keys:manage"
+                                  | "integrations:manage"
+                                  | "company:manage"
                               )[]
                             | null;
                         /**
                          * @description The role assigned to a user within the system. Owner = full access incl. company settings, billing, and user management; editor = read/write on data; viewer = read-only. The role is also used as the default permission preset and as a non-permission marker (e.g. notifications are sent to all owners). For granular API access control, see PermissionSchema.
                          * @enum {string}
                          */
-                        role: 'owner' | 'editor' | 'viewer';
+                        role: "owner" | "editor" | "viewer";
                     };
                 };
             };
@@ -14045,7 +13830,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -14056,7 +13841,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14067,7 +13852,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14081,7 +13866,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors': {
+    "/companies/{companyId}/vendors": {
         parameters: {
             query?: never;
             header?: never;
@@ -14109,7 +13894,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': unknown;
+                        "application/json": unknown;
                     };
                 };
             };
@@ -14126,7 +13911,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         defaultCategorization?: {
                             categoryId: string;
                             passThroughTax?: number;
@@ -14149,16 +13934,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this vendor was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -14192,21 +13977,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this vendor. */
@@ -14233,7 +14018,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/{vendorId}': {
+    "/companies/{companyId}/vendors/{vendorId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -14258,16 +14043,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this vendor was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -14301,21 +14086,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this vendor. */
@@ -14340,7 +14125,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14359,7 +14144,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         defaultCategorization?: {
                             categoryId: string;
                             passThroughTax?: number;
@@ -14381,16 +14166,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this vendor was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -14424,21 +14209,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this vendor. */
@@ -14463,7 +14248,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14489,7 +14274,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             success: boolean;
                         };
                     };
@@ -14501,7 +14286,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/{vendorId}/apply-default-categorization': {
+    "/companies/{companyId}/vendors/{vendorId}/apply-default-categorization": {
         parameters: {
             query?: never;
             header?: never;
@@ -14522,9 +14307,9 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         /** @enum {string} */
-                        applyTo: 'empty' | 'autoAssigned' | 'all';
+                        applyTo: "empty" | "autoAssigned" | "all";
                     };
                 };
             };
@@ -14535,7 +14320,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             insertedSlices: number;
                             updatedSlices: number;
                         };
@@ -14547,7 +14332,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14558,7 +14343,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14571,7 +14356,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/{vendorId}/apply-default-categorization/preview': {
+    "/companies/{companyId}/vendors/{vendorId}/apply-default-categorization/preview": {
         parameters: {
             query?: never;
             header?: never;
@@ -14596,7 +14381,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             autoAssigned: number;
                             empty: number;
                             userEdited: number;
@@ -14613,7 +14398,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/{vendorId}/external-ids': {
+    "/companies/{companyId}/vendors/{vendorId}/external-ids": {
         parameters: {
             query?: never;
             header?: never;
@@ -14638,7 +14423,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -14657,7 +14442,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         externalIds: string[];
                     };
                 };
@@ -14669,7 +14454,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             externalIds: string[];
                         };
                     };
@@ -14680,7 +14465,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             error: string;
                         };
                     };
@@ -14694,7 +14479,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/batch_delete': {
+    "/companies/{companyId}/vendors/batch_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -14714,13 +14499,13 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         selection:
                             | {
                                   /** @description Explicit list of entity IDs to act on. */
                                   ids: string[];
                                   /** @enum {string} */
-                                  mode: 'ids';
+                                  mode: "ids";
                               }
                             | {
                                   /**
@@ -14733,7 +14518,7 @@ export interface paths {
                                       q?: string;
                                   };
                                   /** @enum {string} */
-                                  mode: 'filter';
+                                  mode: "filter";
                               };
                     };
                 };
@@ -14745,7 +14530,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             affected: number;
                             success: boolean;
                         };
@@ -14757,10 +14542,10 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             count: number;
                             /** @enum {string} */
-                            error: 'bulk_too_many';
+                            error: "bulk_too_many";
                             max: number;
                         };
                     };
@@ -14773,7 +14558,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/companies/{companyId}/vendors/merge': {
+    "/companies/{companyId}/vendors/merge": {
         parameters: {
             query?: never;
             header?: never;
@@ -14793,7 +14578,7 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    'application/json': {
+                    "application/json": {
                         newVendor: {
                             defaultCategorization?: {
                                 categoryId: string;
@@ -14819,16 +14604,16 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        'application/json': {
+                        "application/json": {
                             /**
                              * @description The source from which this vendor was automatically created.
                              * @enum {string|null}
                              */
                             autoCreatedSource:
-                                | 'searchApiGoogleWebSearch'
-                                | 'stripe'
-                                | 'hubspot'
-                                | 'datevLohnjournal'
+                                | "searchApiGoogleWebSearch"
+                                | "stripe"
+                                | "hubspot"
+                                | "datevLohnjournal"
                                 | null;
                             /** Format: uuid */
                             companyId: string;
@@ -14862,21 +14647,21 @@ export interface paths {
                                 usingDateRule:
                                     | {
                                           /** @enum {string} */
-                                          type: 'transactionDate';
+                                          type: "transactionDate";
                                       }
                                     | {
                                           /** @enum {string} */
-                                          frequency: 'day' | 'week' | 'month' | 'year';
+                                          frequency: "day" | "week" | "month" | "year";
                                           interval: number;
                                           /** @enum {string} */
-                                          type: 'spread';
+                                          type: "spread";
                                       }
                                     | {
                                           offset: number;
                                           /** @enum {string} */
-                                          period: 'month' | 'year';
+                                          period: "month" | "year";
                                           /** @enum {string} */
-                                          type: 'calendarPeriod';
+                                          type: "calendarPeriod";
                                       };
                             } | null;
                             /** @description An array of website domains associated with this vendor. */

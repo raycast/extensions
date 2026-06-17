@@ -15,11 +15,11 @@
  *   4. Return the response payload as `Record<string, unknown>` so the
  *      LLM can read whatever shape the API returns.
  */
-import { getClient } from './client.js';
-import { resolveCompany } from './companyContext.js';
+import { getClient } from "./client.js";
+import { resolveCompany } from "./companyContext.js";
 
 export type RunEndpointConfig = {
-    method: 'GET' | 'POST';
+    method: "GET" | "POST";
     /** OpenAPI path template, e.g. `/companies/{companyId}/transactions/{transactionId}`. */
     pathTemplate: string;
     /**
@@ -34,13 +34,13 @@ export type RunEndpointConfig = {
 };
 
 export async function runEndpoint(config: RunEndpointConfig): Promise<Record<string, unknown>> {
-    const needsCompany = config.pathTemplate.includes('{companyId}');
+    const needsCompany = config.pathTemplate.includes("{companyId}");
     const path: Record<string, string> = { ...config.pathParams };
 
     if (needsCompany) {
         const resolved = await resolveCompany(config.companyId);
         if (!resolved) {
-            throw new Error('No company found for the signed-in user.');
+            throw new Error("No company found for the signed-in user.");
         }
         path.companyId = resolved.id;
     }
@@ -72,7 +72,7 @@ export async function runEndpoint(config: RunEndpointConfig): Promise<Record<str
     if (config.body !== undefined) init.body = pruneUndefined(config.body);
 
     const { data } =
-        config.method === 'GET'
+        config.method === "GET"
             ? await loose.GET(config.pathTemplate, init)
             : await loose.POST(config.pathTemplate, init);
 

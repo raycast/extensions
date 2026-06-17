@@ -6,17 +6,17 @@
  * Auth (legacy path, used during the Firebase → Better Auth migration).
  */
 export type Auth =
-    | { kind: 'apiKey'; key: string }
-    | { kind: 'firebaseIdToken'; token: string }
-    | { kind: 'oauthBearer'; token: string };
+    | { kind: "apiKey"; key: string }
+    | { kind: "firebaseIdToken"; token: string }
+    | { kind: "oauthBearer"; token: string };
 
 export function authHeaderValue(auth: Auth): string {
     switch (auth.kind) {
-        case 'apiKey':
+        case "apiKey":
             return `Bearer ${auth.key}`;
-        case 'firebaseIdToken':
+        case "firebaseIdToken":
             return `Bearer ${auth.token}`;
-        case 'oauthBearer':
+        case "oauthBearer":
             return `Bearer ${auth.token}`;
     }
 }

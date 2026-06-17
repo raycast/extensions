@@ -1,21 +1,14 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, popToRoot } from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
-import { getClient } from './lib/client.js';
-import {
-    type CompanySummary,
-    getSelectedCompanyId,
-    setSelectedCompanyId,
-} from './lib/companyContext.js';
+import { Action, ActionPanel, Icon, List, showToast, Toast, popToRoot } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { getClient } from "./lib/client.js";
+import { type CompanySummary, getSelectedCompanyId, setSelectedCompanyId } from "./lib/companyContext.js";
 
 async function fetchCompanies(): Promise<{
     companies: CompanySummary[];
     selectedId: string | null;
 }> {
     const client = await getClient();
-    const [{ data }, selectedId] = await Promise.all([
-        client.GET('/companies', {}),
-        getSelectedCompanyId(),
-    ]);
+    const [{ data }, selectedId] = await Promise.all([client.GET("/companies", {}), getSelectedCompanyId()]);
     return { companies: (data ?? []) as CompanySummary[], selectedId };
 }
 
@@ -36,7 +29,7 @@ export default function Companies() {
                         icon={isSelected ? Icon.CheckCircle : Icon.Building}
                         title={company.name}
                         subtitle={company.baseCurrency}
-                        accessories={isSelected ? [{ tag: 'Selected' }] : undefined}
+                        accessories={isSelected ? [{ tag: "Selected" }] : undefined}
                         actions={
                             <ActionPanel>
                                 <Action
@@ -52,10 +45,7 @@ export default function Companies() {
                                         await popToRoot();
                                     }}
                                 />
-                                <Action.CopyToClipboard
-                                    title="Copy Company ID"
-                                    content={company.id}
-                                />
+                                <Action.CopyToClipboard title="Copy Company ID" content={company.id} />
                             </ActionPanel>
                         }
                     />
