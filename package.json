@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bcuninstaller",
+  "description": "List installed software and batch uninstall it through BC Uninstaller from Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "fast-xml-parser": "^5.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "bcuninstaller-icon.png",
+  "preferences": [
+    {
+      "name": "bcuPath",
+      "type": "textfield",
+      "required": true,
+      "title": "BCU Path",
+      "description": "Path to BCU-console.exe or the BC Uninstaller install folder",
+      "placeholder": "C:\\Program Files\\BCUninstaller"
+    },
+    {
+      "name": "autoRemoveHighConfidenceJunk",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-Remove High-Confidence Leftovers",
+      "label": "Enable automatic high-confidence leftover cleanup",
+      "description": "When enabled, batch uninstalls ask BC Uninstaller to automatically remove high-confidence leftover registry entries and other uninstall junk.",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "mode": "view",
+      "name": "list-applications",
+      "title": "Uninstall Applications",
+      "description": "Browse installed software and batch uninstall queued apps",
+      "icon": "bcuninstaller-icon.png"
+    }
+  ],
+  "title": "BCUninstaller",
+  "author": "sansaxena789",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
+}
