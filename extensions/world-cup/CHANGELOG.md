@@ -1,6 +1,6 @@
 # World Cup Changelog
 
-## [AI Match Questions] - {PR_MERGE_DATE}
+## [AI Match Questions] - 2026-06-17
 
 - Added AI tools for asking about World Cup schedules, country matchups, and goal totals by country or player
 - Added full country names to the match detail pane when FIFA provides them
