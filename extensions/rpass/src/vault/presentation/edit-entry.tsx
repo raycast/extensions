@@ -427,11 +427,13 @@ export default function EditEntry({ storepath, entry, passphrase }: Props) {
     setIsLoading(true);
     setLastError(undefined);
     setLastErrorHasGpgHelp(false);
+    let wroteNewEntry = false;
     try {
       const content = [password, additionalLines.trim()]
         .filter(Boolean)
         .join("\n");
       await writeEntry(newEntry, storepath, content, { force: true });
+      wroteNewEntry = true;
       if (isMoving) {
         await removeEntry(entry, storepath);
       }
@@ -445,7 +447,15 @@ export default function EditEntry({ storepath, entry, passphrase }: Props) {
       const message = formatError(error);
       setLastError(message);
       setLastErrorHasGpgHelp(isGpgTimeoutOrPinentryError(error));
-      await showToast(Toast.Style.Failure, "Failed to Update Entry", message);
+      if (wroteNewEntry && isMoving) {
+        await showToast(
+          Toast.Style.Failure,
+          "Failed to Remove Old Entry",
+          `New entry created at '${newEntry}', but the old entry '${entry}' could not be removed. Remove it manually.`,
+        );
+      } else {
+        await showToast(Toast.Style.Failure, "Failed to Update Entry", message);
+      }
     } finally {
       setIsLoading(false);
     }
