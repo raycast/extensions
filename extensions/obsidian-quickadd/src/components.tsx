@@ -177,14 +177,7 @@ function ChoiceListItem({
               shortcut={{ modifiers: ["cmd"], key: "e" }}
               target={<ChoiceForm choice={choice} vaultName={vaultName} initialValue={inputText} />}
             />
-          ) : (
-            <Action.Push
-              title="Enter Text with Options"
-              icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              target={<ChoiceForm choice={choice} vaultName={vaultName} initialValue={inputText} />}
-            />
-          )}
+          ) : null}
           <Action
             title="Refresh Choices"
             icon={Icon.ArrowClockwise}

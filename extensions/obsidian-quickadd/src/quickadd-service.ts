@@ -24,13 +24,8 @@ export {
   type Vault,
 };
 
-type PreferencesShape = {
-  vaultPath?: string;
-  defaultVariableName?: string;
-};
-
 export function getDefaultVariableName() {
-  const preferences = getPreferenceValues<PreferencesShape>();
+  const preferences = getPreferenceValues<Preferences>();
   return normalizeVariableName(preferences.defaultVariableName);
 }
 
@@ -53,7 +48,7 @@ export async function detectVaults(configPath = getObsidianConfigPath()): Promis
 }
 
 export async function resolveVaults(): Promise<Vault[]> {
-  const preferences = getPreferenceValues<PreferencesShape>();
+  const preferences = getPreferenceValues<Preferences>();
   const preferencePath = String(preferences.vaultPath || "").trim();
 
   if (preferencePath) {
