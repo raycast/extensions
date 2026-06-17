@@ -58,6 +58,12 @@ describe("parseVaultedUrl", () => {
       ValidationError,
     );
   });
+
+  it("rejects http for non-localhost hosts", () => {
+    expect(() => parseVaultedUrl("http://evil.com/s/abc#key")).toThrow(
+      ValidationError,
+    );
+  });
 });
 
 describe("validateHost", () => {

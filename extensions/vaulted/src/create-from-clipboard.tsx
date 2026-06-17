@@ -21,7 +21,11 @@ export default async function CreateFromClipboard() {
 
     await Clipboard.copy(result.url);
     const viewsLabel =
-      prefs.defaultViews === 1 ? "1 view" : `${prefs.defaultViews} views`;
+      prefs.defaultViews === 0
+        ? "unlimited views"
+        : prefs.defaultViews === 1
+          ? "1 view"
+          : `${prefs.defaultViews} views`;
     await showHUD(
       `✓ Secret created — link copied (${viewsLabel} · ${prefs.defaultExpiry})`,
     );

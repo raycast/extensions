@@ -38,7 +38,7 @@
   "preferences": [
     {
       "name": "host",
-      "title": "Vaulted host",
+      "title": "Vaulted Host",
       "description": "Base URL of the Vaulted instance. Defaults to https://vaulted.fyi. Use https://... or http://localhost for self-hosted.",
       "type": "textfield",
       "required": false,
@@ -46,7 +46,7 @@
     },
     {
       "name": "defaultViews",
-      "title": "Default max views",
+      "title": "Default Max Views",
       "description": "How many times the secret can be viewed before it's destroyed.",
       "type": "dropdown",
       "required": false,
@@ -61,7 +61,7 @@
     },
     {
       "name": "defaultExpiry",
-      "title": "Default expiry",
+      "title": "Default Expiry",
       "description": "How long the secret remains available.",
       "type": "dropdown",
       "required": false,
@@ -75,7 +75,7 @@
     },
     {
       "name": "autoCopy",
-      "title": "Auto-copy link",
+      "title": "Auto-Copy Link",
       "label": "Copy the new secret link to the clipboard automatically",
       "description": "When checked, the share link is copied as soon as it's created.",
       "type": "checkbox",
@@ -84,7 +84,7 @@
     },
     {
       "name": "openInBrowser",
-      "title": "Open in browser",
+      "title": "Open in Browser",
       "label": "Open the secret link in the browser after creating it",
       "description": "Useful for visually confirming the link before sending.",
       "type": "checkbox",
@@ -93,7 +93,7 @@
     },
     {
       "name": "confirmConsume",
-      "title": "Confirm before consuming a view",
+      "title": "Confirm Before Consuming a View",
       "label": "Ask before revealing a secret",
       "description": "Viewing a secret consumes a view. Toggle off if you don't want the confirmation prompt.",
       "type": "checkbox",

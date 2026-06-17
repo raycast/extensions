@@ -29,6 +29,7 @@ export function parseVaultedUrl(url: string): ParsedVaultedUrl {
     );
   }
 
+  validateHost(match[1]);
   return { origin: match[1], id: match[2], fragment };
 }
 

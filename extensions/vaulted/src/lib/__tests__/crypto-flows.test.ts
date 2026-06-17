@@ -154,15 +154,6 @@ describe("viewSecretFlow validation", () => {
   });
 
   it("throws PASSPHRASE_REQUIRED when passphrase is missing", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        ciphertext: "c",
-        iv: "i",
-        hasPassphrase: true,
-        viewsRemaining: 0,
-      }),
-    });
     try {
       await viewSecretFlow({ url: "https://vaulted.fyi/s/abc#wrapped.salt" });
       expect.fail("should have thrown");
@@ -170,6 +161,7 @@ describe("viewSecretFlow validation", () => {
       expect(err).toBeInstanceOf(ValidationError);
       expect((err as ValidationError).code).toBe("PASSPHRASE_REQUIRED");
     }
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("throws ENCRYPTION_FAILED on key/IV mismatch", async () => {
