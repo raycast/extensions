@@ -32,13 +32,18 @@ export default async function ToggleProfiles() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Toggling…", message: next.name });
 
   try {
+    // Save state before applying so concurrent invocations see the updated
+    // lastAppliedId immediately and don't race to apply the same profile.
+    await TogglePair.save({ ...pair, lastAppliedId: next.id });
     const iconTheme = resolveIconThemePreference(next.iconStyle, next.iconMode);
     await applyProfileToSystem(next.wallpaperPath, iconTheme, next.appearance);
-    await TogglePair.save({ ...pair, lastAppliedId: next.id });
     toast.style = Toast.Style.Success;
     toast.title = "Profile applied";
     toast.message = next.name;
   } catch (error) {
+    // Roll back to the previous lastAppliedId so the next toggle attempt
+    // targets the correct profile.
+    await TogglePair.save(pair);
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to toggle";
     toast.message = String(error);

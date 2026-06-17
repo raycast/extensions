@@ -14,7 +14,7 @@ export default function ConfigureToggle() {
 
   if (firstPick) {
     return (
-      <List isLoading={isLoading} searchBarPlaceholder="Select second profile…">
+      <List searchBarPlaceholder="Select second profile…">
         {profiles
           ?.filter((p) => p.id !== firstPick)
           .map((profile) => (

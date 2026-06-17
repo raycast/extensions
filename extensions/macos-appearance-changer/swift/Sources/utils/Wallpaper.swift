@@ -48,7 +48,6 @@ func applyWallpaperAcrossAllSpaces(_ imagePath: String) throws {
     let timestamp = Date()
 
     sendSignal("-STOP", to: "WallpaperAgent")
-    defer { sendSignal("-9", to: "WallpaperAgent") }
 
     var plist = try {
         let data = try Data(contentsOf: storeURL)
@@ -97,4 +96,13 @@ func applyWallpaperAcrossAllSpaces(_ imagePath: String) throws {
 
     let patchedData = try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0)
     try patchedData.write(to: storeURL)
+
+    sendSignal("-9", to: "WallpaperAgent")
+
+    for screen in NSScreen.screens {
+        try NSWorkspace.shared.setDesktopImageURL(imageURL, for: screen, options: [
+            .imageScaling: NSImageScaling.scaleProportionallyUpOrDown.rawValue,
+            .allowClipping: true,
+        ])
+    }
 }
