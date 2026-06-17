@@ -3,9 +3,7 @@
 // (also runs automatically before `dev` and `build`).
 import { runEndpoint } from '../lib/runEndpoint.js';
 
-type Input = {};
-
-export default async function listCompanies(input: Input): Promise<Record<string, unknown>> {
+export default async function listCompanies(): Promise<Record<string, unknown>> {
     return runEndpoint({
         method: 'GET',
         pathTemplate: '/companies',

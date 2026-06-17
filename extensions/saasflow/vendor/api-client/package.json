@@ -10,7 +10,7 @@
         "./*": "./src/*.ts"
     },
     "scripts": {
-        "check-tsc": "tsgo --noEmit",
+        "check-tsc": "tsc --noEmit",
         "lint": "oxlint src",
         "lint-fix": "oxlint src --fix",
         "format": "oxfmt src",
@@ -22,7 +22,6 @@
     },
     "devDependencies": {
         "@types/node": "^25.7.0",
-        "@typescript/native-preview": "^7.0.0-dev.20260511.1",
         "oxfmt": "^0.49.0",
         "oxlint": "^1.64.0",
         "typescript": "6.0.3",

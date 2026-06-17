@@ -248,11 +248,8 @@
         "build": "ray build",
         "dev": "ray develop",
         "fix-lint": "ray lint --fix",
-        "lint": "oxlint src",
-        "lint-fix": "oxlint src --fix",
-        "format": "oxfmt src",
-        "format-check": "oxfmt --check src",
-        "check-tsc": "tsgo --noEmit",
+        "lint": "ray lint",
+        "check-tsc": "tsc --noEmit",
         "test": "vitest run --silent --passWithNoTests"
     },
     "dependencies": {
@@ -260,12 +257,15 @@
         "@raycast/utils": "^1.18.0",
         "@saasflow/api-client": "file:./vendor/api-client"
     },
+    "overrides": {
+        "esbuild": "0.28.1"
+    },
     "devDependencies": {
+        "@raycast/eslint-config": "^2.1.1",
         "@types/node": "^25.7.0",
         "@types/react": "^19.2.14",
-        "@typescript/native-preview": "^7.0.0-dev.20260511.1",
-        "oxfmt": "^0.49.0",
-        "oxlint": "^1.64.0",
+        "eslint": "^10.0.1",
+        "prettier": "^3.8.1",
         "react": "^19.2.0",
         "typescript": "6.0.3",
         "vitest": "^4.1.6"

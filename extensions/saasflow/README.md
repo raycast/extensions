@@ -14,11 +14,11 @@ Requires a [SaaSFlow](https://saasflow.com) account.
 
 The extension registers 31 read-only AI tools so Raycast AI can answer natural-language questions about your data. A few examples:
 
-- *"What's my MRR today?"* → `data-mrr-at-date`
-- *"Show me last quarter's P&L"* → `data-profit-loss-data`
-- *"Which customers churned in March?"* → `data-customer-changes`
-- *"Find the transaction from Stripe on Jan 12"* → `search`, then `get-transaction`
-- *"Top 10 expense vendors this year"* → `data-top-expense-vendors`
+- _"What's my MRR today?"_ → `data-mrr-at-date`
+- _"Show me last quarter's P&L"_ → `data-profit-loss-data`
+- _"Which customers churned in March?"_ → `data-customer-changes`
+- _"Find the transaction from Stripe on Jan 12"_ → `search`, then `get-transaction`
+- _"Top 10 expense vendors this year"_ → `data-top-expense-vendors`
 
 The 23 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR, cohorts, cash flow, P&L, balances, retention). Eight hand-tuned tools cover company / customer / transaction lookups and free-text search.
 
