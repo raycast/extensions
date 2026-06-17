@@ -11,6 +11,35 @@ function extractRepo(url: string): { owner: string; repo: string } | null {
   return { owner: m[1], repo: m[2].replace(/\.git$/, "") };
 }
 
+/**
+ * Fetch the latest GitHub release's notes for any github.com URL (e.g. a
+ * Homebrew cask's homepage). Lets the detail pane show a real changelog for the
+ * many apps brew tracks that are hosted on GitHub. Returns null when the URL
+ * isn't a GitHub repo or the release has no body. Best-effort, never throws.
+ */
+export async function fetchReleaseNotesForUrl(
+  url: string,
+): Promise<{ markdown: string; htmlUrl?: string } | null> {
+  const repo = extractRepo(url);
+  if (!repo) return null;
+  try {
+    const { stdout } = await run("/usr/bin/curl", [
+      "-sL",
+      "--max-time",
+      "10",
+      "-H",
+      "Accept: application/vnd.github+json",
+      `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`,
+    ]);
+    const data = JSON.parse(stdout);
+    const body = typeof data?.body === "string" ? data.body.trim() : "";
+    if (!body) return null;
+    return { markdown: body, htmlUrl: data.html_url };
+  } catch {
+    return null;
+  }
+}
+
 export async function checkGitHub(
   app: InstalledApp,
 ): Promise<UpdateInfo | null> {

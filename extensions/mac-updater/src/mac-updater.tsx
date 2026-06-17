@@ -24,7 +24,6 @@ import {
 import { upgradeMas } from "./utils/sources/mas";
 import {
   checkSystemUpdates,
-  openSoftwareUpdate,
   SystemUpdate,
 } from "./utils/sources/system-updates";
 import { openAppForSparkleUpdate } from "./utils/sources/sparkle";
@@ -41,15 +40,8 @@ import {
   saveRollbackPoint,
 } from "./utils/rollback";
 import { isMajorBump, shortenVersion } from "./utils/version";
-import {
-  appBundleSize,
-  buildAppDetailMarkdown,
-  formatBytes,
-  formatDate,
-} from "./utils/detail";
-import { hostnameOf, navigationTitle, timeOfDay } from "./utils/format";
+import { navigationTitle, timeOfDay } from "./utils/format";
 import { SOURCE_META } from "./utils/source-meta";
-import * as fs from "fs";
 import { isOnboarded, resetOnboarding } from "./utils/onboarding-store";
 import Onboarding from "./components/Onboarding";
 import {
@@ -79,6 +71,8 @@ import {
   snoozeApp,
   unignoreApp,
 } from "./utils/ignored";
+import AppDetail from "./components/AppDetail";
+import SystemUpdatesSection from "./components/SystemUpdatesSection";
 import AdoptApps from "./components/AdoptApps";
 import CustomCaskForm from "./components/CustomCaskForm";
 import MasSearch from "./components/MasSearch";
@@ -865,55 +859,11 @@ export default function MacUpdater() {
     // primary action. We surface it and hand off to System Settings to apply.
     if (systemUpdates.length > 0) {
       sections.push(
-        <List.Section
+        <SystemUpdatesSection
           key="macos"
-          title="macOS"
-          subtitle={`${systemUpdates.length}`}
-        >
-          {systemUpdates.map((u) => {
-            const size =
-              u.sizeMB && u.sizeMB >= 1024
-                ? `${(u.sizeMB / 1024).toFixed(1)} GB`
-                : u.sizeMB
-                  ? `${u.sizeMB} MB`
-                  : undefined;
-            const accessories: List.Item.Accessory[] = [];
-            if (u.restart)
-              accessories.push({
-                tag: { value: "restart", color: Color.Orange },
-                tooltip: "Requires a restart",
-              });
-            if (size) accessories.push({ text: size });
-            accessories.push({ tag: { value: "⏎", color: Color.Blue } });
-            return (
-              <List.Item
-                key={u.label}
-                icon={{ source: Icon.Desktop, tintColor: Color.Blue }}
-                title={u.title}
-                subtitle={u.version ? `Version ${u.version}` : undefined}
-                accessories={accessories}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Open Software Update"
-                      icon={Icon.Gear}
-                      onAction={openSoftwareUpdate}
-                    />
-                    <Action
-                      title="Re-check macOS Updates"
-                      icon={Icon.RotateClockwise}
-                      onAction={() =>
-                        checkSystemUpdates({ force: true }).then(
-                          setSystemUpdates,
-                        )
-                      }
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>,
+          updates={systemUpdates}
+          onRefresh={setSystemUpdates}
+        />,
       );
     }
 
@@ -1234,76 +1184,8 @@ export default function MacUpdater() {
         title={info.app.name}
         subtitle={showDetail ? undefined : info.app.version}
         accessories={accessories}
-        detail={showDetail ? <>{renderAppDetail(info)}</> : undefined}
+        detail={showDetail ? <AppDetail info={info} /> : undefined}
         actions={<>{renderAppActions(info)}</>}
-      />
-    );
-  }
-
-  function renderAppDetail(info: UpdateInfo): React.ReactNode {
-    const meta = SOURCE_META[info.source];
-    // Compute metadata derived from the .app on disk. These calls are fast for
-    // typical app sizes (~50-500 MB) and only run when the detail pane is open.
-    let installedSize = "";
-    let installedDate = "";
-    try {
-      installedSize = formatBytes(appBundleSize(info.app.appPath));
-      installedDate = formatDate(fs.statSync(info.app.appPath).mtimeMs);
-    } catch {
-      // ignore — show "—" below
-    }
-    return (
-      <List.Item.Detail
-        markdown={buildAppDetailMarkdown(info)}
-        metadata={
-          <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label
-              title="Installed version"
-              text={info.app.version}
-            />
-            <List.Item.Detail.Metadata.Label
-              title="Latest version"
-              text={info.latestVersion}
-            />
-            {info.app.buildNumber &&
-              info.app.buildNumber !== info.app.version && (
-                <List.Item.Detail.Metadata.Label
-                  title="Build"
-                  text={info.app.buildNumber}
-                />
-              )}
-            <List.Item.Detail.Metadata.Separator />
-            <List.Item.Detail.Metadata.TagList title="Source">
-              <List.Item.Detail.Metadata.TagList.Item
-                text={meta.label}
-                color={meta.color}
-                icon={meta.icon}
-              />
-            </List.Item.Detail.Metadata.TagList>
-            <List.Item.Detail.Metadata.Label
-              title="Bundle ID"
-              text={info.app.bundleId || "—"}
-            />
-            <List.Item.Detail.Metadata.Label
-              title="Size"
-              text={installedSize || "—"}
-            />
-            <List.Item.Detail.Metadata.Label
-              title="Last modified"
-              text={installedDate || "—"}
-            />
-            {info.releaseNotesUrl && (
-              <>
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Link
-                  title="Release notes"
-                  target={info.releaseNotesUrl}
-                  text={hostnameOf(info.releaseNotesUrl)}
-                />
-              </>
-            )}
-          </List.Item.Detail.Metadata>
-        }
       />
     );
   }
