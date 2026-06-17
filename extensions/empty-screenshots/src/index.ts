@@ -1,8 +1,8 @@
-import { readdir, stat, rm } from "fs/promises";
+import { readdir, stat } from "fs/promises";
 import { join, resolve } from "path";
 import { homedir } from "os";
 import { execSync } from "child_process";
-import { showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, showHUD, getPreferenceValues, trash } from "@raycast/api";
 
 const MACOS_SCREENSHOT_PATTERN = /^Screen(shot| Recording) \d{4}-\d{2}-\d{2}/;
 
@@ -55,7 +55,7 @@ export default async function main() {
         }
       }
 
-      await rm(screenshot);
+      await trash(screenshot);
       cleanedCount = cleanedCount + 1;
     }
 

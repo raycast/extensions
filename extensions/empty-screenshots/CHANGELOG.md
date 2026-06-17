@@ -3,7 +3,7 @@
 ## [Added macOS Screenshot app integration] - {PR_MERGE_DATE}
 
 - Added option to use macOS Screenshot app folder location and file naming conventions
-- Added "Delete all" option to remove all screenshots regardless of age
+- Added "All screenshots" option to remove all screenshots regardless of age
 - Improved toast message to clearly describe what will be cleaned
 - Migrated to Raycast API v1.103+ and updated dependencies
 
