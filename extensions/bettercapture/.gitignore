@@ -1,0 +1,10 @@
+# dependencies
+node_modules/
+
+# Raycast build output
+dist/
+raycast-env.d.ts
+
+# misc
+.DS_Store
+*.pem
