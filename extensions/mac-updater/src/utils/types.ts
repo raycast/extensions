@@ -49,6 +49,8 @@ export interface UpdateInfo {
   downloadUrl?: string;
   caskToken?: string;
   masId?: number;
+  /** This update will prompt for an admin password (e.g. a .pkg-based cask). */
+  needsAdmin?: boolean;
   checkedAt: number;
 }
 

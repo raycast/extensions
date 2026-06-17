@@ -301,6 +301,7 @@ export async function checkHomebrewCask(
       hasUpdate: false,
       caskToken: token,
       releaseNotesUrl: cask?.homepage,
+      needsAdmin: cask?.isPkg,
       checkedAt: Date.now(),
     };
   }

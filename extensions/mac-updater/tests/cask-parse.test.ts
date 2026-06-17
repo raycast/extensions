@@ -70,3 +70,25 @@ test("parseAndIndex skips a malformed entry without failing the rest", () => {
   const idx = parseAndIndex(Buffer.from(json, "utf8"), 0);
   assert.equal(idx.byToken.size, 2);
 });
+
+test("parseAndIndex flags pkg-based casks (needs admin) and leaves app casks unflagged", () => {
+  const json = JSON.stringify([
+    {
+      token: "google-drive",
+      name: ["Google Drive"],
+      version: "1",
+      homepage: "",
+      artifacts: [{ pkg: ["GoogleDrive.pkg"] }, { quit: "com.google.drivefs" }],
+    },
+    {
+      token: "slack",
+      name: ["Slack"],
+      version: "1",
+      homepage: "",
+      artifacts: [{ app: ["Slack.app"] }],
+    },
+  ]);
+  const idx = parseAndIndex(Buffer.from(json, "utf8"), 0);
+  assert.equal(idx.byToken.get("google-drive")?.isPkg, true);
+  assert.equal(idx.byToken.get("slack")?.isPkg, undefined);
+});

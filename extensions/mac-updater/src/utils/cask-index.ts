@@ -10,6 +10,8 @@ export interface CaskEntry {
   name: string[];
   version: string;
   homepage: string;
+  /** Installs via a macOS .pkg (so the upgrade will need an admin password). */
+  isPkg?: boolean;
 }
 
 export interface CaskIndex {
@@ -50,6 +52,9 @@ function indexEntry(
   for (const art of entry.artifacts ?? []) {
     if (typeof art !== "object" || !art) continue;
     const obj = art as Record<string, unknown>;
+    // A `pkg` artifact means brew runs the macOS installer as root — i.e. the
+    // upgrade will pop an admin-password prompt. Flag it so we can warn first.
+    if (obj.pkg) slim.isPkg = true;
     const zap = (obj.zap as Array<Record<string, unknown>> | undefined) ?? [];
     const uninstall =
       (obj.uninstall as Array<Record<string, unknown>> | undefined) ?? [];

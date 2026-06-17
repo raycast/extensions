@@ -661,12 +661,17 @@ export default function MacUpdater() {
     }
 
     if (total > 0) {
-      const summary =
+      const adminCount = updates.filter((u) => u.needsAdmin).length;
+      const base =
         updates.length && scan.cliPackages.length
           ? `${updates.length} app${updates.length === 1 ? "" : "s"} and ${scan.cliPackages.length} package${scan.cliPackages.length === 1 ? "" : "s"}`
           : updates.length
             ? `${updates.length} app${updates.length === 1 ? "" : "s"}`
             : `${scan.cliPackages.length} package${scan.cliPackages.length === 1 ? "" : "s"}`;
+      // The thoughtful bit: tell the user up front how many will ask for a
+      // password, so the prompt during the run isn't a surprise.
+      const summary =
+        adminCount > 0 ? `${base} · ${adminCount} need your password` : base;
       banners.push(
         <List.Item
           key="update-all-banner"
@@ -1046,6 +1051,12 @@ export default function MacUpdater() {
     if (isBusy) {
       accessories.push({ icon: Icon.ArrowClockwise, tooltip: "Working…" });
     } else if (info.hasUpdate) {
+      if (info.needsAdmin) {
+        accessories.push({
+          icon: { source: Icon.Key, tintColor: Color.SecondaryText },
+          tooltip: "Needs your password (installs via a macOS .pkg)",
+        });
+      }
       accessories.push({
         tag: { value: shortenVersion(info.latestVersion), color: Color.Green },
         tooltip: `${meta.label} · ${info.app.version} → ${info.latestVersion}`,
@@ -1203,11 +1214,12 @@ export default function MacUpdater() {
         )}
 
         <ActionPanel.Section>
+          {/* Update All is first-class: reachable with ⌘↵ from any row. */}
           <Action
-            title="Update Everything"
+            title="Update All"
             icon={Icon.Rocket}
             onAction={openUpdateEverything}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
           <Action
             title="Refresh"
