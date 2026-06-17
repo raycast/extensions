@@ -1,5 +1,11 @@
 # Figma Files Changelog
 
+## [Open File URL from Clipboard command] - {PR_MERGE_DATE}
+
+- New "Open File URL from Clipboard" command that opens the Figma file URL in
+  your clipboard, preferring the Figma desktop app when installed.
+- Updated dependencies.
+
 ## [Adds cache clearing action] - 2025-10-30
 
 - More granular Oauth scopes for Figma

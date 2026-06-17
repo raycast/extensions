@@ -45,7 +45,7 @@ export default function Command() {
   );
 
   const [searchText, setSearchText] = useState("");
-  const state = useSearch({ url, searchText, searchSize: +searchSizeNum });
+  const state = useSearch({ url, searchText, searchSize: +searchSizeNum, branchName: selectedBranch });
 
   return (
     <List
@@ -86,7 +86,17 @@ export default function Command() {
   );
 }
 
-function useSearch({ url, searchText, searchSize }: { url?: string; searchText: string; searchSize: number }) {
+function useSearch({
+  url,
+  searchText,
+  searchSize,
+  branchName,
+}: {
+  url?: string;
+  searchText: string;
+  searchSize: number;
+  branchName: string;
+}) {
   const { isLoading, data } = useFetch(url!, {
     method: "POST",
     headers: {
@@ -94,7 +104,7 @@ function useSearch({ url, searchText, searchSize }: { url?: string; searchText: 
       "Content-Type": "application/json",
     },
     body: JSON.stringify(buildSearchQuery(searchText, searchSize)),
-    parseResponse: parseSearchResponse,
+    parseResponse: (r) => parseSearchResponse(r, branchName),
     initialData: [],
     execute: Boolean(url) && searchText.length > 0,
     failureToastOptions: {

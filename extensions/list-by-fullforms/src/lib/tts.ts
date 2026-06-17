@@ -3,8 +3,9 @@
 // — `say` is universally present on macOS, voice + system rate are
 // configurable in System Settings → Accessibility → Spoken Content,
 // and no extra dependency is needed to ship TTS in a Raycast
-// extension. (Raycast is macOS-only so cross-platform isn't a
-// constraint we have to satisfy.)
+// extension. `say` has no Windows equivalent, so callers gate the
+// Speak actions to macOS (see the isMacOS check in src/search.tsx)
+// and this module is never reached on Windows.
 //
 // What this module owns: the `say` subprocess lifecycle (spawn,
 // kill-previous-on-overlap, kill-on-shutdown), the rate + pause

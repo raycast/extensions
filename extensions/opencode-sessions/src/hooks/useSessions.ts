@@ -1,7 +1,32 @@
 import { useCachedPromise } from "@raycast/utils";
+import { Todo } from "@opencode-ai/sdk/v2/client";
 
-import { checkDatabase, loadProjects, loadSessions } from "../lib/storage";
-import { Project, SessionWithProject } from "../types";
+import { getClient } from "../lib/clients";
+import {
+  checkDatabase,
+  getOpenSessions,
+  loadProjects,
+  loadSessions,
+  searchSessions,
+  OpenSession,
+} from "../lib/storage";
+import { Project, Session, SessionWithProject } from "../types";
+
+export type { OpenSession };
+
+export type MessageWithParts = {
+  info: {
+    id: string;
+    sessionID: string;
+    role: "user" | "assistant";
+    time: { created: number };
+  };
+  parts: Array<{
+    id: string;
+    type: string;
+    text?: string;
+  }>;
+};
 
 interface UseSessionsResult {
   sessions: SessionWithProject[];
@@ -37,14 +62,11 @@ export function useSessions(): UseSessionsResult {
   const projects = projectsData ?? [];
   const sessions = sessionsData ?? [];
 
-  // Build project lookup map
   const projectMap = new Map<string, Project>();
-
   for (const project of projects) {
     projectMap.set(project.id, project);
   }
 
-  // Join sessions with projects
   const sessionsWithProjects: SessionWithProject[] = sessions.map((session) => ({
     session,
     project: projectMap.get(session.projectID),
@@ -61,4 +83,40 @@ export function useSessions(): UseSessionsResult {
     storageError: versionError ?? null,
     mutate,
   };
+}
+
+export function useOpenSessions() {
+  return useCachedPromise(getOpenSessions);
+}
+
+export function useContentSearch(searchQuery: string) {
+  return useCachedPromise(
+    async (q: string) => {
+      if (!q || q.length < 3) return [] as Session[];
+      return searchSessions(q);
+    },
+    [searchQuery],
+  );
+}
+
+export function useSessionTodos(sessionId: string) {
+  return useCachedPromise(
+    async (id: string) => {
+      const client = await getClient();
+      const result = await client.session.todo({ sessionID: id });
+      return result.data ?? ([] as Todo[]);
+    },
+    [sessionId],
+  );
+}
+
+export function useSessionMessages(sessionId: string) {
+  return useCachedPromise(
+    async (id: string) => {
+      const client = await getClient();
+      const result = await client.session.messages({ sessionID: id, limit: 10 });
+      return (result.data ?? []) as MessageWithParts[];
+    },
+    [sessionId],
+  );
 }

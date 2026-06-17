@@ -153,8 +153,32 @@ export function raycastForVSCodeURI(uri: string) {
   return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
 }
 
+export function vscodeFileURI(filePath: string) {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  const isUncPath = normalizedPath.startsWith("//");
+  const pathToEncode = isUncPath ? normalizedPath.slice(2) : normalizedPath;
+  const encodedPath = pathToEncode
+    .split("/")
+    .map((segment, index) => {
+      const encodedSegment = encodeURIComponent(segment);
+      return index === 0 && /^[A-Za-z]%3A$/.test(encodedSegment) ? encodedSegment.replace("%3A", ":") : encodedSegment;
+    })
+    .join("/");
+  const uriPath = isUncPath ? `/${encodedPath}` : encodedPath;
+
+  return `${getBuildScheme()}://file/${uriPath}`;
+}
+
 export async function openURIinVSCode(uri: string) {
   await open(raycastForVSCodeURI(uri));
+}
+
+/**
+ * Opens an unescaped local filesystem path through the selected editor's URL handler.
+ * This avoids Windows shell fallback to Explorer while keeping Raycast aware of launch failures.
+ */
+export async function openPathInVSCode(filePath: string) {
+  await open(vscodeFileURI(filePath));
 }
 
 export function isValidHexColor(color: string): boolean {

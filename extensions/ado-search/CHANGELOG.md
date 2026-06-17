@@ -1,5 +1,11 @@
 # Azure DevOps Repository Search
 
+## [Customisable work item state order] - 2026-06-15
+Added a "Preferred State Order" setting to My Work Items so you can pin states (e.g. "Doing, In Progress") to the top of the list in your own order; unlisted states follow afterwards.
+
+## [Add Windows support] - 2026-06-15
+Declared the extension as cross-platform (macOS and Windows). All commands rely only on cross-platform APIs; the work item "Show in Finder" action now reads "Show in Explorer" on Windows.
+
 ## [Add My Work Items command] - 2026-06-04
 Added a "My Work Items" command: browse work items assigned to you across projects, filter and group by state/type/project, change state on single or multiple items, view descriptions with inline images plus acceptance criteria, repro steps, comments and attachments, create new work items, and create branches linked to a work item.
 

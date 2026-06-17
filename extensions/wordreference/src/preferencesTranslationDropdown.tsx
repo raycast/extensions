@@ -18,7 +18,7 @@ function PreferencesTranslationDropdown({ preferences, setPreferences }: Props) 
           ))}
         </List.Dropdown.Section>
       )),
-    []
+    [],
   );
 
   const onChange = (value: string) => {

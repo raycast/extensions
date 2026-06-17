@@ -40,5 +40,6 @@ If you need different rules per project, add a `.fdignore` alongside the folders
 
 ## Tips
 
+- Use `-d` to search directories only and `-f` to search files only (e.g. `sat -d`).
 - Large trees index fastest when unnecessary paths are ignored—tune your `.fdignore` to skip build output and vendor folders.
 - Combine folder hints and filename fragments in the query to jump straight to the exact file you want.

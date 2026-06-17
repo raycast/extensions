@@ -12,14 +12,18 @@ Never miss new extensions or extension updates ever again!
 - **Changelog Viewer** — Read an extension's changelog inline, copy recent changes, or open it on GitHub
 - **Platform Filter Toggles** — Show or hide macOS-only and Windows-only extensions directly from the action panel (cross-platform extensions are always shown)
 - **My Updates Filter** — Filter the dropdown to show only updates for extensions you have installed locally
+- **Category & Author Filters** — Narrow the list to a single category, or show only a specific author's extensions, on top of the type and platform filters
 - **Read/Unread Tracking** — Optionally mark items as read to keep your list tidy, with "Mark All as Read" and undo (⌘Z) support
 - **Filter Dropdown** — Quickly switch between Show All, New, Updates, and My Updates views
+- **Time Grouping** — Items are grouped into Today / Yesterday / Previous 7 Days / Previous 30 Days / Earlier for easier scanning
+- **Menu Bar** — An optional menu-bar command shows a badge with the number of new and updated extensions since you last checked, refreshing in the background
 
 ## Preferences
 
-| Preference               | Type     | Default | Description                                                        |
-| ------------------------ | -------- | ------- | ------------------------------------------------------------------ |
-| Track Read/Unread Status | Checkbox | Off     | When enabled, items can be marked as read and hidden from the list |
+| Preference               | Type     | Default | Description                                                                                                                                                                   |
+| ------------------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Track Read/Unread Status | Checkbox | Off     | When enabled, items can be marked as read and hidden from the list                                                                                                            |
+| GitHub Token             | Password | —       | Optional personal access token (no scopes needed). Update detection uses the GitHub API, which is capped at 60 requests/hour unauthenticated; a token raises it to 5,000/hour |
 
 ## Actions
 
@@ -30,7 +34,10 @@ Never miss new extensions or extension updates ever again!
 | Open Changelog in Browser         | `⌘⇧L`    | Open the changelog on GitHub                           |
 | Open in Browser                   | —        | Open the extension's store page in a browser           |
 | Open in Raycast Store             | —        | Open the extension via Raycast deeplink                |
-| Copy Extension URL                | `⌘C`     | Copy the store URL                                     |
+| Copy Extension URL                | `⌘⇧C`    | Copy the store URL                                     |
+| Filter by Category                | `⌘⇧F`    | Narrow the list to a single category                   |
+| Show Only This Author             | —        | Filter the list to the selected item's author          |
+| Clear All Filters                 | —        | Remove the active category and author filters          |
 | Hide/Show macOS-only Extensions   | —        | Toggle visibility of macOS-exclusive extensions        |
 | Hide/Show Windows-only Extensions | —        | Toggle visibility of Windows-exclusive extensions      |
 | Mark as Read                      | `⌘⇧R`    | Mark the selected item as read (when tracking enabled) |

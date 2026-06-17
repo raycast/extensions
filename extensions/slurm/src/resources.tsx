@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Color, Detail, Icon, LaunchType, List, launchCommand, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { listNodes, type SlurmNode } from "./lib/slurm";
 import { formatBytesMB, gpuCountFromGres, gpuModelFromGres } from "./lib/format";
@@ -12,6 +12,7 @@ import {
   applyClusterFilter,
   partitionsByCluster,
 } from "./lib/components/ClusterFilter";
+import { NoHostView } from "./lib/components/NoHostView";
 
 type Group = {
   key: string;
@@ -189,25 +190,4 @@ function groupNodes(nodes: SlurmNode[]): Group[] {
     if (b.memMB !== a.memMB) return b.memMB - a.memMB;
     return b.cpuTot - a.cpuTot;
   });
-}
-
-function NoHostView() {
-  return (
-    <List>
-      <List.EmptyView
-        title="No active clusters"
-        description="Select one or more clusters first."
-        icon={Icon.Plug}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Open Select Clusters"
-              icon={Icon.List}
-              onAction={() => launchCommand({ name: "select-cluster", type: LaunchType.UserInitiated })}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
 }

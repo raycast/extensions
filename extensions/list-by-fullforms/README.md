@@ -1,6 +1,16 @@
-# List by FullForms (Raycast extension)
+# List by FullForms
 
-Search and add entries across your FullForms List glossaries from Raycast.
+Search and add abbreviations, full forms, and glossary terms from Raycast.
+
+List by FullForms brings your [FullForms](https://fullforms.com) List glossaries into Raycast. Look up an abbreviation and its full form, search every term across your workspaces, and add or suggest new entries without opening a browser. It is built for teams who keep shared glossaries of acronyms, jargon, and domain terms, and for anyone who wants their personal reference list a keystroke away.
+
+## Features
+
+- Search abbreviations, full forms, and glossary terms across every workspace you belong to, in a single query.
+- A detail pane with the full definition, the long-form description, and your private notes.
+- Quick Add entries with type-aware prompts, a tag picker, and live duplicate detection.
+- Suggest a term to a list owner's moderation queue when you only have view access.
+- Star entries, copy a term or definition, and hear entries read aloud with macOS text-to-speech.
 
 ## Setup
 
@@ -12,13 +22,13 @@ Search and add entries across your FullForms List glossaries from Raycast.
 
 ### Search Entries
 
-Type to search across lists and entries. Defaults to **All workspaces**, searching every workspace you belong to in one query (scoped to your memberships on the server). Use the dropdown (visible when you belong to more than one workspace) to narrow to a single workspace.
+Type to search across your lists and entries. By default it searches every workspace you belong to in a single query; use the dropdown (shown when you belong to more than one workspace) to narrow to a single workspace.
 
-Results group by parent list under section headers; cross-workspace results suffix the workspace name on the header (e.g. `Glossary · Eduport` vs `Glossary · Personal`) so same-named lists across workspaces stay distinguishable. Each row's icon mirrors the list's colour + glyph from the web (book / clipboard / terminal / etc.). Accessory icons on each row signal `⭐ starred` and `📄 has a private note` for entries you've engaged with.
+Results group by their parent list under section headers. When the same list name exists in more than one workspace, the workspace name is added to the header (e.g. `Glossary · FullForms` vs `Glossary · Personal`) so they stay distinct. Each row carries the list's colour and icon from the web, plus accessory markers for `⭐ starred` entries and `📄 entries with a private note`.
 
-The detail pane is on by default: split layout shows a markdown preview of the selected entry on the right side, with `## term ⭐` (star when starred) + short definition + horizontal-rule + long-form description + horizontal-rule + `### Your note` (each section only when present). The metadata panel beneath shows a clickable Open link to the web URL, Type, List (with colour-tinted icon), and Workspace.
+The detail pane is on by default and shows a formatted preview of the selected entry: the term, the short definition, the long-form description, and your private note, with each section shown only when present. A metadata panel below links to the entry on the web and shows its type, list, and workspace.
 
-Shortcuts:
+Shortcuts (on Windows, `Cmd` is `Ctrl` and `Opt` is `Alt`):
 
 - `Enter` opens the entry's list page in your browser with hash routing to the entry detail modal.
 - `Cmd+Shift+O` opens the parent list page.
@@ -26,6 +36,8 @@ Shortcuts:
 - `Cmd+S` stars (or unstars) the selected entry. The change shows immediately and syncs to the server.
 - `Cmd+C` copies the entry term.
 - `Cmd+.` copies the definition.
+
+Text-to-speech (Speak Entry / Speak Definition) is macOS-only; it uses the built-in `say` binary and the actions do not appear on Windows.
 
 ### Quick Add Entry
 

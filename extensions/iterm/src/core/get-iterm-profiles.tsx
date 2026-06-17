@@ -7,44 +7,48 @@ export interface ItermProfile {
   guid: string;
 }
 
-type ItermPreferences = {
-  "New Bookmarks"?: unknown;
+const PlistPreferences = {
+  USER_REL_PATH: "Library/Preferences/com.googlecode.iterm2.plist",
+  Keys: {
+    PROFILES: "New Bookmarks",
+  },
 };
 
-type ItermProfileEntry = {
-  Name?: unknown;
-  Guid?: unknown;
+type CapitalizeKeys<Type> = {
+  [Property in keyof Type as Capitalize<string & Property>]: Type[Property];
 };
 
-function isItermProfileEntry(entry: unknown): entry is ItermProfileEntry {
-  return typeof entry === "object" && entry !== null;
+/** A profile representation in the iTerm preferences file (via JSON conversion) */
+type PlistProfile = CapitalizeKeys<ItermProfile>;
+
+function isPlistProfile(entry: unknown): entry is PlistProfile {
+  return (
+    typeof entry === "object" &&
+    entry !== null &&
+    "Name" in entry &&
+    "Guid" in entry &&
+    typeof (entry as PlistProfile).Name === "string" &&
+    typeof (entry as PlistProfile).Guid === "string"
+  );
 }
 
 export function getItermProfiles(): ItermProfile[] {
-  const plistPath = join(homedir(), "Library/Preferences/com.googlecode.iterm2.plist");
+  // prettier-ignore
+  const plutilArgs = [
+    "-extract", PlistPreferences.Keys.PROFILES, "json",
+    "-expect", "array",
+    "-o", "-", // Output to stdout
+    join(homedir(), PlistPreferences.USER_REL_PATH),
+  ];
 
   try {
-    const output = execFileSync("/usr/bin/plutil", ["-convert", "json", "-o", "-", plistPath], {
+    const output = execFileSync("/usr/bin/plutil", plutilArgs, {
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
     });
-    const preferences = JSON.parse(output) as ItermPreferences;
-    const bookmarks = preferences["New Bookmarks"];
+    const profiles = JSON.parse(output) as unknown[]; // Safe assertion due to `-expect array`
 
-    if (!Array.isArray(bookmarks)) {
-      return [];
-    }
-
-    return bookmarks.flatMap((entry) => {
-      if (!isItermProfileEntry(entry)) {
-        return [];
-      }
-
-      const name = typeof entry.Name === "string" ? entry.Name.trim() : "";
-      const guid = typeof entry.Guid === "string" ? entry.Guid.trim() : "";
-
-      return name && guid ? [{ name, guid }] : [];
-    });
+    return profiles.filter(isPlistProfile).map((profile) => ({ name: profile.Name, guid: profile.Guid }));
   } catch (error) {
     console.error("Failed to read iTerm profiles:", error);
     return [];

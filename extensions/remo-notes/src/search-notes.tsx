@@ -1,42 +1,30 @@
 import { List } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { NoteListItem } from "./components/NoteListItem";
-import type { Note } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
+import { sortByPinned } from "./utils/notes";
 
 export default function SearchNotes() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [searchText, setSearchText] = useState("");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  const fetchNotes = useCallback(async (text: string) => {
-    setIsLoading(true);
-    try {
-      let result: Note[] = [];
+  const { isLoading, data, revalidate, mutate } = useCachedPromise(
+    async (text: string) => {
+      const result = text.trim() === "" ? await remoApi.recentNotes(20) : await remoApi.searchNotes(text);
+      return sortByPinned(result);
+    },
+    [searchText],
+    {
+      keepPreviousData: true,
+      onError: (error) => handleError(error, "Failed to fetch notes"),
+    },
+  );
 
-      if (text.trim() === "") {
-        result = await remoApi.recentNotes(20);
-      } else {
-        result = await remoApi.searchNotes(text);
-      }
+  const { data: folders } = useCachedPromise(() => remoApi.listFolders(), []);
 
-      const sortedResult = result.sort((a: Note, b: Note) => {
-        if (a.isPinned === b.isPinned) return 0;
-        return a.isPinned ? -1 : 1;
-      });
-      setNotes(sortedResult);
-    } catch (error) {
-      handleError(error, "Failed to fetch notes");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotes(searchText);
-  }, [searchText, fetchNotes]);
+  const notes = data ?? [];
 
   return (
     <List
@@ -56,7 +44,9 @@ export default function SearchNotes() {
         <NoteListItem
           key={note._id}
           note={note}
-          onRefresh={() => fetchNotes(searchText)}
+          onRefresh={revalidate}
+          mutate={mutate}
+          folders={folders}
           isShowingDetail={isShowingDetail}
           onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
         />

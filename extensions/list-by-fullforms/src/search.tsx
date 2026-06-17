@@ -19,7 +19,7 @@
 //      <List.Section> header (migration 20260601000000 widened the
 //      response to include workspaceName per row so cross-workspace
 //      results with same-named lists disambiguate via the header,
-//      "Glossary · Eduport" vs "Glossary · Personal"). Each row
+//      "Glossary · FullForms" vs "Glossary · Personal"). Each row
 //      shows term + definition + a list-coloured icon; the list
 //      name lives in the section header rather than the per-row
 //      accessory.
@@ -67,6 +67,13 @@ import { iconForList, listVisibility } from "./lib/listIconCatalog";
 import { composeSpeakable, speakText, stopSpeaking } from "./lib/tts";
 
 const ALL_WORKSPACES = "all";
+
+// The Speak actions shell out to macOS's `say` binary (see
+// src/lib/tts.ts), which doesn't exist on Windows. The extension
+// ships for both platforms, so the TTS actions are gated to macOS
+// and simply don't render elsewhere. Everything else in this
+// command is cross-platform.
+const isMacOS = process.platform === "darwin";
 
 // Display labels for the entry `type` enum. Kept local because
 // this is the only command that surfaces a per-entry type label;
@@ -473,33 +480,39 @@ export default function SearchCommand() {
                       explanation without parsing it visually (or while
                       multitasking). speakText kills the previous
                       playback before starting a new one so the two
-                      actions don't overlap. */}
-                    <Action
-                      title="Speak Entry"
-                      icon={Icon.SpeakerHigh}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
-                      onAction={() =>
-                        speakText(
-                          composeSpeakable(
-                            e.entry,
-                            e.definition,
-                            e.description,
-                          ),
-                        )
-                      }
-                    />
-                    <Action
-                      title="Speak Definition"
-                      icon={Icon.SpeakerHigh}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                      onAction={() => speakText(e.definition)}
-                    />
-                    <Action
-                      title="Stop Speaking"
-                      icon={Icon.SpeakerOff}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
-                      onAction={stopSpeaking}
-                    />
+                      actions don't overlap. macOS-only: `say` has no
+                      Windows equivalent, so these actions are gated out
+                      on Windows rather than failing at runtime. */}
+                    {isMacOS && (
+                      <>
+                        <Action
+                          title="Speak Entry"
+                          icon={Icon.SpeakerHigh}
+                          shortcut={{ modifiers: ["cmd"], key: "t" }}
+                          onAction={() =>
+                            speakText(
+                              composeSpeakable(
+                                e.entry,
+                                e.definition,
+                                e.description,
+                              ),
+                            )
+                          }
+                        />
+                        <Action
+                          title="Speak Definition"
+                          icon={Icon.SpeakerHigh}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                          onAction={() => speakText(e.definition)}
+                        />
+                        <Action
+                          title="Stop Speaking"
+                          icon={Icon.SpeakerOff}
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+                          onAction={stopSpeaking}
+                        />
+                      </>
+                    )}
                   </ActionPanel>
                 }
               />

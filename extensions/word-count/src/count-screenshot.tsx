@@ -64,6 +64,6 @@ export default async function Command({ launchContext }: LaunchProps<{ launchCon
     });
   } catch {
     await showHUD("❌ Please install ScreenOCR extension");
-    await open("raycast://extensions/huzef44/screenocr");
+    await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/huzef44/screenocr`);
   }
 }

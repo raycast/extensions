@@ -91,18 +91,23 @@ export async function listJobs(host: string, user: string): Promise<Job[]> {
     `echo '---ALLOC---'; ` +
     `squeue -h -u ${shellQuote(user)} -O ${shellQuote(allocFmt)}`;
   const out = await runSsh(host, cmd);
-  const [primary, allocBlock = ""] = splitOnSentinel(out, "---ALLOC---");
-  const allocByJob = parseAllocTres(allocBlock, 64);
-  const jobs = primary
+  return parseJobsWithAllocTres(out, parseJobRow);
+}
+
+// Lightweight variant for the menu bar's background refresh. Skips the second
+// `squeue -O tres-alloc` call and the AllocTRES map join from listJobs, because
+// the menu bar only renders state counts + basic job fields and never reads
+// `tres`. `tres` is left as the `%b` GPU shorthand from parseJobRow. Keeping this
+// tick cheap is what lets the background refresh land the title/color reliably
+// without doing (and buffering) work the menu bar throws away.
+export async function listJobsBrief(host: string, user: string): Promise<Job[]> {
+  const fmt = "%i|%P|%j|%T|%M|%l|%D|%C|%R|%b";
+  const out = await runSsh(host, `squeue -h -u ${shellQuote(user)} -o ${shellQuote(fmt)}`);
+  return out
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
     .map(parseJobRow);
-  for (const j of jobs) {
-    const a = allocByJob.get(j.jobId);
-    if (a) j.tres = a;
-  }
-  return jobs;
 }
 
 function parseJobRow(row: string): Job {
@@ -126,13 +131,17 @@ export async function listAllJobs(host: string): Promise<Job[]> {
   const allocFmt = "JobID:64,tres-alloc:512";
   const cmd = `squeue -h -o ${shellQuote(fmt)}; ` + `echo '---ALLOC---'; ` + `squeue -h -O ${shellQuote(allocFmt)}`;
   const out = await runSsh(host, cmd);
+  return parseJobsWithAllocTres(out, parseAllJobRow);
+}
+
+function parseJobsWithAllocTres(out: string, parseRow: (row: string) => Job): Job[] {
   const [primary, allocBlock = ""] = splitOnSentinel(out, "---ALLOC---");
   const allocByJob = parseAllocTres(allocBlock, 64);
   const jobs = primary
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
-    .map(parseAllJobRow);
+    .map(parseRow);
   for (const j of jobs) {
     const a = allocByJob.get(j.jobId);
     if (a) j.tres = a;
@@ -245,4 +254,64 @@ function tokenizeKv(line: string): Record<string, string> {
 
 export function tailFile(host: string, filePath: string): ChildProcess {
   return spawnSsh(host, `tail -n 200 -F ${shellQuote(filePath)}`);
+}
+
+// One-shot read of the *bottom* of a log file for the embedded Output/Error
+// detail panes. We never read the whole file — ML run logs are routinely
+// gigabytes — so this is bounded twice: `tail -c` caps the bytes pulled over the
+// wire (a CR-redraw progress bar can make a single "line" enormous, see the
+// tailview-cr-buffer-leak note), then CR redraws are flattened to newlines and
+// `tail -n` keeps the last `lines`. The newest content ends up at the bottom.
+const LOG_TAIL_BYTES = 128 * 1024;
+
+export async function readLogTail(host: string, filePath: string, lines: number): Promise<string> {
+  const n = Math.max(1, Math.floor(lines));
+  const cmd = `tail -c ${LOG_TAIL_BYTES} -- ${shellQuote(filePath)} | tr '\\r' '\\n' | tail -n ${n}`;
+  return runSsh(host, cmd);
+}
+
+// ---------- live job metrics ----------
+
+// Portable collector that joins a RUNNING job's allocation via `srun --overlap`
+// and streams one tick per second: per-GPU utilization/memory from nvidia-smi
+// (device-scoped to the job) plus job-wide CPU%/RAM% from the job cgroup
+// (cgroup v2 primary, v1 fallback). Single-quoted JS strings keep the shell
+// `${...}` expansions literal; see parseMetricStream for the output format.
+const METRICS_SCRIPT = [
+  "NCPU=${SLURM_CPUS_ON_NODE:-1}",
+  "if [ -f /sys/fs/cgroup/cgroup.controllers ]; then",
+  '  rel=$(sed -n "s/^0:://p" /proc/self/cgroup); job=${rel%%/step_*}; CG=/sys/fs/cgroup$job; MODE=v2',
+  "else",
+  '  crel=$(grep -m1 -E ":cpuacct:|:cpu,cpuacct:|:cpu:" /proc/self/cgroup | cut -d: -f3); cjob=${crel%%/step_*}',
+  '  mrel=$(grep -m1 ":memory:" /proc/self/cgroup | cut -d: -f3); mjob=${mrel%%/step_*}',
+  "  CPUF=/sys/fs/cgroup/cpu,cpuacct$cjob/cpuacct.usage; MEMC=/sys/fs/cgroup/memory$mjob/memory.usage_in_bytes; MEMM=/sys/fs/cgroup/memory$mjob/memory.limit_in_bytes; MODE=v1",
+  "fi",
+  'prev=""; ptime=""',
+  "while true; do",
+  '  now=$(date +%s%3N); echo "T $now"',
+  '  nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits | sed "s/^/G /"',
+  '  if [ "$MODE" = v2 ]; then',
+  '    usage=$(grep usage_usec "$CG/cpu.stat" 2>/dev/null | cut -d" " -f2)',
+  '    memc=$(cat "$CG/memory.current" 2>/dev/null); memm=$(cat "$CG/memory.max" 2>/dev/null)',
+  "  else",
+  '    raw=$(cat "$CPUF" 2>/dev/null); usage=$(( ${raw:-0} / 1000 ))',
+  '    memc=$(cat "$MEMC" 2>/dev/null); memm=$(cat "$MEMM" 2>/dev/null)',
+  "  fi",
+  '  cpu="-"',
+  '  if [ -n "$prev" ] && [ -n "$usage" ]; then',
+  "    dt=$(( now - ptime )); dus=$(( usage - prev ))",
+  '    cpu=$(awk -v dus=$dus -v dt=$dt -v n=$NCPU "BEGIN{printf \\"%.1f\\", (dus/1000.0)/dt/n*100}")',
+  "  fi",
+  "  prev=$usage; ptime=$now",
+  '  echo "C $cpu $memc $memm"; echo "E"; sleep 1',
+  "done",
+].join("\n");
+
+export function streamJobMetrics(host: string, jobId: string): ChildProcess {
+  // Ship the script base64-encoded so its quoting survives the ssh → srun → bash
+  // hops untouched (base64 has no shell-special characters).
+  const b64 = Buffer.from(METRICS_SCRIPT).toString("base64");
+  const inner = `echo ${b64} | base64 -d | bash`;
+  const cmd = `srun --jobid=${shellQuote(jobId)} --overlap -n1 bash -c ${shellQuote(inner)}`;
+  return spawnSsh(host, cmd);
 }

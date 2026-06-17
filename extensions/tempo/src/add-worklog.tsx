@@ -380,7 +380,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         primaryAction: {
           title: "View Worklogs",
           onAction: async () => {
-            await open("raycast://extensions/darchen_gautier/tempo/list-worklogs");
+            await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/darchen_gautier/tempo/list-worklogs`);
           },
         },
       });

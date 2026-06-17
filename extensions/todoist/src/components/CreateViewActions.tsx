@@ -1,12 +1,11 @@
-import { Action, Keyboard, environment } from "@raycast/api";
+import { Action, Keyboard } from "@raycast/api";
 
 import { QuickLinkView } from "../home";
 import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
 
 function createDeeplink(view: string) {
-  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const context = encodeURIComponent(JSON.stringify({ view }));
-  return `${protocol}extensions/thomaslombart/todoist/home?launchContext=${context}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomaslombart/todoist/home?launchContext=${context}`;
 }
 
 export default function CreateViewActions({ title, view, todoistLink }: QuickLinkView) {
