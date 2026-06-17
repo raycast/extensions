@@ -22,6 +22,11 @@ import {
   upgradeFormula,
 } from "./utils/sources/homebrew";
 import { upgradeMas } from "./utils/sources/mas";
+import {
+  checkSystemUpdates,
+  openSoftwareUpdate,
+  SystemUpdate,
+} from "./utils/sources/system-updates";
 import { openAppForSparkleUpdate } from "./utils/sources/sparkle";
 import {
   upgradeGem,
@@ -98,6 +103,17 @@ export default function MacUpdater() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [systemUpdates, setSystemUpdates] = useState<SystemUpdate[]>([]);
+
+  // macOS system updates load independently of the app scan: the cache makes
+  // this instant when fresh, and a stale cache triggers a slow background
+  // `softwareupdate -l` that fills the section in when it finishes — never
+  // blocking the apps list.
+  useEffect(() => {
+    checkSystemUpdates()
+      .then(setSystemUpdates)
+      .catch(() => undefined);
+  }, []);
 
   function toggleSelected(appPath: string) {
     setSelected((prev) => {
@@ -788,6 +804,62 @@ export default function MacUpdater() {
       sections.push(
         <List.Section key="banners">
           <>{banners}</>
+        </List.Section>,
+      );
+    }
+
+    // macOS itself — the most important update on the machine, right under the
+    // primary action. We surface it and hand off to System Settings to apply.
+    if (systemUpdates.length > 0) {
+      sections.push(
+        <List.Section
+          key="macos"
+          title="macOS"
+          subtitle={`${systemUpdates.length}`}
+        >
+          {systemUpdates.map((u) => {
+            const size =
+              u.sizeMB && u.sizeMB >= 1024
+                ? `${(u.sizeMB / 1024).toFixed(1)} GB`
+                : u.sizeMB
+                  ? `${u.sizeMB} MB`
+                  : undefined;
+            const accessories: List.Item.Accessory[] = [];
+            if (u.restart)
+              accessories.push({
+                tag: { value: "restart", color: Color.Orange },
+                tooltip: "Requires a restart",
+              });
+            if (size) accessories.push({ text: size });
+            accessories.push({ tag: { value: "⏎", color: Color.Blue } });
+            return (
+              <List.Item
+                key={u.label}
+                icon={{ source: Icon.Desktop, tintColor: Color.Blue }}
+                title={u.title}
+                subtitle={u.version ? `Version ${u.version}` : undefined}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Open Software Update"
+                      icon={Icon.Gear}
+                      onAction={openSoftwareUpdate}
+                    />
+                    <Action
+                      title="Re-check macOS Updates"
+                      icon={Icon.RotateClockwise}
+                      onAction={() =>
+                        checkSystemUpdates({ force: true }).then(
+                          setSystemUpdates,
+                        )
+                      }
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>,
       );
     }

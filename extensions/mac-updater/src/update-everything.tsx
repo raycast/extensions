@@ -106,6 +106,8 @@ export default function UpdateEverything(props: {
 
   useEffect(() => {
     loadScan();
+    // Run once on mount; loadScan closes over the launch-context safe flag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function patch(id: string, update: Partial<QueueTask>) {
