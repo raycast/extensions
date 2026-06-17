@@ -121,6 +121,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarPlaceholder="Search Dida365 tasks..."
       onSearchTextChange={setSearchText}
       throttle

@@ -122,6 +122,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarPlaceholder="Search today's tasks..."
       onSearchTextChange={setSearchText}
       throttle

@@ -95,8 +95,7 @@ export default function Command() {
 
     try {
       const timeZone = didaTimeZone();
-
-      await Promise.all(
+      const results = await Promise.allSettled(
         parsedTasks.map((task) =>
           createTask({
             title: task.title,
@@ -109,9 +108,25 @@ export default function Command() {
           }),
         ),
       );
+      const succeeded = results.filter(
+        (result) => result.status === "fulfilled",
+      ).length;
+      const failed = results.length - succeeded;
+
+      if (failed > 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Created ${succeeded}, failed ${failed}`;
+        toast.message = firstRejectionMessage(results);
+
+        if (succeeded > 0) {
+          pop();
+        }
+
+        return;
+      }
 
       toast.style = Toast.Style.Success;
-      toast.title = `Created ${parsedTasks.length} task${parsedTasks.length > 1 ? "s" : ""}`;
+      toast.title = `Created ${succeeded} task${succeeded > 1 ? "s" : ""}`;
       pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -166,6 +181,13 @@ export default function Command() {
       </Form.Dropdown>
     </Form>
   );
+}
+
+function firstRejectionMessage(
+  results: PromiseSettledResult<unknown>[],
+): string | undefined {
+  const rejected = results.find((result) => result.status === "rejected");
+  return rejected ? describeApiError(rejected.reason) : undefined;
 }
 
 function parseClipboardTasks(text: string): ParsedClipboardTask[] {
