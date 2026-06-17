@@ -1,5 +1,5 @@
 # DeepL Tools
 
-## 1.0.0
+## [Initial Release] - {PR_MERGE_DATE}
 
-- Initial local extension.
+- Initial Release

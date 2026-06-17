@@ -57,7 +57,7 @@
     },
     {
       "name": "translate-query",
-      "title": "Translate with DeepL",
+      "title": "Translate with Deepl",
       "subtitle": "Deepl Tools",
       "description": "Translate selected text, typed text, or clipboard text with DeepL and copy the result",
       "mode": "no-view",

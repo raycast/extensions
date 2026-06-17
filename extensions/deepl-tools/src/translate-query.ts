@@ -9,11 +9,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { translate, type Preferences } from "./deepl";
-
-type Arguments = {
-  text?: string;
-};
+import { translate } from "./deepl";
 
 const TOAST_PREVIEW_LIMIT = 140;
 
@@ -26,7 +22,7 @@ function previewText(text: string) {
   return `${compactText.slice(0, TOAST_PREVIEW_LIMIT - 1)}…`;
 }
 
-async function getSourceText(props: LaunchProps<{ arguments: Arguments }>) {
+async function getSourceText(props: LaunchProps<{ arguments: Arguments.TranslateQuery }>) {
   try {
     const selectedText = (await getSelectedText()).trim();
     if (selectedText) {
@@ -44,7 +40,7 @@ async function getSourceText(props: LaunchProps<{ arguments: Arguments }>) {
   return (props.arguments.text || props.fallbackText || "").trim();
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.TranslateQuery }>) {
   const preferences = getPreferenceValues<Preferences>();
   const sourceText = await getSourceText(props);
 
@@ -55,7 +51,9 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
 
   try {
     const result = await translate(sourceText, preferences);
-    await Clipboard.copy(result.translatedText);
+    if (preferences.copyResult ?? true) {
+      await Clipboard.copy(result.translatedText);
+    }
     if (result.translatedText.replace(/\s+/g, " ").trim().length > TOAST_PREVIEW_LIMIT) {
       await launchCommand({
         name: "translate-text",
@@ -75,7 +73,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
     await showToast({
       style: Toast.Style.Success,
       title: previewText(result.translatedText),
-      message: "Copied to clipboard",
+      message: (preferences.copyResult ?? true) ? "Copied to clipboard" : undefined,
     });
   } catch (error) {
     await showFailureToast(error, { title: "Couldn't translate text" });

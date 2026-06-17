@@ -11,11 +11,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { translate, type Preferences } from "./deepl";
-
-type Arguments = {
-  text: string;
-};
+import { translate } from "./deepl";
 
 type CompletedTranslation = {
   sourceText: string;
@@ -49,7 +45,9 @@ function markdownForState(state: TranslationState) {
   return [`# Translation`, state.translatedText, "", "## Source", state.sourceText].join("\n\n");
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments; launchContext?: CompletedTranslation }>) {
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.TranslateText; launchContext?: CompletedTranslation }>,
+) {
   const preferences = getPreferenceValues<Preferences>();
   const completedTranslation = props.launchContext;
   const sourceText = (completedTranslation?.sourceText || props.fallbackText || props.arguments.text).trim();

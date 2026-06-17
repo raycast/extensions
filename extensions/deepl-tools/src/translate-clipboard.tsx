@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { translate, type Preferences } from "./deepl";
+import { translate } from "./deepl";
 
 type TranslationState =
   | {

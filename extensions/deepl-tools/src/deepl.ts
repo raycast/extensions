@@ -1,9 +1,3 @@
-export type Preferences = {
-  apiKey: string;
-  apiUrl: string;
-  copyResult?: boolean;
-};
-
 type DeepLResponse = {
   translations?: Array<{
     detected_source_language?: string;
