@@ -101,7 +101,6 @@
     ],
     "dependencies": {
         "@raycast/api": "^1.104.18",
-        "node-fetch": "^3.3.2",
         "react": "^19.2.6"
     },
     "devDependencies": {

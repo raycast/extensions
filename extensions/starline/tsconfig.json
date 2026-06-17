@@ -4,6 +4,7 @@
     "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "test/**/*"],
     "compilerOptions": {
         "lib": ["ES2023"],
+        "types": ["node"],
         "module": "commonjs",
         "target": "ES2022",
         "strict": true,

@@ -1,5 +1,4 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 
 import { StarLineClient } from "./client";
 import { LOCAL_STORAGE } from "./constants";
@@ -24,10 +23,10 @@ class FullAuthStarLineClient extends StarLineClient {
     }
 }
 
-const jsonResponse = (data: unknown, headers?: { raw: () => Record<string, string[]> }) =>
+const jsonResponse = (data: unknown, headers?: { getSetCookie: () => string[] }) =>
     ({ json: () => Promise.resolve(data), headers }) as never;
 
-const slnetHeaders = (cookie: string) => ({ raw: () => ({ "set-cookie": [cookie] }) });
+const slnetHeaders = (cookie: string) => ({ getSetCookie: () => [cookie] });
 
 const textResponse = (status: number, text: string) =>
     ({ status, text: () => Promise.resolve(text) }) as never;

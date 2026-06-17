@@ -1,7 +1,6 @@
 import { createHash } from "crypto";
 
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 
 import { CaptchaNeededError, DisplayableError } from "../utils/errors";
 import { hasText } from "../utils/format";
@@ -247,7 +246,7 @@ export class StarLineClient {
             headers: JSON_HEADERS,
         });
         const data = await readJson<{ user_id: string }>(response);
-        const slnetUserToken = parseSlnetCookie(response.headers.raw()["set-cookie"] ?? []);
+        const slnetUserToken = parseSlnetCookie(response.headers.getSetCookie());
 
         if (!hasText(slnetUserToken)) {
             throw new DisplayableError("Failed to parse SLNet token from auth response");

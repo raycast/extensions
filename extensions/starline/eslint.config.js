@@ -1,3 +1,4 @@
+const { defineConfig } = require("eslint/config");
 const raycast = require("@raycast/eslint-config");
 const importPlugin = require("eslint-plugin-import");
 const prettierPlugin = require("eslint-plugin-prettier");
@@ -6,7 +7,7 @@ const reactPlugin = require("eslint-plugin-react");
 const reactHooksPlugin = require("eslint-plugin-react-hooks");
 const tseslint = require("typescript-eslint");
 
-module.exports = [
+module.exports = defineConfig([
     {
         ignores: ["dist/**", "node_modules/**", "raycast-env.d.ts"],
     },
@@ -190,4 +191,4 @@ module.exports = [
             "no-console": "off",
         },
     },
-];
+]);

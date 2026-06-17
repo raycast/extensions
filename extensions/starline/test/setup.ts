@@ -56,7 +56,7 @@ const List = Object.assign(createComponent("List"), {
     Section: createComponent("List.Section"),
 });
 
-jest.mock("node-fetch", () => jest.fn(), { virtual: true });
+globalThis.fetch = jest.fn() as typeof globalThis.fetch;
 
 jest.mock("@raycast/api", () => ({
     Action,
