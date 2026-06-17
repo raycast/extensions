@@ -11,6 +11,7 @@ import {
   type Match,
   type Team,
 } from "../lib/worldcup";
+import { clamp } from "../utils";
 
 type Input = {
   /**
@@ -105,10 +106,6 @@ function serializeTeam(team: Team | null) {
     code: teamCode(team),
     name: teamName(team),
   };
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
 
 function parseCountries(value: string | undefined): string[] {

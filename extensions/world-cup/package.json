@@ -312,7 +312,6 @@
     "@raycast/api": "^1.104.18",
     "@raycast/utils": "^2.2.5",
     "@types/lodash.groupby": "^4.6.9",
-    "cross-fetch": "^4.1.0",
     "date-fns": "^4.3.0",
     "lodash.groupby": "^4.6.0"
   },

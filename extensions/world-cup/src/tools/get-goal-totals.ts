@@ -14,6 +14,7 @@ import {
   type Team,
   type TeamReference,
 } from "../lib/worldcup";
+import { clamp } from "../utils";
 
 type Input = {
   /**
@@ -191,8 +192,4 @@ function normalize(value: string): string {
     .replace(/[^a-zA-Z0-9]+/g, " ")
     .trim()
     .toLowerCase();
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }

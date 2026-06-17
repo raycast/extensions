@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import fetch from "cross-fetch";
 import flags from "../flags";
 import type { Goal, Match, Player, Team } from "../types";
 
@@ -11,10 +10,6 @@ export const FIFA_MATCH_COUNT = 104;
 export const FIFA_COMPETITION = "FIFA World Cup 2026";
 
 const GOALS_KEY = "goalsEnabled";
-const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
-const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
-
-export const FIFA_LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : "en";
 
 export type MatchState = "pre" | "in" | "post";
 export type MatchSide = "home" | "away";
@@ -83,7 +78,7 @@ export async function getMatchLiveData(match: Pick<Match, "IdCompetition" | "IdS
 }
 
 export function getMatchCenterUrl(match: Pick<Match, "IdCompetition" | "IdSeason" | "IdStage" | "IdMatch">): string {
-  return `https://www.fifa.com/fifaplus/${FIFA_LANG}/match-centre/match/${match.IdCompetition}/${match.IdSeason}/${match.IdStage}/${match.IdMatch}`;
+  return `https://www.fifa.com/fifaplus/en/match-centre/match/${match.IdCompetition}/${match.IdSeason}/${match.IdStage}/${match.IdMatch}`;
 }
 
 /** The currently in-progress match, if any. */
