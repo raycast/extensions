@@ -1,12 +1,12 @@
 # Wise Lens
 
-Unofficial, community-built Raycast extension to observe your [Wise](https://wise.com) account. Not affiliated with or endorsed by Wise plc. "Wise" is a trademark of Wise plc — used here only to reference the service the extension reads from.
+Unofficial, community-built Raycast extension that gives you a clear overview of your [Wise](https://wise.com) account: how you're spending, your combined balance across currencies, and live exchange rates, instead of just listing raw account data. Not affiliated with or endorsed by Wise plc. "Wise" is a trademark of Wise plc, used here only to reference the service the extension reads from.
 
 Three commands:
 
-- **Wise Dashboard** — balances per currency, optional aggregated total, monthly and last‑30‑day spending, and recent activity in a split detail view.
-- **Wise Transactions** — full history with day grouping, keyword search and filters (incoming, outgoing, completed, this month).
-- **Wise Balance** — at‑a‑glance balance in the menu bar (macOS) / tray (Windows) with 10‑minute auto‑refresh.
+- **Wise Dashboard** — a summary of your account with balances by currency, an optional combined total converted into one currency, spending this month and over the last 30 days, and recent activity in a split detail view.
+- **Wise Transactions** — browse and search your activity grouped by day, with filters for incoming, outgoing, completed and this month.
+- **Wise Balance** — your balance and spending this month in the menu bar (macOS) or tray (Windows), refreshed every 10 minutes.
 
 100% local. Read‑only. The extension never initiates transfers — it only reads.
 
