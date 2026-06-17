@@ -1,6 +1,6 @@
 # Personal Ops Changelog
 
-## [Initial Version] - 2026-06-17
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add a daily brief for Google Calendar, Gmail, Linear, and action items.
 - Add optional Gemini summaries with deterministic fallback.

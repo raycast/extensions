@@ -2,12 +2,12 @@ import { Action, ActionPanel, Color, getApplications, Icon, List, open, showToas
 import { CalendarEvent, formatWhen, LinearIssue, respondToCalendarEvent } from "./api";
 
 export function EventActions({ event, onRespond }: { event: CalendarEvent; onRespond?: () => void | Promise<void> }) {
-  const needsAction = event.responseStatus && event.responseStatus !== "accepted";
+  const canRespond = Boolean(event.responseStatus);
   return (
     <ActionPanel>
-      {needsAction ? <Action title="Accept Meeting" icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} onAction={() => respond(event, "accepted", onRespond)} /> : null}
-      {needsAction ? <Action title="Maybe" icon={{ source: Icon.CircleProgress50, tintColor: Color.Yellow }} onAction={() => respond(event, "tentative", onRespond)} /> : null}
-      {needsAction ? <Action title="Decline Meeting" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={() => respond(event, "declined", onRespond)} /> : null}
+      {canRespond ? <Action title="Accept Meeting" icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} onAction={() => respond(event, "accepted", onRespond)} /> : null}
+      {canRespond ? <Action title="Maybe" icon={{ source: Icon.CircleProgress50, tintColor: Color.Yellow }} onAction={() => respond(event, "tentative", onRespond)} /> : null}
+      {canRespond ? <Action title="Decline Meeting" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={() => respond(event, "declined", onRespond)} /> : null}
       {event.htmlLink ? <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} /> : null}
       <Action.CopyToClipboard title="Copy Event ID" content={event.id} />
     </ActionPanel>

@@ -2,21 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { GoogleGenAI } from "@google/genai";
 import { readFileSync } from "node:fs";
 
-type Preferences = {
-  envPath?: string;
-  timezone?: string;
-  linearApiKey?: string;
-  linearDefaultTeam?: string;
-  googleClientId?: string;
-  googleClientSecret?: string;
-  googleRefreshToken?: string;
-  geminiApiKey?: string;
-  geminiModel?: string;
-  briefTone?: BriefTone;
-  summaryMode?: SummaryMode;
-  useGeminiCache?: boolean;
-};
-
 export type CalendarEvent = {
   id: string;
   title: string;
@@ -70,6 +55,10 @@ export type BriefContext = {
 export type BriefTone = "crisp" | "friendly" | "savage" | "founder";
 export type SummaryMode = "hybrid" | "gemini";
 
+let cachedPreferences: Preferences | null = null;
+let cachedEnvPath: string | undefined;
+let cachedEnv: Record<string, string> | null = null;
+
 export async function getBriefData(): Promise<BriefData> {
   const timezone = config("TIMEZONE") || "Asia/Kolkata";
   const today = partsForToday(timezone);
@@ -112,6 +101,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   );
   url.searchParams.set("timeMin", day.startIso);
   url.searchParams.set("timeMax", day.endIso);
+  url.searchParams.set("timeZone", day.timezone);
   url.searchParams.set("singleEvents", "true");
   url.searchParams.set("orderBy", "startTime");
   url.searchParams.set("maxResults", "30");
@@ -354,8 +344,7 @@ export function buildActions({
   return actions.length > 0 ? actions : ["No urgent action found."];
 }
 
-function partsForToday(timezone: string) {
-  const now = new Date();
+function partsForToday(timezone: string, now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
@@ -367,11 +356,18 @@ function partsForToday(timezone: string) {
     parts.map((part) => [part.type, part.value]),
   );
   const ymd = `${values.year}-${values.month}-${values.day}`;
+  const nextDay = new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day) + 1));
+  const nextYmd = [
+    nextDay.getUTCFullYear(),
+    String(nextDay.getUTCMonth() + 1).padStart(2, "0"),
+    String(nextDay.getUTCDate()).padStart(2, "0"),
+  ].join("-");
   return {
     label: `${values.weekday}, ${ymd}`,
     shortLabel: `${values.weekday}, ${monthName(values.month)} ${Number(values.day)}`,
-    startIso: `${ymd}T00:00:00+05:30`,
-    endIso: `${ymd}T23:59:59+05:30`,
+    startIso: zonedTimeToUtcIso(ymd, "00:00:00", timezone),
+    endIso: zonedTimeToUtcIso(nextYmd, "00:00:00", timezone),
+    timezone,
   };
 }
 
@@ -534,8 +530,44 @@ function cleanSummaryLine(value: string, maxLength: number) {
 
 function monthName(month: string) {
   return new Intl.DateTimeFormat("en-US", { month: "long" }).format(
-    new Date(`2026-${month}-01T00:00:00Z`),
+    new Date(`2000-${month}-01T00:00:00Z`),
   );
+}
+
+function zonedTimeToUtcIso(ymd: string, time: string, timezone: string) {
+  const [year, month, day] = ymd.split("-").map(Number);
+  const [hour, minute, second] = time.split(":").map(Number);
+  const localTime = Date.UTC(year, month - 1, day, hour, minute, second);
+  let utcTime = localTime;
+
+  for (let i = 0; i < 3; i++) {
+    utcTime = localTime - timeZoneOffsetMs(new Date(utcTime), timezone);
+  }
+
+  return new Date(utcTime).toISOString();
+}
+
+function timeZoneOffsetMs(date: Date, timezone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const zonedAsUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second),
+  );
+  return zonedAsUtc - date.getTime();
 }
 
 async function getGoogleAccessToken() {
@@ -615,8 +647,8 @@ function required(name: string) {
 }
 
 function config(name: string) {
-  const prefs = getPreferenceValues<Preferences>();
-  const env = prefs.envPath ? loadEnv(prefs.envPath) : {};
+  const prefs = preferences();
+  const env = envValues(prefs.envPath);
   const preferenceMap: Record<string, string | undefined> = {
     GOOGLE_CLIENT_ID: prefs.googleClientId,
     GOOGLE_CLIENT_SECRET: prefs.googleClientSecret,
@@ -631,6 +663,19 @@ function config(name: string) {
     TIMEZONE: prefs.timezone,
   };
   return preferenceMap[name] || env[name] || process.env[name];
+}
+
+function preferences() {
+  cachedPreferences ??= getPreferenceValues<Preferences>();
+  return cachedPreferences;
+}
+
+function envValues(path: string | undefined) {
+  if (!path) return {};
+  if (cachedEnv && cachedEnvPath === path) return cachedEnv;
+  cachedEnvPath = path;
+  cachedEnv = loadEnv(path);
+  return cachedEnv;
 }
 
 function toneInstruction(tone: BriefTone) {
