@@ -23,16 +23,23 @@ type ActionPreferences = Preferences & {
   openUrlsInActiveBrowser?: boolean;
 };
 
+interface ExecuteActionOptions {
+  skipActiveBrowserResolution?: boolean;
+}
+
 export async function executeAction(
   action: Action,
   onComplete?: () => void,
   browser?: string,
+  options: ExecuteActionOptions = {},
 ): Promise<void> {
   const { type, value, label } = action;
 
   try {
     const prefs = getPreferenceValues<ActionPreferences>();
-    const useActiveBrowser = shouldUseActiveBrowserForAction(action, prefs);
+    const useActiveBrowser =
+      !options.skipActiveBrowserResolution &&
+      shouldUseActiveBrowserForAction(action, prefs);
     await closeMainWindow();
 
     switch (type) {

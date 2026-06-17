@@ -180,3 +180,4 @@ bun.lock
 scripts/internal/**
 .claude**
 .cursor/**
+extensions/vim-leader-key/docs/UI-KEYBOARD-LAYOUT.md

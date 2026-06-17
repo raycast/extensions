@@ -27,11 +27,21 @@ import {
 } from "./storage";
 import { getActionIcon, getActionTypeLabel } from "./actions";
 import { filterWebUrlApplications } from "./browser-utils";
+import { normalizeBrowserValue } from "./browser-value";
+import {
+  CUSTOM_ICON_VALUE,
+  getCustomIconDefaultValue,
+  getIconDropdownValue,
+  IconDropdownItems,
+  resolveIconPickerValue,
+} from "./icon-picker";
 
 export interface AddItemFormProps {
   config: RootConfig;
   parentPath: string[];
   itemType: "action" | "group";
+  initialKey?: string;
+  navigationPopCount?: number;
   onSave: (config: RootConfig) => Promise<void>;
 }
 
@@ -39,17 +49,26 @@ export function AddItemForm({
   config,
   parentPath,
   itemType,
+  initialKey,
+  navigationPopCount = 1,
   onSave,
 }: AddItemFormProps) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionType, setActionType] = useState<ActionType>("application");
+  const [iconValue, setIconValue] = useState("");
+  const [keyValue, setKeyValue] = useState(initialKey || "");
   const [applications, setApplications] = useState<Application[]>([]);
   const [webApplications, setWebApplications] = useState<Application[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
 
   const parentGroup =
     parentPath.length === 0 ? config : findGroupByPath(config, parentPath);
+  const keyConflict =
+    parentGroup && keyValue
+      ? checkKeyConflict(parentGroup, keyValue)
+      : { hasConflict: false, conflictLabel: "" };
+  const keyStatus = getKeyStatusText(keyValue, keyConflict);
 
   useEffect(() => {
     async function loadApps() {
@@ -68,7 +87,9 @@ export function AddItemForm({
     actionType?: string;
     value?: string;
     appValue?: string;
-    browser?: string;
+    browser?: unknown;
+    icon?: unknown;
+    customIcon?: unknown;
   }) {
     setIsSubmitting(true);
 
@@ -98,6 +119,11 @@ export function AddItemForm({
     }
 
     let newItem: ActionOrGroup;
+    const browser = normalizeBrowserValue(values.browser);
+    const icon = resolveIconPickerValue({
+      icon: values.icon,
+      customIcon: values.customIcon,
+    });
 
     if (itemType === "group") {
       newItem = {
@@ -106,7 +132,7 @@ export function AddItemForm({
         type: "group",
         label: values.label || undefined,
         actions: [],
-        browser: values.browser || undefined,
+        ...(browser ? { browser } : {}),
       } as Group;
     } else {
       const value =
@@ -127,16 +153,17 @@ export function AddItemForm({
         type: (values.actionType || "application") as ActionType,
         label: values.label || undefined,
         value,
-        ...(values.actionType === "url" && values.browser
-          ? { browser: values.browser }
-          : {}),
+        ...(values.actionType === "url" && browser ? { browser } : {}),
+        ...(values.actionType === "url" && icon ? { icon } : {}),
       } as ActionItem;
     }
 
     const newConfig = await addItemToGroup(config, parentPath, newItem);
     await onSave(newConfig);
     await showToast({ style: Toast.Style.Success, title: "Item added" });
-    pop();
+    for (let index = 0; index < navigationPopCount; index++) {
+      pop();
+    }
   }
 
   const targetConfig = getTargetConfig(actionType);
@@ -157,9 +184,17 @@ export function AddItemForm({
       <Form.TextField
         id="key"
         title="Key"
+        value={keyValue}
+        onChange={(value) => setKeyValue(value.slice(0, 1))}
         placeholder="Single character (e.g., t, o, r)"
         info="The key to press to trigger this item"
+        error={
+          keyConflict.hasConflict
+            ? `Already used by "${keyConflict.conflictLabel}"`
+            : undefined
+        }
       />
+      <Form.Description title="Key Status" text={keyStatus} />
       <Form.TextField
         id="label"
         title="Label"
@@ -182,14 +217,7 @@ export function AddItemForm({
               title="System Default"
               icon={Icon.Globe}
             />
-            {webApplications.map((app) => (
-              <Form.Dropdown.Item
-                key={app.bundleId || app.path}
-                value={app.path}
-                title={app.name}
-                icon={{ fileIcon: app.path }}
-              />
-            ))}
+            <BrowserDropdownItems applications={webApplications} />
           </Form.Dropdown>
         </>
       )}
@@ -250,30 +278,56 @@ export function AddItemForm({
           )}
 
           {actionType === "url" && (
-            <Form.Dropdown
-              id="browser"
-              title="Open With"
-              info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
-            >
-              <Form.Dropdown.Item
-                value=""
-                title="System Default"
-                icon={Icon.Globe}
-              />
-              {webApplications.map((app) => (
-                <Form.Dropdown.Item
-                  key={app.bundleId || app.path}
-                  value={app.path}
-                  title={app.name}
-                  icon={{ fileIcon: app.path }}
+            <>
+              <Form.Dropdown
+                id="icon"
+                title="Icon"
+                value={iconValue}
+                onChange={setIconValue}
+                info="Choose an icon for URLs and Raycast deeplinks. Web URLs use the site icon when this is empty."
+              >
+                <IconDropdownItems />
+              </Form.Dropdown>
+              {iconValue === CUSTOM_ICON_VALUE && (
+                <Form.TextField
+                  id="customIcon"
+                  title="Custom Icon"
+                  placeholder="Emoji or Raycast icon name, e.g., 🌙, moon, link"
                 />
-              ))}
-            </Form.Dropdown>
+              )}
+              <Form.Dropdown
+                id="browser"
+                title="Open With"
+                info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
+              >
+                <Form.Dropdown.Item
+                  value=""
+                  title="System Default"
+                  icon={Icon.Globe}
+                />
+                <BrowserDropdownItems applications={webApplications} />
+              </Form.Dropdown>
+            </>
           )}
         </>
       )}
     </Form>
   );
+}
+
+function getKeyStatusText(
+  key: string,
+  conflict: { hasConflict: boolean; conflictLabel: string },
+): string {
+  if (!key) {
+    return "Enter a single character key.";
+  }
+
+  if (conflict.hasConflict) {
+    return `"${key}" is already used by "${conflict.conflictLabel}".`;
+  }
+
+  return `"${key}" is available.`;
 }
 
 export interface EditItemFormProps {
@@ -286,6 +340,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionType, setActionType] = useState<ActionType>("application");
+  const [iconValue, setIconValue] = useState("");
   const [applications, setApplications] = useState<Application[]>([]);
   const [webApplications, setWebApplications] = useState<Application[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
@@ -310,6 +365,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
   useEffect(() => {
     if (item && !isGroup(item)) {
       setActionType(item.type);
+      setIconValue(getIconDropdownValue(item.icon));
     }
   }, [item]);
 
@@ -325,7 +381,9 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
     actionType?: string;
     value?: string;
     appValue?: string;
-    browser?: string;
+    browser?: unknown;
+    icon?: unknown;
+    customIcon?: unknown;
   }) {
     setIsSubmitting(true);
 
@@ -355,12 +413,17 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
     }
 
     let updates: Partial<ActionItem> | Partial<Group>;
+    const browser = normalizeBrowserValue(values.browser);
+    const icon = resolveIconPickerValue({
+      icon: values.icon,
+      customIcon: values.customIcon,
+    });
 
     if (isGroupItem) {
       updates = {
         key,
         label: values.label || undefined,
-        browser: values.browser || undefined,
+        browser,
       };
     } else {
       const value =
@@ -380,8 +443,8 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
         type: (values.actionType || "application") as ActionType,
         label: values.label || undefined,
         value,
-        browser:
-          values.actionType === "url" ? values.browser || undefined : undefined,
+        browser: values.actionType === "url" ? browser : undefined,
+        icon: values.actionType === "url" ? icon : undefined,
       };
     }
 
@@ -427,7 +490,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
           <Form.Dropdown
             id="browser"
             title="Default Browser for URLs"
-            defaultValue={(item as Group).browser || ""}
+            defaultValue={normalizeBrowserValue((item as Group).browser) || ""}
             info="URL actions inside this group inherit this browser unless the individual URL action overrides it."
           >
             <Form.Dropdown.Item
@@ -435,14 +498,10 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
               title="System Default"
               icon={Icon.Globe}
             />
-            {webApplications.map((app) => (
-              <Form.Dropdown.Item
-                key={app.bundleId || app.path}
-                value={app.path}
-                title={app.name}
-                icon={{ fileIcon: app.path }}
-              />
-            ))}
+            <BrowserDropdownItems
+              applications={webApplications}
+              selectedBrowser={(item as Group).browser}
+            />
           </Form.Dropdown>
         </>
       )}
@@ -505,26 +564,45 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
           )}
 
           {actionType === "url" && (
-            <Form.Dropdown
-              id="browser"
-              title="Open With"
-              defaultValue={(item as ActionItem).browser || ""}
-              info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
-            >
-              <Form.Dropdown.Item
-                value=""
-                title="System Default"
-                icon={Icon.Globe}
-              />
-              {webApplications.map((app) => (
-                <Form.Dropdown.Item
-                  key={app.bundleId || app.path}
-                  value={app.path}
-                  title={app.name}
-                  icon={{ fileIcon: app.path }}
+            <>
+              <Form.Dropdown
+                id="icon"
+                title="Icon"
+                value={iconValue}
+                onChange={setIconValue}
+                info="Choose an icon for URLs and Raycast deeplinks. Web URLs use the site icon when this is empty."
+              >
+                <IconDropdownItems />
+              </Form.Dropdown>
+              {iconValue === CUSTOM_ICON_VALUE && (
+                <Form.TextField
+                  id="customIcon"
+                  title="Custom Icon"
+                  defaultValue={getCustomIconDefaultValue(
+                    (item as ActionItem).icon,
+                  )}
+                  placeholder="Emoji or Raycast icon name, e.g., 🌙, moon, link"
                 />
-              ))}
-            </Form.Dropdown>
+              )}
+              <Form.Dropdown
+                id="browser"
+                title="Open With"
+                defaultValue={
+                  normalizeBrowserValue((item as ActionItem).browser) || ""
+                }
+                info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
+              >
+                <Form.Dropdown.Item
+                  value=""
+                  title="System Default"
+                  icon={Icon.Globe}
+                />
+                <BrowserDropdownItems
+                  applications={webApplications}
+                  selectedBrowser={(item as ActionItem).browser}
+                />
+              </Form.Dropdown>
+            </>
           )}
         </>
       )}
@@ -563,4 +641,46 @@ function getTargetConfig(actionType: ActionType): {
         info: "The shell command to execute",
       };
   }
+}
+
+function BrowserDropdownItems({
+  applications,
+  selectedBrowser,
+}: {
+  applications: Application[];
+  selectedBrowser?: unknown;
+}) {
+  const selected = normalizeBrowserValue(selectedBrowser);
+  const hasSelected =
+    !selected ||
+    applications.some((application) => application.path === selected);
+
+  return (
+    <>
+      {selected && !hasSelected && (
+        <Form.Dropdown.Item
+          value={selected}
+          title={getBrowserTitle(selected)}
+          icon={{ fileIcon: selected }}
+        />
+      )}
+      {applications.map((app) => (
+        <Form.Dropdown.Item
+          key={app.bundleId || app.path}
+          value={app.path}
+          title={app.name}
+          icon={{ fileIcon: app.path }}
+        />
+      ))}
+    </>
+  );
+}
+
+function getBrowserTitle(browser: string): string {
+  return (
+    browser
+      .split("/")
+      .pop()
+      ?.replace(/\.app$/i, "") || browser
+  );
 }

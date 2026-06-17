@@ -28,6 +28,11 @@ interface InfoPlist {
   }>;
 }
 
+export interface OpenWithApplicationGroups {
+  recommended: Application[];
+  others: Application[];
+}
+
 export async function canApplicationOpenWebUrls(
   application: Application,
   {
@@ -64,6 +69,17 @@ export async function filterWebUrlApplications(
   applications: Application[],
   canOpenWebUrls = canApplicationOpenWebUrls,
 ): Promise<Application[]> {
+  const groups = await groupApplicationsForOpenWith(
+    applications,
+    canOpenWebUrls,
+  );
+  return groups.recommended;
+}
+
+export async function groupApplicationsForOpenWith(
+  applications: Application[],
+  canOpenWebUrls = canApplicationOpenWebUrls,
+): Promise<OpenWithApplicationGroups> {
   const results = await Promise.all(
     applications.map(async (application) => ({
       application,
@@ -71,9 +87,17 @@ export async function filterWebUrlApplications(
     })),
   );
 
-  return results
-    .filter((result) => result.canOpen)
-    .map((result) => result.application);
+  return results.reduce<OpenWithApplicationGroups>(
+    (groups, result) => {
+      if (result.canOpen) {
+        groups.recommended.push(result.application);
+      } else {
+        groups.others.push(result.application);
+      }
+      return groups;
+    },
+    { recommended: [], others: [] },
+  );
 }
 
 export function isRaycastApplication(application: Application): boolean {
