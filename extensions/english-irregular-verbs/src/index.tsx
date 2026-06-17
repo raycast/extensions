@@ -41,7 +41,9 @@ function withFlag(form: string): string {
 }
 
 /** Resolve the translation language from the preference. */
-function resolveLang(pref: Preferences.Index["language"]): TranslationLang | null {
+function resolveLang(
+  pref: Preferences.Index["language"],
+): TranslationLang | null {
   return pref === "none" ? null : pref;
 }
 
