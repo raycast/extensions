@@ -100,7 +100,9 @@ export async function relayShortcut(name: string): Promise<void> {
   try {
     action = carbonShortcutToAppleScript(shortcut);
   } catch (e) {
-    throw new BetterCaptureError(e instanceof Error ? e.message : "Unsupported shortcut key.");
+    throw new BetterCaptureError(
+      e instanceof Error ? e.message : "Unsupported shortcut key.",
+    );
   }
   const script = `
     tell application "System Events"
