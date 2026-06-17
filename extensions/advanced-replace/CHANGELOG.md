@@ -1,6 +1,6 @@
 # Regex Replace Changelog
 
-## [Quick Slots] - {PR_MERGE_DATE}
+## [Quick Slots] - 2026-06-17
 
 - Added 6 "Quick Slot" commands that run a saved entry directly, so each can be bound to a Raycast hotkey/alias
 - Assign an entry to a slot from "Extract and Replace Text" via the "Assign to Quick Slot" action (⌘⇧S)
