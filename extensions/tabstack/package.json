@@ -80,7 +80,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^1.17.0",
     "@tabstack/sdk": "^2.6.1"
   },
   "devDependencies": {
