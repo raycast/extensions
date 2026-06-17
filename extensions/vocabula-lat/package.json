@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vocabula-lat",
+  "title": "Vocabula.lat",
+  "description": "An extension to look for words and abbreviations in the Vocabula.lat Latin dictionary",
+  "icon": "command-icon.png",
+  "author": "silencesys",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Look for a Word",
+      "description": "Look for a word in the Vocabula.lat dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "abbreviation",
+      "title": "Look for an Abbreviation",
+      "description": "Look for an abbreviation in the Vocabula.lat dictionary",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

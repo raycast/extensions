@@ -1,0 +1,4 @@
+{
+  "root": true,
+  "extends": ["@raycast", "@labforward/eslint-config-base"]
+}

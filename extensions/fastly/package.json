@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastly",
+  "title": "Fastly",
+  "description": "Access your Fastly account from Raycast",
+  "icon": "icon.png",
+  "author": "JonathanSpeek",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Fastly API Token",
+      "description": "Your Fastly API token from https://manage.fastly.com/account/tokens",
+      "placeholder": "Enter your Fastly API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Services",
+      "description": "View and manage your Fastly services",
+      "mode": "view"
+    },
+    {
+      "name": "invite",
+      "title": "Invite Team Member",
+      "description": "Invite a new member to your Fastly team",
+      "mode": "view"
+    },
+    {
+      "name": "create-service",
+      "title": "Create Service",
+      "description": "Create a new Fastly service",
+      "mode": "view"
+    },
+    {
+      "name": "kv-stores",
+      "title": "Manage KV Stores",
+      "description": "Browse and manage Fastly KV Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "secret-stores",
+      "title": "Manage Secret Stores",
+      "description": "View and manage Fastly Secret Store secrets",
+      "mode": "view"
+    },
+    {
+      "name": "config-stores",
+      "title": "Manage Config Stores",
+      "description": "View and manage Fastly Config Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "acls",
+      "title": "Manage ACLs",
+      "description": "View and manage Fastly Access Control Lists and IP entries",
+      "mode": "view"
+    },
+    {
+      "name": "audit-log",
+      "title": "View Audit Log",
+      "description": "View and filter Fastly audit log events for security monitoring and compliance",
+      "mode": "view"
+    },
+    {
+      "name": "docs",
+      "title": "Fastly Docs",
+      "description": "Helpful Fastly documentation",
+      "mode": "view"
+    },
+    {
+      "name": "support",
+      "title": "Get Support",
+      "description": "Access Fastly support resources",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

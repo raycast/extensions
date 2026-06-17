@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "azure-tts-raycast",
+  "title": "Azure Speech TTS",
+  "description": "Convert selected text to speech using Azure Speech Services with customizable voices and languages",
+  "icon": "extension-icon.png",
+  "author": "liualexiang",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "azure-speech",
+      "title": "Azure Speech TTS Extension",
+      "description": "Read selected text aloud using Azure TTS",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "speechKey",
+          "type": "password",
+          "required": true,
+          "title": "Azure Speech Key",
+          "description": "Your Azure Speech Service subscription key",
+          "placeholder": "Enter your Azure Speech subscription key"
+        },
+        {
+          "name": "serviceRegion",
+          "type": "textfield",
+          "required": true,
+          "title": "Service Region",
+          "description": "Azure service region (e.g., eastus2, westus, etc.)",
+          "default": "eastus2",
+          "placeholder": "eastus2"
+        },
+        {
+          "name": "voiceName",
+          "type": "textfield",
+          "required": true,
+          "title": "Voice Name",
+          "description": "Azure TTS voice name (e.g., en-US-Emma2:DragonHDLatestNeural, en-US-JennyNeural)",
+          "default": "en-US-Emma2:DragonHDLatestNeural",
+          "placeholder": "en-US-Emma2:DragonHDLatestNeural"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "microsoft-cognitiveservices-speech-sdk": "^1.46.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

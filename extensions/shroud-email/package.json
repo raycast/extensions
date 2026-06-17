@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shroud-email",
+  "title": "Shroud.email",
+  "description": "View Domains and Create or View Aliases in Shroud.email instance",
+  "icon": "shroud-email.png",
+  "author": "xmok",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "domain",
+      "title": "Domain",
+      "placeholder": "https://app.shroud.email",
+      "default": "https://app.shroud.email",
+      "description": "Shroud.email Domain",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "c2...==",
+      "description": "API Token from Shroud.email account",
+      "required": false,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "token",
+      "title": "Create API Token",
+      "subtitle": "Shroud.email",
+      "description": "Post to this endpoint with your Shroud.email username and password to get an API token.",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Shroud.email",
+      "description": "View all domains with valid DNS records.",
+      "mode": "view"
+    },
+    {
+      "name": "aliases",
+      "title": "Aliases",
+      "subtitle": "Shroud.email",
+      "description": "Create and View all your email aliases.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

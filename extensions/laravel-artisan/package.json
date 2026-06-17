@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-artisan",
+  "title": "Laravel Artisan",
+  "description": "View and search Laravel Artisan commands.",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Console Commands",
+      "subtitle": "Laravel Artisan",
+      "description": "Search and view Artisan console commands",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "20.1.7",
+    "@types/react": "18.2.6",
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

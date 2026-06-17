@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dolar-cripto-ar",
+  "title": "DolarCripto AR",
+  "description": "DolarCripto AR es una extensión para Raycast que te permite visualizar en tiempo real las cotizaciones de los diferentes dólares en Argentina (CCL, MEP y Blue) y de criptomonedas populares (ETH, BTC) directamente en la barra de menú de tu Mac.",
+  "icon": "extension_icon.png",
+  "author": "manuel_de_la_torre",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "DolarCripto AR",
+      "description": "DolarCripto AR es una extensión para Raycast que te permite visualizar en tiempo real las cotizaciones de los diferentes dólares en Argentina (CCL, MEP y Blue) y de criptomonedas populares (ETH, BTC) directamente en la barra de menú de tu Mac.",
+      "mode": "menu-bar",
+      "interval": "3m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

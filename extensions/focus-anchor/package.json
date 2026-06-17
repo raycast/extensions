@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "focus-anchor",
+  "title": "Focus Anchor",
+  "description": "Anchor your focus on the most important thing",
+  "icon": "command-icon.png",
+  "author": "ashleyhindle",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Anchor Your Focus",
+      "subtitle": "Focus Anchor",
+      "description": "Set your focus through the Focus Anchor desktop app",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "commitment",
+          "placeholder": "What needs your focus?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

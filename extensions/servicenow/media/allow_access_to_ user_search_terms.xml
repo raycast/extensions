@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2024-10-12 18:39:31">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description/>
+<inserted/>
+<name>Allow access to user's search terms</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>c63cebab834d16d012bac7a6feaad32d</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>robertoalvarezalonso</sys_created_by>
+<sys_created_on>2024-10-12 18:39:31</sys_created_on>
+<sys_id>7ee9438c8395121012bac7a6feaad37d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>robertoalvarezalonso</sys_updated_by>
+<sys_updated_on>2024-10-12 18:39:31</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_security_acl_68faaf6b834d16d012bac7a6feaad3bb</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl"><sys_security_acl action="INSERT_OR_UPDATE"><active>true</active><admin_overrides>true</admin_overrides><advanced>false</advanced><condition table="ts_query">userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ<item endquery="false" field="user" goto="false" newquery="false" operator="DYNAMIC" or="false" value="90d1921e5f510100a9ad2572f2b477fe"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></condition><description>Allow read for all fields in ts_query, if the ACL condition (userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ) evaluates to true.</description><local_or_existing>Local</local_or_existing><name>ts_query</name><operation display_value="read">read</operation><script/><security_attribute/><sys_class_name>sys_security_acl</sys_class_name><sys_created_by>robertoalvarezalonso</sys_created_by><sys_created_on>2024-10-11 07:46:50</sys_created_on><sys_id>68faaf6b834d16d012bac7a6feaad3bb</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ts_query</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_security_acl_68faaf6b834d16d012bac7a6feaad3bb</sys_update_name><sys_updated_by>robertoalvarezalonso</sys_updated_by><sys_updated_on>2024-10-11 07:46:50</sys_updated_on><type display_value="record">record</type></sys_security_acl></record_update>]]></payload>
+<payload_hash>1466928164</payload_hash>
+<remote_update_set display_value="Allow access to user's search terms">7ee9438c8395121012bac7a6feaad37d</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>robertoalvarezalonso</sys_created_by>
+<sys_created_on>2024-10-12 18:39:31</sys_created_on>
+<sys_id>3ae9438c8395121012bac7a6feaad37e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1927a92f8ad0000001</sys_recorded_at>
+<sys_updated_by>robertoalvarezalonso</sys_updated_by>
+<sys_updated_on>2024-10-12 18:39:31</sys_updated_on>
+<table>ts_query</table>
+<target_name>ts_query</target_name>
+<type>Access Control</type>
+<update_domain>global</update_domain>
+<update_guid>5ddc2b6f3c4d16d03d1c28921d9319a5</update_guid>
+<update_guid_history>5ddc2b6f3c4d16d03d1c28921d9319a5:1466928164,64faaf6b294d16d09e400613b37076bd:-1235947773</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_security_acl_51a90f4c8395121012bac7a6feaad3fe</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl"><sys_security_acl action="INSERT_OR_UPDATE"><active>true</active><admin_overrides>true</admin_overrides><advanced>true</advanced><condition table="ts_query">userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ<item endquery="false" field="user" goto="false" newquery="false" operator="DYNAMIC" or="false" value="90d1921e5f510100a9ad2572f2b477fe"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></condition><description>Allow read for all fields in ts_query, if the ACL condition (userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ) evaluates to true.</description><local_or_existing>Local</local_or_existing><name>ts_query</name><operation display_value="delete">delete</operation><script/><security_attribute/><sys_class_name>sys_security_acl</sys_class_name><sys_created_by>robertoalvarezalonso</sys_created_by><sys_created_on>2024-10-12 18:38:19</sys_created_on><sys_id>51a90f4c8395121012bac7a6feaad3fe</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ts_query</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_security_acl_51a90f4c8395121012bac7a6feaad3fe</sys_update_name><sys_updated_by>robertoalvarezalonso</sys_updated_by><sys_updated_on>2024-10-12 18:38:19</sys_updated_on><type display_value="record">record</type></sys_security_acl></record_update>]]></payload>
+<payload_hash>-99972179</payload_hash>
+<remote_update_set display_value="Allow access to user's search terms">7ee9438c8395121012bac7a6feaad37d</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>robertoalvarezalonso</sys_created_by>
+<sys_created_on>2024-10-12 18:39:31</sys_created_on>
+<sys_id>72e9438c8395121012bac7a6feaad37e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>19282063ee20000001</sys_recorded_at>
+<sys_updated_by>robertoalvarezalonso</sys_updated_by>
+<sys_updated_on>2024-10-12 18:39:31</sys_updated_on>
+<table>ts_query</table>
+<target_name>ts_query</target_name>
+<type>Access Control</type>
+<update_domain>global</update_domain>
+<update_guid>69a94f4c559512100053fafb58d65802</update_guid>
+<update_guid_history>69a94f4c559512100053fafb58d65802:-99972179</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_security_acl_ef7a6f6b834d16d012bac7a6feaad3f6</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl"><sys_security_acl action="INSERT_OR_UPDATE"><active>true</active><admin_overrides>true</admin_overrides><advanced>false</advanced><condition table="ts_query.*">userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ<item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></condition><description>Allow read for all fields in ts_query, if the ACL condition (userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^EQ) evaluates to true.</description><local_or_existing>Local</local_or_existing><name>ts_query.*</name><operation display_value="read">read</operation><script/><security_attribute/><sys_class_name>sys_security_acl</sys_class_name><sys_created_by>robertoalvarezalonso</sys_created_by><sys_created_on>2024-10-11 07:46:13</sys_created_on><sys_id>ef7a6f6b834d16d012bac7a6feaad3f6</sys_id><sys_mod_count>1</sys_mod_count><sys_name>ts_query.*</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_security_acl_ef7a6f6b834d16d012bac7a6feaad3f6</sys_update_name><sys_updated_by>robertoalvarezalonso</sys_updated_by><sys_updated_on>2024-10-11 07:46:35</sys_updated_on><type display_value="record">record</type></sys_security_acl></record_update>]]></payload>
+<payload_hash>-38913224</payload_hash>
+<remote_update_set display_value="Allow access to user's search terms">7ee9438c8395121012bac7a6feaad37d</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>robertoalvarezalonso</sys_created_by>
+<sys_created_on>2024-10-12 18:39:31</sys_created_on>
+<sys_id>fae9438c8395121012bac7a6feaad37e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1927a9304a40000001</sys_recorded_at>
+<sys_updated_by>robertoalvarezalonso</sys_updated_by>
+<sys_updated_on>2024-10-12 18:39:31</sys_updated_on>
+<table>ts_query.*</table>
+<target_name>ts_query.*</target_name>
+<type>Access Control</type>
+<update_domain>global</update_domain>
+<update_guid>cadca36f164d16d06ae0b9f0ff8a7fd8</update_guid>
+<update_guid_history>cadca36f164d16d06ae0b9f0ff8a7fd8:-38913224,aceaa7abac4d16d0dd013c0d32080342:990041495,9bca27ab304d16d02f63d850c1834a3a:-400606344</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

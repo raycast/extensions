@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "air-quality",
+  "title": "Air Quality",
+  "description": "An air quality information extension",
+  "icon": "icon.png",
+  "author": "earthpyy",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-air-quality",
+      "title": "Show Air Quality",
+      "description": "Show air quality information",
+      "mode": "view"
+    },
+    {
+      "name": "air-quality-menu",
+      "title": "Air Quality Menu Bar",
+      "description": "Show air quality information in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "API Token from https://aqicn.org/data-platform/token/",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "city",
+      "title": "City/Station",
+      "description": "Name, URL, or id (@1234)",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wordle",
+  "title": "Wordle",
+  "description": "Play Wordle locally once a day.",
+  "icon": "wordle-icon.png",
+  "author": "chrisalxlng",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play_en-US",
+      "title": "Play English (US)",
+      "subtitle": "Wordle",
+      "description": "Play Wordle with an English word set",
+      "mode": "view"
+    },
+    {
+      "name": "play_de-DE",
+      "title": "Play German (DE)",
+      "subtitle": "Wordle",
+      "description": "Play Wordle with a German word set",
+      "mode": "view"
+    },
+    {
+      "name": "show_history",
+      "title": "Show History",
+      "subtitle": "Wordle",
+      "description": "Show your Wordle history",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "hash-sum": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/hash-sum": "^1.0.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

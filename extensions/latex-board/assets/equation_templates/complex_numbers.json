@@ -1,0 +1,22 @@
+{
+  "Complex Numbers": {
+    "Complex 1": " i^2 = -1 ",
+    "Complex 2": " \\bar{z} ",
+    "Complex 3": " \\bar{\\bar{z}} = z ",
+    "Complex 4": " z = x + yi ",
+    "Complex 5": " |z| = \\sqrt{x^2 + y^2} "
+  },
+  "Complex Number Examples": {
+    "Complex Example 1": " \\arg (z) ",
+    "Complex Example 2": " z = re^{i\\theta} ",
+    "Complex Example 3": " \\Re z ",
+    "Complex Example 4": " \\Im z ",
+    "Complex Example 5": " \\mathrm{Re} z ",
+    "Complex Example 6": " \\mathrm{Im} z ",
+    "Complex Example 7": " \\mathbb{C} "
+  },
+  "Cube Roots of Unity": {
+    "Cube Root 1": " \\displaystyle \\omega = \\frac{-1 + \\sqrt{3}i}{2} ",
+    "Cube Root 2": " 1 + \\omega + \\omega^2 = 0 "
+  }
+}

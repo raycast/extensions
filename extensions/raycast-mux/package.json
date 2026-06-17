@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-mux",
+  "type": "module",
+  "title": "Mux.com",
+  "description": "Interact with your Mux.com assets",
+  "icon": "extension-icon.png",
+  "author": "adam_engebretson",
+  "repository": "github:adamgoose/raycast-mux",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "get-playback-id",
+      "title": "Get Playback ID",
+      "subtitle": "Convert a Mux.com Asset ID to a Playback ID",
+      "description": "Convert an Asset ID to a Playback ID",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "muxAssetId",
+          "type": "text",
+          "placeholder": "Asset ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-asset-id",
+      "title": "Get Asset ID",
+      "subtitle": "Convert a Mux.com Playback ID to an Asset ID",
+      "description": "Convert a Playback ID to an Asset ID",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "muxPlaybackId",
+          "type": "text",
+          "placeholder": "Playback ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "recent-assets",
+      "title": "List Recent Assets",
+      "subtitle": "Mux.com",
+      "description": "List recently uploaded video assets",
+      "mode": "view"
+    },
+    {
+      "name": "inspect-asset",
+      "title": "Inspect Mux Asset",
+      "subtitle": "Mux.com",
+      "description": "Inspect Mux Asset",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "muxAssetId",
+          "type": "text",
+          "placeholder": "Asset ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "upload-asset",
+      "title": "Upload a new Asset",
+      "subtitle": "Mux.com",
+      "description": "Upload a new Asset",
+      "mode": "view"
+    },
+    {
+      "name": "recent-live-streams",
+      "title": "List Recent Live Streams",
+      "subtitle": "Mux.com",
+      "description": "List recently created video live streams",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessTokenId",
+      "title": "Mux Access Token ID",
+      "description": "Your Mux Access Token ID can be found in the Mux Dashboard under Settings > Access Tokens",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "title": "Mux Secret Key",
+      "description": "Your Mux Secret Key can be found in the Mux Dashboard under Settings > Access Tokens",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "organizationId",
+      "title": "Organization ID",
+      "description": "Your Mux Organization ID; can be obtained from the console URL.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "environmentId",
+      "title": "Environment ID",
+      "description": "Your Mux Environment ID; can be obtained from the console URL.",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@effect/platform": "^0.77.1",
+    "@effect/platform-node": "^0.73.1",
+    "@mux/mux-node": "^9.0.1",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
+    "effect": "^3.13.2",
+    "moment": "^2.30.1",
+    "raycast-effect": "^0.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

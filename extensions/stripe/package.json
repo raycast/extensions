@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stripe",
+  "title": "Stripe",
+  "description": "Quick Stripe dashboard functionality and quick link access",
+  "icon": "stripe.png",
+  "author": "pradeepb28",
+  "contributors": [
+    "farisaziz12",
+    "bradgarropy",
+    "xmorse",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Finance"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "manage-profiles",
+      "title": "Manage Stripe Accounts",
+      "subtitle": "Stripe",
+      "description": "Add, edit, or switch between multiple Stripe accounts with different environments",
+      "mode": "view"
+    },
+    {
+      "name": "fill-checkout",
+      "title": "Fill Checkout",
+      "subtitle": "Stripe",
+      "description": "Fills a checkout form with a Stripe test card.",
+      "mode": "view"
+    },
+    {
+      "name": "balance-transactions",
+      "title": "View Balance Transactions",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent balance transactions",
+      "mode": "view"
+    },
+    {
+      "name": "balance",
+      "title": "View Balance",
+      "subtitle": "Stripe",
+      "description": "Shows an overview of your latest account balances",
+      "mode": "view"
+    },
+    {
+      "name": "charges",
+      "title": "View Charges",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent charges",
+      "mode": "view"
+    },
+    {
+      "name": "connected-accounts",
+      "title": "View Connected Accounts",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your connected accounts",
+      "mode": "view"
+    },
+    {
+      "name": "events",
+      "title": "View Events",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent events",
+      "mode": "view"
+    },
+    {
+      "name": "payment-intents",
+      "title": "View Payment Intents",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent payment intents",
+      "mode": "view"
+    },
+    {
+      "name": "create-a-new-invoice",
+      "title": "Create New Invoice",
+      "subtitle": "Stripe",
+      "description": "It creates an invoice for your business on your stripe account",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-payment",
+      "title": "Create New Payment",
+      "subtitle": "Stripe",
+      "description": "Send and accept payments",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-product",
+      "title": "Create New Product",
+      "subtitle": "Stripe",
+      "description": "Add a new offering to your stripe product catalog",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-subscription",
+      "title": "Create New Subscription",
+      "subtitle": "Stripe",
+      "description": "Create new subscription accounts for your customers",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-customers",
+      "title": "Manage Customers & Subscriptions",
+      "subtitle": "Stripe",
+      "description": "Search and manage your Stripe customers and their active subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "create-coupon",
+      "title": "Create Coupon",
+      "subtitle": "Stripe",
+      "description": "Create a discount coupon with automatic ID copy to clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "create-coupon-quick",
+      "title": "Create Coupon (Quick)",
+      "subtitle": "Stripe",
+      "description": "Quickly create a percentage-based coupon with random ID",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "percentage",
+          "placeholder": "25",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-payment-link",
+      "title": "Create Payment Link",
+      "subtitle": "Stripe",
+      "description": "Generate a payment link for your products with URL copy to clipboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stripeLiveApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Default Profile - Live API Key",
+      "description": "API Key for Live Environment of the default profile. For multiple profiles, use the Profile Manager once you have added your default profile.",
+      "placeholder": "Enter the Live API Key for default profile"
+    },
+    {
+      "name": "stripeTestApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Default Profile - Test API Key",
+      "description": "API Key for Test Environment of the default profile. For multiple profiles, use the Profile Manager once you have added your default profile.",
+      "placeholder": "Enter the Test API Key for default profile"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "lodash": "^4.17.21",
+    "stripe": "^17.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint"
+  }
+}

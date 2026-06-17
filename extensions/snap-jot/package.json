@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snap-jot",
+  "title": "SnapJot",
+  "description": "Create a memo with a timestamp",
+  "icon": "command-icon.png",
+  "author": "k41531",
+  "contributors": [
+    "longy2k"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "directory",
+      "title": "Specify a folder to save the memo",
+      "required": true,
+      "description": "Specify a folder to save the memo",
+      "default": "~/Documents"
+    },
+    {
+      "type": "file",
+      "name": "template",
+      "title": "Memo template",
+      "description": "If there is no file, create a file with the template written in it.",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "format",
+      "title": "File name format",
+      "required": false,
+      "description": "ex) YYYY-MM-DD.md -> 2023-12-11.md",
+      "default": "YYYY-MM-DD.md",
+      "placeholder": "YYYY-MM-DD.md"
+    },
+    {
+      "type": "dropdown",
+      "name": "timeFormat",
+      "title": "Time format",
+      "required": true,
+      "description": "Choose '12' for AM/PM format, or '24' for a military-style time display.",
+      "default": "24",
+      "data": [
+        {
+          "title": "24",
+          "value": "24"
+        },
+        {
+          "title": "12",
+          "value": "12"
+        }
+      ],
+      "placeholder": "24"
+    },
+    {
+      "type": "textfield",
+      "name": "prefix",
+      "title": "Memo prefix",
+      "required": false,
+      "description": "ex) - HH:mm  -> - 12:34 My first memo.\n if you want to use AM/PM format, use 'A' and set 'timeFormat' to '12'.",
+      "default": "- HH:mm ",
+      "placeholder": "- HH:mm"
+    }
+  ],
+  "commands": [
+    {
+      "name": "memo",
+      "title": "Jot Down",
+      "subtitle": "Create a memo with a timestamp",
+      "description": "Create a memo with a timestamp",
+      "category": ["Productivity","Documentation"],
+      "mode": "view"
+    },
+    {
+      "name": "dailyNote",
+      "title": "Daily Note",
+      "description": "Search or add to daily note.",
+      "mode": "view"
+    },
+    {
+      "name": "listFiles",
+      "title": "Search Notes",
+      "description": "Search notes from specified folder.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

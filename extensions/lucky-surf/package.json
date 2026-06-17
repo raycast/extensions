@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lucky-surf",
+  "title": "Lucky Surf",
+  "description": "Say goodbye to scrolling through endless search results – simply trust your intuition and let serendipity guide you to the information you need, swiftly and efficiently",
+  "icon": "extension-icon.png",
+  "author": "popalay",
+  "contributors": [],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lucky-surf",
+      "title": "Lucky Surf",
+      "description": "Navigate to a desired web page with a query from your clipboard or selection",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Query (or selection/clipboard)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.8",
+    "@types/react": "18.3.1",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

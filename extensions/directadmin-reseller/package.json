@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "directadmin-reseller",
+  "title": "DirectAdmin Reseller",
+  "description": "Interact with DirectAdmin as a Reseller",
+  "icon": "directadmin-reseller.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "reseller_username",
+      "description": "DirectAdmin Reseller Username",
+      "title": "Reseller Username",
+      "type": "textfield",
+      "placeholder": "reseller",
+      "required": true
+    },
+    {
+      "name": "reseller_password",
+      "description": "DirectAdmin Reseller Password",
+      "title": "Reseller Password",
+      "type": "password",
+      "placeholder": "hunter2",
+      "required": true
+    },
+    {
+      "name": "directadmin_url",
+      "description": "Link to DirectAdmin instance with Port",
+      "title": "DirectAdmin URL",
+      "type": "textfield",
+      "placeholder": "https://demo.directadmin.com:2222",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "reseller-ip-s",
+      "title": "Reseller IPs",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "List of IPs currently owned by reseller",
+      "mode": "view"
+    },
+    {
+      "name": "reseller-user-accounts",
+      "title": "Reseller User Accounts",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "List of Users currently owned by reseller",
+      "mode": "view"
+    },
+    {
+      "name": "user-packages",
+      "title": "Reseller User Packages",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "List of available User Packages",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "My Domains",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "List all of the domains",
+      "mode": "view"
+    },
+    {
+      "name": "databases",
+      "title": "My Databases",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "List all of the databases",
+      "mode": "view"
+    },
+    {
+      "name": "session",
+      "title": "Session",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "Get session information including usertype and base64 encoded password",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "IP",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "session_id",
+          "placeholder": "SESSION_ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

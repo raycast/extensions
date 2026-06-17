@@ -1,0 +1,308 @@
+{
+  "Prologue": [
+    {
+      "title": "Release Notes",
+      "url": "https://laravel.com/docs/5.5/releases"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://laravel.com/docs/5.5/upgrade"
+    },
+    {
+      "title": "Contribution Guide",
+      "url": "https://laravel.com/docs/5.5/contributions"
+    },
+    {
+      "title": "API Documentation",
+      "url": "https://laravel.com/api/5.5"
+    }
+  ],
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://laravel.com/docs/5.5/installation"
+    },
+    {
+      "title": "Configuration",
+      "url": "https://laravel.com/docs/5.5/configuration"
+    },
+    {
+      "title": "Directory Structure",
+      "url": "https://laravel.com/docs/5.5/structure"
+    },
+    {
+      "title": "Homestead",
+      "url": "https://laravel.com/docs/5.5/homestead"
+    },
+    {
+      "title": "Valet",
+      "url": "https://laravel.com/docs/5.5/valet"
+    },
+    {
+      "title": "Deployment",
+      "url": "https://laravel.com/docs/5.5/deployment"
+    }
+  ],
+  "Architecture Concepts": [
+    {
+      "title": "Request Lifecycle",
+      "url": "https://laravel.com/docs/5.5/lifecycle"
+    },
+    {
+      "title": "Service Container",
+      "url": "https://laravel.com/docs/5.5/container"
+    },
+    {
+      "title": "Service Providers",
+      "url": "https://laravel.com/docs/5.5/providers"
+    },
+    {
+      "title": "Facades",
+      "url": "https://laravel.com/docs/5.5/facades"
+    },
+    {
+      "title": "Contracts",
+      "url": "https://laravel.com/docs/5.5/contracts"
+    }
+  ],
+  "The Basics": [
+    {
+      "title": "Routing",
+      "url": "https://laravel.com/docs/5.5/routing"
+    },
+    {
+      "title": "Middleware",
+      "url": "https://laravel.com/docs/5.5/middleware"
+    },
+    {
+      "title": "CSRF Protection",
+      "url": "https://laravel.com/docs/5.5/csrf"
+    },
+    {
+      "title": "Controllers",
+      "url": "https://laravel.com/docs/5.5/controllers"
+    },
+    {
+      "title": "Requests",
+      "url": "https://laravel.com/docs/5.5/requests"
+    },
+    {
+      "title": "Responses",
+      "url": "https://laravel.com/docs/5.5/responses"
+    },
+    {
+      "title": "Views",
+      "url": "https://laravel.com/docs/5.5/views"
+    },
+    {
+      "title": "URL Generation",
+      "url": "https://laravel.com/docs/5.5/urls"
+    },
+    {
+      "title": "Session",
+      "url": "https://laravel.com/docs/5.5/session"
+    },
+    {
+      "title": "Validation",
+      "url": "https://laravel.com/docs/5.5/validation"
+    },
+    {
+      "title": "Errors & Logging",
+      "url": "https://laravel.com/docs/5.5/errors"
+    }
+  ],
+  "Frontend": [
+    {
+      "title": "Blade Templates",
+      "url": "https://laravel.com/docs/5.5/blade"
+    },
+    {
+      "title": "Localization",
+      "url": "https://laravel.com/docs/5.5/localization"
+    },
+    {
+      "title": "Frontend Scaffolding",
+      "url": "https://laravel.com/docs/5.5/frontend"
+    },
+    {
+      "title": "Compiling Assets",
+      "url": "https://laravel.com/docs/5.5/mix"
+    }
+  ],
+  "Security": [
+    {
+      "title": "Authentication",
+      "url": "https://laravel.com/docs/5.5/authentication"
+    },
+    {
+      "title": "API Authentication",
+      "url": "https://laravel.com/docs/5.5/passport"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://laravel.com/docs/5.5/authorization"
+    },
+    {
+      "title": "Encryption",
+      "url": "https://laravel.com/docs/5.5/encryption"
+    },
+    {
+      "title": "Hashing",
+      "url": "https://laravel.com/docs/5.5/hashing"
+    },
+    {
+      "title": "Password Reset",
+      "url": "https://laravel.com/docs/5.5/passwords"
+    }
+  ],
+  "Digging Deeper": [
+    {
+      "title": "Artisan Console",
+      "url": "https://laravel.com/docs/5.5/artisan"
+    },
+    {
+      "title": "Broadcasting",
+      "url": "https://laravel.com/docs/5.5/broadcasting"
+    },
+    {
+      "title": "Cache",
+      "url": "https://laravel.com/docs/5.5/cache"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/5.5/collections"
+    },
+    {
+      "title": "Events",
+      "url": "https://laravel.com/docs/5.5/events"
+    },
+    {
+      "title": "File Storage",
+      "url": "https://laravel.com/docs/5.5/filesystem"
+    },
+    {
+      "title": "Helpers",
+      "url": "https://laravel.com/docs/5.5/helpers"
+    },
+    {
+      "title": "Mail",
+      "url": "https://laravel.com/docs/5.5/mail"
+    },
+    {
+      "title": "Notifications",
+      "url": "https://laravel.com/docs/5.5/notifications"
+    },
+    {
+      "title": "Package Development",
+      "url": "https://laravel.com/docs/5.5/packages"
+    },
+    {
+      "title": "Queues",
+      "url": "https://laravel.com/docs/5.5/queues"
+    },
+    {
+      "title": "Task Scheduling",
+      "url": "https://laravel.com/docs/5.5/scheduling"
+    }
+  ],
+  "Database": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/5.5/database"
+    },
+    {
+      "title": "Query Builder",
+      "url": "https://laravel.com/docs/5.5/queries"
+    },
+    {
+      "title": "Pagination",
+      "url": "https://laravel.com/docs/5.5/pagination"
+    },
+    {
+      "title": "Migrations",
+      "url": "https://laravel.com/docs/5.5/migrations"
+    },
+    {
+      "title": "Seeding",
+      "url": "https://laravel.com/docs/5.5/seeding"
+    },
+    {
+      "title": "Redis",
+      "url": "https://laravel.com/docs/5.5/redis"
+    }
+  ],
+  "Eloquent ORM": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/5.5/eloquent"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://laravel.com/docs/5.5/eloquent-relationships"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/5.5/eloquent-collections"
+    },
+    {
+      "title": "Mutators",
+      "url": "https://laravel.com/docs/5.5/eloquent-mutators"
+    },
+    {
+      "title": "API Resources",
+      "url": "https://laravel.com/docs/5.5/eloquent-resources"
+    },
+    {
+      "title": "Serialization",
+      "url": "https://laravel.com/docs/5.5/eloquent-serialization"
+    }
+  ],
+  "Testing": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/5.5/testing"
+    },
+    {
+      "title": "HTTP Tests",
+      "url": "https://laravel.com/docs/5.5/http-tests"
+    },
+    {
+      "title": "Browser Tests",
+      "url": "https://laravel.com/docs/5.5/dusk"
+    },
+    {
+      "title": "Database",
+      "url": "https://laravel.com/docs/5.5/database-testing"
+    },
+    {
+      "title": "Mocking",
+      "url": "https://laravel.com/docs/5.5/mocking"
+    }
+  ],
+  "Official Packages": [
+    {
+      "title": "Cashier",
+      "url": "https://laravel.com/docs/5.5/billing"
+    },
+    {
+      "title": "Envoy",
+      "url": "https://laravel.com/docs/5.5/envoy"
+    },
+    {
+      "title": "Horizon",
+      "url": "https://laravel.com/docs/5.5/horizon"
+    },
+    {
+      "title": "Passport",
+      "url": "https://laravel.com/docs/5.5/passport"
+    },
+    {
+      "title": "Scout",
+      "url": "https://laravel.com/docs/5.5/scout"
+    },
+    {
+      "title": "Socialite",
+      "url": "https://laravel.com/docs/5.5/socialite"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cryptgeon",
+  "description": "Create and share encrypted notes",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "cupcakearmy",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
+    "cryptgeon": "^2.8.1",
+    "node-fetch": "^3.3.2",
+    "pretty-bytes": "^6.1.1",
+    "uhrwerk": "^1.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "packageManager": "npm@10.8.2",
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "cryptgeon",
+      "description": "Create and share an encrypted note",
+      "mode": "view"
+    },
+    {
+      "name": "send-encrypted-text",
+      "title": "Send Encrypted Text",
+      "subtitle": "cryptgeon",
+      "description": "Quickly create a once view text note",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "server",
+      "title": "Server",
+      "description": "Which server to use",
+      "required": true,
+      "type": "textfield",
+      "default": "https://cryptgeon.org"
+    }
+  ],
+  "title": "cryptgeon"
+}

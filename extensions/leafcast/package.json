@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leafcast",
+  "title": "Leafcast",
+  "description": "Control your Nanoleaf panels with Raycast! Toggle power, set the current scene, and more.",
+  "icon": "command-icon.png",
+  "author": "syropian",
+  "categories": [
+    "Applications",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pair-device",
+      "title": "Pair Device",
+      "subtitle": "Leafcast",
+      "description": "Pairs your Nanoleaf device with Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "control-lights",
+      "title": "Control Lights",
+      "subtitle": "Leafcast",
+      "description": "Control various aspects of your Nanoleaf light panels",
+      "mode": "view"
+    },
+    {
+      "name": "identify",
+      "title": "Identify Device",
+      "subtitle": "Leafcast",
+      "description": "Briefly flash the paired Nanoleaf panels to confirm which device is paired",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-power",
+      "title": "Toggle Power",
+      "subtitle": "Leafcast",
+      "description": "Toggle the Nanoleaf panels on or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-effect",
+      "title": "Next Effect",
+      "subtitle": "Leafcast",
+      "description": "Cycle to the next effect in your Nanoleaf device's list",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-effect",
+      "title": "Previous Effect",
+      "subtitle": "Leafcast",
+      "description": "Cycle to the previous effect in your Nanoleaf device's list",
+      "mode": "no-view"
+    },
+    {
+      "name": "brightness-up",
+      "title": "Brightness Up",
+      "subtitle": "Leafcast",
+      "description": "Raise the Nanoleaf brightness by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "brightness-down",
+      "title": "Brightness Down",
+      "subtitle": "Leafcast",
+      "description": "Lower the Nanoleaf brightness by 10%",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "set-power",
+      "title": "Set Power",
+      "description": "Turn the Nanoleaf panels on or off."
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set the Nanoleaf panel brightness to a value between 0 and 100."
+    },
+    {
+      "name": "set-color",
+      "title": "Set Color",
+      "description": "Set the Nanoleaf panels to a specific solid color (named, hex, or rgb/hsl)."
+    },
+    {
+      "name": "set-effect",
+      "title": "Set Effect",
+      "description": "Apply a named effect/scene to the Nanoleaf panels."
+    },
+    {
+      "name": "list-effects",
+      "title": "List Effects",
+      "description": "List the effects/scenes available on the Nanoleaf device."
+    },
+    {
+      "name": "get-state",
+      "title": "Get State",
+      "description": "Read the current power, brightness, and active effect of the Nanoleaf panels."
+    },
+    {
+      "name": "identify",
+      "title": "Identify Device",
+      "description": "Briefly flash the Nanoleaf panels to identify which device is paired."
+    }
+  ],
+  "ai": {
+    "instructions": "These tools control the user's Nanoleaf light panels. When the user mentions 'lights', 'panels', or 'leafcast', assume they mean the Nanoleaf panels. For color requests, prefer set-color and pass the most natural representation of the requested color (named CSS color, hex, or rgb). For scene/pattern/mood requests, use set-effect — if the requested effect name isn't an obvious match, call list-effects first to disambiguate. Map vague brightness language ('dim', 'bright', 'cozy') to a numeric value before calling set-brightness."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "axios": "^1.16.1",
+    "bonjour-service": "^1.4.0",
+    "tinycolor2": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/tinycolor2": "^1.4.6",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "deviceAddress",
+      "description": "The IP address of your Nanoleaf device",
+      "placeholder": "(Optional)",
+      "type": "textfield",
+      "title": "Device IP",
+      "required": false
+    },
+    {
+      "name": "maintainBrightnessOnColorChange",
+      "description": "Maintains brightness when setting the panels to a solid color. Useful for having a consistent brightness level on camera.",
+      "type": "checkbox",
+      "label": "Maintain brightness when changing colors",
+      "required": false,
+      "default": true
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,2 @@
+# Ignore OpenAPI generator metadata
+src/api/generated/.openapi-generator-ignore

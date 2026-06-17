@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grafana",
+  "title": "Grafana",
+  "description": "Convenient seach, shortcuts & commands for working with Grafana",
+  "icon": "grafana-logo.png",
+  "author": "Francois",
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "searchDashboards",
+      "title": "Search Dashboards",
+      "subtitle": "Grafana",
+      "description": "Showing grafana results on dashboard search",
+      "mode": "view"
+    },
+    {
+      "name": "searchAnnotations",
+      "title": "Search Annotations",
+      "subtitle": "Grafana",
+      "description": "Showing & managing grafana annotations",
+      "mode": "view"
+    },
+    {
+      "name": "createAnnotation",
+      "title": "Create Annotation",
+      "subtitle": "Grafana",
+      "description": "Create a grafana annotation",
+      "mode": "view"
+    },
+    {
+      "name": "explore",
+      "title": "Explore",
+      "subtitle": "Grafana",
+      "description": "Open the explore section with the selected datasource",
+      "mode": "view"
+    },
+    {
+      "name": "createSavedQuery",
+      "title": "Create Saved Query",
+      "subtitle": "Grafana",
+      "description": "Create saved PromQL or LogQL queries",
+      "mode": "view"
+    },
+    {
+      "name": "listSavedQueries",
+      "title": "List Saved Queries",
+      "subtitle": "Grafana",
+      "description": "List QL queries",
+      "mode": "view"
+    },
+    {
+      "name": "pages",
+      "title": "Pages",
+      "subtitle": "Grafana",
+      "description": "List common pages in Grafana",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootApiUrl",
+      "type": "textfield",
+      "title": "Root API URL (without the trailing slash)",
+      "required": true,
+      "default": "",
+      "description": "Grafana root URL",
+      "placeholder": "https://<organization>.grafana.net"
+    },
+    {
+      "name": "apikey",
+      "type": "password",
+      "title": "Service Account Token",
+      "required": true,
+      "default": "",
+      "description": "Grafana Service Account Token",
+      "placeholder": "glsa_bXlzZWNyZXRhcGlrZXk="
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

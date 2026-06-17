@@ -1,0 +1,96 @@
+### GET - List Teams
+GET https://api.clickup.com/api/v2/team
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - List Spaces of a team
+GET https://api.clickup.com/api/v2/team/{{team_id}}/space?archived=false
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - List Folders of a space
+https://api.clickup.com/api/v2/space/{{space_id}}/folder?archived=false
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - List Lists of a folder
+https://api.clickup.com/api/v2/folder/{{folder_id}}/list?archived=false
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - List Tasks of a list
+# Params: page, order_by, reverse, subtasks, statuses, include_closed,
+# Params: assignees, due_date_gt, due_date_lt, date_created_gt,
+# Params: date_created_lt, date_updated_gt, date_updated_lt, custom_fields
+https://api.clickup.com/api/v2/list/{{list_id}}/task?archived=false
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - List Task Details
+GET https://api.clickup.com/api/v2/task/{{task_id}}/?include_subtasks=true
+# Params: custom_task_ids, team_id, include_subtasks
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### GET - Returns Error
+https://api.clickup.com/api/v2/task/12345/?include_subtasks=true
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request Failed", function() {
+  client.assert(response.status !== 200, "Response Must be anything but 200");
+});
+%}
+
+
+### GET - List Tasks by query
+GET https://api.clickup.com/api/v2/team/{{team_id}}/task?order_by=due_date
+# Params: page, order_by, reverse, subtasks, space_ids, project_ids,
+# Params: list_ids, statuses, include_closed, assignees, tags, due_date,
+# Params: due_date_lt, date_created_gt, date_created_lt, date_updated_gt,
+# Params: date_updated_lt, custom_fields, custom_task_ids, team_id
+Accept: application/json
+Authorization: {{token}} # requires http-client.private.env.json
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}

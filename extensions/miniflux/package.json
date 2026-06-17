@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "miniflux",
+  "title": "Miniflux",
+  "description": "A Raycast extension for Miniflux",
+  "icon": "miniflux-icon.png",
+  "author": "SevicheCC",
+  "license": "MIT",
+  "contributors": [
+    "revcd"
+  ],
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "add-subscription",
+      "title": "Subscribe to Feed",
+      "subtitle": "Miniflux",
+      "description": "Subscribe to a new feed",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Feeds",
+      "subtitle": "Miniflux",
+      "description": "Search entries in your subscribed feeds",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchLimit",
+          "type": "textfield",
+          "required": false,
+          "title": "Max search results",
+          "description": "High numbers could lead to worse performance",
+          "placeholder": "10"
+        }
+      ]
+    },
+    {
+      "name": "read-recent-entries",
+      "title": "Read Recent Feed Entries",
+      "subtitle": "Miniflux",
+      "description": "Read the recent entries from your subscribed feeds in Raycast",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "feedLimit",
+          "type": "textfield",
+          "required": false,
+          "title": "The latest feeds show on first page",
+          "description": "High numbers could lead to poor performance.",
+          "placeholder": "30"
+        }
+      ]
+    },
+    {
+      "name": "open-miniflux",
+      "title": "Open Miniflux",
+      "subtitle": "Miniflux",
+      "description": "Open Miniflux RSS reader",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-all-feeds",
+      "title": "Refresh All Feeds",
+      "subtitle": "Miniflux",
+      "description": "Refresh all RSS feeds",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Miniflux URL",
+      "description": "The URL of your Miniflux server",
+      "placeholder": "e.g. https://hosting.miniflux.app"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Miniflux API key from 'Settings > API Keys > Create a new API key' in Miniflux",
+      "placeholder": "Enter your Miniflux API Key."
+    },
+    {
+      "name": "readwiseToken",
+      "type": "password",
+      "required": false,
+      "title": "Readwise Access Token",
+      "description": "Generate a token at: https://readwise.io/access_token",
+      "placeholder": "Generate a token at: https://readwise.io/access_token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
+    "node-fetch": "^3.3.1",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

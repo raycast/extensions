@@ -1,0 +1,5 @@
+{
+  "ignorePatterns": ["src/__generated__/**/*"],
+  "printWidth": 120,
+  "singleQuote": false
+}

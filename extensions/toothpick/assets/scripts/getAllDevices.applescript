@@ -1,0 +1,1 @@
+return do shell script "/usr/sbin/system_profiler SPBluetoothDataType -json"

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "people-directory",
+  "title": "People Directory",
+  "description": "A detailed employee directory for your company",
+  "icon": "icon.png",
+  "author": "thomas",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "description": "Search employees of your company",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "API Token for Notion's API",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "databaseId",
+      "title": "Database ID",
+      "description": "Database ID of your People Directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.1",
+    "@raycast/api": "^1.40.0",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

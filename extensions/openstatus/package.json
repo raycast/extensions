@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openstatus",
+  "title": "OpenStatus",
+  "description": "Manage your OpenStatus monitors, Incidents and status page",
+  "icon": "OpenStatus.png",
+  "author": "thibaultleouay",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-monitors",
+      "title": "Show Monitors",
+      "subtitle": "OpenStatus",
+      "description": "View all your monitors from your OpenStatus account",
+      "mode": "view"
+    },
+    {
+      "name": "create-status-report",
+      "title": "Create Status Report",
+      "subtitle": "OpenStatus",
+      "description": "Create a new status report for your status page",
+      "mode": "view"
+    },
+    {
+      "name": "show-status-page",
+      "title": "Show Status Page",
+      "subtitle": "OpenStatus",
+      "description": "View all your status page from your OpenStatus account",
+      "mode": "view"
+    },
+    {
+      "name": "create-status-report-update",
+      "title": "Create Status Report Update",
+      "subtitle": "OpenStatus",
+      "description": "Create a new Status Report Update for your Status Report",
+      "mode": "view"
+    },
+    {
+      "name": "show-incidents",
+      "title": "Show Incidents",
+      "subtitle": "OpenStatus",
+      "description": "View all your incidents from your OpenStatus account",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "show-incidents",
+      "title": "Show Incidents",
+      "description": "View all your incidents from your OpenStatus account"
+    },
+    {
+      "name": "show-monitors",
+      "title": "Show Monitors",
+      "description": "View all your monitors from your OpenStatus account"
+    },
+    {
+      "name": "show-status-pages",
+      "title": "Show Status Pages",
+      "description": "View all your status pages from your OpenStatus account"
+    },
+    {
+      "name": "create-status-report",
+      "title": "Create Status Report",
+      "description": "Create a new status report for your status page"
+    },
+    {
+      "name": "create-status-report-update",
+      "title": "Create Status Report Update",
+      "description": "Create a new Status Report Update for your Status Report"
+    },
+    {
+      "name": "show-status-reports",
+      "title": "Show Status Reports",
+      "description": "View all your status reports from your OpenStatus account"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@openstatus show all monitors",
+        "mocks": {
+          "show-monitors": [
+            {
+              "active": true,
+              "jobType": "http",
+              "name": "",
+              "public": false,
+              "regions": [
+                "ams"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "show-monitors"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@openstatus show me active status pages",
+        "mocks": {
+          "show-status-pages": [
+            {
+              "description": "Description",
+              "id": 1457,
+              "slug": "prickly-wolf",
+              "title": ""
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@openstatus show all status pages",
+        "mocks": {
+          "show-status-pages": [
+            {
+              "description": "Description",
+              "slug": "slug",
+              "title": "Title"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@openstatus create report for raycast saying we are investigating date of next monday 9am",
+        "mocks": {
+          "show-status-pages": [
+            {
+              "description": "Description",
+              "id": 0,
+              "slug": "raycast",
+              "title": "Raycast"
+            }
+          ],
+          "create-status-report": {
+            "id": 0,
+            "pageId": 0,
+            "status": "investigating",
+            "statusReportUpdateIds": [
+              2
+            ],
+            "title": "Investigation Ongoing"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "pageId": "0",
+                "status": "investigating"
+              },
+              "name": "create-status-report"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "access_token",
+      "description": "Enter your OpenStatus Access Token",
+      "type": "password",
+      "title": "Access Token",
+      "required": true,
+      "placeholder": "os_xxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

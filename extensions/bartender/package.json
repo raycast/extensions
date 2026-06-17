@@ -1,0 +1,384 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bartender",
+  "title": "Bartender",
+  "description": "Interact with Bartender and menu bar icon apps",
+  "icon": "extension-icon.png",
+  "author": "kmusick",
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "menu bar",
+    "menu bar apps",
+    "bartender",
+    "extras",
+    "status bar",
+    "status bar apps"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-search-overlay",
+      "title": "Open Search Overlay",
+      "description": "Open Bartender's quick search overlay",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-shortcuts",
+      "title": "Search Menu Bar Shortcuts",
+      "description": "Create and manage shortcuts for menu bar apps",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "keyPressDelay",
+          "description": "Delay in milliseconds between keypresses",
+          "type": "textfield",
+          "required": false,
+          "title": "Keypress Delay (milliseconds)",
+          "default": "0",
+          "placeholder": "0"
+        },
+        {
+          "name": "clickDelay",
+          "description": "Delay in milliseconds before sending the first keypress",
+          "type": "textfield",
+          "required": false,
+          "title": "Click Delay (milliseconds)",
+          "default": "0",
+          "placeholder": "0"
+        }
+      ]
+    },
+    {
+      "name": "search-menu-bar-apps",
+      "title": "Search Menu Bar Apps",
+      "description": "Search all menu bar apps known to Bartender",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "description": "Default action when pressing Return/Enter on a menu bar item",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "default": "activate",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "activate",
+              "title": "Activate"
+            },
+            {
+              "value": "left",
+              "title": "Left Click"
+            },
+            {
+              "value": "right",
+              "title": "Right Click"
+            },
+            {
+              "value": "optLeft",
+              "title": "Option Left Click"
+            },
+            {
+              "value": "optRight",
+              "title": "Option Right Click"
+            }
+          ]
+        },
+        {
+          "name": "secondaryAction",
+          "description": "Action when using Command+Return on a menu bar item",
+          "type": "dropdown",
+          "required": false,
+          "title": "Secondary Action",
+          "default": "right",
+          "data": [
+            {
+              "value": "show",
+              "title": "Show"
+            },
+            {
+              "value": "activate",
+              "title": "Activate"
+            },
+            {
+              "value": "left",
+              "title": "Left Click"
+            },
+            {
+              "value": "right",
+              "title": "Right Click"
+            },
+            {
+              "value": "optLeft",
+              "title": "Option Left Click"
+            },
+            {
+              "value": "optRight",
+              "title": "Option Right Click"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "perform-menu-bar-command",
+      "title": "Perform Menu Bar Command",
+      "description": "Execute actions on menu bar items or run saved shortcuts. Can be triggered via Quicklinks or Deeplinks. When run without parameters, it can repeat your last successful command.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "runLastCommandWhenNoContext",
+          "description": "When enabled, automatically runs the last successful command if no specific command is provided",
+          "type": "checkbox",
+          "required": false,
+          "label": "Default to last successful command",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-menu-bar-apps",
+      "title": "Search Menu Bar Apps",
+      "description": "Search currently running menu bar apps"
+    },
+    {
+      "name": "perform-menu-bar-action",
+      "title": "Perform Menu Bar Action",
+      "description": "Execute actions on menu bar items"
+    },
+    {
+      "name": "search-menu-bar-shortcuts",
+      "title": "Search Menu Bar Shortcuts",
+      "description": "Search saved menu bar shortcuts"
+    },
+    {
+      "name": "perform-menu-bar-shortcut",
+      "title": "Perform Menu Bar Shortcut",
+      "description": "Execute saved shortcuts on menu bar items"
+    }
+  ],
+  "ai": {
+    "instructions": "Score may be passed to other tools, but should not be included in any output shown to the user.",
+    "evals": [
+      {
+        "input": "@bartender find all shortcuts for Karabiner",
+        "mocks": {
+          "search-menu-bar-shortcuts": {
+            "data": [
+              {
+                "menuBarId": "org.pqrs.Karabiner-Menu-Item-0",
+                "name": "Default Keyboard",
+                "score": "0.004481"
+              },
+              {
+                "menuBarId": "org.pqrs.Karabiner-Menu-Item-0",
+                "name": "No Rules Keyboard",
+                "score": "0.004481"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchAppName": {
+                  "includes": "karabiner"
+                }
+              },
+              "name": "search-menu-bar-shortcuts"
+            }
+          },
+          {
+            "includes": "default keyboard"
+          },
+          {
+            "includes": "no rules keyboard"
+          }
+        ]
+      },
+      {
+        "input": "@bartender right click Typinator",
+        "mocks": {
+          "perform-menu-bar-action": {
+            "status": "success"
+          },
+          "search-menu-bar-apps": {
+            "data": [
+              {
+                "menuBarId": "com.macility.typinator2-Item-0",
+                "name": "Typinator",
+                "score": "0.000000"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchTerm": "Typinator"
+              },
+              "name": "search-menu-bar-apps"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "actionType": "right",
+                "searchResult.menuBarId": "com.macility.typinator2-Item-0"
+              },
+              "name": "perform-menu-bar-action"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bartender run shortcut Default Keyboard",
+        "mocks": {
+          "perform-menu-bar-shortcut": {
+            "status": "success"
+          },
+          "search-menu-bar-shortcuts": {
+            "data": [
+              {
+                "menuBarId": "org.pqrs.Karabiner-Menu-Item-0",
+                "name": "Default Keyboard",
+                "score": "0.000000"
+              },
+              {
+                "menuBarId": "org.pqrs.Karabiner-Menu-Item-0",
+                "name": "No Rules Keyboard",
+                "score": "0.685716"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchName": "Default Keyboard"
+              },
+              "name": "search-menu-bar-shortcuts"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "searchResult.name": "Default Keyboard"
+              },
+              "name": "perform-menu-bar-shortcut"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bartender what shortcuts do I have for Clop?",
+        "mocks": {
+          "search-menu-bar-shortcuts": {
+            "data": [
+              {
+                "menuBarId": "com.lowtechguys.Clop-setapp-Item-0",
+                "name": "Clop - Bring Back Last",
+                "score": "0.000000"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchAppName": {
+                  "includes": "clop"
+                }
+              },
+              "name": "search-menu-bar-shortcuts"
+            }
+          },
+          {
+            "includes": "clop - bring back last"
+          },
+          {
+            "includes": "clop"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "cacheExpirationTime",
+      "description": "Maximum time to cache app information (images and names)",
+      "type": "dropdown",
+      "required": false,
+      "title": "Cache Expiration Time",
+      "default": "month",
+      "data": [
+        {
+          "value": "hour",
+          "title": "1 Hour"
+        },
+        {
+          "value": "day",
+          "title": "1 Day"
+        },
+        {
+          "value": "week",
+          "title": "1 Week"
+        },
+        {
+          "value": "month",
+          "title": "1 Month"
+        }
+      ]
+    },
+    {
+      "name": "showHudOnSuccess",
+      "description": "Show a HUD notification when successfully interacting with a menu bar item",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show success notification",
+      "title": "Notifications",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "@sinclair/typebox": "^0.34.30",
+    "execa": "^9.5.2",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

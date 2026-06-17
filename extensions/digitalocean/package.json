@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "digitalocean",
+  "title": "DigitalOcean",
+  "description": "Quickly find resources in your DigitalOcean team",
+  "icon": "command-icon.png",
+  "author": "shukantpal",
+  "contributors": [
+    "xmok",
+    "patricklenz"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-container-registry",
+      "title": "Search Container Registry",
+      "subtitle": "DigitalOcean",
+      "description": "Search for images in your container registry on DigitalOcean, and open the repository in the DigitalOcean console.\n\nMoreover, you can browse the tags of the selected repository and copy them.",
+      "mode": "view"
+    },
+    {
+      "name": "search-databases",
+      "title": "Search Databases",
+      "subtitle": "DigitalOcean",
+      "description": "Search for database clusters on DigitalOcean. Moreover, view the connection URIs and database metadata of the selected cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "search-domains",
+      "title": "Search Domains",
+      "subtitle": "DigitalOcean",
+      "description": "Search your domain records in DigitalOcean Networking, and copy the hostname or value of the DNS records. Moreover, create a new DNS record without leaving Raycast (requires write-access token).",
+      "mode": "view"
+    },
+    {
+      "name": "search-droplets",
+      "title": "Search Droplets",
+      "subtitle": "DigitalOcean",
+      "description": "Search your droplets in DigitalOcean, and view their IP addresses and metadata. Moreover, press Enter to view the droplet in the DigitalOcean console.",
+      "mode": "view"
+    },
+    {
+      "name": "search-kubernetes-clusters",
+      "title": "Search Kubernetes Clusters",
+      "subtitle": "DigitalOcean",
+      "description": "Search your Kubernetes clusters in DigitalOcean, and get the doctl command to connect to them. Moreover, view the cluster in the DigitalOcean console.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "DigitalOcean",
+      "description": "Search your projects in DigitalOcean, and go to them directly in your browser.",
+      "mode": "view"
+    },
+    {
+      "name": "search-app-platform",
+      "title": "Search App Platform",
+      "subtitle": "DigitalOcean",
+      "description": "Search your apps in DigitalOcean, and go to them directly in your browser.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "Personal Access Token",
+      "description": "Please enter your DigitalOcean PAT",
+      "required": true,
+      "placeholder": "dop_v1_xxx..xxx"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

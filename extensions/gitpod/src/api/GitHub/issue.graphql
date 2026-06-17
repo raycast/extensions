@@ -1,0 +1,271 @@
+fragment IssueFields on Issue {
+  id
+  url
+  title
+  number
+  closed
+  state
+  body
+  stateReason
+  updatedAt
+  author {
+    ... on Bot {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on User {
+      ...UserFields
+    }
+    ... on Mannequin {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on Organization {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+    ... on EnterpriseUserAccount {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+  }
+  milestone {
+    id
+    title
+  }
+  repository {
+    ...ShortRepositoryFields
+  }
+  comments(first: 0) {
+    totalCount
+  }
+  assignees(first: 50) {
+    totalCount
+    nodes {
+      ... on User {
+        ...UserFields
+      }
+    }
+  }
+}
+
+query searchCreatedIssues(
+  $createdOpenQuery: String!
+  $createdClosedQuery: String!
+  $numberOfOpenItems: Int!
+  $numberOfClosedItems: Int!
+) {
+  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    nodes {
+      ...IssueFields
+    }
+  }
+  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    nodes {
+      ...IssueFields
+    }
+  }
+}
+
+query repositoryCollaboratorsForIssues($owner: String!, $name: String!, $issueNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    collaborators(first: 25) {
+      totalCount
+      nodes {
+        ... on User {
+          ...UserFields
+        }
+      }
+    }
+    issue(number: $issueNumber) {
+      assignees(first: 25) {
+        totalCount
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+
+query repositoryProjectsForIssues($owner: String!, $name: String!, $issueNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    projectsV2(first: 50, orderBy: { field: TITLE, direction: ASC }) {
+      totalCount
+      nodes {
+        id
+        title
+        number
+      }
+    }
+    issue(number: $issueNumber) {
+      projectsV2(first: 50) {
+        totalCount
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+
+query searchOpenIssues($assignedOpenQuery: String!, $mentionedOpenQuery: String!, $numberOfOpenItems: Int!) {
+  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    nodes {
+      ...IssueFields
+    }
+  }
+  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    nodes {
+      ...IssueFields
+    }
+  }
+}
+
+fragment IssueDetailFields on Issue {
+  id
+  url
+  title
+  body
+  number
+  closed
+  state
+  stateReason
+  updatedAt
+  author {
+    ... on Bot {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on User {
+      ...UserFields
+    }
+    ... on Mannequin {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on Organization {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+    ... on EnterpriseUserAccount {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+  }
+  labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+      isDefault
+    }
+  }
+  milestone {
+    id
+    title
+  }
+  repository {
+    ...ShortRepositoryFields
+  }
+  assignees(first: 50) {
+    totalCount
+    nodes {
+      ... on User {
+        ...UserFields
+      }
+    }
+  }
+  projectsV2(first: 25) {
+    totalCount
+    nodes {
+      id
+      title
+    }
+  }
+}
+
+query issueDetails($nodeId: ID!) {
+  node(id: $nodeId) {
+    ...IssueDetailFields
+  }
+}
+
+query searchIssues($query: String!, $numberOfItems: Int!) {
+  search(query: $query, type: ISSUE, first: $numberOfItems) {
+    nodes {
+      ...IssueFields
+    }
+  }
+}
+
+mutation closeIssue($nodeId: ID!, $stateReason: IssueClosedStateReason!) {
+  closeIssue(input: { issueId: $nodeId, stateReason: $stateReason }) {
+    issue {
+      id
+    }
+  }
+}
+
+mutation reopenIssue($nodeId: ID!) {
+  reopenIssue(input: { issueId: $nodeId }) {
+    issue {
+      id
+    }
+  }
+}
+
+mutation changeIssueAssignees($issueId: ID!, $assigneeIds: [ID!]) {
+  updateIssue(input: { id: $issueId, assigneeIds: $assigneeIds }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation changeIssueMilestone($issueId: ID!, $milestoneId: ID) {
+  updateIssue(input: { id: $issueId, milestoneId: $milestoneId }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation addIssueToProject($issueId: ID!, $projectId: ID!) {
+  addProjectV2ItemById(input: { projectId: $projectId, contentId: $issueId }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation createIssue(
+  $repositoryId: ID!
+  $title: String!
+  $body: String!
+  $assigneeIds: [ID!]!
+  $labelIds: [ID!]!
+  $milestoneId: ID
+) {
+  createIssue(
+    input: {
+      repositoryId: $repositoryId
+      title: $title
+      body: $body
+      assigneeIds: $assigneeIds
+      labelIds: $labelIds
+      milestoneId: $milestoneId
+    }
+  ) {
+    issue {
+      ...IssueFields
+    }
+  }
+}

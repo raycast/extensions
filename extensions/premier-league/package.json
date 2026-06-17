@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "premier-league",
+  "title": "Premier League",
+  "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
+  "icon": "icon.png",
+  "author": "anhthang",
+  "license": "MIT",
+  "contributors": [
+    "stelo"
+  ],
+  "categories": [
+    "Data",
+    "Other",
+    "Fun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "table",
+      "title": "Tables",
+      "description": "View current and historical Premier League standings, form guides, and season archives.",
+      "mode": "view"
+    },
+    {
+      "name": "match",
+      "title": "Matches",
+      "description": "View fixtures, results, and archives in one place.",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "description": "Explore club profiles, player rosters, historical data, and recent performances.",
+      "mode": "view"
+    },
+    {
+      "name": "player",
+      "title": "Players",
+      "description": "Search for player profiles, statistics, career highlights, and transfer history.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "award",
+      "title": "Awards",
+      "description": "View a list of Premier League individual and team awards, including winners and statistics.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "filter",
+      "title": "Search Bar Filter",
+      "description": "Select your preferred filtering method in the search bar for Matches.",
+      "required": false,
+      "type": "dropdown",
+      "default": "competition",
+      "data": [
+        {
+          "title": "Filter by Competition",
+          "value": "competition"
+        },
+        {
+          "title": "Filter by Club",
+          "value": "club"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
+    "json2md": "^2.0.3",
+    "lodash.groupby": "^4.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

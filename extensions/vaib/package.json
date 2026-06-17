@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vaib",
+  "title": "vAIb - Your AI Companion",
+  "description": "Get quick answers to your quick questions with the power of AI with this free extension.",
+  "icon": "command-icon.png",
+  "author": "vaibhav_sisodiya",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask vAIb",
+      "description": "Generates answer to your question with GPT-3.5",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "placeholder": "Question",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "question",
+        "answer",
+        "gpt",
+        "gpt-3.5",
+        "gpt3.5",
+        "gpt3",
+        "gpt-3"
+      ]
+    }, 
+    {
+      "name": "clipboard",
+      "title": "Search Using Clipboard",
+      "description": "Generates answer to your question with GPT-3.5",
+      "mode": "view",
+      "keywords": [
+        "question",
+        "answer",
+        "gpt",
+        "gpt-3.5",
+        "gpt3.5",
+        "gpt3",
+        "gpt-3",
+        "clipboard"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/utils": "^1.10.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

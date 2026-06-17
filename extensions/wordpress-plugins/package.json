@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wordpress-plugins",
+  "title": "WordPress Plugins",
+  "description": "Search and download plugins from the WordPress Plugin Directory.",
+  "icon": "icon.png",
+  "author": "edmundcwm",
+  "contributors": [
+    "xmok"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Plugins",
+      "subtitle": "WordPress",
+      "description": "Search for WordPress Plugins",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "wordpress",
+    "plugins",
+    "wp",
+    "wp.org",
+    "wordpress.org",
+    "wordpress plugins",
+    "wordpress plugin"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^2.30.0",
+    "html-entities": "^2.3.3",
+    "to-semver": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

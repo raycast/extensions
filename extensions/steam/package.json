@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "steam",
+  "title": "Steam",
+  "description": "Search and view information about any game on steam, as well as games you own.",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "contributors": [
+    "litomore",
+    "taken"
+  ],
+  "crossExtensions": [
+    "litomore/protondb",
+    "litomore/steamgriddb"
+  ],
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "steam",
+      "title": "Search Games",
+      "subtitle": "Steam",
+      "description": "Search the Steam api for game information.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "Steam API Key",
+      "description": "Add your API key",
+      "placeholder": "API Key",
+      "required": false
+    },
+    {
+      "name": "steamid",
+      "type": "textfield",
+      "title": "Steam ID",
+      "description": "Add your Steam ID",
+      "placeholder": "Steam ID",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0",
+    "raycast-cross-extension": "^0.2.3",
+    "swr": "^2.3.6",
+    "turndown": "^7.2.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

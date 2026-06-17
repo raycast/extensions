@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dockerhub",
+  "title": "Docker Hub",
+  "description": "Docker Hub extension for Raycast",
+  "icon": "docker-icon.png",
+  "author": "k8scat",
+  "license": "MIT",
+  "contributors": [
+    "tonka3000",
+    "BalliAsghar",
+    "imposibrus"
+  ],
+  "commands": [
+    {
+      "name": "search-image",
+      "title": "Search Images",
+      "subtitle": "Docker Hub",
+      "description": "Search images on Docker Hub",
+      "mode": "view"
+    },
+    {
+      "name": "search-repository",
+      "title": "Search Repository",
+      "subtitle": "Docker Hub",
+      "description": "Search repositories on Docker Hub",
+      "mode": "view"
+    },
+    {
+      "name": "search-extension",
+      "title": "Search Extensions",
+      "subtitle": "Docker Hub",
+      "description": "Search extensions on Docker Hub",
+      "mode": "view"
+    },
+    {
+      "name": "search-plugin",
+      "title": "Search Plugins",
+      "subtitle": "Docker Hub",
+      "description": "Search plugins on Docker Hub",
+      "mode": "view"
+    },
+    {
+      "name": "manage-access-token",
+      "title": "Manage Personal Access Token",
+      "subtitle": "Docker Hub",
+      "description": "Manage personal access tokens on Docker Hub",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": false,
+      "title": "Username",
+      "description": "Docker Hub Username"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "description": "Docker Hub Password"
+    },
+    {
+      "name": "twoFactorCode",
+      "type": "textfield",
+      "required": false,
+      "title": "2FA Code",
+      "description": "Code for 2FA"
+    },
+    {
+      "description": "Path to Docker socket",
+      "name": "socketPath",
+      "placeholder": "/var/run/docker.sock",
+      "required": false,
+      "title": "Socket path",
+      "default": "/var/run/docker.sock",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
+    "@raycast/api": "^1.39.3",
+    "axios": "^1.12.2",
+    "axios-retry": "^3.3.1"
+  },
+  "overrides": {
+    "tar-fs": ">=3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
+    "eslint": "^8.18.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^3.3.3",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

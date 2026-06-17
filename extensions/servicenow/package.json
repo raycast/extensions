@@ -1,0 +1,257 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "servicenow",
+  "title": "ServiceNow",
+  "description": "Search and explore content across your ServiceNow instances",
+  "icon": "servicenow.png",
+  "author": "robertoalvarezalonso",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Text",
+      "description": "Search in ServiceNow. Pass the text you want to search for (or copy it to the clipboard) to jump straight to results; otherwise browse your search history and search inline.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-code",
+      "title": "Search Code",
+      "description": "Search inside ServiceNow scripts (business rules, script includes, client scripts, UI scripts, etc.) using the Code Search API. Pass a term to jump straight to results, or open the form to enter one. Requires the sn_codesearch plugin in the instance.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "Term",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-instance-profiles",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and manage profiles to connect to your ServiceNow instances.",
+      "mode": "view"
+    },
+    {
+      "name": "open-all-instances",
+      "title": "Open All Instances",
+      "description": "Open all configured ServiceNow instances in the browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-instance",
+      "title": "Open Instance",
+      "description": "Open a ServiceNow instance in the browser. If an instance URL or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-current-page-instance",
+      "title": "Open Current Page in Another Instance",
+      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance URL or alias is provided, it will open the page in the selected instance profile.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-instance-profile",
+      "title": "Add Instance Profile",
+      "description": "Add a new instance profile.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-tables",
+      "title": "Explore Tables",
+      "description": "Browse and explore the tables of the platform.",
+      "mode": "view"
+    },
+    {
+      "name": "search-resources",
+      "title": "Search Developer Portal",
+      "description": "Search the ServiceNow Developer Portal across documentation, API references, blogs, learning content, and Share apps.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "explore-navigation-history",
+      "title": "Explore Navigation History",
+      "description": "Browse the list of pages and modules you've visited.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-favorites",
+      "title": "Manage Favorites",
+      "description": "View and manage your favorite items and groups.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-navigation-menu",
+      "title": "Explore Navigation Menu",
+      "description": "Browse the list of application menus and their modules.",
+      "mode": "view"
+    },
+    {
+      "name": "search-sysid",
+      "title": "Find Record by Sys ID",
+      "description": "Find the record that owns a given Sys ID and open it. Admins only.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sys_id",
+          "placeholder": "Sys ID",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "find-references",
+      "title": "Find Record References",
+      "description": "Find tables and columns where a record is referenced. Requires an admin profile (uses /sys.scripts.do).",
+      "mode": "view",
+      "keywords": [
+        "reference",
+        "references",
+        "where-used",
+        "sys_dictionary"
+      ],
+      "arguments": [
+        {
+          "name": "table",
+          "placeholder": "Table",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "sysId",
+          "placeholder": "Sys ID",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "cancel-my-transactions",
+      "title": "Cancel My Transactions",
+      "description": "Stop a long-running transaction that has locked you out of your ServiceNow session, without opening a new browser or private window. If no instance URL or alias is provided, uses the currently selected instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Open content using",
+      "description": "Select how you prefer to open ServiceNow pages and content (direct link, nav_to/Polaris, or SOW view).",
+      "default": "direct",
+      "data": [
+        {
+          "title": "Direct",
+          "value": "direct"
+        },
+        {
+          "title": "Navigate",
+          "value": "navigate"
+        },
+        {
+          "title": "Service Operations Workspace",
+          "value": "sow"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0",
+    "javascript-time-ago": "^2.6.4",
+    "lodash": "^4.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

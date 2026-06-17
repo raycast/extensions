@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cosmic-bookmarks",
+  "title": "Cosmic Bookmarks",
+  "description": "Read, visit and save Bookmarks to and from Cosmic CMS",
+  "icon": "bookmarks-icon.png",
+  "author": "kemiljk",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Cosmic Bookmarks",
+      "description": "Quickly view and visit your saved Bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "save-bookmarks",
+      "title": "Save a Bookmark",
+      "description": "Instantly save a Bookmark",
+      "icon": "add-Bookmark-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "menubar",
+      "title": "View Bookmarks",
+      "description": "Bookmarks in your Menu Bar",
+      "mode": "menu-bar",
+      "icon": "menubar-icon.png",
+      "interval": "15m",
+      "refreshControl": true
+    }
+  ],
+  "dependencies": {
+    "@cosmicjs/sdk": "^1.0.6",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "bucketSlug",
+      "title": "Cosmic Bucket Slug",
+      "description": "Your Cosmic Bucket Slug",
+      "type": "textfield",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "readKey",
+      "title": "Cosmic Read Key",
+      "description": "Your Cosmic Read Key",
+      "type": "password",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "writeKey",
+      "title": "Cosmic Write Key",
+      "description": "Your Cosmic Write Key",
+      "type": "password",
+      "defaultValue": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

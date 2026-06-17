@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-tasks",
+  "title": "Google Tasks",
+  "description": "Manage Google Tasks from Raycast.",
+  "icon": "google-tasks.png",
+  "author": "elliotdes",
+  "contributors": [
+    "pernielsentikaer",
+    "erik_vandeputte",
+    "ridemountainpig"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "gtask"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-lists",
+      "title": "View Lists",
+      "description": "View task lists",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Quickly create a new task",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "required": true,
+      "title": "OAuth Client ID",
+      "description": "Your OAuth client ID.",
+      "placeholder": "See https://console.developers.google.com/apis/credentials"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

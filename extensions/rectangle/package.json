@@ -1,0 +1,373 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rectangle",
+  "title": "Rectangle",
+  "description": "Integration with Rectangle",
+  "icon": "rectangle-icon.png",
+  "author": "crickford",
+  "categories": [
+    "Productivity",
+    "System",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Rectangle Actions",
+      "subtitle": "Window management",
+      "description": "Shortcuts for common rectangle actions",
+      "mode": "view"
+    },
+    {
+      "name": "left-half",
+      "title": "Left Half",
+      "icon": "window-positions/leftHalfTemplate.png",
+      "description": "Move the focused window to the left half of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "right-half",
+      "title": "Right Half",
+      "icon": "window-positions/rightHalfTemplate.png",
+      "description": "Move the focused window to the right half of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "maximize",
+      "title": "Maximize",
+      "icon": "window-positions/maximizeTemplate.png",
+      "description": "Maximize the focused window",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "almost-maximize",
+      "title": "Almost Maximize",
+      "icon": "window-positions/almostMaximizeTemplate.png",
+      "description": "Almost maximize the focused window",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "specified",
+      "title": "Reasonable Size",
+      "icon": "window-positions/centerTemplate.png",
+      "description": "Resize the focused window to a reasonable (specified) size",
+      "subtitle": "Rectangle",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "bottom-center-sixth",
+      "title": "Bottom Center Sixth",
+      "icon": "window-positions/bottomCenterSixthTemplate.png",
+      "description": "Move the focused window to the bottom center sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-half",
+      "title": "Bottom Half",
+      "icon": "window-positions/bottomHalfTemplate.png",
+      "description": "Move the focused window to the bottom half of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-left-sixth",
+      "title": "Bottom Left Sixth",
+      "icon": "window-positions/bottomLeftSixthTemplate.png",
+      "description": "Move the focused window to the bottom left sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-left",
+      "title": "Bottom Left",
+      "icon": "window-positions/bottomLeftTemplate.png",
+      "description": "Move the focused window to the bottom left of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-right-sixth",
+      "title": "Bottom Right Sixth",
+      "icon": "window-positions/bottomRightSixthTemplate.png",
+      "description": "Move the focused window to the bottom right sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-right",
+      "title": "Bottom Right",
+      "icon": "window-positions/bottomRightTemplate.png",
+      "description": "Move the focused window to the bottom right of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "second-fourth",
+      "title": "Second Fourth",
+      "icon": "window-positions/centerLeftFourthTemplate.png",
+      "description": "Move the focused window to the second fourth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "third-fourth",
+      "title": "Third Fourth",
+      "icon": "window-positions/centerRightFourthTemplate.png",
+      "description": "Move the focused window to the third fourth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "center",
+      "title": "Center",
+      "icon": "window-positions/centerTemplate.png",
+      "description": "Center the focused window on the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "center-third",
+      "title": "Center Third",
+      "icon": "window-positions/centerThirdTemplate.png",
+      "description": "Move the focused window to the center third of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "first-third",
+      "title": "First Third",
+      "icon": "window-positions/firstThirdTemplate.png",
+      "description": "Move the focused window to the first third of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "first-three-fourths",
+      "title": "First Three Fourths",
+      "icon": "window-positions/firstThreeFourthsTemplate.png",
+      "description": "Move the focused window to occupy the first three fourths of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "first-two-thirds",
+      "title": "First Two Thirds",
+      "icon": "window-positions/firstTwoThirdsTemplate.png",
+      "description": "Move the focused window to occupy the first two thirds of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "center-half",
+      "title": "Half Width Center",
+      "icon": "window-positions/halfWidthCenterTemplate.png",
+      "description": "Center the focused window at half width of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "last-third",
+      "title": "Last Third",
+      "icon": "window-positions/lastThirdTemplate.png",
+      "description": "Move the focused window to the last third of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "last-three-fourths",
+      "title": "Last Three Fourths",
+      "icon": "window-positions/lastThreeFourthsTemplate.png",
+      "description": "Move the focused window to occupy the last three fourths of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "last-two-thirds",
+      "title": "Last Two Thirds",
+      "icon": "window-positions/lastTwoThirdsTemplate.png",
+      "description": "Move the focused window to occupy the last two thirds of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "first-fourth",
+      "title": "First Fourth",
+      "icon": "window-positions/leftFourthTemplate.png",
+      "description": "Move the focused window to the first fourth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "larger",
+      "title": "Make Larger",
+      "icon": "window-positions/makeLargerTemplate.png",
+      "description": "Increase the size of the focused window",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "smaller",
+      "title": "Make Smaller",
+      "icon": "window-positions/makeSmallerTemplate.png",
+      "description": "Decrease the size of the focused window",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "maximize-height",
+      "title": "Maximize Height",
+      "icon": "window-positions/maximizeHeightTemplate.png",
+      "description": "Maximize the height of the focused window",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-down",
+      "title": "Move Down",
+      "icon": "window-positions/moveDownTemplate.png",
+      "description": "Move the focused window down",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-left",
+      "title": "Move Left",
+      "icon": "window-positions/moveLeftTemplate.png",
+      "description": "Move the focused window to the left",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-right",
+      "title": "Move Right",
+      "icon": "window-positions/moveRightTemplate.png",
+      "description": "Move the focused window to the right",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-up",
+      "title": "Move Up",
+      "icon": "window-positions/moveUpTemplate.png",
+      "description": "Move the focused window up",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-display",
+      "title": "Next Display",
+      "icon": "window-positions/nextDisplayTemplate.png",
+      "description": "Move the focused window to the next display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-display",
+      "title": "Previous Display",
+      "icon": "window-positions/prevDisplayTemplate.png",
+      "description": "Move the focused window to the previous display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore",
+      "title": "Restore",
+      "icon": "window-positions/restoreTemplate.png",
+      "description": "Restore the focused window to its original size and position",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "last-fourth",
+      "title": "Last Fourth",
+      "icon": "window-positions/rightFourthTemplate.png",
+      "description": "Move the focused window to the last fourth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-center-sixth",
+      "title": "Top Center Sixth",
+      "icon": "window-positions/topCenterSixthTemplate.png",
+      "description": "Move the focused window to the top center sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-half",
+      "title": "Top Half",
+      "icon": "window-positions/topHalfTemplate.png",
+      "description": "Move the focused window to the top half of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-left-sixth",
+      "title": "Top Left Sixth",
+      "icon": "window-positions/topLeftSixthTemplate.png",
+      "description": "Move the focused window to the top left sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-left",
+      "title": "Top Left",
+      "icon": "window-positions/topLeftTemplate.png",
+      "description": "Move the focused window to the top left of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-right-sixth",
+      "title": "Top Right Sixth",
+      "icon": "window-positions/topRightSixthTemplate.png",
+      "description": "Move the focused window to the top right sixth of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-right",
+      "title": "Top Right",
+      "icon": "window-positions/topRightTemplate.png",
+      "description": "Move the focused window to the top right of the current display",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    },
+    {
+      "name": "cascade-all",
+      "title": "Cascade All",
+      "icon": "window-positions/cascadeAllTemplate.png",
+      "description": "Cascade all windows",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "volumio-control",
+  "title": "Volumio Control",
+  "description": "Control your Volumio music player remotely",
+  "icon": "icon.png",
+  "author": "riclib",
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "volumio",
+    "music",
+    "player",
+    "audio",
+    "streaming",
+    "control",
+    "media",
+    "remote"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-pause",
+      "title": "Play/Pause",
+      "description": "Toggle playback",
+      "mode": "no-view",
+      "keywords": [
+        "toggle",
+        "play",
+        "pause"
+      ]
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Start playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "description": "Pause playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "description": "Skip to next track",
+      "mode": "no-view",
+      "keywords": [
+        "skip",
+        "forward"
+      ]
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "description": "Skip to previous track",
+      "mode": "no-view",
+      "keywords": [
+        "skip",
+        "back",
+        "backward"
+      ]
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "description": "Stop playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "description": "Toggle shuffle mode",
+      "mode": "no-view",
+      "keywords": [
+        "random"
+      ]
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Volumio Control",
+      "description": "View current playing track and controls",
+      "mode": "view",
+      "keywords": [
+        "current",
+        "track",
+        "song"
+      ]
+    },
+    {
+      "name": "media-controls",
+      "title": "Media Controls",
+      "subtitle": "Volumio Control",
+      "description": "Full media control panel",
+      "mode": "view"
+    },
+    {
+      "name": "browse",
+      "title": "Browse Music",
+      "subtitle": "Volumio Control",
+      "description": "Browse and play playlists, albums, and songs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "volumioHost",
+      "title": "Volumio Host",
+      "description": "Hostname or IP address of your Volumio instance",
+      "type": "textfield",
+      "required": false,
+      "default": "volumio.local"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.15.24",
+    "@types/react": "^19.1.6",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

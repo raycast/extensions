@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitter",
+  "title": "Twitter",
+  "description": "Send and search Tweets",
+  "icon": "logo.png",
+  "author": "tonka3000",
+  "contributors": [
+    "peduarte",
+    "xmok"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timeline",
+      "title": "Recent Tweets",
+      "subtitle": "Twitter",
+      "description": "Show Twitter timeline",
+      "mode": "view"
+    },
+    {
+      "name": "mytweets",
+      "title": "My Recent Tweets",
+      "subtitle": "Twitter",
+      "description": "Show My Tweets",
+      "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "Send Tweet",
+      "subtitle": "Twitter",
+      "description": "Send a tweet",
+      "mode": "view"
+    },
+    {
+      "name": "user_search",
+      "title": "Search User",
+      "subtitle": "Twitter",
+      "description": "Search Twitter User",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientid",
+      "type": "password",
+      "title": "OAuth Client ID",
+      "required": false,
+      "default": "",
+      "description": "X OAuth Client ID From Your X Application"
+    },
+    {
+      "name": "listwithdetail",
+      "type": "checkbox",
+      "label": "Show Tweets inside a Tweets List",
+      "required": false,
+      "default": true,
+      "title": "List Behavior",
+      "description": "Show Tweets inside a Tweets List directly"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
+    "twitter-api-v2": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

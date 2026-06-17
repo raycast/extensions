@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rdir",
+  "title": "Rdir",
+  "description": "Free URL shortener",
+  "icon": "extension-icon.png",
+  "author": "krakowiak",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-link",
+      "title": "Create Short Link",
+      "description": "Create a shortened URL using rdir.pl",
+      "mode": "view"
+    },
+    {
+      "name": "shorten-from-clipboard",
+      "title": "Shorten URL from Clipboard",
+      "description": "Instantly shorten URL from clipboard without opening a form",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your rdir.pl API key for authentication",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "autoFillFromClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-fill from Clipboard",
+      "label": "Automatically fill URL from clipboard",
+      "description": "When enabled, the URL field will be pre-filled with clipboard content if it's a valid URL",
+      "default": true
+    },
+    {
+      "name": "copyToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-copy to Clipboard",
+      "label": "Automatically copy short link to clipboard",
+      "description": "When enabled, the short link will be automatically copied to your clipboard",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

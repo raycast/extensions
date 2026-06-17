@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "planetscale",
+  "title": "PlanetScale",
+  "description": "Manage PlanetScale from Raycast",
+  "icon": "extension-icon.png",
+  "author": "vimtor",
+  "categories": [
+    "Applications",
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-databases",
+      "title": "Search Databases",
+      "subtitle": "PlanetScale",
+      "description": "Search PlanetScale databases",
+      "mode": "view"
+    },
+    {
+      "name": "search-branches",
+      "title": "Search Branches",
+      "subtitle": "PlanetScale",
+      "description": "Search PlanetScale branches",
+      "mode": "view"
+    },
+    {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "subtitle": "PlanetScale",
+      "description": "Create a branch in PlanetScale",
+      "mode": "view"
+    },
+    {
+      "name": "create-deploy-request",
+      "title": "Create Deploy Request",
+      "subtitle": "PlanetScale",
+      "description": "Create a deploy request in PlanetScale",
+      "mode": "view"
+    },
+    {
+      "name": "search-deploy-requests",
+      "title": "Search Deploy Requests",
+      "subtitle": "PlanetScale",
+      "description": "Search PlanetScale deploy requests",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@api/pscale": "file:.api/apis/pscale",
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "api": "^6.1.1",
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21",
+    "sql-formatter": "^15.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.200",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-api": "npx api install @pscale/v1.0#1uotglrsbdjt2"
+  }
+}

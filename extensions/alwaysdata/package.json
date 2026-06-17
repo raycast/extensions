@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alwaysdata",
+  "title": "alwaysdata",
+  "description": "The European Cloud",
+  "icon": "alwaysdata.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "xx...xxx",
+      "description": "API Token from Dashboard",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "domains",
+      "title": "Manage Domains",
+      "subtitle": "alwaysdata",
+      "description": "Manage Domains",
+      "mode": "view"
+    },
+    {
+      "name": "emails",
+      "title": "Manage Emails",
+      "subtitle": "alwaysdata",
+      "description": "Manage Emails",
+      "mode": "view"
+    },
+    {
+      "name": "sites",
+      "title": "Manage Sites",
+      "subtitle": "alwaysdata",
+      "description": "Manage Sites",
+      "mode": "view"
+    },
+    {
+      "name": "tokens",
+      "title": "Manage Tokens",
+      "subtitle": "alwaysdata",
+      "description": "Manage Tokens",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

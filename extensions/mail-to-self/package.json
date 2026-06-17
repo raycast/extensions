@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mail-to-self",
+  "title": "Mail to Self",
+  "description": "Send a quick subject + body to your inbox over SMTP without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "MrMage",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "smtpHost",
+      "title": "SMTP Host",
+      "description": "Hostname of the SMTP server used to send messages.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "smtp.example.com"
+    },
+    {
+      "name": "smtpPort",
+      "title": "SMTP Port",
+      "description": "Port for your SMTP server (usually 465 or 587).",
+      "type": "textfield",
+      "required": true,
+      "default": "465"
+    },
+    {
+      "name": "encryption",
+      "title": "Encryption",
+      "description": "Choose how to secure the SMTP connection.",
+      "type": "dropdown",
+      "required": true,
+      "default": "ssl_tls",
+      "data": [
+        {
+          "title": "SSL / TLS (Implicit)",
+          "value": "ssl_tls"
+        },
+        {
+          "title": "STARTTLS",
+          "value": "starttls"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "allowSelfSigned",
+      "title": "TLS Certificate",
+      "description": "Skip certificate validation for trusted self-hosted servers only if you understand the risk.",
+      "type": "checkbox",
+      "label": "Allow self-signed certificates",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "smtpUsername",
+      "title": "SMTP Username",
+      "description": "Leave empty if your server does not require authentication.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "user@example.com"
+    },
+    {
+      "name": "smtpPassword",
+      "title": "SMTP Password",
+      "description": "Stored securely in Raycast's encrypted preferences.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "senderEmail",
+      "title": "Sender Email",
+      "description": "The From address used when sending notes.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "me@example.com"
+    },
+    {
+      "name": "senderName",
+      "title": "Sender Name",
+      "description": "Readable display name for messages.",
+      "type": "textfield",
+      "required": false,
+      "default": "Mail to Self"
+    },
+    {
+      "name": "recipientList",
+      "title": "Recipients",
+      "description": "Comma-separated list of recipients. Optional labels like Jane <jane@example.com> are supported.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "inbox@example.com, idea@example.com"
+    }
+  ],
+  "commands": [
+    {
+      "name": "send-mail",
+      "title": "Mail to Self",
+      "description": "Compose and send a short email to yourself.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.0",
+    "nodemailer": "^7.0.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/nodemailer": "^6.4.15",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
