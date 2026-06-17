@@ -1,6 +1,5 @@
 # AsafAmos — Accessibility Scanner Changelog
 
-## [Initial Release] - 2026-04-20
+## [AsafAmos — Accessibility Scanner] - {PR_MERGE_DATE}
 
-- Scan URL for Accessibility: run axe-core 4.11 against any public URL and render violations in a Raycast list grouped by severity, with links to axe-core docs.
-- Open Hebrew Accessibility Statement Generator: opens the free accessibility statement generator aligned with Israeli תקנה 35.
+- Scan URL for Accessibility runs axe-core against any public URL and shows violations in a filterable list grouped by severity, with detail views and WCAG reference links.

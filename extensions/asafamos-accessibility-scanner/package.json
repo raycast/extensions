@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asafamos-accessibility-scanner",
   "title": "AsafAmos — Accessibility Scanner",
-  "description": "Scan any URL for WCAG 2.1 / 2.2 AA accessibility violations without leaving Raycast. Results appear as a list; pick any violation to see the offending element and suggested fix.",
+  "description": "Scan any URL for WCAG 2.1 / 2.2 AA accessibility violations and browse axe-core results in Raycast.",
   "icon": "command-icon.png",
   "author": "asafamos",
   "categories": [
@@ -14,7 +14,6 @@
     {
       "name": "scan",
       "title": "Scan URL for Accessibility",
-      "subtitle": "AsafAmos",
       "description": "Run an axe-core scan against any public URL and show violations.",
       "mode": "view",
       "arguments": [
@@ -25,25 +24,18 @@
           "required": true
         }
       ]
-    },
-    {
-      "name": "statement",
-      "title": "Open Hebrew Accessibility Statement Generator",
-      "subtitle": "AsafAmos",
-      "description": "Opens the free Hebrew statement generator — aligned with Israeli תקנה 35.",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1"
+    "@raycast/api": "^1.104.19"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.14.1",
-    "@types/react": "^19.1.2",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -51,5 +43,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 type AxeViolation = {
@@ -27,6 +27,7 @@ type ScanResult = {
 };
 
 const AXLE_API = "https://axle-iota.vercel.app";
+const STATEMENT_URL = "https://axle-iota.vercel.app/statement";
 
 const IMPACT_ICON: Record<string, { source: Icon; tintColor?: string }> = {
   critical: { source: Icon.ExclamationMark, tintColor: "#dc2626" },
@@ -35,25 +36,33 @@ const IMPACT_ICON: Record<string, { source: Icon; tintColor?: string }> = {
   minor: { source: Icon.Circle, tintColor: "#2563eb" },
 };
 
-export default function Scan(props: { arguments: { url: string } }) {
+export default function Scan(props: LaunchProps<{ arguments: Arguments.Scan }>) {
   const { url } = props.arguments;
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
+    setResult(null);
+    setError(null);
+    setLoading(true);
+
     showToast({
       style: Toast.Style.Animated,
       title: "Scanning",
       message: normalized,
     });
+
     fetch(`${AXLE_API}/api/scan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: normalized }),
+      signal: controller.signal,
     })
-      .then(async (r) => {
+      .then(async (r: Response) => {
         const data = (await r.json()) as ScanResult & { error?: string };
         if (!r.ok || data.error) throw new Error(data.error || `HTTP ${r.status}`);
         setResult(data);
@@ -63,7 +72,8 @@ export default function Scan(props: { arguments: { url: string } }) {
           message: normalized,
         });
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.name === "AbortError") return;
         const msg = err instanceof Error ? err.message : "Scan failed";
         setError(msg);
         showToast({
@@ -72,7 +82,11 @@ export default function Scan(props: { arguments: { url: string } }) {
           message: msg,
         });
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [url]);
 
   if (loading) {
@@ -80,15 +94,26 @@ export default function Scan(props: { arguments: { url: string } }) {
   }
 
   if (error) {
-    return <Detail markdown={`# Scan failed\n\n${error}`} />;
+    return (
+      <List actions={<ScanActions scannedUrl={url} />}>
+        <List.EmptyView title="Scan Failed" description={error} icon={Icon.ExclamationMark} />
+      </List>
+    );
   }
 
-  if (!result) return null;
+  if (!result) {
+    return (
+      <List actions={<ScanActions scannedUrl={url} />}>
+        <List.EmptyView title="No Results" description="The scan returned no data." icon={Icon.QuestionMark} />
+      </List>
+    );
+  }
 
   return (
     <List
       navigationTitle={`${result.title || result.url} — ${result.violations.length} rules`}
       searchBarPlaceholder="Filter violations"
+      actions={<ScanActions scannedUrl={result.url} />}
     >
       <List.Section title="Summary">
         <List.Item
@@ -96,30 +121,50 @@ export default function Scan(props: { arguments: { url: string } }) {
           icon={Icon.BarChart}
         />
       </List.Section>
-      <List.Section title="Violations">
-        {result.violations.map((v) => (
-          <List.Item
-            key={v.id}
-            title={v.help}
-            subtitle={v.id}
-            accessories={[
-              {
-                text: `${v.nodes.length} element${v.nodes.length === 1 ? "" : "s"}`,
-              },
-              { tag: v.impact ?? "minor" },
-            ]}
-            icon={IMPACT_ICON[v.impact ?? "minor"]}
-            actions={
-              <ActionPanel>
-                <Action.Push title="View Details" target={<ViolationDetail violation={v} />} />
-                <Action.OpenInBrowser title="Open WCAG Reference" url={v.helpUrl} />
-                <Action.CopyToClipboard title="Copy Rule ID" content={v.id} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {result.violations.length === 0 ? (
+        <List.EmptyView
+          title="No Violations Found"
+          description="This page passed all checked accessibility rules."
+          icon={Icon.CheckCircle}
+        />
+      ) : (
+        <List.Section title="Violations">
+          {result.violations.map((v) => (
+            <List.Item
+              key={v.id}
+              title={v.help}
+              subtitle={v.id}
+              accessories={[
+                {
+                  text: `${v.nodes.length} element${v.nodes.length === 1 ? "" : "s"}`,
+                },
+                { tag: v.impact ?? "minor" },
+              ]}
+              icon={IMPACT_ICON[v.impact ?? "minor"]}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="View Details" target={<ViolationDetail violation={v} />} />
+                  <Action.OpenInBrowser title="Open WCAG Reference" url={v.helpUrl} />
+                  <Action.CopyToClipboard title="Copy Rule ID" content={v.id} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
+  );
+}
+
+function ScanActions({ scannedUrl }: { scannedUrl: string }) {
+  const normalized = /^https?:\/\//i.test(scannedUrl) ? scannedUrl : `https://${scannedUrl}`;
+
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser title="Open Scanned URL" url={normalized} />
+      <Action.OpenInBrowser title="Open Full Report" url={AXLE_API} />
+      <Action.OpenInBrowser title="Open Hebrew Accessibility Statement Generator" url={STATEMENT_URL} />
+    </ActionPanel>
   );
 }
 
