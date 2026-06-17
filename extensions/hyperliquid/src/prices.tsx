@@ -8,10 +8,6 @@ import { getStoredFavorites, getStoredWallets } from "./lib/raycast-storage";
 import { getPositionRisk, riskBadge, thresholdsFromPercent, worstLevel } from "./lib/risk";
 import type { PositionRow, RiskLevel } from "./lib/types";
 
-interface Preferences {
-  liqAlertDistance?: string;
-}
-
 interface RiskyPosition {
   position: PositionRow;
   level: RiskLevel;
@@ -77,7 +73,7 @@ function riskColor(level: RiskLevel): Color {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Prices>();
   const thresholds = thresholdsFromPercent(Number(preferences.liqAlertDistance));
   const { data, isLoading, revalidate } = useCachedPromise(loadMenuBarData, [thresholds], {
     initialData: { favorites: [], markets: [], risky: [], worst: "safe" as RiskLevel },

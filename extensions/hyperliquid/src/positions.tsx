@@ -20,10 +20,6 @@ import { getAccountRisk, getPositionRisk, riskBadge, thresholdsFromPercent } fro
 import type { AggregatedPositions, PortfolioMetric, PortfolioPeriod, RiskLevel, Wallet } from "./lib/types";
 import { useLiveMids } from "./lib/use-live-mids";
 
-interface Preferences {
-  liqAlertDistance?: string;
-}
-
 const emptyPositions: AggregatedPositions = {
   summary: { accountValue: 0, unrealizedPnl: 0, marginUsed: 0, maintenanceMarginUsed: 0 },
   positions: [],
@@ -74,7 +70,7 @@ function riskColor(level: RiskLevel): Color {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Positions>();
   const thresholds = useMemo(
     () => thresholdsFromPercent(Number(preferences.liqAlertDistance)),
     [preferences.liqAlertDistance],

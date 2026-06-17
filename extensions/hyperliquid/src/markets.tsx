@@ -28,10 +28,6 @@ import { toggleFavoriteCoin } from "./lib/storage";
 import type { CandleInterval, MarketRow, PositionRow } from "./lib/types";
 import { useLiveMids } from "./lib/use-live-mids";
 
-interface Preferences {
-  defaultInterval?: CandleInterval;
-}
-
 type MarketView = "all" | "favorites" | "gainers" | "losers" | "funding";
 
 const VIEW_LABELS: Record<MarketView, string> = {
@@ -200,8 +196,8 @@ function CoinDetail({
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }) {
-  const preferences = getPreferenceValues<Preferences>();
-  const [interval, setInterval] = useState<CandleInterval>(preferences.defaultInterval ?? "1h");
+  const preferences = getPreferenceValues<Preferences.Markets>();
+  const [interval, setInterval] = useState<CandleInterval>(preferences.defaultInterval);
   const liveMids = useLiveMids(true);
   const liveMarket = applyLiveMids([market], liveMids)[0] ?? market;
   const candlesState = useCachedPromise(loadCandles, [market.coin, interval], {
