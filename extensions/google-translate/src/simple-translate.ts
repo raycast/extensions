@@ -26,6 +26,14 @@ const extractPronounceTextFromRaw = (raw: string) => {
   return raw?.[0]?.[1]?.[2];
 };
 
+function isSameLanguage(lang1: string, lang2: string): boolean {
+  if (!lang1 || !lang2) return false;
+  const l1 = lang1.toLowerCase();
+  const l2 = lang2.toLowerCase();
+  if (l1 === l2) return true;
+  return l1.split("-")[0] === l2.split("-")[0];
+}
+
 export async function simpleTranslate(text: string, options: LanguageCodeSet): Promise<SimpleTranslateResult> {
   try {
     if (!text) {
@@ -38,19 +46,38 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       };
     }
 
-    const translated = await translate(text, {
+    let targetLang = options.langTo[0];
+
+    if (options.langFrom !== AUTO_DETECT && isSameLanguage(options.langFrom, targetLang) && options.langTo.length > 1) {
+      targetLang = options.langTo[1];
+    }
+
+    let translated = await translate(text, {
       from: options.langFrom,
-      to: options.langTo[0],
+      to: targetLang,
       raw: true,
       proxy: options.proxy,
     });
+
+    let detectedLangFrom = translated?.from?.language?.iso as LanguageCode;
+
+    if (options.langFrom === AUTO_DETECT && isSameLanguage(detectedLangFrom, targetLang) && options.langTo.length > 1) {
+      targetLang = options.langTo[1];
+      translated = await translate(text, {
+        from: detectedLangFrom,
+        to: targetLang,
+        raw: true,
+        proxy: options.proxy,
+      });
+      detectedLangFrom = translated?.from?.language?.iso as LanguageCode;
+    }
 
     return {
       originalText: text,
       translatedText: translated.text,
       pronunciationText: extractPronounceTextFromRaw(translated?.raw),
-      langFrom: translated?.from?.language?.iso as LanguageCode,
-      langTo: options.langTo[0],
+      langFrom: detectedLangFrom,
+      langTo: targetLang,
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -71,6 +98,35 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
   }
 }
 
+export async function multiTranslate(text: string, options: LanguageCodeSet): Promise<SimpleTranslateResult[]> {
+  if (!text) {
+    return [];
+  }
+
+  const results = await Promise.all(
+    options.langTo.map((langTo) =>
+      simpleTranslate(text, {
+        langFrom: options.langFrom,
+        langTo: [langTo],
+        proxy: options.proxy,
+      }),
+    ),
+  );
+
+  const validResults = results.filter(Boolean) as SimpleTranslateResult[];
+
+  // Prioritize actual translations (where langFrom !== langTo) over same-language translations
+  validResults.sort((a, b) => {
+    const aIsSame = isSameLanguage(a.langFrom, a.langTo);
+    const bIsSame = isSameLanguage(b.langFrom, b.langTo);
+    if (aIsSame && !bIsSame) return 1;
+    if (!aIsSame && bIsSame) return -1;
+    return 0;
+  });
+
+  return validResults;
+}
+
 export async function doubleWayTranslate(text: string, options: LanguageCodeSet) {
   if (!text) {
     return [];
@@ -85,7 +141,7 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
-        langFrom: options.langTo[0],
+        langFrom: translated1.langTo,
         langTo: [translated1.langFrom],
         proxy: options.proxy,
       });
@@ -95,14 +151,18 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
 
     return [];
   } else {
+    let targetLang = options.langTo[0];
+    if (isSameLanguage(options.langFrom, targetLang) && options.langTo.length > 1) {
+      targetLang = options.langTo[1];
+    }
     return await Promise.all([
       simpleTranslate(text, {
         langFrom: options.langFrom,
-        langTo: options.langTo,
+        langTo: [targetLang],
         proxy: options.proxy,
       }),
       simpleTranslate(text, {
-        langFrom: options.langTo[0],
+        langFrom: targetLang,
         langTo: [options.langFrom],
         proxy: options.proxy,
       }),
