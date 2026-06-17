@@ -1,6 +1,6 @@
 # World Cup Changelog
 
-## [Menu Bar & Live Score] - {PR_MERGE_DATE}
+## [Menu Bar & Live Score] - 2026-06-17
 
 - Added a **World Cup Menu Bar** command showing the live score in the menu bar with a dropdown of every fixture, and a quick toggle to mute goal alerts
 - Added a **World Cup Live Score** background command that keeps the live score under the command name and posts a HUD when a goal is scored (celebratory, or commiserating if it's against your team)
