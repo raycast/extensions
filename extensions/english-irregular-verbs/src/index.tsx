@@ -6,23 +6,9 @@ import {
   Icon,
   List,
 } from "@raycast/api";
-import { execSync } from "child_process";
 import { useState } from "react";
 import { VERBS, IrregularVerb } from "./verbs";
-import {
-  LANG_LABELS,
-  SUPPORTED,
-  TRANSLATIONS,
-  TranslationLang,
-} from "./translations";
-
-interface Preferences {
-  language: "auto" | "none" | TranslationLang;
-}
-
-function isSupported(code: string): code is TranslationLang {
-  return (SUPPORTED as string[]).includes(code);
-}
+import { LANG_LABELS, TRANSLATIONS, TranslationLang } from "./translations";
 
 /**
  * Forms that are the American (US) variant within a UK/US irregular pair.
@@ -54,75 +40,13 @@ function withFlag(form: string): string {
   return US_VARIANTS.has(form) ? `🇺🇸 ${form}` : form;
 }
 
-/** Run a command, returning trimmed stdout or null on failure. */
-function tryExec(cmd: string): string | null {
-  try {
-    return execSync(cmd, { encoding: "utf8", timeout: 1500 }).trim();
-  } catch {
-    return null;
-  }
-}
-
-/** Pull the leading language subtag from a locale string ("fr-FR" / "fr_FR.UTF-8" → "fr"). */
-function extractLang(locale: string | null | undefined): string | null {
-  if (!locale) {
-    return null;
-  }
-  const token = locale.match(/[a-zA-Z]{2,3}(?:[-_][a-zA-Z]+)?/)?.[0];
-  const lang = token?.split(/[-_]/)[0].toLowerCase();
-  return lang && /^[a-z]{2,3}$/.test(lang) ? lang : null;
-}
-
-/**
- * Best-effort system UI language, one pipeline per OS.
- * Raycast exposes no locale API (https://github.com/raycast/extensions/issues/75) and Node's
- * `Intl` reports "en-US" regardless of the OS language, so we probe the OS directly.
- */
-function detectSystemLocale(): string | null {
-  if (process.platform === "darwin") {
-    // macOS rarely sets LANG; read the UI language preference (absolute path — Raycast's PATH is minimal).
-    return (
-      tryExec("/usr/bin/defaults read -g AppleLanguages") ??
-      tryExec("/usr/bin/defaults read -g AppleLocale")
-    );
-  }
-  if (process.platform === "win32") {
-    return tryExec(
-      'powershell -NoProfile -Command "[Globalization.CultureInfo]::CurrentUICulture.Name"',
-    );
-  }
-  // Linux & others: standard POSIX locale environment variables.
-  return (
-    process.env.LC_ALL ||
-    process.env.LC_MESSAGES ||
-    process.env.LANG ||
-    process.env.LANGUAGE ||
-    null
-  );
-}
-
-function systemLanguageCode(): string {
-  return (
-    extractLang(detectSystemLocale()) ??
-    extractLang(Intl.DateTimeFormat().resolvedOptions().locale) ??
-    "en"
-  );
-}
-
-/** Resolve the translation language from the preference, falling back to the system language. */
-function resolveLang(pref: Preferences["language"]): TranslationLang | null {
-  if (pref === "none") {
-    return null;
-  }
-  if (pref !== "auto") {
-    return pref;
-  }
-  const code = systemLanguageCode();
-  return isSupported(code) ? code : null;
+/** Resolve the translation language from the preference. */
+function resolveLang(pref: Preferences.Index["language"]): TranslationLang | null {
+  return pref === "none" ? null : pref;
 }
 
 export default function Command() {
-  const { language } = getPreferenceValues<Preferences>();
+  const { language } = getPreferenceValues<Preferences.Index>();
   const lang = resolveLang(language);
   const [showingDetail, setShowingDetail] = useState(true);
 
