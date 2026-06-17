@@ -1,4 +1,4 @@
-import { LocalStorage, environment } from "@raycast/api";
+import { Color, LocalStorage, environment } from "@raycast/api";
 import { SAPSystem, SystemType } from "./types";
 import * as fs from "fs/promises";
 import * as path from "path";
@@ -15,6 +15,13 @@ export const SYSTEM_TYPE_LABELS: Record<SystemType, string> = {
   Q: "Quality",
   P: "Production",
   S: "Other",
+};
+
+export const SYSTEM_TYPE_COLORS: Record<SystemType, Color> = {
+  E: Color.Green,
+  Q: Color.Yellow,
+  P: Color.Red,
+  S: Color.Blue,
 };
 
 function isSystemType(value: unknown): value is SystemType {

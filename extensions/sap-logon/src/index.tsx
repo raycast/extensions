@@ -15,23 +15,17 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { AddSystemForm } from "./add-system";
 import { LANGUAGES } from "./components";
-import { SAPSystem, SystemType } from "./types";
+import { SAPSystem } from "./types";
 import {
   cleanupSAPCFiles,
   createAndOpenSAPCFile,
   deleteSAPSystem,
   getSAPSystems,
   groupSystemsByCustomer,
+  SYSTEM_TYPE_COLORS,
   SYSTEM_TYPE_LABELS,
 } from "./utils";
 import EditSystemForm from "./edit-system";
-
-const SYSTEM_TYPE_COLORS: Record<SystemType, Color> = {
-  E: Color.Green,
-  Q: Color.Yellow,
-  P: Color.Red,
-  S: Color.Blue,
-};
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");

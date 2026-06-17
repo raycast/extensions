@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { LANGUAGES } from "./components";
-import { SAPSystem, SystemType } from "./types";
-import { createAndOpenSAPCFile, getSAPSystems, groupSystemsByCustomer, SYSTEM_TYPE_LABELS } from "./utils";
-
-const SYSTEM_TYPE_COLORS: Record<SystemType, Color> = {
-  E: Color.Green,
-  Q: Color.Yellow,
-  P: Color.Red,
-  S: Color.Blue,
-};
+import { SAPSystem } from "./types";
+import {
+  createAndOpenSAPCFile,
+  getSAPSystems,
+  groupSystemsByCustomer,
+  SYSTEM_TYPE_COLORS,
+  SYSTEM_TYPE_LABELS,
+} from "./utils";
 
 export default function Command() {
   const { data: systems = [], isLoading } = useCachedPromise(getSAPSystems);
@@ -35,7 +35,7 @@ export default function Command() {
     }
   }
 
-  const groups = groupSystemsByCustomer(systems);
+  const groups = useMemo(() => groupSystemsByCustomer(systems), [systems]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for a customer or system...">
