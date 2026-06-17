@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useState } from "react";
+import { useFetch } from "@raycast/utils";
+import { useMigratedCachedState } from "./migrateCachedState";
 import { Alert, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { WordReferenceErrorResponse, wordReferenceRequestHeaders } from "../wordreference";
 
@@ -35,7 +36,7 @@ export function useSearchTranslations({
         };
       },
       execute: !!searchText.trim(),
-    }
+    },
   );
 
   const data = response?.type === "success" ? response.data : [];
@@ -133,14 +134,14 @@ export interface RecentSearch {
 }
 
 export function useRecentSearches() {
-  const [recentSearches, setRecentSearches] = useCachedState<RecentSearch[]>("recentSearches", []);
+  const [recentSearches, setRecentSearches] = useMigratedCachedState<RecentSearch[]>("recentSearches", []);
 
   const addRecentSearch = ({ word, sourceLangKey, targetLangKey }: RecentSearch) => {
     const newRecentSearches = recentSearches.filter(
       (recentSearch) =>
         recentSearch.word !== word ||
         recentSearch.sourceLangKey !== sourceLangKey ||
-        recentSearch.targetLangKey !== targetLangKey
+        recentSearch.targetLangKey !== targetLangKey,
     );
     newRecentSearches.unshift({ word, sourceLangKey, targetLangKey });
     setRecentSearches(newRecentSearches);

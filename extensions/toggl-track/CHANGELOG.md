@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Quickstart New Timer] - 2026-06-17
+
+- Add a "Quickstart New Timer" command that opens the new time entry form directly, skipping the recent-entries list — assign it a global hotkey to start a timer from anywhere with one keystroke. On submit, Raycast closes immediately.
+
 ## [Bug Fixes] - 2026-05-15
 
 - Fixed "Resume Time Entry" on recent entries: use `Action` with `onAction` instead of `Action.SubmitForm`, which is for form submission and was incorrect in the list action panel

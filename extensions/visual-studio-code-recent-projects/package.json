@@ -32,7 +32,8 @@
     "emiliocantuc",
     "raxityo",
     "yusifaliyevpro",
-    "jkker"
+    "jkker",
+    "sillashead"
   ],
   "keywords": [
     "vscode",
@@ -42,6 +43,7 @@
     "codium",
     "kiro",
     "positron",
+    "devin",
     "windsurf",
     "trae",
     "trae-cn",
@@ -143,6 +145,10 @@
         {
           "title": "Visual Studio Code - Insiders",
           "value": "Code - Insiders"
+        },
+        {
+          "title": "Devin",
+          "value": "Devin"
         },
         {
           "title": "Windsurf",

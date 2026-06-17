@@ -12,6 +12,11 @@ interface ExtensionListItemProps {
   filter: FilterValue;
   trackReadStatus: boolean;
   toggles: FilterToggles;
+  categoryFilter: string | null;
+  authorFilter: string | null;
+  availableCategories: string[];
+  onSetCategory: (category: string | null) => void;
+  onSetAuthor: (author: string | null) => void;
   onToggleMacOS: () => Promise<void>;
   onToggleWindows: () => Promise<void>;
   onMarkAsRead?: (itemId: string) => Promise<void>;
@@ -28,6 +33,11 @@ export function ExtensionListItem({
   filter,
   trackReadStatus,
   toggles,
+  categoryFilter,
+  authorFilter,
+  availableCategories,
+  onSetCategory,
+  onSetAuthor,
   onToggleMacOS,
   onToggleWindows,
   onMarkAsRead,
@@ -78,6 +88,11 @@ export function ExtensionListItem({
           currentIndex={currentIndex}
           trackReadStatus={trackReadStatus}
           toggles={toggles}
+          categoryFilter={categoryFilter}
+          authorFilter={authorFilter}
+          availableCategories={availableCategories}
+          onSetCategory={onSetCategory}
+          onSetAuthor={onSetAuthor}
           onToggleMacOS={onToggleMacOS}
           onToggleWindows={onToggleWindows}
           onMarkAsRead={onMarkAsRead}

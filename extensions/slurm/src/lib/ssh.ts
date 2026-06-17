@@ -87,7 +87,12 @@ export async function isMasterUp(host: string): Promise<boolean> {
   if (DEMO_MODE && isDemoHost(host)) return true;
   await ensureControlDir();
   try {
-    await requireHostInConfig(host);
+    // No requireHostInConfig() here on purpose: `-O check` is a local-only probe
+    // of the ControlPath socket, harmless for any alias, and this runs once per
+    // host on the Select Clusters view. Calling requireHostInConfig would reparse
+    // the whole ~/.ssh/config (Include expansion + compute per alias) once per
+    // host — O(N²) work that stalls the extension thread (and the keypress
+    // handler) for seconds on larger configs. Any failure here just means "down".
     await execFileP(SSH_BIN, [...baseOpts(), "-O", "check", host], { timeout: 5_000 });
     return true;
   } catch {

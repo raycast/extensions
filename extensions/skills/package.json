@@ -37,6 +37,13 @@
       "subtitle": "Skills",
       "description": "View and remove installed skills",
       "mode": "view"
+    },
+    {
+      "name": "update-all-skills",
+      "title": "Update All Skills",
+      "subtitle": "Skills",
+      "description": "Update all installed skills",
+      "mode": "no-view"
     }
   ],
   "tools": [

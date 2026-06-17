@@ -2,8 +2,9 @@ import { ActionPanel, List, Action, getPreferenceValues, environment, showToast,
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
+import { FdIndexType, parseSearchQuery } from "./lib/parse-search-query";
 import os from "os";
 import fs from "fs";
 import afs from "fs/promises";
@@ -22,6 +23,9 @@ type Prefs = {
   customSearchDirs: string;
 };
 
+const MAX_FZF_RESULTS = 200;
+const FZF_DEBOUNCE_MS = 200;
+
 export default function Command() {
   const abortableFd = useRef<AbortController>(new AbortController());
   const abortableFzf = useRef<AbortController>(new AbortController());
@@ -29,6 +33,19 @@ export default function Command() {
 
   const [searchText, setSearchText] = useState("");
   const [searchRoot, setSearchRoot] = useCachedState<string>("searchRootKey", os.homedir());
+  const parsedSearch = useMemo(
+    () => parseSearchQuery(searchText, prefs.ignoreSpacesInSearch, os.homedir()),
+    [searchText, prefs.ignoreSpacesInSearch],
+  );
+  const [debouncedQuery, setDebouncedQuery] = useState(parsedSearch.query);
+  const [resultsIndexType, setResultsIndexType] = useState<FdIndexType | null>(null);
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedQuery(parsedSearch.query), FZF_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [parsedSearch.query]);
+  useEffect(() => {
+    setResultsIndexType(null);
+  }, [parsedSearch.indexType]);
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -85,9 +102,10 @@ export default function Command() {
 
   // Get fdOutput filepath
   const { data: fdOutput, isLoading: isFdOutputLoading } = useCachedPromise(
-    async (searchRoot?: string, fdPath?: string) => {
+    async (searchRoot?: string, fdPath?: string, indexType?: FdIndexType) => {
       assert(searchRoot !== undefined);
       assert(fdPath !== undefined);
+      assert(indexType !== undefined);
 
       const ignoreFile = path.join(os.homedir(), ".config", "fd", "ignore");
       if (!fs.existsSync(ignoreFile)) {
@@ -108,7 +126,11 @@ export default function Command() {
       }
 
       let optionalArgs: string[] = [];
-      if (!prefs.includeDirectories) {
+      if (indexType === "directory") {
+        optionalArgs = [...optionalArgs, "--type", "d"];
+      } else if (indexType === "file") {
+        optionalArgs = [...optionalArgs, "--type", "f"];
+      } else if (!prefs.includeDirectories) {
         optionalArgs = [...optionalArgs, "--type", "file"];
       }
       if (prefs.includeHidden) {
@@ -121,7 +143,7 @@ export default function Command() {
       const searchDirs = searchRoot.split(" ");
 
       // Final file fzf is reading from
-      const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
+      const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}-${indexType}.txt`);
       // File to write to during the indexing
       const fdOutputTemp = `${fdOutput}.${Date.now()}${randomInt(10000)}.temp`;
 
@@ -173,9 +195,9 @@ export default function Command() {
       console.log(`renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       await afs.rename(fdOutputTemp, fdOutput);
       console.log(`finished renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
-      return { filepath: fdOutput, randomUUID: randomUUID() };
+      return { filepath: fdOutput, randomUUID: randomUUID(), indexType };
     },
-    [searchRoot, fdPath],
+    [searchRoot, fdPath, parsedSearch.indexType],
     {
       execute: searchRoot !== undefined && fdPath !== undefined,
       abortable: abortableFd,
@@ -185,33 +207,36 @@ export default function Command() {
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
-    async (searchText: string, fzfPath?: string, fdOutput?: string, _?: string) => {
+    async (query: string, fzfPath?: string, fdOutput?: string, _?: string) => {
       assert(fzfPath !== undefined);
       assert(fdOutput !== undefined);
       assert(_ !== undefined); // required by linter
 
-      // sanitize input
-      let searchTerm = searchText;
-      if (prefs.ignoreSpacesInSearch) {
-        searchTerm = searchTerm.replaceAll(" ", "");
-      }
-      searchTerm = searchTerm.replaceAll("~", os.homedir());
-
       const filteredResults: string[] = [];
+      if (!query) {
+        return filteredResults;
+      }
+
       const fdOutputFD = fs.openSync(fdOutput, "r");
       try {
-        const fzf = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
+        const fzf = spawn(fzfPath, ["--read0", "--filter", query], {
           stdio: [fdOutputFD, "pipe", "pipe"],
           signal: abortableFzf.current?.signal,
         });
         await new Promise<void>((resolve, reject) => {
+          let hitResultLimit = false;
+          let aborted = false;
           const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
           rl.on("line", (line) => {
+            if (aborted) {
+              return;
+            }
             // Limit results, as otherwise they will exceed memory limits,
             // raycast will terminate the extension. Issue #21580
-            if (filteredResults.length >= 1000) {
-              // It sends the kill signal when reaching 1000,
-              // so results will be larger than 1000
+            if (filteredResults.length >= MAX_FZF_RESULTS) {
+              // It sends the kill signal when reaching the cap,
+              // so results may be slightly larger than MAX_FZF_RESULTS
+              hitResultLimit = true;
               fzf.kill();
             } else {
               filteredResults.push(line);
@@ -224,13 +249,20 @@ export default function Command() {
           });
 
           fzf.on("error", () => {
+            aborted = true;
             console.log("aborting fzf");
           });
 
           fzf.on("close", (code) => {
             rl.close();
+            if (aborted) {
+              const error = new Error("Aborted");
+              error.name = "AbortError";
+              reject(error);
+              return;
+            }
             // Fzf returns error code 1 if output is empty
-            if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
+            if (code === 0 || code === null || hitResultLimit || (code === 1 && stderr.length === 0)) {
               resolve();
             } else {
               reject(`Exit code of 'fzf' = ${code}:\n${stderr}`);
@@ -244,18 +276,36 @@ export default function Command() {
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
-    [searchText, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
+    [debouncedQuery, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
-      execute: fzfPath !== undefined && fdOutput !== undefined,
+      execute:
+        fzfPath !== undefined &&
+        fdOutput !== undefined &&
+        !isFdOutputLoading &&
+        fdOutput.indexType === parsedSearch.indexType &&
+        debouncedQuery.length > 0,
       abortable: abortableFzf,
+      onData: () => {
+        setResultsIndexType(parsedSearch.indexType);
+      },
     },
   );
+
+  const isIndexReady = fdOutput !== undefined && fdOutput.indexType === parsedSearch.indexType;
+  const isResultsCurrent = resultsIndexType === parsedSearch.indexType;
+  const displayPaths = debouncedQuery && isIndexReady && isResultsCurrent ? filteredPaths : undefined;
 
   return (
     <List
       navigationTitle="Search Files"
-      isLoading={isFdLoading || isFdOutputLoading || isFzfCliLoading || isFilteredPathsLoading}
-      searchBarPlaceholder={"Search for your files"}
+      isLoading={
+        isFdLoading ||
+        isFzfCliLoading ||
+        isFdOutputLoading ||
+        isFilteredPathsLoading ||
+        (debouncedQuery.length > 0 && (!isIndexReady || !isResultsCurrent))
+      }
+      searchBarPlaceholder={"Search files — use -d or -f for directories/files only"}
       onSearchTextChange={setSearchText}
       filtering={false} // disable builtin filtering as we use a custom one
       searchBarAccessory={
@@ -266,7 +316,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredPaths?.map((filepath) => {
+      {displayPaths?.map((filepath) => {
         const filename = basename(filepath);
         return (
           <List.Item

@@ -1,5 +1,9 @@
 # HTTP Status Codes Changelog
 
+## [Fix Section Labels] - 2026-06-15
+
+- Shorten status-code section subtitles so they do not overflow in the list header
+
 ## [Windows Support] - 2026-03-12
 
 - Add support for Windows

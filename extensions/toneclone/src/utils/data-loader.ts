@@ -35,7 +35,7 @@ export async function loadInitialData(options: {
 
   // Load remaining data in parallel
   const [presetsData, frontmostApp] = await Promise.all([
-    api.getQueryPresets("raycast://extensions/jfox/toneclone/generate-text"),
+    api.getQueryPresets(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/jfox/toneclone/generate-text`),
     getFrontmostApplication().catch((error) => {
       console.warn("Could not get frontmost application:", error);
       return undefined;

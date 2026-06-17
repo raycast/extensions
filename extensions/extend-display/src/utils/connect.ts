@@ -16,12 +16,13 @@ do shell script "open -b com.apple.systempreferences /System/Library/PreferenceP
 
 set device to (system attribute "Device_Name")
 set mirrorSectionName to (system attribute "Mirror_Section_Name")
+set raycastScheme to (system attribute "Raycast_Scheme")
 
 on cleanup()
   try
     tell application "System Settings" to quit
   end try
-  do shell script "open raycast://"
+  do shell script "open " & raycastScheme & "://"
   delay 0.3
 end cleanup
 
@@ -119,7 +120,7 @@ tell application "System Events"
 end tell
 
 tell application "System Settings" to quit
-do shell script "open raycast://"
+do shell script "open " & raycastScheme & "://"
 delay 0.3
 return "success"
 `;
@@ -167,6 +168,7 @@ export async function connectToDisplay(
         ...process.env,
         Device_Name: displayName,
         Mirror_Section_Name: MIRROR_SECTION_NAME,
+        Raycast_Scheme: process.env.RAYCAST_SCHEME ?? "raycast",
       },
     });
 

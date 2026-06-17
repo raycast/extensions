@@ -81,7 +81,7 @@ function useWordTranslation({ word, baseUrl }: { word: string; lang: string; bas
             firstTranslation.definition ? `\n  *${firstTranslation.definition}*` : ""
           }`,
           ...otherTranslations.map(
-            (toItem) => `- **${toItem.word}** (${toItem.type})${toItem.definition ? `\n  *${toItem.definition}*` : ""}`
+            (toItem) => `- **${toItem.word}** (${toItem.type})${toItem.definition ? `\n  *${toItem.definition}*` : ""}`,
           ),
         ].join("\n");
 

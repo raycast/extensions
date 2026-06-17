@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
@@ -70,8 +70,7 @@ export default function ExploreThemes() {
   }, [appearanceFilter, themes]);
 
   function getThemeURL(theme: Theme): string {
-    const { raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const encode = (value: string) => encodeURIComponent(value);
     const urlWithoutColors = `${protocol}theme?version=${theme.version}&name=${encode(theme.name)}&appearance=${encode(
