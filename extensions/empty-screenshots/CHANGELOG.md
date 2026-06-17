@@ -1,6 +1,6 @@
 # Empty Screenshot Folder Changelog
 
-## [Added macOS Screenshot app integration] - {PR_MERGE_DATE}
+## [Added macOS Screenshot app integration] - 2026-06-17
 
 - Added option to use macOS Screenshot app folder location and file naming conventions
 - Added "All screenshots" option to remove all screenshots regardless of age
