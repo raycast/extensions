@@ -1,0 +1,13 @@
+# dependencies
+node_modules
+
+# raycast build output
+.raycast-swift-build
+.swiftpm
+compiled.entitlements
+dist
+
+# misc
+.DS_Store
+*.log
+.eslintcache
