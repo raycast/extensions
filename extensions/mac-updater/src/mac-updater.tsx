@@ -37,7 +37,6 @@ import {
   formatDate,
 } from "./utils/detail";
 import { hostnameOf, navigationTitle, timeOfDay } from "./utils/format";
-import { appUsesTech, computeTechnologyCounts } from "./utils/technologies";
 import { SOURCE_META } from "./utils/source-meta";
 import * as fs from "fs";
 import { isOnboarded, resetOnboarding } from "./utils/onboarding-store";
@@ -80,28 +79,11 @@ import HiddenView from "./components/views/HiddenView";
 import Help from "./components/Help";
 import { isHomebrewInstalled } from "./utils/sources/homebrew";
 
-type Filter =
-  // Updates
-  | "updates-apps"
-  | "updates-packages"
-  // Installed
-  | "installed-apps"
-  | "installed-adoptable"
-  | "installed-no-source"
-  | "installed-packages"
-  | "installed-hidden"
-  | "installed-history"
-  // Sources (apps)
-  | "src-homebrew-cask"
-  | "src-mas"
-  | "src-sparkle"
-  | "src-electron"
-  | "src-github"
-  // Sources (packages)
-  | "src-homebrew-formula"
-  | "src-npm"
-  | "src-pip"
-  | "src-gem";
+// Three views, period. "Updates" is the whole point; "Library" is everything
+// installed (browse + adopt); "Activity" is history + what you've hidden. Source
+// filtering lives on each row (badge) and via search — it was never worth a
+// top-level nav slot.
+type Filter = "updates" | "library" | "activity";
 
 // SOURCE_META lives in utils/source-meta.ts so item components can import it directly.
 
@@ -112,7 +94,7 @@ export default function MacUpdater() {
   const [ignoreStates, setIgnoreStates] = useState<IgnoreState[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<Filter>("updates-apps");
+  const [filter, setFilter] = useState<Filter>("updates");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -527,48 +509,16 @@ export default function MacUpdater() {
     (scan?.apps.filter((a) => a.hasUpdate).length ?? 0) +
     (scan?.cliPackages.length ?? 0);
 
-  // Per-filter counts for the sidebar-style dropdown
-  const counts = (() => {
-    const c: Record<string, number> = {};
-    if (!scan) return c;
-    c["updates-apps"] = scan.apps.filter((a) => a.hasUpdate).length;
-    c["updates-packages"] = scan.cliPackages.length;
-    c["installed-apps"] = scan.apps.length + scan.unmanaged.length;
-    c["installed-adoptable"] = adoptable.length;
-    c["installed-no-source"] = scan.unmanaged.filter(
-      (a) => !a.suggestedCask,
-    ).length;
-    c["installed-packages"] = scan.allInstalledPackages.length;
-    c["installed-hidden"] = scan.ignoredApps.length;
-    c["installed-history"] = history.length;
-
-    const allApps = [...scan.apps.map((u) => u.app), ...scan.unmanaged];
-    // Per-tech counts (replaces the old priority-chain-based counting)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const bySrcApp: Record<string, number> = {};
-    // Source filters now describe the *update technology* an app uses, not the
-    // currently-chosen primary source. That means HandBrake shows up under both
-    // Homebrew (because brew manages it) AND Sparkle (because it ships with a
-    // Sparkle feed). Matches what Updatest shows.
-    const techCounts = computeTechnologyCounts(scan, adoptable.length);
-    c["src-homebrew-cask"] = techCounts["homebrew-cask"];
-    c["src-mas"] = techCounts["mas"];
-    c["src-sparkle"] = techCounts["sparkle"];
-    c["src-electron"] = techCounts["electron"];
-    c["src-github"] = techCounts["github"];
-
-    // Per-source package counts use the *all installed* list (matches Updatest behavior)
-    const bySrcPkg: Record<string, number> = {};
-    for (const p of scan.allInstalledPackages)
-      bySrcPkg[p.source] = (bySrcPkg[p.source] ?? 0) + 1;
-    c["src-homebrew-formula"] = bySrcPkg["homebrew-formula"] ?? 0;
-    c["src-npm"] = bySrcPkg["npm"] ?? 0;
-    c["src-pip"] = bySrcPkg["pip"] ?? 0;
-    c["src-gem"] = bySrcPkg["gem"] ?? 0;
-
-    void allApps;
-    return c;
-  })();
+  // Counts for the three views.
+  const counts: Record<Filter, number> = {
+    updates: updatesCount,
+    library: scan
+      ? scan.apps.length +
+        scan.unmanaged.length +
+        scan.allInstalledPackages.length
+      : 0,
+    activity: (scan?.ignoredApps.length ?? 0) + history.length,
+  };
 
   return (
     <List
@@ -587,121 +537,45 @@ export default function MacUpdater() {
           value={filter}
           onChange={(v) => setFilter(v as Filter)}
         >
-          {/* Updates section: Apps is always visible (it's the default view).
-              Packages only shows when there are CLI package updates. */}
-          <List.Dropdown.Section title="Updates">
-            {dropdownItem(
-              "Apps",
-              "updates-apps",
-              Icon.AppWindowGrid2x2,
-              counts["updates-apps"],
-              { alwaysShow: true },
-            )}
-            {dropdownItem(
-              "Packages",
-              "updates-packages",
-              Icon.Terminal,
-              counts["updates-packages"],
-            )}
-          </List.Dropdown.Section>
-          {/* Installed section: Apps is always visible. Everything else is conditional. */}
-          <List.Dropdown.Section title="Installed">
-            {dropdownItem(
-              "Apps",
-              "installed-apps",
-              Icon.AppWindowGrid2x2,
-              counts["installed-apps"],
-              { alwaysShow: true },
-            )}
-            {dropdownItem(
-              "Adoptable",
-              "installed-adoptable",
-              Icon.Mug,
-              counts["installed-adoptable"],
-            )}
-            {dropdownItem(
-              "No Source",
-              "installed-no-source",
-              Icon.QuestionMark,
-              counts["installed-no-source"],
-            )}
-            {dropdownItem(
-              "Packages",
-              "installed-packages",
-              Icon.Terminal,
-              counts["installed-packages"],
-            )}
-            {dropdownItem(
-              "Hidden",
-              "installed-hidden",
-              Icon.EyeDisabled,
-              counts["installed-hidden"],
-            )}
-            {dropdownItem(
-              "History",
-              "installed-history",
-              Icon.Clock,
-              counts["installed-history"],
-            )}
-          </List.Dropdown.Section>
-          {/* Sources sections — only show sources where there's actually something to see */}
-          <List.Dropdown.Section title="Apps by source">
-            {dropdownItem(
-              "Homebrew",
-              "src-homebrew-cask",
-              Icon.Mug,
-              counts["src-homebrew-cask"],
-            )}
-            {dropdownItem(
-              "App Store",
-              "src-mas",
-              Icon.Store,
-              counts["src-mas"],
-            )}
-            {dropdownItem(
-              "Sparkle",
-              "src-sparkle",
-              Icon.Stars,
-              counts["src-sparkle"],
-            )}
-            {dropdownItem(
-              "Electron",
-              "src-electron",
-              Icon.Bolt,
-              counts["src-electron"],
-            )}
-            {dropdownItem(
-              "GitHub",
-              "src-github",
-              Icon.Code,
-              counts["src-github"],
-            )}
-          </List.Dropdown.Section>
-          <List.Dropdown.Section title="Packages by source">
-            {dropdownItem(
-              "Homebrew",
-              "src-homebrew-formula",
-              Icon.Mug,
-              counts["src-homebrew-formula"],
-            )}
-            {dropdownItem("npm", "src-npm", Icon.Globe, counts["src-npm"])}
-            {dropdownItem("Python", "src-pip", Icon.Code, counts["src-pip"])}
-            {dropdownItem("Ruby", "src-gem", Icon.Star, counts["src-gem"])}
-          </List.Dropdown.Section>
+          {dropdownItem(
+            "Updates",
+            "updates",
+            Icon.ArrowClockwise,
+            counts.updates,
+            {
+              alwaysShow: true,
+            },
+          )}
+          {dropdownItem(
+            "Library",
+            "library",
+            Icon.AppWindowGrid2x2,
+            counts.library,
+            {
+              alwaysShow: true,
+            },
+          )}
+          {dropdownItem("Activity", "activity", Icon.Clock, counts.activity, {
+            alwaysShow: true,
+          })}
         </List.Dropdown>
       }
     >
-      {filter === "updates-apps" && <>{renderUpdates()}</>}
-      {filter === "updates-packages" && <>{renderPackagesOnly()}</>}
-      {filter === "installed-apps" && <>{renderAllApps()}</>}
-      {filter === "installed-adoptable" && <>{renderAdoptable()}</>}
-      {filter === "installed-no-source" && <>{renderNoSource()}</>}
-      {filter === "installed-packages" && <>{renderAllPackages()}</>}
-      {filter === "installed-hidden" && <>{renderHidden()}</>}
-      {filter === "installed-history" && <>{renderHistory()}</>}
-      {filter.startsWith("src-") && <>{renderSource(filter)}</>}
+      {filter === "updates" && <>{renderUpdates()}</>}
+      {filter === "library" && (
+        <>
+          {renderAllApps()}
+          {renderAllPackages()}
+        </>
+      )}
+      {filter === "activity" && (
+        <>
+          {renderHistory()}
+          {renderHidden()}
+        </>
+      )}
 
-      {!isLoading && updatesCount === 0 && filter === "updates-apps" && (
+      {!isLoading && updatesCount === 0 && filter === "updates" && (
         <List.EmptyView
           icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
           title="Up to date"
@@ -1101,78 +975,6 @@ export default function MacUpdater() {
     return sections;
   }
 
-  function renderAdoptable() {
-    if (!scan) return null;
-    if (adoptable.length === 0) {
-      return (
-        <List.EmptyView
-          icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-          title="Nothing to adopt"
-          description="Every matchable app is already brew-managed."
-          actions={
-            <ActionPanel>
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                onAction={load}
-              />
-            </ActionPanel>
-          }
-        />
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const banners: any[] = [
-      <List.Item
-        key="bulk-adopt-banner"
-        icon={{ source: Icon.Rocket, tintColor: Color.Blue }}
-        title={`Adopt all ${adoptable.length} now`}
-        subtitle="One confirm, then they install serially"
-        accessories={[{ tag: { value: "⌘⇧A", color: Color.Blue } }]}
-        actions={
-          <ActionPanel>
-            <Action
-              title={`Adopt ${adoptable.length}`}
-              icon={Icon.Mug}
-              onAction={openAdoptionFlow}
-            />
-            <Action
-              title="Refresh"
-              icon={Icon.RotateClockwise}
-              onAction={load}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Force Rescan (Clear Cache)"
-              icon={Icon.RotateAntiClockwise}
-              onAction={forceRescan}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-          </ActionPanel>
-        }
-      />,
-    ];
-
-    return (
-      <>
-        <List.Section>
-          <>{banners}</>
-        </List.Section>
-        <List.Section
-          title="Available on Homebrew"
-          subtitle={`${adoptable.length}`}
-        >
-          <>
-            {adoptable.map(({ app, caskToken }) =>
-              renderAdoptableItem(app, caskToken),
-            )}
-          </>
-        </List.Section>
-      </>
-    );
-  }
-
   function renderHidden() {
     if (!scan) return null;
     return (
@@ -1188,37 +990,6 @@ export default function MacUpdater() {
 
   function renderHistory() {
     return <HistoryView history={history} onRefresh={load} />;
-  }
-
-  function renderNoSource() {
-    if (!scan) return null;
-    const orphans = scan.unmanaged.filter((a) => !a.suggestedCask);
-    if (orphans.length === 0) {
-      return (
-        <List.EmptyView
-          icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-          title="Every app has somewhere to look"
-          description="No orphan apps — either there's a source, or a cask suggestion exists."
-          actions={
-            <ActionPanel>
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                onAction={load}
-              />
-            </ActionPanel>
-          }
-        />
-      );
-    }
-    return (
-      <List.Section
-        title="No Update Source Found"
-        subtitle={`${orphans.length}`}
-      >
-        {orphans.map((app) => renderUnmanagedItem(app))}
-      </List.Section>
-    );
   }
 
   function renderAllPackages() {
@@ -1258,160 +1029,6 @@ export default function MacUpdater() {
       );
     }
     return <>{sections}</>;
-  }
-
-  function renderPackagesOnly() {
-    if (!scan) return null;
-    if (scan.cliPackages.length === 0) {
-      return (
-        <List.EmptyView
-          icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-          title="All CLI packages are current"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                onAction={load}
-              />
-            </ActionPanel>
-          }
-        />
-      );
-    }
-    return (
-      <List.Section title="Packages" subtitle={`${scan.cliPackages.length}`}>
-        {scan.cliPackages.map((p) => renderCliItem(p))}
-      </List.Section>
-    );
-  }
-
-  function renderSource(srcFilter: Filter) {
-    if (!scan) return null;
-    const srcKey = srcFilter.replace(/^src-/, "") as Source;
-    const isAppSource = [
-      "homebrew-cask",
-      "mas",
-      "sparkle",
-      "electron",
-      "github",
-    ].includes(srcKey);
-
-    if (isAppSource) {
-      // Tech-based filter: an app belongs to a source if it USES that update
-      // technology, regardless of which source the coordinator chose as primary.
-      const matchingApps = scan.apps.filter((u) => appUsesTech(u.app, srcKey));
-      const matchingUnmanagedRaw = scan.unmanaged.filter((a) =>
-        appUsesTech(a, srcKey),
-      );
-
-      const withUpdate = matchingApps.filter((a) => a.hasUpdate);
-      const upToDate = matchingApps.filter((a) => !a.hasUpdate);
-
-      const isHomebrew = srcKey === "homebrew-cask";
-      const showAdoptable = isHomebrew && adoptable.length > 0;
-
-      if (
-        matchingApps.length === 0 &&
-        matchingUnmanagedRaw.length === 0 &&
-        !showAdoptable
-      ) {
-        return (
-          <List.EmptyView
-            icon={{
-              source: SOURCE_META[srcKey].icon,
-              tintColor: SOURCE_META[srcKey].color,
-            }}
-            title={`No ${SOURCE_META[srcKey].label} apps detected`}
-            description={
-              isHomebrew
-                ? "Install apps via `brew install --cask` to manage them here."
-                : `None of your installed apps use ${SOURCE_META[srcKey].label}.`
-            }
-          />
-        );
-      }
-
-      return (
-        <>
-          {withUpdate.length > 0 && (
-            <List.Section
-              title="Update Available"
-              subtitle={`${withUpdate.length}`}
-            >
-              {withUpdate.map((info) => renderAppItem(info))}
-            </List.Section>
-          )}
-          {upToDate.length > 0 && (
-            <List.Section
-              title={isHomebrew ? "Managed by Homebrew" : "Up to Date"}
-              subtitle={`${upToDate.length}`}
-            >
-              {upToDate.map((info) => renderAppItem(info))}
-            </List.Section>
-          )}
-          {matchingUnmanagedRaw.length > 0 && (
-            <List.Section
-              title="No Update Source Wired Up"
-              subtitle={`${matchingUnmanagedRaw.length}`}
-            >
-              {matchingUnmanagedRaw.map((app) => renderUnmanagedItem(app))}
-            </List.Section>
-          )}
-          {showAdoptable && (
-            <List.Section
-              title="Available on Homebrew (not yet adopted)"
-              subtitle={`${adoptable.length}`}
-            >
-              <>
-                {adoptable.map(({ app, caskToken }) =>
-                  renderAdoptableItem(app, caskToken),
-                )}
-              </>
-            </List.Section>
-          )}
-        </>
-      );
-    }
-
-    // Package source — split into outdated vs up-to-date from the full installed list
-    const allPkgs = scan.allInstalledPackages.filter(
-      (p) => p.source === srcKey,
-    );
-    if (allPkgs.length === 0) {
-      return (
-        <List.EmptyView
-          icon={{
-            source: SOURCE_META[srcKey].icon,
-            tintColor: SOURCE_META[srcKey].color,
-          }}
-          title={`Nothing installed via ${SOURCE_META[srcKey].label}`}
-          description="Install something through this manager to see it here."
-        />
-      );
-    }
-    const outdatedKeys = new Set(
-      scan.cliPackages.filter((p) => p.source === srcKey).map((p) => p.name),
-    );
-    const outdatedPkgs = allPkgs.filter((p) => outdatedKeys.has(p.name));
-    const currentPkgs = allPkgs.filter((p) => !outdatedKeys.has(p.name));
-    return (
-      <>
-        {outdatedPkgs.length > 0 && (
-          <List.Section
-            title="Update Available"
-            subtitle={`${outdatedPkgs.length}`}
-          >
-            {outdatedPkgs.map((p) => renderCliItem(p))}
-          </List.Section>
-        )}
-        {currentPkgs.length > 0 && (
-          <List.Section title="Up to Date" subtitle={`${currentPkgs.length}`}>
-            {currentPkgs.map((p) => renderCliItem(p))}
-          </List.Section>
-        )}
-      </>
-    );
   }
 
   function renderAppItem(info: UpdateInfo) {
