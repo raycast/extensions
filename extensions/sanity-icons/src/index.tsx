@@ -267,11 +267,11 @@ export default function Command() {
                 <Action.CopyToClipboard title="Copy Name" content={outline || filled || sanityIcon.name} />
                 <Action.CopyToClipboard
                   title="Copy React Import"
-                  content={getImportStatement(outline || sanityIcon.name)}
+                  content={getImportStatement(outline || filled || sanityIcon.name)}
                 />
                 <Action.CopyToClipboard
                   title="Copy React Component Name"
-                  content={getComponentName(outline || sanityIcon.name)}
+                  content={getComponentName(outline || filled || sanityIcon.name)}
                   shortcut={Keyboard.Shortcut.Common.CopyPath}
                 />
                 {filled && <Action.CopyToClipboard title="Copy Filled Name" content={filled} />}
