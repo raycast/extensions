@@ -1,8 +1,9 @@
 # Slack Changelog
 
-## [Add Slack thread reader AI tool] - 2026-06-16
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
 
 - Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
 
 ## [Fix Set Status deep link with raw emoji] - 2026-06-13
 

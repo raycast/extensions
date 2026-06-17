@@ -26,10 +26,11 @@ type Input = {
 
 type ThreadMessage = NonNullable<
   Awaited<ReturnType<ReturnType<typeof getSlackWebClient>["conversations"]["replies"]>>["messages"]
->[number];
+>[number] & { username?: string };
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
+const USER_MENTION_REGEX = /<@([UW][A-Z0-9]+)>/g;
 
 function getMessageText(message: ThreadMessage) {
   if (message.text) {
@@ -69,6 +70,63 @@ function getLimit(limit?: number) {
   return Math.min(Math.max(Math.floor(limit), 1), MAX_LIMIT);
 }
 
+function getUserIdsFromText(text?: string) {
+  if (!text) {
+    return [];
+  }
+
+  return [...text.matchAll(USER_MENTION_REGEX)].map((match) => match[1]).filter(Boolean);
+}
+
+async function getUserNameMap(messages: ThreadMessage[]) {
+  const slackWebClient = getSlackWebClient();
+  const userIds = new Set<string>();
+
+  for (const message of messages) {
+    if (message.user) {
+      userIds.add(message.user);
+    }
+
+    for (const userId of getUserIdsFromText(getMessageText(message))) {
+      userIds.add(userId);
+    }
+  }
+
+  const userNameById = new Map<string, string>();
+  let cursor: string | undefined;
+  do {
+    const response = await slackWebClient.users.list({
+      limit: 1000,
+      cursor,
+    });
+
+    if (response.error) {
+      break;
+    }
+
+    for (const user of response.members ?? []) {
+      if (user.id && userIds.has(user.id)) {
+        userNameById.set(
+          user.id,
+          user.profile?.display_name || user.profile?.real_name || user.real_name || user.name || user.id,
+        );
+      }
+    }
+
+    cursor = response.response_metadata?.next_cursor;
+  } while (cursor && userNameById.size < userIds.size);
+
+  return userNameById;
+}
+
+function replaceUserMentions(text: string | undefined, userNameById: Map<string, string>) {
+  return text?.replace(USER_MENTION_REGEX, (mention, userId: string) => {
+    const userName = userNameById.get(userId);
+
+    return userName ? `@${userName}` : mention;
+  });
+}
+
 async function readThread(input: Input) {
   const slackWebClient = getSlackWebClient();
   const limit = getLimit(input.limit);
@@ -86,11 +144,16 @@ async function readThread(input: Input) {
 
   const nextCursor = response.response_metadata?.next_cursor || undefined;
   const hasMore = Boolean(response.has_more || nextCursor);
+  const messages = (response.messages ?? []) as ThreadMessage[];
+  const userNameById = await getUserNameMap(messages);
 
   return {
-    messages: response.messages?.map((message) => ({
-      text: getMessageText(message),
-      user: message.user ?? message.bot_profile?.name,
+    messages: messages.map((message) => ({
+      text: replaceUserMentions(getMessageText(message), userNameById),
+      // Incoming webhooks set `username` when `user` and `bot_profile` are absent.
+      user: message.user
+        ? userNameById.get(message.user) || message.user
+        : (message.bot_profile?.name ?? message.username),
       ts: message.ts,
       date: timestampToIsoDate(message.ts),
       isParentMessage: message.ts === input.threadTs,
