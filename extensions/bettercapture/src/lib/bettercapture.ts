@@ -119,7 +119,7 @@ export function getRecordingsDirectory(): string {
 export async function openRecordingsFolder(): Promise<void> {
   const directory = getRecordingsDirectory();
   mkdirSync(directory, { recursive: true });
-  execSync(`open "${directory}"`);
+  await open(directory);
 }
 
 export async function toggleRecording(): Promise<void> {
