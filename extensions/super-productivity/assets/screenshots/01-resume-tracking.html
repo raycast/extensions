@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Resume Tracking — Raycast Super Productivity</title>
+<style>
+  :root {
+    --bg-page: #0d1014;
+    --bg-window: #1c2125;
+    --bg-soft: #232a30;
+    --bg-row: #1f252a;
+    --bg-row-focus: rgba(255, 99, 99, 0.10);
+    --text-primary: #ecedee;
+    --text-secondary: #b8bcc1;
+    --text-muted: #7a8189;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.10);
+    --accent: #ff6363;
+    --accent-text: #ff8888;
+    --play: #ffd252;
+    --play-bg: rgba(255, 210, 68, 0.16);
+    --rewind: #76ccd5;
+    --rewind-bg: rgba(118, 204, 213, 0.16);
+    --check: #5fc88e;
+    --check-bg: rgba(95, 200, 142, 0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a1f24 0%, #07090b 100%);
+  }
+  .window {
+    width: 880px;
+    height: 600px;
+    background: var(--bg-window);
+    border-radius: 14px;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .toolbar {
+    height: 36px;
+    background: rgba(255, 255, 255, 0.025);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .toolbar .title { font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em; }
+  .toolbar-spacer { flex: 1; }
+  .toolbar-meta { color: var(--text-muted); font-size: 11.5px; }
+  .body { flex: 1; display: flex; }
+  .pane { flex: 1; padding: 6px 0; overflow: hidden; }
+  .search {
+    padding: 10px 18px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-row {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .caret {
+    width: 2px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 1px;
+    animation: blink 1.2s infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0.2; }
+  }
+  .filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 9px;
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+  .filter-tag .pill-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rewind);
+  }
+  .toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 6px;
+  }
+  .toolbar-row .label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .task {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13.5px;
+  }
+  .task.focused {
+    background: var(--bg-row-focus);
+    position: relative;
+  }
+  .task.focused::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .icon-tile {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .icon-tile.play { background: var(--play-bg); color: var(--play); }
+  .icon-tile.rewind { background: var(--rewind-bg); color: var(--rewind); }
+  .icon-tile.check { background: var(--check-bg); color: var(--check); }
+  .icon-tile.folder { background: rgba(99,159,255,0.16); color: #639fff; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title {
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .task-sub {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tag {
+    display: inline-flex;
+    padding: 0 7px;
+    height: 16px;
+    align-items: center;
+    background: rgba(118, 204, 213, 0.10);
+    color: var(--rewind);
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .time {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .actions {
+    width: 320px;
+    background: rgba(0, 0, 0, 0.22);
+    border-left: 1px solid var(--border);
+    padding: 14px 6px 10px;
+    font-size: 13px;
+  }
+  .section-label {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: var(--text-muted);
+    padding: 10px 14px 6px;
+    font-weight: 600;
+  }
+  .action {
+    padding: 9px 14px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1px;
+  }
+  .action.primary {
+    background: rgba(255, 99, 99, 0.14);
+    border: 1px solid rgba(255, 99, 99, 0.30);
+  }
+  .action .icon-tile-sm {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+  .action .text { flex: 1; font-weight: 500; }
+  .action .text small {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 11px;
+  }
+  .action .badge {
+    background: var(--rewind-bg);
+    color: var(--rewind);
+    border: 1px solid rgba(118, 204, 213, 0.30);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .kbd {
+    font-family: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-weight: 500;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 14px;
+  }
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 99, 99, 0.18);
+  }
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="toolbar">
+    <span class="pulse-dot"></span>
+    <span class="title">View Tasks</span>
+    <span class="toolbar-meta">· smart-productivity</span>
+    <div class="toolbar-spacer"></div>
+    <span class="toolbar-meta">5 active</span>
+  </div>
+  <div class="body">
+    <div class="pane">
+      <div class="search">
+        <div class="search-row">
+          <span style="color: var(--text-secondary);">Search tasks</span>
+          <div class="caret"></div>
+          <span class="filter-tag"><span class="pill-dot"></span>Project: Super Productivity</span>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="label">Tasks</span>
+        <span class="filter-tag" style="background: rgba(255,210,68,0.10); color: var(--play);"><span class="pill-dot" style="background: var(--play);"></span>1.8h spent on focused work</span>
+      </div>
+
+      <div class="task focused">
+        <div class="icon-tile rewind">↻</div>
+        <div class="task-body">
+          <div class="task-title">Refactor auth flow to use refresh tokens</div>
+          <div class="task-sub">
+            <span class="tag">#backend</span>
+            <span class="tag" style="background: rgba(255,99,99,0.12); color: var(--accent-text);">#important</span>
+          </div>
+        </div>
+        <div class="time">↻ 1.8h spent</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile play">▶</div>
+        <div class="task-body">
+          <div class="task-title">Write copy for landing-page A/B test variant C</div>
+          <div class="task-sub"><span class="tag">#writing</span></div>
+        </div>
+        <div class="time">est. 45m</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile play">▶</div>
+        <div class="task-body">
+          <div class="task-title">Audit user-facing error messages for tone</div>
+          <div class="task-sub"><span class="tag">#writing</span><span class="tag">#ux</span></div>
+        </div>
+        <div class="time">est. 1.5h</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile check">✓</div>
+        <div class="task-body">
+          <div class="task-title">Migrate primary CI pipeline to GitHub Actions</div>
+          <div class="task-sub"><span class="tag">#infrastructure</span></div>
+        </div>
+        <div class="time">done today</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile play">▶</div>
+        <div class="task-body">
+          <div class="task-title">Stand up Slack digest for review-request velocity</div>
+          <div class="task-sub"><span class="tag">#ops</span></div>
+        </div>
+        <div class="time">est. 2h</div>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="section-label">Primary</div>
+      <div class="action primary">
+        <div class="icon-tile-sm rewind" style="background: var(--rewind-bg); color: var(--rewind);">↻</div>
+        <div class="text">Resume Tracking <small>(+ Focus Session)</small> <span class="badge">1.8h spent</span></div>
+        <div class="kbd">↩</div>
+      </div>
+      <div class="section-label">Manage</div>
+      <div class="action">
+        <div class="icon-tile-sm check" style="background: var(--check-bg); color: var(--check);">✓</div>
+        <div class="text">Mark Complete</div>
+        <div class="kbd">⌘ ⇧ C</div>
+      </div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: rgba(255,210,68,0.14); color: var(--play);">⎙</div>
+        <div class="text">Archive</div>
+        <div class="kbd">⌘ E</div>
+      </div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: var(--accent); color: white;">⌫</div>
+        <div class="text" style="color: var(--accent);">Delete</div>
+        <div class="kbd">⌘ ⌫</div>
+      </div>
+      <div class="divider"></div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: var(--bg-soft); color: var(--text-secondary);">↻</div>
+        <div class="text">Refresh</div>
+        <div class="kbd">⌘ R</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

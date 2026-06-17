@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Keyboard shortcuts — Raycast Super Productivity</title>
+<style>
+  :root {
+    --bg-page: #0d1014;
+    --bg-window: #1c2125;
+    --bg-soft: #232a30;
+    --bg-row: #1f252a;
+    --bg-row-focus: rgba(255, 99, 99, 0.10);
+    --text-primary: #ecedee;
+    --text-secondary: #b8bcc1;
+    --text-muted: #7a8189;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.10);
+    --accent: #ff6363;
+    --accent-text: #ff8888;
+    --play: #ffd252;
+    --play-bg: rgba(255, 210, 68, 0.16);
+    --rewind: #76ccd5;
+    --rewind-bg: rgba(118, 204, 213, 0.16);
+    --check: #5fc88e;
+    --check-bg: rgba(95, 200, 142, 0.16);
+    --info: #639fff;
+    --info-bg: rgba(99, 159, 255, 0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a1f24 0%, #07090b 100%);
+  }
+  .window {
+    width: 880px;
+    height: 600px;
+    background: var(--bg-window);
+    border-radius: 14px;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .toolbar {
+    height: 36px;
+    background: rgba(255, 255, 255, 0.025);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .toolbar .title { font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em; }
+  .toolbar-spacer { flex: 1; }
+  .toolbar-meta { color: var(--text-muted); font-size: 11.5px; }
+  .body { flex: 1; display: flex; }
+  .pane { flex: 1; padding: 6px 0; overflow: hidden; }
+  h1 {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    padding: 14px 18px 8px;
+  }
+  .search {
+    padding: 0 18px 10px;
+  }
+  .search-row {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px 6px;
+  }
+  .toolbar-row .label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .toolbar-row .pill {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-soft);
+    border-radius: 999px;
+    padding: 2px 10px;
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 4px;
+  }
+  .section-header .title {
+    font-size: 11px; font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.10em;
+  }
+  .section-header .count {
+    font-size: 11px; color: var(--text-muted);
+  }
+  .task {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13.5px;
+  }
+  .task.focused {
+    background: var(--bg-row-focus);
+    position: relative;
+  }
+  .task.focused::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .icon-tile {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .icon-tile.play { background: var(--play-bg); color: var(--play); }
+  .icon-tile.rewind { background: var(--rewind-bg); color: var(--rewind); }
+  .icon-tile.check { background: var(--check-bg); color: var(--check); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title {
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .task-sub {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tag {
+    display: inline-flex;
+    padding: 0 7px;
+    height: 16px;
+    align-items: center;
+    background: rgba(118, 204, 213, 0.10);
+    color: var(--rewind);
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .time {
+    color: var(--text-muted);
+    font-size: 11.5px;
+  }
+  .actions {
+    width: 320px;
+    background: rgba(0, 0, 0, 0.22);
+    border-left: 1px solid var(--border);
+    padding: 14px 6px 10px;
+    font-size: 13px;
+  }
+  .section-label {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: var(--text-muted);
+    padding: 10px 14px 6px;
+    font-weight: 700;
+  }
+  .action {
+    padding: 9px 14px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+  .action.primary {
+    background: rgba(255, 99, 99, 0.14);
+    border: 1px solid rgba(255, 99, 99, 0.30);
+  }
+  .action .icon-tile-sm {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+  .action .text { flex: 1; font-weight: 500; }
+  .kbd {
+    font-family: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-weight: 500;
+    min-width: 24px;
+    text-align: center;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 14px;
+  }
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 99, 99, 0.18);
+  }
+  /* Floating annotation callouts to highlight shortcuts */
+  .callout {
+    position: absolute;
+    background: rgba(20, 22, 26, 0.96);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 6px 9px;
+    font-size: 11.5px;
+    color: var(--text-primary);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    line-height: 1.4;
+  }
+  .callout strong { color: var(--play); font-weight: 600; }
+  .callout .arrow {
+    position: absolute;
+    width: 0; height: 0;
+  }
+  .relative { position: relative; }
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="toolbar">
+    <span class="pulse-dot"></span>
+    <span class="title">Today's Tasks</span>
+    <span class="toolbar-meta">· Friday, June 17</span>
+    <div class="toolbar-spacer"></div>
+    <span class="toolbar-meta">7 due today</span>
+  </div>
+  <div class="body">
+    <div class="pane">
+      <h1>Today</h1>
+      <div class="search">
+        <div class="search-row">Search today's tasks…</div>
+      </div>
+      <div class="section-header">
+        <span class="title">Today</span>
+        <span class="count">7 tasks</span>
+      </div>
+
+      <div class="task focused">
+        <div class="icon-tile rewind">↻</div>
+        <div class="task-body">
+          <div class="task-title">Review pull request for state-management refactor</div>
+          <div class="task-sub"><span class="tag">#code-review</span></div>
+        </div>
+        <div class="time">↻ 0.4h spent</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile play">▶</div>
+        <div class="task-body">
+          <div class="task-title">Pair on flaky test investigation</div>
+          <div class="task-sub"><span class="tag">#quality</span></div>
+        </div>
+        <div class="time">est. 1.5h</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile check">✓</div>
+        <div class="task-body">
+          <div class="task-title">Send weekly progress update to leadership</div>
+        </div>
+        <div class="time">due 17:00</div>
+      </div>
+
+      <div class="task">
+        <div class="icon-tile play">▶</div>
+        <div class="task-body">
+          <div class="task-title">Draft specs for the new ingest pipeline</div>
+          <div class="task-sub"><span class="tag">#architecture</span></div>
+        </div>
+        <div class="time">est. 3h</div>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="section-label">Track</div>
+      <div class="action primary">
+        <div class="icon-tile-sm rewind" style="background: var(--rewind-bg); color: var(--rewind);">↻</div>
+        <div class="text">Resume Tracking</div>
+        <div class="kbd">↩</div>
+      </div>
+
+      <div class="section-label">Manage</div>
+      <div class="action">
+        <div class="icon-tile-sm check" style="background: var(--check-bg); color: var(--check);">✓</div>
+        <div class="text">Mark Complete</div>
+        <div class="kbd">⌘ ⇧ C</div>
+      </div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: rgba(255,210,68,0.14); color: var(--play);">⎙</div>
+        <div class="text">Archive</div>
+        <div class="kbd">⌘ E</div>
+      </div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: var(--accent); color: white;">⌫</div>
+        <div class="text" style="color: var(--accent);">Delete</div>
+        <div class="kbd">⌘ ⌫</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">View</div>
+      <div class="action">
+        <div class="icon-tile-sm" style="background: var(--bg-soft); color: var(--text-secondary);">↻</div>
+        <div class="text">Refresh</div>
+        <div class="kbd">⌘ R</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
