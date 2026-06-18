@@ -52,11 +52,50 @@ function countDifferences(a: string, b: string): number {
 }
 
 /**
+ * Disambiguate direction using the user dictionary. Counts how many entries'
+ * Traditional-only vs Simplified-only forms appear in the text. Used as a
+ * tie-breaker for phrase-level terms (e.g. 程式 ⇄ 程序) where no single
+ * character differs between scripts, so the character-level heuristic cannot
+ * tell the scripts apart.
+ */
+function dictionaryDirectionHint(
+  text: string,
+  dictionary: DictEntry[],
+): Direction | null {
+  let traditionalHits = 0;
+  let simplifiedHits = 0;
+  for (const { traditional, simplified } of dictionary) {
+    if (!traditional || !simplified || traditional === simplified) {
+      continue;
+    }
+    if (text.includes(traditional)) {
+      traditionalHits++;
+    }
+    if (text.includes(simplified)) {
+      simplifiedHits++;
+    }
+  }
+  if (traditionalHits > simplifiedHits) {
+    return "t2s";
+  }
+  if (simplifiedHits > traditionalHits) {
+    return "s2t";
+  }
+  return null;
+}
+
+/**
  * Detect whether the text is mostly Simplified or Traditional Chinese.
  * - If converting to Traditional changes more characters, the text is Simplified.
- * - Otherwise it is treated as Traditional.
+ * - If converting to Simplified changes more characters, the text is Traditional.
+ * - When the character-level scores tie (e.g. phrase-only terms like 程式/列印
+ *   where no single character differs), fall back to the user dictionary, then
+ *   default to Simplified→Traditional.
  */
-export function detectDirection(text: string): Direction {
+export function detectDirection(
+  text: string,
+  dictionary: DictEntry[] = [],
+): Direction {
   detectToTraditional ??= OpenCC.CustomConverter(STCharacters);
   detectToSimplified ??= OpenCC.CustomConverter(TSCharacters);
 
@@ -66,7 +105,11 @@ export function detectDirection(text: string): Direction {
   const simplifiedScore = countDifferences(text, asTraditional);
   const traditionalScore = countDifferences(text, asSimplified);
 
-  return simplifiedScore >= traditionalScore ? "s2t" : "t2s";
+  if (simplifiedScore !== traditionalScore) {
+    return simplifiedScore > traditionalScore ? "s2t" : "t2s";
+  }
+
+  return dictionaryDirectionHint(text, dictionary) ?? "s2t";
 }
 
 /**
@@ -118,7 +161,7 @@ export function convertText(
   text: string,
   dictionary: DictEntry[] = [],
 ): ConversionResult {
-  const direction = detectDirection(text);
+  const direction = detectDirection(text, dictionary);
   const withDictionary = applyDictionary(text, direction, dictionary);
   const converter = getConverter(direction);
   return { text: converter(withDictionary), direction };
