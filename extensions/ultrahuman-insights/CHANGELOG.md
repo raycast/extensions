@@ -1,5 +1,11 @@
 # Ultrahuman Changelog
 
+## [Add Windows support and streamline codebase] - {PR_MERGE_DATE}
+
+- Add Windows as a supported platform
+- Extract shared hooks and components (`useDailyRange`, `MetricActions`) to reduce duplication across commands
+- Update Raycast API and dev dependencies (ESLint, TypeScript, Prettier)
+
 ## [Initial Version] - 2026-06-18
 
 - Menu bar with color-coded sleep score
