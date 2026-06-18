@@ -27,9 +27,15 @@ export default function Command() {
 
   const filteredTasks = useMemo(() => filterTasksBySearch(tasks, searchText), [searchText, tasks]);
 
-  async function postponeTask(task: Task, preset: PostponePreset, customDate?: string, customTime?: string) {
+  async function postponeTask(
+    task: Task,
+    preset: PostponePreset,
+    customDate?: string,
+    customTime?: string,
+  ): Promise<boolean> {
     const result = dateFromPreset(preset, customDate, customTime);
     const payload = toTaskDatePayload(result);
+    const clearing = preset === "none";
     const timeZone = didaTimeZone();
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -40,27 +46,37 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Invalid custom date";
       toast.message = "Use 2026-05-24, 05-24, 明天, or 周一";
-      return;
+      return false;
     }
 
     try {
       await updateTask({
         ...task,
-        dueDate: payload.dueDate,
-        isAllDay: payload.isAllDay,
+        dueDate: clearing ? null : payload.dueDate,
+        startDate: clearing ? null : task.startDate,
+        isAllDay: clearing ? null : payload.isAllDay,
         timeZone,
       });
       setTasks((current) =>
         current.map((item) =>
-          item.id === task.id ? { ...item, dueDate: payload.dueDate, isAllDay: payload.isAllDay } : item,
+          item.id === task.id
+            ? {
+                ...item,
+                dueDate: clearing ? undefined : payload.dueDate,
+                startDate: clearing ? undefined : item.startDate,
+                isAllDay: clearing ? undefined : payload.isAllDay,
+              }
+            : item,
         ),
       );
       toast.style = Toast.Style.Success;
       toast.title = "Task date updated";
+      return true;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to update task";
       toast.message = describeApiError(error);
+      return false;
     }
   }
 
@@ -87,7 +103,7 @@ function PostponeTaskItem({
   onPostpone,
 }: {
   task: Task;
-  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<void>;
+  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<boolean>;
 }) {
   return (
     <List.Item
@@ -129,13 +145,15 @@ function CustomPostponeForm({
   onPostpone,
 }: {
   task: Task;
-  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<void>;
+  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<boolean>;
 }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { customDate: string; customTime?: string }) {
-    await onPostpone(task, "custom", values.customDate, values.customTime);
-    pop();
+    const success = await onPostpone(task, "custom", values.customDate, values.customTime);
+    if (success) {
+      pop();
+    }
   }
 
   return (

@@ -22,10 +22,10 @@ export type Task = {
   title: string;
   content?: string;
   desc?: string;
-  dueDate?: string;
-  startDate?: string;
+  dueDate?: string | null;
+  startDate?: string | null;
   timeZone?: string;
-  isAllDay?: boolean;
+  isAllDay?: boolean | null;
   priority?: TaskPriority;
   reminders?: string[];
   items?: ChecklistItem[];
