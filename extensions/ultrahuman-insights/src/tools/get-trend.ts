@@ -36,9 +36,7 @@ type Input = {
  */
 export default async function tool(input: Input) {
   if (!VALID_METRICS.includes(input.metric)) {
-    throw new Error(
-      `Unknown metric: "${input.metric}". Valid metrics: ${VALID_METRICS.join(", ")}`,
-    );
+    throw new Error(`Unknown metric: "${input.metric}". Valid metrics: ${VALID_METRICS.join(", ")}`);
   }
   const days = Math.min(7, Math.max(1, input.days ?? 7));
   const { start, end } = lastNDaysEpoch(days);
@@ -51,8 +49,7 @@ export default async function tool(input: Input) {
       return {
         date: d.date,
         value,
-        formatted_value:
-          value != null ? formatMetricValue(input.metric, value) : "—",
+        formatted_value: value != null ? formatMetricValue(input.metric, value) : "—",
       };
     });
 

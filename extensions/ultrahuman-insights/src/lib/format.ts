@@ -47,10 +47,7 @@ export function formatDate(d: Date): string {
 }
 
 /** Return [startEpochSeconds, endEpochSeconds] covering the last N days inclusive of today. */
-export function lastNDaysEpoch(
-  n: number,
-  now: Date = new Date(),
-): { start: number; end: number } {
+export function lastNDaysEpoch(n: number, now: Date = new Date()): { start: number; end: number } {
   const end = new Date(now);
   end.setHours(23, 59, 59, 0);
   const start = new Date(now);
@@ -71,12 +68,7 @@ export function todayDateKey(): string {
 // Metric value formatter (shared by tools and view files)
 // ---------------------------------------------------------------------------
 
-const DURATION_METRIC_NAMES = new Set<MetricName>([
-  "total_sleep",
-  "rem_sleep",
-  "deep_sleep",
-  "light_sleep",
-]);
+const DURATION_METRIC_NAMES = new Set<MetricName>(["total_sleep", "rem_sleep", "deep_sleep", "light_sleep"]);
 
 const METRIC_UNIT_MAP: Partial<Record<MetricName, string>> = {
   hrv: "ms",
@@ -91,10 +83,7 @@ const METRIC_UNIT_MAP: Partial<Record<MetricName, string>> = {
  * Format a metric value with its appropriate unit / duration string.
  * Returns "—" for null/undefined.
  */
-export function formatMetricValue(
-  metric: MetricName,
-  value: number | undefined | null,
-): string {
+export function formatMetricValue(metric: MetricName, value: number | undefined | null): string {
   if (value == null) return "—";
   if (DURATION_METRIC_NAMES.has(metric)) return formatDuration(value);
   const unit = METRIC_UNIT_MAP[metric];
@@ -105,10 +94,7 @@ export function formatMetricValue(
  * From a date-sorted range, return the most recent entry where the given field is non-null.
  * Falls back to the last entry if none satisfy the predicate.
  */
-export function latestWithField<K extends keyof DailyMetrics>(
-  range: DailyMetrics[],
-  field: K,
-): DailyMetrics | null {
+export function latestWithField<K extends keyof DailyMetrics>(range: DailyMetrics[], field: K): DailyMetrics | null {
   if (range.length === 0) return null;
   for (let i = range.length - 1; i >= 0; i--) {
     if (range[i][field] != null) return range[i];
@@ -145,10 +131,6 @@ export function sparkline(values: Array<number | undefined | null>): string {
   const max = Math.max(...present);
   const range = max - min || 1;
   return values
-    .map((v) =>
-      typeof v === "number"
-        ? ticks[Math.min(7, Math.floor(((v - min) / range) * 7))]
-        : " ",
-    )
+    .map((v) => (typeof v === "number" ? ticks[Math.min(7, Math.floor(((v - min) / range) * 7))] : " "))
     .join("");
 }

@@ -105,9 +105,7 @@ function normalizeOne(date: string, entries: RawMetricEntry[]): DailyMetrics {
         .map((v: { value: number }) => v.value)
         .filter((v: number) => v > 0);
       if (readings.length === 0) return undefined;
-      return Math.round(
-        readings.reduce((a: number, b: number) => a + b, 0) / readings.length,
-      );
+      return Math.round(readings.reduce((a: number, b: number) => a + b, 0) / readings.length);
     })(),
     steps: byType["steps"]?.total,
     recovery_index: byType["recovery_index"]?.value,
@@ -118,9 +116,7 @@ function normalizeOne(date: string, entries: RawMetricEntry[]): DailyMetrics {
   };
 
   // Reject empty/unrecognized responses — don't cache garbage
-  const hasData = Object.entries(result).some(
-    ([k, v]) => k !== "date" && v !== undefined,
-  );
+  const hasData = Object.entries(result).some(([k, v]) => k !== "date" && v !== undefined);
   if (!hasData) {
     throw new UltrahumanError(0, "Empty or unrecognized response");
   }
@@ -132,9 +128,7 @@ function normalizeOne(date: string, entries: RawMetricEntry[]): DailyMetrics {
 // HTTP helper
 // ---------------------------------------------------------------------------
 
-async function call(
-  params: Record<string, string | number>,
-): Promise<RawApiResponse> {
+async function call(params: Record<string, string | number>): Promise<RawApiResponse> {
   const token = getApiToken();
   if (!token) throw new MissingTokenError();
 
@@ -193,10 +187,7 @@ export async function fetchDay(date: string): Promise<DailyMetrics> {
 }
 
 /** Fetch metrics across an epoch range. Ultrahuman caps the window at 7 days. */
-export async function fetchRange(
-  startEpoch: number,
-  endEpoch: number,
-): Promise<DailyMetricsRange> {
+export async function fetchRange(startEpoch: number, endEpoch: number): Promise<DailyMetricsRange> {
   const raw = await call({ start_epoch: startEpoch, end_epoch: endEpoch });
   return Object.entries(raw.data.metrics)
     .sort(([a], [b]) => a.localeCompare(b))

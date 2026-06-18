@@ -18,9 +18,7 @@ export interface UseMetricsResult<T> extends State<T> {
  * Wraps a cache-backed fetcher and tracks loading/stale/error/missingToken state.
  * Pass the fetcher as a memoized callback (e.g. `useCallback(() => getDay(today()), [])`).
  */
-export function useMetrics<T>(
-  fetcher: () => Promise<Memoized<T>>,
-): UseMetricsResult<T> {
+export function useMetrics<T>(fetcher: () => Promise<Memoized<T>>): UseMetricsResult<T> {
   const [state, setState] = useState<State<T>>({
     data: null,
     stale: false,
@@ -41,10 +39,7 @@ export function useMetrics<T>(
         error: null,
       });
     } catch (e) {
-      if (
-        e instanceof MissingTokenError ||
-        (e instanceof UltrahumanError && e.status === 401)
-      ) {
+      if (e instanceof MissingTokenError || (e instanceof UltrahumanError && e.status === 401)) {
         setState({
           data: null,
           stale: false,

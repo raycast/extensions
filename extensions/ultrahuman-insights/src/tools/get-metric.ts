@@ -39,9 +39,7 @@ type Input = {
  */
 export default async function tool(input: Input) {
   if (!VALID_METRICS.includes(input.metric)) {
-    throw new Error(
-      `Unknown metric: "${input.metric}". Valid metrics: ${VALID_METRICS.join(", ")}`,
-    );
+    throw new Error(`Unknown metric: "${input.metric}". Valid metrics: ${VALID_METRICS.join(", ")}`);
   }
   const date = input.date ?? today();
   const { data, stale } = await getDay(date);
@@ -54,10 +52,7 @@ export default async function tool(input: Input) {
     metric: input.metric,
     label: METRIC_LABELS[input.metric] ?? input.metric,
     value: numericValue,
-    formatted_value:
-      numericValue != null
-        ? formatMetricValue(input.metric, numericValue)
-        : "—",
+    formatted_value: numericValue != null ? formatMetricValue(input.metric, numericValue) : "—",
     available: value != null,
   };
 }

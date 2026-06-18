@@ -1,4 +1,6 @@
 import { Color } from "@raycast/api";
+import { weekdayShortLabels } from "./daily-metrics";
+import { sparkline } from "./format";
 
 export interface ChartOpts {
   width?: number;
@@ -57,10 +59,7 @@ function svgToDataUri(svg: string): string {
  *
  * Returns `![chart](data:image/svg+xml;base64,...)`.
  */
-export function lineChart(
-  values: Array<number | undefined | null>,
-  opts?: ChartOpts,
-): string {
+export function lineChart(values: Array<number | undefined | null>, opts?: ChartOpts): string {
   const width = opts?.width ?? 600;
   const height = opts?.height ?? 120;
   const color = opts?.color ?? "#5BC8AF";
@@ -189,10 +188,7 @@ export function lineChart(
  * Generate a horizontal stacked bar chart for sleep stages and return a
  * markdown image string using an inline base64 data URI.
  */
-export function stagesBar(
-  stages: { deep: number; rem: number; light: number },
-  opts?: ChartOpts,
-): string {
+export function stagesBar(stages: { deep: number; rem: number; light: number }, opts?: ChartOpts): string {
   const width = opts?.width ?? 600;
   const barHeight = 28;
   const legendHeight = 20;
@@ -285,14 +281,42 @@ export function stagesBar(
   return `![stages](${svgToDataUri(svg)})`;
 }
 
+/** Append a line chart (≥3 points) or ASCII sparkline fallback to markdown lines. */
+export function appendSeriesChart(
+  lines: string[],
+  series: Array<number | undefined>,
+  dates: Array<string | undefined>,
+  color: Color,
+  options?: Pick<ChartOpts, "height">,
+): void {
+  const validCount = series.filter((v) => v != null).length;
+  if (validCount >= 3) {
+    const hexColor = colorToHex(color);
+    const chart = lineChart(series, {
+      color: hexColor,
+      labels: weekdayShortLabels(dates),
+      ...options,
+    });
+    if (chart) {
+      lines.push("");
+      lines.push(chart);
+    }
+    return;
+  }
+
+  const spark = sparkline(series);
+  if (spark) {
+    lines.push("");
+    lines.push("```");
+    lines.push(spark);
+    lines.push("```");
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

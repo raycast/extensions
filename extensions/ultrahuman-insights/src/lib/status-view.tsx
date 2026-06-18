@@ -1,17 +1,6 @@
-import {
-  List,
-  Detail,
-  ActionPanel,
-  Action,
-  Icon,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { List, Detail, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
 
-export type StatusVariant =
-  | "missing-token"
-  | "no-data"
-  | "refresh-failed"
-  | "stale";
+export type StatusVariant = "missing-token" | "no-data" | "refresh-failed" | "stale";
 
 interface Props {
   variant: StatusVariant;
@@ -33,16 +22,12 @@ interface Props {
   onRefresh?: () => void;
 }
 
-function variantProps(
-  variant: StatusVariant,
-  message?: string,
-): { title: string; description: string; icon: Icon } {
+function variantProps(variant: StatusVariant, message?: string): { title: string; description: string; icon: Icon } {
   switch (variant) {
     case "missing-token":
       return {
         title: "Set your Ultrahuman API token",
-        description:
-          "Open extension preferences and paste your Partner API token.",
+        description: "Open extension preferences and paste your Partner API token.",
         icon: Icon.Key,
       };
     case "no-data":
@@ -70,11 +55,7 @@ function buildActions(variant: StatusVariant, onRefresh?: () => void) {
   if (variant === "missing-token") {
     return (
       <ActionPanel>
-        <Action
-          title="Open Preferences"
-          icon={Icon.Cog}
-          onAction={openExtensionPreferences}
-        />
+        <Action title="Open Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
       </ActionPanel>
     );
   }
@@ -122,8 +103,7 @@ export function ListStatus(props: Props) {
     // suppress the generic description subtitle to avoid duplication.
     const resolvedTitle = itemTitle ?? title;
     const resolvedSubtitle = itemTitle ? undefined : description;
-    const defaultSectionTitle =
-      variant === "stale" ? "⚠️ Showing cached data" : "❌ Refresh failed";
+    const defaultSectionTitle = variant === "stale" ? "⚠️ Showing cached data" : "❌ Refresh failed";
     return (
       <List.Section title={sectionTitle ?? defaultSectionTitle}>
         <List.Item
@@ -157,9 +137,7 @@ export function DetailStatus(props: Props) {
   if (variant === "missing-token") {
     return (
       <Detail
-        markdown={
-          "# Set your Ultrahuman API token\n\nOpen extension preferences and paste your Partner API token."
-        }
+        markdown={"# Set your Ultrahuman API token\n\nOpen extension preferences and paste your Partner API token."}
         actions={buildActions(variant, onRefresh)}
       />
     );
@@ -185,9 +163,6 @@ export function DetailStatus(props: Props) {
 
   // stale — blockquote injected into existing markdown body in Detail views
   return (
-    <Detail
-      markdown={"> ⚠️ Showing cached data — network unreachable."}
-      actions={buildActions(variant, onRefresh)}
-    />
+    <Detail markdown={"> ⚠️ Showing cached data — network unreachable."} actions={buildActions(variant, onRefresh)} />
   );
 }

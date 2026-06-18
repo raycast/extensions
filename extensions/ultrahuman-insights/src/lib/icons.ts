@@ -38,10 +38,7 @@ export const METRIC_ICON: Record<MetricName, Icon> = {
  * Returns a Raycast icon spec with the icon appropriate for the metric
  * tinted to the color that matches the insight status.
  */
-export function metricIcon(
-  metric: MetricName,
-  status: Status,
-): { source: Icon; tintColor: Color } {
+export function metricIcon(metric: MetricName, status: Status): { source: Icon; tintColor: Color } {
   return {
     source: METRIC_ICON[metric] ?? Icon.Circle,
     tintColor: statusColor(status),
