@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Show total duration of current project] - {PR_MERGE_DATE}
+## [Show total duration of current project] - 2026-06-18
 
 - In the menu bar, show the total time of all time entries of the current project in addition to the total time of all entries.
 
