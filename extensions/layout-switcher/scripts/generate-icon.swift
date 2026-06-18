@@ -2,7 +2,7 @@
 // "Raycast Icon Final" (variant B): the keys Q (QWERTY) and Й (ЙЦУКЕН) with a
 // bidirectional swap arrow between them, on a full-bleed graphite squircle.
 // One focal lockup so it stays legible at ~40px (Raycast command list).
-// Language-neutral: ЙЦУКЕН is shared by RU/UK/BE.
+// Language-neutral: ЙЦУКЕН is shared by Russian, Ukrainian and Belarusian.
 //
 // Output (512×512, transparent corners):
 //   assets/extension-icon.png  — single icon used for both light and dark UI

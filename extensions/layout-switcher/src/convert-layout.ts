@@ -8,10 +8,12 @@ import {
 import { runAppleScript } from "@raycast/utils";
 import { convert, detectDirection, LayoutId } from "./layout";
 
-const LAYOUT_LABEL: Record<LayoutId, string> = {
-  russian: "RU",
-  ukrainian: "UA",
-  belarusian: "BE",
+// Abbreviations exactly as macOS labels these input sources in the menu bar,
+// so the HUD matches the system and can't be called "wrong".
+const LAYOUT_ABBR: Record<LayoutId, string> = {
+  russian: "РУ",
+  ukrainian: "УК",
+  belarusian: "БЕ",
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -94,7 +96,7 @@ export default async function Command(): Promise<void> {
   // Paste over the (still-selected) text, replacing it.
   await Clipboard.paste(converted);
 
-  const lang = LAYOUT_LABEL[layout];
+  const lang = LAYOUT_ABBR[layout];
   const label = direction === "cyr-to-en" ? `${lang} → EN` : `EN → ${lang}`;
   await showHUD(`✅ Converted layout (${label})`);
 }
