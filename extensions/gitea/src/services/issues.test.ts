@@ -95,7 +95,7 @@ describe("issue services", () => {
     expect(issueApi.listRepo).not.toHaveBeenCalled();
   });
 
-  it("bases repo-only pagination on the filtered issue count", async () => {
+  it("bases repo-only pagination on the unfiltered issue count", async () => {
     issueApi.search.mockResolvedValue([
       issue({ id: 1, repository: { full_name: "alice/app", name: "app" } }),
       issue({ id: 2, repository: { full_name: "alice/other", name: "other" } }),
@@ -103,7 +103,28 @@ describe("issue services", () => {
 
     await expect(searchIssues({ repo: "target", page: 1, limit: 2 })).resolves.toEqual({
       items: [],
-      hasMore: false,
+      hasMore: true,
+    });
+    expect(issueApi.search).toHaveBeenCalledWith({
+      type: "issues",
+      state: undefined,
+      q: undefined,
+      owner: undefined,
+      page: 1,
+      limit: 2,
+    });
+    expect(issueApi.listRepo).not.toHaveBeenCalled();
+  });
+
+  it("filters repo-only issue search results while keeping global pagination", async () => {
+    issueApi.search.mockResolvedValue([
+      issue({ id: 1, repository: { full_name: "alice/app", name: "app" } }),
+      issue({ id: 2, repository: { full_name: "alice/other", name: "other" } }),
+    ]);
+
+    await expect(searchIssues({ repo: "app", page: 1, limit: 2 })).resolves.toEqual({
+      items: [issue({ id: 1, repository: { full_name: "alice/app", name: "app" } })],
+      hasMore: true,
     });
     expect(issueApi.search).toHaveBeenCalledWith({
       type: "issues",

@@ -142,6 +142,28 @@ describe("useSearchIssues", () => {
     expect(result.pagination.hasMore).toBe(false);
   });
 
+  it("keeps pagination active when a filtered page has no visible issues", async () => {
+    mockedSearchIssues
+      .mockResolvedValueOnce({ items: [], hasMore: true })
+      .mockResolvedValueOnce({ items: [{ id: 2, title: "repo match" } as Issue], hasMore: false });
+
+    let result = renderSearchHook(baseParams());
+
+    await publishPageFromFetch();
+    result = renderSearchHook(baseParams());
+    expect(result.items).toEqual([]);
+    expect(result.pagination.hasMore).toBe(true);
+
+    result.pagination.onLoadMore();
+    result = renderSearchHook(baseParams());
+    expect(cachedPromise.args?.[1]).toBe(2);
+
+    await publishPageFromFetch();
+    result = renderSearchHook(baseParams());
+    expect(result.items.map((item) => item.title)).toEqual(["repo match"]);
+    expect(result.pagination.hasMore).toBe(false);
+  });
+
   it.each([
     ["state", { state: "closed" }],
     ["owner", { owner: "bob" }],
