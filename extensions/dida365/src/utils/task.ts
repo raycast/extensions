@@ -43,6 +43,20 @@ export function taskSearchText(task: Task): string {
     .join(" ");
 }
 
+export function filterTasksBySearch(tasks: Task[], searchText: string): Task[] {
+  const query = searchText.trim().toLowerCase();
+
+  if (!query) {
+    return tasks;
+  }
+
+  return tasks.filter((task) => taskSearchText(task).toLowerCase().includes(query));
+}
+
+export function openTasksOnly(tasks: Task[]): Task[] {
+  return tasks.filter((task) => task.status !== 2);
+}
+
 export function isChecklistItemCompleted(item: ChecklistItem): boolean {
   return item.status === 2;
 }

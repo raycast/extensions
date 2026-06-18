@@ -41,11 +41,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Dida365Error(
-      `Dida365 API request failed: ${response.status}`,
-      response.status,
-      body,
-    );
+    throw new Dida365Error(`Dida365 API request failed: ${response.status}`, response.status, body);
   }
 
   const body = await response.text();
@@ -68,9 +64,7 @@ export async function getProjectData(projectId: string): Promise<ProjectData> {
 
 export async function listOpenTasks(): Promise<Task[]> {
   const projects = await listProjects();
-  const projectData = await Promise.all(
-    projects.map((project) => getProjectData(project.id)),
-  );
+  const projectData = await Promise.all(projects.map((project) => getProjectData(project.id)));
 
   return projectData.flatMap((data) =>
     (data.tasks ?? []).map((task) => ({
@@ -96,15 +90,10 @@ export async function updateTask(task: Task): Promise<Task> {
   });
 }
 
-export async function completeTask(
-  task: Pick<Task, "id" | "projectId">,
-): Promise<void> {
-  await request<void>(
-    `/project/${encodeURIComponent(task.projectId)}/task/${encodeURIComponent(task.id)}/complete`,
-    {
-      method: "POST",
-    },
-  );
+export async function completeTask(task: Pick<Task, "id" | "projectId">): Promise<void> {
+  await request<void>(`/project/${encodeURIComponent(task.projectId)}/task/${encodeURIComponent(task.id)}/complete`, {
+    method: "POST",
+  });
 }
 
 export function describeApiError(error: unknown): string {

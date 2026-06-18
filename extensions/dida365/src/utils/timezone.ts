@@ -19,14 +19,7 @@ export function systemTimeZone(): string {
 
 export function nowInTimeZone(timeZone = didaTimeZone()): Date {
   const parts = zonedDateTimeParts(new Date(), timeZone);
-  return new Date(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second,
-  );
+  return new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
 }
 
 export function timeZoneOffsetMinutes(date: Date, timeZone: string): number {
@@ -41,14 +34,7 @@ export function timeZoneOffsetMinutes(date: Date, timeZone: string): number {
     ),
   );
   const parts = zonedDateTimeParts(utcGuess, timeZone);
-  const zonedAsUtc = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second,
-  );
+  const zonedAsUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
 
   return Math.round((zonedAsUtc - utcGuess.getTime()) / 60_000);
 }
@@ -65,8 +51,7 @@ function zonedDateTimeParts(date: Date, timeZone: string) {
     hourCycle: "h23",
   }).formatToParts(date);
 
-  const value = (type: string) =>
-    Number(parts.find((part) => part.type === type)?.value);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
   const hour = value("hour");
 
   return {

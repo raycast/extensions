@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { DIDA_SETTINGS_URL } from "../setup.js";
 
 export function SetupTokenView() {
@@ -28,10 +22,12 @@ export function SetupTokenView() {
             title="Open Dida365 Settings"
             icon={Icon.Globe}
             url={DIDA_SETTINGS_URL}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action
             title="Open Extension Preferences"
             icon={Icon.Gear}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
             onAction={openExtensionPreferences}
           />
         </ActionPanel>

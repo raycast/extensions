@@ -1,9 +1,6 @@
 import { didaTimeZone, timeZoneOffsetMinutes } from "./timezone.js";
 
-export function toDidaDate(
-  date?: Date | null,
-  timeZone = didaTimeZone(),
-): string | undefined {
+export function toDidaDate(date?: Date | null, timeZone = didaTimeZone()): string | undefined {
   if (!date) {
     return undefined;
   }
@@ -19,10 +16,7 @@ export function toDidaDate(
   )}:${pad(date.getSeconds())}${sign}${hours}${minutes}`;
 }
 
-export function formatTaskDate(
-  value?: string,
-  timeZone = didaTimeZone(),
-): string {
+export function formatTaskDate(value?: string, timeZone = didaTimeZone()): string {
   if (!value) {
     return "No date";
   }

@@ -1,13 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createTask, describeApiError, listProjects } from "./api/dida365.js";
+import { PriorityDropdown, ProjectDropdown } from "./components/form-fields.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
 import type { Project, TaskPriority } from "./types.js";
@@ -80,11 +74,7 @@ export default function Command() {
         return;
       }
 
-      if (
-        dueDate &&
-        values.dueTimePreset === "custom" &&
-        !parseTime(values.customDueTime)
-      ) {
+      if (dueDate && values.dueTimePreset === "custom" && !parseTime(values.customDueTime)) {
         toast.style = Toast.Style.Failure;
         toast.title = "Invalid custom time";
         toast.message = "Use HH:mm, for example 09:30";
@@ -122,26 +112,13 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Task" shortcut={Keyboard.Shortcut.Common.Save} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="例如：明天上午提交报告"
-      />
+      <Form.TextField id="title" title="Title" placeholder="例如：明天上午提交报告" />
 
-      <Form.Dropdown id="projectId" title="List">
-        <Form.Dropdown.Item value="" title="Default / Inbox" />
-        {projects.map((project) => (
-          <Form.Dropdown.Item
-            key={project.id}
-            value={project.id}
-            title={project.name}
-          />
-        ))}
-      </Form.Dropdown>
+      <ProjectDropdown projects={projects} />
 
       <Form.Dropdown id="duePreset" title="Due Date" defaultValue="none">
         <Form.Dropdown.Item value="none" title="No Date" />
@@ -152,11 +129,7 @@ export default function Command() {
         <Form.Dropdown.Item value="custom" title="Custom Date" />
       </Form.Dropdown>
 
-      <Form.TextField
-        id="customDueDate"
-        title="Custom Date"
-        placeholder="YYYY-MM-DD or MM-DD, e.g. 2026-05-24"
-      />
+      <Form.TextField id="customDueDate" title="Custom Date" placeholder="YYYY-MM-DD or MM-DD, e.g. 2026-05-24" />
 
       <Form.Dropdown id="dueTimePreset" title="Due Time" defaultValue="none">
         <Form.Dropdown.Item value="none" title="No Time" />
@@ -167,18 +140,9 @@ export default function Command() {
         <Form.Dropdown.Item value="custom" title="Custom Time" />
       </Form.Dropdown>
 
-      <Form.TextField
-        id="customDueTime"
-        title="Custom Time"
-        placeholder="09:30"
-      />
+      <Form.TextField id="customDueTime" title="Custom Time" placeholder="09:30" />
 
-      <Form.Dropdown id="priority" title="Priority" defaultValue="0">
-        <Form.Dropdown.Item value="0" title="None" />
-        <Form.Dropdown.Item value="1" title="Low" />
-        <Form.Dropdown.Item value="3" title="Medium" />
-        <Form.Dropdown.Item value="5" title="High" />
-      </Form.Dropdown>
+      <PriorityDropdown />
 
       <Form.Dropdown id="reminder" title="Reminder" defaultValue="none">
         <Form.Dropdown.Item value="none" title="None" />
@@ -191,11 +155,7 @@ export default function Command() {
       </Form.Dropdown>
 
       <Form.TextArea id="content" title="Notes" placeholder="Optional notes" />
-      <Form.TextArea
-        id="checklist"
-        title="Checklist"
-        placeholder="One item per line"
-      />
+      <Form.TextArea id="checklist" title="Checklist" placeholder="One item per line" />
     </Form>
   );
 }
@@ -247,11 +207,7 @@ function nextWeekday(date: Date, weekday: number): Date {
   return addDays(date, daysUntilWeekday);
 }
 
-function applyDueTime(
-  date: Date | undefined,
-  preset: string,
-  customTime?: string,
-) {
+function applyDueTime(date: Date | undefined, preset: string, customTime?: string) {
   if (!date) {
     return;
   }
@@ -282,9 +238,7 @@ function resolveTime(preset: string, customTime?: string) {
   }
 }
 
-function parseTime(
-  value?: string,
-): { hour: number; minute: number } | undefined {
+function parseTime(value?: string): { hour: number; minute: number } | undefined {
   const text = value?.trim();
 
   if (!text) {
@@ -315,25 +269,13 @@ function parseCustomDate(value?: string): Date | undefined {
 
   const fullDate = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
   if (fullDate) {
-    return startOfDay(
-      new Date(
-        Number(fullDate[1]),
-        Number(fullDate[2]) - 1,
-        Number(fullDate[3]),
-      ),
-    );
+    return startOfDay(new Date(Number(fullDate[1]), Number(fullDate[2]) - 1, Number(fullDate[3])));
   }
 
   const shortDate = text.match(/^(\d{1,2})[-/](\d{1,2})$/);
   if (shortDate) {
     const now = nowInTimeZone();
-    return startOfDay(
-      new Date(
-        now.getFullYear(),
-        Number(shortDate[1]) - 1,
-        Number(shortDate[2]),
-      ),
-    );
+    return startOfDay(new Date(now.getFullYear(), Number(shortDate[1]) - 1, Number(shortDate[2])));
   }
 
   return undefined;

@@ -37,17 +37,12 @@ export function parseSmartDate(input: string): SmartDateResult {
 
   return {
     date,
-    matchedText: [dateMatch?.matchedText, timeMatch?.matchedText]
-      .filter(Boolean)
-      .join(" "),
+    matchedText: [dateMatch?.matchedText, timeMatch?.matchedText].filter(Boolean).join(" "),
     hasTime: Boolean(timeMatch),
   };
 }
 
-export function stripSmartDateText(
-  input: string,
-  result: SmartDateResult,
-): string {
+export function stripSmartDateText(input: string, result: SmartDateResult): string {
   let text = input;
 
   for (const part of result.matchedText?.split(" ").filter(Boolean) ?? []) {
@@ -57,11 +52,7 @@ export function stripSmartDateText(
   return text.replace(/\s+/g, " ").trim();
 }
 
-export function dateFromPreset(
-  preset: string,
-  customDate?: string,
-  customTime?: string,
-): SmartDateResult {
+export function dateFromPreset(preset: string, customDate?: string, customTime?: string): SmartDateResult {
   const now = nowInTimeZone();
   let date: Date | undefined;
 
@@ -99,20 +90,11 @@ export function dateFromPreset(
   return { date, hasTime: Boolean(time) };
 }
 
-function matchDate(
-  text: string,
-  now: Date,
-): { date: Date; matchedText: string } | undefined {
+function matchDate(text: string, now: Date): { date: Date; matchedText: string } | undefined {
   const fullDate = text.match(/\b(\d{4})[-/](\d{1,2})[-/](\d{1,2})\b/);
   if (fullDate) {
     return {
-      date: startOfDay(
-        new Date(
-          Number(fullDate[1]),
-          Number(fullDate[2]) - 1,
-          Number(fullDate[3]),
-        ),
-      ),
+      date: startOfDay(new Date(Number(fullDate[1]), Number(fullDate[2]) - 1, Number(fullDate[3]))),
       matchedText: fullDate[0],
     };
   }
@@ -120,13 +102,7 @@ function matchDate(
   const shortDate = text.match(/\b(\d{1,2})[-/](\d{1,2})\b/);
   if (shortDate) {
     return {
-      date: startOfDay(
-        new Date(
-          now.getFullYear(),
-          Number(shortDate[1]) - 1,
-          Number(shortDate[2]),
-        ),
-      ),
+      date: startOfDay(new Date(now.getFullYear(), Number(shortDate[1]) - 1, Number(shortDate[2]))),
       matchedText: shortDate[0],
     };
   }
@@ -151,21 +127,15 @@ function matchDate(
   return undefined;
 }
 
-function matchTime(
-  text: string,
-): { hour: number; minute: number; matchedText: string } | undefined {
+function matchTime(text: string): { hour: number; minute: number; matchedText: string } | undefined {
   const clock = text.match(/\b(\d{1,2}):(\d{2})\b/);
   if (clock) {
     const hour = Number(clock[1]);
     const minute = Number(clock[2]);
-    return isValidTime(hour, minute)
-      ? { hour, minute, matchedText: clock[0] }
-      : undefined;
+    return isValidTime(hour, minute) ? { hour, minute, matchedText: clock[0] } : undefined;
   }
 
-  const cn = text.match(
-    /(上午|早上|中午|下午|晚上)?\s*(\d{1,2})\s*[点时](半|:(\d{2}))?/,
-  );
+  const cn = text.match(/(上午|早上|中午|下午|晚上)?\s*(\d{1,2})\s*[点时](半|:(\d{2}))?/);
   if (!cn) {
     return undefined;
   }
@@ -182,14 +152,10 @@ function matchTime(
     hour += 12;
   }
 
-  return isValidTime(hour, minute)
-    ? { hour, minute, matchedText: cn[0] }
-    : undefined;
+  return isValidTime(hour, minute) ? { hour, minute, matchedText: cn[0] } : undefined;
 }
 
-export function parseTime(
-  value?: string,
-): { hour: number; minute: number } | undefined {
+export function parseTime(value?: string): { hour: number; minute: number } | undefined {
   const text = value?.trim();
 
   if (!text) {

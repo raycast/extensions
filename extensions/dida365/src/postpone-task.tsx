@@ -1,20 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import { describeApiError, listOpenTasks, updateTask } from "./api/dida365.js";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { describeApiError, updateTask } from "./api/dida365.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
-import { isMissingApiToken } from "./setup.js";
+import { useOpenTasks } from "./hooks/use-open-tasks.js";
 import type { Task } from "./types.js";
 import { dateFromPreset, toTaskDatePayload } from "./utils/smart-date.js";
-import { taskSearchText } from "./utils/task.js";
+import { filterTasksBySearch, openTasksOnly } from "./utils/task.js";
 import { didaTimeZone } from "./utils/timezone.js";
 
 type PostponePreset =
@@ -28,53 +19,15 @@ type PostponePreset =
   | "custom";
 
 export default function Command() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [needsSetup, setNeedsSetup] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const { tasks, setTasks, isLoading, needsSetup } = useOpenTasks({
+    loadErrorTitle: "Failed to load tasks",
+    filterTasks: openTasksOnly,
+  });
 
-  async function loadTasks() {
-    setIsLoading(true);
-    try {
-      setTasks((await listOpenTasks()).filter((task) => task.status !== 2));
-    } catch (error) {
-      if (isMissingApiToken(error)) {
-        setNeedsSetup(true);
-        return;
-      }
+  const filteredTasks = useMemo(() => filterTasksBySearch(tasks, searchText), [searchText, tasks]);
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load tasks",
-        message: describeApiError(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    void loadTasks();
-  }, []);
-
-  const filteredTasks = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
-
-    if (!query) {
-      return tasks;
-    }
-
-    return tasks.filter((task) =>
-      taskSearchText(task).toLowerCase().includes(query),
-    );
-  }, [searchText, tasks]);
-
-  async function postponeTask(
-    task: Task,
-    preset: PostponePreset,
-    customDate?: string,
-    customTime?: string,
-  ) {
+  async function postponeTask(task: Task, preset: PostponePreset, customDate?: string, customTime?: string) {
     const result = dateFromPreset(preset, customDate, customTime);
     const payload = toTaskDatePayload(result);
     const timeZone = didaTimeZone();
@@ -99,9 +52,7 @@ export default function Command() {
       });
       setTasks((current) =>
         current.map((item) =>
-          item.id === task.id
-            ? { ...item, dueDate: payload.dueDate, isAllDay: payload.isAllDay }
-            : item,
+          item.id === task.id ? { ...item, dueDate: payload.dueDate, isAllDay: payload.isAllDay } : item,
         ),
       );
       toast.style = Toast.Style.Success;
@@ -125,11 +76,7 @@ export default function Command() {
       throttle
     >
       {filteredTasks.map((task) => (
-        <PostponeTaskItem
-          key={`postpone:${task.projectId}:${task.id}`}
-          task={task}
-          onPostpone={postponeTask}
-        />
+        <PostponeTaskItem key={`postpone:${task.projectId}:${task.id}`} task={task} onPostpone={postponeTask} />
       ))}
     </List>
   );
@@ -140,12 +87,7 @@ function PostponeTaskItem({
   onPostpone,
 }: {
   task: Task;
-  onPostpone: (
-    task: Task,
-    preset: PostponePreset,
-    customDate?: string,
-    customTime?: string,
-  ) => Promise<void>;
+  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<void>;
 }) {
   return (
     <List.Item
@@ -154,44 +96,26 @@ function PostponeTaskItem({
       subtitle={task.dueDate ?? "No date"}
       actions={
         <ActionPanel>
-          <Action
-            title="Today"
-            icon={Icon.Calendar}
-            onAction={() => onPostpone(task, "today")}
-          />
-          <Action
-            title="Tomorrow"
-            icon={Icon.Calendar}
-            onAction={() => onPostpone(task, "tomorrow")}
-          />
+          <Action title="Today" icon={Icon.Calendar} onAction={() => onPostpone(task, "today")} />
+          <Action title="Tomorrow" icon={Icon.Calendar} onAction={() => onPostpone(task, "tomorrow")} />
           <Action
             title="Day After Tomorrow"
             icon={Icon.Calendar}
             onAction={() => onPostpone(task, "day_after_tomorrow")}
           />
-          <Action
-            title="This Weekend"
-            icon={Icon.Calendar}
-            onAction={() => onPostpone(task, "weekend")}
-          />
-          <Action
-            title="Next Monday"
-            icon={Icon.Calendar}
-            onAction={() => onPostpone(task, "monday")}
-          />
-          <Action
-            title="Next Week"
-            icon={Icon.Calendar}
-            onAction={() => onPostpone(task, "next_week")}
-          />
+          <Action title="This Weekend" icon={Icon.Calendar} onAction={() => onPostpone(task, "weekend")} />
+          <Action title="Next Monday" icon={Icon.Calendar} onAction={() => onPostpone(task, "monday")} />
+          <Action title="Next Week" icon={Icon.Calendar} onAction={() => onPostpone(task, "next_week")} />
           <Action.Push
             title="Custom Date and Time"
             icon={Icon.Pencil}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             target={<CustomPostponeForm task={task} onPostpone={onPostpone} />}
           />
           <Action
             title="Clear Due Date"
             icon={Icon.XMarkCircle}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={() => onPostpone(task, "none")}
           />
         </ActionPanel>
@@ -205,19 +129,11 @@ function CustomPostponeForm({
   onPostpone,
 }: {
   task: Task;
-  onPostpone: (
-    task: Task,
-    preset: PostponePreset,
-    customDate?: string,
-    customTime?: string,
-  ) => Promise<void>;
+  onPostpone: (task: Task, preset: PostponePreset, customDate?: string, customTime?: string) => Promise<void>;
 }) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: {
-    customDate: string;
-    customTime?: string;
-  }) {
+  async function handleSubmit(values: { customDate: string; customTime?: string }) {
     await onPostpone(task, "custom", values.customDate, values.customTime);
     pop();
   }
@@ -226,20 +142,12 @@ function CustomPostponeForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update Date" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Update Date" shortcut={Keyboard.Shortcut.Common.Save} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="customDate"
-        title="Date"
-        placeholder="2026-05-24, 05-24, 明天, 周一"
-      />
-      <Form.TextField
-        id="customTime"
-        title="Time"
-        placeholder="09:30, 上午9点, 下午3点"
-      />
+      <Form.TextField id="customDate" title="Date" placeholder="2026-05-24, 05-24, 明天, 周一" />
+      <Form.TextField id="customTime" title="Time" placeholder="09:30, 上午9点, 下午3点" />
     </Form>
   );
 }

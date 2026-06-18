@@ -1,22 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { createTask, describeApiError, listProjects } from "./api/dida365.js";
+import { PriorityDropdown, ProjectDropdown } from "./components/form-fields.js";
 import { SetupTokenView } from "./components/setup-token-view.js";
 import { isMissingApiToken } from "./setup.js";
 import type { Project, TaskPriority } from "./types.js";
-import {
-  parseSmartDate,
-  stripSmartDateText,
-  toTaskDatePayload,
-} from "./utils/smart-date.js";
+import { parseSmartDate, stripSmartDateText, toTaskDatePayload } from "./utils/smart-date.js";
 import { didaTimeZone } from "./utils/timezone.js";
 
 type Values = {
@@ -43,10 +32,7 @@ export default function Command() {
     async function load() {
       setIsLoading(true);
       try {
-        const [text, loadedProjects] = await Promise.all([
-          Clipboard.readText(),
-          listProjects(),
-        ]);
+        const [text, loadedProjects] = await Promise.all([Clipboard.readText(), listProjects()]);
         setClipboardText(text ?? "");
         setProjects(loadedProjects);
       } catch (error) {
@@ -68,10 +54,7 @@ export default function Command() {
     void load();
   }, []);
 
-  const preview = useMemo(
-    () => parseClipboardTasks(clipboardText),
-    [clipboardText],
-  );
+  const preview = useMemo(() => parseClipboardTasks(clipboardText), [clipboardText]);
 
   if (needsSetup) {
     return <SetupTokenView />;
@@ -108,9 +91,7 @@ export default function Command() {
           }),
         ),
       );
-      const succeeded = results.filter(
-        (result) => result.status === "fulfilled",
-      ).length;
+      const succeeded = results.filter((result) => result.status === "fulfilled").length;
       const failed = results.length - succeeded;
 
       if (failed > 0) {
@@ -140,7 +121,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Tasks" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Tasks" shortcut={Keyboard.Shortcut.Common.Save} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -155,37 +136,17 @@ export default function Command() {
         title="Preview"
         text={preview
           .slice(0, 8)
-          .map(
-            (task) =>
-              `• ${task.title}${task.dueDate ? ` · ${task.dueDate}` : ""}`,
-          )
+          .map((task) => `• ${task.title}${task.dueDate ? ` · ${task.dueDate}` : ""}`)
           .join("\n")}
       />
 
-      <Form.Dropdown id="projectId" title="List">
-        <Form.Dropdown.Item value="" title="Default / Inbox" />
-        {projects.map((project) => (
-          <Form.Dropdown.Item
-            key={project.id}
-            value={project.id}
-            title={project.name}
-          />
-        ))}
-      </Form.Dropdown>
-
-      <Form.Dropdown id="priority" title="Priority" defaultValue="0">
-        <Form.Dropdown.Item value="0" title="None" />
-        <Form.Dropdown.Item value="1" title="Low" />
-        <Form.Dropdown.Item value="3" title="Medium" />
-        <Form.Dropdown.Item value="5" title="High" />
-      </Form.Dropdown>
+      <ProjectDropdown projects={projects} />
+      <PriorityDropdown />
     </Form>
   );
 }
 
-function firstRejectionMessage(
-  results: PromiseSettledResult<unknown>[],
-): string | undefined {
+function firstRejectionMessage(results: PromiseSettledResult<unknown>[]): string | undefined {
   const rejected = results.find((result) => result.status === "rejected");
   return rejected ? describeApiError(rejected.reason) : undefined;
 }
