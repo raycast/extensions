@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-06-18
 
 - Added preferences for "Translate from" (source), "Primary Language" (target), and "Secondary Language" (fallback target)
 - Added automatic swap to the secondary target language if the detected source language matches the primary target language
