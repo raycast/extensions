@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A2A2E"/>
+      <stop offset="100%" stop-color="#101013"/>
+    </linearGradient>
+  </defs>
+
+  <!-- External ultrawide monitor (top) -->
+  <rect x="40"  y="88"  width="432" height="200" rx="20" fill="url(#bezel)"/>
+  <rect x="60"  y="108" width="392" height="160" rx="8"  fill="url(#screen)"/>
+  <!-- monitor stand -->
+  <rect x="232" y="288" width="48"  height="36"  fill="#2A2A2E"/>
+  <rect x="192" y="320" width="128" height="14"  rx="6" fill="#2A2A2E"/>
+
+  <!-- MacBook (bottom, stacked layout) -->
+  <rect x="152" y="356" width="208" height="124" rx="12" fill="url(#bezel)"/>
+  <rect x="164" y="368" width="184" height="92"  rx="4"  fill="url(#screen)"/>
+  <!-- MacBook base / hinge -->
+  <rect x="136" y="478" width="240" height="14" rx="7" fill="#1A1A1D"/>
+  <rect x="240" y="478" width="32"  height="6"  rx="3" fill="#2A2A2E"/>
+</svg>
