@@ -67,18 +67,18 @@
     {
       "name": "timeZone",
       "title": "Time Zone",
-      "description": "Used to create and compare due dates. Choose Asia/Shanghai for Dida365 China accounts.",
+      "description": "Used to create and compare due dates. Defaults to your system time zone; choose Asia/Shanghai for Dida365 China accounts.",
       "type": "dropdown",
       "required": false,
-      "default": "Asia/Shanghai",
+      "default": "system",
       "data": [
-        {
-          "title": "China Standard Time",
-          "value": "Asia/Shanghai"
-        },
         {
           "title": "System Default",
           "value": "system"
+        },
+        {
+          "title": "China Standard Time",
+          "value": "Asia/Shanghai"
         },
         {
           "title": "UTC",

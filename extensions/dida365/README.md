@@ -26,7 +26,7 @@ To set it up manually:
 
 The token is stored locally by Raycast and is only used to call the Dida365 API.
 
-The extension also has a `Time Zone` preference. It defaults to `Asia/Shanghai` for Dida365 China accounts, and can be changed if your tasks should use another time zone.
+The extension also has a `Time Zone` preference. It defaults to your system time zone and can be set to `Asia/Shanghai` for Dida365 China accounts.
 
 ## Clipboard Date Parsing
 
