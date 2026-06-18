@@ -25,10 +25,12 @@ async function fetchConnections(): Promise<Connection[]> {
       set conNames to name of every connection
       set conDescriptions to description of every connection
       set conCount to count of conIds
+      set fieldSep to ASCII character 31
+      set recSep to ASCII character 30
       set output to ""
       repeat with i from 1 to conCount
-        if i > 1 then set output to output & linefeed
-        set output to output & (item i of conIds) & tab & (item i of conNames) & tab & (item i of conDescriptions)
+        if i > 1 then set output to output & recSep
+        set output to output & (item i of conIds) & fieldSep & (item i of conNames) & fieldSep & (item i of conDescriptions)
       end repeat
       return output
     end tell
@@ -41,9 +43,9 @@ async function fetchConnections(): Promise<Connection[]> {
   }
   const connections = result
     .trim()
-    .split("\n")
-    .map((line) => {
-      const parts = line.split("\t");
+    .split("\u001E")
+    .map((record) => {
+      const parts = record.split("\u001F");
       return {
         id: parts[0] ?? "",
         name: parts[1] ?? "",
@@ -110,8 +112,9 @@ export default function Command() {
       if (value) {
         try {
           const parsed = JSON.parse(value);
-          console.debug(`Command: loaded ${parsed.length} recent connection id(s) from LocalStorage`);
-          setRecentIds(parsed);
+          const validated = Array.isArray(parsed) && parsed.every((x) => typeof x === "string") ? parsed : [];
+          console.debug(`Command: loaded ${validated.length} recent connection id(s) from LocalStorage`);
+          setRecentIds(validated);
         } catch (err) {
           console.error("Command: failed to parse recent-connections from LocalStorage", err);
           setRecentIds([]);
