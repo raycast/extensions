@@ -1,6 +1,7 @@
 import { execFileSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
+import plist from "plist";
 
 export interface ItermProfile {
   name: string;
@@ -18,7 +19,6 @@ type CapitalizeKeys<Type> = {
   [Property in keyof Type as Capitalize<string & Property>]: Type[Property];
 };
 
-/** A profile representation in the iTerm preferences file (via JSON conversion) */
 type PlistProfile = CapitalizeKeys<ItermProfile>;
 
 function isPlistProfile(entry: unknown): entry is PlistProfile {
@@ -35,9 +35,8 @@ function isPlistProfile(entry: unknown): entry is PlistProfile {
 export function getItermProfiles(): ItermProfile[] {
   // prettier-ignore
   const plutilArgs = [
-    "-extract", PlistPreferences.Keys.PROFILES, "json",
-    "-expect", "array",
-    "-o", "-", // Output to stdout
+    "-extract", PlistPreferences.Keys.PROFILES, "xml1",
+    "-o", "-",
     join(homedir(), PlistPreferences.USER_REL_PATH),
   ];
 
@@ -46,7 +45,12 @@ export function getItermProfiles(): ItermProfile[] {
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
     });
-    const profiles = JSON.parse(output) as unknown[]; // Safe assertion due to `-expect array`
+    const profiles = plist.parse(output);
+
+    if (!Array.isArray(profiles)) {
+      console.error("Expected an array of profiles from iTerm preferences");
+      return [];
+    }
 
     return profiles.filter(isPlistProfile).map((profile) => ({ name: profile.Name, guid: profile.Guid }));
   } catch (error) {
