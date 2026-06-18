@@ -13,7 +13,7 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Name required",
       });
@@ -23,7 +23,7 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
     try {
       const createdPath = createTryDirectory(name);
       const dirName = basename(createdPath);
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: "Created",
         message: dirName,
@@ -31,10 +31,10 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
       onSuccess();
       pop();
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Failed to create directory",
-        message: String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   };
