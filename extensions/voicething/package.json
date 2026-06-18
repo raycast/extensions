@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voicething",
+  "title": "Voice Thing",
+  "description": "Play MyInstants memes by copying or pasting normalized audio files.",
+  "icon": "icon.png",
+  "author": "shaurya_mathur",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-clips",
+      "title": "Play Meme",
+      "description": "Search MyInstants and paste a normalized meme audio file into the active app.",
+      "mode": "view",
+      "keywords": [
+        "voice",
+        "soundboard",
+        "myinstants",
+        "meme",
+        "audio"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
