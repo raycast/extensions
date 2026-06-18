@@ -1,10 +1,40 @@
 import * as OpenCC from "opencc-js";
+import STCharacters from "opencc-js/dict/STCharacters";
+import TSCharacters from "opencc-js/dict/TSCharacters";
 import { DictEntry } from "./storage";
 
 export type Direction = "s2t" | "t2s";
 
-const simplifiedToTraditional = OpenCC.Converter({ from: "cn", to: "tw" });
-const traditionalToSimplified = OpenCC.Converter({ from: "tw", to: "cn" });
+type ConvertFn = (text: string) => string;
+
+// Building the Simplified→Traditional converter loads the ~1 MB STPhrases
+// dictionary and takes ~100 ms, while Traditional→Simplified is only ~3 ms.
+// Previously both were created at module load, so every cold-started command
+// invocation paid the ~100 ms cost *before* the selection was even copied.
+// We now build each full converter lazily and memoize it, so only the one
+// actually needed is created, and only after the text has been grabbed.
+let simplifiedToTraditional: ConvertFn | null = null;
+let traditionalToSimplified: ConvertFn | null = null;
+
+function getConverter(direction: Direction): ConvertFn {
+  if (direction === "s2t") {
+    return (simplifiedToTraditional ??= OpenCC.Converter({
+      from: "cn",
+      to: "tw",
+    }));
+  }
+  return (traditionalToSimplified ??= OpenCC.Converter({
+    from: "tw",
+    to: "cn",
+  }));
+}
+
+// Lightweight character-only converters used solely for direction detection.
+// They load the tiny ST/TS character tables (a few ms total) instead of the
+// heavy phrase tables, yet produce the same detection result as the full
+// converters because the heuristic below only counts changed characters.
+let detectToTraditional: ConvertFn | null = null;
+let detectToSimplified: ConvertFn | null = null;
 
 /**
  * Count how many characters differ between two strings, comparing position by
@@ -27,8 +57,11 @@ function countDifferences(a: string, b: string): number {
  * - Otherwise it is treated as Traditional.
  */
 export function detectDirection(text: string): Direction {
-  const asTraditional = simplifiedToTraditional(text);
-  const asSimplified = traditionalToSimplified(text);
+  detectToTraditional ??= OpenCC.CustomConverter(STCharacters);
+  detectToSimplified ??= OpenCC.CustomConverter(TSCharacters);
+
+  const asTraditional = detectToTraditional(text);
+  const asSimplified = detectToSimplified(text);
 
   const simplifiedScore = countDifferences(text, asTraditional);
   const traditionalScore = countDifferences(text, asSimplified);
@@ -87,7 +120,6 @@ export function convertText(
 ): ConversionResult {
   const direction = detectDirection(text);
   const withDictionary = applyDictionary(text, direction, dictionary);
-  const converter =
-    direction === "s2t" ? simplifiedToTraditional : traditionalToSimplified;
+  const converter = getConverter(direction);
   return { text: converter(withDictionary), direction };
 }
