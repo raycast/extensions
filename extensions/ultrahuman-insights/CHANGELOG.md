@@ -1,6 +1,6 @@
 # Ultrahuman Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-18
 
 - Menu bar with color-coded sleep score
 - Five view commands: Today's Health, Sleep Detail, HRV & Heart Rate, Recovery & Movement, 7-Day Trends

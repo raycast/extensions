@@ -83,7 +83,7 @@
     {
       "name": "get-trend",
       "title": "Get Metric Trend",
-      "description": "Get N days of history (1\u20137) for a single Ultrahuman metric."
+      "description": "Get N days of history (1–7) for a single Ultrahuman metric."
     }
   ],
   "dependencies": {
@@ -103,5 +103,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
