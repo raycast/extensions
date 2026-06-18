@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-18
 
 - Added a visual keyboard layout with split shifted/unshifted key highlighting and size presets
 - Added inline key conflict feedback when creating actions and groups
