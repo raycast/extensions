@@ -90,7 +90,7 @@ export default function Command() {
     >
       {!input.trim() ? (
         <List.EmptyView
-          icon={Icon.QrCode}
+          icon={Icon.BarCode}
           title="Generate a QR Code"
           description="Type or paste a value or URL. Generated locally with the swiss CLI."
         />
@@ -98,7 +98,7 @@ export default function Command() {
         <List.Item
           title="QR Code"
           subtitle={png ? "Scannable PNG" : error ? "Error" : "Generating…"}
-          icon={Icon.QrCode}
+          icon={Icon.BarCode}
           detail={<List.Item.Detail markdown={markdown} />}
           actions={
             <ActionPanel>
