@@ -1,7 +1,7 @@
 import type { Task } from "../types.js";
 import { didaTimeZone } from "./timezone.js";
 
-export function parseTaskDate(value?: string): Date | undefined {
+export function parseTaskDate(value?: string | null): Date | undefined {
   if (!value) {
     return undefined;
   }
