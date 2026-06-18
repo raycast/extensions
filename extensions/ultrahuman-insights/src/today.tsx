@@ -74,7 +74,7 @@ export default function Today() {
     : [];
 
   return (
-    <List isLoading={loading} isShowingDetail={!loading && !!data} navigationTitle="Today's Health">
+    <List isLoading={loading} isShowingDetail={!loading && !!data}>
       {error && <ListStatus variant="refresh-failed" itemTitle={error.message.slice(0, 80)} onRefresh={refresh} />}
       {stale && (
         <ListStatus

@@ -118,7 +118,15 @@ export default function Hrv() {
     return <DetailStatus variant="missing-token" />;
   }
 
-  const markdown = data ? markdownFor(data, stale, error) : loading ? "Loading…" : "No data yet.";
+  if (error && !data && !loading) {
+    return <DetailStatus variant="refresh-failed" message={error.message} onRefresh={refresh} />;
+  }
+
+  if (!data && !loading) {
+    return <DetailStatus variant="no-data" onRefresh={refresh} />;
+  }
+
+  const markdown = data ? markdownFor(data, stale, error) : "Loading…";
 
   return (
     <Detail

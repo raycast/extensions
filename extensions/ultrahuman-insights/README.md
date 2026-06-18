@@ -1,4 +1,4 @@
-# Ultrahuman Insights for Raycast
+# Ultrahuman Insights
 
 > Smart insights, AI tools, and trend charts for your Ultrahuman Ring AIR. Native Raycast UI throughout — menu bar score, split-pane lists with `Detail.Metadata` rails, inline SVG trend charts, and three Raycast AI tools.
 
@@ -15,7 +15,7 @@ If you don't have Partner API access, this extension won't work. Please confirm 
 
 ## Features
 
-- **Menu bar** — Last night's sleep score in your macOS menu bar, color-coded (green/yellow/red) by status. Click for a Sleep + Recovery breakdown.
+- **Menu bar (macOS only)** — Last night's sleep score in your menu bar, color-coded (green/yellow/red) by status. Click for a Sleep + Recovery breakdown.
 - **Today's Health** — Every available metric (HRV, RHR, Recovery, Movement, Sleep stages, VO₂ Max, SpO₂, steps, and more) with smart insights, 7-day deltas, and inline charts.
 - **Sleep Detail** — Last night's score, ASCII stages bar, vitals during sleep (HRV, temp, RHR), quality breakdown, and 7-day score trend.
 - **HRV & Heart Rate** — Today's HRV and Night RHR with 7-day charts, daily values table, and trend deltas.
@@ -42,7 +42,7 @@ The extension interprets metrics using well-established consumer-wearable thresh
 ## Caching & Refresh
 
 - All API access goes through a 5-minute TTL cache, so multiple commands within 5 minutes share one network call.
-- Data refreshes every 5 minutes in the background (menu bar).
+- Data refreshes every 5 minutes in the background (macOS menu bar).
 - `⌘R` in any view forces a fresh fetch.
 - On network failure, the extension falls back to the last successful response (up to 24 hours old) with a "cached" indicator.
 
@@ -50,7 +50,11 @@ The extension interprets metrics using well-established consumer-wearable thresh
 
 - Your API token is stored in Raycast's encrypted preferences and is never logged, sent to third parties, or written to disk in plaintext.
 - All API calls go directly to `partner.ultrahuman.com`. No analytics, telemetry, or third-party services are used.
-- The extension writes small chart `.svg` files to Raycast's per-extension support directory; these are auto-cleaned after 24 hours.
+
+## Platforms
+
+- **macOS** — All commands, including the menu bar sleep score.
+- **Windows** — View commands and Raycast AI tools. The menu bar command is macOS-only.
 
 ## Limitations
 

@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { METRIC_LABELS, MetricName } from "./lib/types";
 import { formatMetricValue, sparkline } from "./lib/format";
 import { insightFor, deltaVsAverage, appendInsightLines, Insight } from "./lib/insights";
@@ -60,9 +60,10 @@ export default function Trends() {
   }
 
   const metrics = Object.keys(METRIC_LABELS) as MetricName[];
+  const availableMetrics = data ? metrics.filter((m) => sorted.some((d) => d[m] != null)) : [];
 
   return (
-    <List isLoading={loading} isShowingDetail navigationTitle="7-Day Trends">
+    <List isLoading={loading} isShowingDetail={!loading && availableMetrics.length > 0}>
       {error && <ListStatus variant="refresh-failed" itemTitle={error.message.slice(0, 80)} onRefresh={refresh} />}
       {stale && (
         <ListStatus
@@ -72,31 +73,37 @@ export default function Trends() {
           onRefresh={refresh}
         />
       )}
-      {data && (
+      {!loading && data && availableMetrics.length === 0 && (
+        <List.EmptyView
+          title="No trend data yet"
+          description="Charge and sync your Ring, then refresh."
+          icon={Icon.Cloud}
+          actions={<MetricActions refresh={refresh} />}
+        />
+      )}
+      {availableMetrics.length > 0 && (
         <List.Section title="Metrics">
-          {metrics
-            .filter((m) => sorted.some((d) => d[m] != null))
-            .map((m) => {
-              const values = sorted.map((d) => d[m]);
-              const dates = sorted.map((d) => d.date);
-              const todayValue = values[values.length - 1];
-              const insight = insightFor(m, todayValue, values);
-              const formattedValue = formatMetricValue(m, todayValue);
-              const copyText = `${METRIC_LABELS[m]}: ${formattedValue}`;
+          {availableMetrics.map((m) => {
+            const values = sorted.map((d) => d[m]);
+            const dates = sorted.map((d) => d.date);
+            const todayValue = values[values.length - 1];
+            const insight = insightFor(m, todayValue, values);
+            const formattedValue = formatMetricValue(m, todayValue);
+            const copyText = `${METRIC_LABELS[m]}: ${formattedValue}`;
 
-              return (
-                <List.Item
-                  key={m}
-                  title={METRIC_LABELS[m]}
-                  icon={metricIcon(m, insight.status)}
-                  accessories={[{ text: sparkline(values) }]}
-                  detail={<List.Item.Detail markdown={trendMarkdown(m, values, dates, insight)} />}
-                  actions={
-                    <MetricActions refresh={refresh} copyTitle={`Copy ${METRIC_LABELS[m]}`} copyContent={copyText} />
-                  }
-                />
-              );
-            })}
+            return (
+              <List.Item
+                key={m}
+                title={METRIC_LABELS[m]}
+                icon={metricIcon(m, insight.status)}
+                accessories={[{ text: sparkline(values) }]}
+                detail={<List.Item.Detail markdown={trendMarkdown(m, values, dates, insight)} />}
+                actions={
+                  <MetricActions refresh={refresh} copyTitle={`Copy ${METRIC_LABELS[m]}`} copyContent={copyText} />
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

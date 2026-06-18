@@ -12,17 +12,21 @@ export function MetricActions({ refresh, copyTitle, copyContent }: MetricActions
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "r" }, Windows: { modifiers: ["ctrl"], key: "r" } }}
         onAction={refresh}
       />
       <Action
         title="Open Preferences"
         icon={Icon.Cog}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
         onAction={openExtensionPreferences}
       />
       {copyContent != null && copyTitle != null && (
-        <Action.CopyToClipboard title={copyTitle} content={copyContent} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <Action.CopyToClipboard
+          title={copyTitle}
+          content={copyContent}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+        />
       )}
     </ActionPanel>
   );

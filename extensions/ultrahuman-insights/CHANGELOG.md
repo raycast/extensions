@@ -1,10 +1,9 @@
-# Ultrahuman Changelog
+# Ultrahuman Insights
 
-## [Add Windows support and streamline codebase] - {PR_MERGE_DATE}
+## [Ultrahuman Insights] - {PR_MERGE_DATE}
 
-- Add Windows as a supported platform
-- Extract shared hooks and components (`useDailyRange`, `MetricActions`) to reduce duplication across commands
-- Update Raycast API and dev dependencies (ESLint, TypeScript, Prettier)
+- Add Windows support for all view commands and Raycast AI tools.
+- Add AI evals for tool reliability testing.
 
 ## [Initial Version] - 2026-06-18
 

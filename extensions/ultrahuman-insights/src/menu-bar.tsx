@@ -1,4 +1,13 @@
-import { MenuBarExtra, Icon, Color, openExtensionPreferences, launchCommand, LaunchType } from "@raycast/api";
+import {
+  MenuBarExtra,
+  Icon,
+  Color,
+  openExtensionPreferences,
+  launchCommand,
+  LaunchType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useMemo } from "react";
 import { clearRange } from "./lib/cache";
 import { formatDuration, fmt, todayDateKey, latestWithField, relativeDateLabel } from "./lib/format";
@@ -64,7 +73,17 @@ export default function MenuBar() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Today's Health"
-          onAction={() => launchCommand({ name: "today", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "today", type: LaunchType.UserInitiated });
+            } catch (e) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could not open Today's Health",
+                message: e instanceof Error ? e.message : String(e),
+              });
+            }
+          }}
         />
         <MenuBarExtra.Item
           title="Refresh Now"

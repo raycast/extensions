@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { MetricName } from "./lib/types";
-import { fmt } from "./lib/format";
+import { fmt, latestWithField } from "./lib/format";
 import { insightFor, deltaVsAverage, avgExcludingLast, formatDeltaArrow, appendInsightLines } from "./lib/insights";
 import { metricIcon } from "./lib/icons";
 import { lineChart, colorToHex } from "./lib/charts";
@@ -85,14 +85,17 @@ export default function Recovery() {
   const shortLabels = weekdayShortLabels(sorted.map((r) => r.date));
 
   return (
-    <List isLoading={loading} isShowingDetail={!loading && !!data} navigationTitle="Recovery & Movement">
+    <List isLoading={loading} isShowingDetail={!loading && !!data}>
       {error && <ListStatus variant="refresh-failed" itemTitle={error.message.slice(0, 80)} onRefresh={refresh} />}
       {stale && (
         <ListStatus variant="stale" itemTitle="Network unreachable — data may be outdated" onRefresh={refresh} />
       )}
       <List.Section title="Indices">
         {INDICES.map((def) => {
-          const value = todayEntry?.[def.metric];
+          const value =
+            def.metric === "sleep_score"
+              ? latestWithField(sorted, "sleep_score")?.sleep_score
+              : todayEntry?.[def.metric];
           const series = sorted.map((r) => r[def.metric]);
           const insight = insightFor(def.metric, value, series);
           const copyValue = value != null ? `${def.label}: ${value}` : null;

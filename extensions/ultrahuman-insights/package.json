@@ -9,6 +9,7 @@
     "0xdhrv"
   ],
   "categories": [
+    "Data",
     "Productivity"
   ],
   "keywords": [
@@ -39,7 +40,10 @@
       "title": "Menu Bar Sleep Score",
       "description": "Show last night's Ultrahuman sleep score in the macOS menu bar, color-coded by status.",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "5m",
+      "platforms": [
+        "macOS"
+      ]
     },
     {
       "name": "today",
@@ -89,6 +93,122 @@
       "description": "Get N days of history (1–7) for a single Ultrahuman metric."
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@ultrahuman-insights how did I sleep last night",
+        "mocks": {
+          "get-today": {
+            "date": "2026-06-18",
+            "as_of": "2026-06-18T08:00:00.000Z",
+            "stale": false,
+            "available": true,
+            "metrics": {
+              "date": "2026-06-18",
+              "sleep_score": 82,
+              "total_sleep": 420,
+              "hrv": 68,
+              "recovery_index": 79
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-today",
+              "arguments": {}
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@ultrahuman-insights what was my HRV today",
+        "mocks": {
+          "get-metric": {
+            "date": "2026-06-18",
+            "as_of": "2026-06-18T08:00:00.000Z",
+            "stale": false,
+            "metric": "hrv",
+            "label": "HRV",
+            "value": 68,
+            "formatted_value": "68 ms",
+            "available": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-metric",
+              "arguments": {
+                "metric": "hrv"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ultrahuman-insights is my HRV trending down this week",
+        "mocks": {
+          "get-trend": {
+            "date": "2026-06-18",
+            "as_of": "2026-06-18T08:00:00.000Z",
+            "stale": false,
+            "metric": "hrv",
+            "label": "HRV",
+            "days": 7,
+            "series": [
+              {
+                "date": "2026-06-12",
+                "value": 72,
+                "formatted_value": "72 ms"
+              },
+              {
+                "date": "2026-06-13",
+                "value": 70,
+                "formatted_value": "70 ms"
+              },
+              {
+                "date": "2026-06-14",
+                "value": 69,
+                "formatted_value": "69 ms"
+              },
+              {
+                "date": "2026-06-15",
+                "value": 67,
+                "formatted_value": "67 ms"
+              },
+              {
+                "date": "2026-06-16",
+                "value": 66,
+                "formatted_value": "66 ms"
+              },
+              {
+                "date": "2026-06-17",
+                "value": 65,
+                "formatted_value": "65 ms"
+              },
+              {
+                "date": "2026-06-18",
+                "value": 64,
+                "formatted_value": "64 ms"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-trend",
+              "arguments": {
+                "metric": "hrv"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.19"
   },
