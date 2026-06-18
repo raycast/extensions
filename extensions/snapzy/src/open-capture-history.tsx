@@ -2,5 +2,5 @@ import { closeMainWindow, open } from "@raycast/api";
 
 export default async function Command() {
   await closeMainWindow();
-  open("snapzy://open/history");
+  await open("snapzy://open/history");
 }
