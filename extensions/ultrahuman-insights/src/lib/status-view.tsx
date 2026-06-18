@@ -65,14 +65,14 @@ function buildActions(variant: StatusVariant, onRefresh?: () => void) {
         <Action
           title="Retry"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "r" }, Windows: { modifiers: ["ctrl"], key: "r" } }}
           onAction={onRefresh}
         />
       )}
       <Action
         title="Open Preferences"
         icon={Icon.Cog}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
         onAction={openExtensionPreferences}
       />
     </ActionPanel>
