@@ -24,20 +24,6 @@ import {
 import { GameCache } from "./types";
 import { useCachedState } from "@raycast/utils";
 
-interface Preferences {
-  listLimit?: string;
-  tasteTimeframe?: string;
-  modeFilter?: string;
-  useSteamClient: boolean;
-  maxAgeYears?: string;
-  blacklistedTags?: string;
-  requireController?: boolean;
-  requireAchievements?: boolean;
-  hideFreeToPlay?: boolean;
-  vrFilter?: string;
-  showOnlyInstalled?: boolean;
-}
-
 function getSteamStoreUrl(appId: number, useClient: boolean) {
   if (useClient) {
     return `steam://store/${appId}`;

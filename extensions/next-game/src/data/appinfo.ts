@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { getDefaultSteamPath } from "./steam";
+import { DEFAULT_CONFIG, RemoteConfig } from "./config";
 
 const DEBUG_MODE = process.env.NODE_ENV !== "production";
 
@@ -33,36 +34,7 @@ export interface AppMetadataResult {
   schemaWarning?: boolean;
 }
 
-interface RemoteConfig {
-  tagMapVersion: number;
-  schemaVersion: number;
-  parserStrategy: "AUTO" | "FAST" | "BRUTE_FORCE";
-  steamGenres?: Record<string, string>;
-  steamTags?: Record<string, string>;
-  steamCategories?: Record<string, string>;
-  thresholds: {
-    minScore: number;
-    acceptScore: number;
-    maxScan: number;
-  };
-}
-
-const DEFAULT_CONFIG: RemoteConfig = {
-  tagMapVersion: 1,
-  schemaVersion: 1,
-  parserStrategy: "AUTO",
-  steamGenres: {},
-  steamTags: {},
-  steamCategories: {},
-  thresholds: {
-    minScore: 5,
-    acceptScore: 10,
-    maxScan: 256,
-  },
-};
-
 const CACHE_FILE = path.join(os.tmpdir(), "raycast_steam_appinfo_cache.json");
-const CONFIG_CACHE_FILE = path.join(os.tmpdir(), "remote_config_cache.json");
 
 function isVDFArrayLike(obj: any): boolean {
   if (!obj || typeof obj !== "object") return false;
@@ -82,103 +54,6 @@ function normalizeConfidence(rawScore: number): number {
   // name(5) + type(3) + genres(1) + tags(1) + categories(1) + image(1) = 12
   const MAX_POSSIBLE_SCORE = 5 + 3 + 1 + 1 + 1 + 1;
   return Math.min(100, Math.round((rawScore / MAX_POSSIBLE_SCORE) * 100));
-}
-
-const GIST_URL =
-  "https://gist.githubusercontent.com/Glct26/3ab752cca7ff69e84d027c8cd5d1ec16/raw";
-
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 Hours
-
-async function getRemoteConfig(): Promise<RemoteConfig> {
-  let staleCache: RemoteConfig | null = null;
-  if (DEBUG_MODE)
-    console.log("[AppInfo] 🌐 Checking remote configuration (Gist)...");
-  try {
-    const cacheData = await fs.readFile(CONFIG_CACHE_FILE, "utf-8");
-    staleCache = JSON.parse(cacheData) as RemoteConfig;
-
-    const stats = await fs.stat(CONFIG_CACHE_FILE);
-    const now = Date.now();
-
-    if (now - stats.mtimeMs < CACHE_TTL_MS) {
-      if (DEBUG_MODE)
-        console.log("[AppInfo] 📦 Reading config from local cache...");
-      return staleCache;
-    } else {
-      if (DEBUG_MODE)
-        console.log(
-          "[AppInfo] ⏳ Cache expired or disabled, downloading new data.",
-        );
-    }
-  } catch (e) {
-    if (DEBUG_MODE)
-      console.log(
-        "[AppInfo] 🔍 Local config cache not found, downloading from internet.",
-      );
-  }
-
-  try {
-    if (DEBUG_MODE)
-      console.log(`[AppInfo] ⬇️ Requesting Gist URL: ${GIST_URL}`);
-    const response = await fetch(GIST_URL, {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (DEBUG_MODE)
-      console.log(
-        `[AppInfo] 📡 Server response: ${response.status} ${response.statusText}`,
-      );
-
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-    }
-
-    const textData = await response.text();
-    if (DEBUG_MODE)
-      console.log(
-        `[AppInfo] 📄 Fetched ${textData.length} characters from Gist.`,
-      );
-
-    let configData: RemoteConfig;
-    try {
-      configData = JSON.parse(textData);
-
-      if (
-        typeof configData?.thresholds?.maxScan !== "number" ||
-        typeof configData?.thresholds?.minScore !== "number"
-      ) {
-        throw new Error(
-          "JSON is valid but 'thresholds' data is missing or corrupted.",
-        );
-      }
-
-      if (DEBUG_MODE)
-        console.log("[AppInfo] ✅ JSON parsing and validation successful.");
-    } catch (parseError) {
-      console.error("\n[AppInfo] ❌ Data from Gist is invalid or corrupted!");
-      console.error(
-        "First 200 characters of received data:\n",
-        textData.substring(0, 200),
-      );
-      throw parseError;
-    }
-
-    await fs.writeFile(
-      CONFIG_CACHE_FILE,
-      JSON.stringify(configData, null, 2),
-      "utf-8",
-    );
-    if (DEBUG_MODE)
-      console.log(
-        `[AppInfo] 💾 Updated Config successfully saved: ${CONFIG_CACHE_FILE}`,
-      );
-    return configData;
-  } catch (e: any) {
-    console.error(
-      `\n[AppInfo] ⚠️ Failed to fetch Remote Config. Error Details: ${e.message}`,
-    );
-    if (staleCache) return staleCache;
-    return DEFAULT_CONFIG;
-  }
 }
 
 export async function getLocalAppMetadata(
@@ -206,7 +81,7 @@ export async function getLocalAppMetadata(
   }
   if (!targetPath) return { apps: new Map(), rejected: new Set() };
 
-  const config = await getRemoteConfig();
+  const config = DEFAULT_CONFIG;
 
   try {
     const cacheData = await fs.readFile(CACHE_FILE, "utf-8");

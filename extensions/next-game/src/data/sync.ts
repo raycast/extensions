@@ -25,10 +25,6 @@ const CACHE_FILE = path.join(environment.supportPath, "game_cache.json");
 let globalStore: Map<number, GameCache> | null = null;
 let storeHydrationPromise: Promise<Map<number, GameCache>> | null = null;
 
-interface Preferences {
-  customSteamPath?: string;
-}
-
 async function safeRename(tmpPath: string, target: string): Promise<void> {
   try {
     await fs.rename(tmpPath, target);
@@ -112,7 +108,6 @@ export async function syncSteamData(
     });
   }
 
-  console.log("🚫 Games rejected by AppInfo:", metadataPayload.rejected.size);
   const localMetadata = metadataPayload.apps;
   const rejectedAppIds = metadataPayload.rejected;
 

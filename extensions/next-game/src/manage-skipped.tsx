@@ -59,7 +59,7 @@ export default function Command() {
   >("skippedGames", {});
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
-  const prefs = getPreferenceValues<{ useSteamClient: boolean }>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const filteredEntries = useMemo(() => {
     const now = Date.now();

@@ -63,7 +63,7 @@ This extension works out of the box by automatically detecting your default Stea
 
 ## Data Privacy
 
-Next Game operates entirely locally. It reads your Steam library, playtime, and installed games directly from your local Steam configuration (`config.vdf`, `libraryfolders.vdf`, etc.). No personal gaming data is collected or sent to external servers.
+Next Game operates entirely locally. It reads your Steam library, playtime, and installed games directly from your local Steam configuration files. **No automatic network requests are made.** Opening the Steam store page in your browser or client is an explicit action you take.
 
 ## Troubleshooting
 
