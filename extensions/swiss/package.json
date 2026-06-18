@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swiss",
+  "title": "Swiss",
+  "description": "Local developer utilities powered by the swiss CLI — encode, hash, convert and generate, all offline.",
+  "icon": "swiss.png",
+  "author": "huseyinbabal",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transform",
+      "title": "Swiss Transform",
+      "subtitle": "Swiss",
+      "description": "Run swiss conversions, encoders and hashes on your input and copy the result.",
+      "mode": "view",
+      "keywords": [
+        "base64",
+        "hex",
+        "hash",
+        "sha256",
+        "md5",
+        "jwt",
+        "json",
+        "yaml",
+        "url",
+        "encode",
+        "decode",
+        "slug"
+      ]
+    },
+    {
+      "name": "generate",
+      "title": "Swiss Generate",
+      "subtitle": "Swiss",
+      "description": "Generate UUIDs, passwords and lorem ipsum locally.",
+      "mode": "view",
+      "keywords": ["uuid", "password", "lorem", "generate", "random"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "swissPath",
+      "title": "swiss Binary Path",
+      "description": "Path to the swiss CLI. Leave blank to auto-detect (Homebrew / PATH).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "passwordLength",
+      "title": "Password Length",
+      "description": "Default length for generated passwords.",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
