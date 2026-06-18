@@ -48,14 +48,6 @@ npm install
 npm run dev        # ray develop — the extension appears in Raycast
 ```
 
-To regenerate the icon, grab JetBrains Mono Bold first:
-
-```bash
-curl -sL -o /tmp/jbm-extrabold.ttf \
-  https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/JetBrainsMono-ExtraBold.ttf
-swift scripts/generate-icon.swift /tmp/jbm-extrabold.ttf
-```
-
 ## Build / publish
 
 ```bash

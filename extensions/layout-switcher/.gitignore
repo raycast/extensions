@@ -1,8 +1,5 @@
 node_modules
 dist
-.claude
 .DS_Store
 *.log
-.raycast-swift-build
-.swiftpm
 raycast-env.d.ts
