@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-18
 
 - Fixes issue #28841 with versions >=5.2.0
 
