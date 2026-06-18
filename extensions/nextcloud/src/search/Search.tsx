@@ -20,7 +20,7 @@ export function Search() {
 
 function Item({ result }: { result: SearchResult }) {
   const url = result.contentType
-    ? `${BASE_URL}/apps/files/?dir=${encodeURI(result.dirname)}&openfile=${result.fileId}`
+    ? `${BASE_URL}/index.php/apps/files/files/${result.fileId}?dir=${encodeURI(result.dirname)}&editing=false&openfile=true`
     : `${BASE_URL}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
   const approxFileSize = filesize(result.size).human("si");
 
