@@ -27,9 +27,9 @@ export async function openInWindsurf(filePath: string): Promise<boolean> {
     const stats = fs.statSync(normalizedPath);
     const isDirectory = stats.isDirectory();
 
-    // Open in Windsurf with proper shell escaping
     const escapedPath = normalizedPath.replace(/'/g, "'\"'\"'");
-    await execAsync(`open -a "Windsurf" '${escapedPath}'`);
+    const appName = await getAppName();
+    await execAsync(`open -a "${appName}" '${escapedPath}'`);
 
     // Only save folders to recent projects (not files)
     if (isDirectory) {
@@ -55,17 +55,30 @@ export async function openInWindsurf(filePath: string): Promise<boolean> {
   }
 }
 
+async function getAppName(): Promise<string> {
+  try {
+    await execAsync("ls /Applications/Devin.app");
+    return "Devin";
+  } catch {
+    return "Windsurf";
+  }
+}
+
 export async function checkWindsurfInstalled(): Promise<boolean> {
   try {
     await execAsync("which windsurf");
     return true;
   } catch {
     try {
-      // Check if Windsurf app exists in Applications
-      await execAsync("ls /Applications/Windsurf.app");
+      await execAsync("ls /Applications/Devin.app");
       return true;
     } catch {
-      return false;
+      try {
+        await execAsync("ls /Applications/Windsurf.app");
+        return true;
+      } catch {
+        return false;
+      }
     }
   }
 }
