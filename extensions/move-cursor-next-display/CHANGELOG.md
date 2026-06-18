@@ -1,6 +1,6 @@
 # Move Cursor Displays Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-18
 
 - Add commands to move the cursor to the next or previous display.
 - Add relative-position and target-display-center movement modes.
