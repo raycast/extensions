@@ -45,10 +45,25 @@ async function selectAll(): Promise<void> {
 
 async function readSelection(): Promise<string> {
   try {
-    const selected = await getSelectedText();
-    return selected.trim().length > 0 ? selected : "";
+    // Return the selection as-is (don't trim): a whitespace-only selection is
+    // still a real selection, and must NOT fall through to the Cmd+A path that
+    // would grab and overwrite the whole field.
+    return await getSelectedText();
   } catch {
     return "";
+  }
+}
+
+/**
+ * Collapse the current selection by pressing → (Right Arrow). Used after a
+ * whole-field Cmd+A when there's nothing to paste, so the field isn't left
+ * fully selected — otherwise the next keystroke would overwrite all of it.
+ */
+async function collapseSelection(): Promise<void> {
+  try {
+    await runAppleScript('tell application "System Events" to key code 124');
+  } catch {
+    // Best-effort; if Automation is unavailable, just leave the selection.
   }
 }
 
@@ -62,6 +77,7 @@ export default async function Command(): Promise<void> {
   let text = await readSelection();
 
   // 2. ...otherwise grab the whole field with Cmd+A.
+  let selectedWholeField = false;
   if (!text) {
     try {
       await selectAll();
@@ -74,6 +90,7 @@ export default async function Command(): Promise<void> {
       }
       throw error;
     }
+    selectedWholeField = true;
     text = await readSelection();
   }
 
@@ -89,6 +106,9 @@ export default async function Command(): Promise<void> {
   const converted = convert(text, layout, direction);
 
   if (converted === text) {
+    // If we selected the whole field ourselves, don't leave it highlighted —
+    // collapse the selection so the next keystroke can't wipe the field.
+    if (selectedWholeField) await collapseSelection();
     await showHUD("⌨️ Nothing changed — no layout-specific characters found");
     return;
   }
