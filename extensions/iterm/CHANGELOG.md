@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-06-19
 
 - Fixed `Open iTerm Profile` failing when profiles contain values not representable in JSON (e.g. Infinity floats from status bar config)
 
