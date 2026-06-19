@@ -29,11 +29,15 @@ export default function Command() {
         return;
       }
 
-      const found = isWindows
-        ? await searchDirectoriesWindows(query, searchRoots, maxResults, abortable.current?.signal)
-        : await searchDirectoriesMac(query, searchRoots, maxResults, abortable.current?.signal);
+      // Capture this search's signal so a newer search replacing
+      // `abortable.current` can't trick us into committing stale results.
+      const signal = abortable.current?.signal;
 
-      if (abortable.current?.signal.aborted) return;
+      const found = isWindows
+        ? await searchDirectoriesWindows(query, searchRoots, maxResults, signal)
+        : await searchDirectoriesMac(query, searchRoots, maxResults, signal);
+
+      if (signal?.aborted) return;
 
       setResults(found);
     },

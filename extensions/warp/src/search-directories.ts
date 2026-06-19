@@ -87,7 +87,7 @@ export function searchDirectoriesWindows(
   return new Promise((resolve) => {
     const psCommand = [
       "$roots = $env:WARP_SEARCH_ROOTS -split '\\|';",
-      "Get-ChildItem -Path $roots -Directory -Recurse -Depth 5 -ErrorAction SilentlyContinue |",
+      "Get-ChildItem -LiteralPath $roots -Directory -Recurse -Depth 5 -ErrorAction SilentlyContinue |",
       "Where-Object { $_.Name -like ('*' + $env:WARP_SEARCH_QUERY + '*') } |",
       `Select-Object -First ${maxResults} -ExpandProperty FullName`,
     ].join(" ");
