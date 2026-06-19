@@ -1,5 +1,4 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
-import { encodeGeneric } from "@blackwell-systems/gcf";
 
 interface Preferences {
   defaultAction: "copy" | "paste";
@@ -30,6 +29,7 @@ export default async function Command() {
     }
 
     const parsedJson = JSON.parse(text);
+    const { encodeGeneric } = await import("@blackwell-systems/gcf");
     const gcfString = encodeGeneric(parsedJson);
 
     if (preferences.defaultAction === "copy") {
