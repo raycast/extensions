@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Raycast build output
+dist/
+.raycast/
+raycast-env.d.ts
+assets/compiled_raycast_swift/
+
+# Swift build output
+.build/
+swift/.build/
+swift/.raycast-swift-build/
+DerivedData/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/

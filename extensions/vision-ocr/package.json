@@ -1,0 +1,175 @@
+{
+  "name": "vision-ocr",
+  "title": "Vision OCR",
+  "description": "Local OCR for clipboard, image, and PDF files using macOS Apple Vision.",
+  "icon": "icon.png",
+  "author": "yshalsager",
+  "license": "MIT",
+  "packageManager": "npm@11.13.0",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ocr",
+    "vision",
+    "clipboard",
+    "image",
+    "pdf",
+    "text recognition"
+  ],
+  "commands": [
+    {
+      "name": "ocr-clipboard",
+      "title": "Extract Text from Clipboard",
+      "description": "Replace the current clipboard image or copied file with recognized text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "ocr-options",
+      "title": "Extract Text with Options",
+      "description": "Run OCR with one-off source, language, speed, and output options.",
+      "mode": "view"
+    },
+    {
+      "name": "ocr-selected",
+      "title": "Extract Text from Selected Files",
+      "description": "Run local Apple Vision OCR on the selected Finder files.",
+      "mode": "view"
+    },
+    {
+      "name": "ocr-history",
+      "title": "OCR History",
+      "description": "Review recent OCR results.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primary_language",
+      "title": "Primary Language",
+      "description": "Main language to prefer for OCR.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "Korean",
+          "value": "ko-KR"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "Simplified Chinese",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Traditional Chinese",
+          "value": "zh-Hant"
+        }
+      ]
+    },
+    {
+      "name": "extra_languages",
+      "title": "Extra Languages",
+      "description": "Optional additional BCP-47 tags, separated by commas. Example: en-US, ar",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "level",
+      "title": "Recognition Level",
+      "description": "Choose whether Vision should prefer accuracy or speed.",
+      "type": "dropdown",
+      "required": false,
+      "default": "accurate",
+      "data": [
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        },
+        {
+          "title": "Fast",
+          "value": "fast"
+        }
+      ]
+    },
+    {
+      "name": "output_action",
+      "title": "Clipboard Command Output",
+      "description": "Choose what the clipboard command does with recognized text.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Frontmost App",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.17",
+    "typescript": "^5.7.2"
+  }
+}
