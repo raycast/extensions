@@ -1,9 +1,9 @@
+const { defineConfig } = require("eslint/config");
 const raycast = require("@raycast/eslint-config");
 
-// @raycast/eslint-config 2.1.1 ships one nested array element (it forgets to
-// spread the plugin's recommended config), which ESLint 9 flat config rejects.
-// Flatten it before use.
-module.exports = [
+// defineConfig flattens nested config arrays automatically, so @raycast/eslint-config's
+// nested element (which plain ESLint 9 flat config would reject) works without `.flat()`.
+module.exports = defineConfig([
   { ignores: ["dist/**", "node_modules/**", "raycast-env.d.ts"] },
-  ...raycast.flat(),
-];
+  ...raycast,
+]);

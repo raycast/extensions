@@ -3,7 +3,6 @@ import {
   normalizePreferences,
   parseAmounts,
   parseCsvList,
-  type RawPreferences,
 } from "../preferences";
 
 describe("parseCsvList", () => {
@@ -25,7 +24,7 @@ describe("parseAmounts", () => {
 });
 
 describe("normalizePreferences", () => {
-  const raw: RawPreferences = {
+  const raw: Preferences = {
     amounts: "25,50,100,500",
     defaultBuyAction: "g",
     quickBuyAmount: "100",

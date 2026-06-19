@@ -15,6 +15,7 @@ import { getConfig, type Config } from "./config";
 import { detectChains, extractContractAddress, type TokenInfo } from "./detect";
 import { buildCoveLink } from "./link";
 import { resolveChains } from "./resolve";
+import { shortCa } from "./utils";
 
 type TokenContext = {
   ca: string;
@@ -199,7 +200,7 @@ function CopyDeeplinkAction(props: {
     <Action.CopyToClipboard
       title="Copy Deeplink"
       content={url}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
     />
   );
 }
@@ -244,8 +245,4 @@ function isEncodableAmount(amount: number): boolean {
   } catch {
     return false;
   }
-}
-
-function shortCa(ca: string): string {
-  return ca.length <= 12 ? ca : `${ca.slice(0, 6)}…${ca.slice(-4)}`;
 }

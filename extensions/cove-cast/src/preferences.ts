@@ -3,13 +3,6 @@ import type { LinkKind } from "./cove";
 /** The Cove Telegram bot handle. Hardcoded — not a user preference. */
 export const COVE_BOT_USERNAME = "cove_trading_bot";
 
-/** Shape of the preferences as declared in package.json (all strings/booleans). */
-export type RawPreferences = {
-  amounts: string;
-  defaultBuyAction: "g" | "b";
-  quickBuyAmount: string;
-};
-
 /** Normalized, typed configuration used throughout the command. */
 export type Config = {
   amounts: number[];
@@ -30,7 +23,8 @@ export function parseAmounts(value: string): number[] {
     .filter((n) => Number.isFinite(n) && n > 0);
 }
 
-export function normalizePreferences(raw: RawPreferences): Config {
+/** Normalize Raycast's raw {@link Preferences} (all strings) into typed {@link Config}. */
+export function normalizePreferences(raw: Preferences): Config {
   return {
     amounts: parseAmounts(raw.amounts),
     defaultBuyAction: raw.defaultBuyAction === "b" ? "b" : "g",

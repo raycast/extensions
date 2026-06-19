@@ -4,6 +4,7 @@ import { getConfig } from "./config";
 import { detectChains, extractContractAddress, type TokenInfo } from "./detect";
 import { buildCoveLink } from "./link";
 import { resolveChains } from "./resolve";
+import { shortCa } from "./utils";
 
 /**
  * No-view command: read the clipboard, resolve the chain deterministically, and
@@ -63,8 +64,4 @@ export default async function QuickBuy(): Promise<void> {
       `Cove: ${error instanceof Error ? error.message : "couldn't build link"}`,
     );
   }
-}
-
-function shortCa(ca: string): string {
-  return ca.length <= 12 ? ca : `${ca.slice(0, 6)}…${ca.slice(-4)}`;
 }
