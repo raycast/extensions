@@ -177,6 +177,32 @@
         "screenshots",
         "recent"
       ]
+    },
+    {
+      "name": "show-shortcuts",
+      "title": "Show Shortcuts",
+      "subtitle": "Snapzy",
+      "description": "Show the Snapzy keyboard shortcuts overlay.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "shortcuts",
+        "keyboard",
+        "help"
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy Settings.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "settings",
+        "preferences",
+        "configuration"
+      ]
     }
   ],
   "dependencies": {

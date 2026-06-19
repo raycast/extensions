@@ -2,25 +2,35 @@
 
 Control [Snapzy](https://snapzy.app) from Raycast — take screenshots, record screen, annotate, and manage your captures without leaving the keyboard.
 
-Requires Snapzy to be installed on macOS.
+## Installation
+
+Install [Snapzy](https://snapzy.app) via Homebrew:
+
+```bash
+brew install --cask duongductrong/snapzy/snapzy
+```
 
 ## Commands
 
-### Screenshots
-- **Capture Fullscreen** — take a fullscreen screenshot
-- **Capture Area** — select an area to screenshot
-- **Capture Application** — capture an application window
-- **Capture Area and Annotate** — capture an area and open annotation tools
-- **Scrolling Capture** — start a scrolling screenshot
-- **Capture Text (OCR)** — extract text from a screen region
-- **Object Cutout** — cut out an object from the screen
+| Command | Description |
+| --- | --- |
+| Capture Fullscreen | Take a fullscreen screenshot |
+| Capture Area | Select an area to screenshot |
+| Capture Application | Capture an application window |
+| Capture Area and Annotate | Capture an area and open annotation tools |
+| Scrolling Capture | Start a scrolling screenshot |
+| Capture Text (OCR) | Extract text from a screen region |
+| Object Cutout | Cut out an object from the screen |
+| Record Screen | Start screen recording |
+| Record Application | Record an application window |
+| Open Annotate | Open the annotation editor |
+| Open Video Editor | Open the video editor |
+| Open Cloud Uploads | View cloud uploads |
+| Open Capture History | Browse your capture history |
+| Open Settings | Open Snapzy settings |
+| Show Shortcuts | Show the keyboard shortcuts overlay |
 
-### Recording
-- **Record Screen** — start screen recording
-- **Record Application** — record an application window
+## Requirements
 
-### Open
-- **Open Annotate** — open the annotation editor
-- **Open Video Editor** — open the video editor
-- **Open Cloud Uploads** — view cloud uploads
-- **Open Capture History** — browse your capture history
+- macOS
+- [Snapzy](https://snapzy.app) installed
