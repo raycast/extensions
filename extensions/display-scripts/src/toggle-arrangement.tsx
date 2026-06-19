@@ -4,14 +4,6 @@ import { promisify } from "node:util";
 
 const pexec = promisify(exec);
 
-interface Preferences {
-  externalDisplayId: string;
-  macbookDisplayId: string;
-  macbookOriginSideBySide: string;
-  macbookOriginUpAndDown: string;
-  displayplacerPath: string;
-}
-
 type Layout = "side-by-side" | "up-and-down";
 
 function quoteForShell(value: string): string {
