@@ -1,6 +1,6 @@
 # IBM Bob Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-19
 
 - Forked from cursor-recent-projects extension
 - Adapted for IBM Bob IDE
