@@ -1,10 +1,5 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 
-interface Preferences {
-  defaultAction: "copy" | "paste";
-  inputSource: "auto" | "clipboard";
-}
-
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 

@@ -62,7 +62,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.7",
-    "@raycast/utils": "^1.17.0",
     "@blackwell-systems/gcf": "^2.1.2"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 # JSON to GCF Converter Changelog
 
-## [Initial Version] - 2026-06-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Convert JSON to GCF format from clipboard or selected text
 - Copy or paste result based on preferences
