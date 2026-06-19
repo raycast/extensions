@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { MetricName } from "./lib/types";
 import { fmt, latestWithField } from "./lib/format";
-import { insightFor, deltaVsAverage, avgExcludingLast, formatDeltaArrow, appendInsightLines } from "./lib/insights";
+import { insightFor, deltaVsAverage, avgExcludingIndex, formatDeltaArrow, appendInsightLines } from "./lib/insights";
 import { metricIcon } from "./lib/icons";
 import { lineChart, colorToHex } from "./lib/charts";
 import { weekdayShortLabels } from "./lib/daily-metrics";
@@ -25,6 +25,7 @@ function indexDetailMarkdown(
   value: number | undefined,
   series: Array<number | undefined>,
   shortLabels: string[],
+  baselineExcludeIndex: number,
 ): string {
   const insight = insightFor(def.metric, value, series);
   const lines: string[] = [];
@@ -36,7 +37,7 @@ function indexDetailMarkdown(
 
   appendInsightLines(lines, insight);
 
-  const delta = deltaVsAverage(value, series, series.length - 1);
+  const delta = deltaVsAverage(value, series, baselineExcludeIndex);
   if (delta && Math.abs(delta.pct) > 1) {
     const { arrow, deltaStr } = formatDeltaArrow(delta);
     lines.push("");
@@ -60,8 +61,16 @@ function indexDetailMarkdown(
   return lines.join("\n");
 }
 
-function IndexMetadata({ value, series }: { value: number | undefined; series: Array<number | undefined> }) {
-  const avg = avgExcludingLast(series);
+function IndexMetadata({
+  value,
+  series,
+  baselineExcludeIndex,
+}: {
+  value: number | undefined;
+  series: Array<number | undefined>;
+  baselineExcludeIndex: number;
+}) {
+  const avg = avgExcludingIndex(series, baselineExcludeIndex);
   const delta = value != null && avg != null ? Math.round(value - avg) : null;
   const deltaStr = delta != null ? (delta > 0 ? `+${delta}` : String(delta)) : "—";
 
@@ -92,11 +101,18 @@ export default function Recovery() {
       )}
       <List.Section title="Indices">
         {INDICES.map((def) => {
-          const value =
+          const sleepSource =
             def.metric === "sleep_score"
-              ? latestWithField(sorted, "sleep_score")?.sleep_score
-              : todayEntry?.[def.metric];
+              ? todayEntry?.sleep_score != null
+                ? todayEntry
+                : latestWithField(sorted, "sleep_score")
+              : null;
+          const value = def.metric === "sleep_score" ? sleepSource?.sleep_score : todayEntry?.[def.metric];
           const series = sorted.map((r) => r[def.metric]);
+          const baselineExcludeIndex =
+            def.metric === "sleep_score" && sleepSource
+              ? sorted.findIndex((r) => r.date === sleepSource.date)
+              : series.length - 1;
           const insight = insightFor(def.metric, value, series);
           const copyValue = value != null ? `${def.label}: ${value}` : null;
 
@@ -108,8 +124,8 @@ export default function Recovery() {
               accessories={[{ text: value != null ? String(value) : "—" }]}
               detail={
                 <List.Item.Detail
-                  markdown={indexDetailMarkdown(def, value, series, shortLabels)}
-                  metadata={<IndexMetadata value={value} series={series} />}
+                  markdown={indexDetailMarkdown(def, value, series, shortLabels, baselineExcludeIndex)}
+                  metadata={<IndexMetadata value={value} series={series} baselineExcludeIndex={baselineExcludeIndex} />}
                 />
               }
               actions={<MetricActions refresh={refresh} copyTitle={`Copy ${def.label}`} copyContent={copyValue} />}

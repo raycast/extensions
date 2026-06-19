@@ -61,11 +61,19 @@ export function deltaVsAverage(
   return { delta, pct, avg };
 }
 
+/** Average excluding one series index (e.g. today or the displayed reading). */
+export function avgExcludingIndex(series: Array<number | undefined>, excludeIndex: number): number | null {
+  const base = series
+    .map((v, i) => ({ v, i }))
+    .filter(({ v, i }) => v != null && i !== excludeIndex)
+    .map(({ v }) => v as number);
+  return base.length > 0 ? base.reduce((a, b) => a + b, 0) / base.length : null;
+}
+
 /** 7-day average excluding the last element (typically today). */
 export function avgExcludingLast(series: Array<number | undefined>): number | null {
   if (series.length <= 1) return null;
-  const base = series.slice(0, -1).filter((v): v is number => v != null);
-  return base.length > 0 ? base.reduce((a, b) => a + b, 0) / base.length : null;
+  return avgExcludingIndex(series, series.length - 1);
 }
 
 export function formatDeltaArrow(delta: { delta: number; pct: number }): {
