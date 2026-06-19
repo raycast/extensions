@@ -213,7 +213,7 @@ export default function Command() {
                   }}
                   subtitle={!isFinishedMatch(match) ? capitalizeFirstLetter(getTime(match)) : ""}
                   keywords={[teamName(Home), teamName(Away)]}
-                  title={`${home}  vs  ${away}`}
+                  title={`${home}  ×  ${away}`}
                   accessories={[
                     isLiveMatch(match) || isFinishedMatch(match)
                       ? { text: isLiveMatch(match) ? getScore(match) : `${score.home ?? 0} : ${score.away ?? 0}` }

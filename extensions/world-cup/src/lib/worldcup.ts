@@ -170,7 +170,7 @@ export function formatLine(match: Match): string {
   const away = teamLabel(match.Away);
   const state = matchState(match);
 
-  if (state === "pre") return `${home} v ${away} · ${kickoff(match.Date)}`;
+  if (state === "pre") return `${home} × ${away} · ${kickoff(match.Date)}`;
 
   const score = formatScore(match);
   const detail = state === "in" ? match.MatchTime || "Live" : "Finished";
