@@ -1,6 +1,6 @@
 # Android Changelog
 
-## [Add Android CLI commands] - {PR_MERGE_DATE}
+## [Add Android CLI commands] - 2026-06-19
 
 - Add "Search Android Docs" command — search the official Android Knowledge Base and read results as rendered markdown
 - Add "Capture Screenshot" command — capture a connected device's screen, preview it, then save or copy it
