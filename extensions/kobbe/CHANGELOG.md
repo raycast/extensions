@@ -1,6 +1,6 @@
 # Kobbe Changelog
 
-## [Unreleased]
+## [Update] - {PR_MERGE_DATE}
 
 - Address Raycast review feedback: remove unused assets, use generated preferences type, fix locale formatting, and unify metadata screenshots.
 

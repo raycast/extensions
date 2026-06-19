@@ -250,7 +250,17 @@ export function TopPagesList(props: { site: KobbeSite; range?: TimeRange }) {
       navigationTitle={`${props.site.name} Top Pages`}
       searchBarPlaceholder="Search pages..."
     >
-      {pages.error ? <List.EmptyView title="Could not load top pages" description={pages.error.message} /> : null}
+      {pages.error ? (
+        <List.EmptyView
+          title="Could not load top pages"
+          description={pages.error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={pages.revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {pages.data?.pages.length === 0 ? (
         <List.EmptyView
           title="No page data"

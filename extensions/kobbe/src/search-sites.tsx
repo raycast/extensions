@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { listSites, useKobbeQuery } from "./api";
 import { getKobbePreferences } from "./preferences";
@@ -14,7 +14,17 @@ export default function SearchSites() {
       navigationTitle="Search Kobbe Sites"
       searchBarPlaceholder="Search by site or domain..."
     >
-      {sites.error ? <List.EmptyView title="Could not load Kobbe sites" description={sites.error.message} /> : null}
+      {sites.error ? (
+        <List.EmptyView
+          title="Could not load Kobbe sites"
+          description={sites.error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={sites.revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {sites.data?.length === 0 ? (
         <List.EmptyView title="No sites found" description="Create a site in Kobbe first, then come back to Raycast." />
       ) : null}
