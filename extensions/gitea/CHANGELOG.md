@@ -1,6 +1,6 @@
 # Gitea Changelog
 
-## [Improved Browsing and Notifications] - {PR_MERGE_DATE}
+## [Improved Browsing and Notifications] - 2026-06-19
 
 ### New Features
 
