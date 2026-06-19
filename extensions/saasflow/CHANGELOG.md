@@ -1,6 +1,6 @@
 # SaaSFlow Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-19
 
 - **MRR & Cash** menu-bar command — current CMRR (or MRR — switchable in preferences) and cash balance, refreshed every 15 minutes.
 - **Switch Company** command — pick which company the menu bar and AI tools act on.
