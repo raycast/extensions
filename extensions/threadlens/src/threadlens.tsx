@@ -17,12 +17,6 @@ import { useEffect, useState } from "react";
 const execFileAsync = promisify(execFile);
 const TITLE_COLUMN_CHARS = 84;
 
-type Preferences = {
-  threadlensCommand?: string;
-  threadlensArgs?: string;
-  threadlensCwd?: string;
-};
-
 type ThreadlensSnippet = {
   role: string;
   timestamp: string;
@@ -277,9 +271,9 @@ function snippetHeadline(result: ThreadlensResult): string {
 
 function cleanSnippet(value: string): string {
   return value
-    .replace(/\[[^\]]+\]/g, (match) => match.slice(1, -1))
     .replace(/\[`([^`]+)`\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\[[^\]]+\]/g, (match) => match.slice(1, -1))
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .replace(/^\.{3}/, "")
@@ -354,7 +348,10 @@ function sourceIcon(source: string) {
   const icons: Record<string, string | { light: string; dark: string }> = {
     codex: "agents/codex-badge.png",
     claude: "agents/claude.svg",
-    cursor: "agents/cursor.svg",
+    cursor: {
+      light: "agents/cursor.svg",
+      dark: "agents/cursor-dark.svg",
+    },
     pi: "agents/pi.svg",
     amp: "agents/amp.svg",
     omp: "agents/omp.svg",
