@@ -496,7 +496,7 @@ function getDynamicSubtitle(
 
   const gameTags = pickFirst(traits, 2);
   if (!gameTags) return "A classic experience from your library.";
-  return "Explores ${gameTags}.";
+  return `Explores ${gameTags}.`;
 }
 
 function getMatchVisuals(
