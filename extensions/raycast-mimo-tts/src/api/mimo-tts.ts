@@ -280,22 +280,7 @@ function buildOptionsFromSettings(
         ? parseRateString(overrides.speechRate)
         : parseRateString(settings.speechRate);
 
-  return {
-    model,
-    voice,
-    stylePrompt: buildStylePrompt(
-      overrides.baseStylePrompt ?? settings.stylePrompt,
-      rate,
-      overrides.additionalStylePrompt,
-    ),
-    openingStyleTags: normalizeTags(overrides.openingStyleTags),
-    audioEventTags: normalizeTags(overrides.audioEventTags),
-    format: DEFAULT_AUDIO_FORMAT,
-    playbackRate: rate,
-    tokenPlanBaseUrl: settings.tokenPlanBaseUrl,
-    optimizeTextPreview: overrides.optimizeTextPreview,
-    voiceCloneSample: overrides.voiceCloneSample,
-  };
+  return assembleTTSOptions(model, voice, settings, rate, overrides);
 }
 
 /**
@@ -320,22 +305,8 @@ export async function buildOptionsForModel(
 ): Promise<TTSOptions> {
   const settings = await getMimoSettings();
   const rate = (await getSpeedOverride()) ?? parseRateString(settings.speechRate);
-  return {
-    model,
-    voice: normalizeVoiceForModel(settings.defaultVoice || DEFAULT_VOICE, model),
-    stylePrompt: buildStylePrompt(
-      overrides.baseStylePrompt ?? settings.stylePrompt,
-      rate,
-      overrides.additionalStylePrompt,
-    ),
-    openingStyleTags: normalizeTags(overrides.openingStyleTags),
-    audioEventTags: normalizeTags(overrides.audioEventTags),
-    format: DEFAULT_AUDIO_FORMAT,
-    playbackRate: rate,
-    tokenPlanBaseUrl: settings.tokenPlanBaseUrl,
-    optimizeTextPreview: overrides.optimizeTextPreview,
-    voiceCloneSample: overrides.voiceCloneSample,
-  };
+  const voice = normalizeVoiceForModel(settings.defaultVoice || DEFAULT_VOICE, model);
+  return assembleTTSOptions(model, voice, settings, rate, overrides);
 }
 
 /** Validate preferences without making any network call. */
@@ -361,6 +332,31 @@ function buildStylePrompt(
 ): string | undefined {
   const promptParts = [stylePrompt?.trim(), additionalStylePrompt?.trim(), rateToInstruction(rate)].filter(Boolean);
   return promptParts.length > 0 ? promptParts.join("\n") : undefined;
+}
+
+function assembleTTSOptions(
+  model: MimoTTSModel,
+  voice: string,
+  settings: MimoProviderSettings,
+  rate: number,
+  overrides: TTSOptionOverrides,
+): TTSOptions {
+  return {
+    model,
+    voice,
+    stylePrompt: buildStylePrompt(
+      overrides.baseStylePrompt ?? settings.stylePrompt,
+      rate,
+      overrides.additionalStylePrompt,
+    ),
+    openingStyleTags: normalizeTags(overrides.openingStyleTags),
+    audioEventTags: normalizeTags(overrides.audioEventTags),
+    format: DEFAULT_AUDIO_FORMAT,
+    playbackRate: rate,
+    tokenPlanBaseUrl: settings.tokenPlanBaseUrl,
+    optimizeTextPreview: overrides.optimizeTextPreview,
+    voiceCloneSample: overrides.voiceCloneSample,
+  };
 }
 
 function normalizeTags(tags: string[] | undefined): string[] {

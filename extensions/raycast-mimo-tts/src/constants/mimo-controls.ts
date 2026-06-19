@@ -13,7 +13,7 @@ export const SPEECH_RATE_OPTIONS: ControlOption[] = [
   { value: "100", title: "2.0x (Very Fast)" },
 ];
 
-export const OPENING_STYLE_TAGS: ControlOption[] = [
+const CORE_EMOTION_TAGS: ControlOption[] = [
   { value: "开心", title: "Happy" },
   { value: "悲伤", title: "Sad" },
   { value: "愤怒", title: "Angry" },
@@ -23,6 +23,10 @@ export const OPENING_STYLE_TAGS: ControlOption[] = [
   { value: "委屈", title: "Aggrieved" },
   { value: "平静", title: "Calm" },
   { value: "冷漠", title: "Detached" },
+];
+
+export const OPENING_STYLE_TAGS: ControlOption[] = [
+  ...CORE_EMOTION_TAGS,
   { value: "怅然", title: "Melancholic" },
   { value: "欣慰", title: "Relieved" },
   { value: "无奈", title: "Resigned" },
@@ -80,15 +84,7 @@ export const RHYTHM_TAGS: ControlOption[] = [
 ];
 
 export const EMOTION_TAGS: ControlOption[] = [
-  { value: "开心", title: "Happy" },
-  { value: "悲伤", title: "Sad" },
-  { value: "愤怒", title: "Angry" },
-  { value: "恐惧", title: "Fearful" },
-  { value: "惊讶", title: "Surprised" },
-  { value: "兴奋", title: "Excited" },
-  { value: "委屈", title: "Aggrieved" },
-  { value: "平静", title: "Calm" },
-  { value: "冷漠", title: "Detached" },
+  ...CORE_EMOTION_TAGS,
   { value: "紧张", title: "Nervous" },
   { value: "害怕", title: "Scared" },
   { value: "激动", title: "Worked Up" },

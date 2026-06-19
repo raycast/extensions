@@ -29,9 +29,7 @@ import {
   formatSpeed,
   getSpeedOverride,
   markError,
-  markIdle,
   parseRateString,
-  patchNowPlaying,
   requestPlaybackStop,
   setNowPlaying,
   setSpeedOverride,
@@ -39,6 +37,10 @@ import {
 } from "./utils/mimo-playback-state";
 import { getMimoSettings } from "./utils/provider-settings";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { createChunkPlaybackCallbacks, finalizeChunkPlayback } from "./utils/mimo-chunk-playback";
+import { previewText } from "./utils/mimo-text-preview";
+import { adjustSpeechRate } from "./utils/mimo-speech-rate";
+import { voiceGenderIcon } from "./utils/mimo-voice-ui";
 
 interface ControlFormValues extends Form.Values {
   text: string;
@@ -157,28 +159,24 @@ export default function MiMoStudio() {
         source: "TTS Studio",
       });
 
-      await playChunksWithLookahead(chunks, options, player, {
-        onChunkReady: async (index, total) => {
-          const label = total > 1 ? `Playing ${index + 1}/${total} · ${voiceName}` : `Playing · ${voiceName}`;
-          toast.title = label;
-          toast.message = `${modelLabel} · ${formatSpeed(rate)}`;
-          await patchNowPlaying({ status: "playing", currentChunk: index });
-        },
-        onFirstAudioReady: async () => {
-          setIsLoading(false);
-        },
-      });
+      await playChunksWithLookahead(
+        chunks,
+        options,
+        player,
+        createChunkPlaybackCallbacks({
+          toast,
+          voiceName,
+          toastMessage: `${modelLabel} · ${formatSpeed(rate)}`,
+          onFirstAudioReady: () => setIsLoading(false),
+        }),
+      );
 
-      if (player.isStopped()) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Stopped";
-        await markIdle();
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "Playback complete";
-        toast.message = `${voiceName} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
-        await markIdle();
-      }
+      await finalizeChunkPlayback({
+        player,
+        toast,
+        voiceName,
+        totalChunks,
+      });
     } catch (error) {
       await markError(error instanceof Error ? error.message : String(error));
       await showTTSFailure(error);
@@ -225,17 +223,19 @@ export default function MiMoStudio() {
   }, []);
 
   const handleSpeedUp = useCallback(async () => {
-    const next = parseRateString(speechRate) + SPEED_STEP;
-    const clamped = await setSpeedOverride(next);
-    setSpeechRate(matchRateOptionValue(clamped));
-    await showToast({ style: Toast.Style.Success, title: `Speed ${formatSpeed(clamped)}` });
+    await adjustSpeechRate({
+      currentRate: speechRate,
+      delta: SPEED_STEP,
+      onRateChange: (clamped) => setSpeechRate(matchRateOptionValue(clamped)),
+    });
   }, [speechRate]);
 
   const handleSpeedDown = useCallback(async () => {
-    const next = parseRateString(speechRate) - SPEED_STEP;
-    const clamped = await setSpeedOverride(next);
-    setSpeechRate(matchRateOptionValue(clamped));
-    await showToast({ style: Toast.Style.Success, title: `Speed ${formatSpeed(clamped)}` });
+    await adjustSpeechRate({
+      currentRate: speechRate,
+      delta: -SPEED_STEP,
+      onRateChange: (clamped) => setSpeechRate(matchRateOptionValue(clamped)),
+    });
   }, [speechRate]);
 
   return (
@@ -307,7 +307,12 @@ export default function MiMoStudio() {
           return (
             <Form.Dropdown.Section key={category} title={category}>
               {voices.map((voice) => (
-                <Form.Dropdown.Item key={voice.id} value={voice.id} title={voice.name} icon={voiceIcon(voice.gender)} />
+                <Form.Dropdown.Item
+                  key={voice.id}
+                  value={voice.id}
+                  title={voice.name}
+                  icon={voiceGenderIcon(voice.gender)}
+                />
               ))}
             </Form.Dropdown.Section>
           );
@@ -407,17 +412,6 @@ function parseCustomTags(input: string | undefined): string[] {
 function joinNaturalInstructions(...items: Array<string | undefined>): string | undefined {
   const instructions = items.map((item) => item?.trim()).filter(Boolean);
   return instructions.length > 0 ? instructions.join("\n") : undefined;
-}
-
-function voiceIcon(gender: string) {
-  if (gender === "female") return Icon.Female;
-  if (gender === "male") return Icon.Male;
-  return Icon.SpeakerHigh;
-}
-
-function previewText(text: string): string {
-  const trimmed = text.replace(/\s+/g, " ").trim();
-  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
 }
 
 /** Pick the dropdown option value (legacy or modern) closest to a given rate. */

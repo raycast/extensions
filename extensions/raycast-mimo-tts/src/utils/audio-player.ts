@@ -221,29 +221,25 @@ export class AudioPlayer {
     writePidFile(myPid);
 
     proc.on("close", () => {
-      if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
-      if (this.currentProcess === proc) this.currentProcess = null;
-      if (this.currentPid === myPid) this.currentPid = undefined;
-      removePidFileIfMatch(myPid);
-      this.cleanupFile(file);
+      this.releasePcmPlayback(proc, myPid, file);
       this.maybePlayNextPcm();
     });
 
     proc.on("error", (err) => {
-      if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
-      if (this.currentProcess === proc) this.currentProcess = null;
-      // Mirror the close handler: the dead process must release its PID
-      // record before a Stop Reading from another command happens to find
-      // and probe a recycled pid. The non-PCM path already does this; the
-      // PCM error handler was skipping both fields.
-      if (this.currentPid === myPid) this.currentPid = undefined;
-      removePidFileIfMatch(myPid);
-      this.cleanupFile(file);
+      this.releasePcmPlayback(proc, myPid, file);
       if (this.pcmCompletePromise) {
         this.pcmCompletePromise.reject(err);
         this.pcmCompletePromise = null;
       }
     });
+  }
+
+  private releasePcmPlayback(proc: ChildProcess, myPid: number | undefined, file: string): void {
+    if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
+    if (this.currentProcess === proc) this.currentProcess = null;
+    if (this.currentPid === myPid) this.currentPid = undefined;
+    removePidFileIfMatch(myPid);
+    this.cleanupFile(file);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildOptionsAsync, getActiveModelAsync, getModelLabel, synthesizeSpeech } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/mimo-types";
@@ -19,6 +19,10 @@ import {
   setQuickReadVoiceOverride,
 } from "./utils/mimo-voice-preferences";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { OpenApiKeyPreferencesAction } from "./components/open-api-key-preferences-action";
+import { VoiceCategorySections } from "./components/voice-category-sections";
+import { VoiceDetail } from "./components/voice-detail";
+import { escapeMarkdown } from "./utils/mimo-markdown";
 
 const PREVIEW_FALLBACK_TEXT = "This is a short MiMo TTS voice preview.";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -145,50 +149,40 @@ export default function SelectVoice() {
                 <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
               <OpenProviderSetupAction provider="mimo" />
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
-              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+              <OpenApiKeyPreferencesAction />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {voiceGroups.map(({ category, voices }) => (
-        <List.Section key={category} title={category}>
-          {voices.map((voice) => (
-            <List.Item
-              key={voice.id}
-              title={voice.name}
-              subtitle={voice.description}
-              icon={voiceIcon(voice)}
-              keywords={[voice.id, voice.language, voice.category]}
-              accessories={[
-                ...(activeVoiceId === voice.id ? [{ tag: { value: "Quick Read", color: Color.Green } }] : []),
-                ...(previewingVoiceId === voice.id ? [{ tag: { value: "Previewing", color: Color.Blue } }] : []),
-              ]}
-              detail={<VoiceDetail voice={voice} model={MODEL_LABELS[currentModel]} />}
-              actions={
-                <ActionPanel>
-                  <Action title="Set as Quick Read Voice" icon={Icon.Star} onAction={() => handleSetVoice(voice)} />
-                  <Action title="Preview Voice" icon={Icon.Play} onAction={() => handlePreviewVoice(voice)} />
-                  {usesOverride && (
-                    <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
-                  )}
-                  <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <OpenProviderSetupAction provider="mimo" />
-                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+      <VoiceCategorySections
+        groups={voiceGroups}
+        renderAccessories={(voice) => [
+          ...(activeVoiceId === voice.id ? [{ tag: { value: "Quick Read", color: Color.Green } }] : []),
+          ...(previewingVoiceId === voice.id ? [{ tag: { value: "Previewing", color: Color.Blue } }] : []),
+        ]}
+        renderDetail={(voice) => (
+          <VoiceDetail
+            voice={voice}
+            model={MODEL_LABELS[currentModel]}
+            footer="Use Preview to hear this voice with your selected text or clipboard content."
+          />
+        )}
+        renderActions={(voice) => (
+          <ActionPanel>
+            <Action title="Set as Quick Read Voice" icon={Icon.Star} onAction={() => handleSetVoice(voice)} />
+            <Action title="Preview Voice" icon={Icon.Play} onAction={() => handlePreviewVoice(voice)} />
+            {usesOverride && (
+              <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
+            )}
+            <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
+            <OpenProviderSetupAction provider="mimo" />
+            <OpenApiKeyPreferencesAction />
+          </ActionPanel>
+        )}
+      />
     </List>
   );
-}
-
-function openProviderSettings() {
-  return openExtensionPreferences();
 }
 
 function CurrentVoiceDetail({
@@ -219,36 +213,4 @@ function CurrentVoiceDetail({
       }
     />
   );
-}
-
-function VoiceDetail({ voice, model }: { voice: VoiceConfig; model: string }) {
-  return (
-    <List.Item.Detail
-      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nUse Preview to hear this voice with your selected text or clipboard content.`}
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
-          <List.Item.Detail.Metadata.Label title="Model" text={model} />
-          <List.Item.Detail.Metadata.Label title="Language" text={voice.language} />
-          <List.Item.Detail.Metadata.TagList title="Traits">
-            <List.Item.Detail.Metadata.TagList.Item text={voice.gender} color={Color.Blue} />
-            <List.Item.Detail.Metadata.TagList.Item text={voice.category} color={Color.SecondaryText} />
-            {voice.recommended ? (
-              <List.Item.Detail.Metadata.TagList.Item text="Recommended" color={Color.Green} />
-            ) : null}
-          </List.Item.Detail.Metadata.TagList>
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function voiceIcon(voice: VoiceConfig) {
-  if (voice.gender === "female") return Icon.Female;
-  if (voice.gender === "male") return Icon.Male;
-  return Icon.SpeakerHigh;
-}
-
-function escapeMarkdown(text: string): string {
-  return text.replace(/[\\`*_{}[\]()#+\-.!|>]/g, "\\$&");
 }

@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
 import { readFileSync, statSync } from "fs";
 import { extname } from "path";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { buildOptionsForModel, synthesizeSpeech } from "./api/mimo-tts";
+import { useCallback, useState } from "react";
+import { buildOptionsForModel } from "./api/mimo-tts";
 import type { VoiceCloneSample } from "./api/mimo-types";
-import { AudioPlayer } from "./utils/audio-player";
-import { showTTSFailure } from "./utils/mimo-feedback";
-import { clearPlaybackStopRequest } from "./utils/mimo-playback-state";
+import { SynthesisStopAction } from "./components/synthesis-stop-action";
+import { useSynthesisForm } from "./hooks/use-synthesis-form";
 
 const MAX_SAMPLE_BYTES = 10 * 1024 * 1024; // MiMo limit: 10 MB base64-encoded.
 const DEFAULT_TEXT = "Hello, this is a voice cloned from the audio sample you provided.";
@@ -18,78 +17,50 @@ interface CloneVoiceFormValues extends Form.Values {
 }
 
 export default function CloneVoice() {
-  const [isLoading, setIsLoading] = useState(false);
   const [sampleText, setSampleText] = useState(DEFAULT_TEXT);
-  const playerRef = useRef(new AudioPlayer());
+  const { isLoading, handleStop, runSession } = useSynthesisForm();
 
-  useEffect(() => {
-    // handleSubmit swaps playerRef.current to a fresh AudioPlayer on every run,
-    // so cleanup must read the ref at unmount time — not capture the initial player.
-    return () => {
-      playerRef.current.cleanup();
-    };
-  }, []);
-
-  const handleSubmit = useCallback(async (values: CloneVoiceFormValues) => {
-    const samplePath = values.sample?.[0];
-    if (!samplePath) {
-      await showToast({ style: Toast.Style.Failure, title: "Pick an audio sample (mp3 or wav)" });
-      return;
-    }
-    const trimmedText = values.sampleText.trim();
-    if (!trimmedText) {
-      await showToast({ style: Toast.Style.Failure, title: "Text to read is required" });
-      return;
-    }
-
-    let sample: VoiceCloneSample;
-    try {
-      sample = await loadSample(samplePath);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load audio sample",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return;
-    }
-
-    playerRef.current.stopPlayback();
-    await clearPlaybackStopRequest();
-    const player = new AudioPlayer();
-    playerRef.current = player;
-
-    setIsLoading(true);
-
-    try {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Cloning voice",
-        message: "MiMo-V2.5-TTS-VoiceClone",
-      });
-      const options = await buildOptionsForModel("mimo-v2.5-tts-voiceclone", {
-        baseStylePrompt: values.stylePrompt?.trim() || undefined,
-        voiceCloneSample: sample,
-      });
-      const audio = await synthesizeSpeech(trimmedText, options, player.signal);
-      if (player.isStopped()) return;
-      toast.title = "Playing cloned voice";
-      await player.playAudio(audio, options.format, options.playbackRate);
-      if (!player.isStopped()) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Voice clone complete";
+  const handleSubmit = useCallback(
+    async (values: CloneVoiceFormValues) => {
+      const samplePath = values.sample?.[0];
+      if (!samplePath) {
+        await showToast({ style: Toast.Style.Failure, title: "Pick an audio sample (mp3 or wav)" });
+        return;
       }
-    } catch (error) {
-      if (!player.isStopped()) await showTTSFailure(error, "Voice clone failed");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      const trimmedText = values.sampleText.trim();
+      if (!trimmedText) {
+        await showToast({ style: Toast.Style.Failure, title: "Text to read is required" });
+        return;
+      }
 
-  const handleStop = useCallback(() => {
-    playerRef.current.stopPlayback();
-    setIsLoading(false);
-  }, []);
+      let sample: VoiceCloneSample;
+      try {
+        sample = await loadSample(samplePath);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not load audio sample",
+          message: error instanceof Error ? error.message : String(error),
+        });
+        return;
+      }
+
+      await runSession({
+        toastTitle: "Cloning voice",
+        toastMessage: "MiMo-V2.5-TTS-VoiceClone",
+        text: trimmedText,
+        buildOptions: () =>
+          buildOptionsForModel("mimo-v2.5-tts-voiceclone", {
+            baseStylePrompt: values.stylePrompt?.trim() || undefined,
+            voiceCloneSample: sample,
+          }),
+        playingTitle: "Playing cloned voice",
+        successTitle: "Voice clone complete",
+        failureTitle: "Voice clone failed",
+      });
+    },
+    [runSession],
+  );
 
   return (
     <Form
@@ -98,14 +69,7 @@ export default function CloneVoice() {
       actions={
         <ActionPanel>
           <Action.SubmitForm<CloneVoiceFormValues> title="Clone and Play" icon={Icon.Play} onSubmit={handleSubmit} />
-          {isLoading ? (
-            <Action
-              title="Stop Playback"
-              icon={Icon.Stop}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={handleStop}
-            />
-          ) : null}
+          <SynthesisStopAction isLoading={isLoading} onStop={handleStop} />
         </ActionPanel>
       }
     >

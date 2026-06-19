@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  getSelectedText,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, getSelectedText, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildOptionsAsync, getActiveModelAsync, getModelLabel } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/mimo-types";
@@ -24,9 +13,7 @@ import {
   formatSpeed,
   getSpeedOverride,
   markError,
-  markIdle,
   parseRateString,
-  patchNowPlaying,
   requestPlaybackStop,
   setNowPlaying,
   setSpeedOverride,
@@ -34,6 +21,12 @@ import {
 } from "./utils/mimo-playback-state";
 import { getMimoSettings } from "./utils/provider-settings";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { OpenApiKeyPreferencesAction } from "./components/open-api-key-preferences-action";
+import { VoiceCategorySections } from "./components/voice-category-sections";
+import { VoiceDetail } from "./components/voice-detail";
+import { createChunkPlaybackCallbacks, finalizeChunkPlayback } from "./utils/mimo-chunk-playback";
+import { escapeMarkdown } from "./utils/mimo-markdown";
+import { previewText } from "./utils/mimo-text-preview";
 
 type SelectionSource = "selection" | "clipboard" | "none";
 
@@ -160,28 +153,24 @@ export default function ReadWithVoice() {
           source: selectionSource === "clipboard" ? "Clipboard" : "Selection",
         });
 
-        await playChunksWithLookahead(chunks, options, player, {
-          onChunkReady: async (index, total) => {
-            const label = total > 1 ? `Playing ${index + 1}/${total} · ${voice.name}` : `Playing · ${voice.name}`;
-            toast.title = label;
-            toast.message = modelLabel;
-            await patchNowPlaying({ status: "playing", currentChunk: index });
-          },
-          onFirstAudioReady: async () => {
-            setIsLoading(false);
-          },
-        });
+        await playChunksWithLookahead(
+          chunks,
+          options,
+          player,
+          createChunkPlaybackCallbacks({
+            toast,
+            voiceName: voice.name,
+            toastMessage: modelLabel,
+            onFirstAudioReady: () => setIsLoading(false),
+          }),
+        );
 
-        if (player.isStopped()) {
-          toast.style = Toast.Style.Success;
-          toast.title = "Stopped";
-          await markIdle();
-        } else {
-          toast.style = Toast.Style.Success;
-          toast.title = "Playback complete";
-          toast.message = `${voice.name} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
-          await markIdle();
-        }
+        await finalizeChunkPlayback({
+          player,
+          toast,
+          voiceName: voice.name,
+          totalChunks,
+        });
       } catch (error) {
         await markError(error instanceof Error ? error.message : String(error));
         await showTTSFailure(error);
@@ -302,67 +291,52 @@ export default function ReadWithVoice() {
               {stopAction}
               {speedActions}
               <OpenProviderSetupAction provider="mimo" />
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
-              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
+              <OpenApiKeyPreferencesAction />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      {filteredCategories.map(({ category, voices }) => (
-        <List.Section key={category} title={category}>
-          {voices.map((voice) => (
-            <List.Item
-              key={voice.id}
-              title={voice.name}
-              subtitle={voice.description}
-              icon={voiceIcon(voice)}
-              keywords={[voice.id, voice.language, voice.category]}
-              accessories={[
-                ...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: Color.Blue } }] : []),
-                ...(voice.recommended ? [{ tag: { value: "Recommended", color: Color.Green } }] : []),
-              ]}
-              detail={
-                <VoiceDetail
-                  voice={voice}
-                  model={MODEL_LABELS[currentModel]}
-                  selectedText={selectedText}
-                  speedLabel={speedLabel}
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action title="Read Text" icon={Icon.Play} onAction={() => handleRead(voice)} />
-                  {stopAction}
-                  {speedActions}
-                  <Action
-                    title="Refresh Selection"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={() => refreshSelection(false)}
-                  />
-                  <Action
-                    title="Paste from Clipboard"
-                    icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                    onAction={loadFromClipboard}
-                  />
-                  <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <OpenProviderSetupAction provider="mimo" />
-                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
-                </ActionPanel>
-              }
+      <VoiceCategorySections
+        groups={filteredCategories}
+        renderAccessories={(voice) => [
+          ...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: Color.Blue } }] : []),
+          ...(voice.recommended ? [{ tag: { value: "Recommended", color: Color.Green } }] : []),
+        ]}
+        renderDetail={(voice) => (
+          <VoiceDetail
+            voice={voice}
+            model={MODEL_LABELS[currentModel]}
+            footer="Choose this voice to read the current text with MiMo TTS."
+            speedLabel={speedLabel}
+            selectedText={selectedText}
+          />
+        )}
+        renderActions={(voice) => (
+          <ActionPanel>
+            <Action title="Read Text" icon={Icon.Play} onAction={() => handleRead(voice)} />
+            {stopAction}
+            {speedActions}
+            <Action
+              title="Refresh Selection"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => refreshSelection(false)}
             />
-          ))}
-        </List.Section>
-      ))}
+            <Action
+              title="Paste from Clipboard"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              onAction={loadFromClipboard}
+            />
+            <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
+            <OpenProviderSetupAction provider="mimo" />
+            <OpenApiKeyPreferencesAction />
+          </ActionPanel>
+        )}
+      />
     </List>
   );
-}
-
-function openProviderSettings() {
-  return openExtensionPreferences();
 }
 
 function SelectionDetail({
@@ -396,60 +370,8 @@ function SelectionDetail({
   );
 }
 
-function VoiceDetail({
-  voice,
-  model,
-  selectedText,
-  speedLabel,
-}: {
-  voice: VoiceConfig;
-  model: string;
-  selectedText: string;
-  speedLabel: string;
-}) {
-  return (
-    <List.Item.Detail
-      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nChoose this voice to read the current text with MiMo TTS.`}
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
-          <List.Item.Detail.Metadata.Label title="Model" text={model} />
-          <List.Item.Detail.Metadata.Label title="Language" text={voice.language} />
-          <List.Item.Detail.Metadata.Label title="Speed" text={speedLabel} />
-          <List.Item.Detail.Metadata.Label
-            title="Selected Text"
-            text={selectedText ? `${selectedText.length} characters` : "None"}
-          />
-          <List.Item.Detail.Metadata.TagList title="Traits">
-            <List.Item.Detail.Metadata.TagList.Item text={voice.gender} color={Color.Blue} />
-            <List.Item.Detail.Metadata.TagList.Item text={voice.category} color={Color.SecondaryText} />
-            {voice.recommended ? (
-              <List.Item.Detail.Metadata.TagList.Item text="Recommended" color={Color.Green} />
-            ) : null}
-          </List.Item.Detail.Metadata.TagList>
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function voiceIcon(voice: VoiceConfig) {
-  if (voice.gender === "female") return Icon.Female;
-  if (voice.gender === "male") return Icon.Male;
-  return Icon.SpeakerHigh;
-}
-
 function formatSource(source: SelectionSource): string {
   if (source === "selection") return "Selection";
   if (source === "clipboard") return "Clipboard";
   return "None";
-}
-
-function escapeMarkdown(text: string): string {
-  return text.replace(/[\\`*_{}[\]()#+\-.!|>]/g, "\\$&");
-}
-
-function previewText(text: string): string {
-  const trimmed = text.replace(/\s+/g, " ").trim();
-  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
 }

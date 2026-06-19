@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { buildOptionsForModel, synthesizeSpeech } from "./api/mimo-tts";
-import { AudioPlayer } from "./utils/audio-player";
-import { showTTSFailure } from "./utils/mimo-feedback";
-import { clearPlaybackStopRequest } from "./utils/mimo-playback-state";
+import { useCallback, useState } from "react";
+import { buildOptionsForModel } from "./api/mimo-tts";
+import { SynthesisStopAction } from "./components/synthesis-stop-action";
+import { useSynthesisForm } from "./hooks/use-synthesis-form";
 
 interface DesignVoiceFormValues extends Form.Values {
   voicePrompt: string;
@@ -22,73 +21,45 @@ const DEFAULT_SAMPLE_TEXT =
   "Hello, this is a voice generated from your description. Switch the model to MiMo-V2.5-TTS for preset voices.";
 
 export default function DesignVoice() {
-  const [isLoading, setIsLoading] = useState(false);
   const [optimizeText, setOptimizeText] = useState(false);
   const [voicePrompt, setVoicePrompt] = useState("");
   const [sampleText, setSampleText] = useState(DEFAULT_SAMPLE_TEXT);
-  const playerRef = useRef(new AudioPlayer());
+  const { isLoading, handleStop, runSession } = useSynthesisForm();
 
-  useEffect(() => {
-    // handleSubmit swaps playerRef.current to a fresh AudioPlayer on every run,
-    // so cleanup must read the ref at unmount time — not capture the initial player.
-    return () => {
-      playerRef.current.cleanup();
-    };
-  }, []);
-
-  const handleSubmit = useCallback(async (values: DesignVoiceFormValues) => {
-    const trimmedPrompt = values.voicePrompt.trim();
-    if (!trimmedPrompt) {
-      await showToast({ style: Toast.Style.Failure, title: "Voice description is required" });
-      return;
-    }
-    const trimmedText = values.sampleText.trim();
-    if (!values.optimizeText && !trimmedText) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sample text is required",
-        message: "Either fill in the sample text or enable Optimize Text Preview.",
-      });
-      return;
-    }
-
-    playerRef.current.stopPlayback();
-    await clearPlaybackStopRequest();
-    const player = new AudioPlayer();
-    playerRef.current = player;
-
-    setIsLoading(true);
-
-    try {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Designing voice",
-        message: "MiMo-V2.5-TTS-VoiceDesign",
-      });
-      const options = await buildOptionsForModel("mimo-v2.5-tts-voicedesign", {
-        baseStylePrompt: trimmedPrompt,
-        optimizeTextPreview: values.optimizeText,
-      });
-      const audio = await synthesizeSpeech(trimmedText, options, player.signal);
-      if (player.isStopped()) return;
-      toast.title = "Playing designed voice";
-      await player.playAudio(audio, options.format, options.playbackRate);
-      if (!player.isStopped()) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Voice design complete";
-        toast.message = values.optimizeText ? "Text was auto-optimized by MiMo" : undefined;
+  const handleSubmit = useCallback(
+    async (values: DesignVoiceFormValues) => {
+      const trimmedPrompt = values.voicePrompt.trim();
+      if (!trimmedPrompt) {
+        await showToast({ style: Toast.Style.Failure, title: "Voice description is required" });
+        return;
       }
-    } catch (error) {
-      if (!player.isStopped()) await showTTSFailure(error, "Voice design failed");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      const trimmedText = values.sampleText.trim();
+      if (!values.optimizeText && !trimmedText) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Sample text is required",
+          message: "Either fill in the sample text or enable Optimize Text Preview.",
+        });
+        return;
+      }
 
-  const handleStop = useCallback(() => {
-    playerRef.current.stopPlayback();
-    setIsLoading(false);
-  }, []);
+      await runSession({
+        toastTitle: "Designing voice",
+        toastMessage: "MiMo-V2.5-TTS-VoiceDesign",
+        text: trimmedText,
+        buildOptions: () =>
+          buildOptionsForModel("mimo-v2.5-tts-voicedesign", {
+            baseStylePrompt: trimmedPrompt,
+            optimizeTextPreview: values.optimizeText,
+          }),
+        playingTitle: "Playing designed voice",
+        successTitle: "Voice design complete",
+        successMessage: values.optimizeText ? "Text was auto-optimized by MiMo" : undefined,
+        failureTitle: "Voice design failed",
+      });
+    },
+    [runSession],
+  );
 
   return (
     <Form
@@ -101,14 +72,7 @@ export default function DesignVoice() {
             icon={Icon.Play}
             onSubmit={handleSubmit}
           />
-          {isLoading ? (
-            <Action
-              title="Stop Playback"
-              icon={Icon.Stop}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={handleStop}
-            />
-          ) : null}
+          <SynthesisStopAction isLoading={isLoading} onStop={handleStop} />
           {VOICE_PROMPT_EXAMPLES.map((example, idx) => (
             <Action
               key={idx}

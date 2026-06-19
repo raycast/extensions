@@ -10,7 +10,6 @@ import {
   isNowPlayingFresh,
   markError,
   markIdle,
-  patchNowPlaying,
   requestPlaybackStop,
   setNowPlaying,
 } from "./utils/mimo-playback-state";
@@ -19,6 +18,8 @@ import { resolveReadingText } from "./utils/mimo-text-source";
 import { chunkText } from "./utils/mimo-text-chunker";
 import { buildDefaultOptionsFromPrefs, getActiveQuickReadVoiceId } from "./utils/mimo-voice-preferences";
 import { getVoiceById } from "./constants/mimo-voices";
+import { createChunkPlaybackCallbacks, finalizeChunkPlayback } from "./utils/mimo-chunk-playback";
+import { previewText } from "./utils/mimo-text-preview";
 
 export default async function QuickRead() {
   await runMimoQuickRead();
@@ -98,17 +99,19 @@ export async function runMimoQuickRead() {
   });
 
   try {
-    await playChunksWithLookahead(chunks, options, player, {
-      onChunkReady: async (index, total) => {
-        const label = total > 1 ? `Playing ${index + 1}/${total} · ${voiceName}` : `Playing · ${voiceName}`;
-        toast.title = label;
-        toast.message = modelLabel;
-        await patchNowPlaying({ status: "playing", currentChunk: index });
-      },
-      onFirstAudioReady: async () => {
-        toast.style = Toast.Style.Animated;
-      },
-    });
+    await playChunksWithLookahead(
+      chunks,
+      options,
+      player,
+      createChunkPlaybackCallbacks({
+        toast,
+        voiceName,
+        toastMessage: modelLabel,
+        onFirstAudioReady: () => {
+          toast.style = Toast.Style.Animated;
+        },
+      }),
+    );
 
     if (player.isStopped()) {
       toast.style = Toast.Style.Success;
@@ -117,10 +120,7 @@ export async function runMimoQuickRead() {
       await markIdle();
       await showHUD("Stopped");
     } else {
-      toast.style = Toast.Style.Success;
-      toast.title = "Playback complete";
-      toast.message = `${voiceName} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
-      await markIdle();
+      await finalizeChunkPlayback({ player, toast, voiceName, totalChunks });
       await showHUD(`Done · ${voiceName}`);
     }
   } catch (error) {
@@ -129,9 +129,4 @@ export async function runMimoQuickRead() {
   } finally {
     player.cleanup();
   }
-}
-
-function previewText(text: string): string {
-  const trimmed = text.replace(/\s+/g, " ").trim();
-  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
 }

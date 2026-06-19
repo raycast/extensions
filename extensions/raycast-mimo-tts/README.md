@@ -12,12 +12,12 @@ Read any selected or clipboard text aloud, design a brand-new voice from a singl
 
 Xiaomi's MiMo platform launched **MiMo-V2.5-TTS Series + V2.5-ASR** as a single full-stack speech suite, and the entire TTS family is currently **limited-time free** on their billing page:
 
-| Model | What it does | Beta price |
-| --- | --- | --- |
-| `mimo-v2.5-tts` | Preset-voice synthesis with full style control | **Free** |
-| `mimo-v2.5-tts-voicedesign` | Generate a new voice from one sentence of description | **Free** |
-| `mimo-v2.5-tts-voiceclone` | Clone any voice from a small mp3/wav sample | **Free** |
-| `mimo-v2-tts` | Legacy voices | **Free** |
+| Model                       | What it does                                          | Beta price |
+| --------------------------- | ----------------------------------------------------- | ---------- |
+| `mimo-v2.5-tts`             | Preset-voice synthesis with full style control        | **Free**   |
+| `mimo-v2.5-tts-voicedesign` | Generate a new voice from one sentence of description | **Free**   |
+| `mimo-v2.5-tts-voiceclone`  | Clone any voice from a small mp3/wav sample           | **Free**   |
+| `mimo-v2-tts`               | Legacy voices                                         | **Free**   |
 
 (Source: [platform.xiaomimimo.com/docs/zh-CN/price/pay-as-you-go](https://platform.xiaomimimo.com/docs/zh-CN/price/pay-as-you-go), as of 2026-05-27)
 
@@ -29,7 +29,7 @@ On **27 May 2026**, Xiaomi shipped a permanent price cut across the MiMo-V2.5 LL
 
 ### 🎭 Top-tier model capability, three creation modes
 
-MiMo-V2.5-TTS is positioned by Xiaomi as a model that "doesn't just read — it *performs*." All three creation modes share the same instruction-following surface:
+MiMo-V2.5-TTS is positioned by Xiaomi as a model that "doesn't just read — it _performs_." All three creation modes share the same instruction-following surface:
 
 - **Director-style natural-language control** — write a one-line tone hint or a full director's brief (character / scene / direction). The model interprets pacing, breath, restraint, emotional arc.
 - **Inline audio tags** — drop `(轻笑)`, `(深呼吸)`, `(粤语)`, `(唱歌)`, `(suppressed anger)` mid-text for surgical control. Mix Chinese and English tags. Singing mode included.
@@ -48,11 +48,11 @@ Most "Chinese TTS" services are awful at English; most "English TTS" services gi
 
 Type a 1–4 sentence description and get a brand new voice synthesized on the spot:
 
-> *"A weathered Northern Chinese grandfather, slow and steady pace, slightly raspy and time-worn, like he's telling old stories."*
+> _"A weathered Northern Chinese grandfather, slow and steady pace, slightly raspy and time-worn, like he's telling old stories."_
 
 Optional `optimize_text_preview` flag lets the model auto-rewrite your sample text to match the persona — you can submit with an empty text body and MiMo writes the script for you. Other commercial TTS services charge you per generated voice ID; here it's one HTTP call.
 
-### 🪄 Voice Clone — mp3/wav in, *your* voice out
+### 🪄 Voice Clone — mp3/wav in, _your_ voice out
 
 Drop in any mp3 or wav (≤10 MB after base64). MiMo replicates the timbre **and** the cloned voice keeps the full control surface: director prompts, inline tags, dialect switching, singing mode. No upload step, no separate voice-management dashboard — each clone is a one-shot inline call.
 
@@ -61,7 +61,7 @@ Drop in any mp3 or wav (≤10 MB after base64). MiMo replicates the timbre **and
 - **Chunked long-text playback** — sentence- and clause-aware splitter (UTF-8 byte-safe, English word boundary aware), 4 KB per chunk.
 - **Look-ahead synthesis** — the next chunk starts decoding while the current one plays; no audible gap.
 - **Global speed override** (0.5×–2.0× in 0.25× steps) is one keystroke and persists across every command.
-- **Cross-command stop** — Quick Read is a single keystroke that starts *and* stops; menu-bar status and dedicated commands all hook the same `afplay` PID.
+- **Cross-command stop** — Quick Read is a single keystroke that starts _and_ stops; menu-bar status and dedicated commands all hook the same `afplay` PID.
 
 ---
 
@@ -70,25 +70,25 @@ Drop in any mp3 or wav (≤10 MB after base64). MiMo replicates the timbre **and
 This extension is published on the Raycast Store as **MiMo TTS**. Search for it in Raycast → Store, then:
 
 1. Get a **MiMo Token Plan API key** (`tp-...`) from <https://platform.xiaomimimo.com/>. (Pay-as-you-go `sk-` keys go to a different endpoint and are not used by this extension.)
-2. Paste it into Raycast Preferences → Extensions → **MiMo TTS** → *MiMo Token Plan API Key*.
+2. Paste it into Raycast Preferences → Extensions → **MiMo TTS** → _MiMo Token Plan API Key_.
 3. (Optional) Run **Setup Voice Defaults** to pick your default voice, model, baseline speed, and a project-wide style prompt.
 
 ---
 
 ## Commands
 
-| Command | Mode | What it does |
-| --- | --- | --- |
-| **Quick Read** | no-view | Read selected or clipboard text with your default voice. Trigger again to stop. |
-| **Read with Voice** | view | Browse voices and read selection / clipboard with the chosen one. |
-| **Set Quick Read Voice** | view | Pick and preview the voice that Quick Read uses. |
-| **TTS Studio** | view | Long-form composer with voice, speed, opening style, emotion / rhythm / vocal-texture / expression tags, performance presets, and a free-form director prompt. |
-| **Design Voice** | view | Generate a brand-new voice from a one-sentence description (MiMo-V2.5-TTS-VoiceDesign). |
-| **Clone Voice** | view | Replicate any voice from an mp3/wav file (MiMo-V2.5-TTS-VoiceClone). |
-| **Setup Voice Defaults** | view | Persist a per-session override for model / voice / rate / style prompt / Token Plan base URL. |
-| **Stop Reading** | no-view | Stop the current playback immediately. |
-| **Speed up Reading / Slow Down Reading** | no-view | Adjust playback speed by ±0.25× for the next chunk; persists globally. |
-| **Reading Status** | menu-bar | Now-playing status with playback / speed controls. |
+| Command                                  | Mode     | What it does                                                                                                                                                   |
+| ---------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Quick Read**                           | no-view  | Read selected or clipboard text with your default voice. Trigger again to stop.                                                                                |
+| **Read with Voice**                      | view     | Browse voices and read selection / clipboard with the chosen one.                                                                                              |
+| **Set Quick Read Voice**                 | view     | Pick and preview the voice that Quick Read uses.                                                                                                               |
+| **TTS Studio**                           | view     | Long-form composer with voice, speed, opening style, emotion / rhythm / vocal-texture / expression tags, performance presets, and a free-form director prompt. |
+| **Design Voice**                         | view     | Generate a brand-new voice from a one-sentence description (MiMo-V2.5-TTS-VoiceDesign).                                                                        |
+| **Clone Voice**                          | view     | Replicate any voice from an mp3/wav file (MiMo-V2.5-TTS-VoiceClone).                                                                                           |
+| **Setup Voice Defaults**                 | view     | Persist a per-session override for model / voice / rate / style prompt / Token Plan base URL.                                                                  |
+| **Stop Reading**                         | no-view  | Stop the current playback immediately.                                                                                                                         |
+| **Speed up Reading / Slow Down Reading** | no-view  | Adjust playback speed by ±0.25× for the next chunk; persists globally.                                                                                         |
+| **Reading Status**                       | menu-bar | Now-playing status with playback / speed controls.                                                                                                             |
 
 ---
 
@@ -96,7 +96,7 @@ This extension is published on the Raycast Store as **MiMo TTS**. Search for it 
 
 The TTS Studio command exposes everything MiMo-V2.5-TTS supports:
 
-- **Performance Preset** — curated director briefs: *Suppressed Anger*, *Tearful Smile*, *Gentle but Tired*, *Gentleness Amid Frenzy*, *Narration → Whisper → Roar*, …
+- **Performance Preset** — curated director briefs: _Suppressed Anger_, _Tearful Smile_, _Gentle but Tired_, _Gentleness Amid Frenzy_, _Narration → Whisper → Roar_, …
 - **Opening Style** — leading style tags (gentle, magnetic, ethereal, husky, …; `唱歌` overrides others to enter singing mode).
 - **Custom Tags** — comma-separated free-form opening tags.
 - **Pace and Rhythm** — 吸气 / 深呼吸 / 叹气 / 长叹一口气 / 喘息 / 屏息 / 沉默片刻 / 语速加快 / 放慢语速 / 提高音量喊话 / 小声 / …
@@ -110,18 +110,18 @@ The TTS Studio command exposes everything MiMo-V2.5-TTS supports:
 
 ## Models — full coverage
 
-| Model ID | Used by | What it does |
-| --- | --- | --- |
-| `mimo-v2.5-tts` | Quick Read · Read with Voice · Set Quick Read Voice · TTS Studio | Preset voices with style controls. |
-| `mimo-v2.5-tts-voicedesign` | Design Voice | Generate a voice from a 1–4 sentence description. Optional `optimize_text_preview`. |
-| `mimo-v2.5-tts-voiceclone` | Clone Voice | Replicate a voice from a base64-encoded mp3/wav (≤10 MB). |
-| `mimo-v2-tts` | optional, via Setup Voice Defaults | Legacy V2 voices. |
+| Model ID                    | Used by                                                          | What it does                                                                        |
+| --------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `mimo-v2.5-tts`             | Quick Read · Read with Voice · Set Quick Read Voice · TTS Studio | Preset voices with style controls.                                                  |
+| `mimo-v2.5-tts-voicedesign` | Design Voice                                                     | Generate a voice from a 1–4 sentence description. Optional `optimize_text_preview`. |
+| `mimo-v2.5-tts-voiceclone`  | Clone Voice                                                      | Replicate a voice from a base64-encoded mp3/wav (≤10 MB).                           |
+| `mimo-v2-tts`               | optional, via Setup Voice Defaults                               | Legacy V2 voices.                                                                   |
 
 ---
 
 ## Stop semantics & cross-extension safety
 
-Quick Read uses **one keystroke to start *and* stop**. When something is already playing, running Quick Read again terminates the `afplay` process, clears the now-playing state, and shows a stop HUD. The menu-bar status, dedicated Stop Reading command, and `cmd+.` from any view command all trigger the same stop path.
+Quick Read uses **one keystroke to start _and_ stop**. When something is already playing, running Quick Read again terminates the `afplay` process, clears the now-playing state, and shows a stop HUD. The menu-bar status, dedicated Stop Reading command, and `cmd+.` from any view command all trigger the same stop path.
 
 Cross-extension PID isolation: this extension uses `raycast-mimo-tts.pid` / `.stop` in `tmpdir` so it doesn't fight my multi-provider [AI Voice Studio](https://github.com/xwzhangSZU/raycast-ai-voice-studio) extension over the same `afplay` process.
 
