@@ -39,7 +39,7 @@
       "icon": "icon-wrap-with.png",
       "title": "Wrap Selection with…",
       "subtitle": "Wrap Selection",
-      "description": "Pick a pair to wrap the selected text with.",
+      "description": "Choose a pair to wrap the selected text with.",
       "mode": "view"
     },
     {

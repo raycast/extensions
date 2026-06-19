@@ -22,7 +22,7 @@ Select `Hello`, fire a command, and it becomes `(Hello)`.
 | Command | What it does |
 | --- | --- |
 | **Wrap Selection (Default)** | Wraps with your configured default pair. This is the one to bind to a global hotkey for one-press wrapping. |
-| **Wrap Selection with…** | Opens a list so you can pick any pair on the fly. |
+| **Wrap Selection with…** | Opens a list so you can choose any pair on the fly. |
 | **Wrap with Parentheses / Single Quotes / Double Quotes / Square Brackets / Curly Braces / Angle Brackets** | Six instant commands — one per pair — so each can have its own dedicated hotkey. |
 
 Each command has its own icon so it's easy to spot in Raycast's root search.
