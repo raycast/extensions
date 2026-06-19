@@ -51,3 +51,22 @@ npm test         # node --test — client unit tests (mocked fetch, no network)
 The network/error-mapping logic lives in `src/lib/granite.ts` (no `@raycast/api`
 import, so it's unit-tested directly). `src/lib/preferences.ts` is the only seam that
 reads Raycast preferences. Commands live in `src/*.tsx`; AI tools in `src/tools/*.ts`.
+
+## Store screenshots
+
+Screenshots in `metadata/` become the gallery on the Raycast Store listing (max 6,
+aim for 3–5). Capture them with Raycast's built-in Window Capture so they're the
+exact 2000×1250 the Store expects:
+
+1. Raycast → Settings → Advanced → **Window Capture**: assign a hotkey (e.g. `⌘⇧⌥M`).
+2. Run `npm run dev` so the extension is in development mode (Window Capture hides dev
+   menus and icons). A clean, high-contrast wallpaper reads best behind the window.
+3. Open each command, press the hotkey, and tick **Save to Metadata** — it writes a
+   correctly-sized PNG into `metadata/` (named `granite-N.png`).
+
+Suggested shots, in listing order:
+
+1. **Search Vault** with the detail pane open on a result (the core "find anything" view).
+2. **Ask Vault** showing an answer with the Sources panel.
+3. **Browse Documents** — the full vault list.
+4. *(optional)* a document detail view with its fields.
