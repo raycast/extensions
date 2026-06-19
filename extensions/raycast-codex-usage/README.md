@@ -6,6 +6,7 @@ Raycast extension for checking your Codex usage from the command palette.
 
 - Your Codex rate limits, including the 5-hour limit and weekly limit when available
 - Remaining usage for each window, with a color indicator based on how close you are to the limit
+- Available usage resets, the earliest expiry, and a detail view with every reset's grant and expiry dates
 - Recent session activity:
   - Sessions used today
   - Sessions used in the last 7 days

@@ -1,106 +1,39 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { usePromise, getProgressIcon } from "@raycast/utils";
-import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
-
-type RateLimitWindow = {
-  usedPercent: number;
-  windowDurationMins: number | null;
-  resetsAt: number | null;
-};
-
-type RateLimitSnapshot = {
-  limitId: string | null;
-  limitName: string | null;
-  primary: RateLimitWindow | null;
-  secondary: RateLimitWindow | null;
-  credits: unknown;
-  planType: string | null;
-  rateLimitReachedType: string | null;
-};
-
-type GetAccountRateLimitsResponse = {
-  rateLimits: RateLimitSnapshot;
-  rateLimitsByLimitId: Record<string, RateLimitSnapshot | undefined> | null;
-};
-
-type Skill = {
-  name: string;
-  description: string;
-  interface?: {
-    displayName: string;
-    shortDescription: string;
-  };
-  scope: "user" | "system";
-  enabled: boolean;
-};
-
-type SkillsListEntry = {
-  cwd: string;
-  skills: Skill[];
-  errors: unknown[];
-};
-
-type SkillsListResponse = {
-  data: SkillsListEntry[];
-};
-
-type Thread = {
-  id: string;
-  preview: string;
-  createdAt: number;
-  updatedAt: number;
-  cwd: string;
-  source: string;
-  name: string | null;
-};
-
-type ThreadListResponse = {
-  data: Thread[];
-  nextCursor: string | null;
-  backwardsCursor: string | null;
-};
-
-type RpcResponse = {
-  id?: number;
-  result?: unknown;
-  error?: {
-    code: number;
-    message: string;
-  };
-};
-
-type DisplayWindow = {
-  id: string;
-  label: string;
-  window: RateLimitWindow;
-};
-
-type UsageData = {
-  rateLimits: GetAccountRateLimitsResponse;
-  threads: Thread[];
-  skills: Skill[];
-};
-
-const REQUEST_TIMEOUT_MS = 20000;
-const ACTIVITY_TIMEOUT_MS = 3000;
-const THREAD_LIST_LIMIT = 99;
-const CODEX_EXECUTABLE_CANDIDATES = [
-  "/opt/homebrew/bin/codex",
-  "/usr/local/bin/codex",
-  "/usr/bin/codex",
-  join(homedir(), ".local/bin/codex"),
-  join(homedir(), ".npm-global/bin/codex"),
-  "codex",
-];
+import { useCallback, useRef, useState } from "react";
+import { fetchCodexUsage, THREAD_LIST_LIMIT } from "./codex-usage";
+import type {
+  DisplayWindow,
+  GetAccountRateLimitsResponse,
+  RateLimitResetCredit,
+  RateLimitResetCreditsResponse,
+  RateLimitSnapshot,
+  RateLimitWindow,
+  ResetCreditsState,
+  Skill,
+  Thread,
+} from "./codex-usage-types";
 
 export default function Command() {
-  const { data, error, isLoading, revalidate } = usePromise(fetchCodexUsage);
+  const [resetCreditsState, setResetCreditsState] = useState<ResetCreditsState>({ data: null, isLoading: true });
+  const loadGeneration = useRef(0);
+  const loadUsage = useCallback(() => {
+    const generation = ++loadGeneration.current;
+    setResetCreditsState({ data: null, isLoading: true });
+
+    return fetchCodexUsage((resetCredits) => {
+      if (loadGeneration.current === generation) {
+        setResetCreditsState({ data: resetCredits, isLoading: false });
+      }
+    });
+  }, []);
+  const { data, error, isLoading, revalidate } = usePromise(loadUsage);
   const windows = data ? getCodexWindows(data.rateLimits) : [];
   const activity = data ? getRecentActivity(data.threads) : null;
   const skills = data?.skills ?? [];
+  const resetCredits = resetCreditsState.data;
+  const availableResets = resetCredits ? getAvailableResets(resetCredits) : [];
+  const earliestReset = availableResets[0];
   const refresh = () => {
     void revalidate();
   };
@@ -119,6 +52,14 @@ export default function Command() {
           </ActionPanel>
         }
       />
+    );
+  }
+
+  if (isLoading && !data) {
+    return (
+      <List isLoading>
+        <UsageSkeleton />
+      </List>
     );
   }
 
@@ -153,6 +94,56 @@ export default function Command() {
           );
         })}
       </List.Section>
+      {resetCreditsState.isLoading ? (
+        <List.Section title="Usage Resets">
+          <List.Item
+            icon={Icon.Replace}
+            title="Rate Limit Resets"
+            subtitle="Loading available resets…"
+            actions={<ActionPanel>{refreshAction}</ActionPanel>}
+          />
+        </List.Section>
+      ) : resetCredits ? (
+        <List.Section title="Usage Resets">
+          <List.Item
+            icon={Icon.Replace}
+            title="Rate Limit Resets"
+            subtitle={
+              earliestReset
+                ? `Earliest expires ${formatCompactDateTime(earliestReset.expires_at)}`
+                : "No available resets"
+            }
+            accessories={[
+              {
+                tag: {
+                  value: formatResetCount(resetCredits.available_count),
+                  color: Color.Blue,
+                },
+              },
+              ...(earliestReset
+                ? [
+                    {
+                      tag: {
+                        value: formatTimeRemainingTag(earliestReset.expires_at),
+                        color: getResetExpiryColor(earliestReset.expires_at),
+                      },
+                    },
+                  ]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Resets"
+                  icon={Icon.List}
+                  target={<RateLimitResetsView credits={availableResets} />}
+                />
+                {refreshAction}
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
       {activity ? (
         <List.Section title="Sessions">
           <List.Item
@@ -195,6 +186,71 @@ export default function Command() {
   );
 }
 
+function UsageSkeleton() {
+  return (
+    <>
+      <List.Section title="Rate Limits">
+        <List.Item icon={getProgressIcon(0)} title="5H Limit" subtitle="Loading usage…" />
+        <List.Item icon={getProgressIcon(0)} title="Weekly Limit" subtitle="Loading usage…" />
+      </List.Section>
+      <List.Section title="Usage Resets">
+        <List.Item icon={Icon.Replace} title="Rate Limit Resets" subtitle="Loading available resets…" />
+      </List.Section>
+      <List.Section title="Sessions">
+        <List.Item icon={Icon.Clock} title="Today" subtitle="Loading sessions…" />
+        <List.Item icon={Icon.Calendar} title="Last 7 Days" subtitle="Loading sessions…" />
+        <List.Item icon={Icon.Bubble} title="Latest Session" subtitle="Loading session…" />
+      </List.Section>
+      <List.Section title="Skills">
+        <List.Item icon={Icon.Wand} title="Skills" subtitle="Loading skills…" />
+      </List.Section>
+    </>
+  );
+}
+
+function RateLimitResetsView({ credits }: { credits: RateLimitResetCredit[] }) {
+  return (
+    <List navigationTitle="Rate Limit Resets" isShowingDetail={credits.length > 0}>
+      {credits.length === 0 ? <List.EmptyView icon={Icon.Repeat} title="No Available Resets" /> : null}
+      <List.Section title={formatResetCount(credits.length)}>
+        {credits.map((credit, index) => (
+          <List.Item
+            key={credit.id}
+            icon={Icon.Repeat}
+            title={`Reset ${index + 1}`}
+            accessories={[
+              {
+                tag: {
+                  value: formatTimeRemainingTag(credit.expires_at),
+                  color: getResetExpiryColor(credit.expires_at),
+                },
+              },
+            ]}
+            detail={<RateLimitResetDetail credit={credit} index={index} />}
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+function RateLimitResetDetail({ credit, index }: { credit: RateLimitResetCredit; index: number }) {
+  const markdown = [
+    `## Reset ${index + 1}`,
+    `**${credit.title || "Rate Limit Reset"}**`,
+    credit.description || "One Codex rate limit reset is available.",
+    "---",
+    "### Remaining",
+    formatTimeRemainingTag(credit.expires_at),
+    "### Granted",
+    formatDateTime(credit.granted_at),
+    "### Expires",
+    formatDateTime(credit.expires_at),
+  ].join("\n\n");
+
+  return <List.Item.Detail markdown={markdown} />;
+}
+
 function SkillsDetailView({ skills }: { skills: Skill[] }) {
   const userSkills = skills.filter((s) => s.scope === "user");
   const systemSkills = skills.filter((s) => s.scope === "system");
@@ -229,204 +285,69 @@ function SkillsDetailView({ skills }: { skills: Skill[] }) {
   );
 }
 
-function fetchCodexUsage(): Promise<UsageData> {
-  return new Promise((resolve, reject) => {
-    const codexExecutable = resolveCodexExecutable();
-    const child = spawn(codexExecutable, ["app-server"], {
-      env: {
-        ...process.env,
-        PATH: getExtendedPath(),
-      },
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    let stdout = "";
-    let stderr = "";
-    let settled = false;
-    let rateLimits: GetAccountRateLimitsResponse | null = null;
-    let threads: Thread[] = [];
-    let skills: Skill[] = [];
-    let threadListFinished = false;
-    let skillsListFinished = false;
-    let activityTimeout: NodeJS.Timeout | undefined;
-
-    const timeout = setTimeout(() => {
-      finish(new Error("Timed out while waiting for Codex rate limits."));
-    }, REQUEST_TIMEOUT_MS);
-
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString("utf8");
-      const lines = stdout.split("\n");
-      stdout = lines.pop() ?? "";
-
-      for (const line of lines) {
-        handleRpcLine(line);
-      }
-    });
-
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString("utf8");
-    });
-
-    child.on("error", (error) => {
-      if ("code" in error && error.code === "ENOENT") {
-        finish(
-          new Error(
-            `Could not find the Codex CLI. Checked: ${CODEX_EXECUTABLE_CANDIDATES.join(", ")}. Install Codex or add it to a standard PATH location like /opt/homebrew/bin/codex.`,
-          ),
-        );
-        return;
-      }
-
-      finish(error);
-    });
-
-    child.on("exit", (code) => {
-      if (!settled && code !== 0) {
-        finish(new Error(`Codex app-server exited with code ${code}.${formatStderr(stderr)}`));
-      }
-    });
-
-    child.stdin.write(
-      JSON.stringify({
-        id: 1,
-        method: "initialize",
-        params: { clientInfo: { name: "raycast-codex-usage", version: "0.0.0" } },
-      }) + "\n",
-    );
-
-    function handleRpcLine(line: string) {
-      let message: RpcResponse;
-
-      try {
-        message = JSON.parse(line) as RpcResponse;
-      } catch {
-        return;
-      }
-
-      if (message.id === 1) {
-        child.stdin.write(JSON.stringify({ id: 2, method: "account/rateLimits/read" }) + "\n");
-        child.stdin.write(
-          JSON.stringify({
-            id: 3,
-            method: "thread/list",
-            params: {
-              limit: THREAD_LIST_LIMIT,
-              sortKey: "updated_at",
-              sortDirection: "desc",
-              archived: false,
-              sourceKinds: ["cli", "vscode", "exec", "appServer"],
-            },
-          }) + "\n",
-        );
-        child.stdin.write(JSON.stringify({ id: 4, method: "skills/list", params: { cwd: homedir() } }) + "\n");
-        scheduleActivityTimeout();
-        return;
-      }
-
-      if (message.id !== 2 && message.id !== 3 && message.id !== 4) {
-        return;
-      }
-
-      if (message.error) {
-        if (message.id === 2) {
-          finish(new Error(`${message.error.message}.${formatStderr(stderr)}`));
-        }
-        if (message.id === 3) {
-          threadListFinished = true;
-          if (rateLimits && skillsListFinished) {
-            finish(null, { rateLimits, threads, skills });
-          }
-        }
-        if (message.id === 4) {
-          skillsListFinished = true;
-          if (rateLimits && threadListFinished) {
-            finish(null, { rateLimits, threads, skills });
-          }
-        }
-        return;
-      }
-
-      if (!message.result && message.id === 2) {
-        finish(new Error("Codex returned an empty rate-limit response."));
-        return;
-      }
-
-      if (message.id === 2) {
-        rateLimits = message.result as GetAccountRateLimitsResponse;
-      }
-
-      if (message.id === 3) {
-        threads = ((message.result as ThreadListResponse | undefined)?.data ?? []).filter(Boolean);
-        threadListFinished = true;
-      }
-
-      if (message.id === 4) {
-        const entries = (message.result as SkillsListResponse | undefined)?.data ?? [];
-        skills = entries.flatMap((entry) => entry.skills).filter((s) => s.enabled);
-        skillsListFinished = true;
-      }
-
-      if (rateLimits && threadListFinished && skillsListFinished) {
-        finish(null, { rateLimits, threads, skills });
-      }
-    }
-
-    function finish(error: Error | null, result?: UsageData) {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      clearTimeout(timeout);
-      clearTimeout(activityTimeout);
-      child.kill();
-
-      if (error) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to load Codex usage", message: error.message });
-        reject(error);
-        return;
-      }
-
-      resolve(result as UsageData);
-    }
-
-    function scheduleActivityTimeout() {
-      clearTimeout(activityTimeout);
-      activityTimeout = setTimeout(() => {
-        if (!rateLimits) {
-          scheduleActivityTimeout();
-          return;
-        }
-
-        finish(null, { rateLimits, threads, skills });
-      }, ACTIVITY_TIMEOUT_MS);
-    }
-  });
+function getAvailableResets(response: RateLimitResetCreditsResponse): RateLimitResetCredit[] {
+  return response.credits
+    .filter((credit) => credit.status === "available")
+    .sort((a, b) => Date.parse(a.expires_at) - Date.parse(b.expires_at));
 }
 
-function resolveCodexExecutable(): string {
-  for (const candidate of CODEX_EXECUTABLE_CANDIDATES) {
-    if (candidate !== "codex" && existsSync(candidate)) {
-      return candidate;
-    }
+function formatResetCount(count: number): string {
+  return `${count} ${count === 1 ? "reset" : "resets"}`;
+}
+
+function formatTimeUntilDate(date: string): string {
+  const millisecondsRemaining = Date.parse(date) - Date.now();
+
+  if (millisecondsRemaining <= 0) {
+    return "Expired";
   }
 
-  return "codex";
+  const hoursRemaining = millisecondsRemaining / (60 * 60 * 1000);
+  if (hoursRemaining < 24) {
+    return `${Math.max(1, Math.ceil(hoursRemaining))}h`;
+  }
+
+  return `${Math.floor(hoursRemaining / 24)}d`;
 }
 
-function getExtendedPath(): string {
-  return [
-    process.env.PATH,
-    "/opt/homebrew/bin",
-    "/usr/local/bin",
-    "/usr/bin",
-    "/bin",
-    join(homedir(), ".local/bin"),
-    join(homedir(), ".npm-global/bin"),
-  ]
-    .filter(Boolean)
-    .join(":");
+function formatTimeRemainingTag(date: string): string {
+  const remaining = formatTimeUntilDate(date);
+  return remaining === "Expired" ? remaining : `${remaining} left`;
+}
+
+function formatDateTime(date: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(date));
+}
+
+function formatCompactDateTime(date: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(date));
+}
+
+function getResetExpiryColor(date: string): Color {
+  const daysRemaining = (Date.parse(date) - Date.now()) / (24 * 60 * 60 * 1000);
+
+  if (daysRemaining < 7) {
+    return Color.Red;
+  }
+
+  if (daysRemaining <= 14) {
+    return Color.Yellow;
+  }
+
+  return Color.Green;
 }
 
 function getCodexWindows(response: GetAccountRateLimitsResponse): DisplayWindow[] {
@@ -578,13 +499,4 @@ function formatSkillName(name: string): string {
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-function formatStderr(stderr: string): string {
-  const meaningfulLine = stderr
-    .split("\n")
-    .map((line) => line.trim())
-    .find((line) => line && !line.startsWith("WARNING:"));
-
-  return meaningfulLine ? ` ${meaningfulLine}` : "";
 }
