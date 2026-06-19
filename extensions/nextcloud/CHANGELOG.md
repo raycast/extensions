@@ -1,6 +1,6 @@
 # Nextcloud Changelog
 
-## [Fix Open File URL format] - {PR_MERGE_DATE}
+## [Fix Open File URL format] - 2026-06-19
 
 - Use the correct Nextcloud URL format for opening files, fixing 403 errors
 
