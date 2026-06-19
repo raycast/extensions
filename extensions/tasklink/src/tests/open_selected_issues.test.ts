@@ -33,7 +33,7 @@ describe("Open Selected Issues", () => {
   it("Shows an error toast when there are no issue IDs in the selected text", async () => {
     getSelectedText.mockResolvedValue("something something");
     await Command();
-    expect(showToast).toHaveBeenCalledWith({ title: "No issue ids selected", style: "FAILURE" });
+    expect(showToast).toHaveBeenCalledWith({ title: "No issue IDs selected", style: "FAILURE" });
     expect(open).not.toHaveBeenCalled();
   });
 
