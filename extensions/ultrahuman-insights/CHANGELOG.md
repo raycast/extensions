@@ -1,6 +1,6 @@
 # Ultrahuman Insights
 
-## [Ultrahuman Insights] - {PR_MERGE_DATE}
+## [Ultrahuman Insights] - 2026-06-19
 
 - Add Windows support for all view commands and Raycast AI tools.
 - Add AI evals for tool reliability testing.
