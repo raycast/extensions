@@ -5,6 +5,7 @@
     "description": "Track MRR, browse customers and transactions, and ask AI questions about your SaaSFlow data — without leaving Raycast.",
     "icon": "extension-icon.png",
     "author": "alexander.peiniger",
+    "owner": "saasflow",
     "access": "public",
     "license": "MIT",
     "platforms": [
