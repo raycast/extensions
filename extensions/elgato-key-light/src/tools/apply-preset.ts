@@ -1,6 +1,6 @@
 import { convertFormTemperatureToActual } from "../elgato";
 import { getPresets } from "../presets";
-import { discoverKeyLights, ToolResponse, formatErrorResponse } from "../utils";
+import { discoverKeyLights, ToolResponse, formatErrorResponse, getTargetLightNames } from "../utils";
 
 /**
  * Tool to apply a preset to all connected Key Lights
@@ -61,17 +61,21 @@ export default async function tool(input: {
     }
 
     const keyLight = await discoverKeyLights();
+    const targets = await getTargetLightNames();
 
     // First turn on lights to ensure they're responsive
-    await keyLight.turnOn();
+    await keyLight.turnOn(targets);
 
     // Now apply the preset settings
-    await keyLight.update({
-      brightness: preset.settings.brightness,
-      temperature: preset.settings.temperature
-        ? convertFormTemperatureToActual(preset.settings.temperature)
-        : undefined,
-    });
+    await keyLight.update(
+      {
+        brightness: preset.settings.brightness,
+        temperature: preset.settings.temperature
+          ? convertFormTemperatureToActual(preset.settings.temperature)
+          : undefined,
+      },
+      targets,
+    );
 
     return {
       success: true,

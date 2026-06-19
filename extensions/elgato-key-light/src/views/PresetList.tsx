@@ -4,7 +4,7 @@ import { Preset, deletePreset, usePresets } from "../presets";
 import { convertFormTemperatureToActual, KeyLight } from "../elgato";
 import PresetForm, { FormValues } from "./PresetForm";
 import { randomUUID } from "crypto";
-import { discoverKeyLights } from "../utils";
+import { discoverKeyLights, getTargetLightNames } from "../utils";
 import { showFailureToast } from "@raycast/utils";
 
 export default function PresetList() {
@@ -18,10 +18,11 @@ export default function PresetList() {
       });
 
       const keyLight = await discoverKeyLights();
+      const targets = await getTargetLightNames();
 
       // First turn on the lights to ensure they are responsive
       try {
-        await keyLight.turnOn();
+        await keyLight.turnOn(targets);
       } catch (error) {
         // If turning on fails, try force discovery again
         if (environment.isDevelopment) {
@@ -29,19 +30,22 @@ export default function PresetList() {
         }
         try {
           const keyLightRetry = await discoverKeyLights(true);
-          await keyLightRetry.turnOn();
+          await keyLightRetry.turnOn(targets);
         } catch (retryError) {
           throw new Error(`Failed to turn on Key Light after retry: ${(retryError as Error).message}`);
         }
       }
 
       // Now apply the preset settings
-      await keyLight.update({
-        brightness: preset.settings.brightness,
-        temperature: preset.settings.temperature
-          ? convertFormTemperatureToActual(preset.settings.temperature)
-          : undefined,
-      });
+      await keyLight.update(
+        {
+          brightness: preset.settings.brightness,
+          temperature: preset.settings.temperature
+            ? convertFormTemperatureToActual(preset.settings.temperature)
+            : undefined,
+        },
+        targets,
+      );
 
       await showToast({
         style: Toast.Style.Success,

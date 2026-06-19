@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "configure-target-lights",
+      "title": "Configure Target Lights",
+      "subtitle": "Elgato Key Light",
+      "description": "Choose whether commands control all lights or only selected discovered lights",
+      "mode": "view"
+    },
+    {
       "name": "discoverLights",
       "title": "Discover Lights",
       "subtitle": "Elgato Key Light",
@@ -21,35 +28,35 @@
       "name": "toggle",
       "title": "Toggle Lights",
       "subtitle": "Elgato Key Light",
-      "description": "Toggles all connected Key Lights on or off",
+      "description": "Toggles the targeted Key Lights on or off",
       "mode": "no-view"
     },
     {
       "name": "increaseBrightness",
       "title": "Increase Brightness",
       "subtitle": "Elgato Key Light",
-      "description": "Increase brightness of Key Light by 5%",
+      "description": "Increase brightness of the targeted Key Lights by 5%",
       "mode": "no-view"
     },
     {
       "name": "decreaseBrightness",
       "title": "Decrease Brightness",
       "subtitle": "Elgato Key Light",
-      "description": "Decrease brightness of Key Light by 5%",
+      "description": "Decrease brightness of the targeted Key Lights by 5%",
       "mode": "no-view"
     },
     {
       "name": "increaseTemperature",
       "title": "Warmer Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Make light color warmer (lower Kelvin)",
+      "description": "Make the targeted lights warmer (lower Kelvin)",
       "mode": "no-view"
     },
     {
       "name": "decreaseTemperature",
       "title": "Cooler Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Make light color cooler (higher Kelvin)",
+      "description": "Make the targeted lights cooler (higher Kelvin)",
       "mode": "no-view"
     },
     {
