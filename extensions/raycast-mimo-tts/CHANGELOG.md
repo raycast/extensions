@@ -1,6 +1,6 @@
 # MiMo TTS Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-19
 
 - Extract MiMo TTS into a standalone Raycast extension from AI Voice Studio.
 - Full MiMo-V2.5-TTS series coverage: preset voices, Voice Design (text-to-voice), Voice Clone (audio-to-voice).
