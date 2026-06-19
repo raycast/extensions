@@ -33,26 +33,6 @@ export type TranslationLang =
   | "ja"
   | "ko";
 
-/** Languages available for the translation row. */
-export const SUPPORTED: TranslationLang[] = [
-  "fr",
-  "es",
-  "it",
-  "de",
-  "pt",
-  "nl",
-  "sv",
-  "pl",
-  "ru",
-  "el",
-  "tr",
-  "ar",
-  "hi",
-  "zh",
-  "ja",
-  "ko",
-];
-
 /** Native label shown as the translation row title. */
 export const LANG_LABELS: Record<TranslationLang, string> = {
   fr: "Français",
