@@ -83,6 +83,13 @@
       "subtitle": "OVHcloud",
       "description": "Manage Domains, DNS Records, Nameservers",
       "mode": "view"
+    },
+    {
+      "name": "my-messages",
+      "title": "My Messages",
+      "subtitle": "OVHcloud",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -77,3 +77,20 @@ export type DomainServiceInfo = {
   status: "autorenewInProgress" | "expired" | "inCreation" | "ok" | "pendingDebt" | "unPaid";
   contactTech: string;
 };
+
+export type Notification = {
+  "categories": string[],
+  "contacts": 
+    Array<{
+      "id": string
+      "sentAt": string
+      "status": "BOUNCED"|"DELIVERED"|"DROPPED"|"QUEUED"|"SENT",
+      "to": string
+      "type": "EMAIL"
+    }>
+  
+  "createdAt": string
+  "id": string
+  "priority": "HIGH" | "LOW" | "MEDIUM",
+  "title": string
+}
