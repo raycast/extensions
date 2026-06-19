@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cove-cast",
+  "title": "CoveCast",
+  "description": "Copy a token contract address anywhere, hit a hotkey, auto-detect the chain, pick a USD amount, and open the matching Cove Telegram bot deeplink.",
+  "icon": "command-icon.png",
+  "author": "bitski",
+  "categories": ["Finance"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "buy",
+      "title": "Buy",
+      "subtitle": "CoveCast",
+      "description": "Detect the chain for the contract address on your clipboard and open a Cove buy deeplink.",
+      "mode": "view",
+      "keywords": ["cove", "buy", "snipe", "ape", "ca", "token", "telegram", "trade"]
+    },
+    {
+      "name": "quick-buy",
+      "title": "Quick Buy",
+      "subtitle": "CoveCast",
+      "description": "Instantly buy your Quick Buy amount of the contract address on your clipboard — no UI.",
+      "mode": "no-view",
+      "keywords": ["cove", "quick", "snipe", "ape", "qb", "buy"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "amounts",
+      "title": "Buy Amounts (USD)",
+      "description": "Comma-separated USD amounts. Each must fit Cove's format: max 9999 and at most 4 characters incl. the decimal (e.g. 25, 0.5, 9999 — 100.5 is too long).",
+      "type": "textfield",
+      "required": false,
+      "default": "25,50,100,500"
+    },
+    {
+      "name": "quickBuyAmount",
+      "title": "Quick Buy Amount (USD)",
+      "description": "USD amount Quick Buy fires in one keystroke. Max 9999, at most 4 characters incl. the decimal (e.g. 25, 0.5).",
+      "type": "textfield",
+      "required": false,
+      "default": "25"
+    },
+    {
+      "name": "defaultBuyAction",
+      "title": "Default Buy Action",
+      "description": "What picking an amount does: buy it instantly, or open Cove's buy panel to confirm first.",
+      "type": "dropdown",
+      "required": false,
+      "default": "g",
+      "data": [
+        { "title": "Immediate buy", "value": "g" },
+        { "title": "Market panel", "value": "b" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
