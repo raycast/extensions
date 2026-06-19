@@ -562,29 +562,33 @@ export class KeyLight {
 
   async increaseBrightness(targets?: string[]) {
     let newBrightness;
-    let lights = this.getTargetLightsOrThrow(targets);
+    const lights = this.getTargetLightsOrThrow(targets);
     for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(lights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newBrightness = Math.min(keyLight.brightness + 5, 100);
-        await this.updateKeyLight(lights[x].service, { brightness: newBrightness });
+        await this.updateKeyLight(light.service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
         if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
           try {
-            lights = await this.rediscoverAndGetTargets(targets);
-            const keyLight = await this.getKeyLight(lights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newBrightness = Math.min(keyLight.brightness + 5, 100);
-            await this.updateKeyLight(lights[x].service, { brightness: newBrightness });
+            await this.updateKeyLight(refreshedLight.service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed increasing brightness: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed increasing brightness: ${error.message}`);
         }
       }
@@ -595,29 +599,33 @@ export class KeyLight {
 
   async decreaseBrightness(targets?: string[]) {
     let newBrightness;
-    let lights = this.getTargetLightsOrThrow(targets);
+    const lights = this.getTargetLightsOrThrow(targets);
     for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(lights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newBrightness = Math.max(keyLight.brightness - 5, 0);
-        await this.updateKeyLight(lights[x].service, { brightness: newBrightness });
+        await this.updateKeyLight(light.service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
         if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
           try {
-            lights = await this.rediscoverAndGetTargets(targets);
-            const keyLight = await this.getKeyLight(lights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newBrightness = Math.max(keyLight.brightness - 5, 0);
-            await this.updateKeyLight(lights[x].service, { brightness: newBrightness });
+            await this.updateKeyLight(refreshedLight.service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed decreasing brightness: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed decreasing brightness: ${error.message}`);
         }
       }
@@ -628,29 +636,33 @@ export class KeyLight {
 
   async increaseTemperature(targets?: string[]) {
     let newTemperature;
-    let lights = this.getTargetLightsOrThrow(targets);
+    const lights = this.getTargetLightsOrThrow(targets);
     for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(lights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
-        await this.updateKeyLight(lights[x].service, { temperature: newTemperature });
+        await this.updateKeyLight(light.service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
         if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
           try {
-            lights = await this.rediscoverAndGetTargets(targets);
-            const keyLight = await this.getKeyLight(lights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
-            await this.updateKeyLight(lights[x].service, { temperature: newTemperature });
+            await this.updateKeyLight(refreshedLight.service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed increasing temperature: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed increasing temperature: ${error.message}`);
         }
       }
@@ -661,29 +673,33 @@ export class KeyLight {
 
   async decreaseTemperature(targets?: string[]) {
     let newTemperature;
-    let lights = this.getTargetLightsOrThrow(targets);
+    const lights = this.getTargetLightsOrThrow(targets);
     for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(lights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
-        await this.updateKeyLight(lights[x].service, { temperature: newTemperature });
+        await this.updateKeyLight(light.service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
         if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
           try {
-            lights = await this.rediscoverAndGetTargets(targets);
-            const keyLight = await this.getKeyLight(lights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
-            await this.updateKeyLight(lights[x].service, { temperature: newTemperature });
+            await this.updateKeyLight(refreshedLight.service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed decreasing temperature: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed decreasing temperature: ${error.message}`);
         }
       }

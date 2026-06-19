@@ -1,6 +1,6 @@
 # Elgato Key Light Changelog
 
-## [Target Light Selection and Better Discovery] - 2026-06-19
+## [Target Light Selection and Better Discovery] - {PR_MERGE_DATE}
 
 New Features
 - Add a "Configure Target Lights" command to choose between controlling all discovered lights or only selected lights
