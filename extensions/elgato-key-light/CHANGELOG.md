@@ -1,5 +1,17 @@
 # Elgato Key Light Changelog
 
+## [Target Light Selection and Better Discovery] - 2026-06-19
+
+New Features
+- Add a "Configure Target Lights" command to choose between controlling all discovered lights or only selected lights
+- Let users discover lights from the configuration flow and pick the specific lights that shortcuts and commands should control
+- Show Elgato accessory display names during discovery when available
+
+Technical Improvements
+- Apply target light selection across toggle, brightness, temperature, preset, and AI tool operations
+- Improve light re-matching after rediscovery using display names, hostnames, and IP addresses
+- Retry more reliably after transient light connection errors such as `ECONNRESET`
+
 ## [Improved Controls and Feedback] - 2025-05-27
 
 User Interface Improvements
