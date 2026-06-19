@@ -1,6 +1,6 @@
 # TaskLink Changelog
 
-## [New command & updates] - {PR_MERGE_DATE}
+## [New command & updates] - 2026-06-19
 
 - Add new command to open selected issues in your browser
 - Update dependencies to the latest versions
