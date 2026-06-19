@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 
 import {
   dashboardUrl,
@@ -18,8 +12,8 @@ import {
   useKobbeQuery,
 } from "./api";
 import { getKobbePreferences } from "./preferences";
-import type { KobbeSite, TimeRange } from "./types";
-import type { ReactNode } from "react";
+import type { KobbeSite, KobbeTopPage, TimeRange } from "./types";
+import type { ReactElement } from "react";
 
 function siteDomain(site: KobbeSite): string {
   return site.domain || "No domain";
@@ -29,20 +23,35 @@ function siteCreatedDate(site: KobbeSite): Date | undefined {
   return site.createdAt > 0 ? new Date(site.createdAt) : undefined;
 }
 
-export function SiteActions(props: {
-  site: KobbeSite;
-  range?: TimeRange;
-  onRefresh?: () => void;
-}) {
+function topPageAccessories(page: Pick<KobbeTopPage, "visitors" | "views">) {
+  return [
+    { text: `${formatCompactNumber(page.visitors)} visitors` },
+    { text: `${formatCompactNumber(page.views)} views` },
+  ];
+}
+
+function TopPageActions(props: { siteId: string; range: TimeRange; path: string; onRefresh: () => void }) {
+  return (
+    <ActionPanel>
+      <Action.CopyToClipboard title="Copy Path" content={props.path} />
+      <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(props.siteId, props.range)} />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={props.onRefresh}
+      />
+    </ActionPanel>
+  );
+}
+
+export function SiteActions(props: { site: KobbeSite; range?: TimeRange; onRefresh?: () => void }) {
   const range = props.range ?? getKobbePreferences().defaultRange;
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
-          title="Open Dashboard"
-          url={dashboardUrl(props.site.id, range)}
-        />
+        <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(props.site.id, range)} />
         <Action.Push
           title="View Overview"
           icon={Icon.BarChart}
@@ -69,20 +78,13 @@ export function SiteActions(props: {
           />
         ) : null}
         <Action.CopyToClipboard title="Copy Site ID" content={props.site.id} />
-        <Action.CopyToClipboard
-          title="Copy Domain"
-          content={props.site.domain ?? ""}
-        />
+        <Action.CopyToClipboard title="Copy Domain" content={props.site.domain ?? ""} />
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-export function SiteListItem(props: {
-  site: KobbeSite;
-  range?: TimeRange;
-  onRefresh?: () => void;
-}) {
+export function SiteListItem(props: { site: KobbeSite; range?: TimeRange; onRefresh?: () => void }) {
   const createdAt = siteCreatedDate(props.site);
 
   return (
@@ -90,16 +92,8 @@ export function SiteListItem(props: {
       title={props.site.name}
       subtitle={siteDomain(props.site)}
       icon="assets/kobbe-icon.png"
-      accessories={[
-        ...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : []),
-      ]}
-      actions={
-        <SiteActions
-          site={props.site}
-          range={props.range}
-          onRefresh={props.onRefresh}
-        />
-      }
+      accessories={[...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : [])]}
+      actions={<SiteActions site={props.site} range={props.range} onRefresh={props.onRefresh} />}
     />
   );
 }
@@ -108,27 +102,19 @@ export function SitesPicker(props: {
   title: string;
   searchBarPlaceholder: string;
   emptyViewTitle?: string;
-  renderActions: (site: KobbeSite, revalidate: () => void) => ReactNode;
+  renderActions: (site: KobbeSite, revalidate: () => void) => ReactElement;
 }) {
   const sites = useKobbeQuery(listSites);
 
   return (
-    <List
-      isLoading={sites.isLoading}
-      searchBarPlaceholder={props.searchBarPlaceholder}
-      navigationTitle={props.title}
-    >
+    <List isLoading={sites.isLoading} searchBarPlaceholder={props.searchBarPlaceholder} navigationTitle={props.title}>
       {sites.error ? (
         <List.EmptyView
           title="Could not load Kobbe sites"
           description={sites.error.message}
           actions={
             <ActionPanel>
-              <Action
-                title="Try Again"
-                icon={Icon.ArrowClockwise}
-                onAction={sites.revalidate}
-              />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={sites.revalidate} />
             </ActionPanel>
           }
         />
@@ -148,9 +134,7 @@ export function SitesPicker(props: {
             title={site.name}
             subtitle={siteDomain(site)}
             icon="assets/kobbe-icon.png"
-            accessories={[
-              ...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : []),
-            ]}
+            accessories={[...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : [])]}
             actions={props.renderActions(site, sites.revalidate)}
           />
         );
@@ -159,15 +143,9 @@ export function SitesPicker(props: {
   );
 }
 
-export function SiteOverviewDetail(props: {
-  site: KobbeSite;
-  range?: TimeRange;
-}) {
+export function SiteOverviewDetail(props: { site: KobbeSite; range?: TimeRange }) {
   const range = props.range ?? getKobbePreferences().defaultRange;
-  const overview = useKobbeQuery(
-    () => getOverview(props.site.id, range),
-    [props.site.id, range],
-  );
+  const overview = useKobbeQuery(() => getOverview(props.site.id, range), [props.site.id, range]);
   const data = overview.data?.overview;
 
   return (
@@ -182,11 +160,7 @@ export function SiteOverviewDetail(props: {
           description={overview.error.message}
           actions={
             <ActionPanel>
-              <Action
-                title="Try Again"
-                icon={Icon.ArrowClockwise}
-                onAction={overview.revalidate}
-              />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={overview.revalidate} />
             </ActionPanel>
           }
         />
@@ -199,25 +173,13 @@ export function SiteOverviewDetail(props: {
               icon={Icon.Person}
               title="Visitors"
               accessories={[{ text: data.kpis.visitors }]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
             <List.Item
               icon={Icon.Eye}
               title="Views"
               accessories={[{ text: data.kpis.views }]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
           </List.Section>
           <List.Section title="Engagement">
@@ -225,93 +187,51 @@ export function SiteOverviewDetail(props: {
               icon={Icon.TwoPeople}
               title="Visits"
               accessories={[{ text: data.kpis.visits }]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
             <List.Item
               icon={Icon.Clock}
               title="Avg Session"
               accessories={[{ text: data.kpis.sessionTime }]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
             <List.Item
               icon={Icon.PieChart}
               title="Bounce Rate"
               accessories={[{ text: data.kpis.bounceRate }]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
           </List.Section>
           <List.Section title="Revenue">
             <List.Item
               icon={Icon.Coins}
               title="Revenue"
-              accessories={[
-                { text: formatRevenue(data.revenue) },
-                { text: `${data.revenue.orders} orders` },
-              ]}
-              actions={
-                <SiteActions
-                  site={props.site}
-                  range={range}
-                  onRefresh={overview.revalidate}
-                />
-              }
+              accessories={[{ text: formatRevenue(data.revenue) }, { text: `${data.revenue.orders} orders` }]}
+              actions={<SiteActions site={props.site} range={range} onRefresh={overview.revalidate} />}
             />
           </List.Section>
           <List.Section title="Top Pages">
             {data.topPages.length ? (
-              data.topPages.slice(0, 9).map((page) => (
-                <List.Item
-                  key={page.path}
-                  icon={Icon.Document}
-                  title={page.path}
-                  accessories={[
-                    { text: `${formatCompactNumber(page.visitors)} visitors` },
-                    { text: `${formatCompactNumber(page.views)} views` },
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy Path"
-                        content={page.path}
+              data.topPages
+                .slice(0, 9)
+                .map((page) => (
+                  <List.Item
+                    key={page.path}
+                    icon={Icon.Document}
+                    title={page.path}
+                    accessories={topPageAccessories(page)}
+                    actions={
+                      <TopPageActions
+                        siteId={props.site.id}
+                        range={range}
+                        path={page.path}
+                        onRefresh={overview.revalidate}
                       />
-                      <Action.OpenInBrowser
-                        title="Open Dashboard"
-                        url={dashboardUrl(props.site.id, range)}
-                      />
-                      <Action
-                        title="Refresh"
-                        icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                        onAction={overview.revalidate}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              ))
+                    }
+                  />
+                ))
             ) : (
-              <List.Item
-                icon={Icon.Document}
-                title="No page data"
-                subtitle="No pageviews in this range"
-              />
+              <List.Item icon={Icon.Document} title="No page data" subtitle="No pageviews in this range" />
             )}
           </List.Section>
         </>
@@ -322,10 +242,7 @@ export function SiteOverviewDetail(props: {
 
 export function TopPagesList(props: { site: KobbeSite; range?: TimeRange }) {
   const range = props.range ?? getKobbePreferences().defaultRange;
-  const pages = useKobbeQuery(
-    () => getTopPages(props.site.id, range),
-    [props.site.id, range],
-  );
+  const pages = useKobbeQuery(() => getTopPages(props.site.id, range), [props.site.id, range]);
 
   return (
     <List
@@ -333,9 +250,7 @@ export function TopPagesList(props: { site: KobbeSite; range?: TimeRange }) {
       navigationTitle={`${props.site.name} Top Pages`}
       searchBarPlaceholder="Search pages..."
     >
-      {pages.error ? (
-        <List.EmptyView title="Could not load top pages" description={pages.error.message} />
-      ) : null}
+      {pages.error ? <List.EmptyView title="Could not load top pages" description={pages.error.message} /> : null}
       {pages.data?.pages.length === 0 ? (
         <List.EmptyView
           title="No page data"
@@ -347,24 +262,9 @@ export function TopPagesList(props: { site: KobbeSite; range?: TimeRange }) {
           key={page.path}
           title={page.path}
           icon={Icon.Document}
-          accessories={[
-            { text: `${formatCompactNumber(page.visitors)} visitors` },
-            { text: `${formatCompactNumber(page.views)} views` },
-          ]}
+          accessories={topPageAccessories(page)}
           actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy Path" content={page.path} />
-              <Action.OpenInBrowser
-                title="Open Dashboard"
-                url={dashboardUrl(props.site.id, range)}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={pages.revalidate}
-              />
-            </ActionPanel>
+            <TopPageActions siteId={props.site.id} range={range} path={page.path} onRefresh={pages.revalidate} />
           }
         />
       ))}
@@ -374,16 +274,13 @@ export function TopPagesList(props: { site: KobbeSite; range?: TimeRange }) {
 
 export function RevenueDetail(props: { site: KobbeSite; range?: TimeRange }) {
   const range = props.range ?? getKobbePreferences().defaultRange;
-  const revenue = useKobbeQuery(
-    async () => {
-      const [revenueResponse, overviewResponse] = await Promise.all([
-        getRevenue(props.site.id, range),
-        getOverview(props.site.id, range),
-      ]);
-      return { revenueResponse, overviewResponse };
-    },
-    [props.site.id, range],
-  );
+  const revenue = useKobbeQuery(async () => {
+    const [revenueResponse, overviewResponse] = await Promise.all([
+      getRevenue(props.site.id, range),
+      getOverview(props.site.id, range),
+    ]);
+    return { revenueResponse, overviewResponse };
+  }, [props.site.id, range]);
   const data = revenue.data?.revenueResponse;
   const overview = revenue.data?.overviewResponse.overview;
   const topPagesMarkdown = overview?.topPages.length
@@ -457,14 +354,8 @@ export function RevenueDetail(props: { site: KobbeSite; range?: TimeRange }) {
             <Detail.Metadata.Label title="Domain" text={siteDomain(props.site)} />
             <Detail.Metadata.Label title="Range" text={data.range} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Total"
-              text={formatRevenue(data.revenue)}
-            />
-            <Detail.Metadata.Label
-              title="Orders"
-              text={String(data.revenue.orders)}
-            />
+            <Detail.Metadata.Label title="Total" text={formatRevenue(data.revenue)} />
+            <Detail.Metadata.Label title="Orders" text={String(data.revenue.orders)} />
             <Detail.Metadata.Label
               title="Attributed"
               text={formatRevenueAmount(
@@ -473,25 +364,12 @@ export function RevenueDetail(props: { site: KobbeSite; range?: TimeRange }) {
                 data.revenue.multipleCurrencies,
               )}
             />
-            <Detail.Metadata.Label
-              title="Attribution Rate"
-              text={data.revenue.attributedPercent}
-            />
-            <Detail.Metadata.Link
-              title="Dashboard"
-              text="Open in Kobbe"
-              target={dashboardUrl(props.site.id, range)}
-            />
+            <Detail.Metadata.Label title="Attribution Rate" text={data.revenue.attributedPercent} />
+            <Detail.Metadata.Link title="Dashboard" text="Open in Kobbe" target={dashboardUrl(props.site.id, range)} />
           </Detail.Metadata>
         ) : null
       }
-      actions={
-        <SiteActions
-          site={props.site}
-          range={range}
-          onRefresh={revenue.revalidate}
-        />
-      }
+      actions={<SiteActions site={props.site} range={range} onRefresh={revenue.revalidate} />}
     />
   );
 }

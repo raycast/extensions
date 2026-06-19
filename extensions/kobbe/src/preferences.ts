@@ -5,7 +5,7 @@ export function getKobbePreferences() {
   const baseUrl = preferences.baseUrl.trim().replace(/\/+$/, "");
 
   return {
-    apiToken: preferences.apiToken.trim(),
+    apiToken: preferences.apiToken?.trim() ?? "",
     baseUrl: baseUrl || "https://app.kobbe.io",
     defaultRange: preferences.defaultRange || "7d",
   };

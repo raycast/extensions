@@ -12,11 +12,7 @@ export default function TopPages() {
       searchBarPlaceholder="Choose a site..."
       renderActions={(site, revalidate) => (
         <ActionPanel>
-          <Action.Push
-            title="View Top Pages"
-            icon={Icon.List}
-            target={<TopPagesList site={site} range={range} />}
-          />
+          <Action.Push title="View Top Pages" icon={Icon.List} target={<TopPagesList site={site} range={range} />} />
           <Action
             title="Refresh Sites"
             icon={Icon.ArrowClockwise}

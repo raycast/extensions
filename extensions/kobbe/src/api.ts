@@ -50,11 +50,12 @@ function errorMessageFromBody(body: ApiErrorBody, status: number): string {
   return `Kobbe API request failed (${status}).`;
 }
 
-async function kobbeFetch<T>(
-  path: string,
-  searchParams?: Record<string, string | number | undefined>,
-): Promise<T> {
+async function kobbeFetch<T>(path: string, searchParams?: Record<string, string | number | undefined>): Promise<T> {
   const preferences = getKobbePreferences();
+
+  if (!preferences.apiToken) {
+    throw new KobbeApiError("Add your Kobbe API token in extension preferences.", 401);
+  }
   const url = new URL(path, preferences.baseUrl);
 
   for (const [key, value] of Object.entries(searchParams ?? {})) {
@@ -72,28 +73,17 @@ async function kobbeFetch<T>(
 
   const body = (await response.json().catch(() => ({}))) as T | ApiErrorBody;
 
-  const isErrorBody =
-    typeof body === "object" &&
-    body !== null &&
-    "ok" in body &&
-    body.ok === false;
+  const isErrorBody = typeof body === "object" && body !== null && "ok" in body && body.ok === false;
 
   if (!response.ok || isErrorBody) {
     const errorBody = body as ApiErrorBody;
-    throw new KobbeApiError(
-      errorMessageFromBody(errorBody, response.status),
-      response.status,
-      errorBody.required,
-    );
+    throw new KobbeApiError(errorMessageFromBody(errorBody, response.status), response.status, errorBody.required);
   }
 
   return body as T;
 }
 
-export function useKobbeQuery<T>(
-  load: () => Promise<T>,
-  deps: readonly unknown[] = [],
-): Loadable<T> {
+export function useKobbeQuery<T>(load: () => Promise<T>, deps: readonly unknown[] = []): Loadable<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,8 +105,7 @@ export function useKobbeQuery<T>(
           setData(result);
         }
       } catch (cause) {
-        const nextError =
-          cause instanceof Error ? cause : new Error("Could not load Kobbe data.");
+        const nextError = cause instanceof Error ? cause : new Error("Could not load Kobbe data.");
         if (!cancelled) {
           setError(nextError);
           await showToast({
@@ -147,35 +136,16 @@ export async function listSites(): Promise<KobbeSite[]> {
   return response.sites;
 }
 
-export async function getOverview(
-  siteId: string,
-  range: TimeRange,
-): Promise<OverviewResponse> {
-  return kobbeFetch<OverviewResponse>(
-    `/api/agent/sites/${encodeURIComponent(siteId)}/overview`,
-    { range },
-  );
+export async function getOverview(siteId: string, range: TimeRange): Promise<OverviewResponse> {
+  return kobbeFetch<OverviewResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/overview`, { range });
 }
 
-export async function getTopPages(
-  siteId: string,
-  range: TimeRange,
-  limit = 10,
-): Promise<TopPagesResponse> {
-  return kobbeFetch<TopPagesResponse>(
-    `/api/agent/sites/${encodeURIComponent(siteId)}/top-pages`,
-    { range, limit },
-  );
+export async function getTopPages(siteId: string, range: TimeRange, limit = 10): Promise<TopPagesResponse> {
+  return kobbeFetch<TopPagesResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/top-pages`, { range, limit });
 }
 
-export async function getRevenue(
-  siteId: string,
-  range: TimeRange,
-): Promise<RevenueResponse> {
-  return kobbeFetch<RevenueResponse>(
-    `/api/agent/sites/${encodeURIComponent(siteId)}/revenue`,
-    { range },
-  );
+export async function getRevenue(siteId: string, range: TimeRange): Promise<RevenueResponse> {
+  return kobbeFetch<RevenueResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/revenue`, { range });
 }
 
 export function dashboardUrl(siteId: string, range?: TimeRange): string {
@@ -191,18 +161,10 @@ export function formatRevenue(revenue: KobbeRevenue): string {
   if (revenue.orders <= 0 || revenue.amount <= 0) {
     return "No revenue";
   }
-  return formatRevenueAmount(
-    revenue.amount,
-    revenue.currency,
-    revenue.multipleCurrencies,
-  );
+  return formatRevenueAmount(revenue.amount, revenue.currency, revenue.multipleCurrencies);
 }
 
-export function formatRevenueAmount(
-  amount: number,
-  currency: string | null,
-  multipleCurrencies = false,
-): string {
+export function formatRevenueAmount(amount: number, currency: string | null, multipleCurrencies = false): string {
   if (amount <= 0) {
     return "US$0.00";
   }

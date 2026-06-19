@@ -12,5 +12,5 @@
     "target": "ES2023",
     "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

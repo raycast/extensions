@@ -14,25 +14,12 @@ export default function SearchSites() {
       navigationTitle="Search Kobbe Sites"
       searchBarPlaceholder="Search by site or domain..."
     >
-      {sites.error ? (
-        <List.EmptyView
-          title="Could not load Kobbe sites"
-          description={sites.error.message}
-        />
-      ) : null}
+      {sites.error ? <List.EmptyView title="Could not load Kobbe sites" description={sites.error.message} /> : null}
       {sites.data?.length === 0 ? (
-        <List.EmptyView
-          title="No sites found"
-          description="Create a site in Kobbe first, then come back to Raycast."
-        />
+        <List.EmptyView title="No sites found" description="Create a site in Kobbe first, then come back to Raycast." />
       ) : null}
       {sites.data?.map((site) => (
-        <SiteListItem
-          key={site.id}
-          site={site}
-          range={range}
-          onRefresh={sites.revalidate}
-        />
+        <SiteListItem key={site.id} site={site} range={range} onRefresh={sites.revalidate} />
       ))}
     </List>
   );

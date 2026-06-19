@@ -12,11 +12,7 @@ export default function Revenue() {
       searchBarPlaceholder="Choose a site..."
       renderActions={(site, revalidate) => (
         <ActionPanel>
-          <Action.Push
-            title="View Revenue"
-            icon={Icon.Coins}
-            target={<RevenueDetail site={site} range={range} />}
-          />
+          <Action.Push title="View Revenue" icon={Icon.Coins} target={<RevenueDetail site={site} range={range} />} />
           <Action
             title="Refresh Sites"
             icon={Icon.ArrowClockwise}
