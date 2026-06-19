@@ -3,7 +3,7 @@ export function getDownloadQuery(searchText?: string, limit = 100) {
     ? searchText
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(current_path LIKE "%${term}%" OR tab_url LIKE "%${term}%")`)
+        .map((term) => `(current_path LIKE '%${term}%' ESCAPE '\\' OR tab_url LIKE '%${term}%' ESCAPE '\\')`)
         .join(" AND ")
     : undefined;
 
