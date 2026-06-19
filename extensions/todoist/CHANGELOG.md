@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Guard against empty sync response arrays] - {PR_MERGE_DATE}
+
+- Prevent cache corruption when the Todoist Sync API returns an empty array for projects, items, labels, filters, or notes during incremental sync mutations.
+
 ## [Keep recurrence when rescheduling] - 2026-06-19
 
 - **Recurring tasks keep their repeat rule** when you change the due date from task actions or the menu bar (including shortcuts like Today, Tomorrow, Next Week, and Next Weekend).
