@@ -17,6 +17,7 @@ brew install --cask duongductrong/snapzy/snapzy
 | Capture Fullscreen | Take a fullscreen screenshot |
 | Capture Area | Select an area to screenshot |
 | Capture Application | Capture an application window |
+| Capture Active Window | Instantly capture the focused window, no selection step |
 | Capture Area and Annotate | Capture an area and open annotation tools |
 | Scrolling Capture | Start a scrolling screenshot |
 | Capture Text (OCR) | Extract text from a screen region |

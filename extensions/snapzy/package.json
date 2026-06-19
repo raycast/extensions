@@ -53,6 +53,20 @@
       ]
     },
     {
+      "name": "capture-active-window",
+      "title": "Capture Active Window",
+      "subtitle": "Snapzy",
+      "description": "Instantly capture the focused window with Snapzy, no selection step.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "window",
+        "active",
+        "focused",
+        "capture"
+      ]
+    },
+    {
       "name": "capture-area-annotate",
       "title": "Capture Area and Annotate",
       "subtitle": "Snapzy",
