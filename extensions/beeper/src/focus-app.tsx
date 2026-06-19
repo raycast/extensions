@@ -1,6 +1,5 @@
 import { LaunchProps } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
-import { focusApp, createBeeperOAuth } from "./api";
+import { focusApp, withBeeperAuth } from "./api";
 
 type FocusAppArguments = {
   chatID?: string;
@@ -13,4 +12,5 @@ async function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArgument
   await focusApp(props.arguments ?? {});
 }
 
-export default withAccessToken(createBeeperOAuth())(FocusAppCommand);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default withBeeperAuth(FocusAppCommand as any);

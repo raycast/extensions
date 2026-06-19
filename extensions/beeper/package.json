@@ -10,7 +10,8 @@
   "contributors": [
     "pernielsentikaer",
     "clins1994",
-    "gareth_price"
+    "gareth_price",
+    "shubhamj010"
   ],
   "license": "MIT",
   "platforms": [
@@ -87,6 +88,14 @@
       "label": "Yes, Show mock data",
       "description": "Show sample data instead of connecting to Beeper. Useful for taking screenshots or demos.",
       "default": false
+    },
+    {
+      "name": "manualToken",
+      "type": "password",
+      "required": false,
+      "title": "Manual Access Token",
+      "description": "Optional: Paste a token created in Beeper Desktop → Settings → Integrations → Approved connections. If set, the OAuth flow is completely bypassed and this token is used directly as Bearer.",
+      "default": ""
     }
   ],
   "dependencies": {

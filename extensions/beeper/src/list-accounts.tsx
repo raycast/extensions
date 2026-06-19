@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { createBeeperOAuth, listAccounts } from "./api";
+import { useCachedPromise } from "@raycast/utils";
+import { listAccounts, withBeeperAuth } from "./api";
 import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { BeeperAccount } from "./utils/types";
 import { getAccountServiceInfoList } from "./utils/account-service-cache";
@@ -91,4 +91,4 @@ function ListAccountsCommand() {
   );
 }
 
-export default withAccessToken(createBeeperOAuth())(ListAccountsCommand);
+export default withBeeperAuth(ListAccountsCommand);

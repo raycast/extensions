@@ -1,5 +1,6 @@
 import BeeperDesktop from "@beeper/desktop-api";
 import { closeMainWindow, getPreferenceValues, LocalStorage, OAuth, showHUD } from "@raycast/api";
+import { ComponentType } from "react";
 import {
   MOCK_ACCOUNTS,
   MOCK_CHATS,
@@ -8,7 +9,7 @@ import {
   mockChatToBeeperChat,
   mockMessageToBeeperMessage,
 } from "./utils/mock-data";
-import { OAuthService, usePromise, getAccessToken } from "@raycast/utils";
+import { OAuthService, usePromise, getAccessToken, withAccessToken } from "@raycast/utils";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,6 +22,13 @@ export const TOKEN_STORAGE_KEY = "beeper-oauth-token";
 const getPreferences = () => getPreferenceValues<Preferences>();
 
 const useMockData = () => getPreferences().useMockData === true;
+
+// === Manual Token Support (preferred when user pastes a token from Beeper Desktop) ===
+const getManualToken = (): string | undefined => {
+  const prefs = getPreferences();
+  const token = typeof prefs.manualToken === "string" ? prefs.manualToken.trim() : "";
+  return token.length > 0 ? token : undefined;
+};
 
 const createOAuthClient = () =>
   new OAuth.PKCEClient({
@@ -55,37 +63,74 @@ export const getRaycastFocusLink = (
 export function createBeeperOAuth() {
   const baseURL = getBaseURL();
 
-  return new OAuthService({
+  const clientId = "raycast-beeper-extension";
+
+  const service = new OAuthService({
     client: createOAuthClient(),
-    clientId: "raycast-beeper-extension",
+    clientId,
     scope: "read write",
     authorizeUrl: `${baseURL}/oauth/authorize`,
     tokenUrl: `${baseURL}/oauth/token`,
     refreshTokenUrl: `${baseURL}/oauth/token`,
     bodyEncoding: "url-encoded",
+    // This is the redirect_uri value that appeared in the very first failing traces
+    extraParameters: {
+      redirect_uri: "https://raycast.com/redirect?packageName=Extension",
+    },
     onAuthorize: async ({ token }) => {
-      // Reset client when new token is obtained
       clientInstance = null;
       lastAccessToken = token;
       await LocalStorage.setItem(TOKEN_STORAGE_KEY, token);
     },
   });
+
+  return service;
 }
+
+/**
+ * Smart auth wrapper.
+ * - If the user has set a Manual Access Token in preferences → completely bypasses OAuth.
+ * - Otherwise → uses the normal OAuth flow (createBeeperOAuth).
+ *
+ * Usage in command files (recommended):
+ *   export default withBeeperAuth(MyCommand);
+ */
+export function withBeeperAuth<T extends object>(Component: ComponentType<T>) {
+  const manualToken = getManualToken();
+
+  if (manualToken) {
+    return Component;
+  }
+
+  return withAccessToken(createBeeperOAuth())(Component);
+}
+
+export const isUsingManualToken = (): boolean => !!getManualToken();
 
 export function getBeeperDesktop(): BeeperDesktop {
   const baseURL = getBaseURL();
-  const { token: accessToken } = getAccessToken();
+  const manualToken = getManualToken();
 
-  if (!clientInstance || lastBaseURL !== baseURL || lastAccessToken !== accessToken) {
+  let oauthToken: string | undefined = undefined;
+  if (!manualToken) {
+    try {
+      oauthToken = getAccessToken().token;
+    } catch {
+      // No OAuth context available (manual token mode or not yet authorized)
+    }
+  }
+  const effectiveToken = manualToken || oauthToken;
+
+  if (!clientInstance || lastBaseURL !== baseURL || lastAccessToken !== (effectiveToken ?? null)) {
     clientInstance = new BeeperDesktop({
-      accessToken,
+      accessToken: effectiveToken,
       baseURL: baseURL,
       logLevel: "info",
       timeout: 10000,
       maxRetries: 2,
     });
     lastBaseURL = baseURL;
-    lastAccessToken = accessToken;
+    lastAccessToken = effectiveToken ?? null;
   }
 
   return clientInstance;
@@ -96,6 +141,8 @@ export function useBeeperDesktop<T>(fn: (client: BeeperDesktop) => Promise<T>) {
 }
 
 export async function checkBeeperConnection(): Promise<{ connected: boolean; error?: string }> {
+  const manualToken = getManualToken();
+
   try {
     const client = getBeeperDesktop();
     await client.accounts.list();
@@ -114,7 +161,9 @@ export async function checkBeeperConnection(): Promise<{ connected: boolean; err
     if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
       return {
         connected: false,
-        error: "Authentication failed. Please run a command in Raycast to re-authorize.",
+        error: manualToken
+          ? "The manual token is invalid or expired. Please update it in the extension preferences."
+          : "Authentication failed. Please run a command in Raycast to re-authorize.",
       };
     }
 
@@ -254,7 +303,13 @@ const normalizeUnknownCursorResponse = <T>(result: unknown): CursorResponse<T> =
   };
 };
 
-const getAccessTokenValue = () => getAccessToken().token;
+const getAccessTokenValue = () => {
+  const manual = getManualToken();
+  if (manual) {
+    return manual;
+  }
+  return getAccessToken().token;
+};
 
 const getAuthHeaders = () => ({ Authorization: `Bearer ${getAccessTokenValue()}` });
 
