@@ -111,6 +111,7 @@ export async function getBangs(): Promise<Bang[]> {
     }
   }
   const res = await fetch(BANGS_URL);
+  if (!res.ok) throw new Error(`Failed to fetch bangs catalog (HTTP ${res.status}).`);
   const all = (await res.json()) as Record<string, unknown>[];
   const bangs: Bang[] = all
     .filter((b) => b?.t && b?.s)
