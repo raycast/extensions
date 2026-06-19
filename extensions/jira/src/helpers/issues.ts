@@ -315,7 +315,7 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
     }
     case CustomFieldSchema.team: {
       const typedValue = value as string;
-      return typedValue;
+      return { id: typedValue };
     }
     default:
       return null;
