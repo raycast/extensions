@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Threadlens">
+  <rect width="512" height="512" rx="115" fill="#f7f7f2"/>
+  <g transform="translate(12 110) scale(3.7)" fill="none" stroke="#0d0d0d" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M27 34L45 52L27 70" stroke-width="10"/>
+    <path d="M54 70H78" stroke-width="10"/>
+    <circle cx="78" cy="26" r="18" stroke-width="8"/>
+    <path d="M91 39L106 54" stroke-width="8"/>
+  </g>
+</svg>
