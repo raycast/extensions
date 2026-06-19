@@ -20,14 +20,6 @@ const STORAGE_KEY = "mailto-form-values";
 /** Above this length some OS mail handlers truncate the link, so we warn. */
 const TRUNCATION_WARNING_LENGTH = 1800;
 
-interface MailtoPreferences {
-  rememberLastValues: boolean;
-  defaultCc?: string;
-  defaultBcc?: string;
-  signature?: string;
-  outlookHost: string;
-}
-
 interface MailtoFields {
   to: string;
   cc: string;
@@ -85,39 +77,43 @@ function encodeField(value: string): string {
   return encodeURIComponent(value.replace(/\r\n|\r|\n/g, "\r\n"));
 }
 
-/** Build the full mailto: URI from the raw form fields. */
-function buildMailto({ to, cc, bcc, subject, body }: MailtoFields): string {
+/**
+ * Encoded query params shared by every link format: cc, bcc, subject, body.
+ * `subjectKey` differs by target ("subject" for mailto/Outlook, "su" for Gmail).
+ * Each recipient field is encoded exactly once.
+ */
+function sharedParams({ cc, bcc, subject, body }: MailtoFields, subjectKey: "subject" | "su"): string[] {
   const params: string[] = [];
   const ccList = encodeRecipients(cc);
   const bccList = encodeRecipients(bcc);
   if (ccList) params.push(`cc=${ccList}`);
   if (bccList) params.push(`bcc=${bccList}`);
-  if (subject.trim()) params.push(`subject=${encodeField(subject)}`);
+  if (subject.trim()) params.push(`${subjectKey}=${encodeField(subject)}`);
   if (body.trim()) params.push(`body=${encodeField(body)}`);
+  return params;
+}
 
+/** Build the full mailto: URI from the raw form fields. */
+function buildMailto(fields: MailtoFields): string {
+  const params = sharedParams(fields, "subject");
   const query = params.length ? `?${params.join("&")}` : "";
-  return `mailto:${encodeRecipients(to)}${query}`;
+  return `mailto:${encodeRecipients(fields.to)}${query}`;
 }
 
 /** Build a Gmail web "compose" URL (uses `su` for the subject). */
-function buildGmailUrl({ to, cc, bcc, subject, body }: MailtoFields): string {
-  const params = ["view=cm", "fs=1"];
-  if (encodeRecipients(to)) params.push(`to=${encodeRecipients(to)}`);
-  if (encodeRecipients(cc)) params.push(`cc=${encodeRecipients(cc)}`);
-  if (encodeRecipients(bcc)) params.push(`bcc=${encodeRecipients(bcc)}`);
-  if (subject.trim()) params.push(`su=${encodeField(subject)}`);
-  if (body.trim()) params.push(`body=${encodeField(body)}`);
+function buildGmailUrl(fields: MailtoFields): string {
+  const to = encodeRecipients(fields.to);
+  const params: string[] = ["view=cm", "fs=1"];
+  if (to) params.push(`to=${to}`);
+  params.push(...sharedParams(fields, "su"));
   return `https://mail.google.com/mail/?${params.join("&")}`;
 }
 
 /** Build an Outlook web "deeplink/compose" URL for the configured host. */
-function buildOutlookUrl({ to, cc, bcc, subject, body }: MailtoFields, host: string): string {
-  const params: string[] = [];
-  if (encodeRecipients(to)) params.push(`to=${encodeRecipients(to)}`);
-  if (encodeRecipients(cc)) params.push(`cc=${encodeRecipients(cc)}`);
-  if (encodeRecipients(bcc)) params.push(`bcc=${encodeRecipients(bcc)}`);
-  if (subject.trim()) params.push(`subject=${encodeField(subject)}`);
-  if (body.trim()) params.push(`body=${encodeField(body)}`);
+function buildOutlookUrl(fields: MailtoFields, host: string): string {
+  const to = encodeRecipients(fields.to);
+  const params: string[] = to ? [`to=${to}`] : [];
+  params.push(...sharedParams(fields, "subject"));
   const query = params.length ? `?${params.join("&")}` : "";
   return `https://${host}/mail/deeplink/compose${query}`;
 }
@@ -147,7 +143,7 @@ function initialBody(signature: string): string {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<MailtoPreferences>();
+  const preferences = getPreferenceValues<Preferences.GenerateMailto>();
   // Allow multi-line signatures via a literal "\n" in the single-line preference field.
   const signature = (preferences.signature ?? "").replace(/\\n/g, "\n");
 
