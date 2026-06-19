@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Matrix</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+        user-select: none;
+      }
+
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="matrix"></canvas>
+    <script src="./audio.js"></script>
+    <script>
+      const canvas = document.getElementById("matrix");
+      const context = canvas.getContext("2d", { alpha: true });
+      const queryParams = new URLSearchParams(window.location.search);
+      const audioEnabled = queryParams.get("audio") !== "0";
+      const densityConfigs = {
+        sparse: {
+          fontSize: 22,
+          minStreamLength: 5,
+          maxStreamLength: 34,
+          minSpeed: 0.24,
+          maxSpeed: 1.2,
+          fastStreamChance: 0.04,
+          wakeDelayMax: 120,
+        },
+        normal: {
+          fontSize: 18,
+          minStreamLength: 8,
+          maxStreamLength: 56,
+          minSpeed: 0.32,
+          maxSpeed: 1.68,
+          fastStreamChance: 0.08,
+          wakeDelayMax: 85,
+        },
+        dense: {
+          fontSize: 15,
+          minStreamLength: 10,
+          maxStreamLength: 68,
+          minSpeed: 0.38,
+          maxSpeed: 1.9,
+          fastStreamChance: 0.11,
+          wakeDelayMax: 64,
+        },
+        overload: {
+          fontSize: 12,
+          minStreamLength: 14,
+          maxStreamLength: 88,
+          minSpeed: 0.45,
+          maxSpeed: 2.35,
+          fastStreamChance: 0.15,
+          wakeDelayMax: 44,
+        },
+      };
+      const densityConfig =
+        densityConfigs[queryParams.get("density")] ?? densityConfigs.normal;
+
+      const fontSize = densityConfig.fontSize;
+      const frameIntervalMs = 33;
+      const minStreamLength = densityConfig.minStreamLength;
+      const maxStreamLength = densityConfig.maxStreamLength;
+      const minSpeed = densityConfig.minSpeed;
+      const maxSpeed = densityConfig.maxSpeed;
+      const fastStreamChance = densityConfig.fastStreamChance;
+      const wakeDelayMax = densityConfig.wakeDelayMax;
+      const enterDurationMs = 1200;
+      const exitDurationMs = 4600;
+
+      let streams = [];
+      let columnCount = 0;
+      let rowCount = 0;
+      let width = 0;
+      let height = 0;
+      let sessionStartedAt = performance.now();
+      let enteredAt;
+      let lastFrameAt = 0;
+      let exitState;
+      let exitComplete = false;
+      let exitPromise;
+      let resolveExitPromise;
+
+      function range(start, end) {
+        return Array.from({ length: end - start + 1 }, (_, index) =>
+          String.fromCharCode(start + index),
+        );
+      }
+
+      const halfWidthKana = range(0xff66, 0xff9d);
+      const katakana = range(0x30a1, 0x30fa);
+      const hiragana = range(0x3041, 0x3096);
+      const numbers = "0123456789".split("");
+      const ascii =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
+      const symbols = "@#$%&*+-=<>?/\\|[]{}:;".split("");
+
+      function randomBetween(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function randomInteger(min, max) {
+        return Math.floor(randomBetween(min, max + 1));
+      }
+
+      function choose(items) {
+        return items[Math.floor(Math.random() * items.length)];
+      }
+
+      function randomGlyph() {
+        const roll = Math.random();
+
+        if (roll < 0.44) {
+          return choose(halfWidthKana);
+        }
+
+        if (roll < 0.69) {
+          return choose(katakana);
+        }
+
+        if (roll < 0.79) {
+          return choose(hiragana);
+        }
+
+        if (roll < 0.9) {
+          return choose(numbers);
+        }
+
+        if (roll < 0.97) {
+          return choose(ascii);
+        }
+
+        return choose(symbols);
+      }
+
+      function makeStream(column, initial = false) {
+        const length = randomInteger(
+          minStreamLength,
+          Math.min(maxStreamLength, Math.max(minStreamLength, rowCount - 2)),
+        );
+        const fast = Math.random() < fastStreamChance;
+
+        return {
+          column,
+          glyphs: new Map(),
+          head: initial
+            ? randomInteger(-rowCount, rowCount)
+            : randomInteger(-rowCount - length, -length),
+          length,
+          speed: randomBetween(minSpeed, maxSpeed) * (fast ? 1.8 : 1),
+          mutationChance: randomBetween(0.018, 0.09),
+          brightness: randomBetween(0.62, 1),
+          bold: Math.random() < 0.54,
+          wakeDelay: randomInteger(0, wakeDelayMax),
+        };
+      }
+
+      function resetStream(stream) {
+        const next = makeStream(stream.column);
+        Object.assign(stream, next);
+      }
+
+      window.beginMatrixExit = function beginMatrixExit() {
+        if (exitPromise) {
+          return exitPromise;
+        }
+
+        exitState = {
+          startedAt: performance.now(),
+        };
+
+        if (audioEnabled) {
+          window.matrixAudio?.playExitSound?.(
+            exitState.startedAt - sessionStartedAt,
+          );
+        }
+
+        exitPromise = new Promise((resolve) => {
+          resolveExitPromise = resolve;
+        });
+
+        return exitPromise;
+      };
+
+      function resize() {
+        const pixelRatio = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        columnCount = Math.ceil(width / fontSize);
+        rowCount = Math.ceil(height / fontSize);
+
+        canvas.width = Math.floor(width * pixelRatio);
+        canvas.height = Math.floor(height * pixelRatio);
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        context.clearRect(0, 0, width, height);
+        context.textAlign = "center";
+        context.textBaseline = "top";
+
+        streams = Array.from({ length: columnCount }, (_, column) =>
+          makeStream(column, true),
+        );
+
+        enteredAt = performance.now();
+        canvas.style.opacity = "0";
+      }
+
+      function getGlyph(stream, row, step) {
+        if (
+          !stream.glyphs.has(row) ||
+          Math.random() < stream.mutationChance * step
+        ) {
+          stream.glyphs.set(row, randomGlyph());
+        }
+
+        return stream.glyphs.get(row);
+      }
+
+      function drawGlyph(glyph, x, y, depth, stream) {
+        const tailPosition = depth / stream.length;
+        const tailPower = Math.pow(1 - tailPosition, 1.85) * stream.brightness;
+
+        if (depth === 0) {
+          context.font = `700 ${fontSize}px Menlo, Monaco, Consolas, monospace`;
+          context.shadowBlur = 12;
+          context.shadowColor = "rgba(160, 255, 180, 0.85)";
+          context.fillStyle = "rgba(236, 255, 240, 0.96)";
+          context.fillText(glyph, x, y);
+          return;
+        }
+
+        if (depth < 4) {
+          context.font = `700 ${fontSize}px Menlo, Monaco, Consolas, monospace`;
+          context.shadowBlur = 7;
+          context.shadowColor = `rgba(0, 255, 80, ${0.38 * tailPower})`;
+          context.fillStyle = `rgba(160, 255, 178, ${Math.min(0.88, 0.64 * tailPower + 0.18)})`;
+          context.fillText(glyph, x, y);
+          return;
+        }
+
+        context.font = `${stream.bold ? 700 : 400} ${fontSize}px Menlo, Monaco, Consolas, monospace`;
+        context.shadowBlur = 0;
+        context.fillStyle = `rgba(0, 255, 65, ${Math.min(0.78, tailPower * 0.72)})`;
+        context.fillText(glyph, x, y);
+      }
+
+      function draw(timestamp) {
+        if (exitComplete) {
+          return;
+        }
+
+        requestAnimationFrame(draw);
+
+        if (timestamp - lastFrameAt < frameIntervalMs) {
+          return;
+        }
+
+        const step = Math.min(
+          2.5,
+          Math.max(0.5, (timestamp - lastFrameAt) / frameIntervalMs || 1),
+        );
+        lastFrameAt = timestamp;
+        const enterProgress = enteredAt
+          ? Math.min(1, (timestamp - enteredAt) / enterDurationMs)
+          : 1;
+        const exitProgress = exitState
+          ? Math.min(1, (timestamp - exitState.startedAt) / exitDurationMs)
+          : 0;
+        const direction = exitState ? -1 : 1;
+        const exitSpeedMultiplier = exitState ? 1.35 + exitProgress * 1.85 : 1;
+
+        context.globalCompositeOperation = "source-over";
+        context.clearRect(0, 0, width, height);
+        canvas.style.opacity = String(enterProgress * (1 - exitProgress));
+
+        for (const stream of streams) {
+          if (!exitState && stream.wakeDelay > 0) {
+            stream.wakeDelay -= step;
+            continue;
+          }
+
+          stream.head += stream.speed * step * direction * exitSpeedMultiplier;
+
+          const headRow = Math.floor(stream.head);
+          const startRow = exitState
+            ? Math.max(0, headRow)
+            : Math.max(0, headRow - stream.length);
+          const endRow = exitState
+            ? Math.min(rowCount - 1, headRow + stream.length)
+            : Math.min(rowCount - 1, headRow);
+          const x = stream.column * fontSize + fontSize / 2;
+
+          for (let row = startRow; row <= endRow; row += 1) {
+            const depth = exitState ? row - headRow : headRow - row;
+            const glyph = getGlyph(stream, row, step);
+            drawGlyph(glyph, x, row * fontSize, depth, stream);
+          }
+
+          if (!exitState && stream.head - stream.length > rowCount + 4) {
+            resetStream(stream);
+          }
+        }
+
+        context.shadowBlur = 0;
+
+        if (exitProgress >= 1) {
+          exitComplete = true;
+          context.clearRect(0, 0, width, height);
+          canvas.style.opacity = "0";
+          resolveExitPromise?.();
+        }
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      window.matrixAudio?.playEnterSound?.(audioEnabled);
+      requestAnimationFrame(draw);
+    </script>
+  </body>
+</html>
