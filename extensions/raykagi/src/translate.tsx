@@ -1,24 +1,7 @@
 import { useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  Icon,
-  LaunchProps,
-  List,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, LaunchProps, List, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { translateQuicklink, translateUrl } from "./kagi";
-
-interface Prefs {
-  translateFrom: string;
-  translateTo: string;
-  translateQuality: string;
-  translateStyle: string;
-  translateFormality: string;
-}
 
 interface Pair {
   from: string;
@@ -61,7 +44,7 @@ function langName(code?: string): string {
   return LANGS.find((l) => l[0] === code)?.[1] ?? code;
 }
 
-function prefsToOpts(p: Prefs): Pair {
+function prefsToOpts(p: Preferences.Translate): Pair {
   return {
     from: p.translateFrom || "auto",
     to: p.translateTo || "en",
@@ -77,7 +60,7 @@ function pairLabel(p: Pair): string {
 }
 
 export default function Command(props: LaunchProps<{ arguments: { text?: string } }>) {
-  const defaults = prefsToOpts(getPreferenceValues<Prefs>());
+  const defaults = prefsToOpts(getPreferenceValues<Preferences.Translate>());
   const [text, setText] = useState(props.arguments?.text || props.fallbackText || "");
   const { value: pairs = [], setValue: setPairs, isLoading } = useLocalStorage<Pair[]>("translate-pairs", []);
   const t = text.trim();
@@ -193,11 +176,7 @@ function PairForm({ defaults, onSave }: { defaults: Pair; onSave: (p: Pair) => v
               pop();
             }}
           />
-          <Action.OpenInBrowser
-            title="Preview Translation"
-            icon={Icon.Globe}
-            url={translateUrl("hello", pair)}
-          />
+          <Action.OpenInBrowser title="Preview Translation" icon={Icon.Globe} url={translateUrl("hello", pair)} />
         </ActionPanel>
       }
     >

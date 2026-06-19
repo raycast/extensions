@@ -69,9 +69,7 @@ export default function Command(props: LaunchProps) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           url={bangSearchUrl("research", q)}
         />
-        {tokenSet && (
-          <Action.OpenInBrowser title="Open in Kagi (Browser)" icon={Icon.Globe} url={searchPageUrl(q)} />
-        )}
+        {tokenSet && <Action.OpenInBrowser title="Open in Kagi (Browser)" icon={Icon.Globe} url={searchPageUrl(q)} />}
         <Action.CreateQuicklink
           title="Create Kagi Search Quicklink"
           icon={Icon.Link}
@@ -104,9 +102,7 @@ export default function Command(props: LaunchProps) {
       {!submitted ? (
         // Suggestion mode (free autosuggest as you type)
         queries.length ? (
-          <List.Section
-            title={tokenSet ? "↩ Search · ⌘⇧R Research" : "No API token · ↩ opens browser · ⌘⇧R Research"}
-          >
+          <List.Section title={tokenSet ? "↩ Search · ⌘⇧R Research" : "No API token · ↩ opens browser · ⌘⇧R Research"}>
             {queries.map((q) => (
               <List.Item key={q} icon={Icon.MagnifyingGlass} title={q} actions={suggestionActions(q)} />
             ))}

@@ -28,11 +28,7 @@ export default function Command() {
           quicklink={{ name: `Kagi !${b.t} — ${b.s}`, link: bangQuicklink(b.t) }}
         />
         <Action.OpenInBrowser title={`Open !${b.t} in Kagi`} icon={Icon.Globe} url={bangSearchUrl(b.t, "")} />
-        <Action.CopyToClipboard
-          title="Copy Shortcut URL"
-          icon={Icon.Clipboard}
-          content={bangQuicklink(b.t)}
-        />
+        <Action.CopyToClipboard title="Copy Shortcut URL" icon={Icon.Clipboard} content={bangQuicklink(b.t)} />
       </ActionPanel>
     );
   }
@@ -57,10 +53,7 @@ export default function Command() {
               actions={actions({ t: f, s: "Custom" })}
             />
           )}
-          <List.Section
-            title="Bangs"
-            subtitle={bangs.length ? `${matches.length} of ${bangs.length}` : undefined}
-          >
+          <List.Section title="Bangs" subtitle={bangs.length ? `${matches.length} of ${bangs.length}` : undefined}>
             {matches.map((b) => (
               <List.Item
                 key={`${b.t}-${b.s}`}

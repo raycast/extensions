@@ -10,15 +10,14 @@ const KAGI = "https://kagi.com";
 // ---- API token (the v1 Bearer token from kagi.com/api/keys; Search command only) ---
 
 function token(): string {
-  return (getPreferenceValues<{ apiToken?: string }>().apiToken ?? "").trim();
+  return (getPreferenceValues<Preferences>().apiToken ?? "").trim();
 }
 
 export function hasToken(): boolean {
   return token().length > 0;
 }
 
-const NO_TOKEN =
-  "No Kagi API token set. Add one in this command's preferences (generate at kagi.com/api/keys).";
+const NO_TOKEN = "No Kagi API token set. Add one in this command's preferences (generate at kagi.com/api/keys).";
 
 async function kagiJson(url: string, init: RequestInit): Promise<{ data?: unknown }> {
   const res = await fetch(url, init);
@@ -33,9 +32,7 @@ async function kagiJson(url: string, init: RequestInit): Promise<{ data?: unknow
   const errs = json.error ?? json.errors;
   if (errs) {
     const arr = Array.isArray(errs) ? errs : [errs];
-    const msg = arr
-      .map((e) => (typeof e === "string" ? e : (e?.msg ?? e?.message ?? JSON.stringify(e))))
-      .join("; ");
+    const msg = arr.map((e) => (typeof e === "string" ? e : (e?.msg ?? e?.message ?? JSON.stringify(e)))).join("; ");
     throw new Error(msg || `Kagi error (HTTP ${res.status}).`);
   }
   if (!res.ok) throw new Error(`Kagi error (HTTP ${res.status}).`);

@@ -2,15 +2,10 @@ import { useState } from "react";
 import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { SummaryOpts, summarizeQuicklink, summarizeUrl } from "./kagi";
 
-interface Prefs {
-  summaryType: string;
-  summaryLanguage: string;
-}
-
 const SUMMARIZER_PAGE = "https://kagi.com/summarizer/";
 
 export default function Command(props: LaunchProps<{ arguments: { url?: string } }>) {
-  const p = getPreferenceValues<Prefs>();
+  const p = getPreferenceValues<Preferences.Summarize>();
   const opts: SummaryOpts = { summary: p.summaryType, target_language: p.summaryLanguage };
 
   const [text, setText] = useState(props.arguments?.url || props.fallbackText || "");
@@ -41,9 +36,7 @@ export default function Command(props: LaunchProps<{ arguments: { url?: string }
               icon={Icon.Globe}
               url={pageUrl}
             />
-            {valid && (
-              <Action.CopyToClipboard title="Copy Summary URL" icon={Icon.Clipboard} content={pageUrl} />
-            )}
+            {valid && <Action.CopyToClipboard title="Copy Summary URL" icon={Icon.Clipboard} content={pageUrl} />}
             <Action.CreateQuicklink
               title="Bind as Quicklink (Alias / Hotkey)"
               icon={Icon.Link}
