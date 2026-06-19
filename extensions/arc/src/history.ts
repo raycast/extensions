@@ -87,7 +87,7 @@ export function useHistorySearch(
   searchText: string,
   limit?: number,
 ): { data: HistoryEntry[] | undefined; isLoading: boolean; permissionView: JSX.Element | undefined } {
-  const escapedSearchText = searchText.replace(/'/g, "''").replace(/[%_]/g, "\\$&");
+  const escapedSearchText = searchText.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
   let permissionView: JSX.Element | undefined;
   let isLoading = false;
