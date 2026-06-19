@@ -101,6 +101,7 @@ export default function SetupVoiceDefaults() {
     await Promise.all([clearMimoSettingsOverrides(), clearQuickReadVoiceOverride(), clearSpeedOverride()]);
     const fresh = await getMimoSettings();
     setSettings(fresh);
+    setSelectedModel(fresh.model);
     setHasOverrides(false);
     await showToast({ style: Toast.Style.Success, title: "Voice defaults reset" });
   }, []);
