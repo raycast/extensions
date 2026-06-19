@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Jellypod MCP Server] - {PR_MERGE_DATE}
+## [Add Jellypod MCP Server] - 2026-06-19
 
 Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
 
