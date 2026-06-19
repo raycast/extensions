@@ -1,6 +1,6 @@
 # try Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-19
 
 - Clone now runs asynchronously with a live progress toast, so the UI no longer freezes during the clone
 - Disabled the Clone action while a clone is in progress to prevent accidental duplicate clones
