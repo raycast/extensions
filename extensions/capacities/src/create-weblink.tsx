@@ -2,6 +2,7 @@ import { ActionPanel, Action, Form, Icon, closeMainWindow, Clipboard, showToast,
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { useActiveTab } from "./helpers/useActiveTab";
+import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
 import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveWeblinkBody {
@@ -10,6 +11,8 @@ interface SaveWeblinkBody {
   mdText?: string;
   tags?: string;
 }
+
+const SPACE_STORAGE_KEY = "create-weblink-space-id";
 
 function isValidURL(url: string) {
   try {
@@ -86,6 +89,25 @@ export default function Command() {
   });
 
   const activeTab = useActiveTab();
+  const spaces = store?.spaces ?? [];
+  const spaceIds = spaces.map((space) => space.id).join(",");
+
+  useEffect(() => {
+    if (!spaces.length || itemProps.spaceId.value) {
+      return;
+    }
+    let cancelled = false;
+
+    getInitialSpaceId(SPACE_STORAGE_KEY, spaces).then((spaceId) => {
+      if (!cancelled && spaceId) {
+        setValue("spaceId", spaceId);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [spaceIds, itemProps.spaceId.value, setValue]);
 
   useEffect(() => {
     async function checkClipboard() {
@@ -121,8 +143,10 @@ export default function Command() {
           <Form.Dropdown
             title="Space"
             {...itemProps.spaceId}
-            storeValue
-            onChange={(value) => setValue("spaceId", value)}
+            onChange={(value) => {
+              setValue("spaceId", value);
+              setStoredSpaceId(SPACE_STORAGE_KEY, value);
+            }}
             ref={spacesDropdown}
           >
             {store.spaces &&

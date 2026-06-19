@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# Conductor
+.context/
+
+# api.json is the OpenAPI spec kept as a local development reference only.
+# It is already excluded from the published npm package via .npmignore.
+# Uncomment the line below to also exclude it from git if the file grows too large
+# or starts creating noise in PRs.
+# api.json

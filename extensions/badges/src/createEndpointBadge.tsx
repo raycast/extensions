@@ -27,7 +27,7 @@ export default function Command({
   const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$"));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();
 
-  const badgeUrl = new URL(`https://img.shields.io/badge/endpoint`);
+  const badgeUrl = new URL(`https://img.shields.io/endpoint`);
   badgeUrl.search = query;
 
   const parameterFields = parameterIds.map((id) => fields[id]);

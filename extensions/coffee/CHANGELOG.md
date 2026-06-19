@@ -1,5 +1,42 @@
 # Coffee Changelog
 
+## [Fix] - 2026-06-05
+
+- Fixed a typo in the "Caffeinate While" command description ("an certain app" → "a certain app").
+
+## [Fix] - 2026-06-02
+
+- Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a Toggle shortcut for pausing and resuming caffeination schedules.
+
+## [Fix] - 2026-03-24
+
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
+
+## [Fix] - 2026-03-22
+
+- Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
+
+## [Fix] - 2026-03-19
+
+- Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
+
+## [Fix] - 2026-03-17
+
+- Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
+
+## [Fix] - 2026-01-27
+
+- Fixed memory leak caused by zombie processes when starting caffeination.
+- Fixed argument parsing bug in `generateArgs()`.
+- Consolidated duplicate shell commands in menu bar to reduce process spawning.
+- Added proper cleanup to prevent state updates on unmounted components.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Enhancement] - 2025-03-01

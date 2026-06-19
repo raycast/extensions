@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import crypto from "crypto";
+import { useEffect, useRef, useState } from "react";
 
 // Raycast imports
 import {
@@ -17,71 +16,78 @@ import {
 import { useFetch } from "@raycast/utils";
 
 // types
-import { PassageResponse, Preferences, Passage } from "./types";
+import { PassageResponse, Passage } from "./types";
+
+import { reorderActions } from "./helpers";
 
 // get user Prefs
-const { ESVApiToken } = getPreferenceValues<Preferences>();
+const { ESVApiToken, searchMode, defaultAction } = getPreferenceValues<Preferences.PassageLookup>();
 
 // dropdown styling options
 import { stylingOptions } from "./stylingOptions";
 
 const cache = new Cache({ namespace: "bible-verses", capacity: 1000000 });
 
-export default function EsvSearch() {
+function readCachedPassages(): Passage[] {
   const cached = cache.get("bible-verses");
-  const prevItems = cached ? JSON.parse(cached) : [];
+  return cached ? JSON.parse(cached) : [];
+}
+
+export default function EsvSearch() {
+  const [prevItems, setPrevItems] = useState<Passage[]>(readCachedPassages);
   const [query, setQuery] = useState("");
+  const [fetchQuery, setFetchQuery] = useState("");
+
+  useEffect(() => {
+    if (searchMode !== "live") return;
+    const timer = setTimeout(() => setFetchQuery(query), 500);
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const [styling, setStyling] = useState(stylingOptions.default.value);
+
+  const handleFetchError = (error: Error) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: `${error} Check your API Key`,
+      message: `Your ESV API token is invalid or you have no internet connection.`,
+      primaryAction: {
+        title: "Change API Key",
+        onAction: () => openExtensionPreferences(),
+      },
+    });
+  };
+
   const { isLoading, data: passages } = useFetch<PassageResponse>(
-    `https://api.esv.org/v3/passage/text/?q=${query}${styling}`,
+    `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(fetchQuery)}${styling}`,
     {
       method: "GET",
       headers: {
         Authorization: `${ESVApiToken}`,
       },
       keepPreviousData: true,
-      onError: (error: Error) => {
-        if (query.length !== 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `${error} Check your API Key`,
-            message: `Your ESV API token is invalid or you have no internet connection.`,
-            primaryAction: {
-              title: "Change API Key",
-              onAction: () => openExtensionPreferences(),
-            },
-          });
-        }
-      },
-    }
+      execute: fetchQuery.length > 0,
+      onError: handleFetchError,
+    },
   );
   const { data: plainPassages } = useFetch<PassageResponse>(
-    `https://api.esv.org/v3/passage/text/?q=${query}${stylingOptions.none.value}`,
+    `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(fetchQuery)}${stylingOptions.none.value}`,
     {
       method: "GET",
       headers: {
         Authorization: `${ESVApiToken}`,
       },
-      onError: (error: Error) => {
-        if (query.length !== 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `${error} Check your API Key`,
-            message: `Your ESV API token is invalid or you have no internet connection.`,
-            primaryAction: {
-              title: "Change API Key",
-              onAction: () => openExtensionPreferences(),
-            },
-          });
-        }
-      },
-    }
+      execute: fetchQuery.length > 0,
+      onError: handleFetchError,
+    },
   );
   const [searchResult, setSearchResult] = useState<Passage | undefined>(undefined);
+  const lastCanonicalRef = useRef<string>("");
 
   const clearCache = () => {
     cache.clear();
     setSearchResult(undefined);
+    setPrevItems([]);
     cache.set("bible-verses", JSON.stringify([]));
     showToast({
       style: Toast.Style.Success,
@@ -89,39 +95,97 @@ export default function EsvSearch() {
     });
   };
 
+  const buildPassageActions = (passage: Passage) => {
+    const actions = [
+      {
+        key: "copyStyled",
+        element: <Action.CopyToClipboard key="copyStyled" title="Copy Styled Text" content={passage.passage.styled} />,
+      },
+      {
+        key: "pasteStyled",
+        element: <Action.Paste key="pasteStyled" title="Paste Styled Text" content={passage.passage.styled} />,
+      },
+      {
+        key: "copyPlain",
+        element: (
+          <Action.CopyToClipboard
+            key="copyPlain"
+            title="Copy Plain Text"
+            content={passage.passage.plain}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+        ),
+      },
+      {
+        key: "pastePlain",
+        element: (
+          <Action.Paste
+            key="pastePlain"
+            title="Paste Plain Text"
+            content={passage.passage.plain}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+        ),
+      },
+      {
+        key: "copyRef",
+        element: (
+          <Action.CopyToClipboard
+            key="copyRef"
+            title="Copy Reference"
+            content={passage.ref}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+        ),
+      },
+    ];
+    return (
+      <ActionPanel>
+        {reorderActions(actions, defaultAction)}
+        <Action
+          title="Clear Previous Passages"
+          onAction={clearCache}
+          icon={Icon.Eraser}
+          shortcut={{ modifiers: ["opt"], key: "backspace" }}
+        />
+      </ActionPanel>
+    );
+  };
+
   useEffect(() => {
-    if (passages && plainPassages) {
-      const passageObject = {
-        id: crypto.randomUUID(),
-        ref: passages.canonical,
-        passage: {
-          styled: passages.passages
-            .map((p) => p)
-            .join("")
-            .trim(),
-          plain: plainPassages?.passages
-            .map((p) => p)
-            .join("")
-            .trim(),
-        },
-      };
-      setSearchResult(passageObject);
-      const resultExists = prevItems.some((item: Passage) => item.ref === passageObject.ref);
-      if (!resultExists && passages.passages.length !== 0) {
-        cache.set("bible-verses", JSON.stringify([passageObject, ...prevItems]));
-      }
+    if (!passages || !plainPassages) return;
+    if (passages.canonical === lastCanonicalRef.current) return;
+    lastCanonicalRef.current = passages.canonical;
+
+    const passageObject: Passage = {
+      id: passages.canonical,
+      ref: passages.canonical,
+      passage: {
+        styled: passages.passages.join("").trim(),
+        plain: plainPassages.passages.join("").trim(),
+      },
+    };
+    setSearchResult(passageObject);
+
+    if (passages.passages.length > 0) {
+      setPrevItems((prev) => {
+        if (prev.some((item) => item.ref === passageObject.ref)) return prev;
+        const updated = [passageObject, ...prev];
+        cache.set("bible-verses", JSON.stringify(updated));
+        return updated;
+      });
     }
   }, [passages, plainPassages]);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading && fetchQuery.length > 0}
       searchText={query}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Type one or more Bible references..."
-      isShowingDetail={prevItems.length > 0}
+      isShowingDetail={prevItems.length > 0 || (searchMode === "manual" && query.length > 0)}
       selectedItemId={searchResult?.id}
-      throttle={true}
+      throttle={searchMode === "live"}
       searchBarAccessory={
         <List.Dropdown tooltip="Select Styling" onChange={(style) => setStyling(style)} storeValue={true}>
           {Object.values(stylingOptions).map((style) => (
@@ -130,6 +194,20 @@ export default function EsvSearch() {
         </List.Dropdown>
       }
     >
+      {searchMode === "manual" && query.length > 0 && query !== fetchQuery && (
+        <List.Section title="Look Up">
+          <List.Item
+            title={`Look up: ${query}`}
+            icon={Icon.Book}
+            detail={<List.Item.Detail markdown={`Press Enter to look up **${query}**`} />}
+            actions={
+              <ActionPanel>
+                <Action title="Look Up Passage" icon={Icon.MagnifyingGlass} onAction={() => setFetchQuery(query)} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {!query && prevItems.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
@@ -142,35 +220,9 @@ export default function EsvSearch() {
           <List.Item
             title={searchResult.ref}
             icon={Icon.Book}
-            id="1"
+            id={searchResult.id}
             detail={<List.Item.Detail markdown={searchResult.passage.styled} />}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy Styled Text" content={searchResult.passage.styled} />
-                <Action.Paste title="Paste Styled Text" content={searchResult.passage.styled} />
-                <Action.CopyToClipboard
-                  title="Copy Plain Text"
-                  content={searchResult.passage.plain}
-                  shortcut={{ modifiers: ["shift"], key: "enter" }}
-                />
-                <Action.Paste
-                  title="Paste Plain Text"
-                  content={searchResult.passage.plain}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Reference"
-                  content={searchResult.ref}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-                <Action
-                  title="Clear Previous Passages"
-                  onAction={clearCache}
-                  icon={Icon.Eraser}
-                  shortcut={{ modifiers: ["opt"], key: "backspace" }}
-                />
-              </ActionPanel>
-            }
+            actions={buildPassageActions(searchResult)}
           />
         </List.Section>
       )}
@@ -196,33 +248,7 @@ export default function EsvSearch() {
               title={item.ref}
               icon={Icon.Book}
               detail={<List.Item.Detail markdown={item.passage.styled} />}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Styled Text" content={item.passage.styled} />
-                  <Action.Paste title="Paste Styled Text" content={item.passage.styled} />
-                  <Action.CopyToClipboard
-                    title="Copy Plain Text"
-                    content={item.passage.plain}
-                    shortcut={{ modifiers: ["shift"], key: "enter" }}
-                  />
-                  <Action.Paste
-                    title="Paste Plain Text"
-                    content={item.passage.plain}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Reference"
-                    content={item.ref}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                  <Action
-                    title="Clear Previous Passages"
-                    onAction={clearCache}
-                    icon={Icon.Eraser}
-                    shortcut={{ modifiers: ["opt"], key: "backspace" }}
-                  />
-                </ActionPanel>
-              }
+              actions={buildPassageActions(item)}
             />
           ))}
       </List.Section>

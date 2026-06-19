@@ -1,5 +1,25 @@
 # Google Chrome Changelog
 
+## [Bugfix] - 2026-05-28
+
+- Reset stale cached profile selections so history search does not show Chrome as missing.
+
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for account-synced bookmarks stored in `AccountBookmarks`
+
+## [Add History Open Action Shortcuts] - 2026-05-13
+
+- Add keyboard shortcuts for opening history items in the current or original profile.
+
+## [Fix Chrome History Search When Chrome Is Running] - 2026-05-07
+
+- Fix searching Chrome history while Chrome keeps the history database locked.
+
+## [Add Name Window Command] - 2026-03-04
+
+- Add Name Window command to name the currently active Google Chrome window.
+
 ## [Fixes] - 2026-01-05
 
 - Fix infinite rendering with depth bug in new tab `Action`

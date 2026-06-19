@@ -1,5 +1,9 @@
 # Migadu Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Make Identities searchable by their name] - 2025-05-07
 - Identities are now listed by their name and address, meaning that both can be used to search for them
 

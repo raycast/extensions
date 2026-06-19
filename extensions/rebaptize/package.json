@@ -1,0 +1,294 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rebaptize",
+  "title": "Rebaptize - Rename",
+  "description": "Give your files a new name. Bulk rename, smart episode organizing, sort by date or GPS location",
+  "icon": "icon.png",
+  "author": "miguel_caetano_dias",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "rebaptize",
+      "title": "Rename Files",
+      "description": "Bulk rename files using presets for TV shows, anime, movies, auto enumerate, date, or find & replace",
+      "mode": "view"
+    },
+    {
+      "name": "smart-organize",
+      "title": "Smart Organize Episodes",
+      "description": "Auto-detect episode numbers and organize into season folders with proper naming",
+      "mode": "view"
+    },
+    {
+      "name": "sort-by-date",
+      "title": "Sort Files by Date",
+      "description": "Organize files into folders by creation date (day, month, or year)",
+      "mode": "view"
+    },
+    {
+      "name": "sort-by-location",
+      "title": "Sort Photos by Location",
+      "description": "Organize photos into folders based on GPS location data from EXIF metadata",
+      "mode": "view"
+    },
+    {
+      "name": "smart-find-replace",
+      "title": "Smart Find & Replace",
+      "description": "Find and replace patterns in filenames with multi-rule support, regex capture groups, and file filters",
+      "mode": "view"
+    },
+    {
+      "name": "create-script",
+      "title": "Create Rename Script",
+      "description": "Build a reusable rename pipeline: filter by file type, chain multiple rename steps, save and run with an alias",
+      "mode": "view"
+    },
+    {
+      "name": "run-script",
+      "title": "Run Rename Script",
+      "description": "List and run saved rename scripts against the current Finder folder",
+      "mode": "view"
+    },
+    {
+      "name": "preset-tv-show",
+      "title": "Rename as TV Show",
+      "description": "Rename files into TV show format (Show Name S01E01)",
+      "mode": "view"
+    },
+    {
+      "name": "preset-anime",
+      "title": "Rename as Anime",
+      "description": "Rename files into anime fansub format ([Group] Name - 01 [Quality])",
+      "mode": "view"
+    },
+    {
+      "name": "preset-movie",
+      "title": "Rename as Movie",
+      "description": "Rename files into movie format (Name Year Quality)",
+      "mode": "view"
+    },
+    {
+      "name": "preset-date-based",
+      "title": "Rename by Date",
+      "description": "Rename files using their creation date",
+      "mode": "view"
+    },
+    {
+      "name": "preset-change-case",
+      "title": "Change Filename Case",
+      "description": "Convert filenames to UPPERCASE, lowercase, Title Case, or Sentence case",
+      "mode": "view"
+    },
+    {
+      "name": "preset-swap-delimiter",
+      "title": "Swap Filename Delimiter",
+      "description": "Replace dots, underscores, dashes, or any delimiter in filenames with another",
+      "mode": "view"
+    },
+    {
+      "name": "preset-auto-enumerate",
+      "title": "Auto Enumerate Files",
+      "description": "Number files sequentially, optionally sorted by creation or modification date",
+      "mode": "view"
+    },
+    {
+      "name": "preset-change-extension",
+      "title": "Change File Extension",
+      "description": "Bulk change file extensions (e.g. .jpeg to .jpg)",
+      "mode": "view"
+    },
+    {
+      "name": "instant-uppercase",
+      "title": "Uppercase All Filenames",
+      "description": "Instantly convert all filenames in the current Finder folder to UPPERCASE",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-lowercase",
+      "title": "Lowercase All Filenames",
+      "description": "Instantly convert all filenames in the current Finder folder to lowercase",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-titlecase",
+      "title": "Title Case All Filenames",
+      "description": "Instantly capitalize the first letter of every word in filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-sentencecase",
+      "title": "Sentence Case All Filenames",
+      "description": "Instantly capitalize only the first letter of each filename",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-dots-to-spaces",
+      "title": "Replace Dots with Spaces",
+      "description": "Instantly replace all dots in filenames with spaces",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-spaces-to-dots",
+      "title": "Replace Spaces with Dots",
+      "description": "Instantly replace all spaces in filenames with dots",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-underscores-to-spaces",
+      "title": "Replace Underscores with Spaces",
+      "description": "Instantly replace all underscores in filenames with spaces",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-spaces-to-underscores",
+      "title": "Replace Spaces with Underscores",
+      "description": "Instantly replace all spaces in filenames with underscores",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-dashes-to-spaces",
+      "title": "Replace Dashes with Spaces",
+      "description": "Instantly replace all dashes in filenames with spaces",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-spaces-to-dashes",
+      "title": "Replace Spaces with Dashes",
+      "description": "Instantly replace all spaces in filenames with dashes",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-collapse-spaces",
+      "title": "Collapse Multiple Spaces",
+      "description": "Instantly collapse double/triple/etc spaces into single spaces in filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-enumerate-by-name",
+      "title": "Enumerate Files by Name",
+      "description": "Instantly number files 001, 002, 003... sorted alphabetically by name",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-enumerate-by-date",
+      "title": "Enumerate Files by Date Created",
+      "description": "Instantly number files 001, 002, 003... sorted by creation date (oldest first)",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-undo",
+      "title": "Undo Last Rename",
+      "description": "Revert the last instant rename command (available for 5 minutes after execution)",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-remove-accents",
+      "title": "Remove Accents from Filenames",
+      "description": "Remove diacritics and accents: café → cafe, über → uber",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-strip-digits",
+      "title": "Strip Digits from Filenames",
+      "description": "Remove all digits from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-strip-special",
+      "title": "Strip Special Characters",
+      "description": "Remove brackets, symbols, and special characters from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-trim",
+      "title": "Trim Filenames",
+      "description": "Remove leading and trailing spaces, dashes, dots, and underscores from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-pad-numbers",
+      "title": "Add Zero Padding to Numbers",
+      "description": "Pad numbers in filenames to 3 digits: file1 → file001",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-unpad-numbers",
+      "title": "Remove Zero Padding from Numbers",
+      "description": "Remove leading zeros from numbers: file001 → file1",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-parent-folder",
+      "title": "Prepend Parent Folder Name",
+      "description": "Add the parent folder name before each filename: NYC/img.jpg → NYC - img.jpg",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-swap-parts",
+      "title": "Swap Filename Parts",
+      "description": "Swap two parts of a filename around \" - \" separator: Artist - Song → Song - Artist",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-transliterate",
+      "title": "Transliterate to Latin",
+      "description": "Convert Cyrillic, accented, and non-Latin characters to ASCII equivalents",
+      "mode": "no-view"
+    },
+    {
+      "name": "exif-rename",
+      "title": "Rename Photos by EXIF",
+      "description": "Rename photos using EXIF metadata: date taken, camera model, ISO, focal length",
+      "mode": "view"
+    },
+    {
+      "name": "rename-from-csv",
+      "title": "Rename from CSV",
+      "description": "Rename files using a CSV mapping of old names to new names",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tmdbApiKey",
+      "title": "TMDB API Key (Free)",
+      "description": "Optional. Get a free API key at themoviedb.org to enable automatic season/episode lookup for Smart Organize Episodes.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "tvdbApiKey",
+      "title": "TheTVDB API Key ($12/year)",
+      "description": "Optional. Requires a $12/year subscription at thetvdb.com. Alternative to TMDB for season/episode metadata.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "exif-reader": "^2.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.1",
+    "@types/react": "19.0.8",
+    "eslint": "^9.39.4",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

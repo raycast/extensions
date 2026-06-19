@@ -1,13 +1,56 @@
 # Slack Changelog
 
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
+
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
+
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
+
+- Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
+
+## [Add deep link arguments to Set Status] - 2026-06-09
+
+- The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
+
+## [Fix AI Tool for Channel History Failing] - 2026-06-03
+
+- Add fallback to attachment text for the Channel History AI tool.
+
+## [Fix Windows deep links] - 2026-05-27
+
+- "Open in Slack" and "Open Channel"/"Open Chat" Quicklinks now open the requested channel or user on Windows. Previously the `application="Slack"` hint caused Raycast to launch Slack.exe without forwarding the `slack://` URI; the hint is now macOS-only so Windows routes the URI through the registered protocol handler.
+
+## [Accent-insensitive search] - 2026-05-07
+
+- "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
+
+## [Add Direct command for setting slack status] - 2026-02-23
+
+- Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
+- Added full support for custom workspace emojis (beyond default emojis).
+
+## [Add proxy support for corporate networks] - 2026-02-13
+
+- Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy
+- Proxy is resolved from the Raycast preference, `HTTPS_PROXY`, or `HTTP_PROXY` environment variables
+- Note: proxy applies to Slack API calls only; OAuth login uses Raycast's built-in networking
+
+## [Multi-word search support] - 2026-01-20
+
+- Improved search in "Open Channel" and "Send Message" commands to support multi-word queries
+- Now you can search for "sre time" to find channel "sre-free-time"
+
 ## [Add action for copying IDs of users or channels] - 2025-11-20
 
 - Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list for both MacOS and Windows
 
 ## [Fix Send Message Missing Scope Error] - 2025-08-25
+
 - Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
 
 ## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
+
 - Added the `search.message` slack api to enable AI to use the tool (search for full messages)
 - Fixed failure to find channelId when using get-channel-history with AI
 - Fixed issue that prevented importing all slack channels

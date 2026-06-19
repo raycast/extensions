@@ -2,18 +2,15 @@ import { useState } from "react";
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { SearchEventsResponse } from "./types";
-import { formatEventTime, getEventLocation } from "./utils";
+import { formatEventTime, getEventLocation, API_URLS, getEventUrl } from "./utils";
 import EventDetail from "./event-detail";
 
 export default function SearchEvents() {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { isLoading, data, error } = useFetch<SearchEventsResponse>(
-    `https://api2.luma.com/discover/get-paginated-events?query=${encodeURIComponent(searchText)}`,
-    {
-      execute: searchText.length > 0,
-    },
-  );
+  const { isLoading, data, error } = useFetch<SearchEventsResponse>(API_URLS.SEARCH_EVENTS(searchText), {
+    execute: searchText.length > 0,
+  });
 
   const events = data?.entries || [];
 
@@ -45,10 +42,10 @@ export default function SearchEvents() {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail entry={entry} />} />
-              <Action.OpenInBrowser title="Open in Browser" url={`https://luma.com/${entry.event.url}`} />
+              <Action.OpenInBrowser title="Open in Browser" url={getEventUrl(entry)} />
               <Action.CopyToClipboard
                 title="Copy Event Link"
-                content={`https://luma.com/${entry.event.url}`}
+                content={getEventUrl(entry)}
                 shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               />
             </ActionPanel>

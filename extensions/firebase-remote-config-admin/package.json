@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firebase-remote-config-admin",
+  "title": "Firebase - Remote Config",
+  "description": "Inspect, compare, edit, publish, delete, and roll back Firebase Remote Config across multiple projects",
+  "icon": "extension-icon.png",
+  "author": "danilorequena",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "remote-config-admin",
+      "title": "Browse Remote Config",
+      "description": "Inspect parameters and conditions across multiple Firebase projects",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Manage saved Firebase projects and project groups",
+      "mode": "view"
+    },
+    {
+      "name": "bulk-operations",
+      "title": "Bulk Operations",
+      "description": "Preview and publish parameter or condition changes across projects",
+      "mode": "view"
+    },
+    {
+      "name": "remote-config-versions",
+      "title": "Versions & Rollback",
+      "description": "List published versions and roll back a project template",
+      "mode": "view"
+    },
+    {
+      "name": "export-defaults",
+      "title": "Export Defaults",
+      "description": "Download Remote Config defaults for a project",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sharedCredentialRef",
+      "type": "textfield",
+      "required": false,
+      "title": "Shared Service Account JSON Path",
+      "description": "Optional fallback path to a Firebase service account JSON file used by projects without a credentialRef"
+    },
+    {
+      "name": "requestTimeoutMs",
+      "type": "textfield",
+      "required": false,
+      "default": "20000",
+      "title": "Request Timeout (ms)",
+      "description": "HTTP timeout for Firebase API requests"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-projects",
+      "title": "List Firebase Projects",
+      "description": "List saved Firebase Remote Config projects and saved project groups"
+    },
+    {
+      "name": "get-project-remote-config",
+      "title": "Get Project Remote Config",
+      "description": "Fetch one Firebase Remote Config template and summarize parameters, conditions, and versions"
+    },
+    {
+      "name": "find-parameter-across-projects",
+      "title": "Find Parameter Across Projects",
+      "description": "Compare a Remote Config parameter across selected Firebase projects"
+    },
+    {
+      "name": "find-condition-across-projects",
+      "title": "Find Condition Across Projects",
+      "description": "Compare a Remote Config condition across selected Firebase projects"
+    },
+    {
+      "name": "summarize-flag-state-across-projects",
+      "title": "Summarize Flag State Across Projects",
+      "description": "Summarize whether a feature flag is enabled across selected Firebase projects"
+    },
+    {
+      "name": "search-parameters",
+      "title": "Search Parameters",
+      "description": "Search Remote Config parameters by partial key name across selected Firebase projects"
+    },
+    {
+      "name": "upsert-parameter",
+      "title": "Create or Update Parameter",
+      "description": "Create or update a Remote Config parameter across selected Firebase projects",
+      "confirmation": true
+    },
+    {
+      "name": "delete-parameter",
+      "title": "Delete Parameter",
+      "description": "Delete a Remote Config parameter across selected Firebase projects",
+      "confirmation": true
+    },
+    {
+      "name": "upsert-condition",
+      "title": "Create or Update Condition",
+      "description": "Create or update a Remote Config condition across selected Firebase projects",
+      "confirmation": true
+    },
+    {
+      "name": "delete-condition",
+      "title": "Delete Condition",
+      "description": "Delete a Remote Config condition across selected Firebase projects",
+      "confirmation": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.7.0",
+    "@types/react": "~19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

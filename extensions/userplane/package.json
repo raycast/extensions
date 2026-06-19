@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "userplane",
+  "title": "Userplane",
+  "description": "Create Userplane recording links, browse recordings and recording links, and open the Userplane dashboard — all from Raycast.",
+  "icon": "icon.png",
+  "author": "wizenheimer",
+  "version": "0.1.0",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "session replay",
+    "screen recording",
+    "debugging",
+    "support",
+    "bug reports",
+    "customer support"
+  ],
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wizenheimer/userplane.git",
+    "directory": "apps/raycast"
+  },
+  "commands": [
+    {
+      "name": "create-link",
+      "title": "Create Recording Link",
+      "description": "Create a recording link for a workspace domain and copy it to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "list-recordings",
+      "title": "Browse Recordings",
+      "description": "Browse recordings with thumbnails, filters, and sorting.",
+      "mode": "view"
+    },
+    {
+      "name": "list-links",
+      "title": "Browse Links",
+      "description": "Browse recording links with filters and sorting.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show Menu Bar",
+      "description": "Quick access to Userplane from the macOS menu bar.",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create one at https://dash.userplane.io/_/account?tab=developers",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Host",
+      "description": "API host for self-hosted or staging deployments. Accepts any form: api-dev.userplane.io or https://api-dev.userplane.io.",
+      "type": "textfield",
+      "required": false,
+      "default": "api.userplane.io"
+    },
+    {
+      "name": "dashBaseUrl",
+      "title": "Dashboard Host",
+      "description": "Dashboard host for self-hosted or staging deployments. Accepts any form: dash-dev.userplane.io or https://dash-dev.userplane.io.",
+      "type": "textfield",
+      "required": false,
+      "default": "dash.userplane.io"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "3.8.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

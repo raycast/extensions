@@ -1,5 +1,37 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Jellypod MCP Server] - 2026-06-19
+
+Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
+
+## [Add Olostep MCP Server] - 2026-06-16
+
+Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.
+
+## [Add OptionsAhoy MCP Server] - 2026-06-16
+
+Add community OptionsAhoy MCP Server to registry for equity-compensation tax optimization (ISO/AMT scheduling, NSO, RSU sell-vs-hold, QSBS eligibility, concentration risk, protective puts/collars) across federal plus 50-state and DC tax code. Remote endpoint via mcp-remote, no API key required.
+
+## [Add VC Deal Flow Signal MCP Server] - 2026-06-03
+
+Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).
+
+## [Add Alai MCP Server] - 2026-04-30
+
+Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).
+
+## [Add Sanity MCP Server] - 2026-03-07
+
+Add official Sanity MCP Server to registry for direct access to Sanity projects.
+
+## [Add RouteMesh MCP Server] - 2026-03-05
+
+Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
+
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
 ## [Update Anytype MCP Server] - 2026-01-13
 
 Update Anytype MCP Server to use the latest version of the Anytype API.

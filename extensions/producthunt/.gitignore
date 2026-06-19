@@ -9,6 +9,11 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
+# Local-only smoke scripts and credentials (never committed)
+/scripts
+.env
+.env.local
+
 # misc
 .DS_Store
 .windsurfrules

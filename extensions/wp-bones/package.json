@@ -39,6 +39,28 @@
       "subtitle": "WP Bones",
       "description": "Allows you to select the GitHub WP Bones template that suits your needs, so you can create your scaffolding in just a few seconds.",
       "mode": "view"
+    },
+    {
+      "name": "ask-ai",
+      "title": "Ask WP Bones AI",
+      "subtitle": "WP Bones",
+      "description": "Ask a question about WP Bones and get an AI-powered answer based on the documentation.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "How do I create a REST API?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "release-notes",
+      "title": "WP Bones Release Notes",
+      "subtitle": "WP Bones",
+      "description": "View the latest WP Bones release notes.",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -60,5 +82,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

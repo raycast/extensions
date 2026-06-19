@@ -1,10 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
 import type { Image, Ratings } from "@/lib/types/episode";
+import type { SonarrPreferences } from "@/lib/types/preferences";
 import { CoverType } from "@/lib/types/episode";
 
 export function getSonarrUrl(): string {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<SonarrPreferences>();
   const { http, host, port, base } = preferences;
   const baseUrl = base ? `/${base.replace(/^\/|\/$/g, "")}` : "";
   return `${http}://${host}:${port}${baseUrl}`;
@@ -58,7 +59,7 @@ export function formatRelativeTime(dateString: string): string {
   }
 }
 
-export function formatOverview(overview: string, maxLength?: number): string {
+export function formatOverview(overview?: string | null, maxLength?: number): string {
   if (!overview) return "No overview available.";
 
   const cleanedOverview = overview.replace(/\n\n+/g, "\n\n").trim();

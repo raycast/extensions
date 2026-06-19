@@ -1,0 +1,14 @@
+# Raycast
+raycast-env.d.ts
+node_modules/
+dist/
+coverage/
+
+# Editor and OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.*

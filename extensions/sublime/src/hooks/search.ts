@@ -9,29 +9,29 @@ export function useCardsSearch(
     search: (
         query: string,
         restrictToLibrary: boolean,
-        page?: number,
-    ) => Promise<{ results: SublimeCard[]; nextPage?: number }>,
+        cursor?: string,
+    ) => Promise<{ results: SublimeCard[]; nextCursor?: string }>,
     fetchInitial = false,
 ) {
     // Search cards via API
     const [isLoading, setIsLoading] = useState(true);
     const [cards, setCards] = useState<SublimeCardWithMarkdown[]>();
-    const [nextPage, setNextPage] = useState<number>();
+    const [nextCursor, setNextCursor] = useState<string>();
     function runSearch(query: string, restrictToLibrary: boolean) {
         if (!query && !fetchInitial) {
             // Reset
             setIsLoading(false);
             setCards(undefined);
-            setNextPage(undefined);
+            setNextCursor(undefined);
             return;
         }
 
         setIsLoading(true);
         search(query, restrictToLibrary)
-            .then(({ results, nextPage }) => {
+            .then(({ results, nextCursor }) => {
                 setIsLoading(false);
                 setCards(results.map(populateCardMarkdown));
-                setNextPage(nextPage);
+                setNextCursor(nextCursor);
             })
             .catch((error) => {
                 setIsLoading(false);
@@ -45,14 +45,18 @@ export function useCardsSearch(
     // Fetch more results when scrolled down
     const isLoadingMore = useRef(false);
     async function onLoadMore() {
-        if ((!searchQuery && !fetchInitial) || !nextPage || isLoadingMore.current) {
+        if ((!searchQuery && !fetchInitial) || !nextCursor || isLoadingMore.current) {
             return;
         }
         isLoadingMore.current = true;
 
-        const { results: newCards, nextPage: newNextPage } = await search(searchQuery, restrictToLibrary, nextPage);
+        const { results: newCards, nextCursor: newNextCursor } = await search(
+            searchQuery,
+            restrictToLibrary,
+            nextCursor,
+        );
         setCards([...cards!, ...newCards.map(populateCardMarkdown)]);
-        setNextPage(newNextPage);
+        setNextCursor(newNextCursor);
         isLoadingMore.current = false;
     }
 
@@ -61,7 +65,7 @@ export function useCardsSearch(
         cards,
         pagination: {
             pageSize: 15,
-            hasMore: nextPage !== undefined,
+            hasMore: nextCursor !== undefined,
             onLoadMore,
         },
     };

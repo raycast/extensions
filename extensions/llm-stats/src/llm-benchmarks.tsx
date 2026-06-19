@@ -1,5 +1,5 @@
-import { Icon, List, showToast, Toast, Color, ActionPanel } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Icon, List, Color, ActionPanel } from "@raycast/api";
+import { useCachedPromise, useCachedState, showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 import { ZeroEvalAPI } from "./utils/zeroeval-api";
 import { getOrganizationLogo } from "./utils/organization-logos";
@@ -27,11 +27,7 @@ export default function Command() {
     error: categoriesError,
   } = useCachedPromise(async () => api.getCategories(), [], {
     onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load categories",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to load categories" });
     },
   });
 
@@ -43,27 +39,12 @@ export default function Command() {
   } = useCachedPromise(
     async (categoryId: string | undefined) => {
       if (!categoryId) return null;
-
-      try {
-        return await api.getCategoryBenchmarks(categoryId);
-      } catch (error) {
-        console.error(`Failed to load benchmarks for category ${categoryId}:`, error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load benchmarks",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
-        return null;
-      }
+      return await api.getCategoryBenchmarks(categoryId);
     },
     [selectedCategoryId],
     {
       onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load benchmarks",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to load benchmarks" });
       },
     },
   );
@@ -118,16 +99,11 @@ export default function Command() {
     >
       {!selectedCategoryId ? (
         <List.EmptyView
-          icon={Icon.MagnifyingGlass}
           title="Select a category"
           description="Choose a category from the dropdown to view benchmarks"
         />
       ) : categoryData && categoryData.benchmarks.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No models found"
-          description="No models available for benchmarks in this category"
-        />
+        <List.EmptyView title="No models found" description="No models available for benchmarks in this category" />
       ) : (
         categoryData?.benchmarks.map((benchmark) => (
           <List.Section key={benchmark.benchmark_id} title={benchmark.name}>
@@ -193,8 +169,8 @@ export default function Command() {
 function formatBenchmarkScore(score: number, maxScore: number): string {
   if (maxScore === 1) {
     // Percentage format for max_score = 1
-    return `${(score * 100).toFixed(2)}%`;
+    return `${Number((score * 100).toFixed(2))}%`;
   }
-  // Integer format for larger values
-  return score.toFixed(2);
+  // Integer format for larger values - trim trailing zeros
+  return Number(score.toFixed(2)).toString();
 }

@@ -4,21 +4,18 @@ import { useStore } from "./common/store";
 import { View } from "./common/View";
 
 export default function MyView() {
-  const store = useStore(["results"], (_, q) => searchResources(q as string));
+  const store = useStore(["results"], (_, q) => searchResources(q as string), true);
   const [collections, setCollections] = useState<string[]>([]);
   const sectionNames = ["Search Results"];
 
   useEffect(() => {
-    const getCols = async () => {
+    const init = async () => {
       const cols = await getCollections();
       setCollections(cols);
+      await store.runQuery("");
     };
 
-    getCols(); // run it, run it
-
-    return () => {
-      // this now gets called when the component unmounts
-    };
+    init();
   }, []);
 
   return (
@@ -28,11 +25,7 @@ export default function MyView() {
       isLoading={store.queryIsLoading}
       collections={collections}
       onSearchTextChange={(text) => {
-        if (text) {
-          store.runQuery(text);
-        } else {
-          store.clearResults();
-        }
+        store.runQuery(text);
       }}
       throttle
     />

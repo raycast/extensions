@@ -57,11 +57,13 @@ export class CacheManager {
     return this.pinnedFolders.has(path);
   }
 
-  async pinFolder(folder: SpotlightSearchResult): Promise<void> {
+  async pinFolder(folder: SpotlightSearchResult, customName?: string): Promise<void> {
     await this.init();
 
+    const trimmedCustomName = customName?.trim();
     const pinnedFolder: PinnedFolder = {
       ...folder,
+      ...(trimmedCustomName ? { customName: trimmedCustomName } : {}),
       pinnedAt: new Date(),
       lastVerified: new Date(),
     };
@@ -76,6 +78,24 @@ export class CacheManager {
     await this.save();
   }
 
+  async renamePinnedFolder(path: string, customName?: string): Promise<void> {
+    await this.init();
+
+    const folder = this.pinnedFolders.get(path);
+    if (!folder) {
+      return;
+    }
+
+    const trimmedCustomName = customName?.trim();
+    if (trimmedCustomName) {
+      folder.customName = trimmedCustomName;
+    } else {
+      delete folder.customName;
+    }
+
+    await this.save();
+  }
+
   async getPinnedFolders(): Promise<PinnedFolder[]> {
     await this.init();
     await this.verifyPinnedFolders();
@@ -87,28 +107,26 @@ export class CacheManager {
     let needsSave = false;
 
     for (const [path, folder] of this.pinnedFolders.entries()) {
-      // Check if cache is stale
-      if (now.getTime() - folder.lastVerified.getTime() > CACHE_VALIDITY_DURATION) {
-        try {
-          // Verify folder still exists
-          if (!(await fs.pathExists(path))) {
-            this.pinnedFolders.delete(path);
-            needsSave = true;
-            continue;
-          }
+      try {
+        // always verify folder still exists
+        if (!(await fs.pathExists(path))) {
+          this.pinnedFolders.delete(path);
+          needsSave = true;
+          continue;
+        }
 
-          // Update folder stats
+        // refresh stats only when cache is stale
+        if (now.getTime() - folder.lastVerified.getTime() > CACHE_VALIDITY_DURATION) {
           const stats = await fs.stat(path);
           folder.kMDItemContentModificationDate = stats.mtime;
           folder.kMDItemLastUsedDate = stats.atime;
           folder.lastVerified = now;
           needsSave = true;
-        } catch (error) {
-          console.error(`Error verifying pinned folder ${path}:`, error);
-          // Remove invalid folder
-          this.pinnedFolders.delete(path);
-          needsSave = true;
         }
+      } catch (error) {
+        console.error(`Error verifying pinned folder ${path}:`, error);
+        this.pinnedFolders.delete(path);
+        needsSave = true;
       }
     }
 

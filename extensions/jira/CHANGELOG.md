@@ -1,5 +1,35 @@
 # Jira Changelog
 
+## [Bug Fix] - 2026-05-18
+
+- Kept Jira issue lists open when Jira returns an HTML error page while loading issue type icons.
+
+## [Bug Fix] - 2026-05-18
+
+- Fixed issue details failing to load when descriptions include absolute Jira attachment image URLs
+
+## [Bug Fix] - 2026-05-18
+
+- Loaded all saved filters in the My Filters command instead of stopping after the first 100 results
+
+## [Open Issues sprint/backlog split config] - 2026-04-16
+
+- Added new `Open Issues` checkboxes to choose which sections to show: `Active Sprint`, `All Sprints`, and `Backlog`.
+- Updated the `All Sprints` view in `Open Issues` to split issues by sprint name instead of showing a single combined section.
+- Kept original `Open Issues` behavior as the implicit default when no section checkbox is enabled.
+- Removed the separate `Open Issues in Active Sprint` command since equivalent behavior is now configurable in `Open Issues`.
+- Included project dropdown filtering with persisted selection to match the existing active sprint workflow.
+- Added a friendlier fallback error for Jira OAuth `invalid_grant` failures, prompting users to reconnect Jira in extension preferences.
+- Improved extension and `Open Issues` preference descriptions for clearer in-app configuration guidance.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Bug Fix] - 2026-02-05
+
+- Fixed a bug where the Jira create-issue flow copied an API base URL instead of the normal `/browse/KEY` issue link.
+
 ## [Update] - 2025-12-07
 
 - Add MacOS and Windows to supported platforms
@@ -7,7 +37,7 @@
 
 ## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
-- Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
+- Added a fallback `created >= -30d` clause in the _Search Issues_ command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
 
 ## [Fix deprecated Jira search API] - 2025-08-20
 

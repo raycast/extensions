@@ -2,6 +2,7 @@ import { CssColor, HasId, Id } from "../lib/types";
 import React from "react";
 import { getPreferenceValues, Icon, Image } from "@raycast/api";
 import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
+import { updateItem, updateItems } from "./collections";
 
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
@@ -30,7 +31,7 @@ export function optimisticUpdate<T extends HasId>(
 
   setState((prevState: T[]) => {
     undoState = prevState;
-    return prevState.updateItem(stateItem.id, changes);
+    return updateItem(prevState, stateItem.id, changes);
   });
 
   return (): void => {
@@ -46,7 +47,7 @@ export function optimisticUpdates<T extends HasId>(
 
   setState((prevState: T[]) => {
     undoState = prevState;
-    return prevState.updateItems(changes);
+    return updateItems(prevState, changes);
   });
 
   return (): void => {

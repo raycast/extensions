@@ -54,14 +54,14 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     setIsLoading(true);
     setError(null);
 
-    let command = "";
+    let commandArgs: string[] = [];
     let debugText = "";
 
     if (resourceType === "storage" && resourceName) {
-      command = `storage buckets get-iam-policy gs://${resourceName} --format=json`;
+      commandArgs = ["storage", "buckets", "get-iam-policy", `gs://${resourceName}`];
       debugText = `Fetching IAM policy for bucket: ${resourceName}\n`;
     } else {
-      command = `projects get-iam-policy ${projectId}`;
+      commandArgs = ["projects", "get-iam-policy", projectId];
       debugText = `Fetching project-level IAM policy for: ${projectId}\n`;
     }
 
@@ -72,7 +72,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     });
 
     try {
-      const result = await executeGcloudCommand(gcloudPath, command);
+      const result = await executeGcloudCommand(gcloudPath, commandArgs);
 
       if (!Array.isArray(result) || result.length === 0) {
         setError("No IAM policy found or empty result");
@@ -206,15 +206,28 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         return;
       }
 
-      let command = "";
+      let commandArgs: string[] = [];
 
       if (resourceType === "storage" && resourceName) {
-        command = `storage buckets add-iam-policy-binding gs://${resourceName} --member=${values.memberType}:${values.memberId} --role=${values.role}`;
+        commandArgs = [
+          "storage",
+          "buckets",
+          "add-iam-policy-binding",
+          `gs://${resourceName}`,
+          `--member=${values.memberType}:${values.memberId}`,
+          `--role=${values.role}`,
+        ];
       } else {
-        command = `projects add-iam-policy-binding ${projectId} --member=${values.memberType}:${values.memberId} --role=${values.role}`;
+        commandArgs = [
+          "projects",
+          "add-iam-policy-binding",
+          projectId,
+          `--member=${values.memberType}:${values.memberId}`,
+          `--role=${values.role}`,
+        ];
       }
 
-      await executeGcloudCommand(gcloudPath, command);
+      await executeGcloudCommand(gcloudPath, commandArgs);
 
       addingToast.hide();
       showToast({
@@ -297,15 +310,28 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       });
 
       try {
-        let command = "";
+        let commandArgs: string[] = [];
 
         if (resourceType === "storage" && resourceName) {
-          command = `storage buckets remove-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role}`;
+          commandArgs = [
+            "storage",
+            "buckets",
+            "remove-iam-policy-binding",
+            `gs://${resourceName}`,
+            `--member=${memberType}:${memberId}`,
+            `--role=${role}`,
+          ];
         } else {
-          command = `projects remove-iam-policy-binding ${projectId} --member=${memberType}:${memberId} --role=${role}`;
+          commandArgs = [
+            "projects",
+            "remove-iam-policy-binding",
+            projectId,
+            `--member=${memberType}:${memberId}`,
+            `--role=${role}`,
+          ];
         }
 
-        await executeGcloudCommand(gcloudPath, command);
+        await executeGcloudCommand(gcloudPath, commandArgs);
 
         removingToast.hide();
         showToast({

@@ -16,6 +16,7 @@ import {
   defaultProfilePathOrion,
   defaultProfilePathSidekick,
   defaultProfilePathDia,
+  defaultProfilePathHelium,
   defaultProfilePathComet,
   defaultProfilePathChatGPTAtlas,
 } from "../constants";
@@ -53,6 +54,7 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
     profilePathOrion,
     profilePathSidekick,
     profilePathDia,
+    profilePathHelium,
     profilePathComet,
     profilePathChatGPTAtlas,
   } = getPreferenceValues<Preferences>();
@@ -113,6 +115,10 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
       return profilePathDia
         ? path.join(profilePathDia, "History")
         : path.join(userDataDirectory, ...defaultProfilePathDia);
+    case SupportedBrowsers.Helium:
+      return profilePathHelium
+        ? path.join(profilePathHelium, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathHelium);
     case SupportedBrowsers.Comet:
       return profilePathComet
         ? path.join(profilePathComet, "History")

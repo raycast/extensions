@@ -17,10 +17,22 @@ vi.mock("@raycast/api", () => ({
       Failure: "Failure",
     },
   },
+  Alert: {
+    ActionStyle: {
+      Destructive: "destructive",
+      Default: "default",
+    },
+  },
+  confirmAlert: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock("../lib/cache", () => ({
   clearCache: vi.fn(),
+}));
+
+// Mock history module to avoid LocalStorage issues
+vi.mock("../lib/history", () => ({
+  saveToHistory: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Import mocked functions after mocks are set up

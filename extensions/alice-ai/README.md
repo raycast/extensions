@@ -1,74 +1,89 @@
 <p align="center">
-  <img src="https://github.com/wojciechkrol/alice-ai-raycast/raw/master/assets/icon.png" alt="Alice AI - Your ChatGPT Actions Companion" width="128">
+  <img src="https://github.com/wojciechkrol/alice-ai-raycast/raw/master/assets/icon.png" alt="Alice AI" width="128">
 </p>
 
-<h1 align="center">Alice AI - Your ChatGPT Actions Companion</h1>
+<h1 align="center">Alice AI - Your Daily AI Actions Companion</h1>
 
 # 📚 Introduction
 
-Alice AI is a daily productivity tool that uses your selection to execute actions using OpenAI's GPT models. It allows you to easily browse your actions, execute them, and go back to your result history. You can also add your own actions, create quicklinks to them, and back them up.
+Alice AI lets you run reusable AI actions on selected text directly in Raycast. You can create your own action library, run one-off custom prompts, and review response history with token and cost metadata.
+
+The extension now supports both OpenAI and Google Gemini models.
 
 # 🚀 Getting Started
 
-Before you start using Alice AI, you need to set up your OpenAI API key:
+1. Install the extension in Raycast.
+2. Open extension settings and add API keys (optional, depending on provider):
+   - `OpenAI API Key` for OpenAI models
+   - `Gemini API Key` for Gemini models
+3. Run `Select Action` and execute an action on selected text.
 
-![Set up your OpenAI API key](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-7.png)
+Notes:
+
+- API keys are not required globally.
+- A key is required only when you use a model from that provider.
+
+# 🧭 Commands
+
+- `Select Action`: Browse, search, and run saved actions.
+- `Show History`: Review previous executions and results.
+- `Create New Action`: Create or edit reusable actions.
+- `Custom Action`: Run an ad-hoc instruction with configurable model/temperature/max tokens.
+- `Display Actions in Menu Bar`: Quick access to actions from the menu bar.
 
 # 🎉 Features
 
-## Browse your actions 📚
+### ⚡ Instant Results From Selected Text
 
-Alice AI allows you to browse your actions and easily run them.
+Run actions directly on your current selection in Raycast and get live-streamed answers without breaking focus.
 
-![Browse your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-1.png)
+### 🧩 Reusable AI Actions
 
-## Execute your actions ⚡️
+Build your own library of prompts as actions, edit them anytime, and keep your best workflows one shortcut away.
 
-Alice AI uses your selected text for executing actions.
+### 🧠 Multi-Model Flexibility
 
-![Execute your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-2.png)
+Choose the right model for the job across OpenAI and Gemini, including fast, lightweight, and premium options.
 
-## Always go back to your action history 🔙
+### 📊 Transparent Usage and Cost
 
-Alice AI keeps track of your actions and allows you to go back to them.
+Track input tokens, output tokens, total tokens, and estimated cost for every run.
 
-![Always go back to your action history](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-3.png)
-![Always go back to your action history](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-4.png)
+### 🕘 Searchable History
 
-## Easily customize your actions ✏️
+Revisit previous outputs, compare results, and copy what you need from past executions in seconds.
 
-Alice AI allows you to easily customize your actions. You can add new actions, edit existing actions, and delete actions.
+### ⭐ Favorites and Fast Access
 
-![Easily customize your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-5.png)
+Pin your most-used actions, launch from menu bar, and integrate with Quicklinks for an even faster daily workflow.
 
-## Quicklink to your actions 🔗
+### 🔄 Portable Action Library
 
-Alice AI allows you to quickly access your actions from the raycast root. Just create a quicklink to your actions.
+Export and import actions to back up your setup or share proven prompts with your team.
 
-![Quicklink to your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-6.png)
+# 🤖 Supported Models
 
-## Keep your favorite actions handy ⭐️
+## OpenAI 🧠
 
-Alice AI allows you to mark your favorite actions. You can easily access them from the favorites section which is on top of the actions list.
+- `gpt-5.4`
+- `gpt-5.4-mini`
+- `gpt-5.4-nano`
+- `gpt-4o`
+- `gpt-4o-mini`
 
-![Keep your favorite actions handy](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-9.png)
+## Google Gemini ✨
 
-## Export and import your actions 📤 📥
+- `gemini-3-flash-preview`
+- `gemini-3-pro-preview`
+- `gemini-2.5-flash`
+- `gemini-2.5-flash-lite`
 
-Alice AI allows you to export and import your actions. You can easily share your actions with others or back them up.
+# 💸 Notes on Pricing
 
-![Export and import your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-8.png)
+- Cost values shown in the UI are estimates derived from model-specific pricing rules.
+- OpenAI and Gemini models use separate pricing tables.
+- Gemini pricing is based on the Gemini API pricing documentation.
 
-# 🚀 Supported OpenAI models
+# 👤 About the Author
 
-Alice AI supports the following models:
-- GPT-3.5 Turbo
-- GPT-4 Turbo
-- GPT-4o
-- GPT-4o Mini
-
----
-
-## About the Author
-
-Alice AI is created by [Wojciech Król](https://github.com/wojciechkrol). If you have any questions or feedback, feel free to reach out to me on [Twitter](https://twitter.com/_wojciechkrol). I'd love to hear from you! 🚀
+Alice AI is created by [Wojciech Król](https://github.com/wojciechkrol).

@@ -1,12 +1,14 @@
 import { useCachedState, useFetch } from "@raycast/utils";
-import type { KitIconsResult, SearchItem, SearchResult } from "@/types";
+import type { KitIconUpload, KitIconsResult, SearchItem, SearchResult } from "@/types";
+import { buildScopedCacheKey } from "@/utils/access-token";
 import { familyStylesByPrefix } from "@/utils/data";
+import { findKitByToken } from "@/utils/kits";
 import { iconQuery, kitIconsQuery } from "@/utils/query";
 
 type ApiResult = SearchResult | KitIconsResult | undefined;
 
-export const useData = (accessToken: string, execute: boolean, query: string, type: string) => {
-  const [iconData, setIconData] = useCachedState<ApiResult>("iconData");
+export const useData = (accessToken: string, cacheScope: string, execute: boolean, query: string, type: string) => {
+  const [iconData, setIconData] = useCachedState<ApiResult>(buildScopedCacheKey("iconData", cacheScope, type));
 
   const isKitSelection = type.startsWith("kit:");
   const kitToken = isKitSelection ? type.replace("kit:", "") : "";
@@ -36,13 +38,13 @@ export const useData = (accessToken: string, execute: boolean, query: string, ty
     if (isKitSelection) {
       const kitResult = raw as KitIconsResult;
       const kits = kitResult?.data?.me?.kits ?? [];
-      const kit = kits.find((k: { token: string; id: string }) => k.token === kitToken || k.id === kitToken) ?? kits[0];
+      const kit = findKitByToken(kits, kitToken) ?? kits[0];
       const uploads = kit?.iconUploads ?? [];
 
       const trimmedQuery = query.trim().toLowerCase();
 
       normalized = uploads
-        .filter((upload) => {
+        .filter((upload: KitIconUpload) => {
           if (!trimmedQuery) {
             return true;
           }
@@ -56,7 +58,7 @@ export const useData = (accessToken: string, execute: boolean, query: string, ty
 
           return nameMatch || unicodeMatch;
         })
-        .map((upload) => {
+        .map((upload: KitIconUpload) => {
           const rawPathData = upload.pathData;
           const paths = Array.isArray(rawPathData) ? rawPathData : [rawPathData];
 

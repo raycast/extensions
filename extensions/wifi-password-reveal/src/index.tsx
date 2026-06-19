@@ -143,6 +143,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push
+                icon={Icon.Info}
                 title="Show Details"
                 target={<DetailPassword networkName={network} setIsLoading={setIsLoading} />}
               />

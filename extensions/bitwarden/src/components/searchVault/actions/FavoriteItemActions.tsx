@@ -28,7 +28,7 @@ function FavoriteItemActions() {
           title={isLocalFavorite ? "Remove Favorite" : "Mark As Favorite"}
           onAction={handleToggleFavorite}
           icon={isLocalFavorite ? Icon.StarDisabled : Icon.Star}
-          shortcut={{ macOS: { key: "f", modifiers: ["opt"] }, windows: { key: "f", modifiers: ["alt"] } }}
+          shortcut={{ macOS: { key: "f", modifiers: ["opt"] }, Windows: { key: "f", modifiers: ["alt"] } }}
         />
       )}
       {(isBitwardenFavorite || isLocalFavorite) && (
@@ -39,7 +39,7 @@ function FavoriteItemActions() {
             icon={Icon.ArrowUpCircleFilled}
             shortcut={{
               macOS: { key: "arrowUp", modifiers: ["opt", "shift"] },
-              windows: { key: "arrowUp", modifiers: ["alt", "shift"] },
+              Windows: { key: "arrowUp", modifiers: ["alt", "shift"] },
             }}
           />
           <Action
@@ -48,7 +48,7 @@ function FavoriteItemActions() {
             icon={Icon.ArrowDownCircleFilled}
             shortcut={{
               macOS: { key: "arrowDown", modifiers: ["opt", "shift"] },
-              windows: { key: "arrowDown", modifiers: ["alt", "shift"] },
+              Windows: { key: "arrowDown", modifiers: ["alt", "shift"] },
             }}
           />
         </>

@@ -67,7 +67,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Adopt a Pet"
           icon={Icon.Plus}
-          onAction={() => open("raycast://extensions/timoransky/virtual-pet/index")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/timoransky/virtual-pet/index`)}
         />
       </MenuBarExtra>
     );
@@ -190,7 +190,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Open Full View"
           icon={Icon.Window}
-          onAction={() => open("raycast://extensions/timoransky/virtual-pet/index")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/timoransky/virtual-pet/index`)}
         />
       </MenuBarExtra.Section>
 

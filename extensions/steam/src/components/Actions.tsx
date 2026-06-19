@@ -85,7 +85,7 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
               steamAppId: appid,
             },
           }).catch(() => {
-            open("raycast://extensions/litomore/steamgriddb");
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/steamgriddb`);
           });
         }}
       />
@@ -103,7 +103,7 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
               steamAppName: name,
             },
           }).catch(() => {
-            open("raycast://extensions/litomore/protondb");
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/protondb`);
           });
         }}
       />

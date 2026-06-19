@@ -5,6 +5,9 @@
   "description": "Toggles mirroring of external displays quickly",
   "icon": "extension_icon.png",
   "author": "yonbergman",
+  "contributors": [
+    "leodbrs"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -12,14 +15,13 @@
   "commands": [
     {
       "name": "mirror-displays",
-      "title": "Toggle Mirror Displays",
-      "description": "Toggle the mirroring of external displays on and off",
-      "mode": "no-view"
+      "title": "Mirror Displays",
+      "description": "Choose which display to mirror, or turn off mirroring.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.88.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

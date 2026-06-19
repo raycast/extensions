@@ -5,6 +5,9 @@
   "description": "Send notifications to your devices using ntfy.sh",
   "icon": "ntfy.png",
   "author": "wesleycoder",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Communication",
@@ -13,7 +16,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "ray build -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
@@ -75,11 +78,18 @@
       "label": "Cache",
       "default": false,
       "required": true
+    },
+    {
+      "name": "access_token",
+      "title": "Access Token",
+      "description": "Optional access token for protected topics.",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.2",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -88,5 +98,8 @@
     "eslint": "^9.23.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

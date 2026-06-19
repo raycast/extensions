@@ -11,13 +11,16 @@ import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 import { apiCall, isLinkValid } from "./shared/searchToClipboard";
 
-const searchResultLinksTitles: Record<Adapter, string> = {
+const searchResultLinksTitles: Record<string, string> = {
   [Adapter.YouTube]: "YouTube",
   [Adapter.Deezer]: "Deezer",
   [Adapter.AppleMusic]: "Apple Music",
   [Adapter.Tidal]: "Tidal",
   [Adapter.SoundCloud]: "SoundCloud",
   [Adapter.Spotify]: "Spotify",
+  [Adapter.Qobuz]: "Qobuz",
+  [Adapter.Bandcamp]: "Bandcamp",
+  [Adapter.Pandora]: "Pandora",
 };
 
 const searchResultTypesTitles: Record<MetadataType, string> = {
@@ -101,7 +104,7 @@ export default function Command() {
       throttle
     >
       {state.searchText === "" && !state.searchResult ? (
-        <List.EmptyView title="Paste a Spotify Link https://open.spotify.com/track/..." />
+        <List.EmptyView title="Paste a music link (Spotify, Apple Music, Deezer, Tidal, etc.)" />
       ) : (
         <>
           {state.searchResult && (
@@ -143,7 +146,7 @@ export default function Command() {
                 <List.Item
                   key={type}
                   icon={Icon.Link}
-                  title={searchResultLinksTitles[type as Adapter]}
+                  title={searchResultLinksTitles[type] ?? type}
                   subtitle={url}
                   accessories={[{ icon: isVerified ? Icon.CheckCircle : null }]}
                   actions={

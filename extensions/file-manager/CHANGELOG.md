@@ -1,10 +1,17 @@
 # File Manager Changelog
 
+## [Fixes] - 2026-04-04
+
+- Improved sorting to use natural numeric order.
+- Added broken symlink detection and display.
+- Added more error handling.
+- Fixed gitignore and hidden file filters not reapplying after refresh.
+
 ## [Update] - 2025-05-22
 
 - Added a preferences to enable search by file permissions
 
-## [Fixes] - 2025-02-29
+## [Fixes] - 2025-01-30
 
 - Fixed shell command errors caused by filenames containing single quotes.
 

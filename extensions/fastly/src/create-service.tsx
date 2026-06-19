@@ -9,7 +9,7 @@ export default function CreateService() {
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<{ name: string; domain: string; origin: string }>({
+  const { handleSubmit, itemProps, setValidationError } = useForm<{ name: string; domain: string; origin: string }>({
     async onSubmit(values) {
       try {
         setIsLoading(true);
@@ -31,10 +31,16 @@ export default function CreateService() {
 
         push(<ServiceDetail service={service} />);
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+
+        if (message.toLowerCase().includes("already taken by another customer")) {
+          setValidationError("domain", "This domain is already taken by another Fastly customer");
+        }
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create service",
-          message: error instanceof Error ? error.message : "Unknown error",
+          message,
         });
       } finally {
         setIsLoading(false);

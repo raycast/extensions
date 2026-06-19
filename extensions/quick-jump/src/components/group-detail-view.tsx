@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Group, Root } from "../types";
 import { OpenConfigFileAction } from "./open-config-action";
 import { extractPlaceholders, getEnhancedKeywords, combineKeywords } from "../utils";
+import { SHORTCUTS } from "../constants";
 
 interface GroupDetailViewProps {
   groupKey: string;
@@ -202,7 +203,7 @@ export function GroupDetailView({ groupKey, group, rootData, onBrowseGroup }: Gr
         <ActionPanel>
           {onBrowseGroup && <Action title="Browse Group" icon={Icon.Folder} onAction={onBrowseGroup} />}
           <ActionPanel.Section>
-            <OpenConfigFileAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <OpenConfigFileAction shortcut={SHORTCUTS.OPEN_CONFIG} />
           </ActionPanel.Section>
         </ActionPanel>
       }

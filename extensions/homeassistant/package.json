@@ -638,6 +638,14 @@
       "placeholder": "Ignore Certificates"
     },
     {
+      "name": "customHeaders",
+      "type": "password",
+      "required": false,
+      "title": "Custom HTTP Headers",
+      "description": "Additional HTTP headers sent with every request and WebSocket connection (format: Header1:Value1;Header2:Value2)",
+      "placeholder": "CF-Access-Client-Id:xxx;CF-Access-Client-Secret:yyy"
+    },
+    {
       "name": "showEntityId",
       "type": "checkbox",
       "label": "Show Entity IDs",

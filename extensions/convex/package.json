@@ -11,6 +11,22 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "deployKey",
+      "title": "Deploy Key",
+      "description": "Convex deploy key for direct access (optional). Get from Dashboard → Settings → Deploy Key. Format: instance-name|key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "deploymentUrl",
+      "title": "Deployment URL",
+      "description": "Your Convex deployment URL (optional). Example: https://polite-condor-874.convex.cloud",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "switch-project",
@@ -74,6 +90,13 @@
       "subtitle": "Convex",
       "description": "Browse and install Convex components",
       "mode": "view"
+    },
+    {
+      "name": "configure-deploy-key",
+      "title": "Configure Deploy Key",
+      "subtitle": "Convex",
+      "description": "Configure deploy key authentication for direct deployment access",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -81,13 +104,13 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.10.2",
     "@types/react": "19.0.2",
     "eslint": "^8.57.0",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",

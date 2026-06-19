@@ -1,4 +1,4 @@
-import EditItemForm, { EditItemConfig } from "./lib/edit-item-form";
+import EditItemForm, { type EditItemConfig } from "./lib/edit-item-form";
 
 interface EditAliasProps {
   /** Existing alias name (for editing) */

@@ -12,6 +12,7 @@ import {
 import { FormValidation, useForm } from "@raycast/utils";
 import { APICallError } from "ai";
 import type { StackInput } from "../types";
+import { formatIconLabel } from "../utils/format-icon-label";
 import { generateStackFields } from "../utils/generate-stack-fields";
 import { slugify } from "../utils/slugify";
 import { createStackWithFields } from "../utils/stacks";
@@ -98,7 +99,7 @@ export const NewStackForm = () => {
       <Form.TextField title="Name" placeholder="Plane tickets" {...itemProps.name} />
       <Form.Dropdown title="Icon" {...itemProps.icon}>
         {Array.from(new Set(Object.values(Icon))).map((icon) => (
-          <Form.Dropdown.Item key={icon} value={icon} title={icon} icon={icon} />
+          <Form.Dropdown.Item key={icon} value={icon} title={formatIconLabel(icon)} icon={icon} />
         ))}
       </Form.Dropdown>
       <Form.TextArea

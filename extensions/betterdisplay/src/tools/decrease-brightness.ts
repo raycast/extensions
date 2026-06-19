@@ -1,4 +1,5 @@
 import { availabilityBrightness, decreaseBrightness } from "../commands";
+import { adjustDisplayValue } from "./adjust-display-value";
 
 type Input = {
   /**
@@ -21,16 +22,5 @@ type Input = {
  * not support brightness changes.
  */
 export default async function toolDecreaseBrightness(input: Input) {
-  if (!(await availabilityBrightness(input.tagID))) {
-    return false;
-  }
-
-  const increment =
-    typeof input.increment === "number" && input.increment >= 0 && input.increment <= 1 ? input.increment : undefined;
-
-  try {
-    return await decreaseBrightness(input.tagID, increment);
-  } catch (error) {
-    return false;
-  }
+  return adjustDisplayValue(input, availabilityBrightness, decreaseBrightness);
 }

@@ -5,6 +5,7 @@ export const usePreferences = () => {
   let { API_TOKEN, STYLE_PREFERENCE } = preferences;
   const { KIT_FILTER, REMEMBER_LAST_KIT } = preferences;
   let account = "pro";
+  const hasCustomToken = !!API_TOKEN;
 
   //if pro API Token not provided, use free API Token
   if (!API_TOKEN) {
@@ -13,5 +14,12 @@ export const usePreferences = () => {
     STYLE_PREFERENCE = "fas";
   }
 
-  return { API_TOKEN, STYLE_PREFERENCE, account, kitFilter: KIT_FILTER, rememberLastKit: REMEMBER_LAST_KIT };
+  return {
+    API_TOKEN,
+    STYLE_PREFERENCE,
+    account,
+    hasCustomToken,
+    kitFilter: KIT_FILTER,
+    rememberLastKit: REMEMBER_LAST_KIT,
+  };
 };

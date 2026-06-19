@@ -22,7 +22,7 @@ export enum ErrorType {
 const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string }> = {
   [ErrorType.API_KEY_MISSING]: {
     title: "API Key Required",
-    message: "Please configure your Fathom API Key in Extension Preferences.",
+    message: "Please set your Fathom API Key in Extension Preferences.",
   },
   [ErrorType.API_KEY_INVALID]: {
     title: "Invalid API Key",
@@ -68,11 +68,16 @@ export function classifyError(error: unknown): ErrorType {
 
   const message = error.message.toLowerCase();
 
-  // API Key errors
-  if (message.includes("api key is not set") || message.includes("api key required")) {
+  // Auth errors
+  if (message.includes("api_key_missing") || message.includes("no api key")) {
     return ErrorType.API_KEY_MISSING;
   }
-  if (message.includes("invalid api key") || message.includes("unauthorized") || message.includes("401")) {
+  if (
+    message.includes("api_key_invalid") ||
+    message.includes("invalid api key") ||
+    message.includes("unauthorized") ||
+    message.includes("401")
+  ) {
     return ErrorType.API_KEY_INVALID;
   }
 

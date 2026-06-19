@@ -11,11 +11,24 @@ import {
 
 describe("errors.ts", () => {
   describe("ZshManagerError", () => {
-    it("should be an abstract class", () => {
-      // ZshManagerError is abstract but can be instantiated in JavaScript
-      // We'll test that it has the expected structure instead
-      expect(ZshManagerError.prototype).toBeDefined();
-      expect(typeof ZshManagerError).toBe("function");
+    it("should have proper inheritance chain for all error subclasses", () => {
+      // Verify that all error types properly extend ZshManagerError
+      const errors = [
+        new FileNotFoundError("/test"),
+        new PermissionError("/test"),
+        new FileTooLargeError("/test", 1000, 100),
+        new ParseError("test"),
+        new ReadError("/test", new Error("test")),
+      ];
+
+      for (const error of errors) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error).toBeInstanceOf(ZshManagerError);
+        expect(error.code).toBeDefined();
+        expect(error.userMessage).toBeDefined();
+        expect(typeof error.code).toBe("string");
+        expect(typeof error.userMessage).toBe("string");
+      }
     });
   });
 

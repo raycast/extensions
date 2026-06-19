@@ -219,7 +219,9 @@ export const ActionPanelForIcon: FC<Props> = ({
 
       {firstFormat && (
         <Action
+          icon={Icon.Download}
           title={`Download ${firstFormat.label}`}
+          shortcut={KEYBOARD_SHORTCUTS.DOWNLOAD}
           onAction={async () => {
             if (!defaultUrl || !defaultFilename) {
               await showFailureToast({

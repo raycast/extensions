@@ -1,8 +1,15 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
-import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
+import {
+  GetProblemResponse,
+  Problem,
+  ProblemDifficulty,
+  ProblemPreview,
+  ProblemStats,
+  SearchProblemResponse,
+} from './types';
 import { formatProblemMarkdown } from './utils';
 import { useProblemTemplateActions } from './useProblemTemplateActions';
 
@@ -19,7 +26,7 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   }
 }
 
-function ProblemDetail(props: { titleSlug: string }): JSX.Element {
+function ProblemDetail(props: { titleSlug: string }) {
   const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
@@ -31,7 +38,7 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: GetProblemResponse) {
       return {
         data: result.data.problem,
       };
@@ -50,7 +57,8 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
   return <Detail isLoading={isProblemLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
-export default function Command(): JSX.Element {
+export default function Command() {
+  const { showProblemStats } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
@@ -71,12 +79,12 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: SearchProblemResponse) {
       return {
         data: result.data.problemsetQuestionList?.data || [],
       };
     },
-    onData: (data) => {
+    onData: (data: ProblemPreview[]) => {
       setProblems(data);
     },
     execute: searchText !== '' || problems.length === 0,
@@ -139,10 +147,12 @@ export default function Command(): JSX.Element {
           key={problem.questionFrontendId}
           id={problem.questionFrontendId}
           title={`${problem.questionFrontendId}. ${problem.title}`}
-          subtitle={JSON.parse(problem.stats).acRate}
+          subtitle={showProblemStats ? (JSON.parse(problem.stats) as ProblemStats).acRate : undefined}
           accessories={[
             ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
-            { tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } },
+            ...(showProblemStats
+              ? [{ tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } }]
+              : []),
           ]}
           actions={
             <ActionPanel>

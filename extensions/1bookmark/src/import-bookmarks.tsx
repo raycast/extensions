@@ -109,9 +109,9 @@ function Body() {
 }
 
 // The main component that will be the default export
-export default function Command() {
+export default function Command(props: { launchContext?: { token?: string } }) {
   return (
-    <CachedQueryClientProvider>
+    <CachedQueryClientProvider launchContext={props.launchContext}>
       <Body />
     </CachedQueryClientProvider>
   );

@@ -49,3 +49,31 @@ export type DNSRecord = {
   ttl: number | null;
   zone: string;
 };
+export type DomainServiceInfo = {
+  contactAdmin: string;
+  renewalType:
+    | "automaticForcedProduct"
+    | "automaticV2012"
+    | "automaticV2014"
+    | "automaticV2016"
+    | "manual"
+    | "oneShot"
+    | "option";
+  expiration: string;
+  canDeleteAtExpiration: boolean;
+  possibleRenewPeriod: [number];
+  contactBilling: string;
+  serviceId: number;
+  domain: string;
+  engagedUpTo: string | null;
+  creation: string;
+  renew: {
+    deleteAtExpiration: boolean;
+    forced: boolean;
+    manualPayment: boolean | null;
+    period: number | null;
+    automatic: boolean;
+  } | null;
+  status: "autorenewInProgress" | "expired" | "inCreation" | "ok" | "pendingDebt" | "unPaid";
+  contactTech: string;
+};

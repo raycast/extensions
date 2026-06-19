@@ -6,7 +6,7 @@ interface QuoteResult {
 
 export interface QuoteResponse {
   result: Quote[];
-  error: any;
+  error: unknown;
 }
 
 export interface Quote {
@@ -14,7 +14,7 @@ export interface Quote {
   currency?: string;
   shortName?: string;
   displayName?: string;
-  marketState?: "POST" | "PRE" | "REGULAR";
+  marketState?: "PRE" | "PREPRE" | "REGULAR" | "POST" | "POSTPOST" | "CLOSED";
   typeDisp?: string;
   regularMarketPrice?: number;
   regularMarketPreviousClose?: number;
@@ -51,12 +51,14 @@ export interface PriceInfo {
 export function currentPriceInfo(quote: Quote): PriceInfo {
   switch (quote.marketState) {
     case "POST":
+    case "POSTPOST":
       return {
         price: quote.postMarketPrice,
         change: quote.postMarketChange,
         changePercent: quote.postMarketChangePercent,
       };
     case "PRE":
+    case "PREPRE":
       return {
         price: quote.preMarketPrice,
         change: quote.preMarketChange,

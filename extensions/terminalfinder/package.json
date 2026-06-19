@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminalfinder",
   "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm) and vice versa",
+  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm, cmux) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
   "contributors": [
     "Ianvs",
     "anirudh_gupta",
-    "xmok"
+    "xmok",
+    "vatsalsanjay"
   ],
   "license": "MIT",
   "commands": [
@@ -55,6 +56,13 @@
       "mode": "no-view"
     },
     {
+      "name": "clipboardToCmux",
+      "title": "Clipboard → Cmux",
+      "subtitle": "Open Path",
+      "description": "Open current Clipboard directory in cmux",
+      "mode": "no-view"
+    },
+    {
       "name": "finderToITerm",
       "title": "Finder → iTerm",
       "subtitle": "Open Path",
@@ -94,6 +102,13 @@
       "title": "Finder → Kitty",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Kitty",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToCmux",
+      "title": "Finder → Cmux",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in cmux",
       "mode": "no-view"
     },
     {
@@ -139,6 +154,13 @@
       "mode": "no-view"
     },
     {
+      "name": "cmuxToFinder",
+      "title": "Cmux → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current cmux directory in Finder",
+      "mode": "no-view"
+    },
+    {
       "name": "index",
       "title": "X → Y",
       "subtitle": "Open Path",
@@ -158,6 +180,10 @@
             {
               "title": "Finder",
               "value": "Finder"
+            },
+            {
+              "title": "Cmux",
+              "value": "cmux"
             },
             {
               "title": "Ghostty",
@@ -194,6 +220,10 @@
             {
               "title": "Finder",
               "value": "Finder"
+            },
+            {
+              "title": "Cmux",
+              "value": "cmux"
             },
             {
               "title": "Ghostty",

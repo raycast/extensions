@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "append-to-file",
+  "title": "Append Text to File",
+  "description": "Append text to markdown and text files quickly from clipboard history or direct input.",
+  "icon": "text-to-file-icon.png",
+  "author": "brusik",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "clipboard",
+    "notes",
+    "markdown",
+    "text",
+    "journal",
+    "quick-capture",
+    "append",
+    "productivity",
+    "raycast",
+    "workflow",
+    "note-taking"
+  ],
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test --experimental-strip-types tests/**/*.test.ts",
+    "publish": "ray publish"
+  },
+  "commands": [
+    {
+      "name": "append-clipboard-to-file",
+      "title": "Append Text from Clipboard to File",
+      "subtitle": "Append Text to File",
+      "description": "Pick an entry from the clipboard history and append it to a file.",
+      "mode": "view"
+    },
+    {
+      "name": "append-text-to-file",
+      "title": "Append Text to File",
+      "subtitle": "Append Text to File",
+      "description": "Edit text before appending to a file.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-append-clipboard-to-last-appended-file",
+      "title": "Quick Append Current Clipboard Text to Last Appended File",
+      "subtitle": "Append Text to File",
+      "description": "Append latest clipboard text entry to the last appended file.",
+      "mode": "no-view"
+    },
+    {
+      "name": "undo-last-append",
+      "title": "Undo Last Append",
+      "subtitle": "Append Text to File",
+      "description": "Revert the most recent append operation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-last-appended-file",
+      "title": "Open Last Appended File",
+      "subtitle": "Append Text to File",
+      "description": "Open the most recently appended file.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "roots",
+      "type": "textfield",
+      "title": "Root Directories",
+      "description": "Comma or newline separated directories to search.",
+      "required": false,
+      "default": "~/Documents",
+      "placeholder": "~/Documents, ~/Notes"
+    },
+    {
+      "name": "allowedExtensions",
+      "type": "textfield",
+      "title": "Allowed Extensions",
+      "description": "Comma or newline separated extensions to allow (for example: .txt,.md,.markdown,.yaml,.yml, etc.).",
+      "required": false,
+      "default": ".txt,.text,.md,.markdown"
+    },
+    {
+      "name": "searchExcludes",
+      "type": "textfield",
+      "title": "Search Excludes",
+      "description": "Comma or newline separated names/patterns to ignore while searching (for example: .git,node_modules,archive/*).",
+      "required": false,
+      "default": ".git,node_modules,dist,build"
+    },
+    {
+      "name": "searchMaxDepth",
+      "type": "textfield",
+      "title": "Search Max Depth",
+      "description": "Maximum depth under each root to search (0 = root only).",
+      "required": false,
+      "default": "8"
+    },
+    {
+      "name": "separatorRule",
+      "type": "dropdown",
+      "title": "Separator Rule",
+      "description": "How entries are separated when appending.",
+      "required": false,
+      "default": "single-newline",
+      "data": [
+        {
+          "title": "Exactly One Newline",
+          "value": "single-newline"
+        },
+        {
+          "title": "Blank Line",
+          "value": "blank-line"
+        },
+        {
+          "title": "Custom Separator",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customSeparator",
+      "type": "textfield",
+      "title": "Custom Separator",
+      "description": "Used when separator rule is Custom. Supports \\n and \\t.",
+      "required": false,
+      "placeholder": "\\n---\\n"
+    },
+    {
+      "name": "ensureTrailingNewline",
+      "type": "checkbox",
+      "title": "Ensure Trailing Newline",
+      "label": "Keep one trailing newline after append",
+      "description": "Keep one newline at end of file after append.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "timestampFormat",
+      "type": "textfield",
+      "title": "Timestamp Format",
+      "description": "Used by the Append with Timestamp action.",
+      "required": false,
+      "default": "YYYY-MM-DD HH:mm"
+    },
+    {
+      "name": "defaultInsertPosition",
+      "type": "dropdown",
+      "title": "Default Insert Position",
+      "description": "Where new text is inserted when appending.",
+      "required": false,
+      "default": "end",
+      "data": [
+        {
+          "title": "End of File",
+          "value": "end"
+        },
+        {
+          "title": "Beginning of File",
+          "value": "beginning"
+        }
+      ]
+    },
+    {
+      "name": "defaultClipboardOffset",
+      "type": "dropdown",
+      "title": "Default Clipboard Offset",
+      "description": "Default clipboard history item (0 = latest).",
+      "required": false,
+      "default": "0",
+      "data": [
+        {
+          "title": "0 (Latest)",
+          "value": "0"
+        },
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "react": "^19.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-
 /** @module SuggestionsGetter */
 import QueryParser from "./QueryParser";
 import escapeStringRegexp from "escape-string-regexp";
 
 export default class SuggestionsGetter {
-  constructor(env) {
+  [key: string]: any;
+
+  constructor(env: AnyObject) {
     this.env = env;
   }
 
@@ -17,7 +16,7 @@ export default class SuggestionsGetter {
    *
    * @return {array} suggestions – The found suggestions.
    */
-  getSuggestions(query) {
+  getSuggestions(query: string) {
     if (!query) {
       return [];
     }
@@ -70,8 +69,8 @@ export default class SuggestionsGetter {
    *
    * @return {object} matches – The found matches, grouped by type of match.
    */
-  getMatches(query) {
-    const matches = {
+  getMatches(query: string) {
+    const matches: AnyObject = {
       showOnHome: [],
       keywordFullReachable: [],
       keywordFullUnreachable: [],
@@ -86,14 +85,14 @@ export default class SuggestionsGetter {
       urlMiddleReachable: [],
       urlMiddleUnreachable: [],
     };
-    const env = QueryParser.parse(query);
-    const [regExp, filters] = this.getRegExpAndFilters(query);
+    const env: AnyObject = QueryParser.parse(query);
+    const [regExp, filters]: [RegExp, AnyObject] = this.getRegExpAndFilters(query);
 
-    for (const namespaceInfo of Object.values(this.env.namespaceInfos)) {
+    for (const namespaceInfo of Object.values(this.env.namespaceInfos) as any[]) {
       if (!namespaceInfo.shortcuts) {
         continue;
       }
-      for (const shortcut of Object.values(namespaceInfo.shortcuts)) {
+      for (const shortcut of Object.values(namespaceInfo.shortcuts) as any[]) {
         if (shortcut.deprecated || shortcut.removed) {
           continue;
         }
@@ -174,8 +173,8 @@ export default class SuggestionsGetter {
     return matches;
   }
 
-  getRegExpAndFilters(query) {
-    const filters = {};
+  getRegExpAndFilters(query: string): [RegExp, AnyObject] {
+    const filters: AnyObject = {};
     const queryParts = query.split(" ");
     const remainingQueryParts = [];
     for (const part of queryParts) {
@@ -211,7 +210,7 @@ export default class SuggestionsGetter {
    *
    * @param {string} keyword – The keyword from the query.
    */
-  sort(matches) {
+  sort(matches: AnyObject) {
     const compareKeywords = (a, b) => a.keyword.localeCompare(b.keyword);
     for (const key in matches) {
       matches[key].sort(compareKeywords);

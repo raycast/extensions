@@ -28,6 +28,7 @@ import {
   availabilityContrast,
 } from "./commands";
 import ResolutionList from "./list-resolutions";
+import InputSourceList from "./list-input-sources";
 import events from "./events";
 
 type FilterOption = "all" | "displays" | "virtualScreens";
@@ -50,7 +51,7 @@ function verifyAppAvailability() {
       });
       popToRoot();
     }
-  } catch (error) {
+  } catch {
     showFailureToast("Failed to verify BetterDisplay app", {
       title: "Preference Error",
       message: "Could not access extension preferences.",
@@ -207,6 +208,12 @@ function DisplayItem({ display, status, resolution, isMain, onToggle }: DisplayI
                 shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                 target={<ResolutionList display={{ tagID: display.tagID, name: display.name }} />}
               />
+              <Action.Push
+                title="Change Input Source"
+                icon={Icon.Switch}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                target={<InputSourceList display={{ tagID: display.tagID, name: display.name }} />}
+              />
             </>
           )}
         </ActionPanel>
@@ -305,6 +312,15 @@ export default function ManageDisplays() {
   const displayItems = displays.filter((d) => d.deviceType === "Display");
   const virtualScreenItems = displays.filter((d) => d.deviceType === "VirtualScreen");
 
+  const displaySections: { title: string; items: Display[]; visible: boolean }[] = [
+    { title: "Displays", items: displayItems, visible: filter === "all" || filter === "displays" },
+    {
+      title: "Virtual Screens",
+      items: virtualScreenItems,
+      visible: filter === "all" || filter === "virtualScreens",
+    },
+  ];
+
   return (
     <List
       isLoading={isLoading}
@@ -323,34 +339,22 @@ export default function ManageDisplays() {
         </List.Dropdown>
       }
     >
-      {(filter === "all" || filter === "displays") && (
-        <List.Section title="Displays">
-          {displayItems.map((display) => (
-            <DisplayItem
-              key={display.tagID}
-              display={display}
-              status={statuses[display.tagID] || "Loading"}
-              resolution={resolutions[display.tagID] || "Loading"}
-              isMain={mainDisplay?.tagID === display.tagID}
-              onToggle={handleToggleRefresh}
-            />
-          ))}
-        </List.Section>
-      )}
-      {(filter === "all" || filter === "virtualScreens") && (
-        <List.Section title="Virtual Screens">
-          {virtualScreenItems.map((display) => (
-            <DisplayItem
-              key={display.tagID}
-              display={display}
-              status={statuses[display.tagID] || "Loading"}
-              resolution={resolutions[display.tagID] || "Loading"}
-              isMain={mainDisplay?.tagID === display.tagID}
-              onToggle={handleToggleRefresh}
-            />
-          ))}
-        </List.Section>
-      )}
+      {displaySections
+        .filter((section) => section.visible)
+        .map((section) => (
+          <List.Section key={section.title} title={section.title}>
+            {section.items.map((display) => (
+              <DisplayItem
+                key={display.tagID}
+                display={display}
+                status={statuses[display.tagID] || "Loading"}
+                resolution={resolutions[display.tagID] || "Loading"}
+                isMain={mainDisplay?.tagID === display.tagID}
+                onToggle={handleToggleRefresh}
+              />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }

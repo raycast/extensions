@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cut-out",
+  "title": "Cut Out",
+  "description": "Delete a horizontal or vertical strip from an image and stitch the remaining parts",
+  "icon": "extension-icon.png",
+  "author": "lemikeone",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "keywords": [
+    "image",
+    "snagit",
+    "crop",
+    "cut out",
+    "remove section"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "exportMode",
+      "title": "Export Mode",
+      "description": "Choose whether the edited image overwrites the source or creates a new file",
+      "type": "dropdown",
+      "required": true,
+      "default": "new-file",
+      "data": [
+        {
+          "title": "Create New File",
+          "value": "new-file"
+        },
+        {
+          "title": "Overwrite Original",
+          "value": "overwrite"
+        }
+      ]
+    },
+    {
+      "name": "revealInFinder",
+      "title": "After Export",
+      "description": "Reveal the output image in Finder after processing",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Reveal output in Finder"
+    },
+    {
+      "name": "openAfterExport",
+      "title": "",
+      "description": "Open the output image with the default image app after processing",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Open output image"
+    }
+  ],
+  "commands": [
+    {
+      "name": "cut-out-image-section-from-selection",
+      "title": "Cut out Image Section from Selection",
+      "description": "Delete a horizontal or vertical strip from the selected Finder image",
+      "mode": "no-view"
+    },
+    {
+      "name": "cut-out-image-section-from-clipboard",
+      "title": "Cut out Image Section from Clipboard",
+      "description": "Delete a horizontal or vertical strip from the clipboard image, then copy it back",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -34,5 +34,6 @@ export type SvgActionKey =
   | "copyAngularComponent"
   | "copySvgUrl"
   | "copySvgWordmarkUrl"
+  | "copyAstroComponent"
   | "operation"
   | "svgInfo";

@@ -46,11 +46,14 @@
     "preferences": [
       {
         "name": "email",
-        "type": "text",
+        "type": "textfield",
         "title": "Your Email (for Liquipedia User-Agent header)",
         "placeholder": "you@example.com",
         "required": true
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -37,13 +37,18 @@ export function createTemplateDisplayUrls(
   const templateUrls: DisplayUrl[] = [];
   const allAppliedTemplates = getAllAppliedTemplates(entity, rootData);
 
+  const placeholdersResult = mergePlaceholders(rootData.globalPlaceholders, entity.templatePlaceholders);
+
+  if (!placeholdersResult.success) {
+    console.error(`Placeholder error for ${keyPrefix}: ${placeholdersResult.error}`);
+    return templateUrls;
+  }
+
+  const placeholders = placeholdersResult.placeholders;
+
   for (const templateKey of allAppliedTemplates) {
     const template = rootData.templates?.[templateKey];
     if (!template || !template.templateUrl) continue;
-
-    const placeholders = mergePlaceholders(rootData.globalPlaceholders, entity.templatePlaceholders);
-
-    if (!placeholders) continue;
 
     const finalUrl = applyTemplate(template.templateUrl, placeholders);
     const tags = template.tags || [];

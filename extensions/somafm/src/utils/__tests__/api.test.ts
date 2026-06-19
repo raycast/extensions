@@ -68,4 +68,13 @@ describe("fetchStations", () => {
       }),
     );
   });
+
+  it("should return empty array without toast when showErrorToast is false", async () => {
+    global.fetch = vi.fn(() => Promise.reject(new Error("Network error")));
+
+    const result = await fetchStations({ showErrorToast: false });
+
+    expect(result).toEqual([]);
+    expect(showFailureToast).not.toHaveBeenCalled();
+  });
 });

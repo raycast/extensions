@@ -3,63 +3,141 @@
   "name": "klack",
   "title": "Klack",
   "description": "Control Klack for macOS with Raycast",
-  "icon": "klack.png",
+  "icon": "icon.png",
   "author": "henrikruscon",
-  "contributors": [],
-  "categories": [
-    "Applications",
-    "Media",
-    "Fun"
-  ],
+  "contributors": ["jace"],
+  "categories": ["Applications", "Media", "Fun"],
   "license": "MIT",
   "commands": [
     {
-      "name": "toggleKlack",
+      "name": "toggle",
       "title": "Toggle Klack",
       "subtitle": "Klack",
-      "description": "Toggles Klack",
-      "mode": "no-view"
+      "description": "Toggles Klack on or off",
+      "mode": "no-view",
+      "keywords": ["toggle"]
     },
     {
-      "name": "setSwitchSet",
+      "name": "turn-on",
+      "title": "Turn Klack on",
+      "subtitle": "Klack",
+      "description": "Explicitly enables Klack",
+      "mode": "no-view",
+      "keywords": ["enable"]
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn Klack off",
+      "subtitle": "Klack",
+      "description": "Explicitly disables Klack",
+      "mode": "no-view",
+      "keywords": ["disable", "mute"]
+    },
+    {
+      "name": "wake-up",
+      "title": "Wake Klack",
+      "subtitle": "Klack",
+      "description": "Wakes Klack from sleep",
+      "mode": "no-view",
+      "keywords": ["sleep"]
+    },
+    {
+      "name": "set-switch",
       "title": "Set Switch Set",
       "subtitle": "Klack",
-      "description": "Sets Switch Set",
-      "mode": "view"
+      "description": "Pick a mechanical-switch sound set",
+      "mode": "view",
+      "keywords": ["switch", "sound", "pack"]
     },
     {
-      "name": "setSoftVolume",
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Klack",
+      "description": "Pick a volume between 0 and 100",
+      "mode": "view",
+      "keywords": ["loudness"]
+    },
+    {
+      "name": "set-soft-volume",
       "title": "Set Volume to Soft",
       "subtitle": "Klack",
-      "description": "Sets Volume to Soft (30%)",
-      "mode": "no-view"
+      "description": "Sets volume to Soft (30%)",
+      "mode": "no-view",
+      "keywords": ["quiet"]
     },
     {
-      "name": "setBalancedVolume",
+      "name": "set-balanced-volume",
       "title": "Set Volume to Balanced",
       "subtitle": "Klack",
-      "description": "Sets Volume to Balanced (60%)",
-      "mode": "no-view"
+      "description": "Sets volume to Balanced (60%)",
+      "mode": "no-view",
+      "keywords": ["medium"]
     },
     {
-      "name": "setLoudVolume",
+      "name": "set-loud-volume",
       "title": "Set Volume to Loud",
       "subtitle": "Klack",
-      "description": "Sets Volume to Loud (90%)",
-      "mode": "no-view"
+      "description": "Sets volume to Loud (90%)",
+      "mode": "no-view",
+      "keywords": ["high"]
+    },
+    {
+      "name": "stats",
+      "title": "Klack Stats",
+      "subtitle": "Klack",
+      "description": "Live keystroke, ding, click, and favourite switch counts",
+      "mode": "view",
+      "keywords": ["stats", "statistics", "usage", "keystrokes"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "toggle",
+      "title": "Toggle Klack",
+      "description": "Toggle Klack typing sounds on or off."
+    },
+    {
+      "name": "turn-on",
+      "title": "Turn Klack on",
+      "description": "Enable Klack typing sounds."
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn Klack off",
+      "description": "Disable Klack typing sounds."
+    },
+    {
+      "name": "wake-up",
+      "title": "Wake Klack",
+      "description": "Wake Klack from sleep mode."
+    },
+    {
+      "name": "set-switch",
+      "title": "Set Switch Set",
+      "description": "Set the active mechanical-switch sound set. Accepts switch names like \"Cream\", \"Crystal Purple\", \"Super Red\", or \"None\"."
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "description": "Set Klack volume to a value between 0 and 100."
+    },
+    {
+      "name": "get-status",
+      "title": "Get Klack Status",
+      "description": "Returns whether Klack is enabled and sleeping, plus the current switch set and volume."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.2",
-    "run-applescript": "^7.0.0"
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -68,7 +146,5 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": [
-    "macOS"
-  ]
+  "platforms": ["macOS"]
 }

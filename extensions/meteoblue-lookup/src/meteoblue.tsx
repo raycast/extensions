@@ -3,10 +3,12 @@ import {
   ActionPanel,
   Action,
   Icon,
-  Detail,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useWeather } from "./hooks";
+import { useFavorites } from "./favorites";
+import { DayHourlyForecast } from "./DayHourlyForecast";
+import { HourDetail } from "./HourDetail";
 import {
   formatTemperature,
   formatTemperatureRange,
@@ -35,6 +37,22 @@ export default function Command() {
     preferences,
     setLocationResults,
   } = useWeather();
+
+  const {
+    favorites,
+    lastUsedLocation,
+    handleAddFavorite,
+    handleRemoveFavorite,
+    handleSetLastUsed,
+    isLocationFavorite,
+  } = useFavorites();
+
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
+    await handleSetLastUsed(location);
+    await handleSelectLocation(location);
+  };
 
   // Error state - API key missing
   if (
@@ -81,8 +99,21 @@ export default function Command() {
                       <Action
                         title="Select Location"
                         icon={Icon.Check}
-                        onAction={() => handleSelectLocation(location)}
+                        onAction={() => selectLocation(location)}
                       />
+                      {isLocationFavorite(location.id) ? (
+                        <Action
+                          title="Remove from Favorites"
+                          icon={Icon.StarDisabled}
+                          onAction={() => handleRemoveFavorite(location.id)}
+                        />
+                      ) : (
+                        <Action
+                          title="Add to Favorites"
+                          icon={Icon.Star}
+                          onAction={() => handleAddFavorite(location)}
+                        />
+                      )}
                       <Action
                         title="Configure Extension"
                         icon={Icon.Gear}
@@ -114,7 +145,24 @@ export default function Command() {
     const basicData = weatherData.basic?.data_1h || [];
     const dailyData =
       weatherData.basicDay?.data_day || weatherData.basic?.data_day || [];
-    const currentData = basicData[0]; // First item is current/next hour
+
+    // Forward-looking: start from current hour (rounded down)
+    const now = new Date();
+    const currentHourStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+    ).getTime();
+    const startIndex = basicData.findIndex(
+      (item) => new Date(item.time).getTime() >= currentHourStart,
+    );
+    const hourlyData =
+      startIndex >= 0
+        ? basicData.slice(startIndex, startIndex + 24)
+        : basicData.slice(0, 24);
+    const currentData = hourlyData[0];
+
     const locationName = selectedLocation
       ? `${selectedLocation.name}, ${selectedLocation.country}`
       : "Unknown Location";
@@ -173,6 +221,20 @@ export default function Command() {
                     }
                   }}
                 />
+                {selectedLocation &&
+                  (isLocationFavorite(selectedLocation.id) ? (
+                    <Action
+                      title="Remove from Favorites"
+                      icon={Icon.StarDisabled}
+                      onAction={() => handleRemoveFavorite(selectedLocation.id)}
+                    />
+                  ) : (
+                    <Action
+                      title="Add to Favorites"
+                      icon={Icon.Star}
+                      onAction={() => handleAddFavorite(selectedLocation)}
+                    />
+                  ))}
                 <Action
                   title="Configure Extension"
                   icon={Icon.Gear}
@@ -263,11 +325,11 @@ export default function Command() {
         <List.Section
           title="Hourly Forecast"
           subtitle={
-            basicData.length > 0 ? `${basicData.length} hours` : "No data"
+            hourlyData.length > 0 ? `${hourlyData.length} hours` : "No data"
           }
         >
-          {basicData.length > 0 ? (
-            basicData.slice(0, 24).map((item, index) => {
+          {hourlyData.length > 0 ? (
+            hourlyData.map((item, index) => {
               const date = new Date(item.time);
               const timeStr = date.toLocaleTimeString([], {
                 hour: "2-digit",
@@ -278,7 +340,6 @@ export default function Command() {
                   ? "Now"
                   : date.toLocaleDateString([], {
                       weekday: "short",
-                      hour: "2-digit",
                     });
 
               return (
@@ -293,8 +354,23 @@ export default function Command() {
                         title="View Details"
                         icon={Icon.Info}
                         target={
-                          <Detail
-                            markdown={`# Weather Details\n\n**Time:** ${new Date(item.time).toLocaleString()}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                          <HourDetail
+                            item={item}
+                            units={{
+                              temperature:
+                                weatherData.basic?.units?.temperature || "°C",
+                              felttemperature:
+                                weatherData.basic?.units?.felttemperature ||
+                                weatherData.basic?.units?.temperature ||
+                                "°C",
+                              precipitation:
+                                weatherData.basic?.units?.precipitation || "mm",
+                              windspeed:
+                                weatherData.basic?.units?.windspeed || "km/h",
+                              sealevelpressure:
+                                weatherData.basic?.units?.sealevelpressure ||
+                                "hPa",
+                            }}
                           />
                         }
                       />
@@ -318,49 +394,77 @@ export default function Command() {
           }
         >
           {dailyData.length > 0 ? (
-            dailyData.slice(0, 7).map((item) => {
-              const date = new Date(item.time);
-              const dateStr = date.toLocaleDateString([], {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-              });
+            dailyData
+              .filter((item) => {
+                const itemDate = new Date(item.time);
+                const todayStart = new Date(
+                  now.getFullYear(),
+                  now.getMonth(),
+                  now.getDate(),
+                );
+                return itemDate >= todayStart;
+              })
+              .slice(0, 7)
+              .map((item) => {
+                const date = new Date(item.time);
+                const dateStr = date.toLocaleDateString([], {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                });
 
-              const tempUnit =
-                weatherData.basicDay?.units?.temperature ||
-                weatherData.basic?.units?.temperature ||
-                "°C";
-              const precipUnit =
-                weatherData.basicDay?.units?.precipitation ||
-                weatherData.basic?.units?.precipitation ||
-                "mm";
-              const windUnit =
-                weatherData.basicDay?.units?.windspeed ||
-                weatherData.basic?.units?.windspeed ||
-                "km/h";
+                const tempUnit =
+                  weatherData.basicDay?.units?.temperature ||
+                  weatherData.basic?.units?.temperature ||
+                  "°C";
+                const precipUnit =
+                  weatherData.basicDay?.units?.precipitation ||
+                  weatherData.basic?.units?.precipitation ||
+                  "mm";
+                const windUnit =
+                  weatherData.basicDay?.units?.windspeed ||
+                  weatherData.basic?.units?.windspeed ||
+                  "km/h";
 
-              return (
-                <List.Item
-                  key={item.time}
-                  title={dateStr}
-                  subtitle={`${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)} • ${formatPrecipitation(item.precipitation, precipUnit)} • ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}`}
-                  icon={getWeatherIcon(item.pictocode)}
-                  actions={
-                    <ActionPanel>
-                      <Action.Push
-                        title="View Details"
-                        icon={Icon.Info}
-                        target={
-                          <Detail
-                            markdown={`# Daily Forecast\n\n**Date:** ${date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n**Temperature:** ${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit)}\n**Precipitation:** ${formatPrecipitation(item.precipitation, precipUnit)}\n**Wind Speed:** ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
-                          />
-                        }
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })
+                return (
+                  <List.Item
+                    key={item.time}
+                    title={dateStr}
+                    subtitle={`${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)} • ${formatPrecipitation(item.precipitation, precipUnit)} • ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}`}
+                    icon={getWeatherIcon(item.pictocode)}
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="View Hourly Breakdown"
+                          icon={Icon.Clock}
+                          target={
+                            <DayHourlyForecast
+                              date={date}
+                              hourlyData={basicData}
+                              units={{
+                                temperature: tempUnit,
+                                felttemperature:
+                                  weatherData.basicDay?.units
+                                    ?.felttemperature ||
+                                  weatherData.basic?.units?.felttemperature ||
+                                  tempUnit,
+                                precipitation: precipUnit,
+                                windspeed: windUnit,
+                                sealevelpressure:
+                                  weatherData.basicDay?.units
+                                    ?.sealevelpressure ||
+                                  weatherData.basic?.units?.sealevelpressure ||
+                                  "hPa",
+                              }}
+                              locationName={locationName}
+                            />
+                          }
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })
           ) : (
             <List.Item
               title="No daily forecast data available"
@@ -381,26 +485,86 @@ export default function Command() {
       throttle
     >
       {searchText.length === 0 && !selectedLocation ? (
-        <List.Section title="Suggestions">
-          <List.Item
-            title="Current Location"
-            icon={Icon.Pin}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Use Current Location"
-                  icon={Icon.Pin}
-                  onAction={handleUseCurrentLocation}
+        <>
+          <List.Section title="Suggestions">
+            {lastUsedLocation && (
+              <List.Item
+                title={lastUsedLocation.name}
+                subtitle={`${lastUsedLocation.country}${lastUsedLocation.admin1 ? `, ${lastUsedLocation.admin1}` : ""}`}
+                icon={Icon.Clock}
+                accessories={[{ text: "Last used" }]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Select Location"
+                      icon={Icon.Check}
+                      onAction={() => selectLocation(lastUsedLocation)}
+                    />
+                    {isLocationFavorite(lastUsedLocation.id) ? (
+                      <Action
+                        title="Remove from Favorites"
+                        icon={Icon.StarDisabled}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
+                      />
+                    ) : (
+                      <Action
+                        title="Add to Favorites"
+                        icon={Icon.Star}
+                        onAction={() => handleAddFavorite(lastUsedLocation)}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            )}
+            <List.Item
+              title="Current Location"
+              icon={Icon.Pin}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Use Current Location"
+                    icon={Icon.Pin}
+                    onAction={handleUseCurrentLocation}
+                  />
+                  <Action
+                    title="Configure Extension"
+                    icon={Icon.Gear}
+                    onAction={openExtensionPreferences}
+                  />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          {favorites.length > 0 && (
+            <List.Section title="Favorites">
+              {favorites.map((fav) => (
+                <List.Item
+                  key={fav.id}
+                  title={fav.name}
+                  subtitle={`${fav.country}${fav.admin1 ? `, ${fav.admin1}` : ""}`}
+                  icon={Icon.Star}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Select Location"
+                        icon={Icon.Check}
+                        onAction={() => selectLocation(fav)}
+                      />
+                      <Action
+                        title="Remove from Favorites"
+                        icon={Icon.StarDisabled}
+                        onAction={() => handleRemoveFavorite(fav.id)}
+                      />
+                    </ActionPanel>
+                  }
                 />
-                <Action
-                  title="Configure Extension"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
+              ))}
+            </List.Section>
+          )}
+        </>
       ) : (
         <List.EmptyView
           icon={

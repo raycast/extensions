@@ -12,7 +12,10 @@ export default function Command({ arguments: { domain } }: LaunchProps<{ argumen
       try {
         isValidToken();
         const result = await checkDomainAvailability(domain);
-        setAvailability(typeof result === "boolean" ? result : false);
+        if (result.error) {
+          console.error("Error checking domain availability:", result.error);
+        }
+        setAvailability(result.available);
       } catch (error) {
         console.error("Error checking domain availability:", error);
         setAvailability(false);

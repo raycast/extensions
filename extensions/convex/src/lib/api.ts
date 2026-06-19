@@ -3,6 +3,8 @@
  *
  * Provides API functions for interacting with Convex deployments
  * and the BigBrain management API.
+ *
+ * Supports both OAuth access tokens and deploy keys for authentication.
  */
 
 import {
@@ -16,6 +18,45 @@ import {
   type UserProfile,
 } from "./bigbrain";
 import { CONVEX_CLIENT_ID } from "./constants";
+
+/**
+ * Authentication options for API calls.
+ * Either provide deploymentName + accessToken, or deploymentUrl + deployKey
+ */
+export interface AuthOptions {
+  /** Deployment name (e.g., "polite-condor-874") - used with accessToken */
+  deploymentName?: string;
+  /** OAuth access token from BigBrain */
+  accessToken?: string;
+  /** Full deployment URL (e.g., "https://polite-condor-874.convex.cloud") - used with deployKey */
+  deploymentUrl?: string;
+  /** Deploy key for direct authentication */
+  deployKey?: string;
+}
+
+/**
+ * Get the deployment URL from auth options
+ */
+function getUrlFromAuth(auth: AuthOptions): string {
+  if (auth.deploymentUrl) {
+    return auth.deploymentUrl;
+  }
+  if (auth.deploymentName) {
+    return getDeploymentUrl(auth.deploymentName);
+  }
+  throw new Error("Either deploymentUrl or deploymentName must be provided");
+}
+
+/**
+ * Get the authorization header value from auth options
+ */
+function getAuthHeader(auth: AuthOptions): string {
+  const token = auth.deployKey || auth.accessToken;
+  if (!token) {
+    throw new Error("Either deployKey or accessToken must be provided");
+  }
+  return `Convex ${token}`;
+}
 
 export { getTeams, getProjects, getDeployments, getProfile };
 export type { Team, Project, Deployment, UserProfile };
@@ -55,17 +96,23 @@ export function getDeploymentUrl(deploymentName: string): string {
  * Fetch all functions from a deployment using system query
  */
 export async function getFunctions(
-  deploymentName: string,
-  accessToken: string,
+  deploymentNameOrAuth: string | AuthOptions,
+  accessToken?: string,
 ): Promise<ModuleFunctions[]> {
-  const url = getDeploymentUrl(deploymentName);
+  // Support both old and new signatures
+  const auth: AuthOptions =
+    typeof deploymentNameOrAuth === "string"
+      ? { deploymentName: deploymentNameOrAuth, accessToken }
+      : deploymentNameOrAuth;
+
+  const url = getUrlFromAuth(auth);
 
   // Use system query to get function API spec
   const response = await fetch(`${url}/api/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Convex ${accessToken}`,
+      Authorization: getAuthHeader(auth),
       "Convex-Client": CONVEX_CLIENT_ID,
     },
     body: JSON.stringify({
@@ -150,16 +197,23 @@ function parseApiSpec(apiSpec: unknown): ModuleFunctions[] {
  * Get all tables from a deployment using the shapes2 API
  */
 export async function getTables(
-  deploymentName: string,
-  accessToken: string,
+  deploymentNameOrAuth: string | AuthOptions,
+  accessToken?: string,
 ): Promise<TableInfo[]> {
-  const url = getDeploymentUrl(deploymentName);
+  // Support both old and new signatures
+  const auth: AuthOptions =
+    typeof deploymentNameOrAuth === "string"
+      ? { deploymentName: deploymentNameOrAuth, accessToken }
+      : deploymentNameOrAuth;
+
+  const url = getUrlFromAuth(auth);
+  const authHeader = getAuthHeader(auth);
 
   // Primary approach: Use /api/shapes2 endpoint which returns table schemas
   const shapesResponse = await fetch(`${url}/api/shapes2`, {
     method: "GET",
     headers: {
-      Authorization: `Convex ${accessToken}`,
+      Authorization: authHeader,
       "Convex-Client": CONVEX_CLIENT_ID,
     },
   });
@@ -182,7 +236,7 @@ export async function getTables(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Convex ${accessToken}`,
+      Authorization: authHeader,
       "Convex-Client": CONVEX_CLIENT_ID,
     },
     body: JSON.stringify({
@@ -215,19 +269,41 @@ export async function getTables(
  * Get documents from a table
  */
 export async function getDocuments(
-  deploymentName: string,
-  accessToken: string,
-  tableName: string,
+  deploymentNameOrAuth: string | AuthOptions,
+  accessTokenOrTableName: string,
+  tableNameOrOptions?: string | { limit?: number; cursor?: string },
   options?: {
     limit?: number;
     cursor?: string;
   },
 ): Promise<{ documents: Document[]; nextCursor?: string; isDone?: boolean }> {
-  const url = getDeploymentUrl(deploymentName);
-  const numItems = options?.limit ?? 25;
+  // Support both old and new signatures
+  let auth: AuthOptions;
+  let tableName: string;
+  let opts: { limit?: number; cursor?: string } | undefined;
+
+  if (typeof deploymentNameOrAuth === "string") {
+    // Old signature: (deploymentName, accessToken, tableName, options?)
+    auth = {
+      deploymentName: deploymentNameOrAuth,
+      accessToken: accessTokenOrTableName,
+    };
+    tableName = tableNameOrOptions as string;
+    opts = options;
+  } else {
+    // New signature: (auth, tableName, options?)
+    auth = deploymentNameOrAuth;
+    tableName = accessTokenOrTableName;
+    opts = tableNameOrOptions as
+      | { limit?: number; cursor?: string }
+      | undefined;
+  }
+
+  const url = getUrlFromAuth(auth);
+  const numItems = opts?.limit ?? 25;
 
   const paginationOpts = {
-    cursor: options?.cursor ?? null,
+    cursor: opts?.cursor ?? null,
     numItems,
     id: Date.now(),
   };
@@ -236,7 +312,7 @@ export async function getDocuments(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Convex ${accessToken}`,
+      Authorization: getAuthHeader(auth),
       "Convex-Client": CONVEX_CLIENT_ID,
     },
     body: JSON.stringify({
@@ -274,13 +350,38 @@ export async function getDocuments(
  * Run a Convex function
  */
 export async function runFunction(
-  deploymentName: string,
-  accessToken: string,
-  functionPath: string,
-  functionType: "query" | "mutation" | "action",
-  args: Record<string, unknown> = {},
+  deploymentNameOrAuth: string | AuthOptions,
+  accessTokenOrFunctionPath: string,
+  functionPathOrType?: string | ("query" | "mutation" | "action"),
+  functionTypeOrArgs?:
+    | ("query" | "mutation" | "action")
+    | Record<string, unknown>,
+  argsParam?: Record<string, unknown>,
 ): Promise<{ result: unknown; executionTime: number }> {
-  const url = getDeploymentUrl(deploymentName);
+  // Support both old and new signatures
+  let auth: AuthOptions;
+  let functionPath: string;
+  let functionType: "query" | "mutation" | "action";
+  let args: Record<string, unknown>;
+
+  if (typeof deploymentNameOrAuth === "string") {
+    // Old signature: (deploymentName, accessToken, functionPath, functionType, args?)
+    auth = {
+      deploymentName: deploymentNameOrAuth,
+      accessToken: accessTokenOrFunctionPath,
+    };
+    functionPath = functionPathOrType as string;
+    functionType = functionTypeOrArgs as "query" | "mutation" | "action";
+    args = argsParam ?? {};
+  } else {
+    // New signature: (auth, functionPath, functionType, args?)
+    auth = deploymentNameOrAuth;
+    functionPath = accessTokenOrFunctionPath;
+    functionType = functionPathOrType as "query" | "mutation" | "action";
+    args = (functionTypeOrArgs as Record<string, unknown>) ?? {};
+  }
+
+  const url = getUrlFromAuth(auth);
   const startTime = Date.now();
 
   const endpoint =
@@ -294,7 +395,7 @@ export async function runFunction(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Convex ${accessToken}`,
+      Authorization: getAuthHeader(auth),
       "Convex-Client": CONVEX_CLIENT_ID,
     },
     body: JSON.stringify({
@@ -389,17 +490,42 @@ export interface GetLogsResponse {
  * Get function execution logs from a deployment
  */
 export async function getLogs(
-  deploymentName: string,
-  accessToken: string,
+  deploymentNameOrAuth: string | AuthOptions,
+  accessTokenOrOptions?:
+    | string
+    | {
+        cursor?: string | number;
+        limit?: number;
+        functionFilter?: string;
+      },
   options?: {
     cursor?: string | number;
     limit?: number;
     functionFilter?: string;
   },
 ): Promise<GetLogsResponse> {
-  const url = getDeploymentUrl(deploymentName);
-  const cursor = options?.cursor ?? 0;
-  const limit = options?.limit ?? 50;
+  // Support both old and new signatures
+  let auth: AuthOptions;
+  let opts:
+    | { cursor?: string | number; limit?: number; functionFilter?: string }
+    | undefined;
+
+  if (typeof deploymentNameOrAuth === "string") {
+    // Old signature: (deploymentName, accessToken, options?)
+    auth = {
+      deploymentName: deploymentNameOrAuth,
+      accessToken: accessTokenOrOptions as string,
+    };
+    opts = options;
+  } else {
+    // New signature: (auth, options?)
+    auth = deploymentNameOrAuth;
+    opts = accessTokenOrOptions as typeof opts;
+  }
+
+  const url = getUrlFromAuth(auth);
+  const cursor = opts?.cursor ?? 0;
+  const limit = opts?.limit ?? 50;
 
   // Build URL with query params - use stream_udf_execution for real-time logs
   const logsUrl = new URL(`${url}/api/stream_udf_execution`);
@@ -409,7 +535,7 @@ export async function getLogs(
   const response = await fetch(logsUrl.toString(), {
     method: "GET",
     headers: {
-      Authorization: `Convex ${accessToken}`,
+      Authorization: getAuthHeader(auth),
       "Content-Type": "application/json",
       "Convex-Client": CONVEX_CLIENT_ID,
     },

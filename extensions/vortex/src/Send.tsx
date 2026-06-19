@@ -45,15 +45,15 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
       try {
         try {
           text = await getSelectedText();
-        } catch (e) {
+        } catch {
           // ignore error for getting selected text
         }
         // if nothing was selected we check the clipboard
         if (!text) {
           text = await Clipboard.readText();
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     }
     //invoice doesn't always start with "lnbc1" as 1 is only bech32 separator and invoice can contain amount.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot, LocalStorage } from "@raycast/api";
 
 import { addMovie, getRootFolders, getQualityProfiles } from "@/lib/hooks/useRadarrAPI";
 import { formatMovieTitle } from "@/lib/utils/formatting";
@@ -18,18 +18,37 @@ interface FormValues {
   searchOnAdd: boolean;
 }
 
+interface RememberedAddMovieOptions {
+  monitored: boolean;
+  searchOnAdd: boolean;
+  qualityProfileName: string;
+}
+
+const LAST_ADD_MOVIE_OPTIONS_KEY = "last-add-movie-options";
+
 export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
   const [rootFolders, setRootFolders] = useState<{ path: string; id: number }[]>([]);
   const [qualityProfiles, setQualityProfiles] = useState<{ name: string; id: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [rememberedOptions, setRememberedOptions] = useState<RememberedAddMovieOptions | null>(null);
+  const preferredQualityProfileName = rememberedOptions?.qualityProfileName.trim().toLowerCase();
+  const defaultQualityProfileId =
+    qualityProfiles
+      .find(profile => preferredQualityProfileName && profile.name.trim().toLowerCase() === preferredQualityProfileName)
+      ?.id.toString() ?? qualityProfiles[0]?.id.toString();
 
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [folders, profiles] = await Promise.all([getRootFolders(instance), getQualityProfiles(instance)]);
+        const [folders, profiles, savedOptions] = await Promise.all([
+          getRootFolders(instance),
+          getQualityProfiles(instance),
+          LocalStorage.getItem<string>(LAST_ADD_MOVIE_OPTIONS_KEY),
+        ]);
 
         setRootFolders(folders);
         setQualityProfiles(profiles);
+        setRememberedOptions(savedOptions ? (JSON.parse(savedOptions) as RememberedAddMovieOptions) : null);
 
         if (folders.length === 0) {
           showToast({
@@ -69,6 +88,16 @@ export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
         values.rootFolderPath,
         values.monitored,
         values.searchOnAdd,
+      );
+
+      const selectedQualityProfile = qualityProfiles.find(profile => profile.id.toString() === values.qualityProfileId);
+      await LocalStorage.setItem(
+        LAST_ADD_MOVIE_OPTIONS_KEY,
+        JSON.stringify({
+          monitored: values.monitored,
+          searchOnAdd: values.searchOnAdd,
+          qualityProfileName: selectedQualityProfile?.name ?? "",
+        } satisfies RememberedAddMovieOptions),
       );
 
       popToRoot();
@@ -112,7 +141,7 @@ export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
     >
       <Form.Description text={`Configure settings to add "${formatMovieTitle(movie)}" to your Radarr collection`} />
 
-      <Form.Dropdown id="qualityProfileId" title="Quality Profile" defaultValue={qualityProfiles[0]?.id.toString()}>
+      <Form.Dropdown id="qualityProfileId" title="Quality Profile" defaultValue={defaultQualityProfileId}>
         {qualityProfiles.map(profile => (
           <Form.Dropdown.Item key={profile.id} value={profile.id.toString()} title={profile.name} />
         ))}
@@ -127,14 +156,14 @@ export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
       <Form.Checkbox
         id="monitored"
         label="Monitor this movie"
-        defaultValue={true}
+        defaultValue={rememberedOptions?.monitored ?? true}
         info="If enabled, Radarr will automatically monitor for new releases of this movie"
       />
 
       <Form.Checkbox
         id="searchOnAdd"
         label="Search immediately"
-        defaultValue={true}
+        defaultValue={rememberedOptions?.searchOnAdd ?? true}
         info="If enabled, Radarr will immediately search for this movie after adding"
       />
     </Form>

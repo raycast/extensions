@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { getFileSize, RenameForm, deleteFile, handleSetWallpaper, isImageFile } from "../utils";
 import { FileDataType } from "../types";
@@ -11,7 +12,7 @@ export function FileItem(props: {
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const filePath = join(props.fileData.path, props.fileData.name);
   const typeName = `${isSymlink ? "Symlink " : ""}File`;
 
   return (
@@ -64,7 +65,7 @@ export function FileItem(props: {
           <ActionPanel.Section>
             <Action.Push
               target={<RenameForm filePath={filePath} refresh={props.refresh} typeName={typeName} />}
-              title={`RenameForm ${typeName}`}
+              title={`Rename ${typeName}`}
               icon={Icon.Pencil}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />

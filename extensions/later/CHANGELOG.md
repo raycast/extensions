@@ -1,5 +1,9 @@
 # Later Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Added Features] - 2024-06-12
 
 - Add sort function to mangement read list item's order

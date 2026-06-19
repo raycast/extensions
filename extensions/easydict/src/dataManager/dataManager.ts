@@ -464,7 +464,6 @@ export class DataManager {
       })
       .catch((error) => {
         showErrorToast(error);
-        showErrorToast(error);
       })
       .finally(() => {
         this.removeQueryFromRecordList(type);

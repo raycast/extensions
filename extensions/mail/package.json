@@ -17,7 +17,9 @@
     "ViGeng",
     "dante",
     "5z99tsb75z",
-    "xilopaint"
+    "xilopaint",
+    "chrahe",
+    "clins1994"
   ],
   "categories": [
     "Applications",
@@ -73,6 +75,15 @@
           "value": "20"
         }
       ]
+    },
+    {
+      "name": "autoFillReplySubject",
+      "label": "Auto-fill subject when replying",
+      "title": "Auto-fill Reply Subject",
+      "description": "Automatically fill the subject field with 'Re: ' followed by the original email's subject when using Reply or Reply All.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "commands": [
@@ -185,6 +196,11 @@
       "description": "Send an email with Apple Mail."
     },
     {
+      "name": "move-to-trash",
+      "title": "Move to Trash",
+      "description": "Move an email to Trash in Apple Mail."
+    },
+    {
       "name": "copy-email-link",
       "title": "Copy Email Link",
       "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
@@ -198,7 +214,7 @@
     "javascript-time-ago": "^2.5.10",
     "json2md": "^1.13.0",
     "juice": "^9.1.0",
-    "mailparser": "^3.7.2",
+    "mailparser": "^3.9.4",
     "mime-types": "^2.1.35",
     "plist": "^3.1.0",
     "string-strip-html": "^13.4.12",
@@ -209,7 +225,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/got": "^9.6.12",
     "@types/json2md": "^1.5.4",
-    "@types/mailparser": "^3.4.4",
+    "@types/mailparser": "^3.4.6",
     "@types/mime-types": "^2.1.4",
     "@types/plist": "^3.0.5",
     "@types/turndown": "^5.0.5",

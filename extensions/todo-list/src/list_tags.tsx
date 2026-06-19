@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useAtom } from "jotai";
-import { todoAtom, selectedTagAtom, TodoSections } from "./atoms";
+import { ALL_TAG_VALUE, todoAtom, selectedTagAtom, TodoSections } from "./atoms";
 
 const ListTags = () => {
   const [todoSections] = useAtom(todoAtom);
@@ -10,7 +10,7 @@ const ListTags = () => {
 
   return (
     <List.Dropdown onChange={(newValue) => setSelectedTag(newValue)} tooltip="Todo With Tags">
-      <List.Dropdown.Item title="All" value="All" />
+      <List.Dropdown.Item title="All" value={ALL_TAG_VALUE} />
       {sectionKeys.map((sectionKey) =>
         todoSections[sectionKey].map((item, i) => {
           if (item.tag != undefined && item.tag != "") {

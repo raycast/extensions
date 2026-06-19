@@ -48,6 +48,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
+| [Sanity](https://www.sanity.io/docs/ai/mcp-server) | Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
 | [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
@@ -72,6 +73,9 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Gen-PDF](https://gen-pdf.com) | MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more. |
 | [Linear](https://linear.app/docs/mcp) | The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments. |
 | [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
+| [Olostep](https://github.com/olostep/olostep-mcp-server) | A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API. |
+| [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
+| [Jellypod](https://www.jellypod.com/mcp) | Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes. |
 
 ### Community MCP Servers
 
@@ -91,6 +95,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Lightdash](https://github.com/syucream/lightdash-mcp-server) | This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface. |
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
 | [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
+| [VC Deal Flow Signal](https://github.com/kindrat86/vc-deal-flow-signal) | GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required. |
 
 
 <!-- MCP_SERVERS_END -->

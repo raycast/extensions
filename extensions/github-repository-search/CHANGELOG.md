@@ -1,5 +1,12 @@
 # Changelog
 
+## [Bug fixes and stability] - 2026-03-26
+
+- Fix typo in toast: "visted" → "visited"
+- Move error toasts out of render into `useEffect` to avoid render-phase side effects
+- **useRepositoryReleases:** Add effect cleanup to prevent state updates after unmount; handle null repository response and invalid `nameWithOwner`; clear releases on error/restart; normalize caught errors to `Error`
+- **useVisitedRepositories:** Fix race when visiting multiple repos quickly by using functional `setState` updater
+
 ## [Updates] - 2024-07-31
 
 - Updated (dev) dependencies, code cleanup

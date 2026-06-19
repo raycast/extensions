@@ -1,5 +1,9 @@
 # Vault Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Fix] - 2023-12-18
 
 - Fix copy token issue with OIDC login

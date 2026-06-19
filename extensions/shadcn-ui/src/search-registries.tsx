@@ -1,6 +1,5 @@
 import { Action, ActionPanel, List, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import { RegistryItemsList } from "./components/registry-items-list";
 import { CREATE_ERROR_TOAST_OPTIONS } from "./constants";
 
@@ -10,6 +9,13 @@ export interface Registry {
   name: string;
   url: string;
   domain: string;
+}
+
+interface RegistryAPIResponse {
+  name: string;
+  url: string;
+  homepage?: string;
+  description?: string;
 }
 
 /**
@@ -34,12 +40,12 @@ async function getRegistries(): Promise<Registry[]> {
   if (!response.ok) {
     throw new Error(response.statusText);
   }
-  const data = (await response.json()) as Record<string, string>;
+  const data = (await response.json()) as Record<string, RegistryAPIResponse>;
 
-  return Object.entries(data).map(([name, url]) => ({
-    name,
-    url,
-    domain: getDomain(url),
+  return Object.entries(data).map(([key, item]) => ({
+    name: item.name || key,
+    url: item.url,
+    domain: getDomain(item.url),
   }));
 }
 

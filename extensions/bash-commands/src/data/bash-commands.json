@@ -1,0 +1,1091 @@
+[
+  { "name": "!!", "command": "!!", "type": "history", "description": "Run the last command." },
+  {
+    "name": "history",
+    "command": "history",
+    "type": "history",
+    "description": "List command history with line numbers."
+  },
+  {
+    "name": "history N",
+    "command": "history <n>",
+    "type": "history",
+    "description": "List the last N commands from history."
+  },
+
+  { "name": "pwd", "command": "pwd", "type": "navigation", "description": "Print the current directory path." },
+  { "name": "ls", "command": "ls", "type": "navigation", "description": "List directory contents." },
+  { "name": "ls -a", "command": "ls -a", "type": "navigation", "description": "List all files including hidden ones." },
+  {
+    "name": "ls -la",
+    "command": "ls -la",
+    "type": "navigation",
+    "description": "List all files including hidden ones in long form."
+  },
+  { "name": "ls -l", "command": "ls -l", "type": "navigation", "description": "List directory contents in long form." },
+  {
+    "name": "ls -lh",
+    "command": "ls -lh",
+    "type": "navigation",
+    "description": "List directory contents in long form with human readable sizes."
+  },
+  {
+    "name": "ls -t",
+    "command": "ls -t",
+    "type": "navigation",
+    "description": "List directory contents by modification time, newest first."
+  },
+  {
+    "name": "stat",
+    "command": "stat <file>",
+    "type": "navigation",
+    "description": "List size, created and modified timestamps for a file or directory."
+  },
+  { "name": "tree", "command": "tree", "type": "navigation", "description": "List directory and file tree." },
+  {
+    "name": "tree -a",
+    "command": "tree -a",
+    "type": "navigation",
+    "description": "List directory and file tree including hidden files."
+  },
+  { "name": "tree -d", "command": "tree -d", "type": "navigation", "description": "List directory tree only." },
+  { "name": "cd", "command": "cd", "type": "navigation", "description": "Go to home directory (shorthand for cd ~)." },
+  { "name": "cd ~", "command": "cd ~", "type": "navigation", "description": "Go to home directory." },
+  { "name": "cd -", "command": "cd -", "type": "navigation", "description": "Go to last directory." },
+  {
+    "name": "pushd",
+    "command": "pushd <dir>",
+    "type": "navigation",
+    "description": "Go to a sub-directory and push the previous directory onto the stack."
+  },
+  {
+    "name": "popd",
+    "command": "popd",
+    "type": "navigation",
+    "description": "Go back to the directory saved by pushd."
+  },
+
+  { "name": "mkdir", "command": "mkdir <dir>", "type": "directories", "description": "Create a directory." },
+  {
+    "name": "mkdir -p",
+    "command": "mkdir -p <dir>",
+    "type": "directories",
+    "description": "Create nested directories."
+  },
+  {
+    "name": "mktemp -d",
+    "command": "mktemp -d",
+    "type": "directories",
+    "description": "Create a temporary directory."
+  },
+  {
+    "name": "cp -R",
+    "command": "cp -R <src> <dest>",
+    "type": "directories",
+    "description": "Copy a directory recursively."
+  },
+  {
+    "name": "rsync -zv",
+    "command": "rsync -zv <src> <dest>",
+    "type": "directories",
+    "description": "Copy directory, overwrites destination."
+  },
+  {
+    "name": "rsync -azv",
+    "command": "rsync -azv <src> <dest>",
+    "type": "directories",
+    "description": "Copy directory without overwriting destination."
+  },
+  {
+    "name": "rsync local→remote",
+    "command": "rsync -avz <src> <user>@<host>:<dest>",
+    "type": "directories",
+    "description": "Copy local directory to remote directory."
+  },
+  {
+    "name": "rsync remote→local",
+    "command": "rsync -avz <user>@<host>:<src> <dest>",
+    "type": "directories",
+    "description": "Copy remote directory to local directory."
+  },
+  { "name": "rmdir", "command": "rmdir <dir>", "type": "directories", "description": "Delete an empty directory." },
+  {
+    "name": "rm -r",
+    "command": "rm -r <dir>",
+    "type": "directories",
+    "description": "Delete a directory and its contents."
+  },
+  {
+    "name": "rm -rf",
+    "command": "rm -rf <dir>",
+    "type": "directories",
+    "description": "Delete a directory and its contents, ignoring nonexistent files and never prompting."
+  },
+
+  {
+    "name": "touch",
+    "command": "touch <file>",
+    "type": "files",
+    "description": "Create a file or update its modified timestamp."
+  },
+  { "name": "mktemp", "command": "mktemp", "type": "files", "description": "Create a temporary file." },
+  { "name": "cp", "command": "cp <src> <dest>", "type": "files", "description": "Copy a file." },
+  { "name": "mv", "command": "mv <src> <dest>", "type": "files", "description": "Move or rename a file." },
+  { "name": "rm", "command": "rm <file>", "type": "files", "description": "Delete a file." },
+  {
+    "name": "rm -f",
+    "command": "rm -f <file>",
+    "type": "files",
+    "description": "Delete a file, ignoring nonexistent files and never prompting."
+  },
+  { "name": "cat", "command": "cat <file>", "type": "files", "description": "Print all file contents." },
+  {
+    "name": "less",
+    "command": "less <file>",
+    "type": "files",
+    "description": "Print file contents one page at a time (g: top, SHIFT+g: bottom, /foo: search)."
+  },
+  {
+    "name": "head",
+    "command": "head <file>",
+    "type": "files",
+    "description": "Print the top 10 lines of a file.",
+    "notes": "Use `-n` to specify the number of lines:\n\n```\nhead -n 50 file    # print the top 50 lines\n```"
+  },
+  {
+    "name": "tail",
+    "command": "tail <file>",
+    "type": "files",
+    "description": "Print the bottom 10 lines of a file.",
+    "notes": "Use `-n` to specify the number of lines:\n\n```\ntail -n 50 file    # print the bottom 50 lines\n```\n\n`-f` follows the file in real time, useful for watching logs:\n\n```\ntail -f file\n```"
+  },
+  {
+    "name": "open",
+    "command": "open <file>",
+    "type": "files",
+    "description": "Open a file in its default application."
+  },
+  {
+    "name": "wc",
+    "command": "wc <file>",
+    "type": "files",
+    "description": "Count lines, words and characters in a file.",
+    "notes": "### Flags\n\n| Flag | Counts |\n|------|--------|\n| `-l` | Lines |\n| `-w` | Words |\n| `-c` | Bytes |\n| `-m` | Characters |\n\nWithout flags, `wc` prints all three (lines, words, bytes) at once."
+  },
+  { "name": "ln -s", "command": "ln -s <target> <link>", "type": "files", "description": "Create a symbolic link." },
+  {
+    "name": "ln -sf",
+    "command": "ln -sf <target> <link>",
+    "type": "files",
+    "description": "Overwrite an existing symbolic link."
+  },
+  {
+    "name": "sed replace",
+    "command": "sed 's/<old>/<new>/g' <file>",
+    "type": "files",
+    "description": "Replace a pattern in a file and output to console.",
+    "notes": "### Expression breakdown\n\nThe expression follows the pattern `s/pattern/replacement/flags`:\n\n| Part | Meaning |\n|------|---------|\n| `s` | Substitute |\n| `pattern` | What to find (supports regex) |\n| `replacement` | What to replace it with |\n| `g` | Global — replace all occurrences, not just the first |\n| `i` | Case-insensitive match |\n\n```\nsed 's/foo/bar/'     # replaces first match per line\nsed 's/foo/bar/g'    # replaces all matches\nsed 's/foo/bar/gi'   # all matches, case-insensitive\n```"
+  },
+  {
+    "name": "sed replace -i",
+    "command": "sed -i 's/<old>/<new>/g' <file>",
+    "type": "files",
+    "description": "Replace a pattern in a file and overwrite it in place.",
+    "notes": "### Expression breakdown\n\nThe expression follows the pattern `s/pattern/replacement/flags`:\n\n| Part | Meaning |\n|------|---------|\n| `s` | Substitute |\n| `pattern` | What to find (supports regex) |\n| `replacement` | What to replace it with |\n| `g` | Global — replace all occurrences, not just the first |\n| `i` | Case-insensitive match |\n\n`-i` overwrites the file in place. Without it, output is printed to the console only."
+  },
+  {
+    "name": "sed replace -i case",
+    "command": "sed 's/<old>/<new>/gi' <file>",
+    "type": "files",
+    "description": "Replace a pattern case-insensitively in a file and output to console.",
+    "notes": "### Expression breakdown\n\nThe expression follows the pattern `s/pattern/replacement/flags`:\n\n| Part | Meaning |\n|------|---------|\n| `s` | Substitute |\n| `pattern` | What to find (supports regex) |\n| `replacement` | What to replace it with |\n| `g` | Global — replace all occurrences, not just the first |\n| `i` | Case-insensitive match |"
+  },
+  {
+    "name": "awk",
+    "command": "awk '{print $1}' <file>",
+    "type": "files",
+    "description": "Extract and process fields from structured text.",
+    "notes": "### Column extraction\n\n`$1`, `$2`, etc. refer to columns separated by whitespace. `$0` is the whole line:\n\n```\nawk '{print $1}' file          # first column\nawk '{print $1, $3}' file      # first and third columns\nawk -F: '{print $1}' /etc/passwd  # use : as delimiter\n```\n\n### Filtering rows\n\n```\nawk '/error/ {print $0}' file      # lines matching 'error'\nawk '$3 > 100 {print}' file        # lines where column 3 > 100\n```"
+  },
+  { "name": "sort", "command": "sort <file>", "type": "files", "description": "Sort lines of a file alphabetically." },
+  { "name": "sort -r", "command": "sort -r <file>", "type": "files", "description": "Sort lines in reverse order." },
+  { "name": "sort -n", "command": "sort -n <file>", "type": "files", "description": "Sort lines numerically." },
+  {
+    "name": "uniq",
+    "command": "uniq <file>",
+    "type": "files",
+    "description": "Remove consecutive duplicate lines. Pipe from sort to remove all duplicates."
+  },
+  {
+    "name": "sort | uniq",
+    "command": "sort <file> | uniq",
+    "type": "files",
+    "description": "Remove all duplicate lines (sort first to group duplicates together)."
+  },
+  {
+    "name": "cut",
+    "command": "cut -d '<delim>' -f <n> <file>",
+    "type": "files",
+    "description": "Extract a specific column from a delimited file.",
+    "notes": "### Flags\n\n| Flag | Meaning |\n|------|---------|\n| `-d` | Delimiter character |\n| `-f` | Field number(s) to extract |\n\n```\ncut -d ':' -f 1 /etc/passwd     # extract usernames\ncut -d ',' -f 1,3 file.csv      # extract columns 1 and 3\ncut -d ' ' -f 2- file           # extract from column 2 onwards\n```"
+  },
+  {
+    "name": "diff",
+    "command": "diff <file1> <file2>",
+    "type": "files",
+    "description": "Show differences between two files."
+  },
+  {
+    "name": "diff -u",
+    "command": "diff -u <file1> <file2>",
+    "type": "files",
+    "description": "Show differences in unified format (the format used in patches and PRs)."
+  },
+  {
+    "name": "tee",
+    "command": "<cmd> | tee <file>",
+    "type": "files",
+    "description": "Write command output to both a file and stdout simultaneously."
+  },
+
+  {
+    "name": "chmod +x",
+    "command": "chmod +x <file>",
+    "type": "permissions",
+    "description": "Give everybody execute permission.",
+    "notes": "### Symbolic — `chmod [who][operator][permission] <file>`\n\n**Who**\n\n| Symbol | Target |\n|--------|--------|\n| `u` | User (owner) |\n| `g` | Group |\n| `o` | Others |\n| `a` | All of the above |\n\n**Operator**\n\n| Symbol | Effect |\n|--------|--------|\n| `+` | Add permission |\n| `-` | Remove permission |\n| `=` | Set exactly (replaces existing) |\n\n**Permission**\n\n| Symbol | Meaning |\n|--------|--------|\n| `r` | Read |\n| `w` | Write |\n| `x` | Execute (or enter, for directories) |\n\n**Examples**\n\n```\nchmod u+x file       # give user execute\nchmod g+rwx file     # give group all permissions\nchmod o-w file       # remove write from others\nchmod a=r file       # set everyone to read-only\n```\n\n---\n\n### Numeric — `chmod [user][group][others] <file>`\n\nEach digit (0–7) represents the combined permissions for that target. You always provide all three.\n\n| # | Permissions | rwx |\n|---|-------------|-----|\n| 7 | read + write + execute | rwx |\n| 6 | read + write | rw- |\n| 5 | read + execute | r-x |\n| 4 | read only | r-- |\n| 3 | write + execute | -wx |\n| 2 | write only | -w- |\n| 1 | execute only | --x |\n| 0 | none | --- |\n\n**Examples**\n\n```\nchmod 755 file   # user: rwx, group: r-x, others: r-x\nchmod 644 file   # user: rw-, group: r--, others: r--\nchmod 700 file   # user: rwx, group: ---, others: ---\n```\n\n**Common defaults**\n\n| Value | Result | Use case |\n|-------|--------|----------|\n| `644` | rw-r--r-- | Default file |\n| `755` | rwxr-xr-x | Default directory |"
+  },
+  {
+    "name": "chmod u+x",
+    "command": "chmod u+x <file>",
+    "type": "permissions",
+    "description": "Give the user execute permission.",
+    "notes": "### Symbolic — `chmod [who][operator][permission] <file>`\n\n**Who:** `u` = user, `g` = group, `o` = others, `a` = all\n\n**Operator:** `+` add, `-` remove, `=` set exactly\n\n**Permission:** `r` read, `w` write, `x` execute\n\n```\nchmod u+x file     # add execute for user\nchmod g+rwx file   # add all for group\nchmod o-w file     # remove write for others\n```\n\n---\n\n### Numeric — `chmod [user][group][others] <file>`\n\n| # | rwx | Permissions |\n|---|-----|-------------|\n| 7 | rwx | read + write + execute |\n| 6 | rw- | read + write |\n| 5 | r-x | read + execute |\n| 4 | r-- | read only |\n| 0 | --- | none |\n\n```\nchmod 755 file   # rwxr-xr-x\nchmod 644 file   # rw-r--r--\n```"
+  },
+  {
+    "name": "chmod g+x",
+    "command": "chmod g+x <file>",
+    "type": "permissions",
+    "description": "Give the group execute permission.",
+    "notes": "### Symbolic — `chmod [who][operator][permission] <file>`\n\n**Who:** `u` = user, `g` = group, `o` = others, `a` = all\n\n**Operator:** `+` add, `-` remove, `=` set exactly\n\n**Permission:** `r` read, `w` write, `x` execute\n\n```\nchmod g+x file     # add execute for group\nchmod g+rwx file   # add all permissions for group\nchmod g-w file     # remove write for group\n```\n\n---\n\n### Numeric — `chmod [user][group][others] <file>`\n\n| # | rwx | Permissions |\n|---|-----|-------------|\n| 7 | rwx | read + write + execute |\n| 6 | rw- | read + write |\n| 5 | r-x | read + execute |\n| 4 | r-- | read only |\n| 0 | --- | none |\n\n```\nchmod 755 file   # user: rwx, group: r-x, others: r-x\nchmod 070 file   # user: ---, group: rwx, others: ---\n```"
+  },
+  {
+    "name": "chmod u-x,g-x",
+    "command": "chmod u-x,g-x <file>",
+    "type": "permissions",
+    "description": "Take away execute permission from user and group.",
+    "notes": "### Symbolic — `chmod [who][operator][permission] <file>`\n\nYou can chain multiple targets in one command by separating them with a comma:\n\n```\nchmod u-x,g-x file     # remove execute from both user and group\nchmod u+rw,o-rwx file  # add rw to user, remove all from others\n```\n\n**Who:** `u` = user, `g` = group, `o` = others, `a` = all\n\n**Operator:** `+` add, `-` remove, `=` set exactly\n\n**Permission:** `r` read, `w` write, `x` execute"
+  },
+  {
+    "name": "chmod a+x",
+    "command": "chmod a+x <file>",
+    "type": "permissions",
+    "description": "Give all users execute permission.",
+    "notes": "### Symbolic — `chmod [who][operator][permission] <file>`\n\n`a` targets all three groups (user, group, others) at once. It is equivalent to writing `u+x,g+x,o+x`.\n\n```\nchmod a+x file   # give everyone execute\nchmod a+r file   # give everyone read\nchmod a-w file   # remove write from everyone\nchmod a=r file   # set everyone to read-only (replaces existing)\n```\n\n**Who:** `u` = user, `g` = group, `o` = others, `a` = all\n\n**Operator:** `+` add, `-` remove, `=` set exactly\n\n**Permission:** `r` read, `w` write, `x` execute"
+  },
+  {
+    "name": "chmod +100",
+    "command": "chmod +100 <file>",
+    "type": "permissions",
+    "description": "Add 1 to the user permission.",
+    "notes": "## Numeric chmod\n\nThe three-digit form sets permissions for **user**, **group**, and **others** in order. Each digit is 0–7.\n\n| # | rwx | Permissions |\n|---|-----|-------------|\n| 7 | rwx | read + write + execute |\n| 6 | rw- | read + write |\n| 5 | r-x | read + execute |\n| 4 | r-- | read only |\n| 3 | -wx | write + execute |\n| 2 | -w- | write only |\n| 1 | --x | execute only |\n| 0 | --- | none |\n\n```\nchmod 644 file   # user: rw-, group: r--, others: r--\nchmod 755 file   # user: rwx, group: r-x, others: r-x\nchmod 700 file   # user: rwx, group: ---, others: ---\n```\n\n`chmod +100` adds `1` (execute) to the user digit without touching group or others."
+  },
+  {
+    "name": "chmod -100",
+    "command": "chmod -100 <file>",
+    "type": "permissions",
+    "description": "Subtract 1 from the user permission.",
+    "notes": "## Numeric chmod\n\nThe three-digit form sets permissions for **user**, **group**, and **others** in order. Each digit is 0–7.\n\n| # | rwx | Permissions |\n|---|-----|-------------|\n| 7 | rwx | read + write + execute |\n| 6 | rw- | read + write |\n| 5 | r-x | read + execute |\n| 4 | r-- | read only |\n| 3 | -wx | write + execute |\n| 2 | -w- | write only |\n| 1 | --x | execute only |\n| 0 | --- | none |\n\n`chmod -100` removes `1` (execute) from the user digit without touching group or others."
+  },
+  {
+    "name": "chown",
+    "command": "chown <user>:<group> <file>",
+    "type": "permissions",
+    "description": "Change file owner and group."
+  },
+
+  { "name": "type", "command": "type <cmd>", "type": "search", "description": "Find the binary for a command." },
+  { "name": "which", "command": "which <cmd>", "type": "search", "description": "Find the binary path for a command." },
+  {
+    "name": "whereis",
+    "command": "whereis <cmd>",
+    "type": "search",
+    "description": "Find the binary, source, and manual page files for a command."
+  },
+  { "name": "updatedb", "command": "updatedb", "type": "search", "description": "Update the locate database index." },
+  {
+    "name": "locate",
+    "command": "locate <file>",
+    "type": "search",
+    "description": "Find a file using the index (fast)."
+  },
+  {
+    "name": "locate -i",
+    "command": "locate --ignore-case <file>",
+    "type": "search",
+    "description": "Find a file using the index, ignoring case."
+  },
+  {
+    "name": "find -name",
+    "command": "find <path> -name <file>",
+    "type": "search",
+    "description": "Find a file by name.",
+    "notes": "### Running commands on results\n\nAppend `-exec` to run a command on each matched file:\n\n```\nfind . -name \"*.log\" -exec rm {} \\;\nfind . -type f -exec chmod 644 {} \\;\n```\n\nSee `find -exec` for the full reference."
+  },
+  {
+    "name": "find -iname",
+    "command": "find <path> -iname <file>",
+    "type": "search",
+    "description": "Find a file by name, case insensitive.",
+    "notes": "### Running commands on results\n\nAppend `-exec` to run a command on each matched file:\n\n```\nfind . -iname \"*.Log\" -exec rm {} \\;\n```\n\nSee `find -exec` for the full reference."
+  },
+  {
+    "name": "find -name *.ext",
+    "command": "find <path> -name \"*.<ext>\"",
+    "type": "search",
+    "description": "Find all files with a given extension.",
+    "notes": "### Running commands on results\n\nAppend `-exec` to run a command on each matched file:\n\n```\nfind . -name \"*.png\" -exec pngquant {} \\;\nfind . -name \"*.log\" -exec rm {} +\n```\n\nSee `find -exec` for the full reference."
+  },
+  {
+    "name": "find -delete",
+    "command": "find <path> -name <file> -delete",
+    "type": "search",
+    "description": "Find a file and delete it."
+  },
+  {
+    "name": "find -type f",
+    "command": "find <path> -type f -name <file>",
+    "type": "search",
+    "description": "Find a regular file."
+  },
+  {
+    "name": "find -type d",
+    "command": "find <path> -type d -name <dir>",
+    "type": "search",
+    "description": "Find a directory."
+  },
+  {
+    "name": "find -type l",
+    "command": "find <path> -type l -name <file>",
+    "type": "search",
+    "description": "Find a symbolic link."
+  },
+  {
+    "name": "find -mtime",
+    "command": "find <path> -type f -mtime +30",
+    "type": "search",
+    "description": "Find files that haven't been modified in 30 days."
+  },
+  {
+    "name": "find -mtime -delete",
+    "command": "find <path> -type f -mtime +30 -delete",
+    "type": "search",
+    "description": "Delete files that haven't been modified in 30 days."
+  },
+  {
+    "name": "find -exec",
+    "command": "find <path> -name <file> -exec <cmd> {} \\;",
+    "type": "search",
+    "description": "Run a command on each file found.",
+    "notes": "### The -exec flag\n\n`{}` is a placeholder for the matched file. `\\;` terminates the command.\n\n```\nfind . -name \"*.log\" -exec rm {} \\;\nfind . -type f -exec chmod 644 {} \\;\n```\n\nUse `+` instead of `\\;` to pass all results at once — faster for large sets:\n\n```\nfind . -name \"*.log\" -exec rm {} +\n```"
+  },
+  {
+    "name": "grep",
+    "command": "grep '<pattern>' <file>",
+    "type": "search",
+    "description": "Search for a pattern in a file.",
+    "notes": "### Extended regex with `-E`\n\n`-E` enables extended regex, allowing the use of the following operators without backslashes:\n\n| Operator | Meaning | Example |\n|----------|---------|---------|\n| `\\|` | OR — match either side | `error\\|warning` |\n| `+` | One or more of the preceding char | `fo+` matches `fo`, `foo` |\n| `?` | Zero or one of the preceding char | `https?` matches `http`, `https` |\n| `()` | Group expressions | `(foo\\|bar)` |"
+  },
+  {
+    "name": "grep -r",
+    "command": "grep -r '<pattern>' <dir>",
+    "type": "search",
+    "description": "Recursively search for a pattern in a directory."
+  },
+  {
+    "name": "grep -R",
+    "command": "grep -R '<pattern>' <dir>",
+    "type": "search",
+    "description": "Recursively search for a pattern and follow symbolic links."
+  },
+  {
+    "name": "grep -l",
+    "command": "grep -l '<pattern>' <dir>",
+    "type": "search",
+    "description": "Show only files that match the pattern."
+  },
+  {
+    "name": "grep -L",
+    "command": "grep -L '<pattern>' <dir>",
+    "type": "search",
+    "description": "Show only files that don't match the pattern."
+  },
+  {
+    "name": "grep -i",
+    "command": "grep -i '<pattern>' <dir>",
+    "type": "search",
+    "description": "Case insensitive pattern search."
+  },
+  {
+    "name": "grep -x",
+    "command": "grep -x '<pattern>' <dir>",
+    "type": "search",
+    "description": "Match the entire line."
+  },
+  {
+    "name": "grep -C",
+    "command": "grep -C 1 '<pattern>' <dir>",
+    "type": "search",
+    "description": "Show N lines of context above and below each match."
+  },
+  {
+    "name": "grep -v",
+    "command": "grep -v '<pattern>' <dir>",
+    "type": "search",
+    "description": "Show only lines that don't match the pattern."
+  },
+  {
+    "name": "grep -c",
+    "command": "grep -c '<pattern>' <dir>",
+    "type": "search",
+    "description": "Count the number of matching lines."
+  },
+  {
+    "name": "grep -n",
+    "command": "grep -n '<pattern>' <dir>",
+    "type": "search",
+    "description": "Show line numbers alongside results."
+  },
+  {
+    "name": "grep -E",
+    "command": "grep -rE '<pattern>' <dir>",
+    "type": "search",
+    "description": "Search using extended regular expressions.",
+    "notes": "### Extended regex with `-E`\n\n`-E` enables extended regex, allowing the use of the following operators without backslashes:\n\n| Operator | Meaning | Example |\n|----------|---------|---------|\n| `\\|` | OR — match either side | `error\\|warning` |\n| `+` | One or more of the preceding char | `fo+` matches `fo`, `foo` |\n| `?` | Zero or one of the preceding char | `https?` matches `http`, `https` |\n| `()` | Group expressions | `(foo\\|bar)` |"
+  },
+  {
+    "name": "egrep",
+    "command": "egrep -R '<pattern>' <dir>",
+    "type": "search",
+    "description": "Search using extended regular expressions (alias for grep -E).",
+    "notes": "### Extended regex with `-E`\n\n`-E` enables extended regex, allowing the use of the following operators without backslashes:\n\n| Operator | Meaning | Example |\n|----------|---------|---------|\n| `\\|` | OR — match either side | `error\\|warning` |\n| `+` | One or more of the preceding char | `fo+` matches `fo`, `foo` |\n| `?` | Zero or one of the preceding char | `https?` matches `http`, `https` |\n| `()` | Group expressions | `(foo\\|bar)` |"
+  },
+  {
+    "name": "xargs",
+    "command": "xargs <cmd>",
+    "type": "search",
+    "description": "Build and execute commands from standard input.",
+    "notes": "### Usage\n\n`xargs` reads items from stdin and passes them as arguments to a command. Commonly paired with `find` or `grep`:\n\n```\nfind . -name \"*.log\" | xargs rm\ngrep -rl 'foo' . | xargs sed -i 's/foo/bar/g'\n```\n\nUse `-I {}` to control where the argument is placed:\n\n```\nfind . -name \"*.txt\" | xargs -I {} cp {} /backup/\n```"
+  },
+
+  {
+    "name": "zip",
+    "command": "zip <output>.zip <file>",
+    "type": "compression",
+    "description": "Compress a file into a .zip archive."
+  },
+  {
+    "name": "zip -r",
+    "command": "zip -r <output>.zip <dir>",
+    "type": "compression",
+    "description": "Compress a directory into a .zip archive."
+  },
+  {
+    "name": "unzip",
+    "command": "unzip <file>.zip",
+    "type": "compression",
+    "description": "Extract a .zip archive into the current directory."
+  },
+  {
+    "name": "gzip",
+    "command": "gzip <file>",
+    "type": "compression",
+    "description": "Compress <file> into <file>.gz and delete the original."
+  },
+  {
+    "name": "gzip -k",
+    "command": "gzip -k <file>",
+    "type": "compression",
+    "description": "Compress a file into a .gz archive and keep the original."
+  },
+  {
+    "name": "gzip -d",
+    "command": "gzip -d <file>.gz",
+    "type": "compression",
+    "description": "Decompress <file>.gz and restore the original file."
+  },
+  {
+    "name": "gunzip",
+    "command": "gunzip <file>.gz",
+    "type": "compression",
+    "description": "Decompress a .gz archive and delete it."
+  },
+  {
+    "name": "gunzip -k",
+    "command": "gunzip -k <file>.gz",
+    "type": "compression",
+    "description": "Decompress a .gz archive and keep the original."
+  },
+  {
+    "name": "tar -czf",
+    "command": "tar -czf <output>.tgz <dir>",
+    "type": "compression",
+    "description": "Compress a directory into a .tgz archive.",
+    "notes": "### Flag breakdown\n\nFlags are combined into one block — no spaces needed:\n\n| Flag | Meaning |\n|------|---------|\n| `c` | Create archive |\n| `x` | Extract archive |\n| `z` | Compress/decompress with gzip (.tar.gz / .tgz) |\n| `f` | Next argument is the filename |\n| `v` | Verbose — list files as they are processed |\n\n```\ntar -czf archive.tgz dir/    # create\ntar -xzf archive.tgz         # extract\ntar -xzf archive.tgz -v      # extract with file list\n```"
+  },
+  {
+    "name": "tar -xzf",
+    "command": "tar -xzf <file>.tar.gz",
+    "type": "compression",
+    "description": "Extract a .tar.gz archive into the current directory.",
+    "notes": "### Flag breakdown\n\n| Flag | Meaning |\n|------|---------|\n| `c` | Create archive |\n| `x` | Extract archive |\n| `z` | Compress/decompress with gzip (.tar.gz / .tgz) |\n| `f` | Next argument is the filename |\n| `v` | Verbose — list files as they are processed |\n\n```\ntar -xzf archive.tgz         # extract\ntar -xzf archive.tgz -v      # extract with file list\ntar -xzf archive.tgz -C dir/ # extract into a specific directory\n```"
+  },
+  {
+    "name": "tar -xf",
+    "command": "tar -xf <file>.tar",
+    "type": "compression",
+    "description": "Extract a .tar archive into the current directory.",
+    "notes": "### Flag breakdown\n\n| Flag | Meaning |\n|------|---------|\n| `c` | Create archive |\n| `x` | Extract archive |\n| `z` | Compress/decompress with gzip (.tar.gz / .tgz) |\n| `f` | Next argument is the filename |\n| `v` | Verbose — list files as they are processed |\n\nNo `z` flag here — `.tar` files are not gzip-compressed, just bundled."
+  },
+
+  { "name": "df", "command": "df", "type": "system", "description": "List disks, size, used and available space." },
+  {
+    "name": "df -h",
+    "command": "df -h",
+    "type": "system",
+    "description": "List disks, size, used and available space in human readable format."
+  },
+  {
+    "name": "du",
+    "command": "du",
+    "type": "system",
+    "description": "List current directory, subdirectories and file sizes."
+  },
+  {
+    "name": "du -h",
+    "command": "du -h",
+    "type": "system",
+    "description": "List directory sizes in human readable format."
+  },
+  {
+    "name": "du -sh",
+    "command": "du -sh <dir>",
+    "type": "system",
+    "description": "Show the total size of a directory in human readable format."
+  },
+  { "name": "free", "command": "free", "type": "system", "description": "Show memory usage." },
+  {
+    "name": "free -h",
+    "command": "free -h",
+    "type": "system",
+    "description": "Show memory usage in human readable format."
+  },
+  {
+    "name": "free -s",
+    "command": "free -s 5",
+    "type": "system",
+    "description": "Show memory usage and update every N seconds."
+  },
+  { "name": "lsusb", "command": "lsusb", "type": "system", "description": "List USB devices." },
+  { "name": "lspci", "command": "lspci", "type": "system", "description": "List PCI hardware." },
+  { "name": "lshw", "command": "lshw", "type": "system", "description": "List all hardware." },
+  { "name": "date", "command": "date", "type": "system", "description": "Print the current date and time." },
+  {
+    "name": "date --iso-8601",
+    "command": "date --iso-8601",
+    "type": "system",
+    "description": "Print the ISO8601 date."
+  },
+  {
+    "name": "date --iso-8601=ns",
+    "command": "date --iso-8601=ns",
+    "type": "system",
+    "description": "Print the ISO8601 date and time with nanoseconds."
+  },
+  {
+    "name": "time",
+    "command": "time <cmd>",
+    "type": "system",
+    "description": "Time how long a command takes to execute."
+  },
+  { "name": "shutdown", "command": "shutdown", "type": "system", "description": "Shutdown in 1 minute." },
+  { "name": "shutdown now", "command": "shutdown now", "type": "system", "description": "Immediately shut down." },
+  { "name": "shutdown +N", "command": "shutdown +<n>", "type": "system", "description": "Shutdown in N minutes." },
+  {
+    "name": "shutdown --reboot",
+    "command": "shutdown --reboot",
+    "type": "system",
+    "description": "Reboot in 1 minute."
+  },
+  { "name": "shutdown -r now", "command": "shutdown -r now", "type": "system", "description": "Immediately reboot." },
+  {
+    "name": "shutdown -c",
+    "command": "shutdown -c",
+    "type": "system",
+    "description": "Cancel a pending shutdown or reboot."
+  },
+  { "name": "reboot", "command": "reboot", "type": "system", "description": "Reboot now." },
+  { "name": "reboot -f", "command": "reboot -f", "type": "system", "description": "Force a reboot." },
+  {
+    "name": "uname -a",
+    "command": "uname -a",
+    "type": "system",
+    "description": "Print all system information — kernel, hostname, OS, architecture."
+  },
+  {
+    "name": "uptime",
+    "command": "uptime",
+    "type": "system",
+    "description": "Show how long the system has been running, and the load average."
+  },
+  {
+    "name": "w",
+    "command": "w",
+    "type": "system",
+    "description": "Show who is logged in and what they are doing, including load average."
+  },
+  {
+    "name": "vmstat",
+    "command": "vmstat",
+    "type": "system",
+    "description": "Report a snapshot of memory, swap, I/O, and CPU activity."
+  },
+  {
+    "name": "env",
+    "command": "env",
+    "type": "system",
+    "description": "List all environment variables currently active in the shell."
+  },
+
+  {
+    "name": "journalctl -u",
+    "command": "journalctl -u <service>",
+    "type": "logs",
+    "description": "Show logs for a specific service."
+  },
+  {
+    "name": "journalctl -xe",
+    "command": "journalctl -xe",
+    "type": "logs",
+    "description": "Show recent errors with explanations."
+  },
+  { "name": "journalctl -f", "command": "journalctl -f", "type": "logs", "description": "Follow logs in real time." },
+  { "name": "journalctl -k", "command": "journalctl -k", "type": "logs", "description": "Show kernel logs." },
+  {
+    "name": "tail -f /var/log/syslog",
+    "command": "tail -f /var/log/syslog",
+    "type": "logs",
+    "description": "Follow live system logs (Debian/Ubuntu)."
+  },
+  {
+    "name": "tail -f /var/log/messages",
+    "command": "tail -f /var/log/messages",
+    "type": "logs",
+    "description": "Follow live system logs (RHEL/CentOS)."
+  },
+
+  { "name": "top", "command": "top", "type": "process", "description": "List all processes interactively." },
+  {
+    "name": "htop",
+    "command": "htop",
+    "type": "process",
+    "description": "List all processes interactively with a better UI."
+  },
+  { "name": "ps all", "command": "ps all", "type": "process", "description": "List all processes." },
+  {
+    "name": "ps aux",
+    "command": "ps aux",
+    "type": "process",
+    "description": "List all running processes with user, CPU and memory usage."
+  },
+  {
+    "name": "pidof",
+    "command": "pidof <name>",
+    "type": "process",
+    "description": "Return the PID of all processes with a given name."
+  },
+  {
+    "name": "bg",
+    "command": "bg",
+    "type": "process",
+    "description": "Resume a suspended process and run it in the background."
+  },
+  {
+    "name": "fg",
+    "command": "fg",
+    "type": "process",
+    "description": "Bring the last background process to the foreground."
+  },
+  { "name": "jobs", "command": "jobs", "type": "process", "description": "List all background jobs." },
+  {
+    "name": "jobs -p",
+    "command": "jobs -p",
+    "type": "process",
+    "description": "List all background jobs with their PID."
+  },
+  {
+    "name": "lsof",
+    "command": "lsof",
+    "type": "process",
+    "description": "List all open files and the processes using them."
+  },
+  {
+    "name": "lsof -itcp",
+    "command": "lsof -itcp:<port>",
+    "type": "process",
+    "description": "Return the process listening on a given port."
+  },
+  {
+    "name": "nice",
+    "command": "nice -n <priority> <cmd>",
+    "type": "process",
+    "description": "Start a command with a given priority (-20 highest, 19 lowest)."
+  },
+  {
+    "name": "renice",
+    "command": "renice <priority> <PID>",
+    "type": "process",
+    "description": "Change the priority of a running process by PID."
+  },
+  {
+    "name": "ps -o ni",
+    "command": "ps -o ni <PID>",
+    "type": "process",
+    "description": "Return the priority of a process by PID."
+  },
+  {
+    "name": "kill",
+    "command": "kill <PID>",
+    "type": "process",
+    "description": "Shut down a process by PID gracefully (TERM signal)."
+  },
+  {
+    "name": "kill -9",
+    "command": "kill -9 <PID>",
+    "type": "process",
+    "description": "Force kill a process by PID (SIGKILL signal)."
+  },
+  {
+    "name": "pkill",
+    "command": "pkill <name>",
+    "type": "process",
+    "description": "Shut down a process by name gracefully (TERM signal)."
+  },
+  {
+    "name": "pkill -9",
+    "command": "pkill -9 <name>",
+    "type": "process",
+    "description": "Force kill a process by name (SIGKILL signal)."
+  },
+  {
+    "name": "killall",
+    "command": "killall <name>",
+    "type": "process",
+    "description": "Kill all processes with the specified name gracefully."
+  },
+
+  {
+    "name": "apt update",
+    "command": "apt update",
+    "type": "packages",
+    "description": "Refresh the package repository index."
+  },
+  { "name": "apt search", "command": "apt search <pkg>", "type": "packages", "description": "Search for a package." },
+  {
+    "name": "apt show",
+    "command": "apt show <pkg>",
+    "type": "packages",
+    "description": "Show information about a package."
+  },
+  {
+    "name": "apt list --all-versions",
+    "command": "apt list --all-versions <pkg>",
+    "type": "packages",
+    "description": "List all available versions of a package."
+  },
+  {
+    "name": "apt install",
+    "command": "apt install <pkg>",
+    "type": "packages",
+    "description": "Install the latest version of a package."
+  },
+  {
+    "name": "apt install version",
+    "command": "apt install <pkg>=<version>",
+    "type": "packages",
+    "description": "Install a specific version of a package."
+  },
+  { "name": "apt remove", "command": "apt remove <pkg>", "type": "packages", "description": "Remove a package." },
+  {
+    "name": "apt upgrade",
+    "command": "apt upgrade",
+    "type": "packages",
+    "description": "Upgrade all upgradable packages."
+  },
+
+  { "name": "crontab -l", "command": "crontab -l", "type": "scheduled", "description": "List all cron jobs." },
+  {
+    "name": "crontab -e",
+    "command": "crontab -e",
+    "type": "scheduled",
+    "description": "Edit cron jobs in the default editor."
+  },
+  {
+    "name": "crontab load",
+    "command": "crontab <path>",
+    "type": "scheduled",
+    "description": "Load cron jobs from a file."
+  },
+  {
+    "name": "crontab save",
+    "command": "crontab -l > <path>",
+    "type": "scheduled",
+    "description": "Save cron jobs to a file."
+  },
+  { "name": "at -l", "command": "at -l", "type": "scheduled", "description": "List all scheduled at tasks." },
+  { "name": "at -c", "command": "at -c <id>", "type": "scheduled", "description": "Show a scheduled at task by ID." },
+  { "name": "at -r", "command": "at -r <id>", "type": "scheduled", "description": "Remove a scheduled at task by ID." },
+  {
+    "name": "at now +",
+    "command": "at now + 2 minutes",
+    "type": "scheduled",
+    "description": "Schedule a task to run in N minutes."
+  },
+  {
+    "name": "at time",
+    "command": "at 12:34 PM next month",
+    "type": "scheduled",
+    "description": "Schedule a task to run at a specific date and time."
+  },
+  {
+    "name": "at tomorrow",
+    "command": "at tomorrow",
+    "type": "scheduled",
+    "description": "Schedule a task to run tomorrow."
+  },
+
+  { "name": "curl", "command": "curl <url>", "type": "network", "description": "Return the response body of a URL." },
+  {
+    "name": "curl -i",
+    "command": "curl -i <url>",
+    "type": "network",
+    "description": "Include HTTP status code and headers in the response."
+  },
+  { "name": "curl -L", "command": "curl -L <url>", "type": "network", "description": "Follow redirects." },
+  {
+    "name": "curl -o",
+    "command": "curl -o <file> <url>",
+    "type": "network",
+    "description": "Save the response to a file."
+  },
+  {
+    "name": "curl -H",
+    "command": "curl -H '<header>' <url>",
+    "type": "network",
+    "description": "Add a custom HTTP header to the request."
+  },
+  {
+    "name": "curl -X POST",
+    "command": "curl -X POST -H \"Content-Type: application/json\" -d '<json>' <url>",
+    "type": "network",
+    "description": "Send a POST request with a JSON body."
+  },
+  {
+    "name": "wget",
+    "command": "wget <url>",
+    "type": "network",
+    "description": "Download a file to the current directory."
+  },
+  {
+    "name": "wget -O",
+    "command": "wget -O <file> <url>",
+    "type": "network",
+    "description": "Download a file with a specified output name."
+  },
+  {
+    "name": "ping",
+    "command": "ping <host>",
+    "type": "network",
+    "description": "Send continuous ping requests to a host using ICMP."
+  },
+  {
+    "name": "ping -c -i",
+    "command": "ping -c 10 -i 5 <host>",
+    "type": "network",
+    "description": "Send a fixed number of pings at a set interval."
+  },
+  { "name": "ip addr", "command": "ip addr", "type": "network", "description": "List IP addresses on the system." },
+  {
+    "name": "ip route show",
+    "command": "ip route show",
+    "type": "network",
+    "description": "Show the IP routing table."
+  },
+  {
+    "name": "netstat -i",
+    "command": "netstat -i",
+    "type": "network",
+    "description": "List all network interfaces and their in/out traffic."
+  },
+  { "name": "netstat -l", "command": "netstat -l", "type": "network", "description": "List all open ports." },
+  {
+    "name": "traceroute",
+    "command": "traceroute <host>",
+    "type": "network",
+    "description": "List all servers the network traffic passes through."
+  },
+  {
+    "name": "mtr -w",
+    "command": "mtr -w <host>",
+    "type": "network",
+    "description": "Continually list all servers the network traffic passes through."
+  },
+  {
+    "name": "mtr -r",
+    "command": "mtr -r -w -c 100 <host>",
+    "type": "network",
+    "description": "Output a report of network traffic across 100 cycles."
+  },
+  {
+    "name": "nmap",
+    "command": "nmap <host>",
+    "type": "network",
+    "description": "Scan for the 1000 most common open ports on a host."
+  },
+  {
+    "name": "nmap -p",
+    "command": "nmap -p1-65535 <host>",
+    "type": "network",
+    "description": "Scan all open ports on a host."
+  },
+  {
+    "name": "nmap -sn",
+    "command": "nmap -sn <subnet>",
+    "type": "network",
+    "description": "Discover all machines on a network by pinging them (-sP is deprecated)."
+  },
+  {
+    "name": "host",
+    "command": "host <domain>",
+    "type": "network",
+    "description": "Show the IPv4 and IPv6 addresses for a domain."
+  },
+  {
+    "name": "dig",
+    "command": "dig <domain>",
+    "type": "network",
+    "description": "Show complete DNS information for a domain."
+  },
+  {
+    "name": "ssh",
+    "command": "ssh <host>",
+    "type": "network",
+    "description": "Connect to a remote host using your current user over port 22."
+  },
+  {
+    "name": "ssh -i",
+    "command": "ssh -i <key>.pem <host>",
+    "type": "network",
+    "description": "Connect to a remote host using an identity file."
+  },
+  {
+    "name": "ssh user@host",
+    "command": "ssh <user>@<host>",
+    "type": "network",
+    "description": "Connect to a remote host as a specific user."
+  },
+  {
+    "name": "ssh -p",
+    "command": "ssh -p <port> <user>@<host>",
+    "type": "network",
+    "description": "Connect to a remote host over a custom port."
+  },
+  {
+    "name": "scp",
+    "command": "scp <file> <user>@<host>:<path>",
+    "type": "network",
+    "description": "Securely copy a file to a remote directory."
+  },
+
+  {
+    "name": "tmux",
+    "command": "tmux",
+    "type": "terminal",
+    "description": "Start a new tmux session (CTRL-b + d to detach)."
+  },
+  { "name": "tmux ls", "command": "tmux ls", "type": "terminal", "description": "List all tmux sessions." },
+  {
+    "name": "tmux attach",
+    "command": "tmux attach -t <id>",
+    "type": "terminal",
+    "description": "Reattach to a tmux session."
+  },
+  {
+    "name": "screen",
+    "command": "screen",
+    "type": "terminal",
+    "description": "Start a new screen session (CTRL-a + d to detach)."
+  },
+  {
+    "name": "screen -S",
+    "command": "screen -S <name>",
+    "type": "terminal",
+    "description": "Start a new named screen session."
+  },
+  { "name": "screen -ls", "command": "screen -ls", "type": "terminal", "description": "List all screen sessions." },
+  {
+    "name": "screen -R",
+    "command": "screen -R <id>",
+    "type": "terminal",
+    "description": "Reattach to a screen session by name or ID."
+  },
+  {
+    "name": "screen -d",
+    "command": "screen -d <id>",
+    "type": "terminal",
+    "description": "Detach a screen session that is running in another terminal."
+  },
+  { "name": "exit", "command": "exit", "type": "terminal", "description": "Exit the current shell session." },
+
+  {
+    "name": ">",
+    "command": "cmd > file",
+    "type": "redirect",
+    "description": "Redirect stdout to a file, overwriting it."
+  },
+  {
+    "name": ">>",
+    "command": "cmd >> file",
+    "type": "redirect",
+    "description": "Redirect stdout to a file, appending to it."
+  },
+  { "name": "2>", "command": "cmd 2> file", "type": "redirect", "description": "Redirect stderr to a file." },
+  {
+    "name": "2>&1",
+    "command": "cmd > file 2>&1",
+    "type": "redirect",
+    "description": "Redirect both stdout and stderr to a file.",
+    "notes": "### File descriptors\n\n| # | Stream |\n|---|--------|\n| `1` | stdout (standard output) |\n| `2` | stderr (standard error) |\n\n`2>&1` means: send stderr (`2`) to wherever stdout (`1`) is going."
+  },
+  {
+    "name": "/dev/null",
+    "command": "cmd > /dev/null 2>&1",
+    "type": "redirect",
+    "description": "Discard all output. Use > /dev/null for stdout only, 2> /dev/null for stderr only."
+  },
+  {
+    "name": "|",
+    "command": "cmd1 | cmd2",
+    "type": "redirect",
+    "description": "Pipe stdout of one command as stdin to the next."
+  },
+
+  {
+    "name": "alias",
+    "command": "alias <name>='<cmd>'",
+    "type": "shell",
+    "description": "Create a shortcut for a command."
+  },
+  { "name": "alias list", "command": "alias", "type": "shell", "description": "List all currently defined aliases." },
+  { "name": "unalias", "command": "unalias <name>", "type": "shell", "description": "Remove an alias." }
+]

@@ -1,5 +1,10 @@
 # OpenVPN Changelog
 
+## [Bug Fixes] - 2026-02-05
+
+- Fixed AppleScript failures when OpenVPN Connect is still launching or its menu bar menu is not available yet.
+- Added fallback handling for menu bar index changes to keep connect/disconnect actions stable.
+
 ## [Updated README] - 2025-05-09
 
 ## [Handle multiple profiles] - 2024-08-01

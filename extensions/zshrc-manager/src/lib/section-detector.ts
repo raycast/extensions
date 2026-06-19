@@ -7,7 +7,7 @@
 
 import { PARSING_CONSTANTS, getSectionFormatsInOrder } from "../constants";
 
-import { SectionMarkerType } from "../types/enums";
+import type { SectionMarkerType } from "../types/enums";
 
 /**
  * Represents a detected section marker

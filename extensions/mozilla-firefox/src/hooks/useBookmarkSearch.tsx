@@ -5,10 +5,19 @@ import { getBookmarksDirectoryPath, decodeLZ4 } from "../util";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
 
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: any): HistoryEntry[] {
+interface FirefoxBookmarkNode {
+  type: string;
+  id: number;
+  title: string;
+  uri?: string;
+  dateAdded: Date;
+  children?: FirefoxBookmarkNode[];
+}
+
+function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: FirefoxBookmarkNode): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
   if (bookmarkDirectory.type === "text/x-moz-place-container" && bookmarkDirectory.children) {
-    bookmarkDirectory.children.forEach((child: any) => {
+    bookmarkDirectory.children.forEach((child: FirefoxBookmarkNode) => {
       const bookmarkEntries = extractBookmarkFromBookmarkDirectory(child);
       bookmarks.push(...bookmarkEntries);
     });
@@ -50,8 +59,8 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
           bookmarks.filter(
             (bookmark) =>
               bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
+          ),
         );
         setIsLoading(false);
       })

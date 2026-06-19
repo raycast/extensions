@@ -7,6 +7,7 @@ import {
   capitalizeFirstLetter,
   daysInSeconds,
   getErrorMessage,
+  isNumber,
   now,
   optimizeMarkdownText,
   Query,
@@ -176,21 +177,18 @@ export function MRDetail(props: { mr: MergeRequest }) {
 
 export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expandDetails: boolean }) {
   const mr = props.mr;
-  const { mrdetail, error, isLoading } = useDetail(props.mr.id);
-  if (error) {
-    showErrorToast(error, "Could not get Merge Request Details");
-  }
 
   const lines: string[] = [];
   lines.push(`# ${mr.title}`);
 
-  const desc = mrdetail?.description ?? props.mr.description ?? "";
-  lines.push(optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
+  const desc = props.mr.description ?? "";
+  const projectWebUrlIndex = mr.web_url.indexOf("/-/");
+  const projectWebUrl = projectWebUrlIndex > 1 ? mr.web_url.substring(0, projectWebUrlIndex) : undefined;
+  lines.push(optimizeMarkdownText(desc, projectWebUrl));
 
   return (
     <List.Item.Detail
       markdown={lines.join("\n")}
-      isLoading={isLoading}
       metadata={
         props.expandDetails ? (
           <List.Item.Detail.Metadata>
@@ -428,13 +426,23 @@ export function MRListItem(props: {
 
   const accessories: List.Item.Accessory[] = [];
   if (!getListDetailsPreference()) {
+    if (approval) {
+      if (isNumber(approval.approvals_left) && isNumber(approval.approvals_required)) {
+        accessories.push({
+          icon: Icon.Eye,
+          text: `${approval.approvals_required - approval.approvals_left}/${approval.approvals_required}`,
+        });
+      } else if (approval.approved) {
+        accessories.push({
+          icon: {
+            source: Icon.Checkmark,
+            tintColor: Color.Green,
+          },
+        });
+      }
+    }
+
     accessories.push(
-      {
-        icon: approval ? Icon.Eye : undefined,
-        text: approval
-          ? `${approval.approvals_required - approval.approvals_left}/${approval.approvals_required}`
-          : undefined,
-      },
       {
         icon: mr.merge_when_pipeline_succeeds && mr.state === "opened" ? Icon.Rewind : undefined,
         tooltip: mr.merge_when_pipeline_succeeds && mr.state === "opened" ? "Auto Merge" : undefined,

@@ -7,7 +7,8 @@
   "author": "vimtor",
   "contributors": [
     "hrishabhn",
-    "xmok"
+    "xmok",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "preferences": [
@@ -72,14 +73,6 @@
       "mode": "view"
     },
     {
-      "name": "menu-bookmarks",
-      "title": "Menu Bar Bookmarks",
-      "subtitle": "Pocket",
-      "description": "See your latest bookmarks at a glance",
-      "mode": "menu-bar",
-      "interval": "5m"
-    },
-    {
       "name": "clipboard",
       "title": "Save Clipboard",
       "subtitle": "Pocket",
@@ -95,17 +88,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
-    "got": "^12.0.1",
-    "is-url": "^1.2.4",
-    "lodash": "^4.17.21",
-    "zod": "^3.23.8"
+    "@raycast/api": "^1.104.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/is-url": "^1.2.32",
-    "@types/lodash": "^4.14.200",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
@@ -119,5 +105,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

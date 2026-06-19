@@ -2,17 +2,17 @@ import { useMemo, useState } from "react";
 import { Action, ActionPanel, Grid, AI, environment } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
-import { getSlackWebClient } from "./shared/client/WebClient";
+import { SlackClient } from "./shared/client";
 
 function EmojiItem({ name, url }: { name: string; url: string }) {
   return (
     <Grid.Item
       content={url}
-      title={`:${name}:`}
+      title={name}
       actions={
         <ActionPanel>
-          <Action.Paste content={`:${name}:`} />
-          <Action.CopyToClipboard content={`:${name}:`} />
+          <Action.Paste content={name} />
+          <Action.CopyToClipboard content={name} />
         </ActionPanel>
       }
     />
@@ -22,12 +22,10 @@ function EmojiItem({ name, url }: { name: string; url: string }) {
 function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { data, isLoading } = useCachedPromise(async () => {
-    const slackWebClient = getSlackWebClient();
-    return await slackWebClient.emoji.list();
-  });
+  const { data, isLoading } = useCachedPromise(SlackClient.getWorkspaceEmojis);
 
-  const emojis = Object.entries(data?.emoji ?? {});
+  const emojis = Object.entries(data ?? {});
+
   const allEmojiNames = emojis.map(([name]) => name).join(", ");
 
   const filteredEmojis = useMemo(() => {
@@ -46,8 +44,8 @@ function Command() {
     return modelResponse
       .split(",")
       .map((name) => name.trim())
-      .filter((name) => !!data?.emoji?.[name])
-      .map((name) => [name, data?.emoji?.[name]]) as Array<[string, string]>;
+      .filter((name) => !!data?.[name])
+      .map((name) => [name, data?.[name]]) as Array<[string, string]>;
   }, [modelResponse, data]);
 
   const emojiEntries = useMemo(() => {

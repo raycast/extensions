@@ -6,7 +6,8 @@ import {
   type MovieStatistics,
 } from "./types";
 import { parse } from "./parser";
-import { Element, load } from "cheerio";
+import type { Element } from "domhandler";
+import { load } from "cheerio";
 import { fetchWithRetry } from "./utils";
 
 const cache = new Cache();
@@ -229,7 +230,7 @@ async function fetchMovieStats(letterboxdId: string): Promise<MovieStatistics> {
 async function fetchRatingHistogram(
   letterboxdId: string,
 ): Promise<MovieRatingHistogram> {
-  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/ratings-summary/`;
+  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/rating-histogram/`;
   const ratingResponse = await fetchWithRetry(ratingUrl);
   return parse(ratingResponse, {
     histogram: [

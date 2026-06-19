@@ -17,6 +17,7 @@ import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 import { LogsView } from "../logs-service";
 import { CloudShellAction } from "../../components/CloudShellAction";
 
@@ -88,27 +89,12 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         console.error("Error initializing:", error);
         loadingToast.then((toast) => toast.hide());
 
-        // Show more informative error message based on error type
-        if (error instanceof Error && error.message.includes("timeout")) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Request Timed Out",
-            message: "Try again or check your connection",
-          });
-        } else if (error instanceof Error && error.message.includes("Authentication")) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Authentication Error",
-            message: "Please re-authenticate with Google Cloud",
-          });
-        } else {
-          // Generic error message
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to load instances",
-            message: error instanceof Error ? error.message : "An unknown error occurred",
-          });
-        }
+        const friendly = friendlyErrorMessage(error, "Failed to load instances");
+        showToast({
+          style: Toast.Style.Failure,
+          title: friendly.title,
+          message: friendly.message,
+        });
       } finally {
         setIsLoading(false);
       }

@@ -346,3 +346,57 @@ export interface TaskCreateData {
 export interface TaskResponse {
   task: Task;
 }
+
+export interface ProjectCreateData {
+  name: string;
+  contact: string;
+  status?: string;
+  currency?: string;
+  budget_units?: string;
+  budget?: number;
+  is_ir35?: boolean;
+  uses_project_invoice_sequence?: boolean;
+  hours_per_day?: number;
+  normal_billing_rate?: string;
+  billing_period?: string;
+  starts_on?: string;
+  ends_on?: string;
+}
+
+export interface ProjectUpdateData {
+  name?: string;
+  contact?: string;
+  status?: string;
+  currency?: string;
+  budget?: number;
+  budget_units?: string;
+  normal_billing_rate?: string;
+  billing_period?: string;
+  starts_on?: string;
+  ends_on?: string;
+}
+
+export interface ProjectResponse {
+  project: Project;
+}
+
+export interface TaskUpdateData {
+  name?: string;
+  is_billable?: boolean;
+  billing_rate?: string;
+  billing_period?: string;
+  status?: string;
+}
+
+export interface TimeslipUpdateData {
+  task?: string;
+  project?: string;
+  user?: string;
+  dated_on?: string;
+  hours?: number;
+  comment?: string;
+}
+
+export interface TimeslipResponseSingle {
+  timeslip: Timeslip;
+}

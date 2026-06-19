@@ -240,13 +240,31 @@ export function CommitRebaseAction(context: RepositoryContext & NavigationContex
 
 /**
  * Action to open Interactive Rebase Editor starting from selected commit.
+ * Blocks execution if there are uncommitted changes.
  */
 export function CommitInteractiveRebaseAction(context: RepositoryContext & NavigationContext & { commit: Commit }) {
+  const { push } = useNavigation();
+
+  const handleInteractiveRebase = () => {
+    const hasUncommittedChanges = context.status.data.files.length !== 0;
+
+    if (hasUncommittedChanges) {
+      confirmAlert({
+        title: "Cannot Start Interactive Rebase",
+        message: "You have uncommitted changes. Please commit or stash them before starting an interactive rebase.",
+        primaryAction: { title: "OK", style: Alert.ActionStyle.Default },
+      });
+      return;
+    }
+
+    push(<InteractiveRebaseEditorView startFromCommit={context.commit.hash} {...context} />);
+  };
+
   return (
-    <Action.Push
+    <Action
       title="Interactive Rebase from Here"
       icon={{ source: `arrow-rebase.svg`, tintColor: Color.Blue }}
-      target={<InteractiveRebaseEditorView startFromCommit={context.commit.hash} {...context} />}
+      onAction={handleInteractiveRebase}
       shortcut={{ modifiers: ["cmd"], key: "e" }}
     />
   );

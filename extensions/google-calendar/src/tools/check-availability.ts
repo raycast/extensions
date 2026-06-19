@@ -1,18 +1,19 @@
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
+import { parseAttendeeEmails } from "../lib/utils";
 import { tool as getCurrentUser } from "./get-current-user";
 
 type Input = {
   /**
-   * List of email addresses to check availability for
+   * Comma-separated email addresses to check availability for
    *
    * @remarks
    * Email addresses of the attendees whose availability you want to check.
    * These must be valid Google Calendar users in the format "user@domain.com".
    *
    * @example
-   * ["john.doe@company.com", "jane.smith@company.com"]
+   * "john.doe@company.com, jane.smith@company.com"
    */
-  attendees: string[];
+  attendees: string;
 
   /**
    * The start of the time range to check for availability
@@ -47,13 +48,17 @@ type Input = {
  */
 const tool = async (input: Input) => {
   const currentUser = await getCurrentUser();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const calendar = getCalendarClient();
 
   const requestBody = {
     timeMin: input.timeMin,
     timeMax: input.timeMax,
-    items: [...input.attendees.map((email) => ({ id: email })), { id: currentUser.email }],
+    items: [...attendeeEmails.map((email) => ({ id: email })), { id: currentUser.email }],
   };
 
   const response = await calendar.freebusy.query({

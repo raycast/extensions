@@ -5,6 +5,13 @@
   "description": "Provides different actions via the Hetzner API",
   "icon": "hetzner-icon.png",
   "author": "alex-w0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "yonn"
+  ],
   "categories": [
     "Applications",
     "Productivity",

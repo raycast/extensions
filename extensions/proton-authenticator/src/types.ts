@@ -22,3 +22,17 @@ export interface TOTPAccount {
   digits: number;
   algorithm: string;
 }
+
+export type ImportMode = "json" | "sqlite";
+
+export interface DecryptedAuthenticatorEntry {
+  metadata: {
+    name: string;
+    note: string;
+    id: string;
+  };
+  content: {
+    totp?: { uri: string };
+    steam?: { secret: string };
+  };
+}

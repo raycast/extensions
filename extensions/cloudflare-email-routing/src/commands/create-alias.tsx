@@ -2,13 +2,23 @@ import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
 import { useForm, useCachedPromise } from "@raycast/utils";
 import { CreateAliasFormData, CreateAliasProps } from "../types";
-import { validateLabel, validateDescription, extractDomainFromEmail } from "../utils";
+import {
+  validateLabel,
+  validateDescription,
+  extractDomainFromEmail,
+  generateRandomSlug,
+  validateEmail,
+} from "../utils";
 import { getApiConfig } from "../services/api/config";
 import { getUnusedRules, createRule, updateRule, ensurePoolSize, getAccountDomain } from "../services/cf/rules";
 
 export default function CreateAlias({ alias }: CreateAliasProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const config = getApiConfig();
+  const [defaultAliasSlug] = useState(() => {
+    const slug = generateRandomSlug();
+    return config.aliasPreface ? `${config.aliasPreface}-${slug}` : slug;
+  });
 
   // Fetch the correct domain for alias creation
   const { data: domain } = useCachedPromise(async () => {
@@ -28,6 +38,51 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
       return fallbackDomain;
     }
   });
+
+  const normalizeAliasInput = (input: string, aliasDomain: string): string => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      throw new Error("Alias is required");
+    }
+
+    if (trimmed.includes("@")) {
+      const atIndex = trimmed.indexOf("@");
+      const lastAtIndex = trimmed.lastIndexOf("@");
+      if (atIndex !== lastAtIndex) {
+        throw new Error("Alias must include only one @ symbol");
+      }
+      const localPart = trimmed.slice(0, atIndex);
+      const inputDomain = trimmed.slice(atIndex + 1);
+      if (!localPart || !inputDomain) {
+        throw new Error("Alias must include a valid domain");
+      }
+      if (inputDomain.toLowerCase() !== aliasDomain.toLowerCase()) {
+        throw new Error(`Alias domain must match ${aliasDomain}`);
+      }
+      return `${localPart}@${aliasDomain}`;
+    }
+
+    return `${trimmed}@${aliasDomain}`;
+  };
+
+  const validateAlias = (value?: string): string | undefined => {
+    if (alias) {
+      return undefined;
+    }
+    if (!value) {
+      return "Alias is required";
+    }
+    if (!domain) {
+      return "Domain not available yet";
+    }
+
+    try {
+      const normalized = normalizeAliasInput(value, domain as string);
+      return validateEmail(normalized) ? undefined : "Alias must be a valid email address";
+    } catch (error) {
+      return error instanceof Error ? error.message : "Invalid alias";
+    }
+  };
 
   const { handleSubmit, itemProps } = useForm<CreateAliasFormData>({
     async onSubmit(values) {
@@ -66,48 +121,52 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
           });
         } else {
           // Create new alias
-          let unusedRules = await getUnusedRules();
+          const normalizedAlias = normalizeAliasInput(values.alias, safeDomain);
+          if (!validateEmail(normalizedAlias)) {
+            throw new Error("Alias must be a valid email address");
+          }
 
-          if (unusedRules.length === 0) {
-            // No unused rules available, create a new one
+          let unusedRules = await getUnusedRules();
+          let createdEmail = normalizedAlias;
+
+          if (unusedRules.length > 0) {
+            const ruleToUse = unusedRules[0];
+            const updatedRule = await updateRule(ruleToUse.id, values.label, values.description, normalizedAlias);
+            createdEmail = updatedRule.email;
+          } else {
             showToast({
               style: Toast.Style.Animated,
               title: "Creating New Alias",
               message: "Generating new email alias...",
             });
-            await createRule(safeDomain);
+            const createdRule = await createRule(safeDomain, normalizedAlias, values.label, values.description);
+            createdEmail = createdRule.email;
             unusedRules = await getUnusedRules();
           }
 
-          if (unusedRules.length > 0) {
-            const ruleToUse = unusedRules[0];
-            await updateRule(ruleToUse.id, values.label, values.description);
-
-            showToast({
-              style: Toast.Style.Success,
-              title: "Alias Created",
-              message: `Successfully created ${ruleToUse.email}`,
-              primaryAction: {
-                title: "Copy Email",
-                onAction: () => {
-                  Clipboard.copy(ruleToUse.email);
-                },
+          await Clipboard.copy(createdEmail);
+          showToast({
+            style: Toast.Style.Success,
+            title: "Alias Created",
+            message: `Copied ${createdEmail} to clipboard`,
+            primaryAction: {
+              title: "Copy Email",
+              onAction: () => {
+                Clipboard.copy(createdEmail);
               },
-            });
+            },
+          });
 
-            // Ensure pool size after using a rule
-            if (config.preAllocatePool) {
-              ensurePoolSize(20).catch((poolError) => {
-                console.error("Pool size maintenance failed:", poolError);
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Pool Maintenance Warning",
-                  message: "Alias created but pool replenishment failed. Next alias creation may be slower.",
-                });
+          // Ensure pool size after using a rule
+          if (config.preAllocatePool) {
+            ensurePoolSize(20).catch((poolError) => {
+              console.error("Pool size maintenance failed:", poolError);
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Pool Maintenance Warning",
+                message: "Alias created but pool replenishment failed. Next alias creation may be slower.",
               });
-            }
-          } else {
-            throw new Error("Failed to create or find available alias");
+            });
           }
         }
 
@@ -130,10 +189,12 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
       }
     },
     initialValues: {
-      label: alias?.name.label || "",
+      alias: alias?.email || defaultAliasSlug,
+      label: alias?.name.label || config.defaultLabel || "",
       description: alias?.name.description || "",
     },
     validation: {
+      alias: validateAlias,
       label: (value) => {
         const validation = validateLabel(value || "");
         return validation.isValid ? undefined : validation.error;
@@ -174,16 +235,18 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
       if (unusedRules.length > 0) {
         const ruleToUse = unusedRules[0];
-        await updateRule(ruleToUse.id, "Quick Alias", "Created using random unused alias");
+        const quickLabel = config.defaultLabel || "Quick Alias";
+        const updatedRule = await updateRule(ruleToUse.id, quickLabel, "Created using random unused alias");
 
+        await Clipboard.copy(updatedRule.email);
         showToast({
           style: Toast.Style.Success,
           title: "Alias Created",
-          message: `Successfully created ${ruleToUse.email}`,
+          message: `Copied ${updatedRule.email} to clipboard`,
           primaryAction: {
             title: "Copy Email",
             onAction: () => {
-              Clipboard.copy(ruleToUse.email);
+              Clipboard.copy(updatedRule.email);
             },
           },
         });
@@ -231,7 +294,15 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Label" placeholder="Enter a label for this alias (required)" {...itemProps.label} />
+      {!alias && (
+        <Form.TextField title="Alias" placeholder="random-slug or name@example.com" autoFocus {...itemProps.alias} />
+      )}
+      <Form.TextField
+        title="Label"
+        placeholder="Enter a label for this alias (required)"
+        autoFocus={Boolean(alias)}
+        {...itemProps.label}
+      />
       <Form.TextArea
         title="Description"
         placeholder="Enter a description for this alias (optional)"

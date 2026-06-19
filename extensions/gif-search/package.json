@@ -17,7 +17,9 @@
     "spookywy",
     "seanparkross",
     "YourMCGeek",
-    "thomas"
+    "thomas",
+    "tim_gailey",
+    "clins1994"
   ],
   "license": "MIT",
   "categories": [
@@ -29,6 +31,7 @@
     "Tenor",
     "Giphy",
     "Finer",
+    "Klipy",
     "clips"
   ],
   "commands": [
@@ -37,6 +40,20 @@
       "title": "Search for GIFs",
       "description": "Search for GIFs across multiple services…",
       "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Browse Favorite GIFs",
+      "description": "Browse and search your favorite GIFs across all services",
+      "mode": "view",
+      "icon": "favorites-icon.png"
+    },
+    {
+      "name": "recents",
+      "title": "Browse Recent GIFs",
+      "description": "Browse and search your recently used GIFs across all services",
+      "mode": "view",
+      "icon": "recents-icon.png"
     }
   ],
   "preferences": [
@@ -113,6 +130,10 @@
           "value": "copyGifUrl"
         },
         {
+          "title": "Paste GIF Link",
+          "value": "pasteGifUrl"
+        },
+        {
           "title": "Copy GIF Markdown",
           "value": "copyGifMarkdown"
         },
@@ -127,6 +148,14 @@
         {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Copy GIF Square",
+          "value": "copySquareGif"
+        },
+        {
+          "title": "Paste GIF Square",
+          "value": "pasteSquareGif"
         },
         {
           "title": "Copy Page Link",
@@ -487,6 +516,63 @@
         {
           "title": "Vietnamese",
           "value": "vi"
+        }
+      ]
+    },
+    {
+      "name": "klipyApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Klipy API Key",
+      "description": "API key for Klipy service. Get your key at partner.klipy.com"
+    },
+    {
+      "name": "klipyLocale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Klipy Locale",
+      "description": "Select the locale for the Klipy API",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh-TW"
         }
       ]
     }

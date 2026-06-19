@@ -5,7 +5,7 @@
  * for different display modes and section types.
  */
 
-import { LogicalSection } from "../lib/parse-zshrc";
+import type { LogicalSection } from "../lib/parse-zshrc";
 import { parseAliases, parseExports } from "./parsers";
 
 /**

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, open } from '@raycast/api'
 import { Project } from '../project'
-import { openUrl, preferences, resizeEditorWindow } from '../helpers'
+import { markProjectOpened, openUrl, preferences, resizeEditorWindow } from '../helpers'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
 
 type OpenProps = {
@@ -20,6 +20,7 @@ export function OpenInEditor({ project }: OpenProps) {
             }
 
             await open(project.fullPath, preferences.editorApp.path)
+            await markProjectOpened(project)
             await resizeEditorWindow(preferences.editorApp)
             await showSuccessToast(`Opening project in ${preferences.editorApp.name}`)
         } catch (error) {
@@ -59,6 +60,7 @@ export function OpenInTerminal({ project }: OpenProps) {
             }
 
             await open(project.fullPath, preferences.terminalApp.path)
+            await markProjectOpened(project)
             await showSuccessToast(`Opening project in ${preferences.terminalApp.name}`)
         } catch (error) {
             if (error instanceof Error && error.message === 'Terminal app not configured') {
@@ -91,10 +93,11 @@ export function OpenInTerminal({ project }: OpenProps) {
     )
 }
 
-function OpenUrlAction(key: string, value: string, props: ActionProps = {}) {
+function OpenUrlAction(project: Project, key: string, value: string, props: ActionProps = {}) {
     async function handleOpenUrl() {
         try {
             await openUrl(value)
+            await markProjectOpened(project)
             await showSuccessToast(`Opening ${key} URL`)
         } catch (error) {
             await showErrorToast(`Failed to open ${key} URL`)
@@ -121,7 +124,7 @@ export function OpenUrl({ project }: OpenProps) {
             return null
         }
 
-        return OpenUrlAction(key, value, {
+        return OpenUrlAction(project, key, value, {
             icon: Icon.Globe,
             shortcut: {
                 modifiers: ['cmd'] as Keyboard.KeyModifier[],
@@ -139,7 +142,7 @@ export function OpenUrl({ project }: OpenProps) {
                 key: 'o' as Keyboard.KeyEquivalent,
             }}
         >
-            {urlEntries.map(([key, value]) => value && OpenUrlAction(key, value))}
+            {urlEntries.map(([key, value]) => value && OpenUrlAction(project, key, value))}
         </ActionPanel.Submenu>
     )
 }

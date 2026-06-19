@@ -97,27 +97,40 @@ export const PackageListItem = ({
         onOpen={handleAddToHistory}
       />
     ),
+    npmxPackagePage: (
+      <Action.OpenInBrowser
+        url={`https://npmx.dev/package/${pkg.name}`}
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title="Open npmx Package Page"
+        icon={{
+          source: "npmx.png",
+        }}
+        key="npmxPackagePage"
+        onOpen={handleAddToHistory}
+      />
+    ),
   };
 
+  const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : typeof pkg.keywords === "string" ? [pkg.keywords] : [];
+
+  const subtitle =
+    pkg.description != null && String(pkg.description).length > 0
+      ? `v${pkg.version} · ${pkg.description}`
+      : `v${pkg.version}`;
+
   const accessories: List.Item.Accessory[] = [
-    pkg?.keywords?.length
+    keywords?.length
       ? {
           icon: Icon.Tag,
-          tooltip: pkg.keywords.join(", "),
+          tooltip: keywords.join(", "),
         }
       : {},
   ];
   if (!isViewingFavorites) {
-    accessories.push(
-      {
-        text: `v${pkg.version}`,
-        tooltip: `Latest version`,
-      },
-      {
-        icon: Icon.Calendar,
-        tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
-      },
-    );
+    accessories.push({
+      icon: Icon.Calendar,
+      tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+    });
     if (isFavorited) {
       accessories.push({
         icon: Icon.Star,
@@ -130,10 +143,10 @@ export const PackageListItem = ({
       id={pkg.name}
       key={pkg.name}
       title={pkg.name}
-      subtitle={pkg.description}
+      subtitle={subtitle}
       icon={Icon.Box}
       accessories={accessories}
-      keywords={pkg.keywords}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">

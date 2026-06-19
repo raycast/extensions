@@ -9,7 +9,7 @@ export function parseOtpAuthUri(uri: string): Omit<TOTPAccount, "id"> | null {
     }
 
     const secret = url.searchParams.get("secret");
-    const issuer = url.searchParams.get("issuer") || "";
+    const issuer = url.searchParams.get("issuer") || "No issuer";
     const period = parseInt(url.searchParams.get("period") || "30");
     const digits = parseInt(url.searchParams.get("digits") || "6");
     const algorithm = url.searchParams.get("algorithm") || "SHA1";

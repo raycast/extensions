@@ -3,7 +3,7 @@ import { useCachedPromise, useFetch } from "@raycast/utils";
 import { parse } from "http-link-header";
 import fetch from "node-fetch";
 import { URLSearchParams } from "url";
-import { Event, Issue, Project, User } from "./types";
+import { Event, Issue, Project, Release, User } from "./types";
 import { getDefaultBaseUrl } from "./utils";
 
 const { token } = getPreferenceValues();
@@ -79,6 +79,36 @@ export function useUsers(organizationSlug: string, projectId?: string) {
   return useFetch<User[]>(`${defaultBaseUrl}/api/0/organizations/${organizationSlug}/users/?` + searchParams, {
     headers,
   });
+}
+
+export function useReleases(project?: Project) {
+  return useCachedPromise(
+    (organizationSlug?: string, projectId?: string) =>
+      async ({ page, cursor }) => {
+        if (page > 0 && !cursor) {
+          return { data: [] as Release[], hasMore: false };
+        }
+        const baseUrl = project?.baseUrl || defaultBaseUrl;
+        const url =
+          page === 0
+            ? `${baseUrl}/api/0/organizations/${organizationSlug}/releases/?project=${projectId}&health=1&flatten=1&sort=date`
+            : cursor;
+        const response = await fetch(url, { headers });
+        const data = ((await response.json()) as Release[]).map((release) => ({
+          ...release,
+          baseUrl,
+        })) as Release[];
+        let nextCursor: string | undefined = undefined;
+        const linkHeader = parse(response.headers.get("link") ?? "");
+        if (linkHeader) {
+          const next = linkHeader.refs.find((ref) => ref.rel === "next");
+          nextCursor = next?.uri;
+        }
+        return { hasMore: Boolean(nextCursor) && data.length > 0, data, cursor: nextCursor };
+      },
+    [project?.organization?.slug, project?.id],
+    { execute: !!project }
+  );
 }
 
 export async function updateIssue(issue: Issue, payload: { assignedTo?: string | null }) {

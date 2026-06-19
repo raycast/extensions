@@ -24,7 +24,7 @@ export default function Evals({ searchBarAccessory }: EvalsProps) {
     <ListViewController<EvalItem>
       commandName="Evals"
       navigationTitle="Evals"
-      searchPlaceholder="Search eval commands..."
+      searchPlaceholder="Search Eval Commands..."
       icon={Icon.Code}
       tintColor={MODERN_COLORS.warning}
       itemType="eval"

@@ -1,5 +1,5 @@
-export function htmlToMarkdown(rawHtml: any, title: any) {
-  const formattedContent = rawHtml
+export function htmlToMarkdown(rawHtml?: string, title?: string): string {
+  const formattedContent = (rawHtml ?? "")
     .replaceAll("<div>", "")
     .replaceAll('<div class="">', "")
     .replaceAll("</div>", "")
@@ -9,6 +9,8 @@ export function htmlToMarkdown(rawHtml: any, title: any) {
     .replaceAll("</code>", "`")
     .replaceAll("<pre>", "``` ")
     .replaceAll("</pre>", "```  ")
+    .replaceAll("``` `", "```\n")
+    .replaceAll("````", "```  ")
     .replaceAll("<h1>", "# ")
     .replaceAll("</h1>", "\n\n")
     .replaceAll("<h2>", "## ")
@@ -25,6 +27,11 @@ export function htmlToMarkdown(rawHtml: any, title: any) {
     .replaceAll("</strong>", "**")
     .replaceAll("<em>", "_")
     .replaceAll("</em>", "_")
+    .replaceAll("<ul>", "")
+    .replaceAll("</ul>", "\n")
+    .replaceAll("<li>", "- ")
+    .replaceAll("</li>", "\n")
+    .replaceAll("- \n", "- ")
     .replaceAll("New:", "\n New:")
     .replaceAll("Old:", "\n Old:")
     .replaceAll(/<a.*?href="(.*?)".*?>(.*?)<\/a>/g, "[$2]($1)");

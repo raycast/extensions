@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import {
   format,
   formatDistanceToNow,
@@ -11,7 +11,7 @@ import {
   isBefore,
   isAfter,
 } from "date-fns";
-import { Holiday } from "./api";
+import { getHolidays, Holiday } from "./api";
 
 export type DateRange = "next_1_month" | "next_3_months" | "next_6_months" | "this_year" | "next_year";
 
@@ -30,35 +30,7 @@ const buildMarkdown = (holidays: Holiday[] | undefined) => {
 };
 
 export const CountryDetail = ({ countryCode, dateRange }: { countryCode: string; dateRange?: DateRange }) => {
-  const { data, error, isLoading } = useFetch(
-    `https://askholidays.vercel.app/api/holiday-country?country=${countryCode}`,
-    {
-      parseResponse: async (response: Response) => {
-        // Be resilient to empty or non-JSON responses to avoid JSON.parse errors
-        if (!response.ok) return [];
-
-        const contentType = response.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-          // Try to read text; if empty return empty array
-          const text = await response.text();
-          if (!text) return [];
-          try {
-            const holidays = JSON.parse(text) as Holiday[];
-            return holidays.map((holiday) => ({ ...holiday, date: new Date(holiday.date) }));
-          } catch {
-            return [];
-          }
-        }
-
-        try {
-          const holidays = (await response.json()) as Holiday[];
-          return holidays.map((holiday) => ({ ...holiday, date: new Date(holiday.date) }));
-        } catch {
-          return [];
-        }
-      },
-    },
-  );
+  const { data, error, isLoading } = usePromise((code: string) => getHolidays(code), [countryCode]);
 
   if (error) {
     return <List.Item.Detail markdown={"No upcoming holidays known"} />;
@@ -104,19 +76,19 @@ export const CountryDetail = ({ countryCode, dateRange }: { countryCode: string;
 export interface Country {
   name: string;
   alpha2: string;
-  alpha3: string;
-  numeric: string;
-  locales: string[];
-  default_locale: string;
-  currency: string;
-  currency_name: string;
-  languages: string[];
-  capital: string;
   emoji: string;
-  emojiU: string;
-  fips: string;
-  internet: string;
-  continent: string;
-  region: string;
+  alpha3?: string;
+  numeric?: string;
+  locales?: string[];
+  default_locale?: string;
+  currency?: string;
+  currency_name?: string;
+  languages?: string[];
+  capital?: string;
+  emojiU?: string;
+  fips?: string;
+  internet?: string;
+  continent?: string;
+  region?: string;
   alternate_names?: string[];
 }

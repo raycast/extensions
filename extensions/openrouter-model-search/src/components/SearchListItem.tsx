@@ -27,25 +27,37 @@ export const SearchListItem = React.memo(function SearchListItem({ refreshModels
               title="Open in Chatroom"
               url={url.chatroom}
               icon={Icon.Message}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "return" },
+                Windows: { modifiers: ["ctrl"], key: "return" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Model ID"
               content={searchResult.id}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Model URL"
               content={url.model}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              }}
             />
             {searchResult.hugging_face_id && (
               <Action.OpenInBrowser
                 title="Open in Hugging Face"
                 url={`https://huggingface.co/${searchResult.hugging_face_id}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "h" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+                }}
               />
             )}
           </ActionPanel.Section>
@@ -53,7 +65,7 @@ export const SearchListItem = React.memo(function SearchListItem({ refreshModels
             <Action
               title="Refresh Model Data"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "r" }, Windows: { modifiers: ["ctrl"], key: "r" } }}
               onAction={refreshModels}
             />
           </ActionPanel.Section>

@@ -1,6 +1,6 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
-import { RemovePaywallService } from "./constants";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { RemovePaywallService } from "./constants";
 
 const urlRegex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
@@ -10,16 +10,17 @@ interface BrowserInfo {
 
 const SUPPORTED_BROWSERS: Record<string, BrowserInfo> = {
   // WebKit
-  Safari: { engine: "webkit" },
   Orion: { engine: "webkit" },
   "Orion RC": { engine: "webkit" },
+  Safari: { engine: "webkit" },
 
   // Chromium
+  Arc: { engine: "chromium" },
+  "Brave Browser": { engine: "chromium" },
+  Dia: { engine: "chromium" },
   "Google Chrome": { engine: "chromium" },
   "Microsoft Edge": { engine: "chromium" },
-  "Brave Browser": { engine: "chromium" },
   Vivaldi: { engine: "chromium" },
-  Arc: { engine: "chromium" },
 
   // Gecko
   firefox: { engine: "gecko" },
@@ -86,6 +87,9 @@ export async function getCurrentTabURL(): Promise<string> {
   let script = "";
   if (browserInfo.engine === "webkit") {
     script = `tell application "${escapedBrowserName}" to return URL of current tab of front window`;
+  } else if (browserInfo.name === "Dia") {
+    // Dia has a different AppleScript dictionary
+    script = `tell application "${escapedBrowserName}" to return URL of first tab of front window where isFocused is true`;
   } else if (browserInfo.engine === "chromium") {
     script = `tell application "${escapedBrowserName}" to return URL of active tab of front window`;
   } else if (browserInfo.engine === "gecko") {

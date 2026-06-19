@@ -15,10 +15,10 @@ import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
 import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
-import { addSignature, roundUpTime } from "./lib/utils";
+import { addSignature, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useMemo, useState } from "react";
-import parse from "parse-duration";
+import { randomUUID } from "node:crypto";
 
 type FormValues = {
   calendar: string;
@@ -28,9 +28,10 @@ type FormValues = {
   attendees: string | undefined;
   conferencingProvider: string | undefined;
   description: string | undefined;
+  sendInvitations: string;
 };
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 function parseDurationAsMinutesForPlainNumbers(value: string | undefined): number | null | undefined {
   if (value === undefined) {
@@ -42,12 +43,7 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
     return undefined;
   }
 
-  const isPlainIntegerString = /^\d+$/.test(trimmedValue);
-  if (isPlainIntegerString) {
-    return parse(`${trimmedValue}m`);
-  } else {
-    return parse(trimmedValue);
-  }
+  return parseDurationMs(trimmedValue) ?? null;
 }
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
@@ -80,6 +76,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
+      sendInvitations: props.launchContext?.sendInvitations ?? preferences.sendInvitations,
     },
     validation: {
       title: FormValidation.Required,
@@ -111,6 +108,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
+      const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(values.attendees);
+      if (invalidEntries.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Guest Email",
+          message: `Please check: ${invalidEntries.join(", ")}`,
+        });
+        return;
+      }
+
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
@@ -120,7 +127,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         end: {
           dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
         },
-        attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
+        attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
         location:
           values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
             ? undefined
@@ -132,7 +139,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
                   conferenceSolutionKey: {
                     type: "hangoutsMeet",
                   },
-                  requestId: values.conferencingProvider,
+                  requestId: randomUUID(),
                 },
               }
             : undefined,
@@ -149,6 +156,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           calendarId,
           requestBody,
           conferenceDataVersion: values.conferencingProvider === "hangoutsMeet" ? 1 : undefined,
+          sendUpdates: values.sendInvitations as "all" | "externalOnly" | "none",
         });
 
         resetForm();
@@ -259,6 +267,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
             />
           ))}
         </Form.Dropdown.Section>
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="Send Invitations"
+        info="Send email invitations (including meeting links) to guests"
+        storeValue
+        {...itemProps.sendInvitations}
+      >
+        <Form.Dropdown.Item title="All Guests" value="all" />
+        <Form.Dropdown.Item title="External Guests Only" value="externalOnly" />
+        <Form.Dropdown.Item title="None" value="none" />
       </Form.Dropdown>
       <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
     </Form>

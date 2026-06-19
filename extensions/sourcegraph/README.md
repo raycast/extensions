@@ -42,16 +42,6 @@ Alternatively, you can [install this extension from source](https://github.com/b
 This extension adds a [variety of commands](#commands) for interacting with [Sourcegraph](https://about.sourcegraph.com).
 Some configuration is required to use certain features, most notably the [variants of each command for custom Sourcegraph Instances](#sourcegraph-instance-or-workspace), though you can get started with [Sourcegraph.com commands](#sourcegraphcom) without any additional setup.
 
-### Sourcegraph.com
-
-No setup is required to connect to [Sourcegraph.com](https://sourcegraph.com/search) through the 'Sourcegraph.com' variants of this extensions's commands.
-To configure your own [search contexts](#search-contexts), [sign up for a Sourcegraph.com account](https://sourcegraph.com/sign-up)!
-
-Once you have an account, you can create an access token under the ["Access tokens" tab in your user settings on Sourcegraph.com](https://sourcegraph.com/user/settings/tokens/new).
-Copy that access token to the "Sourcegraph.com: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
-
-To search your private code, please reach out [get a demo of the single-tenant solution](https://sourcegraph.com/contact/request-info) or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted).
-
 ### Sourcegraph instance or workspace
 
 To start searching code on your own Sourcegraph instance or workspace:
@@ -65,6 +55,16 @@ You can set up access through the 'Sourcegraph' variants of this extensions's co
 - **Access token**: You can create an access token (`sgp_...`) under the "Access tokens" tab in your user settings in Sourcegraph, and set it in the "Sourcegraph Instance: Access token" field in the extension preferences.
   - For example, you can configure `example.sourcegraph.app` as a URL and go to `https://example.sourcegraph.app/user/settings/tokens/new` to create an access token for use in this extension.
 - **OAuth**: If your Sourcegraph version supports it (any version newer than v6.10.0), you can authenticate via OAuth without additional configuration by omitting the "Sourcegraph Instance: Access token" field in the extension preferences.
+
+### Sourcegraph.com
+
+No setup is required to connect to [Sourcegraph.com](https://sourcegraph.com/search) through the 'Sourcegraph.com' variants of this extensions's commands.
+To configure your own [search contexts](#search-contexts), [sign up for a Sourcegraph.com account](https://sourcegraph.com/sign-up)!
+
+Once you have an account, you can create an access token under the ["Access tokens" tab in your user settings on Sourcegraph.com](https://sourcegraph.com/user/settings/tokens/new).
+Copy that access token to the "Sourcegraph.com: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
+
+To search your private code, please reach out [get a demo of the single-tenant solution](https://sourcegraph.com/contact/request-info) or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted).
 
 <br />
 
@@ -89,6 +89,16 @@ Browse, manage, and run recent [code searches](#search-code). New searches can a
 Recent searches are persisted [locally through a native Raycast API](https://developers.raycast.com/api-reference/storage).
 
 ![search history demo](metadata/2a-search-history.png)
+
+### Ask Deep Search
+
+![deepsearch demo](metadata/0-deepsearch.png)
+
+Get answers to natural language questions about your code with [Deep Search](https://sourcegraph.com/deep-search), Sourcegraph's agentic code search.
+
+### Deep Search Conversations
+
+Browse, view, and manage your recent [Deep Search](#ask-deep-search) conversations.
 
 ### Manage Batch Changes
 

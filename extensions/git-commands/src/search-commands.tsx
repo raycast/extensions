@@ -11,6 +11,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { Alias, Data } from "./types";
 import aliasesJSON from "./alias.json";
 
@@ -18,6 +19,7 @@ const cache = new Cache();
 
 export default function Command() {
   const [showDetails, setShowDetails] = useCachedState("show-details", false);
+  const [searchText, setSearchText] = useState("");
 
   // Preferences
   const preferences = getPreferenceValues();
@@ -88,6 +90,42 @@ export default function Command() {
 
     return [...new Set([clean, clean.replace(/--/g, "")])];
   };
+
+  const normalize = (value: string) => value.toLowerCase().trim();
+  const tokenize = (value: string) => normalize(value).split(/\s+/).filter(Boolean);
+  const scoreAlias = (alias: Alias, query: string) => {
+    if (!query) return 0;
+    const terms = tokenize(query);
+    if (terms.length === 0) return 0;
+
+    const name = normalize(alias.name);
+    const command = normalize(alias.command);
+    const description = normalize(alias.description || "");
+    const keywords = (alias.keywords || []).map(normalize);
+
+    let score = 0;
+    for (const term of terms) {
+      if (name === term) score += 60;
+      if (name.startsWith(term)) score += 25;
+      if (command.startsWith(`git ${term}`)) score += 40;
+      if (command.includes(` ${term}`)) score += 10;
+      if (keywords.includes(term)) score += 20;
+      if (description.includes(term)) score += 5;
+    }
+    // Prefer shorter aliases (base commands) when scores are close.
+    score += Math.max(0, 10 - name.length);
+    return score;
+  };
+
+  const sortBySearch = (aliases: Alias[]) => {
+    if (!searchText.trim()) return aliases;
+    const query = searchText;
+    return aliases.slice().sort((a, b) => scoreAlias(b, query) - scoreAlias(a, query) || a.name.localeCompare(b.name));
+  };
+
+  const sortedPins = useMemo(() => sortBySearch(data.pins), [data.pins, searchText]);
+  const sortedRecent = useMemo(() => sortBySearch(data.recent), [data.recent, searchText]);
+  const sortedAliases = useMemo(() => sortBySearch(data.aliases), [data.aliases, searchText]);
   const Item = ({ alias, hidePin }: { alias: Alias; hidePin?: boolean }) => {
     const { name, command, type, description, pin = false, recent = false } = alias;
 
@@ -104,7 +142,7 @@ export default function Command() {
         title={name}
         subtitle={{ value: command, tooltip: command }}
         detail={<List.Item.Detail markdown={detail} />}
-        keywords={[...description.split(" "), ...command.split(" ").map(toKeyword).flat()]}
+        keywords={[...(alias.keywords || []), ...command.split(" ").map(toKeyword).flat(), name]}
         accessories={[
           ...(pin && !hidePin
             ? [{ icon: { source: Icon.Tack, ...(isPinColored && { tintColor: Color.Yellow }) } }]
@@ -167,21 +205,22 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder="Search command, description or alias"
       isShowingDetail={showDetails}
+      onSearchTextChange={setSearchText}
     >
       <List.Section title="Pinned" subtitle={data.pins.length > maxPins ? `${data.pins.length}` : ""}>
-        {data.pins.slice(0, maxPins).map((alias) => (
+        {sortedPins.slice(0, maxPins).map((alias) => (
           <Item key={alias.name} alias={alias} hidePin />
         ))}
       </List.Section>
 
       <List.Section title="Recent" subtitle={data.recent.length > maxRecent ? `${data.recent.length}` : ""}>
-        {data.recent.slice(0, maxRecent).map((alias) => (
+        {sortedRecent.slice(0, maxRecent).map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>
 
       <List.Section title="All aliases" subtitle={`${data.aliases.length}`}>
-        {data.aliases.map((alias) => (
+        {sortedAliases.map((alias) => (
           <Item key={alias.name} alias={alias} />
         ))}
       </List.Section>

@@ -32,7 +32,7 @@ export default function Redeem(props: LaunchProps<{ arguments: Arguments.Redeem 
     try {
       try {
         text = await getSelectedText();
-      } catch (e) {
+      } catch {
         // ignore error for getting selected text
       }
       if (!text) {
@@ -62,10 +62,9 @@ export default function Redeem(props: LaunchProps<{ arguments: Arguments.Redeem 
         const requestByteArray = bech32.fromWords(words);
         const url = Buffer.from(requestByteArray).toString();
         await showToast(Toast.Style.Animated, "Fetching Data from LNURL");
-        !URL_REGEX.test(url) &&
-          (() => {
-            throw new Error("Invalid URL");
-          })();
+        if (!URL_REGEX.test(url)) {
+          throw new Error("Invalid URL");
+        }
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -92,7 +91,7 @@ export default function Redeem(props: LaunchProps<{ arguments: Arguments.Redeem 
 
         await showToast(Toast.Style.Success, "Copied data from LNURL");
         setLnurlData(data);
-      } catch (e) {
+      } catch {
         setError("Invalid LNurl");
       }
       return;

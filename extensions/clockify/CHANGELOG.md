@@ -1,5 +1,23 @@
 # Clockify Changelog
 
+## [Fix cached workspace data] - 2026-05-15
+
+- Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.
+
+## [Enhanced Menu Bar Features] - 2026-04-10
+
+- Added quick timer restart from up to 5 recent unique entries when no timer is active
+- Added today's total tracked time display per project while a timer is running
+- Updated time interval type to support active timers
+
+## [Add menu bar timer] - 2026-01-16
+
+- Added a menu bar command that shows the current timer counting up.
+- Allows stopping the timer directly from the menu bar.
+- Menu bar timer automatically updates when a timer is started or stopped from other menus.
+- Fixed timer display to update properly even when the menu bar is not focused.
+- Updated the menu bar timer to use a monospace font for better readability.
+
 ## [Time Entry Management] - 2026-01-14
 
 - Add "Stop Timer at" action to stop running timer at a specific past time

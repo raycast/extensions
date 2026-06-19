@@ -1,10 +1,8 @@
 import { Detail, Icon } from "@raycast/api";
-
-// Components
 import Actions from "@/components/ActionsCollection";
 import { CollectionResult } from "@/types";
 
-export const Details: React.FC<{ result: CollectionResult }> = ({ result }) => {
+export function Details({ result }: { result: CollectionResult }) {
   const coverImage =
     result.cover_photo?.urls?.regular || result.cover_photo?.urls?.small || result.cover_photo?.urls?.thumb;
   const date = result.published_at ? new Date(result.published_at).toLocaleString() : "Unknown";
@@ -25,6 +23,6 @@ export const Details: React.FC<{ result: CollectionResult }> = ({ result }) => {
       actions={<Actions item={result} />}
     />
   );
-};
+}
 
 export default Details;

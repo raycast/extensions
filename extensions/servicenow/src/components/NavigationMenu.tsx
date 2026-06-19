@@ -4,6 +4,18 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToa
 import { useFetch } from "@raycast/utils";
 
 import { NavigationMenuResponse, Instance, Module } from "../types";
+
+type IndexedModule = Module & { _titleLc: string; modules?: IndexedModule[] };
+
+const annotate = (modules?: Module[]): IndexedModule[] | undefined => {
+  if (!modules) return undefined;
+  const out: IndexedModule[] = new Array(modules.length);
+  for (let i = 0; i < modules.length; i++) {
+    const m = modules[i];
+    out[i] = { ...m, _titleLc: (m.title ?? "").toLowerCase(), modules: annotate(m.modules) };
+  }
+  return out;
+};
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
@@ -13,6 +25,9 @@ import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -32,38 +47,35 @@ export default function NavigationMenu(props: { groupId?: string }) {
     addModuleToFavorites,
     removeFromFavorites,
   } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "", full } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", full } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
-  const { isLoading, data, revalidate } = useFetch(
+  const { isLoading, data, error, revalidate } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/navigator`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: selectedInstance && !groupId,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !groupId && !!authHeader,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch menu entries", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could Not Fetch Menu Entries",
+          message: error.message,
+        });
       },
 
       mapResult(response: NavigationMenuResponse) {
         if (response && response.result && response.result.length === 0) {
-          setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch menu entries");
-          return { data: [] };
+          throw new Error("Could not fetch menu entries");
         }
-        setErrorFetching(false);
-        return { data: response.result };
+        return { data: annotate(response.result) ?? [] };
       },
-      keepPreviousData: true,
     },
   );
 
@@ -88,34 +100,61 @@ export default function NavigationMenu(props: { groupId?: string }) {
     return result;
   }, [data]);
 
-  const recursiveFilter = (modules: Module[], terms: string[], keywords: string[]): Module[] => {
-    return modules
-      .map((module) => {
-        const newKeywords = module.title ? [...keywords, module.title.toLowerCase()] : keywords;
-        const matches = terms.every((term) => newKeywords.some((string) => string.includes(term.toLowerCase())));
-
-        const filteredModules = module.modules ? recursiveFilter(module.modules, terms, newKeywords) : [];
-        if (matches || filteredModules.length > 0) {
-          return {
-            ...module,
-            modules: filteredModules,
-          };
-        }
-      })
-      .filter((favorite) => favorite != undefined);
-  };
-
   const filteredData = useMemo(() => {
-    if (searchTerm === "") return filterByGroup;
-    const terms = searchTerm.split(" ");
-    return filterByGroup ? recursiveFilter(filterByGroup, terms, []) : [];
+    if (!filterByGroup) return [];
+    const term = searchTerm.trim().toLowerCase();
+    if (term === "") return filterByGroup;
+    const terms = term.split(" ").filter(Boolean);
+
+    const walk = (modules: IndexedModule[], pathMatches: boolean[]): IndexedModule[] | null => {
+      let kept: IndexedModule[] | null = null;
+
+      for (let i = 0; i < modules.length; i++) {
+        const m = modules[i];
+        const nextPath = pathMatches.slice();
+        for (let t = 0; t < terms.length; t++) {
+          if (!nextPath[t] && m._titleLc.includes(terms[t])) nextPath[t] = true;
+        }
+        const selfFullMatch = nextPath.every(Boolean);
+
+        if (!m.modules || m.modules.length === 0) {
+          if (selfFullMatch) {
+            if (kept) kept.push(m);
+          } else if (!kept) {
+            kept = modules.slice(0, i);
+          }
+          continue;
+        }
+
+        if (selfFullMatch) {
+          if (kept) kept.push(m);
+          continue;
+        }
+
+        const childResult = walk(m.modules, nextPath);
+        if (childResult === null) {
+          if (!kept) kept = modules.slice(0, i);
+        } else if (childResult === m.modules) {
+          if (kept) kept.push(m);
+        } else {
+          if (!kept) kept = modules.slice(0, i);
+          kept.push({ ...m, modules: childResult });
+        }
+      }
+
+      if (kept === null) return modules;
+      return kept.length > 0 ? kept : null;
+    };
+
+    const result = walk(filterByGroup as IndexedModule[], new Array(terms.length).fill(false));
+    return result ?? [];
   }, [filterByGroup, searchTerm]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -137,7 +176,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -150,7 +189,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"
@@ -343,12 +382,16 @@ function ModuleItem(props: {
       tooltip: "Favorite",
     });
   }
+  const keywords = useMemo(
+    () => `${group} ${section} ${module.title}`.split(" ").filter(Boolean),
+    [group, section, module.title],
+  );
   return (
     <List.Item
       icon={icon}
       title={module.title}
       accessories={accessories}
-      keywords={[...group.split(" "), ...section.split(" "), ...module.title.split(" ")]}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={module.title}>

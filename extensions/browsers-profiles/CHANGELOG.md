@@ -1,5 +1,17 @@
 # Raycast Browsers Profiles
 
+## [Add Vivaldi browser support] - 2026-03-27
+
+- Adding Vivaldi browser to supported browser list
+
+## [Add Arc browser support] - 2026-02-04
+
+- Adding Arc browser to supported browser list
+
+## [Fix crash when reading Chromium profiles] - 2026-01-16
+
+- Fix ENOENT error when iterating over non-profile directories in browser data folder
+
 ## [Allow the user to filter out non-interesting profiles] - 2026-01-13
 
 - Adding an option to let the users select only a subset of the available browsers

@@ -31,6 +31,8 @@ export const CATEGORY_ICONS: Record<string, Image.ImageLike | undefined> = {
   "image-to-text": Icon.Camera,
   "speech-to-text": Icon.Headphones,
   "text-to-image": Icon.Text,
+  "image-generation": Icon.Image,
+  "text-rendering": Icon.Text,
   document: Icon.Book,
   economics: Icon.BankNote,
   roleplay: Icon.TwoPeople,

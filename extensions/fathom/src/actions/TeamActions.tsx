@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import type { Team, TeamMember } from "../types/Types";
 import { exportTeamMembers } from "../utils/export";
 import { showContextualError } from "../utils/errorHandling";
@@ -83,7 +83,7 @@ export function TeamActions(props: {
           title="View Team Members"
           onAction={onShowMembers}
           icon={Icon.PersonCircle}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       )}
       <Action.CopyToClipboard title="Copy Team Name" content={team.name} icon={Icon.Clipboard} />
@@ -124,7 +124,7 @@ export function TeamActions(props: {
           title="Refresh"
           onAction={onRefresh}
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       )}
     </ActionPanel>

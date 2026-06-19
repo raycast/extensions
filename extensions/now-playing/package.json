@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "now-playing",
+  "title": "Now Playing",
+  "description": "Show the currently playing track and artist in the Raycast menu bar.",
+  "icon": "command-icon-v2.png",
+  "author": "kendaniels",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now-playing-menubar",
+      "title": "Now Playing Menu Bar Item",
+      "description": "Show currently playing track and artist in the macOS menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "menuBarDisplayMode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Display",
+          "description": "Choose whether the menu bar shows text, artwork, or both.",
+          "default": "track-artist",
+          "data": [
+            {
+              "title": "Track + Artist",
+              "value": "track-artist"
+            },
+            {
+              "title": "Track Only",
+              "value": "track-only"
+            },
+            {
+              "title": "Artist Only",
+              "value": "artist-only"
+            },
+            {
+              "title": "Track + Album",
+              "value": "track-album"
+            },
+            {
+              "title": "Artwork Only",
+              "value": "artwork-only"
+            },
+            {
+              "title": "Custom Template",
+              "value": "custom"
+            }
+          ]
+        },
+        {
+          "name": "menuBarTitleTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Menu Bar Title Template",
+          "description": "Used when Menu Bar Display is set to Custom Template. Available variables: {track}, {artist}, {album}.",
+          "default": "{track} — {artist}"
+        },
+        {
+          "name": "showAlbumArtwork",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Album Artwork",
+          "description": "Show album artwork alongside the title in Track + Artist and Custom Template modes.",
+          "label": "Show album artwork alongside text when supported",
+          "default": true
+        }
+      ],
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.35.0",
+    "prettier": "^3.0.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ]
+}

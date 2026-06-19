@@ -35,9 +35,21 @@ export const {
   githubToken,
   releaseVersion,
   shuffleOnStart,
+  usePasteInsteadOfCopy,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
+export const isRaycastX = Boolean(process.env.RAYCASTX);
+export const raycastProtocol = isRaycastX ? "raycast-x:" : "raycast:";
+
+export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
+  if (usePasteInsteadOfCopy) {
+    Clipboard.paste(content);
+  } else {
+    Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
+  }
+};
 
 export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   if (!launchContext) return "";
@@ -125,7 +137,9 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
               message: "Do you want to reload the command to apply updates?",
             });
             if (confirmed) {
-              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+              open(
+                `${raycastProtocol}//extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
+              );
             }
           } else {
             setVersion(latestVersion);
@@ -159,8 +173,7 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   });
   if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
-  Clipboard.copy(svg);
-  await showHUD("Copied to Clipboard");
+  copyOrPaste(svg);
 };
 
 export const cleanAssetPack = async () => {
@@ -264,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open("raycast://extensions/litomore/badges");
+      await open(`${raycastProtocol}//extensions/litomore/badges`);
     }
   }
 };

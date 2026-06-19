@@ -1,10 +1,15 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchProps, LaunchType, List, LocalStorage } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getProjects, getTasks, task } from "./composables/FetchData";
-import { getTokens } from "./composables/WebClient";
+import { getTokens, onTokenChange } from "./composables/WebClient";
 
-const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: string | undefined }) => {
+const Actions = (props: {
+  taskId: string;
+  taskKey: string | undefined;
+  projectId: string;
+  typeOfWorkId: string | undefined;
+}) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
 
   return (
@@ -13,7 +18,7 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
       <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard
         title={"Copy Task ID"}
-        content={props.taskId}
+        content={props.taskKey ? props.taskKey : props.taskId}
         shortcut={{ modifiers: ["ctrl"], key: "i" }}
       />
       <Action
@@ -70,51 +75,46 @@ const TaskItem = (props: { task: task }) => {
       title={props.task.name}
       subtitle={props.task.project.name}
       keywords={[props.task.project.name, props.task.id]}
+      accessories={[{ text: props.task.taskIdentifier }]}
       actions={
-        <Actions taskId={props.task.id} projectId={props.task.projectId} typeOfWorkId={props.task.typeOfWorkId} />
+        <Actions
+          taskId={props.task.id}
+          projectId={props.task.projectId}
+          typeOfWorkId={props.task.typeOfWorkId}
+          taskKey={props.task.taskIdentifier}
+        />
       }
     />
   );
 };
 
 export default function Command(props: LaunchProps) {
-  const { data: token, revalidate } = usePromise(getTokens, [], {
-    onData: (data) => {
-      if (!data || data.isExpired()) {
-        revalidate();
-      }
-    },
-  });
+  const { data: token, revalidate: revalidateToken } = usePromise(getTokens);
+
+  useEffect(() => {
+    return onTokenChange(revalidateToken);
+  }, [revalidateToken]);
   const [searchText, setSearchText] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const {
     data: tasks,
     pagination,
     isLoading: isLoadingTasks,
-    revalidate: updateTasks,
   } = useCachedPromise(getTasks, [token?.accessToken as string, searchText, 100, projectId], {
     execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (data.length === 0 && !searchText) {
-        updateTasks();
-      }
-    },
   });
-  const {
-    data: projects,
-    isLoading: isLoadingProjects,
-    revalidate: updateProjects,
-  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (data.length === 0) {
-        updateProjects();
-      }
-      if (props.launchContext?.projectId) {
-        setProjectId(props.launchContext.projectId);
-      }
+  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+    getProjects,
+    [token?.accessToken as string, "", 1000],
+    {
+      execute: !!token?.accessToken && !token.isExpired(),
+      onData: () => {
+        if (props.launchContext?.projectId) {
+          setProjectId(props.launchContext.projectId);
+        }
+      },
     },
-  });
+  );
 
   return (
     <List

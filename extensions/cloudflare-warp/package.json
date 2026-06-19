@@ -3,36 +3,32 @@
   "name": "cloudflare-warp",
   "title": "Cloudflare WARP",
   "description": "Manage Cloudflare WARP",
-  "icon": "command-icon.png",
+  "icon": "extension-icon.png",
   "author": "anandubajith",
+  "contributors": [
+    "ezzylan"
+  ],
+  "categories": [
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "connect",
-      "title": "WARP Connect",
-      "subtitle": "Cloudflare Warp",
-      "description": "Disconnect from Cloudflare Warp",
-      "mode": "no-view"
-    },
-    {
-      "name": "disconnect",
-      "title": "WARP Disconnect",
-      "subtitle": "Cloudflare Warp",
-      "description": "Disconnect from Cloudflare Warp",
+      "name": "toggle-connection",
+      "title": "Toggle Connection",
+      "description": "Toggle WARP connection",
       "mode": "no-view"
     },
     {
       "name": "switch-virtual-network",
-      "title": "WARP Switch Virtual Network",
-      "subtitle": "Cloudflare Warp",
-      "description": "Switches between available virtual networks",
+      "title": "Switch Virtual Network",
+      "description": "Switch between available virtual networks",
       "mode": "view"
     },
     {
       "name": "switch-mdm-profile",
-      "title": "WARP Switch MDM Profile",
-      "subtitle": "Cloudflare Warp",
-      "description": "Switches between available MDM profiles",
+      "title": "Switch MDM Profile",
+      "description": "Switch between available MDM profiles",
       "mode": "view"
     }
   ],
@@ -47,15 +43,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.1"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.3",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.0",
+    "eslint-plugin-unicorn": "^63.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

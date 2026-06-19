@@ -35,8 +35,8 @@ body:
     attributes:
       label: OS Version
       description: |
-        Please provide the version of macOS or Windows you are using.
-      placeholder: ex. 14.4.1
+        Auto-filled when reporting from Raycast. The first word should be macOS or Windows; leave blank if unknown.
+      placeholder: ex. macOS 14.4.1
   - type: textarea
     id: description
     attributes:

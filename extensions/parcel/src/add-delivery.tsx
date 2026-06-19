@@ -15,6 +15,9 @@ export default function Command() {
   const { carriers, isLoading: carriersLoading, error: carriersError } = useCarriers();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      carrierCode: "",
+    },
     onSubmit: async (values) => {
       try {
         // Trim whitespace from inputs
@@ -88,7 +91,8 @@ export default function Command() {
         autoFocus
         {...itemProps.trackingNumber}
       />
-      <Form.Dropdown title="Carrier" placeholder="Select a carrier" {...itemProps.carrierCode}>
+      <Form.Dropdown title="Carrier" {...itemProps.carrierCode}>
+        <Form.Dropdown.Item value="" title="" />
         {carriers.map((carrier) => (
           <Form.Dropdown.Item key={carrier.code} value={carrier.code} title={carrier.name} />
         ))}

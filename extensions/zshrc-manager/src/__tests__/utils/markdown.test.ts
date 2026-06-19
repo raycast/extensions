@@ -10,9 +10,9 @@ import {
   generateCompactMarkdown,
   generateFormattedMarkdown,
   generateSectionMarkdown,
-  ParsedSectionContent,
+  type ParsedSectionContent,
 } from "../../utils/markdown";
-import { LogicalSection } from "../../lib/parse-zshrc";
+import type { LogicalSection } from "../../lib/parse-zshrc";
 
 // Mock section factory
 const createMockSection = (

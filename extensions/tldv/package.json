@@ -1,0 +1,226 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tldv",
+  "title": "Tldv Meetings",
+  "description": "Browse and view your tl;dv meeting recordings",
+  "icon": "icon.png",
+  "author": "keito4",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "tldv",
+    "meeting",
+    "recording",
+    "transcript",
+    "video"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "subtitle": "tl;dv",
+      "description": "Browse your tl;dv meeting recordings",
+      "mode": "view"
+    },
+    {
+      "name": "search-meetings",
+      "title": "Search Meetings",
+      "subtitle": "tl;dv",
+      "description": "Search through your tl;dv meeting recordings",
+      "mode": "view"
+    },
+    {
+      "name": "recent-meetings",
+      "title": "Recent Meetings",
+      "subtitle": "tl;dv",
+      "description": "Quick access to recent tl;dv meetings",
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "open-meeting",
+      "title": "Open Meeting",
+      "subtitle": "tl;dv",
+      "description": "Open a specific tl;dv meeting by ID or URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "meetingId",
+          "type": "text",
+          "required": false,
+          "placeholder": "Meeting ID"
+        },
+        {
+          "name": "meetingUrl",
+          "type": "text",
+          "required": false,
+          "placeholder": "Meeting URL"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspace1Name",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace 1 Name",
+      "description": "Display name for workspace 1 (optional, defaults to 'Default')",
+      "placeholder": "My Workspace"
+    },
+    {
+      "name": "workspace1ApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Workspace 1 API Key",
+      "description": "API key for workspace 1 (required)"
+    },
+    {
+      "name": "workspace2Name",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace 2 Name",
+      "description": "Display name for workspace 2 (optional)",
+      "placeholder": "Work"
+    },
+    {
+      "name": "workspace2ApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Workspace 2 API Key",
+      "description": "API key for workspace 2 (optional)"
+    },
+    {
+      "name": "workspace3Name",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace 3 Name",
+      "description": "Display name for workspace 3 (optional)",
+      "placeholder": "Personal"
+    },
+    {
+      "name": "workspace3ApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Workspace 3 API Key",
+      "description": "API key for workspace 3 (optional)"
+    },
+    {
+      "name": "defaultWorkspace",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Workspace",
+      "description": "Name of the default workspace to use (must match one of the workspace names above)",
+      "placeholder": "My Workspace"
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Date Format",
+      "description": "How to display meeting dates",
+      "default": "relative",
+      "data": [
+        {
+          "title": "Relative (2h ago)",
+          "value": "relative"
+        },
+        {
+          "title": "Absolute (2024/01/15)",
+          "value": "absolute"
+        }
+      ]
+    },
+    {
+      "name": "pageSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Page Size",
+      "description": "Number of meetings to load per page",
+      "default": "50",
+      "data": [
+        {
+          "title": "25",
+          "value": "25"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ]
+    },
+    {
+      "name": "cacheTTL",
+      "type": "dropdown",
+      "required": false,
+      "title": "Cache Duration",
+      "description": "How long to cache meeting data",
+      "default": "15",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "showMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar",
+      "label": "Show Recent Meetings in Menu Bar",
+      "description": "Display recent meetings icon in the macOS menu bar",
+      "default": true
+    },
+    {
+      "name": "useMockData",
+      "type": "checkbox",
+      "required": false,
+      "title": "Development",
+      "label": "Use Mock Data (for testing)",
+      "description": "Use sample mock data instead of real API calls. Useful for development and testing.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

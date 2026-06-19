@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
@@ -7,15 +7,17 @@ import { dump } from "js-yaml";
 import { Project, WarpTemplate, WarpLaunchConfig, TerminalCommand } from "../types";
 import { environment } from "@raycast/api";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const DEBUG = environment.isDevelopment;
 const FILE_PREFIX = "code-runway__"; // only clean files we created
 
 /**
- * 生成Warp启动配置
+ * Builds a Warp launch configuration from a project template.
  */
 export function generateWarpConfig(project: Project, template: WarpTemplate): WarpLaunchConfig {
   const { launchMode = "split-panes", splitDirection = "vertical" } = template;
+  // Warp's split_direction semantics are the inverse of our UI labels (left/right vs up/down).
+  const warpSplitDirection = splitDirection === "vertical" ? "horizontal" : "vertical";
 
   const config: WarpLaunchConfig = {
     name: `${project.name} - ${template.name}`,
@@ -36,7 +38,7 @@ export function generateWarpConfig(project: Project, template: WarpTemplate): Wa
         {
           title: `${project.name} - ${template.name}`,
           layout: {
-            split_direction: splitDirection,
+            split_direction: warpSplitDirection,
             panes: template.commands.map(createLayout),
           },
         },
@@ -65,7 +67,7 @@ export function generateWarpConfig(project: Project, template: WarpTemplate): Wa
 }
 
 /**
- * 获取Warp Launch Configuration目录路径
+ * Returns the Warp launch configuration directory.
  */
 function getWarpConfigDir(): string {
   const homeDir = homedir();
@@ -73,14 +75,14 @@ function getWarpConfigDir(): string {
 }
 
 /**
- * 清理旧的配置文件
+ * Removes stale configuration files created by this extension.
  */
 async function cleanOldConfigFiles(configName: string): Promise<void> {
   try {
     const warpConfigDir = getWarpConfigDir();
     const fs = await import("fs/promises");
 
-    // 生成安全的文件名前缀
+    // Generate a stable, safe filename prefix.
     const safeFileName = configName
       .replace(/[^a-zA-Z0-9\s\-_]/g, "")
       .replace(/\s+/g, "_")
@@ -88,10 +90,10 @@ async function cleanOldConfigFiles(configName: string): Promise<void> {
 
     if (DEBUG) console.log(`Cleaning old config files with prefix: ${safeFileName}`);
 
-    // 读取配置目录中的所有文件
+    // Read every configuration file in Warp's directory.
     const files = await fs.readdir(warpConfigDir);
 
-    // 找到所有匹配的旧配置文件
+    // Find previous configurations for the same launch entry.
     const oldConfigFiles = files.filter(
       (file) => file.startsWith(`${FILE_PREFIX}${safeFileName}`) && file.endsWith(".yaml"),
     );
@@ -99,7 +101,7 @@ async function cleanOldConfigFiles(configName: string): Promise<void> {
     if (oldConfigFiles.length > 0) {
       if (DEBUG) console.log(`Found ${oldConfigFiles.length} old config files to remove:`, oldConfigFiles);
 
-      // 删除旧的配置文件
+      // Remove superseded config files.
       for (const file of oldConfigFiles) {
         const filePath = join(warpConfigDir, file);
         await fs.unlink(filePath);
@@ -116,22 +118,22 @@ async function cleanOldConfigFiles(configName: string): Promise<void> {
 }
 
 /**
- * 将配置写入Warp配置目录并返回路径
+ * Writes the Warp config to disk and returns the final path.
  */
 async function writeConfigToWarpDir(config: WarpLaunchConfig): Promise<string> {
   const warpConfigDir = getWarpConfigDir();
 
-  // 清理同名的旧配置文件
+  // Remove older configs for the same launch entry first.
   await cleanOldConfigFiles(config.name);
 
-  // 确保目录存在
+  // Ensure the Warp config directory exists.
   try {
     await mkdir(warpConfigDir, { recursive: true });
   } catch (error) {
-    console.log("创建目录时出错（可能已存在）:", error);
+    console.log("Error creating Warp config directory (it may already exist):", error);
   }
 
-  // 生成安全的文件名（移除特殊字符）
+  // Build a filename-safe slug from the config name.
   const safeFileName = config.name
     .replace(/[^a-zA-Z0-9\s\-_]/g, "")
     .replace(/\s+/g, "_")
@@ -149,7 +151,7 @@ async function writeConfigToWarpDir(config: WarpLaunchConfig): Promise<string> {
 
   await writeFile(configPath, yamlContent, "utf-8");
 
-  // 验证文件是否正确写入
+  // Verify the file was written correctly.
   const writtenContent = await import("fs/promises").then((fs) => fs.readFile(configPath, "utf-8"));
   if (DEBUG) {
     console.log("Written file content:");
@@ -160,7 +162,7 @@ async function writeConfigToWarpDir(config: WarpLaunchConfig): Promise<string> {
 }
 
 /**
- * 启动Warp配置
+ * Launches a generated Warp configuration.
  */
 export async function launchWarpConfig(project: Project, template: WarpTemplate): Promise<void> {
   try {
@@ -180,17 +182,17 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
     const configPath = await writeConfigToWarpDir(config);
     if (DEBUG) console.log(`Config file written: ${configPath}`);
 
-    // 验证文件确实存在
+    // Double-check the config exists before launching it.
     try {
       const fs = await import("fs/promises");
       const stats = await fs.stat(configPath);
       if (DEBUG) console.log(`File verification ok, size: ${stats.size} bytes`);
     } catch (error) {
       console.error(`File verification failed:`, error);
-      throw new Error(`配置文件不存在: ${configPath}`);
+      throw new Error(`Configuration file not found: ${configPath}`);
     }
 
-    // 使用Warp的URI scheme打开配置 - 使用配置名称而不是文件路径
+    // Warp expects the configuration name in the URL scheme, not the file path.
     const warpUrl = `warp://launch/${encodeURIComponent(config.name)}`;
     if (DEBUG) {
       console.log("Preparing to launch Warp...");
@@ -199,20 +201,20 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
     }
 
     try {
-      if (DEBUG) console.log("Try method1 - URL Scheme:", `open '${warpUrl}'`);
-      const result1 = await execAsync(`open '${warpUrl}'`);
+      if (DEBUG) console.log("Try method1 - URL Scheme:", warpUrl);
+      const result1 = await execFileAsync("open", [warpUrl]);
       if (DEBUG) {
         console.log("URL Scheme executed");
         console.log("stdout:", result1.stdout || "<empty>");
         if (result1.stderr) console.log("stderr:", result1.stderr);
       }
 
-      // 等待一下看Warp是否启动
+      // Give Warp a moment to start before checking the process list.
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // 检查Warp是否在运行
+      // Check whether Warp is now running.
       try {
-        const psResult = await execAsync("pgrep -x Warp");
+        const psResult = await execFileAsync("pgrep", ["-x", "Warp"]);
         if (psResult.stdout.trim()) {
           if (DEBUG) console.log("Warp process detected; URL Scheme worked");
           return;
@@ -221,21 +223,21 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
         if (DEBUG) console.log("Warp process not detected; trying fallback...");
       }
 
-      // 备用方法1：直接启动Warp应用
+      // Fallback 1: open the Warp application directly.
       if (DEBUG) console.log("Try method2 - open Warp app");
-      await execAsync("open -a Warp");
+      await execFileAsync("open", ["-a", "Warp"]);
       if (DEBUG) console.log("Warp app open command executed");
 
-      // 等待Warp启动
+      // Wait for Warp to finish launching.
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // 备用方法2：使用warp命令行工具（如果存在）
+      // Fallback 2: use the Warp CLI when available.
       try {
         if (DEBUG) console.log("Try method3 - warp CLI check");
-        const warpCliResult = await execAsync("which warp");
+        const warpCliResult = await execFileAsync("which", ["warp"]);
         if (warpCliResult.stdout.trim()) {
           if (DEBUG) console.log("warp CLI found, launching config");
-          await execAsync(`warp launch "${config.name}"`);
+          await execFileAsync("warp", ["launch", config.name]);
           if (DEBUG) console.log("warp CLI launch success");
           return;
         }
@@ -259,24 +261,24 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
       console.log("  2. Open file in Warp:", configPath);
     }
 
-    // 不再删除配置文件，让用户可以重复使用
-    // 如果需要清理，可以定期清理旧的配置文件
+    // Keep generated configs so users can relaunch them from Warp later.
+    // Old files can still be cleaned up periodically.
   } catch (error) {
     console.error("Launch Warp failed:", error);
-    throw new Error(`启动Warp失败: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Failed to launch Warp: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * 检查Warp是否已安装
+ * Checks whether Warp is installed.
  */
 export async function checkWarpInstalled(): Promise<boolean> {
   try {
-    await execAsync("which warp");
+    await execFileAsync("which", ["warp"]);
     return true;
   } catch {
     try {
-      await execAsync("ls /Applications/Warp.app");
+      await execFileAsync("ls", ["/Applications/Warp.app"]);
       return true;
     } catch {
       return false;
@@ -285,19 +287,19 @@ export async function checkWarpInstalled(): Promise<boolean> {
 }
 
 /**
- * 简单启动项目（直接在单个窗口中打开项目目录）
+ * Opens a project in a single Warp window without using a template.
  */
 export async function launchProjectSimple(project: Project): Promise<void> {
   try {
     const warpUrl = `warp://action/new_window?path=${encodeURIComponent(project.path)}`;
-    await execAsync(`open "${warpUrl}"`);
+    await execFileAsync("open", [warpUrl]);
   } catch (error) {
-    throw new Error(`启动Warp失败: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Failed to launch Warp: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * 测试函数：创建一个简单的配置文件用于调试
+ * Creates a simple test configuration for local debugging.
  */
 export async function createTestWarpConfig(): Promise<string> {
   const testConfig: WarpLaunchConfig = {
@@ -328,35 +330,35 @@ export async function createTestWarpConfig(): Promise<string> {
 }
 
 /**
- * 调试函数：检查Warp配置和环境
+ * Prints basic Warp diagnostics to the development console.
  */
 export async function debugWarpEnvironment(): Promise<void> {
   console.log("Start Warp environment diagnostics...");
 
-  // 1. 检查Warp是否安装
+  // 1. Check whether Warp is installed.
   try {
-    const result = await execAsync("which warp");
+    const result = await execFileAsync("which", ["warp"]);
     console.log("Warp CLI path:", result.stdout.trim());
   } catch {
     console.log("Warp CLI not found");
   }
 
-  // 2. 检查Warp应用是否安装
+  // 2. Check whether the app bundle exists.
   try {
-    await execAsync("ls -la /Applications/Warp.app");
+    await execFileAsync("ls", ["-la", "/Applications/Warp.app"]);
     console.log("Warp.app installed");
   } catch {
     console.log("Warp.app not found in /Applications");
   }
 
-  // 3. 检查配置目录
+  // 3. Inspect Warp's configuration directory.
   const configDir = getWarpConfigDir();
   try {
     const fs = await import("fs/promises");
     await fs.stat(configDir);
     console.log(`Config dir exists: ${configDir}`);
 
-    // 列出现有配置文件
+    // List existing launch configuration files.
     const files = await fs.readdir(configDir);
     console.log(`Config files: ${files.length}`);
     files.forEach((file) => console.log(`  - ${file}`));
@@ -364,10 +366,10 @@ export async function debugWarpEnvironment(): Promise<void> {
     console.log(`Config dir issue: ${configDir}`, error);
   }
 
-  // 4. 测试简单的URI启动
+  // 4. Verify the basic URL scheme works.
   try {
     console.log("Test basic URI launch...");
-    await execAsync('open "warp://action/new_window"');
+    await execFileAsync("open", ["warp://action/new_window"]);
     console.log("Basic URI launch success");
   } catch (error) {
     console.log("Basic URI launch failed:", error);

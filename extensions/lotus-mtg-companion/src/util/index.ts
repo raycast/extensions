@@ -3,7 +3,7 @@ import { Mana, ScryfallCard } from "../types";
 export function getCardImage(card: ScryfallCard) {
     if (card.image_uris) {
         return card.image_uris.png;
-    } else if (card.card_faces) {
+    } else if (card.card_faces?.[0]?.image_uris) {
         return card.card_faces[0].image_uris.png;
     } else {
         return "";

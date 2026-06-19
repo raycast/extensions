@@ -1,6 +1,6 @@
 import { authService } from "./utils/auth";
 import { withAccessToken } from "@raycast/utils";
-import { searchCardsInCollection, searchSublimeCards } from "./utils/api";
+import { browseMyCollections, searchCardsInCollection, searchCollectionsByName } from "./utils/api";
 import { useCardsSearch } from "./hooks/search";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getEntityIcon, getIconPath } from "./utils/icons";
@@ -14,8 +14,8 @@ function SearchCollections() {
     const { cards, isLoading, pagination } = useCardsSearch(
         searchQuery,
         true,
-        (query, restrictToLibrary, page) =>
-            searchSublimeCards(query, true, "collection.collection", !query ? "most_recent" : undefined, page),
+        (query, restrictToLibrary, cursor) =>
+            query ? searchCollectionsByName(query, cursor) : browseMyCollections(cursor),
         true,
     );
 
@@ -35,7 +35,7 @@ function SearchCollections() {
                 <List.Item
                     key={item.uuid}
                     title={item.name!}
-                    subtitle={`${item.number_of_cards}`}
+                    subtitle={`${item.number_of_cards ?? item.number_of_connections ?? ""}`}
                     icon={getEntityIcon(item)}
                     actions={
                         <ActionPanel title={item.name}>
@@ -59,7 +59,7 @@ function CollectionCardsList({ collectionUuid, collectionTitle }: { collectionUu
     const { cards, isLoading, pagination } = useCardsSearch(
         searchQuery,
         true,
-        (query, restrictToLibrary, page) => searchCardsInCollection(collectionUuid, query, page),
+        (query, restrictToLibrary, cursor) => searchCardsInCollection(collectionUuid, query, cursor),
         true,
     );
 

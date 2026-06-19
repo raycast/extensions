@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
 import { priorities, mapPriority } from "../helpers/priorities";
+import { parseOptionalStringList } from "../helpers/parseStringList";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -92,9 +93,9 @@ type Input = {
    */
   collapsed?: boolean;
   /**
-   * Array of label names that may represent either personal or shared labels
+   * JSON array of label names (e.g. ["work", "urgent"]) or comma-separated label names
    */
-  labels?: string[];
+  labels?: string;
   /**
    * The ID of user who assigns the task. Only relevant for shared projects.
    * Must be 0 or a valid user ID from project collaborators
@@ -112,7 +113,13 @@ type Input = {
 };
 
 export default withTodoistApi(async function (input: Input) {
-  input.priority = mapPriority(input.priority);
+  const { labels, ...taskInput } = input;
+  const args = {
+    ...taskInput,
+    priority: mapPriority(taskInput.priority),
+    ...(labels ? { labels: parseOptionalStringList(labels) } : {}),
+  };
+
   return syncRequest({
     sync_token,
     resource_types: ["items"],
@@ -120,7 +127,7 @@ export default withTodoistApi(async function (input: Input) {
       {
         type: "item_update",
         uuid: crypto.randomUUID(),
-        args: input,
+        args,
       },
     ],
   });
@@ -169,8 +176,9 @@ export const confirmation = withTodoistApi(
     if (collapsed !== undefined) {
       info.push({ name: "Sub-tasks Collapsed", value: collapsed ? "Yes" : "No" });
     }
-    if (labels?.length) {
-      info.push({ name: "New Labels", value: labels.join(", ") });
+    const parsedLabels = parseOptionalStringList(labels);
+    if (parsedLabels?.length) {
+      info.push({ name: "New Labels", value: parsedLabels.join(", ") });
     }
     if (assigned_by_uid) {
       info.push({ name: "Assigned By", value: assigned_by_uid });

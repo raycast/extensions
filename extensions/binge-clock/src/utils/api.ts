@@ -1,68 +1,156 @@
-import fetch from "node-fetch";
-import { SearchResult } from "../interface/search-result";
+import { SearchResult, SearchResultType } from "../interface/search-result";
 import { ShowWatchTime } from "../interface/show-watch-time";
-import { load } from "cheerio";
 
-export async function getSuggestions(searchTerm: string): Promise<SearchResult[]> {
-  const url = "https://www.bingeclock.com/call_search.php";
-  const params = new URLSearchParams({
-    sendSearch: "1",
-    searchTerm: searchTerm,
-  });
-  const options = {
-    method: "POST",
-    headers: {
-      "x-requested-with": "XMLHttpRequest",
-    },
-    body: params,
-  };
+const BINGE_CLOCK_BASE_URL = "https://www.bingeclock.com";
 
-  const response = await fetch(url, options);
-  const html = await response.text();
-  const searchResults: SearchResult[] = [];
-  const $ = load(html);
-  $(".search_item").each((_, elem) => {
-    const titleElem = $(elem).find("a");
-    const anchorElem = $(elem).find("a");
-    const imageElem = $(elem).find(".search_image");
+const IMAGE_BASE_URL: Record<SearchResultType, string> = {
+  show: "https://background-images-shows-hero.nyc3.cdn.digitaloceanspaces.com/background-images-shows-hero",
+  film: "https://background-images-films-hero.nyc3.cdn.digitaloceanspaces.com/background-images-films-hero",
+};
 
-    const title = titleElem.text().trim();
-    const url = anchorElem.attr("href") || "";
-    const image = imageElem.attr("src") || "";
-    const type = url.includes("/s/") ? "show" : "film";
-    searchResults.push({
-      title,
-      url,
-      image,
-      type,
-    });
-  });
-  return searchResults;
+interface BingeClockSearchItem {
+  title: string;
+  urlname: string;
+  media_type: string;
+  haspic?: string;
+  pic_name?: string;
+  how_long_day?: string;
+  how_long_hour?: string;
+  how_long_minute?: string;
+  year?: string;
+  from_year?: string;
+  to_year?: string;
+  episodes?: string | number;
+  runtime?: string;
 }
 
-export async function getWatchTime(url: string): Promise<ShowWatchTime> {
-  const response = await fetch(url);
-  const html = await response.text();
-  const $ = load(html);
+interface BingeClockSearchResponse {
+  results?: BingeClockSearchItem[];
+}
 
-  const showWatchTime: ShowWatchTime = {
-    days: null,
-    hours: null,
-    minutes: null,
+function isSupportedResultType(value: string): value is SearchResultType {
+  return value === "show" || value === "film";
+}
+
+function parseTimeValue(value?: string): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.replace(/,/g, "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const parsedValue = Number.parseInt(normalized, 10);
+  return Number.isNaN(parsedValue) ? null : parsedValue;
+}
+
+function parseNumberValue(value?: string | number): number | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value === "number") {
+    return Number.isNaN(value) ? null : Math.round(value);
+  }
+
+  const normalized = value.replace(/,/g, "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const parsed = Number.parseFloat(normalized);
+  return Number.isNaN(parsed) ? null : Math.round(parsed);
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+function buildResultUrl(type: SearchResultType, urlname: string): string {
+  const path = type === "show" ? `/s/${urlname}/` : `/film/title/${urlname}/`;
+  return new URL(path, BINGE_CLOCK_BASE_URL).toString();
+}
+
+function buildImageUrl(type: SearchResultType, hasPic?: string, picName?: string): string | null {
+  if (hasPic !== "y" || !picName) {
+    return null;
+  }
+
+  return `${IMAGE_BASE_URL[type]}/${picName}.webp`;
+}
+
+function buildWatchTime(result: BingeClockSearchItem): ShowWatchTime {
+  return {
+    days: parseTimeValue(result.how_long_day),
+    hours: parseTimeValue(result.how_long_hour),
+    minutes: parseTimeValue(result.how_long_minute),
   };
+}
 
-  $(".date_counter_cont").each((_, elem) => {
-    const dateNum = parseInt($(elem).find(".date_num").text().trim(), 10);
-    const dateType = $(elem).find(".date_type").text().trim();
+function buildResultId(type: SearchResultType, urlname: string, title: string, index: number): string {
+  const normalizedUrlname = urlname.trim();
 
-    if (dateType === "days") {
-      showWatchTime.days = dateNum;
-    } else if (dateType === "hours") {
-      showWatchTime.hours = dateNum;
-    } else if (dateType === "minutes") {
-      showWatchTime.minutes = dateNum;
+  if (normalizedUrlname.length > 0) {
+    return `${type}:${normalizedUrlname}`;
+  }
+
+  return `${type}:${title.toLowerCase().replace(/\s+/g, "-")}:${index}`;
+}
+
+function ensureUniqueIds(results: SearchResult[]): SearchResult[] {
+  const counts = new Map<string, number>();
+
+  return results.map((result) => {
+    const currentCount = (counts.get(result.id) ?? 0) + 1;
+    counts.set(result.id, currentCount);
+
+    if (currentCount === 1) {
+      return result;
     }
-  });
 
-  return showWatchTime;
+    return {
+      ...result,
+      id: `${result.id}#${currentCount}`,
+    };
+  });
+}
+
+export async function getSuggestions(searchTerm: string): Promise<SearchResult[]> {
+  const searchQuery = encodeURIComponent(searchTerm.trim());
+  const endpoint = `${BINGE_CLOCK_BASE_URL}/api/search_new/${searchQuery}`;
+  const response = await fetch(endpoint);
+
+  if (!response.ok) {
+    throw new Error(`Search request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as BingeClockSearchResponse;
+  const results = payload.results ?? [];
+
+  const mappedResults = results
+    .filter((result): result is BingeClockSearchItem & { media_type: SearchResultType } =>
+      isSupportedResultType(result.media_type)
+    )
+    .map((result, index) => ({
+      id: buildResultId(result.media_type, result.urlname, result.title, index),
+      title: decodeHtmlEntities(result.title),
+      url: buildResultUrl(result.media_type, result.urlname),
+      image: buildImageUrl(result.media_type, result.haspic, result.pic_name),
+      type: result.media_type,
+      watchTime: buildWatchTime(result),
+      year: parseNumberValue(result.year),
+      fromYear: parseNumberValue(result.from_year),
+      toYear: parseNumberValue(result.to_year),
+      episodeCount: parseNumberValue(result.episodes),
+      runtimeMinutes: parseNumberValue(result.runtime),
+    }));
+
+  return ensureUniqueIds(mappedResults);
 }

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { HistoryItem } from "../types";
+import { HistoryItem } from "../lib/types";
 
 export function EditTitle(props: { item: HistoryItem; onEdit: (item: HistoryItem) => void }) {
   const { item } = props;

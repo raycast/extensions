@@ -1,9 +1,11 @@
+import { Keyboard } from "@raycast/api";
+
 export const APP_NAME = "Quick Jump";
 
-export const DEFAULT_ICON = "icon.png";
 export const DEFAULT_TITLE = "Untitled";
 export const FALLBACK_ICON = "icon.png";
-export const COMMON_TLDS = new Set(["com", "net", "org", "io", "co", "edu", "gov", "mil", "biz", "info"]);
+
+export const PLACEHOLDER_PATTERN = /\$\{([^{}]+)\}/g;
 
 export const SECTION_TITLES = {
   GROUPS: "Groups",
@@ -18,6 +20,10 @@ export const ACTION_TITLES = {
   OPEN_CONFIG_FILE: "Open Config File",
   COPY_URL: "Copy URL",
 } as const;
+
+export const SHORTCUTS: { OPEN_CONFIG: Keyboard.Shortcut } = {
+  OPEN_CONFIG: { modifiers: ["cmd", "shift"], key: "c" },
+};
 
 export const ERROR_MESSAGES = {
   FILE_NOT_FOUND: "Configuration file not found. Please check your extension preferences.",

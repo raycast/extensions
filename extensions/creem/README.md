@@ -1,16 +1,16 @@
 <p align="center">
-    <img src="./assets/extension_icon.png" width="150" height="150" />
+    <img src="./assets/creem@dark.png" width="150" height="150" />
 </p>
-
 
 # Creem
 
-This is a Raycast extension for [Creem](https://www.creem.io/) - _Smooth payments for SaaS and Indie Hackers that don't break the bank_.
+This is a Raycast extension for [Creem](https://www.creem.io/) - _The all-in-one platform for software companies_.
 
 With this extension you can:
 
 - List and Create Products
 - List Payments (Transactions)
+- List Customers
 
 ## 🚀 Getting Started
 
@@ -27,3 +27,9 @@ With this extension you can:
     d. `Toggle` "mode" to Test
 
     e. `Copy` and `Paste` the test key in Preferences
+
+---
+
+### Looking for another solution? Try this:
+
+<a title="Install lemon-squeezy Raycast Extension" href="https://www.raycast.com/xmok/lemon-squeezy"><img src="https://www.raycast.com/xmok/lemon-squeezy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

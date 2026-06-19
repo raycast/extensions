@@ -24,6 +24,7 @@ import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../acti
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
 import { basename } from "path";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GravatarIcon } from "../icons/GravatarIcon";
 
 export function CommitsView(context: RepositoryContext & NavigationContext) {
   const toggleDetailController = useToggleDetail("Commits-Detail", "Detail", false);
@@ -106,18 +107,25 @@ function CommitListItem(
       onMoveToCommit: (commitHash: string) => void;
     },
 ) {
-  const icon: Image.ImageLike | undefined = useMemo(() => {
+  const icon: List.Item.Props["icon"] | undefined = useMemo(() => {
     if (
       context.commits.selectedBranch &&
       context.commits.selectedBranch.kind === "branch" &&
       context.commits.selectedBranch.ahead
     ) {
       if (context.commits.selectedBranch.ahead > context.index) {
-        return { source: Icon.Dot, tintColor: Color.Orange, tooltip: "Unpushed" };
+        return {
+          value: { source: Icon.Dot, tintColor: Color.Orange },
+          tooltip: "Unpushed",
+        };
       }
     }
-    return undefined;
-  }, [context.commits.selectedBranch, context.index]);
+
+    return {
+      value: GravatarIcon(context.commit),
+      tooltip: context.commit.author,
+    };
+  }, [context.commits.selectedBranch, context.index, context.commit.authorEmail]);
 
   // Prepare accessories based on filter and detail view state
   const accessories: List.Item.Accessory[] = useMemo(() => {
@@ -231,10 +239,22 @@ function CommitListItem(
           metadata={
             context.toggleMetadataController.isShowingDetail ? (
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Author" text={context.commit.author} />
-                <List.Item.Detail.Metadata.Label title="Email" text={context.commit.authorEmail} />
-                <List.Item.Detail.Metadata.Label title="Date" text={context.commit.date.toLocaleString()} />
-                <List.Item.Detail.Metadata.Label title="Hash" text={context.commit.hash} />
+                <List.Item.Detail.Metadata.Label
+                  title="Author"
+                  text={context.commit.author}
+                  icon={GravatarIcon(context.commit)}
+                />
+                <List.Item.Detail.Metadata.Link
+                  title="Email"
+                  text={context.commit.authorEmail}
+                  target={`mailto:${context.commit.authorEmail}`}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Date"
+                  text={context.commit.date.toLocaleString()}
+                  icon={Icon.Calendar}
+                />
+                <List.Item.Detail.Metadata.Label title="SHA" text={context.commit.hash} icon={Icon.Hashtag} />
                 {/* Tags as TagList */}
                 {context.commit.tags.length > 0 && (
                   <List.Item.Detail.Metadata.TagList title="Tags">
@@ -435,7 +455,6 @@ function CommitBranchFilterAction(context: RepositoryContext) {
       <ActionPanel.Section title={context.branches.data.detachedHead ? "Detached HEAD" : "Current Branch"}>
         {context.branches.data.detachedHead && (
           <Action
-            // eslint-disable-next-line @raycast/prefer-title-case
             title={`HEAD (${context.branches.data.detachedHead.shortCommitHash})`}
             icon={context.commits.filter.kind === "current" ? Icon.Checkmark : Icon.Anchor}
             autoFocus={context.commits.filter.kind === "current"}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "upset-dev",
+  "title": "Upset.dev",
+  "description": "A collection of utilities from upset.dev that you can interact inside Raycast!",
+  "icon": "upsetdotdev.png",
+  "author": "sereinne",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "favicone",
+      "title": "Favicone",
+      "subtitle": "upset.dev",
+      "description": "Fetches favicones from websites and customize it with your needs",
+      "mode": "view"
+    },
+    {
+      "name": "blobCDN",
+      "title": "BlobCDN",
+      "subtitle": "upset.dev",
+      "description": "Get SVG blobs from blobcdn.com",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.17.0",
+    "is-valid-domain": "^0.1.6",
+    "jimp": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

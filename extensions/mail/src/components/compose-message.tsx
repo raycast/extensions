@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Action, ActionPanel, showHUD, popToRoot } from "@raycast/api";
+import { Form, Action, ActionPanel, showHUD, popToRoot, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 
 import { Account, OutgoingMessageAction, OutgoingMessage, OutgoingMessageForm, Message, Mailbox } from "../types";
@@ -8,6 +8,8 @@ import { getAccounts } from "../scripts/accounts";
 import { Validation } from "../utils/validation";
 import { OutgoingMessageIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
+
+const { autoFillReplySubject } = getPreferenceValues<Preferences>();
 
 export type ComposeMessageProps = {
   account?: Account;
@@ -26,13 +28,26 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
 
   const defaultAccount = Cache.getDefaultAccount();
 
+  const getInitialSubject = () => {
+    if (draftValues?.subject) return draftValues.subject;
+    if (autoFillReplySubject && message?.subject) {
+      if (action === OutgoingMessageAction.Reply || action === OutgoingMessageAction.ReplyAll) {
+        if (message.subject.toLowerCase().startsWith("re:")) {
+          return message.subject;
+        }
+        return `Re: ${message.subject}`;
+      }
+    }
+    return undefined;
+  };
+
   const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
       account: draftValues?.account || defaultAccount?.emails[0],
       to: draftValues?.to,
       cc: draftValues?.cc,
       bcc: draftValues?.bcc,
-      subject: draftValues?.subject,
+      subject: getInitialSubject(),
       content: draftValues?.content,
       attachments: attachments || draftValues?.attachments,
     },

@@ -1,7 +1,7 @@
 import { Action, Keyboard } from "@raycast/api";
 export const OpenInNeon = ({ title, route }: { route: string; title?: string }) => (
   <Action.OpenInBrowser
-    icon="neon.png"
+    icon="neon-logomark.png"
     title={title}
     url={`https://console.neon.tech/app/${route}`}
     shortcut={Keyboard.Shortcut.Common.Open}

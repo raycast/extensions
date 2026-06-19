@@ -1,5 +1,12 @@
 function removeDuplicates<T>(array: T[], key: keyof T) {
-  return array.filter((v, i, a) => a.findIndex((t) => t[key] === v[key]) === i);
+  const seen = new Set<T[keyof T]>();
+
+  return array.filter((value) => {
+    const id = value[key];
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 export default removeDuplicates;

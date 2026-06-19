@@ -1,10 +1,7 @@
-import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { Color, LaunchType, environment, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { commandConfig } from "./constants.js";
-
-export const isWindows = process.platform === "win32";
 
 export const getCommandConfig = () => commandConfig[environment.commandName];
 
@@ -34,7 +31,7 @@ export const pickColor = async ({ field }: { field: string }) =>
         field,
       },
     },
-  ).catch(() => open("raycast://extensions/thomas/color-picker"));
+  ).catch(() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomas/color-picker`));
 
 export const getSvgFromFile = async (file: string, color?: string) => {
   let svg = await readFile(file, "utf8");
@@ -61,6 +58,6 @@ export const pickLogo = async () => {
       },
     );
   } catch {
-    open("raycast://extensions/litomore/simple-icons");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/simple-icons`);
   }
 };

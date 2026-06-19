@@ -18,14 +18,18 @@ import {
   addDays,
   addMonths,
   addWeeks,
+  addYears,
   compareDesc,
   endOfMonth,
+  endOfYear,
   format,
   getISOWeek,
   startOfMonth,
+  startOfYear,
   subDays,
   subMonths,
   subWeeks,
+  subYears,
 } from "date-fns";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import {
@@ -36,7 +40,7 @@ import {
   STATE_COLORS,
   STATE_ICONS,
 } from "./postiz";
-import { Identifier, Post } from "./types";
+import { Identifier, Post, State } from "./types";
 import CreatePost from "./create-post";
 import TurndownService from "turndown";
 
@@ -63,8 +67,9 @@ const generateMarkdown = (post: Post) => {
 };
 const getProviderIdentifierIcon = (providerIdentifier: string) => `platforms/${providerIdentifier}.png`;
 export default function SearchPosts() {
-  type Display = "day" | "week" | "month";
+  type Display = "day" | "week" | "month" | "year";
   const [display, setDisplay] = useState<Display>("week");
+  const [postState, setPostState] = useState<State>();
   const [date, setDate] = useState(new Date());
   const { startDate, endDate } = useMemo(() => {
     switch (display) {
@@ -74,6 +79,8 @@ export default function SearchPosts() {
         return { startDate: subDays(date, 6), endDate: date };
       case "month":
         return { startDate: startOfMonth(date), endDate: endOfMonth(date) };
+      case "year":
+        return { startDate: startOfYear(date), endDate: endOfYear(date) };
     }
   }, [date, display]);
 
@@ -159,7 +166,13 @@ export default function SearchPosts() {
             title="Go to Next Period"
             onAction={() =>
               setDate((prev) =>
-                display === "day" ? addDays(prev, 1) : display === "week" ? addWeeks(prev, 1) : addMonths(prev, 1),
+                display === "day"
+                  ? addDays(prev, 1)
+                  : display === "week"
+                    ? addWeeks(prev, 1)
+                    : display === "month"
+                      ? addMonths(prev, 1)
+                      : addYears(prev, 1),
               )
             }
             shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
@@ -169,10 +182,22 @@ export default function SearchPosts() {
             title="Go to Previous Period"
             onAction={() =>
               setDate((prev) =>
-                display === "day" ? subDays(prev, 1) : display === "week" ? subWeeks(prev, 1) : subMonths(prev, 1),
+                display === "day"
+                  ? subDays(prev, 1)
+                  : display === "week"
+                    ? subWeeks(prev, 1)
+                    : display === "month"
+                      ? subMonths(prev, 1)
+                      : subYears(prev, 1),
               )
             }
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          />
+          <Action
+            icon={Icon.Calendar}
+            title="Jump to Today"
+            onAction={() => setDate(new Date())}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
           <Action.Push
             icon={Icon.Calendar}
@@ -184,16 +209,50 @@ export default function SearchPosts() {
       )
     );
   };
+
+  const [searchText, setSearchText] = useState("");
+  const filteredPosts = posts.filter(
+    (post) => post.content.toLowerCase().includes(searchText.toLowerCase()) && (!postState || post.state === postState),
+  );
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
+      searchBarPlaceholder={`Search ${postState || "all"} posts`}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarAccessory={
         postiz_version === "1" ? undefined : (
-          <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
-            <List.Dropdown.Item icon={Icon.Calendar} title="Day" value="day" />
-            <List.Dropdown.Item icon={Icon.Calendar} title="Week" value="week" />
-            <List.Dropdown.Item icon={Icon.Calendar} title="Month" value="month" />
+          <List.Dropdown
+            tooltip="Display"
+            onChange={(d) => {
+              const [key, value] = d.split("=");
+              if (key === "display") {
+                setDisplay(value as Display);
+              } else if (key === "state") {
+                setPostState(value as State);
+              }
+            }}
+            defaultValue="display=week"
+            storeValue
+          >
+            <List.Dropdown.Section title="Display">
+              <List.Dropdown.Item icon={Icon.Calendar} title="Day" value="display=day" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Week" value="display=week" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Month" value="display=month" />
+              <List.Dropdown.Item icon={Icon.Calendar} title="Year" value="display=year" />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section title="State">
+              <List.Dropdown.Item icon={Icon.Circle} title="All" value="state=" />
+              {Object.keys(State).map((state) => (
+                <List.Dropdown.Item
+                  key={state}
+                  icon={STATE_ICONS[state as State]}
+                  title={state}
+                  value={`state=${state}`}
+                />
+              ))}
+            </List.Dropdown.Section>
           </List.Dropdown>
         )
       }
@@ -208,7 +267,7 @@ export default function SearchPosts() {
         }
       />
       <List.Section title="Today" subtitle={subtitle}>
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <List.Item
             key={post.id}
             icon={post.integration.picture}
@@ -219,7 +278,7 @@ export default function SearchPosts() {
                 tooltip: post.integration.providerIdentifier,
               },
               { icon: { source: STATE_ICONS[post.state], tintColor: STATE_COLORS[post.state] }, tooltip: post.state },
-              { date: new Date(post.publishDate) },
+              { date: new Date(post.publishDate), tooltip: format(post.publishDate, "EEE dd MMM yyyy") },
             ]}
             detail={
               <List.Item.Detail

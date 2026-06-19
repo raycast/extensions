@@ -1,7 +1,11 @@
 import { Color, Icon, Image } from "@raycast/api";
 import { Remote, RemoteProvider } from "../../types/git-types";
 
-export function RemoteHostIcon(remoteHost: Remote): Image.ImageLike {
+export function RemoteHostIcon(remoteHost: Remote | undefined): Image.ImageLike {
+  if (!remoteHost) {
+    return { source: Icon.Globe, tintColor: Color.SecondaryText };
+  }
+
   if (remoteHost.avatarUrl) {
     return {
       source: remoteHost.avatarUrl,
@@ -13,17 +17,21 @@ export function RemoteHostIcon(remoteHost: Remote): Image.ImageLike {
   return RemoteHostProviderIcon(remoteHost.provider);
 }
 
-export function RemoteHostProviderIcon(provider: RemoteProvider): Image.ImageLike {
+export function RemoteHostProviderIcon(provider: RemoteProvider | undefined): Image.ImageLike {
+  if (!provider) {
+    return { source: Icon.Globe, tintColor: Color.SecondaryText };
+  }
+
   switch (provider) {
-    case "GitHub":
+    case RemoteProvider.GitHub:
       return { source: "github.svg", tintColor: Color.PrimaryText };
-    case "GitLab":
+    case RemoteProvider.GitLab:
       return { source: "gitlab.svg", tintColor: Color.Red };
-    case "Bitbucket":
+    case RemoteProvider.Bitbucket:
       return { source: "bitbucket.svg", tintColor: Color.Blue };
-    case "Azure DevOps":
-      return { source: "azure-devops.svg", tintColor: Color.Blue };
-    case "Gitea":
+    case RemoteProvider.AzureDevOps:
+      return { source: "azuredevops.svg", tintColor: Color.Blue };
+    case RemoteProvider.Gitea:
       return { source: "gitea.svg", tintColor: Color.Green };
     default:
       return { source: Icon.Globe, tintColor: Color.SecondaryText };

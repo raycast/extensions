@@ -90,7 +90,7 @@ export function FileActionsPanel({
           <ActionPanel.Submenu
             // eslint-disable-next-line @raycast/prefer-title-case
             title="Sort Search Results By"
-            icon={Icon.ArrowUp}
+            icon={Icon.ArrowDown}
             shortcut={{
               macOS: { modifiers: ["opt", "cmd"], key: "s" },
               Windows: { modifiers: ["alt", "ctrl"], key: "s" },
@@ -98,12 +98,12 @@ export function FileActionsPanel({
           >
             <Action
               title="Relevance"
-              icon={sorting.config.field === "relevance" ? Icon.Check : Icon.Circle}
+              icon={sorting.config.field === "relevance" ? Icon.CheckCircle : Icon.Circle}
               onAction={() => sorting.onChange("relevance")}
             />
             <Action
               title="Last Modified"
-              icon={sorting.config.field === "lastModifiedDateTime" ? Icon.Check : Icon.Circle}
+              icon={sorting.config.field === "lastModifiedDateTime" ? Icon.CheckCircle : Icon.Circle}
               onAction={() => sorting.onChange("lastModifiedDateTime")}
             />
           </ActionPanel.Submenu>
@@ -121,7 +121,6 @@ export function FileActionsPanel({
 
         <Action.CreateQuicklink
           title="Create Quicklink"
-          icon={Icon.Quicklink}
           quicklink={{ link: item.webUrl, name: item.name }}
           shortcut={{
             macOS: { modifiers: ["shift", "cmd"], key: "q" },
@@ -167,7 +166,7 @@ export function FileActionsPanel({
       <ActionPanel.Section>
         {upload && (
           <Action.Push
-            title="Upload to Current Folder…"
+            title="Upload to Current Directory"
             icon={Icon.Upload}
             shortcut={{
               macOS: { modifiers: ["shift", "cmd"], key: "u" },
@@ -240,7 +239,7 @@ export function EmptyFolderActionsPanel({
 
       {currentDrive && (
         <Action.Push
-          title="Upload to Current Folder…"
+          title="Upload to Current Directory"
           icon={Icon.Upload}
           shortcut={{
             macOS: { modifiers: ["shift", "cmd"], key: "u" },

@@ -21,3 +21,7 @@ export function getDateMention(date: Date = new Date()): BlockObjectRequest {
     },
   };
 }
+
+export function prependDateDivider(children: BlockObjectRequest[]) {
+  return [{ divider: {} }, getDateMention(), ...children];
+}

@@ -1,8 +1,7 @@
 // src/fastgpt-view.tsx
-import { ActionPanel, Detail, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { searchWithFastGPT } from "./utils/kagiApi";
-import open from "open";
 
 interface FastGPTViewProps {
   query: string;
@@ -67,17 +66,16 @@ ${references.map((ref, index) => `${index + 1}. [${ref.title}](${ref.url})\n   $
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Item
+          <Action.OpenInBrowser
             title="Search on Kagi"
             icon={{ source: Icon.MagnifyingGlass }}
-            onAction={() => open(`https://kagi.com/search?token=${token}&q=${encodeURIComponent(props.query)}`)}
+            url={`https://kagi.com/search?token=${token}&q=${encodeURIComponent(props.query)}`}
           />
           {references.map((ref, index) => (
-            <ActionPanel.Item
-              key={index}
+            <Action.OpenInBrowser
               title={`Open Reference ${index + 1}`}
               icon={{ source: Icon.ArrowRight }}
-              onAction={() => open(ref.url)}
+              url={ref.url}
             />
           ))}
         </ActionPanel>

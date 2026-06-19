@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voicemeeter-raycast",
+  "title": "Voicemeeter Control",
+  "description": "Control Voicemeeter strips and buses from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "Vorm--",
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System",
+    "Media",
+    "Productivity",
+    "Communication"
+  ],
+  "commands": [
+    {
+      "name": "mute",
+      "title": "Mute Channels",
+      "subtitle": "Voicemeeter",
+      "description": "Toggle, mute, or unmute Voicemeeter strips and buses.",
+      "mode": "view"
+    },
+    {
+      "name": "volume",
+      "title": "Adjust Volume",
+      "subtitle": "Voicemeeter",
+      "description": "Adjust Voicemeeter volume by quick steps or absolute values.",
+      "mode": "view"
+    },
+    {
+      "name": "connections",
+      "title": "Manage Connections",
+      "subtitle": "Voicemeeter",
+      "description": "Connect or disconnect strips to Voicemeeter buses.",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Manage Profiles",
+      "subtitle": "Voicemeeter",
+      "description": "Create and apply Voicemeeter volume and mute profiles.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "View Status",
+      "subtitle": "Voicemeeter",
+      "description": "Show Voicemeeter connection status and current target state.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "muteBehavior",
+      "title": "Mute Behavior",
+      "description": "How mute actions behave when state may be stale.",
+      "required": false,
+      "default": "optimistic-toggle",
+      "data": [
+        {
+          "title": "Optimistic Toggle",
+          "value": "optimistic-toggle"
+        },
+        {
+          "title": "Refresh Then Toggle",
+          "value": "refresh-then-toggle"
+        },
+        {
+          "title": "Explicit Idempotent",
+          "value": "explicit-idempotent"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "name": "undoTtlSeconds",
+      "title": "Undo TTL (seconds)",
+      "description": "Undo availability window in seconds.",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "type": "textfield",
+      "name": "voicemeeterExecutablePath",
+      "title": "Voicemeeter Executable Path",
+      "description": "Absolute path to voicemeeter executable for launch actions.",
+      "required": false,
+      "placeholder": "C:\\Program Files\\VB\\Voicemeeter\\voicemeeter8.exe"
+    },
+    {
+      "type": "textfield",
+      "name": "increaseStep",
+      "title": "Volume Increase Step (dB)",
+      "description": "dB to add when increasing volume.",
+      "required": false,
+      "default": "1"
+    },
+    {
+      "type": "textfield",
+      "name": "decreaseStep",
+      "title": "Volume Decrease Step (dB)",
+      "description": "dB to subtract when decreasing volume.",
+      "required": false,
+      "default": "1"
+    },
+    {
+      "type": "dropdown",
+      "name": "volumePrimaryAction",
+      "title": "Primary Hotkey (Enter)",
+      "description": "Which action gets the Enter key. Secondary gets Ctrl+Enter.",
+      "required": false,
+      "default": "increase",
+      "data": [
+        {
+          "title": "Increase Volume",
+          "value": "increase"
+        },
+        {
+          "title": "Decrease Volume",
+          "value": "decrease"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "name": "sectionOrder",
+      "title": "Section Order",
+      "description": "Which section appears first in lists.",
+      "required": false,
+      "default": "buses-first",
+      "data": [
+        {
+          "title": "Strips First",
+          "value": "strips-first"
+        },
+        {
+          "title": "Buses First",
+          "value": "buses-first"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "koffi": "^2.15.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "koffi": "node scripts/fetch-koffi.js"
+  }
+}

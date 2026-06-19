@@ -41,6 +41,12 @@ export default function Advanced({ selectedDomainName }: { selectedDomainName: s
     },
   });
 
+  const TYPE_DESCRIPTIONS: Record<CatchAllType, string> = {
+    fail: "Emails to non-existent addresses are bounced back to the sender with an error message.",
+    blackhole: "Emails to non-existent addresses are silently deleted. The sender receives no notification.",
+    address: "All emails to non-existent addresses are forwarded to a specific email address.",
+  };
+
   return !catchAll ? (
     <Detail isLoading={isLoading} markdown="Fetching Catch All Settings" />
   ) : (
@@ -53,7 +59,10 @@ export default function Advanced({ selectedDomainName }: { selectedDomainName: s
       }
     >
       <Form.Description text={selectedDomainName} />
-      <Form.Description title="Description" text={catchAll.description} />
+      <Form.Description
+        title="Description"
+        text="Configure what happens when email is sent to non-existent addresses."
+      />
       <Form.Separator />
       <Form.Dropdown
         title="Catch-All Email"
@@ -65,13 +74,9 @@ export default function Advanced({ selectedDomainName }: { selectedDomainName: s
         <Form.Dropdown.Item title="Forward to Address" value={CatchAllType.Forward} />
       </Form.Dropdown>
       {values.type === CatchAllType.Forward && (
-        <Form.TextField
-          title="Forward to Address"
-          placeholder="catchall@example.com"
-          info="All emails to non-existent addresses are forwarded to a specific email address."
-          {...itemProps.address}
-        />
+        <Form.TextField title="Forward to Address" placeholder="catchall@example.com" {...itemProps.address} />
       )}
+      <Form.Description text={TYPE_DESCRIPTIONS[values.type as CatchAllType]} />
     </Form>
   );
 }

@@ -5,7 +5,10 @@
   "description": "Search, preview and copy Phosphor Icons",
   "icon": "command-icon.png",
   "author": "marinsokol",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok",
+    "ridemountainpig"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",

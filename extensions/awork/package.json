@@ -101,24 +101,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@jest/globals": "^30.2.0",
+    "@jest/globals": "^30.3.0",
     "@raycast/eslint-config": "^2.1.1",
     "@types/jest": "^30.0.0",
     "@types/node": "24.10.1",
-    "@types/react": "19.2.7",
-    "@typescript-eslint/parser": "^8.48.1",
+    "@types/react": "19.2.14",
+    "@typescript-eslint/parser": "^8.57.2",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
-    "globals": "^16.5.0",
-    "jest": "^30.2.0",
-    "prettier": "^3.7.3",
-    "react": "^19.2.0",
+    "globals": "^17.4.0",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },

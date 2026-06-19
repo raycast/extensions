@@ -109,10 +109,9 @@ export function BranchesView(context: RepositoryContext & NavigationContext) {
 }
 
 function BranchListItem(context: RepositoryContext & NavigationContext & { branch: Branch }) {
-  const hasConflicts =
-    context.branch.type === "current" && context.status.data?.files?.some((file) => file.isConflicted);
+  const hasConflicts = context.branch.type === "current" && context.status.data.files.some((file) => file.isConflicted);
 
-  const hasUncommittedChanges = context.branch.type === "current" && context.status.data?.files?.length !== 0;
+  const hasUncommittedChanges = context.branch.type === "current" && context.status.data.files.length !== 0;
 
   const accessories: List.Item.Accessory[] = useMemo(() => {
     const result = [];
@@ -160,7 +159,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
         tooltip: context.branch.isGone ? "Upstream was removed from remote" : "Tracked upstream",
         icon: context.branch.isGone
           ? Icon.ExclamationMark
-          : RemoteHostIcon(context.remotes.data[context.branch.upstream!.remote]),
+          : RemoteHostIcon(context.remotes.data[context.branch.upstream?.remote]),
       });
     }
 
@@ -172,7 +171,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
     if (context.branch.type === "current") {
       return { source: Icon.Dot, tintColor: Color.Green };
     } else if (context.branch.type === "remote") {
-      return RemoteHostProviderIcon(context.remotes.data[context.branch.remote!].provider);
+      return RemoteHostProviderIcon(context.remotes.data[context.branch.remote!]?.provider);
     } else {
       return { source: Icon.Dot, tintColor: Color.SecondaryText };
     }
@@ -308,8 +307,8 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
 }
 
 function DetachedHeadListItem(context: RepositoryContext & NavigationContext & { detachedHead: DetachedHead }) {
-  const hasConflicts = context.status.data?.files?.some((file) => file.isConflicted);
-  const hasUncommittedChanges = context.status.data?.files?.length !== 0;
+  const hasConflicts = context.status.data.files.some((file) => file.isConflicted);
+  const hasUncommittedChanges = context.status.data.files.length !== 0;
 
   const accessories: List.Item.Accessory[] = useMemo(() => {
     const result: List.Item.Accessory[] = [];

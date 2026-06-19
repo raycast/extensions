@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "horimislime",
   "contributors": [
-    "xmok"
+    "xmok",
+    "erecarte-twilio"
   ],
   "categories": [
     "Developer Tools",
@@ -19,6 +20,20 @@
       "title": "View Incidents",
       "subtitle": "PagerDuty",
       "description": "Explore and Update Recent Incidents",
+      "mode": "view"
+    },
+    {
+      "name": "my-incidents",
+      "title": "My Incidents",
+      "subtitle": "PagerDuty",
+      "description": "View and update incidents assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "oncall-shifts",
+      "title": "My Oncall Shifts",
+      "subtitle": "PagerDuty",
+      "description": "View your current and upcoming on-call schedule",
       "mode": "view"
     }
   ],

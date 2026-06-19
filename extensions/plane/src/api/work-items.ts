@@ -1,4 +1,4 @@
-import { IssueSearchItem, IssueRequest, PatchedIssueRequest } from "@makeplane/plane-node-sdk";
+import { IssueSearchItem, IssueRequest, PatchedIssueRequest, StateLite } from "@makeplane/plane-node-sdk";
 import { planeClient } from "./auth";
 
 export async function createWorkItem(projectId: string, workItemRequest: IssueRequest) {
@@ -33,10 +33,16 @@ export async function getProjectWorkItems({
     slug: planeClient?.workspaceSlug,
     perPage,
     cursor,
+    expand: "state",
   });
 
+  const results = (response?.results || []).map((workItem) => ({
+    ...workItem,
+    state: workItem.state as StateLite,
+  }));
+
   return {
-    data: response?.results || [],
+    data: results,
     hasMore: !!response?.nextPageResults,
     cursor: response?.nextCursor,
   };

@@ -1,10 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
+import { ParsedSchedule } from "./interfaces";
 
-export interface ParsedSchedule {
-  days: string[];
-  from: string;
-  to: string;
-}
+export type { ParsedSchedule };
 
 export async function extractSchedule(text: string): Promise<ParsedSchedule | null> {
   const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];

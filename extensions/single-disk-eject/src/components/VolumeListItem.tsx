@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 
 import { Volume } from "../types";
 
@@ -14,7 +14,7 @@ export default function VolumeListItem(props: { volume: Volume; eject: (volume: 
       icon="list-icon.png"
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Eject Volume" onAction={() => eject(volume)} />
+          <Action title="Eject Volume" onAction={() => eject(volume)} />
         </ActionPanel>
       }
     />

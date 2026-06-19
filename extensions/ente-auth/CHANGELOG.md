@@ -1,5 +1,29 @@
 # Ente Auth Changelog
 
+## [Upgrade Raycast deps] - 2026-05-19
+
+- Upgrade @raycast/api and @raycast/utils to make the extension more compatible with Raycast v2.
+
+## [Fixed Ente Auth import] - 2026-05-10
+
+- Fixed parsing of Ente exports with bare issuer parameters
+- Handled secrets containing whitespace, dashes, or plus signs
+- Improved error logging for import failures
+
+## [Fix spaces in export path] - 2026-03-09
+
+- Fixed issue with spaces in export path causing export to fail
+
+## [Fix import edge cases] - 2026-03-05
+
+- Fixed cases when ente auth added dashes and plus signs into secret (so far it wasn't parsing correctly)
+- Fixed hiding ente auth entries that were trashed
+
+## [Fix import deleting export file] - 2026-02-01
+
+- Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails
+- Added missing return in export command error handling
+
 ## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
 
 - Handle double-encoded TOTP

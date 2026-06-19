@@ -30,7 +30,7 @@ export default function CopyPinActionsSubmenu(props: { pin: Pin; pins: Pin[] }) 
       />
       <Action.CopyToClipboard
         title="Copy Deeplink"
-        content={`raycast://extensions/HelloImSteven/pins/view-pins?context=${encodeURIComponent(
+        content={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/pins/view-pins?context=${encodeURIComponent(
           JSON.stringify({
             pinID: pin.id,
             action: PinAction.OPEN,

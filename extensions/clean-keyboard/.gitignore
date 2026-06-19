@@ -14,3 +14,5 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
+rust/*/target
+assets/compiled_raycast_rust

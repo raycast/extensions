@@ -30,6 +30,7 @@ fragment ExtendedRepositoryFields on Repository {
   mergeCommitAllowed
   squashMergeAllowed
   rebaseMergeAllowed
+  autoMergeAllowed
   updatedAt
   pushedAt
   stargazerCount

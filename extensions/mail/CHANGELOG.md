@@ -1,5 +1,30 @@
 # Mail Changelog
 
+## [Fix] - 2026-06-15
+
+- Fix sending composed messages when the subject or other message fields contain double quotes.
+
+## [Improvement] - 2026-06-10
+
+- Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
+
+## [Add AI Tools] - 2026-06-05
+
+- Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Security] - 2026-03-16
+
+- Upgrade `mailparser` to 3.9.4 to fix DoS via uncontrolled recursion in nodemailer's addressparser (CVE-2025-14874)
+
+## [Improvement] - 2026-01-19
+
+- Add "Refresh" action to message actions
+- Add preference to auto-fill the reply subject when replying to an email
+
 ## [Add AI Tools] - 2026-01-01
 
 - Add new AI tool `list-account-emails` to list all available email addresses from the user's mail accounts

@@ -1,6 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useMemo } from "react";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
+import { collectUrlsFromFolder } from "../bookmarks/utils";
 import { BookmarkItem } from "../bookmarks/types";
+
+const DIA_BUNDLE_ID = "company.thebrowser.dia";
+
+async function openInDia(url: string) {
+  await open(url, DIA_BUNDLE_ID);
+  await closeMainWindow();
+}
 
 export function BookmarkListItem({
   item,
@@ -15,7 +24,11 @@ export function BookmarkListItem({
       return null;
     }
 
-    const childCount = item.children?.length || 0;
+    const children = item.children ?? [];
+    const childCount = children.length;
+    const urls = useMemo(() => collectUrlsFromFolder(children), [children]);
+    const urlCount = urls.length;
+
     return (
       <List.Item
         id={item.id}
@@ -25,6 +38,19 @@ export function BookmarkListItem({
         actions={
           <ActionPanel title={item.name}>
             <Action title="Open Folder" icon={Icon.ArrowRight} onAction={() => onNavigate(item.idPath)} />
+            {urlCount > 0 && (
+              <Action
+                title={`Open All ${urlCount} in Dia`}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                onAction={async () => {
+                  for (const url of urls) {
+                    await open(url, DIA_BUNDLE_ID);
+                  }
+                  await closeMainWindow();
+                }}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -33,6 +59,7 @@ export function BookmarkListItem({
 
   // URL bookmark
   if (item.url) {
+    const url = item.url;
     const pathText = item.path.length > 1 ? item.path.slice(0, -1).join(" › ") : undefined;
 
     return (
@@ -43,9 +70,9 @@ export function BookmarkListItem({
         icon={getSafeFavicon(item.url)}
         actions={
           <ActionPanel title={item.name}>
-            <Action.Open icon={Icon.Globe} title="Open Tab" target={item.url} application="company.thebrowser.dia" />
-            <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action title="Open in Dia" icon={Icon.Globe} onAction={() => openInDia(url)} />
+            <Action.OpenInBrowser url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard
               title="Copy Title"
               content={item.name}

@@ -69,7 +69,7 @@ async function tool(input: Input) {
 
     return {
       success: true,
-      pullRequestUrl: response.pullRequestUrl,
+      taskUrl: response.taskUrl,
       repository: cleanRepository,
       branch: targetBranch,
       prompt: prompt.trim(),

@@ -14,7 +14,7 @@ import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { TraktMediaType, TraktMovieListItem, TraktShowListItem, withPagination } from "./lib/schema";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const [mediaType, setMediaType] = useState<TraktMediaType>("movie");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();

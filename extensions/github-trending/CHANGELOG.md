@@ -1,5 +1,9 @@
 # GitHub Trending Changelog
 
+## [Improve README Rendering] - 2026-05-16
+
+- Convert README HTML to Markdown for better rendering in Raycast
+
 ## [Fix Scraper Iutdated] - 2023-04-24
 
 - Fix outdated scraper Github Trending page

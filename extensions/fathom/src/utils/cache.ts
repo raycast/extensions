@@ -59,6 +59,42 @@ function isCacheValid(cachedAt: number, ttl: number): boolean {
 }
 
 /**
+ * Store a batch of meetings in the cache in one pass.
+ * Writes all meeting items in parallel, then updates the index once.
+ */
+export async function cacheMeetingsBatch(
+  meetings: Array<{
+    meetingId: string;
+    meeting: unknown;
+    summary?: string;
+    transcript?: string;
+    actionItems?: unknown[];
+  }>,
+): Promise<void> {
+  const now = Date.now();
+
+  // Write all meeting entries in parallel
+  await Promise.all(
+    meetings.map(({ meetingId, meeting, summary, transcript, actionItems }) => {
+      const cacheKey = `${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${meetingId}`;
+      const cached: CachedMeetingData = {
+        meeting,
+        summary,
+        transcript,
+        actionItems,
+        cachedAt: now,
+        hash: generateHash(meetingId),
+      };
+      return LocalStorage.setItem(cacheKey, JSON.stringify(cached));
+    }),
+  );
+
+  // Update index once for the whole batch
+  const meetingIds = meetings.map((m) => m.meetingId);
+  await updateMeetingIndexBatch(meetingIds);
+}
+
+/**
  * Store a meeting with its summary and transcript in the cache
  */
 export async function cacheMeeting(
@@ -68,22 +104,7 @@ export async function cacheMeeting(
   transcript?: string,
   actionItems?: unknown[],
 ): Promise<void> {
-  const hash = generateHash(meetingId);
-  const cacheKey = `${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${meetingId}`;
-
-  const cached: CachedMeetingData = {
-    meeting,
-    summary,
-    transcript,
-    actionItems,
-    cachedAt: Date.now(),
-    hash,
-  };
-
-  await LocalStorage.setItem(cacheKey, JSON.stringify(cached));
-
-  // Update index
-  await updateMeetingIndex(meetingId);
+  await cacheMeetingsBatch([{ meetingId, meeting, summary, transcript, actionItems }]);
 }
 
 /**
@@ -117,15 +138,22 @@ export async function getCachedMeeting(meetingId: string): Promise<CachedMeeting
 }
 
 /**
- * Update the index of cached meeting IDs
+ * Update the index for a batch of meeting IDs (single read + single write)
  */
-async function updateMeetingIndex(meetingId: string): Promise<void> {
+async function updateMeetingIndexBatch(meetingIds: string[]): Promise<void> {
   try {
     const indexData = await LocalStorage.getItem<string>(CACHE_CONFIG.MEETINGS.INDEX_KEY);
     const index: CachedMeetingIndex = indexData ? JSON.parse(indexData) : { meetingIds: [], lastUpdated: Date.now() };
 
-    if (!index.meetingIds.includes(meetingId)) {
-      index.meetingIds.push(meetingId);
+    let changed = false;
+    for (const meetingId of meetingIds) {
+      if (!index.meetingIds.includes(meetingId)) {
+        index.meetingIds.push(meetingId);
+        changed = true;
+      }
+    }
+
+    if (changed) {
       index.lastUpdated = Date.now();
       await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
     }
@@ -151,20 +179,69 @@ export async function getCachedMeetingIds(): Promise<string[]> {
 }
 
 /**
- * Get all cached meetings
+ * Get all cached meetings — uses allItems() for a single bulk read instead of N individual reads.
  */
 export async function getAllCachedMeetings(): Promise<CachedMeetingData[]> {
-  const meetingIds = await getCachedMeetingIds();
-  const meetings: CachedMeetingData[] = [];
+  try {
+    const all = await LocalStorage.allItems();
+    const prefix = CACHE_CONFIG.MEETINGS.KEY_PREFIX;
+    const ttl = CACHE_CONFIG.MEETINGS.TTL;
+    const actionItemsTtl = CACHE_CONFIG.ACTION_ITEMS.TTL;
 
-  for (const id of meetingIds) {
-    const cached = await getCachedMeeting(id);
-    if (cached) {
-      meetings.push(cached);
+    const meetings: CachedMeetingData[] = [];
+    const expiredIds: string[] = [];
+
+    for (const [key, value] of Object.entries(all)) {
+      if (!key.startsWith(prefix)) continue;
+      // Skip the index key itself
+      if (key === CACHE_CONFIG.MEETINGS.INDEX_KEY) continue;
+
+      try {
+        const data = JSON.parse(value as string) as CachedMeetingData;
+
+        if (!isCacheValid(data.cachedAt, ttl)) {
+          expiredIds.push(key.slice(prefix.length));
+          continue;
+        }
+
+        if (data.actionItems && !isCacheValid(data.cachedAt, actionItemsTtl)) {
+          data.actionItems = undefined;
+        }
+
+        meetings.push(data);
+      } catch {
+        // Skip malformed entries
+      }
     }
-  }
 
-  return meetings;
+    // Prune expired entries from the index asynchronously (don't block return)
+    if (expiredIds.length > 0) {
+      pruneExpiredFromIndex(expiredIds).catch(() => {});
+    }
+
+    return meetings;
+  } catch (error) {
+    logger.error("Error reading all cached meetings:", error);
+    return [];
+  }
+}
+
+/**
+ * Remove expired IDs from the index (background cleanup)
+ */
+async function pruneExpiredFromIndex(expiredIds: string[]): Promise<void> {
+  try {
+    const indexData = await LocalStorage.getItem<string>(CACHE_CONFIG.MEETINGS.INDEX_KEY);
+    if (!indexData) return;
+    const index: CachedMeetingIndex = JSON.parse(indexData);
+    const expiredSet = new Set(expiredIds);
+    index.meetingIds = index.meetingIds.filter((id) => !expiredSet.has(id));
+    index.lastUpdated = Date.now();
+    await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
+    await Promise.all(expiredIds.map((id) => LocalStorage.removeItem(`${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${id}`)));
+  } catch (error) {
+    logger.error("Error pruning expired meetings from index:", error);
+  }
 }
 
 /**
@@ -173,36 +250,29 @@ export async function getAllCachedMeetings(): Promise<CachedMeetingData[]> {
  */
 export async function pruneCache(keepCount: number = 50): Promise<void> {
   try {
-    const indexData = await LocalStorage.getItem<string>(CACHE_CONFIG.MEETINGS.INDEX_KEY);
-    if (!indexData) return;
+    const meetings = await getAllCachedMeetings();
+    if (meetings.length <= keepCount) return;
 
-    const index: CachedMeetingIndex = JSON.parse(indexData);
+    // Sort by cachedAt descending, keep newest N
+    meetings.sort((a, b) => b.cachedAt - a.cachedAt);
+    const toRemove = meetings.slice(keepCount);
+    const toKeep = meetings.slice(0, keepCount);
 
-    if (index.meetingIds.length <= keepCount) return;
+    const getMeetingId = (m: CachedMeetingData): string => {
+      const meeting = m.meeting as { recordingId?: string; id?: string };
+      return meeting.recordingId || meeting.id || "";
+    };
 
-    // Get all cached meetings with their dates
-    const meetingsWithDates: Array<{ id: string; cachedAt: number }> = [];
+    await Promise.all(
+      toRemove.map((m) => {
+        const id = getMeetingId(m);
+        return id ? LocalStorage.removeItem(`${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${id}`) : Promise.resolve();
+      }),
+    );
 
-    for (const id of index.meetingIds) {
-      const cached = await getCachedMeeting(id);
-      if (cached) {
-        meetingsWithDates.push({ id, cachedAt: cached.cachedAt });
-      }
-    }
-
-    // Sort by cachedAt (newest first) and keep only top N
-    meetingsWithDates.sort((a, b) => b.cachedAt - a.cachedAt);
-    const toKeep = meetingsWithDates.slice(0, keepCount).map((m) => m.id);
-    const toRemove = index.meetingIds.filter((id) => !toKeep.includes(id));
-
-    // Remove old entries
-    for (const id of toRemove) {
-      await LocalStorage.removeItem(`${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${id}`);
-    }
-
-    // Update index
-    index.meetingIds = toKeep;
-    index.lastUpdated = Date.now();
+    // Rewrite index with only kept IDs
+    const keptIds = toKeep.map(getMeetingId).filter(Boolean);
+    const index: CachedMeetingIndex = { meetingIds: keptIds, lastUpdated: Date.now() };
     await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
   } catch (error) {
     logger.error("Error pruning cache:", error);
@@ -210,12 +280,10 @@ export async function pruneCache(keepCount: number = 50): Promise<void> {
 }
 
 /**
- * Update cache metadata
+ * Update cache metadata from in-memory meetings (avoids re-reading from storage)
  */
-export async function updateCacheMetadata(): Promise<void> {
+export async function updateCacheMetadataFromMeetings(meetings: CachedMeetingData[]): Promise<void> {
   try {
-    const meetings = await getAllCachedMeetings();
-
     if (meetings.length === 0) {
       await LocalStorage.removeItem(CACHE_CONFIG.METADATA.KEY);
       return;
@@ -233,6 +301,14 @@ export async function updateCacheMetadata(): Promise<void> {
   } catch (error) {
     logger.error("Error updating cache metadata:", error);
   }
+}
+
+/**
+ * Update cache metadata
+ */
+export async function updateCacheMetadata(): Promise<void> {
+  const meetings = await getAllCachedMeetings();
+  await updateCacheMetadataFromMeetings(meetings);
 }
 
 /**
@@ -271,43 +347,27 @@ export async function clearAllCache(): Promise<void> {
  * Searches titles, summaries, and transcripts
  */
 export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query: string): CachedMeetingData[] {
-  if (!query || query.trim() === "") {
-    logger.log("[searchCachedMeetings] Empty query, returning all meetings");
+  if (!query.trim()) {
     return cachedMeetings;
   }
 
   const searchTerms = query.toLowerCase().split(/\s+/);
-  logger.log(`[searchCachedMeetings] Searching for: "${query}" (terms: ${searchTerms.join(", ")})`);
-  logger.log(`[searchCachedMeetings] Total meetings to search: ${cachedMeetings.length}`);
-
-  // Log cache content stats
-  const withSummary = cachedMeetings.filter((c) => c.summary && c.summary.length > 0).length;
-  const withTranscript = cachedMeetings.filter((c) => c.transcript && c.transcript.length > 0).length;
-  logger.log(`[searchCachedMeetings] Cache stats: ${withSummary} with summaries, ${withTranscript} with transcripts`);
+  logger.log(`[searchCachedMeetings] Searching ${cachedMeetings.length} meetings for: "${query}"`);
 
   const results = cachedMeetings.filter((cached) => {
-    const meeting = cached.meeting as { title?: string; meetingTitle?: string; recordingId?: string };
-    const title = meeting.title || "";
-    const meetingTitle = meeting.meetingTitle || "";
-    const summary = cached.summary || "";
-    const transcript = cached.transcript || "";
+    const meeting = cached.meeting as { title?: string; meetingTitle?: string };
+    const searchableText = [
+      meeting.title || "",
+      meeting.meetingTitle || "",
+      cached.summary || "",
+      cached.transcript || "",
+    ]
+      .join(" ")
+      .toLowerCase();
 
-    const searchableText = [title, meetingTitle, summary, transcript].join(" ").toLowerCase();
-
-    const matches = searchTerms.every((term) => searchableText.includes(term));
-
-    // Log detailed match info for first few meetings
-    if (cachedMeetings.indexOf(cached) < 3) {
-      logger.log(
-        `[searchCachedMeetings] Meeting "${title}" (${meeting.recordingId}): ` +
-          `title=${title.length}ch, summary=${summary.length}ch, transcript=${transcript.length}ch, matches=${matches}`,
-      );
-    }
-
-    return matches;
+    return searchTerms.every((term) => searchableText.includes(term));
   });
 
-  logger.log(`[searchCachedMeetings] Found ${results.length} matching meetings`);
-
+  logger.log(`[searchCachedMeetings] Found ${results.length} matches`);
   return results;
 }

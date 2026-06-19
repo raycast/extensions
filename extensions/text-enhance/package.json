@@ -1,0 +1,403 @@
+{
+  "name": "text-enhance",
+  "title": "Text Enhance",
+  "description": "Enhance drafts with Raycast AI, copy the improved result to the clipboard, and iterate with follow-up corrections.",
+  "version": "0.1.0",
+  "author": "max13021302",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "writing",
+    "rewrite",
+    "editing",
+    "clipboard",
+    "ai",
+    "email",
+    "telegram",
+    "slack"
+  ],
+  "icon": "icon.png",
+  "preferences": [
+    {
+      "name": "defaultPurpose",
+      "title": "Default Purpose",
+      "description": "Purpose selected when the command opens and no saved preset applies.",
+      "type": "dropdown",
+      "required": false,
+      "default": "general",
+      "data": [
+        {
+          "title": "Plain Text",
+          "value": "general"
+        },
+        {
+          "title": "Email",
+          "value": "email"
+        },
+        {
+          "title": "Reply",
+          "value": "reply"
+        },
+        {
+          "title": "Follow-Up",
+          "value": "follow-up"
+        },
+        {
+          "title": "Telegram Message",
+          "value": "telegram"
+        },
+        {
+          "title": "Slack Message",
+          "value": "slack"
+        },
+        {
+          "title": "Professional Update",
+          "value": "professional-update"
+        },
+        {
+          "title": "Meeting Summary",
+          "value": "meeting-summary"
+        },
+        {
+          "title": "Announcement",
+          "value": "announcement"
+        },
+        {
+          "title": "Customer Support",
+          "value": "customer-support"
+        },
+        {
+          "title": "Social Post",
+          "value": "social-post"
+        },
+        {
+          "title": "Personal Message",
+          "value": "personal-message"
+        },
+        {
+          "title": "Sensitive Message",
+          "value": "sensitive-message"
+        },
+        {
+          "title": "Request",
+          "value": "request"
+        },
+        {
+          "title": "Proposal",
+          "value": "proposal"
+        }
+      ]
+    },
+    {
+      "name": "defaultEnhancement",
+      "title": "Default Enhancement",
+      "description": "Enhancement mode selected when the command opens and no saved preset applies.",
+      "type": "dropdown",
+      "required": false,
+      "default": "polish",
+      "data": [
+        {
+          "title": "Improve Clarity",
+          "value": "clarity"
+        },
+        {
+          "title": "Fix Grammar",
+          "value": "grammar"
+        },
+        {
+          "title": "Polish It",
+          "value": "polish"
+        },
+        {
+          "title": "Make Shorter",
+          "value": "shorten"
+        },
+        {
+          "title": "Make Fuller",
+          "value": "expand"
+        },
+        {
+          "title": "Make Funny",
+          "value": "funny"
+        },
+        {
+          "title": "Make Sarcastic",
+          "value": "sarcastic"
+        },
+        {
+          "title": "Make Persuasive",
+          "value": "persuasive"
+        },
+        {
+          "title": "Make Warmer",
+          "value": "warmer"
+        },
+        {
+          "title": "Make Stronger",
+          "value": "stronger"
+        }
+      ]
+    },
+    {
+      "name": "defaultTone",
+      "title": "Default Tone",
+      "description": "Tone selected when the command opens and no saved preset applies.",
+      "type": "dropdown",
+      "required": false,
+      "default": "natural",
+      "data": [
+        {
+          "title": "Natural",
+          "value": "natural"
+        },
+        {
+          "title": "Professional",
+          "value": "professional"
+        },
+        {
+          "title": "Friendly",
+          "value": "friendly"
+        },
+        {
+          "title": "Confident",
+          "value": "confident"
+        },
+        {
+          "title": "Direct",
+          "value": "direct"
+        },
+        {
+          "title": "Warm",
+          "value": "warm"
+        },
+        {
+          "title": "Playful",
+          "value": "playful"
+        },
+        {
+          "title": "Empathetic",
+          "value": "empathetic"
+        },
+        {
+          "title": "Formal",
+          "value": "formal"
+        },
+        {
+          "title": "Persuasive",
+          "value": "persuasive"
+        },
+        {
+          "title": "Humble",
+          "value": "humble"
+        },
+        {
+          "title": "Energetic",
+          "value": "energetic"
+        }
+      ]
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "AI model selected when the command opens and no saved preset applies.",
+      "type": "dropdown",
+      "required": false,
+      "default": "claude-4.5-sonnet",
+      "data": [
+        {
+          "title": "Claude 4 Sonnet",
+          "value": "claude-4-sonnet"
+        },
+        {
+          "title": "Claude 4.6 Sonnet",
+          "value": "claude-4.6-sonnet"
+        },
+        {
+          "title": "Claude 4.5 Sonnet",
+          "value": "claude-4.5-sonnet"
+        },
+        {
+          "title": "Claude 4.5 Haiku",
+          "value": "claude-4.5-haiku"
+        },
+        {
+          "title": "Claude 4.5 Opus",
+          "value": "claude-4.5-opus"
+        },
+        {
+          "title": "Claude 4.6 Opus",
+          "value": "claude-4.6-opus"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5.1",
+          "value": "gpt-5.1"
+        },
+        {
+          "title": "GPT-5.2",
+          "value": "gpt-5.2"
+        },
+        {
+          "title": "GPT-4.1",
+          "value": "gpt-4.1"
+        },
+        {
+          "title": "GPT-4.1 Mini",
+          "value": "gpt-4.1-mini"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        },
+        {
+          "title": "Gemini 3 Flash",
+          "value": "gemini-3-flash"
+        },
+        {
+          "title": "Gemini 3.1 Pro",
+          "value": "gemini-3.1-pro"
+        },
+        {
+          "title": "Gemini 3.1 Flash Lite",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Flash Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Perplexity Sonar",
+          "value": "perplexity-sonar"
+        },
+        {
+          "title": "Perplexity Sonar Pro",
+          "value": "perplexity-sonar-pro"
+        },
+        {
+          "title": "Grok 4.1 Fast",
+          "value": "grok-4.1-fast"
+        },
+        {
+          "title": "Grok 4",
+          "value": "grok-4"
+        },
+        {
+          "title": "Mistral Large",
+          "value": "mistral-large"
+        },
+        {
+          "title": "Mistral Medium",
+          "value": "mistral-medium"
+        },
+        {
+          "title": "Mistral Small 3",
+          "value": "mistral-small-3"
+        },
+        {
+          "title": "DeepSeek V3",
+          "value": "deepseek-v3"
+        },
+        {
+          "title": "DeepSeek R1",
+          "value": "deepseek-r1"
+        },
+        {
+          "title": "Qwen3 32B",
+          "value": "qwen3-32b"
+        },
+        {
+          "title": "Kimi K2 Instruct",
+          "value": "kimi-k2-instruct"
+        }
+      ]
+    },
+    {
+      "name": "defaultCreativity",
+      "title": "Default Creativity",
+      "description": "Creativity level selected when the command opens and no saved preset applies.",
+      "type": "dropdown",
+      "required": false,
+      "default": "balanced",
+      "data": [
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "defaultExtraInstruction",
+      "title": "Default Extra Instruction",
+      "description": "Optional instruction applied by default when no saved preset applies.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Example: Keep it concise and avoid buzzwords.",
+      "default": ""
+    },
+    {
+      "name": "autoCopyResult",
+      "title": "Clipboard Behavior",
+      "description": "Automatically copy the generated result to the clipboard.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Copy generated text automatically",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Enhance Text",
+      "description": "Improve a draft with Raycast AI and copy the output to the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Enhancement History",
+      "description": "Browse, copy, and clear previous generated texts",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/react": "19.0.10",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

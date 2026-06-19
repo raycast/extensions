@@ -1,0 +1,4828 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Typefully Public API",
+    "version": "2.0.0",
+    "description": "\nThe Typefully Public API allows you to programmatically manage your social media drafts,\nschedule posts, and publish content across multiple platforms.\n\n## Important: X Automation Compliance\n\n**Before building with this API for X automation, please review these critical guidelines:**\n\n- Make sure to adhere to [X automation rules](https://help.x.com/en/rules-and-policies/x-automation) and [general X rules](https://help.x.com/en/rules-and-policies/x-rules) when scheduling content, otherwise your X account might be banned.\n- If you plan to build an app on X that is not just for you or your company to use, you will need to use the [X API with higher rate limits](https://developer.x.com/en) than Typefully's API, which is meant to create personal automations and workflows.\n\n## Authentication\n\nAll requests require a Bearer token in the Authorization header:\n\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\nGenerate your API key from your Typefully settings.\n\n## Permissions & Access Levels\n\nAPI keys inherit the same permissions as the user who created them. Your access to social sets (accounts)\ndetermines which API operations you can perform.\n\n## Rate Limiting\n\nAPI requests are rate-limited on a per user and per social set basis. When you exceed the rate limit, you'll receive a 429 Too Many Requests response. All API responses include headers showing your current rate limit status:\n\n**User rate limits** (applies to all endpoints, per user): `X-RateLimit-User-Limit` (maximum requests allowed), `X-RateLimit-User-Remaining` (requests remaining), `X-RateLimit-User-Reset` (Unix timestamp when limit resets).\n\n**Social set rate limits** (applies to specific operations like draft creation, per social set): `X-RateLimit-SocialSet-Limit`, `X-RateLimit-SocialSet-Remaining`, `X-RateLimit-SocialSet-Reset`, `X-RateLimit-SocialSet-Resource` (the resource identifier, e.g., \"drafts.create\").\n\n## Pagination\n\nList endpoints use limit-offset pagination for efficient data retrieval:\n\n- **limit**: Maximum items per page (default: 10, max: 50)\n- **offset**: Number of items to skip (default: 0)\n\nExample request:\n```\nGET /v2/social-sets?limit=25&offset=50\n```\n\nEach paginated response includes:\n- **results**: Array of items for the current page\n- **count**: Total number of items available\n- **limit**: Items per page used for this request\n- **offset**: Current offset value\n- **next**: URL for the next page (null if on last page)\n- **previous**: URL for the previous page (null if on first page)\n    ",
+    "contact": {
+      "name": "Typefully API Support",
+      "email": "support@typefully.com"
+    }
+  },
+  "paths": {
+    "/v2/me": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_user_get_me",
+        "summary": "Get current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid or missing API key."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve the currently authenticated Typefully user associated with your API Key",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_social_sets_list_social_sets",
+        "summary": "List social sets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 10,
+              "description": "Maximum number of items to return per page",
+              "title": "Limit"
+            },
+            "required": false,
+            "description": "Maximum number of items to return per page"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of items to skip from the beginning",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Number of items to skip from the beginning"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedSocialSetListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid or missing API key."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve all social sets (accounts) you can access. This includes accounts you own directly and accounts that belong to teams you are a member of.",
+        "tags": [
+          "Social Sets"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_social_sets_get_social_set_details",
+        "summary": "Get social set details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialSetDetailResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have permission to access this social set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "access_denied": {
+                    "summary": "No access to social set",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have access to this social set."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve detailed information about a social set, including every configured social media platform (X, LinkedIn, Mastodon, Threads, Bluesky) with account details and profile information.\n\n**Required permission:** READ access to the social set.",
+        "tags": [
+          "Social Sets"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/drafts": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_drafts_list_drafts",
+        "summary": "List drafts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "draft",
+                    "published",
+                    "scheduled",
+                    "error",
+                    "publishing"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tag"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "allOf": [
+                {
+                  "description": "Allowed order_by fields for draft listing - prevents SQL injection",
+                  "enum": [
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at",
+                    "scheduled_date",
+                    "-scheduled_date",
+                    "published_at",
+                    "-published_at"
+                  ],
+                  "title": "DraftOrderBy",
+                  "type": "string"
+                }
+              ],
+              "default": "-updated_at"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 10,
+              "description": "Maximum number of items to return per page",
+              "title": "Limit"
+            },
+            "required": false,
+            "description": "Maximum number of items to return per page"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of items to skip from the beginning",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Number of items to skip from the beginning"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedDraftListResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve all drafts for a specific social set with optional filtering and sorting. Drafts are ordered by last edited date (most recent first) by default.\n\n**Required permission:** READ access to this social set.",
+        "tags": [
+          "Drafts"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "typefully_apps_apiv2_handlers_drafts_create_draft",
+        "summary": "Create draft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "no_platforms": {
+                    "summary": "No platforms enabled",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "At least one platform must be enabled"
+                      }
+                    }
+                  },
+                  "linkedin_validation": {
+                    "summary": "LinkedIn validation error",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "LinkedIn only supports single posts. Please provide only one post for LinkedIn."
+                      }
+                    }
+                  },
+                  "media_not_found": {
+                    "summary": "Media not found",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Media 550e8400-e29b-41d4-a716-446655440000 is still processing. Please wait and try again."
+                      }
+                    }
+                  },
+                  "draft_limit": {
+                    "summary": "Draft limit exceeded",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "You have reached your draft limit"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Account is paused or requires a paid plan before creating drafts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "account_paused": {
+                    "summary": "Account paused",
+                    "value": {
+                      "error": {
+                        "code": "MONETIZATION_ERROR",
+                        "message": "Upgrade your plan to create drafts from this account"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions or feature not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "no_write_access": {
+                    "summary": "Insufficient permissions",
+                    "value": {
+                      "error": {
+                        "code": "INSUFFICIENT_ACCESS_LEVEL",
+                        "message": "You need write access to create drafts in this social set."
+                      }
+                    }
+                  },
+                  "x_communities_not_available": {
+                    "summary": "X communities feature not available",
+                    "value": {
+                      "error": {
+                        "code": "MONETIZATION_ERROR",
+                        "message": "You need to upgrade to use X communities"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Schema validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "schema_validation": {
+                    "summary": "Invalid payload",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Some fields are invalid.",
+                        "details": [
+                          {
+                            "field": "platforms.x.posts.0.text",
+                            "message": "Must not be empty."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a new draft with content for one or more social media platforms. The draft can be saved as a draft, scheduled for later publishing, or published immediately.\n\n**Account-level settings:** This endpoint automatically applies the following account-level settings if enabled: Auto-Retweet, Auto-Plug, and Natural Posting Time.\n\n**Required permission:** WRITE access to create drafts. PUBLISH access is required to schedule or publish immediately.",
+        "tags": [
+          "Drafts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftCreateRequest"
+              },
+              "examples": {
+                "Multi-platform draft": {
+                  "summary": "Create multi-platform draft",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "1/ Excited to share our latest product update!"
+                          },
+                          {
+                            "text": "2/ We've added new features based on your feedback."
+                          },
+                          {
+                            "text": "3/ Try it out and let us know what you think!"
+                          }
+                        ]
+                      },
+                      "linkedin": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "Excited to share our latest product update! We've added new features based on your feedback. Try it out and let us know what you think!"
+                          }
+                        ]
+                      }
+                    },
+                    "share": true
+                  }
+                },
+                "Simple LinkedIn post": {
+                  "summary": "Simple LinkedIn post",
+                  "value": {
+                    "platforms": {
+                      "linkedin": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "Sharing some thoughts on building great products."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "Simple X post": {
+                  "summary": "Simple X post",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "Hello world! This is my first post."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "X post to a community": {
+                  "summary": "X post to a community",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "Hello community! Sharing this with everyone."
+                          }
+                        ],
+                        "settings": {
+                          "community_id": "1493446837214187523"
+                        }
+                      }
+                    }
+                  }
+                },
+                "X reply to an existing post": {
+                  "summary": "X reply to an existing post",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "This is a reply to another post!"
+                          }
+                        ],
+                        "settings": {
+                          "reply_to_url": "https://x.com/username/status/1234567890"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/drafts/{draft_id}": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_drafts_get_draft",
+        "summary": "Get draft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "draft_id",
+            "schema": {
+              "title": "Draft Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftDetailResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve a specific draft by ID, including its content for all configured platforms, status, and scheduling information.\n\n**Required permission:** READ access to this social set.",
+        "tags": [
+          "Drafts"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "typefully_apps_apiv2_handlers_drafts_edit_draft",
+        "summary": "Update draft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "draft_id",
+            "schema": {
+              "title": "Draft Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data or draft cannot be edited (e.g., already published)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "already_published": {
+                    "summary": "Draft already published",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Cannot edit a draft that has already been published"
+                      }
+                    }
+                  },
+                  "no_platforms": {
+                    "summary": "No platforms enabled",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "At least one platform must be enabled"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Account is paused or requires a paid plan before editing drafts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "account_paused": {
+                    "summary": "Account paused",
+                    "value": {
+                      "error": {
+                        "code": "MONETIZATION_ERROR",
+                        "message": "Resume your subscription to edit drafts from this account"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions or feature not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "insufficient_access": {
+                    "summary": "Missing publish permission",
+                    "value": {
+                      "error": {
+                        "code": "INSUFFICIENT_ACCESS_LEVEL",
+                        "message": "You need publish access to edit scheduled drafts in this social set."
+                      }
+                    }
+                  },
+                  "x_communities_not_available": {
+                    "summary": "X communities feature not available",
+                    "value": {
+                      "error": {
+                        "code": "MONETIZATION_ERROR",
+                        "message": "You need to upgrade to use X communities"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Schema validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "schema_validation": {
+                    "summary": "Invalid payload",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Some fields are invalid.",
+                        "details": [
+                          {
+                            "field": "platforms.x.posts.0.text",
+                            "message": "Must not be empty."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Update an existing draft with partial update semantics. Only provided fields are updated; omitted fields remain unchanged. Scheduled drafts require publish access to edit.\n\n**Required permission:** WRITE access to edit drafts. PUBLISH access is required to edit scheduled drafts, schedule, or publish.",
+        "tags": [
+          "Drafts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftUpdateRequest"
+              },
+              "examples": {
+                "update_text": {
+                  "summary": "Update post text",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": true,
+                        "posts": [
+                          {
+                            "text": "Updated post content!"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "share_draft": {
+                  "summary": "Enable draft sharing",
+                  "value": {
+                    "share": true
+                  }
+                },
+                "schedule": {
+                  "summary": "Schedule draft",
+                  "value": {
+                    "publish_at": "2025-01-20T14:00:00Z"
+                  }
+                },
+                "update_tags": {
+                  "summary": "Update tags",
+                  "value": {
+                    "tags": [
+                      "marketing",
+                      "product-launch"
+                    ]
+                  }
+                },
+                "disable_platform": {
+                  "summary": "Disable X platform",
+                  "value": {
+                    "platforms": {
+                      "x": {
+                        "enabled": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "typefully_apps_apiv2_handlers_drafts_delete_draft",
+        "summary": "Delete draft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "draft_id",
+            "schema": {
+              "title": "Draft Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Delete a draft. Requires WRITE access. You can delete your own drafts in any status (DRAFT, ERROR, SCHEDULED, PUBLISHED, PUBLISHING) with WRITE access. Drafts created by other users also require WRITE access to delete.\n\n**Required permission:** WRITE access to this social set.",
+        "tags": [
+          "Drafts"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/media/upload": {
+      "post": {
+        "operationId": "typefully_apps_apiv2_handlers_media_create_media_upload",
+        "summary": "Create media upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Upload URL created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaUploadResponse"
+                },
+                "example": {
+                  "media_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "upload_url": "https://s3.amazonaws.com/bucket/path/file.jpg?X-Amz-Algorithm=..."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Schema validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "schema_validation": {
+                    "summary": "Invalid payload",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Some fields are invalid.",
+                        "details": [
+                          {
+                            "field": "platforms.x.posts.0.text",
+                            "message": "Must not be empty."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Generate a presigned S3 upload URL for images, videos, GIFs, or PDFs. After you receive the URL, upload the file contents with a PUT request and then reference the returned media_id when creating drafts.\n\n**Required permission:** WRITE access to the social set.",
+        "tags": [
+          "Media"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/media/{media_id}": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_media_get_media_status",
+        "summary": "Get media status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "media_id",
+            "schema": {
+              "format": "uuid",
+              "title": "Media Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaStatusResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieves the processing status of an uploaded media file. Poll this endpoint after uploading to check when the file is ready to use in drafts.\n\n**Required permission:** READ access to the social set.",
+        "tags": [
+          "Media"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    },
+    "/v2/social-sets/{social_set_id}/tags": {
+      "get": {
+        "operationId": "typefully_apps_apiv2_handlers_tags_list_tags",
+        "summary": "List tags",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 10,
+              "description": "Maximum number of items to return per page",
+              "title": "Limit"
+            },
+            "required": false,
+            "description": "Maximum number of items to return per page"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of items to skip from the beginning",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Number of items to skip from the beginning"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedTagResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Not allowed",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "You do not have permission to perform this action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve all tags for a social set, ordered by their slugs.\n\n**Required permission:** READ access to the social set.",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "typefully_apps_apiv2_handlers_tags_create_tag",
+        "summary": "Create tag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "social_set_id",
+            "schema": {
+              "title": "Social Set Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "duplicate_tag": {
+                    "summary": "Duplicate tag name",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "You already have a tag with this name"
+                      }
+                    }
+                  },
+                  "empty_slug": {
+                    "summary": "Tag name too short",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Tag name is too short"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions or feature not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "no_manage_access": {
+                    "summary": "Insufficient permissions",
+                    "value": {
+                      "error": {
+                        "code": "INSUFFICIENT_ACCESS_LEVEL",
+                        "message": "You need write access to create tags in this social set."
+                      }
+                    }
+                  },
+                  "feature_not_enabled": {
+                    "summary": "Tags feature not enabled",
+                    "value": {
+                      "error": {
+                        "code": "MONETIZATION_ERROR",
+                        "message": "You need to upgrade to create tags"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Missing resource",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Resource not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Schema validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "schema_validation": {
+                    "summary": "Invalid payload",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": "Some fields are invalid.",
+                        "details": [
+                          {
+                            "field": "platforms.x.posts.0.text",
+                            "message": "Must not be empty."
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Rate limit exceeded. Try again later."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a new tag for a social set. The slug is automatically generated from the tag name, which must be unique per social set.\n\n**Required permission:** WRITE access to the social set.",
+        "tags": [
+          "Tags"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "PublicAPIAuthentication": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserResponse": {
+        "description": "User details response schema",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the user",
+            "examples": [
+              12345,
+              67890
+            ],
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name of the user",
+            "examples": [
+              "John Doe",
+              "Jane Smith"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email address of the user",
+            "examples": [
+              "user@example.com"
+            ],
+            "title": "Email",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the user's profile image. Null if not available.",
+            "examples": [
+              "https://example.com/avatar.jpg"
+            ],
+            "title": "Profile Image Url"
+          },
+          "signup_date": {
+            "description": "Timestamp when the user signed up (ISO 8601 format in UTC)",
+            "examples": [
+              "2024-01-15T10:30:00Z"
+            ],
+            "format": "date-time",
+            "title": "Signup Date",
+            "type": "string"
+          },
+          "api_key_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Label of the API key used to authenticate this request. Null if no label was set.",
+            "examples": [
+              "My Production Key",
+              "Zapier Integration"
+            ],
+            "title": "Api Key Label"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "signup_date"
+        ],
+        "title": "UserResponse",
+        "type": "object"
+      },
+      "APIErrorResponse": {
+        "description": "Standard error response for all API errors.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorObject"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "APIErrorResponse",
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "description": "Field-level error detail.",
+        "properties": {
+          "message": {
+            "description": "Human-readable error message",
+            "title": "Message",
+            "type": "string"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Field name that caused the error",
+            "title": "Field"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error type (e.g. 'string_too_long', 'list_max_items')",
+            "title": "Type"
+          },
+          "loc": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error location path (e.g. ['body', 'platforms', 'x', 'posts', 0, 'text'])",
+            "title": "Loc"
+          },
+          "ctx": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error context",
+            "title": "Ctx"
+          },
+          "input": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Input value that caused the error (e.g. 'Hello, world!')",
+            "title": "Input"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "ErrorObject": {
+        "description": "Standard error response object.",
+        "properties": {
+          "code": {
+            "description": "Error code",
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable error message",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of field-level errors (optional - only present when applicable)",
+            "title": "Details"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorObject",
+        "type": "object"
+      },
+      "Input": {
+        "description": "Pagination input parameters.",
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "maximum": 50,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 10,
+            "description": "Maximum number of items to return per page",
+            "title": "Limit"
+          },
+          "offset": {
+            "default": 0,
+            "description": "Number of items to skip from the beginning",
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          }
+        },
+        "title": "Input",
+        "type": "object"
+      },
+      "PagedSocialSetListResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SocialSetListResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          }
+        },
+        "required": [
+          "results",
+          "count",
+          "limit",
+          "offset",
+          "next",
+          "previous"
+        ],
+        "title": "PagedSocialSetListResponse",
+        "type": "object"
+      },
+      "SocialSetListResponse": {
+        "description": "Details of the social set for list endpoints",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the social set",
+            "examples": [
+              12345,
+              67890
+            ],
+            "title": "Id",
+            "type": "integer"
+          },
+          "username": {
+            "description": "Username/handle for the social media account",
+            "examples": [
+              "elonmusk",
+              "typefully"
+            ],
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the social media account",
+            "examples": [
+              "Elon Musk",
+              "Typefully"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "description": "URL to the profile image of the social media account",
+            "examples": [
+              "https://typefully-user-avatars.s3.amazonaws.com/_generic/account/537/twitter.jpeg"
+            ],
+            "title": "Profile Image Url",
+            "type": "string"
+          },
+          "team": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Team"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Team that owns this social set. Null if the social set is owned by an individual user."
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "name",
+          "profile_image_url"
+        ],
+        "title": "SocialSetListResponse",
+        "type": "object"
+      },
+      "Team": {
+        "description": "Details of the team that owns this social set",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the team",
+            "examples": [
+              "abc123def4567890"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the team",
+            "examples": [
+              "Marketing Team",
+              "Engineering"
+            ],
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Team",
+        "type": "object"
+      },
+      "BlueskyAccount": {
+        "description": "Schema for Bluesky account data in API responses",
+        "properties": {
+          "platform": {
+            "default": "bluesky",
+            "description": "Platform identifier",
+            "title": "Platform",
+            "type": "string"
+          },
+          "username": {
+            "description": "Bluesky username/handle",
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Display name for the account. Null if not available.",
+            "title": "Name"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the profile image. Null if not available.",
+            "title": "Profile Image Url"
+          },
+          "profile_url": {
+            "description": "URL to the public Bluesky profile",
+            "title": "Profile Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "profile_url"
+        ],
+        "title": "BlueskyAccount",
+        "type": "object"
+      },
+      "LinkedInAccount": {
+        "description": "Schema for LinkedIn account data in API responses",
+        "properties": {
+          "platform": {
+            "default": "linkedin",
+            "description": "Platform identifier",
+            "title": "Platform",
+            "type": "string"
+          },
+          "username": {
+            "description": "LinkedIn username/vanity name",
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the account",
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the profile image. Null if not available.",
+            "title": "Profile Image Url"
+          },
+          "profile_url": {
+            "description": "URL to the public LinkedIn profile",
+            "title": "Profile Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "name",
+          "profile_url"
+        ],
+        "title": "LinkedInAccount",
+        "type": "object"
+      },
+      "MastodonAccount": {
+        "description": "Schema for Mastodon account data in API responses",
+        "properties": {
+          "platform": {
+            "default": "mastodon",
+            "description": "Platform identifier",
+            "title": "Platform",
+            "type": "string"
+          },
+          "username": {
+            "description": "Mastodon username/handle (without the server suffix)",
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the account",
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the profile image. Null if not available.",
+            "title": "Profile Image Url"
+          },
+          "profile_url": {
+            "description": "URL to the public Mastodon profile",
+            "title": "Profile Url",
+            "type": "string"
+          },
+          "followers_count": {
+            "description": "Number of followers on Mastodon",
+            "title": "Followers Count",
+            "type": "integer"
+          },
+          "server": {
+            "description": "Server/instance for the Mastodon account",
+            "title": "Server",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "name",
+          "profile_url",
+          "followers_count",
+          "server"
+        ],
+        "title": "MastodonAccount",
+        "type": "object"
+      },
+      "PlatformsDict": {
+        "description": "Strictly typed dictionary for platform accounts",
+        "properties": {
+          "x": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/XAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "linkedin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LinkedInAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mastodon": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MastodonAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "threads": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThreadsAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bluesky": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BlueskyAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "x",
+          "linkedin",
+          "mastodon",
+          "threads",
+          "bluesky"
+        ],
+        "title": "PlatformsDict",
+        "type": "object"
+      },
+      "SocialSetDetailResponse": {
+        "description": "Detailed social set response including all platform accounts",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the social set",
+            "examples": [
+              12345,
+              67890
+            ],
+            "title": "Id",
+            "type": "integer"
+          },
+          "username": {
+            "description": "Username/handle for the social media account",
+            "examples": [
+              "elonmusk",
+              "typefully"
+            ],
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the social media account",
+            "examples": [
+              "Elon Musk",
+              "Typefully"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "description": "URL to the profile image of the social media account",
+            "examples": [
+              "https://typefully-user-avatars.s3.amazonaws.com/_generic/account/537/twitter.jpeg"
+            ],
+            "title": "Profile Image Url",
+            "type": "string"
+          },
+          "team": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Team"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Team that owns this social set. Null if the social set is owned by an individual user."
+          },
+          "platforms": {
+            "$ref": "#/components/schemas/PlatformsDict",
+            "description": "All platform accounts configured in this social set (X, LinkedIn, Mastodon, Threads, Bluesky)"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "name",
+          "profile_image_url",
+          "platforms"
+        ],
+        "title": "SocialSetDetailResponse",
+        "type": "object"
+      },
+      "ThreadsAccount": {
+        "description": "Schema for Threads account data in API responses",
+        "properties": {
+          "platform": {
+            "default": "threads",
+            "description": "Platform identifier",
+            "title": "Platform",
+            "type": "string"
+          },
+          "username": {
+            "description": "Threads username/handle",
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Display name for the account. Null if not available.",
+            "title": "Name"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the profile image. Null if not available.",
+            "title": "Profile Image Url"
+          },
+          "profile_url": {
+            "description": "URL to the public Threads profile",
+            "title": "Profile Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "profile_url"
+        ],
+        "title": "ThreadsAccount",
+        "type": "object"
+      },
+      "XAccount": {
+        "description": "Schema for X/Twitter account data in API responses",
+        "properties": {
+          "platform": {
+            "default": "x",
+            "description": "Platform identifier",
+            "title": "Platform",
+            "type": "string"
+          },
+          "username": {
+            "description": "X/Twitter username/handle",
+            "title": "Username",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the account",
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the profile image. Null if not available.",
+            "title": "Profile Image Url"
+          },
+          "profile_url": {
+            "description": "URL to the public X/Twitter profile",
+            "title": "Profile Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "name",
+          "profile_url"
+        ],
+        "title": "XAccount",
+        "type": "object"
+      },
+      "DraftOrderBy": {
+        "description": "Allowed order_by fields for draft listing - prevents SQL injection",
+        "enum": [
+          "created_at",
+          "-created_at",
+          "updated_at",
+          "-updated_at",
+          "scheduled_date",
+          "-scheduled_date",
+          "published_at",
+          "-published_at"
+        ],
+        "title": "DraftOrderBy",
+        "type": "string"
+      },
+      "DraftListResponse": {
+        "description": "Schema for draft/thread data in API responses with standardized timestamp field names",
+        "properties": {
+          "social_set_id": {
+            "description": "ID of the social set (account) this draft belongs to",
+            "examples": [
+              67890
+            ],
+            "title": "Social Set Id",
+            "type": "integer"
+          },
+          "share_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Public share URL for the draft. Null if the draft is not publicly shared.",
+            "examples": [
+              "https://typefully.com/share/abc123"
+            ],
+            "title": "Share Url"
+          },
+          "private_url": {
+            "description": "Private URL for accessing the draft in Typefully. Can be shared with team members without requiring public sharing.",
+            "examples": [
+              "https://typefully.com/?d=12345&a=67890"
+            ],
+            "title": "Private Url",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the draft. 'draft' = saved but not scheduled, 'scheduled' = queued for publishing, 'published' = successfully posted, 'publishing' = currently being posted, 'error' = publishing failed",
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "description": "List of tag slugs (not names) associated with this draft. Use the /tags endpoint to get available tags with their slugs.",
+            "examples": [
+              [
+                "marketing",
+                "product"
+              ],
+              [
+                "newsletter"
+              ],
+              []
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "created_at": {
+            "description": "Timestamp when the draft was created (ISO 8601 format in UTC)",
+            "examples": [
+              "2025-01-15T10:30:00Z"
+            ],
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the draft was last edited (ISO 8601 format in UTC). Null if never edited.",
+            "examples": [
+              "2025-01-16T09:15:00Z"
+            ],
+            "title": "Updated At"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the draft was published on any enabled platform (ISO 8601 format in UTC). Null if not yet published anywhere.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Published At"
+          },
+          "mastodon_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Mastodon (ISO 8601 format in UTC). Null if not published to Mastodon.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Mastodon Post Published At"
+          },
+          "linkedin_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to LinkedIn (ISO 8601 format in UTC). Null if not published to LinkedIn.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Linkedin Post Published At"
+          },
+          "threads_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Threads (ISO 8601 format in UTC). Null if not published to Threads.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Threads Post Published At"
+          },
+          "bluesky_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Bluesky (ISO 8601 format in UTC). Null if not published to Bluesky.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Bluesky Post Published At"
+          },
+          "x_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to X (ISO 8601 format in UTC). Null if not published to X.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "X Post Published At"
+          },
+          "x_post_enabled": {
+            "description": "Whether posting to X is enabled for this draft",
+            "title": "X Post Enabled",
+            "type": "boolean"
+          },
+          "linkedin_post_enabled": {
+            "description": "Whether posting to LinkedIn is enabled for this draft",
+            "title": "Linkedin Post Enabled",
+            "type": "boolean"
+          },
+          "threads_post_enabled": {
+            "description": "Whether posting to Threads is enabled for this draft",
+            "title": "Threads Post Enabled",
+            "type": "boolean"
+          },
+          "bluesky_post_enabled": {
+            "description": "Whether posting to Bluesky is enabled for this draft",
+            "title": "Bluesky Post Enabled",
+            "type": "boolean"
+          },
+          "x_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on X (Twitter). Null if not published to X or URL not available.",
+            "examples": [
+              "https://x.com/username/status/1234567890"
+            ],
+            "title": "X Published Url"
+          },
+          "linkedin_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on LinkedIn. Null if not published to LinkedIn or URL not available.",
+            "examples": [
+              "https://www.linkedin.com/feed/update/urn:li:share:1234567890"
+            ],
+            "title": "Linkedin Published Url"
+          },
+          "mastodon_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Mastodon. Null if not published to Mastodon or URL not available.",
+            "examples": [
+              "https://mastodon.social/@username/1234567890"
+            ],
+            "title": "Mastodon Published Url"
+          },
+          "threads_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Threads. Null if not published to Threads or URL not available.",
+            "examples": [
+              "https://www.threads.net/@username/post/ABC123"
+            ],
+            "title": "Threads Published Url"
+          },
+          "bluesky_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Bluesky. Null if not published to Bluesky or URL not available.",
+            "examples": [
+              "https://bsky.app/profile/username.bsky.social/post/abc123"
+            ],
+            "title": "Bluesky Published Url"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "ID"
+          },
+          "preview": {
+            "anyOf": [
+              {
+                "maxLength": 180,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview"
+          },
+          "scheduled_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled Date"
+          },
+          "draft_title": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Title"
+          },
+          "mastodon_post_enabled": {
+            "default": false,
+            "title": "Mastodon Post Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "social_set_id",
+          "private_url",
+          "status",
+          "created_at",
+          "updated_at",
+          "published_at",
+          "mastodon_post_published_at",
+          "linkedin_post_published_at",
+          "threads_post_published_at",
+          "bluesky_post_published_at",
+          "x_post_enabled",
+          "linkedin_post_enabled",
+          "threads_post_enabled",
+          "bluesky_post_enabled"
+        ],
+        "title": "DraftListResponse",
+        "type": "object"
+      },
+      "PagedDraftListResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/DraftListResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          }
+        },
+        "required": [
+          "results",
+          "count",
+          "limit",
+          "offset",
+          "next",
+          "previous"
+        ],
+        "title": "PagedDraftListResponse",
+        "type": "object"
+      },
+      "BlueskySettings": {
+        "additionalProperties": false,
+        "description": "Settings specific to Bluesky",
+        "properties": {},
+        "title": "BlueskySettings",
+        "type": "object"
+      },
+      "DisabledPlatform": {
+        "additionalProperties": false,
+        "description": "Shared schema for all disabled platforms",
+        "properties": {
+          "enabled": {
+            "const": false,
+            "enum": [
+              false
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "DisabledPlatform",
+        "type": "object"
+      },
+      "DraftDetailResponse": {
+        "description": "Response schema for draft creation and retrieval",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the draft",
+            "examples": [
+              12345
+            ],
+            "title": "Id",
+            "type": "integer"
+          },
+          "social_set_id": {
+            "description": "ID of the social set (account) this draft belongs to",
+            "examples": [
+              67890
+            ],
+            "title": "Social Set Id",
+            "type": "integer"
+          },
+          "draft_id": {
+            "deprecated": true,
+            "description": "Deprecated: Use 'id' instead. Unique identifier for the draft.",
+            "examples": [
+              12345
+            ],
+            "title": "Draft Id",
+            "type": "integer"
+          },
+          "status": {
+            "description": "Current status of the draft. 'draft' = saved but not scheduled, 'scheduled' = queued for publishing, 'published' = successfully posted, 'publishing' = currently being posted, 'error' = publishing failed",
+            "enum": [
+              "draft",
+              "scheduled",
+              "published",
+              "publishing",
+              "error"
+            ],
+            "examples": [
+              "draft",
+              "scheduled",
+              "published"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "Timestamp when the draft was created (ISO 8601 format in UTC)",
+            "examples": [
+              "2025-01-15T10:30:00Z"
+            ],
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the draft was last edited (ISO 8601 format in UTC). Null if never edited.",
+            "examples": [
+              "2025-01-16T09:15:00Z"
+            ],
+            "title": "Updated At"
+          },
+          "scheduled_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the draft is scheduled to publish (ISO 8601 format in UTC). Null if not scheduled.",
+            "examples": [
+              "2025-01-20T14:00:00Z"
+            ],
+            "title": "Scheduled Date"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the draft was published on any enabled platform (ISO 8601 format in UTC). Null if not yet published.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "Published At"
+          },
+          "draft_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable title for the draft. This is for internal organization only and is not posted to social media.",
+            "examples": [
+              "Weekly Newsletter",
+              "Product Launch Announcement"
+            ],
+            "title": "Draft Title"
+          },
+          "tags": {
+            "description": "List of tag slugs (not names) associated with this draft. Use the /tags endpoint to get available tags with their slugs.",
+            "examples": [
+              [
+                "marketing",
+                "product"
+              ],
+              [
+                "newsletter"
+              ],
+              []
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "preview": {
+            "description": "Text preview of the draft (first 180 characters)",
+            "examples": [
+              "Excited to announce our new feature! 🚀"
+            ],
+            "title": "Preview",
+            "type": "string"
+          },
+          "share_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Public share URL for the draft. Null if the draft is not publicly shared.",
+            "examples": [
+              "https://typefully.com/share/abc123"
+            ],
+            "title": "Share Url"
+          },
+          "private_url": {
+            "description": "Private URL for accessing the draft in Typefully. Can be shared with team members without requiring public sharing.",
+            "examples": [
+              "https://typefully.com/?d=12345&a=67890"
+            ],
+            "title": "Private Url",
+            "type": "string"
+          },
+          "platforms": {
+            "$ref": "#/components/schemas/PlatformsResponse",
+            "description": "Platform configurations showing which platforms are enabled and their content"
+          },
+          "x_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on X (Twitter). Null if not published to X or URL not available.",
+            "examples": [
+              "https://x.com/username/status/1234567890"
+            ],
+            "title": "X Published Url"
+          },
+          "linkedin_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on LinkedIn. Null if not published to LinkedIn or URL not available.",
+            "examples": [
+              "https://www.linkedin.com/feed/update/urn:li:share:1234567890"
+            ],
+            "title": "Linkedin Published Url"
+          },
+          "mastodon_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Mastodon. Null if not published to Mastodon or URL not available.",
+            "examples": [
+              "https://mastodon.social/@username/1234567890"
+            ],
+            "title": "Mastodon Published Url"
+          },
+          "threads_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Threads. Null if not published to Threads or URL not available.",
+            "examples": [
+              "https://www.threads.net/@username/post/ABC123"
+            ],
+            "title": "Threads Published Url"
+          },
+          "bluesky_published_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the published post on Bluesky. Null if not published to Bluesky or URL not available.",
+            "examples": [
+              "https://bsky.app/profile/username.bsky.social/post/abc123"
+            ],
+            "title": "Bluesky Published Url"
+          },
+          "x_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to X  (ISO 8601 format in UTC). Null if not published to X.",
+            "examples": [
+              "2025-01-20T14:00:05Z"
+            ],
+            "title": "X Post Published At"
+          },
+          "linkedin_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to LinkedIn (ISO 8601 format in UTC). Null if not published to LinkedIn.",
+            "examples": [
+              "2025-01-20T14:00:08Z"
+            ],
+            "title": "Linkedin Post Published At"
+          },
+          "mastodon_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Mastodon (ISO 8601 format in UTC). Null if not published to Mastodon.",
+            "examples": [
+              "2025-01-20T14:00:10Z"
+            ],
+            "title": "Mastodon Post Published At"
+          },
+          "threads_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Threads (ISO 8601 format in UTC). Null if not published to Threads.",
+            "examples": [
+              "2025-01-20T14:00:12Z"
+            ],
+            "title": "Threads Post Published At"
+          },
+          "bluesky_post_published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timestamp when the post was published to Bluesky (ISO 8601 format in UTC). Null if not published to Bluesky.",
+            "examples": [
+              "2025-01-20T14:00:15Z"
+            ],
+            "title": "Bluesky Post Published At"
+          },
+          "scratchpad_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Plain text scratchpad notes for the draft. Formatting is stripped.",
+            "examples": [
+              "line 1\nline 2\n\nline 4"
+            ],
+            "title": "Scratchpad Text"
+          }
+        },
+        "required": [
+          "id",
+          "social_set_id",
+          "draft_id",
+          "status",
+          "created_at",
+          "preview",
+          "private_url",
+          "platforms"
+        ],
+        "title": "DraftDetailResponse",
+        "type": "object"
+      },
+      "EnabledBlueskyPlatformResponse": {
+        "additionalProperties": false,
+        "description": "Enabled Bluesky platform for responses (no validation limits)",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BlueskySettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bluesky-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledBlueskyPlatformResponse",
+        "type": "object"
+      },
+      "EnabledLinkedInPlatformResponse": {
+        "additionalProperties": false,
+        "description": "Enabled LinkedIn platform for responses (no validation limits)",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LinkedInSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "LinkedIn-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledLinkedInPlatformResponse",
+        "type": "object"
+      },
+      "EnabledMastodonPlatformResponse": {
+        "additionalProperties": false,
+        "description": "Enabled Mastodon platform for responses (no validation limits)",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MastodonSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mastodon-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledMastodonPlatformResponse",
+        "type": "object"
+      },
+      "EnabledThreadsPlatformResponse": {
+        "additionalProperties": false,
+        "description": "Enabled Threads platform for responses (no validation limits)",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThreadsSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Threads-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledThreadsPlatformResponse",
+        "type": "object"
+      },
+      "EnabledXPlatformResponse": {
+        "additionalProperties": false,
+        "description": "Enabled X platform for responses (no validation limits)",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/XSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledXPlatformResponse",
+        "type": "object"
+      },
+      "LinkedInSettings": {
+        "additionalProperties": false,
+        "description": "Settings specific to LinkedIn",
+        "properties": {},
+        "title": "LinkedInSettings",
+        "type": "object"
+      },
+      "MastodonSettings": {
+        "additionalProperties": false,
+        "description": "Settings specific to Mastodon",
+        "properties": {},
+        "title": "MastodonSettings",
+        "type": "object"
+      },
+      "PlatformsResponse": {
+        "additionalProperties": false,
+        "description": "Schema for platform configurations in responses (no validation limits)",
+        "properties": {
+          "x": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledXPlatformResponse"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X (Twitter) configuration",
+            "title": "X"
+          },
+          "linkedin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledLinkedInPlatformResponse"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "LinkedIn configuration",
+            "title": "Linkedin"
+          },
+          "mastodon": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledMastodonPlatformResponse"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mastodon configuration",
+            "title": "Mastodon"
+          },
+          "threads": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledThreadsPlatformResponse"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Threads configuration",
+            "title": "Threads"
+          },
+          "bluesky": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledBlueskyPlatformResponse"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bluesky configuration",
+            "title": "Bluesky"
+          }
+        },
+        "title": "PlatformsResponse",
+        "type": "object"
+      },
+      "Post": {
+        "additionalProperties": false,
+        "description": "Schema for individual post content",
+        "properties": {
+          "text": {
+            "description": "The text content of the post",
+            "examples": [
+              "Hello world! This is my first post.",
+              "Check out this amazing update! 🚀"
+            ],
+            "maxLength": 50000,
+            "title": "Text",
+            "type": "string"
+          },
+          "media_ids": {
+            "description": "List of media IDs to attach to the post. Obtain media IDs by uploading files via the media upload endpoint.",
+            "examples": [
+              [
+                "550e8400-e29b-41d4-a716-446655440000"
+              ],
+              [
+                "550e8400-e29b-41d4-a716-446655440000",
+                "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Media Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Post",
+        "type": "object"
+      },
+      "ThreadsSettings": {
+        "additionalProperties": false,
+        "description": "Settings specific to Threads",
+        "properties": {},
+        "title": "ThreadsSettings",
+        "type": "object"
+      },
+      "XSettings": {
+        "additionalProperties": false,
+        "description": "Settings specific to X (Twitter)",
+        "properties": {
+          "reply_to_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the X post to reply to. When provided, the first post in your thread will be posted as a reply.",
+            "examples": [
+              "https://x.com/therajatkapoor/status/1399394576951959554"
+            ],
+            "title": "Reply To Url"
+          },
+          "community_id": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID of the X community to post to. Find the ID in the community URL (e.g., x.com/i/communities/1493446837214187523). You must have permission to post to the community, otherwise publishing will fail.",
+            "title": "Community Id"
+          },
+          "share_with_followers": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When posting to a community, whether to also share the post to your timeline/followers. Defaults to true if not specified. Only has an effect when community_id is provided.",
+            "title": "Share With Followers"
+          }
+        },
+        "title": "XSettings",
+        "type": "object"
+      },
+      "DraftCreateRequest": {
+        "additionalProperties": false,
+        "description": "Request schema for creating a draft",
+        "properties": {
+          "platforms": {
+            "$ref": "#/components/schemas/Platforms",
+            "description": "Platform configurations for each social media platform"
+          },
+          "draft_title": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable title for the draft. This is for internal organization only and is not posted to social media.",
+            "examples": [
+              "Weekly Newsletter",
+              "Product Launch Announcement",
+              "Monday Motivation Post"
+            ],
+            "title": "Draft Title"
+          },
+          "scratchpad_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Plain text scratchpad notes for the draft. Formatting is stripped.",
+            "examples": [
+              "line 1\nline 2\n\nline 4"
+            ],
+            "title": "Scratchpad Text"
+          },
+          "tags": {
+            "description": "List of tag slugs (not names) associated with this draft. Use the /tags endpoint to get available tags with their slugs. Tags must already exist in the social set.",
+            "examples": [
+              [
+                "marketing",
+                "product"
+              ],
+              [
+                "newsletter"
+              ],
+              []
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Tags",
+            "type": "array"
+          },
+          "share": {
+            "default": false,
+            "description": "Whether to generate a public share URL for this draft. When true, anyone with the URL can view the draft content.",
+            "title": "Share",
+            "type": "boolean"
+          },
+          "publish_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "now",
+                  "next-free-slot"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When to publish the draft. Options: \"now\" to publish immediately, \"next-free-slot\" to schedule to your next available posting slot, or an ISO 8601 datetime string with timezone for a specific future time (e.g., '2025-01-20T14:00:00Z' for UTC or '2025-01-20T09:00:00-05:00' for EST). Timezone is required. Omit to save as a draft.",
+            "examples": [
+              "2025-12-20T09:00:00-05:00",
+              "now",
+              "next-free-slot"
+            ],
+            "title": "Publish At"
+          }
+        },
+        "required": [
+          "platforms"
+        ],
+        "title": "DraftCreateRequest",
+        "type": "object"
+      },
+      "EnabledBlueskyPlatform": {
+        "additionalProperties": false,
+        "description": "Enabled Bluesky platform with required data",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "maxItems": 25,
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BlueskySettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bluesky-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledBlueskyPlatform",
+        "type": "object"
+      },
+      "EnabledLinkedInPlatform": {
+        "additionalProperties": false,
+        "description": "Enabled LinkedIn platform with required data",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "maxItems": 25,
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LinkedInSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "LinkedIn-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledLinkedInPlatform",
+        "type": "object"
+      },
+      "EnabledMastodonPlatform": {
+        "additionalProperties": false,
+        "description": "Enabled Mastodon platform with required data",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "maxItems": 25,
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MastodonSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mastodon-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledMastodonPlatform",
+        "type": "object"
+      },
+      "EnabledThreadsPlatform": {
+        "additionalProperties": false,
+        "description": "Enabled Threads platform with required data",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "maxItems": 25,
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThreadsSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Threads-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledThreadsPlatform",
+        "type": "object"
+      },
+      "EnabledXPlatform": {
+        "additionalProperties": false,
+        "description": "Enabled X platform with required data",
+        "properties": {
+          "enabled": {
+            "const": true,
+            "enum": [
+              true
+            ],
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "posts": {
+            "description": "List of posts for this platform",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "maxItems": 25,
+            "title": "Posts",
+            "type": "array"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/XSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X-specific settings"
+          }
+        },
+        "required": [
+          "enabled",
+          "posts"
+        ],
+        "title": "EnabledXPlatform",
+        "type": "object"
+      },
+      "Platforms": {
+        "additionalProperties": false,
+        "description": "Schema for all platform configurations",
+        "properties": {
+          "x": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledXPlatform"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X (Twitter) configuration",
+            "title": "X"
+          },
+          "linkedin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledLinkedInPlatform"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "LinkedIn configuration",
+            "title": "Linkedin"
+          },
+          "mastodon": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledMastodonPlatform"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mastodon configuration",
+            "title": "Mastodon"
+          },
+          "threads": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledThreadsPlatform"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Threads configuration",
+            "title": "Threads"
+          },
+          "bluesky": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnabledBlueskyPlatform"
+              },
+              {
+                "$ref": "#/components/schemas/DisabledPlatform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bluesky configuration",
+            "title": "Bluesky"
+          }
+        },
+        "title": "Platforms",
+        "type": "object"
+      },
+      "DraftUpdateRequest": {
+        "additionalProperties": false,
+        "description": "Request schema for updating a draft (partial updates supported)",
+        "properties": {
+          "platforms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Platforms"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Platform configurations. Only provided platforms will be updated; omitted platforms remain unchanged."
+          },
+          "draft_title": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable title for the draft. This is for internal organization only and is not posted to social media. Omit to keep unchanged.",
+            "examples": [
+              "Weekly Newsletter",
+              "Product Launch Announcement"
+            ],
+            "title": "Draft Title"
+          },
+          "scratchpad_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Plain text scratchpad notes for the draft. Formatting is stripped. Omit to keep unchanged.",
+            "examples": [
+              "line 1\nline 2\n\nline 4"
+            ],
+            "title": "Scratchpad Text"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of tag slugs (not names) associated with this draft. Use the /tags endpoint to get available tags with their slugs. Tags must already exist in the social set. Omit to keep unchanged.",
+            "examples": [
+              [
+                "marketing",
+                "product"
+              ],
+              [
+                "newsletter"
+              ],
+              []
+            ],
+            "title": "Tags"
+          },
+          "share": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Whether to generate a public share URL. Omit to keep unchanged.",
+            "title": "Share"
+          },
+          "publish_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "now",
+                  "next-free-slot"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When to publish the draft. Options: \"now\" to publish immediately, \"next-free-slot\" to schedule to your next available posting slot, or an ISO 8601 datetime string with timezone for a specific future time (e.g., '2025-01-20T14:00:00Z' for UTC or '2025-01-20T09:00:00-05:00' for EST). Timezone is required. Omit to keep unchanged.",
+            "examples": [
+              "2025-12-20T09:00:00-05:00",
+              "now",
+              "next-free-slot"
+            ],
+            "title": "Publish At"
+          }
+        },
+        "title": "DraftUpdateRequest",
+        "type": "object"
+      },
+      "MediaUploadResponse": {
+        "description": "Schema for media upload response",
+        "properties": {
+          "media_id": {
+            "description": "Unique identifier for the uploaded media. Use this ID when attaching media to posts.",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "format": "uuid",
+            "title": "Media Id",
+            "type": "string"
+          },
+          "upload_url": {
+            "description": "Presigned S3 URL for uploading the file. PUT the file content to this URL within 1 hour. ",
+            "examples": [
+              "https://s3.amazonaws.com/bucket/path/file?signature=..."
+            ],
+            "title": "Upload Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "media_id",
+          "upload_url"
+        ],
+        "title": "MediaUploadResponse",
+        "type": "object"
+      },
+      "MediaUploadRequest": {
+        "description": "Schema for media upload request",
+        "properties": {
+          "file_name": {
+            "description": "Original filename with extension (e.g., 'image.jpg', 'video.mp4'). Used for MIME type detection and display. Allowed characters: letters, numbers, hyphens, underscores, periods, parentheses. Allowed extensions: .jpg, .jpeg, .png, .webp, .gif, .mp4, .mov, .pdf",
+            "examples": [
+              "profile-photo.jpg",
+              "demo-video.mp4",
+              "screenshot.png"
+            ],
+            "maxLength": 255,
+            "pattern": "(?i)^[a-zA-Z0-9_.()\\-]+\\.(jpg|jpeg|png|webp|gif|mp4|mov|pdf)$",
+            "title": "File Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_name"
+        ],
+        "title": "MediaUploadRequest",
+        "type": "object"
+      },
+      "MediaStatusResponse": {
+        "description": "Schema for media status response",
+        "properties": {
+          "media_id": {
+            "description": "Unique identifier for the media file",
+            "format": "uuid",
+            "title": "Media Id",
+            "type": "string"
+          },
+          "file_name": {
+            "description": "Original filename",
+            "examples": [
+              "photo.jpg"
+            ],
+            "title": "File Name",
+            "type": "string"
+          },
+          "mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "MIME type of the media file",
+            "examples": [
+              "image/jpeg",
+              "image/png",
+              "video/mp4",
+              "image/gif",
+              "application/pdf"
+            ],
+            "title": "Mime"
+          },
+          "status": {
+            "description": "Processing status: 'processing' = file is being processed, 'ready' = file is ready to use in posts, 'failed' = processing failed",
+            "enum": [
+              "processing",
+              "ready",
+              "failed"
+            ],
+            "examples": [
+              "ready",
+              "processing",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "error_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error message if status is 'failed'. Null otherwise.",
+            "examples": [
+              "Unsupported file format"
+            ],
+            "title": "Error Reason"
+          },
+          "media_urls": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dictionary of media URLs. For resizable images (PNG, JPG, WEBP): includes 'small' (600px), 'medium' (1200px), 'large' (3200px), and 'original'. For non-resizable media (GIF, video, PDF): includes only 'original'.",
+            "examples": [
+              {
+                "large": "https://cdn.../resized/...",
+                "medium": "https://cdn.../resized/...",
+                "original": "https://cdn.../original/...",
+                "small": "https://cdn.../resized/..."
+              }
+            ],
+            "title": "Media Urls"
+          }
+        },
+        "required": [
+          "media_id",
+          "file_name",
+          "status"
+        ],
+        "title": "MediaStatusResponse",
+        "type": "object"
+      },
+      "PagedTagResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/TagResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          }
+        },
+        "required": [
+          "results",
+          "count",
+          "limit",
+          "offset",
+          "next",
+          "previous"
+        ],
+        "title": "PagedTagResponse",
+        "type": "object"
+      },
+      "TagResponse": {
+        "description": "Response schema for tag data",
+        "properties": {
+          "slug": {
+            "description": "Auto-generated URL-safe identifier from the tag name",
+            "examples": [
+              "marketing",
+              "product-launch",
+              "weekly-updates"
+            ],
+            "title": "Slug",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the tag",
+            "examples": [
+              "Marketing",
+              "Product Launch",
+              "Weekly Updates"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "Timestamp when the tag was created (ISO 8601 format in UTC)",
+            "examples": [
+              "2025-01-15T10:30:00Z"
+            ],
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "created_at"
+        ],
+        "title": "TagResponse",
+        "type": "object"
+      },
+      "TagCreateRequest": {
+        "additionalProperties": false,
+        "description": "Request schema for creating a tag",
+        "examples": [
+          {
+            "name": "Marketing"
+          },
+          {
+            "name": "Product Launch"
+          },
+          {
+            "name": "Weekly Newsletter"
+          }
+        ],
+        "properties": {
+          "name": {
+            "description": "Display name for the tag. The slug will be auto-generated from this name.",
+            "examples": [
+              "Marketing",
+              "Product Launch",
+              "Weekly Updates"
+            ],
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TagCreateRequest",
+        "type": "object"
+      },
+      "WebhookEventPayload": {
+        "description": "Payload envelope sent to webhook endpoints.\n\nAll webhook events follow this structure, with the event type identifying\nthe specific event and data containing the full draft details.",
+        "properties": {
+          "event": {
+            "description": "The event type that triggered this webhook",
+            "enum": [
+              "draft.created",
+              "draft.scheduled",
+              "draft.published",
+              "draft.status_changed",
+              "draft.tags_changed",
+              "draft.deleted"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DraftDetailResponse",
+            "description": "The draft data at the time of the event. See DraftDetailResponse schema for full structure."
+          }
+        },
+        "required": [
+          "event",
+          "data"
+        ],
+        "title": "WebhookEventPayload",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "PublicAPIAuthentication": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.typefully.com",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Get details about the currently authenticated user."
+    },
+    {
+      "name": "Social Sets",
+      "description": "Get details about social sets that you have access to."
+    },
+    {
+      "name": "Drafts",
+      "description": "Get all your drafts and make changes to them."
+    },
+    {
+      "name": "Media",
+      "description": "Allows you to upload media to use in your drafts. Supported formats: jpg, jpeg, png, webp, gif, mp4, mov, pdf.\n\nThe flow for uploading media is three-fold:\n1. Get an upload URL\n2. Upload the media to the URL\n3. Verify that the media has completed processing\n\nFor example scripts in Python and Node.js, see: https://gist.github.com/rajatkapoor/e5be4497506f58b3546a35925db6a3a8"
+    },
+    {
+      "name": "Tags",
+      "description": "Get all your tags and or create new ones to easily organize your drafts."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Configure webhooks to receive real-time notifications when events occur in your account.\n\n## Webhook Events\n\nSubscribe to any combination of these events:\n\n| Event | Description |\n|-------|-------------|\n| `draft.created` | Triggered when a new draft is created |\n| `draft.scheduled` | Triggered when a draft is scheduled for publishing |\n| `draft.published` | Triggered when a draft is successfully published |\n| `draft.status_changed` | Triggered on any status transition (includes scheduled/published) |\n| `draft.tags_changed` | Triggered when draft tags are modified |\n| `draft.deleted` | Triggered when a draft is deleted |\n\n## Payload Structure\n\nAll webhooks send a JSON payload with two fields:\n- `event`: The event type (e.g., \"draft.created\")\n- `data`: The full draft details (see DraftDetailResponse schema)\n\n## HTTP Headers\n\nEach webhook request includes these headers:\n- `X-Typefully-Event`: The event type (e.g., \"draft.published\")\n- `X-Typefully-Timestamp`: Unix timestamp when the event was generated\n- `X-Typefully-Signature`: HMAC-SHA256 signature for verification (format: `sha256=<hex>`)\n\n## Signature Verification\n\nTo verify webhook authenticity, compute the expected signature and compare:\n\n```python\nimport hmac\nimport hashlib\n\ndef verify_signature(payload_body: bytes, timestamp: str, signature: str, webhook_secret: str) -> bool:\n    # Construct the signed payload\n    signature_payload = f\"{timestamp}.{payload_body.decode('utf-8')}\"\n\n    # Compute expected signature\n    expected = hmac.new(\n        webhook_secret.encode(),\n        signature_payload.encode(),\n        hashlib.sha256\n    ).hexdigest()\n\n    # Compare using constant-time comparison to prevent timing attacks\n    expected_sig = f\"sha256={expected}\"\n    return hmac.compare_digest(expected_sig, signature)\n```\n\n**Important notes:**\n- The JSON payload uses compact separators (no spaces after `:` or `,`) and sorted keys\n- Always use constant-time comparison to prevent timing attacks\n- Verify the timestamp is recent to prevent replay attacks\n\n## Retry Behavior\n\nFailed webhook deliveries are retried with exponential backoff up to 4 times (5 attempts total) over a 1 hour window.\n\nYour endpoint should return any 2xx status code to acknowledge receipt. Non-2xx responses trigger retries.\n\n## Auto-Disable\n\nWebhooks are automatically disabled after **100 consecutive failures**. You'll receive an email notification when this happens. Re-enable from your API settings after fixing the endpoint issue."
+    }
+  ],
+  "webhooks": {
+    "draft.created": {
+      "post": {
+        "summary": "Draft Created",
+        "description": "Triggered when a new draft is created in a social set you have access to.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.created",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    },
+    "draft.scheduled": {
+      "post": {
+        "summary": "Draft Scheduled",
+        "description": "Triggered when a draft is scheduled for publishing.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.scheduled",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    },
+    "draft.published": {
+      "post": {
+        "summary": "Draft Published",
+        "description": "Triggered when a draft is successfully published to one or more platforms.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.published",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    },
+    "draft.status_changed": {
+      "post": {
+        "summary": "Draft Status Changed",
+        "description": "Triggered on any status transition. This event fires alongside specific events like draft.scheduled or draft.published.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.status_changed",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    },
+    "draft.tags_changed": {
+      "post": {
+        "summary": "Draft Tags Changed",
+        "description": "Triggered when tags are added to or removed from a draft.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.tags_changed",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    },
+    "draft.deleted": {
+      "post": {
+        "summary": "Draft Deleted",
+        "description": "Triggered when a draft is deleted. The payload contains the draft data as it was before deletion.",
+        "tags": [
+          "Webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Payload envelope sent to webhook endpoints.",
+                "required": [
+                  "event",
+                  "data"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "const": "draft.deleted",
+                    "description": "The event type that triggered this webhook"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DraftDetailResponse",
+                    "description": "The draft data at the time of the event."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt"
+          }
+        }
+      }
+    }
+  }
+}

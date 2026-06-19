@@ -1,4 +1,4 @@
-# 🧠 Liquipedia Matches – Raycast Extension
+# Liquipedia Matches
 
 Get live and upcoming **Counter-Strike 2 (CS2)** matches directly from [Liquipedia.net](https://liquipedia.net) – right in Raycast.
 

@@ -1,0 +1,117 @@
+query getViewerStats($repositoriesCount: Int = 100) {
+  viewer {
+    ...UserFields
+    bio
+    company
+    location
+    url
+    websiteUrl
+    createdAt
+    followers {
+      totalCount
+    }
+    following {
+      totalCount
+    }
+    starredRepositories {
+      totalCount
+    }
+    pullRequestsAuthored: pullRequests {
+      totalCount
+    }
+    pullRequestsMerged: pullRequests(states: [MERGED]) {
+      totalCount
+    }
+    pullRequestsOpen: pullRequests(states: [OPEN]) {
+      totalCount
+    }
+    issuesAuthored: issues {
+      totalCount
+    }
+    issuesOpen: issues(states: [OPEN]) {
+      totalCount
+    }
+    recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        state
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentOpenPullRequests: pullRequests(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentIssues: issues(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        state
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentOpenIssues: issues(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    contributionsCollection {
+      totalCommitContributions
+    }
+    publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+      totalCount
+    }
+    ownedRepositories: repositories(
+      first: $repositoriesCount
+      ownerAffiliations: OWNER
+      orderBy: { field: STARGAZERS, direction: DESC }
+    ) {
+      totalCount
+      nodes {
+        id
+        nameWithOwner
+        url
+        stargazerCount
+        forkCount
+      }
+    }
+    organizations(first: 20) {
+      totalCount
+      nodes {
+        id
+        login
+        name
+        avatarUrl
+        url
+      }
+    }
+  }
+  rateLimit {
+    remaining
+    limit
+    used
+    resetAt
+  }
+}

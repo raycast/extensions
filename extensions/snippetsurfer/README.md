@@ -11,6 +11,7 @@ After installing this extension, go to its settings and select a *Primary Snippe
 After selecting the folder, you can create your snippets by creating one or more Markdown or YAML files, each containing a collection of snippets.
 
 Please note: SnippetSurfer does not support creating snippets directly in Raycast. Use your preferred editor to create snippets instead.
+
 ### Features
 
 - Raycast extension for quick navigation of text excerpts and code snippets.
@@ -19,10 +20,11 @@ Please note: SnippetSurfer does not support creating snippets directly in Raycas
     - For markdown files, YAML Metadata support enables addition of titles and descriptions to snippets for better organization.
 - Streamlines personal workflows by automatically copying code snippets to the clipboard.
 - Automatically copies only the content inside code snippets for code snippets.
+- Option to copy or paste only the first code block from a snippet instead of the entire content, so you can include additional notes outside the code block.
 
 ### Example of Markdown File
 
-```md
+````md
 ---
 Title: Git init
 Description: |
@@ -33,8 +35,8 @@ Tags:
 ---
 ```shell
 git init
-    ```
 ```
+````
 
 ### Example of YAML File
 

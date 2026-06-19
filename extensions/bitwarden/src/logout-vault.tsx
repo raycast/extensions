@@ -1,7 +1,6 @@
 import { Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { Bitwarden } from "~/api/bitwarden";
-import { SessionStorage } from "~/context/session/utils";
-import { Cache } from "~/utils/cache";
+import { cleanupPostLogout } from "~/context/session";
 import { NotLoggedInError } from "~/utils/errors";
 
 async function logoutVaultCommand() {
@@ -30,8 +29,7 @@ async function logoutVaultCommand() {
   }
 
   try {
-    await SessionStorage.logoutClearSession();
-    Cache.clear();
+    await cleanupPostLogout();
     await showToast(Toast.Style.Success, "Successfully logged out");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to logout from vault");

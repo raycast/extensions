@@ -1,8 +1,7 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
-import { generateMeme } from "../api";
-import { ImgflipCaptionImageBox } from "../api/types";
-import { Meme } from "../types";
+import { ImgflipCaptionImageBox } from "../api/imgflip/types";
+import { ApiModule, Meme } from "../api/types";
 import MemePreview from "./MemePreview";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 
@@ -11,7 +10,11 @@ interface FormValues {
   [text: string]: string;
 }
 
-export default function MemeForm({ id, title, boxCount }: Meme) {
+interface MemeFormProps extends Meme {
+  apiModule: ApiModule;
+}
+
+export default function MemeForm({ id, title, boxCount, apiModule }: MemeFormProps) {
   const [textBoxError, setTextBoxError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
@@ -31,7 +34,8 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
 
     setIsLoading(true);
 
-    generateMeme({ id, boxes })
+    apiModule
+      .generateMeme({ id, boxes })
       .then(async (results) => {
         if (preview) {
           push(<MemePreview title={title} url={results.url} />);
@@ -43,11 +47,11 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
         }
       })
       .catch(async (error) => {
-        await generatingToast.hide();
         showToast(Toast.Style.Failure, "Something went wrong", error.message);
       })
       .finally(async () => {
         setIsLoading(false);
+        await generatingToast.hide();
       });
   }
 

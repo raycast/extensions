@@ -1,129 +1,120 @@
-import { Action, ActionPanel, Detail, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useCallback, useMemo, useState } from "react";
 import { useSearch } from "./hooks/useSearch";
-import { useState } from "react";
 import { VolumeItem } from "./types/google-books.dt";
-
-const iconToEmojiMap = new Map<number, string>([
-  [0, "📘"],
-  [1, "📕"],
-  [2, "📗"],
-  [3, "📓"],
-  [4, "📔"],
-  [5, "📙"],
-]);
-
-function getIcon(index: number) {
-  return iconToEmojiMap.get(index % 5);
-}
-
-function getAccessoryTitle(item: VolumeItem) {
-  return (
-    (item?.volumeInfo?.averageRating ? "  ⭐  " + item.volumeInfo.averageRating + "/5" : "  ⭐  N/A") +
-    (item.volumeInfo?.pageCount ? "  📄  " + item.volumeInfo.pageCount : "  📄  N/A")
-  );
-}
-
-function convertInfoToMarkdown(item: VolumeItem) {
-  return (
-    "# " +
-    item.volumeInfo?.title +
-    "\n\n*" +
-    (item.volumeInfo?.authors ? item.volumeInfo?.authors?.join(", ") : "") +
-    "*\n\n ![thumbnail](" +
-    (item.volumeInfo?.imageLinks?.thumbnail ? item.volumeInfo?.imageLinks?.thumbnail.replace("http", "https") : "") +
-    ") \n\n**" +
-    (item.volumeInfo?.subtitle ? item.volumeInfo?.subtitle : "") +
-    "**\n\n" +
-    // Chunk long text into paragraphs
-    (item.volumeInfo?.description ? item.volumeInfo?.description?.replace(/(.*?\. ){3}/g, "$&\n\n") : "")
-  );
-}
-
-function getMaskedImage(item: VolumeItem | undefined, catIndex: number) {
-  return item?.volumeInfo?.imageLinks?.thumbnail
-    ? {
-        source: item.volumeInfo.imageLinks.thumbnail.replace("http", "https"),
-        mask: Image.Mask.RoundedRectangle,
-      }
-    : getIcon(catIndex);
-}
-
-function BookDetail({ item }: { item: VolumeItem }) {
-  return (
-    <Detail
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
-          <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.volumeInfo.infoLink} />
-        </ActionPanel>
-      }
-      navigationTitle={item.volumeInfo.title}
-      markdown={convertInfoToMarkdown(item)}
-    />
-  );
-}
+import { bookCount } from "./utils/books";
+import { BookListItem } from "./views/BookListItem";
+import { BookGrid } from "./views/BookGrid";
+import type { ViewMode } from "./views/BookGrid";
 
 export default function SearchGoogleBooks() {
-  const [searchText, setSearchText] = useState<string>();
-  const { items, loading } = useSearch(searchText);
-  const [filter, setFilter] = useState("");
+  const [showDetail, setShowDetail] = useCachedState("show-detail", true);
+  const [viewMode, setViewMode] = useCachedState<ViewMode>("view-mode", "list");
+  const [searchText, setSearchText] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+  const { items, loading, clearCache } = useSearch(searchText);
 
-  const categorisedItems =
-    items.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
-      const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(item);
-      return acc;
-    }, {}) ?? {};
+  const toggleDetail = useCallback(() => {
+    setShowDetail((prev) => !prev);
+  }, [setShowDetail]);
+
+  const handleSearchTextChange = useCallback(
+    (text: string) => {
+      setSearchText(text);
+    },
+    [setSearchText],
+  );
+
+  const handleClearSearch = useCallback(() => {
+    setSearchText("");
+    setActiveFilter("");
+    clearCache();
+    setViewMode("list");
+  }, [setSearchText, setActiveFilter, clearCache, setViewMode]);
+
+  const categorizedItems = useMemo(
+    () =>
+      items.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
+        const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(item);
+        return acc;
+      }, {}),
+    [items],
+  );
+
+  const filteredCategorizedItems = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(categorizedItems).filter(([category]) => !activeFilter || category === activeFilter),
+      ),
+    [categorizedItems, activeFilter],
+  );
+
+  const totalCount = items.length;
+
+  if (viewMode === "categorized-grid" || viewMode === "grid") {
+    return (
+      <BookGrid
+        categorizedItems={categorizedItems}
+        filteredCategorizedItems={filteredCategorizedItems}
+        totalCount={totalCount}
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+        isLoading={loading}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onClearSearch={handleClearSearch}
+        categorized={viewMode === "categorized-grid"}
+        searchText={searchText}
+        onSearchTextChange={handleSearchTextChange}
+      />
+    );
+  }
 
   return (
     <List
       throttle
+      isShowingDetail={showDetail}
       searchBarPlaceholder="Search Google Books by keywords..."
       navigationTitle="Search Google Books"
       isLoading={loading}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
+      searchText={searchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Category" onChange={setFilter}>
-          <List.Dropdown.Item title="All" value="" />
-          {Object.keys(categorisedItems).map((category) => (
-            <List.Dropdown.Item key={category} title={category} value={category} />
-          ))}
+        <List.Dropdown tooltip="Category" value={activeFilter} onChange={setActiveFilter}>
+          <List.Dropdown.Item title={`All (${totalCount})`} value="" />
+          {Object.keys(categorizedItems)
+            .sort((a, b) => a.localeCompare(b))
+            .map((category) => (
+              <List.Dropdown.Item
+                key={category}
+                title={`${category} (${categorizedItems[category].length})`}
+                value={category}
+              />
+            ))}
         </List.Dropdown>
       }
     >
-      {Object.keys(categorisedItems)
-        .filter((category) => !filter || category === filter)
-        .map((category, catIndex) => (
-          <List.Section
-            key={category}
-            title={category}
-            subtitle={`📚 Total Books: ${categorisedItems[category].length}`}
-          >
-            {categorisedItems[category].map((item) => (
-              <List.Item
-                key={item.id}
-                icon={getMaskedImage(item, catIndex)}
-                title={item.volumeInfo.title}
-                subtitle={item.volumeInfo?.authors ? item.volumeInfo.authors[0] : "Various Authors"}
-                accessories={[{ text: getAccessoryTitle(item) }]}
-                actions={
-                  <ActionPanel>
-                    <Action.Push icon={Icon.List} title="Show Book Details" target={<BookDetail item={item} />} />
-                    <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
-                    <Action.CopyToClipboard
-                      shortcut={Keyboard.Shortcut.Common.Copy}
-                      title="Copy URL to Clipboard"
-                      content={item.volumeInfo.infoLink}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        ))}
+      <List.EmptyView icon={Icon.Book} title="Search Google Books" description="Type a query to find books" />
+      {Object.keys(filteredCategorizedItems).map((category) => (
+        <List.Section key={category} title={category} subtitle={bookCount(filteredCategorizedItems[category].length)}>
+          {filteredCategorizedItems[category].map((item) => (
+            <BookListItem
+              key={item.id}
+              item={item}
+              showDetail={showDetail}
+              toggleDetail={toggleDetail}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onClearSearch={handleClearSearch}
+            />
+          ))}
+        </List.Section>
+      ))}
     </List>
   );
 }

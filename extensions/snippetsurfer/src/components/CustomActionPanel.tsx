@@ -8,25 +8,33 @@ const CustomActionPanel = ({
   handleAction,
   snippet,
   primaryAction,
+  pasteContentScope,
   reloadSnippets,
   paths,
 }: {
   handleAction: (s: Snippet) => void;
   snippet: Snippet;
   primaryAction: string;
+  pasteContentScope: string;
   reloadSnippets: () => void;
   paths: string[];
 }) => {
+  const useFirstCodeBlock = pasteContentScope === "pasteScopeFirstCodeBlock";
+  const pasteContent =
+    useFirstCodeBlock && snippet.content?.firstCodeBlock
+      ? snippet.content.firstCodeBlock
+      : getPastableContent(snippet.content?.content);
+
   const actions = [
     <Action.CopyToClipboard
-      content={getPastableContent(snippet.content?.content)}
+      content={pasteContent}
       key="copy"
       onCopy={() => {
         handleAction(snippet);
       }}
     />,
     <Action.Paste
-      content={getPastableContent(snippet.content?.content)}
+      content={pasteContent}
       key="paste"
       onPaste={() => {
         handleAction(snippet);

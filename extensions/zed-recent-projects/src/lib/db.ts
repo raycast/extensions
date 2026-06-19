@@ -24,9 +24,15 @@ export function getZedDbName(build: ZedBuild): string {
   return ZedDbNameMapping[build];
 }
 
-// Current migration step for Zed Stable as of 2025-09-09
-export const DEFAULT_WORKSPACE_DB_VERSION = 28;
+/**
+ * Minimum supported WorkspaceDb schema version.
+ * v34 uses remote_connections table with name/container_id fields and paths_order field.
+ */
+export const MIN_SUPPORTED_DB_VERSION = 34;
 
+/**
+ * Query the Zed SQLite database.
+ */
 export async function queryDb(dbPath: string, query: string): Promise<string> {
   try {
     if (isWindows) {
@@ -64,28 +70,29 @@ export async function queryDb(dbPath: string, query: string): Promise<string> {
   }
 }
 
-export async function getZedWorkspaceDbVersion(
-  dbPath: string,
-  defaultDbVersion: number = DEFAULT_WORKSPACE_DB_VERSION,
-): Promise<{ version: number; supported: boolean }> {
+/**
+ * Get the Zed workspace database schema version.
+ * Returns the version number and whether it's supported by this extension.
+ */
+export async function getZedWorkspaceDbVersion(dbPath: string): Promise<{ version: number; supported: boolean }> {
   try {
     const result = await queryDb(dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';");
     const version = parseInt(result.trim(), 10);
 
     if (isNaN(version)) {
       console.error(`Error parsing Zed workspace DB version: ${result}`);
-      return {
-        version: 0,
-        supported: false,
-      };
+      return { version: 0, supported: false };
     }
 
-    return { version, supported: true };
+    return {
+      version,
+      supported: version >= MIN_SUPPORTED_DB_VERSION,
+    };
   } catch (error) {
     // Zed DB might be temporarily locked during write operation
     if (String(error).includes("Error: in prepare, database is locked")) {
-      console.warn("DB is locked, fallback to default version");
-      return { version: defaultDbVersion, supported: true };
+      console.warn("DB is locked, assuming supported version");
+      return { version: MIN_SUPPORTED_DB_VERSION, supported: true };
     }
 
     console.error(`Error getting Zed workspace DB version: ${error}`);
@@ -93,62 +100,39 @@ export async function getZedWorkspaceDbVersion(
   }
 }
 
+/**
+ * Get the appropriate SQL query for fetching workspaces based on schema version.
+ * This allows for future schema changes while maintaining backward compatibility.
+ */
 export function getZedWorkspacesQuery(dbVersion: number): string {
-  if (dbVersion <= 24) {
-    return ZED_WORKSPACES_QUERY_24;
-  } else if (dbVersion <= 26) {
-    return ZED_WORKSPACES_QUERY_26;
-  } else {
-    return ZED_WORKSPACES_QUERY_28;
+  // For now, we only support v34+
+  // Future schema changes can add new queries here
+  if (dbVersion >= MIN_SUPPORTED_DB_VERSION) {
+    return ZED_WORKSPACES_QUERY;
   }
+
+  // Unsupported version - return the latest query anyway
+  // The caller should check version support before calling this
+  console.warn(`Unsupported DB version ${dbVersion}, using latest query`);
+  return ZED_WORKSPACES_QUERY;
 }
 
-// Schema version 24 and below uses ssh_projects table and separate local_paths field
-export const ZED_WORKSPACES_QUERY_24 = `SELECT
-  CASE
-    WHEN local_paths IS NOT NULL THEN 'local'
-    ELSE 'remote'
-  END as type,
-  workspace_id as id,
-  local_paths,
-  paths,
-  timestamp,
-  host,
-  user,
-  port
-FROM workspaces
-LEFT JOIN ssh_projects ON ssh_project_id = ssh_projects.id
-WHERE (local_paths IS NOT NULL AND paths IS NULL)
-   OR (local_paths IS NULL AND paths IS NOT NULL)
-ORDER BY timestamp DESC`;
-
-// Schema version 26-27 uses ssh_connections table and unified paths field
-export const ZED_WORKSPACES_QUERY_26 = `SELECT
-  CASE
-    WHEN ssh_connection_id IS NULL THEN 'local'
-    ELSE 'remote'
-  END as type,
-  workspace_id as id,
-  paths,
-  timestamp,
-  window_id,
-  session_id,
-  host,
-  user,
-  port
-FROM workspaces
-LEFT JOIN ssh_connections ON ssh_connection_id = ssh_connections.id
-WHERE paths IS NOT NULL AND paths != ''
-ORDER BY timestamp DESC`;
-
-// Schema version 28+ uses remote_connections table instead of ssh_connections
-export const ZED_WORKSPACES_QUERY_28 = `SELECT
+/**
+ * SQL query to fetch workspaces from Zed DB (v34+).
+ *
+ * Schema uses remote_connections table for SSH/WSL/container connections.
+ * Paths are stored as newline-separated strings with paths_order for ordering.
+ *
+ * See docs/zed-db.md for full schema documentation.
+ */
+export const ZED_WORKSPACES_QUERY = `SELECT
   CASE
     WHEN remote_connection_id IS NULL THEN 'local'
     ELSE 'remote'
   END as type,
   workspace_id as id,
   paths,
+  paths_order,
   timestamp,
   window_id,
   session_id,
@@ -156,7 +140,8 @@ export const ZED_WORKSPACES_QUERY_28 = `SELECT
   user,
   port,
   kind,
-  distro
+  distro,
+  name
 FROM workspaces
 LEFT JOIN remote_connections ON remote_connection_id = remote_connections.id
 WHERE paths IS NOT NULL AND paths != ''

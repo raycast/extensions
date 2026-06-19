@@ -6,6 +6,7 @@ Raycast version of <https://search.nixos.org>
 
 - Search NixOS packages directly from Raycast
 - View package details including description, version, homepage, and licenses
+- Open package details on search.nixos.org, homepage, and source code
 - Copy package attribute names, URLs, and source code links
 - **Support for multiple NixOS branches** - switch between different NixOS versions
 - In-app branch switcher with validation
@@ -32,7 +33,7 @@ The extension features a **branch selector** directly in the search interface. A
 The dropdown includes:
 
 - **Unstable** (rolling release) - Latest bleeding edge packages
-- **NixOS 25.05** - Current stable release
+- **NixOS 25.11** - Current stable release
 
 Simply select your preferred branch from the dropdown in the search bar to switch between different NixOS versions.
 

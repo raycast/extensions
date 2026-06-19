@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.raycast/
+.npm-cache/
+.claude/
+.entire/
+.DS_Store
+*.log

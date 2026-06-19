@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "v2box-control",
+  "version": "1.0.0",
+  "title": "V2BOX VPN",
+  "description": "Connect, disconnect, and check the status of your V2BOX VPN connection.",
+  "icon": "v2box-store-icon.png",
+  "author": "vanish2000",
+  "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "v2box",
+    "vpn",
+    "network",
+    "network extension"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "serviceName",
+      "title": "VPN Service Name",
+      "description": "Exact macOS network service name from scutil --nc list.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "V2BOX",
+      "default": "V2BOX"
+    }
+  ],
+  "commands": [
+    {
+      "name": "on-vpn",
+      "title": "Connect V2BOX",
+      "subtitle": "V2BOX VPN",
+      "description": "Connect to the configured VPN service",
+      "mode": "no-view",
+      "keywords": [
+        "connect",
+        "start",
+        "enable",
+        "vpn",
+        "v2box"
+      ]
+    },
+    {
+      "name": "off-vpn",
+      "title": "Disconnect V2BOX",
+      "subtitle": "V2BOX VPN",
+      "description": "Disconnect from the configured VPN service",
+      "mode": "no-view",
+      "keywords": [
+        "disconnect",
+        "stop",
+        "disable",
+        "vpn",
+        "v2box"
+      ]
+    },
+    {
+      "name": "status",
+      "title": "V2BOX Status",
+      "subtitle": "V2BOX VPN",
+      "description": "Check the configured VPN service status",
+      "mode": "no-view",
+      "keywords": [
+        "state",
+        "check",
+        "vpn",
+        "v2box"
+      ]
+    },
+    {
+      "name": "toggle-vpn",
+      "title": "Toggle V2BOX",
+      "subtitle": "V2BOX VPN",
+      "description": "Toggle the configured VPN service",
+      "mode": "no-view",
+      "keywords": [
+        "toggle",
+        "switch",
+        "vpn",
+        "v2box"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "^25.5.0",
+    "eslint": "9.39.3",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  }
+}

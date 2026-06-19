@@ -19,7 +19,7 @@ export const EpisodeGrid = ({
   seasonNumber: number;
   slug?: string;
 }) => {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const traktClient = initTraktClient();
   const [actionLoading, setActionLoading] = useState(false);
   const { isLoading, data: episodes } = useCachedPromise(

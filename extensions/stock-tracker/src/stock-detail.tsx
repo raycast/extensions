@@ -19,7 +19,7 @@ export function StockDetail({ quote }: { quote: Quote | undefined }) {
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label title="Exchange" text={quote.fullExchangeName} />
-          <List.Item.Detail.Metadata.Label title="Market State" text={marketStates[quote.marketState ?? "UNKNOWN"]} />
+          <List.Item.Detail.Metadata.Label title="Market State" text={marketStateLabel(quote.marketState)} />
 
           <List.Item.Detail.Metadata.Separator />
 
@@ -36,17 +36,26 @@ export function StockDetail({ quote }: { quote: Quote | undefined }) {
               priceInfo.changePercent ? ` (${priceInfo.changePercent.toFixed(2)}%)` : ""
             }`}
           />
-          <List.Item.Detail.Metadata.Label title="Market Cap" text={formatMoney(quote.marketCap, quote.currency)} />
+          <List.Item.Detail.Metadata.Label
+            title="Market Cap"
+            text={formatMoney(quote.marketCap, quote.currency, true)}
+          />
         </List.Item.Detail.Metadata>
       }
     />
   );
 }
 
-const marketStates = {
+const marketStateLabels: Record<NonNullable<Quote["marketState"]>, string> = {
   PRE: "Pre-market",
+  PREPRE: "Pre-market",
   REGULAR: "Open",
   POST: "Post-market",
+  POSTPOST: "Post-market",
   CLOSED: "Closed",
-  UNKNOWN: "Unknown",
 };
+
+function marketStateLabel(state: Quote["marketState"]): string {
+  if (!state) return "Unknown";
+  return marketStateLabels[state] ?? state;
+}

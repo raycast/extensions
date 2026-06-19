@@ -1,5 +1,27 @@
 # Quick Git Changelog
 
+## [Bug fixes] - 2026-06-15
+
+Fixes a bug to do with certain forms not submitting correctly
+
+## [Submodule Selection] - 2026-04-18
+
+Added functionality to view and select submodules in a repo
+
+- View a list of submodules in a repo
+- Select a submodule as your working repo from the Git Status list
+- Open submodules remote repo
+- Include the repo name in the navigation title when you are in a repo.
+- Fix some bugs and cleanup some code
+
+## [Working with worktrees] - 2026-02-12
+
+Added support for navigating and managing worktrees.
+
+- Create, delete and change to a worktree
+- Better support for identifying submodules
+- Updated shortcuts to support Windows
+
 ## [Smoother repo selection] - 2025-08-18
 
 Updated how repos are selected so that it is quicker to change between them.

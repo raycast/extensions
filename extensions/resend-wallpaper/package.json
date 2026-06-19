@@ -5,6 +5,9 @@
   "description": "Get and set Resend official wallpapers.",
   "icon": "resend-icon.png",
   "author": "jopcmelo",
+  "contributors": [
+    "alexi.build"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -225,5 +228,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Chore] - 2025-01-14

@@ -6,6 +6,7 @@ import FirewallRulesView from "./FirewallRulesView";
 import { NetworkService } from "./NetworkService";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface NetworkViewProps {
   projectId: string;
@@ -27,10 +28,11 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Error validating network access:", error);
+          const friendly = friendlyErrorMessage(error, "Network Service Error");
           showToast({
             style: Toast.Style.Failure,
-            title: "Network Service Error",
-            message: error instanceof Error ? error.message : "Unknown error",
+            title: friendly.title,
+            message: friendly.message,
           });
         }
       } finally {
@@ -92,7 +94,7 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
           actions={
             <ActionPanel>
               <Action
-                title="Open Ip Addresses"
+                title="Open IP Addresses"
                 icon={Icon.Globe}
                 onAction={() => {
                   push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);

@@ -1,5 +1,9 @@
+export interface TerminalOpenOptions {
+  ghosttyOpenBehavior?: "window" | "tab";
+}
+
 export interface TerminalAdapter {
   name: string;
   bundleId: string;
-  open(directory: string): Promise<void>;
+  open(directory: string, options?: TerminalOpenOptions): Promise<void>;
 }

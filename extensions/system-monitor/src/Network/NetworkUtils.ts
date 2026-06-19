@@ -1,4 +1,4 @@
-import { execp } from "../utils";
+import { execf } from "../utils";
 
 export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => {
   const nettopOptions = [
@@ -20,7 +20,7 @@ export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => 
     "W",
     "arch",
   ];
-  const output = await execp(`/usr/bin/nettop -P -L 1 -k ${nettopOptions.join()}`);
+  const output = await execf("/usr/bin/nettop", ["-P", "-L", "1", "-k", nettopOptions.join()]);
   const processList: string[] = output.split("\n").slice(1);
   const modProcessList: string[][] = [];
   const processDict: { [key: string]: number[] } = {};

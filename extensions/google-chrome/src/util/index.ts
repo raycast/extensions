@@ -10,7 +10,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
 
-type ChromeFile = "History" | "Bookmarks";
+type ChromeFile = "History" | "Bookmarks" | "AccountBookmarks";
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
@@ -40,6 +40,7 @@ export const getHistoryDbPath = (profile?: string) => getChromeFilePath("History
 export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultChromeStatePath);
 
 const getBookmarksFilePath = (profile?: string) => getChromeFilePath("Bookmarks", profile);
+const getAccountBookmarksFilePath = (profile?: string) => getChromeFilePath("AccountBookmarks", profile);
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
@@ -70,6 +71,19 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 };
 
 export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+  const accountBookmarksFilePath = getAccountBookmarksFilePath(profile);
+  if (fs.existsSync(accountBookmarksFilePath)) {
+    try {
+      const fileBuffer = await fs.promises.readFile(accountBookmarksFilePath, { encoding: "utf-8" });
+      const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
+      if (bookmarks.length > 0) {
+        return bookmarks;
+      }
+    } catch {
+      // Fall back to the legacy Bookmarks file below.
+    }
+  }
+
   const bookmarksFilePath = getBookmarksFilePath(profile);
   if (!fs.existsSync(bookmarksFilePath)) {
     throw new Error(NO_BOOKMARKS_MESSAGE);

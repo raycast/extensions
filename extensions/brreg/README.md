@@ -1,98 +1,90 @@
-# Brreg (Norwegian Company Register) Raycast Extension
+# Brreg Search
 
-Search and retrieve information about Norwegian companies (Enhetsregisteret) directly from the Raycast command bar. The extension uses the official [Brønnøysund Register Center (Brreg)](https://www.brreg.no) API to find companies by name or organisation number.
+Search Norwegian companies from the Central Coordinating Register for Legal Entities (Enhetsregisteret). Find companies by name or organisation number, view details, and keep favourites close at hand.
 
 ![Extension screenshot](metadata/brreg-2.png)
 
-## Features
+## What It Does
 
-- **Search & Retrieval**
-  - Search by company name or 9-digit organisation number
-  - Partial numeric search with full-text fallback
-  - Copy organisation number or address with single actions
-  - Open companies directly in Brønnøysund Register website
+Search for Norwegian companies directly from Raycast. View company details, financial information, and locations. Save favourites for quick access. All data comes from the official [Brønnøysund Register Centre (Brreg)](https://www.brreg.no) API.
 
-- **Favorites Management**
-  - Save companies to a persistent local favorites list
-  - Customize with emojis from predefined categories or custom options
-  - Reorder favorites to organize them in preferred order
-  - Automatic favicon detection for company websites
-  - Favorites appear above search results and are hidden while typing
+The extension intentionally ships as a single command: `Brreg Search`.
 
-- **Company Details View**
-  - **Overview Tab**: Company description, contact information, key KPIs, employee count, and basic business details
-  - **Financials Tab**: Revenue, EBITDA, operating result, net result, total assets, equity, total debt, and depreciation
-  - **Map Tab**: Company location visualization using OpenStreetMap tiles with Google Maps directions
+## Quick Start
 
-- **Business Intelligence**
-  - VAT and audit status indicators
-  - Industry classification with NACE codes
-  - Financial history across multiple years
-  - Last filing date tracking
-  - Employee count and company size information
+Type a company name or 9-digit organisation number in the search bar.
 
-- **User Experience**
-  - Welcome messages for new users
-  - Comprehensive keyboard shortcuts guide
-  - Interactive tab navigation
-  - Proff.no integration for additional business information
+**Examples:**
 
-## Favorites
+- `Equinor` — search by name
+- `916880286` — search by organisation number (exactly 9 digits)
+- `DNB` — partial name search
 
-Favorites provide quick access to your most-used companies. They appear above search results and are stored locally on your device.
+## Search Rules
 
-### Managing Favorites
-- **Add/Remove**: Use `⌘F` to add a company to favorites, `⌘⇧F` to remove it. Works from both search results and detailed company view.
-- **Customize with Emojis**: Choose from predefined categories (⭐ Star, 🏦 Bank, 📈 Growth, 🧪 Test, 🛍️ Retail, 🧑‍💻 Tech, 🏗️ Construction, 🏥 Health, 🍽️ Food, ⚙️ Industry) or set custom emojis.
-- **Reorder**: Move favorites up and down using `⌘⇧↑` and `⌘⇧↓` to organize them in your preferred order.
-- **Automatic Favicon Detection**: Company website favicons are automatically detected and displayed for visual identification.
-- **Refresh Favicons**: Update favicon information for companies whose websites may have changed.
+- **Name search**: Type any part of a company name. Results update as you type (debounced for performance).
+- **Organisation number**: Must be exactly 9 digits. Incomplete numbers won't trigger a search.
+- **Favicon loading**: Search view hydrates favicons for the top 3 hits only, using an in-memory session cache to reduce churn.
 
-## User Experience Features
+## Favourites
 
-- **Welcome Messages**: When you first open the extension with no favorites, you'll see helpful welcome messages and quick tips to get started.
-- **Keyboard Shortcuts Help**: Comprehensive guide accessible from any view via the action menu and from the welcome screen.
+Favourites are stored locally using Raycast's local storage. They appear above search results and hide while you're typing.
 
-## Company Details View
+- **Add / Remove**: `⌘F` to add, `⌘⇧F` to remove — works from search results and company details
+- **Emoji**: Choose from predefined categories or set a custom emoji
+- **Favicon**: Company website favicons are detected and displayed automatically
+- **Reorder**: Toggle move mode with `⌘⇧M`, then `⌘⇧↑` / `⌘⇧↓` to reorder
 
-The extension provides a comprehensive company details view with three interactive tabs:
+## Company Details
 
-- **Overview Tab**: Company description, contact information, key KPIs, employee count, and basic business details.
-- **Financials Tab**: Detailed financial metrics including revenue, EBITDA, operating result, net result, total assets, equity, total debt, and depreciation.
-- **Map Tab**: Company location visualization using OpenStreetMap tiles with quick access to Google Maps directions.
+Three tabs:
+
+- **Overview**: Description, contact info, organisation number, address, employees, industry codes (NACE), VAT and audit status, founding date, last filing date
+- **Financials**: Revenue, EBITDA, operating result, net result, total assets, equity, total debt, depreciation, audit status
+- **Map**: Location via OpenStreetMap with a link to Google Maps
+
+**External links:** Brønnøysundregistrene website, Proff.no
 
 ## Keyboard Shortcuts
 
-- **⌘F**: Add/Remove company from favorites
-- **⌘O**: Copy organization number
-- **⌘B**: Copy business address
-- **⌘⇧R**: Copy revenue
-- **⌘⇧N**: Copy net result
-- **⌘⇧Enter**: Open company in Brønnøysundregistrene
-- **⌘⇧↑**: Move favorite up in list
-- **⌘⇧↓**: Move favorite down in list
-- **⌘1**: Switch to Overview tab
-- **⌘2**: Switch to Financials tab
-- **⌘3**: Switch to Map tab
-- **⌘←**: Go back from company details
-- **⌘⇧M**: Toggle move mode for favorites
-- **⌘⇧**: Hold to show move indicators (for favorites reordering)
+| Action                        | Shortcut           |
+| ----------------------------- | ------------------ |
+| View company details          | `Enter`            |
+| Open in Brønnøysundregistrene | `⌘⇧↵`              |
+| Go back                       | `⌘←`               |
+| Add to favourites             | `⌘F`               |
+| Remove from favourites        | `⌘⇧F`              |
+| Toggle move mode              | `⌘⇧M`              |
+| Move favourite up / down      | `⌘⇧↑` / `⌘⇧↓`      |
+| Copy organisation number      | `⌘⇧C`              |
+| Copy business address         | `⌘⇧B`              |
+| Copy revenue                  | `⌘⇧R`              |
+| Copy net result               | `⌘⇧N`              |
+| Switch tab                    | `⌘1` / `⌘2` / `⌘3` |
+| Previous tab                  | `Backspace`        |
 
-## Feedback
+## Privacy & Networking
 
-- Feature requests and issues: https://github.com/kyndig/brreg-search
+**External requests:**
+
+- **Brreg API** (`data.brreg.no`): Search queries and organisation numbers
+- **Brreg Regnskapsregisteret** (`data.brreg.no/regnskapsregisteret`): Financial data
+- **Nominatim** (`nominatim.openstreetmap.org`): Geocoding company addresses
+- **OpenStreetMap tiles** (`tile.openstreetmap.org`): Map display
+- **Favicon service** (via `@raycast/utils`): Company website favicons
+
+**Stored locally:** Favourites (organisation number, name, address, emoji/favicon) in Raycast local storage.
+
+**Opened in browser only:** Google Maps, Proff.no, Brønnøysundregistrene.
+
+No credentials, API keys, or personal data required or collected.
 
 ## Requirements
 
-- **No credentials or API keys** are required. Brreg provides open, free access to its Enhetsregisteret endpoints.
-- **Map functionality** uses free OpenStreetMap services (Nominatim for geocoding, tiles for map display).
-- **Directions** link to Google Maps without requiring an API key.
+None. Brreg provides open, free access to Enhetsregisteret. Maps use free OpenStreetMap services. Google Maps directions are opened via link — no API key needed.
 
-## Privacy & Data Usage
+## Feedback
 
-- No user credentials or passwords are required by this extension.
-- The extension sends your search query (name or number) to the public Brreg API to retrieve matching entities.
-- All information collected from the user is used solely to connect to Brreg and improve the extension's response.
-- We do not store, share, or process personal data outside of fulfilling these requests.
+Feature requests and issues: [GitHub repository](https://github.com/kyndig/brreg-search)
 
 Made with 🫶 by [kynd](https://kynd.no)

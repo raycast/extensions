@@ -1,23 +1,22 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import path from "node:path";
 import got from "got";
 import { UserInfo, BaseResponse, NoteRequest, NoteInfo, SearchRequest, HomeFeedRequest } from "./types.js";
 import { API_URL } from "./constants.js";
 
 /**
- * Get my info (verify cookie is valid)
- * @param cookie cookie
+ * Get my info(Verify cookie is valid)
+ * @param headers headers
  * @returns User info
  */
-export const getMeApi = async (cookie: string) => {
+export const getMeApi = async (headers: Record<string, string>) => {
   const url = `${API_URL}/sns/web/v2/user/me`;
   const response = await got
     .get(url, {
-      headers: {
-        Cookie: cookie,
-      },
+      headers,
     })
     .json<BaseResponse<UserInfo>>();
+
   if (response.code !== 0) {
     throw new Error(response.message);
   }
@@ -54,7 +53,7 @@ export const downloadAssetApi = async (url: string, dir: string) => {
   const file = await got(url).buffer();
   const filename = url.split("/").pop() || Date.now().toString();
   const destinationFile = path.join(dir, `${filename}`);
-  await fs.writeFile(destinationFile, file);
+  await fs.promises.writeFile(destinationFile, file);
 };
 
 /**
@@ -86,8 +85,5 @@ export const searchPostApi = async (data: SearchRequest, headers: Record<string,
 export const getHomeFeedApi = async (data: HomeFeedRequest, headers: Record<string, string>) => {
   const url = `${API_URL}/sns/web/v1/homefeed`;
   const response = await got.post(url, { headers, json: data }).json<BaseResponse<NoteInfo>>();
-  if (response.code !== 0) {
-    throw new Error(response.message);
-  }
   return response.data;
 };

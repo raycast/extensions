@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-docs",
+  "title": "Markdown Documents",
+  "description": "Manage and search markdown cheatsheets and documents",
+  "icon": "extension-icon.png",
+  "author": "craigharman",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "contributors": [],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-documents",
+      "title": "Browse Documents",
+      "description": "Browse, search, and manage your markdown documents",
+      "mode": "view"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Document",
+      "description": "Create a new markdown document",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search",
+      "title": "Quick Search",
+      "description": "Search within documents using shortcuts (e.g., 'ags: character')",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "abc: search term",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "syncFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Storage Folder",
+      "description": "Folder for storing documents. Defaults to iCloud Drive if not set.",
+      "placeholder": "Leave empty for iCloud Drive"
+    },
+    {
+      "name": "defaultEditor",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Editor",
+      "description": "Application to open documents in (e.g., 'Visual Studio Code'). Leave empty for system default.",
+      "placeholder": "System default"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "eslint src --fix --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

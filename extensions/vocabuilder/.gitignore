@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Raycast
+.raycast/
+
+.claude/
+
+# Promptfoo local artifacts
+.promptfoo/
+evals/results/

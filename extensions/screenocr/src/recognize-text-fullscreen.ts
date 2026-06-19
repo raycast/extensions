@@ -8,7 +8,7 @@ export default async function command() {
     const recognizedText = await recognizeText(true);
 
     if (!recognizedText) {
-      await showFailureToast("No text detected");
+      await showFailureToast("No text detected", { title: "No text detected" });
       return;
     }
 
@@ -16,6 +16,6 @@ export default async function command() {
     await showSuccessToast("Copied text to clipboard");
   } catch (e) {
     console.error(e);
-    await showFailureToast("Failed detecting text");
+    await showFailureToast(e, { title: "Failed detecting text" });
   }
 }

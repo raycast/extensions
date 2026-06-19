@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Raycast
+.raycast/
+raycast-env.d.ts
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/

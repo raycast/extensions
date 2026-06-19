@@ -10,7 +10,7 @@
 
 import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
 import { AxiosError } from "axios";
-import CryptoJS from "crypto-js";
+import { createHash } from "node:crypto";
 import { clipboardQueryTextKey } from "./consts";
 import { LanguageDetectType } from "./detectLanguage/types";
 import { LingueeListItemType } from "./dictionary/linguee/types";
@@ -255,7 +255,7 @@ export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
 }
 
 export function md5(text: string): string {
-  return CryptoJS.MD5(text).toString();
+  return createHash("md5").update(text).digest("hex");
 }
 
 export function printObject(name: string, obj: unknown, space = 4) {

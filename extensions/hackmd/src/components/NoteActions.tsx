@@ -1,5 +1,15 @@
 import type { Note } from "@hackmd/api/dist/type";
-import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  confirmAlert,
+  Alert,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 
 import api from "../lib/api";
 import NoteForm from "./NoteForm";
@@ -28,7 +38,7 @@ export default function NoteActions({
   return (
     <>
       <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
-      <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} />
+      <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} shortcut={Keyboard.Shortcut.Common.Copy} />
       <Action
         title={pinned ? "Unpin Note" : "Pin Note"}
         icon={pinned ? Icon.PinDisabled : Icon.Pin}

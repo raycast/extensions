@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upcoming-holidays",
+  "version": "1.0.1",
   "title": "Upcoming Holidays",
   "description": "Show upcoming holidays for a country",
   "icon": "calendar-icon.png",
@@ -22,20 +23,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
-    "country-locale-map": "^1.9.11",
-    "date-fns": "^2.30.0"
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "~25.0.3",
-    "@types/react": "^19.2.7",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
+    "@types/node": "~25.1.0",
+    "@types/react": "^19.2.10",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {

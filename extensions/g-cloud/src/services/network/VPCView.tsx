@@ -260,7 +260,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   }}
                 />
                 <Action title="Copy Name" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.name)} />
-                <Action title="Copy Id" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.id)} />
+                <Action title="Copy ID" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.id)} />
               </ActionPanel>
             }
           />

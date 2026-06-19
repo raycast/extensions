@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   Icon,
   Keyboard,
   List,
@@ -15,6 +16,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance, Server } from "../types";
 import { joinServer } from "../utils/instance";
+import { pingServer } from "../utils/ping";
 import {
   isPrismLauncherInstalled,
   loadFavoriteInstanceIds,
@@ -79,7 +81,18 @@ export default function FavoriteServers() {
       (server, index, self) => index === self.findIndex((s) => s.address === server.address),
     );
 
+    // Show the list immediately, then fill in status badges as pings resolve
     setServers(sortServers(uniqueServers, storedFavorites));
+
+    for (const server of uniqueServers) {
+      pingServer(server).then((pingResult) => {
+        setServers((prev) => {
+          if (!prev) return prev;
+          const updated = prev.map((s) => (s.address === server.address ? { ...s, ...pingResult } : s));
+          return sortServers(updated, storedFavorites);
+        });
+      });
+    }
   };
 
   useAsyncEffect(async () => {
@@ -97,8 +110,20 @@ export default function FavoriteServers() {
             <List.Item
               key={`fav-server-${index}`}
               title={server.name}
-              subtitle={server.address}
-              accessories={[{ text: server.instanceName }, ...(server.favorite ? [{ icon: Icon.Star }] : [])]}
+              subtitle={server.instanceName}
+              accessories={[
+                ...(server.online === true
+                  ? [
+                      {
+                        tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
+                        tooltip: server.version,
+                      },
+                    ]
+                  : server.online === false
+                    ? [{ tag: { value: "Offline", color: Color.Red } }]
+                    : [{ tag: { value: "Checking…", color: Color.SecondaryText } }]),
+                ...(server.favorite ? [{ icon: Icon.Star }] : []),
+              ]}
               icon={server.icon ? { source: server.icon } : Icon.Network}
               actions={
                 <ActionPanel>

@@ -20,10 +20,14 @@ export async function mapSpaces(spaces: RawSpace[]): Promise<Space[]> {
  * @returns Display-ready `Space` object.
  */
 export async function mapSpace(space: RawSpace): Promise<Space> {
-  const icon = await getIconWithFallback(space.icon, space.object);
+  // The API namespaces space kinds (e.g. "anytype.space", "anytype.onetoone", "anytype.chatspace");
+  // normalize to the simple values the UI filters and icon fallback expect.
+  const object = space.object === "anytype.onetoone" || space.object === "anytype.chatspace" ? "chat" : "space";
+  const icon = await getIconWithFallback(space.icon, object);
 
   return {
     ...space,
+    object,
     name: getNameWithFallback(space.name),
     icon,
   };

@@ -70,17 +70,17 @@ export function DirectoryBrowser({
               {dirname(directoryPath) !== directoryPath &&
                 (previousDir && dirname(directoryPath) === previousDir ? (
                   <Action
-                    title="Navigate Up"
+                    title="Navigate Up" // eslint-disable-line @raycast/prefer-title-case
                     icon={Icon.ArrowUp}
                     onAction={() => pop()}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
                     }}
                   />
                 ) : (
                   <Action.Push
-                    title="Navigate Up"
+                    title="Navigate Up" // eslint-disable-line @raycast/prefer-title-case
                     icon={Icon.ArrowUp}
                     target={
                       <DirectoryBrowser
@@ -93,7 +93,7 @@ export function DirectoryBrowser({
                     }
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
                     }}
                   />
                 ))}
@@ -105,7 +105,7 @@ export function DirectoryBrowser({
                     onAction={() => pop()}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
                     }}
                   />
                 ) : (
@@ -123,7 +123,7 @@ export function DirectoryBrowser({
                     }
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
                     }}
                   />
                 ))}

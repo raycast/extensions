@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import path from "node:path";
 import { showToast, Toast } from "@raycast/api";
-import { assign, createMachine, fromCallback, fromPromise, type StateFrom, type StateValueMap } from "xstate";
+import { assign, createMachine, fromCallback, fromPromise, StateFrom, StateValueMap } from "xstate";
 import { refreshStore } from "../stores/refresh-store";
 import selectionStore from "../stores/selection-store";
 import type { DiskUsageContext, DiskUsageEvent } from "../types";
@@ -34,18 +34,12 @@ export const diskUsageMachine = createMachine({
   states: {
     checkingCache: {
       invoke: {
-        src: fromPromise(async () => await hasIndex()),
+        src: fromPromise(hasIndex),
         onDone: [
-          {
-            target: "loadingUsage",
-            guard: ({ event }) => event.output === true,
-          },
+          { target: "loadingUsage", guard: ({ event }) => event.output === true },
           { target: "loadingUsage", actions: assign({ needsScan: true }) },
         ],
-        onError: {
-          target: "loadingUsage",
-          actions: assign({ needsScan: true }),
-        },
+        onError: { target: "loadingUsage", actions: assign({ needsScan: true }) },
       },
     },
     loadingUsage: {
@@ -57,10 +51,7 @@ export const diskUsageMachine = createMachine({
             guard: ({ context }) => context.needsScan,
             actions: assign({ volume: ({ event }) => event.output }),
           },
-          {
-            target: "ready",
-            actions: assign({ volume: ({ event }) => event.output }),
-          },
+          { target: "ready", actions: assign({ volume: ({ event }) => event.output }) },
         ],
         onError: { target: "ready" },
       },
@@ -71,10 +62,7 @@ export const diskUsageMachine = createMachine({
           indexHomeDirectory(homedir(), (path, heap) => sendBack({ type: "SCAN_PROGRESS", path, heap }))
             .then(() => sendBack({ type: "SCAN_SUCCESS" }))
             .catch((error) =>
-              sendBack({
-                type: "SCAN_FAILURE",
-                error: error instanceof Error ? error.message : String(error),
-              }),
+              sendBack({ type: "SCAN_FAILURE", error: error instanceof Error ? error.message : String(error) }),
             );
           return () => {};
         }),
@@ -104,6 +92,24 @@ export const diskUsageMachine = createMachine({
           actions: async () => await clearCache(),
         },
         RETRY: "loadingUsage",
+        ITEM_MISSING: {
+          actions: async ({ event }) => {
+            if (event.type !== "ITEM_MISSING") return;
+            const { path: filePath, bytes: removedBytes } = event;
+            const home = homedir();
+
+            await removeItemFromCache(filePath);
+
+            let currentPath = filePath;
+            while (currentPath.startsWith(home) && currentPath !== home) {
+              const parent = path.dirname(currentPath);
+              await decreaseEntrySize(parent, currentPath, removedBytes);
+              currentPath = parent;
+            }
+
+            refreshStore.triggerRefresh();
+          },
+        },
       },
       states: {
         idle: {
@@ -136,10 +142,7 @@ export const diskUsageMachine = createMachine({
                 () => {
                   selectionStore.clear();
                   refreshStore.triggerRefresh();
-                  showToast({
-                    title: "Moved to Trash",
-                    message: "Space reclaimed",
-                  });
+                  showToast({ title: "Moved to Trash", message: "Space reclaimed" });
                 },
               ],
             },

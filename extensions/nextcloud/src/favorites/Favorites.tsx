@@ -19,8 +19,8 @@ export function Favorites() {
 
 function Item({ result }: { result: Favorite }) {
   const url = path.extname(result.filename)
-    ? `${BASE_URL}/apps/files/?dir=${encodeURI(result.dirname)}&view=files`
-    : `${BASE_URL}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
+    ? `${BASE_URL}/apps/files/?dir=${encodeURIComponent(result.dirname)}&view=files`
+    : `${BASE_URL}/apps/files/?dir=${encodeURIComponent(result.fullpath)}&view=files`;
 
   return (
     <List.Item

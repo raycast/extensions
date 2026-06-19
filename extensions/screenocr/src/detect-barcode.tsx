@@ -11,7 +11,9 @@ export default async function command() {
       !detectedCodes ||
       detectedCodes === "No barcodes or QR codes detected"
     ) {
-      await showFailureToast("No barcodes or QR codes detected");
+      await showFailureToast("No barcodes or QR codes detected", {
+        title: "No barcodes or QR codes detected",
+      });
       return;
     }
 
@@ -19,6 +21,6 @@ export default async function command() {
     await showSuccessToast("Copied barcode/QR code to clipboard");
   } catch (e) {
     console.error(e);
-    await showFailureToast("Failed detecting barcode/QR code");
+    await showFailureToast(e, { title: "Failed detecting barcode/QR code" });
   }
 }

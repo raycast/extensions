@@ -1,5 +1,9 @@
 # Fancy Text Changelog
 
+## [Improvement] - 2026-02-04
+
+- Added a new preference to control whether the selected text is automatically retrieved when the command opens
+
 ## [Feature] - 2026-01-06
 
 - Added a new action to decorate the generated fancy text

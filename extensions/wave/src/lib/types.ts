@@ -32,6 +32,18 @@ export enum InvoiceStatus {
   VIEWED = "VIEWED",
 }
 
+export enum InvoiceSendMethod {
+  EXPORT_PDF = "EXPORT_PDF",
+  GMAIL = "GMAIL",
+  MARKED_SENT = "MARKED_SENT",
+  NOT_SENT = "NOT_SENT",
+  OUTLOOK = "OUTLOOK",
+  SHARED_LINK = "SHARED_LINK",
+  SKIPPED = "SKIPPED",
+  WAVE = "WAVE",
+  YAHOO = "YAHOO",
+}
+
 export type InvoiceItem = {
   product: {
     id: string;
@@ -59,6 +71,9 @@ export type Invoice = {
   unitTitle: string;
   priceTitle: string;
   amountTitle: string;
+  lastSentAt: string | null;
+  lastSentVia: InvoiceSendMethod;
+  lastViewedAt: string | null;
   customer: {
     name: string;
   };

@@ -75,16 +75,6 @@ export function formatServiceName(serviceName: string): string {
     .join(" ");
 }
 
-export function getServicesByCategory(category: GCPServiceCategory): GCPServiceInfo[] {
-  return Object.values(predefinedServices).filter((service) => {
-    return service.category === category;
-  });
-}
-
-export function getAllCategories(): GCPServiceCategory[] {
-  return Object.values(GCPServiceCategory);
-}
-
 export function getAllServices(): GCPServiceInfo[] {
   return Object.values(predefinedServices);
 }

@@ -1,0 +1,339 @@
+[
+  {
+    "uid": 100029176,
+    "migrosId": "104241300000",
+    "migrosOnlineId": "6197910",
+    "name": "Getreideriegel",
+    "brand": "Farmer",
+    "brandLine": "Classic",
+    "versioning": "Himbeer",
+    "title": "Farmer Classic · Getreideriegel · Himbeer",
+    "description": "Farmer Getreideriegel Himbeer Ohne Palmöl",
+    "productRange": "STANDARD",
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productInformation": {
+      "mainInformation": {
+        "labels": [
+          {
+            "id": "L57",
+            "name": "V-Label vegan",
+            "slug": "v-label-vegan",
+            "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483003/labels/V-Label_Vegan_Color"
+          }
+        ],
+        "brand": {
+          "name": "Farmer",
+          "slug": "farmer",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1703170125/brands/farmer"
+        },
+        "nutritionalCharacteristicsV2": [
+          {
+            "name": "Vegan"
+          }
+        ],
+        "ingredients": "Getreide 35% (<strong>Weizen</strong>, <strong>Hafer</strong>, Reis), Glucose-Fructosesirup, Zucker, <strong>Soja</strong>schrot, Sonnenblumenöl, Feuchthaltemittel: Sorbit, Himbeerpüree 4%, Akazienfasern, Glucose, Himbeerpulver 1.5%, Säuerungsmittel: Citronensäure und Äpfelsäure, Kochsalz, Emulgator: <strong>Soja</strong>lecithin, Aromen, Geliermittel: Pektin, Frucht- und Gemüsesaftkonzentrate (Cassis, Heidelbeeren, Karotten).",
+        "allergenIndication": "Kann enthalten: Milch und Nüsse.",
+        "allergens": "Glutenhaltiges Getreide und daraus gewonnene Erzeugnisse, Sojabohnen und daraus gewonnene Erzeugnisse",
+        "origin": "Die Herkunftsangabe findest du auf der Verpackung in der Filiale.",
+        "mcheck": {
+          "carbonFootprint": {
+            "rating": 5,
+            "co2CarKmEquivalent": 3,
+            "productionRatio": 64,
+            "transportRatio": 7,
+            "packagingRatio": 28,
+            "image": "https://image.migros.ch/original/9cc7d75df616343c2fe49360a283dcb87c393688.svg",
+            "stackImage": "https://image.migros.ch/{stack}/9cc7d75df616343c2fe49360a283dcb87c393688.svg",
+            "co2KgRange": "0 - 0.9 kg CO₂eq / kg"
+          }
+        },
+        "rating": {
+          "nbReviews": 372,
+          "nbStars": 4.5
+        },
+        "migipediaUrl": "https://migipedia.migros.ch/de/products/104241300000"
+      },
+      "nutrientsInformation": {
+        "nutrientsTable": {
+          "headers": [
+            "100 g",
+            "1 Riegel (20 g)"
+          ],
+          "rows": [
+            {
+              "label": "Energie",
+              "values": [
+                "1611 kJ (384 kcal)",
+                "322 kJ (77 kcal)",
+                "4 %"
+              ]
+            },
+            {
+              "label": "Fett",
+              "values": [
+                "11 g",
+                "2.2 g",
+                "3 %"
+              ],
+              "fsaLevel": "MEDIUM"
+            },
+            {
+              "label": "davon gesättigte Fettsäuren",
+              "values": [
+                "1.2 g",
+                "0.2 g",
+                "1 %"
+              ],
+              "fsaLevel": "LOW"
+            },
+            {
+              "label": "Kohlenhydrate",
+              "values": [
+                "60 g",
+                "12 g",
+                "5 %"
+              ]
+            },
+            {
+              "label": "davon Zucker",
+              "values": [
+                "26 g",
+                "5.2 g",
+                "6 %"
+              ],
+              "fsaLevel": "HIGH"
+            },
+            {
+              "label": "Ballaststoffe",
+              "values": [
+                "9.1 g",
+                "1.8 g",
+                ""
+              ]
+            },
+            {
+              "label": "Eiweiss",
+              "values": [
+                "8.5 g",
+                "1.7 g",
+                "3 %"
+              ]
+            },
+            {
+              "label": "Salz",
+              "values": [
+                "0.36 g",
+                "0.07 g",
+                "1 %"
+              ],
+              "fsaLevel": "MEDIUM"
+            }
+          ]
+        },
+        "nutrientsTableV2": {
+          "headers": [
+            {
+              "value": "100 g"
+            },
+            {
+              "value": "Referenzmenge",
+              "infoText": "% der Referenzmenge für einen durchschnittlichen Erwachsenen (8400kj/2000kcal)"
+            },
+            {
+              "value": "1 Riegel (20 g)"
+            },
+            {
+              "value": "Referenzmenge",
+              "infoText": "% der Referenzmenge für einen durchschnittlichen Erwachsenen (8400kj/2000kcal)"
+            }
+          ],
+          "rows": [
+            {
+              "label": "Energie",
+              "values": [
+                "1611 kJ (384 kcal)",
+                "19 %",
+                "322 kJ (77 kcal)",
+                "4 %"
+              ]
+            },
+            {
+              "label": "Fett",
+              "values": [
+                "11 g",
+                "16 %",
+                "2.2 g",
+                "3 %"
+              ],
+              "fsaLevel": "MEDIUM"
+            },
+            {
+              "label": "davon gesättigte Fettsäuren",
+              "values": [
+                "1.2 g",
+                "6 %",
+                "0.2 g",
+                "1 %"
+              ],
+              "fsaLevel": "LOW"
+            },
+            {
+              "label": "Kohlenhydrate",
+              "values": [
+                "60 g",
+                "23 %",
+                "12 g",
+                "5 %"
+              ]
+            },
+            {
+              "label": "davon Zucker",
+              "values": [
+                "26 g",
+                "29 %",
+                "5.2 g",
+                "6 %"
+              ],
+              "fsaLevel": "HIGH"
+            },
+            {
+              "label": "Ballaststoffe",
+              "values": [
+                "9.1 g",
+                "",
+                "1.8 g",
+                ""
+              ]
+            },
+            {
+              "label": "Eiweiss",
+              "values": [
+                "8.5 g",
+                "17 %",
+                "1.7 g",
+                "3 %"
+              ]
+            },
+            {
+              "label": "Salz",
+              "values": [
+                "0.36 g",
+                "6 %",
+                "0.07 g",
+                "1 %"
+              ],
+              "fsaLevel": "MEDIUM"
+            }
+          ]
+        },
+        "portionSentence": "1 Packung = 12 Portionen",
+        "isAnalyticalConstituents": false
+      },
+      "usageInformation": {
+        "usage": "Geeignet als Snack oder Zwischenverpflegung bei sportlicher Betätigung, beim Wandern, Bergsteigen, Autofahren, vor oder nach jeder sonstigen Anstrengung sowie in der Schule und im Büro."
+      },
+      "otherInformation": {
+        "articleNumber": "104241300000",
+        "legalDesignation": "Getreideriegel mit Himbeeren",
+        "distributorName": "Migros-Genossenschafts-Bund",
+        "distributorStreetAndNumber": "Limmatstrasse 152, CH-8031 Zürich",
+        "remarks": [
+          {
+            "code": "Weitere Zusatzangaben",
+            "value": "Reich an Ballaststoffen"
+          },
+          {
+            "code": "Kühlhinweis / Aufbewahrungshinweis",
+            "value": "Trocken aufbewahren und vor Wärme schützen."
+          }
+        ],
+        "mainSpecificities": [
+          {
+            "code": "Vegetarismus",
+            "value": "Vegan"
+          },
+          {
+            "code": "Anzahl entnehmbarer Einzeleinheiten",
+            "value": "12"
+          },
+          {
+            "code": "Einzeln verpackt",
+            "value": "Nein"
+          },
+          {
+            "code": "Verpackungsart",
+            "value": "Schachtel"
+          }
+        ]
+      }
+    },
+    "gtins": [
+      "7613312285930"
+    ],
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/ef9d0988518d8d3952a76954aedbd427f41fd803/farmer-soft-himbeer.jpg"
+      }
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/ef9d0988518d8d3952a76954aedbd427f41fd803/farmer-soft-himbeer.png"
+    },
+    "breadcrumb": [
+      {
+        "id": "7494736",
+        "name": "Snacks & Süssigkeiten",
+        "slugs": [
+          "snacks-sussigkeiten"
+        ]
+      },
+      {
+        "id": "7494783",
+        "name": "Cracker & Getreide- & Fruchtriegel",
+        "slugs": [
+          "snacks-sussigkeiten",
+          "cracker-getreide-fruchtriegel"
+        ]
+      },
+      {
+        "id": "7495025",
+        "name": "Getreideriegel",
+        "slugs": [
+          "snacks-sussigkeiten",
+          "cracker-getreide-fruchtriegel",
+          "getreideriegel"
+        ]
+      }
+    ],
+    "productUrls": "https://www.migros.ch/de/product/104241300000",
+    "isMgbCompatible": true,
+    "isConsignmentProduct": false,
+    "offer": {
+      "price": {
+        "displayUnitPrice": true,
+        "advertisedDisplayValue": "4.60",
+        "effectiveDisplayValue": "4.60",
+        "multiplier": 1,
+        "effectiveValue": 4.6,
+        "advertisedValue": 4.6,
+        "unitPrice": {
+          "value": 1.92,
+          "unit": "100g"
+        }
+      },
+      "quantity": "12 x 20g",
+      "quantityPrice": "1.92/100g",
+      "isVariableWeight": false,
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "gmzh"
+      },
+      "maxOrderableQuantityV2": 96,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "displayPrice": true,
+      "type": "STANDARD"
+    }
+  }
+]

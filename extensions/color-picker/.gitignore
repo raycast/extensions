@@ -13,3 +13,5 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+/rust/*/target
+assets/compiled_raycast_rust

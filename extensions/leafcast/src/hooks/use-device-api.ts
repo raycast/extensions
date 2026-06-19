@@ -1,35 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import axios from "axios";
 import { useEffect, useState } from "react";
-
-type NumberWithMinMax = {
-  value: number;
-  max: number;
-  min: number;
-};
-
-interface DeviceMetadata {
-  name: string;
-  serialNo: string;
-  manufacturer: string;
-  firmwareVersion: string;
-  model: string;
-  state: {
-    on: {
-      value: boolean;
-    };
-    brightness: NumberWithMinMax;
-    hue: NumberWithMinMax;
-    sat: NumberWithMinMax;
-    ct: NumberWithMinMax;
-    colorMode: string;
-  };
-  effects: {
-    select: string;
-    effectsList: string[];
-  };
-}
+import type tinycolor from "tinycolor2";
+import { getDeviceInfo, getEffects, pair, setBrightness, setColor, setEffect, setPower } from "../lib/nanoleaf-client";
+import { DeviceInfo } from "../types";
 
 export function useDeviceApi() {
   const { deviceAddress: deviceAddressFromPreferences, maintainBrightnessOnColorChange } =
@@ -37,117 +11,68 @@ export function useDeviceApi() {
 
   const [deviceAddress, setDeviceAddress] = useCachedState<string>(
     "device-address",
-    deviceAddressFromPreferences ?? ""
+    deviceAddressFromPreferences ?? "",
   );
   const [deviceToken, setDeviceToken] = useCachedState<string>("device-token", "");
-  const [deviceMetadata, setDeviceMetadata] = useCachedState<DeviceMetadata | null>("device-metadata", null);
-  const [isConnecting, setConnected] = useState<boolean>(true);
-
-  const http = axios.create({
-    baseURL: `http://${deviceAddress}:16021/api/v1`,
-  });
+  const [deviceMetadata, setDeviceMetadata] = useCachedState<DeviceInfo | null>("device-metadata", null);
+  const [isConnecting, setIsConnecting] = useState<boolean>(true);
 
   useEffect(() => {
     if (!deviceToken) {
-      setConnected(false);
+      setIsConnecting(false);
       return;
     }
-
-    _getDeviceMetadata();
+    refreshMetadata();
   }, [deviceToken]);
 
-  async function _getDeviceMetadata() {
+  async function refreshMetadata() {
     try {
-      const { data } = await http.get(`/${deviceToken}`);
-      delete data.panelLayout;
-      delete data.rhythm;
-
-      setDeviceMetadata(data);
-    } catch (e) {
-      Promise.reject(e);
+      const info = await getDeviceInfo();
+      setDeviceMetadata(info);
+    } catch (error) {
+      console.error("Failed to refresh device metadata", error);
     } finally {
-      setConnected(false);
+      setIsConnecting(false);
     }
-  }
-
-  function _updateState(state: Record<string, unknown>) {
-    return http.put(`/${deviceToken}/state`, state);
   }
 
   async function pairDevice(): Promise<void> {
-    try {
-      const { data } = await http.post(
-        "/new",
-        {},
-        {
-          timeout: 8000,
-        }
-      );
-      const token = data.auth_token;
-
-      if (token) {
-        setDeviceToken(token);
-      }
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    const token = await pair();
+    setDeviceToken(token);
   }
 
-  async function setDeviceBrightness(brightness: number) {
-    await _updateState({
-      brightness: {
-        value: brightness,
-      },
-    });
-    _getDeviceMetadata();
+  async function setDeviceBrightness(brightness: number): Promise<void> {
+    await setBrightness(brightness);
+    refreshMetadata();
   }
 
-  async function setDeviceColor(color: tinycolor.ColorFormats.HSV) {
-    await _updateState({
-      hue: {
-        value: Math.round(color.h),
-      },
-      sat: {
-        value: Math.min(Math.max(Math.round(color.s * 100), 0), 100),
-      },
-      ...(!maintainBrightnessOnColorChange
-        ? {
-            brightness: {
-              value: Math.min(Math.max(Math.round(color.v * 100), 0), 100),
-            },
-          }
-        : {}),
-    });
-    _getDeviceMetadata();
+  async function setDeviceColor(color: tinycolor.ColorFormats.HSV): Promise<void> {
+    const hue = Math.round(color.h);
+    const saturation = Math.min(Math.max(Math.round(color.s * 100), 0), 100);
+    const brightness = maintainBrightnessOnColorChange
+      ? undefined
+      : Math.min(Math.max(Math.round(color.v * 100), 0), 100);
+    await setColor(hue, saturation, brightness);
+    refreshMetadata();
   }
 
-  async function turnOffDevice() {
-    await _updateState({
-      on: {
-        value: false,
-      },
-    });
-    _getDeviceMetadata();
+  async function turnOnDevice(): Promise<void> {
+    await setPower(true);
+    refreshMetadata();
   }
 
-  async function turnOnDevice() {
-    await _updateState({
-      on: {
-        value: true,
-      },
-    });
-    _getDeviceMetadata();
+  async function turnOffDevice(): Promise<void> {
+    await setPower(false);
+    refreshMetadata();
   }
 
   async function getDeviceEffects(): Promise<string[]> {
-    const { data } = await http.get(`/${deviceToken}/effects/effectsList`);
-
-    return data as string[];
+    return getEffects();
   }
 
-  async function updateDeviceEffect(effect: string) {
-    await http.put(`/${deviceToken}/effects`, { select: effect });
-    _getDeviceMetadata();
+  async function updateDeviceEffect(effect: string): Promise<void> {
+    await setEffect(effect);
+    refreshMetadata();
   }
 
   return {

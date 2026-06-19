@@ -8,7 +8,7 @@ Conveniently read articles without leaving Raycast.
 
 ## ✨ Features
 
-- Add Feeds
+- Add Subscriptions, including prefilling the URL from the active browser tab when the Raycast Browser Extension is available
 - Rename Feeds
 - Read Stories
 - Open Stories

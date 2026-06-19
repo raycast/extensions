@@ -22,13 +22,12 @@ export const getTasks = async () => {
 
     const data = JSON.parse(stdout) as Task[];
     if (data) tasks = data.sort((a, b) => b.urgency - a.urgency);
-  } catch (error) {
+  } catch {
     throw new Error("Please make sure you have set the path to task in the settings");
   }
   return tasks;
 };
 
-//
 // returns a single task by its uuid
 export const getTask = async (uuid: string) => {
   const tasks = await getTasks();
@@ -92,7 +91,7 @@ export const updateTask = async (
   project?: string,
   tags?: string[],
   due?: string,
-  priority?: Priority | ""
+  priority?: Priority | "",
 ) => {
   const commandParts = [`${taskPath}`];
 

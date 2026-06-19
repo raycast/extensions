@@ -1,10 +1,10 @@
 import { Toast } from "@raycast/api";
 
 export const SHADCN_URL = {
-  DOCS_COMPONENTS: "https://ui.shadcn.com/docs/components",
+  DOCS_COMPONENTS: "https://ui.shadcn.com/docs/components/radix",
   EXAMPLES: "https://ui.shadcn.com/examples",
   GITHUB: "https://github.com/shadcn-ui/ui/tree/main",
-  RAW_GITHUB_COMPONENTS: "https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/content/docs/components",
+  RAW_GITHUB_COMPONENTS: "https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/content/docs/components/radix",
 } as const;
 
 export const OCTOKIT_CONFIG = {

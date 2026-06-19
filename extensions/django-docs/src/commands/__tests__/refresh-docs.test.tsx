@@ -3,6 +3,7 @@ import RefreshDocsCommand from "../refresh-docs";
 import { fetchDocEntries } from "../../services/django-docs";
 import { writeCache, shouldRefresh } from "../../services/cache";
 import { DJANGO_VERSIONS } from "../../constants";
+import { DocEntry } from "../../types/DocEntry";
 
 jest.mock("../../services/django-docs");
 jest.mock("../../services/cache");
@@ -15,11 +16,12 @@ const mockedShowToast = showToast as jest.MockedFunction<typeof showToast>;
 describe("RefreshDocsCommand", () => {
   let consoleErrorSpy: jest.SpyInstance;
 
-  const mockEntries = [
+  const mockEntries: DocEntry[] = [
     {
       url: "https://docs.djangoproject.com/en/dev/topics/http/",
       title: "HTTP",
       content: "HTTP content",
+      headings: [],
       parent: null,
       previous: null,
       next: null,
@@ -28,6 +30,7 @@ describe("RefreshDocsCommand", () => {
       url: "https://docs.djangoproject.com/en/dev/topics/db/",
       title: "Database",
       content: "Database content",
+      headings: [],
       parent: null,
       previous: null,
       next: null,

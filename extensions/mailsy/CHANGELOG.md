@@ -1,5 +1,12 @@
 # Mailsy Changelog
 
+## [Changes] - 2026-03-19
+
+- Upgraded the extension to the latest Raycast API and tooling versions.
+- Added Windows platform support.
+- Refactored the UI into dedicated `Mail` and `Message` components.
+- Improved loading, timeout, retry, and error states for bootstrap and message fetching.
+
 ## [Fixed] - 2025-10-29
 
 - Removed unused code.

@@ -5,7 +5,7 @@ import { currentUserId } from "./api/user";
 import { OpenUrlAction } from "./api/util";
 import { CallType, callUser } from "./actions/callAction";
 import { usePromise } from "@raycast/utils";
-import { getPresence, Presence, defaultPresence } from "./api/presence";
+import { getPresence, defaultPresence } from "./api/presence";
 import { usePromiseWithTimeout } from "./hooks/usePromiseWithTimeout";
 
 const chatIcon = {

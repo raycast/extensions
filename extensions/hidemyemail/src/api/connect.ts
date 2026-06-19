@@ -198,7 +198,8 @@ export class iCloudSession {
       return new iCloudServiceNotActivatedError(reason);
     }
 
-    if (code == "503") reason += ". Are you using a VPN?";
+    if (code == "503")
+      reason += " (503). Please check if you are able to login using your email/password on icloud.com.";
 
     if (code in ERROR_MAPPINGS) {
       reason = ERROR_MAPPINGS[code];

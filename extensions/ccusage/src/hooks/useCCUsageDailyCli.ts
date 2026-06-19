@@ -1,19 +1,29 @@
+import { useState, useEffect } from "react";
+import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { DailyUsageCommandResponseSchema } from "../types/usage-types";
+import { DailyUsageCommandResponse, DailyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
-/**
- * Hook for executing `ccusage daily --json` command
- */
+const cache = new Cache();
+const CACHE_KEY = "ccusage-daily";
+
 export const useCCUsageDailyCli = () => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const [initialData] = useState<DailyUsageCommandResponse | undefined>(() => {
+    const cached = cache.get(CACHE_KEY);
+    return cached ? (JSON.parse(cached) as DailyUsageCommandResponse) : undefined;
+  });
 
   const command = useDirectCommand ? "ccusage" : "npx";
   const args = useDirectCommand ? ["daily", "--json"] : ["ccusage@latest", "daily", "--json"];
   const result = useExec(command, args, {
     ...getExecOptions(),
+    initialData,
     parseOutput: ({ stdout }) => {
       if (!stdout) {
         throw new Error("No output received from ccusage daily command");
@@ -22,9 +32,17 @@ export const useCCUsageDailyCli = () => {
       const parseResult = stringToJSON.pipe(DailyUsageCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid daily usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid daily usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
+      cache.set(CACHE_KEY, JSON.stringify(parseResult.data));
       return parseResult.data;
     },
     keepPreviousData: true,
@@ -39,6 +57,12 @@ export const useCCUsageDailyCli = () => {
       },
     },
   });
+
+  const intervalMs = parseInt(preferences.usageLimitsRefreshInterval || "60", 10) * 1000;
+  useEffect(() => {
+    const id = setInterval(() => result.revalidate(), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, result.revalidate]);
 
   return result;
 };

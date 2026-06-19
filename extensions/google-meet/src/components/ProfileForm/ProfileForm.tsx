@@ -4,6 +4,19 @@ import { GoogleProfile, useCacheHelpers } from "../../hooks";
 
 type ProfileFormProps = { onFinish: () => void };
 
+const emailRegex =
+  /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+
+function validateEmail(value?: string) {
+  if (!value) {
+    return "The item is required";
+  }
+
+  if (!emailRegex.test(value)) {
+    return "You need a valid email address";
+  }
+}
+
 export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
   const { onStoreData } = useCacheHelpers();
 
@@ -17,7 +30,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
           style: Toast.Style.Success,
           title: "Profile created!",
         });
-      } catch (err) {
+      } catch {
         showToast({
           style: Toast.Style.Failure,
           title: "Profile already exists!",
@@ -26,18 +39,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
     },
     validation: {
       name: FormValidation.Required,
-      email: (value) => {
-        const regexp =
-          /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
-
-        if (!value) {
-          return "The item is required";
-        }
-
-        if (!regexp.test(value)) {
-          return "You need a valid email address";
-        }
-      },
+      email: validateEmail,
     },
   });
 
@@ -45,7 +47,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add profile" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Profile" onSubmit={handleSubmit} />
           <Action.SubmitForm title="Back" onSubmit={onFinish} />
         </ActionPanel>
       }

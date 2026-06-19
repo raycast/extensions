@@ -32,7 +32,7 @@ const expireFormat = (seconds: number) => {
 export default function Command() {
   const { isLoading, assignments } = useAssignments();
 
-  return assignments === undefined || assignments.length == 0 ? (
+  return assignments === undefined || assignments.length === 0 ? (
     <List isLoading={isLoading}>
       <List.EmptyView title="Stand by for further orders from Super Earth" />
     </List>
@@ -43,7 +43,9 @@ export default function Command() {
       metadata={
         assignments && (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Task" text={assignments[0].setting.taskDescription} />
+            {assignments[0].setting.taskDescription ? (
+              <Detail.Metadata.Label title="Task" text={assignments[0].setting.taskDescription} />
+            ) : null}
             {assignments[0].setting.tasks.map((task, index) => {
               const progress = Math.max(
                 (task.info.maxHealth - task.status.health) / task.info.maxHealth,
@@ -64,7 +66,7 @@ export default function Command() {
 
             <Detail.Metadata.Separator />
 
-            <Detail.Metadata.Label title={"Major Order ends in:"} text={expireFormat(assignments[0].expiresIn)} />
+            <Detail.Metadata.Label title="Major Order Ends In" text={expireFormat(assignments[0].expiresIn)} />
           </Detail.Metadata>
         )
       }

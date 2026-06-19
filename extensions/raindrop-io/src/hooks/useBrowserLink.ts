@@ -96,9 +96,10 @@ export function useBrowserLink() {
           break;
       }
 
-      // Fallback for Vivaldi Browser not recognized by bundleId
-      if (app?.name === "Vivaldi.app") {
-        return runAppleScript(`tell application "Vivaldi" to return URL of active tab of front window`);
+      // Fallback for browsers whose bundleId is not recognized by Raycast API (Vivaldi + Arc)
+      if (app?.name === "Vivaldi.app" || app?.name === "Arc") {
+        const scriptName = app.name === "Arc" ? "Arc" : "Vivaldi";
+        return runAppleScript(`tell application "${scriptName}" to return URL of active tab of front window`);
       }
 
       throw new Error(`Unsupported App: ${app.name}`);

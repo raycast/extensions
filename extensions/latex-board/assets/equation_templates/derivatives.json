@@ -1,0 +1,39 @@
+{
+  "Lagrange Notation": {
+    "First Derivative": " f^{\\prime}(x) ",
+    "Second Derivative": " f^{\\prime\\prime}(x) ",
+    "Nth Derivative": " f^{(n)}(x) "
+  },
+  "Leibniz Notation": {
+    "Leibniz 1": " \\frac{dy}{dx} ",
+    "Leibniz 2": " \\frac{ \\mathrm{d} y}{ \\mathrm{d} x} ",
+    "Leibniz 3": " \\frac{d^n y}{dx^n} ",
+    "Derivative at a Point": " \\left. \\frac{dy}{dx} \\right|_{x=a} "
+  },
+  "Newton Notation": {
+    "Newton Example 1": " \\dot{y} = \\frac{dy}{dt} = v ",
+    "Newton Example 2": " \\ddot{y} = \\frac{d^2y}{dt^2} =a "
+  },
+  "Euler Notation": {
+    "Euler 1": " Df ",
+    "Euler 2": " D_x y ",
+    "Derivative Definition": " f^{\\prime}(x) = \\frac{df}{dx} = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h} "
+  },
+  "Partial Derivatives": {
+    "Partial Symbol": " \\partial ",
+    "Partial Example 1": " \\frac{\\partial f}{\\partial x} =f_x ",
+    "Partial Example 2": " \\frac{\\partial}{\\partial y} \\left( \\frac{\\partial f}{\\partial x} \\right) = f_{xy} ",
+    "Partial Example 3": " \\frac{\\partial^n f}{\\partial x^n} "
+  },
+  "Vector Differential Operators": {
+    "Nabla": " \\nabla ",
+    "Vector Diff Example 1": " \\nabla = \\left( \\frac{\\partial}{\\partial x}, \\frac{\\partial}{\\partial y}, \\frac{\\partial}{\\partial z} \\right) ",
+    "Gradient": " \\mathrm{grad} \\phi = \\nabla \\phi ",
+    "Divergence": " \\mathrm{div} \\mathbf{A} = \\nabla \\cdot \\mathbf{A} ",
+    "Curl": " \\mathrm{rot} \\mathbf{A} = \\nabla \\times \\mathbf{A} "
+  },
+  "Other Vector Operators": {
+    "Laplacian 1": " \\Delta = \\nabla^2 ",
+    "Laplacian 2": " \\Delta \\phi = \\nabla \\cdot \\nabla \\phi = \\left( \\frac{\\partial^2}{\\partial x^2} + \\frac{\\partial^2}{\\partial y^2} + \\frac{\\partial^2}{\\partial z^2} \\right) \\phi "
+  }
+}

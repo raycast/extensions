@@ -1,5 +1,10 @@
 # GitHub Enterprise Changelog
 
+## [Add Search Repositories Feature] - 2026-03-01
+
+- Added new "Search Repositories" command to search across public and private repositories.
+- Added repository actions shortcuts for issues, pull requests, and actions.
+
 ## [Fix notification URLs for GitHub Enterprise Cloud] - 2025-11-21
 
 - Fixed notification URLs for GitHub Enterprise Cloud instances

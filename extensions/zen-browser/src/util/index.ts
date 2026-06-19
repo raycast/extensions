@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { executeSQL } from "@raycast/utils";
-import { HistoryEntry } from "../interfaces";
+import { HistoryEntry, WorkspaceModel, SessionSpace } from "../interfaces";
 import fs from "fs";
 import path from "path";
 
@@ -137,6 +137,23 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
 export const getSessionInactivePath = async () => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
+};
+
+export const getZenSessionsPath = (): string => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "zen-sessions.jsonlz4");
+};
+
+export const readZenWorkspacesFromSession = (): WorkspaceModel[] => {
+  const raw = fs.readFileSync(getZenSessionsPath());
+  const session: { spaces?: SessionSpace[] } = decodeLZ4(raw);
+  return (session.spaces ?? []).map((space, index) => ({
+    uuid: space.uuid,
+    name: space.name,
+    icon: space.icon ?? "",
+    position: space.position ?? index * 1000,
+    is_default: index === 0,
+  }));
 };
 
 export const getSessionActivePath = async () => {

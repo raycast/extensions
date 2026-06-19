@@ -1,6 +1,6 @@
 # LaLiga Changelog
 
-## [Maintenance & Stability] - {PR_MERGED_DATE}
+## [Maintenance & Stability] - 2025-10-27
 
 - Fixed an issue on the club details page where some information was missing.
 - Upgraded to the latest dependencies for improved security and stability.

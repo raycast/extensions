@@ -1,5 +1,10 @@
 # OpenRouter Model Search Changelog
 
+## [Update] - 2026-03-05
+
+- Fix model "Open in Browser" action URL
+- Update action shortcuts for Windows platform
+
 ## [Code Refactoring Add Windows Support] - 2025-11-26
 
 - Add support for Windows platform

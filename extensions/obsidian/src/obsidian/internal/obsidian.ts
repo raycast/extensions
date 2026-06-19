@@ -1,10 +1,21 @@
 import { getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
 import * as fsAsync from "fs/promises";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import path from "path";
 import { GlobalPreferences } from "../../utils/preferences";
 import { ObsidianVault } from "./vault";
+
+function obsidianJsonPath(): string {
+  switch (platform()) {
+    case "win32":
+      return path.join(process.env.APPDATA ?? path.join(homedir(), "AppData", "Roaming"), "obsidian", "obsidian.json");
+    case "linux":
+      return path.join(process.env.XDG_CONFIG_HOME ?? path.join(homedir(), ".config"), "obsidian", "obsidian.json");
+    default:
+      return path.join(homedir(), "Library", "Application Support", "obsidian", "obsidian.json");
+  }
+}
 
 interface ObsidianVaultJSON {
   path: string;
@@ -25,7 +36,8 @@ export function getVaultNameFromPath(vaultPath: string): string | undefined {
 
 export function getVaultsFromPreferences(): ObsidianVault[] {
   const pref: GlobalPreferences = getPreferenceValues();
-  const vaultString = pref.vaultPath;
+  // The preference can actually be undefined instead of a string on first install -> default to empty string
+  const vaultString = pref.vaultPath ?? "";
 
   return vaultString
     .split(",")
@@ -40,12 +52,10 @@ export function getVaultsFromPreferences(): ObsidianVault[] {
 }
 
 export async function getVaultsFromObsidianJson(): Promise<ObsidianVault[]> {
-  const obsidianJsonPath = path.resolve(
-    path.join(homedir(), "Library", "Application Support", "obsidian", "obsidian.json")
-  );
+  const jsonPath = path.resolve(obsidianJsonPath());
 
   try {
-    const obsidianJson = JSON.parse(await fsAsync.readFile(obsidianJsonPath, "utf8")) as ObsidianJSON;
+    const obsidianJson = JSON.parse(await fsAsync.readFile(jsonPath, "utf8")) as ObsidianJSON;
     return Object.values(obsidianJson.vaults).map(({ path }) => ({
       name: getVaultNameFromPath(path) ?? "invalid vault name",
       key: path,
@@ -80,6 +90,7 @@ export enum ObsidianTargetType {
   DailyNoteAppend = "obsidian://adv-uri?daily=true&",
   NewNote = "obsidian://new?vault=",
   AppendTask = "obsidian://adv-uri?mode=append&filepath=",
+  AppendToNote = "obsidian://adv-uri?filepath=",
 }
 
 export type ObsidianTarget =
@@ -101,6 +112,15 @@ export type ObsidianTarget =
       vault: ObsidianVault;
       text: string;
       path: string;
+      heading?: string;
+      silent?: boolean;
+    }
+  | {
+      type: ObsidianTargetType.AppendToNote;
+      vault: ObsidianVault;
+      text: string;
+      path: string;
+      mode: "append" | "prepend" | "overwrite";
       heading?: string;
       silent?: boolean;
     };
@@ -157,6 +177,21 @@ export function getObsidianTarget(target: ObsidianTarget) {
         encodeURIComponent(target.text) +
         "&vault=" +
         encodeURIComponent(target.vault.name) +
+        headingParam +
+        (target.silent ? "&openmode=silent" : "")
+      );
+    }
+    case ObsidianTargetType.AppendToNote: {
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      return (
+        ObsidianTargetType.AppendToNote +
+        encodeURIComponent(target.path) +
+        "&vault=" +
+        encodeURIComponent(target.vault.name) +
+        "&data=" +
+        encodeURIComponent(target.text) +
+        "&mode=" +
+        target.mode +
         headingParam +
         (target.silent ? "&openmode=silent" : "")
       );

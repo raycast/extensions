@@ -1,7 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetSingleListBookmarks } from "../apis";
-import { ApiResponse, Bookmark } from "../types";
+
+const log = logger.child("[ListsBookmarks]");
 
 /**
  * Hook to fetch bookmarks for a specific list with native Raycast pagination support.
@@ -12,12 +14,12 @@ export function useGetListsBookmarks(listId: string) {
 
   const { isLoading, data, error, revalidate, pagination } = useCachedPromise(
     (listId) => async (options) => {
-      const result = (await fetchGetSingleListBookmarks(listId, options.cursor)) as ApiResponse<Bookmark>;
+      const result = await fetchGetSingleListBookmarks(listId, options.cursor);
 
       return {
         data: result.bookmarks || [],
-        hasMore: result.nextCursor !== null,
-        cursor: result.nextCursor,
+        hasMore: result.nextCursor != null,
+        cursor: result.nextCursor ?? undefined,
       };
     },
     [listId],
@@ -29,7 +31,7 @@ export function useGetListsBookmarks(listId: string) {
 
   useEffect(() => {
     if (error) {
-      console.error("Failed to fetch list bookmarks:", error);
+      log.error("Failed to fetch list bookmarks", { listId, error });
     }
   }, [error]);
 

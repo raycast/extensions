@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { getInstanceBaseUrl } from "./instanceUrl";
 
 type Preferences = {
   openMode: "direct" | "navigate" | "sow";
@@ -8,7 +9,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 export function buildServiceNowUrl(instanceName: string, relativeUrl: string): string {
   const openMode = preferences.openMode;
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
   let cleanUrl = relativeUrl.startsWith("/") ? relativeUrl.slice(1) : relativeUrl;
 
   // Handle special cases

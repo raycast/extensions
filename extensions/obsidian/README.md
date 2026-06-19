@@ -18,6 +18,7 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Create Note](https://github.com/KevinBatdorf/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#daily-note)
 - [Append to Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#append-to-daily-note)
+- [Custom Append Actions](https://github.com/KevinBatdorf/obsidian-raycast#custom-append-actions)
 - [Bookmarked Note](https://github.com/KevinBatdorf/obsidian-raycast#bookmarked-notes)
 - [Obsidian Menu Bar Item](https://github.com/KevinBatdorf/obsidian-raycast#obsidian-menu-bar-item)
 
@@ -137,6 +138,19 @@ It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plu
 This command will append text to the daily note from the selected vault. If a daily note doesn't exist it will create one and open it. To append as efficiently as possible, the text is provided as a parameter to the command, so there's no form to fill out.
 
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
+
+## Custom Append Actions
+
+This command allows you to create your own "Append to Note" actions. You can configure specific notes, templates, and behaviors, and even assign global keyboard shortcuts to them.
+
+1.  Use the `Create New Action` command (CMD+N in the list) to define a new action.
+2.  Set the **Path** (supports variables like `{date}`, `{year}`, `{week}`).
+3.  Set the **Template** (supports `{clipboard}`, `{content}`).
+4.  Run the action from the list or create a **Quicklink** (CMD+SHIFT+C) to run it directly with a hotkey.
+
+**Action Types:**
+- **Capture text:** Standard input mode. What you type fills the `{content}` placeholder in your template.
+- **Pre-fill with template:** Loads the resolved template into the input box so you can edit it before sending. Ideal for daily logs or structured entries.
 
 ## Bookmarked Notes
 

@@ -1,4 +1,6 @@
-import type { TypesProps } from "@jeromefitz/conventional-gitmoji";
+// Raycast's build pipeline supports this ESM package, but `tsc` reports an interop
+// error for this ESM-only package even with Node16 module resolution.
+// @ts-expect-error ESM-only package consumed by Raycast bundler
 import { types } from "@jeromefitz/conventional-gitmoji";
 
 export type GitmojiFormat = {
@@ -9,7 +11,14 @@ export type GitmojiFormat = {
 interface GitmojiTypes {
   format: string;
   formats: GitmojiFormat[];
-  types: TypesProps;
+  types: Record<
+    string,
+    {
+      commit: string;
+      description: string;
+      emoji: string;
+    }
+  >;
 }
 
 const gitmoji: GitmojiTypes = {

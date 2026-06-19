@@ -5,7 +5,7 @@ export interface SeriesLookup {
   sortTitle: string;
   status: string;
   overview: string;
-  network?: string;
+  network?: string | null;
   images: Image[];
   remotePoster?: string;
   seasons: Season[];
@@ -13,9 +13,9 @@ export interface SeriesLookup {
   tvdbId: number;
   tvRageId?: number;
   tvMazeId?: number;
-  imdbId?: string;
+  imdbId?: string | null;
   titleSlug: string;
-  certification?: string;
+  certification?: string | null;
   genres: string[];
   tags: number[];
   added?: string;
@@ -23,7 +23,7 @@ export interface SeriesLookup {
   runtime: number;
   seriesType: string;
   cleanTitle: string;
-  firstAired?: string;
+  firstAired?: string | null;
   statistics?: SeriesStatistics;
 }
 
@@ -43,8 +43,8 @@ export interface SeriesFull {
   seasonCount: number;
   status: string;
   overview: string;
-  network?: string;
-  airTime?: string;
+  network?: string | null;
+  airTime?: string | null;
   images: Image[];
   seasons: Season[];
   year: number;
@@ -58,13 +58,13 @@ export interface SeriesFull {
   tvdbId: number;
   tvRageId: number;
   tvMazeId: number;
-  firstAired: string;
+  firstAired?: string | null;
   lastInfoSync?: string;
   seriesType: string;
   cleanTitle: string;
-  imdbId: string;
+  imdbId?: string | null;
   titleSlug: string;
-  certification?: string;
+  certification?: string | null;
   genres: string[];
   tags: number[];
   added: string;
@@ -83,7 +83,7 @@ export interface AddSeriesOptions {
   tvdbId: number;
   tvRageId?: number;
   tvMazeId?: number;
-  imdbId?: string;
+  imdbId?: string | null;
   rootFolderPath: string;
   monitored: boolean;
   seasonFolder: boolean;

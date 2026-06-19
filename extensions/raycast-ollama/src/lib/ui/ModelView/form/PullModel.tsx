@@ -17,7 +17,7 @@ interface FormData {
   model: string;
 }
 
-export function FormPullModel(props: props) {
+export function FormPullModel(props: props): React.JSX.Element {
   const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit(values) {

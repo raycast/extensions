@@ -53,6 +53,7 @@ ${rawCode}
       description: description,
       tags: tags,
       content: content,
+      firstCodeBlock: rawCode ?? "",
       rawMetadata: title + description,
     },
   };

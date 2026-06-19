@@ -9,13 +9,16 @@ export default async function main() {
     return
   }
 
+  const { clearConsole, openConsole } = getPreferenceValues<Preferences.ReloadConfigurationFile>()
+
   try {
     await runAppleScript(`
       tell application "Hammerspoon"
         execute lua code "
+          ${clearConsole ? 'hs.console.clearConsole();' : ''}
           hs.reload();
-          ${getPreferenceValues().openConsole ? 'hs.openConsole();' : ''}
-        "
+          ${openConsole ? 'hs.openConsole();' : ''}
+      "
       end tell
     `)
   } catch (error) {

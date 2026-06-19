@@ -1,0 +1,32 @@
+{
+  "Arrow Notation": {
+    "Arrow Notation 1": " \\vec{a} ",
+    "Arrow Notation 2": " \\overrightarrow{AB} "
+  },
+  "Bold Notation": {
+    "Bold Notation 1": " \\boldsymbol{a} ",
+    "Bold Notation Example": " \\boldsymbol{A} ",
+    "Bold Unit Vector 1": " \\boldsymbol{\\mathrm{e}} ",
+    "Bold Unit Vector 2": " \\mathbf{e} "
+  },
+  "Row and Column Vectors": {
+    "Row Vector": " ( a_1, a_2, \\cdots , a_n ) ",
+    "Column Vector": " \\left(\\begin{array}{c} a_1 \\\\a_2 \\\\ \\vdots \\\\ a_n\\end{array}\\right) "
+  },
+  "Norm": {
+    "Norm Example 1": " |\\vec{a}| ",
+    "Norm Example 2": " \\| \\boldsymbol{A} \\| ",
+    "Norm Example 3": " a = \\| \\boldsymbol{a} \\| = \\sqrt{a_1^2 + a_2^2 + \\cdots +a_n^2} "
+  },
+  "Dot Product and Cross Product": {
+    "Dot Product": " \\boldsymbol{a} \\cdot \\boldsymbol{b} ",
+    "Cross Product": " \\boldsymbol{a} \\times \\boldsymbol{b} ",
+    "Dot Product Definition": " ( \\boldsymbol{a} , \\boldsymbol{b} ) = \\boldsymbol{a} \\cdot \\boldsymbol{b} = \\sum_{i=1}^n a_i b_i ",
+    "Cross Product Definition": " [ \\boldsymbol{a} , \\boldsymbol{b} ] = \\boldsymbol{a} \\times \\boldsymbol{b} = \\sum_{j,k} \\varepsilon_{ijk} a_j b_k "
+  },
+  "Transpose": {
+    "Transpose 1": " {}^t \\boldsymbol{A} ",
+    "Transpose 2": " \\boldsymbol{A}^{ \\mathrm{T} } ",
+    "N-dim Column Vector Transpose": " \\boldsymbol{a} = ( a_1, a_2, \\cdots , a_n )^{ \\mathrm{T} } = \\left( \\begin{array}{c} a_1 \\\\ a_2 \\\\ \\vdots \\\\ a_n \\end{array}\\right) "
+  }
+}

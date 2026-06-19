@@ -2,11 +2,15 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "file-info",
 	"title": "File Info",
-	"description": "Quickly view metadata of the currently selected file",
+	"description": "Quickly view or strip metadata (EXIF, GPS, IPTC, etc.) from selected files for privacy and cleaner sharing. Works on macOS and Windows.",
 	"icon": "extension-icon.png",
 	"author": "Envl",
+	"contributors": [
+		"SandeepBaskaran"
+	],
 	"platforms": [
-		"macOS"
+		"macOS",
+		"Windows"
 	],
 	"categories": [
 		"Productivity",
@@ -20,6 +24,12 @@
 			"title": "Show File Info",
 			"description": "Display metadata of the currently selected file",
 			"mode": "view"
+		},
+		{
+			"name": "clear-file-metadata",
+			"title": "Clear File Metadata",
+			"description": "Strip all embedded metadata (EXIF, GPS, IPTC, XMP, etc.) and system attributes from selected files.",
+			"mode": "no-view"
 		}
 	],
 	"dependencies": {

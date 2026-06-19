@@ -32,6 +32,13 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-enhanced-mode",
+      "title": "Toggle Enhanced Mode",
+      "subtitle": "Surge",
+      "description": "Toggle Surge Enhanced Mode setting",
+      "mode": "no-view"
+    },
+    {
       "name": "switch-mode",
       "title": "Switch Mode",
       "subtitle": "Surge",

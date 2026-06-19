@@ -1,48 +1,26 @@
-import { exec as cExec } from "child_process";
-import { promisify } from "util";
 import { ProcessInfo } from "../models/interfaces";
-
-const exec = promisify(cExec);
+import { runCommand } from "./runCommand";
 
 export const KillSignal = {
-  /** Hang Up */
   HUP: "1",
-
-  /** Interrupt */
   INT: "2",
-
-  /** Quit */
   QUIT: "3",
-
-  /** Abort */
   ABRT: "6",
-
-  /** Non-catchable, non-ignorable kill */
   KILL: "9",
-
-  /** Alarm clock */
   ALRM: "14",
-
-  /** Software termination signal */
   TERM: "15",
 };
 
 export type KillSignal = typeof KillSignal[keyof typeof KillSignal];
 
 export async function kill(pid: number | number[], signal: KillSignal) {
-  const pidString = pid instanceof Array ? pid.join(" ") : pid;
-  const cmd = `kill -${signal} ${pidString}`;
-
-  const { stderr } = await exec(cmd);
-  if (stderr) throw new Error(stderr);
+  const pids = pid instanceof Array ? pid : [pid];
+  await runCommand("/bin/kill", [`-${signal}`, ...pids.map(String)], { timeout: 2_000 });
 }
 
 export async function killall(processname: string | string[], signal: KillSignal) {
-  const processnameString =
-    processname instanceof Array ? processname.map((n) => `'${n}'`).join(" ") : `'${processname}'`;
-  const cmd = `/usr/bin/killall -${signal} ${processnameString}`;
-  const { stderr } = await exec(cmd);
-  if (stderr) throw new Error(stderr);
+  const processNames = processname instanceof Array ? processname : [processname];
+  await runCommand("/usr/bin/killall", [`-${signal}`, ...processNames], { timeout: 5_000 });
 }
 
 export async function killProcess(

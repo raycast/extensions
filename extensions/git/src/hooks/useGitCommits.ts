@@ -32,7 +32,7 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
         } else if (branchesState.currentBranch) {
           if (branchFilter.upstream) {
             if (!branchesState.currentBranch.upstream) return undefined;
-            const upstreamName = branchesState.currentBranch.upstream!.fullName;
+            const upstreamName = branchesState.currentBranch.upstream?.fullName;
             return {
               kind: "branch",
               ...branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
@@ -77,12 +77,17 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
     (_repoPath: string, branchFilter: BranchFilter, _selectedBranch?: Branch, _detachedHead?: DetachedHead) =>
       async (options: { page: number }) => {
         const selectedSourceName = evaluateBranchName(branchFilter, branchesState!);
-        const commits = await gitManager.getCommits(selectedSourceName, options.page);
 
-        return {
-          data: commits,
-          hasMore: commits.length > 0,
-        };
+        try {
+          const commits = await gitManager.getCommits(selectedSourceName, options.page);
+
+          return {
+            data: commits,
+            hasMore: commits.length > 0,
+          };
+        } catch {
+          return { data: [], hasMore: false };
+        }
       },
     [gitManager.repoPath, branchFilter, branchesState?.currentBranch, branchesState?.detachedHead], // Include both repository path and branch for proper cache isolation
     {
@@ -109,7 +114,7 @@ function evaluateBranchName(branchFilter: BranchFilter, branchesState: BranchesS
         return branchesState.detachedHead.commitHash;
       } else if (branchesState.currentBranch) {
         if (branchFilter.upstream) {
-          return branchesState.currentBranch.upstream!.fullName;
+          return branchesState.currentBranch.upstream?.fullName;
         } else {
           return branchesState.currentBranch.name;
         }

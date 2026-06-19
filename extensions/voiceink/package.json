@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voiceink",
+  "title": "VoiceInk",
+  "description": "Quick access to your VoiceInk transcriptions",
+  "icon": "extension-icon.png",
+  "author": "metrovoc",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-transcriptions",
+      "title": "Search Transcriptions",
+      "description": "Browse and search through your VoiceInk transcriptions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "databaseSource",
+      "title": "Database Source",
+      "description": "Choose which VoiceInk version to use",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect",
+          "value": "auto"
+        },
+        {
+          "title": "VoiceInk (Official)",
+          "value": "official"
+        },
+        {
+          "title": "VoiceInk CE",
+          "value": "ce"
+        },
+        {
+          "title": "Custom Path",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customDatabasePath",
+      "title": "Custom Database Path",
+      "description": "Path to VoiceInk database (only used when 'Custom Path' is selected)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Library/Application Support/.../default.store"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

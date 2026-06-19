@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "baseUrl": ".",
+    "strict": true,
+    "types": [
+      "@raycast/api",
+      "node"
+    ],
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "react": [
+        "./node_modules/@raycast/api/node_modules/react"
+      ],
+      "react/jsx-runtime": [
+        "./node_modules/@raycast/api/node_modules/react/jsx-runtime"
+      ]
+    },
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*",
+    "raycast-env.d.ts"
+  ]
+}

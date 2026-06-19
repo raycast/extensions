@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.raycast/
+assets/move-cursor
+assets/compiled_raycast_swift/
+swift/movecursor/.build/
+swift/movecursor/.raycast-swift-build/
+raycast-env.d.ts
+*.log

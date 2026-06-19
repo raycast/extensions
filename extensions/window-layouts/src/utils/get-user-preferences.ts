@@ -1,30 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 
-type UserPreferences = Readonly<{
-  gap: number;
-  disableToasts: boolean;
-  keepWindowOpenAfterTiling: boolean;
-}>;
+export function getUserPreferences() {
+  const userPreferences = getPreferenceValues<Preferences>();
+  const gap = parseInt(userPreferences.gap as string, 10);
+  const rawExcluded = (userPreferences.excludedApps as string) ?? "";
 
-export async function getUserPreferences(): Promise<UserPreferences> {
-  try {
-    const userPreferences = getPreferenceValues();
-
-    return {
-      gap: parseInt(userPreferences.gap as string, 10) ?? 0,
-      disableToasts: (userPreferences.disableToasts as boolean) ?? false,
-      keepWindowOpenAfterTiling: (userPreferences.keepWindowOpenAfterTiling as boolean) ?? false,
-    } as UserPreferences;
-  } catch {
-    await showFailureToast("Failed to get preferences", {
-      message: "Using default values.",
-    }).catch(console.error);
-
-    return {
-      gap: 0,
-      disableToasts: false,
-      keepWindowOpenAfterTiling: false,
-    } as UserPreferences;
-  }
+  return {
+    gap: Number.isNaN(gap) ? 0 : gap,
+    disableToasts: Boolean(userPreferences.disableToasts),
+    keepWindowOpenAfterTiling: Boolean(userPreferences.keepWindowOpenAfterTiling),
+    excludedApps: rawExcluded
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  };
 }

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whisper",
+  "title": "Whisper - Share Secrets",
+  "description": "Share passwords, API keys, and private notes securely. Whisper creates encrypted links that expire or self-destruct after viewing.",
+  "icon": "whisper-icon.png",
+  "author": "quentinved",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whisper",
+      "title": "Whisper",
+      "subtitle": "Whisper",
+      "description": "Quickly create an encrypted secret link",
+      "keywords": [
+        "secret",
+        "password",
+        "encrypt",
+        "share",
+        "link",
+        "secure"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "secret 1h false",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "whisper-form",
+      "title": "Create Secret",
+      "subtitle": "Whisper",
+      "description": "Create an encrypted secret link with a form",
+      "keywords": [
+        "secret",
+        "password",
+        "encrypt",
+        "share",
+        "link",
+        "secure"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Whisper Server URL",
+      "type": "textfield",
+      "required": false,
+      "default": "https://whisper.quentinvedrenne.com",
+      "description": "URL of the Whisper server (for self-hosted instances)"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-secret",
+      "title": "Create Secret Link",
+      "description": "Create an encrypted, expiring link for sharing a secret securely"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@create-secret Create a secret link for my-api-key and copy it to the clipboard.",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/abcd1234"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "my-api-key"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@create-secret Create a secret for \"my-api-key\" that expires in 24h and can be viewed multiple times.",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/efgh5678"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "my-api-key",
+                "duration": "24h",
+                "selfDestruct": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@create-secret Whisper my password: hunter2 7d false",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/ijkl9012"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "hunter2",
+                "duration": "7d",
+                "selfDestruct": false
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

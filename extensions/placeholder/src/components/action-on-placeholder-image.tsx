@@ -28,7 +28,7 @@ export function ActionOnPlaceholderImage(props: {
         <Action
           icon={Icon.ChevronUp}
           title={"Previous Page"}
-          shortcut={{ modifiers: ["cmd"], key: "[" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "[" }, Windows: { modifiers: ["ctrl"], key: "[" } }}
           onAction={() => {
             if (page > 1) {
               setPage(page - 1);
@@ -38,7 +38,7 @@ export function ActionOnPlaceholderImage(props: {
         <Action
           icon={Icon.ChevronDown}
           title={"Next Page"}
-          shortcut={{ modifiers: ["cmd"], key: "]" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "]" }, Windows: { modifiers: ["ctrl"], key: "]" } }}
           onAction={() => setPage(page + 1)}
         />
       </ActionPanel.Section>
@@ -49,11 +49,14 @@ export function ActionOnPlaceholderImage(props: {
         <RevealImageAction imageURL={picsumImage.download_url} size={picsumImage.width + "x" + picsumImage.height} />
         <Action.OpenInBrowser
           title={"Open in Unsplash"}
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
           url={picsumImage.url}
         />
         <Action.CopyToClipboard
-          shortcut={{ modifiers: ["opt", "cmd"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["opt", "cmd"], key: "." },
+            Windows: { modifiers: ["alt", "ctrl"], key: "." },
+          }}
           title={"Copy Unsplash URL"}
           content={picsumImage.url}
         />

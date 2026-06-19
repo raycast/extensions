@@ -59,7 +59,7 @@ export default function Command() {
               key={server._id}
               title={server.name}
               icon={{
-                source: server.providerInfo.icon === "" ? "extension-icon.png" : server.providerInfo.icon,
+                source: !server.providerInfo?.icon ? "extension-icon.png" : server.providerInfo.icon,
                 fallback: "extension-icon.png",
                 mask: Image.Mask.RoundedRectangle,
               }}
@@ -123,7 +123,9 @@ export default function Command() {
                             mask: Image.Mask.RoundedRectangle,
                           }}
                           target={
-                            <ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />
+                            project.environments[0] ? (
+                              <ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />
+                            ) : undefined
                           }
                         />
                       ))}

@@ -1,9 +1,10 @@
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { Enhet } from "../types";
 import { formatAddress } from "../utils/format";
-import { canMoveUp, canMoveDown } from "../utils/entity";
+import { canMoveUp, canMoveDown, getEntityIcon, getMoveIndicators } from "../utils/entity";
 import EntityActions from "./EntityActions";
 import FavoriteActions from "./FavoriteActions";
+import { UI_TEXT } from "../constants";
 
 interface FavoritesListProps {
   favorites: Enhet[];
@@ -32,23 +33,14 @@ export default function FavoritesList({
 }: FavoritesListProps) {
   if (favorites.length === 0) {
     return (
-      <List.Section title="Favorites">
-        <List.Item
-          title="No favorites yet"
-          subtitle="Search and ⌘F to add favorites "
-          icon="⭐"
-          // accessories={[
-          //   { text: "Search above to find companies" },
-          //   { text: "Use ⌘F to add to favorites" },
-          //   { text: "Organize with custom emojis" },
-          // ]}
-        />
+      <List.Section title={UI_TEXT.FAVORITES_SECTION}>
+        <List.Item title="No favorites yet" subtitle="Search and ⌘F to add favorites " icon="⭐" />
       </List.Section>
     );
   }
 
   return (
-    <List.Section title={`Favorites${showMoveIndicators ? " - Move Mode Active (⌘⇧)" : ""}`}>
+    <List.Section title={`${UI_TEXT.FAVORITES_SECTION}${showMoveIndicators ? UI_TEXT.MOVE_MODE_INDICATOR : ""}`}>
       {favorites.map((entity, index) => {
         const addressString = formatAddress(entity.forretningsadresse);
         const canMoveUpFlag = canMoveUp(index);
@@ -59,45 +51,18 @@ export default function FavoritesList({
             key={`fav-${entity.organisasjonsnummer}`}
             title={entity.navn}
             subtitle={entity.organisasjonsnummer}
-            icon={entity.emoji ? entity.emoji : entity.faviconUrl ? entity.faviconUrl : "Icon.Globe"}
+            icon={getEntityIcon(entity)}
             accessories={[
               ...(addressString ? [{ text: addressString }] : []),
-              ...(showMoveIndicators && canMoveUpFlag
-                ? [
-                    {
-                      icon: "Icon.ArrowUp",
-                      text: "Move up",
-                      tooltip: "⌘⇧↑ to move up",
-                    },
-                  ]
-                : []),
-              ...(showMoveIndicators && canMoveDownFlag
-                ? [
-                    {
-                      icon: "Icon.ArrowDown",
-                      text: "Move down",
-                      tooltip: "⌘⇧↓ to move down",
-                    },
-                  ]
-                : []),
+              ...getMoveIndicators(index, favorites.length, showMoveIndicators),
             ]}
             actions={
               <ActionPanel>
-                <EntityActions
-                  entity={entity}
-                  addressString={addressString}
-                  onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onCopyAddress={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onOpenInBrowser={() => showToast(Toast.Style.Success, "Opening in browser")}
-                />
+                <EntityActions entity={entity} addressString={addressString} onViewDetails={onViewDetails} />
                 <FavoriteActions
                   entity={entity}
-                  index={index}
+                  canMoveUp={canMoveUpFlag}
+                  canMoveDown={canMoveDownFlag}
                   showMoveIndicators={showMoveIndicators}
                   onRemoveFavorite={onRemoveFavorite}
                   onUpdateEmoji={onUpdateEmoji}

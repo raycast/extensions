@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firefox-tabs",
+  "title": "Firefox Tabs",
+  "description": "Search and switch Firefox tabs from Raycast",
+  "icon": "icon.png",
+  "author": "stephen_lau",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "version": "1.1.0",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Firefox Tabs",
+      "description": "Search open Firefox tabs by title or URL",
+      "mode": "view"
+    },
+    {
+      "name": "setup-bridge",
+      "title": "Setup Firefox Bridge",
+      "description": "Register the native messaging host with Firefox",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

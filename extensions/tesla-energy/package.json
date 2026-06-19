@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tesla-energy",
+  "title": "Tesla Energy",
+  "description": "Monitor your Tesla solar panels and Powerwalls. View real-time solar production, battery charge, grid usage, and energy history.",
+  "icon": "raycast-energy-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-solar-production",
+      "title": "Solar Production",
+      "subtitle": "Tesla Energy",
+      "description": "View solar production, Powerwall, home consumption, and grid data by time period",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-status",
+      "title": "Solar Status",
+      "subtitle": "Tesla Energy",
+      "description": "Show current solar production and Powerwall charge in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showTodaySummary",
+      "title": "Today Summary",
+      "description": "Show a brief overview of today's energy activity",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Show"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed logging for debugging Tesla API calls",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable verbose logging"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

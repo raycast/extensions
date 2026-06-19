@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-commands",
   "title": "Git Commands",
-  "description": "Quickly use and learn Git commands and Oh My Zsh alias.",
+  "description": "Quickly use and learn Git commands and Oh My Zsh aliases.",
   "icon": "icon.png",
   "author": "manumorante",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "chizitere_david"
   ],
   "categories": [
     "Documentation",

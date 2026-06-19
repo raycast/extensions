@@ -1,6 +1,6 @@
 import axios from "axios";
 import { pipeline } from "stream";
-import tar from "tar";
+import * as tar from "tar";
 
 import { environment } from "@raycast/api";
 import fs from "fs";

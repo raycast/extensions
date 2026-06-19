@@ -1,5 +1,14 @@
 # Badges Changelog
 
+## [Maintenance] - 2026-03-07
+
+- Update endpoint badge base URL
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-13
+
+- Expose color picker ability to Windows
+
 ## [Enhancement] - 2025-12-25
 
 - Add support for Windows

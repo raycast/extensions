@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "seventv-search",
+  "version": "1.0.0",
+  "title": "7TV Emotes Search",
+  "description": "Search, preview, copy, and paste 7TV emotes from Raycast.",
+  "icon": "icon.png",
+  "author": "Paranjayy",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Emotes",
+      "description": "Find any 7TV emote",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "eslint src --fix",
+    "lint": "eslint src"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

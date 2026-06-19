@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { updateReminder } from "swift:../../swift/AppleReminders";
 
 import { Frequency } from "../create-reminder";
@@ -29,10 +30,11 @@ type Input = {
   isCompleted?: boolean;
   /**
    * The recurrence settings.
+   * Only include this when the user explicitly asks to add or change recurrence.
    */
   recurrence?: {
     /**
-     * Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".
+     * Recurrence frequency. Only pick the value from this list: "daily", "weekdays", "weekends", "weekly", "monthly", "yearly".
      */
     frequency: Frequency;
     /**
@@ -43,6 +45,23 @@ type Input = {
      * Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.
      */
     endDate?: string;
+  };
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.recurrence) {
+    return undefined;
+  }
+
+  return {
+    message: "Apply recurrence changes to this reminder?",
+    info: [
+      { name: "Reminder ID", value: input.reminderId },
+      { name: "Frequency", value: input.recurrence.frequency },
+      { name: "Interval", value: String(input.recurrence.interval) },
+      { name: "Due Date", value: input.dueDate },
+      { name: "Recurrence End Date", value: input.recurrence.endDate },
+    ],
   };
 };
 

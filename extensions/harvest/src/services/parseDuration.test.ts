@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { parseDuration } from "./parseDuration";
 
 dayjs.extend(duration);
+dayjs.extend(customParseFormat);
 
 const TEST_CASES = [
   // Basic minutes
@@ -43,15 +45,29 @@ const TEST_CASES = [
   { input: "1.5 - 45m", totalMinutes: 90 - 45 },
   { input: "1+1+2", totalMinutes: 4 * 60 },
   { input: "1+15m-5m", totalMinutes: 60 + 15 - 5 },
+
+  // current-time based operations
+  { input: "since 7:30a", totalMinutes: 60, assumeCurrentTime: dayjs("8:30 am", "h:mm a") },
+  { input: "since noon", totalMinutes: 60, assumeCurrentTime: dayjs("1:00 pm", "h:mm a") },
+  { input: "since 1pm", totalMinutes: 60, assumeCurrentTime: dayjs("2:00 pm", "h:mm a") },
+
+  { input: "until 5:00p", totalMinutes: 60, assumeCurrentTime: dayjs("4:00 pm", "h:mm a") },
+  { input: "until 5p", totalMinutes: 60, assumeCurrentTime: dayjs("4:00 pm", "h:mm a") },
+  { input: "until 5pm", totalMinutes: 60, assumeCurrentTime: dayjs("4:00 pm", "h:mm a") },
 ];
 
 const INVALID_CASES = ["", "abc", "h", ":", "1:", "1-2"];
 
 describe("parseDuration", () => {
-  it.each(TEST_CASES)("parses '$input' to $totalMinutes minutes", ({ input, totalMinutes }) => {
-    const result = parseDuration(input);
-    expect(result).not.toBeNull();
-    expect(result!.asMinutes()).toBe(totalMinutes);
+  it.each(TEST_CASES)("parses '$input' to $totalMinutes minutes", ({ input, totalMinutes, assumeCurrentTime }) => {
+    const result = parseDuration(input, assumeCurrentTime);
+
+    if (totalMinutes === null) {
+      expect(result).toBeNull();
+    } else {
+      expect(result).not.toBeNull();
+      expect(result!.asMinutes()).toBe(totalMinutes);
+    }
   });
 
   it.each(INVALID_CASES)("returns null for invalid input: '%s'", (input) => {

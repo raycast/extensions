@@ -24,7 +24,7 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder={placeholder}
       onSearchTextChange={setNewReminderTitle}
-      filtering={true}
+      filtering={{ keepSectionOrder: true }}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by List" onChange={setListId} value={listId}>
           {data?.lists && data.lists.length > 0 ? (

@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { getAccessories } from "./utils";
 import { Lottery } from "./types";
 
-const LOTTERY_RESULTS_URL = "https://api.2626.com.cn/api/getCaipiaoInfo";
+const LOTTERY_RESULTS_URL = "https://api.xkzbw.com/api/getCaipiaoInfo";
 
 export default function Command() {
   const { data, isLoading } = useFetch<{ data: Lottery[] }>(LOTTERY_RESULTS_URL, {

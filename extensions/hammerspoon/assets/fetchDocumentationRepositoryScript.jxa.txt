@@ -1,0 +1,324 @@
+function run (argv) {
+  const mode = argv[0] === 'detail' ? 'detail' : 'repository'
+  let result
+
+  if (mode === 'detail') {
+    result = getDetail(argv[1], argv[2], argv[3])
+  } else {
+    result = getRepository()
+  }
+
+  return JSON.stringify(result)
+}
+
+function readDocumentationFile (docFilePath, sourceType, includeDetails, onItemCb) {
+  ObjC.import('Foundation')
+
+  const assert = function assert(condition, message) {
+    if (!condition) {
+      throw new Error(message || 'Assertion failed')
+    }
+  }
+
+  let items
+
+  try {
+    // read the file content with obj-c and get it in JS, finally parse it as JSON
+    const fileContent = $.NSString.alloc.initWithDataEncoding(
+      $.NSFileManager.defaultManager.contentsAtPath(docFilePath),
+      $.NSUTF8StringEncoding
+    ).js
+
+    items = JSON.parse(fileContent)
+  } catch (error) {
+    throw new Error(`Error when parsing json of documentation file at "${docFilePath}". Cause: ${error.message}`)
+  }
+
+  const pendingSubmodulesSet = new Set()
+  const instancesByNameMap = new Map()
+  const toProcess = items.map((item) => ({ item }))
+
+  while (toProcess.length > 0) {
+    const current = toProcess.shift()
+
+    if (current == null) {
+      continue
+    }
+
+    const { parent, item } = current
+
+    try {
+      assert(item.name != null, `Expected to get a non-null name`)
+      assert(typeof item.name === 'string', `Expected name to be a string`)
+      assert(item.name.trim().length > 0, `Expected name to be non-empty string`)
+
+      let type = item.type
+      let name
+
+      if (parent == null && sourceType === 'Lua') {
+        if (!type) {
+          type = 'manual'
+        }
+        name = item.name.startsWith('lua.') ? item.name.slice(4) : item.name
+      } else {
+        name = item.name
+      }
+
+      if (parent != null) {
+        // skip adding Lua prefix for globals
+        const parentName = sourceType === 'Lua' && parent.name === 'lua' ? '' : parent.name
+
+        if (parentName !== '') {
+          name = `${parent.name}.${name}`
+        }
+      }
+
+      if (parent != null) {
+        assert(item.type != null, `Expected to get a non-null type`)
+        assert(typeof item.type === 'string', `Expected type to be a string`)
+        assert(item.type.trim().length > 0, `Expected type to be non-empty string`)
+      }
+
+      const idParts = []
+
+      if (parent != null) {
+        idParts.push(parent.id)
+      } else {
+        idParts.push(sourceType)
+      }
+
+      idParts.push(type)
+      idParts.push(name)
+
+      let description = item.desc
+
+      // generate description from .doc when it does not exists
+      if (description == null) {
+        const firstNewLineIndex = item.doc.indexOf('\n')
+
+        if (firstNewLineIndex === -1) {
+          description = item.doc.slice(0, 100)
+        } else {
+          description = item.doc.slice(0, firstNewLineIndex)
+        }
+
+        if (description.startsWith('`') && description.endsWith('`')) {
+          description = description.slice(1, -1)
+        }
+      }
+
+      let documentation = item.doc
+
+      // verify that .desc is part of .doc, if not concat it to
+      // get the final documentation to use
+      if (item.desc != null && !item.doc.startsWith(item.desc)) {
+        documentation = item.desc + '\n\n' + item.doc
+      }
+
+      if (item.signature) {
+        documentation = `\`${item.signature}\` _(${item.type})_` + '\n\n' + documentation
+      }
+
+      if (item.file && item.lineno) {
+        let source
+
+        if (sourceType === 'hs') {
+          source = `Source Code: [${item.file} line ${item.lineno}](https://github.com/Hammerspoon/hammerspoon/blob/master/${item.file}#L${item.lineno})`
+        } else {
+          source = `Source Code: ${item.file}:${item.lineno}`
+        }
+
+        documentation += `\n\n---\n${source}`
+      }
+
+      const codeBlockRegexp = /```[a-z]+ ?\n?([\s\S]*?)\n?```/g
+
+      // we ensure that code blocks are well-formed, some examples from hs
+      // documentation contains invalid code blocks.
+      documentation = documentation.replace(codeBlockRegexp, (match, blockContent) => {
+        let newText
+        const contentIndex = match.indexOf(blockContent)
+        const charBeforeContent = match[contentIndex - 1]
+
+        if (charBeforeContent !== '\n') {
+          newText = match.slice(0, contentIndex) + '\n'
+        } else {
+          newText = match.slice(0, contentIndex)
+        }
+
+        newText += blockContent
+
+        const charAfterContent = match[contentIndex + blockContent.length]
+
+        if (charAfterContent !== '\n') {
+          newText += '\n' + match.slice(contentIndex + blockContent.length)
+        } else {
+          newText += match.slice(contentIndex + blockContent.length)
+        }
+
+        return newText
+      })
+
+      if (sourceType !== 'Lua' && Array.isArray(item.submodules) && item.submodules.length > 0) {
+        for (const submodule of item.submodules) {
+          pendingSubmodulesSet.add(`${name}.${submodule}`)
+        }
+      }
+
+      const docItem = {
+        id: idParts.join('-'),
+        sourceType,
+        sourceFile: docFilePath,
+        name,
+        type: type,
+        description,
+        parentId: parent?.id
+      }
+
+      if (includeDetails) {
+        docItem.documentation = documentation
+      }
+
+      if (sourceType !== 'Lua' && pendingSubmodulesSet.has(name)) {
+        const parentName = name.split('.').slice(0, -1).join('.')
+        const parentInstance = instancesByNameMap.get(parentName)
+
+        if (parentInstance) {
+          parentInstance.childrenIds ??= []
+          parentInstance.childrenIds.push(docItem.id)
+          pendingSubmodulesSet.delete(name)
+        }
+      }
+
+      instancesByNameMap.set(name, docItem)
+
+      if (parent) {
+        parent.childrenIds ??= []
+        parent.childrenIds.push(docItem.id)
+      }
+
+      if (typeof onItemCb === 'function') {
+        onItemCb(docItem)
+      }
+
+      if (Array.isArray(item.items)) {
+        if (parent != null) {
+          throw new Error(`Expected that subitem does not contain more items`)
+        }
+
+        // process subitems as the last elements after root items
+        toProcess.push(
+          ...item.items.map((subitem) => ({
+            item: subitem,
+            parent: docItem
+          }))
+        )
+      }
+    } catch (error) {
+      let msg = `Error when processing documentation file at "${docFilePath}"`
+
+      if (parent && typeof parent.name === 'string') {
+        msg += ` (parent: "${parent.name}")`
+      }
+
+      if (typeof item.name === 'string') {
+        msg += ` (item: "${item.name}")`
+      }
+
+      msg += '.'
+
+      if (error instanceof Error) {
+        msg += `Details: ${error.message}`
+      }
+
+      throw new Error(msg, { cause: error })
+    }
+  }
+}
+
+function getDetail (docFilePath, sourceType, id) {
+  let documentationItem
+
+  readDocumentationFile(docFilePath, sourceType, true, (docItem) => {
+    if (docItem.id === id) {
+      documentationItem = docItem
+    }
+  })
+
+  return documentationItem
+}
+
+function getRepository () {
+  ObjC.import('Foundation')
+  const app = Application('Hammerspoon')
+
+  // we get all files and built in files separately because
+  // technically user may unregister json files with `hs.doc.unregisterJSONFile`
+  const output = app.executeLuaCode(`
+    hs.json.encode({
+      builtInFiles = {
+        hs.docstrings_json_file,
+        hs.docstrings_json_file:gsub('/docs.json$', '/lua.json')
+      },
+      allFiles = hs.doc.registeredFiles()
+    })
+  `)
+
+  const docsInfo = JSON.parse(output)
+  const builtInFiles = docsInfo?.builtInFiles ?? []
+  const allFiles = docsInfo?.allFiles ?? []
+  const documentationList = []
+  const sourceList = []
+  const sourceToDocumentationRangeEntries = []
+  const documentationItemsEntries = []
+
+  let itemIdx = -1
+
+  for (const docFilePath of allFiles) {
+    const dirname = $(docFilePath).stringByStandardizingPath.stringByDeletingLastPathComponent.js
+    // get basename of the directory path
+    let sourceName = $(dirname).stringByStandardizingPath.lastPathComponent.js
+    let sourceType = 'Spoon'
+
+    if (docFilePath === builtInFiles[0]) {
+      sourceName = 'hs'
+      sourceType = 'hs'
+    } else if (docFilePath === builtInFiles[1]) {
+      sourceName = 'Lua'
+      sourceType = 'Lua'
+    }
+
+    sourceList.push({
+      type: sourceType,
+      name: sourceName,
+      path: docFilePath
+    })
+
+    let rangeStart = -1
+
+    readDocumentationFile(docFilePath, sourceType, false, (docItem) => {
+      // keep a record of the id to index of the item in the documentation list
+      // for fast access
+      documentationItemsEntries.push([docItem.id, documentationList.length])
+
+      documentationList.push(docItem)
+
+      itemIdx++
+
+      if (rangeStart === -1) {
+        rangeStart = itemIdx
+      }
+    })
+
+    if (rangeStart !== -1) {
+      sourceToDocumentationRangeEntries.push([docFilePath, [rangeStart, itemIdx]])
+    }
+  }
+
+  return {
+    sourceList,
+    sourceToDocumentationRangeEntries,
+    documentationList,
+    documentationItemsEntries
+  }
+}

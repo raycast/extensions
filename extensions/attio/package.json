@@ -70,8 +70,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "attio-js": "^0.1.1",
     "date-fns": "^4.1.0"
   },
