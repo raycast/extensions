@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Fix] - 2026-06-19
+## [Fix] - {PR_MERGE_DATE}
 
 - Fix the `Color Wheel` command showing an oversized, clipped wheel by replacing the preview asset and rendering it at a smaller height
 
