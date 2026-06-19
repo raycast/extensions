@@ -1,6 +1,6 @@
 # MiMo TTS Changelog
 
-## [Fix Setup Form Reset] - {PR_MERGE_DATE}
+## [Fix Setup Form Reset] - 2026-06-19
 
 - Fix "Reset to Preferences" in Setup MiMo Voice Defaults: resetting now syncs the model dropdown and voice filter, so a later Save no longer silently re-saves the pre-reset model and recreates the override that was just cleared.
 
