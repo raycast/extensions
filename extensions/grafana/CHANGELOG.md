@@ -1,6 +1,6 @@
 # Grafana Changelog
 
-## [Fix Explore link URL encoding] - {PR_MERGE_DATE}
+## [Fix Explore link URL encoding] - 2026-06-19
 
 - Use `encodeURIComponent` for the JSON `panes` query parameter instead of `encodeURI`, which left `{`, `}`, `"`, and `&` unescaped, producing broken Explore URLs.
 - Fix double `&&` typo in the query string.
