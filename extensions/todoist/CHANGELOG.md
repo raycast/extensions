@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Keep recurrence when rescheduling] - {PR_MERGE_DATE}
+## [Keep recurrence when rescheduling] - 2026-06-19
 
 - **Recurring tasks keep their repeat rule** when you change the due date from task actions or the menu bar (including shortcuts like Today, Tomorrow, Next Week, and Next Weekend).
 - **Hourly recurring tasks** still anchor an all-day due to the current time when rescheduled.
