@@ -41,7 +41,7 @@
       "title": "API Token",
       "description": "Create a token in Kobbe Settings -> Agent access.",
       "type": "password",
-      "required": false
+      "required": true
     },
     {
       "name": "baseUrl",

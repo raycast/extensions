@@ -91,7 +91,7 @@ export function SiteListItem(props: { site: KobbeSite; range?: TimeRange; onRefr
     <List.Item
       title={props.site.name}
       subtitle={siteDomain(props.site)}
-      icon="assets/kobbe-icon.png"
+      icon="assets/extension-icon.png"
       accessories={[...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : [])]}
       actions={<SiteActions site={props.site} range={props.range} onRefresh={props.onRefresh} />}
     />
@@ -133,7 +133,7 @@ export function SitesPicker(props: {
             key={site.id}
             title={site.name}
             subtitle={siteDomain(site)}
-            icon="assets/kobbe-icon.png"
+            icon="assets/extension-icon.png"
             accessories={[...(createdAt ? [{ date: createdAt, tooltip: "Created" }] : [])]}
             actions={props.renderActions(site, sites.revalidate)}
           />
