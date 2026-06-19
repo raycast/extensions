@@ -15,43 +15,16 @@
       "subtitle": "Display Scripts",
       "description": "Switch between side-by-side and stacked MacBook + external monitor layouts.",
       "mode": "no-view"
+    },
+    {
+      "name": "configure-displays",
+      "title": "Configure Displays",
+      "subtitle": "Display Scripts",
+      "description": "Pick your displays from a list, identify them on-screen, and capture the two MacBook origin layouts.",
+      "mode": "view"
     }
   ],
   "preferences": [
-    {
-      "name": "externalDisplayId",
-      "type": "textfield",
-      "title": "External Display ID",
-      "description": "Persistent screen ID of your external monitor. Get it by running `displayplacer list` in Terminal.",
-      "required": true,
-      "placeholder": "67CDF9A2-1A6E-4CAD-80D4-C46F201EECE3"
-    },
-    {
-      "name": "macbookDisplayId",
-      "type": "textfield",
-      "title": "MacBook Display ID",
-      "description": "Persistent screen ID of your MacBook's built-in display.",
-      "required": true,
-      "placeholder": "37D8832A-2D66-02CA-B9F7-8F30A301B230"
-    },
-    {
-      "name": "macbookOriginSideBySide",
-      "type": "textfield",
-      "title": "MacBook Origin (Side-by-Side)",
-      "description": "MacBook's origin coordinate in the side-by-side layout (laptop pushed to the side with external keyboard in front).",
-      "required": true,
-      "default": "(-1512,360)",
-      "placeholder": "(-1512,360)"
-    },
-    {
-      "name": "macbookOriginUpAndDown",
-      "type": "textfield",
-      "title": "MacBook Origin (Up-and-Down)",
-      "description": "MacBook's origin coordinate in the stacked layout (laptop pulled in front of you on a stand for meetings).",
-      "required": true,
-      "default": "(949,1440)",
-      "placeholder": "(949,1440)"
-    },
     {
       "name": "displayplacerPath",
       "type": "textfield",
@@ -68,7 +41,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.13.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"

@@ -5,7 +5,7 @@ Toggle between two MacBook + external monitor layouts in one keystroke.
 Built for the specific dual-mode setup where your laptop sits on a stand next to an external monitor:
 
 - **Up-and-down (meeting mode)** — external on top, MacBook stacked below and centered, so the webcam lines up with your face when the laptop is pulled in front of you.
-- **Side-by-side (focus mode)** — MacBook pushed to the left, external as the main canvas, with the external keyboard in front of you.
+- **Side-by-side (focus mode)** — MacBook pushed to the side, external as the main canvas, with the external keyboard in front of you.
 
 ## Setup
 
@@ -13,25 +13,25 @@ Built for the specific dual-mode setup where your laptop sits on a stand next to
    ```sh
    brew install displayplacer
    ```
-2. Run `displayplacer list` in Terminal. Find the **Persistent screen id** lines for your external monitor and MacBook.
-3. Open the extension preferences and fill in:
-   - **External Display ID** / **MacBook Display ID** — the persistent IDs from step 2.
-   - **MacBook Origin (Side-by-Side)** — the `Origin:` value you want the MacBook to land at in focus mode (defaults to `(-1512,360)`).
-   - **MacBook Origin (Up-and-Down)** — the `Origin:` value in meeting mode (defaults to `(949,1440)`).
-   - **Path to displayplacer** — defaults to `/opt/homebrew/bin/displayplacer`; change for Intel Macs (`/usr/local/bin/displayplacer`).
+2. In Raycast, run **Configure Displays**. From there you can:
+   - **Pick your displays** from a dropdown (no copy-pasting UUIDs).
+   - **Identify a display** with `⌘1` / `⌘2` — the cursor will shake on the physical screen so you know which is which.
+   - **Capture the two MacBook origins**:
+     - Press `⌘D` to open System Settings → Displays.
+     - Drag the MacBook into the side-by-side position you want and press `⌘S` to capture it.
+     - Drag it into the up-and-down position and press `⌘U` to capture that one.
+   - Press `⌘↩` to save.
+3. Bind **Toggle Arrangement** to a Raycast hotkey.
 
-## Assumed display setup
+## Preferences
 
-Resolutions and refresh rates are hardcoded to the author's setup:
+Only one manifest preference: **Path to displayplacer** (defaults to `/opt/homebrew/bin/displayplacer`; change to `/usr/local/bin/displayplacer` on Intel Macs).
 
-- External: **3440×1440 @ 144 Hz**, rotated 180° (typical for an inverted ultrawide mount).
-- MacBook: **1512×982 @ 120 Hz**, HiDPI scaling.
+All other configuration lives in the Configure Displays form.
 
-If your displays differ, fork the extension and adjust `buildLayoutArgs` in `src/toggle-arrangement.tsx`.
+## How it works
 
-## Usage
-
-Run **Toggle Arrangement** from Raycast. The toast confirms which layout you're now in.
+`Toggle Arrangement` runs `displayplacer list`, parses the MacBook's current `Origin:`, picks the opposite of the two captured layouts, and applies it. Resolutions and refresh rates of each display are read live from `displayplacer list`, so the extension adapts to whatever resolutions your displays are actually running.
 
 ## Source
 
