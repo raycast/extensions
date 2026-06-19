@@ -32,3 +32,4 @@ npm run fix-lint
 
 # To locally build the extension
 npm run build
+```
