@@ -165,9 +165,6 @@ export function formatRevenue(revenue: KobbeRevenue): string {
 }
 
 export function formatRevenueAmount(amount: number, currency: string | null, multipleCurrencies = false): string {
-  if (amount <= 0) {
-    return "US$0.00";
-  }
   if (multipleCurrencies || !currency) {
     return "Multiple currencies";
   }
