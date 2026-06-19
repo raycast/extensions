@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Guard against empty sync response arrays] - {PR_MERGE_DATE}
+## [Guard against empty sync response arrays] - 2026-06-19
 
 - Prevent cache corruption when the Todoist Sync API returns an empty array for projects, items, labels, filters, or notes during incremental sync mutations.
 
