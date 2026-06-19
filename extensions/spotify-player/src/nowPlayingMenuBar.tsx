@@ -30,7 +30,11 @@ import { View } from "./components/View";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
+import { removeFromPlaylist } from "./api/removeFromPlaylist";
+import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
+import removeTrackFromPlaylistCache from "./helpers/removeTrackFromPlaylistCache";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
 import { getErrorMessage } from "./helpers/getError";
@@ -61,6 +65,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
     options: { execute: launchType === LaunchType.UserInitiated },
+  });
+
+  const ownedPlaylists = myPlaylistsData?.items?.filter((playlist) => playlist.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: launchType === LaunchType.UserInitiated && ownedPlaylists.length > 0 },
   });
 
   // Sync URI from Spotify app data
@@ -279,31 +290,43 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       )}
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
-        {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id)
-          .map((playlist, index) => {
-            return (
-              playlist.name &&
-              playlist.id && (
-                <MenuBarExtra.Item
-                  key={`${playlist.id}-${index}`}
-                  title={playlist.name}
-                  onAction={async () => {
-                    try {
-                      await addToPlaylist({
-                        playlistId: playlist.id as string,
-                        trackUris: [uri as string],
-                      });
-                      showHUD(`Added to ${playlist.name}`);
-                    } catch (err) {
-                      const error = getErrorMessage(err);
-                      showHUD(error);
-                    }
-                  }}
-                />
-              )
-            );
-          })}
+        {ownedPlaylists.map((playlist, index) => {
+          if (!playlist.name || !playlist.id) return null;
+          const alreadyInPlaylist = playlistsContainingTrack.includes(playlist.id);
+          return (
+            <MenuBarExtra.Item
+              key={`${playlist.id}-${index}`}
+              title={playlist.name}
+              icon={
+                alreadyInPlaylist
+                  ? { source: Icon.Checkmark, tintColor: Color.Green }
+                  : { source: Icon.Circle, tintColor: Color.SecondaryText }
+              }
+              onAction={async () => {
+                try {
+                  if (alreadyInPlaylist) {
+                    await removeFromPlaylist({
+                      playlistId: playlist.id as string,
+                      trackUris: [{ uri: uri as string }],
+                    });
+                    await removeTrackFromPlaylistCache(playlist.id as string, uri as string);
+                    showHUD(`Removed from ${playlist.name}`);
+                  } else {
+                    await addToPlaylist({
+                      playlistId: playlist.id as string,
+                      trackUris: [uri as string],
+                    });
+                    await addTrackToPlaylistCache(playlist.id as string, { uri } as TrackObject);
+                    showHUD(`Added to ${playlist.name}`);
+                  }
+                } catch (err) {
+                  const error = getErrorMessage(err);
+                  showHUD(error);
+                }
+              }}
+            />
+          );
+        })}
       </MenuBarExtra.Submenu>
       {myDevicesData?.devices && (
         <MenuBarExtra.Submenu icon={Icon.Mobile} title="Connect Device">

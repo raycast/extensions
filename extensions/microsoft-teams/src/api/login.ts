@@ -3,7 +3,7 @@ import { OAuth } from "@raycast/api";
 import { prefs } from "./preferences";
 import { cacheCurrentUserId } from "./user";
 
-const scope = "offline_access user.read Presence.ReadWrite Chat.Read Presence.Read.All";
+const scope = "offline_access user.read User.Read.All Presence.ReadWrite Chat.Read Presence.Read.All";
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Microsoft",
@@ -27,8 +27,18 @@ interface RequestTokenWithRefreshToken {
   refreshToken: string;
 }
 
+interface MicrosoftTokenResponse {
+  access_token?: string;
+  refresh_token?: string;
+  id_token?: string;
+  token_type?: string;
+  scope?: string;
+  expires_in?: number;
+  error?: string;
+  error_description?: string;
+}
+
 async function login(): Promise<string> {
-  console.log("oauthLogin");
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: `https://login.microsoftonline.com/${prefs.tenantId}/oauth2/v2.0/authorize`,
     clientId: prefs.clientId,
@@ -40,19 +50,7 @@ async function login(): Promise<string> {
     },
   });
   const { authorizationCode } = await oauthClient.authorize(authRequest);
-  console.log(authorizationCode);
   return requestTokens({ grantType: "authorization_code", authRequest, authorizationCode });
-}
-
-interface RequestTokenWithCode {
-  grantType: "authorization_code";
-  authRequest: OAuth.AuthorizationRequest;
-  authorizationCode: string;
-}
-
-interface RequestTokenWithRefreshToken {
-  grantType: "refresh_token";
-  refreshToken: string;
 }
 
 async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRefreshToken): Promise<string> {
@@ -73,8 +71,30 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
     method: "POST",
     body: form,
   });
-  const tokenSet = (await response.json()) as OAuth.TokenResponse;
-  console.log(tokenSet);
+  const tokenResponse = (await response.json()) as MicrosoftTokenResponse;
+  if (!response.ok) {
+    if (tokenResponse.error_description?.includes("AADSTS7000218")) {
+      throw new Error(
+        "Microsoft app registration is configured as a confidential client. In Azure Portal, set Authentication -> Platform to 'Mobile and desktop applications' with redirect URI 'https://raycast.com/redirect?packageName=Extension' and enable 'Allow public client flows'."
+      );
+    }
+    throw new Error(
+      tokenResponse.error_description ?? tokenResponse.error ?? `Token request failed with status ${response.status}`
+    );
+  }
+
+  if (!tokenResponse.access_token) {
+    throw new Error("Token request succeeded but access_token is missing");
+  }
+
+  const tokenSet: OAuth.TokenResponse = {
+    access_token: tokenResponse.access_token,
+    refresh_token: tokenResponse.refresh_token,
+    id_token: tokenResponse.id_token,
+    scope: tokenResponse.scope,
+    expires_in: tokenResponse.expires_in,
+  };
+
   await oauthClient.setTokens(tokenSet);
   await cacheCurrentUserId();
   return tokenSet.access_token;

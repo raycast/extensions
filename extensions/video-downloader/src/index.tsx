@@ -14,6 +14,7 @@ import {
   showHUD,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
@@ -26,6 +27,11 @@ import {
   getFormatTitle,
   getFormatValue,
   getytdlPath,
+  getCommonArgs,
+  copyToClipboardAction,
+  describeYtdlpError,
+  looksLikeFilePath,
+  hasPlaylist,
   isMac,
   isValidHHMM,
   isValidUrl,
@@ -37,15 +43,11 @@ import { MP3_FORMAT_ID } from "./utils.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
-const {
-  downloadPath,
-  autoLoadUrlFromClipboard,
-  autoLoadUrlFromSelectedText,
-  enableBrowserExtensionSupport,
-  forceIpv4,
-} = getPreferenceValues<ExtensionPreferences>();
+const { downloadPath, autoLoadUrlFromClipboard, autoLoadUrlFromSelectedText, enableBrowserExtensionSupport } =
+  getPreferenceValues<ExtensionPreferences>();
 
 export default function DownloadVideo() {
+  const { push } = useNavigation();
   const [error, setError] = useState(0);
   const [warning, setWarning] = useState("");
 
@@ -61,6 +63,11 @@ export default function DownloadVideo() {
       if (!values.format) return;
       const options = ["-o", path.join(downloadPath, `${video?.title || "video"} (%(id)s).%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
+
+      // The metadata preview is always for the single video, so default to
+      // --no-playlist; only pull the whole list when the user opted in via the
+      // "Download entire playlist" checkbox (shown only for playlist URLs).
+      options.push(values.downloadPlaylist ? "--yes-playlist" : "--no-playlist");
 
       options.push("--ffmpeg-location", ffmpegPath);
 
@@ -82,11 +89,16 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const downloadProcess = spawn(ytdlPath, [...options, values.url], {
+      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, values.url], {
         env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
       });
 
       let filePath = "";
+      // Accumulate the full stderr stream so a failure can surface complete logs
+      // via "Copy Logs". `lastErrorLine` is the most useful single line to show
+      // in the toast body when the download fails.
+      const logLines: string[] = [];
+      let lastErrorLine = "";
 
       downloadProcess.stdout.on("data", (data) => {
         const line = data.toString() as string;
@@ -101,27 +113,60 @@ export default function DownloadVideo() {
           toast.message = `${Math.floor(progress)}%`;
         }
 
-        if (isMac ? line.startsWith("/") : line.match(/^[a-zA-Z]:\\/)) {
+        if (looksLikeFilePath(line)) {
           filePath = line.trim();
         }
       });
 
       downloadProcess.stderr.on("data", (data) => {
         const line = data.toString();
+        logLines.push(line);
 
+        // Surface warnings inline, and remember the last error line for the
+        // failure toast — but do NOT touch toast.message here: the running toast
+        // is reserved for download progress (stderr would otherwise clobber it
+        // on every chunk). The exit code in `close` is the real failure verdict.
         if (line.startsWith("WARNING:")) {
           setWarning(line);
         }
-
         if (line.startsWith("ERROR:")) {
-          toast.title = "Download Failed";
-          toast.style = Toast.Style.Failure;
+          lastErrorLine = line.trim();
         }
-        toast.message = line;
       });
 
-      downloadProcess.on("close", () => {
-        if (toast.style === Toast.Style.Failure) {
+      downloadProcess.on("close", (code) => {
+        // The exit code is the sole success/failure verdict: 0 is success,
+        // anything else (including null, i.e. killed by a signal) is a failure.
+        if (code !== 0) {
+          const reason = code === null ? "yt-dlp was terminated" : `yt-dlp exited with code ${code}`;
+          toast.title = "Download Failed";
+          toast.style = Toast.Style.Failure;
+          toast.message = lastErrorLine || reason;
+
+          const logs = logLines.join("").trim() || reason;
+          toast.primaryAction = copyToClipboardAction("Copy Logs", logs, "Copied Logs to Clipboard");
+
+          // If a file actually landed on disk before the non-zero exit (e.g. a
+          // non-fatal postprocessor failure), still let the user open it.
+          if (filePath) {
+            toast.secondaryAction = {
+              title: isMac ? "Open in Finder" : "Open in Explorer",
+              shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+              onAction: () => {
+                open(path.dirname(filePath));
+              },
+            };
+          } else {
+            // "Bad guest token" and similar extractor failures are often resolved
+            // by a newer yt-dlp, so offer a one-key jump to the update view.
+            toast.secondaryAction = {
+              title: "Update Libraries",
+              shortcut: { modifiers: ["cmd", "shift"], key: "u" },
+              onAction: () => {
+                push(<Updater />);
+              },
+            };
+          }
           return;
         }
 
@@ -177,20 +222,19 @@ export default function DownloadVideo() {
     },
   });
 
-  const { data: video, isLoading } = usePromise(
+  const {
+    data: video,
+    isLoading,
+    error: videoError,
+    revalidate,
+  } = usePromise(
     async (url: string) => {
       if (!url) return;
       if (!isValidUrl(url)) return;
 
       const result = await execa(
         ytdlPath,
-        [
-          forceIpv4 ? "--force-ipv4" : "",
-          "--no-playlist",
-          "--dump-json",
-          "--format-sort=resolution,ext,tbr",
-          url,
-        ].filter(Boolean),
+        [...getCommonArgs({ throttle: true }), "--no-playlist", "--dump-json", "--format-sort=res,ext,tbr", url],
         {
           env: {
             ...process.env,
@@ -205,16 +249,26 @@ export default function DownloadVideo() {
     [values.url],
     {
       onError(error) {
+        const friendly = describeYtdlpError(error);
+        // "Try Again" is the primary action only when retrying could help
+        // (transient/rate-limit failures); for an unsupported or unavailable
+        // URL it would be misleading, so Copy Logs leads instead. Copy Logs
+        // always copies the full raw error for debugging, not the summary.
+        const copyLogs = copyToClipboardAction("Copy Logs", error.message, "Copied Logs to Clipboard");
         showToast({
           style: Toast.Style.Failure,
-          title: "Video not found with the provided URL",
-          message: error.message,
-          primaryAction: {
-            title: "Copy to Clipboard",
-            onAction: () => {
-              Clipboard.copy(error.message);
-            },
-          },
+          title: friendly.title,
+          message: friendly.message,
+          primaryAction: friendly.retryable
+            ? {
+                title: "Try Again",
+                shortcut: { modifiers: ["cmd"], key: "r" },
+                onAction: () => {
+                  revalidate();
+                },
+              }
+            : copyLogs,
+          secondaryAction: friendly.retryable ? copyLogs : undefined,
         });
       },
     },
@@ -276,6 +330,17 @@ export default function DownloadVideo() {
 
   const formats = useMemo(() => getFormats(video), [video]);
 
+  // Classify the load error once so the placeholder, the Title row, and the
+  // Try Again action all agree on whether a retry would help.
+  const friendlyError = videoError ? describeYtdlpError(videoError) : null;
+
+  // Friendlier, state-aware placeholder for the Title row. Em dash means "no URL
+  // queried yet". On a retryable error, nudge toward Try Again; otherwise show
+  // the reason (e.g. "Unsupported Site") since retrying won't help.
+  const titlePlaceholder =
+    video?.title ??
+    (friendlyError ? (friendlyError.retryable ? "Couldn't load — press ⌘R to try again" : friendlyError.title) : "—");
+
   if (missingExecutable) {
     return <Installer executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
@@ -294,6 +359,19 @@ export default function DownloadVideo() {
                 handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
               }}
             />
+            {/* Only offer Try Again when revalidating could actually help: a
+                retryable fetch error, or a valid URL that hasn't loaded yet.
+                Invalid URLs (no-op re-query) and non-retryable errors like
+                "Unsupported Site" are excluded. */}
+            {((friendlyError?.retryable ?? false) ||
+              (!video && !isLoading && !videoError && isValidUrl(values.url))) && (
+              <Action
+                icon={Icon.ArrowClockwise}
+                title="Try Again"
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => revalidate()}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
@@ -307,7 +385,7 @@ export default function DownloadVideo() {
         />
       }
     >
-      <Form.Description title="Title" text={video?.title ?? "Video not found"} />
+      <Form.Description title="Title" text={titlePlaceholder} />
       <Form.TextField
         {...itemProps.url}
         autoFocus
@@ -329,6 +407,14 @@ export default function DownloadVideo() {
             </Form.Dropdown.Section>
           ))}
         </Form.Dropdown>
+      )}
+      {hasPlaylist(values.url) && (
+        <Form.Checkbox
+          {...itemProps.downloadPlaylist}
+          title="Playlist"
+          label="Download entire playlist"
+          info="This URL is part of a playlist. Leave unchecked to download only the video shown above."
+        />
       )}
     </Form>
   );

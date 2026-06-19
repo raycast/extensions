@@ -80,11 +80,12 @@ type Input = {
     date?: string; // Available but string format is recommended
   };
   /**
-   * The deadline of the task in the format YYYY-MM-DD (RFC 3339)
+   * The deadline of the task in the format YYYY-MM-DD (RFC 3339). Omit unless the user explicitly asks for a
+   * Todoist deadline.
    */
   deadline?: { date: string };
   /**
-   * The duration of the task
+   * The duration of the task. Omit unless the user explicitly asks for a Todoist duration.
    * @property unit - The time unit ('minute' or 'day')
    * @property amount - Positive integer representing the amount of time
    */
@@ -140,9 +141,32 @@ type Input = {
   auto_parse_labels?: boolean;
 };
 
+function isValidDeadline(deadline: Input["deadline"]): deadline is NonNullable<Input["deadline"]> {
+  return typeof deadline?.date === "string" && deadline.date.trim().length > 0;
+}
+
+function isValidDuration(duration: Input["duration"]): duration is NonNullable<Input["duration"]> {
+  return (
+    duration != null &&
+    (duration.unit === "minute" || duration.unit === "day") &&
+    Number.isInteger(duration.amount) &&
+    duration.amount > 0
+  );
+}
+
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
-  input.priority = mapPriority(input.priority);
+  const taskArgs: Input = { ...input, priority: mapPriority(input.priority) };
+
+  if (isValidDeadline(input.deadline)) {
+    taskArgs.deadline = { date: input.deadline.date.trim() };
+  } else {
+    delete taskArgs.deadline;
+  }
+
+  if (!isValidDuration(input.duration)) {
+    delete taskArgs.duration;
+  }
 
   return syncRequest({
     sync_token,
@@ -152,7 +176,7 @@ export default withTodoistApi(async function (input: Input) {
         type: "item_add",
         temp_id,
         uuid: crypto.randomUUID(),
-        args: input,
+        args: taskArgs,
       },
     ],
   });

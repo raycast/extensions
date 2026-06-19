@@ -17,6 +17,10 @@ function runJS(browser: SupportedBrowsers | string, code: string): string {
   }
 }
 
+export function wrapJS(code: string): string {
+  return `(function() { ${code.replace(/\s+/g, " ")} })()`;
+}
+
 export async function runJSInYandexMusicTab(code: string) {
   const browser = getPreferenceValues<{ browser: Application }>().browser;
 

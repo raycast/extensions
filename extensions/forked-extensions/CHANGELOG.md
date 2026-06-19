@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Fix Concurrent Git Operations] - 2026-06-02
+
+- Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running.
+
 ## [Improvements] - 2026-04-11
 
 - Optimize clone and fetch behavior with the "tree:0" partial clone filter, "--no-tags", and "upstream/main"-only tracking

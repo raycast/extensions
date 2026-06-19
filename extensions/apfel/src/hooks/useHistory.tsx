@@ -28,9 +28,9 @@ export function useHistory(): HistoryHook {
 
   const add = useCallback(
     async (chat: Chat) => {
-      setData([...data, chat]);
+      setData((prev) => [...prev, chat]);
     },
-    [setData, data],
+    [setData],
   );
 
   const remove = useCallback(
@@ -39,12 +39,11 @@ export function useHistory(): HistoryHook {
         title: "Removing answer...",
         style: Toast.Style.Animated,
       });
-      const newHistory: Chat[] = data.filter((item) => item.id !== answer.id);
-      setData(newHistory);
+      setData((prev) => prev.filter((item) => item.id !== answer.id));
       toast.title = "Answer removed!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data],
+    [setData],
   );
 
   const clear = useCallback(async () => {

@@ -11,6 +11,21 @@ const variables: Record<string, ISSUE_KEY> = {
   ISSUE_BRANCH_NAME: "branchName",
 };
 
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function escapeMarkdownLinkText(str: string) {
+  return str.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
+}
+
+function getTitleLink(issue: IssueResult) {
+  return {
+    html: `<a href="${issue.url}">${escapeHtml(issue.title)}</a>`,
+    text: `[${escapeMarkdownLinkText(issue.title)}](${issue.url})`,
+  };
+}
+
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
   const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
 
@@ -38,6 +53,7 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           Windows: { modifiers: ["ctrl", "shift"], key: "'" },
         }}
       />
+      <Action.CopyToClipboard content={getTitleLink(issue)} title="Copy Title as Link" />
       <Action.CopyToClipboard
         content={issue.branchName}
         title="Copy Git Branch Name"

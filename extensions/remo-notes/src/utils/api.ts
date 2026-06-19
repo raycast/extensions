@@ -188,10 +188,24 @@ export const remoApi = {
     });
   },
 
-  permanentDelete(noteId: string, password?: string) {
+  permanentDelete(noteId: string) {
     return request<{ success: boolean }>("/notes/permanent-delete", {
       method: "POST",
-      body: JSON.stringify({ noteId, password }),
+      body: JSON.stringify({ noteId }),
+    });
+  },
+
+  updateNote(noteId: string, payload: { title?: string; tags?: string[]; folderId?: string | null }) {
+    return request<{ noteId: string }>("/notes/update", {
+      method: "POST",
+      body: JSON.stringify({ noteId, ...payload }),
+    });
+  },
+
+  softDeleteNote(noteId: string) {
+    return request<{ success: boolean }>("/notes/delete", {
+      method: "POST",
+      body: JSON.stringify({ noteId }),
     });
   },
 

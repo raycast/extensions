@@ -40,7 +40,7 @@ const formatDate = (value?: string): string => {
 };
 
 export default function Command() {
-  const { noteData, isLoading, hasError } = useGranolaData();
+  const { noteData, isLoading, hasError, error } = useGranolaData();
 
   // Handle loading and error states
   if (isLoading) {
@@ -48,7 +48,7 @@ export default function Command() {
   }
 
   if (hasError) {
-    return <Unresponsive />;
+    return <Unresponsive context="export-transcripts" error={error} />;
   }
 
   if (noteData?.data) {
@@ -409,7 +409,8 @@ ${transcript}
 `;
 
           const safeTitle = sanitizeFileName(note.title || untitledNoteTitle);
-          const fileName = `${safeTitle}_${note.id.substring(0, 8)}.md`;
+          const datePrefix = note.created_at ? new Date(note.created_at).toISOString().split("T")[0] + "_" : "";
+          const fileName = `${datePrefix}${safeTitle}_${note.id.substring(0, 8)}.md`;
 
           return {
             content: transcriptContent,

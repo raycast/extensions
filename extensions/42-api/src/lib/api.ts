@@ -4,8 +4,9 @@
  */
 
 import { ensureAuthenticated } from "./auth";
-import { User, LocationStats, DateRange } from "./types";
+import { User, LocationStats, DateRange, Location } from "./types";
 import { API_BASE_URL } from "./constants";
+import { aggregateLocationsByDay, buildLocationsRangeParam } from "./utils";
 
 // =============================================================================
 // TYPES
@@ -85,9 +86,19 @@ export async function getUser(login: string): Promise<ApiResult<User>> {
  * @param dateRange Date range for the query
  */
 export async function getLocationStats(userId: number, dateRange: DateRange): Promise<ApiResult<LocationStats>> {
-  return fetchApi<LocationStats>(
-    `/users/${userId}/locations_stats?begin_at=${dateRange.beginAt}&end_at=${dateRange.endAt}`,
-  );
+  const params = new URLSearchParams({
+    "filter[user_id]": String(userId),
+    "range[begin_at]": buildLocationsRangeParam(dateRange),
+  });
+
+  const result = await fetchApi<Location[]>(`/locations?${params.toString()}`);
+  if (result.error) {
+    return { error: result.error };
+  }
+
+  return {
+    data: aggregateLocationsByDay(result.data || [], dateRange.endAt),
+  };
 }
 
 /**

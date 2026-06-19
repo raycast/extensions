@@ -1,5 +1,9 @@
 # Convex Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Fix TypeError Crashes] - 2026-01-26
 
 - Fix TypeError crashes when API returns non-array responses

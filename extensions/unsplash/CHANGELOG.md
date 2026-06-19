@@ -1,5 +1,17 @@
 # Unsplash Changelog
 
+## [Modernize & OAuth Setup Guide] - 2026-05-28
+
+- Added OAuth setup guide shown before login — displays the required redirect URI and a Connect button so users can set up their Unsplash app without confusion
+- Fixed crashes caused by unhandled OAuth errors (`TypeError: Cannot read properties of null (reading 'useState')`)
+- Migrated deprecated `Grid.itemSize` / `Grid.ItemSize` to `columns` prop
+- Exported all types, merged `LikesResult` into `SearchResult`, extended `User` with optional fields
+- Extracted shared `OrientationDropdown` component used by Search Images and Search Collections
+- Simplified `useSearch` hook — removed intermediate `performSearch` abstraction
+- Moved module-level `getPreferenceValues` calls inside functions to avoid side effects on import
+- Removed `React.FC` annotations and noisy section comments throughout
+- Fixed missing `await` on `LocalStorage.setItem` in likes hook
+
 ## [Keyboard Shortcut Updates] - 2026-05-12
 
 - Added Raycast common keyboard shortcuts

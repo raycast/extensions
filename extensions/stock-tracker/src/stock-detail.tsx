@@ -36,7 +36,10 @@ export function StockDetail({ quote }: { quote: Quote | undefined }) {
               priceInfo.changePercent ? ` (${priceInfo.changePercent.toFixed(2)}%)` : ""
             }`}
           />
-          <List.Item.Detail.Metadata.Label title="Market Cap" text={formatMoney(quote.marketCap, quote.currency)} />
+          <List.Item.Detail.Metadata.Label
+            title="Market Cap"
+            text={formatMoney(quote.marketCap, quote.currency, true)}
+          />
         </List.Item.Detail.Metadata>
       }
     />

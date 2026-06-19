@@ -1,5 +1,9 @@
 # Colima Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Save Template Defaults] - 2026-03-24
 
 ### Added

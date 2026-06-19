@@ -8,7 +8,8 @@
   "contributors": [
     "elfitaflores",
     "xmok",
-    "ggon"
+    "ggon",
+    "tongy"
   ],
   "license": "MIT",
   "categories": [
@@ -45,6 +46,32 @@
       "title": "Add Task",
       "description": "Add a new task to Obsidian",
       "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Quickly add a new task to Obsidian",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Reminder",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "date",
+          "placeholder": "Date",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "edit-task",
@@ -139,6 +166,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.3",
+    "chrono-node": "^2.9.1",
     "date-fns": "^2.30.0",
     "fs-extra": "^11.1.0",
     "gray-matter": "^4.0.3"

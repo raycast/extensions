@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./lib/types";
 import { ChatView } from "./lib/ui/ChatView/main";
 
 const p = getPreferenceValues<Preferences>();

@@ -79,7 +79,7 @@ export default function FakerListItem({ item, pin, unpin }: FakerListItemProps) 
             title="Create Copy Quicklink"
             quicklink={{
               name: `Copy Random ${_.startCase(item.id)}`,
-              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+              link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
                 JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "copy" }),
               )}`,
             }}
@@ -88,7 +88,7 @@ export default function FakerListItem({ item, pin, unpin }: FakerListItemProps) 
             title="Create Paste Quicklink"
             quicklink={{
               name: `Paste Random ${_.startCase(item.id)}`,
-              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+              link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
                 JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "paste" }),
               )}`,
             }}

@@ -4,6 +4,8 @@ import { useExec } from "@raycast/utils";
 import { MonthlyUsageCommandResponse, MonthlyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
 const cache = new Cache();
@@ -31,7 +33,14 @@ export const useCCUsageMonthlyCli = () => {
       const parseResult = stringToJSON.pipe(MonthlyUsageCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid monthly usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid monthly usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
       cache.set(CACHE_KEY, JSON.stringify(parseResult.data));

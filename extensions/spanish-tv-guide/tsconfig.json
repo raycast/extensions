@@ -3,16 +3,16 @@
   "display": "Node 16",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2021"],
-    "module": "commonjs",
-    "target": "es2021",
+    "lib": ["esnext"],
+    "module": "node20",
+    "target": "esnext",
+    "moduleResolution": "nodenext",
     "strict": true,
-    "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "types": ["node", "jest"],
+    "types": ["node"]
   },
 }

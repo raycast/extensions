@@ -12,6 +12,7 @@ import { unwrap } from "./lib/unwrap.js";
 type UnwrapContext = BaseLaunchContext & {
   hyphenation?: boolean;
   keepBlankLines?: boolean;
+  flattenBullets?: boolean;
 };
 
 export default async function Command(
@@ -25,7 +26,13 @@ export default async function Command(
     const hyphenation = props.launchContext?.hyphenation ?? prefs.hyphenation;
     const keepBlankLines =
       props.launchContext?.keepBlankLines ?? prefs.keepBlankLines;
-    const result = unwrap(input, { hyphenation, keepBlankLines });
+    const flattenBullets =
+      props.launchContext?.flattenBullets ?? prefs.flattenBullets;
+    const result = unwrap(input, {
+      hyphenation,
+      keepBlankLines,
+      flattenBullets,
+    });
     await deliver({
       launchContext: props.launchContext,
       prefs,

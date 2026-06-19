@@ -16,7 +16,7 @@ export default function Command() {
     if (!storedHosts.data) return;
     try {
       await updateHostsFile(storedHosts.data);
-      await open("raycast://"); // Password prompt causes Raycast to close, so we reopen it here
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`); // Password prompt causes Raycast to close, so we reopen it here
       currentBlocked.revalidate().catch(() => {});
       showToast({ title: "Successfully updated hosts file", style: Toast.Style.Success });
     } catch (e) {

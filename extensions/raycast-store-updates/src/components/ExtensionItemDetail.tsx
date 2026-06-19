@@ -1,24 +1,6 @@
 import { List, Color, Icon } from "@raycast/api";
 import { StoreItem } from "../types";
-import { createStoreDeeplink, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Applications: "#8E44AD",
-  Communication: "#E67E22",
-  Data: "#16A085",
-  Documentation: "#7F8C8D",
-  "Design Tools": "#E91E63",
-  "Developer Tools": "#2980B9",
-  Finance: "#27AE60",
-  Fun: "#F39C12",
-  Media: "#E74C3C",
-  News: "#3498DB",
-  Productivity: "#9B59B6",
-  Security: "#C0392B",
-  System: "#34495E",
-  Web: "#1ABC9C",
-  Other: "#95A5A6",
-};
+import { createStoreDeeplink, CATEGORY_COLORS, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
 
 export function ExtensionItemDetail({ item }: { item: StoreItem }) {
   const storeDeeplink = createStoreDeeplink(item.url);

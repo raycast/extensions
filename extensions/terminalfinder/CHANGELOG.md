@@ -1,5 +1,9 @@
 # Terminal Finder Changelog
 
+## [Bugfix] - 2026-05-27
+
+- Show a helpful recovery message when cmux reports a broken automation socket.
+
 ## [Update] - 2026-03-27
 
 - Added support for `cmux`

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { WindowInfo } from "../types/index";
 import { getActiveWindowInfo, WindowDetailsObject } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
+import { isTimeoutError, withTimeout } from "../utils/timeout";
 
 /**
  * Hook for getting window information using Swift API
@@ -32,7 +33,7 @@ export function useWindowInfo() {
 
     try {
       // Get active window info directly from Swift API
-      const result = await getActiveWindowInfo();
+      const result = await withTimeout(getActiveWindowInfo(), "Get active window info");
 
       // Handle different response types
       if (!result) {
@@ -93,6 +94,11 @@ export function useWindowInfo() {
         logError("Error getting window info:", errorMsg);
         setError(new Error(errorMsg));
       }
+
+      if (isTimeoutError(err)) {
+        throw err;
+      }
+
       return null;
     } finally {
       // Only update state if component is still mounted

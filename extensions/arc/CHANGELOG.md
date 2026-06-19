@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Performance Improvement] - 2026-04-30
 
 - Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs

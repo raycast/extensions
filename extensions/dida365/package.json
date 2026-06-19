@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dida365",
+  "title": "Dida365",
+  "description": "Control Dida365 tasks from Raycast on Windows.",
+  "icon": "dida365-icon.png",
+  "author": "max",
+  "license": "MIT",
+  "type": "module",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "subtitle": "Dida365",
+      "description": "Create a Dida365 task with date, priority, notes, and reminder.",
+      "icon": "dida365-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Tasks",
+      "subtitle": "Dida365",
+      "description": "View Dida365 tasks and mark them as complete.",
+      "icon": "dida365-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "today-tasks",
+      "title": "Today Tasks",
+      "subtitle": "Dida365",
+      "description": "View and complete tasks due today.",
+      "icon": "dida365-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "postpone-task",
+      "title": "Postpone Task",
+      "subtitle": "Dida365",
+      "description": "Move an existing task to another date.",
+      "icon": "dida365-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "clipboard-to-task",
+      "title": "Clipboard to Task",
+      "subtitle": "Dida365",
+      "description": "Create a Dida365 task from clipboard text.",
+      "icon": "dida365-icon.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Dida365 API Token",
+      "description": "Generate it in Dida365 Web -> Settings -> Account & Security -> API Token / Bearer Token.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "timeZone",
+      "title": "Time Zone",
+      "description": "Used to create and compare due dates. Defaults to your system time zone; choose Asia/Shanghai for Dida365 China accounts.",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "System Default",
+          "value": "system"
+        },
+        {
+          "title": "China Standard Time",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "UTC",
+          "value": "UTC"
+        },
+        {
+          "title": "US Eastern",
+          "value": "America/New_York"
+        },
+        {
+          "title": "US Pacific",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Central Europe",
+          "value": "Europe/Berlin"
+        },
+        {
+          "title": "United Kingdom",
+          "value": "Europe/London"
+        },
+        {
+          "title": "Japan",
+          "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Singapore",
+          "value": "Asia/Singapore"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  }
+}

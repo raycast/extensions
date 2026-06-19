@@ -221,7 +221,7 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
               <Action.Push title="Run Action" target={<ActionInput action={a} />} icon={Icon.Play} />
               <Action.CopyToClipboard
                 title="Copy Quicklink URL"
-                content={`raycast://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
+                content={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
                   JSON.stringify({ actionId: a.id })
                 )}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}

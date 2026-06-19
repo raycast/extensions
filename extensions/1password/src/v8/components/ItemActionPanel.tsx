@@ -1,11 +1,15 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, open, showToast, Toast } from "@raycast/api";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 import resetCache from "../../reset-cache";
 import { Item, User } from "../types";
-import { ActionID, hrefToOpenInBrowser } from "../utils";
+import { ActionID, getCliPath, handleErrors, hrefToOpenInBrowser, windowsEnv } from "../utils";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { ShareItem } from "./ActionShareItem";
 import { SwitchAccount } from "./ActionSwitchAccount";
+
+const execFileAsync = promisify(execFile);
 
 export function ItemActionPanel({
   account,
@@ -29,7 +33,7 @@ export function ItemActionPanel({
           case "open-in-1password":
             return OpenIn1Password(account, item);
           case "open-in-browser":
-            return OpenInBrowser(item);
+            return OpenInBrowser(account, item);
           case "paste-one-time-password":
             return PasteOneTimePassword(item);
           case "paste-password":
@@ -123,7 +127,7 @@ function OpenIn1Password(account: undefined | User, item: Item) {
   return null;
 }
 
-function OpenInBrowser(item: Item) {
+function OpenInBrowser(account: undefined | User, item: Item) {
   const href = hrefToOpenInBrowser(item);
 
   if (href) {
@@ -137,7 +141,59 @@ function OpenInBrowser(item: Item) {
     );
   }
 
-  return null;
+  if (!getPreferenceValues<ExtensionPreferences>().reduceItemListMemoryUsage || item.category !== "LOGIN") {
+    return null;
+  }
+
+  return (
+    <Action
+      key="open-in-browser"
+      onAction={async () => {
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Opening in browser..." });
+
+        try {
+          const { stdout } = await execFileAsync(
+            getCliPath(),
+            [
+              ...(account ? ["--account", account.account_uuid] : []),
+              "item",
+              "get",
+              item.id,
+              "--vault",
+              item.vault.id,
+              "--format=json",
+            ],
+            { encoding: "utf8", maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) },
+          );
+          const detailedItem = JSON.parse(stdout) as Item;
+          const detailedHref = hrefToOpenInBrowser(detailedItem);
+
+          if (!detailedHref) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "No website URL found";
+            return;
+          }
+
+          await open(detailedHref);
+          toast.style = Toast.Style.Success;
+          toast.title = "Opened in browser";
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to open in browser";
+
+          if (error instanceof Error) {
+            try {
+              handleErrors(error.message);
+            } catch (err) {
+              toast.message = err instanceof Error ? err.message : error.message;
+            }
+          }
+        }
+      }}
+      shortcut={{ key: "return", modifiers: ["opt"] }}
+      title="Open in Browser"
+    />
+  );
 }
 
 function PasteOneTimePassword(item: Item) {

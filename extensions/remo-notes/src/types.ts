@@ -14,6 +14,7 @@ export interface Note {
   isPinned?: boolean;
   isE2E?: boolean;
   deletedAt?: number;
+  folderId?: Id<"folders">;
 }
 
 export type NoteId = string;

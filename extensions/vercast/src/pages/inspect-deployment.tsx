@@ -108,6 +108,15 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
               }
             />
           )}
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={`https://${deployment.url}`}
+            icon={Icon.CopyClipboard}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "c" },
+              Windows: { modifiers: ["ctrl", "opt"], key: "c" },
+            }}
+          />
         </ActionPanel>
       }
       metadata={

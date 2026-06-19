@@ -77,11 +77,11 @@ export const statusCodeToColor = (status: string): Color => {
 export const getCodeGroupDescription = (firstDigit: string): string => {
   return (
     {
-      1: "Informational response - the request was received, continuing process",
-      2: "Successful - the request was successfully received, understood, and accepted",
-      3: "Redirection - further action needs to be taken in order to complete the request",
-      4: "Client error - the request contains bad syntax or cannot be fulfilled",
-      5: "Server error - the server failed to fulfil an apparently valid request",
+      1: "Informational",
+      2: "Successful",
+      3: "Redirection",
+      4: "Client error",
+      5: "Server error",
     }[firstDigit] || ""
   );
 };

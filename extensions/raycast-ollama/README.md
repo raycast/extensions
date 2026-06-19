@@ -38,6 +38,10 @@ Chat with your preferred model from Raycast, with the following features:
 - **_CMD+T (macOS) CTRL+T (Windows)_**, _Selection_: Add text from selection or clipboard to the prompt.
 - **_CMD+B (macOS) CTRL+B (Windows)_**, _Browser Selection Tab_: Add content from selected tab to the prompt. Raycast Browser Extension is required.
 - **_CMD+I (macOS) CTRL+I (Windows)_**, _Image From Clipboard_: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
+- _Disable Internet Search/Enable Internet Search_: Disable/Enable Ollama Search API Tools.
+
+> [!WARNING]
+> For Internet Search feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
 
 From extentions preferences you can chose how many messages use as memory. By default it use the last 20 messages.
 

@@ -8,7 +8,8 @@
   "contributors": [
     "neil_brown",
     "nicolas-marien",
-    "Civ2boss"
+    "Civ2boss",
+    "alexi.build"
   ],
   "categories": [
     "Productivity",
@@ -48,15 +49,15 @@
     {
       "name": "save-link",
       "title": "Save Link",
-      "description": "Save a URL to Reader",
+      "description": "Save a URL to Reader; falls back to the current browser tab when omitted",
       "mode": "no-view",
       "icon": "reader-logo.png",
       "arguments": [
         {
           "name": "url",
-          "placeholder": "URL",
+          "placeholder": "URL (optional)",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "author",
@@ -185,5 +186,8 @@
       "label": "Open links in desktop app",
       "default": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

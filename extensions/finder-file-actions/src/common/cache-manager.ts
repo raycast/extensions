@@ -57,11 +57,13 @@ export class CacheManager {
     return this.pinnedFolders.has(path);
   }
 
-  async pinFolder(folder: SpotlightSearchResult): Promise<void> {
+  async pinFolder(folder: SpotlightSearchResult, customName?: string): Promise<void> {
     await this.init();
 
+    const trimmedCustomName = customName?.trim();
     const pinnedFolder: PinnedFolder = {
       ...folder,
+      ...(trimmedCustomName ? { customName: trimmedCustomName } : {}),
       pinnedAt: new Date(),
       lastVerified: new Date(),
     };
@@ -73,6 +75,24 @@ export class CacheManager {
   async unpinFolder(path: string): Promise<void> {
     await this.init();
     this.pinnedFolders.delete(path);
+    await this.save();
+  }
+
+  async renamePinnedFolder(path: string, customName?: string): Promise<void> {
+    await this.init();
+
+    const folder = this.pinnedFolders.get(path);
+    if (!folder) {
+      return;
+    }
+
+    const trimmedCustomName = customName?.trim();
+    if (trimmedCustomName) {
+      folder.customName = trimmedCustomName;
+    } else {
+      delete folder.customName;
+    }
+
     await this.save();
   }
 

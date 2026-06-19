@@ -117,7 +117,9 @@ function RemoteListItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section title={context.remote.name}>
-            <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            {context.remote.type == "http" && (
+              <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            )}
             <RemoteOpenInDevAction remote={context.remote} />
             <RemoteEditAction initialRemote={context.remote} {...context} />
 

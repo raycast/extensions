@@ -10,7 +10,7 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   SearchHistoryEntry,
@@ -23,7 +23,7 @@ import {
   clearSearchHistory,
   clearCompanySearchHistory,
 } from "./history-storage";
-import { ResultsView } from "./email-finder";
+import { ResultsView } from "./mail-finder";
 
 // * Filter types
 type FilterType = "all" | "email" | "company" | "success" | "error";
@@ -64,7 +64,7 @@ function HistoryResultView({ entry }: { entry: SearchHistoryEntry }) {
         isLoading={false}
         error={entry.error ?? "Unknown error"}
         searchParams={searchParams}
-        onBack={() => {}}
+        onBack={undefined}
       />
     );
   }
@@ -77,7 +77,7 @@ function HistoryResultView({ entry }: { entry: SearchHistoryEntry }) {
         isLoading={false}
         error={undefined}
         searchParams={searchParams}
-        onBack={() => {}}
+        onBack={undefined}
       />
     );
   }
@@ -92,15 +92,19 @@ function HistoryResultView({ entry }: { entry: SearchHistoryEntry }) {
             title="Run Search"
             icon={Icon.MagnifyingGlass}
             onAction={async () => {
-              await launchCommand({
-                name: "email-finder",
-                type: LaunchType.UserInitiated,
-                arguments: {
-                  firstName: entry.firstName,
-                  lastName: entry.lastName,
-                  domain: entry.domain,
-                },
-              });
+              try {
+                await launchCommand({
+                  name: "mail-finder",
+                  type: LaunchType.UserInitiated,
+                  arguments: {
+                    firstName: entry.firstName,
+                    lastName: entry.lastName,
+                    domain: entry.domain,
+                  },
+                });
+              } catch (err) {
+                console.error("Failed to launch command:", err);
+              }
             }}
           />
           {entry.email && (
@@ -183,11 +187,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
               title="Search Again"
               icon={Icon.MagnifyingGlass}
               onAction={async () => {
-                await launchCommand({
-                  name: "company-employees",
-                  type: LaunchType.UserInitiated,
-                  arguments: { domain: entry.domain },
-                });
+                try {
+                  await launchCommand({
+                    name: "company-employees",
+                    type: LaunchType.UserInitiated,
+                    arguments: { domain: entry.domain },
+                  });
+                } catch (err) {
+                  console.error("Failed to launch command:", err);
+                }
               }}
             />
           </ActionPanel>
@@ -241,11 +249,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                 title="Search Again"
                 icon={Icon.MagnifyingGlass}
                 onAction={async () => {
-                  await launchCommand({
-                    name: "company-employees",
-                    type: LaunchType.UserInitiated,
-                    arguments: { domain: entry.domain },
-                  });
+                  try {
+                    await launchCommand({
+                      name: "company-employees",
+                      type: LaunchType.UserInitiated,
+                      arguments: { domain: entry.domain },
+                    });
+                  } catch (err) {
+                    console.error("Failed to launch command:", err);
+                  }
                 }}
               />
             </ActionPanel>
@@ -272,15 +284,19 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                     title="Reveal Profile"
                     icon={Icon.Person}
                     onAction={async () => {
-                      await launchCommand({
-                        name: "email-finder",
-                        type: LaunchType.UserInitiated,
-                        arguments: {
-                          firstName: employee.firstName,
-                          lastName: employee.lastName,
-                          domain: entry.domain,
-                        },
-                      });
+                      try {
+                        await launchCommand({
+                          name: "mail-finder",
+                          type: LaunchType.UserInitiated,
+                          arguments: {
+                            firstName: employee.firstName,
+                            lastName: employee.lastName,
+                            domain: entry.domain,
+                          },
+                        });
+                      } catch (err) {
+                        console.error("Failed to launch command:", err);
+                      }
                     }}
                   />
                   {employee.linkedinUrl && (
@@ -317,11 +333,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                   title="Continue Search"
                   icon={Icon.MagnifyingGlass}
                   onAction={async () => {
-                    await launchCommand({
-                      name: "company-employees",
-                      type: LaunchType.UserInitiated,
-                      arguments: { domain: entry.domain },
-                    });
+                    try {
+                      await launchCommand({
+                        name: "company-employees",
+                        type: LaunchType.UserInitiated,
+                        arguments: { domain: entry.domain },
+                      });
+                    } catch (err) {
+                      console.error("Failed to launch command:", err);
+                    }
                   }}
                 />
               </ActionPanel>
@@ -340,32 +360,29 @@ export default function Command() {
 
   // * Filter entries based on dropdown selection
   const filteredEntries = (entries ?? []).filter((entry) => {
-    switch (filter) {
-      case "all":
-        return true;
-      case "email":
-        return isEmailEntry(entry);
-      case "company":
-        return isCompanyEntry(entry);
-      case "success":
-      case "error":
-        return isEmailEntry(entry) && entry.status === filter;
-      default: {
-        return false;
-      }
+    if (filter === "all") return true;
+    if (filter === "email") return isEmailEntry(entry);
+    if (filter === "company") return isCompanyEntry(entry);
+    if (isEmailEntry(entry)) {
+      return entry.status === filter;
     }
+    return false; // Company entries don't have success/error status
   });
 
   async function handleRunSearch(entry: SearchHistoryEntry) {
-    await launchCommand({
-      name: "email-finder",
-      type: LaunchType.UserInitiated,
-      arguments: {
-        firstName: entry.firstName,
-        lastName: entry.lastName,
-        domain: entry.domain,
-      },
-    });
+    try {
+      await launchCommand({
+        name: "mail-finder",
+        type: LaunchType.UserInitiated,
+        arguments: {
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          domain: entry.domain,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to launch command:", err);
+    }
   }
 
   async function handleRemove(entry: HistoryEntry) {
@@ -415,7 +432,11 @@ export default function Command() {
             key={entry.id}
             title={entry.companyName}
             subtitle={`${entry.domain}${entry.totalEmployees ? ` · ${entry.totalEmployees} employees` : entry.employees ? ` · ${entry.employees.length} employees` : ""}`}
-            icon={entry.logoUrl ? { source: entry.logoUrl, fallback: Icon.Building } : Icon.Building}
+            icon={
+              entry.logoUrl
+                ? { source: entry.logoUrl, fallback: Icon.Building }
+                : getFavicon(`https://${entry.domain}`, { fallback: Icon.Building })
+            }
             accessories={[
               { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
             ]}
@@ -431,11 +452,15 @@ export default function Command() {
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={async () => {
-                    await launchCommand({
-                      name: "company-employees",
-                      type: LaunchType.UserInitiated,
-                      arguments: { domain: entry.domain },
-                    });
+                    try {
+                      await launchCommand({
+                        name: "company-employees",
+                        type: LaunchType.UserInitiated,
+                        arguments: { domain: entry.domain },
+                      });
+                    } catch (err) {
+                      console.error("Failed to launch command:", err);
+                    }
                   }}
                 />
                 <Action.CopyToClipboard

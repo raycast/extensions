@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Form, Icon, closeMainWindow, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
+import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
 import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveWeblinkBody {
@@ -10,6 +11,8 @@ interface SaveWeblinkBody {
   priority?: string;
   date?: Date;
 }
+
+const SPACE_STORAGE_KEY = "create-task-space-id";
 
 export default function Command() {
   const { store, triggerLoading, isLoading: storeIsLoading } = useCapacitiesStore();
@@ -104,6 +107,26 @@ export default function Command() {
     },
   });
 
+  const spaces = store?.spaces ?? [];
+  const spaceIds = spaces.map((space) => space.id).join(",");
+
+  useEffect(() => {
+    if (!spaces.length || itemProps.spaceId.value) {
+      return;
+    }
+    let cancelled = false;
+
+    getInitialSpaceId(SPACE_STORAGE_KEY, spaces).then((spaceId) => {
+      if (!cancelled && spaceId) {
+        setValue("spaceId", spaceId);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [spaceIds, itemProps.spaceId.value, setValue]);
+
   return (
     <Form
       isLoading={storeIsLoading}
@@ -118,8 +141,10 @@ export default function Command() {
           <Form.Dropdown
             title="Space"
             {...itemProps.spaceId}
-            storeValue
-            onChange={(value) => setValue("spaceId", value)}
+            onChange={(value) => {
+              setValue("spaceId", value);
+              setStoredSpaceId(SPACE_STORAGE_KEY, value);
+            }}
             ref={spacesDropdown}
           >
             {store.spaces &&

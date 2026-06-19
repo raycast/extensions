@@ -48,6 +48,9 @@ import type { ZaiError, ZaiUsage } from "./zai/types";
 import { useMiniMaxUsage } from "./minimax/fetcher";
 import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer";
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types";
+import { useOpencodegoUsage } from "./opencode-go/fetcher";
+import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer";
+import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
 import type { AccountUsageState } from "./accounts/types";
 
@@ -76,6 +79,7 @@ interface AgentUsageById {
   antigravity: AntigravityUsage;
   zai: ZaiUsage;
   minimax: MiniMaxUsage;
+  "opencode-go": OpencodegoUsage;
 }
 
 interface AgentErrorById {
@@ -90,6 +94,7 @@ interface AgentErrorById {
   antigravity: AntigravityError;
   zai: ZaiError;
   minimax: MiniMaxError;
+  "opencode-go": OpencodegoError;
 }
 
 type AgentRegistry = {
@@ -265,6 +270,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getMiniMaxAccessory,
     formatUsageText: formatMiniMaxUsageText,
   },
+  "opencode-go": {
+    id: "opencode-go",
+    name: "OpenCode Go",
+    icon: "opencode-go-icon.png",
+    description: "OpenCode Go Subscription",
+    isSupported: true,
+    settingsUrl: "https://opencode.ai",
+    useUsage: useOpencodegoUsage,
+    renderDetail: renderOpencodegoDetail,
+    getAccessory: getOpencodegoAccessory,
+    formatUsageText: formatOpencodegoUsageText,
+  },
 };
 
 const AGENT_IDS = Object.keys(AGENT_REGISTRY) as AgentId[];
@@ -338,6 +355,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
+  const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
 
   // Multi-account providers
   const codexAccountStates = useCodexAccounts(Boolean(prefs.showCodex));
@@ -353,6 +371,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
+    "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
   };
 
   const kimiAccountedViews = createAccountedViews(

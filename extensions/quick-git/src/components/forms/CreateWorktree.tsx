@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast, useExec, useForm } from "@raycast/utils";
-import { useSelectedRepo } from "../../hooks/useRepo.js";
+import { useSelectedRepoStorage } from "../../hooks/useRepo.js";
 import path from "node:path";
 import { validateBranchName } from "../../utils/validators.js";
 
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function CreateWorktree({ checkBranches }: Props) {
-  const repo = useSelectedRepo();
+  const repo = useSelectedRepoStorage();
   const { pop } = useNavigation();
   const [worktreeName, setWorktreeName] = useState("");
   const [worktreeDir, setWorktreeDir] = useState("");

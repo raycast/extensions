@@ -31,7 +31,7 @@ export const pickColor = async ({ field }: { field: string }) =>
         field,
       },
     },
-  ).catch(() => open("raycast://extensions/thomas/color-picker"));
+  ).catch(() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomas/color-picker`));
 
 export const getSvgFromFile = async (file: string, color?: string) => {
   let svg = await readFile(file, "utf8");
@@ -58,6 +58,6 @@ export const pickLogo = async () => {
       },
     );
   } catch {
-    open("raycast://extensions/litomore/simple-icons");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/simple-icons`);
   }
 };

@@ -79,14 +79,16 @@ export default function Command() {
 
       return {
         data: rawItems.map((item) => ({
+          season: item.season || 0,
+          episode: item.episode || 0,
           date: item.date || "",
           episode_id: item.id || item.episode_id || 0,
           show_id: item.show?.id || item.show_id || 0,
           show_title: item.show?.title || item.show_title || "Unknown Show",
-          season: item.season || 0,
-          episode: item.episode || 0,
           title: item.title || "",
-          code: item.code || `S${item.season || 0}E${item.episode || 0}`,
+          code:
+            item.code ||
+            `S${String(item.season || 0).padStart(2, "0")}E${String(item.episode || 0).padStart(2, "0")}`,
         })),
       };
     },
@@ -143,32 +145,47 @@ export default function Command() {
       />
       {items
         .filter((item) => isUpcomingOrToday(item.date))
-        .map((item) => (
-          <List.Item
-            key={`${item.episode_id}-${item.show_id}-${item.code}-${item.date}`}
-            title={item.show_title || "Unknown Show"}
-            subtitle={`${item.code || `S${item.season}E${item.episode}`} - ${item.title || "Episode"}`}
-            accessories={[{ text: item.date || "" }]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Mark as Watched"
-                  icon={Icon.CheckCircle}
-                  onAction={() => handleMarkAsWatched(item.episode_id)}
-                />
-                <Action.OpenInBrowser
-                  url={`https://www.betaseries.com/episode/${item.show_title}/${item.code}`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                />
-                <Action
-                  title="Logout"
-                  icon={Icon.XMarkCircle}
-                  onAction={() => void handleLogout()}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        .map((item) => {
+          const episodeCode = item.code;
+
+          return (
+            <List.Item
+              key={`${item.episode_id}-${item.show_id}-${item.code}-${item.date}`}
+              title={item.show_title || "Unknown Show"}
+              subtitle={`${episodeCode} - ${item.title || "Episode"}`}
+              accessories={[{ text: item.date || "" }]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Mark as Watched"
+                    icon={Icon.CheckCircle}
+                    onAction={() => handleMarkAsWatched(item.episode_id)}
+                  />
+                  <ActionPanel.Section title="Open">
+                    <Action.OpenInBrowser
+                      url={`https://www.betaseries.com/episode/${item.show_title}/${episodeCode}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Account">
+                    <Action
+                      title="Logout"
+                      icon={Icon.XMarkCircle}
+                      onAction={() => void handleLogout()}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard
+                      title="Copy Show and Episode Number"
+                      content={`${item.show_title || "Unknown Show"} ${episodeCode}`}
+                      shortcut={{ modifiers: ["opt"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

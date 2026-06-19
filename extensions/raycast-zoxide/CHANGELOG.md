@@ -1,5 +1,22 @@
 # Raycast Zoxide Changelog
 
+## [Add Features from Zoxide Plus] - 2026-06-07
+
+Inspired by [UnlockHomes](https://github.com/UnlockHomes)' [similar zoxide extension](https://github.com/raycast/extensions/pull/27348), this update brings over several of its ideas — a configurable search mode, opening directories in your terminal or editor, and more per-result actions.
+
+- [Added] A "Search Mode" preference with two ways to search:
+  - **Full Path (fuzzy):** Fuzzy-match across the entire path with fzf (the default; unchanged from previous versions, requires fzf)
+  - **Folder Name (strict):** Match the folder name using zoxide's native ranking (re-queried on each keystroke, no fzf required)
+- [Added] New search result actions:
+  - **Open in {Terminal App}:** open the highlighted directory in your configured terminal (default: Terminal)
+  - **Open in {Editor App}:** open the highlighted directory in your configured editor (default: TextEdit)
+  - **Boost in Zoxide:** bump the directory's frecency score in zoxide
+  - **Show in Finder:** reveal the directory in its enclosing folder
+- [Changed] The primary "Open Folder" action now reflects the app chosen in the "Open directories in" preference — e.g. "Open in Finder" (or "Open in ForkLift", etc.)
+- [Changed] When no Finder window is currently open, the "Add from Finder" command now opens a native macOS folder picker
+- [Changed] Updated dependencies to their latest compatible versions
+- [Removed] **Breaking:** "Add from Finder" no longer appears in the search result action panel — it didn't relate directly to the highlighted result, so it now lives solely as a root command
+
 ## [Fixed Memory Limit Crash] - 2026-03-24
 
 - Fixed "JS heap out of memory" crash for users with large zoxide databases by capping rendered results to 500

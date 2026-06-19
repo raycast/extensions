@@ -8,7 +8,7 @@ on:
 jobs:
   issue_bot:
     name: Issue Bot
-    if: ${{ !github.event.issue.pull_request }} && github.repository == 'raycast/extensions'
+    if: ${{ !github.event.issue.pull_request && github.repository == 'raycast/extensions' }}
     runs-on: ubuntu-latest
     steps:
       - uses: oven-sh/setup-bun@v2
@@ -28,7 +28,7 @@ jobs:
 
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
 
       - name: Notify Failure to Slack
         if: failure()

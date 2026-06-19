@@ -96,6 +96,9 @@ function isBlank(content: string): boolean {
 }
 
 type FenceState = { char: "`" | "~"; len: number } | null;
+type ClassifyOptions = {
+  recognizeDashBullets?: boolean;
+};
 
 function classifyFenceBoundary(
   content: string,
@@ -149,7 +152,10 @@ function classifyHtmlBlockStart(content: string): boolean {
   return HTML_BLOCK_TAGS.has(m[1].toLowerCase());
 }
 
-function classifyListItem(content: string): {
+function classifyListItem(
+  content: string,
+  opts: Required<ClassifyOptions>,
+): {
   listMarker: string;
   hangIndent: number;
   listIndent: string;
@@ -161,6 +167,9 @@ function classifyListItem(content: string): {
   if (!m) return null;
   const indent = m[1];
   const marker = m[2];
+  if ((marker === "–" || marker === "—") && !opts.recognizeDashBullets) {
+    return null;
+  }
   const gap = m[3];
   const hangIndent = indent.length + marker.length + gap.length;
   const afterMarker = content.slice(hangIndent);
@@ -244,7 +253,11 @@ function applyHardBreakPass(records: Classified[]): void {
   }
 }
 
-export function classify(text: string): Classified[] {
+export function classify(
+  text: string,
+  opts: ClassifyOptions = {},
+): Classified[] {
+  const classifyOpts = { recognizeDashBullets: false, ...opts };
   const lines = text.replace(/\r\n?/g, "\n").split("\n");
   const out: Classified[] = [];
   let fence: FenceState = null;
@@ -306,7 +319,7 @@ export function classify(text: string): Classified[] {
       continue;
     }
 
-    const li = classifyListItem(content);
+    const li = classifyListItem(content, classifyOpts);
     if (li) {
       out.push({
         prefixes,

@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
@@ -63,12 +64,51 @@ const partialCloneFilter = "tree:0";
 const mainBranch = "main";
 
 /**
+ * Maximum time to wait for another Git process to release the repository index lock.
+ */
+const gitIndexLockTimeoutMs = 30_000;
+
+/**
+ * How often to check whether the repository index lock has been released.
+ */
+const gitIndexLockPollMs = 500;
+
+/**
+ * Waits for a transient Git index lock to clear before starting another Git command.
+ * @param cwd The repository directory where the Git command should run.
+ */
+const waitForGitIndexLock = async (cwd: string) => {
+  const lockPath = path.join(cwd, ".git", "index.lock");
+  const startedAt = Date.now();
+  const lockFileExists = async () =>
+    fs
+      .access(lockPath)
+      .then(() => true)
+      .catch(() => false);
+
+  while (true) {
+    if (!(await lockFileExists())) break;
+
+    if (Date.now() - startedAt >= gitIndexLockTimeoutMs) {
+      throw new Error(
+        "Another Git operation is still running in the forked extensions repository. Please wait a moment and try again. If the problem persists, close other Git tools and remove the stale .git/index.lock file.",
+      );
+    }
+
+    await delay(gitIndexLockPollMs);
+  }
+};
+
+/**
  * Executes a git command in a specific repository directory.
  * @param args The arguments to pass to the git command.
  * @param cwd The working directory where the git command should run.
  * @returns The subprocess result of the git command execution.
  */
-const gitAtPath = async (args: string[], cwd: string) => spawn(gitFilePath, args, { cwd, shell: true });
+const gitAtPath = async (args: string[], cwd: string) => {
+  await waitForGitIndexLock(cwd);
+  return spawn(gitFilePath, args, { cwd, shell: true });
+};
 
 /**
  * Normalizes a GitHub remote URL into a `owner/repository` string.

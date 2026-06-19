@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ultrahuman-insights",
+  "title": "Ultrahuman Insights",
+  "description": "Smart insights, AI tools, and trend charts for your Ultrahuman Ring AIR.",
+  "icon": "extension-icon.png",
+  "author": "aryan_rustagi",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ultrahuman",
+    "health",
+    "sleep",
+    "hrv",
+    "heart-rate",
+    "recovery",
+    "ring-air",
+    "wearable",
+    "biometrics",
+    "quantified-self"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Ultrahuman Partner API token (from partner.ultrahuman.com)",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Sleep Score",
+      "description": "Show last night's Ultrahuman sleep score in the macOS menu bar, color-coded by status.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "today",
+      "title": "Today's Health",
+      "description": "View every available Ultrahuman metric for today with smart insights and 7-day deltas.",
+      "mode": "view"
+    },
+    {
+      "name": "sleep",
+      "title": "Sleep Detail",
+      "description": "Last night's sleep score, stages, vitals, and quality breakdown.",
+      "mode": "view"
+    },
+    {
+      "name": "hrv",
+      "title": "HRV & Heart Rate",
+      "description": "Today's HRV and resting heart rate with 7-day trend charts.",
+      "mode": "view"
+    },
+    {
+      "name": "recovery",
+      "title": "Recovery & Movement",
+      "description": "Recovery, Movement, and Sleep indices with daily trends and personalised insights.",
+      "mode": "view"
+    },
+    {
+      "name": "trends",
+      "title": "7-Day Trends",
+      "description": "Per-day history for every Ultrahuman metric over the last 7 days.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-today",
+      "title": "Get Today's Metrics",
+      "description": "Get a snapshot of all of today's Ultrahuman metrics, including sleep, HRV, recovery, and movement."
+    },
+    {
+      "name": "get-metric",
+      "title": "Get One Metric",
+      "description": "Get a single Ultrahuman metric for a specific date."
+    },
+    {
+      "name": "get-trend",
+      "title": "Get Metric Trend",
+      "description": "Get N days of history (1–7) for a single Ultrahuman metric."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

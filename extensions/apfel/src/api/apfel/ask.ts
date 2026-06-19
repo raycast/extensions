@@ -1,19 +1,41 @@
+import { spawn } from "child_process";
 import { Model } from "../../type";
 import { getApfelPath } from ".";
-import { escapeForShell } from "../../utils";
-import { runAppleScript } from "@raycast/utils";
 
-export async function askApfel(prompt: string, model?: Model): Promise<string> {
-  const args = [
-    model?.prompt ? `-s '${escapeForShell(model.prompt)}'` : "",
-    model?.temperature ? `--temperature '${escapeForShell(model.temperature)}'` : "",
-    model?.max_tokens ? `--max-tokens '${escapeForShell(model.max_tokens)}'` : "",
-    `'${escapeForShell(prompt)}'`,
-  ].filter(Boolean);
+export function askApfelStreaming(
+  prompt: string,
+  model: Model | undefined,
+  onChunk: (partialAnswer: string) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const args: string[] = ["--stream", "--quiet", "--no-color"];
+    if (model?.prompt) args.push("-s", model.prompt);
+    if (model?.temperature) args.push("--temperature", model.temperature);
+    if (model?.max_tokens) args.push("--max-tokens", model.max_tokens);
+    args.push(prompt);
 
-  const result = await runAppleScript(`do shell script "${getApfelPath()} ${args.join(" ")}"`, {
-    timeout: 60000,
+    const proc = spawn(getApfelPath(), args, {
+      env: { ...process.env, PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let accumulated = "";
+    let stderrOutput = "";
+
+    proc.stdout.on("data", (chunk: Buffer) => {
+      accumulated += chunk.toString();
+      onChunk(accumulated);
+    });
+
+    proc.stderr.on("data", (chunk: Buffer) => {
+      stderrOutput += chunk.toString();
+    });
+
+    proc.on("close", (code) => {
+      if (code === 0) resolve(accumulated.trim());
+      else reject(new Error(stderrOutput.trim() || `apfel exited with code ${code}`));
+    });
+
+    proc.on("error", reject);
   });
-
-  return result;
 }

@@ -18,18 +18,18 @@
     "test:format": "prettier --check ."
   },
   "dependencies": {
-    "@raycast/api": "^1.104.10",
-    "@raycast/utils": "^2.2.3",
-    "clockodo": "^28.1.0",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
+    "clockodo": "^28.1.1",
     "dayjs": "^1.11.20"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.2.14",
-    "eslint": "^9.22.0",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "icon": "extension-icon.png",
   "ai": {

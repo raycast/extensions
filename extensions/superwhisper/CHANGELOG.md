@@ -1,5 +1,15 @@
 # superwhisper Changelog
 
+## [Recording Directory: copy/paste and single extension preference] - 2026-06-09
+
+- Copy Last History and Paste Last History now read the Recording Directory from preferences when set, matching Search History behaviour; they fall back to `~/Documents/superwhisper/recordings` when not configured.
+- Recording Directory is now configured once at the extension level (Preferences > Extensions > Superwhisper) and shared by Search History, Copy Last History, and Paste Last History; the duplicate per-command setting was removed.
+
+## [Paginate Search History to fix memory crash] - 2026-06-09
+
+- Fixed Search History crashing with an out-of-memory error on large recording libraries by loading the list one page at a time instead of reading every `meta.json` up front.
+- Search History now sorts recordings cheaply by modified time and only parses transcripts for the page on screen, with more loaded on scroll.
+
 ## [Copy/Paste Last History and fix missing meta files] - 2026-03-08
 
 - Added no-view commands to copy or paste the most recent Superwhisper transcript.

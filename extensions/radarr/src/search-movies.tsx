@@ -165,7 +165,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+                <Action.Open title="Open Preferences" target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`} icon={Icon.Gear} />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -187,7 +187,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+              <Action.Open title="Open Preferences" target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`} icon={Icon.Gear} />
             </ActionPanel>
           }
         />

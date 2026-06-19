@@ -34,12 +34,9 @@ export default function ChromeProfileDropDown({ onProfileSelected }: Props) {
   useEffect(() => {
     if (loadedProfiles) {
       setProfiles(loadedProfiles);
-      if (!selectedProfile) {
-        if (loadedProfiles.length > 0) {
-          setSelectedProfile(loadedProfiles[0].id);
-        } else {
-          setSelectedProfile(DEFAULT_CHROME_PROFILE_ID);
-        }
+      const selectedProfileExists = loadedProfiles.some((profile) => profile.id === selectedProfile);
+      if (!selectedProfile || !selectedProfileExists) {
+        setSelectedProfile(loadedProfiles[0]?.id ?? DEFAULT_CHROME_PROFILE_ID);
       }
     }
   }, [loadedProfiles]);

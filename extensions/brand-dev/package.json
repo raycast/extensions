@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brand-dev",
-  "title": "Brand.dev",
-  "description": "Get a company's brand logos, colors, slogan, socials, and more.",
-  "icon": "brand-dev-purple.png",
+  "title": "Context.dev (formerly Brand.dev)",
+  "description": "Web Scraping & Crawl API for AI Agents",
+  "icon": "context-dev.png",
   "author": "xmok",
   "categories": [
     "Data",
@@ -15,8 +15,8 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "description": "API Key from Brand.dev Dashboard",
-      "placeholder": "brand__XXX...xX",
+      "description": "API Key from Context.dev Dashboard",
+      "placeholder": "brand__XXX... / ctxt_secret_xx...",
       "required": true,
       "type": "password"
     }
@@ -31,12 +31,12 @@
     {
       "name": "retrieve-brands",
       "title": "Retrieve Brands",
-      "description": "Get a company's brand logos, colors, slogan, socials, and more",
+      "description": "Get comprehensive brand data by domain, company name, email, or stock ticker",
       "mode": "view",
       "arguments": [
         {
           "name": "search",
-          "placeholder": "brand.dev",
+          "placeholder": "context.dev",
           "type": "text",
           "required": false
         }

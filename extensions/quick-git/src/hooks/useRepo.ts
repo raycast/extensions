@@ -5,8 +5,12 @@ export type SelectedRepo = ReturnType<typeof useLocalStorage<string>>;
 
 export const RepoContext = createContext<SelectedRepo>({
   value: undefined,
-  setValue: async () => {},
-  removeValue: async () => {},
+  setValue: () => {
+    throw Error("Cannot set repo value: RepoContext was not initialized");
+  },
+  removeValue: () => {
+    throw Error("Cannot remove repo value: RepoContext was not initialized");
+  },
   isLoading: false,
 });
 

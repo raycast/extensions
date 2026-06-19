@@ -1,5 +1,23 @@
 # Raycast Store Updates Changelog
 
+## [Menu bar, category and author filters, GitHub token, and reliability fixes] - 2026-06-16
+
+- Add an optional menu-bar command with a badge showing the number of new and updated extensions since you last checked, a dropdown of recent items, "Mark All as Seen", and hourly background refresh
+- Add category and author filters: filter by any category present in the list, or "Show Only This Author" from any item, with a "Clear Filters" action
+- Add an optional GitHub personal access token preference that raises the API rate limit from 60 to 5,000 requests/hour, used for all update and removal detection calls
+- Group the list into time sections (Today, Yesterday, Previous 7 Days, Previous 30 Days, Earlier) for easier scanning, each showing its item count
+- Sort every filter tab (New, Updates, My Updates, Removed) newest-first, consistently with the All tab
+- Fix manual refresh being incorrectly blocked for the rest of the GitHub hourly window: the rate-limit cooldown is now set only on an actual 403/429 (or exhausted quota), not on every successful fetch
+- Cache extension `package.json` lookups (6h TTL) and bound network concurrency, eliminating the burst of uncached requests fired on every command open
+- Fix a race condition where revalidating could overwrite fresh data with stale results, and stop the updates pipeline from re-running redundantly when the feed merely reloads
+- Fall back to the PR's changed file paths when a title-derived slug doesn't resolve, avoiding wrong store URLs
+- Validate the remote `platforms` field before use to avoid crashes on malformed `package.json`
+- Keep previously loaded updates (and show a clear toast) when rate limited, instead of emptying the list
+- Show a loading state while updates are still being processed instead of a premature "No Extensions Found"
+- Add Windows keyboard-shortcut variants for read-status, copy-URL, and changelog actions
+- Fix "Previous Changelog" navigation when a changelog is opened directly from a mid-list item
+- Await refresh so the "Refreshing…" state is shown correctly
+
 ## [Add platform filter shortcuts] - 2026-04-30
 
 - Add keyboard shortcuts for toggling macOS-only and Windows-only extension filters

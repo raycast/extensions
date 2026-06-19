@@ -85,7 +85,9 @@ export function getSortOrder(): string[] {
   const defaultOrders = defaultOrderList.map((type) => type.toString().toLowerCase());
 
   // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
-  const manualOrder = myPreferences.servicesOrder.split(",");
+  // TEPORARY FIX, servicesOrder should be string here, but actually string | undefined.
+  const manualOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
+
   // console.log("---> manualOrder:", manualOrder);
   const formatManualOrder = manualOrder.map((order) => order.trim().toLowerCase());
 

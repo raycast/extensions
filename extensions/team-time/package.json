@@ -78,19 +78,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
-    "date-fns": "^4.1.0",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5",
+    "date-fns": "^4.2.1",
     "date-fns-tz": "^3.2.0",
-    "nanoid": "^5.1.6"
+    "nanoid": "^5.1.11"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^2.1.1",
+    "@eslint/eslintrc": "^3.3.5",
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.10.1",
-    "@types/react": "19.2.4",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   },
   "scripts": {

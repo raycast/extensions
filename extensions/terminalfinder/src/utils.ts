@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { findApplication } from "./application";
 import { extractCmuxWorkingDirectory } from "./cmux";
+import { formatCmuxError } from "./cmux-error";
 
 export async function runAppleScript(script: string) {
   if (process.platform !== "darwin") {
@@ -33,14 +34,6 @@ export async function checkApplication(name: Terminal) {
 }
 
 const CMUX_COMMAND_TIMEOUT_MS = 10_000;
-
-function formatCmuxError(message: string) {
-  if (message.includes("Access denied")) {
-    return "cmux denied external control. In cmux, open Settings -> Automation and set Socket Mode to Allow all local processes or Password.";
-  }
-
-  return message || "cmux command failed";
-}
 
 function formatCmuxProcessError(error: NodeJS.ErrnoException) {
   if (error.code === "ETIMEDOUT") {

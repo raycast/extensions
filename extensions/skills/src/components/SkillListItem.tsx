@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { buildInstallCommand, buildSkillUrl, formatInstalls, type Skill } from "../shared";
 import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
+import { fetchSkillContent } from "../hooks/skill-content";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 import { SkillDetailView } from "./SkillDetailView";
 
@@ -23,7 +25,7 @@ export function SkillListItem({
   const isInstalled = installedMatch.type === "exact";
   const hasSourceConflict = installedMatch.type === "conflict";
   const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
-  const skillUrl = buildSkillUrl(skill.source, skill.skillId);
+  const skillUrl = buildSkillUrl(skill);
 
   const iconValue = isInstalled
     ? { source: Icon.CheckCircle, tintColor: Color.Green }
@@ -58,11 +60,12 @@ export function SkillListItem({
             onPush={() => onViewedSkillChange(skill.id)}
           />
           <InstallSkillAction skill={skill} installedMatch={installedMatch} onSkillInstalled={onSkillInstalled} />
+          <CopySkillContentsAction loadContent={() => fetchSkillContent(skill).then((result) => result?.raw)} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
           <Action.OpenInBrowser
             title="Open on skills.sh"

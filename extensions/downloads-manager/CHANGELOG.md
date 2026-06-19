@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add Copy Path action] - 2026-05-18
+
+- Added a "Copy Path" action to the Manage Downloads command that copies the focused download's absolute path as text (shortcut: `⌘⇧.` on macOS, `Ctrl+Shift+.` on Windows).
+
 ## [Upgrade Delete Latest Download Command] - 2026-04-27
 
 - Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to support background deeplinks without focusing Raycast.

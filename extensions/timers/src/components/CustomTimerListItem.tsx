@@ -7,7 +7,7 @@ import RenameAction from "./RenameAction";
 const createPresetLink = (ctID: string): string => {
   const payload: CommandLinkParams = { timerID: ctID };
   const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-  return `raycast://extensions/ThatNerd/timers/manageTimers?context=${encodedPayload}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/ThatNerd/timers/manageTimers?context=${encodedPayload}`;
 };
 
 export default function CustomTimerListItem(props: { customTimer: CustomTimer; id: string }) {

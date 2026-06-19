@@ -1,5 +1,27 @@
 # Todoist Changelog
 
+## [Fix Create Task tool paid fields] - 2026-05-28
+
+- The Create Task tool now omits empty or invalid `deadline` and `duration` fields so standard task creation works for Todoist Free plan users.
+
+## [Include deadlines in Today] - 2026-05-20
+
+- Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
+
+## [Menu bar priority sorting] - 2026-05-18
+
+- **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.
+- **Toggle from preferences**: A new **Sort tasks by priority** checkbox in the menu bar command preferences lets you turn priority sorting off and fall back to the previous default ordering. Enabled by default.
+
+## [Reduce Menu Bar sync size] - 2026-05-28
+
+- Reduced Menu Bar Tasks memory usage by syncing only the Todoist resources used by the menu bar.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a shortcut to create Raycast quicklinks from Todoist views.
+- Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
+
 ## [Filter completion UI and incremental reminder sync] - 2026-05-04
 
 - **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.

@@ -1,11 +1,25 @@
-import { Image } from "@raycast/api";
+import { Cache as RaycastCache, Image, LocalStorage } from "@raycast/api";
 
 import { Mailbox } from "../types";
 import { MailIcon } from "./presets";
+import { tryParseJson } from "./string";
+import { Cache } from "./cache";
 
-const MAILBOXES = ["inbox", "important", "starred", "drafts", "outbox", "junk", "trash", "archive"] as const;
+export const MAILBOXES = Object.freeze([
+  "inbox",
+  "important",
+  "starred",
+  "drafts",
+  "other",
+  "outbox",
+  "junk",
+  "trash",
+  "archive",
+] as const);
 
-const MAILBOX_ICONS: Record<string, Image.ImageLike> = {
+export type MailboxType = (typeof MAILBOXES)[number];
+
+const MAILBOX_ICONS: Record<MailboxType, Image.ImageLike> = {
   inbox: MailIcon.Inbox,
   important: MailIcon.Important,
   starred: MailIcon.Starred,
@@ -14,6 +28,7 @@ const MAILBOX_ICONS: Record<string, Image.ImageLike> = {
   junk: MailIcon.Junk,
   trash: MailIcon.Trash,
   archive: MailIcon.Archive,
+  other: MailIcon.Mailbox,
 };
 
 const INBOX_ALIAS = [
@@ -114,51 +129,82 @@ const ARCHIVE_ALIAS = [
   "вся почта",
 ];
 
-export const translateMailboxName = (name: string): string => {
-  name = name.toLowerCase();
+const overrideCache = new RaycastCache();
 
-  if (INBOX_ALIAS.includes(name)) return "inbox";
-  if (IMPORTANT_ALIAS.includes(name)) return "important";
-  if (STARRED_ALIAS.includes(name)) return "starred";
-  if (DRAFTS_ALIAS.includes(name)) return "drafts";
-  if (OUTBOX_ALIAS.includes(name)) return "outbox";
-  if (JUNK_ALIAS.includes(name)) return "junk";
-  if (TRASH_ALIAS.includes(name)) return "trash";
-  if (ARCHIVE_ALIAS.includes(name)) return "archive";
+LocalStorage.getItem<string>("mailbox-overrides").then((value) => {
+  overrideCache.set("mailbox-overrides", value ?? "{}");
+  overrideCache.subscribe((key, value) => {
+    if (key !== "mailbox-overrides") return;
+    LocalStorage.setItem(key, value ?? "{}");
+  });
+});
 
-  return name;
+const getMailboxTypeOverride = (name: string): MailboxType | undefined => {
+  const overrides = tryParseJson<Record<string, MailboxType>>(overrideCache.get("mailbox-overrides"), {});
+
+  return overrides[name];
 };
+
+export const setMailboxTypeOverride = (name: string, type: MailboxType) => {
+  const overrides = tryParseJson<Record<string, MailboxType>>(overrideCache.get("mailbox-overrides"), {});
+
+  overrides[name] = type;
+
+  overrideCache.set("mailbox-overrides", JSON.stringify(overrides));
+  Cache.invalidateAccounts();
+};
+
+export const translateMailboxName = (name: string): MailboxType => {
+  const override = getMailboxTypeOverride(name);
+  if (override) return override;
+
+  name = name.toLowerCase().trim();
+
+  function includes(aliases: string[], name: string) {
+    return aliases.includes(name);
+  }
+
+  if (includes(INBOX_ALIAS, name)) return "inbox";
+  if (includes(IMPORTANT_ALIAS, name)) return "important";
+  if (includes(STARRED_ALIAS, name)) return "starred";
+  if (includes(DRAFTS_ALIAS, name)) return "drafts";
+  if (includes(OUTBOX_ALIAS, name)) return "outbox";
+  if (includes(JUNK_ALIAS, name)) return "junk";
+  if (includes(TRASH_ALIAS, name)) return "trash";
+  if (includes(ARCHIVE_ALIAS, name)) return "archive";
+
+  return "other";
+};
+
+export const getMailboxType = translateMailboxName;
 
 export const sortMailboxes = (a: Mailbox, b: Mailbox) => {
-  const aName = translateMailboxName(a.name);
-  const bName = translateMailboxName(b.name);
+  const aIndex = MAILBOXES.indexOf(a.type);
+  const bIndex = MAILBOXES.indexOf(b.type);
 
-  const aIndex = MAILBOXES.findIndex((mailbox) => mailbox === aName);
-  const bIndex = MAILBOXES.findIndex((mailbox) => mailbox === bName);
-
-  return (aIndex - bIndex) * (aIndex === -1 || bIndex === -1 ? -1 : 1);
+  return aIndex - bIndex;
 };
 
-export const getMailboxIcon = (name: string): Image.ImageLike => {
-  return MAILBOX_ICONS[translateMailboxName(name)] ?? MailIcon.Mailbox;
+export const getMailboxIcon = (type: MailboxType): Image.ImageLike => {
+  return MAILBOX_ICONS[type] ?? MailIcon.Mailbox;
 };
 
 export const isInbox = (mailbox: Mailbox) => {
-  return INBOX_ALIAS.includes(mailbox.name.toLowerCase());
+  return mailbox.type === "inbox";
 };
 
 export const isImportantMailbox = (mailbox: Mailbox) => {
-  return IMPORTANT_ALIAS.includes(mailbox.name.toLowerCase());
+  return mailbox.type === "important";
 };
 
 export const isArchiveMailbox = (mailbox: Mailbox) => {
-  return ARCHIVE_ALIAS.includes(mailbox.name.toLowerCase());
+  return mailbox.type === "archive";
 };
 
 export const isJunkMailbox = (mailbox: Mailbox) => {
-  return JUNK_ALIAS.includes(mailbox.name.toLowerCase());
+  return mailbox.type === "junk";
 };
 
 export const isTrashMailbox = (mailbox: Mailbox) => {
-  return TRASH_ALIAS.includes(mailbox.name.toLowerCase());
+  return mailbox.type === "trash";
 };

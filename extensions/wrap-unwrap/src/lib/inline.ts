@@ -23,10 +23,11 @@ const INLINE_PATTERNS = [
  * Placeholder sentinel — U+E000, a Unicode Private Use Area character that
  * (a) is a single code point with no whitespace semantics, so reflow won't
  * split inside a placeholder, and (b) is exceedingly unlikely to appear in
- * user input. Followed by the token's index.
+ * user input. The index is wrapped in a trailing sentinel too, so a literal
+ * digit immediately after a token in the source can't bleed into the index.
  */
 const PLACEHOLDER = String.fromCodePoint(0xe000);
-const RESTORE_PATTERN = new RegExp(`${PLACEHOLDER}(\\d+)`, "g");
+const RESTORE_PATTERN = new RegExp(`${PLACEHOLDER}(\\d+)${PLACEHOLDER}`, "g");
 
 export type Protected = {
   protected: string;
@@ -40,7 +41,7 @@ export function protectInline(input: string): Protected {
     working = working.replace(pattern, (match) => {
       const idx = tokens.length;
       tokens.push(match);
-      return `${PLACEHOLDER}${idx}`;
+      return `${PLACEHOLDER}${idx}${PLACEHOLDER}`;
     });
   }
   return { protected: working, tokens };

@@ -29,10 +29,6 @@ export interface GramRemoteWorkspace extends GramBaseWorkspace {
 
 export type GramWorkspace = GramLocalWorkspace | GramRemoteWorkspace;
 
-//
-// Unified types for extension
-//
-
 function isWslWorkspace(workspace: GramRemoteWorkspace): boolean {
   return workspace.kind === "wsl" && !!workspace.user && !!workspace.distro;
 }
@@ -134,7 +130,6 @@ export function parseGramWorkspace(gramWorkspace: GramWorkspace): Workspace | nu
     };
   }
 
-  // else TODO: clarify
   if (gramWorkspace.type === "remote") {
     const processedPaths = paths.map((p) => p.replace(/^\/+/, "").replace(/\/+$/, ""));
     const primaryPath = processedPaths[0];

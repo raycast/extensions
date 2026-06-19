@@ -2,7 +2,7 @@ import { runAppleScript } from "@raycast/utils";
 
 import { Account, Mailbox } from "../types";
 import { Cache } from "../utils/cache";
-import { getMailboxIcon, sortMailboxes } from "../utils/mailbox";
+import { getMailboxType, sortMailboxes } from "../utils/mailbox";
 
 export const getAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
@@ -93,7 +93,7 @@ export const getMailboxes = async (accountName: string): Promise<Mailbox[]> => {
         const lastCommaIndex = line.lastIndexOf(",");
         const name = line.substring(0, lastCommaIndex);
         const unreadCount = line.substring(lastCommaIndex + 1);
-        return { name, icon: getMailboxIcon(name), unreadCount: parseInt(unreadCount) };
+        return { name, type: getMailboxType(name), unreadCount: parseInt(unreadCount) };
       })
       .sort(sortMailboxes);
 

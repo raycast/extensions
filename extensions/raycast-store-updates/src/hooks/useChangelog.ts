@@ -1,6 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-
-const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
+import { RAW_CONTENT_BASE } from "../utils";
 
 export function useChangelog(slug: string | undefined) {
   const url = slug ? `${RAW_CONTENT_BASE}/${slug}/CHANGELOG.md` : undefined;

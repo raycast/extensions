@@ -27,7 +27,7 @@ export default function MatchItem({
   onEdited,
 }: MatchItemProps) {
   const { triggers, replace, image_path, form, label, filePath, profile, vars, isRegex } = match;
-  const [expandedReplace, setExpandedReplace] = useState(replace ?? "");
+  const [expandedReplace, setExpandedReplace] = useState("");
   const [resolvedImagePath, setResolvedImagePath] = useState<string | undefined>(undefined);
 
   const isDynamic = !!vars?.length;
@@ -41,8 +41,10 @@ export default function MatchItem({
 
     if (isImage) {
       setResolvedImagePath(resolveImagePath(image_path, configPath));
-    } else {
+    } else if (isDynamic) {
       refresh();
+    } else {
+      setExpandedReplace(replace ?? "");
     }
   }, [isSelected]);
 
@@ -52,11 +54,11 @@ export default function MatchItem({
     <List.Item
       id={id}
       title={label ?? triggers.join(", ")}
-      keywords={replace ? [replace] : undefined}
+      keywords={replace && replace.length <= 200 ? [replace] : undefined}
       subtitle={profile ? formatCategoryName(profile, separator) : ""}
       detail={
         <List.Item.Detail
-          markdown={form ? "`form` is not supported yet." : isImage ? imageMarkdown : expandedReplace}
+          markdown={form ? "`form` is not supported yet." : isImage ? imageMarkdown : isSelected ? expandedReplace : ""}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.TagList title="Triggers">

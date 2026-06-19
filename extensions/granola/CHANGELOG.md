@@ -1,5 +1,20 @@
 # Granola Changelog
 
+## [Sortable date prefixes for exports] - 2026-05-29
+
+- Prefix exported note and transcript filenames with ISO-8601 creation date
+- Sorting files by name now yields chronological order
+
+## [2.1.4] - 2026-05-26
+
+### Bug Fixes
+
+- Automatically refresh expired WorkOS access tokens via Granola's `refresh-access-token` API and persist updated tokens locally, so Search Notes and other commands work again without requiring the Granola app to refresh the session first.
+
+### Enhancements
+
+- Added structured `[Granola]` dev-console logging across auth, fetch, and error UI paths to make troubleshooting easier during `npm run dev`.
+
 ## [2.1.3] - 2026-05-08
 
 ### New Features

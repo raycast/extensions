@@ -29,7 +29,12 @@ export default function Command() {
     },
   );
 
-  const entries = Array.isArray(data) ? data.filter((d): d is Document => "title" in d && "items" in d) : [];
+  const entries = Array.isArray(data)
+    ? data.filter(
+        (d): d is Document =>
+          typeof d === "object" && d !== null && "title" in d && "items" in d && Array.isArray((d as Document).items),
+      )
+    : [];
 
   return (
     <List

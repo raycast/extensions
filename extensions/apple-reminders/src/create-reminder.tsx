@@ -413,6 +413,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           <Action.SubmitForm
             icon={Icon.Window}
             onSubmit={(values) => submitWithOptions(values as CreateReminderValues, { closeWindowAfterCreate: true })}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             title="Create Reminder and Close Window"
           />
           <Action.Push

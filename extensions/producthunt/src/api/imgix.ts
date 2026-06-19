@@ -3,6 +3,10 @@
  * Based on the imgix API documentation: https://docs.imgix.com/en-US/apis/rendering
  */
 
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[ProductHuntImgix]");
+
 /**
  * Image format options supported by imgix
  * @see https://docs.imgix.com/en-US/apis/rendering/format
@@ -106,16 +110,7 @@ export function processImageUrl(url: string, options: ImgixOptions = {}): string
 
     return parsedUrl.toString();
   } catch (error) {
-    try {
-      import("../util/logger")
-        .then(({ getLogger }) => {
-          const log = getLogger("imgix");
-          log.error("imgix:process_error", error, { url });
-        })
-        .catch(() => void 0);
-    } catch {
-      // ignore
-    }
+    log.error("failed to process image URL", { url, error });
     return url;
   }
 }
@@ -159,16 +154,7 @@ export function processThumbnail(url: string, options: { isDetailView?: boolean 
       ...(quality !== undefined ? { quality } : {}),
     });
   } catch (error) {
-    try {
-      import("../util/logger")
-        .then(({ getLogger }) => {
-          const log = getLogger("imgix");
-          log.error("imgix:thumbnail_error", error, { url, isDetailView });
-        })
-        .catch(() => void 0);
-    } catch {
-      // ignore
-    }
+    log.error("failed to process thumbnail URL", { url, isDetailView, error });
     return url;
   }
 }

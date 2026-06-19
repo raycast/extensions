@@ -100,6 +100,13 @@
       "subtitle": "Porkbun",
       "description": "Get all domain names in account. Domains are returned in chunks of 1000",
       "mode": "view"
+    },
+    {
+      "name": "retrieve-account-balance",
+      "title": "Retrieve Account Balance",
+      "subtitle": "Porkbun",
+      "description": "Get available account credit balance",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

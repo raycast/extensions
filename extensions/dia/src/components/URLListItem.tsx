@@ -1,5 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getSubtitle } from "../utils";
 
 const DIA_BUNDLE_ID = "company.thebrowser.dia";
@@ -11,6 +12,7 @@ interface URLListItemProps {
 
 export function URLListItem({ url, searchText }: URLListItemProps) {
   const normalizedUrl = /^\S+:\/\//.test(url) ? url : `https://${url}`;
+  const searchEngine = getSearchEngine();
 
   return (
     <List.Item
@@ -29,8 +31,8 @@ export function URLListItem({ url, searchText }: URLListItemProps) {
             }}
           />
           <Action.OpenInBrowser
-            title="Search Google Instead"
-            url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+            title={`${getSearchActionTitle(searchEngine)} Instead`}
+            url={getSearchUrl(searchText, searchEngine)}
             icon={Icon.MagnifyingGlass}
             shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
           />

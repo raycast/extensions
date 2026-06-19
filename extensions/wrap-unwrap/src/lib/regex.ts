@@ -21,10 +21,14 @@ export const HR = /^ {0,3}([-*_])(?:\s*\1){2,}\s*$/;
 /**
  * List-item start. Captures:
  *   group 1: leading indent
- *   group 2: marker (`-` `*` `+` or `\d{1,9}[.)]` per CommonMark 9-digit cap)
+ *   group 2: marker — CommonMark `-` `*` `+` / `\d{1,9}[.)]` (9-digit cap),
+ *            plus common Unicode bullets pasted from rich text or terminals
+ *            (•, ‣, ▪, ▸, –, —). The Unicode set is recognized so pasted
+ *            content can be reflowed and (optionally) re-indented; it is
+ *            emitted back verbatim, never rewritten to an ASCII marker.
  *   group 3: trailing whitespace (defines hang indent column)
  */
-export const LIST_ITEM = /^(\s*)([-*+]|\d{1,9}[.)])(\s+)/;
+export const LIST_ITEM = /^(\s*)([-*+]|[•‣▪▸–—]|\d{1,9}[.)])(\s+)/;
 
 /** Task-item marker, applied to list-item content (after stripping the list marker). */
 export const TASK_MARKER = /^\[[ xX]\]\s/;

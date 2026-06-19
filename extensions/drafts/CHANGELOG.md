@@ -1,5 +1,9 @@
 # Drafts Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Security Maintenance] - 2026-02-13
 
 - Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE

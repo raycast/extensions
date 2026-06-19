@@ -1,18 +1,12 @@
-import { LocalStorage, ActionPanel, popToRoot, Action, Form, showToast, Toast } from "@raycast/api";
+import { ActionPanel, popToRoot, Action, Form, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { Question } from "./types";
+import { createQuestion, saveQuestion } from "./lib/questions";
 
 export default function CreateQuestion() {
-  // generate a random uuid
-  function generateQuickGuid() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  }
   const { handleSubmit, itemProps } = useForm<Question>({
     async onSubmit(values: Question) {
-      values.box = 0;
-      values.date = new Date();
-      values.id = generateQuickGuid();
-      await LocalStorage.setItem(values.id, JSON.stringify(values));
+      await saveQuestion(createQuestion(values.question, values.answer));
       await showToast({
         style: Toast.Style.Success,
         title: "Great Job!",

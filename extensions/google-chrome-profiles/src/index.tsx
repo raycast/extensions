@@ -334,7 +334,11 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               key={index}
               title={b.title}
               subtitle={b.subtitle}
-              icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
+              icon={
+                b.iconURL
+                  ? getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })
+                  : { source: Icon.Globe, mask: Image.Mask.Circle }
+              }
               actions={
                 <ActionPanelForTarget
                   profile={props.profile}
@@ -358,7 +362,7 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
   const context = encodeURIComponent(
     JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
   );
-  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
+  const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
 
   const targetUrl = props.target.action === "openUrl" ? props.target.url : "";
 

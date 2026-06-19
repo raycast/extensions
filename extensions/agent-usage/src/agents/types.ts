@@ -11,7 +11,8 @@ export type AgentId =
   | "synthetic"
   | "antigravity"
   | "zai"
-  | "minimax";
+  | "minimax"
+  | "opencode-go";
 
 export interface AgentDefinition {
   id: AgentId;

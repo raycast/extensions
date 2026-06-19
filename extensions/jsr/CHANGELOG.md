@@ -1,5 +1,18 @@
 # JSR Changelog
 
+## [Improvements] - 2026-05-18
+
+- Update dependencies
+- View package README from search results
+- Richer package metadata: downloads, bundle size, entry points, publish dates, archived badge
+- Browse other packages in the same scope from package detail
+- Version list shows per-version downloads and last-updated time
+- Fixed version list pagination
+- Adapt to JSR API changes (stats/featured packages)
+- Cache search API key
+- Code refactoring, improved readability and maintainability
+- Add a bunch of AI tools that can be used with JSR
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

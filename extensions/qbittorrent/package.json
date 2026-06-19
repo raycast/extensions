@@ -75,7 +75,7 @@
     }
   ],
   "dependencies": {
-    "@ctrl/qbittorrent": "^9.11.2",
+    "@ctrl/qbittorrent": "^9.14.0",
     "@raycast/api": "^1.104.11",
     "change-case": "^5.4.4",
     "filesize": "^10.1.6"

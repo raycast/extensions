@@ -126,6 +126,19 @@ function formatTime(timestamp: number): string {
   });
 }
 
+export function formatRelativeTime(timestamp: number): string {
+  const ts = timestamp < 1e12 ? timestamp * 1000 : timestamp;
+  const now = Date.now();
+  const diffMs = now - ts;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffSec < 60) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
 export function buildTranscriptMarkdown(entries: TranscriptEntry[]): string {
   const sections: string[] = [];
 

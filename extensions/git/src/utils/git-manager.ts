@@ -1618,7 +1618,7 @@ __REBASE_TODO__
    * Returns a single commit by hash with parsed metadata and changed files.
    */
   async getCommitByHash(commitHash: string): Promise<Commit | null> {
-    const log = await this.git.log(["--max-count=1", "--name-status", "--decorate=full", commitHash]);
+    const log = await this.git.log(["--max-count=1", "--name-status", "--decorate=full", "--first-parent", commitHash]);
 
     if (!log.latest) return null;
 

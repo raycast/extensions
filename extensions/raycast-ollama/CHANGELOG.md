@@ -1,5 +1,24 @@
 # raycast-ollama Changelog
 
+## [Fix] - 2026-06-16
+
+- [Fix] Command "Chat with Ollama" and "Answer" commands: fixed a bug in the thinking rendering during streaming. The thinking text could stop updating mid-generation while the stream continued and the final answer appeared. The root cause was a missing flush of the pending `textThinkingBuffer` on stream termination (`emitDone`) combined with a `else if` in the throttle path that prevented symmetric flushing of thinking and content buffers.
+
+## [Improvement] - 2026-05-26
+
+- Command "Chat with Ollama": new system prompt with current date and system information in the context.
+- Command "Chat with Ollama": internet search using Ollama Search API. API Key Requied. Enabled by default.
+- Command "Chat with Ollama": improved tool call.
+- UI Improvements.
+
+## [Improvement and Fix] - 2026-05-18
+
+- [Improvement] The thinking process is now shown in a separate section.
+- [Improvement] You can now choose the level of thinking effort.
+- [Improvement] Improved rendering performance for all commands.
+- [Improvement] Minor UI changes.
+- [Fix] Missing Actions on empty Chat
+
 ## [Improvement] - 2026-04-06
 
 - Added AI Extension "Web Search" and "Web Fetch". This feature requires the Ollama Web Search API Key.

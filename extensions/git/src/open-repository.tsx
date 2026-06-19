@@ -24,6 +24,7 @@ import {
   Submodule,
   Branch,
   Remote,
+  RemoteProvider,
   Preferences,
 } from "./types";
 import { useGitRemotes } from "./hooks/useGitRemotes";
@@ -53,6 +54,8 @@ export type RepositoryContext = {
     data: Record<string, Remote>;
     isLoading: boolean;
     revalidate: () => void;
+    providerOverrides: Record<string, RemoteProvider>;
+    addProviderOverride: (provider: RemoteProvider, url: string) => void;
   };
   branches: {
     data: BranchesState;

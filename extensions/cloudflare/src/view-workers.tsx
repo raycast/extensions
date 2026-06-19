@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useState } from 'react';
 
 import Service, { Worker } from './service';
@@ -84,6 +84,7 @@ function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort By"
@@ -124,24 +125,17 @@ function Command() {
               {accountWorkers.map((worker) => (
                 <List.Item
                   key={worker.id}
-                  icon={Icon.Code}
                   title={worker.id}
                   accessories={[
                     {
-                      text: new Date(worker.modifiedOn).toLocaleDateString(),
-                      tooltip: `Modified: ${worker.modifiedOn}`,
+                      date: new Date(worker.modifiedOn),
+                      tooltip: `Modified: ${new Date(worker.modifiedOn).toLocaleString()}`,
                     },
                   ]}
+                  detail={<WorkerDetail worker={worker} />}
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section>
-                        <Action.Push
-                          icon={Icon.Document}
-                          title="Show Details"
-                          target={
-                            <WorkerView accountId={accountId} worker={worker} />
-                          }
-                        />
                         <Action.OpenInBrowser
                           title="Open on Cloudflare"
                           url={getWorkerUrl(accountId, worker.id)}
@@ -173,82 +167,135 @@ function Command() {
   );
 }
 
-interface WorkerViewProps {
-  accountId: string;
+interface WorkerDetailProps {
   worker: Worker;
 }
 
-function WorkerView(props: WorkerViewProps) {
-  const { accountId, worker } = props;
+function formatOptionalDate(value?: string): string {
+  if (!value) {
+    return 'Unknown';
+  }
 
-  const markdown = `
-# Worker
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
 
-## Name
+function getBooleanTag(
+  value?: boolean,
+  enabledText = 'Enabled',
+  disabledText = 'Disabled',
+  disabledColor: Color = Color.Red,
+) {
+  return {
+    color: value ? Color.Green : disabledColor,
+    text: value ? enabledText : disabledText,
+  };
+}
 
-${worker.id}
-
-## Usage Model
-
-${worker.usageModel || 'Standard'}
-
-## Placement
-
-${worker.placementMode || 'Default'}
-  `;
+function WorkerDetail(props: WorkerDetailProps) {
+  const { worker } = props;
+  const hasModules = getBooleanTag(
+    worker.hasModules,
+    'Yes',
+    'No',
+    Color.SecondaryText,
+  );
+  const hasAssets = getBooleanTag(
+    worker.hasAssets,
+    'Yes',
+    'No',
+    Color.SecondaryText,
+  );
+  const logpush = getBooleanTag(worker.logpush);
 
   return (
-    <Detail
-      markdown={markdown}
+    <List.Item.Detail
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Name" text={worker.id} />
+          <List.Item.Detail.Metadata.Label
             title="Modified"
             text={new Date(worker.modifiedOn).toLocaleString()}
           />
-          <Detail.Metadata.Label
+          <List.Item.Detail.Metadata.Label
             title="Created"
             text={new Date(worker.createdOn).toLocaleString()}
           />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Has Modules"
-            icon={worker.hasModules ? Icon.Check : Icon.Xmark}
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Compatibility" />
+          <List.Item.Detail.Metadata.Label
+            title="Date"
+            text={worker.compatibilityDate || 'None'}
           />
-          <Detail.Metadata.Label
-            title="Has Assets"
-            icon={worker.hasAssets ? Icon.Check : Icon.Xmark}
+          <List.Item.Detail.Metadata.TagList title="Flags">
+            {worker.compatibilityFlags.length ? (
+              worker.compatibilityFlags.map((flag) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={flag}
+                  text={flag}
+                />
+              ))
+            ) : (
+              <List.Item.Detail.Metadata.TagList.Item text="None" />
+            )}
+          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Runtime" />
+          <List.Item.Detail.Metadata.Label
+            title="Usage Model"
+            text={worker.usageModel || 'Standard'}
           />
-          <Detail.Metadata.Label
-            title="Logpush"
-            icon={worker.logpush ? Icon.Check : Icon.Xmark}
+          <List.Item.Detail.Metadata.TagList title="Handlers">
+            {worker.handlers.length ? (
+              worker.handlers.map((handler) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={handler}
+                  text={handler}
+                />
+              ))
+            ) : (
+              <List.Item.Detail.Metadata.TagList.Item text="None" />
+            )}
+          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.TagList title="Logpush">
+            <List.Item.Detail.Metadata.TagList.Item
+              text={logpush.text}
+              color={logpush.color}
+            />
+          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Placement" />
+          <List.Item.Detail.Metadata.Label
+            title="Mode"
+            text={worker.placement?.mode || 'Default'}
           />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Open on Cloudflare"
-              url={getWorkerUrl(accountId, worker.id)}
-              shortcut={{ modifiers: ['cmd'], key: 'o' }}
+          <List.Item.Detail.Metadata.Label
+            title="Status"
+            text={worker.placement?.status || 'Unknown'}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Last Analyzed"
+            text={formatOptionalDate(worker.placement?.lastAnalyzedAt)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Assets and Modules" />
+          <List.Item.Detail.Metadata.TagList title="Has Modules">
+            <List.Item.Detail.Metadata.TagList.Item
+              text={hasModules.text}
+              color={hasModules.color}
             />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              icon={Icon.CopyClipboard}
-              content={worker.id}
-              title="Copy Worker Name"
-              shortcut={{ modifiers: ['cmd'], key: '.' }}
+          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.TagList title="Has Assets">
+            <List.Item.Detail.Metadata.TagList.Item
+              text={hasAssets.text}
+              color={hasAssets.color}
             />
-            <Action.CopyToClipboard
-              icon={Icon.CopyClipboard}
-              content={getWorkerUrl(accountId, worker.id)}
-              title="Copy Cloudflare URL"
-              shortcut={{ modifiers: ['cmd', 'shift'], key: '.' }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
+          </List.Item.Detail.Metadata.TagList>
+        </List.Item.Detail.Metadata>
       }
     />
   );

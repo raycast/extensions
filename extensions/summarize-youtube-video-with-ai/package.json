@@ -296,6 +296,72 @@
       "arguments": []
     }
   ],
+  "preferences": [
+    {
+      "name": "creativity",
+      "title": "Creativity",
+      "description": "Choose how creative the AI should be.",
+      "type": "dropdown",
+      "default": "0.5",
+      "data": [
+        {
+          "value": "0",
+          "title": "None"
+        },
+        {
+          "value": "0.5",
+          "title": "Low"
+        },
+        {
+          "value": "1",
+          "title": "Medium"
+        },
+        {
+          "value": "1.5",
+          "title": "High"
+        },
+        {
+          "value": "2",
+          "title": "Maximum"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Define the language which Raycast AI should use to answer video questions.",
+      "type": "textfield",
+      "default": "english",
+      "required": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "answer-video-question",
+      "title": "Answer YouTube Video Question",
+      "description": "Answer a user's question about a YouTube video by fetching its transcript. Use this when the user asks about the contents, claims, explanation, or context of a YouTube video. If no URL is provided, the tool can use a YouTube URL from the clipboard.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "The user's question about the YouTube video. Do not include the YouTube URL unless it is part of the user's original question."
+          },
+          "video": {
+            "type": "string",
+            "description": "Optional YouTube video URL or video ID. Omit this when the user wants the extension to use the YouTube URL from the clipboard."
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    }
+  ],
+  "ai": {
+    "instructions": "Use the answer-video-question tool whenever the user asks a question about a YouTube video. Pass the YouTube URL or video ID when the prompt includes one. If the prompt does not include a URL, call the tool without the video argument so it can inspect the clipboard. Do not answer questions about the video from general knowledge; use the transcript-backed tool result."
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
     "@raycast/api": "^1.104.4",

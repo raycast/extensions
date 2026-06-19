@@ -11,4 +11,6 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
+AGENTS.md
 .cursor/hooks/state/continual-learning.json
+.cursor/hooks/state/continual-learning-index.json

@@ -97,5 +97,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "axios": "0.31.1"
+  }
 }

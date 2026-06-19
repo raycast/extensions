@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { Ollama } from "../ollama/ollama";
 import { GetOllamaServerByName, GetOllamaServers } from "../settings/settings";
-import { Preferences, RaycastImage } from "../types";
+import { RaycastImage } from "../types";
 import {
   ErrorRaycastBrowserExtantion,
   ErrorRaycastClipboardTextEmpty,
@@ -19,7 +19,6 @@ import {
   ErrorRaycastSelectedTextEmpty,
 } from "./error";
 import fs from "fs";
-import fetch from "node-fetch";
 import { fileTypeFromBuffer } from "file-type";
 import { OllamaApiTagsResponseModel } from "../ollama/types";
 import { UiModelDetails } from "./types";
@@ -107,10 +106,10 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
                 name: tag.name,
                 capabilities: show && show.capabilities,
               };
-            })
-          )
+            }),
+          ),
         );
-    })
+    }),
   );
   return o;
 }
@@ -299,4 +298,24 @@ async function GetPromptTokenSelectionText(): Promise<string | undefined> {
       break;
   }
   return query;
+}
+
+/**
+ * Check if selected Model has thinking capabilities.
+ *
+ * @param models - Models from all Ollama Server.
+ * @param server - Selected Ollama Server.
+ * @param model - Selected Ollama Model name.
+ * @returns true if model has thinking capabilities.
+ */
+export function isThinkingModel(models?: Map<string, UiModelDetails[]>, server?: string, model?: string): boolean {
+  if (!models || !server || !model) return false;
+
+  const serverModels = models.get(server);
+  if (!serverModels) return false;
+
+  const capabilities = serverModels.find((value) => value.name === model)?.capabilities;
+  if (!capabilities || !capabilities.includes("thinking")) return false;
+
+  return true;
 }

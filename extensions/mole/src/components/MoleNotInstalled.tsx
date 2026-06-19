@@ -13,7 +13,7 @@ function openInBrewExtension() {
     ownerOrAuthorName: "nhojb",
     fallbackText: "mole",
   }).catch(() => {
-    open("raycast://extensions/nhojb/brew/search?fallbackText=mole");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nhojb/brew/search?fallbackText=mole`);
   });
 }
 

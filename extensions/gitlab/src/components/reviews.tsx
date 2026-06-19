@@ -51,6 +51,7 @@ export function ReviewList() {
 export function useMyReviews(
   project?: Project | undefined,
   labels: string[] | undefined = undefined,
+  hideArchived = false,
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -59,7 +60,7 @@ export function useMyReviews(
 } {
   const [mrs, setMrs] = useState<MergeRequest[]>();
   const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
-    `myreviews_${labels ? labels.join(",") : "[]"}`,
+    `myreviews_${labels ? labels.join(",") : "[]"}_${hideArchived}`,
     async (): Promise<MergeRequest[] | undefined> => {
       const user = await gitlab.getMyself();
       return await gitlab.getMergeRequests({
@@ -68,10 +69,11 @@ export function useMyReviews(
         in: "title",
         scope: "all",
         ...(labels && { labels }),
+        ...(hideArchived && { non_archived: true }),
       });
     },
     {
-      deps: [labels],
+      deps: [labels, hideArchived],
       secondsToRefetch: 5,
       secondsToInvalid: daysInSeconds(7),
     },

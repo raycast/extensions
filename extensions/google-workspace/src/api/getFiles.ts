@@ -68,6 +68,13 @@ type FileData = {
   parents: string[];
 };
 
+type DriveFilesResponse = {
+  files?: File[];
+  error?: {
+    message?: string;
+  };
+};
+
 // For the whole list of properties, look at: https://developers.google.com/drive/api/reference/rest/v3/files
 
 const EXTENSION_SEARCH_PARAMS =
@@ -172,7 +179,15 @@ async function baseGetFiles(params: StandardGetFilesParams | AIGetFilesParams) {
       Authorization: `Bearer ${getOAuthToken()}`,
     },
   });
-  const data = (await response.json()) as { files: File[] };
+  const data = (await response.json()) as DriveFilesResponse;
+
+  if (!response.ok) {
+    throw new Error(data.error?.message ?? `Google Drive request failed: ${response.status} ${response.statusText}`);
+  }
+
+  if (!Array.isArray(data.files)) {
+    throw new Error(data.error?.message ?? "Google Drive response did not include files.");
+  }
 
   const { displayFilePath } = getPreferenceValues<Preferences>();
   if (displayFilePath) {
@@ -183,7 +198,7 @@ async function baseGetFiles(params: StandardGetFilesParams | AIGetFilesParams) {
     );
   }
 
-  return data;
+  return data as DriveFilesResponse & { files: File[] };
 }
 
 // Standard search using predefined query types

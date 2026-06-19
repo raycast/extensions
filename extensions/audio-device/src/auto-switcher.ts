@@ -1,4 +1,4 @@
-import { updateCommandMetadata } from "@raycast/api";
+import { LaunchType, Toast, environment, showToast, updateCommandMetadata } from "@raycast/api";
 import {
   type IOType,
   getDefaultInputDevice,
@@ -82,11 +82,18 @@ async function buildSubtitle(type: IOType): Promise<string> {
 
 export async function runAutoSwitch(type: IOType) {
   await migrateFromPriorityOrder(getInputDevices, getOutputDevices);
-  await updateCommandMetadata({ subtitle: await buildSubtitle(type) });
+  const subtitle = await buildSubtitle(type);
+  await updateCommandMetadata({ subtitle });
 
   try {
     await runEnforcement(type);
-  } catch {
-    // Silently ignore errors in background
+    if (environment.launchType === LaunchType.UserInitiated) {
+      const label = type === "input" ? "Enforce Input Device" : "Enforce Output Device";
+      await showToast(Toast.Style.Success, `${label} is running`, subtitle);
+    }
+  } catch (error) {
+    if (environment.launchType === LaunchType.UserInitiated) {
+      await showToast(Toast.Style.Failure, `Failed to enforce ${type} device`, String(error));
+    }
   }
 }

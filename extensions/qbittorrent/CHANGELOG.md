@@ -1,5 +1,9 @@
 # qBittorrent Changelog
 
+## [Update] - 2026-06-18
+
+- Fixes issue #28841 with versions >=5.2.0
+
 ## [Update] - 2026-03-27
 
 - Replaced the torrent file tag picker with a real file picker that supports Finder prefill and manual browsing

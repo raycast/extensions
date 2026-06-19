@@ -39,11 +39,20 @@ type TaskCollaborator = {
 type Task = {
   id: string;
   name: string | null;
-  creator_id: number;
+  creator: {
+    id: number;
+    login?: string;
+    node_id?: string;
+    url?: string;
+  };
   user_collaborators: number[];
   agent_collaborators: TaskCollaborator[];
-  owner_id: number;
-  repo_id: number;
+  owner: {
+    id: number;
+  };
+  repository: {
+    id: number;
+  };
   state: string;
   status: string;
   session_count: number;
@@ -296,7 +305,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
   const tasksWithoutPRs = retrievedTasks.filter(
     (task) => !task.artifacts.some((artifact) => artifact.data.type === "pull"),
   );
-  const uniqueRepoIds = Array.from(new Set(tasksWithoutPRs.map((task) => task.repo_id)));
+  const uniqueRepoIds = Array.from(new Set(tasksWithoutPRs.map((task) => task.repository.id)));
 
   const repoResults = await Promise.allSettled(
     uniqueRepoIds.map(async (repoId) => {
@@ -321,7 +330,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
 
     const prGlobalId = pullArtifact?.data.global_id;
     const premiumRequests = prGlobalId ? premiumByGlobalId[prGlobalId] || 0 : 0;
-    const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repo_id) ?? null;
+    const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repository.id) ?? null;
 
     return {
       task,

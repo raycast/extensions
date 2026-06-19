@@ -88,6 +88,16 @@
       "name": "toggle-pip-status",
       "title": "Toggle the PIP Status",
       "description": "Change the PIP (Picture in Picture) status for a display using its tagID"
+    },
+    {
+      "name": "get-input-sources",
+      "title": "Get Input Sources",
+      "description": "Get available input sources for a display using its tagID"
+    },
+    {
+      "name": "set-input-source",
+      "title": "Set Input Source",
+      "description": "Set the input source of a display using its tagID and VCP value"
     }
   ],
   "preferences": [
@@ -137,7 +147,7 @@
     }
   ],
   "ai": {
-    "instructions": "Always execute the 'Get Displays' command first to get a list of all available displays. The 'Get Main Display' command will return information about the main display. Every command that requires a display tagID, first run the 'Get Displays' command to get the tagID of the display you want to interact with. When setting brightness or contrast, the value should always be rounded to 1 decimal place. When changing the resolution, never suggest a resolution that is marked unsafe unless specifically requested by the user. PIP stands for Picture in Picture.",
+    "instructions": "Always execute the 'Get Displays' command first to get a list of all available displays. The 'Get Main Display' command will return information about the main display. Every command that requires a display tagID, first run the 'Get Displays' command to get the tagID of the display you want to interact with. When setting brightness or contrast, the value should always be rounded to 1 decimal place. When changing the resolution, never suggest a resolution that is marked unsafe unless specifically requested by the user. PIP stands for Picture in Picture. When changing the input source, first call 'Get Input Sources' with the display's tagID to retrieve the available sources and their vcpValue, then pass those values to 'Set Input Source'.",
     "evals": [
       {
         "input": "@betterdisplay List all my connected displays?",
@@ -251,16 +261,16 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.16",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -269,5 +279,11 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "raidel-a"
+  ],
+  "platforms": [
+    "macOS"
+  ]
 }

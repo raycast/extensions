@@ -674,6 +674,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "olostep",
+    title: "Olostep",
+    description:
+      "A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API.",
+    icon: "https://www.olostep.com/images/olostep-logo-cropped.svg",
+    homepage: "https://github.com/olostep/olostep-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "olostep-mcp"],
+      env: {
+        OLOSTEP_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "routemesh",
     title: "RouteMesh",
     description:
@@ -891,6 +906,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "optionsahoy",
+    title: "OptionsAhoy",
+    description:
+      "Equity-compensation tax optimizer. ISO/AMT exercise scheduling, NSO, RSU sell-vs-hold, QSBS eligibility, single-stock concentration risk, and protective puts/collars, computed against federal plus 50-state and DC tax code over multi-year horizons.",
+    icon: "https://raw.githubusercontent.com/AlvisoOculus/optionsahoy-mcp/main/assets/logo-400.png",
+    homepage: "https://optionsahoy.com/for-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://optionsahoy.com/mcp"],
+    },
+  },
+  {
     name: "paperless-ngx",
     title: "Paperless-NGX",
     description:
@@ -904,6 +931,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "vc-deal-flow-signal",
+    title: "VC Deal Flow Signal",
+    description:
+      "GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required.",
+    icon: "https://signals.gitdealflow.com/icon.png",
+    homepage: "https://github.com/kindrat86/vc-deal-flow-signal",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
 ];

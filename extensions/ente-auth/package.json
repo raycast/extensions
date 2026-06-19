@@ -100,8 +100,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
     "fs-extra": "^11.2.0",
     "otpauth": "^9.3.2",
     "ts-node": "^10.0.0",

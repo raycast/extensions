@@ -255,6 +255,7 @@ function DeviceActions({
               deviceName: device.name,
             }),
           }}
+          shortcut={Keyboard.Shortcut.Common.Save}
         />
         <Action.CopyToClipboard
           title="Copy Device Name"
@@ -405,7 +406,10 @@ function ToggleHiddenDeviceAction({
     <Action
       title={title}
       icon={icon}
-      shortcut={null}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: isHidden ? "s" : "h" },
+        Windows: { modifiers: ["ctrl", "shift"], key: isHidden ? "s" : "h" },
+      }}
       onAction={async () => {
         await toggleDeviceVisibility(ioType, deviceId);
         onAction();
@@ -430,6 +434,10 @@ function ToggleShowHiddenDevicesAction({
       onAction={async () => {
         await setShowHiddenDevices(ioType, !isShowing);
         onToggle();
+      }}
+      shortcut={{
+        macOS: { modifiers: ["opt", "shift"], key: isShowing ? "h" : "s" },
+        Windows: { modifiers: ["alt", "shift"], key: isShowing ? "h" : "s" },
       }}
     />
   );

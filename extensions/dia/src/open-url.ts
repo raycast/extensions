@@ -1,4 +1,5 @@
 import { closeMainWindow, Clipboard, LaunchProps, showToast, Toast, open } from "@raycast/api";
+import { getSearchUrl } from "./search-engines";
 
 const DIA_BUNDLE_ID = "company.thebrowser.dia";
 
@@ -35,9 +36,7 @@ export default async function Command(props: LaunchProps<{ arguments: { url?: st
       return;
     }
 
-    const url = isLikelyURL(target)
-      ? normalizeURL(target)
-      : `https://www.google.com/search?q=${encodeURIComponent(target)}`;
+    const url = isLikelyURL(target) ? normalizeURL(target) : getSearchUrl(target);
 
     await closeMainWindow();
     await open(url, DIA_BUNDLE_ID);

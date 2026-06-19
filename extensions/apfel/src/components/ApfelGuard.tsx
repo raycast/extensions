@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import { useApfelCheck } from "../hooks/useApfelCheck";
 
-import NotFoundView from "../views/not-found";
+import NotFoundView from "../views/apfel-not-found";
 import IntelligenceNotReadyView from "../views/intelligence-not-ready";
 import FinderPermissionDeniedView from "../views/finder-permission-denied";
 

@@ -1,5 +1,17 @@
 # Apple Notes Changelog
 
+## [Bug Fixes] - 2026-06-07
+
+- Fix tags not rendering in note detail view
+- Fix "Recently Deleted" notes not appearing in search results
+- Fix duplicate ⌘⇧M keyboard shortcut — Plain Text copy action now uses ⌘⇧T
+- Fix menu bar icon and missing preferences configuration
+- Fix missing `await` on async calls and remove unnecessary `await` on sync `pop()`
+- Fix strict equality (`===`) for primary key comparisons and add missing radix in `parseInt` calls
+- Remove deprecated AI model
+- Remove `lodash` dependency, replace `partition` with local implementation
+- Update packages
+
 ## [Bug Fix Update] - 2026-02-26
 
 - Fix `get-note-content` and `update-note` timing out when Notes is not already running by using a longer AppleScript timeout.

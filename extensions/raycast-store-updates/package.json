@@ -6,7 +6,8 @@
   "icon": "store-updates-icon.png",
   "author": "chrismessina",
   "contributors": [
-    "alexi.build"
+    "alexi.build",
+    "Undolog"
   ],
   "platforms": [
     "macOS",
@@ -25,6 +26,13 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "githubToken",
+      "title": "GitHub Token",
+      "description": "Optional GitHub personal access token. The extension reads merged pull requests from the GitHub API to detect extension updates and removals; without a token this is capped at 60 requests/hour. A classic token with no scopes (public read only) raises the limit to 5,000 requests/hour. Create one at github.com/settings/tokens.",
+      "type": "password",
+      "required": false
     }
   ],
   "commands": [
@@ -34,6 +42,14 @@
       "subtitle": "Raycast Store Updates",
       "description": "See the latest Raycast store updates and new extensions",
       "mode": "view"
+    },
+    {
+      "name": "store-updates-menu-bar",
+      "title": "Store Updates Menu Bar",
+      "subtitle": "Raycast Store Updates",
+      "description": "Show new and updated Raycast Store extensions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
     }
   ],
   "dependencies": {

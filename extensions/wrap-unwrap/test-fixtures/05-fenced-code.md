@@ -15,10 +15,10 @@ function thisIsAVeryLongFunctionNameThatShouldNotBeWrappedNoMatterWhat() {
 
 between fences
 
-~~~
+```
 - this looks like a list but is inside a fence
 1. and so is this
 | not | a | table |
-~~~
+```
 
 after

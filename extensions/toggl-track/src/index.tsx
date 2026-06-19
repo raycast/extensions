@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { useEffect, useRef } from "react";
 
-import { liteModeSync, isLiteModeColdStart, isLiteModeSyncDue } from "@/api";
+import { isLiteModeColdStart, isLiteModeSyncDue, liteModeSync } from "@/api";
 import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
@@ -123,6 +123,7 @@ function ListView() {
           revalidateTimeEntries={revalidateTimeEntries}
         />
       )}
+
       <List.Section title="Actions">
         <List.Item
           title="Create a new time entry"
@@ -149,6 +150,7 @@ function ListView() {
           }
         />
       </List.Section>
+
       {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
         <List.Section title="Recent time entries">
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
@@ -165,11 +167,12 @@ function ListView() {
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
-                  <Action.SubmitForm
+                  <Action
                     title="Resume Time Entry"
-                    onSubmit={() => resumeTimeEntry(timeEntry)}
+                    onAction={() => resumeTimeEntry(timeEntry)}
                     icon={{ source: Icon.Clock }}
                   />
+
                   <Action.Push
                     title="Edit Time Entry"
                     icon={Icon.Pencil}
@@ -183,6 +186,7 @@ function ListView() {
                       </ExtensionContextProvider>
                     }
                   />
+
                   <Action.Push
                     title="Create Similar Time Entry"
                     icon={{ source: Icon.Plus }}
@@ -197,11 +201,13 @@ function ListView() {
                       </ExtensionContextProvider>
                     }
                   />
+
                   <ActionPanel.Section>
                     <SyncAction
                       revalidateRunningTimeEntry={revalidateRunningTimeEntry}
                       revalidateTimeEntries={revalidateTimeEntries}
                     />
+
                     <Action
                       title="Delete Time Entry"
                       icon={Icon.Trash}

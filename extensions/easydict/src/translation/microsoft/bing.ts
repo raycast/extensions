@@ -29,7 +29,7 @@ let bingConfig: BingConfig | undefined;
 const defaultBingHost = "www.bing.com";
 
 // * bing host depends ip, if ip is in china, `must` use cn.bing.com, otherwise use www.bing.com. And vice versa.
-let bingHost = myPreferences.bingHost || defaultBingHost;
+let bingHost: string = myPreferences.bingHost || defaultBingHost;
 
 let retryCount = 0;
 

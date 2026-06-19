@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Bugfix] - 2026-05-22
+
+- Clarify the Full Disk Access requirement when Safari history cannot be opened.
+
 ## [Fix] - 2026-05-06
 
 - Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.

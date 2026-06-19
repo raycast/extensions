@@ -17,6 +17,36 @@ type IssueDetailProps = {
   issueKey: string;
 };
 
+function resolveAuthenticatedImageUri(uri: string, baseUrl: string) {
+  if (uri.startsWith("data:")) {
+    return null;
+  }
+
+  if (uri.startsWith("http://") || uri.startsWith("https://")) {
+    const url = new URL(uri);
+    const isAtlassianUrl = url.hostname === "api.atlassian.com" || url.hostname.endsWith(".atlassian.net");
+
+    if (!isAtlassianUrl) {
+      return null;
+    }
+
+    if (baseUrl.includes("api.atlassian.com/ex/jira/")) {
+      if (url.hostname === "api.atlassian.com") {
+        return uri;
+      }
+
+      const restPathIndex = url.pathname.indexOf("/rest/");
+      if (restPathIndex >= 0) {
+        return `${baseUrl}${url.pathname.slice(restPathIndex)}${url.search}`;
+      }
+    }
+
+    return uri;
+  }
+
+  return `${baseUrl}${uri.startsWith("/") ? uri : `/${uri}`}`;
+}
+
 export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps) {
   const {
     data: issue,
@@ -32,10 +62,19 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
       const baseUrl = getBaseUrl();
       const description = issue.renderedFields?.description ?? "";
       // Resolve all the image URLs to data URIs in the cached promise for better performance
-      // Jira images use partial URLs, so we need to prepend the base URL
+      // Jira can return partial URLs or tenant URLs; OAuth requests must go through the API base.
       const resolvedDescription = await replaceAsync(description, /src="(.*?)"/g, async (_, uri) => {
-        const dataUri = await getAuthenticatedUri(`${baseUrl}${uri}`, "image/jpeg");
-        return `src="${dataUri}"`;
+        const authenticatedUri = resolveAuthenticatedImageUri(uri, baseUrl);
+        if (!authenticatedUri) {
+          return `src="${uri}"`;
+        }
+
+        try {
+          const dataUri = await getAuthenticatedUri(authenticatedUri, "image/jpeg");
+          return `src="${dataUri}"`;
+        } catch {
+          return `src="${uri}"`;
+        }
       });
       issue.renderedFields.description = resolvedDescription;
 

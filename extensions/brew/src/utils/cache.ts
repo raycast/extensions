@@ -7,7 +7,7 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
-import { rm, mkdir, readFile, writeFile } from "fs/promises";
+import { rm, mkdir, readFile, writeFile, rename, unlink } from "fs/promises";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
@@ -88,9 +88,13 @@ export async function clearCache(): Promise<void> {
           // Ignore errors for files that don't exist
         }),
       ),
-      // Clear chunked cache directories
+      // Clear chunked cache directories — include sibling .partial dirs in
+      // case a build was in progress (self-healing on the next build either
+      // way, but keeps the cleared state consistent).
       rm(path.join(environment.supportPath, "formula"), { recursive: true, force: true }).catch(() => {}),
       rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "formula.partial"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "cask.partial"), { recursive: true, force: true }).catch(() => {}),
     ]);
 
     cacheLogger.log("Cache clear completed", {
@@ -240,6 +244,20 @@ export async function downloadRemoteToCache(
     throw streamError;
   }
 
+  // Guard against truncated responses that didn't surface as a stream error
+  // (e.g. server closed the connection cleanly after partial body). Leaving
+  // a short file on disk causes every subsequent build to fail with a JSON
+  // parse error since the cached file's mtime gets refreshed each download.
+  // Use the write stream's own counter — bytesDownloaded is only updated when
+  // a progress callback is supplied, so it can't be trusted here.
+  const bytesWritten = writeStream.bytesWritten;
+  if (totalBytes > 0 && bytesWritten < totalBytes) {
+    await unlink(cachePath).catch(() => {});
+    throw new NetworkError(`Truncated download: got ${bytesWritten} of ${totalBytes} bytes`, {
+      url,
+    });
+  }
+
   onProgress?.({
     url,
     bytesDownloaded,
@@ -283,11 +301,11 @@ export function getChunkedCacheConfig(type: "formula" | "cask"): ChunkedCacheCon
 }
 
 /**
- * Get the path for a specific chunk file.
+ * Get the path for a specific chunk file within the given directory.
  */
-function getChunkPath(config: ChunkedCacheConfig, chunkNumber: number): string {
+function getChunkPath(baseDir: string, chunkNumber: number): string {
   const paddedNumber = String(chunkNumber).padStart(4, "0");
-  return path.join(config.baseDir, `chunk-${paddedNumber}.json`);
+  return path.join(baseDir, `chunk-${paddedNumber}.json`);
 }
 
 /**
@@ -364,9 +382,11 @@ export async function buildChunkedCache<T>(
   const buildStartTime = Date.now();
   cacheLogger.log("Building chunked cache", { type: config.type, sourcePath });
 
-  // Reset and ensure directory exists
-  await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
-  await mkdir(config.baseDir, { recursive: true });
+  // Build into a sibling partial directory so a failed build does not wipe
+  // any existing cache. On success we atomically swap into place.
+  const partialDir = `${config.baseDir}.partial`;
+  await rm(partialDir, { recursive: true, force: true }).catch(() => {});
+  await mkdir(partialDir, { recursive: true });
 
   // Get last modified time from source file (will use this for cache validity)
   let lastModified = Date.now();
@@ -440,7 +460,7 @@ export async function buildChunkedCache<T>(
 
           writePromises.push(
             (async () => {
-              const chunkPath = getChunkPath(config, chunkNum);
+              const chunkPath = getChunkPath(partialDir, chunkNum);
               await writeFile(chunkPath, JSON.stringify(chunkToWrite));
             })(),
           );
@@ -463,15 +483,14 @@ export async function buildChunkedCache<T>(
 
         // Write final partial chunk
         if (currentChunk.length > 0) {
-          const chunkPath = getChunkPath(config, chunkNumber);
+          const chunkPath = getChunkPath(partialDir, chunkNumber);
           await writeFile(chunkPath, JSON.stringify(currentChunk));
           chunkNumber++;
         }
 
-        // Write index
-        await writeFile(config.indexPath, JSON.stringify(index));
+        // Write index and meta into the partial dir
+        await writeFile(path.join(partialDir, "index.json"), JSON.stringify(index));
 
-        // Write meta
         const meta: ChunkedCacheMeta = {
           version: CHUNKED_CACHE_VERSION,
           sourceUrl,
@@ -482,7 +501,12 @@ export async function buildChunkedCache<T>(
           chunkCount: chunkNumber,
           type: config.type,
         };
-        await writeFile(config.metaPath, JSON.stringify(meta));
+        await writeFile(path.join(partialDir, "meta.json"), JSON.stringify(meta));
+
+        // Atomically swap partial -> baseDir. Doing this last means a failed
+        // build leaves any prior cache intact for the fall-back path to use.
+        await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
+        await rename(partialDir, config.baseDir);
 
         const buildDurationMs = Date.now() - buildStartTime;
         cacheLogger.log("Chunked cache built", {
@@ -495,6 +519,8 @@ export async function buildChunkedCache<T>(
         reportProgress(true);
         resolve();
       } catch (err) {
+        // Clean up the partial dir on any post-stream failure
+        await rm(partialDir, { recursive: true, force: true }).catch(() => {});
         reject(err);
       }
     });
@@ -502,12 +528,13 @@ export async function buildChunkedCache<T>(
     pipeline.on("error", async (err) => {
       signal?.removeEventListener("abort", onAbort);
 
-      // Clean up partial cache
-      try {
-        await rm(config.baseDir, { recursive: true, force: true });
-      } catch {
-        // Ignore cleanup errors
-      }
+      // Wait for any in-flight chunk writes so we can safely remove the dir.
+      // These may reject (e.g. partialDir already removed) — that's expected.
+      await Promise.allSettled(writePromises);
+
+      // Clean up partial build only — leave any existing baseDir intact so
+      // the caller can fall back to stale cache if necessary.
+      await rm(partialDir, { recursive: true, force: true }).catch(() => {});
 
       // If aborted, reject with AbortError instead of ParseError
       if (aborted) {
@@ -524,7 +551,7 @@ export async function buildChunkedCache<T>(
       });
 
       reject(
-        new ParseError("Failed to build chunked cache", {
+        new ParseError(`Failed to build chunked cache: ${err.message}`, {
           cause: err,
         }),
       );
@@ -564,7 +591,7 @@ export async function loadChunks<T>(config: ChunkedCacheConfig, chunkNumbers: Se
   }
 
   const loadPromises = Array.from(chunkNumbers).map(async (chunkNum) => {
-    const chunkPath = getChunkPath(config, chunkNum);
+    const chunkPath = getChunkPath(config.baseDir, chunkNum);
     const content = await readFile(chunkPath, "utf-8");
     const items = JSON.parse(content) as T[];
     return { chunkNum, items };

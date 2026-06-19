@@ -47,6 +47,34 @@ const cloneTab = async (closeTab = false) => {
           tell front window to make new tab with properties {URL:theURL}
         end if
       end tell
+    else if frontmostApp is "Dia"
+      tell application "Dia"
+        if (count every tab of front window) > 0 then
+          set theURL to ""
+
+          repeat with t in every tab of front window
+            try
+              if isFocused of t is true then
+                set theURL to URL of t
+                if ${closeTab} then close t
+                exit repeat
+              end if
+            end try
+          end repeat
+
+          if theURL is "" then
+            set theURL to URL of active tab of front window
+            if ${closeTab} then close active tab of front window
+          end if
+
+          activate
+          tell application "System Events"
+            keystroke "n" using {command down, shift down}
+          end tell
+          delay 0.2
+          set URL of active tab of front window to theURL
+        end if
+      end tell
     else
       error "You need a supported browser as your frontmost app."
     end if

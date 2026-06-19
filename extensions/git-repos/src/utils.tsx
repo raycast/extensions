@@ -249,43 +249,56 @@ async function findGitEntries(
 ): Promise<{ gitDirs: string[]; gitFiles: string[] }> {
   const gitDirs: string[] = [];
   const gitFiles: string[] = [];
+  const dirsToScan = [{ dir, depth: currentDepth }];
 
-  let entries: fs.Dirent[];
-  try {
-    entries = await fs.promises.readdir(dir, { withFileTypes: true });
-  } catch {
-    return { gitDirs, gitFiles };
-  }
+  while (dirsToScan.length > 0) {
+    const nextDir = dirsToScan.pop();
+    if (!nextDir) {
+      continue;
+    }
 
-  await Promise.all(
-    entries.map(async (entry) => {
-      const fullPath = path.join(dir, entry.name);
-      const stat = await statLink(fullPath, entry);
+    let entries: fs.Dirent[];
+    try {
+      entries = await fs.promises.readdir(nextDir.dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
 
+    for (const entry of entries) {
+      const fullPath = path.join(nextDir.dir, entry.name);
       if (entry.name === ".git") {
+        const stat = await statLink(fullPath, entry);
         if (entry.isDirectory() || stat?.isDirectory()) {
           gitDirs.push(fullPath);
         } else if (entry.isFile() || stat?.isFile()) {
           gitFiles.push(fullPath);
         }
-        return;
+        continue;
       }
 
-      if (currentDepth < maxDepth && (entry.isDirectory() || stat?.isDirectory())) {
-        const sub = await findGitEntries(fullPath, maxDepth, currentDepth + 1);
-        gitDirs.push(...sub.gitDirs);
-        gitFiles.push(...sub.gitFiles);
+      if (nextDir.depth >= maxDepth) {
+        continue;
       }
-    }),
-  );
+
+      if (entry.isDirectory()) {
+        dirsToScan.push({ dir: fullPath, depth: nextDir.depth + 1 });
+        continue;
+      }
+
+      const stat = await statLink(fullPath, entry);
+      if (stat?.isDirectory()) {
+        dirsToScan.push({ dir: fullPath, depth: nextDir.depth + 1 });
+      }
+    }
+  }
 
   return { gitDirs, gitFiles };
 }
 
 export async function findRepos(paths: string[], maxDepth: number, includeSubmodules: boolean): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
-  await Promise.allSettled(
-    paths.map(async (scanPath) => {
+  for (const scanPath of paths) {
+    try {
       const { gitDirs, gitFiles } = await findGitEntries(scanPath, maxDepth);
 
       const repos = parseRepoPaths(scanPath, gitDirs, false);
@@ -313,8 +326,10 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
           foundRepos.push(worktree);
         }
       });
-    }),
-  );
+    } catch {
+      continue;
+    }
+  }
   foundRepos.sort((a, b) => {
     const fa = a.name.toLowerCase(),
       fb = b.name.toLowerCase();

@@ -117,7 +117,7 @@ export default function Command() {
               animateSequence([...state.sequence, nextColor]);
             }, 800);
           } else {
-            exec("open raycast://confetti");
+            exec(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
 
             setState((previous) => ({ ...previous, gameState: "win" }));
           }

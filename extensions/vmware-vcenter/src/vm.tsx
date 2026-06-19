@@ -43,9 +43,9 @@ import {
   showToast,
   Color,
   Cache,
-  getPreferenceValues,
   open,
   getApplications,
+  getPreferenceValues,
 } from "@raycast/api";
 import { runPowerShellScript, usePromise } from "@raycast/utils";
 import ServerView from "./api/ServerView";
@@ -56,7 +56,7 @@ if (!pref.certificate) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const cache = new Cache();
 
-export default function Command(): JSX.Element {
+export default function Command(): React.JSX.Element {
   const {
     data: ServerNames,
     revalidate: RevalidateServerNames,
@@ -70,18 +70,18 @@ export default function Command(): JSX.Element {
 
   const [Networks, SetNetworks]: [
     Map<string, NetworkSummary[]>,
-    React.Dispatch<React.SetStateAction<Map<string, NetworkSummary[]>>>
+    React.Dispatch<React.SetStateAction<Map<string, NetworkSummary[]>>>,
   ] = React.useState(new Map());
   const [IsLoadingNetworks, SetIsLoadingNetworks]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
   const [StoragePolicies, SetStoragePolicies]: [
     Map<string, StoragePoliciesSummary[]>,
-    React.Dispatch<React.SetStateAction<Map<string, StoragePoliciesSummary[]>>>
+    React.Dispatch<React.SetStateAction<Map<string, StoragePoliciesSummary[]>>>,
   ] = React.useState(new Map());
   const [IsLoadingStoragePolicies, SetIsLoadingStoragePolicies]: [
     boolean,
-    React.Dispatch<React.SetStateAction<boolean>>
+    React.Dispatch<React.SetStateAction<boolean>>,
   ] = React.useState(false);
 
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
@@ -503,7 +503,7 @@ export default function Command(): JSX.Element {
 
     // Get First IPv4
     const ip = ips.find((ip) =>
-      ip.match(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)
+      ip.match(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/),
     );
 
     // Open Rdp Connection
@@ -638,7 +638,7 @@ export default function Command(): JSX.Element {
   /**
    * Search Bar Accessory
    */
-  function GetSearchBar(server: string[]): JSX.Element {
+  function GetSearchBar(server: string[]): React.JSX.Element {
     return (
       <List.Dropdown storeValue={true} tooltip="VMware Server" onChange={onChangeSelectedServerName}>
         {server.map((value) => (
@@ -678,9 +678,9 @@ export default function Command(): JSX.Element {
   /**
    * Action Menu.
    * @param {Vm} vm.
-   * @returns {JSX.Element}
+   * @returns {React.JSX.Element}
    */
-  function GetVMAction(vm?: Vm): JSX.Element {
+  function GetVMAction(vm?: Vm): React.JSX.Element {
     if (vm)
       return (
         <ActionPanel title="vCenter VM">
@@ -886,9 +886,9 @@ export default function Command(): JSX.Element {
   /**
    * Detail Section.
    * @param {string} vm - vm identifier.
-   * @returns {JSX.Element}
+   * @returns {React.JSX.Element}
    */
-  function GetVmDetail(vm: Vm): JSX.Element {
+  function GetVmDetail(vm: Vm): React.JSX.Element {
     if (!vm.vm_info) return <List.Item.Detail></List.Item.Detail>;
 
     const cdroms = Object.values(vm.vm_info.cdroms);
@@ -940,7 +940,7 @@ export default function Command(): JSX.Element {
               const storagePolicyFiltered =
                 StoragePolicies && StoragePolicies.get(vm.server)
                   ? StoragePolicies.get(vm.server)?.filter((policy) =>
-                      vm.storage_policy_info ? policy.policy === vm.storage_policy_info.disks[id] : false
+                      vm.storage_policy_info ? policy.policy === vm.storage_policy_info.disks[id] : false,
                     )
                   : [];
               return (
@@ -967,14 +967,14 @@ export default function Command(): JSX.Element {
                         <List.Item.Detail.Metadata.TagList.Item
                           key={`Storage Policy Compliance: ${vm.storage_policy_compliance_info.disks[id].status}`}
                           text={`${VMStoragePolicyComplianceText.get(
-                            vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus
+                            vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus,
                           )}`}
                           icon={`${VMStoragePolicyComplianceIcon.get(
-                            vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus
+                            vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus,
                           )}`}
                           color={
                             VMStoragePolicyComplianceColor.get(
-                              vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus
+                              vm.storage_policy_compliance_info.disks[id].status as VmStoragePolicyComplianceStatus,
                             ) as Color
                           }
                         />

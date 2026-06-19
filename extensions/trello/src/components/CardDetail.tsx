@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { trelloClient } from "../utils/trelloClient";
 import { TrelloCardDetails } from "../trelloResponse.model";
+import { getDefaultOpenTarget, toTrelloAppUrl } from "../utils/openInTrello";
 
 type Props = { cardId: string };
 
@@ -19,6 +20,14 @@ export function CardDetail({ cardId }: Props) {
   }, [cardId]);
 
   const markdown = error ? `**Error:** ${error}` : card ? buildMarkdown(card) : "Loading card details...";
+  const appFirst = getDefaultOpenTarget() === "app";
+  const cardUrl = card?.url;
+  const openWebAction = cardUrl ? (
+    <Action.OpenInBrowser title="Open in Trello Web" url={cardUrl} icon={Icon.Globe} />
+  ) : null;
+  const openAppAction = cardUrl ? (
+    <Action.Open title="Open in Trello Desktop" icon={Icon.AppWindow} target={toTrelloAppUrl(cardUrl)} />
+  ) : null;
 
   return (
     <Detail
@@ -27,8 +36,9 @@ export function CardDetail({ cardId }: Props) {
       actions={
         card ? (
           <ActionPanel>
-            {card.url ? <Action.OpenInBrowser title="Open in Trello" url={card.url} icon={Icon.Globe} /> : null}
-            {card.url ? <Action.CopyToClipboard title="Copy URL" content={card.url} /> : null}
+            {appFirst ? openAppAction : openWebAction}
+            {appFirst ? openWebAction : openAppAction}
+            {cardUrl ? <Action.CopyToClipboard title="Copy URL" content={cardUrl} /> : null}
           </ActionPanel>
         ) : undefined
       }

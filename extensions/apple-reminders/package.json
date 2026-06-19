@@ -285,7 +285,7 @@
     }
   ],
   "ai": {
-    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- Never add the recurrence field unless the user explicitly asks for a repeating reminder (for example: every day, weekly, monthly, yearly, weekdays, weekends).\\n- If the user does not explicitly ask for recurrence, omit recurrence entirely.\\n- Requests like \"today\", \"tomorrow\", or a specific date without recurrence keywords must be treated as one-off reminders (no recurrence field).\\n- Example: \"ask uncle for car today\" should call create-reminder without recurrence.\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
+    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- Never add the recurrence field unless the user explicitly asks for a repeating reminder (for example: every day, weekly, monthly, yearly, weekdays, weekends).\\n- If the user does not explicitly ask for recurrence, omit recurrence entirely.\\n- Requests like \"today\", \"tomorrow\", or a specific date without recurrence keywords must be treated as one-off reminders (no recurrence field).\\n- Example: \"ask uncle for car today\" should call create-reminder without recurrence.\\n- Only include dueDate, priority, or recurrence when the user's request explicitly contains a corresponding date/time word, priority word such as urgent or important, an exclamation mark, or a recurrence word. Otherwise omit the field entirely. Never default priority to low.\\n- For title-only, Inbox, Backlog, or generic capture reminders, call create-reminder with only the title and any explicitly requested list.\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
     "evals": [
       {
         "input": "@apple-reminders Walk the dog tomorrow at 8am",
@@ -360,6 +360,109 @@
           },
           {
             "meetsCriteria": "The reminder is created as a one-off reminder with no recurrence."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders Create a Backlog Test reminder in Backlog",
+        "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            },
+            {
+              "id": "backlog",
+              "title": "Backlog",
+              "isDefault": false
+            }
+          ],
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/backlog-test",
+            "title": "Backlog Test",
+            "id": "backlog-test",
+            "isCompleted": false,
+            "list": {
+              "id": "backlog",
+              "title": "Backlog"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "listId": "backlog",
+                "title": "Backlog Test"
+              },
+              "name": "create-reminder"
+            }
+          },
+          {
+            "meetsCriteria": "The reminder is created without dueDate, priority, or recurrence because the user only asked for a title and list."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders remind me to call John",
+        "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            }
+          ],
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/call-john",
+            "title": "Call John",
+            "id": "call-john",
+            "isCompleted": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": "Call John"
+              },
+              "name": "create-reminder"
+            }
+          },
+          {
+            "meetsCriteria": "The reminder is created without dueDate, priority, or recurrence because the user gave no date, priority, or recurrence cue."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders remind me to water the plants",
+        "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            }
+          ],
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/water-plants",
+            "title": "Water the plants",
+            "id": "water-plants",
+            "isCompleted": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": "Water the plants"
+              },
+              "name": "create-reminder"
+            }
+          },
+          {
+            "meetsCriteria": "Priority is omitted; only the title is sent."
           }
         ]
       },

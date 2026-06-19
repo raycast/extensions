@@ -14,6 +14,7 @@ export function useSkillContent(skill: Skill, execute = true) {
 
   return {
     content: data?.body,
+    rawContent: data?.raw,
     frontmatter: data?.frontmatter ?? {},
     isLoading,
   };

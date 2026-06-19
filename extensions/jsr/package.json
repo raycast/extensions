@@ -21,6 +21,383 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search Packages",
+      "description": "Search for packages on JSR.io"
+    },
+    {
+      "name": "get-package",
+      "title": "Get Package",
+      "description": "Fetch full metadata for a single JSR package"
+    },
+    {
+      "name": "get-readme",
+      "title": "Get README",
+      "description": "Fetch the README markdown for a JSR package version"
+    },
+    {
+      "name": "get-versions",
+      "title": "Get Versions",
+      "description": "List published versions for a JSR package"
+    },
+    {
+      "name": "get-dependencies",
+      "title": "Get Dependencies",
+      "description": "List the outgoing dependencies of a JSR package version"
+    },
+    {
+      "name": "get-dependents",
+      "title": "Get Dependents",
+      "description": "List packages that depend on a given JSR package"
+    },
+    {
+      "name": "get-downloads",
+      "title": "Get Downloads",
+      "description": "Fetch ~90-day download stats for a JSR package"
+    },
+    {
+      "name": "list-scope-packages",
+      "title": "List Scope Packages",
+      "description": "List all JSR packages within a given scope"
+    },
+    {
+      "name": "get-stats",
+      "title": "Get Stats",
+      "description": "Fetch the JSR landing-page stats (featured + newest packages)"
+    },
+    {
+      "name": "get-package-manifest",
+      "title": "Get Package Manifest",
+      "description": "Fetch the per-version manifest: total size, file count, and exports map"
+    },
+    {
+      "name": "get-score-breakdown",
+      "title": "Get Score Breakdown",
+      "description": "Fetch the JSR quality-score breakdown for a package"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@jsr find me a TypeScript schema validation library",
+        "mocks": {
+          "search": {
+            "count": 2,
+            "hits": [
+              {
+                "id": "@zod/zod",
+                "scope": "zod",
+                "name": "zod",
+                "description": "TypeScript-first schema declaration and validation library with static type inference",
+                "score": 100,
+                "runtimeCompat": { "node": true, "deno": true, "bun": true, "browser": true, "workerd": true },
+                "url": "https://jsr.io/@zod/zod"
+              },
+              {
+                "id": "@valibot/valibot",
+                "scope": "valibot",
+                "name": "valibot",
+                "description": "Modular and type safe schema library",
+                "score": 95,
+                "runtimeCompat": { "node": true, "deno": true, "bun": true, "browser": true, "workerd": true },
+                "url": "https://jsr.io/@valibot/valibot"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "schema"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr tell me about @std/fs",
+        "mocks": {
+          "get-package": {
+            "scope": "std",
+            "name": "fs",
+            "description": "Helpers for working with the file system",
+            "githubRepository": {
+              "id": 156498505,
+              "owner": "denoland",
+              "name": "std",
+              "updatedAt": "2024-08-18T11:29:02.113616Z",
+              "createdAt": "2023-12-22T11:10:57.995437Z"
+            },
+            "runtimeCompat": { "browser": false, "deno": true, "node": false, "workerd": false, "bun": false },
+            "updatedAt": "2024-03-13T02:23:41.070982Z",
+            "createdAt": "2023-12-22T03:19:20.157401Z",
+            "versionCount": 68,
+            "dependencyCount": 2,
+            "dependentCount": 852,
+            "score": 94,
+            "latestVersion": "1.0.23",
+            "whenFeatured": null,
+            "isArchived": false,
+            "readmeSource": "jsdoc"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-package",
+              "arguments": { "scope": "std", "name": "fs" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr show me the README for @zod/zod",
+        "mocks": {
+          "get-readme": {
+            "markdown": "# Zod\n\nTypeScript-first schema validation with static type inference.\n\n## Installation\n\n```bash\ndeno add jsr:@zod/zod\n```",
+            "version": "4.4.3",
+            "readmeSource": "readme"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-readme",
+              "arguments": { "scope": "zod", "name": "zod" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr what versions of @std/fs exist?",
+        "mocks": {
+          "get-versions": {
+            "total": 3,
+            "versions": [
+              {
+                "version": "1.0.23",
+                "yanked": false,
+                "usesNpm": false,
+                "readmePath": null,
+                "createdAt": "2025-08-15T03:42:09Z",
+                "updatedAt": "2025-08-15T03:42:11Z"
+              },
+              {
+                "version": "1.0.22",
+                "yanked": false,
+                "usesNpm": false,
+                "readmePath": null,
+                "createdAt": "2025-06-18T06:30:57Z",
+                "updatedAt": "2025-06-18T06:30:58Z"
+              },
+              {
+                "version": "1.0.21",
+                "yanked": true,
+                "usesNpm": false,
+                "readmePath": null,
+                "createdAt": "2025-05-01T10:00:00Z",
+                "updatedAt": "2025-05-01T10:00:00Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-versions",
+              "arguments": { "scope": "std", "name": "fs" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr what does @zod/zod depend on?",
+        "mocks": {
+          "get-dependencies": {
+            "version": "4.4.3",
+            "count": 0,
+            "dependencies": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-dependencies",
+              "arguments": { "scope": "zod", "name": "zod" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr which packages depend on @std/fs?",
+        "mocks": {
+          "get-dependents": {
+            "total": 852,
+            "dependents": [
+              { "scope": "denoland", "package": "fresh", "versions": ["1.6.0"], "totalVersions": 1 },
+              { "scope": "oak", "package": "oak", "versions": ["12.5.0"], "totalVersions": 1 }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-dependents",
+              "arguments": { "scope": "std", "name": "fs" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr how popular is @zod/zod?",
+        "mocks": {
+          "get-downloads": {
+            "totalLast90Days": 24092,
+            "byKind": { "jsr_meta": 22304, "npm_tarball": 1788 },
+            "recentVersions": [
+              { "version": "4.4.3", "downloads": 5000 },
+              { "version": "4.4.2", "downloads": 3000 }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-downloads",
+              "arguments": { "scope": "zod", "name": "zod" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr list all packages under the @std scope",
+        "mocks": {
+          "list-scope-packages": {
+            "total": 2,
+            "packages": [
+              {
+                "id": "@std/fs",
+                "scope": "std",
+                "name": "fs",
+                "description": "Helpers for working with the file system",
+                "score": 94,
+                "latestVersion": "1.0.23",
+                "runtimeCompat": { "deno": true },
+                "isArchived": false
+              },
+              {
+                "id": "@std/path",
+                "scope": "std",
+                "name": "path",
+                "description": "Helpers for cross-platform path manipulation",
+                "score": 100,
+                "latestVersion": "1.0.10",
+                "runtimeCompat": { "deno": true, "node": true },
+                "isArchived": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-scope-packages",
+              "arguments": { "scope": "std" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr what's featured on JSR right now?",
+        "mocks": {
+          "get-stats": {
+            "featured": [
+              {
+                "scope": "zod",
+                "name": "zod",
+                "description": "TypeScript-first schema declaration and validation library",
+                "latestVersion": "4.4.3",
+                "score": 100,
+                "isArchived": false,
+                "versionCount": 44
+              }
+            ],
+            "newest": [
+              {
+                "scope": "newpkg",
+                "name": "thing",
+                "description": "A brand-new package",
+                "latestVersion": "0.1.0",
+                "score": 70,
+                "isArchived": false,
+                "versionCount": 1
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-stats"
+          }
+        ]
+      },
+      {
+        "input": "@jsr how big is @zod/zod and what does it export?",
+        "mocks": {
+          "get-package-manifest": {
+            "version": "4.4.3",
+            "fileCount": 120,
+            "totalBytes": 1052965,
+            "entryPoints": 65,
+            "exports": {
+              ".": "./src/index.ts",
+              "./mini": "./src/mini/index.ts",
+              "./v4": "./src/v4/index.ts"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-package-manifest",
+              "arguments": { "scope": "zod", "name": "zod" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jsr why does @std/fs have its current score?",
+        "mocks": {
+          "get-score-breakdown": {
+            "hasReadme": true,
+            "hasReadmeExamples": true,
+            "allEntrypointsDocs": true,
+            "percentageDocumentedSymbols": 100,
+            "allFastCheck": true,
+            "hasProvenance": true,
+            "hasDescription": true,
+            "atLeastOneRuntimeCompatible": true,
+            "multipleRuntimesCompatible": false,
+            "total": 94
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-score-breakdown",
+              "arguments": { "scope": "std", "name": "fs" }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "openWebsiteByDefault",
@@ -32,18 +409,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.1",
-    "cheerio": "^1.1.2",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
+    "cheerio": "^1.2.0",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "24.7.0",
     "@types/react": "19.2.2",
     "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   },
   "scripts": {

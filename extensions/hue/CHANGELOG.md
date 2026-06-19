@@ -1,5 +1,13 @@
 # Hue Changelog
 
+## [Improvements] - 2026-06-01
+
+- Fix crash when setting a scene with certain light colors
+- Fix manual bridge IP setup failing when no bridge was previously discovered
+- Downgrade expected network errors (timeouts, connection refused, etc.) and rate limit responses to warnings
+- Treat bridge firmware update errors as expected
+- Update dependencies
+
 ## [Update HTTPS support] - 2025-12-25
 
 - Add CA Certificate

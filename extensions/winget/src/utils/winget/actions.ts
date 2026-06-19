@@ -9,7 +9,7 @@ function parseWingetMessage(output: string, fallback: string): string {
     .replace(/\r/g, "\n")
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0 && !/^[-\\\/|]+$/.test(l));
+    .filter((l) => l.length > 0 && !/^[-\\/|]+$/.test(l));
   return lines.at(-1) ?? fallback;
 }
 

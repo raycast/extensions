@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 const { api_key } = getPreferenceValues<Preferences>();
-export const API_URL = "https://api.brand.dev/v1/brand/";
+export const API_URL = "https://api.context.dev/v1/brand/";
 export const API_HEADERS = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${api_key}`,

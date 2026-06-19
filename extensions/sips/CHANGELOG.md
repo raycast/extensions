@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [1.11.3 - File Path Comma Fixes] - 2026-03-12
 
 - Fixed file selection breaking when filenames contain commas

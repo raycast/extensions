@@ -2,8 +2,19 @@ import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import sudo from "sudo-prompt";
+import { isMockEnabled, mockExec } from "./mockBridge";
 
-export async function execDiskCommand(command: string, options?: { sudo?: boolean }): Promise<string> {
+export interface ExecDiskOptions {
+  sudo?: boolean;
+  /** Omit to run without a timeout. On timeout the child is SIGKILL'd. */
+  timeoutMs?: number;
+}
+
+export async function execDiskCommand(command: string, options?: ExecDiskOptions): Promise<string> {
+  if (isMockEnabled()) {
+    return mockExec(command);
+  }
+
   const env = {
     ...process.env,
     PATH: `${process.env.PATH ?? ""}:/usr/sbin:/usr/bin`,
@@ -27,18 +38,25 @@ export async function execDiskCommand(command: string, options?: { sudo?: boolea
   }
 
   return new Promise<string>((resolve, reject) => {
-    exec(command, { env }, (error, stdout) => {
+    let timer: NodeJS.Timeout | undefined;
+    const child = exec(command, { env }, (error, stdout) => {
+      if (timer !== undefined) clearTimeout(timer);
       if (error) {
         reject(error);
       } else {
         resolve(stdout);
       }
     });
+    if (options?.timeoutMs !== undefined) {
+      timer = setTimeout(() => {
+        child.kill("SIGKILL");
+        reject(new Error(`Timed out: ${command}`));
+      }, options.timeoutMs);
+    }
   });
 }
 
 export async function openCommandInTerminal(command: string) {
-  // Execute AppleScript to open a new Terminal window and run the command
   const fullCommand = `
     osascript -e 'tell application "Terminal"
     activate
@@ -52,7 +70,7 @@ export async function openCommandInTerminal(command: string) {
     style: Toast.Style.Animated,
     title: `Opening "${command}" in terminal...`,
   });
-  await new Promise((resolve) => setTimeout(resolve, 690)); // delay
+  await new Promise((resolve) => setTimeout(resolve, 690));
   showToast({
     style: Toast.Style.Success,
     title: `Opened "${command}" in terminal`,

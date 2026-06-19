@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.2.5
+
+- Fixed an issue where `useSql` would not properly show the permission priming screen
+
 ### v2.2.4
 
 - Fixed an issue where an avatar's initials wouldn't be centered

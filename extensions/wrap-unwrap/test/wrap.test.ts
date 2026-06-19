@@ -41,7 +41,10 @@ test("wrap respects width INCLUDING blockquote prefix", () => {
   const out = wrap(input, W(20));
   for (const line of out.split("\n")) {
     assert.ok(line.length <= 20, `line too long: ${JSON.stringify(line)}`);
-    assert.ok(line.startsWith("> "), `lost quote prefix: ${JSON.stringify(line)}`);
+    assert.ok(
+      line.startsWith("> "),
+      `lost quote prefix: ${JSON.stringify(line)}`,
+    );
   }
 });
 

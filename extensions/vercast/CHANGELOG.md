@@ -1,5 +1,10 @@
 # Vercast Changelog
 
+## [2.18] - 2026-05-27
+
+- Use orange status dot for in-progress deployments (building/initializing) for better contrast with ready (green)
+- Added `Copy URL` action to deployment detail view
+
 ## [2.17] - 2026-02-20
 
 - Added `Cancel Deployment` action to deployments

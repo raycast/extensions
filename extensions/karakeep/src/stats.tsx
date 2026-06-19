@@ -11,7 +11,7 @@ const log = logger.child("[Stats]");
 
 const EXTENSION_AUTHOR = "luolei";
 const EXTENSION_NAME = "karakeep";
-const deepLink = (command: string) => `raycast://extensions/${EXTENSION_AUTHOR}/${EXTENSION_NAME}/${command}`;
+const deepLink = (command: string) => `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${EXTENSION_AUTHOR}/${EXTENSION_NAME}/${command}`;
 
 const formatHour = (hour: number) => {
   if (hour === 0) return "12 AM";

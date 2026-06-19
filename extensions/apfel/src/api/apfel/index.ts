@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import { escapeForShell } from "../../utils";
 import { runAppleScript } from "@raycast/utils";
-import { getSelectedFinderItems } from "@raycast/api";
+import { hasFinderPermission } from "../../utils/finder";
 
 export const getApfelPath = () => {
   const candidates = [
@@ -14,7 +14,7 @@ export const getApfelPath = () => {
     if (existsSync(p)) return p;
   }
 
-  throw new Error("apfel binary not found. Install it with:\n  brew install Arthur-Ficial/tap/apfel");
+  throw new Error("apfel binary not found. Install it with:\n  brew install apfel");
 };
 
 function isApfelInstalled() {
@@ -32,23 +32,6 @@ async function isAppleIntelligenceAvailable() {
     return result.includes("available:  yes");
   } catch {
     return false;
-  }
-}
-
-async function hasFinderPermission() {
-  try {
-    await getSelectedFinderItems();
-    return true;
-  } catch {
-    // ignore
-  }
-
-  try {
-    await runAppleScript(`tell application "Finder" to get selection`);
-    return true;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return !message.includes("-1743") && !message.includes("not allowed");
   }
 }
 

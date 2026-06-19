@@ -1,5 +1,9 @@
 # MXroute Changelog
 
+## [Remove Domain] - 2026-06-08
+
+- Add "Remove Domain" `Action`
+
 ## [Toggle Domain Mail Hosting Status] - 2026-02-27
 
 - Enable or Disable mail hosting in "Domains"

@@ -1,5 +1,9 @@
 # Incident.io Changelog
 
+## [Bug Fix] - 2026-05-18
+
+- Prevent the on-call schedule list from crashing when a shift has no user details.
+
 ## [v0.0.3] - 2025-06-13
 
 - Add AI-powered incident search functionality

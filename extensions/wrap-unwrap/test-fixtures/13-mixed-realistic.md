@@ -24,7 +24,7 @@ Then configure it:
 
 > Note: see [the docs](https://example.com/docs) for advanced setup.
 
-| Option | Default |
-| --- | --- |
+| Option | Default        |
+| ------ | -------------- |
 | `mode` | `"production"` |
-| `port` | `8080` |
+| `port` | `8080`         |

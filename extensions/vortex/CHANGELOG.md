@@ -1,5 +1,9 @@
 # Alby Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Fixes] - 2026-02-17
 
 - Renamed "Recent Transactions" command to "Transactions".

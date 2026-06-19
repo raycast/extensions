@@ -26,9 +26,9 @@ the AI chat and you ask it to run commands, you may inadvertently expose sensiti
 
 1. **Why can't I set a user password when creating a machine?**
 
-  `orbctl` (which this extension uses) prompts the user for a password during machine creation. We can't 'answer' the prompt via the raycast API. Use `orbctl` or `orb` cli if you need to set a username with password when creating a machine. Example: `orbctl create -u <user> -p <distro> <machine-name>`.
+`orbctl` (which this extension uses) prompts the user for a password during machine creation. We can't 'answer' the prompt via the raycast API. Use `orbctl` or `orb` cli if you need to set a username with password when creating a machine. Example: `orbctl create -u <user> -p <distro> <machine-name>`.
 
 2. **Why do I get a `-bash: warning: setlocale: LC_ALL: cannot change locale ...` when I open a machine via the extension?**
 
-  By default, macOS Terminal sets locale environment variables (like `LANG`, `LC_ALL`, and others) and, via SSH, forwards these to the remote host.
-  I don't know of a workaround for this. If you know of a fix, please let me know.
+By default, macOS Terminal sets locale environment variables (like `LANG`, `LC_ALL`, and others) and, via SSH, forwards these to the remote host.
+I don't know of a workaround for this. If you know of a fix, please let me know.

@@ -16,7 +16,7 @@ import {
   Toast,
 } from "@raycast/api";
 import prettyBytes from "pretty-bytes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
@@ -70,6 +70,7 @@ export default function ProcessList() {
   const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT_BY);
   const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(false);
+  const isFetchingProcesses = useRef(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
@@ -94,7 +95,16 @@ export default function ProcessList() {
     void loadAppGrouping();
   }, []);
 
-  const fetchProcesses = () => {
+  const fetchProcesses = (showErrorToast = false) => {
+    if (isFetchingProcesses.current) {
+      if (showErrorToast) {
+        showToast({ title: "Refresh already in progress", style: Toast.Style.Animated });
+      }
+
+      return;
+    }
+
+    isFetchingProcesses.current = true;
     fetchRunningProcesses()
       .then((processes) => {
         // Apply cached CPU values to new process list
@@ -126,11 +136,16 @@ export default function ProcessList() {
       })
       .catch((err) => {
         console.error("Failed to fetch processes:", err);
-        showToast({
-          title: "Failed to fetch processes",
-          style: Toast.Style.Failure,
-          message: err instanceof Error ? err.message : "Unknown error",
-        });
+        if (showErrorToast) {
+          showToast({
+            title: "Failed to fetch processes",
+            style: Toast.Style.Failure,
+            message: err instanceof Error ? err.message : "Unknown error",
+          });
+        }
+      })
+      .finally(() => {
+        isFetchingProcesses.current = false;
       });
   };
 
@@ -293,7 +308,7 @@ export default function ProcessList() {
         title: `Restarted ${processName}`,
         style: Toast.Style.Success,
       });
-      fetchProcesses();
+      fetchProcesses(true);
     } catch (error) {
       handleRestartError(processName, error);
     }
@@ -547,7 +562,7 @@ export default function ProcessList() {
                       title="Reload"
                       icon={Icon.ArrowClockwise}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={() => fetchProcesses()}
+                      onAction={() => fetchProcesses(true)}
                     />
                     <Action
                       title={`${isAppGroupingEnabled ? "Disable" : "Enable"} App Grouping`}

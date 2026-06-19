@@ -48,6 +48,18 @@ export type SyncData = {
   user: User;
 };
 
+export type SyncResourceType =
+  | "user"
+  | "projects"
+  | "items"
+  | "sections"
+  | "labels"
+  | "filters"
+  | "collaborators"
+  | "reminders"
+  | "locations"
+  | "notes";
+
 export type CachedDataParams = {
   data: SyncData | undefined;
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
@@ -109,10 +121,10 @@ export async function getFilterTasks(query: string) {
   }
 }
 
-export async function initialSync() {
+export async function initialSync(resourceTypes?: SyncResourceType[]) {
   return syncRequest({
     sync_token: "*",
-    resource_types: [
+    resource_types: resourceTypes ?? [
       "user",
       "projects",
       "items",

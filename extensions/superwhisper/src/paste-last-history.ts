@@ -8,14 +8,15 @@ function wait(ms: number): Promise<void> {
 }
 
 export default async function main() {
-  const { transcriptVariant } = getPreferenceValues<Preferences.PasteLastHistory>();
+  const { transcriptVariant, recordingDir } = getPreferenceValues<Preferences.PasteLastHistory>();
+  const recordingsPath = recordingDir || undefined;
   const isInstalled = await checkSuperwhisperInstallation();
   if (!isInstalled) {
     return;
   }
 
   try {
-    const latestRecording = await getLatestRecordingByVariant(transcriptVariant as TranscriptVariant);
+    const latestRecording = await getLatestRecordingByVariant(transcriptVariant as TranscriptVariant, recordingsPath);
     const variantTitle = transcriptVariant === "processed" ? "AI processed" : "unprocessed";
 
     await closeMainWindow();

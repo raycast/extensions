@@ -18,7 +18,7 @@ interface Props {
 const useTopAlbums = (props: Props) => {
   try {
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<Error | null>(null);
     const [albums, setAlbums] = useState<Album[]>([]);
 
     const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<AlbumResponse>);
@@ -39,7 +39,7 @@ const useTopAlbums = (props: Props) => {
             setLoading(false);
           }
         },
-        onError: (err: unknown) => {
+        onError: (err: Error) => {
           setError(err);
           setLoading(false);
         },
@@ -54,7 +54,7 @@ const useTopAlbums = (props: Props) => {
   } catch (err: unknown) {
     return {
       loading: false,
-      error: (err as any)?.mesage || null,
+      error: err instanceof Error ? err.message : null,
       albums: [],
     };
   }

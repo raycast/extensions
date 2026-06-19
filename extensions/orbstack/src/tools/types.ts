@@ -106,6 +106,13 @@ export interface CreateArgs {
    * The ONLY valid values are arm64 or x86_64
    */
   architecture?: string;
+
+  /**
+   * OPTIONAL
+   * Whether to create the machine in isolated mode. Only supported in orbstack version 2.1.0 and later.
+   * DO NOT set this unless the user EXPLICITLY requested an isolated machine.
+   */
+  isolated?: boolean;
 }
 
 export function validateCreateArgs(args: CreateArgs) {
@@ -127,16 +134,6 @@ export function validateCreateArgs(args: CreateArgs) {
     !ARCHITECTURES.map((e) => e.value).includes(args.architecture as Architecture)
   ) {
     throw new Error("architecture must be either arm64 or x86_64");
-  }
-
-  // user_name is optional but if set, make sure it isn't blank.
-  if (args.user_name !== undefined && args.user_name.trim() === "") {
-    throw new Error("user_name cannot be empty. Ask the user for the username.");
-  }
-
-  // version is optional but if set, make sure it isn't blank.
-  if (args.version !== undefined && args.version.trim() === "") {
-    throw new Error("user_name cannot be empty. Ask the user for the username.");
   }
 }
 

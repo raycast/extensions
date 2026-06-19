@@ -109,7 +109,7 @@ export interface AuthorUserInfo {
   user_priv_info: UserPrivInfo;
 }
 
-export interface ExtraMap {}
+export type ExtraMap = Record<string, unknown>;
 
 export interface Major {
   major_id: string;

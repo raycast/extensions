@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- **Session Path Resolution**: Session metadata, details, and search results now prefer the session JSONL `cwd` field when present, avoiding lossy fallback decoding for project paths with underscore-prefixed segments.
 - **Cost Calculation: Streaming Chunk Deduplication**: Anthropic streams response chunks where each chunk's `usage` is cumulative. Naive summing inflated session totals by 2x to 4x. Now deduped by `(message.id, requestId)` so per-message totals reflect the final cumulative value once per request.
 - **Cost Calculation: Sonnet 200K Token Tier**: Above 200K input tokens per message, Sonnet rates double across all token types (input, output, cache read, cache write). The pricing now applies a flat per-request high tier keyed off the message's input token count, matching Anthropic's billing.
 - **Cost Calculation: Date-Range Filter Skips Timestampless Entries**: When a date range is active (today/week/month/daily chart), entries without a `timestamp` field are excluded. Previously they passed through the filter and inflated reported costs for users with older session files.

@@ -1,6 +1,5 @@
 import Contacts
 import RaycastSwiftMacros
-import SQLite
 
 struct PhoneNumber: Codable {
   let number: String
@@ -12,6 +11,7 @@ struct ContactItem: Codable {
   let givenName: String
   let familyName: String
   let phoneNumbers: [PhoneNumber]
+  let emails: [String]
   let imageData: Data?
 }
 
@@ -36,6 +36,7 @@ enum MessagesError: Error {
     CNContactGivenNameKey as CNKeyDescriptor,
     CNContactFamilyNameKey as CNKeyDescriptor,
     CNContactPhoneNumbersKey as CNKeyDescriptor,
+    CNContactEmailAddressesKey as CNKeyDescriptor,
   ]
 
   if loadPhotos {
@@ -45,47 +46,60 @@ enum MessagesError: Error {
   // Fetch ALL contacts in one query instead of N queries
   let allContacts = try store.unifiedContacts(matching: NSPredicate(value: true), keysToFetch: keys)
 
-  // Create a set of normalized phone numbers to match against
-  let phoneNumberSet = Set(phoneNumbers.map { normalizePhoneNumber($0) })
-  let targetCount = phoneNumberSet.count
+  // Separate identifiers into emails and phone numbers
+  let emailSet = Set(phoneNumbers.filter { $0.contains("@") }.map { $0.lowercased() })
+  let phoneSet = Set(phoneNumbers.filter { !$0.contains("@") }.map { normalizePhoneNumber($0) })
+  let targetCount = emailSet.count + phoneSet.count
 
   var matchedContacts: [ContactItem] = []
   var seenContactIds = Set<String>()
-  var matchedPhoneNumbers = Set<String>()
+  var matchedIdentifiers = Set<String>()
 
   // Match contacts in memory
   for (index, contact) in allContacts.enumerated() {
     // Early exit check every 25 contacts to reduce overhead
-    if index % 25 == 0 && matchedPhoneNumbers.count >= targetCount {
+    if index % 25 == 0 && matchedIdentifiers.count >= targetCount {
       break
     }
 
-    // Check if any of this contact's phone numbers match our search list
     var contactMatches: [String] = []
+
+    // Match by phone number
     for cnPhoneNumber in contact.phoneNumbers {
       let normalized = normalizePhoneNumber(cnPhoneNumber.value.stringValue)
-      if phoneNumberSet.contains(normalized) {
+      if phoneSet.contains(normalized) {
         contactMatches.append(normalized)
+      }
+    }
+
+    // Match by email address
+    for emailAddress in contact.emailAddresses {
+      let email = (emailAddress.value as String).lowercased()
+      if emailSet.contains(email) {
+        contactMatches.append(email)
       }
     }
 
     if !contactMatches.isEmpty && !seenContactIds.contains(contact.identifier) {
       seenContactIds.insert(contact.identifier)
-      matchedPhoneNumbers.formUnion(contactMatches)
+      matchedIdentifiers.formUnion(contactMatches)
 
-      let phoneNumbers = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
+      let phoneNumberItems = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
         let number = cnPhoneNumber.value.stringValue
         let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
         return PhoneNumber(
           number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
       }
 
+      let emailItems = contact.emailAddresses.map { ($0.value as String).lowercased() }
+
       matchedContacts.append(
         ContactItem(
           id: contact.identifier,
           givenName: contact.givenName,
           familyName: contact.familyName,
-          phoneNumbers: phoneNumbers,
+          phoneNumbers: phoneNumberItems,
+          emails: emailItems,
           imageData: loadPhotos ? contact.imageData : nil
         ))
     }

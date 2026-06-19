@@ -18,6 +18,7 @@ import {
   flattenGroupDestinations,
   getSuggestedKey,
   GroupDestination,
+  normalizeCapturedKey,
 } from "./capture-utils";
 import {
   addItemToGroup,
@@ -115,7 +116,7 @@ export default function QuickCapture() {
       return;
     }
 
-    const normalizedKey = key.trim().slice(0, 1).toLowerCase();
+    const normalizedKey = normalizeCapturedKey(key);
     if (!normalizedKey) {
       await showToast({
         style: Toast.Style.Failure,
@@ -220,7 +221,7 @@ export default function QuickCapture() {
         id="key"
         title="Key"
         value={key}
-        onChange={(nextKey) => setKey(nextKey.slice(0, 1).toLowerCase())}
+        onChange={(nextKey) => setKey(nextKey.slice(0, 1))}
         placeholder="Single character"
       />
       <Form.TextField

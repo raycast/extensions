@@ -8,6 +8,7 @@ export interface Surface {
   workspaceName: string;
   isSelected: boolean;
   isActive: boolean;
+  keywords?: string[];
 }
 
 interface SurfaceListProps {
@@ -73,6 +74,7 @@ function SurfaceItem({ surface }: { surface: Surface }) {
     <List.Item
       key={surface.ref}
       title={surface.name}
+      keywords={surface.keywords}
       accessories={[...(surface.isActive ? [{ tag: { value: "active", color: Color.Green } }] : [])]}
       actions={
         <ActionPanel>

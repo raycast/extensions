@@ -14,7 +14,8 @@
     "litomore",
     "anwarulislam",
     "yusifaliyevpro",
-    "xilopaint"
+    "xilopaint",
+    "chrismessina"
   ],
   "categories": [
     "Applications",
@@ -93,7 +94,7 @@
       "title": "Auto Load URL from Clipboard",
       "description": "Automatically load the URL from the clipboard when the command is executed",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Load URL from clipboard",
       "default": false,
       "required": false
     },
@@ -102,7 +103,7 @@
       "title": "Auto Load URL from Selected Text",
       "description": "Automatically load the URL from the selected text when the command is executed",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Load URL from selected text",
       "default": false,
       "required": false
     },
@@ -111,18 +112,36 @@
       "title": "Enable Browser Extension Support",
       "description": "Enable browser extension support for reading video URLs from the browser",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Read video URLs from the browser",
       "default": false,
       "required": false
     },
     {
       "name": "forceIpv4",
-      "title": "Force IPv4 (Experimental)",
-      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "title": "Force IPv4",
+      "description": "Route requests over IPv4. Helps when downloads fail with bot-check or 403 errors (common on YouTube over IPv6) or when your network's IPv6 is unreliable.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Force IPv4 for network requests",
       "default": false,
       "required": false
+    },
+    {
+      "name": "cookiesFromBrowser",
+      "title": "Use Cookies from Browser",
+      "description": "Work around auth-protected media, age restrictions, and CAPTCHAs by passing your logged-in browser's cookies.",
+      "type": "dropdown",
+      "default": "none",
+      "required": false,
+      "data": [
+        { "title": "None", "value": "none" },
+        { "title": "Safari", "value": "safari" },
+        { "title": "Chrome", "value": "chrome" },
+        { "title": "Brave", "value": "brave" },
+        { "title": "Microsoft Edge", "value": "edge" },
+        { "title": "Firefox", "value": "firefox" },
+        { "title": "Opera", "value": "opera" },
+        { "title": "Vivaldi", "value": "vivaldi" }
+      ]
     }
   ],
   "ai": {
@@ -179,21 +198,21 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5",
     "@types/validator": "^13.15.10",
-    "date-fns": "^4.1.0",
-    "execa": "^9.6.0",
+    "date-fns": "^4.4.0",
+    "execa": "^9.6.1",
     "pretty-bytes": "^6.1.1",
     "srt-parser-2": "^1.2.3",
-    "validator": "^13.15.23"
+    "validator": "^13.15.35"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.9",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19.2.16",
     "eslint": "^9.36.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.3",
     "typescript": "^5.8.2"
   },
   "scripts": {

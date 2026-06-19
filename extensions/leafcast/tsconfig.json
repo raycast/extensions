@@ -6,6 +6,7 @@
     "lib": ["es2021"],
     "module": "commonjs",
     "target": "es2021",
+    "types": ["node", "react"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

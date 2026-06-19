@@ -3,21 +3,44 @@ import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 
-import fetch from "node-fetch";
-
 import { useLocalStorage } from "./useLocalStorage";
 
 import { Instance } from "../types";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { getAuthHeader, persistInstance } from "../utils/auth";
 
 const compareInstances = (a: Instance, b: Instance): number => {
-  const nameA = a.alias ? a.alias : a.name;
-  const nameB = b.alias ? b.alias : b.name;
-  return nameA.localeCompare(nameB);
+  return instanceLabel(a).localeCompare(instanceLabel(b));
+};
+
+const TRANSIENT_NETWORK_CODES = new Set([
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ECONNABORTED",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+]);
+
+// True when the error is a network blip or a non-JSON body (e.g. HTML login/maintenance
+// page). These should surface as a toast but must NOT mark the instance as having a
+// credential failure — that state blocks the UI and requires the user to re-authenticate.
+const isTransientError = (error: unknown): boolean => {
+  if (error instanceof SyntaxError) return true;
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { code: unknown }).code;
+    if (typeof code === "string" && TRANSIENT_NETWORK_CODES.has(code)) return true;
+  }
+  return false;
 };
 
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const [userId, setUserId] = useCachedState<string>("user-id");
+  const [currentUserName, setCurrentUserName] = useCachedState<string>("user-name");
 
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>("saved-instances", []);
 
@@ -52,47 +75,79 @@ export default function useInstances() {
     }
 
     const fetchUserId = async () => {
-      const { name: instanceName = "", username = "", password = "" } = selectedInstance;
-
       try {
-        const response = await fetch(
-          `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-            },
+        const authorization = await getAuthHeader(selectedInstance, {
+          onRefresh: async (updated) => {
+            setSelectedInstance(updated);
+            await mutate();
           },
-        );
+        });
+        const response = await fetch(`${getInstanceBaseUrl(selectedInstance)}/api/now/ui/user/current_user`, {
+          method: "GET",
+          headers: {
+            Authorization: authorization,
+            Accept: "application/json",
+          },
+        });
 
-        const jsonData = (await response.json()) as {
-          result?: { sys_id: string }[];
+        let jsonData: {
+          result?: { user_sys_id?: string; user_name?: string };
           error?: { message: string };
         };
-
-        if (!jsonData.result) {
+        try {
+          jsonData = (await response.json()) as typeof jsonData;
+        } catch (parseError) {
+          // Non-JSON body — usually an HTML login or maintenance page. Treat as
+          // transient (no persisted authError) so the instance isn't flagged as broken.
+          console.error(parseError);
           showToast({
             style: Toast.Style.Failure,
-            title: `Could not connect to ${instanceName}`,
-            message: jsonData.error?.message,
+            title: `Could not connect to ${instanceLabel(selectedInstance)}`,
+            message: `Unexpected response (HTTP ${response.status})`,
           });
-
-          return "";
+          return undefined;
         }
 
-        return jsonData.result[0].sys_id;
+        if (!jsonData.result?.user_sys_id) {
+          const message = jsonData.error?.message || `HTTP ${response.status}`;
+          showToast({
+            style: Toast.Style.Failure,
+            title: `Could not connect to ${instanceLabel(selectedInstance)}`,
+            message,
+          });
+          if (response.status === 401 || response.status === 403) {
+            await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+            await mutate();
+          }
+          return undefined;
+        }
+
+        if (selectedInstance.authError) {
+          await persistInstance({ ...selectedInstance, authError: undefined, authErrorAt: undefined });
+          await mutate();
+        }
+
+        return { sysId: jsonData.result.user_sys_id, userName: jsonData.result.user_name ?? "" };
       } catch (error) {
         console.error(error);
 
+        const message = error instanceof Error ? error.message : String(error);
         showToast({
           style: Toast.Style.Failure,
-          title: `Could not connect to ${instanceName}`,
-          message: error instanceof Error ? error.message : "",
+          title: `Could not connect to ${instanceLabel(selectedInstance)}`,
+          message,
         });
+        if (!isTransientError(error)) {
+          await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+          await mutate();
+        }
       }
     };
-    fetchUserId().then((userId) => {
-      if (userId) setUserId(userId);
+    fetchUserId().then((result) => {
+      if (result) {
+        setUserId(result.sysId);
+        setCurrentUserName(result.userName);
+      }
     });
   }, [selectedInstance]);
 
@@ -106,5 +161,6 @@ export default function useInstances() {
     selectedInstance,
     setSelectedInstance,
     userId,
+    currentUserName,
   };
 }

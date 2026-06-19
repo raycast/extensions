@@ -9,7 +9,7 @@ type Input = {
 
 export default async function (input: Input = {}) {
   const { maxQueryResults } = getPreferenceValues();
-  const max = Number.isNaN(parseInt(maxQueryResults)) ? 250 : parseInt(maxQueryResults);
+  const max = parseInt(maxQueryResults, 10) || 250;
   const notes = await getNotes(max, [], input.searchText);
   return notes;
 }

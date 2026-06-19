@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix Open Workspace Command for Recent Zen Versions] - 2026-06-05
+
+- Fixed the **Open Workspace** command crashing with `no such table: zen_workspaces`. Zen Browser migrated workspace storage from the `zen_workspaces` SQLite table in `places.sqlite` to a dedicated `zen-sessions.jsonlz4` file (see [zen-browser/desktop#6469](https://github.com/zen-browser/desktop/pull/6469)). The extension now reads workspace data directly from `zen-sessions.jsonlz4` using a pure-TypeScript mozLz40/LZ4 decompressor — no new runtime dependencies required.
+
 ## [Fix Bookmark and History Search When Zen Is Running] - {PR-MERGE-DATE}
 
 - Bumped `@raycast/utils` from `^2.2.0` to `^2.2.3` to pick up the fix for `useSQL` not falling back to a DB copy when `node:sqlite` reports `errcode: 5` ("database is locked"). Previously, searching bookmarks or history while Zen was running surfaced "Cannot query the data — database is locked" because the lock detector only matched error message text containing `(5)`/`(14)`, which the native `node:sqlite` path does not produce.

@@ -9,6 +9,7 @@ import { URLListItem } from "./components/URLListItem";
 import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
+import { getSearchEngine, getSearchUrl } from "./search-engines";
 import { filterHistory, filterTabs, isLikelyURL } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
@@ -32,11 +33,24 @@ function Command() {
   // Immediate: tabs filter + URL detection (cheap, local)
   // Debounced: history SQL + Google API + bookmarks file I/O (expensive)
   const debouncedSearch = useDebouncedValue(searchText, 200);
+  const searchEngine = getSearchEngine();
 
   const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
   const { data: history, permissionView } = useSearchHistory(debouncedSearch);
   const { data: bookmarks } = useBookmarks(debouncedSearch);
-  const { data: googleSuggestions } = useGoogleSuggestions(debouncedSearch);
+  const { data: googleSuggestions } = useGoogleSuggestions(debouncedSearch, searchEngine.id === "google");
+  const suggestions =
+    searchEngine.id === "google"
+      ? googleSuggestions
+      : debouncedSearch
+        ? [
+            {
+              id: `search-${searchEngine.id}-${debouncedSearch}`,
+              query: debouncedSearch,
+              url: getSearchUrl(debouncedSearch, searchEngine),
+            },
+          ]
+        : [];
 
   if (permissionView) {
     return permissionView;
@@ -142,8 +156,8 @@ function Command() {
       )}
 
       {shouldShow("suggestions") && debouncedSearch && (
-        <List.Section title="Google Suggestions">
-          {googleSuggestions?.map((suggestion) => (
+        <List.Section title={searchEngine.id === "google" ? "Google Suggestions" : `${searchEngine.name} Search`}>
+          {suggestions?.map((suggestion) => (
             <SuggestionListItem key={suggestion.id} suggestion={suggestion} onSuggestionAction={revalidateTabs} />
           ))}
         </List.Section>

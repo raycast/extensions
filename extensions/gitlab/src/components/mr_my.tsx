@@ -91,6 +91,7 @@ export function useMyMergeRequests(
   state: MRState,
   project: Project | undefined,
   labels: string[] | undefined = undefined,
+  hideArchived = false,
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -103,12 +104,17 @@ export function useMyMergeRequests(
     error,
     performRefetch,
   } = useCache<MergeRequest[] | undefined>(
-    `mymrs_${scope}_${state}_${labels ? labels.join(",") : "[]"}`,
+    `mymrs_${scope}_${state}_${labels ? labels.join(",") : "[]"}_${hideArchived}`,
     async (): Promise<MergeRequest[] | undefined> => {
-      return await gitlab.getMergeRequests({ state, scope, ...(labels && { labels }) });
+      return await gitlab.getMergeRequests({
+        state,
+        scope,
+        ...(labels && { labels }),
+        ...(hideArchived && { non_archived: true }),
+      });
     },
     {
-      deps: [project, scope, state, labels],
+      deps: [project, scope, state, labels, hideArchived],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
     },

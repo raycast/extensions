@@ -44,6 +44,7 @@ interface JSONLEntry {
   summary?: string;
   leafUuid?: string;
   uuid?: string;
+  cwd?: string;
   // Used as part of the streaming-chunk dedup key.
   requestId?: string;
   message?: {
@@ -478,6 +479,10 @@ async function parseSessionMetadataFast(
           result.id = entry.leafUuid || path.basename(filePath, ".jsonl");
         }
 
+        if (!result.projectPath && entry.cwd) {
+          result.projectPath = sanitizeString(entry.cwd);
+        }
+
         if (entry.type === "user" || entry.type === "human") {
           turnCount++;
           if (!result.permissionMode && entry.permissionMode) {
@@ -584,6 +589,7 @@ async function parseFullSession(
     let id = path.basename(filePath, ".jsonl");
     let model: string | undefined;
     let firstMessage = "";
+    let sessionProjectPath: string | undefined;
 
     const stream = fs.createReadStream(filePath, { encoding: "utf8" });
     const rl = readline.createInterface({ input: stream });
@@ -597,6 +603,10 @@ async function parseFullSession(
         if (entry.type === "summary") {
           summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
+        }
+
+        if (!sessionProjectPath && entry.cwd) {
+          sessionProjectPath = sanitizeString(entry.cwd);
         }
 
         if (entry.type === "user" || entry.type === "human") {
@@ -654,7 +664,8 @@ async function parseFullSession(
     rl.on("close", async () => {
       try {
         const stat = await fs.promises.stat(filePath);
-        const projectPath = await resolveProjectPath(encodedProjectPath);
+        const projectPath =
+          sessionProjectPath || (await resolveProjectPath(encodedProjectPath));
 
         const totalMessageCount = messages.length;
         const trimmedMessages =
@@ -785,7 +796,8 @@ export async function listAllSessions(options?: {
   for (const { filePath, projectDir, mtime } of filesToParse) {
     try {
       const metadata = await parseSessionMetadataFast(filePath);
-      const projectPath = await resolveProjectPathOnce(projectDir);
+      const projectPath =
+        metadata.projectPath || (await resolveProjectPathOnce(projectDir));
 
       sessions.push({
         id: metadata.id || path.basename(filePath, ".jsonl"),
@@ -826,7 +838,8 @@ export async function listProjectSessions(
       try {
         const stat = await fs.promises.stat(filePath);
         const metadata = await parseSessionMetadataFast(filePath);
-        const resolvedPath = await resolveProjectPath(encodedPath);
+        const resolvedPath =
+          metadata.projectPath || (await resolveProjectPath(encodedPath));
         sessions.push({
           id: metadata.id || path.basename(filePath, ".jsonl"),
           filePath,
@@ -912,7 +925,8 @@ export async function searchSessionContent(
 
     const match = await searchSingleSession(filePath, lowerQuery, signal);
     if (match) {
-      const projectPath = await resolveProjectPath(projectDir);
+      const projectPath =
+        match.projectPath || (await resolveProjectPath(projectDir));
       onMatch({
         id: match.id || path.basename(filePath, ".jsonl"),
         filePath,
@@ -950,6 +964,7 @@ async function searchSingleSession(
   model?: string;
   matchSnippet?: string;
   permissionMode?: PermissionMode;
+  projectPath?: string;
 } | null> {
   type MatchResult = {
     id: string;
@@ -960,6 +975,7 @@ async function searchSingleSession(
     model?: string;
     matchSnippet?: string;
     permissionMode?: PermissionMode;
+    projectPath?: string;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
@@ -971,6 +987,7 @@ async function searchSingleSession(
     let turnCount = 0;
     let model: string | undefined;
     let permissionMode: PermissionMode | undefined;
+    let projectPath: string | undefined;
     let resolved = false;
 
     const safeResolve = (value: MatchResult | null) => {
@@ -1016,6 +1033,10 @@ async function searchSingleSession(
         if (entry.type === "summary") {
           summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
+        }
+
+        if (!projectPath && entry.cwd) {
+          projectPath = sanitizeString(entry.cwd);
         }
 
         // Extract message content
@@ -1084,6 +1105,7 @@ async function searchSingleSession(
               model,
               matchSnippet,
               permissionMode,
+              projectPath,
             }
           : null,
       );

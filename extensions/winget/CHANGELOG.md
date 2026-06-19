@@ -1,5 +1,10 @@
 # WinGet Changelog
 
+## [Simplify Package Actions] - 2026-06-10
+
+- Remove the `View Details` action from package action panels
+- Make `Install Package` and `Update Package` the primary actions in search and upgrade lists
+
 ## [Fix localized upgrade parsing] - 2026-04-23
 
 - Fix winget table parsing on localized outputs by mapping table columns by position
@@ -27,4 +32,3 @@
 - Copy package ID and command shortcuts to clipboard
 - Configurable winget executable path preference
 - Graceful error messages when winget executable is not found
-

@@ -1,5 +1,9 @@
 # JWT-Decoder Changelog
 
+## [Fix] - 2026-05-28
+
+- Fixed runtime React version mismatch by pinning React peer versions
+
 ## [Fix] - 2026-04-15
 
 - Pinned `react` and `react-dom` to `19.0.0` to avoid runtime React version mismatch errors

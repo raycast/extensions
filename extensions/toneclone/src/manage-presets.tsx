@@ -16,7 +16,7 @@ import { api } from "./api";
 import { QueryPreset } from "./types";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-const RAYCAST_URL = "raycast://extensions/jfox/toneclone/manage-presets";
+const RAYCAST_URL = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/jfox/toneclone/manage-presets`;
 
 function PresetList() {
   const [presets, setPresets] = useState<QueryPreset[]>([]);

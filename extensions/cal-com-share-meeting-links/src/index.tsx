@@ -11,9 +11,11 @@ import {
   Toast,
 } from "@raycast/api";
 import {
+  appBaseUrl,
   CalEventType,
   createPrivateLinkForEventType,
   formatCurrency,
+  publicBaseUrl,
   useCurrentUser,
   useEventTypes,
 } from "@api/cal.com";
@@ -85,17 +87,17 @@ export default function Command() {
                 <Action.OpenInBrowser
                   title="Open Dashboard"
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  url="https://app.cal.com"
+                  url={appBaseUrl}
                 />
                 <Action.OpenInBrowser
                   title="Open Availability Troubleshooter"
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  url={`https://app.cal.com/availability/troubleshoot?eventType=${item.slug}`}
+                  url={`${appBaseUrl}/availability/troubleshoot?eventType=${item.slug}`}
                 />
                 <Action.CopyToClipboard
                   title="Copy My Link"
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
-                  content={`https://cal.com/${user?.username}`}
+                  content={`${publicBaseUrl}/${user?.username}`}
                 />
                 <GeneratePrivateLinkCommand item={item} aborter={generatePrivateLinkAborter} />
               </ActionPanel.Section>

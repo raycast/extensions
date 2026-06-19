@@ -88,3 +88,38 @@ ${summary}
 ${previousContext}
 Question: ${question}`;
 }
+
+type VideoQuestionAnswerSnippetParams = {
+  language: string;
+  question: string;
+  transcript: string;
+  videoTitle?: string;
+  channelName?: string;
+};
+
+export function getVideoQuestionAnswerSnippet({
+  language,
+  question,
+  transcript,
+  videoTitle,
+  channelName,
+}: VideoQuestionAnswerSnippetParams): string {
+  const metadata = [
+    videoTitle ? `Title: ${videoTitle}` : undefined,
+    channelName ? `Channel: ${channelName}` : undefined,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return `${SYSTEM_PROMPT}
+Use only the transcript below.
+If the transcript does not contain enough information to answer, say that directly.
+Do not invent facts or use outside knowledge.
+Answer in ${language}.
+
+${metadata ? `Video metadata:\n${metadata}\n\n` : ""}Question:
+${question}
+
+Transcript:
+${transcript}`;
+}

@@ -33,7 +33,10 @@ class Operation {
    * Initializes the repository by cloning it if it doesn't exist.
    */
   init = async () => {
-    if (this.isOperating) return;
+    if (this.isOperating) {
+      await this.showOperationBusyToast();
+      return;
+    }
     try {
       this.isOperating = true;
       const gitInstalled = await git.checkIfGitIsValid();
@@ -267,7 +270,10 @@ class Operation {
     loadingMessage: string,
     completedMessage?: string | Toast.Options,
   ) => {
-    if (this.isOperating) return;
+    if (this.isOperating) {
+      await this.showOperationBusyToast();
+      return;
+    }
     try {
       this.isOperating = true;
       await git.checkIfStatusClean();
@@ -318,6 +324,18 @@ class Operation {
    */
   private hideToast = async () => {
     if (this.toast.style === Toast.Style.Animated) this.toast.hide();
+  };
+
+  /**
+   * Shows a failure toast when an operation is already running.
+   */
+  private showOperationBusyToast = async () => {
+    const busyToast = new Toast({
+      title: "Operation Already Running",
+      message: "Please wait for the current Git operation to finish, then try again.",
+      style: Toast.Style.Failure,
+    });
+    await busyToast.show();
   };
 }
 
