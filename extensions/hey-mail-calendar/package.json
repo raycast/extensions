@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hey-mail-calendar",
+  "title": "HEY Mail + Calendar",
+  "description": "Browse HEY mail, calendar, and habits via the hey CLI.",
+  "icon": "calendar-icon.png",
+  "author": "h_habibi",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Communication", "Productivity"],
+  "keywords": ["hey", "email", "mail", "calendar", "habits", "37signals"],
+  "preferences": [
+    {
+      "name": "heyPath",
+      "title": "hey CLI Path",
+      "description": "Path to the hey binary. Run `which hey` in Terminal to find it.",
+      "type": "textfield",
+      "required": false,
+      "default": "/usr/local/bin/hey",
+      "placeholder": "/usr/local/bin/hey"
+    },
+    {
+      "name": "habitsCalendarId",
+      "title": "Habits Calendar ID",
+      "description": "Calendar ID for habits (personal calendar). Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "782237"
+    }
+  ],
+  "commands": [
+    {
+      "name": "browse-mail",
+      "title": "Browse Mail",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "Browse HEY mailboxes, read threads, and mark messages seen or unseen.",
+      "mode": "view",
+      "icon": "mail-icon.png"
+    },
+    {
+      "name": "compose-email",
+      "title": "Compose Email",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "Compose a new HEY email.",
+      "mode": "view",
+      "icon": "mail-icon.png"
+    },
+    {
+      "name": "drafts",
+      "title": "Drafts",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "List HEY email drafts.",
+      "mode": "view",
+      "icon": "mail-icon.png"
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "Browse HEY calendars and upcoming events.",
+      "mode": "view",
+      "icon": "calendar-icon.png"
+    },
+    {
+      "name": "habits",
+      "title": "Habits",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "View and complete HEY habits for today.",
+      "mode": "view",
+      "icon": "calendar-icon.png"
+    },
+    {
+      "name": "check-auth",
+      "title": "Check Authentication",
+      "subtitle": "HEY Mail + Calendar",
+      "description": "Check hey CLI authentication and run doctor diagnostics.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
