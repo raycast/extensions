@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wrap-star",
+  "title": "Wrap Star",
+  "description": "Wrap the selected text with quotes, parentheses, brackets, braces, or angle brackets.",
+  "icon": "extension-icon.png",
+  "author": "brendantobin",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wrap-default",
+      "icon": "icon-default.png",
+      "title": "Wrap Selection (Default)",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with your default pair.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "defaultWrapper",
+          "title": "Default Pair",
+          "description": "The pair used by the default command.",
+          "type": "dropdown",
+          "required": false,
+          "default": "parentheses",
+          "data": [
+            { "title": "Parentheses ( )", "value": "parentheses" },
+            { "title": "Single Quotes ' '", "value": "single-quotes" },
+            { "title": "Double Quotes \" \"", "value": "double-quotes" },
+            { "title": "Square Brackets [ ]", "value": "square-brackets" },
+            { "title": "Curly Braces { }", "value": "curly-braces" },
+            { "title": "Angle Brackets < >", "value": "angle-brackets" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wrap-with",
+      "icon": "icon-wrap-with.png",
+      "title": "Wrap Selection with…",
+      "subtitle": "Wrap Selection",
+      "description": "Pick a pair to wrap the selected text with.",
+      "mode": "view"
+    },
+    {
+      "name": "wrap-parentheses",
+      "icon": "icon-parentheses.png",
+      "title": "Wrap with Parentheses",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with ( ).",
+      "mode": "no-view"
+    },
+    {
+      "name": "wrap-single-quotes",
+      "icon": "icon-single-quotes.png",
+      "title": "Wrap with Single Quotes",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with ' '.",
+      "mode": "no-view"
+    },
+    {
+      "name": "wrap-double-quotes",
+      "icon": "icon-double-quotes.png",
+      "title": "Wrap with Double Quotes",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with \" \".",
+      "mode": "no-view"
+    },
+    {
+      "name": "wrap-square-brackets",
+      "icon": "icon-square-brackets.png",
+      "title": "Wrap with Square Brackets",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with [ ].",
+      "mode": "no-view"
+    },
+    {
+      "name": "wrap-curly-braces",
+      "icon": "icon-curly-braces.png",
+      "title": "Wrap with Curly Braces",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with { }.",
+      "mode": "no-view"
+    },
+    {
+      "name": "wrap-angle-brackets",
+      "icon": "icon-angle-brackets.png",
+      "title": "Wrap with Angle Brackets",
+      "subtitle": "Wrap Selection",
+      "description": "Wrap the selected text with < >.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
