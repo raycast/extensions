@@ -30,7 +30,7 @@ const useSuggestions = (query: string) => {
     },
   });
 
-  return { suggestions: url ? (data ?? []) : [], isLoading: !!url && isLoading };
+  return { suggestions: url ? data ?? [] : [], isLoading: !!url && isLoading };
 };
 
 export default useSuggestions;
