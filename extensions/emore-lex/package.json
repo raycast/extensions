@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emore-lex",
   "title": "Emore Lex",
   "description": "A Raycast extension for English pronunciation, meaning, and ops-focused language learning.",

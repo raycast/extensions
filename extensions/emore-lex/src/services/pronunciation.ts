@@ -28,7 +28,7 @@ async function cacheAudio(audioUrl: string): Promise<string> {
 async function getAudioBuffer(audioUrl: string): Promise<Buffer> {
   const response = await fetch(audioUrl);
   if (!response.ok) {
-    throw new Error(`发音音频下载失败：${response.status}`);
+    throw new Error(`Failed to download pronunciation audio：${response.status}`);
   }
   return Buffer.from(await response.arrayBuffer());
 }

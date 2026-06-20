@@ -1,6 +1,6 @@
 import { getCached, setCached } from "../utils/cache";
 import { fetchSynonyms } from "./datamuse";
-import { getChineseDefinitions } from "./localChinese";
+import { getLocalDefinitions } from "./localDefinitions";
 import { findTechEntry } from "./techDictionary";
 import { Definition, PhoneticVariant, WordResult } from "../types/word";
 
@@ -55,7 +55,7 @@ function normalizeEntries(query: string, entries: DictionaryApiEntry[], synonyms
   const apiSynonyms = collectSynonyms(entries);
   const mergedSynonyms = unique([...synonyms, ...apiSynonyms]).slice(0, 10);
   const techEntry = findTechEntry(query);
-  const localDefinitions = getChineseDefinitions(query);
+  const localDefinitions = getLocalDefinitions(query);
 
   return {
     query,
@@ -63,7 +63,7 @@ function normalizeEntries(query: string, entries: DictionaryApiEntry[], synonyms
     syllables: splitSyllables(word),
     pronunciationHint: getPronunciationHint(word),
     phonetics: collectPhonetics(entries),
-    chineseDefinitions: techEntry ? unique([techEntry.chinese, ...localDefinitions]) : localDefinitions,
+    localDefinitions: techEntry ? unique([techEntry.meaning, ...localDefinitions]) : localDefinitions,
     definitions,
     examples: definitions.filter((definition) => definition.example).slice(0, MAX_EXAMPLES),
     inflections: getInflections(word),

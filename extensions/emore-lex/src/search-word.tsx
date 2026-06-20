@@ -40,8 +40,8 @@ export default function Command() {
         })
         .catch((lookupError: unknown) => {
           setResult(undefined);
-          setError(lookupError instanceof Error ? lookupError.message : "查询失败");
-          void showToast({ style: Toast.Style.Failure, title: "查询失败", message: String(lookupError) });
+          setError(lookupError instanceof Error ? lookupError.message : "Lookup failed");
+          void showToast({ style: Toast.Style.Failure, title: "Lookup Failed", message: String(lookupError) });
         })
         .finally(() => setIsLoading(false));
     }, 300);
@@ -56,7 +56,7 @@ export default function Command() {
       isLoading={isLoading}
       searchText={query}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder="输入英语单词或运维短语，例如 denied / permission denied"
+      searchBarPlaceholder="Search English words or ops phrases, for example denied / permission denied"
     >
       {query.trim().length < MIN_QUERY_LENGTH ? (
         <HomeItems history={history} favorites={favorites} stats={stats} setQuery={setQuery} />
@@ -64,8 +64,8 @@ export default function Command() {
         <SearchResultItem result={result} />
       ) : (
         <List.EmptyView
-          title={error ? "查询失败" : "输入后开始查询"}
-          description={error ?? "支持单词、短语和运维英语场景。"}
+          title={error ? "Lookup Failed" : "Start Typing to Search"}
+          description={error ?? "Search words, phrases, and operations vocabulary."}
           icon={error ? Icon.Warning : Icon.MagnifyingGlass}
         />
       )}
@@ -86,15 +86,15 @@ function HomeItems({ history, favorites, stats, setQuery }: HomeItemsProps) {
 
   return (
     <>
-      <List.Section title="学习统计">
+      <List.Section title="Study Stats">
         <List.Item
-          title={`今日 ${stats.today} 次 · 本周 ${stats.week} 次 · 总计 ${stats.total} 次`}
-          subtitle="输入关键词开始查询"
+          title={`Today ${stats.today} · This Week ${stats.week} · Total ${stats.total}`}
+          subtitle="Enter a keyword to start searching"
           icon={Icon.BarChart}
         />
       </List.Section>
       {recentFavorites.length > 0 ? (
-        <List.Section title="收藏">
+        <List.Section title="Favorites">
           {recentFavorites.map((favorite) => (
             <QuickSearchItem
               key={favorite.word}
@@ -107,7 +107,7 @@ function HomeItems({ history, favorites, stats, setQuery }: HomeItemsProps) {
         </List.Section>
       ) : null}
       {recentHistory.length > 0 ? (
-        <List.Section title="查询历史">
+        <List.Section title="Recent Searches">
           {recentHistory.map((item) => (
             <QuickSearchItem
               key={item.word}
@@ -120,8 +120,8 @@ function HomeItems({ history, favorites, stats, setQuery }: HomeItemsProps) {
         </List.Section>
       ) : (
         <List.EmptyView
-          title="开始查询"
-          description="输入 denied、throughput 或 permission denied。"
+          title="Start Searching"
+          description="Try denied, throughput, or permission denied."
           icon={Icon.Book}
         />
       )}
@@ -140,11 +140,11 @@ function QuickSearchItem({ title, date, icon, setQuery }: QuickSearchItemProps) 
   return (
     <List.Item
       title={title}
-      subtitle={new Date(date).toLocaleString("zh-CN")}
+      subtitle={new Date(date).toLocaleString("en-US")}
       icon={icon}
       actions={
         <ActionPanel>
-          <Action title="查询" icon={Icon.MagnifyingGlass} onAction={() => setQuery(title)} />
+          <Action title="Search" icon={Icon.MagnifyingGlass} onAction={() => setQuery(title)} />
         </ActionPanel>
       }
     />
@@ -153,20 +153,20 @@ function QuickSearchItem({ title, date, icon, setQuery }: QuickSearchItemProps) 
 
 function SearchResultItem({ result }: { result: WordResult }) {
   const accessories = [
-    result.techEntry ? { text: "运维" } : undefined,
+    result.techEntry ? { text: "Ops" } : undefined,
     result.phonetics[0]?.text ? { text: result.phonetics[0].text } : undefined,
   ].filter((item): item is { text: string } => item !== undefined);
 
   return (
-    <List.Section title="查询结果">
+    <List.Section title="Search Result">
       <List.Item
         title={result.word}
-        subtitle={result.chineseDefinitions.join("；")}
+        subtitle={result.localDefinitions.join("; ")}
         icon={result.techEntry ? Icon.Terminal : Icon.Book}
         accessories={accessories}
         actions={
           <ActionPanel>
-            <Action.Push title="打开详情" icon={Icon.Sidebar} target={<WordDetail result={result} />} />
+            <Action.Push title="Open Details" icon={Icon.Sidebar} target={<WordDetail result={result} />} />
           </ActionPanel>
         }
       />

@@ -21,32 +21,32 @@ export function WordDetail({ result }: WordDetailProps) {
       markdown={renderDetailMarkdown(result)}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="发音">
+          <ActionPanel.Section title="Pronunciation">
             {result.phonetics
               .filter((phonetic) => phonetic.audioUrl)
               .map((phonetic) => (
                 <Action
                   key={`${phonetic.region}-${phonetic.audioUrl}`}
-                  title={`播放${phonetic.region === "US" ? "美式" : phonetic.region === "UK" ? "英式" : ""}发音`}
+                  title={`Play ${renderPronunciationRegion(phonetic.region)} Pronunciation`}
                   icon={Icon.SpeakerHigh}
                   onAction={() => void handlePlay(phonetic.audioUrl)}
                 />
               ))}
           </ActionPanel.Section>
-          <ActionPanel.Section title="学习">
+          <ActionPanel.Section title="Learning">
             <Action
-              title={favorite ? "取消收藏" : "收藏单词"}
+              title={favorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={favorite ? Icon.StarDisabled : Icon.Star}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => void handleToggleFavorite(result.word, setFavorite)}
             />
             <Action.CopyToClipboard
-              title="复制 Markdown"
+              title="Copy Markdown"
               content={renderWordMarkdown(result)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
             <Action
-              title="复制 CSV"
+              title="Copy CSV"
               icon={Icon.Document}
               shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
               onAction={() => void handleCopyCsv(result)}
@@ -66,8 +66,8 @@ async function handlePlay(audioUrl?: string): Promise<void> {
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "发音播放失败",
-      message: error instanceof Error ? error.message : "未知错误",
+      title: "Pronunciation Playback Failed",
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
@@ -77,14 +77,14 @@ async function handleToggleFavorite(word: string, setFavorite: (value: boolean) 
   setFavorite(nextFavorite);
   await showToast({
     style: Toast.Style.Success,
-    title: nextFavorite ? "已收藏" : "已取消收藏",
+    title: nextFavorite ? "Added to Favorites" : "Removed from Favorites",
     message: word,
   });
 }
 
 async function handleCopyCsv(result: WordResult): Promise<void> {
   await Clipboard.copy(renderWordCsv(result));
-  await showToast({ style: Toast.Style.Success, title: "已复制 CSV" });
+  await showToast({ style: Toast.Style.Success, title: "Copied CSV" });
 }
 
 function renderDetailMarkdown(result: WordResult): string {
@@ -92,38 +92,40 @@ function renderDetailMarkdown(result: WordResult): string {
     `# ${result.word}`,
     "",
     renderPhonetics(result),
-    result.syllables ? `**音节**：${result.syllables}` : undefined,
-    result.pronunciationHint ? `**发音提示**：${result.pronunciationHint}` : undefined,
+    result.syllables ? `**Syllables**: ${result.syllables}` : undefined,
+    result.pronunciationHint ? `**Pronunciation Hint**: ${result.pronunciationHint}` : undefined,
     "",
-    "## 中文释义",
-    ...result.chineseDefinitions.map((definition, index) => `${index + 1}. ${definition}`),
+    "## Meaning Notes",
+    ...result.localDefinitions.map((definition, index) => `${index + 1}. ${definition}`),
     "",
-    "## 英文释义",
+    "## English Definitions",
     ...(result.definitions.length > 0
       ? result.definitions.map((definition) => `- **${definition.partOfSpeech}.** ${definition.english}`)
-      : ["- 暂无远程英文释义。"]),
+      : ["- No remote English definitions found."]),
     "",
-    "## 例句",
+    "## Examples",
     ...(result.examples.length > 0
       ? result.examples.map((definition) => `- ${definition.example ?? definition.english}`)
-      : ["- 暂无例句。"]),
+      : ["- No examples found."]),
     "",
-    "## 词形变化",
+    "## Inflections",
     `- Base Form: ${result.inflections.base}`,
     result.inflections.past ? `- Past: ${result.inflections.past}` : undefined,
     result.inflections.pastParticiple ? `- Past Participle: ${result.inflections.pastParticiple}` : undefined,
     result.inflections.presentParticiple ? `- Present Participle: ${result.inflections.presentParticiple}` : undefined,
     result.inflections.plural ? `- Plural: ${result.inflections.plural}` : undefined,
     "",
-    "## 常见搭配",
-    ...(result.collocations.length > 0 ? result.collocations.map((item) => `- ${item}`) : ["- 暂无本地搭配。"]),
+    "## Common Collocations",
+    ...(result.collocations.length > 0
+      ? result.collocations.map((item) => `- ${item}`)
+      : ["- No local collocations found."]),
     "",
-    "## 同义词",
-    ...(result.synonyms.length > 0 ? result.synonyms.map((item) => `- ${item}`) : ["- 暂无同义词。"]),
+    "## Synonyms",
+    ...(result.synonyms.length > 0 ? result.synonyms.map((item) => `- ${item}`) : ["- No synonyms found."]),
     "",
     ...renderTechSection(result),
     "---",
-    `数据来源：${renderSource(result.source)} · 更新时间：${new Date(result.updatedAt).toLocaleString("zh-CN")}`,
+    `Source: ${renderSource(result.source)} · Updated: ${new Date(result.updatedAt).toLocaleString("en-US")}`,
   ].filter((line): line is string => line !== undefined);
 
   return lines.join("\n");
@@ -139,30 +141,36 @@ function renderTechSection(result: WordResult): string[] {
   if (!entry) return [];
 
   return [
-    "## 运维英语模式",
-    `**场景**：${entry.chinese}`,
+    "## Operations Context",
+    `**Scenario**: ${entry.meaning}`,
     "",
     entry.explanation,
     "",
-    `**覆盖领域**：${entry.domains.join("、")}`,
+    `**Domains**: ${entry.domains.join(", ")}`,
     "",
-    "### 常见原因",
+    "### Common Causes",
     ...(entry.commonCauses ?? []).map((item) => `- ${item}`),
     "",
-    "### 常见解决方案",
+    "### Common Fixes",
     ...(entry.solutions ?? []).map((item) => `- ${item}`),
     "",
-    "### 常见命令",
+    "### Useful Commands",
     ...(entry.commands ?? []).map((item) => `- ${item}`),
     "",
-    "### 技术例句",
+    "### Technical Examples",
     ...(entry.examples ?? []).map((item) => `- ${item}`),
     "",
   ];
 }
 
 function renderSource(source: WordResult["source"]): string {
-  if (source === "cache") return "本地缓存";
-  if (source === "local") return "本地词库";
-  return "远程词典";
+  if (source === "cache") return "Local Cache";
+  if (source === "local") return "Local Dictionary";
+  return "Remote Dictionary";
+}
+
+function renderPronunciationRegion(region: string): string {
+  if (region === "US") return "US";
+  if (region === "UK") return "UK";
+  return "Available";
 }

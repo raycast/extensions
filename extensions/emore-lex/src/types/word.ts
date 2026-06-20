@@ -21,7 +21,7 @@ export type Inflections = {
 export type TechEntry = {
   term: string;
   domains: string[];
-  chinese: string;
+  meaning: string;
   explanation: string;
   commonCauses?: string[];
   solutions?: string[];
@@ -35,7 +35,7 @@ export type WordResult = {
   syllables?: string;
   pronunciationHint?: string;
   phonetics: PhoneticVariant[];
-  chineseDefinitions: string[];
+  localDefinitions: string[];
   definitions: Definition[];
   examples: Definition[];
   inflections: Inflections;
