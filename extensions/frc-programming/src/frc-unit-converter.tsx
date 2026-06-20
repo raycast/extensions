@@ -51,7 +51,7 @@ function getMarkdown(conversionType: string, termsStr: string): [string, string]
   const parametersTerms = parametersStr.split(",").map((term) => term.trim());
 
   const mainPart = termsStr.replace(/\(([^)]+)\)/, "");
-  const mainTerms = mainPart.split(" ");
+  const mainTerms = mainPart.trim().split(/\s+/).filter(Boolean);
 
   let value = null;
   let fromUnit = null;
@@ -115,7 +115,7 @@ function getMarkdown(conversionType: string, termsStr: string): [string, string]
 
   markdown += `${syntaxHelp}\n\n`;
 
-  if (value && convertedValue) {
+  if (value !== null && !isNaN(value) && convertedValue !== null) {
     markdown += `# ${value} → ${convertedValue != null ? parseFloat(convertedValue.toFixed(4)).toString() : "N/A"}\n\n`;
   } else {
     markdown += `# Enter a value to convert...\n\n`;

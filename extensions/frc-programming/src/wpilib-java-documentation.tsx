@@ -15,7 +15,6 @@ type ClassItem = {
 interface JavaTypeEntry {
   p: string;
   l: string;
-  signature: string;
 }
 
 interface JavaMemberEntry {
@@ -27,6 +26,7 @@ interface JavaMemberEntry {
 interface JavaMethod {
   name: string;
   url: string;
+  signature: string;
 }
 
 interface JavaClassEntry {
@@ -76,7 +76,7 @@ async function getDocumentation() {
   }
 }
 
-function getClassMarkdown(item: ClassItem): string {
+function getClassMarkdown(item: JavaClassEntry): string {
   let markdown = "";
   markdown += `## ${item.name}\n\n`;
   markdown += `*${item.path.replace(".html", "").replace("edu/wpi/first/", "")}*\n\n`;

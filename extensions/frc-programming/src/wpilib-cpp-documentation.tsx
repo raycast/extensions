@@ -18,7 +18,12 @@ async function getDocumentation() {
     try {
       const response = await fetch(`${BASE_URL}search/classes_${i}.js`);
       const text = await response.text();
-      const json = eval(text.replace(/^var searchData=\n/, ""));
+      const stripped = text
+        .replace(/^var searchData=\n/, "")
+        .trim()
+        .replace(/;$/, "");
+      const jsonSafe = stripped.replace(/'/g, '"').replace(/,\s*\]/g, "]");
+      const json = JSON.parse(jsonSafe);
 
       for (const entry of json) {
         const [, details] = entry;
