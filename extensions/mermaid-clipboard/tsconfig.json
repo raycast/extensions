@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.raycast.com/schemas/tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "target": "ES2022",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx"
+  }
+}
