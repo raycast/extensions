@@ -242,6 +242,7 @@ export async function ensureFindrBinaries(): Promise<string> {
         (res) => {
           let data = "";
           res.on("data", (chunk: string) => (data += chunk));
+          res.on("error", reject);
           res.on("end", () => {
             if (res.statusCode !== 200) {
               reject(
