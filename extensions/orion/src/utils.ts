@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
-import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export function extractDomainName(urlString: string) {
@@ -144,3 +144,54 @@ export const idToColor = (id: number) => {
   }
   return Color.PrimaryText;
 };
+
+// --- Command Bar: search engine + opening URLs in Orion ---
+
+export type SearchEngine = "duckduckgo" | "google" | "brave" | "kagi";
+
+const SEARCH_ENGINES: Record<SearchEngine, { name: string; search: string; suggest: string | null }> = {
+  duckduckgo: {
+    name: "DuckDuckGo",
+    search: "https://duckduckgo.com/?q=",
+    suggest: "https://duckduckgo.com/ac/?type=list&q=",
+  },
+  google: {
+    name: "Google",
+    search: "https://www.google.com/search?q=",
+    suggest: "https://suggestqueries.google.com/complete/search?client=firefox&q=",
+  },
+  brave: {
+    name: "Brave",
+    search: "https://search.brave.com/search?q=",
+    suggest: "https://search.brave.com/api/suggest?source=web&q=",
+  },
+  kagi: {
+    name: "Kagi",
+    search: "https://kagi.com/search?q=",
+    suggest: null,
+  },
+};
+
+export function getSearchEngine(): SearchEngine {
+  const value = getPreferenceValues<{ searchEngine?: SearchEngine }>().searchEngine;
+  return value && value in SEARCH_ENGINES ? value : "duckduckgo";
+}
+
+export function getSearchEngineName(engine: SearchEngine = getSearchEngine()) {
+  return SEARCH_ENGINES[engine].name;
+}
+
+export function buildSearchUrl(query: string, engine: SearchEngine = getSearchEngine()) {
+  return SEARCH_ENGINES[engine].search + encodeURIComponent(query);
+}
+
+// Returns null for engines (e.g. Kagi) that have no public autocomplete endpoint.
+export function buildSuggestUrl(query: string, engine: SearchEngine = getSearchEngine()): string | null {
+  const base = SEARCH_ENGINES[engine].suggest;
+  return base ? base + encodeURIComponent(query) : null;
+}
+
+// Always open a URL in Orion rather than the system default browser.
+export async function openInOrion(url: string) {
+  await open(url, getOrionAppIdentifier());
+}
