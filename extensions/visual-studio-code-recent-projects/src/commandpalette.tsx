@@ -1,18 +1,11 @@
-import { Action, ActionPanel, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
 import { Shortcut } from "./lib/shortcuts";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
-import {
-  fileExists,
-  getErrorMessage,
-  isWin,
-  openURIinVSCode,
-  raycastForVSCodeURI,
-  waitForFileExists,
-} from "./lib/utils";
+import { fileExists, getErrorMessage, isWin, waitForFileExists } from "./lib/utils";
 
 interface CommandMetadata {
   command: string;
@@ -40,6 +33,14 @@ function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
       quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: `VSCode - ${title}` }}
     />
   );
+}
+
+function raycastForVSCodeURI(uri: string) {
+  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
+}
+
+async function openURIinVSCode(uri: string) {
+  await open(raycastForVSCodeURI(uri));
 }
 
 async function getCommandFromVSCode() {

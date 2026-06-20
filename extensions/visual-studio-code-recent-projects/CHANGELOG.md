@@ -4,6 +4,7 @@
 
 - `getSelectedFinderItems` works on Windows; reverted.
 - Using the URL handler causes previous VS Code windows to close; reverted.
+- Bumped dependency versions
 
 ## [Update] - 2026-06-17
 

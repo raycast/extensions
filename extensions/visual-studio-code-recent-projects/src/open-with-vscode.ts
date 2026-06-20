@@ -49,7 +49,6 @@ export default async function main() {
 
     if (isWin) {
       selectedItems = await getSelectedFinderItems();
-      console.log("Selected items:", selectedItems);
 
       if (selectedItems.length === 0) {
         const currentPath = await getCurrentExplorerPath();
