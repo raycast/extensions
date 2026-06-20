@@ -32,8 +32,11 @@ const OpenTabAction = (props: { tab: Tab }) => {
       title="Open in Browser"
       icon={Icon.Globe}
       onAction={async () => {
-        await activateTab(tab);
+        // Close launcher tabs BEFORE activating Orion. If a raycast:// tab is
+        // still present when Orion comes to the front, it re-commits its pending
+        // deeplink navigation and the palette reopens.
         await closeLauncherTabs();
+        await activateTab(tab);
         await closeMainWindow({ clearRootSearch: true });
       }}
     />

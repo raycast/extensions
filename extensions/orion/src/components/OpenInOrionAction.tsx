@@ -7,8 +7,10 @@ const OpenInOrionAction = (props: { url: string; title?: string }) => (
     title={props.title ?? "Open in Orion"}
     icon={Icon.Globe}
     onAction={async () => {
-      await openInOrion(props.url);
+      // Close launcher tabs before opening the result (which brings Orion to the
+      // front); otherwise a lingering raycast:// tab re-fires the deeplink.
       await closeLauncherTabs();
+      await openInOrion(props.url);
       await closeMainWindow({ clearRootSearch: true });
     }}
   />
