@@ -13,3 +13,9 @@ assets/overlay/runtime-config.json
 
 # misc
 .DS_Store
+
+# references
+/cmatrix
+/current.png
+/reference.gif
+/reference.png

@@ -1,6 +1,6 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { spawn, execFile } from "node:child_process";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -9,11 +9,9 @@ const execFileAsync = promisify(execFile);
 const overlayPidKey = "matrix-overlay-pid";
 const overlayProcessFlag = "--the-matrix-raycast-overlay";
 const overlayStopFileName = "matrix-overlay.stop";
+const overlayRunnerPath = "/usr/bin/osascript";
 const gracefulStopTimeoutMs = 7400;
 const forceStopTimeoutMs = 500;
-const matrixDensityValues = ["sparse", "normal", "dense", "overload"] as const;
-export type MatrixDensity = (typeof matrixDensityValues)[number];
-const defaultMatrixDensity: MatrixDensity = "normal";
 
 type StartResult = {
   alreadyRunning: boolean;
@@ -21,18 +19,12 @@ type StartResult = {
 };
 
 type StartOptions = {
-  matrixDensity?: string;
   soundsOn: boolean;
 };
 
 type StopResult = {
   stopped: boolean;
   fallbackCount: number;
-};
-
-type RuntimeConfig = {
-  electronPath?: string;
-  extensionRoot?: string;
 };
 
 export async function startOverlay(
@@ -46,36 +38,35 @@ export async function startOverlay(
 
   await LocalStorage.removeItem(overlayPidKey);
 
-  const electronPath = await findElectronExecutable();
   const mainScriptPath = path.join(
     environment.assetsPath,
     "overlay",
-    "main.js",
+    "main.jxa",
   );
+  const overlayDirectoryPath = path.dirname(mainScriptPath);
   const stopFilePath = getStopFilePath();
-  await assertExecutable(electronPath);
+  await assertExecutable(overlayRunnerPath);
   await assertReadable(mainScriptPath);
   await mkdir(environment.supportPath, { recursive: true });
   await rm(stopFilePath, { force: true });
 
   const child = spawn(
-    electronPath,
+    overlayRunnerPath,
     [
+      "-l",
+      "JavaScript",
       mainScriptPath,
+      "--",
       overlayProcessFlag,
       "--stop-file",
       stopFilePath,
+      "--overlay-dir",
+      overlayDirectoryPath,
       "--audio",
       options.soundsOn ? "1" : "0",
-      "--density",
-      normalizeMatrixDensity(options.matrixDensity),
     ],
     {
       detached: true,
-      env: {
-        ...process.env,
-        ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
-      },
       stdio: "ignore",
     },
   );
@@ -83,18 +74,12 @@ export async function startOverlay(
   child.unref();
 
   if (!child.pid) {
-    throw new Error("Electron overlay launched without a process ID");
+    throw new Error("Matrix overlay launched without a process ID");
   }
 
   await LocalStorage.setItem(overlayPidKey, String(child.pid));
 
   return { alreadyRunning: false, pid: child.pid };
-}
-
-function normalizeMatrixDensity(value: string | undefined): MatrixDensity {
-  return matrixDensityValues.includes(value as MatrixDensity)
-    ? (value as MatrixDensity)
-    : defaultMatrixDensity;
 }
 
 export async function isOverlayRunning(): Promise<boolean> {
@@ -150,112 +135,6 @@ async function getStoredPid(): Promise<number | undefined> {
   const pid = Number(value);
 
   return Number.isInteger(pid) && pid > 0 ? pid : undefined;
-}
-
-async function findElectronExecutable(): Promise<string> {
-  const overridePath = process.env.THE_MATRIX_ELECTRON_PATH;
-
-  if (overridePath) {
-    return overridePath;
-  }
-
-  const runtimeConfig = await getRuntimeConfig();
-  const configuredPaths = [
-    runtimeConfig.electronPath,
-    process.env.THE_MATRIX_EXTENSION_ROOT
-      ? getElectronExecutablePath(process.env.THE_MATRIX_EXTENSION_ROOT)
-      : undefined,
-    runtimeConfig.extensionRoot
-      ? getElectronExecutablePath(runtimeConfig.extensionRoot)
-      : undefined,
-  ].filter((candidatePath): candidatePath is string => Boolean(candidatePath));
-
-  for (const candidatePath of configuredPaths) {
-    if (await canAccess(candidatePath)) {
-      return candidatePath;
-    }
-  }
-
-  const roots = getCandidateRoots(runtimeConfig);
-  const candidatePaths = roots.flatMap((root) => {
-    if (process.platform === "darwin") {
-      return [
-        getElectronExecutablePath(root),
-        path.join(root, "node_modules", ".bin", "electron"),
-      ];
-    }
-
-    if (process.platform === "win32") {
-      return [
-        path.join(root, "node_modules", "electron", "dist", "electron.exe"),
-        path.join(root, "node_modules", ".bin", "electron.cmd"),
-      ];
-    }
-
-    return [
-      path.join(root, "node_modules", "electron", "dist", "electron"),
-      path.join(root, "node_modules", ".bin", "electron"),
-    ];
-  });
-
-  for (const candidatePath of candidatePaths) {
-    if (await canAccess(candidatePath)) {
-      return candidatePath;
-    }
-  }
-
-  throw new Error(
-    "Electron runtime not found. Run `npm install` in the extension folder first, then restart `npm run dev`.",
-  );
-}
-
-async function getRuntimeConfig(): Promise<RuntimeConfig> {
-  const configPath = path.join(
-    environment.assetsPath,
-    "overlay",
-    "runtime-config.json",
-  );
-
-  try {
-    return JSON.parse(await readFile(configPath, "utf8")) as RuntimeConfig;
-  } catch {
-    return {};
-  }
-}
-
-function getElectronExecutablePath(root: string): string {
-  if (process.platform === "darwin") {
-    return path.join(
-      root,
-      "node_modules",
-      "electron",
-      "dist",
-      "Electron.app",
-      "Contents",
-      "MacOS",
-      "Electron",
-    );
-  }
-
-  if (process.platform === "win32") {
-    return path.join(root, "node_modules", "electron", "dist", "electron.exe");
-  }
-
-  return path.join(root, "node_modules", "electron", "dist", "electron");
-}
-
-function getCandidateRoots(runtimeConfig: RuntimeConfig): string[] {
-  const roots = [
-    runtimeConfig.extensionRoot,
-    process.cwd(),
-    path.resolve(environment.assetsPath, ".."),
-    path.resolve(environment.assetsPath, "..", ".."),
-    path.resolve(environment.assetsPath, "..", "..", ".."),
-    path.resolve(__dirname, ".."),
-    path.resolve(__dirname, "..", ".."),
-  ].filter((root): root is string => Boolean(root));
-
-  return [...new Set(roots)];
 }
 
 async function assertExecutable(filePath: string): Promise<void> {

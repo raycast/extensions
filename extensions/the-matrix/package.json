@@ -21,65 +21,36 @@
       "type": "checkbox",
       "default": true,
       "required": true
-    },
-    {
-      "name": "matrixDensity",
-      "title": "Matrix density",
-      "label": "Matrix density",
-      "description": "Controls how packed the Matrix rain appears on screen.",
-      "type": "dropdown",
-      "default": "normal",
-      "required": false,
-      "data": [
-        {
-          "title": "Sparse",
-          "value": "sparse"
-        },
-        {
-          "title": "Normal",
-          "value": "normal"
-        },
-        {
-          "title": "Dense",
-          "value": "dense"
-        },
-        {
-          "title": "Overload",
-          "value": "overload"
-        }
-      ]
     }
   ],
   "commands": [
     {
       "mode": "no-view",
-      "name": "red-pill",
-      "title": "Take a Red Pill",
-      "subtitle": "Choose truth. Wake up from the simulation and face the pain ...",
-      "description": "Choose truth. Wake up from the simulation and face the pain ..."
+      "name": "blue-pill",
+      "title": "Take a Blue Pill",
+      "subtitle": "Start the Matrix rain overlay",
+      "description": "Start a click-through Matrix rain overlay with optional procedural audio."
     },
     {
       "mode": "no-view",
-      "name": "blue-pill",
-      "title": "Take a Blue Pill",
-      "subtitle": "Choose comfort. Stay in the illusion, keeping life unchanged ...",
-      "description": "Choose comfort. Stay in the illusion, keeping life unchanged ..."
+      "name": "red-pill",
+      "title": "Take a Red Pill",
+      "subtitle": "Stop the Matrix rain overlay",
+      "description": "Stop the Matrix rain overlay with a reverse fade-out and exit sound."
     }
   ],
   "tools": [],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "overlay:dev": "electron assets/overlay/main.js --the-matrix-raycast-overlay",
+    "overlay:dev": "osascript -l JavaScript assets/overlay/main.jxa -- --the-matrix-raycast-overlay --overlay-dir \"$PWD/assets/overlay\" --audio 1",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1",
-    "electron": "^42.4.1"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

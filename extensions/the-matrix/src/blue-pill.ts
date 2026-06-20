@@ -5,13 +5,8 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
-import { isOverlayRunning, startOverlay, type MatrixDensity } from "./overlay";
+import { isOverlayRunning, startOverlay } from "./overlay";
 import { getBluePillQuote } from "./quotes";
-
-type Preferences = {
-  matrixDensity?: MatrixDensity;
-  soundsOn: boolean;
-};
 
 export default async function Command() {
   try {
@@ -23,17 +18,18 @@ export default async function Command() {
       popToRootType: PopToRootType.Immediate,
     });
 
+    const startPromise = alreadyRunning
+      ? undefined
+      : startOverlay({
+          soundsOn: preferences.soundsOn,
+        });
+
     await showToast({
       style: Toast.Style.Success,
       title: getBluePillQuote(alreadyRunning),
     });
 
-    if (!alreadyRunning) {
-      await startOverlay({
-        matrixDensity: preferences.matrixDensity,
-        soundsOn: preferences.soundsOn,
-      });
-    }
+    await startPromise;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
