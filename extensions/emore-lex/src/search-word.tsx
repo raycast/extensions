@@ -22,31 +22,50 @@ export default function Command() {
 
   useEffect(() => {
     const normalizedQuery = query.trim();
+    const abortController = new AbortController();
+    let isCurrentQuery = true;
     setError(undefined);
 
     if (normalizedQuery.length < MIN_QUERY_LENGTH) {
       setResult(undefined);
       setIsLoading(false);
-      return;
+      return () => {
+        isCurrentQuery = false;
+        abortController.abort();
+      };
     }
 
     setIsLoading(true);
     const timer = setTimeout(() => {
-      void lookupWord(normalizedQuery)
+      void lookupWord(normalizedQuery, abortController.signal)
         .then(async (nextResult) => {
+          if (!isCurrentQuery || abortController.signal.aborted) return;
+
           setResult(nextResult);
           await recordHistory(nextResult.word);
+
+          if (!isCurrentQuery || abortController.signal.aborted) return;
           await refreshLocalData(setHistory, setFavorites);
         })
         .catch((lookupError: unknown) => {
+          if (!isCurrentQuery || isAbortError(lookupError)) return;
+
           setResult(undefined);
           setError(lookupError instanceof Error ? lookupError.message : "Lookup failed");
           void showToast({ style: Toast.Style.Failure, title: "Lookup Failed", message: String(lookupError) });
         })
-        .finally(() => setIsLoading(false));
+        .finally(() => {
+          if (isCurrentQuery) {
+            setIsLoading(false);
+          }
+        });
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCurrentQuery = false;
+      abortController.abort();
+      clearTimeout(timer);
+    };
   }, [query]);
 
   const stats = useMemo(() => getStudyStats(history), [history]);
@@ -172,6 +191,10 @@ function SearchResultItem({ result }: { result: WordResult }) {
       />
     </List.Section>
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 async function refreshLocalData(

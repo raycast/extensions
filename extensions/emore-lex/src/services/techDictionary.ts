@@ -8,10 +8,6 @@ export function findTechEntry(query: string): TechEntry | undefined {
   return techEntries.find((entry) => normalize(entry.term) === normalizedQuery);
 }
 
-export function getTechEntries(): TechEntry[] {
-  return techEntries;
-}
-
 function normalize(value: string): string {
   return value.trim().toLowerCase().replaceAll(/\s+/g, " ");
 }

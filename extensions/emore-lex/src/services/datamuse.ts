@@ -2,8 +2,8 @@ type DatamuseWord = {
   word: string;
 };
 
-export async function fetchSynonyms(word: string): Promise<string[]> {
-  const response = await fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}&max=8`);
+export async function fetchSynonyms(word: string, signal?: AbortSignal): Promise<string[]> {
+  const response = await fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}&max=8`, { signal });
   if (!response.ok) return [];
 
   const data = (await response.json()) as DatamuseWord[];

@@ -25,7 +25,7 @@ type DictionaryApiEntry = {
 const MAX_DEFINITIONS = 8;
 const MAX_EXAMPLES = 5;
 
-export async function lookupWord(query: string): Promise<WordResult> {
+export async function lookupWord(query: string, signal?: AbortSignal): Promise<WordResult> {
   const normalizedQuery = normalizeQuery(query);
   const cacheKey = `word:${normalizedQuery}`;
   const cached = await getCached<WordResult>(cacheKey);
@@ -34,16 +34,18 @@ export async function lookupWord(query: string): Promise<WordResult> {
   }
 
   const [entries, synonyms] = await Promise.all([
-    fetchDictionaryEntries(normalizedQuery),
-    fetchSynonyms(normalizedQuery),
+    fetchDictionaryEntries(normalizedQuery, signal),
+    fetchSynonyms(normalizedQuery, signal),
   ]);
   const result = normalizeEntries(normalizedQuery, entries, synonyms);
   await setCached(cacheKey, result);
   return result;
 }
 
-async function fetchDictionaryEntries(query: string): Promise<DictionaryApiEntry[]> {
-  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
+async function fetchDictionaryEntries(query: string, signal?: AbortSignal): Promise<DictionaryApiEntry[]> {
+  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`, {
+    signal,
+  });
   if (!response.ok) return [];
   return (await response.json()) as DictionaryApiEntry[];
 }
@@ -164,12 +166,14 @@ function getInflections(word: string) {
     };
   }
 
+  const plural = normalizedWord.endsWith("s") ? normalizedWord : `${normalizedWord}s`;
+
   return {
     base: normalizedWord,
     past: `${normalizedWord}ed`,
     pastParticiple: `${normalizedWord}ed`,
     presentParticiple: `${normalizedWord}ing`,
-    plural: `${normalizedWord}s`,
+    plural,
   };
 }
 
