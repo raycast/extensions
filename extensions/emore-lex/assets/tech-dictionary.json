@@ -1,0 +1,72 @@
+[
+  {
+    "term": "permission denied",
+    "domains": ["Linux", "PostgreSQL", "TBase", "Kubernetes", "Docker"],
+    "chinese": "权限不足 / 访问被拒绝",
+    "explanation": "进程、用户、容器或数据库角色没有执行目标操作所需的权限。",
+    "commonCauses": ["文件或目录权限不足", "缺少 sudo 或目标用户不正确", "SELinux / AppArmor 策略拒绝", "数据库角色缺少对象权限", "容器运行用户与宿主文件属主不匹配"],
+    "solutions": ["检查当前用户和目标资源属主", "用最小权限补充 chmod、chown 或 ACL", "为数据库角色显式 grant 所需权限", "检查 SELinux audit 日志或容器安全上下文"],
+    "commands": ["id", "ls -l", "chmod", "chown", "getfacl", "grant", "kubectl describe pod"],
+    "examples": ["Permission denied while opening a log file.", "Database user gets permission denied for schema public."]
+  },
+  {
+    "term": "access denied",
+    "domains": ["Linux", "PostgreSQL", "TBase", "Elasticsearch", "Cloud Native"],
+    "chinese": "访问被拒绝",
+    "explanation": "认证通过或请求到达后，授权规则拒绝访问目标资源。",
+    "commonCauses": ["账号没有资源权限", "API token scope 不足", "网络入口策略或安全组拦截", "数据库行级或对象级权限限制"],
+    "solutions": ["确认身份主体", "检查 RBAC / ACL / IAM 规则", "补齐 token scope 或服务账号权限", "核对审计日志中的拒绝原因"],
+    "commands": ["curl -v", "kubectl auth can-i", "SHOW GRANTS", "GET _security/user"],
+    "examples": ["Access denied for user when connecting to the database."]
+  },
+  {
+    "term": "throughput",
+    "domains": ["Linux", "PostgreSQL", "TBase", "Kafka", "ClickHouse", "Prometheus"],
+    "chinese": "吞吐量",
+    "explanation": "单位时间内系统处理的数据量、请求量或消息量，常用于衡量服务、网络、数据库和队列能力。",
+    "commonCauses": ["CPU、磁盘或网络达到瓶颈", "连接池或线程池过小", "批处理大小不合理", "下游响应慢导致反压"],
+    "solutions": ["分别观察 QPS、带宽、IOPS 和处理延迟", "扩大批量或并发时同时观察错误率", "定位最先饱和的资源", "用 Prometheus 指标建立容量基线"],
+    "commands": ["iostat", "sar", "iftop", "pg_stat_statements", "rate()"],
+    "examples": ["Network throughput dropped after the deployment.", "Kafka consumer throughput is lower than producer throughput."]
+  },
+  {
+    "term": "latency",
+    "domains": ["Linux", "PostgreSQL", "TBase", "Kubernetes", "Prometheus"],
+    "chinese": "延迟 / 响应耗时",
+    "explanation": "从请求发出到得到响应所经历的时间，通常需要按 p50、p95、p99 分位数观察。",
+    "commonCauses": ["网络抖动", "锁等待或慢 SQL", "GC 或 CPU 抢占", "下游服务超时", "冷缓存或磁盘 IO 慢"],
+    "solutions": ["用分位数而非平均值观察", "拆分客户端、网关、服务端和下游耗时", "结合 tracing 或慢日志定位长尾", "对超时、重试和连接池做容量校准"],
+    "commands": ["curl -w", "ping", "traceroute", "EXPLAIN ANALYZE", "histogram_quantile()"],
+    "examples": ["The p99 latency increased after enabling debug logging."]
+  },
+  {
+    "term": "resilience",
+    "domains": ["Kubernetes", "Docker", "Cloud Native", "Prometheus"],
+    "chinese": "韧性 / 故障恢复能力",
+    "explanation": "系统在故障、流量波动或依赖异常时维持核心能力并恢复的能力。",
+    "commonCauses": ["单点依赖", "缺少超时和熔断", "重试放大流量", "Pod 资源限制过紧", "没有降级路径"],
+    "solutions": ["设置超时、限流、熔断和重试预算", "为关键路径准备降级策略", "增加健康检查和自动恢复", "用演练验证故障边界"],
+    "commands": ["kubectl rollout status", "kubectl describe pod", "kubectl top pod", "promtool"],
+    "examples": ["The service needs better resilience during dependency outages."]
+  },
+  {
+    "term": "deprecated",
+    "domains": ["Kubernetes", "Docker", "Elasticsearch", "ClickHouse"],
+    "chinese": "已弃用",
+    "explanation": "功能、API 或配置项仍可能可用，但官方不建议继续使用，未来版本可能移除。",
+    "commonCauses": ["升级后 API 版本过旧", "配置项被新机制替代", "客户端 SDK 使用旧接口"],
+    "solutions": ["查目标版本迁移指南", "替换为推荐 API 或配置", "在升级窗口前完成兼容性验证"],
+    "commands": ["kubectl api-resources", "kubectl convert", "docker compose config"],
+    "examples": ["This Kubernetes API version is deprecated and will be removed."]
+  },
+  {
+    "term": "provision",
+    "domains": ["Cloud Native", "Kubernetes", "Docker"],
+    "chinese": "供应 / 配置 / 创建资源",
+    "explanation": "为系统创建并准备可用资源，例如主机、磁盘、账号、网络或 Kubernetes 对象。",
+    "commonCauses": ["资源配额不足", "权限或凭据错误", "自动化脚本参数不完整", "云资源状态未就绪"],
+    "solutions": ["检查 quota 和审批状态", "核对凭据权限", "让脚本具备幂等和重试", "等待依赖资源进入 ready 状态"],
+    "commands": ["terraform plan", "kubectl get pvc", "kubectl describe", "cloud-init status"],
+    "examples": ["The cluster failed to provision persistent volumes."]
+  }
+]

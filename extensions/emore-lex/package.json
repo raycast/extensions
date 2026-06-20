@@ -1,0 +1,44 @@
+{
+  "name": "emore-lex",
+  "title": "Emore Lex",
+  "description": "A Raycast extension for English pronunciation, meaning, and ops-focused language learning.",
+  "icon": "icon.png",
+  "author": "jiaozhu",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "search-word",
+      "title": "Search Word",
+      "description": "Look up English words, phrases, and operations vocabulary",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}
