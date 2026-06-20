@@ -59,6 +59,7 @@ function downloadFile(url: string, dest: string): Promise<void> {
       }
       reject(err);
     };
+    file.on("error", fail);
     const request = (u: string) => {
       get(u, (res) => {
         if (followRedirect(res, request)) return;
