@@ -3,8 +3,7 @@ import { execFile } from "child_process";
 import { homedir } from "os";
 import { getFindrPath } from "./utils";
 
-const GITHUB_NEW_ISSUE =
-  "https://github.com/Roderick111/findr/issues/new?labels=bug";
+const GITHUB_NEW_ISSUE = "https://github.com/Roderick111/findr/issues/new";
 
 function redactHomePaths(text: string): string {
   const home = homedir();

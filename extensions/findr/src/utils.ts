@@ -8,6 +8,9 @@ import {
   readFileSync,
   renameSync,
   unlinkSync,
+  statSync,
+  openSync,
+  closeSync,
 } from "fs";
 import { createHash } from "crypto";
 import { execFile } from "child_process";
@@ -18,6 +21,55 @@ import { get } from "https";
 const GITHUB_REPO = "Roderick111/findr";
 const FINDR_BINARY = "findr-macos-universal";
 const FINDR_OCR_BINARY = "findr-ocr-macos-universal";
+
+/** True when path exists, is a regular file, and is non-empty. */
+function isUsableBinary(path: string): boolean {
+  try {
+    const stat = statSync(path);
+    return stat.isFile() && stat.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Remove zero-byte or corrupt partial downloads so retries are not blocked. */
+function removeIfInvalid(path: string): void {
+  if (existsSync(path) && !isUsableBinary(path)) {
+    try {
+      unlinkSync(path);
+    } catch {
+      /* best effort */
+    }
+  }
+}
+
+let downloadInFlight: Promise<string> | null = null;
+
+/** Serialize parallel downloads across extension instances. */
+async function withDownloadLock<T>(
+  lockPath: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const deadline = Date.now() + 120_000;
+  while (Date.now() < deadline) {
+    try {
+      const fd = openSync(lockPath, "wx");
+      closeSync(fd);
+      try {
+        return await fn();
+      } finally {
+        try {
+          unlinkSync(lockPath);
+        } catch {
+          /* already released */
+        }
+      }
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+  throw new Error("Timed out waiting for binary download lock");
+}
 
 /** Directory for downloaded binaries (persists across extension updates). */
 function binDir(): string {
@@ -157,14 +209,26 @@ export async function ensureFindrBinaries(): Promise<string> {
   const findrPath = join(dir, "findr");
   const ocrPath = join(dir, "findr-ocr");
 
-  if (existsSync(findrPath)) {
+  removeIfInvalid(findrPath);
+  if (isUsableBinary(findrPath)) {
     return findrPath;
   }
 
-  // Fetch latest release download URLs from GitHub API
-  const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
-  const release: { assets: { name: string; browser_download_url: string }[] } =
-    await new Promise((resolve, reject) => {
+  if (downloadInFlight) {
+    return downloadInFlight;
+  }
+
+  downloadInFlight = withDownloadLock(join(dir, ".download.lock"), async () => {
+    removeIfInvalid(findrPath);
+    if (isUsableBinary(findrPath)) {
+      return findrPath;
+    }
+
+    // Fetch latest release download URLs from GitHub API
+    const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+    const release: {
+      assets: { name: string; browser_download_url: string }[];
+    } = await new Promise((resolve, reject) => {
       get(
         releaseUrl,
         {
@@ -195,38 +259,56 @@ export async function ensureFindrBinaries(): Promise<string> {
       ).on("error", reject);
     });
 
-  const findrAsset = release.assets?.find((a) => a.name === FINDR_BINARY);
-  const ocrAsset = release.assets?.find((a) => a.name === FINDR_OCR_BINARY);
-  const checksumAsset = release.assets?.find((a) => a.name === "checksums.txt");
-
-  if (!findrAsset) {
-    throw new Error("findr binary not found in latest GitHub release");
-  }
-
-  // Try to fetch checksums.txt from the release (optional, backwards compatible)
-  let checksums: Map<string, string> | null = null;
-  if (checksumAsset) {
-    const content = await fetchText(checksumAsset.browser_download_url);
-    if (content) {
-      checksums = parseChecksums(content);
-    }
-  } else {
-    console.warn(
-      "No checksums.txt in release, skipping integrity verification",
+    const findrAsset = release.assets?.find((a) => a.name === FINDR_BINARY);
+    const ocrAsset = release.assets?.find((a) => a.name === FINDR_OCR_BINARY);
+    const checksumAsset = release.assets?.find(
+      (a) => a.name === "checksums.txt",
     );
+
+    if (!findrAsset) {
+      throw new Error("findr binary not found in latest GitHub release");
+    }
+
+    // Try to fetch checksums.txt from the release (optional, backwards compatible)
+    let checksums: Map<string, string> | null = null;
+    if (checksumAsset) {
+      const content = await fetchText(checksumAsset.browser_download_url);
+      if (content) {
+        checksums = parseChecksums(content);
+      }
+    } else {
+      console.warn(
+        "No checksums.txt in release, skipping integrity verification",
+      );
+    }
+
+    try {
+      await downloadFile(findrAsset.browser_download_url, findrPath);
+      verifyChecksum(findrPath, FINDR_BINARY, checksums);
+      if (!isUsableBinary(findrPath)) {
+        throw new Error("Downloaded findr binary is empty");
+      }
+      chmodSync(findrPath, 0o755);
+
+      if (ocrAsset) {
+        await downloadFile(ocrAsset.browser_download_url, ocrPath);
+        verifyChecksum(ocrPath, FINDR_OCR_BINARY, checksums);
+        chmodSync(ocrPath, 0o755);
+      }
+
+      return findrPath;
+    } catch (err) {
+      removeIfInvalid(findrPath);
+      removeIfInvalid(ocrPath);
+      throw err;
+    }
+  });
+
+  try {
+    return await downloadInFlight;
+  } finally {
+    downloadInFlight = null;
   }
-
-  await downloadFile(findrAsset.browser_download_url, findrPath);
-  verifyChecksum(findrPath, FINDR_BINARY, checksums);
-  chmodSync(findrPath, 0o755);
-
-  if (ocrAsset) {
-    await downloadFile(ocrAsset.browser_download_url, ocrPath);
-    verifyChecksum(ocrPath, FINDR_OCR_BINARY, checksums);
-    chmodSync(ocrPath, 0o755);
-  }
-
-  return findrPath;
 }
 
 let chmodApplied = false;
@@ -241,7 +323,8 @@ export function getFindrPath(): string {
 
   // Downloaded binary (from GitHub Releases)
   const downloaded = join(binDir(), "findr");
-  if (existsSync(downloaded)) {
+  removeIfInvalid(downloaded);
+  if (isUsableBinary(downloaded)) {
     if (!chmodApplied) {
       try {
         chmodSync(downloaded, 0o755);
@@ -255,7 +338,7 @@ export function getFindrPath(): string {
 
   // Fallback: bundled binary (for local development)
   const bundled = join(environment.assetsPath, "findr");
-  if (existsSync(bundled)) {
+  if (isUsableBinary(bundled)) {
     if (!chmodApplied) {
       try {
         chmodSync(bundled, 0o755);
