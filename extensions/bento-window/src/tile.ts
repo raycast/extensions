@@ -131,15 +131,6 @@ export default async function Command() {
       WindowManagement.getDesktops(),
     ]);
 
-    // Beta 双屏下每个显示器各有一个 active 桌面，优先选含目标窗口的那个
-    const activeDesktop =
-      desktops.find((d) => d.active && windows.some((w) => w.desktopId === d.id)) ?? desktops.find((d) => d.active);
-    if (!activeDesktop) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not detect active desktop";
-      return;
-    }
-
     let targetAppName: string | undefined;
     let targetWindows: WindowManagement.Window[];
 
@@ -190,16 +181,28 @@ export default async function Command() {
       }
     }
 
+    // 延后到 targetWindows 确定后，用目标窗口所在桌面匹配，多显示器下不会选错屏
+    const targetDesktopId = targetWindows[0].desktopId;
+    const desktop =
+      desktops.find((d) => d.id === targetDesktopId) ??
+      desktops.find((d) => d.active && windows.some((w) => w.desktopId === d.id)) ??
+      desktops.find((d) => d.active);
+    if (!desktop) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not detect active desktop";
+      return;
+    }
+
     const count = targetWindows.length;
     const grid = layoutFor(count);
-    const frames = computeFrames(grid, activeDesktop.size, gap).filter((f) => f.windowIndex < count);
+    const frames = computeFrames(grid, desktop.size, gap).filter((f) => f.windowIndex < count);
 
     await Promise.allSettled(
       frames.map((f) => {
         const win = targetWindows[f.windowIndex];
         return WindowManagement.setWindowBounds({
           id: win.id,
-          desktopId: activeDesktop.id,
+          desktopId: desktop.id,
           bounds: {
             position: { x: f.x, y: f.y },
             size: { width: f.width, height: f.height },
