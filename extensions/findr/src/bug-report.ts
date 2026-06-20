@@ -103,7 +103,7 @@ export async function openBugReport(errorMessage?: string): Promise<void> {
   });
 
   const redactedDoctor = truncateText(redactHomePaths(doctorOutput), 8000);
-  const summary = buildDoctorSummary(redactedDoctor);
+  const summary = buildDoctorSummary(redactHomePaths(doctorOutput));
 
   const fullReport = [
     "## What happened",

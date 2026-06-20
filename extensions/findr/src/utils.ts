@@ -157,6 +157,7 @@ function fetchText(url: string): Promise<string | null> {
         let data = "";
         res.on("data", (chunk: string) => (data += chunk));
         res.on("end", () => resolve(data));
+        res.on("error", () => resolve(null));
       }).on("error", () => resolve(null));
     };
     request(url);
