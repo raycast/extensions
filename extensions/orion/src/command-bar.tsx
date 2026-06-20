@@ -124,6 +124,20 @@ export default function Command() {
         </List.Section>
       )}
 
+      {hasQuery && (
+        <List.Section title="Search the Web">
+          <List.Item
+            icon={Icon.MagnifyingGlass}
+            title={`Search ${getSearchEngineName()} for “${query}”`}
+            actions={
+              <ActionPanel>
+                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {suggestionHits.length > 0 && (
         <List.Section title="Suggestions">
           {suggestionHits.map((s, i) => (
@@ -161,20 +175,6 @@ export default function Command() {
           {historySection.map((h) => (
             <UrlListItem key={`hist-${h.id}`} item={h} />
           ))}
-        </List.Section>
-      )}
-
-      {hasQuery && (
-        <List.Section title="Search the Web">
-          <List.Item
-            icon={Icon.MagnifyingGlass}
-            title={`Search ${getSearchEngineName()} for “${query}”`}
-            actions={
-              <ActionPanel>
-                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
-              </ActionPanel>
-            }
-          />
         </List.Section>
       )}
     </List>
