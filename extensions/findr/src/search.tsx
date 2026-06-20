@@ -36,6 +36,7 @@ import {
   formatRelativeDate,
   getFileIcon,
   trackInteraction,
+  parseSearchStdout,
 } from "./utils";
 import { openBugReport } from "./bug-report";
 
@@ -205,6 +206,7 @@ export default function SearchFiles() {
         "--limit",
         String(maxResults),
         "--no-semantic",
+        "--no-sync",
       ],
       { env: { ...process.env, ...findrEnv } },
       (err, stdout) => {
@@ -215,10 +217,12 @@ export default function SearchFiles() {
           return;
         }
         try {
-          setSearchData(JSON.parse(stdout) as SearchResponse);
+          setSearchData(parseSearchStdout(stdout));
           setSearchError(null);
-        } catch {
-          setSearchError(new Error("Failed to parse search output"));
+        } catch (e) {
+          setSearchError(
+            e instanceof Error ? e : new Error("Failed to parse search output"),
+          );
         }
         setSearchLoading(false);
       },
@@ -242,14 +246,20 @@ export default function SearchFiles() {
     let killed = false;
     const child = execFile(
       findrPath,
-      ["search", debouncedSemantic, "--json", "--limit", String(maxResults)],
+      [
+        "search",
+        debouncedSemantic,
+        "--json",
+        "--limit",
+        String(maxResults),
+        "--no-sync",
+      ],
       { env: { ...process.env, ...findrEnv }, timeout: 4000 },
       (err, stdout) => {
         if (killed) return;
         if (err) return; // silently skip — fast results already showing
         try {
-          const semanticData = JSON.parse(stdout) as SearchResponse;
-          // Only update if more results or higher scores
+          const semanticData = parseSearchStdout(stdout);
           if (semanticData.total_results > 0) {
             setSearchData(semanticData);
           }
@@ -283,7 +293,7 @@ export default function SearchFiles() {
         if (cancelled) return;
         if (!err && stdout) {
           try {
-            setRecentData(JSON.parse(stdout));
+            setRecentData(parseSearchStdout(stdout));
           } catch {
             /* ignore */
           }

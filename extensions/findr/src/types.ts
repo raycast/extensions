@@ -11,10 +11,23 @@ export interface SearchResult {
   interactions: number;
 }
 
+export type SearchMode =
+  | "unified"
+  | "recent"
+  | "indexing"
+  | "too_short"
+  | "error"
+  | "stale";
+
 export interface SearchResponse {
   query: string;
-  mode: string;
+  mode: SearchMode;
   elapsed_ms: number;
   total_results: number;
   results: SearchResult[];
+  error?: string;
+  hint?: string;
+  message?: string;
+  sync_skipped?: boolean;
+  warning?: string;
 }

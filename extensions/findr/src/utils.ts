@@ -1,4 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
+import type { SearchResponse } from "./types";
 import {
   chmodSync,
   existsSync,
@@ -384,4 +385,29 @@ export function getFileIcon(ext: string | null): string {
 /** Fire-and-forget interaction tracking for frequency-based ranking. */
 export function trackInteraction(path: string, action: string): void {
   execFile(getFindrPath(), ["track", path, "--action", action], () => {});
+}
+
+/** Parse findr search stdout; surfaces JSON `error`/`hint` before generic failures. */
+export function parseSearchStdout(stdout: string): SearchResponse {
+  const trimmed = stdout.trim();
+  if (!trimmed) {
+    throw new Error("Empty search output from findr");
+  }
+
+  let data: SearchResponse;
+  try {
+    data = JSON.parse(trimmed) as SearchResponse;
+  } catch {
+    throw new Error("Failed to parse search output");
+  }
+
+  if (!Array.isArray(data.results)) {
+    throw new Error("Invalid search response: missing results array");
+  }
+
+  if (data.mode === "error" || data.error) {
+    throw new Error(data.error || data.hint || data.message || "Search failed");
+  }
+
+  return data;
 }
