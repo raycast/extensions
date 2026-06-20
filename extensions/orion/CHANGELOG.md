@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Fix Search Tabs] - {PR_MERGE_DATE}
+
+- Fix "Search Tabs" showing no tabs on current Orion versions. Orion's AppleScript bridge no longer resolves `URL`/`name` getters on the individual tab objects returned by `window.tabs()`; the failure was silently swallowed, leaving the list empty. Switched to bulk property access (`window.tabs.url()` / `window.tabs.name()`) for listing tabs and indexed tab specifiers (`window.tabs[i]`) for opening and closing them.
+
 ## [Profile Support] - 2023-09-07
 
 - Support filtering by profile when searching for bookmarks, history, and reading list. Tabs are not supported.

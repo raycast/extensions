@@ -7,12 +7,20 @@ const activateTab = async (tab: Tab) =>
   executeJxa(`
     const orion = Application("${getOrionAppIdentifier()}");
     const window = orion.windows.byId(${tab.window_id});
-    const tab = window.tabs().find(tab => tab.url() === String.raw\`${tab.url}\` && tab.name() === String.raw\`${
-      tab.title
-    }\`);
-    if (tab) {
+    const urls = window.tabs.url();
+    const names = window.tabs.name();
+    const targetUrl = String.raw\`${tab.url}\`;
+    const targetName = String.raw\`${tab.title}\`;
+    let index = -1;
+    for (let i = 0; i < urls.length; i++) {
+      if (urls[i] === targetUrl && names[i] === targetName) {
+        index = i;
+        break;
+      }
+    }
+    if (index !== -1) {
       window.index = 1;
-      window.currentTab = tab;
+      window.currentTab = window.tabs[index];
       orion.activate();
     }
   `);
