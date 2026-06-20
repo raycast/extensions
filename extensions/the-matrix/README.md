@@ -16,5 +16,6 @@ The overlay is a native macOS window that stays above your desktop, ignores mous
 ## Notes
 
 - macOS only.
+- The rain behavior is inspired by [`cmatrix`](https://github.com/abishekvashok/cmatrix).
 - No external `cmatrix`, Electron runtime, or bundled audio files are required.
 - Audio is generated procedurally inside the overlay.
