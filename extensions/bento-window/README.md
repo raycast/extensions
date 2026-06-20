@@ -18,18 +18,21 @@ A Raycast extension that tiles your windows into a bento-box grid with one keyst
 
 By default it tiles **a single app's windows** (great for the **vibe coding** workflow where you spin up several terminals — Ghostty, Terminal, iTerm2… — and want them snapped into place without dragging each one into a quarter). Switch the **Tile Scope** preference to **All Windows** and it tiles every window on the active desktop instead.
 
-## How this differs from [Window Layouts](https://www.raycast.com/teemu_suvinen/window-layouts)
+## Acknowledgment
 
-Window Layouts is excellent and the auto-layout algorithm here is intentionally similar. **The thing Bento Window adds: it can filter by app.**
+Bento Window is inspired by [Window Layouts](https://www.raycast.com/teemu_suvinen/window-layouts) by [@teemusuvinen](https://github.com/teemusuvinen). Window Layouts is a mature, full-featured window tiling extension — if you need fine-grained layout control across all your windows, go check it out.
 
-| Scenario | Window Layouts | Bento Window |
+## How Bento Window differs
+
+Bento Window is intentionally **narrower and more opinionated**. It's built for one workflow: bind a hotkey, press it, and your app's windows snap into a grid. No menus, no views, no choices at runtime.
+
+| | Window Layouts | Bento Window |
 |---|---|---|
-| Tile only Ghostty windows, leave Chrome / VSCode untouched | ❌ all windows get tiled | ✅ Tile Scope → App List |
-| Run from the focused window, auto-detect which app to tile | ❌ | ✅ leave the app list empty |
-| Tile every window on the desktop | ✅ | ✅ Tile Scope → All Windows |
-| Auto-pick a layout based on window count | ✅ | ✅ |
-
-Window Layouts is mature and has more layout options. Reach for Bento Window when you want to tile *just one app's windows* — or want both modes from a single command.
+| **Scope** | All windows on the desktop | Single app's windows (or all, your choice) |
+| **Auto-detect target app** | — | ✅ uses the focused window's app |
+| **Layout philosophy** | Multiple commands for different layouts | One command, grid adapts to window count |
+| **Own layout grids** | Shared grid definitions | Opinionated grids (e.g. 3 windows → 2 small + 1 big, not 3 equal columns) |
+| **Interface** | Multiple commands | Single no-view command, hotkey-optimized |
 
 ## Layouts
 
