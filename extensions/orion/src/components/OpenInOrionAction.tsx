@@ -1,6 +1,6 @@
 import { Action, closeMainWindow, Icon } from "@raycast/api";
 
-import { openInOrion } from "../utils";
+import { closeLauncherTabs, openInOrion } from "../utils";
 
 const OpenInOrionAction = (props: { url: string; title?: string }) => (
   <Action
@@ -8,6 +8,7 @@ const OpenInOrionAction = (props: { url: string; title?: string }) => (
     icon={Icon.Globe}
     onAction={async () => {
       await openInOrion(props.url);
+      await closeLauncherTabs();
       await closeMainWindow({ clearRootSearch: true });
     }}
   />

@@ -1,7 +1,7 @@
 import { closeMainWindow, Icon, Action } from "@raycast/api";
 
 import { Tab } from "../types";
-import { executeJxa, getOrionAppIdentifier } from "../utils";
+import { closeLauncherTabs, executeJxa, getOrionAppIdentifier } from "../utils";
 
 const activateTab = async (tab: Tab) =>
   executeJxa(`
@@ -33,6 +33,7 @@ const OpenTabAction = (props: { tab: Tab }) => {
       icon={Icon.Globe}
       onAction={async () => {
         await activateTab(tab);
+        await closeLauncherTabs();
         await closeMainWindow({ clearRootSearch: true });
       }}
     />

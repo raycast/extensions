@@ -203,8 +203,13 @@ export function isLauncherTab(url: string) {
 }
 
 // Close those blank launcher tabs. Never closes a window's last tab, to avoid
-// closing the window (or Orion re-spawning a homepage tab in a loop).
+// closing the window (or Orion re-spawning a homepage tab in a loop). Call this
+// only while acting on a result (the palette is dismissing) — closing on every
+// palette open re-fires the deeplink and loops.
 export async function closeLauncherTabs() {
+  if (getPreferenceValues<{ autoCloseLauncherTabs?: boolean }>().autoCloseLauncherTabs === false) {
+    return;
+  }
   await executeJxa(`
     const orion = Application("${getOrionAppIdentifier()}");
     orion.windows().forEach((w) => {

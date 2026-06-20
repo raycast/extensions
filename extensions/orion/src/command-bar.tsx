@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { useState } from "react";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -15,7 +15,7 @@ import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
-import { buildSearchUrl, closeLauncherTabs, extractDomainName, getSearchEngineName, isLauncherTab } from "./utils";
+import { buildSearchUrl, extractDomainName, getSearchEngineName, isLauncherTab } from "./utils";
 
 const LIMITS = { tabs: 6, bookmarks: 6, reading: 4, history: 8 };
 
@@ -50,14 +50,6 @@ export default function Command() {
     permissionView,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
   const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
-
-  // Each time the palette opens, close the blank "launcher" tab(s) Orion leaves
-  // behind when its homepage / new-tab is set to the Command Bar deeplink.
-  const { autoCloseLauncherTabs } = getPreferenceValues<{ autoCloseLauncherTabs?: boolean }>();
-  useEffect(() => {
-    if (autoCloseLauncherTabs === false) return;
-    closeLauncherTabs().then(() => refresh());
-  }, []);
 
   const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
 
