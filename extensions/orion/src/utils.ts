@@ -195,3 +195,30 @@ export function buildSuggestUrl(query: string, engine: SearchEngine = getSearchE
 export async function openInOrion(url: string) {
   await open(url, getOrionAppIdentifier());
 }
+
+// A "launcher tab" is the blank tab Orion leaves behind when its homepage /
+// new-tab is set to the Command Bar deeplink (its URL is the raycast:// scheme).
+export function isLauncherTab(url: string) {
+  return url.startsWith("raycast://");
+}
+
+// Close those blank launcher tabs. Never closes a window's last tab, to avoid
+// closing the window (or Orion re-spawning a homepage tab in a loop).
+export async function closeLauncherTabs() {
+  await executeJxa(`
+    const orion = Application("${getOrionAppIdentifier()}");
+    orion.windows().forEach((w) => {
+      let urls;
+      try { urls = w.tabs.url(); } catch (e) { return; }
+      if (urls.length <= 1) return;
+      const idx = [];
+      for (let i = 0; i < urls.length; i++) {
+        if (typeof urls[i] === "string" && urls[i].indexOf("raycast://") === 0) idx.push(i);
+      }
+      // Close highest index first so earlier closes don't shift later indices.
+      for (let j = idx.length - 1; j >= 0; j--) {
+        try { w.tabs[idx[j]].close(); } catch (e) {}
+      }
+    });
+  `);
+}

@@ -76,6 +76,15 @@
         { "title": "Brave", "value": "brave" },
         { "title": "Kagi (no autocomplete)", "value": "kagi" }
       ]
+    },
+    {
+      "name": "autoCloseLauncherTabs",
+      "title": "Command Bar",
+      "label": "Auto-close launcher tabs",
+      "description": "When the Command Bar opens, close leftover blank tabs created when Orion's homepage / new-tab is set to the Command Bar deeplink",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

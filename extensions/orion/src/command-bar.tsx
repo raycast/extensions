@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -15,7 +15,7 @@ import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
-import { buildSearchUrl, extractDomainName, getSearchEngineName } from "./utils";
+import { buildSearchUrl, closeLauncherTabs, extractDomainName, getSearchEngineName, isLauncherTab } from "./utils";
 
 const LIMITS = { tabs: 6, bookmarks: 6, reading: 4, history: 8 };
 
@@ -51,10 +51,21 @@ export default function Command() {
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
   const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
 
+  // Each time the palette opens, close the blank "launcher" tab(s) Orion leaves
+  // behind when its homepage / new-tab is set to the Command Bar deeplink.
+  const { autoCloseLauncherTabs } = getPreferenceValues<{ autoCloseLauncherTabs?: boolean }>();
+  useEffect(() => {
+    if (autoCloseLauncherTabs === false) return;
+    closeLauncherTabs().then(() => refresh());
+  }, []);
+
   const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
 
+  // Never show the launcher tabs in the list itself.
+  const openTabs: Tab[] = (tabs ?? []).filter((t) => !isLauncherTab(t.url));
+
   // Filter each source against the query (open tabs are always shown when empty).
-  const tabHits: Tab[] = (tabs ?? []).filter((t) => !hasQuery || relevance(q, t.title, t.url) > 0);
+  const tabHits: Tab[] = openTabs.filter((t) => !hasQuery || relevance(q, t.title, t.url) > 0);
   const bookmarkHits: Bookmark[] = hasQuery
     ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => f.toLowerCase().includes(q)))
     : [];
