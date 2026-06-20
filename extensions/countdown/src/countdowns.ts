@@ -96,7 +96,7 @@ export function getDaysUntil(
 }
 
 export function formatDateLabel(targetDateKey: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",

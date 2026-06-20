@@ -1,5 +1,5 @@
 # Date Countdown Changelog
 
-## [Initial Release] - 2026-06-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Date Countdown extension to create, pin, edit, and delete date countdowns.
