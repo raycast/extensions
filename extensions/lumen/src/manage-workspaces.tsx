@@ -113,7 +113,7 @@ function WorkspaceForm({ workspace, onSaved }: { workspace?: Workspace; onSaved:
       const c = collisions[0];
       return void showToast({
         style: Toast.Style.Failure,
-        title: t(c.field === "alias" ? "err.aliasUsed" : "err.numberUsed", { value: c.value, name: c.otherName }),
+        title: `${c.field === "alias" ? "Alias" : "Number"} "${c.value}" already used by ${c.otherName}`,
       });
     }
 
