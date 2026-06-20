@@ -120,6 +120,7 @@ function downloadFile(url: string, dest: string): Promise<void> {
           fail(new Error(`Download failed: HTTP ${res.statusCode}`));
           return;
         }
+        res.on("error", fail);
         res.pipe(file);
         file.on("finish", () => {
           file.close();
