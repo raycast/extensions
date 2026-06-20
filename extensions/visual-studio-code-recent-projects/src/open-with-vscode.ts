@@ -61,7 +61,7 @@ export default async function main() {
       }
 
       for (const item of selectedItems) {
-        open(item.path, editor);
+        await open(item.path, editor);
       }
     }
 
