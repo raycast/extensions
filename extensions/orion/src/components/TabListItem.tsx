@@ -8,10 +8,10 @@ import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
 
-const Actions = (props: { tab: Tab; refresh: () => void }) => (
+const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean }) => (
   <ActionPanel>
     <ActionPanel.Section>
-      <OpenTabAction tab={props.tab} />
+      <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />
@@ -30,14 +30,14 @@ const Actions = (props: { tab: Tab; refresh: () => void }) => (
   </ActionPanel>
 );
 
-const TabListItem = (props: { tab: Tab; refresh: () => void }) => {
+const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean }) => {
   const url = props.tab.url;
 
   return (
     <List.Item
       title={getTitle(props.tab)}
       icon={getFavicon(props.tab.url)}
-      actions={<Actions tab={props.tab} refresh={props.refresh} />}
+      actions={<Actions tab={props.tab} refresh={props.refresh} closeLaunchers={props.closeLaunchers} />}
       accessories={[
         {
           text: getUrlDomain(url),

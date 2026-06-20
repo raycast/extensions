@@ -120,7 +120,7 @@ export default function Command() {
       {topHit && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
-            <TabListItem tab={topHit.tab} refresh={refresh} />
+            <TabListItem tab={topHit.tab} refresh={refresh} closeLaunchers />
           ) : (
             <UrlListItem item={topHit.item} accessory={topHit.source} />
           )}
@@ -152,7 +152,7 @@ export default function Command() {
       {tabSection.length > 0 && (
         <List.Section title="Open Tabs">
           {tabSection.map((t) => (
-            <TabListItem key={tabKey(t)} tab={t} refresh={refresh} />
+            <TabListItem key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
           ))}
         </List.Section>
       )}

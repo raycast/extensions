@@ -173,8 +173,8 @@ const SEARCH_ENGINES: Record<SearchEngine, { name: string; search: string; sugge
 };
 
 export function getSearchEngine(): SearchEngine {
-  const value = getPreferenceValues<{ searchEngine?: SearchEngine }>().searchEngine;
-  return value && value in SEARCH_ENGINES ? value : "duckduckgo";
+  const value = getPreferenceValues<Preferences>().searchEngine;
+  return value in SEARCH_ENGINES ? value : "duckduckgo";
 }
 
 export function getSearchEngineName(engine: SearchEngine = getSearchEngine()) {
@@ -207,7 +207,7 @@ export function isLauncherTab(url: string) {
 // only while acting on a result (the palette is dismissing) — closing on every
 // palette open re-fires the deeplink and loops.
 export async function closeLauncherTabs() {
-  if (getPreferenceValues<{ autoCloseLauncherTabs?: boolean }>().autoCloseLauncherTabs === false) {
+  if (getPreferenceValues<Preferences>().autoCloseLauncherTabs === false) {
     return;
   }
   await executeJxa(`

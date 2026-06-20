@@ -25,8 +25,10 @@ const activateTab = async (tab: Tab) =>
     }
   `);
 
-const OpenTabAction = (props: { tab: Tab }) => {
-  const { tab } = props;
+// `closeLaunchers` is opt-in (the Command Bar passes it) so the standalone
+// "Search Tabs" command doesn't make an extra AppleScript call on every open.
+const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean }) => {
+  const { tab, closeLaunchers } = props;
   return (
     <Action
       title="Open in Browser"
@@ -35,7 +37,9 @@ const OpenTabAction = (props: { tab: Tab }) => {
         // Close launcher tabs BEFORE activating Orion. If a raycast:// tab is
         // still present when Orion comes to the front, it re-commits its pending
         // deeplink navigation and the palette reopens.
-        await closeLauncherTabs();
+        if (closeLaunchers) {
+          await closeLauncherTabs();
+        }
         await activateTab(tab);
         await closeMainWindow({ clearRootSearch: true });
       }}
