@@ -37,7 +37,6 @@ import {
   isValidHexColor,
   isWin,
   isWorkspaceEntry,
-  openPathInVSCode,
 } from "./lib/utils";
 import { Shortcut } from "./lib/shortcuts";
 import { getEditorApplication } from "./utils/editor";
@@ -214,7 +213,7 @@ function LocalItem(
         if (isWorkspaceEntry(props.entry)) {
           open(props.uri, editorApp);
         } else {
-          await openPathInVSCode(path);
+          open(path, editorApp);
         }
       } else {
         open(props.uri, editorApp);

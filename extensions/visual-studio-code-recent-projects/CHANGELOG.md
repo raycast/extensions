@@ -1,5 +1,10 @@
 # Visual Studio Code Changelog
 
+## [Revert: Windows project opening] - {PR_MERGE_DATE}
+
+- `getSelectedFinderItems` works on Windows; reverted.
+- Using the URL handler causes previous VS Code windows to close; reverted.
+
 ## [Update] - 2026-06-17
 
 - Added support for Devin Desktop.
