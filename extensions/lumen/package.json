@@ -74,24 +74,8 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "UI language. Custom uses a language pack imported from Manage Tools.",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        { "title": "English", "value": "en" },
-        { "title": "Español", "value": "es" },
-        { "title": "Custom (imported)", "value": "custom" }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^1.17.0",
     "fzf": "^0.5.2"
   },
   "devDependencies": {

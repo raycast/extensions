@@ -20,7 +20,6 @@ import {
   parseAliases,
   upsertWorkspace,
 } from "./lib/workspaces";
-import { t } from "./lib/i18n";
 
 export default function Command() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -37,23 +36,23 @@ export default function Command() {
 
   async function remove(w: Workspace) {
     const ok = await confirmAlert({
-      title: t("mw.deleteConfirm", { name: w.name }),
-      primaryAction: { title: t("common.delete"), style: Alert.ActionStyle.Destructive },
+      title: `Delete "${w.name}"?`,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     await deleteWorkspace(w.id);
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: t("mw.toast.deleted") });
+    await showToast({ style: Toast.Style.Success, title: "Workspace deleted" });
   }
 
   return (
     <List isLoading={isLoading}>
       <List.EmptyView
-        title={t("mw.empty.title")}
-        description={t("mw.empty.desc")}
+        title={"No workspaces yet"}
+        description={"Create your first workspace to scope Lumen searches."}
         actions={
           <ActionPanel>
-            <Action.Push title={t("mw.create")} icon={Icon.Plus} target={<WorkspaceForm onSaved={refresh} />} />
+            <Action.Push title={"Create Workspace"} icon={Icon.Plus} target={<WorkspaceForm onSaved={refresh} />} />
           </ActionPanel>
         }
       />
@@ -66,13 +65,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push
-                title={t("mw.edit")}
+                title={"Edit Workspace"}
                 icon={Icon.Pencil}
                 target={<WorkspaceForm workspace={w} onSaved={refresh} />}
               />
-              <Action.Push title={t("mw.create")} icon={Icon.Plus} target={<WorkspaceForm onSaved={refresh} />} />
+              <Action.Push title={"Create Workspace"} icon={Icon.Plus} target={<WorkspaceForm onSaved={refresh} />} />
               <Action
-                title={t("mw.delete")}
+                title={"Delete Workspace"}
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -92,18 +91,20 @@ function WorkspaceForm({ workspace, onSaved }: { workspace?: Workspace; onSaved:
   async function handleSubmit(values: { name: string; path: string[]; aliases: string; number: string }) {
     const name = values.name.trim();
     const path = values.path[0];
-    if (!name) return void showToast({ style: Toast.Style.Failure, title: t("err.nameRequired") });
-    if (!path) return void showToast({ style: Toast.Style.Failure, title: t("err.folderRequired") });
+    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Name is required" });
+    if (!path) return void showToast({ style: Toast.Style.Failure, title: "Folder is required" });
 
     const aliases = parseAliases(values.aliases);
-    if (aliases.length === 0) return void showToast({ style: Toast.Style.Failure, title: t("err.aliasRequired") });
-    if (aliases.includes("h")) return void showToast({ style: Toast.Style.Failure, title: t("err.hReserved") });
+    if (aliases.length === 0)
+      return void showToast({ style: Toast.Style.Failure, title: "At least one alias is required" });
+    if (aliases.includes("h"))
+      return void showToast({ style: Toast.Style.Failure, title: '"h" is reserved for Home search' });
 
     let number: number | undefined;
     if (values.number.trim()) {
       number = Number(values.number.trim());
       if (!Number.isInteger(number))
-        return void showToast({ style: Toast.Style.Failure, title: t("err.numberInteger") });
+        return void showToast({ style: Toast.Style.Failure, title: "Number must be an integer" });
     }
 
     const w: Workspace = { id: workspace?.id ?? randomUUID(), name, path, aliases, number };
@@ -118,7 +119,7 @@ function WorkspaceForm({ workspace, onSaved }: { workspace?: Workspace; onSaved:
 
     await upsertWorkspace(w);
     onSaved();
-    await showToast({ style: Toast.Style.Success, title: workspace ? t("mw.toast.updated") : t("mw.toast.created") });
+    await showToast({ style: Toast.Style.Success, title: workspace ? "Workspace updated" : "Workspace created" });
     pop();
   }
 
@@ -126,14 +127,14 @@ function WorkspaceForm({ workspace, onSaved }: { workspace?: Workspace; onSaved:
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("mw.save")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={"Save Workspace"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={t("form.name")} placeholder="Ceramica" defaultValue={workspace?.name} />
+      <Form.TextField id="name" title={"Name"} placeholder="Ceramica" defaultValue={workspace?.name} />
       <Form.FilePicker
         id="path"
-        title={t("form.folder")}
+        title={"Folder"}
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
@@ -141,16 +142,16 @@ function WorkspaceForm({ workspace, onSaved }: { workspace?: Workspace; onSaved:
       />
       <Form.TextField
         id="aliases"
-        title={t("form.aliases")}
+        title={"Aliases"}
         placeholder="cr, ceramica"
-        info={t("form.aliases.info")}
+        info={"Comma-separated. Lowercased on save. Must be unique across workspaces."}
         defaultValue={workspace?.aliases.join(", ")}
       />
       <Form.TextField
         id="number"
-        title={t("form.number")}
+        title={"Number"}
         placeholder="Optional"
-        info={t("form.number.info")}
+        info={"Optional unique integer shortcut."}
         defaultValue={workspace?.number !== undefined ? String(workspace.number) : undefined}
       />
     </Form>

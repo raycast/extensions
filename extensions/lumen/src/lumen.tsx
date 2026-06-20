@@ -11,7 +11,6 @@ import { Category, extensionsForCodes, getCategories } from "./lib/categories";
 import { ResolvedTool, getOrderTools, resolveCommand } from "./lib/commands";
 import { ResolvedQualifier, dateMatches, getDateQualifiers } from "./lib/dates";
 import { HOME_ROOT, disposeIndex, indexHome, streamFilter } from "./lib/home";
-import { t } from "./lib/i18n";
 
 const MAX_RESULTS = 200;
 
@@ -19,7 +18,7 @@ const MAX_RESULTS = 200;
 function refreshAction(onRefresh: () => void) {
   return (
     <Action
-      title={t("action.refreshIndex")}
+      title={"Refresh Index"}
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       onAction={onRefresh}
@@ -32,19 +31,19 @@ function refreshAction(onRefresh: () => void) {
 function itemActions(path: string, isDir: boolean, onRefresh: () => void) {
   return (
     <ActionPanel>
-      <Action.Open title={isDir ? t("action.openInFinder") : t("action.open")} target={path} />
+      <Action.Open title={isDir ? "Open in Finder" : "Open"} target={path} />
       <Action.CopyToClipboard
-        title={t("action.copyFolderPath")}
+        title={"Copy Folder Path"}
         content={isDir ? path : dirname(path)}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
       <Action.CopyToClipboard
-        title={t("action.copyFullPath")}
+        title={"Copy Full Path"}
         content={path}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       />
-      <Action.ShowInFinder title={t("action.showInFinder")} path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-      <Action.ToggleQuickLook title={t("action.quickLook")} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+      <Action.ShowInFinder title={"Show in Finder"} path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+      <Action.ToggleQuickLook title={"Quick Look"} shortcut={{ modifiers: ["cmd"], key: "d" }} />
       {refreshAction(onRefresh)}
     </ActionPanel>
   );
@@ -71,11 +70,6 @@ function truncateFront(s: string, max = 44): string {
   return s.length > max ? "…" + s.slice(s.length - max + 1) : s;
 }
 
-interface Preferences {
-  firstLevelSort: "modified" | "name";
-  homeExcludeWorkspaces: boolean;
-}
-
 interface Entry {
   name: string;
   path: string;
@@ -89,7 +83,7 @@ function matchToken(token: string, workspaces: Workspace[]): Workspace | undefin
 }
 
 // Read-only: lists the top level, never mutates the folder.
-async function readFirstLevel(path: string, sort: Preferences["firstLevelSort"]): Promise<Entry[]> {
+async function readFirstLevel(path: string, sort: Preferences.Lumen["firstLevelSort"]): Promise<Entry[]> {
   const dirents = await readdir(path, { withFileTypes: true });
   const visible = dirents.filter((d) => !d.name.startsWith("."));
   const entries = await Promise.all(
@@ -112,7 +106,7 @@ async function readFirstLevel(path: string, sort: Preferences["firstLevelSort"])
 }
 
 export default function Command() {
-  const { firstLevelSort, homeExcludeWorkspaces } = getPreferenceValues<Preferences>();
+  const { firstLevelSort, homeExcludeWorkspaces } = getPreferenceValues<Preferences.Lumen>();
   const { push } = useNavigation();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -179,11 +173,15 @@ export default function Command() {
       isLoading={isLoading}
       filtering
       onSearchTextChange={onSearchTextChange}
-      searchBarPlaceholder={t("selector.placeholder")}
+      searchBarPlaceholder={"Type a workspace alias and press space to enter"}
     >
       <List.EmptyView
-        title={workspaces.length === 0 ? t("selector.empty.none.title") : t("selector.empty.nomatch.title")}
-        description={workspaces.length === 0 ? t("selector.empty.none.desc") : t("selector.empty.nomatch.desc")}
+        title={workspaces.length === 0 ? "No workspaces yet" : "No match"}
+        description={
+          workspaces.length === 0
+            ? "Create one with the Manage Workspaces command."
+            : "No workspace matches your search."
+        }
       />
       {workspaces.map((w) => (
         <List.Item
@@ -195,7 +193,7 @@ export default function Command() {
           accessories={w.number !== undefined ? [{ tag: { value: String(w.number), color: Color.SecondaryText } }] : []}
           actions={
             <ActionPanel>
-              <Action title={t("action.enterWorkspace")} icon={Icon.ArrowRight} onAction={() => open(w)} />
+              <Action title={"Enter Workspace"} icon={Icon.ArrowRight} onAction={() => open(w)} />
             </ActionPanel>
           }
         />
@@ -213,7 +211,7 @@ function FirstLevel({
   qualifiers,
 }: {
   workspace: Workspace;
-  sort: Preferences["firstLevelSort"];
+  sort: Preferences.Lumen["firstLevelSort"];
   initialQuery: string;
   categories: Category[];
   tools: ResolvedTool[];
@@ -388,11 +386,13 @@ function FirstLevel({
       searchText={query}
       onSearchTextChange={setQuery}
       navigationTitle={workspace.name}
-      searchBarPlaceholder={t("firstLevel.placeholder", { name: workspace.name })}
+      searchBarPlaceholder={`Search in ${workspace.name}`}
     >
       <List.EmptyView
-        title={error ?? (searching ? t("search.noresults.title") : t("firstLevel.empty.title"))}
-        description={error ? root : searching ? t("search.noresults.desc") : t("firstLevel.empty.desc")}
+        title={error ?? (searching ? "No results" : "Empty")}
+        description={
+          error ? root : searching ? "No file matches your search." : "This workspace's top level has no visible items."
+        }
         actions={<ActionPanel>{refreshAction(onRefresh)}</ActionPanel>}
       />
 
@@ -576,14 +576,18 @@ function HomeSearch({
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}
-      navigationTitle={t("home.nav")}
-      searchBarPlaceholder={t("home.placeholder")}
+      navigationTitle={"Home"}
+      searchBarPlaceholder={"Search your home folder (~)"}
     >
       <List.EmptyView
-        title={
-          error ?? (indexing ? t("home.indexing") : hasQuery ? t("search.noresults.title") : t("home.empty.title"))
+        title={error ?? (indexing ? "Indexing ~…" : hasQuery ? "No results" : "Search Home")}
+        description={
+          error
+            ? HOME_ROOT
+            : hasQuery
+              ? "No file matches your search."
+              : "Type a term to fuzzy-search everything under ~."
         }
-        description={error ? HOME_ROOT : hasQuery ? t("search.noresults.desc") : t("home.empty.desc")}
         actions={<ActionPanel>{refreshAction(onRefresh)}</ActionPanel>}
       />
       {displayed.map(({ rel, isDir, datum }) => {

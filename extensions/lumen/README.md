@@ -1,5 +1,10 @@
-# Lumen — Find Anything
+<div align="center">
+<img width="128" height="128" alt="lumen-128" src="https://github.com/user-attachments/assets/034327b9-3364-46a2-9909-06ca5ea48f1c" />
 
+
+  # Lumen — Find Anything
+
+</div>
 Scoped fuzzy file search across the folders you actually work in. Jump into a favorite
 folder with a shortcut and find anything inside instantly — no Finder, no clicking through
 subfolders. Plenty of small tools to find what you want fast, with minimal typing.
@@ -69,8 +74,7 @@ excluded by default — so Home stays for the stuff *outside* your scoped folder
 
 1. **Manage Workspaces** — add a folder, give it a name and one or more aliases.
 2. Open **Lumen**, type your alias + space, and search.
-3. **Manage Tools** to tweak categories, ordering tools and date filters — or switch the UI
-   language (English / Español / your own imported pack) in the extension preferences.
+3. **Manage Tools** to tweak categories, ordering tools and date filters.
 
 ---
 

@@ -18,7 +18,6 @@ import { Workspace, getWorkspaces, saveWorkspaces } from "./lib/workspaces";
 import { Category, getCategories, saveCategories } from "./lib/categories";
 import { getOrderTools, saveOrderTools } from "./lib/commands";
 import { getDateQualifiers, saveDateQualifiers } from "./lib/dates";
-import { t } from "./lib/i18n";
 
 const ABOUT =
   "Lumen configuration blueprint. Back it up, move it to another Raycast, or hand it to an AI to understand or extend your setup. Each section explains what it is. NOTE: global command hotkeys are managed by Raycast and are NOT included here.";
@@ -89,17 +88,17 @@ export default function Command() {
   async function saveToFile() {
     const path = join(homedir(), "Downloads", "lumen-config.json");
     await writeFile(path, json, "utf8");
-    await showToast({ style: Toast.Style.Success, title: t("ex.saved"), message: path });
+    await showToast({ style: Toast.Style.Success, title: "Saved", message: path });
   }
 
   return (
     <Detail
-      markdown={"# " + t("ex.title") + "\n\n```json\n" + json + "\n```"}
+      markdown={"# " + "Export Configuration" + "\n\n```json\n" + json + "\n```"}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title={t("ex.copy")} content={json} />
-          <Action title={t("ex.save")} icon={Icon.Download} onAction={saveToFile} />
-          <Action.Push title={t("ex.import")} icon={Icon.Upload} target={<ImportForm />} />
+          <Action.CopyToClipboard title={"Copy JSON"} content={json} />
+          <Action title={"Save to Downloads"} icon={Icon.Download} onAction={saveToFile} />
+          <Action.Push title={"Import from File…"} icon={Icon.Upload} target={<ImportForm />} />
         </ActionPanel>
       }
     />
@@ -111,13 +110,13 @@ function ImportForm() {
 
   async function handleSubmit(values: { file: string[] }) {
     const file = values.file[0];
-    if (!file) return void showToast({ style: Toast.Style.Failure, title: t("ex.importPick") });
+    if (!file) return void showToast({ style: Toast.Style.Failure, title: "Pick a file" });
 
     let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(await readFile(file, "utf8"));
     } catch {
-      return void showToast({ style: Toast.Style.Failure, title: t("ex.importInvalid") });
+      return void showToast({ style: Toast.Style.Failure, title: "Invalid JSON" });
     }
 
     const workspaces = itemsOf<Workspace>(parsed.workspaces);
@@ -125,7 +124,7 @@ function ImportForm() {
     const tools = itemsOf<{ id: string; code: string; enabled: boolean }>(parsed.orderTools);
     const quals = itemsOf<{ id: string; code: string }>(parsed.dateFilters);
     if (!workspaces.length && !categories.length && !tools.length && !quals.length) {
-      return void showToast({ style: Toast.Style.Failure, title: t("ex.importNothing") });
+      return void showToast({ style: Toast.Style.Failure, title: "Nothing recognizable to import" });
     }
 
     const sections = [
@@ -135,9 +134,9 @@ function ImportForm() {
       quals.length && "date filters",
     ].filter(Boolean);
     const ok = await confirmAlert({
-      title: t("ex.importConfirm.title"),
-      message: t("ex.importConfirm.msg", { sections: sections.join(", ") }),
-      primaryAction: { title: t("common.restore"), style: Alert.ActionStyle.Destructive },
+      title: "Replace your Lumen configuration?",
+      message: `Overwrites your ${sections.join(", ")} with the file contents.`,
+      primaryAction: { title: "Restore", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
 
@@ -161,7 +160,7 @@ function ImportForm() {
         }),
       );
     }
-    await showToast({ style: Toast.Style.Success, title: t("ex.imported"), message: sections.join(", ") });
+    await showToast({ style: Toast.Style.Success, title: "Imported", message: sections.join(", ") });
     pop();
   }
 
@@ -169,18 +168,22 @@ function ImportForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("ex.importAction")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={"Import (Replace)"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.FilePicker
         id="file"
-        title={t("ex.fileTitle")}
+        title={"JSON File"}
         allowMultipleSelection={false}
         canChooseDirectories={false}
         canChooseFiles
       />
-      <Form.Description text={t("ex.importFormDesc")} />
+      <Form.Description
+        text={
+          "Import REPLACES your current Lumen config (workspaces, categories, tools, date filters) with whatever sections the file contains."
+        }
+      />
     </Form>
   );
 }

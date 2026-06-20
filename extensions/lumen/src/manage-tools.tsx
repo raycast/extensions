@@ -7,18 +7,13 @@ import {
   List,
   Toast,
   confirmAlert,
-  getPreferenceValues,
   showToast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { readFile, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { Category, getCategories, resetCategories, saveCategories } from "./lib/categories";
 import { ResolvedTool, getOrderTools, resetOrderTools, saveOrderTools } from "./lib/commands";
 import { ResolvedQualifier, getDateQualifiers, resetDateQualifiers, saveDateQualifiers } from "./lib/dates";
-import { languageTemplate, saveCustomLanguage, t } from "./lib/i18n";
 
 // "pdf, .DOCX , txt" -> ["pdf", "docx", "txt"]. Lowercased, dots stripped, deduped.
 function parseExtensions(raw: string): string[] {
@@ -35,7 +30,6 @@ export default function Command() {
   const [tools, setTools] = useState<ResolvedTool[]>([]);
   const [qualifiers, setQualifiers] = useState<ResolvedQualifier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const language = getPreferenceValues<{ language?: string }>().language ?? "en";
 
   async function refresh() {
     const [cats, ts, qs] = await Promise.all([getCategories(), getOrderTools(), getDateQualifiers()]);
@@ -51,25 +45,25 @@ export default function Command() {
 
   async function removeCategory(c: Category) {
     const ok = await confirmAlert({
-      title: t("mt.cat.deleteConfirm", { name: c.name }),
-      primaryAction: { title: t("common.delete"), style: Alert.ActionStyle.Destructive },
+      title: `Delete category "${c.name}"?`,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     await saveCategories(categories.filter((o) => o.code !== c.code));
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: t("mt.cat.toast.deleted") });
+    await showToast({ style: Toast.Style.Success, title: "Category deleted" });
   }
 
   async function restoreCategories() {
     const ok = await confirmAlert({
-      title: t("mt.cat.restoreConfirm.title"),
-      message: t("mt.cat.restoreConfirm.msg"),
-      primaryAction: { title: t("common.restore"), style: Alert.ActionStyle.Destructive },
+      title: "Restore default categories?",
+      message: "Replaces all categories with the built-in defaults.",
+      primaryAction: { title: "Restore", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     await resetCategories();
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: t("common.defaultsRestored") });
+    await showToast({ style: Toast.Style.Success, title: "Defaults restored" });
   }
 
   async function toggleTool(tool: ResolvedTool) {
@@ -79,37 +73,31 @@ export default function Command() {
 
   async function restoreTools() {
     const ok = await confirmAlert({
-      title: t("mt.tool.restoreConfirm.title"),
-      message: t("mt.tool.restoreConfirm.msg"),
-      primaryAction: { title: t("common.restore"), style: Alert.ActionStyle.Destructive },
+      title: "Restore default tools?",
+      message: "Resets every order tool's code and enabled state.",
+      primaryAction: { title: "Restore", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     await resetOrderTools();
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: t("common.defaultsRestored") });
+    await showToast({ style: Toast.Style.Success, title: "Defaults restored" });
   }
 
   async function restoreQualifiers() {
     const ok = await confirmAlert({
-      title: t("mt.date.restoreConfirm.title"),
-      message: t("mt.date.restoreConfirm.msg"),
-      primaryAction: { title: t("common.restore"), style: Alert.ActionStyle.Destructive },
+      title: "Restore default date filters?",
+      message: "Resets every date filter code (today/week/month/year and jan…dec).",
+      primaryAction: { title: "Restore", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     await resetDateQualifiers();
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: t("common.defaultsRestored") });
-  }
-
-  async function exportTemplate() {
-    const path = join(homedir(), "Downloads", "lumen-language-template.json");
-    await writeFile(path, languageTemplate(), "utf8");
-    await showToast({ style: Toast.Style.Success, title: t("mt.lang.templateSaved"), message: path });
+    await showToast({ style: Toast.Style.Success, title: "Defaults restored" });
   }
 
   const restoreCategoriesAction = (
     <Action
-      title={t("mt.cat.restore")}
+      title={"Restore Default Categories"}
       icon={Icon.ArrowCounterClockwise}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
       onAction={restoreCategories}
@@ -117,8 +105,8 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle={t("mt.nav")}>
-      <List.Section title={t("mt.cat.section")} subtitle={t("mt.cat.section.sub")}>
+    <List isLoading={isLoading} navigationTitle={"Manage Tools"}>
+      <List.Section title={"Categories"} subtitle={"Filter files by type with -code"}>
         {categories.map((c) => (
           <List.Item
             key={c.code}
@@ -129,17 +117,17 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("mt.cat.edit")}
+                  title={"Edit Category"}
                   icon={Icon.Pencil}
                   target={<CategoryForm category={c} categories={categories} onSaved={refresh} />}
                 />
                 <Action.Push
-                  title={t("mt.cat.create")}
+                  title={"Create Category"}
                   icon={Icon.Plus}
                   target={<CategoryForm categories={categories} onSaved={refresh} />}
                 />
                 <Action
-                  title={t("mt.cat.delete")}
+                  title={"Delete Category"}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -152,31 +140,29 @@ export default function Command() {
         ))}
       </List.Section>
 
-      <List.Section title={t("mt.tool.section")} subtitle={t("mt.tool.section.sub")}>
+      <List.Section title={"Order Tools"} subtitle={"Sort/filter results with --code"}>
         {tools.map((tool) => (
           <List.Item
             key={tool.id}
             icon={Icon.Filter}
             title={tool.label}
             subtitle={`--${tool.code}`}
-            accessories={[
-              { tag: tool.enabled ? { value: t("mt.tool.on") } : { value: t("mt.tool.off"), color: "#888" } },
-            ]}
+            accessories={[{ tag: tool.enabled ? { value: "On" } : { value: "Off", color: "#888" } }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("mt.tool.edit")}
+                  title={"Edit Tool"}
                   icon={Icon.Pencil}
                   target={<ToolForm tool={tool} tools={tools} onSaved={refresh} />}
                 />
                 <Action
-                  title={tool.enabled ? t("mt.tool.disable") : t("mt.tool.enable")}
+                  title={tool.enabled ? "Disable Tool" : "Enable Tool"}
                   icon={tool.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
                   onAction={() => toggleTool(tool)}
                 />
                 <Action
-                  title={t("mt.tool.restore")}
+                  title={"Restore Default Tools"}
                   icon={Icon.ArrowCounterClockwise}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                   onAction={restoreTools}
@@ -187,23 +173,23 @@ export default function Command() {
         ))}
       </List.Section>
 
-      <List.Section title={t("mt.date.section")} subtitle={t("mt.date.section.sub")}>
+      <List.Section title={"Date Filters"} subtitle={"Args for --dc/--dm (e.g. --dc,month or --dc,mar,2024)"}>
         {qualifiers.map((q) => (
           <List.Item
             key={q.id}
             icon={q.kind === "month" ? Icon.Calendar : Icon.Clock}
             title={q.label}
             subtitle={q.code}
-            accessories={[{ tag: q.kind === "month" ? t("mt.date.kind.month") : t("mt.date.kind.window") }]}
+            accessories={[{ tag: q.kind === "month" ? "Month" : "Window" }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("mt.date.edit")}
+                  title={"Edit Date Filter"}
                   icon={Icon.Pencil}
                   target={<QualifierForm qualifier={q} qualifiers={qualifiers} onSaved={refresh} />}
                 />
                 <Action
-                  title={t("mt.date.restore")}
+                  title={"Restore Default Date Filters"}
                   icon={Icon.ArrowCounterClockwise}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   onAction={restoreQualifiers}
@@ -212,20 +198,6 @@ export default function Command() {
             }
           />
         ))}
-      </List.Section>
-
-      <List.Section title={t("mt.lang.section")} subtitle={t("mt.lang.section.sub")}>
-        <List.Item
-          icon={Icon.Globe}
-          title={t("mt.lang.section")}
-          subtitle={t("mt.lang.current", { lang: language })}
-          actions={
-            <ActionPanel>
-              <Action title={t("mt.lang.exportTemplate")} icon={Icon.Download} onAction={exportTemplate} />
-              <Action.Push title={t("mt.lang.import")} icon={Icon.Upload} target={<LanguageImportForm />} />
-            </ActionPanel>
-          }
-        />
       </List.Section>
     </List>
   );
@@ -246,15 +218,16 @@ function CategoryForm({
     const name = values.name.trim();
     const code = values.code.trim().toLowerCase().replace(/^-+/, "");
     const extensions = parseExtensions(values.extensions);
-    if (!name) return void showToast({ style: Toast.Style.Failure, title: t("err.nameRequired") });
-    if (!code) return void showToast({ style: Toast.Style.Failure, title: t("err.codeRequired") });
-    if (extensions.length === 0) return void showToast({ style: Toast.Style.Failure, title: t("err.extRequired") });
+    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Name is required" });
+    if (!code) return void showToast({ style: Toast.Style.Failure, title: "Code is required" });
+    if (extensions.length === 0)
+      return void showToast({ style: Toast.Style.Failure, title: "At least one extension is required" });
 
     const collision = categories.find((o) => o.code === code && o.code !== category?.code);
     if (collision)
       return void showToast({
         style: Toast.Style.Failure,
-        title: t("err.catCodeUsed", { code, name: collision.name }),
+        title: `Code "-${code}" already used by ${collision.name}`,
       });
 
     const next = category
@@ -264,7 +237,7 @@ function CategoryForm({
     onSaved();
     await showToast({
       style: Toast.Style.Success,
-      title: category ? t("mt.cat.toast.updated") : t("mt.cat.toast.created"),
+      title: category ? "Category updated" : "Category created",
     });
     pop();
   }
@@ -273,23 +246,23 @@ function CategoryForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("mt.cat.save")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={"Save Category"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={t("form.name")} placeholder="Documents" defaultValue={category?.name} />
+      <Form.TextField id="name" title={"Name"} placeholder="Documents" defaultValue={category?.name} />
       <Form.TextField
         id="code"
-        title={t("form.code")}
+        title={"Code"}
         placeholder="d"
-        info={t("form.cat.codeInfo")}
+        info={"Typed after a dash, e.g. -d. Must be unique."}
         defaultValue={category?.code}
       />
       <Form.TextField
         id="extensions"
-        title={t("form.extensions")}
+        title={"Extensions"}
         placeholder="pdf, docx, txt"
-        info={t("form.extensions.info")}
+        info={"Comma-separated. Dots optional, lowercased on save."}
         defaultValue={category?.extensions.join(", ")}
       />
     </Form>
@@ -301,18 +274,18 @@ function ToolForm({ tool, tools, onSaved }: { tool: ResolvedTool; tools: Resolve
 
   async function handleSubmit(values: { code: string; enabled: boolean }) {
     const code = values.code.trim().toLowerCase().replace(/^-+/, "");
-    if (!code) return void showToast({ style: Toast.Style.Failure, title: t("err.codeRequired") });
+    if (!code) return void showToast({ style: Toast.Style.Failure, title: "Code is required" });
 
     const collision = tools.find((o) => o.code === code && o.id !== tool.id);
     if (collision)
       return void showToast({
         style: Toast.Style.Failure,
-        title: t("err.toolCodeUsed", { code, label: collision.label }),
+        title: `Code "--${code}" already used by ${collision.label}`,
       });
 
     await saveOrderTools(tools.map((o) => (o.id === tool.id ? { ...o, code, enabled: values.enabled } : o)));
     onSaved();
-    await showToast({ style: Toast.Style.Success, title: t("mt.tool.toast.updated") });
+    await showToast({ style: Toast.Style.Success, title: "Tool updated" });
     pop();
   }
 
@@ -320,19 +293,19 @@ function ToolForm({ tool, tools, onSaved }: { tool: ResolvedTool; tools: Resolve
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("mt.tool.save")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={"Save Tool"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text={t("form.tool.desc", { label: tool.label })} />
+      <Form.Description text={`${tool.label} — sorts results by this field.`} />
       <Form.TextField
         id="code"
-        title={t("form.code")}
+        title={"Code"}
         placeholder={tool.defaultCode}
-        info={t("form.tool.codeInfo")}
+        info={"Typed after a double dash, e.g. --dc. Must be unique."}
         defaultValue={tool.code}
       />
-      <Form.Checkbox id="enabled" label={t("form.enabled")} defaultValue={tool.enabled} />
+      <Form.Checkbox id="enabled" label={"Enabled"} defaultValue={tool.enabled} />
     </Form>
   );
 }
@@ -350,19 +323,20 @@ function QualifierForm({
 
   async function handleSubmit(values: { code: string }) {
     const code = values.code.trim().toLowerCase().replace(/^-+/, "");
-    if (!code) return void showToast({ style: Toast.Style.Failure, title: t("err.codeRequired") });
-    if (/^\d{4}$/.test(code)) return void showToast({ style: Toast.Style.Failure, title: t("err.qualFourDigits") });
+    if (!code) return void showToast({ style: Toast.Style.Failure, title: "Code is required" });
+    if (/^\d{4}$/.test(code))
+      return void showToast({ style: Toast.Style.Failure, title: "A 4-digit code clashes with year filtering" });
 
     const collision = qualifiers.find((o) => o.code === code && o.id !== qualifier.id);
     if (collision)
       return void showToast({
         style: Toast.Style.Failure,
-        title: t("err.qualCodeUsed", { code, label: collision.label }),
+        title: `Code "${code}" already used by ${collision.label}`,
       });
 
     await saveDateQualifiers(qualifiers.map((o) => (o.id === qualifier.id ? { ...o, code } : o)));
     onSaved();
-    await showToast({ style: Toast.Style.Success, title: t("mt.date.toast.updated") });
+    await showToast({ style: Toast.Style.Success, title: "Date filter updated" });
     pop();
   }
 
@@ -370,56 +344,18 @@ function QualifierForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t("mt.date.save")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={"Save Date Filter"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text={t("form.date.desc", { label: qualifier.label })} />
+      <Form.Description text={`${qualifier.label} — used as a --dc/--dm argument.`} />
       <Form.TextField
         id="code"
-        title={t("form.code")}
+        title={"Code"}
         placeholder={qualifier.defaultCode}
-        info={t("form.date.codeInfo")}
+        info={"Typed after a date command, e.g. --dc,today. Must be unique; can't be 4 digits."}
         defaultValue={qualifier.code}
       />
-    </Form>
-  );
-}
-
-function LanguageImportForm() {
-  const { pop } = useNavigation();
-
-  async function handleSubmit(values: { file: string[] }) {
-    const file = values.file[0];
-    if (!file) return void showToast({ style: Toast.Style.Failure, title: t("ex.importPick") });
-    let parsed: Record<string, string>;
-    try {
-      parsed = JSON.parse(await readFile(file, "utf8"));
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("bad");
-    } catch {
-      return void showToast({ style: Toast.Style.Failure, title: t("mt.lang.importInvalid") });
-    }
-    await saveCustomLanguage(parsed);
-    await showToast({ style: Toast.Style.Success, title: t("mt.lang.imported") });
-    pop();
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title={t("mt.lang.import")} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.FilePicker
-        id="file"
-        title={t("ex.fileTitle")}
-        allowMultipleSelection={false}
-        canChooseDirectories={false}
-        canChooseFiles
-      />
-      <Form.Description text={t("mt.lang.importDesc")} />
     </Form>
   );
 }
