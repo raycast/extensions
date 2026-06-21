@@ -5,6 +5,9 @@
   "description": "Rituals that open your apps, websites and files, run shell commands, and tear everything down again — in one keystroke.",
   "icon": "extension-icon.png",
   "author": "omerssimsekk",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
