@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2023"
+    "target": "ESNext"
   },
   "include": ["src/**/*", "ray-env.d.ts"]
 }
