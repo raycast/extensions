@@ -1,6 +1,6 @@
 # Warp Changelog
 
-## [Scoped Directory Search] - {PR_MERGE_DATE}
+## [Scoped Directory Search] - 2026-06-21
 
 - "Open Directory" search is now scoped to a configurable list of root folders instead of searching your whole system.
 - Added "Add Search Folder" and "Manage Search Folders" actions to add folders with a native picker (multi-select) and remove them; folders persist automatically.
