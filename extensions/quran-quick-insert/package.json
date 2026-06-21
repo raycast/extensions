@@ -9,9 +9,6 @@
   "engines": {
     "node": ">=22.22.2"
   },
-  "platforms": [
-    "macOS"
-  ],
   "categories": [
     "Productivity"
   ],

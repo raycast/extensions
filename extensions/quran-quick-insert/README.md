@@ -8,6 +8,19 @@ Search, copy, and insert Quran ayahs or ranges from Raycast. Quran text is bundl
 > [!CAUTION]
 > **Disclaimer:** This project was developed with heavy use of AI assistance. Tested and verified by the author.
 
+<details>
+  <summary>Screenshots</summary>
+
+  <p align="center">
+    <img src="./metadata/quran-quick-insert-1.png" alt="Search Quran ayahs" width="32%" loading="lazy">
+    <img src="./metadata/quran-quick-insert-2.png" alt="Search Quran by reference" width="32%" loading="lazy">
+    <img src="./metadata/quran-quick-insert-3.png" alt="Quran range selection" width="32%" loading="lazy">
+    <img src="./metadata/quran-quick-insert-4.png" alt="Quran surah picker" width="32%" loading="lazy">
+    <img src="./metadata/quran-quick-insert-5.png" alt="Quran copy actions" width="32%" loading="lazy">
+    <img src="./metadata/quran-quick-insert-6.png" alt="Quran preferences" width="32%" loading="lazy">
+  </p>
+</details>
+
 ## Commands
 
 - **Search Quran**: search Quran text or enter `2:255` / `2:255-257`, then copy or paste the ayah or range.
