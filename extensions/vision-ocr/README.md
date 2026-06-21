@@ -8,6 +8,16 @@ Local Raycast OCR for clipboard images, copied files, selected Finder files, and
 > [!CAUTION]
 > **Disclaimer:** This project was developed with heavy use of AI assistance. Tested and verified by the author.
 
+<details>
+  <summary>Screenshots</summary>
+
+  <p align="center">
+    <img src="./metadata/screenshot-1.png" alt="Extract text from clipboard" width="32%" loading="lazy">
+    <img src="./metadata/screenshot-2.png" alt="Extract text with options" width="32%" loading="lazy">
+    <img src="./metadata/screenshot-3.png" alt="OCR history" width="32%" loading="lazy">
+  </p>
+</details>
+
 ## Commands
 
 - **Extract Text from Clipboard**: reads the current clipboard image or copied image/PDF file, runs OCR, and copies or pastes recognized text.

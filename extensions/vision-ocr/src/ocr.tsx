@@ -16,13 +16,6 @@ import { save_history } from "./ocr-history";
 
 type OutputAction = "copy" | "paste";
 
-type Preferences = {
-  primary_language?: string;
-  extra_languages?: string;
-  level?: "fast" | "accurate";
-  output_action?: OutputAction;
-};
-
 type State = {
   is_loading: boolean;
   text: string;

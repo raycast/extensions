@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vision-ocr",
   "title": "Vision OCR",
   "description": "Local OCR for clipboard, image, and PDF files using macOS Apple Vision.",
@@ -170,6 +171,7 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
     "typescript": "^5.7.2"
   }
 }

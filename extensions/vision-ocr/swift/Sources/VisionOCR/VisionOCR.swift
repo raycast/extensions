@@ -27,8 +27,9 @@ enum OCRError: Error, CustomStringConvertible {
 @raycast func ocrClipboard(_ languages: [String], _ level: String) throws -> String {
     let pasteboard = NSPasteboard.general
 
-    if let urls = pasteboard.readObjects(forClasses: [NSURL.self]) as? [URL], !urls.isEmpty {
-        return try ocrFiles(urls.map(\.path), languages, level)
+    let fileURLs = (pasteboard.readObjects(forClasses: [NSURL.self]) as? [URL] ?? []).filter(\.isFileURL)
+    if !fileURLs.isEmpty {
+        return try ocrFiles(fileURLs.map(\.path), languages, level)
     }
 
     if let image = imageFromPasteboard(pasteboard) {
