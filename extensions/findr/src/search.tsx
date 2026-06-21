@@ -11,7 +11,7 @@ import {
   open,
   showInFinder,
 } from "@raycast/api";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { existsSync } from "fs";
 import { execFile } from "child_process";
 import { SearchResponse, SearchResult } from "./types";
@@ -150,21 +150,33 @@ export default function SearchFiles() {
   );
   const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
+  const downloadToastRef = useRef<Toast | null>(null);
+
   useEffect(() => {
     if (binaryExists) return;
     let cancelled = false;
     showToast({
       style: Toast.Style.Animated,
       title: "Downloading findr engine...",
+    }).then((toast) => {
+      if (cancelled) {
+        toast.hide();
+        return;
+      }
+      downloadToastRef.current = toast;
     });
     ensureFindrBinaries()
       .then((path) => {
         if (cancelled) return;
+        downloadToastRef.current?.hide();
+        downloadToastRef.current = null;
         setFindrPath(path);
         showToast({ style: Toast.Style.Success, title: "findr ready" });
       })
       .catch((err) => {
         if (cancelled) return;
+        downloadToastRef.current?.hide();
+        downloadToastRef.current = null;
         showToast({
           style: Toast.Style.Failure,
           title: "Download failed",
@@ -173,6 +185,8 @@ export default function SearchFiles() {
       });
     return () => {
       cancelled = true;
+      downloadToastRef.current?.hide();
+      downloadToastRef.current = null;
     };
   }, [binaryExists]);
 
@@ -341,12 +355,13 @@ export default function SearchFiles() {
       if (newPaths.length > 0) {
         timer = setTimeout(() => {
           if (cancelled) return;
-          let completed = 0;
+          let finished = 0;
           for (const p of newPaths) {
-            execFile(findrPath, ["index", "add-path", p], (err) => {
+            execFile(findrPath, ["index", "add-path", p], () => {
               if (cancelled) return;
-              if (!err) completed++;
-              if (completed === newPaths.length) {
+              finished++;
+              // Persist after all attempts — one bad path must not block the rest.
+              if (finished === newPaths.length) {
                 LocalStorage.setItem(
                   "findr_custom_paths",
                   currentList.join(","),
