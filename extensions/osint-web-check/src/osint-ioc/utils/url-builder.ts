@@ -4,16 +4,12 @@
  * Constructs search URLs for various OSINT platforms
  */
 
-import { IOCType } from "../types";
+import { IOCType } from "../ioc-types";
 
 /**
  * Build search URL for a given OSINT source and IOC
  */
-export async function buildSearchURL(
-  sourceId: string,
-  ioc: string,
-  iocType: IOCType,
-): Promise<string> {
+export async function buildSearchURL(sourceId: string, ioc: string, iocType: IOCType): Promise<string> {
   const encodedIOC = encodeURIComponent(ioc);
 
   switch (sourceId) {
@@ -68,61 +64,15 @@ export async function buildSearchURL(
     case "whois":
       return `https://who.is/whois/${encodedIOC}`;
 
-    // Hybrid Analysis
-    case "hybridanalysis":
-      if (iocType === "hash") {
-        return `https://www.hybrid-analysis.com/search?query=${encodedIOC}`;
-      } else if (iocType === "url") {
-        return `https://www.hybrid-analysis.com/search?query=${encodedIOC}`;
-      } else if (iocType === "domain") {
-        return `https://www.hybrid-analysis.com/search?query=domain:${encodedIOC}`;
-      }
-      return `https://www.hybrid-analysis.com/search?query=${encodedIOC}`;
-
-    // Joe Sandbox
-    case "joesandbox": {
-      if (iocType === "hash") {
-        // Joe Sandbox uses specific hash type parameters
-        // We need to determine the hash type from the length
-        const hashLength = ioc.length;
-        if (hashLength === 32) {
-          return `https://www.joesandbox.com/analysis/search?md5=${encodedIOC}`;
-        } else if (hashLength === 40) {
-          return `https://www.joesandbox.com/analysis/search?sha1=${encodedIOC}`;
-        } else if (hashLength === 64) {
-          return `https://www.joesandbox.com/analysis/search?sha256=${encodedIOC}`;
-        }
-        return `https://www.joesandbox.com/analysis/search?q=${encodedIOC}`;
-      } else if (iocType === "ip") {
-        return `https://www.joesandbox.com/analysis/search?ioc-public-ip=${encodedIOC}`;
-      }
-      return `https://www.joesandbox.com/analysis/search?q=${encodedIOC}`;
-    }
-
     // MalwareBazaar
     case "malwarebazaar":
-      return `https://bazaar.abuse.ch/browse.php?search=${encodedIOC}`;
-
-    // threat.rip
-    case "threatrip":
-      return `https://threat.rip/search?q=${encodeURIComponent(`hash:${ioc}`)}`;
-
-    // IBM X-Force Exchange
-    case "xforce":
-      if (iocType === "ip" || iocType === "ipv6") {
-        return `https://exchange.xforce.ibmcloud.com/ip/${encodedIOC}`;
-      } else if (iocType === "domain") {
-        return `https://exchange.xforce.ibmcloud.com/url/${encodedIOC}`;
-      } else if (iocType === "url") {
-        return `https://exchange.xforce.ibmcloud.com/url/${encodedIOC}`;
-      } else if (iocType === "hash") {
-        return `https://exchange.xforce.ibmcloud.com/malware/${encodedIOC.toUpperCase()}`;
-      }
-      return `https://exchange.xforce.ibmcloud.com/`;
+      return `https://bazaar.abuse.ch/sample/${encodedIOC}`;
 
     // Pulsedive
-    case "pulsedive":
-      return `https://pulsedive.com/explore.php?q=${encodeURIComponent(`ioc=${ioc}`)}`;
+    case "pulsedive": {
+      const base64 = Buffer.from(ioc).toString("base64").replace(/=+$/, "");
+      return `https://pulsedive.com/indicator/?ioc=${base64}`;
+    }
 
     // Kaspersky OpenTIP
     case "opentip":
@@ -179,14 +129,8 @@ function buildVirusTotalURL(ioc: string, iocType: IOCType): string {
 /**
  * Get a human-readable description for an OSINT source
  */
-export function getSourceDescription(
-  sourceId: string,
-  iocType: IOCType,
-): string {
-  const descriptions: Record<
-    string,
-    Partial<Record<IOCType, string>> & { default: string }
-  > = {
+export function getSourceDescription(sourceId: string, iocType: IOCType): string {
+  const descriptions: Record<string, Partial<Record<IOCType, string>> & { default: string }> = {
     virustotal: {
       ip: "Check IP reputation and related files",
       domain: "Analyze domain reputation and DNS records",
@@ -214,9 +158,5 @@ export function getSourceDescription(
     return "Search this IOC";
   }
 
-  return (
-    sourceDescriptions[iocType] ||
-    sourceDescriptions.default ||
-    "Search this IOC"
-  );
+  return sourceDescriptions[iocType] || sourceDescriptions.default || "Search this IOC";
 }

@@ -4,7 +4,7 @@
  * Defines all OSINT platforms and their configurations
  */
 
-import { OSINTSource, IOCType } from "../types";
+import { OSINTSource, IOCType } from "../ioc-types";
 
 export const OSINT_SOURCES: OSINTSource[] = [
   // Multi-purpose platforms
@@ -125,54 +125,12 @@ export const OSINT_SOURCES: OSINTSource[] = [
 
   // Malware Analysis
   {
-    id: "hybridanalysis",
-    name: "Hybrid Analysis",
-    description: "Free automated malware analysis service",
-    url: "https://www.hybrid-analysis.com",
-    category: "Malware Analysis",
-    supportedTypes: ["hash", "url", "domain"],
-    requiresAuth: false,
-    isFree: true,
-  },
-  {
-    id: "joesandbox",
-    name: "Joe Sandbox",
-    description: "Advanced malware analysis platform",
-    url: "https://www.joesandbox.com",
-    category: "Malware Analysis",
-    supportedTypes: ["hash", "ip"],
-    requiresAuth: false,
-    isFree: true,
-  },
-  {
     id: "malwarebazaar",
     name: "MalwareBazaar",
     description: "Malware sample sharing platform",
     url: "https://bazaar.abuse.ch",
     category: "Malware Analysis",
     supportedTypes: ["hash"],
-    requiresAuth: false,
-    isFree: true,
-  },
-
-  // Threat Intelligence
-  {
-    id: "threatrip",
-    name: "threat.rip",
-    description: "Fast and simple threat intelligence for file hashes",
-    url: "https://threat.rip",
-    category: "Threat Intelligence",
-    supportedTypes: ["hash"],
-    requiresAuth: false,
-    isFree: true,
-  },
-  {
-    id: "xforce",
-    name: "IBM X-Force Exchange",
-    description: "Threat intelligence sharing platform",
-    url: "https://exchange.xforce.ibmcloud.com",
-    category: "Threat Intelligence",
-    supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
     requiresAuth: false,
     isFree: true,
   },
@@ -204,9 +162,7 @@ export const OSINT_SOURCES: OSINTSource[] = [
  * Get OSINT sources for a specific IOC type
  */
 export function getSourcesForIOCType(iocType: IOCType): OSINTSource[] {
-  return OSINT_SOURCES.filter((source) =>
-    source.supportedTypes.includes(iocType),
-  );
+  return OSINT_SOURCES.filter((source) => source.supportedTypes.includes(iocType));
 }
 
 /**
@@ -219,10 +175,7 @@ export function getSourceById(id: string): OSINTSource | undefined {
 /**
  * Check if a source is enabled in preferences
  */
-export function isSourceEnabled(
-  sourceId: string,
-  preferences: Record<string, unknown>,
-): boolean {
+export function isSourceEnabled(sourceId: string, preferences: Record<string, unknown>): boolean {
   const prefKey = `enable_${sourceId}`;
   const isEnabled = preferences[prefKey];
 
@@ -233,11 +186,6 @@ export function isSourceEnabled(
 /**
  * Get all enabled sources for an IOC type
  */
-export function getEnabledSourcesForIOCType(
-  iocType: IOCType,
-  preferences: Record<string, unknown>,
-): OSINTSource[] {
-  return getSourcesForIOCType(iocType).filter((source) =>
-    isSourceEnabled(source.id, preferences),
-  );
+export function getEnabledSourcesForIOCType(iocType: IOCType, preferences: Record<string, unknown>): OSINTSource[] {
+  return getSourcesForIOCType(iocType).filter((source) => isSourceEnabled(source.id, preferences));
 }

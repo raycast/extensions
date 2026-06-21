@@ -4,14 +4,24 @@
  * Detects and validates various types of Indicators of Compromise (IOCs)
  */
 
-import { IOCType, HashType, IOCDetectionResult } from "../types";
+import { IOCType, HashType, IOCDetectionResult } from "../ioc-types";
 import * as net from "net";
+import { VALID_TLDS, RESERVED_TLDS } from "./tld-list";
 
 /**
  * Detect the type of IOC from a given string
  */
 export function detectIOCType(value: string): IOCDetectionResult {
   const trimmedValue = value.trim();
+
+  // Handle email-shaped input ("user@example.com") by re-running detection
+  // on the part after the last "@". URL-shaped input is left intact so
+  // `https://...` still parses as a URL.
+  if (trimmedValue.includes("@") && !trimmedValue.includes("://")) {
+    const at = trimmedValue.lastIndexOf("@");
+    const host = trimmedValue.slice(at + 1);
+    return detectIOCType(host);
+  }
 
   // Check for hash (MD5, SHA1, SHA256)
   const hashResult = detectHash(trimmedValue);
@@ -87,6 +97,18 @@ export function detectHash(value: string): IOCDetectionResult {
   let hashType: HashType = "unknown";
   let confidence = 0;
 
+  // Reject trivial hashes: all zeros, or every character identical
+  // (e.g. "aaaa...a" of length 32/40/64). These are never real IOCs.
+  if (/^0+$/.test(value) || /^(.)\1+$/.test(value)) {
+    return {
+      type: "hash",
+      value,
+      hashType: "unknown",
+      isValid: false,
+      confidence: 0,
+    };
+  }
+
   if (length === 32) {
     hashType = "md5";
     confidence = 1.0;
@@ -122,6 +144,11 @@ export function detectHash(value: string): IOCDetectionResult {
  */
 function normalizeDomain(value: string): string {
   let v = value.trim();
+  // Strip path/query/fragment first (before port, so `host:80/path` works).
+  const cut = v.search(/[/?#]/);
+  if (cut !== -1) {
+    v = v.slice(0, cut);
+  }
   const portIndex = v.indexOf(":");
   if (portIndex !== -1) {
     const after = v.slice(portIndex + 1);
@@ -167,6 +194,12 @@ export function isDomain(value: string): boolean {
   if (tld.length < 2) return false;
   if (!/[a-z]/i.test(tld)) return false;
 
+  // Reject TLDs that aren't in the IANA root zone (e.g. "b", "qx") and
+  // RFC-reserved names (test, invalid, example, localhost, local).
+  const tldLower = tld.toLowerCase();
+  if (RESERVED_TLDS.has(tldLower)) return false;
+  if (!VALID_TLDS.has(tldLower)) return false;
+
   return true;
 }
 
@@ -202,9 +235,7 @@ export function isURL(value: string): boolean {
 export function defangIOC(value: string, type: IOCType): string {
   switch (type) {
     case "url":
-      return value
-        .replace(/^https?:\/\//i, (match) => match.replace(/t/gi, "x"))
-        .replace(/\./g, "[.]");
+      return value.replace(/^https?:\/\//i, (match) => match.replace(/t/gi, "x")).replace(/\./g, "[.]");
     case "domain":
       return value.replace(/\./g, "[.]").replace(/@/g, "[@]");
     case "ip":
