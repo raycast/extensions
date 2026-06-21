@@ -220,6 +220,8 @@ export async function closeLauncherTabs() {
       for (let i = 0; i < urls.length; i++) {
         if (typeof urls[i] === "string" && urls[i].indexOf("raycast://") === 0) idx.push(i);
       }
+      // If every tab in the window is a launcher tab, leave them — never empty the window.
+      if (idx.length >= urls.length) return;
       // Close highest index first so earlier closes don't shift later indices.
       for (let j = idx.length - 1; j >= 0; j--) {
         try { w.tabs[idx[j]].close(); } catch (e) {}
