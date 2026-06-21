@@ -28,9 +28,5 @@ const LOCAL_DEFINITIONS: Record<string, string[]> = {
 
 export function getLocalDefinitions(query: string): string[] {
   const normalizedQuery = query.trim().toLowerCase();
-  return (
-    LOCAL_DEFINITIONS[normalizedQuery] ?? [
-      "暂无本地中文释义 / No local usage note is available. Use the English definitions as the primary source.",
-    ]
-  );
+  return LOCAL_DEFINITIONS[normalizedQuery] ?? [];
 }

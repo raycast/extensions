@@ -175,6 +175,10 @@ function QuickSearchItem({ title, date, icon, setQuery }: QuickSearchItemProps) 
 }
 
 function SearchResultItem({ result }: { result: WordResult }) {
+  const chineseMeanings = [
+    ...result.definitions.map((definition) => definition.chinese).filter(isString),
+    ...result.localDefinitions,
+  ];
   const accessories = [
     result.techEntry ? { text: "Ops" } : undefined,
     result.phonetics[0]?.text ? { text: result.phonetics[0].text } : undefined,
@@ -184,7 +188,7 @@ function SearchResultItem({ result }: { result: WordResult }) {
     <List.Section title="Search Result">
       <List.Item
         title={result.word}
-        subtitle={result.localDefinitions.join("; ")}
+        subtitle={unique(chineseMeanings).slice(0, 3).join("; ") || "No Chinese translation found"}
         icon={result.techEntry ? Icon.Terminal : Icon.Book}
         accessories={accessories}
         actions={
@@ -199,6 +203,14 @@ function SearchResultItem({ result }: { result: WordResult }) {
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function isString(value: string | undefined): value is string {
+  return typeof value === "string";
 }
 
 async function refreshLocalData(

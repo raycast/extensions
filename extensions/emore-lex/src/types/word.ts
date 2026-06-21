@@ -7,6 +7,7 @@ export type PhoneticVariant = {
 export type Definition = {
   partOfSpeech: string;
   english: string;
+  chinese?: string;
   example?: string;
 };
 

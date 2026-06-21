@@ -2,6 +2,7 @@ import { getCached, setCached } from "../utils/cache";
 import { fetchSynonyms } from "./datamuse";
 import { getLocalDefinitions } from "./localDefinitions";
 import { findTechEntry } from "./techDictionary";
+import { translateDefinitions } from "./translation";
 import { Definition, PhoneticVariant, WordResult } from "../types/word";
 
 type DictionaryApiEntry = {
@@ -27,7 +28,7 @@ const MAX_EXAMPLES = 5;
 
 export async function lookupWord(query: string, signal?: AbortSignal): Promise<WordResult> {
   const normalizedQuery = normalizeQuery(query);
-  const cacheKey = `word:v2:${normalizedQuery}`;
+  const cacheKey = `word:v3:${normalizedQuery}`;
   const cached = await getCached<WordResult>(cacheKey);
   if (cached) {
     return { ...cached, source: "cache" };
@@ -37,7 +38,7 @@ export async function lookupWord(query: string, signal?: AbortSignal): Promise<W
     fetchDictionaryEntries(normalizedQuery, signal),
     fetchSynonyms(normalizedQuery, signal),
   ]);
-  const result = normalizeEntries(normalizedQuery, entries, synonyms);
+  const result = await normalizeEntries(normalizedQuery, entries, synonyms, signal);
   await setCached(cacheKey, result);
   return result;
 }
@@ -50,10 +51,15 @@ async function fetchDictionaryEntries(query: string, signal?: AbortSignal): Prom
   return (await response.json()) as DictionaryApiEntry[];
 }
 
-function normalizeEntries(query: string, entries: DictionaryApiEntry[], synonyms: string[]): WordResult {
+async function normalizeEntries(
+  query: string,
+  entries: DictionaryApiEntry[],
+  synonyms: string[],
+  signal?: AbortSignal,
+): Promise<WordResult> {
   const firstEntry = entries[0];
   const word = firstEntry?.word ?? query;
-  const definitions = collectDefinitions(entries);
+  const definitions = await translateDefinitions(collectDefinitions(entries), signal);
   const apiSynonyms = collectSynonyms(entries);
   const mergedSynonyms = unique([...synonyms, ...apiSynonyms]).slice(0, 10);
   const techEntry = findTechEntry(query);

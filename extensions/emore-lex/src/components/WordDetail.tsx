@@ -95,8 +95,10 @@ function renderDetailMarkdown(result: WordResult): string {
     result.syllables ? `**Syllables**: ${result.syllables}` : undefined,
     result.pronunciationHint ? `**Pronunciation Hint**: ${result.pronunciationHint}` : undefined,
     "",
-    "## Meaning Notes",
-    ...result.localDefinitions.map((definition, index) => `${index + 1}. ${definition}`),
+    "## Chinese Meanings",
+    ...renderChineseMeanings(result),
+    "",
+    ...renderMeaningNotes(result),
     "",
     "## English Definitions",
     ...(result.definitions.length > 0
@@ -136,6 +138,22 @@ function renderPhonetics(result: WordResult): string | undefined {
   return result.phonetics.map((phonetic) => `**${phonetic.region}** ${phonetic.text ?? ""}`.trim()).join("  \n");
 }
 
+function renderChineseMeanings(result: WordResult): string[] {
+  const translatedDefinitions = unique(result.definitions.map((definition) => definition.chinese).filter(isString));
+  if (translatedDefinitions.length === 0) return ["- No Chinese translation found."];
+
+  return translatedDefinitions.map((definition) => `- ${definition}`);
+}
+
+function renderMeaningNotes(result: WordResult): string[] {
+  if (result.localDefinitions.length === 0) return [];
+
+  return [
+    "## Operations / Local Notes",
+    ...result.localDefinitions.map((definition, index) => `${index + 1}. ${definition}`),
+  ];
+}
+
 function renderTechSection(result: WordResult): string[] {
   const entry = result.techEntry;
   if (!entry) return [];
@@ -173,4 +191,12 @@ function renderPronunciationRegion(region: string): string {
   if (region === "US") return "US";
   if (region === "UK") return "UK";
   return "Available";
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function isString(value: string | undefined): value is string {
+  return typeof value === "string";
 }
