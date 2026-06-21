@@ -27,7 +27,7 @@ const MAX_EXAMPLES = 5;
 
 export async function lookupWord(query: string, signal?: AbortSignal): Promise<WordResult> {
   const normalizedQuery = normalizeQuery(query);
-  const cacheKey = `word:${normalizedQuery}`;
+  const cacheKey = `word:v2:${normalizedQuery}`;
   const cached = await getCached<WordResult>(cacheKey);
   if (cached) {
     return { ...cached, source: "cache" };
