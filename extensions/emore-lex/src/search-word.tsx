@@ -8,11 +8,7 @@ import { Favorite, HistoryItem, WordResult } from "./types/word";
 
 const MIN_QUERY_LENGTH = 2;
 
-type CommandArguments = {
-  word?: string;
-};
-
-export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchWord }>) {
   const [query, setQuery] = useState(props.arguments?.word ?? "");
   const [result, setResult] = useState<WordResult>();
   const [error, setError] = useState<string>();

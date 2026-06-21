@@ -14,6 +14,7 @@
     "noEmit": true
   },
   "include": [
+    "raycast-env.d.ts",
     "src/**/*",
     "assets/**/*.json"
   ]
