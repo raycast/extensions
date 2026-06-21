@@ -65,39 +65,24 @@ export interface Profile {
 const clean = (list?: unknown): string[] =>
   Array.isArray(list) ? list.map((s) => String(s).trim()).filter(Boolean) : [];
 
-/**
- * Coerce raw stored/imported data into the current Profile shape, migrating the
- * old model (string[] commands, separate quitApps/waitFor/teardownCommands).
- */
+/** Coerce raw stored/imported data into a valid Profile shape. */
 function normalizeProfile(raw: Record<string, unknown>): Profile {
-  const apps = clean(raw.apps);
-  // Old "quitApps" are folded into apps, since apps now auto-quit on deactivate.
-  for (const q of clean(raw.quitApps)) if (!apps.includes(q)) apps.push(q);
-
-  let commands: CommandEntry[];
-  if (Array.isArray(raw.commands) && raw.commands.every((c) => typeof c === "string")) {
-    commands = (raw.commands as string[]).map((run) => ({ run: run.trim() })).filter((c) => c.run);
-  } else if (Array.isArray(raw.commands)) {
-    commands = (raw.commands as CommandEntry[])
-      .map((c) => ({
-        run: (c.run ?? "").trim(),
-        waitFor: c.waitFor?.trim() || undefined,
-        stop: c.stop?.trim() || undefined,
-        stopWaitFor: c.stopWaitFor?.trim() || undefined,
-      }))
-      .filter((c) => c.run || c.stop || c.waitFor);
-  } else {
-    commands = [];
-  }
-  // Preserve legacy readiness/teardown lists as stand-alone command entries.
-  for (const w of clean(raw.waitFor)) commands.push({ run: "", waitFor: w });
-  for (const t of clean(raw.teardownCommands)) commands.push({ run: "", stop: t });
+  const commands: CommandEntry[] = Array.isArray(raw.commands)
+    ? (raw.commands as CommandEntry[])
+        .map((c) => ({
+          run: (c.run ?? "").trim(),
+          waitFor: c.waitFor?.trim() || undefined,
+          stop: c.stop?.trim() || undefined,
+          stopWaitFor: c.stopWaitFor?.trim() || undefined,
+        }))
+        .filter((c) => c.run || c.stop || c.waitFor)
+    : [];
 
   return {
     id: typeof raw.id === "string" ? raw.id : crypto.randomUUID(),
     name: typeof raw.name === "string" ? raw.name : "Untitled",
     icon: typeof raw.icon === "string" ? raw.icon : undefined,
-    apps,
+    apps: clean(raw.apps),
     urls: clean(raw.urls),
     paths: clean(raw.paths),
     commands,
