@@ -32,7 +32,6 @@ export default function CalendarGrid() {
   const [selectedId, setSelectedId] = useState<string | undefined>();
 
   const delaySetSelectedId = useCallback((val: string | undefined) => {
-
     // NOTE: some delay to prevent flash UI
     setTimeout(() => {
       setSelectedId(val);
