@@ -39,12 +39,17 @@ type Values = {
   date: string;
   customDate?: string;
   timeSpent: string;
+  remainingEstimate?: string;
   useTimeRange?: boolean;
   startTime?: string;
   endTime?: string;
 };
 
 const USE_TIME_RANGE_STORAGE_KEY = "add-worklog-use-time-range";
+
+type TempoGlobalConfiguration = {
+  remainingEstimateOptional?: boolean;
+};
 
 function IssueSelector({ onSelect }: { onSelect: (issueKey: string) => void }) {
   const [favoriteIssues, setFavoriteIssues] = useState<FavoriteIssue[]>([]);
@@ -238,14 +243,20 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>(formatDateToString(new Date()));
   const [useTimeRange, setUseTimeRange] = useCachedState<boolean>(USE_TIME_RANGE_STORAGE_KEY, false);
+  const [isRemainingEstimateRequired, setIsRemainingEstimateRequired] = useState(false);
 
   // Fetch details of the selected issue
   useEffect(() => {
     async function loadIssue() {
       try {
         setIsLoading(true);
-        const fetchedIssue = await getIssueByKey(issueKey);
+        const [fetchedIssue, globalConfiguration] = await Promise.all([
+          getIssueByKey(issueKey),
+          fetchFromTempoAPI("/globalconfiguration") as Promise<TempoGlobalConfiguration>,
+        ]);
+
         setIssue(fetchedIssue);
+        setIsRemainingEstimateRequired(globalConfiguration.remainingEstimateOptional === false);
       } catch (error) {
         console.error("Failed to load issue:", error);
       } finally {
@@ -294,6 +305,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       let submittedDuration = values.timeSpent;
       let startTime: string;
       let timeSpentSeconds: number;
+      let remainingEstimateSeconds: number | undefined;
 
       if (values.useTimeRange) {
         if (!values.startTime || !values.endTime) {
@@ -339,6 +351,26 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         }
       }
 
+      if (isRemainingEstimateRequired && values.remainingEstimate?.trim()) {
+        remainingEstimateSeconds = parseDuration(values.remainingEstimate);
+
+        if (remainingEstimateSeconds === 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid remaining estimate",
+            message: "Please enter a valid remaining estimate (e.g., 1h, 1h30m, 30m)",
+          });
+          return;
+        }
+      } else if (isRemainingEstimateRequired) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Remaining estimate required",
+          message: "Your Tempo workspace requires an estimated remaining time for new worklogs",
+        });
+        return;
+      }
+
       // Check if issue was loaded successfully
       if (!issue) {
         await showToast({
@@ -361,6 +393,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
           startDate: dateStr,
           startTime,
           description: values.description || "",
+          ...(remainingEstimateSeconds !== undefined ? { remainingEstimateSeconds } : {}),
         }),
       });
 
@@ -380,7 +413,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         primaryAction: {
           title: "View Worklogs",
           onAction: async () => {
-            await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/darchen_gautier/tempo/list-worklogs`);
+            await open("raycast://extensions/darchen_gautier/tempo/list-worklogs");
           },
         },
       });
@@ -432,6 +465,14 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
           placeholder="1h, 1h30m, 30m"
           defaultValue="1h"
           info="Enter duration in human format: 1h, 1h30m, 2h, 45m, etc."
+        />
+      )}
+      {isRemainingEstimateRequired && (
+        <Form.TextField
+          id="remainingEstimate"
+          title="Remaining Estimate"
+          placeholder="Required: 1h, 1h30m, 30m"
+          info="Required by your Tempo workspace. Enter the estimated remaining time after this worklog."
         />
       )}
       <Form.Dropdown id="date" title="Date" value={selectedDate} onChange={setSelectedDate}>
