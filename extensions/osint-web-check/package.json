@@ -153,7 +153,7 @@
       "label": "Enabled"
     },
     {
-      "name": "copy_on_select",
+      "name": "copy_on_open",
       "title": "Copy IOC on Open",
       "description": "Automatically copy the IOC to the clipboard when opening a search result",
       "type": "checkbox",

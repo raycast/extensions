@@ -208,7 +208,7 @@ export default function OsintWebCheck(props: LaunchProps<{ arguments: { url?: st
                       url={deepDiveUrl}
                       icon={Icon.Globe}
                       onOpen={() => {
-                        if (preferences.copy_on_select) {
+                        if (preferences.copy_on_open) {
                           Clipboard.copy(deepDiveUrl);
                           showToast({
                             style: Toast.Style.Success,
@@ -254,7 +254,7 @@ export default function OsintWebCheck(props: LaunchProps<{ arguments: { url?: st
                         url={url}
                         icon={Icon.MagnifyingGlass}
                         onOpen={() => {
-                          if (preferences.copy_on_select) {
+                          if (preferences.copy_on_open) {
                             Clipboard.copy(mode.ioc);
                             showToast({
                               style: Toast.Style.Success,
