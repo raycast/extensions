@@ -125,38 +125,3 @@ function buildVirusTotalURL(ioc: string, iocType: IOCType): string {
       return `https://www.virustotal.com/gui/search/${encodedIOC}`;
   }
 }
-
-/**
- * Get a human-readable description for an OSINT source
- */
-export function getSourceDescription(sourceId: string, iocType: IOCType): string {
-  const descriptions: Record<string, Partial<Record<IOCType, string>> & { default: string }> = {
-    virustotal: {
-      ip: "Check IP reputation and related files",
-      domain: "Analyze domain reputation and DNS records",
-      url: "Scan URL for malicious content",
-      hash: "Get file analysis and detections",
-      default: "Search across all VirusTotal data",
-    },
-    abuseipdb: {
-      ip: "Check IP abuse reports and confidence score",
-      default: "Check IP address reputation",
-    },
-    shodan: {
-      ip: "View open ports and services",
-      default: "Discover internet-facing systems",
-    },
-    urlscan: {
-      url: "View website screenshot and behavior",
-      domain: "Search all scans of this domain",
-      default: "Analyze website behavior",
-    },
-  };
-
-  const sourceDescriptions = descriptions[sourceId];
-  if (!sourceDescriptions) {
-    return "Search this IOC";
-  }
-
-  return sourceDescriptions[iocType] || sourceDescriptions.default || "Search this IOC";
-}

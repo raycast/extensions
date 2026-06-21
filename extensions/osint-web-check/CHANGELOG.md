@@ -1,15 +1,11 @@
 # OSINT Web Check Changelog
 
-## [Merge Search IOC into OSINT Web Check] - {PR_MERGE_DATE}
+## [Consolidate OSINT Toolkit into OSINT Web Check] - {PR_MERGE_DATE}
 
 - Single "OSINT Web Check" command now accepts URLs, domains, IPs, and hashes in one search bar.
 - Deep-dive checks (DNS, SSL, ports, headers, etc.) appear as a single detail panel alongside external OSINT platform lookups.
-- Removed the separate "Search IOC" command.
-
-## [Add Search IOC command] - {PR_MERGE_DATE}
-
-- Added new "Search IOC" command that auto-detects and searches IOCs (IPs, domains, URLs, hashes) across 18 OSINT platforms (VirusTotal, AbuseIPDB, Shodan, AlienVault OTX, URLScan, Hybrid Analysis, etc.).
-- Added 18 source toggle preferences and a "Copy IOC on Open" preference for the new command.
+- Removed the separate "OSINT Toolkit" extension and its "Search IOC" command.
+- Added 14 OSINT source toggle preferences for the platforms now exposed inside OSINT Web Check (VirusTotal, AbuseIPDB, Shodan, AlienVault OTX, URLScan, Pulsedive, Kaspersky OpenTIP, ipinfo, GreyNoise, WHOIS, MalwareBazaar, Censys, crt.sh, WebCheck).
 
 ## [Security.txt Support] - 2024-01-18
 
