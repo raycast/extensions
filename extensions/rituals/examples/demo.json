@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Work",
+    "icon": "hammer-16",
+    "apps": ["Visual Studio Code", "Slack", "Docker", "Google Chrome"],
+    "urls": ["https://github.com", "https://linear.app"],
+    "paths": ["~/Projects/web-app"],
+    "commands": [
+      {
+        "run": "cd ~/Projects/web-app && git pull --ff-only",
+        "stop": ""
+      },
+      {
+        "run": "docker start app-db app-cache",
+        "waitFor": "docker info",
+        "stop": "docker stop app-db app-cache",
+        "stopWaitFor": "docker info"
+      }
+    ],
+    "browser": "Google Chrome",
+    "fastMode": true
+  },
+  {
+    "name": "Focus",
+    "icon": "bulls-eye-16",
+    "apps": ["Notion"],
+    "urls": [],
+    "paths": ["~/Documents/Notes"],
+    "commands": [
+      {
+        "run": "shortcuts run 'Turn On Do Not Disturb'",
+        "stop": "shortcuts run 'Turn Off Do Not Disturb'"
+      }
+    ]
+  }
+]
