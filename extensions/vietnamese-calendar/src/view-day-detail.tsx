@@ -7,8 +7,8 @@ import {
   getLunarDayOccurrences,
   getFullDetail,
   getDateDiff,
+  getSolarTerm,
 } from "./utils/date-utils";
-import { getSolarTerm } from "./utils/solar-terms";
 import { SolarDate } from "lunar-date-vn";
 import {
   getHoliday,
@@ -165,11 +165,12 @@ export default function DayDetailView({ date: initialDate }: Props) {
                     <List.Item.Detail.Metadata.Separator />
 
                     {(() => {
-                      const { term, day } = getSolarTerm(date);
+                      const solarTerm = getSolarTerm(date);
+                      if (!solarTerm) return null;
                       return (
                         <List.Item.Detail.Metadata.Label
                           title="Tiết Khí"
-                          text={`${term.emoji} ${term.name} (ngày ${day})`}
+                          text={`${solarTerm.emoji} ${solarTerm.name} (ngày ${solarTerm.day})`}
                         />
                       );
                     })()}
