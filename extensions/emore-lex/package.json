@@ -21,7 +21,15 @@
       "name": "search-word",
       "title": "Search Word",
       "description": "Look up English words, phrases, and operations vocabulary",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "type": "text",
+          "placeholder": "Word or phrase",
+          "required": false
+        }
+      ]
     }
   ],
   "scripts": {

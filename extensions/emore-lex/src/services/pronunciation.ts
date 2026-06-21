@@ -1,11 +1,12 @@
-import { environment, open } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export async function playPronunciation(audioUrl: string): Promise<void> {
   const cachedPath = await cacheAudio(audioUrl);
-  await open(cachedPath);
+  await playAudioFile(cachedPath);
 }
 
 async function cacheAudio(audioUrl: string): Promise<string> {
@@ -28,9 +29,23 @@ async function cacheAudio(audioUrl: string): Promise<string> {
 async function getAudioBuffer(audioUrl: string): Promise<Buffer> {
   const response = await fetch(audioUrl);
   if (!response.ok) {
-    throw new Error(`Failed to download pronunciation audio：${response.status}`);
+    throw new Error(`Failed to download pronunciation audio: ${response.status}`);
   }
   return Buffer.from(await response.arrayBuffer());
+}
+
+async function playAudioFile(filePath: string): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const player = spawn("/usr/bin/afplay", [filePath], { stdio: "ignore" });
+    player.on("error", reject);
+    player.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Audio playback failed with exit code ${code ?? "unknown"}`));
+      }
+    });
+  });
 }
 
 function isAlreadyExistsError(error: unknown): boolean {

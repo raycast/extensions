@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { WordDetail } from "./components/WordDetail";
 import { lookupWord } from "./services/dictionary";
@@ -8,8 +8,12 @@ import { Favorite, HistoryItem, WordResult } from "./types/word";
 
 const MIN_QUERY_LENGTH = 2;
 
-export default function Command() {
-  const [query, setQuery] = useState("");
+type CommandArguments = {
+  word?: string;
+};
+
+export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+  const [query, setQuery] = useState(props.arguments.word ?? "");
   const [result, setResult] = useState<WordResult>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
