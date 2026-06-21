@@ -19,7 +19,7 @@ import {
   getFindrPath,
   ensureFindrBinaries,
   getMaxResults,
-  getFindrEnv,
+  getOpenRouterApiKey,
   getCustomPaths,
   getFileIcon,
   trackInteraction,
@@ -140,8 +140,14 @@ export default function SearchFiles() {
   const [query, setQuery] = useState("");
   const [findrPath, setFindrPath] = useState(() => getFindrPath());
   const maxResults = getMaxResults();
-  const findrEnv = getFindrEnv();
-  const execEnv = useMemo(() => mergedFindrEnv(findrEnv), [findrEnv]);
+  const openRouterApiKey = getOpenRouterApiKey();
+  const execEnv = useMemo(
+    () =>
+      mergedFindrEnv(
+        openRouterApiKey ? { OPENROUTER_API_KEY: openRouterApiKey } : {},
+      ),
+    [openRouterApiKey],
+  );
   const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
   useEffect(() => {
