@@ -1,5 +1,11 @@
 # Google Calendar Changelog
 
+## [Narrow OAuth Scope] - {PR_MERGE_DATE}
+
+- Narrow OAuth scope from `calendar` (full read/write) to `calendar.events` + `calendar.calendarlist.readonly` + `calendar.freebusy` for least-privilege access
+- Derive conference solution types from the calendar list instead of a separate `calendars.get` call
+- Remove unused `getAutoAddHangouts` dead code
+
 ## [1.4.3] - 2026-05-12
 
 - Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))

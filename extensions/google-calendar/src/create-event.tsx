@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
-import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
+import { useGoogleAPIs, withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
 import { addSignature, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
@@ -66,7 +66,11 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   }, [calendarsData]);
 
   const [conferencingProviders] = useConferenceProviders();
-  const { data: calendarData, isLoading } = useCalendar(calendarId);
+  const allowedConferenceSolutionTypes = useMemo(() => {
+    const allCalendars = [...calendarsData.selected, ...calendarsData.unselected];
+    const match = allCalendars.find((c) => c.id === calendarId || (calendarId === "primary" && c.primary));
+    return match?.conferenceProperties?.allowedConferenceSolutionTypes ?? [];
+  }, [calendarsData, calendarId]);
   const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
@@ -207,7 +211,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   return (
     <Form
-      isLoading={isLoading || isLoadingCalendars}
+      isLoading={isLoadingCalendars}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Calendar} title="Create Event" onSubmit={handleSubmit} />
@@ -248,7 +252,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       >
         <Form.Dropdown.Section>
           <Form.Dropdown.Item icon={Icon.CircleDisabled} title="None" value="none" />
-          {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
+          {allowedConferenceSolutionTypes.map((type) => (
             <Form.Dropdown.Item
               key={type}
               icon={getConferenceSolutionIcon(type)}
