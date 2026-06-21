@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Image, List, getApplications, useNavigation } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CommandEntry, Profile, upsertProfile } from "../lib/profiles";
 import { AppPicker, FilesPicker, UrlPicker } from "./pickers";
 import ProfileDetailsForm from "./ProfileDetailsForm";
@@ -33,41 +33,48 @@ export default function ProfileBuilder({ profile, onSaved }: Props) {
     return path ? { fileIcon: path } : Icon.AppWindow;
   }
 
-  async function persist(next: Profile) {
+  // Mirror the latest committed profile in a ref so successive/multiple adds
+  // (e.g. picking several files at once) build on the newest list, not a stale
+  // closure from the render that opened the picker.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  function commit(next: Profile) {
+    stateRef.current = next;
     setState(next);
-    await upsertProfile(next);
+    upsertProfile(next);
     onSaved?.();
   }
 
-  // ----- string-list helpers (apps / urls / paths) -----
+  // ----- string-list helpers (apps / urls / paths) — read from the ref -----
   const get = (key: ListKey) => state[key] ?? [];
-  const setList = (key: ListKey, values: string[]) => persist({ ...state, [key]: values });
-  const addTo = (key: ListKey) => (value: string) => setList(key, [...get(key), value]);
-  const removeAt = (key: ListKey, index: number) =>
-    setList(
-      key,
-      get(key).filter((_, i) => i !== index),
-    );
+  const addTo = (key: ListKey) => (value: string) => {
+    const p = stateRef.current;
+    commit({ ...p, [key]: [...(p[key] ?? []), value] });
+  };
+  const removeAt = (key: ListKey, index: number) => {
+    const p = stateRef.current;
+    commit({ ...p, [key]: (p[key] ?? []).filter((_, i) => i !== index) });
+  };
   function move(key: ListKey, index: number, dir: -1 | 1) {
-    const values = [...get(key)];
+    const values = [...(stateRef.current[key] ?? [])];
     const t = index + dir;
     if (t < 0 || t >= values.length) return;
     [values[index], values[t]] = [values[t], values[index]];
-    setList(key, values);
+    commit({ ...stateRef.current, [key]: values });
   }
 
   // ----- command helpers -----
-  const addCommand = (e: CommandEntry) => persist({ ...state, commands: [...state.commands, e] });
+  const addCommand = (e: CommandEntry) => commit({ ...stateRef.current, commands: [...stateRef.current.commands, e] });
   const updateCommand = (index: number, e: CommandEntry) =>
-    persist({ ...state, commands: state.commands.map((c, i) => (i === index ? e : c)) });
+    commit({ ...stateRef.current, commands: stateRef.current.commands.map((c, i) => (i === index ? e : c)) });
   const removeCommand = (index: number) =>
-    persist({ ...state, commands: state.commands.filter((_, i) => i !== index) });
+    commit({ ...stateRef.current, commands: stateRef.current.commands.filter((_, i) => i !== index) });
   function moveCommand(index: number, dir: -1 | 1) {
-    const cmds = [...state.commands];
+    const cmds = [...stateRef.current.commands];
     const t = index + dir;
     if (t < 0 || t >= cmds.length) return;
     [cmds[index], cmds[t]] = [cmds[t], cmds[index]];
-    persist({ ...state, commands: cmds });
+    commit({ ...stateRef.current, commands: cmds });
   }
 
   const addApp = () => push(<AppPicker onPick={addTo("apps")} />);
@@ -79,7 +86,7 @@ export default function ProfileBuilder({ profile, onSaved }: Props) {
       <ProfileDetailsForm
         name={state.name}
         icon={state.icon}
-        onSave={(name, icon) => persist({ ...state, name, icon })}
+        onSave={(name, icon) => commit({ ...stateRef.current, name, icon })}
       />,
     );
   const editSettings = () =>
@@ -89,7 +96,7 @@ export default function ProfileBuilder({ profile, onSaved }: Props) {
         stepDelay={state.stepDelay ?? 0}
         browser={state.browser}
         browserProfile={state.browserProfile}
-        onSave={(s) => persist({ ...state, ...s })}
+        onSave={(s) => commit({ ...stateRef.current, ...s })}
       />,
     );
 

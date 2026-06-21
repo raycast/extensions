@@ -9,6 +9,8 @@ interface FlatItem {
   type: ItemType;
   value: string;
   profile: string;
+  browser?: string;
+  browserProfile?: string;
 }
 
 const TYPE_LABEL: Record<ItemType, string> = { app: "App", url: "URL", path: "File", command: "Command" };
@@ -25,7 +27,16 @@ export default function QuickOpen() {
       const add = (type: ItemType, values?: string[]) =>
         (values ?? [])
           .filter((v) => v.trim())
-          .forEach((value, i) => out.push({ id: `${p.id}-${type}-${i}`, type, value, profile: p.name }));
+          .forEach((value, i) =>
+            out.push({
+              id: `${p.id}-${type}-${i}`,
+              type,
+              value,
+              profile: p.name,
+              browser: type === "url" ? p.browser : undefined,
+              browserProfile: type === "url" ? p.browserProfile : undefined,
+            }),
+          );
       add("app", p.apps);
       add("url", p.urls);
       add("path", p.paths);
@@ -52,7 +63,7 @@ export default function QuickOpen() {
   async function open(item: FlatItem) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Opening ${item.value}` });
     try {
-      await runOne(item.type, item.value);
+      await runOne(item.type, item.value, { browser: item.browser, browserProfile: item.browserProfile });
       toast.style = Toast.Style.Success;
       toast.title = "Opened";
     } catch (err) {

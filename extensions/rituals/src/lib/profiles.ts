@@ -352,13 +352,19 @@ export function countTeardown(profile: Profile): number {
   return clean(profile.apps).length + profile.commands.filter((c) => c.stop?.trim()).length;
 }
 
-/** Run a single item (used by Quick Open). */
-export function runOne(type: ItemType, value: string): Promise<unknown> {
+/** Run a single item (used by Quick Open). URLs honor the ritual's browser settings. */
+export function runOne(
+  type: ItemType,
+  value: string,
+  opts?: { browser?: string; browserProfile?: string },
+): Promise<unknown> {
   switch (type) {
     case "app":
       return runStep({ label: value, kind: "open-app", arg: value });
     case "url":
-      return runStep({ label: value, kind: "open-url", arg: value });
+      return opts?.browser
+        ? openUrlsIn(opts.browser, opts.browserProfile, [value])
+        : runStep({ label: value, kind: "open-url", arg: value });
     case "path":
       return runStep({ label: value, kind: "open-path", arg: value });
     case "command":
