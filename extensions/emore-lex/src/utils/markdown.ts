@@ -54,7 +54,7 @@ export function renderWordCsv(result: WordResult): string {
   const values = [
     result.word,
     result.phonetics.map((item) => `${item.region} ${item.text ?? ""}`.trim()).join("; "),
-    unique(result.definitions.map((item) => item.chinese).filter(isString)).join("; "),
+    renderChineseMeaningValues(result).join("; "),
     result.localDefinitions.join("; "),
     result.definitions.map((item) => `${item.partOfSpeech}. ${item.english}`).join("; "),
     result.synonyms.join("; "),
@@ -70,10 +70,17 @@ function escapeCsvValue(value: string): string {
 }
 
 function renderChineseMeanings(result: WordResult): string[] {
-  const translatedDefinitions = unique(result.definitions.map((definition) => definition.chinese).filter(isString));
-  if (translatedDefinitions.length === 0) return ["- No Chinese translation found."];
+  const translatedDefinitions = renderChineseMeaningValues(result);
+  if (translatedDefinitions.length === 0) return ["- No Chinese meaning found."];
 
   return translatedDefinitions.map((definition) => `- ${definition}`);
+}
+
+function renderChineseMeaningValues(result: WordResult): string[] {
+  return unique([
+    ...result.definitions.map((definition) => definition.chinese).filter(isString),
+    ...result.localDefinitions,
+  ]);
 }
 
 function renderMeaningNotes(result: WordResult): string[] {

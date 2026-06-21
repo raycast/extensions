@@ -13,7 +13,7 @@ type CommandArguments = {
 };
 
 export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
-  const [query, setQuery] = useState(props.arguments.word ?? "");
+  const [query, setQuery] = useState(props.arguments?.word ?? "");
   const [result, setResult] = useState<WordResult>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);

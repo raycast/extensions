@@ -23,6 +23,16 @@ type DictionaryApiEntry = {
   }>;
 };
 
+type DictionaryFetchResult = {
+  entries: DictionaryApiEntry[];
+  cacheable: boolean;
+};
+
+type NormalizedResult = {
+  result: WordResult;
+  cacheable: boolean;
+};
+
 const MAX_DEFINITIONS = 8;
 const MAX_EXAMPLES = 5;
 
@@ -34,21 +44,38 @@ export async function lookupWord(query: string, signal?: AbortSignal): Promise<W
     return { ...cached, source: "cache" };
   }
 
-  const [entries, synonyms] = await Promise.all([
+  const [dictionary, synonyms] = await Promise.all([
     fetchDictionaryEntries(normalizedQuery, signal),
-    fetchSynonyms(normalizedQuery, signal),
+    fetchSynonymsSafely(normalizedQuery, signal),
   ]);
-  const result = await normalizeEntries(normalizedQuery, entries, synonyms, signal);
-  await setCached(cacheKey, result);
+  const { result, cacheable } = await normalizeEntries(normalizedQuery, dictionary.entries, synonyms, signal);
+  if (dictionary.cacheable && cacheable) {
+    await setCached(cacheKey, result);
+  }
   return result;
 }
 
-async function fetchDictionaryEntries(query: string, signal?: AbortSignal): Promise<DictionaryApiEntry[]> {
-  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`, {
-    signal,
-  });
-  if (!response.ok) return [];
-  return (await response.json()) as DictionaryApiEntry[];
+async function fetchDictionaryEntries(query: string, signal?: AbortSignal): Promise<DictionaryFetchResult> {
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`, {
+      signal,
+    });
+    if (response.status === 404) return { entries: [], cacheable: true };
+    if (!response.ok) return { entries: [], cacheable: false };
+    return { entries: (await response.json()) as DictionaryApiEntry[], cacheable: true };
+  } catch (error) {
+    if (isAbortError(error)) throw error;
+    return { entries: [], cacheable: false };
+  }
+}
+
+async function fetchSynonymsSafely(query: string, signal?: AbortSignal): Promise<string[]> {
+  try {
+    return await fetchSynonyms(query, signal);
+  } catch (error) {
+    if (isAbortError(error)) throw error;
+    return [];
+  }
 }
 
 async function normalizeEntries(
@@ -56,30 +83,34 @@ async function normalizeEntries(
   entries: DictionaryApiEntry[],
   synonyms: string[],
   signal?: AbortSignal,
-): Promise<WordResult> {
+): Promise<NormalizedResult> {
   const firstEntry = entries[0];
   const word = firstEntry?.word ?? query;
-  const definitions = await translateDefinitions(collectDefinitions(entries), signal);
+  const translation = await translateDefinitions(collectDefinitions(entries), signal);
+  const definitions = translation.definitions;
   const apiSynonyms = collectSynonyms(entries);
   const mergedSynonyms = unique([...synonyms, ...apiSynonyms]).slice(0, 10);
   const techEntry = findTechEntry(query);
   const localDefinitions = getLocalDefinitions(query);
 
   return {
-    query,
-    word,
-    syllables: splitSyllables(word),
-    pronunciationHint: getPronunciationHint(word),
-    phonetics: collectPhonetics(entries),
-    localDefinitions: techEntry ? unique([techEntry.meaning, ...localDefinitions]) : localDefinitions,
-    definitions,
-    examples: definitions.filter((definition) => definition.example).slice(0, MAX_EXAMPLES),
-    inflections: getInflections(word),
-    collocations: getCollocations(query),
-    synonyms: mergedSynonyms,
-    techEntry,
-    source: entries.length > 0 ? "remote" : "local",
-    updatedAt: new Date().toISOString(),
+    result: {
+      query,
+      word,
+      syllables: splitSyllables(word),
+      pronunciationHint: getPronunciationHint(word),
+      phonetics: collectPhonetics(entries),
+      localDefinitions: techEntry ? unique([techEntry.meaning, ...localDefinitions]) : localDefinitions,
+      definitions,
+      examples: definitions.filter((definition) => definition.example).slice(0, MAX_EXAMPLES),
+      inflections: getInflections(word),
+      collocations: getCollocations(query),
+      synonyms: mergedSynonyms,
+      techEntry,
+      source: entries.length > 0 ? "remote" : "local",
+      updatedAt: new Date().toISOString(),
+    },
+    cacheable: translation.cacheable,
   };
 }
 
@@ -118,8 +149,9 @@ function collectPhonetics(entries: DictionaryApiEntry[]): PhoneticVariant[] {
   const variants: PhoneticVariant[] = [];
 
   const us =
-    allPhonetics.find((phonetic) => phonetic.audio?.includes("-us")) ?? allPhonetics.find((phonetic) => phonetic.audio);
-  const uk = allPhonetics.find((phonetic) => phonetic.audio?.includes("-uk"));
+    allPhonetics.find((phonetic) => phonetic.audio?.toLowerCase().includes("-us")) ??
+    allPhonetics.find((phonetic) => phonetic.audio);
+  const uk = allPhonetics.find((phonetic) => phonetic.audio?.toLowerCase().includes("-uk"));
   const textFallback = entries.find((entry) => entry.phonetic)?.phonetic;
 
   if (us?.text || us?.audio || textFallback) {
@@ -231,4 +263,8 @@ function unique(values: string[]): string[] {
 
 function normalizeQuery(query: string): string {
   return query.trim().toLowerCase().replaceAll(/\s+/g, " ");
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }

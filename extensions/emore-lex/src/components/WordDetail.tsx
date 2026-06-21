@@ -139,8 +139,11 @@ function renderPhonetics(result: WordResult): string | undefined {
 }
 
 function renderChineseMeanings(result: WordResult): string[] {
-  const translatedDefinitions = unique(result.definitions.map((definition) => definition.chinese).filter(isString));
-  if (translatedDefinitions.length === 0) return ["- No Chinese translation found."];
+  const translatedDefinitions = unique([
+    ...result.definitions.map((definition) => definition.chinese).filter(isString),
+    ...result.localDefinitions,
+  ]);
+  if (translatedDefinitions.length === 0) return ["- No Chinese meaning found."];
 
   return translatedDefinitions.map((definition) => `- ${definition}`);
 }
