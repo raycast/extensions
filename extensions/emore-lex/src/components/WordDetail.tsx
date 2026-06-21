@@ -7,9 +7,10 @@ import { renderWordCsv, renderWordMarkdown } from "../utils/markdown";
 
 type WordDetailProps = {
   result: WordResult;
+  onFavoriteChange?: () => Promise<void>;
 };
 
-export function WordDetail({ result }: WordDetailProps) {
+export function WordDetail({ result, onFavoriteChange }: WordDetailProps) {
   const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export function WordDetail({ result }: WordDetailProps) {
               title={favorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={favorite ? Icon.StarDisabled : Icon.Star}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              onAction={() => void handleToggleFavorite(result.word, setFavorite)}
+              onAction={() => void handleToggleFavorite(result.word, setFavorite, onFavoriteChange)}
             />
             <Action.CopyToClipboard
               title="Copy Markdown"
@@ -72,9 +73,14 @@ async function handlePlay(audioUrl?: string): Promise<void> {
   }
 }
 
-async function handleToggleFavorite(word: string, setFavorite: (value: boolean) => void): Promise<void> {
+async function handleToggleFavorite(
+  word: string,
+  setFavorite: (value: boolean) => void,
+  onFavoriteChange?: () => Promise<void>,
+): Promise<void> {
   const nextFavorite = await toggleFavorite(word);
   setFavorite(nextFavorite);
+  await onFavoriteChange?.();
   await showToast({
     style: Toast.Style.Success,
     title: nextFavorite ? "Added to Favorites" : "Removed from Favorites",

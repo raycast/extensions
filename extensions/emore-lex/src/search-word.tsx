@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { WordDetail } from "./components/WordDetail";
 import { lookupWord } from "./services/dictionary";
 import { getFavorites } from "./storage/favorites";
@@ -19,10 +19,11 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const refreshData = useCallback(() => refreshLocalData(setHistory, setFavorites), []);
 
   useEffect(() => {
-    void refreshLocalData(setHistory, setFavorites);
-  }, []);
+    void refreshData();
+  }, [refreshData]);
 
   useEffect(() => {
     const normalizedQuery = query.trim();
@@ -49,7 +50,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
           await recordHistory(nextResult.word);
 
           if (!isCurrentQuery || abortController.signal.aborted) return;
-          await refreshLocalData(setHistory, setFavorites);
+          await refreshData();
         })
         .catch((lookupError: unknown) => {
           if (!isCurrentQuery || isAbortError(lookupError)) return;
@@ -70,7 +71,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       abortController.abort();
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, refreshData]);
 
   const stats = useMemo(() => getStudyStats(history), [history]);
 
@@ -84,7 +85,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       {query.trim().length < MIN_QUERY_LENGTH ? (
         <HomeItems history={history} favorites={favorites} stats={stats} setQuery={setQuery} />
       ) : result ? (
-        <SearchResultItem result={result} />
+        <SearchResultItem result={result} onFavoriteChange={refreshData} />
       ) : (
         <List.EmptyView
           title={error ? "Lookup Failed" : "Start Typing to Search"}
@@ -174,7 +175,7 @@ function QuickSearchItem({ title, date, icon, setQuery }: QuickSearchItemProps) 
   );
 }
 
-function SearchResultItem({ result }: { result: WordResult }) {
+function SearchResultItem({ result, onFavoriteChange }: { result: WordResult; onFavoriteChange: () => Promise<void> }) {
   const chineseMeanings = [
     ...result.definitions.map((definition) => definition.chinese).filter(isString),
     ...result.localDefinitions,
@@ -193,7 +194,11 @@ function SearchResultItem({ result }: { result: WordResult }) {
         accessories={accessories}
         actions={
           <ActionPanel>
-            <Action.Push title="Open Details" icon={Icon.Sidebar} target={<WordDetail result={result} />} />
+            <Action.Push
+              title="Open Details"
+              icon={Icon.Sidebar}
+              target={<WordDetail result={result} onFavoriteChange={onFavoriteChange} />}
+            />
           </ActionPanel>
         }
       />

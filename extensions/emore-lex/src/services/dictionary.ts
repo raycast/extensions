@@ -180,6 +180,10 @@ function collectPhonetics(entries: DictionaryApiEntry[]): PhoneticVariant[] {
 
 function getInflections(word: string) {
   const normalizedWord = word.toLowerCase();
+  if (!isSingleWord(normalizedWord)) {
+    return { base: normalizedWord };
+  }
+
   if (normalizedWord.endsWith("ied")) {
     const base = `${normalizedWord.slice(0, -3)}y`;
     return {
@@ -191,8 +195,7 @@ function getInflections(word: string) {
   }
 
   if (normalizedWord.endsWith("ing")) {
-    const base = normalizedWord.slice(0, -3);
-    return { base, presentParticiple: normalizedWord, past: `${base}ed`, pastParticiple: `${base}ed` };
+    return { base: normalizedWord, presentParticiple: normalizedWord };
   }
 
   if (normalizedWord.endsWith("e")) {
@@ -204,15 +207,13 @@ function getInflections(word: string) {
     };
   }
 
-  const plural = normalizedWord.endsWith("s") ? normalizedWord : `${normalizedWord}s`;
-
   return {
     base: normalizedWord,
-    past: `${normalizedWord}ed`,
-    pastParticiple: `${normalizedWord}ed`,
-    presentParticiple: `${normalizedWord}ing`,
-    plural,
   };
+}
+
+function isSingleWord(word: string): boolean {
+  return /^[a-z]+$/.test(word);
 }
 
 function getCollocations(query: string): string[] {

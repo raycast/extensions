@@ -66,7 +66,12 @@ export function renderWordCsv(result: WordResult): string {
 }
 
 function escapeCsvValue(value: string): string {
-  return `"${value.replaceAll('"', '""')}"`;
+  const safeValue = neutralizeCsvFormula(value);
+  return `"${safeValue.replaceAll('"', '""')}"`;
+}
+
+function neutralizeCsvFormula(value: string): string {
+  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 }
 
 function renderChineseMeanings(result: WordResult): string[] {

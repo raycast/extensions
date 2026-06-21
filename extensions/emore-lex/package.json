@@ -14,7 +14,7 @@
     "Developer Tools"
   ],
   "engines": {
-    "node": ">=22.22.2"
+    "node": ">=22"
   },
   "commands": [
     {

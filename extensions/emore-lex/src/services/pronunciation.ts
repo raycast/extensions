@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export async function playPronunciation(audioUrl: string): Promise<void> {
@@ -17,11 +17,21 @@ async function cacheAudio(audioUrl: string): Promise<string> {
   const fileName = `${createHash("sha1").update(audioUrl).digest("hex")}.${extension}`;
   const filePath = join(audioDirectory, fileName);
 
-  try {
-    await writeFile(filePath, await getAudioBuffer(audioUrl), { flag: "wx" });
-  } catch (error) {
-    if (!isAlreadyExistsError(error)) throw error;
+  if (await isUsableFile(filePath)) {
+    return filePath;
   }
+
+  const audioBuffer = await getAudioBuffer(audioUrl);
+  if (audioBuffer.length === 0) {
+    throw new Error("Downloaded pronunciation audio is empty");
+  }
+
+  const temporaryPath = join(audioDirectory, `${fileName}.${process.pid}.${Date.now()}.tmp`);
+  await writeFile(temporaryPath, audioBuffer, { flag: "wx" });
+  await rename(temporaryPath, filePath).catch(async (error) => {
+    await unlink(temporaryPath).catch(() => undefined);
+    if (!(await isUsableFile(filePath))) throw error;
+  });
 
   return filePath;
 }
@@ -48,6 +58,11 @@ async function playAudioFile(filePath: string): Promise<void> {
   });
 }
 
-function isAlreadyExistsError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "EEXIST";
+async function isUsableFile(filePath: string): Promise<boolean> {
+  try {
+    const fileStat = await stat(filePath);
+    return fileStat.isFile() && fileStat.size > 0;
+  } catch {
+    return false;
+  }
 }
