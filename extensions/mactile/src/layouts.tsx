@@ -103,6 +103,7 @@ export default function Command() {
           updatedAt: "",
         }}
         onSave={loadLayouts}
+        returnToListAfterSave
       />,
     );
   }

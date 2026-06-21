@@ -17,9 +17,10 @@ import { LayoutFormValues, LayoutPreset } from "../types";
 type Props = {
   layout?: LayoutPreset;
   onSave?: () => void;
+  returnToListAfterSave?: boolean;
 };
 
-export function LayoutForm({ layout, onSave }: Props) {
+export function LayoutForm({ layout, onSave, returnToListAfterSave = false }: Props) {
   const { pop } = useNavigation();
   const isEditing = Boolean(layout?.id);
 
@@ -38,7 +39,7 @@ export function LayoutForm({ layout, onSave }: Props) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Use percentages from 1 to 100",
-        message: "Width and height are based on the main monitor.",
+        message: "Width and height are based on the window's current monitor.",
       });
       return;
     }
@@ -71,10 +72,10 @@ export function LayoutForm({ layout, onSave }: Props) {
 
     onSave?.();
 
-    if (isEditing) {
+    if (isEditing || returnToListAfterSave) {
       await showToast({
         style: Toast.Style.Success,
-        title: "Layout Updated",
+        title: isEditing ? "Layout Updated" : "Layout Created",
         message: `${name} is ready to run.`,
       });
       pop();
@@ -98,7 +99,7 @@ export function LayoutForm({ layout, onSave }: Props) {
         </ActionPanel>
       }
     >
-      <Form.Description text="Set the focused window as a percentage of the main monitor." />
+      <Form.Description text="Set the focused window as a percentage of its current monitor." />
       <Form.TextField id="name" title="Name" placeholder="Reading, Writing, Focus" defaultValue={layout?.name} />
       <Form.TextField
         id="widthPercentage"
