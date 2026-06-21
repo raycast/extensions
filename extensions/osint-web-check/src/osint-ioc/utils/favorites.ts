@@ -19,10 +19,7 @@ export async function getFavorites(): Promise<string[]> {
 
   try {
     const parsed = JSON.parse(favoritesJson);
-    return Array.isArray(parsed) &&
-      parsed.every((item) => typeof item === "string")
-      ? parsed
-      : [];
+    return Array.isArray(parsed) && parsed.every((item) => typeof item === "string") ? parsed : [];
   } catch {
     return [];
   }
