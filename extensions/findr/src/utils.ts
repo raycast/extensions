@@ -21,6 +21,8 @@ import { get } from "https";
 const GITHUB_REPO = "Roderick111/findr";
 const FINDR_BINARY = "findr-macos-universal";
 const FINDR_OCR_BINARY = "findr-ocr-macos-universal";
+/** Steal lock files left behind by crashed downloads after this age. */
+const LOCK_STALE_MS = 5 * 60 * 1000;
 
 /** True when path exists, is a regular file, and is non-empty. */
 function isUsableBinary(path: string): boolean {
@@ -45,6 +47,18 @@ function removeIfInvalid(path: string): void {
 
 let downloadInFlight: Promise<string> | null = null;
 
+/** Remove lock files orphaned by a crashed download process. */
+function removeStaleLock(lockPath: string): void {
+  try {
+    if (!existsSync(lockPath)) return;
+    if (Date.now() - statSync(lockPath).mtimeMs > LOCK_STALE_MS) {
+      unlinkSync(lockPath);
+    }
+  } catch {
+    /* best effort */
+  }
+}
+
 /** Serialize parallel downloads across extension instances. */
 async function withDownloadLock<T>(
   lockPath: string,
@@ -52,6 +66,7 @@ async function withDownloadLock<T>(
 ): Promise<T> {
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
+    removeStaleLock(lockPath);
     try {
       const fd = openSync(lockPath, "wx");
       closeSync(fd);
@@ -143,6 +158,33 @@ function sha256File(filePath: string): string {
   return createHash("sha256").update(data).digest("hex");
 }
 
+/** Fetch JSON from an HTTPS URL. Rejects on network, stream, or parse errors. */
+function httpsGetJson<T>(
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    get(url, { headers }, (res) => {
+      let data = "";
+      res.on("data", (chunk: string) => (data += chunk));
+      res.on("error", reject);
+      res.on("end", () => {
+        if (res.statusCode !== 200) {
+          const hint =
+            res.statusCode === 403 ? " (rate limit — try again later)" : "";
+          reject(new Error(`HTTP ${res.statusCode}${hint}`));
+          return;
+        }
+        try {
+          resolve(JSON.parse(data) as T);
+        } catch {
+          reject(new Error("Failed to parse JSON response"));
+        }
+      });
+    }).on("error", reject);
+  });
+}
+
 /** Fetch text content from a URL, following redirects. Returns null on any error. */
 function fetchText(url: string): Promise<string | null> {
   return new Promise((resolve) => {
@@ -226,41 +268,19 @@ export async function ensureFindrBinaries(): Promise<string> {
       return findrPath;
     }
 
-    // Fetch latest release download URLs from GitHub API
     const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
-    const release: {
+    let release: {
       assets: { name: string; browser_download_url: string }[];
-    } = await new Promise((resolve, reject) => {
-      get(
-        releaseUrl,
-        {
-          headers: {
-            "User-Agent": "findr-raycast",
-            Accept: "application/json",
-          },
-        },
-        (res) => {
-          let data = "";
-          res.on("data", (chunk: string) => (data += chunk));
-          res.on("error", reject);
-          res.on("end", () => {
-            if (res.statusCode !== 200) {
-              reject(
-                new Error(
-                  `GitHub API error: HTTP ${res.statusCode}${res.statusCode === 403 ? " (rate limit — try again later)" : ""}`,
-                ),
-              );
-              return;
-            }
-            try {
-              resolve(JSON.parse(data));
-            } catch {
-              reject(new Error("Failed to parse GitHub release"));
-            }
-          });
-        },
-      ).on("error", reject);
-    });
+    };
+    try {
+      release = await httpsGetJson(releaseUrl, {
+        "User-Agent": "findr-raycast",
+        Accept: "application/json",
+      });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`GitHub API error: ${detail}`);
+    }
 
     const findrAsset = release.assets?.find((a) => a.name === FINDR_BINARY);
     const ocrAsset = release.assets?.find((a) => a.name === FINDR_OCR_BINARY);
@@ -394,6 +414,25 @@ export function getFindrEnv(): Record<string, string> {
     env.OPENROUTER_API_KEY = key;
   }
   return env;
+}
+
+/** Merge process env with findr-specific overrides for subprocess calls. */
+export function mergedFindrEnv(
+  findrEnv: Record<string, string>,
+): NodeJS.ProcessEnv {
+  return { ...process.env, ...findrEnv };
+}
+
+/** Build findr search CLI args. */
+export function buildSearchArgs(
+  query: string,
+  limit: number,
+  opts: { semantic?: boolean; sync?: boolean } = {},
+): string[] {
+  const args = ["search", query, "--json", "--limit", String(limit)];
+  if (!opts.semantic) args.push("--no-semantic");
+  if (opts.sync === false) args.push("--no-sync");
+  return args;
 }
 
 export function formatFileSize(bytes: number | null): string {
