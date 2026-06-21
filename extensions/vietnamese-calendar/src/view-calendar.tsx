@@ -28,10 +28,11 @@ const isNewRaycast = (() => {
 })();
 
 export default function CalendarGrid() {
-  console.log("Environment:", JSON.stringify(environment));
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedId, setSelectedId] = useState<string | undefined>();
+
   const delaySetSelectedId = useCallback((val: string | undefined) => {
+
     // NOTE: some delay to prevent flash UI
     setTimeout(() => {
       setSelectedId(val);
