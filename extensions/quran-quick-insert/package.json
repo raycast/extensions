@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quran-quick-insert",
   "title": "Quran Quick Insert",
   "description": "Search, copy, and insert Quran ayahs or ranges.",

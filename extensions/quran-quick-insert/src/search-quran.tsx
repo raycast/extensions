@@ -9,9 +9,7 @@ import {
   ayahs_in_surah,
   Cursor,
   format_reference,
-  OutputOptions,
   parse_reference,
-  SearchOptions,
   search_ayahs,
   search_surahs,
   Surah,
@@ -19,14 +17,16 @@ import {
 
 type Mode = "ayah" | "surah";
 type SetCursor = (cursor?: Cursor) => void;
-type Preferences = OutputOptions & SearchOptions;
 
 export default function Command() {
   const [query, set_query] = useState("");
   const [mode, set_mode] = useState<Mode>("ayah");
   const [range_start, set_range_start] = useState<Cursor>();
   const [range_end, set_range_end] = useState<Cursor>();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = useMemo(
+    () => getPreferenceValues<Preferences.SearchQuran>(),
+    [],
+  );
   const clear_range = () => {
     set_range_start(undefined);
     set_range_end(undefined);

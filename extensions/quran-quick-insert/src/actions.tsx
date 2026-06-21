@@ -1,11 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues } from "@raycast/api";
-import {
-  Ayah,
-  format_ayahs,
-  OutputFormat,
-  OutputOptions,
-  quran_com_url,
-} from "./quran";
+import { Ayah, format_ayahs, OutputFormat, quran_com_url } from "./quran";
 
 export function AyahActionSections({
   ayahs,
@@ -16,7 +10,7 @@ export function AyahActionSections({
   copy_title?: string;
   paste_title?: string;
 }) {
-  const preferences = getPreferenceValues<OutputOptions>();
+  const preferences = getPreferenceValues<Preferences>();
 
   return (
     <>
@@ -59,7 +53,7 @@ function CopyFormat({
   ayahs: Ayah[];
   format: OutputFormat;
 }) {
-  const preferences = getPreferenceValues<OutputOptions>();
+  const preferences = getPreferenceValues<Preferences>();
   return (
     <Action.CopyToClipboard
       title={title}
