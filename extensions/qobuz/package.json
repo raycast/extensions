@@ -86,7 +86,7 @@
   ],
   "dependencies": {
     "@kud/qobuz": "0.5.0",
-    "@raycast/api": "1.104.19",
+    "@raycast/api": "1.104.20",
     "@raycast/utils": "2.2.6"
   },
   "devDependencies": {
