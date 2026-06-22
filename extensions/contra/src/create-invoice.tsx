@@ -5,6 +5,7 @@ import {
   Form,
   Icon,
   Toast,
+  open,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -226,8 +227,7 @@ function ConfirmInvoice({
       if (res.invoiceUrl) {
         toast.primaryAction = {
           title: "Open Invoice",
-          onAction: () =>
-            import("@raycast/api").then((m) => m.open(res.invoiceUrl!)),
+          onAction: () => open(res.invoiceUrl!),
         };
       }
       pop();

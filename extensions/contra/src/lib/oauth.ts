@@ -31,11 +31,24 @@ export const client = new OAuth.PKCEClient({
   description: "Connect your Contra account to view finances and projects.",
 });
 
+// Coalesces concurrent registration attempts (e.g. menu-bar + a command
+// launching together) onto a single request so we never orphan a client_id.
+let registrationInFlight: Promise<string> | null = null;
+
 /** Register (or reuse) a public OAuth client for the given redirect URI. */
 async function getClientId(redirectURI: string): Promise<string> {
   const stored = await LocalStorage.getItem<string>(CLIENT_ID_KEY);
   if (stored) return stored;
 
+  if (!registrationInFlight) {
+    registrationInFlight = registerClient(redirectURI).finally(() => {
+      registrationInFlight = null;
+    });
+  }
+  return registrationInFlight;
+}
+
+async function registerClient(redirectURI: string): Promise<string> {
   const res = await fetch(REGISTER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
