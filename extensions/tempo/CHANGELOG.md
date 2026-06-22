@@ -1,6 +1,6 @@
 # Tempo Changelog
 
-## [Add Remaining Estimate Validation] - {PR_MERGE_DATE}
+## [Add Remaining Estimate Validation] - 2026-06-22
 
 - Add validation for remaining estimate field based on global configuration
 
