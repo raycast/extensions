@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pos",
+  "title": "Pos — Focus Cockpit",
+  "description": "Drive the pos terminal cockpit from Raycast: browse focuses, projects and git status, and run any pos command.",
+  "icon": "icon.png",
+  "author": "glebkalinin",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "commands": [
+    {
+      "name": "focuses",
+      "title": "Pos: Focuses",
+      "subtitle": "pos",
+      "description": "Browse focus areas; drill into a focus's projects.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Pos: Project Status",
+      "subtitle": "pos",
+      "description": "Projects across focuses with git branch/dirty status; open, load, or launch Claude Code.",
+      "mode": "view"
+    },
+    {
+      "name": "commands",
+      "title": "Pos: Run Command",
+      "subtitle": "pos",
+      "description": "Fuzzy-pick any pos command and run it.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "posBin",
+      "type": "textfield",
+      "required": false,
+      "title": "pos binary",
+      "description": "Path to the pos executable. Leave blank to auto-detect via your login shell.",
+      "placeholder": "/Users/you/.local/bin/pos"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts"
+  }
+}
