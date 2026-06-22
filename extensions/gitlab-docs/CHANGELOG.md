@@ -1,6 +1,6 @@
 # GitLab Docs Changelog
 
-## [Add Detail View] - {PR_MERGE_DATE}
+## [Add Detail View] - 2026-06-22
 
 - Add a detail panel to Documentation, Handbook, and Design System results that renders the full page content
 - Toggle the detail panel with "Show Details" / "Hide Details" (Cmd+D); open the page in the browser with Enter while the panel is open
