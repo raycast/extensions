@@ -5,11 +5,6 @@ import { STORAGE_KEY } from "../src/constants/secrets";
 import db from "./__mocks__/db.json";
 
 jest.mock("fs-extra");
-jest.mock("@raycast/api", () => ({
-	LocalStorage: {
-		setItem: jest.fn(),
-	},
-}));
 
 const mockedReadFileSync = fse.readFileSync as jest.MockedFunction<typeof fse.readFileSync>;
 const mockedSetItem = LocalStorage.setItem as jest.MockedFunction<typeof LocalStorage.setItem>;
