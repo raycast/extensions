@@ -61,13 +61,12 @@ export const fetchSearchIndex = async (): Promise<DocItem[]> => {
       "https://doc.rust-lang.org/alloc/",
     );
 
-    // Merge logic: Index items (Keywords, Modules) should take precedence or at least exist.
-    // De-duplication: if name and type match?
-    // Let's just concat. Raycast list handles duplicates by key, but we need unique key.
-    // DocItem doesn't have ID.
-    // We'll trust the user search.
-
-    return [...stdIndexItems, ...stdItems, ...coreItems, ...allocItems];
+    return deduplicateItems([
+      ...stdIndexItems,
+      ...stdItems,
+      ...coreItems,
+      ...allocItems,
+    ]);
   } catch (error) {
     console.error("Error fetching documentation:", error);
     throw error;
@@ -167,6 +166,27 @@ function normalizeType(type: string): string {
   if (type === "constant") return "const";
   if (type === "typedef") return "type"; // "type" alias
   return type;
+}
+
+function deduplicateItems(items: DocItem[]): DocItem[] {
+  const seen = new Set<string>();
+
+  return items.filter((item) => {
+    const key = getDeduplicationKey(item);
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function getDeduplicationKey(item: DocItem): string {
+  const canonicalPath = item.path.replace(/^(std|core|alloc)::/, "");
+
+  return `${item.type}:${canonicalPath}`;
 }
 
 export const fetchDocPage = async (url: string): Promise<string> => {
