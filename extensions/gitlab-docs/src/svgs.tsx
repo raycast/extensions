@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, LocalStorage, Color } from "@raycast/api";
+import { ActionPanel, Action, Grid, showToast, Toast, LocalStorage, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 // GitLab's icon set (@gitlab/svgs) is previewed at https://design.gitlab.com/svgs/.
@@ -12,12 +12,18 @@ export default function Command() {
   const { icons, isLoading } = useIcons();
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search GitLab icons..." throttle>
-      <List.Section title="Icons" subtitle={icons.length + ""}>
+    <Grid
+      isLoading={isLoading}
+      searchBarPlaceholder="Search GitLab icons..."
+      columns={8}
+      inset={Grid.Inset.Large}
+      throttle
+    >
+      <Grid.Section title="Icons" subtitle={icons.length + ""}>
         {icons.map((icon) => (
-          <List.Item
+          <Grid.Item
             key={icon.name}
-            icon={{ source: icon.dataUri, tintColor: Color.PrimaryText }}
+            content={{ source: icon.dataUri, tintColor: Color.PrimaryText }}
             title={icon.name}
             keywords={icon.keywords}
             actions={
@@ -32,8 +38,8 @@ export default function Command() {
             }
           />
         ))}
-      </List.Section>
-    </List>
+      </Grid.Section>
+    </Grid>
   );
 }
 
