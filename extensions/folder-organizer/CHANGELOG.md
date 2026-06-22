@@ -1,6 +1,6 @@
 # Folder Organizer Changelog
 
-## [Recursive Organization and Empty Folder Cleanup] - {PR_MERGE_DATE}
+## [Recursive Organization and Empty Folder Cleanup] - 2026-06-22
 
 - Added **Root Only** and **Full Organization** modes for Downloads and custom folders
 - Added recursive file organization that collects files from nested folders
