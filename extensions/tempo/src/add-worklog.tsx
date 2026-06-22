@@ -8,7 +8,8 @@ import {
   Icon,
   Color,
   getPreferenceValues,
-  open,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -248,20 +249,26 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
   // Fetch details of the selected issue
   useEffect(() => {
     async function loadIssue() {
-      try {
-        setIsLoading(true);
-        const [fetchedIssue, globalConfiguration] = await Promise.all([
-          getIssueByKey(issueKey),
-          fetchFromTempoAPI("/globalconfiguration") as Promise<TempoGlobalConfiguration>,
-        ]);
+      setIsLoading(true);
 
-        setIssue(fetchedIssue);
-        setIsRemainingEstimateRequired(globalConfiguration.remainingEstimateOptional === false);
-      } catch (error) {
-        console.error("Failed to load issue:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      const issuePromise = getIssueByKey(issueKey)
+        .then(setIssue)
+        .catch((error) => {
+          console.error("Failed to load issue:", error);
+        });
+
+      const configPromise = fetchFromTempoAPI("/globalconfiguration")
+        .then((config) => {
+          const globalConfiguration = config as TempoGlobalConfiguration;
+          setIsRemainingEstimateRequired(globalConfiguration.remainingEstimateOptional === false);
+        })
+        .catch((error) => {
+          console.error("Failed to load global configuration:", error);
+          setIsRemainingEstimateRequired(false);
+        });
+
+      await Promise.all([issuePromise, configPromise]);
+      setIsLoading(false);
     }
     loadIssue();
   }, [issueKey]);
@@ -413,7 +420,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         primaryAction: {
           title: "View Worklogs",
           onAction: async () => {
-            await open("raycast://extensions/darchen_gautier/tempo/list-worklogs");
+            await launchCommand({ name: "list-worklogs", type: LaunchType.UserInitiated });
           },
         },
       });
