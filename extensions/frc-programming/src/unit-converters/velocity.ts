@@ -2,6 +2,7 @@ import {
   applyWheelRadiusParameter,
   createWheelRadiusState,
   toGearRatio,
+  normalizeUnit,
   ParameterDisplay,
   ConverterConfig,
   createConverter,
@@ -48,16 +49,24 @@ interface ParsedParams {
   gearRatio: number;
   hasWheelRadius: boolean;
   hasGearRatio: boolean;
+  involvesRpm: boolean;
   wheelRadiusInput: string;
   parametersNeeded?: string[];
 }
 
-function parseVelocityParameters(parameterStrings: string[]): ParsedParams {
+function conversionInvolvesRpm(fromUnit: string, toUnit: string): boolean {
+  const normalizedFrom = normalizeUnit(UNIT_ALIASES, fromUnit);
+  const normalizedTo = normalizeUnit(UNIT_ALIASES, toUnit);
+  return normalizedFrom === "rpm" || normalizedTo === "rpm";
+}
+
+function parseVelocityParameters(parameterStrings: string[], fromUnit: string, toUnit: string): ParsedParams {
   const wheelRadius = createWheelRadiusState(VELOCITY_DEFAULTS.wheelRadius);
   const result: ParsedParams = {
     ...wheelRadius,
     gearRatio: VELOCITY_DEFAULTS.gearRatio,
     hasGearRatio: false,
+    involvesRpm: conversionInvolvesRpm(fromUnit, toUnit),
     parametersNeeded: [],
   };
 
@@ -75,11 +84,13 @@ function parseVelocityParameters(parameterStrings: string[]): ParsedParams {
     }
   });
 
-  if (!wheelRadius.hasWheelRadius) {
-    result.parametersNeeded!.push("wheel radius");
-  }
-  if (!result.hasGearRatio) {
-    result.parametersNeeded!.push("gear ratio");
+  if (result.involvesRpm) {
+    if (!wheelRadius.hasWheelRadius) {
+      result.parametersNeeded!.push("wheel radius");
+    }
+    if (!result.hasGearRatio) {
+      result.parametersNeeded!.push("gear ratio");
+    }
   }
 
   return {
@@ -99,6 +110,10 @@ function formatGearRatio(ratio: number, isDefault: boolean): string {
 }
 
 function buildParametersUsed(parsed: ParsedParams): ParameterDisplay[] {
+  if (!parsed.involvesRpm) {
+    return [];
+  }
+
   return [
     {
       name: "Wheel radius",

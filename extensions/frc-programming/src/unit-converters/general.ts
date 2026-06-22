@@ -19,7 +19,7 @@ export interface ConverterConfig<TParams = unknown> {
   unitAliases: Record<string, string>;
   toIntermediate: Record<string, (value: number, params: TParams) => number>;
   fromIntermediate: Record<string, (value: number, params: TParams) => number>;
-  parseParameters: (params: string[]) => TParams;
+  parseParameters: (params: string[], fromUnit: string, toUnit: string) => TParams;
   buildParametersUsed: (params: TParams) => ParameterDisplay[];
 }
 
@@ -32,7 +32,7 @@ export function createConverter<TParams>(config: ConverterConfig<TParams>) {
   return (value: number, fromUnit: string, toUnit: string, parameters: string[]): ConversionResult => {
     const normalizedFromUnit = normalizeUnit(config.unitAliases, fromUnit);
     const normalizedToUnit = normalizeUnit(config.unitAliases, toUnit);
-    const params = config.parseParameters(parameters);
+    const params = config.parseParameters(parameters, normalizedFromUnit, normalizedToUnit);
 
     const parametersNeeded: string[] = [];
 
