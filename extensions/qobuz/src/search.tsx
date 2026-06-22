@@ -1,35 +1,35 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import { useState } from "react"
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import {
   appLink,
   BRAND,
   deepLink,
   formatDuration,
   getClient,
-} from "./lib/client"
+} from "./lib/client";
 
-const EMPTY = { query: "", albums: [], artists: [], tracks: [] }
+const EMPTY = { query: "", albums: [], artists: [], tracks: [] };
 
 export default function Command() {
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState("");
 
   const { data, isLoading } = useCachedPromise(
     async (term: string) => {
-      if (!term.trim()) return EMPTY
-      const client = await getClient()
-      return client.search.search(term, { limit: 20 })
+      if (!term.trim()) return EMPTY;
+      const client = await getClient();
+      return client.search.search(term, { limit: 20 });
     },
     [query],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, { title: "Qobuz search failed" })
+        showFailureToast(error, { title: "Qobuz search failed" });
       },
     },
-  )
+  );
 
-  const results = data ?? EMPTY
+  const results = data ?? EMPTY;
 
   return (
     <List
@@ -97,7 +97,7 @@ export default function Command() {
         ))}
       </List.Section>
     </List>
-  )
+  );
 }
 
 function LinkActions({ app, web }: { app: string; web: string }) {
@@ -107,5 +107,5 @@ function LinkActions({ app, web }: { app: string; web: string }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
-  )
+  );
 }

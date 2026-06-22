@@ -1,3 +1,3 @@
-import { mediaCommand } from "./lib/media-command"
+import { mediaCommand } from "./lib/media-command";
 
-export default mediaCommand("next", "⏭ Next Track")
+export default mediaCommand("next", "⏭ Next Track");

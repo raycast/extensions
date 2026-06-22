@@ -1,31 +1,31 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import { useState } from "react"
-import type { FavouriteType } from "@kud/qobuz"
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import type { FavouriteType } from "@kud/qobuz";
 import {
   appLink,
   BRAND,
   deepLink,
   formatDuration,
   getClient,
-} from "./lib/client"
+} from "./lib/client";
 
 export default function Command() {
-  const [type, setType] = useState<FavouriteType>("albums")
+  const [type, setType] = useState<FavouriteType>("albums");
 
   const { data, isLoading } = useCachedPromise(
     async (favouriteType: FavouriteType) => {
-      const client = await getClient()
-      return client.favourites.list(favouriteType)
+      const client = await getClient();
+      return client.favourites.list(favouriteType);
     },
     [type],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, { title: "Couldn't load favourites" })
+        showFailureToast(error, { title: "Couldn't load favourites" });
       },
     },
-  )
+  );
 
   return (
     <List
@@ -99,7 +99,7 @@ export default function Command() {
           />
         ))}
     </List>
-  )
+  );
 }
 
 function LinkActions({ app, web }: { app: string; web: string }) {
@@ -109,5 +109,5 @@ function LinkActions({ app, web }: { app: string; web: string }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
-  )
+  );
 }

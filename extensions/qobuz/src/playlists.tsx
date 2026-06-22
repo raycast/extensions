@@ -1,25 +1,25 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import { appLink, BRAND, deepLink, getClient } from "./lib/client"
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { appLink, BRAND, deepLink, getClient } from "./lib/client";
 
 export default function Command() {
   const { data, isLoading } = useCachedPromise(
     async () => {
-      const client = await getClient()
-      return client.playlists.listForUser()
+      const client = await getClient();
+      return client.playlists.listForUser();
     },
     [],
     {
       onError: (error) => {
-        showFailureToast(error, { title: "Couldn't load playlists" })
+        showFailureToast(error, { title: "Couldn't load playlists" });
       },
     },
-  )
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter playlists…">
       {(data ?? []).map((playlist) => {
-        const web = deepLink.playlist(playlist.id)
+        const web = deepLink.playlist(playlist.id);
         return (
           <List.Item
             key={playlist.id}
@@ -39,8 +39,8 @@ export default function Command() {
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </List>
-  )
+  );
 }

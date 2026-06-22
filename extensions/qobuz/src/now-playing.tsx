@@ -1,17 +1,17 @@
-import { Clipboard, Icon, MenuBarExtra, open, showHUD } from "@raycast/api"
-import { useCachedPromise } from "@raycast/utils"
-import { appLink, deepLink, getClient } from "./lib/client"
+import { Clipboard, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { appLink, deepLink, getClient } from "./lib/client";
 
 export default function Command() {
   const { data: track, isLoading } = useCachedPromise(async () => {
-    const client = await getClient()
-    return client.nowPlaying()
-  })
+    const client = await getClient();
+    return client.nowPlaying();
+  });
 
   const title = track
     ? `${track.artist?.name ?? "?"} — ${track.title}`
-    : undefined
-  const url = track ? deepLink.track(track.id) : undefined
+    : undefined;
+  const url = track ? deepLink.track(track.id) : undefined;
 
   return (
     <MenuBarExtra
@@ -26,8 +26,8 @@ export default function Command() {
             title="Copy Share Link"
             icon={Icon.Clipboard}
             onAction={async () => {
-              await Clipboard.copy(url)
-              await showHUD("Copied share link")
+              await Clipboard.copy(url);
+              await showHUD("Copied share link");
             }}
           />
           <MenuBarExtra.Item
@@ -40,5 +40,5 @@ export default function Command() {
         <MenuBarExtra.Item title="Nothing playing in Qobuz" />
       )}
     </MenuBarExtra>
-  )
+  );
 }

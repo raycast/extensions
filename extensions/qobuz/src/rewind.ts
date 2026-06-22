@@ -1,3 +1,3 @@
-import { mediaCommand } from "./lib/media-command"
+import { mediaCommand } from "./lib/media-command";
 
-export default mediaCommand("rewind", "⏪ Rewind")
+export default mediaCommand("rewind", "⏪ Rewind");
