@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { ActivityItemDetail } from "./components/ActivityItemDetail";
+import { renderLoadErrorList } from "./components/LoadErrorList";
 import { DashboardDetail } from "./components/DashboardDetail";
 import { TransactionsDetail } from "./components/TransactionsDetail";
 import { TransactionsView } from "./components/TransactionsView";
@@ -12,23 +13,8 @@ import { useDashboard } from "./lib/useDashboard";
 export default function Dashboard() {
   const { data: snapshot, isLoading, revalidate, error, prefs } = useDashboard();
 
-  if (!isLoading && !snapshot && error) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Couldn't load Wise"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  const loadError = renderLoadErrorList(isLoading, snapshot, error, revalidate);
+  if (loadError) return loadError;
 
   const summaryCurrency = snapshot
     ? prefs.displayCurrency || inferPrimaryCurrency(snapshot.activities)

@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { ActivityListItem } from "./ActivityListItem";
+import { renderLoadErrorList } from "./LoadErrorList";
 import { classifyDirection } from "../lib/classify";
 import { formatDayHeader } from "../lib/format";
 import { WiseActivity } from "../lib/types";
@@ -35,23 +36,8 @@ export function TransactionsView() {
 
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
 
-  if (!isLoading && !data && error) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Couldn't load Wise"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  const loadError = renderLoadErrorList(isLoading, data, error, revalidate);
+  if (loadError) return loadError;
 
   return (
     <List

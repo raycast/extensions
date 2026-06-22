@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
-import { classifyDirection, parseAmount, stripHtml } from "../lib/classify";
-import { formatDate, formatMoney } from "../lib/format";
+import { ReactNode } from "react";
+import { ActivityMetadataBody } from "./ActivityMetadataBody";
+import { formatSignedPrimaryAmount, parseActivity } from "../lib/activity";
+import { formatDate } from "../lib/format";
 import { WiseActivity } from "../lib/types";
 
 interface Props {
@@ -8,31 +10,20 @@ interface Props {
   numberFormat: string;
 }
 
-const STATUS_COLORS: Record<string, Color> = {
-  COMPLETED: Color.Green,
-  PENDING: Color.Yellow,
-  CANCELLED: Color.Red,
-  REJECTED: Color.Red,
-  REFUNDED: Color.Blue,
-};
-
-const DIRECTION_COLORS: Record<string, Color> = {
-  in: Color.Green,
-  out: Color.Red,
-  neutral: Color.SecondaryText,
+const detailMetadataParts = {
+  Label: (props: { title: string; text: string }) => <Detail.Metadata.Label {...props} />,
+  TagList: (props: { title: string; children: ReactNode }) => (
+    <Detail.Metadata.TagList title={props.title}>{props.children}</Detail.Metadata.TagList>
+  ),
+  TagListItem: (props: { text: string; color: Color }) => (
+    <Detail.Metadata.TagList.Item text={props.text} color={props.color} />
+  ),
+  Separator: () => <Detail.Metadata.Separator />,
 };
 
 export function ActivityDetail({ activity, numberFormat }: Props) {
-  const direction = classifyDirection(activity);
-  const title = stripHtml(activity.title) || activity.type;
-  const description = stripHtml(activity.description);
-  const primary = parseAmount(activity.primaryAmount);
-  const secondary = parseAmount(activity.secondaryAmount);
-
-  const sign = direction === "out" ? "-" : direction === "in" ? "+" : "";
-  const amountStr = primary
-    ? `${sign}${formatMoney(primary.value, primary.currency, numberFormat)}`
-    : activity.primaryAmount;
+  const { direction, title, description, primary } = parseActivity(activity);
+  const amountStr = formatSignedPrimaryAmount(direction, primary, activity.primaryAmount, numberFormat);
 
   const markdown = [
     `# ${title}`,
@@ -50,31 +41,7 @@ export function ActivityDetail({ activity, numberFormat }: Props) {
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Type" text={activity.type} />
-          <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={activity.status}
-              color={STATUS_COLORS[activity.status] ?? Color.SecondaryText}
-            />
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.TagList title="Direction">
-            <Detail.Metadata.TagList.Item text={direction} color={DIRECTION_COLORS[direction]} />
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.Separator />
-          {primary && (
-            <Detail.Metadata.Label title="Amount" text={formatMoney(primary.value, primary.currency, numberFormat)} />
-          )}
-          {secondary && secondary.currency !== primary?.currency && (
-            <Detail.Metadata.Label
-              title="Equivalent"
-              text={formatMoney(secondary.value, secondary.currency, numberFormat)}
-            />
-          )}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Date" text={formatDate(activity.createdOn)} />
-          {activity.resource && (
-            <Detail.Metadata.Label title="Resource" text={`${activity.resource.type} #${activity.resource.id}`} />
-          )}
+          <ActivityMetadataBody activity={activity} numberFormat={numberFormat} parts={detailMetadataParts} />
         </Detail.Metadata>
       }
       actions={

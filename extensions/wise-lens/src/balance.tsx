@@ -23,6 +23,30 @@ async function copyAndHud(text: string) {
   await showHUD(`Copied ${text}`);
 }
 
+function menuItemMoney(value: number, currency: string, numberFormat: string) {
+  const formatted = formatMoney(value, currency, numberFormat);
+  return {
+    subtitle: formatted,
+    onAction: () => copyAndHud(formatted),
+  };
+}
+
+function BalanceMenuItem({
+  icon,
+  title,
+  value,
+  currency,
+  numberFormat,
+}: {
+  icon: { source: Icon; tintColor: Color };
+  title: string;
+  value: number;
+  currency: string;
+  numberFormat: string;
+}) {
+  return <MenuBarExtra.Item icon={icon} title={title} {...menuItemMoney(value, currency, numberFormat)} />;
+}
+
 export default function Balance() {
   const prefs = getPrefs();
   const fingerprint = prefsFingerprint(prefs);
@@ -126,12 +150,13 @@ export default function Balance() {
           {standardBalances.length > 0 && (
             <MenuBarExtra.Section title="Balances">
               {standardBalances.map((b) => (
-                <MenuBarExtra.Item
+                <BalanceMenuItem
                   key={b.id}
                   icon={{ source: Icon.Coins, tintColor: Color.Yellow }}
                   title={b.currency}
-                  subtitle={formatMoney(b.amount.value, b.currency, prefs.numberFormat)}
-                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.numberFormat))}
+                  value={b.amount.value}
+                  currency={b.currency}
+                  numberFormat={prefs.numberFormat}
                 />
               ))}
             </MenuBarExtra.Section>
@@ -140,12 +165,13 @@ export default function Balance() {
           {savingsBalances.length > 0 && (
             <MenuBarExtra.Section title="Jars">
               {savingsBalances.map((b) => (
-                <MenuBarExtra.Item
+                <BalanceMenuItem
                   key={b.id}
                   icon={{ source: Icon.SaveDocument, tintColor: Color.Purple }}
                   title={b.name ?? b.currency}
-                  subtitle={formatMoney(b.amount.value, b.currency, prefs.numberFormat)}
-                  onAction={() => copyAndHud(formatMoney(b.amount.value, b.currency, prefs.numberFormat))}
+                  value={b.amount.value}
+                  currency={b.currency}
+                  numberFormat={prefs.numberFormat}
                 />
               ))}
             </MenuBarExtra.Section>

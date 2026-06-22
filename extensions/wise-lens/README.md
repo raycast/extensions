@@ -28,13 +28,13 @@ Open any Wise Lens command. On first run Raycast prompts you for the token. It's
 
 ## Preferences
 
-| Field | Default | Description |
-| --- | --- | --- |
-| API Token | — | Required. Personal Read‑Only Token from Wise. |
-| Display Currency | *(empty)* | ISO 4217 (EUR, USD…). If set, shows an aggregated total converted to this currency. |
-| Secondary Currency (FX) | *(empty)* | Shows a secondary FX conversion (e.g. EUR → THB). |
-| Number Format | `en-US` | Thousands/decimal separators and symbol position for monetary amounts. |
-| Hide zero balances | `true` | Hides accounts and Jars with a zero balance. |
+| Field                   | Default   | Description                                                                         |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------- |
+| API Token               | —         | Required. Personal Read‑Only Token from Wise.                                       |
+| Display Currency        | _(empty)_ | ISO 4217 (EUR, USD…). If set, shows an aggregated total converted to this currency. |
+| Secondary Currency (FX) | _(empty)_ | Shows a secondary FX conversion (e.g. EUR → THB).                                   |
+| Number Format           | `en-US`   | Thousands/decimal separators and symbol position for monetary amounts.              |
+| Hide zero balances      | `true`    | Hides accounts and Jars with a zero balance.                                        |
 
 ## Endpoints used
 
