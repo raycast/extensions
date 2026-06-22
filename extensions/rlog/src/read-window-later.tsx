@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { getOpenTabs, fetchMetadata } from "./utils";
+import { getOpenTabs, fetchMetadata, requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -17,6 +17,8 @@ export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
+    requireBlogPath(preferences.blogPath);
+
     await showToast({
       style: Toast.Style.Animated,
       title: "Fetching tabs...",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -11,7 +11,8 @@ import { useForm, showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import simpleGit from "simple-git";
-import { getActiveUrl, fetchMetadata } from "./utils";
+import { fetchMetadata, requireBlogPath } from "./utils";
+import { ReadingFields, useActiveUrlAutofill, validateUrl } from "./components";
 
 interface Preferences {
   blogPath: string;
@@ -25,12 +26,14 @@ interface ReadingEntry {
   publishedDate: string | null;
   addedDate: string;
   thoughts?: string;
+  rating?: number;
 }
 
 // Could display Title and Author fields for user to manually verify and edit
 interface FormValues {
   url: string;
   thoughts: string;
+  rating: string;
   date: Date | null;
   pushToGit: boolean;
 }
@@ -43,6 +46,7 @@ export default function Command() {
     initialValues: {
       url: "",
       thoughts: "",
+      rating: "",
       date: new Date(),
       pushToGit: false,
     },
@@ -54,6 +58,8 @@ export default function Command() {
       });
 
       try {
+        requireBlogPath(preferences.blogPath);
+
         // 1. Fetch Metadata
         const { title, author, publishedDate } = await fetchMetadata(
           values.url,
@@ -67,6 +73,7 @@ export default function Command() {
           publishedDate: publishedDate ? publishedDate.split("T")[0] : null,
           addedDate: (values.date || new Date()).toISOString().split("T")[0],
           thoughts: values.thoughts.trim() || undefined,
+          rating: values.rating ? parseInt(values.rating, 10) : undefined,
         };
 
         // 3. Read/Write File
@@ -95,7 +102,36 @@ export default function Command() {
 
         fs.writeFileSync(fullPath, JSON.stringify(readings, null, 2));
 
-        // 4. Git Integration
+        // 4. Remove from Reading List (if it exists there)
+        const readingListPath = path.join(
+          preferences.blogPath,
+          "data",
+          "reading_list.json",
+        );
+        if (fs.existsSync(readingListPath)) {
+          try {
+            const readingListContent = fs.readFileSync(
+              readingListPath,
+              "utf-8",
+            );
+            let readingList = JSON.parse(readingListContent);
+            const originalLength = readingList.length;
+            readingList = readingList.filter(
+              (item: { url: string }) => item.url !== values.url,
+            );
+            if (readingList.length < originalLength) {
+              fs.writeFileSync(
+                readingListPath,
+                JSON.stringify(readingList, null, 2),
+              );
+              console.log("Removed from reading list:", values.url);
+            }
+          } catch (e) {
+            console.error("Failed to update reading list:", e);
+          }
+        }
+
+        // 5. Git Integration
         if (values.pushToGit) {
           toast.title = "Pushing to Git...";
           const git = simpleGit(preferences.blogPath);
@@ -111,6 +147,7 @@ export default function Command() {
         reset({
           url: "",
           thoughts: "",
+          rating: "",
           date: new Date(),
           pushToGit: false,
         });
@@ -120,30 +157,10 @@ export default function Command() {
         setIsLoading(false);
       }
     },
-    validation: {
-      url: (value) => {
-        if (!value) return "The item is required";
-        try {
-          new URL(value);
-        } catch (e) {
-          return "Invalid URL";
-        }
-      },
-    },
+    validation: { url: validateUrl },
   });
 
-  // Auto-fill URL from Browser (Primary) or Clipboard (Fallback)
-  useEffect(() => {
-    async function fetchUrl() {
-      const url = await getActiveUrl();
-      if (url) {
-        console.log("Setting URL:", url);
-        setValue("url", url);
-      }
-    }
-
-    fetchUrl();
-  }, []);
+  useActiveUrlAutofill(setValue);
 
   return (
     <Form
@@ -154,15 +171,10 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="URL"
-        placeholder="https://example.com/article"
-        {...itemProps.url}
-      />
-      <Form.TextArea
-        title="Thoughts"
-        placeholder="Optional thoughts..."
-        {...itemProps.thoughts}
+      <ReadingFields
+        url={itemProps.url}
+        thoughts={itemProps.thoughts}
+        rating={itemProps.rating}
       />
       {/* Can't default to past dates e.g. last week, last month, user must do this manually */}
       <Form.DatePicker title="Date Added" {...itemProps.date} />

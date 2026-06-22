@@ -6,7 +6,7 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import path from "path";
-import { ReadLaterEntry, loadJson } from "./utils";
+import { ReadLaterEntry, loadJson, requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -15,6 +15,7 @@ interface Preferences {
 export default async function Command() {
   try {
     const preferences = getPreferenceValues<Preferences>();
+    requireBlogPath(preferences.blogPath);
     const dataPath = path.join(
       preferences.blogPath,
       "data",

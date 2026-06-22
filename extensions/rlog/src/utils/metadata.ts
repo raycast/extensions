@@ -7,12 +7,36 @@ export interface Metadata {
   publishedDate: string | null;
 }
 
+function normalizeName(name: string | undefined): string | null {
+  if (!name) return null;
+  // Handle "Last, First" format
+  if (name.includes(",")) {
+    const parts = name.split(",").map((p) => p.trim());
+    if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  }
+  // Handle multiple spaces/newlines
+  return name.replace(/\s+/g, " ").trim();
+}
+
+function transformUrl(url: string): string {
+  // Handle Arxiv PDF -> Abstract
+  if (url.includes("arxiv.org/pdf/")) {
+    return url.replace("/pdf/", "/abs/").replace(".pdf", "");
+  }
+  // Handle OpenReview PDF -> Forum
+  if (url.includes("openreview.net/pdf?id=")) {
+    return url.replace("/pdf?", "/forum?");
+  }
+  return url;
+}
+
 export async function fetchMetadata(url: string): Promise<Metadata> {
   try {
-    const response = await fetch(url, {
+    const targetUrl = transformUrl(url);
+    const response = await fetch(targetUrl, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       },
     });
 
@@ -23,6 +47,18 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     }
 
     const contentType = response.headers.get("content-type");
+
+    // Handle PDF
+    if (contentType && contentType.includes("application/pdf")) {
+      // For non-Arxiv PDFs, we don't parse the full file to avoid heavy dependencies and latency.
+      // We fallback to the filename as a title.
+      return {
+        title: url.split("/").pop()?.replace(".pdf", "") || "Untitled",
+        author: null,
+        publishedDate: null,
+      };
+    }
+
     if (contentType && !contentType.includes("text/html")) {
       console.log(`Skipping non-HTML content: ${contentType}`);
       return {
@@ -44,7 +80,8 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         if (
           data["@type"] === "Article" ||
           data["@type"] === "BlogPosting" ||
-          data["@type"] === "NewsArticle"
+          data["@type"] === "NewsArticle" ||
+          data["@type"] === "ScholarlyArticle"
         ) {
           jsonLdData = data;
           return false; // break
@@ -58,11 +95,29 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     let title = "Untitled";
     if (jsonLdData && jsonLdData.headline) {
       title = jsonLdData.headline;
+    } else if (jsonLdData && jsonLdData.name) {
+      title = jsonLdData.name;
     } else {
+      // Special handling for arXiv papers
+      let arxivTitle = null;
+      if (url.includes("arxiv.org")) {
+        // arXiv has a specific structure: h1.title contains "Title:" followed by the actual title
+        const h1Title = $("h1.title");
+        if (h1Title.length > 0) {
+          const fullText = h1Title.text();
+          // Remove the "Title:" prefix if present
+          arxivTitle = fullText.replace(/^Title:\s*/i, "").trim();
+        }
+      }
+
       // Heuristic: Some blogs use h2 for the post title if h1 is site title
       // We prefer og:title, but if it matches the site title (often <title>), we might want to look deeper.
       // For now, let's keep the standard order but add h2 as a fallback.
       const ogTitle = $('meta[property="og:title"]').attr("content");
+      const citationTitle = $('meta[name="citation_title"]').attr("content");
+      const dcTitle =
+        $('meta[name="DC.title"]').attr("content") ||
+        $('meta[name="dc.title"]').attr("content");
 
       // Improved H1 extraction:
       // 1. Select all h1s
@@ -107,12 +162,17 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
 
       // If og:title exists and is different from page title (which might be just "Author Name"), use it.
       // Otherwise, prefer h1 or h2 if they look like titles.
-      if (ogTitle && ogTitle !== pageTitle) {
+      if (arxivTitle) {
+        title = arxivTitle;
+      } else if (citationTitle) {
+        title = citationTitle;
+      } else if (dcTitle) {
+        title = dcTitle;
+      } else if (ogTitle && ogTitle !== pageTitle) {
         title = ogTitle;
       } else if (h1 && h1 !== pageTitle && h1 !== ogTitle) {
         title = h1;
       } else if (h2) {
-        // Specific fix for nabeelqu.co where title is in h2
         title = h2;
       } else if (h1) {
         title = h1;
@@ -124,28 +184,70 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     }
 
     // 3. Extract Author
+    // Detect if this is an academic paper (has citation_author meta tags or is from arxiv/openreview)
+    const citationAuthors = $('meta[name="citation_author"]')
+      .map((_, el) => normalizeName($(el).attr("content")))
+      .get()
+      .filter(Boolean);
+
+    const isAcademicPaper =
+      citationAuthors.length > 0 ||
+      url.includes("arxiv.org") ||
+      url.includes("openreview.net") ||
+      jsonLdData?.["@type"] === "ScholarlyArticle";
+
     let author: string | null = null;
     if (jsonLdData && jsonLdData.author) {
       if (Array.isArray(jsonLdData.author)) {
-        author = jsonLdData.author[0]?.name || null;
+        const authors = jsonLdData.author
+          .map((a: { name?: string } | string) =>
+            normalizeName(typeof a === "string" ? a : a.name),
+          )
+          .filter(Boolean);
+        if (isAcademicPaper) {
+          author = authors.length > 1 ? `${authors[0]} et al.` : authors[0];
+        } else {
+          author =
+            authors.length > 4
+              ? `${authors.slice(0, 4).join(", ")}, et al.`
+              : authors.join(", ");
+        }
       } else if (typeof jsonLdData.author === "object") {
-        author = jsonLdData.author.name || null;
+        author = normalizeName(jsonLdData.author.name);
       } else if (typeof jsonLdData.author === "string") {
-        author = jsonLdData.author;
+        author = normalizeName(jsonLdData.author);
       }
     }
 
     if (!author) {
-      author =
-        $('meta[name="author"]').attr("content") ||
-        $('meta[property="article:author"]').attr("content") ||
-        $('meta[property="og:author"]').attr("content") ||
-        $('meta[name="twitter:creator"]').attr("content") ||
-        $('a[rel="author"]').first().text().trim() ||
-        $(".author").first().text().trim() ||
-        $(".byline").first().text().trim() ||
-        // Heuristic: Look for "By [Name]" text nodes
-        null;
+      const dcAuthors = $(
+        'meta[name="DC.creator"], meta[name="dc.creator"], meta[name="DC.author"], meta[name="dc.author"]',
+      )
+        .map((_, el) => normalizeName($(el).attr("content")))
+        .get()
+        .filter(Boolean);
+
+      if (citationAuthors.length > 0) {
+        // Academic paper: first author + et al.
+        author =
+          citationAuthors.length > 1
+            ? `${citationAuthors[0]} et al.`
+            : citationAuthors[0];
+      } else if (dcAuthors.length > 0) {
+        // DC authors: treat as academic if multiple
+        author = dcAuthors.length > 1 ? `${dcAuthors[0]} et al.` : dcAuthors[0];
+      } else {
+        // Blog/article fallback
+        author =
+          normalizeName($('meta[name="author"]').attr("content")) ||
+          normalizeName($('meta[property="article:author"]').attr("content")) ||
+          normalizeName($('meta[property="og:author"]').attr("content")) ||
+          normalizeName($('meta[name="twitter:creator"]').attr("content")) ||
+          normalizeName($('a[rel="author"]').first().text()) ||
+          normalizeName($(".author").first().text()) ||
+          normalizeName($(".byline").first().text()) ||
+          null;
+      }
     }
 
     // 4. Extract Date
@@ -156,6 +258,11 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
 
     if (!publishedDate) {
       publishedDate =
+        $('meta[name="citation_publication_date"]').attr("content") ||
+        $('meta[name="citation_date"]').attr("content") ||
+        $('meta[name="DC.date"]').attr("content") ||
+        $('meta[name="dc.date"]').attr("content") ||
+        $('meta[name="DCTERMS.issued"]').attr("content") ||
         $('meta[property="article:published_time"]').attr("content") ||
         $('meta[name="date"]').attr("content") ||
         $('meta[property="og:published_time"]').attr("content") ||
@@ -180,10 +287,6 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
       try {
         publishedDate = new Date(publishedDate).toISOString().split("T")[0];
       } catch (e) {
-        // If date parsing fails, keep original or set to null?
-        // Let's try to be safe and set to null if it's clearly invalid,
-        // but simple strings might be valid for the user to fix.
-        // For now, if it fails ISO conversion, we leave it null or try simple regex.
         publishedDate = null;
       }
     }

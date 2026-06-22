@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import { useState, useEffect } from "react";
-import { ReadLaterEntry, loadJson } from "./utils";
+import { ReadLaterEntry, loadJson, requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -16,6 +16,7 @@ export default function Command() {
   useEffect(() => {
     async function loadReadingList() {
       try {
+        requireBlogPath(preferences.blogPath);
         const dataPath = path.join(
           preferences.blogPath,
           "data",

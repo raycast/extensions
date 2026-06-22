@@ -9,6 +9,7 @@ import {
 import fs from "fs";
 import path from "path";
 import { useState } from "react";
+import { requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -26,6 +27,7 @@ interface ReadingEntry {
   publishedDate: string | null;
   addedDate: string;
   thoughts?: string;
+  rating?: number;
 }
 
 function formatDate(dateStr: string) {
@@ -79,6 +81,8 @@ export default function ReadingPage() {
                 {entry.title}
               </a>
               <div className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+                {entry.rating && <span>{entry.rating}</span>}
+                {entry.rating && (entry.author || entry.publishedDate) && <span className="mx-2">•</span>}
                 {entry.author && <span>{entry.author}</span>}
                 {entry.author && entry.publishedDate && <span className="mx-2">•</span>}
                 {entry.publishedDate && (
@@ -120,7 +124,7 @@ export default function Command() {
     });
 
     try {
-      const blogPath = preferences.blogPath;
+      const blogPath = requireBlogPath(preferences.blogPath);
 
       // 1. Create Data File
       const dataDir = path.join(blogPath, path.dirname(preferences.dataPath));

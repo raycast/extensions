@@ -19,6 +19,51 @@
             "mode": "view"
         },
         {
+            "name": "capture",
+            "title": "Capture Read",
+            "subtitle": "rlog",
+            "description": "Capture a reading entry to a local file (no git, no blog setup)",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "inboxPath",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Inbox File Path",
+                    "description": "Local JSONL file captures are appended to.",
+                    "default": "~/rlog/inbox.jsonl",
+                    "placeholder": "~/rlog/inbox.jsonl"
+                }
+            ]
+        },
+        {
+            "name": "sync",
+            "title": "Sync Reading Log",
+            "subtitle": "rlog",
+            "description": "Merge a captured inbox file into reading.json and push",
+            "mode": "no-view",
+            "preferences": [
+                {
+                    "name": "inboxPath",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Inbox File Path",
+                    "description": "Fallback inbox file when no Finder item is selected.",
+                    "default": "~/rlog/inbox.jsonl",
+                    "placeholder": "~/rlog/inbox.jsonl"
+                },
+                {
+                    "name": "autoPush",
+                    "type": "checkbox",
+                    "required": false,
+                    "title": "Auto Push",
+                    "label": "Commit and push to the blog repo after syncing",
+                    "description": "When enabled, sync commits and pushes reading.json to your blog repo.",
+                    "default": true
+                }
+            ]
+        },
+        {
             "name": "setup-rlog",
             "title": "Setup rlog",
             "subtitle": "rlog",
@@ -106,9 +151,9 @@
         {
             "name": "blogPath",
             "type": "directory",
-            "required": true,
+            "required": false,
             "title": "Blog Repository Path",
-            "description": "Absolute path to your static blog repository."
+            "description": "Absolute path to your static blog repository. Not needed for the Capture Read command."
         },
         {
             "name": "dataPath",

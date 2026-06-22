@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
-import { getActiveUrl, fetchMetadata } from "./utils";
+import { getActiveUrl, fetchMetadata, requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -20,6 +20,7 @@ interface ReadLaterEntry {
 export default async function Command() {
   try {
     const preferences = getPreferenceValues<Preferences>();
+    requireBlogPath(preferences.blogPath);
 
     // 1. Get URL
     const url = await getActiveUrl();

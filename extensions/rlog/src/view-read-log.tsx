@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import { useState, useEffect } from "react";
-import { ReadingEntry, loadJson } from "./utils";
+import { ReadingEntry, loadJson, requireBlogPath } from "./utils";
 
 interface Preferences {
   blogPath: string;
@@ -17,6 +17,7 @@ export default function Command() {
   useEffect(() => {
     async function loadReadings() {
       try {
+        requireBlogPath(preferences.blogPath);
         const dataPath = path.join(preferences.blogPath, preferences.dataPath);
         const data = loadJson<ReadingEntry>(dataPath);
 
@@ -38,22 +39,30 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {readings.map((entry, index) => (
-        <List.Item
-          key={index}
-          title={entry.title}
-          subtitle={entry.author || undefined}
-          accessories={[
-            { text: new Date(entry.addedDate).toLocaleDateString() },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={entry.url} />
-              <Action.CopyToClipboard content={entry.url} title="Copy URL" />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {readings.map((entry, index) => {
+        const accessories = [];
+        if (entry.rating) {
+          accessories.push({ text: String(entry.rating) });
+        }
+        accessories.push({
+          text: new Date(entry.addedDate).toLocaleDateString(),
+        });
+
+        return (
+          <List.Item
+            key={index}
+            title={entry.title}
+            subtitle={entry.author || undefined}
+            accessories={accessories}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={entry.url} />
+                <Action.CopyToClipboard content={entry.url} title="Copy URL" />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
