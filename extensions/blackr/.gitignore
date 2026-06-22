@@ -4,3 +4,4 @@ dist
 .DS_Store
 assets/blackr-overlay-arm64
 assets/blackr-overlay-x64
+.codex
