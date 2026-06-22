@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Service Icons] - {PR_MERGE_DATE}
+## [Service Icons] - 2026-06-22
 
 - Added service icons sourced from the Ente custom-icon registry with a Simple Icons fallback, cached locally and matched by service name
 - Added a "Refresh Icons" action to re-download icons on demand
