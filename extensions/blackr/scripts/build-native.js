@@ -16,7 +16,8 @@ if (process.platform === "darwin") {
 } else if (process.platform === "win32") {
   validateWindowsOverlay();
 } else {
-  throw new Error(`Unsupported build platform: ${process.platform}`);
+  validateWindowsOverlay();
+  console.log(`Skipping native overlay compilation on unsupported build platform: ${process.platform}`);
 }
 
 function buildMacOSOverlay() {
