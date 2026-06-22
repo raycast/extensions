@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
+import fetch from "node-fetch";
 import { LocalStorage } from "@raycast/api";
 import groupBy from "lodash.groupby";
 
@@ -20,7 +20,7 @@ export default function Command() {
       {Object.entries(groupBy(state.metas, "category")).map(([category, group]) => (
         <List.Section title={category + ""} subtitle={group.length + ""} key={category}>
           {group.map((searchResult) => (
-            <SearchListItem key={searchResult.key} searchResult={searchResult} />
+            <SearchListItem key={searchResult.url} searchResult={searchResult} />
           ))}
         </List.Section>
       ))}
@@ -33,9 +33,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       icon="pajamas-icon.png"
       title={searchResult.name}
+      subtitle={searchResult.path}
+      accessoryTitle={searchResult.category}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={searchResult.url} />
+          <Action.CopyToClipboard title="Copy URL" content={searchResult.url} />
         </ActionPanel>
       }
     />
@@ -44,46 +47,47 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 
 function useSearch() {
   const [state, setState] = useState<SearchState>({ metas: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
+  // Monotonically increasing id used to ignore stale (superseded) requests
+  // instead of aborting in-flight fetches, which can emit unhandled errors.
+  const requestIdRef = useRef(0);
 
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
+  const search = useCallback(async function search(searchText: string) {
+    const requestId = ++requestIdRef.current;
+    setState((oldState) => ({
+      ...oldState,
+      isLoading: true,
+    }));
+    try {
+      const metas = await performSearch(searchText);
+
+      // A newer search has started since this one; drop these results.
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
       setState((oldState) => ({
         ...oldState,
-        isLoading: true,
+        metas: metas,
+        isLoading: false,
       }));
-      try {
-        const metas = await performSearch(searchText, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          metas: metas,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        if (error instanceof AbortError) {
-          return;
-        }
-
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+    } catch (error) {
+      if (requestId !== requestIdRef.current || isAbortError(error)) {
+        return;
       }
-    },
-    [cancelRef, setState]
-  );
+
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: false,
+      }));
+
+      console.error("search error", error);
+      showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+    }
+  }, []);
 
   useEffect(() => {
     search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
+  }, [search]);
 
   return {
     state: state,
@@ -91,7 +95,18 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+// node-fetch / AbortController can surface aborts in several shapes
+// depending on the runtime, so check the name and message too.
+function isAbortError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const name = (error as { name?: string }).name;
+  const message = (error as { message?: string }).message;
+  return name === "AbortError" || message === "The operation was aborted." || message === "The user aborted a request.";
+}
+
+async function performSearch(searchText: string): Promise<SearchResult[]> {
   let metas: string = (await LocalStorage.getItem("GitLabDesignAPI")) || "";
 
   if (!metas) {
@@ -100,7 +115,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      signal: signal,
     });
 
     const json = (await response.json()) as
@@ -122,12 +136,22 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   data.forEach((item) => {
     if (item.title.toLowerCase().includes(searchText.toLowerCase())) {
-      const title = item.title.split(" > ");
+      const [category, name] = item.title.split(" > ");
+
+      // Skip entries that have no category/section name (e.g. " > Introduction").
+      if (!category.trim() || !name) {
+        return;
+      }
+
+      const route = item.route.replace(/^\//, "");
+      const url = baseUrl + route;
+      const path = route.split("/").join(" / ");
       entries.push({
-        key: item.title,
-        name: title[1],
-        category: title[0],
-        url: baseUrl + item.route,
+        key: url,
+        name,
+        category,
+        path,
+        url,
       });
     }
   });
@@ -148,5 +172,6 @@ interface SearchResult {
   icon?: string;
   name: string;
   category?: string;
+  path?: string;
   url: string;
 }
