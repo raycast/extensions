@@ -6,10 +6,12 @@ const LIMIT = 100;
 
 /** Escape a user term for safe interpolation into a SQLite LIKE pattern (with ESCAPE '\\'). */
 const escapeLikeTerm = (term: string) =>
-  term.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, (char) => `\\${char}`);
+  term
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "''")
+    .replace(/[%_]/g, (char) => `\\${char}`);
 
-const likeClause = (column: string, escaped: string) =>
-  `${column} LIKE '%${escaped}%' ESCAPE '\\'`;
+const likeClause = (column: string, escaped: string) => `${column} LIKE '%${escaped}%' ESCAPE '\\'`;
 
 const getHistoryQuery = (searchText?: string) => {
   const whereClause = searchText
