@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-06-22
 
 - Add a "Command Bar" command — an Arc-style unified palette that searches open tabs, bookmarks, reading list, history, and the web from one place. Shows a top hit, a "Search the Web" action, live search-engine autocomplete, and per-source sections. Includes a profile switcher (search bar accessory) and a Search Engine preference (DuckDuckGo, Google, Brave, or Kagi). Results open in Orion rather than the system default browser.
 - When you open a result from the Command Bar, it auto-closes the blank "launcher" tabs Orion leaves behind if you set its homepage / new-tab to the Command Bar deeplink (`raycast://…`). Controlled by the "Auto-close launcher tabs" preference (on by default); never closes a window's last tab.
