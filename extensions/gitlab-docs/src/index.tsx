@@ -1,6 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import fetch from "node-fetch";
 import { LocalStorage } from "@raycast/api";
 
 // GitLab's handbook search is powered by Algolia DocSearch. These values are

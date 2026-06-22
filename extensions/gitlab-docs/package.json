@@ -39,10 +39,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@types/lodash.groupby": "^4.6.7",
-    "apicache": "^1.6.3",
-    "lodash.groupby": "^4.6.0",
-    "node-fetch": "^3.0.0",
-    "simple-json-cache": "^1.0.3"
+    "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

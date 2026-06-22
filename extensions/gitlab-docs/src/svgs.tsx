@@ -1,6 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast, LocalStorage, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 
 // GitLab's icon set (@gitlab/svgs) is previewed at https://design.gitlab.com/svgs/.
 // The full icon set ships as a single SVG sprite sheet of <symbol> elements.
