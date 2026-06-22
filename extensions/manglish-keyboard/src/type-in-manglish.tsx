@@ -8,11 +8,11 @@ export default function Command() {
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestId = useRef(0);
 
   function handleSearchChange(text: string) {
     setInput(text);
     setOutput("");
-
     if (!text.trim()) {
       setIsLoading(false);
       return;
@@ -22,10 +22,11 @@ export default function Command() {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
-
     debounceTimer.current = setTimeout(async () => {
+      const currentRequestId = ++requestId.current;
       setIsLoading(true);
       const result = await transliterate(text);
+      if (currentRequestId !== requestId.current) return; // stale, a newer request superseded this one
       setOutput(result);
       setIsLoading(false);
     }, 400); // wait 400ms after user stops typing

@@ -18,7 +18,12 @@ export async function addToHistory(input: string, output: string) {
 
 export async function getHistory(): Promise<HistoryItem[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as HistoryItem[];
+  } catch {
+    return [];
+  }
 }
 
 export async function clearHistory() {
