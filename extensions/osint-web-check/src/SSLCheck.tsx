@@ -1,6 +1,7 @@
 import { connect, type PeerCertificate } from "node:tls";
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Fragment } from "react";
+import { CheckItemActions } from "./components/CheckItemActions";
 import { WebCheckComponentProps } from "./utils/types";
 import { useCheckDetail } from "./utils/useCheckDetail";
 
@@ -29,14 +30,7 @@ export function SSLCheck({ url, enabled }: WebCheckComponentProps) {
   return (
     <List.Item
       title="SSL Certificate"
-      actions={
-        <ActionPanel>
-          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
-          {items.map(([key, value]) => (
-            <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
-          ))}
-        </ActionPanel>
-      }
+      actions={<CheckItemActions info={INFO} items={items} />}
       detail={
         <List.Item.Detail
           isLoading={isLoading}

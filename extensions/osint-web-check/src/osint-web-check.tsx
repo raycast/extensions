@@ -270,13 +270,11 @@ export default function OsintWebCheck(props: LaunchProps<{ arguments: { url?: st
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.CopyToClipboard
-                        // eslint-disable-next-line @raycast/prefer-title-case
                         title="Copy IOC"
                         content={mode.ioc}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
                       <Action.CopyToClipboard
-                        // eslint-disable-next-line @raycast/prefer-title-case
                         title="Copy Defanged IOC"
                         content={defangIOC(mode.ioc, mode.iocType)}
                         shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
@@ -395,11 +393,7 @@ ${
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={url} />
           <Action.CopyToClipboard title="Copy Search URL" content={url} />
-          <Action.CopyToClipboard
-            // eslint-disable-next-line @raycast/prefer-title-case
-            title="Copy IOC"
-            content={ioc}
-          />
+          <Action.CopyToClipboard title="Copy IOC" content={ioc} />
         </ActionPanel>
       }
     />
