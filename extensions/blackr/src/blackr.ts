@@ -9,10 +9,6 @@ const DEFAULT_DURATION_SECONDS = 60;
 const MIN_DURATION_SECONDS = 10;
 const MAX_DURATION_SECONDS = 600;
 
-interface Preferences {
-  durationSeconds?: string;
-}
-
 export default async function command() {
   const preferences = getPreferenceValues<Preferences.Blackr>();
   const durationSeconds = normalizeDuration(preferences.durationSeconds);
