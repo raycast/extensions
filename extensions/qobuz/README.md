@@ -1,29 +1,53 @@
 # Qobuz
 
-Search Qobuz, see what's playing, and manage your favourites and playlists — and open anything straight in the Qobuz app.
+Search Qobuz, see what's playing, and manage your favourites and playlists — open anything straight in the Qobuz app.
 
 ## Commands
 
-- **Search** — find albums, artists, and tracks; open them in Qobuz or copy the link.
-- **Now Playing** — a menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link.
-- **Favourites** — browse your favourite albums, artists, and tracks.
-- **Playlists** — browse your Qobuz playlists.
+### Browse & search
+
+| Command        | Description                                                                  |
+| -------------- | ---------------------------------------------------------------------------- |
+| **Search**     | Search for albums, artists, and tracks; open them in Qobuz or copy the link. |
+| **Favourites** | Browse your favourite albums, artists, and tracks.                           |
+| **Playlists**  | Browse your Qobuz playlists.                                                 |
+
+### Now Playing
+
+| Command         | Description                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Now Playing** | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every minute. |
+
+### Playback controls
+
+| Command            | Description                                 |
+| ------------------ | ------------------------------------------- |
+| **Play / Pause**   | Toggle play/pause in the Qobuz desktop app. |
+| **Next Track**     | Skip to the next track.                     |
+| **Previous Track** | Skip to the previous track.                 |
+| **Fast-Forward**   | Fast-forward within the current track.      |
+| **Rewind**         | Rewind within the current track.            |
 
 ## Setup
 
-Qobuz has no public OAuth, so the extension authenticates with your personal **`user_auth_token`**. You only need to provide it once.
+Qobuz has no public OAuth flow, so the extension authenticates with your personal user auth token. You only need to provide it once.
 
 1. Open [play.qobuz.com](https://play.qobuz.com) and sign in.
-2. Open your browser's DevTools → **Network**.
-3. Click any request to `www.qobuz.com/api.json` and find the **`X-User-Auth-Token`** request header.
-4. Copy its value into the extension's **Qobuz Token** preference.
+2. Open your browser's DevTools and switch to the **Network** tab.
+3. Click any request going to `www.qobuz.com/api.json`.
+4. Find the **`X-User-Auth-Token`** request header and copy its value.
+5. Paste it into the extension's **Qobuz Token** preference in Raycast.
 
-That's it — the extension bootstraps the rest (the `app_id` is discovered automatically) and caches your session.
+**Using the `@kud/qobuz` CLI?** If you have already run `qobuz login`, the token is stored in your macOS Keychain. Leave the **Qobuz Token** preference empty and the extension will read it from there automatically — no manual copy-paste needed.
 
 ## Now Playing
 
-The **Now Playing** command reads the Qobuz desktop app's local player state to determine the current track — macOS doesn't expose Qobuz to the system "Now Playing" widget, so this fills that gap.
+The **Now Playing** command reads the Qobuz desktop app's local player state to determine the current track. macOS does not expose Qobuz to the system Now Playing widget, so this command fills that gap. The Qobuz desktop app must be running for it to show anything.
+
+## Playback controls
+
+The playback control commands (Play / Pause, Next, Previous, Fast-Forward, Rewind) send macOS media keys to the system. They require **Accessibility permission** — Raycast will prompt you to grant this the first time you use one of these commands.
 
 ## Credits
 
-Built on the [`@kud/qobuz`](https://www.npmjs.com/package/@kud/qobuz) core library. Not affiliated with Qobuz.
+Built on the open-source [`@kud/qobuz`](https://www.npmjs.com/package/@kud/qobuz) core library. Not affiliated with Qobuz.
