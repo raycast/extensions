@@ -133,7 +133,7 @@ export default function OsintWebCheck(props: LaunchProps<{ arguments: { url?: st
         description: "Analyzing your input...",
       };
     }
-    if (!mode.ioc) {
+    if (mode.iocType === "unknown" || !mode.ioc) {
       return {
         icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
         title: "Invalid IOC",
