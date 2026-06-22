@@ -10,8 +10,7 @@ function ClearAuthCacheAction({ onCleared }: ClearAuthCacheActionProps) {
     const handleAction = async () => {
         const confirmed = await confirmAlert({
             title: "Clear StarLine Auth Cache?",
-            message:
-                "Cached app/user tokens and SLNet session will be removed. Preferences are not affected.",
+            message: "Cached app/user tokens and SLNet session will be removed. Preferences are not affected.",
             primaryAction: {
                 title: "Clear Cache",
                 style: Alert.ActionStyle.Destructive,

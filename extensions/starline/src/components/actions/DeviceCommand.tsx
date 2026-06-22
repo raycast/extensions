@@ -22,16 +22,7 @@ const updateArmState = (target: Item, result: CarStatus) => {
 };
 
 function DeviceCommandAction(config: DeviceCommandConfig) {
-    const {
-        title,
-        icon,
-        shortcut,
-        confirmation,
-        run,
-        successMessage,
-        supportCommand,
-        updatesArmState,
-    } = config;
+    const { title, icon, shortcut, confirmation, run, successMessage, supportCommand, updatesArmState } = config;
     const item = useSelectedDeviceItem();
     const devicesContext = useOptionalDevicesContext();
     const contextStarLine = useOptionalStarLine();

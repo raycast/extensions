@@ -24,18 +24,8 @@ export default function useItemAccessories(item: Item): ListItemAccessory[] {
     }
 
     accessories.push(
-        stateIcon(
-            item.car_state.arm,
-            Icon.Lock,
-            Icon.LockUnlocked,
-            item.car_state.arm ? "Armed" : "Disarmed",
-        ),
-        stateIcon(
-            item.car_state.run,
-            Icon.Play,
-            Icon.Stop,
-            item.car_state.run ? "Engine running" : "Engine stopped",
-        ),
+        stateIcon(item.car_state.arm, Icon.Lock, Icon.LockUnlocked, item.car_state.arm ? "Armed" : "Disarmed"),
+        stateIcon(item.car_state.run, Icon.Play, Icon.Stop, item.car_state.run ? "Engine running" : "Engine stopped"),
     );
 
     return accessories;

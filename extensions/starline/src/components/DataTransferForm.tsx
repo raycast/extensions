@@ -16,11 +16,7 @@ function DataTransferForm() {
                 setAddress(data.address ?? "");
                 await showToast(Toast.Style.Success, "Loaded");
             } catch (error) {
-                await showToast(
-                    Toast.Style.Failure,
-                    "Failed to load data transfer",
-                    getErrorMessage(error),
-                );
+                await showToast(Toast.Style.Failure, "Failed to load data transfer", getErrorMessage(error));
             }
         }
 
@@ -44,11 +40,7 @@ function DataTransferForm() {
         }
 
         if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-            await showToast(
-                Toast.Style.Failure,
-                "Invalid protocol",
-                "Only http: and https: are allowed",
-            );
+            await showToast(Toast.Style.Failure, "Invalid protocol", "Only http: and https: are allowed");
             return;
         }
 

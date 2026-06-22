@@ -38,11 +38,7 @@ export function formatUnixTimestamp(value?: number | string) {
     return Number.isNaN(timestamp) ? String(value) : new Date(timestamp * 1000).toLocaleString();
 }
 
-export function statusLabel(
-    value: boolean | undefined,
-    enabledLabel: string,
-    disabledLabel: string,
-) {
+export function statusLabel(value: boolean | undefined, enabledLabel: string, disabledLabel: string) {
     if (value === undefined) {
         return EMPTY_VALUE;
     }
@@ -71,9 +67,7 @@ export function markdownTable(headers: string[], rows: MarkdownRow[]) {
     const divider = `| ${headers.map(() => "---").join(" | ")} |`;
     const body = rows.map((row) => `| ${row.map(markdownCell).join(" | ")} |`);
 
-    return [header, divider, ...(body.length > 0 ? body : [emptyTableRow(headers.length)])].join(
-        "\n",
-    );
+    return [header, divider, ...(body.length > 0 ? body : [emptyTableRow(headers.length)])].join("\n");
 }
 
 function markdownCell(value: unknown) {

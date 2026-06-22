@@ -21,11 +21,7 @@ function AccountActions() {
                 icon={Icon.Mobile}
                 target={<AccountApiDetail kind="mobileDevices" title="Mobile Devices" />}
             />
-            <Action.Push
-                title="Manage Data Transfer"
-                icon={Icon.Network}
-                target={<DataTransferForm />}
-            />
+            <Action.Push title="Manage Data Transfer" icon={Icon.Network} target={<DataTransferForm />} />
         </ActionPanel.Section>
     );
 }

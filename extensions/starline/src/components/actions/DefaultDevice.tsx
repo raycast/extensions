@@ -17,10 +17,7 @@ export default function DefaultDeviceAction({ isDefault }: { isDefault: boolean 
         }
 
         devicesContext?.setDefaultDevice(item, !isDefault);
-        await showToast(
-            Toast.Style.Success,
-            `Device "${item.alias}" ${isDefault ? "unset" : "set"} as default`,
-        );
+        await showToast(Toast.Style.Success, `Device "${item.alias}" ${isDefault ? "unset" : "set"} as default`);
     };
 
     return <Action title={title} icon={Icon.Star} onAction={handleAction} />;

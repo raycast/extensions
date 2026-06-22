@@ -23,16 +23,11 @@ type LoginResponse = ApiV3Response<{
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 const CAPTCHA_NEEDED_MESSAGE = "Captcha needed.";
-const AUTH_CACHE_KEYS = [
-    LOCAL_STORAGE.CAPTCHA_SID,
-    LOCAL_STORAGE.CAPTCHA_IMG,
-    LOCAL_STORAGE.USER_ID,
-];
+const AUTH_CACHE_KEYS = [LOCAL_STORAGE.CAPTCHA_SID, LOCAL_STORAGE.CAPTCHA_IMG, LOCAL_STORAGE.USER_ID];
 const HOUR_MS = 60 * 60 * 1000;
 const memorySecrets = new Map<MemorySecretKey, { value: string; expiresAt: number }>();
 
-const hash = (algorithm: "md5" | "sha1", value: string) =>
-    createHash(algorithm).update(value).digest("hex");
+const hash = (algorithm: "md5" | "sha1", value: string) => createHash(algorithm).update(value).digest("hex");
 const md5 = (value: string) => hash("md5", value);
 const sha1 = (value: string) => hash("sha1", value);
 const parseSlnetCookie = (setCookies: string[]) => {
@@ -44,8 +39,7 @@ const parseSlnetCookie = (setCookies: string[]) => {
     }
     return undefined;
 };
-const encodeSlnetAuth = ({ userId, slnetUserToken }: AuthTokens) =>
-    JSON.stringify({ userId, slnetUserToken });
+const encodeSlnetAuth = ({ userId, slnetUserToken }: AuthTokens) => JSON.stringify({ userId, slnetUserToken });
 const decodeSlnetAuth = (value: string): AuthTokens | undefined => {
     try {
         const { userId, slnetUserToken } = JSON.parse<Partial<AuthTokens>>(value);
@@ -160,8 +154,7 @@ export class StarLineClient {
             const response = await fetch(
                 idApiV3Url("application/getCode", { appId: this.appId, secret: md5(this.secret) }),
             );
-            const data =
-                await readJson<ApiV3Response<{ code?: string; message?: string }>>(response);
+            const data = await readJson<ApiV3Response<{ code?: string; message?: string }>>(response);
             return apiValueOrThrow(data, ({ code }) => code, "Failed to get app code");
         });
     }
@@ -175,8 +168,7 @@ export class StarLineClient {
                     secret: md5(this.secret + code),
                 }),
             );
-            const data =
-                await readJson<ApiV3Response<{ token?: string; message?: string }>>(response);
+            const data = await readJson<ApiV3Response<{ token?: string; message?: string }>>(response);
             return apiValueOrThrow(data, ({ token }) => token, "Failed to get app token");
         });
     }
@@ -215,8 +207,7 @@ export class StarLineClient {
     }
 
     private async handleLoginError({ message, captchaSid, captchaImg }: LoginResponse["desc"]) {
-        const needsCaptcha =
-            message === CAPTCHA_NEEDED_MESSAGE && hasText(captchaSid) && hasText(captchaImg);
+        const needsCaptcha = message === CAPTCHA_NEEDED_MESSAGE && hasText(captchaSid) && hasText(captchaImg);
 
         if (!needsCaptcha) {
             throw new DisplayableError(message ?? "Login failed");

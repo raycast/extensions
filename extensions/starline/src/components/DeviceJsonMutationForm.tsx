@@ -1,13 +1,4 @@
-import {
-    Action,
-    ActionPanel,
-    Alert,
-    Form,
-    Toast,
-    confirmAlert,
-    popToRoot,
-    showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 
 import { useStarLine } from "../context/starline";
@@ -39,12 +30,9 @@ const JSON_MUTATIONS: Record<DeviceJsonMutationKind, JsonMutationRunner> = {
     controls: (starline, deviceId, body) => starline.updateControls(deviceId, body),
     comfortOptions: (starline, deviceId, body) => starline.putComfortOptions(deviceId, body),
     webastoSettings: (starline, deviceId, body) => starline.updateWebastoSettings(deviceId, body),
-    remoteStartSettings: (starline, deviceId, body) =>
-        starline.updateRemoteStartSettings(deviceId, body),
-    shockSensorSettings: (starline, deviceId, body) =>
-        starline.updateShockSensorSettings(deviceId, body),
-    monitoringSettings: (starline, deviceId, body) =>
-        starline.updateMonitoringSettings(deviceId, body),
+    remoteStartSettings: (starline, deviceId, body) => starline.updateRemoteStartSettings(deviceId, body),
+    shockSensorSettings: (starline, deviceId, body) => starline.updateShockSensorSettings(deviceId, body),
+    monitoringSettings: (starline, deviceId, body) => starline.updateMonitoringSettings(deviceId, body),
 };
 
 function defaultJson(value: unknown) {
@@ -74,8 +62,7 @@ function DeviceJsonMutationForm(props: DeviceJsonMutationFormProps) {
 
         const confirmed = await confirmAlert({
             title: `${title}?`,
-            message:
-                "This will change StarLine device settings. Continue only if you know the expected JSON schema.",
+            message: "This will change StarLine device settings. Continue only if you know the expected JSON schema.",
             primaryAction: {
                 title: "Submit",
                 style: Alert.ActionStyle.Destructive,

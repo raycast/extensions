@@ -93,9 +93,7 @@ function renderPanel(subject: Item) {
         throw new Error("Renderer was not created");
     }
 
-    return renderer.root
-        .findAll((node) => node.type === "Action")
-        .map((node) => String(node.props.title));
+    return renderer.root.findAll((node) => node.type === "Action").map((node) => String(node.props.title));
 }
 
 describe("DevicesItemActionPanel", () => {
@@ -103,10 +101,7 @@ describe("DevicesItemActionPanel", () => {
 
     beforeEach(() => {
         consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((message?: unknown) => {
-            if (
-                typeof message === "string" &&
-                message.includes("react-test-renderer is deprecated")
-            ) {
+            if (typeof message === "string" && message.includes("react-test-renderer is deprecated")) {
                 return;
             }
             process.stderr.write(`${String(message)}\n`);
@@ -170,9 +165,7 @@ describe("DevicesItemActionPanel", () => {
         }
 
         const advancedJsonSections = renderer.root.findAll(
-            (node) =>
-                node.type === "ActionPanel.Section" &&
-                node.props.title === "Settings / Advanced JSON Forms",
+            (node) => node.type === "ActionPanel.Section" && node.props.title === "Settings / Advanced JSON Forms",
         );
 
         expect(advancedJsonSections).toHaveLength(0);

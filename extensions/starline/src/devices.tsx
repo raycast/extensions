@@ -31,10 +31,7 @@ function CaptchaForm({ captchaImg, captchaSid }: { captchaImg: string; captchaSi
             actions={
                 <ActionPanel>
                     <Action.SubmitForm title="Submit Captcha" onSubmit={submitCaptcha} />
-                    <Action.OpenInBrowser
-                        url={captchaImg}
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
-                    />
+                    <Action.OpenInBrowser url={captchaImg} shortcut={{ modifiers: ["cmd"], key: "." }} />
                 </ActionPanel>
             }
         >
@@ -42,12 +39,7 @@ function CaptchaForm({ captchaImg, captchaSid }: { captchaImg: string; captchaSi
                 title="Captcha needed"
                 text={`Open this captcha URL and enter the captcha to continue:\n${captchaImg}`}
             />
-            <Form.TextField
-                id="captchaValue"
-                title="Captcha"
-                placeholder="Captcha value"
-                autoFocus
-            />
+            <Form.TextField id="captchaValue" title="Captcha" placeholder="Captcha value" autoFocus />
         </Form>
     );
 }
@@ -69,10 +61,7 @@ function DevicesList() {
 
     return (
         <List searchBarPlaceholder="Search device" isLoading={isLoading}>
-            <List.EmptyView
-                title="No Devices"
-                actions={<AccountActionPanel reloadDevices={loadItems} />}
-            />
+            <List.EmptyView title="No Devices" actions={<AccountActionPanel reloadDevices={loadItems} />} />
             <List.Section title="Account">
                 <List.Item
                     title="StarLine Account"

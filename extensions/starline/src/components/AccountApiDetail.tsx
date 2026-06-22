@@ -6,11 +6,7 @@ import { getErrorMessage } from "../utils/errors";
 import { displayString, formatUnixTimestamp, jsonCodeBlock, markdownTable } from "../utils/format";
 
 import type { StarLine } from "../starline/api";
-import type {
-    DeviceListResponse,
-    MobileDevicesResponse,
-    UserDevicesResponse,
-} from "../types/starline";
+import type { DeviceListResponse, MobileDevicesResponse, UserDevicesResponse } from "../types/starline";
 import type { MarkdownRow } from "../utils/format";
 
 type AccountApiDetailKind = "userDevices" | "deviceList" | "mobileDevices";

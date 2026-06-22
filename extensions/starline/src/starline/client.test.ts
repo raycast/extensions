@@ -28,8 +28,7 @@ const jsonResponse = (data: unknown, headers?: { getSetCookie: () => string[] })
 
 const slnetHeaders = (cookie: string) => ({ getSetCookie: () => [cookie] });
 
-const textResponse = (status: number, text: string) =>
-    ({ status, text: () => Promise.resolve(text) }) as never;
+const textResponse = (status: number, text: string) => ({ status, text: () => Promise.resolve(text) }) as never;
 
 describe("StarLineClient", () => {
     beforeEach(async () => {
@@ -49,9 +48,7 @@ describe("StarLineClient", () => {
             text: () => Promise.resolve("upstream unavailable"),
         } as never);
 
-        await expect(new TestStarLineClient().callRequest()).rejects.toThrow(
-            "upstream unavailable",
-        );
+        await expect(new TestStarLineClient().callRequest()).rejects.toThrow("upstream unavailable");
     });
 
     it("rejects API envelopes with unsuccessful codes even when HTTP status is 200", async () => {
@@ -69,16 +66,12 @@ describe("StarLineClient", () => {
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { code: "app-code" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { token: "app-token" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { user_token: "slid-token" } }))
-            .mockResolvedValueOnce(
-                jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie; Path=/")),
-            )
+            .mockResolvedValueOnce(jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie; Path=/")))
             .mockResolvedValueOnce(textResponse(200, JSON.stringify({ code: 200 })));
 
         await new FullAuthStarLineClient().callRequest();
 
-        expect(jest.mocked(LocalStorage.setItem).mock.calls).toEqual([
-            [LOCAL_STORAGE.USER_ID, "user-1"],
-        ]);
+        expect(jest.mocked(LocalStorage.setItem).mock.calls).toEqual([[LOCAL_STORAGE.USER_ID, "user-1"]]);
     });
 
     it("only clears persisted auth metadata from LocalStorage", async () => {
@@ -99,15 +92,11 @@ describe("StarLineClient", () => {
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { code: "app-code-1" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { token: "app-token-1" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { user_token: "slid-token-1" } }))
-            .mockResolvedValueOnce(
-                jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie-1; Path=/")),
-            )
+            .mockResolvedValueOnce(jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie-1; Path=/")))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { code: "app-code-2" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { token: "app-token-2" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { user_token: "slid-token-2" } }))
-            .mockResolvedValueOnce(
-                jsonResponse({ user_id: "user-2" }, slnetHeaders("slnet=slnet-cookie-2; Path=/")),
-            );
+            .mockResolvedValueOnce(jsonResponse({ user_id: "user-2" }, slnetHeaders("slnet=slnet-cookie-2; Path=/")));
 
         await new FullAuthStarLineClient().callAuth();
 
@@ -138,16 +127,12 @@ describe("StarLineClient", () => {
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { code: "app-code-1" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { token: "app-token-1" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { user_token: "slid-token-1" } }))
-            .mockResolvedValueOnce(
-                jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie-1; Path=/")),
-            )
+            .mockResolvedValueOnce(jsonResponse({ user_id: "user-1" }, slnetHeaders("slnet=slnet-cookie-1; Path=/")))
             .mockResolvedValueOnce(textResponse(200, JSON.stringify({ code: 200 })))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { code: "app-code-2" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { token: "app-token-2" } }))
             .mockResolvedValueOnce(jsonResponse({ state: 1, desc: { user_token: "slid-token-2" } }))
-            .mockResolvedValueOnce(
-                jsonResponse({ user_id: "user-2" }, slnetHeaders("slnet=slnet-cookie-2; Path=/")),
-            )
+            .mockResolvedValueOnce(jsonResponse({ user_id: "user-2" }, slnetHeaders("slnet=slnet-cookie-2; Path=/")))
             .mockResolvedValueOnce(textResponse(200, JSON.stringify({ code: 200 })));
 
         await new FullAuthStarLineClient().callRequest("https://example.test/first");

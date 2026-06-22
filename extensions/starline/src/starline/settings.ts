@@ -33,20 +33,11 @@ export class StarLineSettingsApi extends StarLineUserApi {
         return this.getSettingsEndpoint<T>(deviceId, "settings", API_VERSION.v4);
     }
 
-    private getSettingsEndpoint<T>(
-        deviceId: string,
-        path: string,
-        version: ApiVersion = API_VERSION.v1,
-    ) {
+    private getSettingsEndpoint<T>(deviceId: string, path: string, version: ApiVersion = API_VERSION.v1) {
         return this.request<T>(deviceUrl(version, deviceId, path));
     }
 
-    private postSettings<T>(
-        deviceId: string,
-        path: string,
-        body: unknown,
-        version: ApiVersion = API_VERSION.v1,
-    ) {
+    private postSettings<T>(deviceId: string, path: string, body: unknown, version: ApiVersion = API_VERSION.v1) {
         return this.request<T>(deviceUrl(version, deviceId, path), { method: "post", body });
     }
 }

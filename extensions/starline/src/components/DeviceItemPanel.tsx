@@ -90,9 +90,7 @@ function DevicesItemActionPanel({ showDetailsAction = true }: { showDetailsActio
     return (
         <ActionPanel>
             <ActionPanel.Section>
-                {showDetailsAction && (
-                    <Action.Push title="Show Details" target={<DeviceDetails item={item} />} />
-                )}
+                {showDetailsAction && <Action.Push title="Show Details" target={<DeviceDetails item={item} />} />}
                 {PRIMARY_DEVICE_ACTIONS.map((command) => (
                     <ConfiguredDeviceCommandAction key={command} command={command} />
                 ))}
@@ -106,11 +104,7 @@ function DevicesItemActionPanel({ showDetailsAction = true }: { showDetailsActio
                     icon={Icon.MagnifyingGlass}
                     target={<EventDescriptionForm />}
                 />
-                <Action.Push
-                    title="Get LBS Position"
-                    icon={Icon.Map}
-                    target={<LbsPositionForm />}
-                />
+                <Action.Push title="Get LBS Position" icon={Icon.Map} target={<LbsPositionForm />} />
             </ActionPanel.Section>
 
             {environment.isDevelopment && (
@@ -141,10 +135,7 @@ function DevicesItemActionPanel({ showDetailsAction = true }: { showDetailsActio
 
             {environment.isDevelopment && (
                 <ActionPanel.Section title="Development">
-                    <Action.CopyToClipboard
-                        title="Copy Item UUID"
-                        content={item.device_id.toString()}
-                    />
+                    <Action.CopyToClipboard title="Copy Item UUID" content={item.device_id.toString()} />
                     <ClearAuthCacheAction />
                 </ActionPanel.Section>
             )}

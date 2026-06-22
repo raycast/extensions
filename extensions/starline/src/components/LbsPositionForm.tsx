@@ -52,26 +52,13 @@ function LbsPositionForm() {
         const parsedCid = parseRequiredInt(cid);
         const parsedPwr = parseOptionalInt(pwr);
 
-        if (
-            parsedMcc === undefined ||
-            parsedMnc === undefined ||
-            parsedLac === undefined ||
-            parsedCid === undefined
-        ) {
-            await showToast(
-                Toast.Style.Failure,
-                "Invalid Input",
-                "MCC, MNC, LAC, CID must be integers",
-            );
+        if (parsedMcc === undefined || parsedMnc === undefined || parsedLac === undefined || parsedCid === undefined) {
+            await showToast(Toast.Style.Failure, "Invalid Input", "MCC, MNC, LAC, CID must be integers");
             return;
         }
 
         if (!parsedPwr.ok) {
-            await showToast(
-                Toast.Style.Failure,
-                "Invalid PWR",
-                "Power must be an integer if provided",
-            );
+            await showToast(Toast.Style.Failure, "Invalid PWR", "Power must be an integer if provided");
             return;
         }
 
@@ -94,11 +81,7 @@ function LbsPositionForm() {
 
             setResult(data);
         } catch (error) {
-            await showToast(
-                Toast.Style.Failure,
-                "Failed to get LBS position",
-                getErrorMessage(error),
-            );
+            await showToast(Toast.Style.Failure, "Failed to get LBS position", getErrorMessage(error));
         }
     };
 
@@ -114,34 +97,10 @@ function LbsPositionForm() {
                 </ActionPanel>
             }
         >
-            <Form.TextField
-                id="mcc"
-                title="MCC"
-                placeholder="Mobile Country Code"
-                value={mcc}
-                onChange={setMcc}
-            />
-            <Form.TextField
-                id="mnc"
-                title="MNC"
-                placeholder="Mobile Network Code"
-                value={mnc}
-                onChange={setMnc}
-            />
-            <Form.TextField
-                id="lac"
-                title="LAC"
-                placeholder="Location Area Code"
-                value={lac}
-                onChange={setLac}
-            />
-            <Form.TextField
-                id="cid"
-                title="CID"
-                placeholder="Cell ID"
-                value={cid}
-                onChange={setCid}
-            />
+            <Form.TextField id="mcc" title="MCC" placeholder="Mobile Country Code" value={mcc} onChange={setMcc} />
+            <Form.TextField id="mnc" title="MNC" placeholder="Mobile Network Code" value={mnc} onChange={setMnc} />
+            <Form.TextField id="lac" title="LAC" placeholder="Location Area Code" value={lac} onChange={setLac} />
+            <Form.TextField id="cid" title="CID" placeholder="Cell ID" value={cid} onChange={setCid} />
             <Form.TextField
                 id="pwr"
                 title="Power (optional)"

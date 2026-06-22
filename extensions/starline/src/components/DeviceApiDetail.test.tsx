@@ -25,10 +25,7 @@ describe("DeviceApiDetail", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((message?: unknown) => {
-            if (
-                typeof message === "string" &&
-                message.includes("react-test-renderer is deprecated")
-            ) {
+            if (typeof message === "string" && message.includes("react-test-renderer is deprecated")) {
                 return;
             }
             process.stderr.write(`${String(message)}\n`);

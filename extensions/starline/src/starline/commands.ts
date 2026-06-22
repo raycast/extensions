@@ -71,11 +71,8 @@ const commandBody = (
     const body: CommandBody = { type, [type]: value };
     return variables === undefined ? body : { ...body, variables: [variables] };
 };
-const asyncCommandBody = (
-    type: string,
-    value: CommandValue = DEFAULT_COMMAND_VALUE,
-    variables?: CommandVariables,
-) => (variables === undefined ? { type, value } : { type, value, variables });
+const asyncCommandBody = (type: string, value: CommandValue = DEFAULT_COMMAND_VALUE, variables?: CommandVariables) =>
+    variables === undefined ? { type, value } : { type, value, variables };
 const boolValue = (enabled: boolean) => (enabled ? 1 : 0);
 const flexCommandType = (index: number) => `flex_${index}`;
 const isDone = ({ status }: AsyncCommandResponse) => status === ASYNC_STATUS.done;
@@ -167,27 +164,15 @@ export class StarLineCommands extends StarLineClient {
     }
 
     setIgnition(deviceId: string, enabled: boolean) {
-        return this.sendCommandWithAsyncFallback(
-            deviceId,
-            COMMAND_TYPES.ignition,
-            boolValue(enabled),
-        );
+        return this.sendCommandWithAsyncFallback(deviceId, COMMAND_TYPES.ignition, boolValue(enabled));
     }
 
     setSecurityMode(deviceId: string, enabled: boolean) {
-        return this.sendCommand<CarStatus>(
-            deviceId,
-            COMMAND_TYPES.securityMode,
-            boolValue(enabled),
-        );
+        return this.sendCommand<CarStatus>(deviceId, COMMAND_TYPES.securityMode, boolValue(enabled));
     }
 
     setQuietSecurityMode(deviceId: string, enabled: boolean) {
-        return this.sendCommand<CarStatus>(
-            deviceId,
-            COMMAND_TYPES.quietSecurityMode,
-            boolValue(enabled),
-        );
+        return this.sendCommand<CarStatus>(deviceId, COMMAND_TYPES.quietSecurityMode, boolValue(enabled));
     }
 
     async setHijackMode(deviceId: string, enabled: boolean, pinCode: string) {
@@ -196,23 +181,14 @@ export class StarLineCommands extends StarLineClient {
             throw new DisplayableError("Hijack PIN is required");
         }
 
-        const result = await this.sendCommandWithAsyncFallback(
-            deviceId,
-            COMMAND_TYPES.hijack,
-            boolValue(enabled),
-            {
-                variables: { pin_code: trimmedPinCode },
-            },
-        );
+        const result = await this.sendCommandWithAsyncFallback(deviceId, COMMAND_TYPES.hijack, boolValue(enabled), {
+            variables: { pin_code: trimmedPinCode },
+        });
         return result;
     }
 
     setHandsFree(deviceId: string, enabled: boolean) {
-        return this.sendCommandWithAsyncFallback(
-            deviceId,
-            COMMAND_TYPES.handsFree,
-            boolValue(enabled),
-        );
+        return this.sendCommandWithAsyncFallback(deviceId, COMMAND_TYPES.handsFree, boolValue(enabled));
     }
 
     disarmTrunk(deviceId: string) {
@@ -228,11 +204,7 @@ export class StarLineCommands extends StarLineClient {
     }
 
     setOutput(deviceId: string, enabled: boolean) {
-        return this.sendCommandWithAsyncFallback(
-            deviceId,
-            COMMAND_TYPES.output,
-            boolValue(enabled),
-        );
+        return this.sendCommandWithAsyncFallback(deviceId, COMMAND_TYPES.output, boolValue(enabled));
     }
 
     setDvr(deviceId: string, enabled: boolean) {
@@ -240,11 +212,7 @@ export class StarLineCommands extends StarLineClient {
     }
 
     setWebasto(deviceId: string, enabled: boolean) {
-        return this.sendCommandWithAsyncFallback(
-            deviceId,
-            COMMAND_TYPES.webasto,
-            boolValue(enabled),
-        );
+        return this.sendCommandWithAsyncFallback(deviceId, COMMAND_TYPES.webasto, boolValue(enabled));
     }
 
     webastoOn(deviceId: string) {
@@ -296,9 +264,7 @@ export class StarLineCommands extends StarLineClient {
         const deadline = Date.now() + timeoutMs;
 
         while (Date.now() <= deadline) {
-            const status = await this.request<AsyncCommandResponse>(
-                asyncCommandUrl(deviceId, commandId),
-            );
+            const status = await this.request<AsyncCommandResponse>(asyncCommandUrl(deviceId, commandId));
             if (isDone(status)) {
                 return status;
             }

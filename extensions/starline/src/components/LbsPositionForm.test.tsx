@@ -16,10 +16,7 @@ describe("LbsPositionForm", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((message?: unknown) => {
-            if (
-                typeof message === "string" &&
-                message.includes("react-test-renderer is deprecated")
-            ) {
+            if (typeof message === "string" && message.includes("react-test-renderer is deprecated")) {
                 return;
             }
             process.stderr.write(`${String(message)}\n`);
@@ -49,8 +46,7 @@ describe("LbsPositionForm", () => {
     function getOnSubmit(renderer: ReactTestRenderer) {
         const form = renderer.root.findByType("Form");
         const actionsEl = form.props.actions as React.ReactElement;
-        return (actionsEl.props.children as React.ReactElement<{ onSubmit: () => Promise<void> }>)
-            .props.onSubmit;
+        return (actionsEl.props.children as React.ReactElement<{ onSubmit: () => Promise<void> }>).props.onSubmit;
     }
 
     it("shows failure toast and calls neither API method when required fields are empty", async () => {
@@ -160,13 +156,11 @@ describe("LbsPositionForm", () => {
 
     it("calls getLbsPositions with PWR when all fields including PWR are valid integers", async () => {
         const getLbsSpy = jest.spyOn(StarLine.prototype, "getLbsPosition");
-        const getLbsPositionsSpy = jest
-            .spyOn(StarLine.prototype, "getLbsPositions")
-            .mockResolvedValue({
-                code: 200,
-                codestring: "OK",
-                gps: { lat: 55.7, lon: 37.6, r: 100 },
-            });
+        const getLbsPositionsSpy = jest.spyOn(StarLine.prototype, "getLbsPositions").mockResolvedValue({
+            code: 200,
+            codestring: "OK",
+            gps: { lat: 55.7, lon: 37.6, r: 100 },
+        });
 
         const renderer = renderForm();
         const fields = fillRequiredFields(renderer);

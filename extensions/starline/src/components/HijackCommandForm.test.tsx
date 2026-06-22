@@ -26,10 +26,7 @@ describe("HijackCommandForm", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((message?: unknown) => {
-            if (
-                typeof message === "string" &&
-                message.includes("react-test-renderer is deprecated")
-            ) {
+            if (typeof message === "string" && message.includes("react-test-renderer is deprecated")) {
                 return;
             }
             process.stderr.write(`${String(message)}\n`);
@@ -59,8 +56,7 @@ describe("HijackCommandForm", () => {
     function getOnSubmit(renderer: ReactTestRenderer) {
         const form = renderer.root.findByType("Form");
         const actionsEl = form.props.actions as React.ReactElement;
-        return (actionsEl.props.children as React.ReactElement<{ onSubmit: () => Promise<void> }>)
-            .props.onSubmit;
+        return (actionsEl.props.children as React.ReactElement<{ onSubmit: () => Promise<void> }>).props.onSubmit;
     }
 
     it("shows failure toast and does not call setHijackMode when PIN is empty", async () => {

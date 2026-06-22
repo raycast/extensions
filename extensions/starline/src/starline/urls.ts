@@ -17,8 +17,7 @@ export const idApiV3Url = (path: string, params?: Record<string, string>) => {
 export const deviceUrl = (version: ApiVersion, deviceId: string, path?: string) =>
     developerJsonUrl(version, "device", deviceId, path);
 
-export const legacyDeviceUrl = (deviceId: string, path: string) =>
-    developerJsonUrl("device", deviceId, path);
+export const legacyDeviceUrl = (deviceId: string, path: string) => developerJsonUrl("device", deviceId, path);
 
 export const userUrl = (version: ApiVersion, userId: string, path: string) =>
     developerJsonUrl(version, "user", userId, path);
@@ -30,5 +29,4 @@ export const appendQuery = (url: string, params: Record<string, string | number 
     return query.length === 0 ? url : `${url}${url.includes("?") ? "&" : "?"}${query}`;
 };
 
-export const libraryUrl = (version: ApiVersion, path: string) =>
-    developerJsonUrl(version, "library", path);
+export const libraryUrl = (version: ApiVersion, path: string) => developerJsonUrl(version, "library", path);

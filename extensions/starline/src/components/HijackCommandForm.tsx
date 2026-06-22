@@ -1,13 +1,4 @@
-import {
-    Action,
-    ActionPanel,
-    Alert,
-    Form,
-    Toast,
-    confirmAlert,
-    popToRoot,
-    showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 
 import { useStarLine } from "../context/starline";
@@ -68,10 +59,7 @@ function HijackCommandForm({ item, enabled }: HijackCommandFormProps) {
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm
-                        title={enabled ? "Enable Hijack" : "Disable Hijack"}
-                        onSubmit={submit}
-                    />
+                    <Action.SubmitForm title={enabled ? "Enable Hijack" : "Disable Hijack"} onSubmit={submit} />
                 </ActionPanel>
             }
         >

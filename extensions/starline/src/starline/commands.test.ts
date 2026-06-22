@@ -33,9 +33,7 @@ describe("StarLineCommands", () => {
     it("does not fallback to legacy command when async command returns device failure", async () => {
         const client = new TestStarLineCommands([asyncResponse(4)]);
 
-        await expect(client.sendCommandWithAsyncFallback("42", "poke", 1)).rejects.toThrow(
-            "Device is offline",
-        );
+        await expect(client.sendCommandWithAsyncFallback("42", "poke", 1)).rejects.toThrow("Device is offline");
 
         expect(client.requests).toHaveLength(1);
     });
@@ -57,9 +55,7 @@ describe("StarLineCommands", () => {
             {},
         ]);
 
-        await expect(client.sendCommandWithAsyncFallback("42", "poke", 1)).rejects.toThrow(
-            "status network failed",
-        );
+        await expect(client.sendCommandWithAsyncFallback("42", "poke", 1)).rejects.toThrow("status network failed");
 
         expect(client.requests).toHaveLength(2);
         expect(client.requests.map(({ url }) => url)).toEqual([
@@ -115,9 +111,7 @@ describe("StarLineCommands", () => {
     it("rejects empty hijack PIN", async () => {
         const client = new TestStarLineCommands([]);
 
-        await expect(client.setHijackMode("42", true, "   ")).rejects.toThrow(
-            "Hijack PIN is required",
-        );
+        await expect(client.setHijackMode("42", true, "   ")).rejects.toThrow("Hijack PIN is required");
         expect(client.requests).toHaveLength(0);
     });
 
@@ -136,9 +130,7 @@ describe("StarLineCommands", () => {
     it("rejects invalid flex command index", async () => {
         const client = new TestStarLineCommands([]);
 
-        await expect(client.runFlexCommand("42", 10)).rejects.toThrow(
-            "Flex command index must be between 1 and 9",
-        );
+        await expect(client.runFlexCommand("42", 10)).rejects.toThrow("Flex command index must be between 1 and 9");
         expect(client.requests).toHaveLength(0);
     });
 });

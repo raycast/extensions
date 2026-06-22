@@ -52,11 +52,7 @@ type DeviceApiDetailProps = {
 };
 
 type ApiPeriod = ReturnType<typeof lastHoursPeriod>;
-type ApiDetailLoader = (
-    starline: StarLine,
-    deviceId: string,
-    period: ApiPeriod,
-) => Promise<unknown>;
+type ApiDetailLoader = (starline: StarLine, deviceId: string, period: ApiPeriod) => Promise<unknown>;
 type DetailFormatter = (data: unknown) => string;
 
 const DEFAULT_HISTORY_HOURS = 24;
@@ -88,8 +84,7 @@ const API_DETAIL_LOADERS: Record<DeviceApiDetailKind, ApiDetailLoader> = {
     report: (api, id) => api.getDeviceReport(id),
     settings: (api, id) => api.getSettings(id),
     comfortOptions: (api, id) => api.getSupportedComfortOptions(id),
-    events: (api, id, { start, end }) =>
-        api.getEvents(id, { period_start: start, period_end: end }),
+    events: (api, id, { start, end }) => api.getEvents(id, { period_start: start, period_end: end }),
     ways: (api, id, { start, end }) => api.getWays(id, { begin: start, end, split_way: false }),
     drivingScore: (api, id) => api.getDrivingScore(id, {}),
     drivingScoreHistory: (api, id) => api.getDrivingScoreHistory(id, {}),
@@ -166,11 +161,7 @@ function formatPosition({ device }: Partial<DevicePositionResponse>) {
 function formatEvents({ events }: Partial<DeviceEventsResponse>) {
     return markdownTable(
         ["Time", "Group", "Type"],
-        (events ?? []).map((event) => [
-            formatUnixTimestamp(event.timestamp),
-            event.groupId,
-            event.type,
-        ]),
+        (events ?? []).map((event) => [formatUnixTimestamp(event.timestamp), event.groupId, event.type]),
     );
 }
 
@@ -182,11 +173,7 @@ function formatObdParams({ obd_params: params, requirements }: ObdParamsResponse
             formatUnixTimestamp(params?.fuel?.ts),
         ],
         ["Errors", displayString(params?.errors?.val), formatUnixTimestamp(params?.errors?.ts)],
-        [
-            "Mileage",
-            `${displayString(params?.mileage?.val)} km`,
-            formatUnixTimestamp(params?.mileage?.ts),
-        ],
+        ["Mileage", `${displayString(params?.mileage?.val)} km`, formatUnixTimestamp(params?.mileage?.ts)],
     ];
 
     return `${markdownTable(["Field", "Value", "Timestamp"], rows)}\n\nMinimum firmware: ${displayString(requirements?.min_version)}`;
@@ -224,9 +211,7 @@ function formatSettings(data: Partial<DeviceSettingsResponse>) {
 function formatEventLibrary({ eventDescriptions }: Partial<LibraryEventsResponse>) {
     return markdownTable(
         ["Code", "Group", "Description"],
-        (eventDescriptions ?? []).map(
-            (event): MarkdownRow => [event.code, event.group_id, event.desc],
-        ),
+        (eventDescriptions ?? []).map((event): MarkdownRow => [event.code, event.group_id, event.desc]),
     );
 }
 

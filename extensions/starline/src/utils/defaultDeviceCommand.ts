@@ -9,18 +9,13 @@ import { runDeviceCommand } from "./runDeviceCommand";
 
 import type { DeviceActionKey } from "../starline/commandConfig";
 
-export const createDefaultDeviceCommand = (command: DeviceActionKey) => () =>
-    defaultDeviceCommand(command);
+export const createDefaultDeviceCommand = (command: DeviceActionKey) => () => defaultDeviceCommand(command);
 
 export default async function defaultDeviceCommand(command: DeviceActionKey) {
     const deviceId = await LocalStorage.getItem(LOCAL_STORAGE.DEFAULT_DEVICE);
 
     if (deviceId === undefined) {
-        await showToast(
-            Toast.Style.Failure,
-            "No default device",
-            "Please set default device first",
-        );
+        await showToast(Toast.Style.Failure, "No default device", "Please set default device first");
         return;
     }
 

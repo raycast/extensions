@@ -2,10 +2,7 @@ import { Alert, confirmAlert } from "@raycast/api";
 
 import type { DeviceCommandConfig } from "../starline/commandConfig";
 
-export const confirmDeviceCommand = (
-    confirmation: DeviceCommandConfig["confirmation"],
-    fallbackTitle: string,
-) =>
+export const confirmDeviceCommand = (confirmation: DeviceCommandConfig["confirmation"], fallbackTitle: string) =>
     confirmation === undefined ||
     confirmAlert({
         title: confirmation.title,

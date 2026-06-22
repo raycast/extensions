@@ -21,11 +21,7 @@ export type DeviceCommandConfig = {
     run: (starline: StarLine, deviceId: string, item?: Item) => Promise<unknown>;
 };
 
-const destructiveConfirmation = (
-    title: string,
-    message: string,
-    primaryActionTitle: string,
-): CommandConfirmation => ({
+const destructiveConfirmation = (title: string, message: string, primaryActionTitle: string): CommandConfirmation => ({
     title,
     message,
     primaryActionTitle,
@@ -71,31 +67,17 @@ export const DEVICE_ACTIONS = {
         ),
         updatesArmState: true,
     }),
-    stopEngine: deviceCommand(
-        "Stop Engine",
-        "Engine stopped",
-        (starline, deviceId) => starline.stopEngine(deviceId),
-        {
-            icon: Icon.Stop,
-            supportCommand: "ign_stop",
-            shortcut: { modifiers: ["cmd"], key: "s" },
-            confirmation: destructiveConfirmation(
-                "Stop engine?",
-                "This will stop the engine remotely.",
-                "Stop Engine",
-            ),
-        },
-    ),
-    armQuietly: deviceCommand(
-        "Arm Quietly",
-        "Armed quietly",
-        (starline, deviceId) => starline.armQuietly(deviceId),
-        {
-            icon: Icon.Lock,
-            supportCommand: "arm_start_quiet",
-            updatesArmState: true,
-        },
-    ),
+    stopEngine: deviceCommand("Stop Engine", "Engine stopped", (starline, deviceId) => starline.stopEngine(deviceId), {
+        icon: Icon.Stop,
+        supportCommand: "ign_stop",
+        shortcut: { modifiers: ["cmd"], key: "s" },
+        confirmation: destructiveConfirmation("Stop engine?", "This will stop the engine remotely.", "Stop Engine"),
+    }),
+    armQuietly: deviceCommand("Arm Quietly", "Armed quietly", (starline, deviceId) => starline.armQuietly(deviceId), {
+        icon: Icon.Lock,
+        supportCommand: "arm_start_quiet",
+        updatesArmState: true,
+    }),
     disarmQuietly: deviceCommand(
         "Disarm Quietly",
         "Disarmed quietly",
@@ -141,15 +123,10 @@ export const DEVICE_ACTIONS = {
         (starline, deviceId) => starline.serviceModeDisable(deviceId),
         { supportCommand: "valet" },
     ),
-    horn: deviceCommand(
-        "Horn",
-        "Horn command sent",
-        (starline, deviceId) => starline.horn(deviceId),
-        {
-            icon: Icon.SpeakerUp,
-            supportCommand: "poke",
-        },
-    ),
+    horn: deviceCommand("Horn", "Horn command sent", (starline, deviceId) => starline.horn(deviceId), {
+        icon: Icon.SpeakerUp,
+        supportCommand: "poke",
+    }),
     updatePosition: deviceCommand(
         "Update Position",
         "Position update requested",
@@ -189,20 +166,15 @@ export const ADVANCED_DEVICE_ACTIONS = {
             ),
         },
     ),
-    panic: deviceCommand(
-        "Panic",
-        "Panic mode triggered",
-        (starline, deviceId) => starline.panic(deviceId),
-        {
-            icon: Icon.ExclamationMark,
-            supportCommand: "panic",
-            confirmation: destructiveConfirmation(
-                "Trigger panic mode?",
-                "This will enable alarm mode for 15 seconds.",
-                "Trigger Panic",
-            ),
-        },
-    ),
+    panic: deviceCommand("Panic", "Panic mode triggered", (starline, deviceId) => starline.panic(deviceId), {
+        icon: Icon.ExclamationMark,
+        supportCommand: "panic",
+        confirmation: destructiveConfirmation(
+            "Trigger panic mode?",
+            "This will enable alarm mode for 15 seconds.",
+            "Trigger Panic",
+        ),
+    }),
     getSim1Balance: deviceCommand(
         "Get SIM 1 Balance",
         "SIM 1 balance requested",
@@ -227,18 +199,14 @@ export const ADVANCED_DEVICE_ACTIONS = {
         (starline, deviceId) => starline.setOutput(deviceId, false),
         { icon: Icon.BoltDisabled, supportCommand: "out" },
     ),
-    dvrEnable: deviceCommand(
-        "Enable DVR",
-        "DVR enabled",
-        (starline, deviceId) => starline.setDvr(deviceId, true),
-        { icon: Icon.Video, supportCommand: "dvr" },
-    ),
-    dvrDisable: deviceCommand(
-        "Disable DVR",
-        "DVR disabled",
-        (starline, deviceId) => starline.setDvr(deviceId, false),
-        { icon: Icon.Video, supportCommand: "dvr" },
-    ),
+    dvrEnable: deviceCommand("Enable DVR", "DVR enabled", (starline, deviceId) => starline.setDvr(deviceId, true), {
+        icon: Icon.Video,
+        supportCommand: "dvr",
+    }),
+    dvrDisable: deviceCommand("Disable DVR", "DVR disabled", (starline, deviceId) => starline.setDvr(deviceId, false), {
+        icon: Icon.Video,
+        supportCommand: "dvr",
+    }),
     webastoEnable: deviceCommand(
         "Enable Webasto",
         "Webasto enabled",
@@ -251,72 +219,52 @@ export const ADVANCED_DEVICE_ACTIONS = {
         (starline, deviceId) => starline.setWebasto(deviceId, false),
         { icon: Icon.Gear, supportCommand: "webasto" },
     ),
-    webastoOn: deviceCommand(
-        "Webasto On",
-        "Webasto turned on",
-        (starline, deviceId) => starline.webastoOn(deviceId),
-        { icon: Icon.Gear, supportCommand: "webasto_on" },
-    ),
+    webastoOn: deviceCommand("Webasto On", "Webasto turned on", (starline, deviceId) => starline.webastoOn(deviceId), {
+        icon: Icon.Gear,
+        supportCommand: "webasto_on",
+    }),
     webastoOff: deviceCommand(
         "Webasto Off",
         "Webasto turned off",
         (starline, deviceId) => starline.webastoOff(deviceId),
         { icon: Icon.Gear, supportCommand: "webasto_off" },
     ),
-    flex1: deviceCommand(
-        "Flex 1",
-        "Flex 1 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 1),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_1" },
-    ),
-    flex2: deviceCommand(
-        "Flex 2",
-        "Flex 2 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 2),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_2" },
-    ),
-    flex3: deviceCommand(
-        "Flex 3",
-        "Flex 3 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 3),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_3" },
-    ),
-    flex4: deviceCommand(
-        "Flex 4",
-        "Flex 4 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 4),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_4" },
-    ),
-    flex5: deviceCommand(
-        "Flex 5",
-        "Flex 5 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 5),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_5" },
-    ),
-    flex6: deviceCommand(
-        "Flex 6",
-        "Flex 6 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 6),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_6" },
-    ),
-    flex7: deviceCommand(
-        "Flex 7",
-        "Flex 7 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 7),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_7" },
-    ),
-    flex8: deviceCommand(
-        "Flex 8",
-        "Flex 8 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 8),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_8" },
-    ),
-    flex9: deviceCommand(
-        "Flex 9",
-        "Flex 9 sent",
-        (starline, deviceId) => starline.runFlexCommand(deviceId, 9),
-        { icon: Icon.CommandSymbol, supportCommand: "flex_9" },
-    ),
+    flex1: deviceCommand("Flex 1", "Flex 1 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 1), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_1",
+    }),
+    flex2: deviceCommand("Flex 2", "Flex 2 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 2), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_2",
+    }),
+    flex3: deviceCommand("Flex 3", "Flex 3 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 3), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_3",
+    }),
+    flex4: deviceCommand("Flex 4", "Flex 4 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 4), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_4",
+    }),
+    flex5: deviceCommand("Flex 5", "Flex 5 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 5), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_5",
+    }),
+    flex6: deviceCommand("Flex 6", "Flex 6 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 6), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_6",
+    }),
+    flex7: deviceCommand("Flex 7", "Flex 7 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 7), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_7",
+    }),
+    flex8: deviceCommand("Flex 8", "Flex 8 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 8), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_8",
+    }),
+    flex9: deviceCommand("Flex 9", "Flex 9 sent", (starline, deviceId) => starline.runFlexCommand(deviceId, 9), {
+        icon: Icon.CommandSymbol,
+        supportCommand: "flex_9",
+    }),
 } satisfies Record<string, DeviceCommandConfig>;
 
 export const ADVANCED_DEVICE_ACTION_KEYS = Object.keys(ADVANCED_DEVICE_ACTIONS);

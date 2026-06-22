@@ -44,10 +44,7 @@ function DeviceDetails({ item }: DeviceDetailsProps) {
             ["Engine temperature", `${item.etemp}°C`],
             ["Battery", displayString(item.battery)],
             ["GSM level", displayString(item.gsm_lvl)],
-            [
-                "Balance",
-                `${displayString(item.balance?.active.value)} ${item.balance?.active.currency ?? ""}`.trim(),
-            ],
+            ["Balance", `${displayString(item.balance?.active.value)} ${item.balance?.active.currency ?? ""}`.trim()],
             ["Last activity", formatUnixTimestamp(item.ts_activity)],
         ]),
         markdownSection("Position", [
