@@ -1,6 +1,6 @@
 # OSINT Web Check Changelog
 
-## [Consolidate OSINT Toolkit into OSINT Web Check] - {PR_MERGE_DATE}
+## [Consolidate OSINT Toolkit into OSINT Web Check] - 2026-06-22
 
 - Single "OSINT Web Check" command now accepts URLs, domains, IPs, and hashes in one search bar.
 - Deep-dive checks (DNS, SSL, ports, headers, etc.) appear as a single detail panel alongside external OSINT platform lookups.
