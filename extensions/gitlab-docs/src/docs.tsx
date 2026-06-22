@@ -48,6 +48,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={searchResult.url} />
+          <Action.CopyToClipboard title="Copy URL" content={searchResult.url} />
         </ActionPanel>
       }
     />

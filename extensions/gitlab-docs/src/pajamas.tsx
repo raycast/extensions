@@ -126,8 +126,8 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
       throw new Error("message" in json ? json.message : response.statusText);
     }
 
-    await LocalStorage.setItem("GitLabDesignAPI", JSON.stringify(json["metas"]));
-    metas = (await LocalStorage.getItem("GitLabDesignAPI")) || "";
+    metas = JSON.stringify(json["metas"]);
+    await LocalStorage.setItem("GitLabDesignAPI", metas);
   }
 
   const entries: Array<SearchResult> = [];
