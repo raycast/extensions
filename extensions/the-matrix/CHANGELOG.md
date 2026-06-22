@@ -1,6 +1,6 @@
 # The Matrix Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-22
 
 - Add **Take a Blue Pill** and **Take a Red Pill** commands for starting and stopping the Matrix overlay.
 - Add native macOS click-through Matrix rain across all displays.
