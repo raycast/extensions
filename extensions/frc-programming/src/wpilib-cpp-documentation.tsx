@@ -1,5 +1,5 @@
 import { List, Cache, ActionPanel, Action } from "@raycast/api";
-import { useState } from "react";
+import { useWpilibDocumentation } from "./use-wpilib-documentation";
 
 const cache = new Cache();
 const SEARCH_TEXT_KEY = "searchTextCpp";
@@ -12,8 +12,8 @@ interface CppClassEntry {
   tag: string;
 }
 
-async function getDocumentation() {
-  const allClasses = [];
+async function getDocumentation(): Promise<CppClassEntry[]> {
+  const allClasses: CppClassEntry[] = [];
   for (let i = 0; i < 20; i++) {
     try {
       const response = await fetch(`${BASE_URL}search/classes_${i}.js`);
@@ -49,38 +49,12 @@ async function getDocumentation() {
 }
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<CppClassEntry[] | null>(() => {
-    const cachedDocs = cache.get("wpilibCppDocumentation");
-    if (typeof cachedDocs === "string") {
-      try {
-        return JSON.parse(cachedDocs) as CppClassEntry[];
-      } catch (error) {
-        console.log(error);
-        return null;
-      }
-    }
-    return cachedDocs ?? null;
+  const { searchText, loading, data, handleSearchChange, fetchDocumentation } = useWpilibDocumentation({
+    cache,
+    cacheKey: "wpilibCppDocumentation",
+    searchTextKey: SEARCH_TEXT_KEY,
+    getDocumentation,
   });
-
-  const handleSearchChange = (text: string) => {
-    setSearchText(text);
-    cache.set(SEARCH_TEXT_KEY, text);
-  };
-
-  const fetchDocumentation = async () => {
-    if (loading) return;
-
-    setLoading(true);
-
-    const docs = await getDocumentation();
-
-    cache.set("wpilibCppDocumentation", JSON.stringify(docs ?? []));
-    setData(docs ?? []);
-    setLoading(false);
-    setSearchText("");
-  };
 
   return (
     <List

@@ -1,6 +1,6 @@
 import { List, Cache, ActionPanel, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { ParameterDisplay } from "./unit-converters/general";
+import { ParameterDisplay, ConversionResult } from "./unit-converters/general";
 import { convertVelocity } from "./unit-converters/velocity";
 import { convertAngularVelocity } from "./unit-converters/angular-velocity";
 import { convertTorque } from "./unit-converters/torque";
@@ -29,6 +29,19 @@ const helpMarkdown = `
 - n or newton or newtons
 - lbf or pound-force
 `;
+
+function applyConversionResult(conversionResult: ConversionResult): {
+  convertedValue: number | null;
+  parametersUsed: ParameterDisplay[] | null;
+  parametersNeededStr: string;
+} {
+  return {
+    convertedValue: conversionResult.result,
+    parametersUsed: conversionResult.parametersUsed,
+    parametersNeededStr:
+      conversionResult.parametersNeeded.length > 0 ? conversionResult.parametersNeeded.join(", ") : "",
+  };
+}
 
 function getMarkdown(conversionType: string, termsStr: string): [string, string] {
   let syntaxHelp = "";
@@ -63,50 +76,25 @@ function getMarkdown(conversionType: string, termsStr: string): [string, string]
   let parametersNeededStr = "";
 
   if (mainTerms.length >= 4) {
-    if (conversionType === "Velocity") {
-      value = Number.parseFloat(mainTerms[0]);
-      fromUnit = mainTerms[1];
-      convertUnit = mainTerms[3];
+    value = Number.parseFloat(mainTerms[0]);
+    fromUnit = mainTerms[1];
+    convertUnit = mainTerms[3];
 
-      if (!isNaN(value) && fromUnit && convertUnit) {
-        const conversionResult = convertVelocity(value, fromUnit, convertUnit, parametersTerms);
+    if (!isNaN(value) && fromUnit && convertUnit) {
+      const converter =
+        conversionType === "Velocity"
+          ? convertVelocity
+          : conversionType === "Angular Velocity"
+            ? convertAngularVelocity
+            : conversionType === "Force & Torque"
+              ? convertTorque
+              : null;
 
-        convertedValue = conversionResult.result;
+      if (converter) {
+        const conversionResult = applyConversionResult(converter(value, fromUnit, convertUnit, parametersTerms));
+        convertedValue = conversionResult.convertedValue;
         parametersUsed = conversionResult.parametersUsed;
-
-        if (conversionResult.parametersNeeded.length > 0) {
-          parametersNeededStr = conversionResult.parametersNeeded.join(", ");
-        }
-      }
-    } else if (conversionType === "Angular Velocity") {
-      value = Number.parseFloat(mainTerms[0]);
-      fromUnit = mainTerms[1];
-      convertUnit = mainTerms[3];
-
-      if (!isNaN(value) && fromUnit && convertUnit) {
-        const conversionResult = convertAngularVelocity(value, fromUnit, convertUnit, parametersTerms);
-
-        convertedValue = conversionResult.result;
-        parametersUsed = conversionResult.parametersUsed;
-
-        if (conversionResult.parametersNeeded.length > 0) {
-          parametersNeededStr = conversionResult.parametersNeeded.join(", ");
-        }
-      }
-    } else if (conversionType === "Force & Torque") {
-      value = Number.parseFloat(mainTerms[0]);
-      fromUnit = mainTerms[1];
-      convertUnit = mainTerms[3];
-
-      if (!isNaN(value) && fromUnit && convertUnit) {
-        const conversionResult = convertTorque(value, fromUnit, convertUnit, parametersTerms);
-
-        convertedValue = conversionResult.result;
-        parametersUsed = conversionResult.parametersUsed;
-
-        if (conversionResult.parametersNeeded.length > 0) {
-          parametersNeededStr = conversionResult.parametersNeeded.join(", ");
-        }
+        parametersNeededStr = conversionResult.parametersNeededStr;
       }
     }
   }

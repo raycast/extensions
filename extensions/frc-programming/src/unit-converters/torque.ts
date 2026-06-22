@@ -1,4 +1,10 @@
-import { toMeters, ParameterDisplay, ConverterConfig, createConverter } from "./general";
+import {
+  applyWheelRadiusParameter,
+  createWheelRadiusState,
+  ParameterDisplay,
+  ConverterConfig,
+  createConverter,
+} from "./general";
 
 const TORQUE_UNITS: string[] = [
   "nm",
@@ -60,41 +66,17 @@ interface ParsedParams {
   parametersNeeded?: string[];
 }
 
-function parseVelocityParameters(parameterStrings: string[]): ParsedParams {
-  const result: ParsedParams = {
-    wheelRadius: TORQUE_DEFAULTS.wheelRadius,
-    hasWheelRadius: false,
-    wheelRadiusInput: "",
-    parametersNeeded: [],
-  };
+function parseTorqueParameters(parameterStrings: string[]): ParsedParams {
+  const wheelRadius = createWheelRadiusState(TORQUE_DEFAULTS.wheelRadius);
 
   parameterStrings.forEach((param) => {
-    const fusedMatch = param.match(/^(\d+\.?\d*)([a-z]+)$/i);
-    if (fusedMatch) {
-      const [, value, unit] = fusedMatch;
-      const parsedValue = parseFloat(value);
-      if (parsedValue > 0) {
-        result.wheelRadius = toMeters(parsedValue, unit);
-        result.wheelRadiusInput = `${value}${unit}`;
-        result.hasWheelRadius = true;
-      }
-      return;
-    }
-
-    const spacedMatch = param.match(/^(\d+\.?\d*)\s+([a-z]+)$/i);
-    if (spacedMatch) {
-      const [, value, unit] = spacedMatch;
-      const parsedValue = parseFloat(value);
-      if (parsedValue > 0) {
-        result.wheelRadius = toMeters(parsedValue, unit);
-        result.wheelRadiusInput = `${value} ${unit}`;
-        result.hasWheelRadius = true;
-      }
-      return;
-    }
+    applyWheelRadiusParameter(wheelRadius, param);
   });
 
-  return result;
+  return {
+    ...wheelRadius,
+    parametersNeeded: [],
+  };
 }
 
 function buildParametersUsed(parsed: ParsedParams): ParameterDisplay[] {
@@ -114,7 +96,7 @@ const torqueConfig: ConverterConfig<ParsedParams> = {
   unitAliases: UNIT_ALIASES,
   toIntermediate: TO_INTERMEDIATE_FACTORS,
   fromIntermediate: FROM_INTERMEDIATE_FACTORS,
-  parseParameters: parseVelocityParameters,
+  parseParameters: parseTorqueParameters,
   buildParametersUsed: buildParametersUsed,
 };
 

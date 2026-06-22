@@ -1,4 +1,11 @@
-import { toMeters, toGearRatio, ParameterDisplay, ConverterConfig, createConverter } from "./general";
+import {
+  applyWheelRadiusParameter,
+  createWheelRadiusState,
+  toGearRatio,
+  ParameterDisplay,
+  ConverterConfig,
+  createConverter,
+} from "./general";
 
 const VELOCITY_UNITS: string[] = ["rpm", "m/s", "mps", "ft/s", "fps", "km/h", "kph", "mph"];
 const VELOCITY_DEFAULTS = {
@@ -46,37 +53,16 @@ interface ParsedParams {
 }
 
 function parseVelocityParameters(parameterStrings: string[]): ParsedParams {
+  const wheelRadius = createWheelRadiusState(VELOCITY_DEFAULTS.wheelRadius);
   const result: ParsedParams = {
-    wheelRadius: VELOCITY_DEFAULTS.wheelRadius,
+    ...wheelRadius,
     gearRatio: VELOCITY_DEFAULTS.gearRatio,
-    hasWheelRadius: false,
     hasGearRatio: false,
-    wheelRadiusInput: "",
     parametersNeeded: [],
   };
 
   parameterStrings.forEach((param) => {
-    const fusedMatch = param.match(/^(\d+\.?\d*)([a-z]+)$/i);
-    if (fusedMatch) {
-      const [, value, unit] = fusedMatch;
-      const parsedValue = parseFloat(value);
-      if (parsedValue > 0) {
-        result.wheelRadius = toMeters(parsedValue, unit);
-        result.wheelRadiusInput = `${value}${unit}`;
-        result.hasWheelRadius = true;
-      }
-      return;
-    }
-
-    const spacedMatch = param.match(/^(\d+\.?\d*)\s+([a-z]+)$/i);
-    if (spacedMatch) {
-      const [, value, unit] = spacedMatch;
-      const parsedValue = parseFloat(value);
-      if (parsedValue > 0) {
-        result.wheelRadius = toMeters(parsedValue, unit);
-        result.wheelRadiusInput = `${value} ${unit}`;
-        result.hasWheelRadius = true;
-      }
+    if (applyWheelRadiusParameter(wheelRadius, param)) {
       return;
     }
 
@@ -89,14 +75,17 @@ function parseVelocityParameters(parameterStrings: string[]): ParsedParams {
     }
   });
 
-  if (!result.hasWheelRadius) {
+  if (!wheelRadius.hasWheelRadius) {
     result.parametersNeeded!.push("wheel radius");
   }
   if (!result.hasGearRatio) {
     result.parametersNeeded!.push("gear ratio");
   }
 
-  return result;
+  return {
+    ...result,
+    ...wheelRadius,
+  };
 }
 
 function formatGearRatio(ratio: number, isDefault: boolean): string {

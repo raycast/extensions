@@ -1,5 +1,5 @@
 import { List, Cache, ActionPanel, Action } from "@raycast/api";
-import { useState } from "react";
+import { useWpilibDocumentation } from "./use-wpilib-documentation";
 
 const cache = new Cache();
 const SEARCH_TEXT_KEY = "searchTextJava";
@@ -106,38 +106,12 @@ function getClassKeywords(item: ClassItem): string[] {
 }
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<JavaClassEntry[] | null>(() => {
-    const cachedDocs = cache.get("wpilibJavaDocumentation");
-    if (typeof cachedDocs === "string") {
-      try {
-        return JSON.parse(cachedDocs) as JavaClassEntry[];
-      } catch (error) {
-        console.log(error);
-        return null;
-      }
-    }
-    return cachedDocs ?? null;
+  const { searchText, loading, data, handleSearchChange, fetchDocumentation } = useWpilibDocumentation({
+    cache,
+    cacheKey: "wpilibJavaDocumentation",
+    searchTextKey: SEARCH_TEXT_KEY,
+    getDocumentation,
   });
-
-  const handleSearchChange = (text: string) => {
-    setSearchText(text);
-    cache.set(SEARCH_TEXT_KEY, text);
-  };
-
-  const fetchDocumentation = async () => {
-    if (loading) return;
-
-    setLoading(true);
-
-    const docs = await getDocumentation();
-
-    cache.set("wpilibJavaDocumentation", JSON.stringify(docs ?? []));
-    setData(docs ?? []);
-    setLoading(false);
-    setSearchText("");
-  };
 
   return (
     <List

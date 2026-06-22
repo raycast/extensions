@@ -113,6 +113,48 @@ export function toMeters(value: number, unit: string | null | undefined) {
   return (factors[unit.toLowerCase()] ?? 1) * value;
 }
 
+export interface WheelRadiusState {
+  wheelRadius: number;
+  wheelRadiusInput: string;
+  hasWheelRadius: boolean;
+}
+
+export function createWheelRadiusState(defaultRadius: number): WheelRadiusState {
+  return {
+    wheelRadius: defaultRadius,
+    wheelRadiusInput: "",
+    hasWheelRadius: false,
+  };
+}
+
+export function applyWheelRadiusParameter(state: WheelRadiusState, param: string): boolean {
+  const fusedMatch = param.match(/^(\d+\.?\d*)([a-z]+)$/i);
+  if (fusedMatch) {
+    const [, value, unit] = fusedMatch;
+    const parsedValue = parseFloat(value);
+    if (parsedValue > 0) {
+      state.wheelRadius = toMeters(parsedValue, unit);
+      state.wheelRadiusInput = `${value}${unit}`;
+      state.hasWheelRadius = true;
+    }
+    return true;
+  }
+
+  const spacedMatch = param.match(/^(\d+\.?\d*)\s+([a-z]+)$/i);
+  if (spacedMatch) {
+    const [, value, unit] = spacedMatch;
+    const parsedValue = parseFloat(value);
+    if (parsedValue > 0) {
+      state.wheelRadius = toMeters(parsedValue, unit);
+      state.wheelRadiusInput = `${value} ${unit}`;
+      state.hasWheelRadius = true;
+    }
+    return true;
+  }
+
+  return false;
+}
+
 export function toGearRatio(gearRatioStr: string | null | undefined): number {
   if (!gearRatioStr) return 1;
   const parts = gearRatioStr.split(":");
