@@ -42,7 +42,7 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.9",
+    "@raycast/api": "^1.104.18",
     "@raycast/utils": "^2.2.6",
     "cron-parser": "^5.6.0",
     "cronstrue": "^3.21.0"
