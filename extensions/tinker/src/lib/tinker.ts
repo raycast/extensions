@@ -129,20 +129,31 @@ async function waitForResponse(path: string, requestID: string): Promise<Command
   const deadline = Date.now() + RESPONSE_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
+    let contents: string;
     try {
-      const response = parseCommandResponse(await readFile(path, "utf8"));
-      await rm(path, { force: true });
-      if (response.request_id.toLowerCase() !== requestID.toLowerCase()) {
-        throw new Error("Tinker returned a mismatched command response ID");
-      }
-      return response;
+      contents = await readFile(path, "utf8");
     } catch (error) {
       if (!isFileNotFoundError(error)) {
         throw error;
       }
+      await sleep(RESPONSE_POLL_INTERVAL_MS);
+      continue;
     }
 
-    await sleep(RESPONSE_POLL_INTERVAL_MS);
+    let response: CommandResponse;
+    try {
+      response = parseCommandResponse(contents);
+    } catch {
+      await sleep(RESPONSE_POLL_INTERVAL_MS);
+      continue;
+    }
+
+    if (response.request_id.toLowerCase() !== requestID.toLowerCase()) {
+      await sleep(RESPONSE_POLL_INTERVAL_MS);
+      continue;
+    }
+    await rm(path, { force: true });
+    return response;
   }
 
   throw new ResponseTimeoutError("Timed out waiting for Tinker");

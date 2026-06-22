@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "record-area",
-      "title": "Capture Area",
+      "title": "Record Area",
       "description": "Choose an area, then start recording it with Tinker.",
       "mode": "no-view",
       "keywords": ["capture", "select", "region"]

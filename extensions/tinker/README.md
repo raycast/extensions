@@ -1,6 +1,6 @@
 # Tinker for Raycast
 
-Control Tinker from Raycast. Capture a selected area, repeat your last capture area, or copy your latest recording without reaching for the menu bar.
+Control Tinker from Raycast. Record a selected area, repeat your last capture area, or copy your latest recording without reaching for the menu bar.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ Requires Tinker 0.4.0 or later for macOS. Complete Tinker's onboarding and grant
 
 ## Commands
 
-- **Capture Area** opens Tinker's area-selection flow.
+- **Record Area** opens Tinker's area-selection flow.
 - **Record Last Area** records the last area selected manually in Tinker. The original display must still be connected.
 - **Copy Latest Recording** copies the newest recording in Tinker's archive to the clipboard.
 
