@@ -10,6 +10,7 @@ const CACHE_KEY = "GitLabSvgs.sprite";
 
 export default function Command() {
   const { icons, isLoading } = useIcons();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
     <Grid
@@ -17,14 +18,16 @@ export default function Command() {
       searchBarPlaceholder="Search GitLab icons..."
       columns={8}
       inset={Grid.Inset.Large}
+      onSelectionChange={setSelectedId}
+      navigationTitle={selectedId ? `GitLab Icons – ${selectedId}` : "GitLab Icons"}
       throttle
     >
       <Grid.Section title="Icons" subtitle={icons.length + ""}>
         {icons.map((icon) => (
           <Grid.Item
             key={icon.name}
+            id={icon.name}
             content={{ source: icon.dataUri, tintColor: Color.PrimaryText }}
-            title={icon.name}
             keywords={icon.keywords}
             actions={
               <ActionPanel>
