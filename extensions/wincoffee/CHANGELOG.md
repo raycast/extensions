@@ -1,5 +1,5 @@
 # WinCoffee Changelog
 
-## [Added WinCoffee] - 2026-06-12
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial version code

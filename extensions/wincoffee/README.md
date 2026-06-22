@@ -20,7 +20,7 @@ WinCoffee is a Raycast extension designed specifically for Windows users to prev
 
 ## Configuration (Preferences)
 
-- **Display Settings - Keep display awake**: Prevent the screen from turning off while caffeinated. (Default: `true`)
+- **Screen Settings - Keep screen alive**: Prevent the screen from turning off while caffeinated. (Default: `true`)
 - **Lid Settings - Ignore closing the lid**: Prevent the computer from sleeping when the lid is closed while caffeinated. (Default: `false`)
 
 

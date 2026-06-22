@@ -42,14 +42,42 @@ export default function Command() {
     loadState();
   }, []);
 
-  // Set up an interval to refresh the remaining time if active and in duration mode
+  // Set up intervals to refresh the remaining time locally and sync with background process state less often
   useEffect(() => {
-    if (!state.active || state.mode !== "duration") return;
-    const interval = setInterval(async () => {
+    if (
+      !state.active ||
+      state.mode !== "duration" ||
+      state.remainingSeconds === undefined
+    )
+      return;
+
+    // Decrement the local countdown every second
+    const secondsInterval = setInterval(() => {
+      setState((prevState) => {
+        if (!prevState.active || prevState.remainingSeconds === undefined)
+          return prevState;
+        if (prevState.remainingSeconds <= 1) {
+          // If it reaches 0, trigger a refresh to let getCaffeinateState clean up/verify
+          loadState();
+          return prevState;
+        }
+        return {
+          ...prevState,
+          remainingSeconds: prevState.remainingSeconds - 1,
+        };
+      });
+    }, 1000);
+
+    // Poll the actual process status and sync state every 10 seconds
+    const pollInterval = setInterval(async () => {
       const s = await getCaffeinateState();
       setState(s);
-    }, 1000);
-    return () => clearInterval(interval);
+    }, 10000);
+
+    return () => {
+      clearInterval(secondsInterval);
+      clearInterval(pollInterval);
+    };
   }, [state.active, state.mode]);
 
   async function handleStop() {
@@ -104,9 +132,14 @@ export default function Command() {
     const [error, setError] = useState<string | undefined>();
 
     async function handleSubmit() {
-      const parsed = parseInt(minutes, 10);
-      if (isNaN(parsed) || parsed <= 0) {
-        setError("Please enter a positive number");
+      const trimmed = minutes.trim();
+      if (!/^\d+$/.test(trimmed)) {
+        setError("Please enter a positive integer");
+        return;
+      }
+      const parsed = parseInt(trimmed, 10);
+      if (parsed <= 0) {
+        setError("Please enter a positive integer");
         return;
       }
       pop(); // Go back to main list

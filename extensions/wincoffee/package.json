@@ -12,13 +12,13 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
+    "esbuild": "^0.28.1",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
@@ -99,12 +99,12 @@
   ],
   "preferences": [
     {
-      "name": "keepDisplayAwake",
+      "name": "keepScreenAlive",
       "type": "checkbox",
       "required": false,
-      "label": "Keep display awake",
-      "title": "Display Settings",
-      "description": "Prevent the display from turning off while caffeinated",
+      "label": "Keep screen alive",
+      "title": "Screen Settings",
+      "description": "Prevent the screen from turning off while caffeinated",
       "default": true
     },
     {
@@ -124,5 +124,9 @@
   ],
   "categories": [
     "System"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "esbuild@0.27.7": true
+  }
 }

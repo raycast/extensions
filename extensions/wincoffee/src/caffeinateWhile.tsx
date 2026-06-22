@@ -30,24 +30,19 @@ export default function Command() {
       const s = await getCaffeinateState();
       setState(s);
 
-      // Query running processes using tasklist (much faster than powershell)
-      const { stdout: output } = await execAsync("tasklist /NH /FO CSV");
+      // Query running apps (processes with a visible window) using powershell
+      const { stdout: output } = await execAsync(
+        'powershell -NoProfile -Command "Get-Process | Where-Object MainWindowTitle | Select-Object -ExpandProperty Name | Sort-Object -Unique"',
+      );
 
       let processList: string[] = [];
       if (output) {
         const lines = output.split(/\r?\n/);
         const nameSet = new Set<string>();
         for (const line of lines) {
-          if (!line.trim()) continue;
-          // tasklist /FO CSV format: "Image Name","PID","Session Name","Session#","Mem Usage"
-          const match = line.match(/^"([^"]+)"/);
-          if (match && match[1]) {
-            let procName = match[1];
-            if (procName.toLowerCase().endsWith(".exe")) {
-              procName = procName.slice(0, -4);
-            }
-            nameSet.add(procName);
-          }
+          const procName = line.trim();
+          if (!procName) continue;
+          nameSet.add(procName);
         }
         processList = Array.from(nameSet).sort((a, b) =>
           a.localeCompare(b, undefined, { sensitivity: "base" }),

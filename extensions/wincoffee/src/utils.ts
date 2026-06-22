@@ -12,6 +12,8 @@ import { promisify } from "node:util";
 export function logDebug(_msg: string): void {}
 
 const execAsync = promisify(exec);
+const LID_RESTORE_STARTING_KEY = "caffeinate_lid_restore_starting_at";
+const STARTUP_RESTORE_GRACE_MS = 30_000;
 
 export interface CaffeinateState {
   active: boolean;
@@ -29,10 +31,10 @@ export interface LidSleepState {
   dcValue?: number;
 }
 
-interface Preferences {
-  keepDisplayAwake: boolean;
-  ignoreLidWhileCaffeinated: boolean;
-}
+type WinCoffeePreferences = Preferences & {
+  keepScreenAlive?: boolean;
+  keepDisplayAwake?: boolean;
+};
 
 // Update the caffeinate command subtitle inline status
 export async function updateMetadata(caffeinated: boolean): Promise<void> {
@@ -66,6 +68,87 @@ async function isPidRunning(pid: number): Promise<boolean> {
   }
 }
 
+async function stopPid(pid: number): Promise<void> {
+  let taskkillError: unknown;
+  try {
+    logDebug(`Executing taskkill for PID ${pid}`);
+    await execAsync(`taskkill /F /T /PID ${pid}`);
+  } catch (err) {
+    taskkillError = err;
+    logDebug(
+      `taskkill error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
+  if (await isPidRunning(pid)) {
+    throw new Error(
+      `Failed to stop caffeinate process ${pid}${taskkillError instanceof Error ? `: ${taskkillError.message}` : ""}`,
+    );
+  }
+}
+
+async function clearOriginalLidSettings(): Promise<void> {
+  await Promise.all([
+    LocalStorage.removeItem("original_ac_value"),
+    LocalStorage.removeItem("original_dc_value"),
+  ]);
+}
+
+async function isCaffeinateStartupInProgress(): Promise<boolean> {
+  const startingAtStr = await LocalStorage.getItem<string>(
+    LID_RESTORE_STARTING_KEY,
+  );
+  if (startingAtStr === undefined) {
+    return false;
+  }
+
+  const startingAt = parseInt(startingAtStr, 10);
+  if (
+    !isNaN(startingAt) &&
+    Date.now() - startingAt < STARTUP_RESTORE_GRACE_MS
+  ) {
+    return true;
+  }
+
+  await LocalStorage.removeItem(LID_RESTORE_STARTING_KEY);
+  return false;
+}
+
+async function restoreOriginalLidSettings(reason: string): Promise<void> {
+  const [origAcStr, origDcStr] = await Promise.all([
+    LocalStorage.getItem<string>("original_ac_value"),
+    LocalStorage.getItem<string>("original_dc_value"),
+  ]);
+
+  if (origAcStr === undefined && origDcStr === undefined) {
+    return;
+  }
+
+  if (origAcStr === undefined || origDcStr === undefined) {
+    logDebug(
+      `Skipping lid restore (${reason}): original values are incomplete`,
+    );
+    return;
+  }
+
+  const origAc = parseInt(origAcStr, 10);
+  const origDc = parseInt(origDcStr, 10);
+  if (isNaN(origAc) || isNaN(origDc)) {
+    logDebug(`Skipping lid restore (${reason}): original values are invalid`);
+    return;
+  }
+
+  try {
+    logDebug(`Restoring lid settings (${reason}): AC=${origAc}, DC=${origDc}`);
+    await setRawLidSleepState(origAc, origDc);
+    await clearOriginalLidSettings();
+  } catch (err) {
+    logDebug(
+      `Lid sleep restore error (${reason}): ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
 // Get the current caffeinate state, cleaning up if the process died
 export async function getCaffeinateState(): Promise<CaffeinateState> {
   logDebug("getCaffeinateState called");
@@ -82,10 +165,17 @@ export async function getCaffeinateState(): Promise<CaffeinateState> {
   );
 
   if (status !== "active" || !pidStr) {
-    if (status === "active" || pidStr) {
+    const startupInProgress = await isCaffeinateStartupInProgress();
+    if (!startupInProgress && (status === "active" || pidStr)) {
       logDebug("State inconsistent, clearing state");
       await clearLocalStorageState();
     }
+
+    if (!startupInProgress) {
+      // Restore lid sleep settings if they were modified but not cleaned up (e.g. after restart)
+      await restoreOriginalLidSettings("orphaned state");
+    }
+
     return { active: false };
   }
 
@@ -96,29 +186,7 @@ export async function getCaffeinateState(): Promise<CaffeinateState> {
     await updateMetadata(false);
 
     // Restore lid sleep settings if they were modified
-    try {
-      const [origAcStr, origDcStr] = await Promise.all([
-        LocalStorage.getItem<string>("original_ac_value"),
-        LocalStorage.getItem<string>("original_dc_value"),
-      ]);
-      if (origAcStr !== undefined && origDcStr !== undefined) {
-        const origAc = parseInt(origAcStr, 10);
-        const origDc = parseInt(origDcStr, 10);
-        if (!isNaN(origAc) && !isNaN(origDc)) {
-          logDebug(
-            `Restoring original lid settings: AC=${origAc}, DC=${origDc}`,
-          );
-          await setRawLidSleepState(origAc, origDc);
-        }
-      }
-    } catch (err) {
-      logDebug(
-        `Lid sleep restore error: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    } finally {
-      await LocalStorage.removeItem("original_ac_value");
-      await LocalStorage.removeItem("original_dc_value");
-    }
+    await restoreOriginalLidSettings("dead caffeinate process");
 
     return { active: false };
   }
@@ -149,11 +217,13 @@ export async function getCaffeinateState(): Promise<CaffeinateState> {
 
 // Clear state from local storage in parallel
 async function clearLocalStorageState() {
-  await LocalStorage.removeItem("caffeinate_status");
-  await LocalStorage.removeItem("caffeinate_pid");
-  await LocalStorage.removeItem("caffeinate_mode");
-  await LocalStorage.removeItem("caffeinate_startTime");
-  await LocalStorage.removeItem("caffeinate_value");
+  await Promise.all([
+    LocalStorage.removeItem("caffeinate_status"),
+    LocalStorage.removeItem("caffeinate_pid"),
+    LocalStorage.removeItem("caffeinate_mode"),
+    LocalStorage.removeItem("caffeinate_startTime"),
+    LocalStorage.removeItem("caffeinate_value"),
+  ]);
 }
 
 // Spawn a detached PowerShell process using Start-Process with -EncodedCommand.
@@ -201,12 +271,20 @@ export async function startCaffeinate(
   // Always stop existing first
   await stopCaffeinate(false);
 
-  const prefs = getPreferenceValues<Preferences>();
-  const keepDisplayAwake = prefs.keepDisplayAwake ?? true;
+  const prefs = getPreferenceValues<WinCoffeePreferences>();
+  const keepScreenAlive =
+    prefs.keepScreenAlive ?? prefs.keepDisplayAwake ?? true;
   const ignoreLid = prefs.ignoreLidWhileCaffeinated ?? false;
+  let lidStartupGuard = false;
 
   if (ignoreLid) {
     try {
+      await LocalStorage.setItem(
+        LID_RESTORE_STARTING_KEY,
+        Date.now().toString(),
+      );
+      lidStartupGuard = true;
+
       const lidState = await getLidSleepState();
       if (
         lidState.supported &&
@@ -242,7 +320,7 @@ export async function startCaffeinate(
   // ES_CONTINUOUS = 0x80000000
   // ES_SYSTEM_REQUIRED = 0x00000001
   // ES_DISPLAY_REQUIRED = 0x00000002
-  const flags = keepDisplayAwake ? "0x80000003" : "0x80000001";
+  const flags = keepScreenAlive ? "0x80000003" : "0x80000001";
   // ES_CONTINUOUS only — clears all other flags
   const clearFlags = "0x80000000";
 
@@ -284,7 +362,7 @@ try {
     const escapedProcessName = value.replace(/'/g, "''");
     psCommand = `${baseScript}
 try {
-  while (Get-Process -Name '${escapedProcessName}' -ErrorAction SilentlyContinue) {
+  while (Get-Process -Name '${escapedProcessName}' -ErrorAction SilentlyContinue | Where-Object MainWindowTitle) {
     [Win32]::SetThreadExecutionState(${flags}) | Out-Null
     Start-Sleep -Seconds 10
   }
@@ -301,19 +379,29 @@ try {
     const pid = spawnDetachedPowerShell(psCommand);
     logDebug(`Spawned process successfully. PID: ${pid}`);
 
-    await LocalStorage.setItem("caffeinate_status", "active");
-    await LocalStorage.setItem("caffeinate_pid", pid.toString());
-    await LocalStorage.setItem("caffeinate_mode", mode);
-    await LocalStorage.setItem("caffeinate_startTime", Date.now().toString());
+    const stateWrites = [
+      LocalStorage.setItem("caffeinate_pid", pid.toString()),
+      LocalStorage.setItem("caffeinate_mode", mode),
+      LocalStorage.setItem("caffeinate_startTime", Date.now().toString()),
+    ];
     if (value !== undefined) {
-      await LocalStorage.setItem("caffeinate_value", value.toString());
+      stateWrites.push(
+        LocalStorage.setItem("caffeinate_value", value.toString()),
+      );
     }
+    await Promise.all(stateWrites);
+    await LocalStorage.setItem("caffeinate_status", "active");
+    await LocalStorage.removeItem(LID_RESTORE_STARTING_KEY);
     logDebug("LocalStorage state saved successfully");
     await updateMetadata(true);
   } catch (err) {
     logDebug(
       `spawnDetachedPowerShell failed: ${err instanceof Error ? err.message : String(err)}`,
     );
+    if (lidStartupGuard) {
+      await restoreOriginalLidSettings("failed caffeinate start");
+      await LocalStorage.removeItem(LID_RESTORE_STARTING_KEY);
+    }
     throw err;
   }
 }
@@ -332,14 +420,7 @@ export async function stopCaffeinate(runOrphanKiller = true): Promise<void> {
       wasRunning = await isPidRunning(pid);
       logDebug(`stopCaffeinate: PID=${pid}, wasRunning=${wasRunning}`);
       if (wasRunning) {
-        try {
-          logDebug(`Executing taskkill for PID ${pid}`);
-          exec(`taskkill /F /T /PID ${pid}`);
-        } catch (err) {
-          logDebug(
-            `taskkill error: ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
+        await stopPid(pid);
       }
     }
   }
@@ -349,24 +430,8 @@ export async function stopCaffeinate(runOrphanKiller = true): Promise<void> {
   await updateMetadata(false);
 
   // Restore lid sleep settings if they were modified
-  try {
-    const [origAcStr, origDcStr] = await Promise.all([
-      LocalStorage.getItem<string>("original_ac_value"),
-      LocalStorage.getItem<string>("original_dc_value"),
-    ]);
-    if (origAcStr !== undefined && origDcStr !== undefined) {
-      const origAc = parseInt(origAcStr, 10);
-      const origDc = parseInt(origDcStr, 10);
-      if (!isNaN(origAc) && !isNaN(origDc)) {
-        await setRawLidSleepState(origAc, origDc);
-      }
-    }
-  } catch {
-    // Ignore errors during restore
-  } finally {
-    await LocalStorage.removeItem("original_ac_value");
-    await LocalStorage.removeItem("original_dc_value");
-  }
+  await restoreOriginalLidSettings("stop caffeinate");
+  await LocalStorage.removeItem(LID_RESTORE_STARTING_KEY);
 
   // Safely clean up orphaned processes in the background (only if requested and the process was actively running)
   if (runOrphanKiller && wasRunning) {
@@ -389,9 +454,10 @@ export async function stopCaffeinate(runOrphanKiller = true): Promise<void> {
           .join(" -and ");
 
         // Find powershell processes running the WinCoffee encoded command and stop them
-        const psCmd = `Get-CimInstance Win32_Process -Filter "name = 'powershell.exe'" | ForEach-Object { if ($_.CommandLine -match '-EncodedCommand\\s+(\\S+)') { $b64 = $matches[1]; try { $bytes = [System.Convert]::FromBase64String($b64); $decoded = [System.Text.Encoding]::Unicode.GetString($bytes); if ($decoded -like '*WinCoffee_Caffeinate*' -and ${excludeFilter}) { Stop-Process -Id $_.ProcessId -Force } } catch {} } }`;
+        const psScript = `Get-CimInstance Win32_Process -Filter "name = 'powershell.exe'" | ForEach-Object { if ($_.CommandLine -match '-EncodedCommand\\s+(\\S+)') { $b64 = $matches[1]; try { $bytes = [System.Convert]::FromBase64String($b64); $decoded = [System.Text.Encoding]::Unicode.GetString($bytes); if ($decoded -like '*WinCoffee_Caffeinate*' -and ${excludeFilter}) { Stop-Process -Id $_.ProcessId -Force } } catch {} } }`;
+        const base64 = Buffer.from(psScript, "utf-16le").toString("base64");
         exec(
-          `powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psCmd}"`,
+          `powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${base64}`,
         );
       } catch {
         // Ignore background cleanup errors
@@ -447,15 +513,49 @@ export async function setRawLidSleepState(
   acVal: number,
   dcVal: number,
 ): Promise<void> {
+  const currentState = await getLidSleepState();
+  const rollbackAc = currentState.supported ? currentState.acValue : undefined;
+  const rollbackDc = currentState.supported ? currentState.dcValue : undefined;
+
+  let acChanged = false;
+  let dcChanged = false;
+
   try {
     await execAsync(
       `powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION ${acVal}`,
     );
+    acChanged = true;
+
     await execAsync(
       `powercfg /setdcvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION ${dcVal}`,
     );
+    dcChanged = true;
+
     await execAsync(`powercfg /setactive SCHEME_CURRENT`);
   } catch (err) {
+    logDebug(
+      `setRawLidSleepState failed: ${err instanceof Error ? err.message : String(err)}. Attempting rollback...`,
+    );
+    try {
+      if (acChanged && rollbackAc !== undefined) {
+        await execAsync(
+          `powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION ${rollbackAc}`,
+        );
+      }
+      if (dcChanged && rollbackDc !== undefined) {
+        await execAsync(
+          `powercfg /setdcvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION ${rollbackDc}`,
+        );
+      }
+      if (acChanged || dcChanged) {
+        await execAsync(`powercfg /setactive SCHEME_CURRENT`);
+      }
+    } catch (rollbackErr) {
+      logDebug(
+        `Rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr)}`,
+      );
+    }
+
     throw new Error(
       `Failed to change lid sleep settings: ${err instanceof Error ? err.message : String(err)}`,
     );
