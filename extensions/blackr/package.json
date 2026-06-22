@@ -1,11 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blackr",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Blackr",
   "description": "Turn your main display black for quick screen cleaning.",
   "icon": "icon.png",
   "author": "li_jin",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "System"
   ],
@@ -38,14 +42,14 @@
   ],
   "scripts": {
     "build": "npm run build-native && ray build -e dist",
-    "build-native": "swiftc native/BlackrOverlay.swift -O -target arm64-apple-macos12 -o assets/blackr-overlay-arm64 && swiftc native/BlackrOverlay.swift -O -target x86_64-apple-macos12 -o assets/blackr-overlay-x64 && lipo -create assets/blackr-overlay-arm64 assets/blackr-overlay-x64 -output assets/blackr-overlay && rm assets/blackr-overlay-arm64 assets/blackr-overlay-x64 && chmod 755 assets/blackr-overlay",
+    "build-native": "node scripts/build-native.js",
     "dev": "npm run build-native && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.89.1"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -55,6 +59,7 @@
     "typescript": "^5.7.2"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,5 +1,10 @@
 # Blackr Changelog
 
+## [1.1.0] - {PR_MERGE_DATE}
+
+- Add support for Raycast on Windows.
+- Add platform-specific overlays for macOS and Windows.
+
 ## [Initial Release] - 2026-06-09
 
 - Initial release.
