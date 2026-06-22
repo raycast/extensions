@@ -2,6 +2,7 @@
 
 ## [Fix Search Commands] - {PR_MERGE_DATE}
 
+- Add a "Search Icons" command to browse and copy GitLab SVG icons from design.gitlab.com/svgs
 - Migrate the "Search Documentation" command from the deprecated Algolia DocSearch API to the Elasticsearch backend used by docs.gitlab.com
 - Migrate the "Search Handbook" command from the deprecated Swiftype API to the Algolia DocSearch backend used by handbook.gitlab.com
 - Show default results in Documentation and Handbook when the search field is empty

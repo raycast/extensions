@@ -27,6 +27,13 @@
       "description": "Search Pajamas components.",
       "mode": "view",
       "icon": "pajamas-icon.png"
+    },
+    {
+      "name": "svgs",
+      "title": "Search Icons",
+      "description": "Search GitLab SVG icons.",
+      "mode": "view",
+      "icon": "pajamas-icon.png"
     }
   ],
   "dependencies": {
