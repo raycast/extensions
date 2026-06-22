@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LocalStorage } from "@raycast/api";
+import { usePageContent, buildDetailMarkdown } from "./content";
 
 // GitLab's handbook search is powered by Algolia DocSearch. These values are
 // published in the page source of https://handbook.gitlab.com/ and are used by
@@ -13,33 +14,92 @@ const apiUrl = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_IN
 
 export default function Command() {
   const { state, search } = useSearch();
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const items = state.records.map((searchResult, index) => ({
+    id: searchResult.objectID || `${index}`,
+    searchResult,
+  }));
+  const selectedUrl = items.find((item) => item.id === selectedId)?.searchResult.url ?? null;
+
+  // Fetch content only for the currently selected item, and only while the
+  // detail panel is open. This avoids every list item fetching at once.
+  const { content, isLoading } = usePageContent(isShowingDetail ? selectedUrl : null);
 
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
+      onSelectionChange={setSelectedId}
       searchBarPlaceholder="Search GitLab Handbook..."
+      isShowingDetail={isShowingDetail}
       throttle
     >
       <List.Section title="Results" subtitle={state.records.length + ""}>
-        {state.records.map((searchResult, index) => (
-          <SearchListItem key={searchResult.objectID || index} searchResult={searchResult} />
+        {items.map(({ id, searchResult }) => (
+          <SearchListItem
+            key={id}
+            id={id}
+            searchResult={searchResult}
+            isShowingDetail={isShowingDetail}
+            isSelected={selectedId === id}
+            content={content}
+            isContentLoading={isLoading}
+            onToggleDetail={() => setIsShowingDetail((value) => !value)}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  id,
+  searchResult,
+  isShowingDetail,
+  isSelected,
+  content,
+  isContentLoading,
+  onToggleDetail,
+}: {
+  id: string;
+  searchResult: SearchResult;
+  isShowingDetail: boolean;
+  isSelected: boolean;
+  content: string;
+  isContentLoading: boolean;
+  onToggleDetail: () => void;
+}) {
+  const body = isSelected
+    ? content || (isContentLoading ? "Loading page content…" : "_No content available for this page._")
+    : "";
+
+  const markdown = buildDetailMarkdown(searchResult.name, searchResult.category, body);
+
   return (
     <List.Item
+      id={id}
       icon="handbook-icon.png"
       title={searchResult.name}
-      subtitle={searchResult.description}
-      accessoryTitle={searchResult.category}
+      subtitle={isShowingDetail ? undefined : searchResult.description}
+      accessoryTitle={isShowingDetail ? undefined : searchResult.category}
+      detail={<List.Item.Detail isLoading={isShowingDetail && isSelected && isContentLoading} markdown={markdown} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={searchResult.url} />
+          {isShowingDetail ? (
+            <>
+              <Action.OpenInBrowser url={searchResult.url} />
+              <Action
+                title="Hide Details"
+                icon={Icon.Sidebar}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={onToggleDetail}
+              />
+            </>
+          ) : (
+            <Action title="Show Details" icon={Icon.Sidebar} onAction={onToggleDetail} />
+          )}
           <Action.CopyToClipboard title="Copy URL" content={searchResult.url} />
         </ActionPanel>
       }

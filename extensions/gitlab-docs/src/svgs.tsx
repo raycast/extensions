@@ -19,6 +19,7 @@ export default function Command() {
             key={icon.name}
             icon={{ source: icon.dataUri, tintColor: Color.PrimaryText }}
             title={icon.name}
+            keywords={icon.keywords}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Icon Name" content={icon.name} />
@@ -40,6 +41,7 @@ interface Icon {
   name: string;
   svg: string;
   dataUri: string;
+  keywords: string[];
 }
 
 function useIcons() {
@@ -112,7 +114,12 @@ function parseSprite(sprite: string): Icon[] {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" fill="#000000">${inner}</svg>`;
     const dataUri = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
-    icons.push({ name, svg, dataUri });
+    // Allow searching with spaces (or no separator) for hyphenated names,
+    // e.g. "chevron lg" or "chevronlg" should match "chevron-lg-left".
+    const parts = name.split(/[-_]/).filter(Boolean);
+    const keywords = Array.from(new Set([...parts, name.replace(/[-_]/g, " "), name.replace(/[-_]/g, "")]));
+
+    icons.push({ name, svg, dataUri, keywords });
   }
 
   icons.sort((a, b) => a.name.localeCompare(b.name));

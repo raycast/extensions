@@ -1,25 +1,42 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LocalStorage } from "@raycast/api";
 import groupBy from "lodash.groupby";
+import { usePageContent, buildDetailMarkdown } from "./content";
 
 const baseUrl = "https://design.gitlab.com/";
 const apiUrl = `${baseUrl}/_nuxt/search-index/en.json`;
 
 export default function Command() {
   const { state, search } = useSearch();
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+
+  // Fetch content only for the currently selected item, and only while the
+  // detail panel is open. This avoids every list item fetching at once.
+  const { content, isLoading } = usePageContent(isShowingDetail ? selectedUrl : null);
 
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
+      onSelectionChange={setSelectedUrl}
       searchBarPlaceholder="Search GitLab Design System..."
+      isShowingDetail={isShowingDetail}
       throttle
     >
       {Object.entries(groupBy(state.metas, "category")).map(([category, group]) => (
         <List.Section title={category + ""} subtitle={group.length + ""} key={category}>
           {group.map((searchResult) => (
-            <SearchListItem key={searchResult.url} searchResult={searchResult} />
+            <SearchListItem
+              key={searchResult.url}
+              searchResult={searchResult}
+              isShowingDetail={isShowingDetail}
+              isSelected={selectedUrl === searchResult.url}
+              content={content}
+              isContentLoading={isLoading}
+              onToggleDetail={() => setIsShowingDetail((value) => !value)}
+            />
           ))}
         </List.Section>
       ))}
@@ -27,16 +44,50 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  searchResult,
+  isShowingDetail,
+  isSelected,
+  content,
+  isContentLoading,
+  onToggleDetail,
+}: {
+  searchResult: SearchResult;
+  isShowingDetail: boolean;
+  isSelected: boolean;
+  content: string;
+  isContentLoading: boolean;
+  onToggleDetail: () => void;
+}) {
+  const body = isSelected
+    ? content || (isContentLoading ? "Loading page content…" : "_No content available for this page._")
+    : "";
+
+  const markdown = buildDetailMarkdown(searchResult.name, searchResult.category, body);
+
   return (
     <List.Item
+      id={searchResult.url}
       icon="pajamas-icon.png"
       title={searchResult.name}
-      subtitle={searchResult.path}
-      accessoryTitle={searchResult.category}
+      subtitle={isShowingDetail ? undefined : searchResult.path}
+      accessoryTitle={isShowingDetail ? undefined : searchResult.category}
+      detail={<List.Item.Detail isLoading={isShowingDetail && isSelected && isContentLoading} markdown={markdown} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={searchResult.url} />
+          {isShowingDetail ? (
+            <>
+              <Action.OpenInBrowser url={searchResult.url} />
+              <Action
+                title="Hide Details"
+                icon={Icon.Sidebar}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={onToggleDetail}
+              />
+            </>
+          ) : (
+            <Action title="Show Details" icon={Icon.Sidebar} onAction={onToggleDetail} />
+          )}
           <Action.CopyToClipboard title="Copy URL" content={searchResult.url} />
         </ActionPanel>
       }
