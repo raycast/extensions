@@ -4,12 +4,18 @@ import { useSQL } from "@raycast/utils";
 
 const LIMIT = 100;
 
+/** Escape a user term for safe interpolation into a SQLite string literal inside LIKE. */
+const escapeLikeTerm = (term: string) => term.replace(/'/g, "''");
+
 const getHistoryQuery = (searchText?: string) => {
   const whereClause = searchText
     ? searchText
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(URL LIKE '%${term}%' OR TITLE LIKE '%${term}%')`)
+        .map((term) => {
+          const escaped = escapeLikeTerm(term);
+          return `(URL LIKE '%${escaped}%' OR TITLE LIKE '%${escaped}%')`;
+        })
         .join(" AND ")
     : undefined;
   return `

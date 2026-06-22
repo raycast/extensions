@@ -118,7 +118,7 @@ export const getUrlDomain = (url: string) => {
 export const parseUrl = (url: string) => {
   try {
     return new URL(url);
-  } catch (err) {
+  } catch {
     return null;
   }
 };

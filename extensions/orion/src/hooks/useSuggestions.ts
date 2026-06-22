@@ -12,11 +12,11 @@ const useSuggestions = (query: string) => {
   const trimmed = query.trim();
   const url = trimmed.length > 0 ? buildSuggestUrl(trimmed, engine) : null;
 
-  const { data, isLoading } = useFetch(url ?? "", {
+  const { data, isLoading } = useFetch<string[]>(url ?? "", {
     execute: !!url,
     keepPreviousData: true,
     headers: { "User-Agent": "Mozilla/5.0" },
-    parseResponse: async (response): Promise<string[]> => {
+    parseResponse: async (response: Response): Promise<string[]> => {
       if (!response.ok) {
         return [];
       }
@@ -30,7 +30,7 @@ const useSuggestions = (query: string) => {
     },
   });
 
-  return { suggestions: url ? data ?? [] : [], isLoading: !!url && isLoading };
+  return { suggestions: url ? (data ?? []) : [], isLoading: !!url && isLoading };
 };
 
 export default useSuggestions;
