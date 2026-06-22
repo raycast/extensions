@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.3.6] - {PR_MERGE_DATE}
+## [1.3.6] - 2026-06-22
 
 - fix: Redesigned the grid layout for Raycast 2.0 (beta) by changing the SVG viewBox to 512x512 to prevent letterboxing on square cards.
 - feat: Enhanced legibility and vertical spacing:
