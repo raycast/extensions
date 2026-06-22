@@ -15,18 +15,38 @@ import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
-import { buildSearchUrl, extractDomainName, getSearchEngineName, isLauncherTab } from "./utils";
+import { buildSearchUrl, extractDomainName, getSearchEngineName, isLauncherTab, splitSearchTerms } from "./utils";
 
 const LIMITS = { tabs: 6, bookmarks: 6, reading: 4, history: 8 };
 
 // 3 = prefix match on title/domain, 2 = substring of title/domain, 1 = substring of url.
+function scoreTerm(term: string, title: string, domain: string, url: string): number {
+  if (title.startsWith(term) || domain.startsWith(term)) return 3;
+  if (title.includes(term) || domain.includes(term)) return 2;
+  if (url.includes(term)) return 1;
+  return 0;
+}
+
 function relevance(query: string, title: string | undefined, url: string): number {
   const t = (title ?? "").toLowerCase();
   const d = extractDomainName(url).toLowerCase();
-  if (t.startsWith(query) || d.startsWith(query)) return 3;
-  if (t.includes(query) || d.includes(query)) return 2;
-  if (url.toLowerCase().includes(query)) return 1;
-  return 0;
+  const u = url.toLowerCase();
+
+  const phraseScore = scoreTerm(query, t, d, u);
+  if (phraseScore > 0) return phraseScore;
+
+  const terms = splitSearchTerms(query);
+  if (terms.length <= 1) return 0;
+
+  const termScores = terms.map((term) => scoreTerm(term, t, d, u));
+  if (termScores.some((score) => score === 0)) return 0;
+
+  return Math.min(...termScores);
+}
+
+function textMatchesQuery(query: string, text: string): boolean {
+  const haystack = text.toLowerCase();
+  return splitSearchTerms(query).every((term) => haystack.includes(term));
 }
 
 type Hit = { kind: "tab"; tab: Tab; key: string } | { kind: "url"; item: UrlItem; source: string; key: string };
@@ -59,7 +79,7 @@ export default function Command() {
   // Filter each source against the query (open tabs are always shown when empty).
   const tabHits: Tab[] = openTabs.filter((t) => !hasQuery || relevance(q, t.title, t.url) > 0);
   const bookmarkHits: Bookmark[] = hasQuery
-    ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => f.toLowerCase().includes(q)))
+    ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => textMatchesQuery(q, f)))
     : [];
   const readingHits: Bookmark[] = hasQuery ? (readingList ?? []).filter((b) => relevance(q, b.title, b.url) > 0) : [];
   const historyHits: HistoryItem[] = hasQuery ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0) : [];

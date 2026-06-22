@@ -94,6 +94,10 @@ const normalizeText = (text: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
+export function splitSearchTerms(text: string): string[] {
+  return text.trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+
 export function search<T extends object>(collection: T[], keys: string[], searchText: string): T[] {
   return collection.filter((item) =>
     keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText))),
