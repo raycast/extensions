@@ -14,7 +14,6 @@ const useSuggestions = (query: string) => {
 
   const { data, isLoading } = useFetch<string[]>(url ?? "", {
     execute: !!url,
-    keepPreviousData: true,
     headers: { "User-Agent": "Mozilla/5.0" },
     parseResponse: async (response: Response): Promise<string[]> => {
       if (!response.ok) {
@@ -30,7 +29,9 @@ const useSuggestions = (query: string) => {
     },
   });
 
-  return { suggestions: url ? (data ?? []) : [], isLoading: !!url && isLoading };
+  // Hide suggestions while a new query is in flight so a slower response for an
+  // earlier keystroke can't briefly show stale results.
+  return { suggestions: url && !isLoading ? (data ?? []) : [], isLoading: !!url && isLoading };
 };
 
 export default useSuggestions;

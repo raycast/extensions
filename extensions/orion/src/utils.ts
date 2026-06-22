@@ -202,10 +202,10 @@ export function isLauncherTab(url: string) {
   return url.startsWith("raycast://");
 }
 
-// Close those blank launcher tabs. Never closes a window's last tab, to avoid
-// closing the window (or Orion re-spawning a homepage tab in a loop). Call this
-// only while acting on a result (the palette is dismissing) — closing on every
-// palette open re-fires the deeplink and loops.
+// Close those blank launcher tabs. When a window only has launcher tabs, navigate
+// the survivor to about:blank instead of closing it (emptying the window). Call
+// this only while acting on a result (the palette is dismissing) — closing on
+// every palette open re-fires the deeplink and loops.
 export async function closeLauncherTabs() {
   if (getPreferenceValues<Preferences>().autoCloseLauncherTabs === false) {
     return;
@@ -215,13 +215,21 @@ export async function closeLauncherTabs() {
     orion.windows().forEach((w) => {
       let urls;
       try { urls = w.tabs.url(); } catch (e) { return; }
-      if (urls.length <= 1) return;
       const idx = [];
       for (let i = 0; i < urls.length; i++) {
         if (typeof urls[i] === "string" && urls[i].indexOf("raycast://") === 0) idx.push(i);
       }
-      // If every tab in the window is a launcher tab, leave them — never empty the window.
-      if (idx.length >= urls.length) return;
+      if (idx.length === 0) return;
+      const blankLauncher = (i) => { try { w.tabs[i].url = "about:blank"; } catch (e) {} };
+      // Every tab is a launcher tab: close extras but keep one window tab, navigated
+      // away from the deeplink so it can't re-fire the palette.
+      if (idx.length >= urls.length) {
+        for (let j = idx.length - 2; j >= 0; j--) {
+          try { w.tabs[idx[j]].close(); } catch (e) {}
+        }
+        blankLauncher(idx[idx.length - 1]);
+        return;
+      }
       // Close highest index first so earlier closes don't shift later indices.
       for (let j = idx.length - 1; j >= 0; j--) {
         try { w.tabs[idx[j]].close(); } catch (e) {}

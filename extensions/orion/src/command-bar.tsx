@@ -62,7 +62,7 @@ export default function Command() {
     ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => f.toLowerCase().includes(q)))
     : [];
   const readingHits: Bookmark[] = hasQuery ? (readingList ?? []).filter((b) => relevance(q, b.title, b.url) > 0) : [];
-  const historyHits: HistoryItem[] = hasQuery ? (history ?? []).filter((h) => !!h.title) : [];
+  const historyHits: HistoryItem[] = hasQuery ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0) : [];
   const suggestionHits: string[] = hasQuery ? suggestions : [];
 
   // Pick the single best local match as the Top Hit, preferring tabs > bookmarks > reading list > history.
