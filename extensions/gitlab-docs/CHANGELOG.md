@@ -1,6 +1,6 @@
 # GitLab Docs Changelog
 
-## [Fix Search Commands] - {PR_MERGE_DATE}
+## [Fix Search Commands] - 2026-06-22
 
 - Add a "Search Icons" command to browse and copy GitLab SVG icons from design.gitlab.com/svgs
 - Migrate the "Search Documentation" command from the deprecated Algolia DocSearch API to the Elasticsearch backend used by docs.gitlab.com
