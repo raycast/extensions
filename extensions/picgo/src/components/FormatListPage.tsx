@@ -30,8 +30,7 @@ export default function FormatListPage({ result }: Props) {
 
     return (
         <List isShowingDetail navigationTitle={`${imgs.length} images uploaded`}>
-            {Object.keys(exportFormats).map((k) => {
-                const f = exportFormats[k];
+            {Object.values(exportFormats).map((f) => {
                 return (
                     <List.Item
                         id={f.name}
