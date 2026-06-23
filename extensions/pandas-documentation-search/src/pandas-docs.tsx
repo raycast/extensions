@@ -16,17 +16,10 @@ type DetailRenderState = {
   error?: Error;
 };
 
-interface CommandPreferences {
-  documentationSourceMode?: DocumentationSourceMode;
-  localDocsDirectory?: string;
-  useShortPrefix: boolean;
-  hideApiItems: boolean;
-}
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const preferences = getPreferenceValues<CommandPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const documentationSourceMode = preferences.documentationSourceMode ?? "online";
 
   const {
@@ -91,13 +84,18 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
     >
       {inventoryError ? (
-        <RecoveryItem error={inventoryError} revalidate={revalidateInventory} />
+        <RecoveryItem error={inventoryError} mode={documentationSourceMode} revalidate={revalidateInventory} />
       ) : noResults ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No results" description="Try a different Pandas symbol." />
       ) : (
         <>
           {inventoryRemoteError ? (
-            <RecoveryItem error={inventoryRemoteError} revalidate={revalidateInventory} source={inventorySource} />
+            <RecoveryItem
+              error={inventoryRemoteError}
+              mode={documentationSourceMode}
+              revalidate={revalidateInventory}
+              source={inventorySource}
+            />
           ) : null}
           {results.map((item) => {
             const renderState: DetailRenderState =
@@ -195,20 +193,35 @@ function ItemActions({
 
 function RecoveryItem({
   error,
+  mode,
   revalidate,
   source,
 }: {
   error: Error;
+  mode: DocumentationSourceMode;
   revalidate: () => void;
   source?: ResolvedDocumentationSource;
 }) {
-  const title = source === "local" ? "Using Local Pandas Documentation" : "Configure Local Pandas Documentation";
+  const isLocalFailure = mode === "local" && source !== "local";
+  const title =
+    source === "local"
+      ? "Using Local Pandas Documentation"
+      : isLocalFailure
+        ? "Unable to Load Local Pandas Documentation"
+        : "Configure Local Pandas Documentation";
+  const subtitle = isLocalFailure
+    ? "Check the configured local docs folder"
+    : "Open preferences to select a downloaded docs folder";
   const markdown = [
-    "Raycast could not connect to the online Pandas documentation.",
+    isLocalFailure
+      ? "Raycast could not load Pandas documentation from the configured local docs folder."
+      : "Raycast could not connect to the online Pandas documentation.",
     "",
     source === "local"
       ? "The extension recovered by using the configured local docs folder."
-      : "To keep searching while offline or when the site is unreachable, configure a local docs folder.",
+      : isLocalFailure
+        ? "Make sure **Local Docs Directory** points to the extracted Pandas docs folder and contains a `stable` subfolder with `objects.inv`."
+        : "To keep searching while offline or when the site is unreachable, configure a local docs folder.",
     "",
     "1. Download the Pandas documentation source ZIP.",
     "2. Extract it locally.",
@@ -222,7 +235,7 @@ function RecoveryItem({
     <List.Item
       id="local-docs-recovery"
       title={title}
-      subtitle="Open preferences to select a downloaded docs folder"
+      subtitle={subtitle}
       icon={Icon.ExclamationMark}
       detail={<List.Item.Detail markdown={markdown} />}
       actions={

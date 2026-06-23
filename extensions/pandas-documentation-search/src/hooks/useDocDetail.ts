@@ -37,6 +37,8 @@ export function useDocDetail({
   const revalidate = useCallback(() => setReloadToken((current) => current + 1), []);
 
   useEffect(() => {
+    setResult({});
+
     if (!item) {
       setIsLoading(false);
       return;

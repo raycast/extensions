@@ -8,7 +8,7 @@ The goal is simple:
 - when Raycast cannot reach them, let the user point the extension at a downloaded local docs folder
 - keep the recovery UX explicit and predictable
 
-This guide is written from the NumPy implementation, but the same shape should work for SciPy, pandas, PyTorch, Matplotlib, and similar documentation-based extensions.
+This guide is written for the Pandas implementation, but the same shape should work for SciPy, NumPy, PyTorch, Matplotlib, and similar documentation-based extensions.
 
 ## What We Changed
 
@@ -89,21 +89,21 @@ Now:
 
 These are the key implementation files in this repo:
 
-- [src/lib/docs-source.ts](/Users/faria/git/NumPy-Documentation-Search-Raycast/src/lib/docs-source.ts)
+- [src/lib/docs-source.ts](src/lib/docs-source.ts)
   Shared source resolver for remote vs local loading.
-- [src/hooks/useInventory.ts](/Users/faria/git/NumPy-Documentation-Search-Raycast/src/hooks/useInventory.ts)
+- [src/hooks/useInventory.ts](src/hooks/useInventory.ts)
   Hook that loads the inventory and exposes the resolved source plus remote error state.
-- [src/hooks/useDocDetail.ts](/Users/faria/git/NumPy-Documentation-Search-Raycast/src/hooks/useDocDetail.ts)
+- [src/hooks/useDocDetail.ts](src/hooks/useDocDetail.ts)
   Hook that loads detail content from the current source.
-- [src/numpy-docs.tsx](/Users/faria/git/NumPy-Documentation-Search-Raycast/src/numpy-docs.tsx)
+- [src/pandas-docs.tsx](src/pandas-docs.tsx)
   Command UI, recovery item, and recovery actions.
-- [package.json](/Users/faria/git/NumPy-Documentation-Search-Raycast/package.json)
+- [package.json](package.json)
   Raycast preferences for source mode and local docs directory.
-- [src/__tests__/docs-source.test.ts](/Users/faria/git/NumPy-Documentation-Search-Raycast/src/__tests__/docs-source.test.ts)
+- [src/__tests__/docs-source.test.ts](src/__tests__/docs-source.test.ts)
   Tests for local fallback behavior.
-- [README.md](/Users/faria/git/NumPy-Documentation-Search-Raycast/README.md)
+- [README.md](README.md)
   User-facing documentation for the local-docs workflow.
-- [CHANGELOG.md](/Users/faria/git/NumPy-Documentation-Search-Raycast/CHANGELOG.md)
+- [CHANGELOG.md](CHANGELOG.md)
   User-visible record of the feature.
 
 ## Source Model
@@ -158,11 +158,11 @@ From there it expects:
 - `objects.inv`
 - the HTML tree referenced by inventory entries
 
-For NumPy, that means files such as:
+For Pandas, that means files such as:
 
 ```text
 stable/objects.inv
-stable/reference/generated/numpy.linspace.html
+stable/reference/api/pandas.DataFrame.html
 ```
 
 ### Windows checkout compatibility
@@ -185,7 +185,7 @@ like:
 
 ```text
 stable/objects.inv
-stable/reference/generated/numpy.linspace.html
+stable/reference/api/pandas.DataFrame.html
 ```
 
 When `stable` is a text file, those paths are invalid. To make the fallback portable, resolve `stable` before building the
@@ -205,7 +205,7 @@ async function getStableDocsDirectory(localDocsDirectory: string | undefined, de
   const stablePath = path.join(directory, "stable");
 
   try {
-    const symlinkTarget = (await deps.readTextFileImpl(stablePath)).trim();
+    const symlinkTarget = (await deps.readFileImpl(stablePath, "utf-8")).trim();
     if (symlinkTarget) {
       return path.resolve(directory, symlinkTarget);
     }
