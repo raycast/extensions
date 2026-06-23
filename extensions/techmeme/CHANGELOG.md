@@ -1,6 +1,6 @@
 # Techmeme Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-23
 
 - Browse Techmeme front page and River stories.
 - Search, inspect coverage clusters, open links, and copy story references.
