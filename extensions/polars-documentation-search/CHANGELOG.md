@@ -1,6 +1,6 @@
 # Polars Documentation Search Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-06-23
 
 - Added an optional local documentation source for downloaded Polars docs.
 - Added automatic local fallback when the live Polars docs cannot be reached and a local docs directory is configured.
