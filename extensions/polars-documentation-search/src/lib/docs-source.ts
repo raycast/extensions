@@ -105,7 +105,11 @@ async function loadLocalInventory(localDocsDirectory: string | undefined, deps: 
   const docsDirectory = await getStableDocsDirectory(localDocsDirectory, deps);
   const inventoryPath = path.join(docsDirectory, "objects.inv");
   const inventory = await deps.readFileImpl(inventoryPath);
-  return transformInventoryResponse(inventory);
+  return transformInventoryResponse(toArrayBuffer(inventory));
+}
+
+function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
 }
 
 async function loadRemoteDocDetail(item: InventoryItem, deps: LoaderDeps): Promise<DocDetail> {
