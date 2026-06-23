@@ -25,8 +25,8 @@ function formatDueDate(dueDate?: string): string | undefined {
 
 export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
   const { data: comments, revalidate: reloadComments } = useCachedPromise(
-    () => getComments(task.projectId, task.id),
-    [task.id, task.projectId],
+    (projectId: string, taskId: string) => getComments(projectId, taskId),
+    [task.projectId, task.id],
   );
 
   async function handleComplete() {

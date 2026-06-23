@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [1.0.0] - 2026-06-22
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - Full TickTick integration: Today, Inbox, Projects, Next 7 Days, Overdue, Search, Eisenhower Matrix

@@ -17,14 +17,14 @@ export default function Pomodoro() {
   const { state, remaining, todayCount, isLoading, start, startPhase, pause, resume, reset, skip, formatTime } =
     usePomodoro();
 
-  const phaseLabels: Record<string, string> = {
+  const phaseLabels: Record<PomodoroPhase, string> = {
     idle: "Ready to Focus",
     work: "🍅 Focus",
     short_break: "☕ Short Break",
     long_break: "🌿 Long Break",
   };
 
-  const phaseColors: Record<string, Color> = {
+  const phaseColors: Record<PomodoroPhase, Color> = {
     idle: Color.SecondaryText,
     work: Color.Red,
     short_break: Color.Green,
@@ -90,12 +90,18 @@ export default function Pomodoro() {
 
       <List.Section title="Schedule">
         {(["work", "short_break", "long_break"] as PomodoroPhase[]).map((phase) => {
-          const labels = {
+          const labels: Record<PomodoroPhase, string> = {
+            idle: "",
             work: "🍅 Focus — 25 min",
             short_break: "☕ Short Break — 5 min",
             long_break: "🌿 Long Break — 15 min",
           };
-          const colors = { work: Color.Red, short_break: Color.Green, long_break: Color.Blue };
+          const colors: Record<PomodoroPhase, Color> = {
+            idle: Color.SecondaryText,
+            work: Color.Red,
+            short_break: Color.Green,
+            long_break: Color.Blue,
+          };
           return (
             <List.Item
               key={phase}
@@ -117,7 +123,7 @@ export default function Pomodoro() {
           {todayTasks.map((task) => (
             <List.Item
               key={task.id}
-              icon={Icon.Target}
+              icon={Icon.Pin}
               title={task.title}
               actions={
                 <ActionPanel>

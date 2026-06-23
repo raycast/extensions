@@ -4,11 +4,6 @@ import * as http from "http";
 const BASE_URL = "https://ticktick.com";
 const REDIRECT_URI = "http://localhost:42813/callback";
 
-interface Preferences {
-  clientId: string;
-  clientSecret: string;
-}
-
 interface TokenResponse {
   access_token: string;
   refresh_token?: string;

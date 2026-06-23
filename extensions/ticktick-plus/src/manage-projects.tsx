@@ -85,12 +85,12 @@ export default function ManageProjects() {
               />
               <Action
                 title="Archive Project"
-                icon={Icon.Archive}
+                icon={Icon.Tray}
                 style={Action.Style.Destructive}
                 onAction={async () => {
                   const confirmed = await confirmAlert({
                     title: `Archive "${project.name}"?`,
-                    icon: Icon.Archive,
+                    icon: Icon.Tray,
                     primaryAction: { title: "Archive", style: Alert.ActionStyle.Destructive },
                   });
                   if (!confirmed) return;

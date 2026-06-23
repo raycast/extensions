@@ -30,7 +30,6 @@ function ProjectTasks({
             <TaskItem
               key={task.id}
               task={task}
-              projects={data.projects}
               projects={projects}
               onComplete={onMutate}
               onDelete={onMutate}

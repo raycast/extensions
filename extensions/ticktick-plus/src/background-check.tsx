@@ -8,12 +8,6 @@ import { Task } from "./types/ticktick";
 
 const LAST_CHECK_KEY = "ticktick_last_alert_check";
 
-interface Preferences {
-  enableAlerts?: boolean;
-  alertOverdue?: boolean;
-  alertUrgent?: boolean;
-}
-
 async function getLastCheck(): Promise<number> {
   const { LocalStorage } = await import("@raycast/api");
   const v = await LocalStorage.getItem<string>(LAST_CHECK_KEY);
