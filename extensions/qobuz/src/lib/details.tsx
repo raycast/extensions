@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import type { Album, Artist, Playlist, Track } from "@kud/qobuz"
-import { appLink, BRAND, deepLink, formatDuration, getClient } from "./client"
-import { spotifySearchUrl, ytMusicSearchUrl } from "./resolve"
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import type { Album, Artist, Playlist, Track } from "@kud/qobuz";
+import { appLink, BRAND, deepLink, formatDuration, getClient } from "./client";
+import { spotifySearchUrl, ytMusicSearchUrl } from "./resolve";
 
-const COVER_SIZE = 220
+const COVER_SIZE = 220;
 
 const cover = (image: string | undefined, title: string, subtitle?: string) =>
   [
@@ -15,7 +15,7 @@ const cover = (image: string | undefined, title: string, subtitle?: string) =>
     subtitle ? `### ${subtitle}` : "",
   ]
     .filter(Boolean)
-    .join("\n\n")
+    .join("\n\n");
 
 const ExternalActions = ({ query }: { query: string }) => (
   <ActionPanel.Section title="Find Elsewhere">
@@ -31,11 +31,11 @@ const ExternalActions = ({ query }: { query: string }) => (
     />
     <Action.CopyToClipboard title="Copy Artist & Title" content={query} />
   </ActionPanel.Section>
-)
+);
 
 export function TrackDetail({ track }: { track: Track }) {
-  const web = deepLink.track(track.id)
-  const query = `${track.artist?.name ?? ""} ${track.title}`.trim()
+  const web = deepLink.track(track.id);
+  const query = `${track.artist?.name ?? ""} ${track.title}`.trim();
   return (
     <Detail
       navigationTitle={track.title}
@@ -83,12 +83,12 @@ export function TrackDetail({ track }: { track: Track }) {
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 export function AlbumDetail({ album }: { album: Album }) {
-  const web = deepLink.album(album.id)
-  const query = `${album.artist?.name ?? ""} ${album.title}`.trim()
+  const web = deepLink.album(album.id);
+  const query = `${album.artist?.name ?? ""} ${album.title}`.trim();
   return (
     <Detail
       navigationTitle={album.title}
@@ -134,11 +134,11 @@ export function AlbumDetail({ album }: { album: Album }) {
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 export function ArtistDetail({ artist }: { artist: Artist }) {
-  const web = deepLink.artist(artist.id)
+  const web = deepLink.artist(artist.id);
   return (
     <Detail
       navigationTitle={artist.name}
@@ -179,13 +179,13 @@ export function ArtistDetail({ artist }: { artist: Artist }) {
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 // Item action panels for list/grid rows: the primary action stays in Raycast
 // (push the detail view); opening externally is available as secondary actions.
 export function TrackItemActions({ track }: { track: Track }) {
-  const web = deepLink.track(track.id)
+  const web = deepLink.track(track.id);
   return (
     <ActionPanel>
       <Action.Push
@@ -201,11 +201,11 @@ export function TrackItemActions({ track }: { track: Track }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
-  )
+  );
 }
 
 export function AlbumItemActions({ album }: { album: Album }) {
-  const web = deepLink.album(album.id)
+  const web = deepLink.album(album.id);
   return (
     <ActionPanel>
       <Action.Push
@@ -221,11 +221,11 @@ export function AlbumItemActions({ album }: { album: Album }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
-  )
+  );
 }
 
 export function ArtistItemActions({ artist }: { artist: Artist }) {
-  const web = deepLink.artist(artist.id)
+  const web = deepLink.artist(artist.id);
   return (
     <ActionPanel>
       <Action.Push
@@ -241,7 +241,7 @@ export function ArtistItemActions({ artist }: { artist: Artist }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
-  )
+  );
 }
 
 // A playlist's tracklist as a List, each track drilling into its own detail —
@@ -249,15 +249,15 @@ export function ArtistItemActions({ artist }: { artist: Artist }) {
 export function PlaylistTracks({ playlist }: { playlist: Playlist }) {
   const { data, isLoading } = useCachedPromise(
     async (id: number) => {
-      const client = await getClient()
-      return (await client.playlists.get(id)).tracks ?? []
+      const client = await getClient();
+      return (await client.playlists.get(id)).tracks ?? [];
     },
     [playlist.id],
     {
       onError: (error) =>
         showFailureToast(error, { title: "Couldn't load tracks" }),
     },
-  )
+  );
 
   return (
     <List
@@ -281,5 +281,5 @@ export function PlaylistTracks({ playlist }: { playlist: Playlist }) {
         />
       ))}
     </List>
-  )
+  );
 }

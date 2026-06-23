@@ -1,38 +1,38 @@
-import { Grid, Icon } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import { useState } from "react"
-import { BRAND, getClient } from "./lib/client"
+import { Grid, Icon } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { BRAND, getClient } from "./lib/client";
 import {
   AlbumItemActions,
   ArtistItemActions,
   TrackItemActions,
-} from "./lib/details"
+} from "./lib/details";
 
-const EMPTY = { query: "", albums: [], artists: [], tracks: [] }
+const EMPTY = { query: "", albums: [], artists: [], tracks: [] };
 
-type Filter = "all" | "albums" | "artists" | "tracks"
+type Filter = "all" | "albums" | "artists" | "tracks";
 
 export default function Command() {
-  const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<Filter>("all")
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
 
   const { data, isLoading } = useCachedPromise(
     async (term: string) => {
-      if (!term.trim()) return EMPTY
-      const client = await getClient()
-      return client.search.search(term, { limit: 20 })
+      if (!term.trim()) return EMPTY;
+      const client = await getClient();
+      return client.search.search(term, { limit: 20 });
     },
     [query],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, { title: "Qobuz search failed" })
+        showFailureToast(error, { title: "Qobuz search failed" });
       },
     },
-  )
+  );
 
-  const results = data ?? EMPTY
-  const show = (type: Filter) => filter === "all" || filter === type
+  const results = data ?? EMPTY;
+  const show = (type: Filter) => filter === "all" || filter === type;
 
   return (
     <Grid
@@ -108,5 +108,5 @@ export default function Command() {
         </Grid.Section>
       )}
     </Grid>
-  )
+  );
 }

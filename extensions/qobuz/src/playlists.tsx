@@ -7,25 +7,25 @@ import {
   showToast,
   Toast,
   useNavigation,
-} from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import type { Playlist } from "@kud/qobuz"
-import { appLink, BRAND, deepLink, getClient } from "./lib/client"
-import { PlaylistTracks } from "./lib/details"
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import type { Playlist } from "@kud/qobuz";
+import { appLink, BRAND, deepLink, getClient } from "./lib/client";
+import { PlaylistTracks } from "./lib/details";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(
     async () => {
-      const client = await getClient()
-      return client.playlists.listForUser()
+      const client = await getClient();
+      return client.playlists.listForUser();
     },
     [],
     {
       onError: (error) => {
-        showFailureToast(error, { title: "Couldn't load playlists" })
+        showFailureToast(error, { title: "Couldn't load playlists" });
       },
     },
-  )
+  );
 
   return (
     <Grid
@@ -36,7 +36,7 @@ export default function Command() {
       searchBarPlaceholder="Filter playlists…"
     >
       {(data ?? []).map((playlist) => {
-        const web = deepLink.playlist(playlist.id)
+        const web = deepLink.playlist(playlist.id);
         return (
           <Grid.Item
             key={playlist.id}
@@ -72,39 +72,39 @@ export default function Command() {
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </Grid>
-  )
+  );
 }
 
 function EditDescription({
   playlist,
   onSaved,
 }: {
-  playlist: Playlist
-  onSaved: () => void
+  playlist: Playlist;
+  onSaved: () => void;
 }) {
-  const { pop } = useNavigation()
+  const { pop } = useNavigation();
 
   const submit = async (values: { description: string }) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving description…",
-    })
+    });
     try {
-      const client = await getClient()
+      const client = await getClient();
       await client.playlists.update(playlist.id, {
         description: values.description,
-      })
-      toast.style = Toast.Style.Success
-      toast.title = "Description updated"
-      onSaved()
-      pop()
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Description updated";
+      onSaved();
+      pop();
     } catch (error) {
-      await showFailureToast(error, { title: "Couldn't update description" })
+      await showFailureToast(error, { title: "Couldn't update description" });
     }
-  }
+  };
 
   return (
     <Form
@@ -122,5 +122,5 @@ function EditDescription({
         defaultValue={playlist.description ?? ""}
       />
     </Form>
-  )
+  );
 }

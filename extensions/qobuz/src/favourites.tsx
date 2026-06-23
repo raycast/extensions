@@ -1,30 +1,30 @@
-import { Grid, Icon } from "@raycast/api"
-import { showFailureToast, useCachedPromise } from "@raycast/utils"
-import { useState } from "react"
-import type { FavouriteType } from "@kud/qobuz"
-import { BRAND, getClient } from "./lib/client"
+import { Grid, Icon } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import type { FavouriteType } from "@kud/qobuz";
+import { BRAND, getClient } from "./lib/client";
 import {
   AlbumItemActions,
   ArtistItemActions,
   TrackItemActions,
-} from "./lib/details"
+} from "./lib/details";
 
 export default function Command() {
-  const [type, setType] = useState<FavouriteType>("albums")
+  const [type, setType] = useState<FavouriteType>("albums");
 
   const { data, isLoading } = useCachedPromise(
     async (favouriteType: FavouriteType) => {
-      const client = await getClient()
-      return client.favourites.list(favouriteType)
+      const client = await getClient();
+      return client.favourites.list(favouriteType);
     },
     [type],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, { title: "Couldn't load favourites" })
+        showFailureToast(error, { title: "Couldn't load favourites" });
       },
     },
-  )
+  );
 
   return (
     <Grid
@@ -88,5 +88,5 @@ export default function Command() {
           />
         ))}
     </Grid>
-  )
+  );
 }
