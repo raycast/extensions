@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fix SQL injection in history and download search] - {PR_MERGE_DATE}
+## [Fix SQL injection in history and download search] - 2026-06-23
 
 - Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection
 - Switch LIKE string literals from double quotes to single quotes (correct SQLite syntax)
