@@ -48,5 +48,3 @@ Print-readiness report.
 - Add page preview thumbnails if a local PDF rendering path is added.
 - Add severity filters for large reports.
 - Add export actions for a persistent report file.
-
-

@@ -38,7 +38,6 @@ Run local design and text utilities from [delphitools](https://tools.rmv.fyi/) i
 - Zine Imposer
 - Background Remover
 
-
 ## Setup
 
 This extension uses the local `delphitools` CLI. Install it before running commands that call delphitools:

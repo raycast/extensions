@@ -39,4 +39,3 @@ Carousel tile image files.
 - `Copy All Tile Paths`: copy a list of all generated tile paths.
 - `Reveal Output Folder`: reveal the temporary output directory.
 - `Reveal in Finder`: reveal the selected tile file in Finder.
-

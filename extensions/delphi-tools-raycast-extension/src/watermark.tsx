@@ -1,18 +1,20 @@
 import { execFileAsync, getDelphitoolsCliPath } from "./utils/exec";
-import { getDefaultOutputRoot } from "./utils/preferences";
+import {
+  createOutputDirectory,
+  getImageOutputFiles,
+  ImageOutput,
+  ImageOutputResult,
+  ImageResults,
+} from "./utils/image-output";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Form,
   Icon,
-  List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { mkdir, readdir, stat } from "node:fs/promises";
-import path from "node:path";
 
 import { DelphitoolsRequired } from "./delphitools-install";
 
@@ -24,16 +26,8 @@ type FormValues = {
   scale: string;
 };
 
-type WatermarkOutput = {
-  path: string;
-  size: number;
-};
-
-type WatermarkResult = {
-  outputDirectory: string;
-  outputs: WatermarkOutput[];
-  outputPaths: string[];
-};
+type WatermarkOutput = ImageOutput;
+type WatermarkResult = ImageOutputResult<WatermarkOutput>;
 
 const OUTPUT_NAMESPACE = "watermark";
 const DEFAULT_POSITION = "bottom-right";
@@ -160,103 +154,20 @@ function WatermarkForm({ isCheckingInstall }: { isCheckingInstall: boolean }) {
 }
 
 function WatermarkResults({ result }: { result: WatermarkResult }) {
-  const allPaths = result.outputPaths.join("\n");
-
   return (
-    <List searchBarPlaceholder="Search watermarked images">
-      {result.outputs.map((output) => (
-        <List.Item
-          key={output.path}
-          icon={{ source: output.path }}
-          title={path.basename(output.path)}
-          subtitle={path.dirname(output.path)}
-          accessories={[{ text: formatFileSize(output.size) }]}
-          actions={
-            <WatermarkActions
-              outputPath={output.path}
-              allPaths={allPaths}
-              outputDirectory={result.outputDirectory}
-            />
-          }
-        />
-      ))}
-    </List>
-  );
-}
-
-function WatermarkActions({
-  outputPath,
-  allPaths,
-  outputDirectory,
-}: {
-  outputPath: string;
-  allPaths: string;
-  outputDirectory: string;
-}) {
-  async function copyImage() {
-    await Clipboard.copy({ file: outputPath });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied Watermarked Image",
-    });
-  }
-
-  async function copyAllPaths() {
-    await Clipboard.copy(allPaths);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied All Output Paths",
-    });
-  }
-
-  return (
-    <ActionPanel>
-      <Action.Open
-        icon={Icon.Eye}
-        title="Open Watermarked Image"
-        target={outputPath}
-      />
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy Watermarked Image"
-        onAction={copyImage}
-      />
-      <Action.CopyToClipboard
-        title="Copy Image Path"
-        content={outputPath}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy All Output Paths"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-        onAction={copyAllPaths}
-      />
-      <Action.ShowInFinder
-        title="Reveal Output Folder"
-        path={outputDirectory}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-      />
-      <Action.ShowInFinder
-        title="Reveal in Finder"
-        path={outputPath}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-      />
-    </ActionPanel>
+    <ImageResults
+      result={result}
+      searchBarPlaceholder="Search watermarked images"
+      openTitle="Open Watermarked Image"
+      copyImageTitle="Copy Watermarked Image"
+      copyImagePathTitle="Copy Image Path"
+      copiedImageTitle="Copied Watermarked Image"
+    />
   );
 }
 
 async function runWatermark(values: FormValues): Promise<WatermarkResult> {
-  const outputRoot = getDefaultOutputRoot();
-  await mkdir(outputRoot, { recursive: true });
-
-  const hash = Math.random().toString(36).slice(2, 10);
-  const outputDirectory = path.join(
-    outputRoot,
-    OUTPUT_NAMESPACE,
-    `${Date.now()}-${hash}`,
-  );
-  await mkdir(outputDirectory, { recursive: true });
+  const outputDirectory = await createOutputDirectory(OUTPUT_NAMESPACE);
 
   const args = [
     "watermark",
@@ -285,7 +196,7 @@ async function runWatermark(values: FormValues): Promise<WatermarkResult> {
 
   await execFileAsync(getDelphitoolsCliPath(), args);
 
-  const outputs = await getOutputFiles(outputDirectory);
+  const outputs = await getImageOutputFiles(outputDirectory);
 
   if (outputs.length === 0) {
     throw new Error("No watermarked images were generated.");
@@ -296,43 +207,6 @@ async function runWatermark(values: FormValues): Promise<WatermarkResult> {
     outputs,
     outputPaths: outputs.map((out) => out.path),
   };
-}
-
-async function getOutputFiles(
-  outputDirectory: string,
-): Promise<WatermarkOutput[]> {
-  const entries = await readdir(outputDirectory);
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const outputPath = path.join(outputDirectory, entry);
-      const outputStat = await stat(outputPath);
-
-      return outputStat.isFile()
-        ? { path: outputPath, size: outputStat.size }
-        : null;
-    }),
-  );
-
-  return files
-    .filter((file): file is WatermarkOutput => file !== null)
-    .sort((a, b) => a.path.localeCompare(b.path));
-}
-
-function formatFileSize(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB"];
-  let size = bytes;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex += 1;
-  }
-
-  if (unitIndex === 0) {
-    return `${bytes} B`;
-  }
-
-  return `${size >= 10 ? size.toFixed(0) : size.toFixed(1)} ${units[unitIndex]}`;
 }
 
 function validateFormValues(values: FormValues): {

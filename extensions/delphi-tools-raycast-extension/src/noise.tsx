@@ -1,18 +1,20 @@
 import { execFileAsync, getDelphitoolsCliPath } from "./utils/exec";
-import { getDefaultOutputRoot } from "./utils/preferences";
+import {
+  createOutputDirectory,
+  getImageOutputFiles,
+  ImageOutput,
+  ImageOutputResult,
+  ImageResults,
+} from "./utils/image-output";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Form,
   Icon,
-  List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { mkdir, readdir, stat } from "node:fs/promises";
-import path from "node:path";
 import { useEffect, useState } from "react";
 
 import {
@@ -27,16 +29,8 @@ type FormValues = {
   seed: string;
 };
 
-type NoiseOutput = {
-  path: string;
-  size: number;
-};
-
-type NoiseResult = {
-  outputDirectory: string;
-  outputs: NoiseOutput[];
-  outputPaths: string[];
-};
+type NoiseOutput = ImageOutput;
+type NoiseResult = ImageOutputResult<NoiseOutput>;
 
 const OUTPUT_NAMESPACE = "noise";
 const DEFAULT_OPACITY = "0.15";
@@ -146,103 +140,20 @@ function NoiseForm({ isCheckingInstall }: { isCheckingInstall: boolean }) {
 }
 
 function NoiseResults({ result }: { result: NoiseResult }) {
-  const allPaths = result.outputPaths.join("\n");
-
   return (
-    <List searchBarPlaceholder="Search processed images">
-      {result.outputs.map((output) => (
-        <List.Item
-          key={output.path}
-          icon={{ source: output.path }}
-          title={path.basename(output.path)}
-          subtitle={path.dirname(output.path)}
-          accessories={[{ text: formatFileSize(output.size) }]}
-          actions={
-            <NoiseActions
-              outputPath={output.path}
-              allPaths={allPaths}
-              outputDirectory={result.outputDirectory}
-            />
-          }
-        />
-      ))}
-    </List>
-  );
-}
-
-function NoiseActions({
-  outputPath,
-  allPaths,
-  outputDirectory,
-}: {
-  outputPath: string;
-  allPaths: string;
-  outputDirectory: string;
-}) {
-  async function copyImage() {
-    await Clipboard.copy({ file: outputPath });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied Noisy Image",
-    });
-  }
-
-  async function copyAllPaths() {
-    await Clipboard.copy(allPaths);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied All Output Paths",
-    });
-  }
-
-  return (
-    <ActionPanel>
-      <Action.Open
-        icon={Icon.Eye}
-        title="Open Noisy Image"
-        target={outputPath}
-      />
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy Noisy Image"
-        onAction={copyImage}
-      />
-      <Action.CopyToClipboard
-        title="Copy Noisy Image Path"
-        content={outputPath}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy All Output Paths"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-        onAction={copyAllPaths}
-      />
-      <Action.ShowInFinder
-        title="Reveal Output Folder"
-        path={outputDirectory}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-      />
-      <Action.ShowInFinder
-        title="Reveal in Finder"
-        path={outputPath}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-      />
-    </ActionPanel>
+    <ImageResults
+      result={result}
+      searchBarPlaceholder="Search processed images"
+      openTitle="Open Noisy Image"
+      copyImageTitle="Copy Noisy Image"
+      copyImagePathTitle="Copy Noisy Image Path"
+      copiedImageTitle="Copied Noisy Image"
+    />
   );
 }
 
 async function runNoise(values: FormValues): Promise<NoiseResult> {
-  const outputRoot = getDefaultOutputRoot();
-  await mkdir(outputRoot, { recursive: true });
-
-  const hash = Math.random().toString(36).slice(2, 10);
-  const outputDirectory = path.join(
-    outputRoot,
-    OUTPUT_NAMESPACE,
-    `${Date.now()}-${hash}`,
-  );
-  await mkdir(outputDirectory, { recursive: true });
+  const outputDirectory = await createOutputDirectory(OUTPUT_NAMESPACE);
 
   const args = [
     "noise",
@@ -269,7 +180,7 @@ async function runNoise(values: FormValues): Promise<NoiseResult> {
 
   await execFileAsync(getDelphitoolsCliPath(), args);
 
-  const outputs = await getOutputFiles(outputDirectory);
+  const outputs = await getImageOutputFiles(outputDirectory);
 
   if (outputs.length === 0) {
     throw new Error("No noisy images were generated.");
@@ -280,41 +191,6 @@ async function runNoise(values: FormValues): Promise<NoiseResult> {
     outputs,
     outputPaths: outputs.map((out) => out.path),
   };
-}
-
-async function getOutputFiles(outputDirectory: string): Promise<NoiseOutput[]> {
-  const entries = await readdir(outputDirectory);
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const outputPath = path.join(outputDirectory, entry);
-      const outputStat = await stat(outputPath);
-
-      return outputStat.isFile()
-        ? { path: outputPath, size: outputStat.size }
-        : null;
-    }),
-  );
-
-  return files
-    .filter((file): file is NoiseOutput => file !== null)
-    .sort((a, b) => a.path.localeCompare(b.path));
-}
-
-function formatFileSize(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB"];
-  let size = bytes;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex += 1;
-  }
-
-  if (unitIndex === 0) {
-    return `${bytes} B`;
-  }
-
-  return `${size >= 10 ? size.toFixed(0) : size.toFixed(1)} ${units[unitIndex]}`;
 }
 
 function validateFormValues(values: FormValues): {

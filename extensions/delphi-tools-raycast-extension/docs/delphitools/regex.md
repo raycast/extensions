@@ -3,7 +3,7 @@
 Test a regex pattern against text.
 
 ## Raycast command
- 
+
 The Raycast Command should be `Regex Tester`. It should be a live tester with
 pattern, flags, and text input. The text field should be seeded from selected
 text or clipboard when available.
@@ -52,4 +52,3 @@ Regex match results.
 - Add a file picker mode for testing a pattern against a local text file.
 - Add replacement/substitution support if the CLI adds it.
 - Add regex examples or snippets if users need syntax help.
-

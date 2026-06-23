@@ -49,5 +49,3 @@ Image files with noise overlay.
 - Add support for selected Finder files as input when it can be tested cleanly.
 - Add an optional persistent output directory picker.
 - Add side-by-side before/after preview if Raycast image preview performance is acceptable.
-
-

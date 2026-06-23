@@ -41,5 +41,3 @@ Watermarked image files.
 - `Copy All Output Paths`: copy all generated file paths.
 - `Reveal Output Folder`: reveal the temporary output directory.
 - `Reveal in Finder`: reveal the selected output file in Finder.
-
-

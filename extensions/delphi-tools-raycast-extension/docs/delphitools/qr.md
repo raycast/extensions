@@ -5,14 +5,14 @@ Generate styled QR codes.
 ## Raycast commands
 
 This Tool should be exposed as two Raycast Commands:
- 
+
 - `QR Code Generator`
 - `QR Code Generator vCard`
- 
+
 `QR Code Generator` should use a `Form` for single QR generation. It should
 mirror the web UI workflow where the user enters content, adjusts basic options,
 and previews the generated QR code. Only CLI-backed options should ship in v1.
- 
+
 `QR Code Generator vCard` should use a separate `Form` that builds vCard text
 locally, then passes that text into the same `delphitools qr` generation flow.
 
@@ -98,5 +98,3 @@ Omit empty optional fields except `BEGIN:VCARD`, `VERSION:3.0`, `N`, `FN`, and
 - Add bit style, eye style, pupil style, and padding when the CLI exposes those options.
 - Add SVG export when supported by the CLI.
 - Add batch QR ZIP generation as a separate command or mode after CLI behavior is verified.
-
-

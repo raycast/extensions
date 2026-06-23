@@ -38,4 +38,3 @@ SVG vector output.
 - `Copy SVG File`: copy the generated vector file to the clipboard.
 - `Copy SVG Path`: copy the generated file path.
 - `Reveal in Finder`: reveal the generated SVG file in Finder.
-

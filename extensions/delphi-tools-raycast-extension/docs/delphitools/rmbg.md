@@ -40,4 +40,3 @@ Images with background removed.
 ## Notes
 
 First use downloads an approximately 170 MB Apache-licensed ONNX model.
-

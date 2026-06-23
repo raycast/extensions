@@ -62,4 +62,3 @@ A generated palette as text, CSS, JSON, or PNG.
 - Add colour names and RGB/HSL metadata if the CLI or a local helper provides them.
 - Add SVG export if the CLI gains a supported SVG output format.
 - Add a richer strategy browser if users need to discover all 28 strategies before generating.
-

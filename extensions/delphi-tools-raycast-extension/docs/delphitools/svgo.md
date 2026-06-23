@@ -5,6 +5,7 @@ Optimise SVG files.
 ## Raycast command
 
 The Raycast Command should be `SVG Optimiser`. It should use a `Form` that accepts input via two methods:
+
 1. **SVG File Picker**: A multi-file picker to choose existing SVG files.
 2. **SVG Code Text Area**: A multi-line text area to paste SVG XML code directly.
 
@@ -44,4 +45,3 @@ Optimised SVG files.
 - `Copy SVG File`: copy the selected optimized `.svg` file to the clipboard.
 - `Reveal Output Folder`: reveal the temporary output directory.
 - `Reveal in Finder`: reveal the selected optimized SVG file in Finder.
-
