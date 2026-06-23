@@ -1,48 +1,24 @@
-import { showToast, Toast } from "@raycast/api";
-import { execa, execaCommand } from "execa";
-import { formatYabaiPathLookupError, resolveYabaiPath, YABAI_EXEC_ENV } from "./yabai-path";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { execaCommand } from "execa";
+import { userInfo } from "os";
+import { cpus } from "os";
+import fs from "fs";
 
-function quoteShellArgument(value: string): string {
-  return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
-// Keep execaCommand's escaped-space behavior for the argument string while passing the executable separately.
-function parseCommandArguments(command: string): string[] {
-  const args: string[] = [];
-
-  for (const arg of command.trim().split(/ +/g)) {
-    if (!arg) {
-      continue;
-    }
-
-    const previousArg = args[args.length - 1];
-    if (previousArg?.endsWith("\\")) {
-      args[args.length - 1] = `${previousArg.slice(0, -1)} ${arg}`;
-    } else {
-      args.push(arg);
-    }
-  }
-
-  return args;
-}
+const userEnv = `env USER=${userInfo().username}`;
 
 export const runYabaiCommand = async (command: string, opt?: { shell?: boolean }) => {
-  const lookup = resolveYabaiPath();
+  const preferences = getPreferenceValues<Preferences>();
+  const yabaiPath: string =
+    preferences.yabaiPath && preferences.yabaiPath.length > 0
+      ? preferences.yabaiPath
+      : cpus()[0].model.includes("Apple")
+        ? "/opt/homebrew/bin/yabai"
+        : "/usr/local/bin/yabai";
 
-  if (!lookup.path) {
-    const message = `Yabai executable not found. ${formatYabaiPathLookupError(lookup)}`;
-    await showToast(Toast.Style.Failure, "Yabai executable not found", message);
-    return { stdout: "", stderr: message };
+  if (!fs.existsSync(yabaiPath)) {
+    await showToast(Toast.Style.Failure, "Yabai executable not found", `Is yabai installed at ${yabaiPath}?`);
+    return { stdout: "", stderr: "Yabai executable not found" };
   }
 
-  const options = {
-    ...opt,
-    env: YABAI_EXEC_ENV,
-  };
-
-  if (opt?.shell) {
-    return await execaCommand([quoteShellArgument(lookup.path), command].join(" "), options);
-  }
-
-  return await execa(lookup.path, parseCommandArguments(command), options);
+  return await execaCommand([userEnv, yabaiPath, command].join(" "), opt);
 };

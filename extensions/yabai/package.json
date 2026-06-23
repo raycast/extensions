@@ -248,7 +248,7 @@
       "title": "Yabai installation path",
       "required": false,
       "type": "textfield",
-      "description": "Location to the Yabai installation. If empty, searches PATH and common Nix/Homebrew/MacPorts paths."
+      "description": "Location to the Yabai installation (Defaults to `/opt/homebrew/bin/yabai` on M1 Macs, and `/usr/local/bin/yabai` otherwise)"
     }
   ],
   "dependencies": {
