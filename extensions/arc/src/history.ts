@@ -137,7 +137,7 @@ export function useHistorySearch(
 
 export async function getHistory(searchText?: string, limit = 200): Promise<HistoryEntry[]> {
   const data: HistoryEntry[] = [];
-  const escapedSearchText = searchText?.replace(/'/g, "''").replace(/[%_]/g, "\\$&");
+  const escapedSearchText = searchText?.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
   for (const profile of profileHistoryDatabasePaths) {
     try {
