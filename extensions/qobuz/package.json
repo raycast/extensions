@@ -18,12 +18,19 @@
       "mode": "view"
     },
     {
+      "name": "convert-link",
+      "title": "Convert Track Link",
+      "subtitle": "Qobuz",
+      "description": "Copy a Spotify, YouTube Music, or Qobuz track link, then run this to convert it to the other services.",
+      "mode": "view"
+    },
+    {
       "name": "now-playing",
       "title": "Now Playing",
       "subtitle": "Qobuz",
       "description": "Show the track currently playing in the Qobuz desktop app and copy its link.",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "5s"
     },
     {
       "name": "favourites",
@@ -85,7 +92,7 @@
     }
   ],
   "dependencies": {
-    "@kud/qobuz": "0.5.0",
+    "@kud/qobuz": "0.5.4",
     "@raycast/api": "1.104.20",
     "@raycast/utils": "2.2.6"
   },

@@ -1,6 +1,17 @@
-import { Clipboard, Icon, MenuBarExtra, open, showHUD } from "@raycast/api"
+import {
+  Cache,
+  Clipboard,
+  Icon,
+  MenuBarExtra,
+  open,
+  showHUD,
+} from "@raycast/api"
 import { useCachedPromise } from "@raycast/utils"
-import { defaultPlayerStatePath, type Track } from "@kud/qobuz"
+import {
+  defaultPlayerStatePath,
+  type QobuzClient,
+  type Track,
+} from "@kud/qobuz"
 import { readFile } from "node:fs/promises"
 import { appLink, deepLink, getClient } from "./lib/client"
 import { sendMediaKey } from "./lib/media-keys"
@@ -8,8 +19,33 @@ import { sendMediaKey } from "./lib/media-keys"
 const QUEUE_PREVIEW = 3
 const HISTORY_PREVIEW = 3
 
+// Keep the menu-bar title from eating the whole bar on long titles.
+const MAX_TITLE_LENGTH = 45
+const truncate = (text: string): string =>
+  text.length > MAX_TITLE_LENGTH
+    ? `${text.slice(0, MAX_TITLE_LENGTH - 1).trimEnd()}…`
+    : text
+
+// Track metadata (title, artist, art) never changes, so cache it by id. This
+// keeps the frequent menu-bar poll cheap: a steady-playing track and an
+// unchanged queue are served entirely from cache, hitting the network only
+// when a genuinely new track appears.
+const cache = new Cache()
+
+const fetchTrack = async (
+  client: QobuzClient,
+  id: number,
+): Promise<Track | null> => {
+  const key = `track-${id}`
+  const cached = cache.get(key)
+  if (cached) return JSON.parse(cached) as Track
+  const track = await client.tracks.get(id).catch(() => null)
+  if (track) cache.set(key, JSON.stringify(track))
+  return track
+}
+
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(async () => {
+  const { data, isLoading } = useCachedPromise(async () => {
     const client = await getClient()
 
     let currentId: number | undefined
@@ -30,12 +66,12 @@ export default function Command() {
       // player state absent — controls still work
     }
 
-    const fetchTrack = (id: number) => client.tracks.get(id).catch(() => null)
-
     const [current, nextResults, histResults] = await Promise.all([
-      currentId !== undefined ? fetchTrack(currentId) : Promise.resolve(null),
-      Promise.all(nextIds.map(fetchTrack)),
-      Promise.all(histIds.map(fetchTrack)),
+      currentId !== undefined
+        ? fetchTrack(client, currentId)
+        : Promise.resolve(null),
+      Promise.all(nextIds.map((id) => fetchTrack(client, id))),
+      Promise.all(histIds.map((id) => fetchTrack(client, id))),
     ])
 
     return {
@@ -47,14 +83,15 @@ export default function Command() {
 
   const control = (key: Parameters<typeof sendMediaKey>[0]) => async () => {
     await sendMediaKey(key).catch(() => {})
-    setTimeout(revalidate, 500)
+    // The menu-bar repaints on its interval — Raycast tears this command down
+    // when the menu closes, so there's no reliable way to refresh it sooner.
   }
 
   const trackIcon = (track: Track) =>
     track.album?.image?.small ? { source: track.album.image.small } : Icon.Music
 
   const title = data?.current
-    ? `${data.current.artist?.name ?? "?"} — ${data.current.title}`
+    ? truncate(`${data.current.artist?.name ?? "?"} — ${data.current.title}`)
     : undefined
 
   return (
@@ -84,9 +121,9 @@ export default function Command() {
 
       {(data?.nextTracks.length ?? 0) > 0 && (
         <MenuBarExtra.Section title="Up Next">
-          {data!.nextTracks.map((track) => (
+          {data!.nextTracks.map((track, index) => (
             <MenuBarExtra.Item
-              key={track.id}
+              key={`next-${index}-${track.id}`}
               title={track.title}
               subtitle={track.artist?.name}
               icon={trackIcon(track)}
@@ -98,9 +135,9 @@ export default function Command() {
 
       {(data?.histTracks.length ?? 0) > 0 && (
         <MenuBarExtra.Section title="History">
-          {data!.histTracks.map((track) => (
+          {data!.histTracks.map((track, index) => (
             <MenuBarExtra.Item
-              key={track.id}
+              key={`hist-${index}-${track.id}`}
               title={track.title}
               subtitle={track.artist?.name}
               icon={trackIcon(track)}
