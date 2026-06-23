@@ -13,6 +13,23 @@ import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showErrorToast } from "./utils";
 import { existsSync } from "fs";
 
+export const losslessAvifEncArgs = [
+  "-s",
+  "0",
+  "--min",
+  "0",
+  "--max",
+  "0",
+  "--minalpha",
+  "0",
+  "--maxalpha",
+  "0",
+  "--qcolor",
+  "100",
+  "--qalpha",
+  "100",
+];
+
 /**
  * Attempts to install the AVIF encoder using Homebrew.
  *

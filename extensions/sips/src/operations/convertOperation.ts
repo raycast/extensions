@@ -13,7 +13,7 @@ import path from "path";
 
 import { environment, getPreferenceValues } from "@raycast/api";
 
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import {
   addItemToRemove,
   convertPDF,
@@ -24,23 +24,6 @@ import {
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-
-const losslessAvifEncArgs = [
-  "-s",
-  "0",
-  "--min",
-  "0",
-  "--max",
-  "0",
-  "--minalpha",
-  "0",
-  "--maxalpha",
-  "0",
-  "--qcolor",
-  "100",
-  "--qalpha",
-  "100",
-];
 
 function cwebpCommandArgs(inputPath: string, outputPath: string, lossless: boolean): string[] {
   return [...(lossless ? ["-lossless"] : []), inputPath, "-o", outputPath];

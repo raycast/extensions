@@ -15,7 +15,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { optimize as svgoOptimize } from "svgo";
 
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import {
   expandTilde,
   getDestinationPaths,
@@ -23,23 +23,6 @@ import {
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-
-const losslessAvifEncArgs = [
-  "-s",
-  "0",
-  "--min",
-  "0",
-  "--max",
-  "0",
-  "--minalpha",
-  "0",
-  "--maxalpha",
-  "0",
-  "--qcolor",
-  "100",
-  "--qalpha",
-  "100",
-];
 
 /**
  * Optimizes a JPEG image by applying lossy compression.

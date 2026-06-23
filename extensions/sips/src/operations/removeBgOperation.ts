@@ -13,7 +13,7 @@ import { runAppleScript } from "@raycast/utils";
 import { Color, Colors } from "../utilities/types";
 import { execFileSync } from "child_process";
 import { environment, getPreferenceValues } from "@raycast/api";
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import path from "path";
 import { readdir } from "fs/promises";
 import { makePDF } from "../utilities/pdf";
@@ -132,12 +132,7 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await using tempPNGnoBG = await getScopedTempFile("sips-remove-bg-2", "png");
 
       const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
-      execFileSync(dwebpPath, [
-        ...(preferences.useLosslessConversion ? ["-lossless"] : []),
-        imagePath,
-        "-o",
-        tempPNGfromWEBP.path,
-      ]);
+      execFileSync(dwebpPath, [imagePath, "-o", tempPNGfromWEBP.path]);
       await runRemoveBgScript(tempPNGfromWEBP.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
@@ -181,24 +176,7 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
 
       if (preferences.preserveFormat) {
         execFileSync(encoderPath, [
-          ...(preferences.useLosslessConversion
-            ? [
-                "-s",
-                "0",
-                "--min",
-                "0",
-                "--max",
-                "0",
-                "--minalpha",
-                "0",
-                "--maxalpha",
-                "0",
-                "--qcolor",
-                "100",
-                "--qalpha",
-                "100",
-              ]
-            : []),
+          ...(preferences.useLosslessConversion ? losslessAvifEncArgs : []),
           tempPNGnoBG.path,
           newPath,
         ]);
