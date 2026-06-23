@@ -1,6 +1,6 @@
 # Pandas Documentation Search Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-06-23
 
 - Added a documentation source preference for online docs or a downloaded local docs folder.
 - Added automatic fallback to local docs when online inventory or detail loading fails.
