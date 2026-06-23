@@ -10,7 +10,6 @@ import {
   showInFinder,
   showToast,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { createContext, useContext, type ReactElement } from "react";
 import { UpdateYcCli } from "../views/updater";
 import type {
@@ -131,18 +130,21 @@ function ExportCsvActions() {
   const type = filterType;
   const label = SEARCH_TYPE_LABELS[type];
 
-  async function fetchCsv(): Promise<
-    { csv: string; total: number } | undefined
-  > {
-    if (!query.trim()) return undefined;
+  async function fetchCsv(): Promise<{ csv: string; total: number }> {
+    if (!query.trim()) {
+      throw new Error("Enter a search query first.");
+    }
     const result = await runYcCsv(query, exportType);
     if (!result.ok) {
-      await showFailureToast(new Error(result.message), {
-        title: "Export failed",
-      });
-      return undefined;
+      throw new Error(result.message);
     }
     return result.data;
+  }
+
+  function failToast(toast: Toast, title: string, error: unknown) {
+    toast.style = Toast.Style.Failure;
+    toast.title = title;
+    toast.message = error instanceof Error ? error.message : String(error);
   }
 
   async function save() {
@@ -150,22 +152,25 @@ function ExportCsvActions() {
       style: Toast.Style.Animated,
       title: `Exporting ${label}…`,
     });
-    const data = await fetchCsv();
-    if (!data) return;
-    const path = join(homedir(), "Downloads", csvFileName(query, exportType));
     try {
-      await writeFile(path, data.csv, "utf8");
+      const data = await fetchCsv();
+      const path = join(homedir(), "Downloads", csvFileName(query, exportType));
+      try {
+        await writeFile(path, data.csv, "utf8");
+      } catch (error) {
+        failToast(toast, "Could not write CSV file", error);
+        return;
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = `Exported ${data.total} ${label}`;
+      toast.message = path.replace(homedir(), "~");
+      toast.primaryAction = {
+        title: "Show in Finder",
+        onAction: () => showInFinder(path),
+      };
     } catch (error) {
-      await showFailureToast(error, { title: "Could not write CSV file" });
-      return;
+      failToast(toast, "Export failed", error);
     }
-    toast.style = Toast.Style.Success;
-    toast.title = `Exported ${data.total} ${label}`;
-    toast.message = path.replace(homedir(), "~");
-    toast.primaryAction = {
-      title: "Show in Finder",
-      onAction: () => showInFinder(path),
-    };
   }
 
   async function copy() {
@@ -173,11 +178,14 @@ function ExportCsvActions() {
       style: Toast.Style.Animated,
       title: `Copying ${label}…`,
     });
-    const data = await fetchCsv();
-    if (!data) return;
-    await Clipboard.copy(data.csv);
-    toast.style = Toast.Style.Success;
-    toast.title = `Copied ${data.total} ${label} as CSV`;
+    try {
+      const data = await fetchCsv();
+      await Clipboard.copy(data.csv);
+      toast.style = Toast.Style.Success;
+      toast.title = `Copied ${data.total} ${label} as CSV`;
+    } catch (error) {
+      failToast(toast, "Copy failed", error);
+    }
   }
 
   return (

@@ -10,7 +10,7 @@
 - Fixed large searches (e.g. "stripe") returning no results — the CLI's output is now captured reliably regardless of size.
 - Added a **Check Again** action to the signed-out screens so you can refresh after logging in, plus a Verbose Logging preference for diagnostics.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-08
 
 - Added `Search YC` command — search Bookface across people, YC and non-YC companies, schools, posts, deals, employers, and Startup Library articles, with a type-filter dropdown and per-type secondary actions.
 - Added `Ask YC` command — ask the YC agent questions and read the markdown response inline; recent questions are remembered for one-click reuse.
