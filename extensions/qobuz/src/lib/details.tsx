@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api"
-import type { Album, Artist, Track } from "@kud/qobuz"
-import { appLink, BRAND, deepLink, formatDuration } from "./client"
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api"
+import { showFailureToast, useCachedPromise } from "@raycast/utils"
+import type { Album, Artist, Playlist, Track } from "@kud/qobuz"
+import { appLink, BRAND, deepLink, formatDuration, getClient } from "./client"
 import { spotifySearchUrl, ytMusicSearchUrl } from "./resolve"
 
 const COVER_SIZE = 220
@@ -240,5 +241,45 @@ export function ArtistItemActions({ artist }: { artist: Artist }) {
       <Action.OpenInBrowser title="Open in Browser" url={web} />
       <Action.CopyToClipboard title="Copy Share Link" content={web} />
     </ActionPanel>
+  )
+}
+
+// A playlist's tracklist as a List, each track drilling into its own detail —
+// so browsing a playlist stays entirely inside Raycast.
+export function PlaylistTracks({ playlist }: { playlist: Playlist }) {
+  const { data, isLoading } = useCachedPromise(
+    async (id: number) => {
+      const client = await getClient()
+      return (await client.playlists.get(id)).tracks ?? []
+    },
+    [playlist.id],
+    {
+      onError: (error) =>
+        showFailureToast(error, { title: "Couldn't load tracks" }),
+    },
+  )
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={playlist.name}
+      searchBarPlaceholder={`Filter ${playlist.name}…`}
+    >
+      {(data ?? []).map((track, index) => (
+        <List.Item
+          key={`${index}-${track.id}`}
+          icon={
+            track.album?.image?.small ?? {
+              source: Icon.Music,
+              tintColor: BRAND,
+            }
+          }
+          title={track.title}
+          subtitle={track.artist?.name ?? ""}
+          accessories={[{ text: formatDuration(track.duration) }]}
+          actions={<TrackItemActions track={track} />}
+        />
+      ))}
+    </List>
   )
 }

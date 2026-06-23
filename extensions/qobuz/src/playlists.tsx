@@ -11,6 +11,7 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils"
 import type { Playlist } from "@kud/qobuz"
 import { appLink, BRAND, deepLink, getClient } from "./lib/client"
+import { PlaylistTracks } from "./lib/details"
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(
@@ -49,6 +50,11 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
+                <Action.Push
+                  title="Show Tracks"
+                  icon={Icon.AppWindowList}
+                  target={<PlaylistTracks playlist={playlist} />}
+                />
                 <Action.Open
                   title="Open in Qobuz"
                   target={appLink.playlist(playlist.id)}
