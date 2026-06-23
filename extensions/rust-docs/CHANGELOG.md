@@ -1,6 +1,6 @@
 # Rust Documentation Changelog
 
-## [Fix Duplicate Search Results] - {PR_MERGE_DATE}
+## [Fix Duplicate Search Results] - 2026-06-23
 
 - Removed duplicate results for Rust items re-exported across `std`, `core`, and `alloc`
 - Reduced startup memory usage while building the Rust documentation search index
