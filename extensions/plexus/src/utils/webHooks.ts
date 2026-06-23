@@ -5,7 +5,7 @@ export function useServiceIcon(url: string) {
   const { isLoading, data, error } = useFetch<boolean | undefined>(faviconUrl, {
     method: "HEAD",
     execute: true,
-    keepPreviousData: true,
+    keepPreviousData: false,
     parseResponse: async (response) => (response.ok ? true : undefined),
   });
 
@@ -19,7 +19,7 @@ export function useServiceIcon(url: string) {
 export function usePageTitle(url: string) {
   const { isLoading, data, error } = useFetch<string | undefined>(url, {
     execute: true,
-    keepPreviousData: true,
+    keepPreviousData: false,
     parseResponse: async (response) => (response.ok ? response.text() : undefined),
   });
 
