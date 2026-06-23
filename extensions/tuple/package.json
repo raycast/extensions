@@ -8,20 +8,118 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Start a Pairing Session",
+      "name": "search-contacts",
+      "title": "Search Contacts",
       "subtitle": "Tuple",
-      "description": "Start pairing sessions in Tuple.",
+      "description": "Browse Tuple contacts and start calls.",
       "mode": "view"
+    },
+    {
+      "name": "active-call",
+      "title": "Active Call",
+      "subtitle": "Tuple",
+      "description": "Control your active Tuple call from the menu bar.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Tuple",
+      "description": "Mute or unmute your active Tuple call.",
+      "mode": "no-view"
+    },
+    {
+      "name": "hang-up",
+      "title": "End Call",
+      "subtitle": "Tuple",
+      "description": "Hang up your active Tuple call.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-calls",
+      "title": "Search Calls",
+      "subtitle": "Tuple",
+      "description": "Browse and search recorded Tuple call transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "search-rooms",
+      "title": "Search Rooms",
+      "subtitle": "Tuple",
+      "description": "Browse and join Tuple rooms.",
+      "mode": "view"
+    },
+    {
+      "name": "join-personal-room",
+      "title": "Join Personal Room",
+      "subtitle": "Tuple",
+      "description": "Join your Tuple personal room.",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-title-summary",
+      "title": "Generate Title & Summary",
+      "subtitle": "Tuple",
+      "description": "Generate and save a title and summary for a recorded Tuple call.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-recent-calls",
+      "title": "List Recent Calls",
+      "description": "List recent recorded Tuple calls with participants and transcript metadata."
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "description": "Search across stored Tuple call transcripts."
+    },
+    {
+      "name": "read-transcript",
+      "title": "Read Transcript",
+      "description": "Read the full speaker-attributed transcript for a recorded Tuple call."
+    },
+    {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "List Tuple contacts with online status, favorites, and recents."
+    },
+    {
+      "name": "get-active-call",
+      "title": "Get Active Call",
+      "description": "Report whether you are in a Tuple call, including participants, mute state, and transcription state."
+    },
+    {
+      "name": "list-rooms",
+      "title": "List Rooms",
+      "description": "List Tuple personal and team rooms with current occupants."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tuplePath",
+      "title": "Tuple CLI Path",
+      "description": "Absolute path to the tuple executable. Leave blank to auto-detect it.",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "exportDirectory",
+      "title": "Transcript Export Folder",
+      "description": "Folder where exported transcripts are saved. Defaults to your Downloads folder.",
+      "required": false,
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0"
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
+    "@types/react": "19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
