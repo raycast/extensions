@@ -42,6 +42,13 @@
       "description": "Show the currently logged-in Bookface account.",
       "mode": "view",
       "subtitle": "Bookface"
+    },
+    {
+      "name": "logout",
+      "title": "Log out of YC",
+      "description": "Log out and clear stored YC CLI credentials from ~/.yc.",
+      "mode": "no-view",
+      "subtitle": "Bookface"
     }
   ],
   "preferences": [
@@ -52,18 +59,28 @@
       "title": "yc CLI Path",
       "description": "Optional absolute path to the yc binary. If empty, the extension searches $PATH for yc or ycp, then falls back to ~/.local/bin, /opt/homebrew/bin, and /usr/local/bin.",
       "placeholder": "/Users/you/.local/bin/yc"
+    },
+    {
+      "name": "verboseLogging",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Verbose Logging",
+      "label": "Enable verbose logging",
+      "description": "Sensitive values are redacted. Useful for diagnosing search issues."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@chrismessina/raycast-logger": "^1.2.4",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.8.4",
     "typescript": "^5.8.2"
   },
   "scripts": {

@@ -1,19 +1,40 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import type { ReactElement } from "react";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Icon,
+  Image,
+  List,
+  Toast,
+  showInFinder,
+  showToast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { createContext, useContext, type ReactElement } from "react";
 import { UpdateYcCli } from "../views/updater";
 import type {
   CompanyAttributes,
   DealAttributes,
   EmployerAttributes,
+  KnowledgeBaseAttributes,
   PostAttributes,
   Position,
   SchoolAttributes,
   SearchItem,
+  SearchItemType,
   StartupLibraryAttributes,
   UserAttributes,
 } from "./types";
-import { SEARCH_TYPE_ICONS, SEARCH_TYPE_LABELS } from "./types";
-import { truncate } from "./yc";
+import {
+  CLI_SEARCH_TYPE,
+  SEARCH_TYPE_ICONS,
+  SEARCH_TYPE_LABELS,
+} from "./types";
+import { runYcCsv, truncate } from "./yc";
+import { writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { MarkdownPreview } from "../views/preview";
 
 function avatarIcon(
@@ -62,6 +83,119 @@ function ycBatchOf(positions: Position[]): string | undefined {
     (p) => p.company_yc && p.company_batches && p.company_batches.length > 0,
   );
   return ycPos?.company_batches?.[0];
+}
+
+// Carries the active query and dropdown filter down to per-item actions (e.g.
+// CSV export) without threading them through all eight renderer signatures. The
+// search command wraps its list body in the provider. `filterType` is the
+// selected type, or undefined when the dropdown is on "All".
+export const SearchContext = createContext<{
+  query: string;
+  filterType?: SearchItemType;
+}>({ query: "" });
+
+// Slugify a query for a filename: keep word chars, collapse the rest to hyphens.
+function csvFileName(query: string, cliType: string): string {
+  const slug =
+    query
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || "search";
+  return `yc-${slug}-${cliType}.csv`;
+}
+
+// Export the FULL matching set for the active dropdown filter via
+// `yc search --type`, which returns CSV (and the true total, not just the
+// displayed page). Offers saving to ~/Downloads and copying the raw CSV.
+//
+// Keyed off the dropdown filter, NOT the hovered item: a typed export only makes
+// sense for a single type, so these actions render only when the dropdown is on
+// a specific type (not "All") — then "Export Deals" unambiguously matches what's
+// on screen. Also suppressed when the filter has no clean 1:1 CLI mapping
+// (non_yc_company, startup_library), since exporting via the shared CLI type
+// would include the sibling's rows that aren't shown.
+//
+// Returns a fragment of two sibling actions; each fetches on demand (Raycast
+// doesn't keep this around, so there's no state to cache between them).
+function ExportCsvActions() {
+  const { query, filterType } = useContext(SearchContext);
+  // Bail (render nothing) unless the filter has a clean 1:1 CLI type. Capturing
+  // the narrowed value as a `string`-typed const lets the nested closures use it
+  // without re-narrowing (TS doesn't carry the early-return guard into them).
+  const cliType: string | null = filterType
+    ? CLI_SEARCH_TYPE[filterType]
+    : null;
+  if (!filterType || !cliType) return null;
+  const exportType: string = cliType;
+  const type = filterType;
+  const label = SEARCH_TYPE_LABELS[type];
+
+  async function fetchCsv(): Promise<
+    { csv: string; total: number } | undefined
+  > {
+    if (!query.trim()) return undefined;
+    const result = await runYcCsv(query, exportType);
+    if (!result.ok) {
+      await showFailureToast(new Error(result.message), {
+        title: "Export failed",
+      });
+      return undefined;
+    }
+    return result.data;
+  }
+
+  async function save() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Exporting ${label}…`,
+    });
+    const data = await fetchCsv();
+    if (!data) return;
+    const path = join(homedir(), "Downloads", csvFileName(query, exportType));
+    try {
+      await writeFile(path, data.csv, "utf8");
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not write CSV file" });
+      return;
+    }
+    toast.style = Toast.Style.Success;
+    toast.title = `Exported ${data.total} ${label}`;
+    toast.message = path.replace(homedir(), "~");
+    toast.primaryAction = {
+      title: "Show in Finder",
+      onAction: () => showInFinder(path),
+    };
+  }
+
+  async function copy() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Copying ${label}…`,
+    });
+    const data = await fetchCsv();
+    if (!data) return;
+    await Clipboard.copy(data.csv);
+    toast.style = Toast.Style.Success;
+    toast.title = `Copied ${data.total} ${label} as CSV`;
+  }
+
+  return (
+    <>
+      <Action
+        title={`Export ${label} as CSV`}
+        icon={Icon.Download}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+        onAction={save}
+      />
+      <Action
+        title={`Copy ${label} as CSV`}
+        icon={Icon.Clipboard}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        onAction={copy}
+      />
+    </>
+  );
 }
 
 type RenderProps = {
@@ -128,7 +262,16 @@ export function renderItem({
         toggleDetail,
       );
     case "startup_library":
-      return renderStartupLibrary(
+      return renderArticle(
+        "startup_library",
+        item.path,
+        item.displayed_attributes,
+        isShowingDetail,
+        toggleDetail,
+      );
+    case "knowledge_base":
+      return renderArticle(
+        "knowledge_base",
         item.path,
         item.displayed_attributes,
         isShowingDetail,
@@ -173,6 +316,8 @@ function UniversalActions({
         content={markdownLink(title, url)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       />
+      {/* Renders only when the dropdown is filtered to a specific type. */}
+      <ExportCsvActions />
       <Action.Push
         title="Update YC CLI"
         icon={Icon.Download}
@@ -645,29 +790,35 @@ function renderEmployer(
   );
 }
 
-function startupLibraryMarkdown(a: StartupLibraryAttributes): string {
+// Startup Library and Knowledge Base are the same "article" content shape, so
+// one renderer serves both — parameterized by `type` for the label/icon/key.
+type ArticleAttributes = StartupLibraryAttributes | KnowledgeBaseAttributes;
+type ArticleType = "startup_library" | "knowledge_base";
+
+function articleMarkdown(a: ArticleAttributes): string {
   const lines = [`# ${a.title}`];
   if (a.description) lines.push("", `*${a.description}*`);
   if (a.body) lines.push("", a.body);
   return lines.join("\n");
 }
 
-function renderStartupLibrary(
+function renderArticle(
+  type: ArticleType,
   path: string,
-  a: StartupLibraryAttributes,
+  a: ArticleAttributes,
   isShowingDetail: boolean,
   toggleDetail: () => void,
 ): ReactElement {
   const accessories: List.Item.Accessory[] = [];
   const cat = a.categories?.[0] ?? a.parents?.[0]?.title;
   if (cat) accessories.push({ text: cat });
-  accessories.push({ tag: { value: SEARCH_TYPE_LABELS.startup_library } });
-  const md = startupLibraryMarkdown(a);
+  accessories.push({ tag: { value: SEARCH_TYPE_LABELS[type] } });
+  const md = articleMarkdown(a);
 
   return (
     <List.Item
-      key={`lib-${a.id}`}
-      icon={SEARCH_TYPE_ICONS.startup_library}
+      key={`${type}-${a.id}`}
+      icon={SEARCH_TYPE_ICONS[type]}
       title={a.title}
       subtitle={
         isShowingDetail
