@@ -63,7 +63,7 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
 
   const [, cwebpPath] = await getWebPBinaryPath();
   execSync(
-    `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
+    `"${cwebpPath}" ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
   );
   return newPath;
 };
@@ -93,8 +93,8 @@ const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const pngoutPath = `${environment.assetsPath}/pngout/pngout`;
-  execSync(`chmod +x ${pngoutPath}`);
-  execSync(`${pngoutPath} -s${strategy} -y -force "${pngPath}" "${newPath}"`);
+  execSync(`chmod +x "${pngoutPath}"`);
+  execSync(`"${pngoutPath}" -s${strategy} -y -force "${pngPath}" "${newPath}"`);
   return newPath;
 };
 
@@ -130,14 +130,14 @@ export default async function optimize(sourcePaths: string[], amount: number) {
 
       // Convert to JPEG
       await using jpegFile = await getScopedTempFile("tmp", "jpeg");
-      execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegFile.path}"`);
+      execSync(`"${decoderPath}" -q ${amount} "${imgPath}" "${jpegFile.path}"`);
 
       // Convert back to AVIF
       let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
       execSync(
-        `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
+        `"${encoderPath}" ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
       );
     } else if (imgPath.toLowerCase().endsWith("pdf")) {
       // PDF -> JPEG -> PDF

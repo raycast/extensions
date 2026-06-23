@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Fix Optimize Command on Asset Paths Containing Spaces] - {PR_MERGE_DATE}
+
+- Fixed the Optimize command failing for PNG, GIF, BMP, TGA, WebP, and AVIF images when the extension's assets path contains a space (e.g. `~/Library/Application Support/...`). The bundled binary paths (`pngout`, `cwebp`, `avifdec`, `avifenc`) are now quoted before being passed to the shell.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
