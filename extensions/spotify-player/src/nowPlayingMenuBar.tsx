@@ -220,9 +220,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Skip 15 seconds"
           onAction={async () => {
             try {
-              const elapsed = isPlaying && currentlyPlayingData?.timestamp
-                ? Date.now() - currentlyPlayingData.timestamp
-                : 0;
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
               const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
               await seek(currentPositionSeconds + 15, currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
@@ -237,9 +236,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Back 15 seconds"
           onAction={async () => {
             try {
-              const elapsed = isPlaying && currentlyPlayingData?.timestamp
-                ? Date.now() - currentlyPlayingData.timestamp
-                : 0;
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
               const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
               await seek(Math.max(currentPositionSeconds - 15, 0), currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
