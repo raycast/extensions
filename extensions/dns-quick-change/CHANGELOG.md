@@ -2,7 +2,7 @@
 
 All notable changes to the DNS Quick Change extension will be documented in this file.
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-23
 
 ### Added
 - Quick DNS preset switching with one-key activation
