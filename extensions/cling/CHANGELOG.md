@@ -1,6 +1,6 @@
 # Cling Changelog
 
-## [Copy File Content Action] - {PR_MERGE_DATE}
+## [Copy File Content Action] - 2026-06-23
 
 - Add "Copy File" action to copy the file to the system clipboard (⌘⇧F)
 
