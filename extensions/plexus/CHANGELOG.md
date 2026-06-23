@@ -1,6 +1,6 @@
 # Plexus Changelog
 
-## [Fix favicon and title caching] - {PR_MERGE_DATE}
+## [Fix favicon and title caching] - 2026-06-23
 
 ### Fixed
 
