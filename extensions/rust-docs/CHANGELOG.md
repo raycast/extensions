@@ -3,6 +3,7 @@
 ## [Fix Duplicate Search Results] - {PR_MERGE_DATE}
 
 - Removed duplicate results for Rust items re-exported across `std`, `core`, and `alloc`
+- Reduced startup memory usage while building the Rust documentation search index
 - Removed deprecated `node-fetch` usage to avoid `punycode` deprecation warnings
 
 ## [Initial Version] - 2026-01-07
