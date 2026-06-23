@@ -38,6 +38,10 @@ Use this to skip to the next song/episode.
 
 Use this to skip to the previous song/episode.
 
+### Select Device (💸)
+
+Use this to select a device to play music on.
+
 ## Disabled Commands
 
 This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings. These commands are:
@@ -94,9 +98,9 @@ Use this to turn the volume up by 10%.
 
 Use this to toggle shuffle.
 
-### Cycle Repeat (💸)
+### Toggle Repeat (💸)
 
-Use this to cycle through repeat options.
+Use this to toggle repeat.
 
 ### Start Radio (💸)
 
@@ -129,6 +133,10 @@ Use this to skip ahead 15 seconds.
 ### Back 15 Seconds (💸)
 
 Use this to go back 15 seconds.
+
+### Replay (💸)
+
+Use this to replay the current song/episode from the beginning.
 
 ### Queue (💸)
 
