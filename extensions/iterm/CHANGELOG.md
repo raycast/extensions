@@ -1,5 +1,9 @@
 # iTerm Changelog
 
+## [Bug Fixes] - 2026-06-19
+
+- Fixed `Open iTerm Profile` failing when profiles contain values not representable in JSON (e.g. Infinity floats from status bar config)
+
 ## [Bug Fixes] - 2026-06-16
 
 - Fixed `Open iTerm Profile` if parts of a user's iTerm preferences plist other than profiles cannot be converted to JSON

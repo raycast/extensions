@@ -12,11 +12,11 @@ const MAX_DURATION_SECONDS = 600;
 export default async function command() {
   const preferences = getPreferenceValues<Preferences.Blackr>();
   const durationSeconds = normalizeDuration(preferences.durationSeconds);
-  const overlayPath = join(environment.assetsPath, "blackr-overlay");
+  const overlayCommand = getOverlayCommand(durationSeconds);
 
   try {
     await closeMainWindow({ clearRootSearch: true });
-    await execFileAsync(overlayPath, [String(durationSeconds)], {
+    await execFileAsync(overlayCommand.file, overlayCommand.args, {
       timeout: (durationSeconds + 5) * 1000,
       windowsHide: true,
     });
@@ -37,4 +37,29 @@ function normalizeDuration(value: string | undefined): number {
   }
 
   return Math.min(Math.max(parsedValue, MIN_DURATION_SECONDS), MAX_DURATION_SECONDS);
+}
+
+function getOverlayCommand(durationSeconds: number): { file: string; args: string[] } {
+  if (process.platform === "darwin") {
+    return {
+      file: join(environment.assetsPath, "blackr-overlay"),
+      args: [String(durationSeconds)],
+    };
+  }
+
+  if (process.platform === "win32") {
+    return {
+      file: "powershell.exe",
+      args: [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        join(environment.assetsPath, "blackr-overlay.ps1"),
+        String(durationSeconds),
+      ],
+    };
+  }
+
+  throw new Error(`Blackr is not supported on ${process.platform}`);
 }

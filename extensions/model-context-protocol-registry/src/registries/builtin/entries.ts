@@ -703,6 +703,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "jellypod",
+    title: "Jellypod",
+    description:
+      "Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes.",
+    icon: "https://www.jellypod.com/assets/app-icon-square.png",
+    homepage: "https://www.jellypod.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jellypod.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [

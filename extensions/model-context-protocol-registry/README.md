@@ -75,6 +75,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
 | [Olostep](https://github.com/olostep/olostep-mcp-server) | A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API. |
 | [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
+| [Jellypod](https://www.jellypod.com/mcp) | Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes. |
 
 ### Community MCP Servers
 

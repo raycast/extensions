@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix stale seek position in menu bar] - 2026-06-20
+
+- Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.
+
 ## [See Which Playlists Contain the Current Song] - 2026-06-16
 
 - All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song

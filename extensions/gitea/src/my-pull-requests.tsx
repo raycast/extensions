@@ -22,6 +22,7 @@ export default function Command() {
         includeMentioned: prefs.includeMentioned ?? true,
         includeReviewRequested: prefs.includeReviewRequested ?? true,
         includeOwnedRepositories: prefs.includeOwnedRepositories ?? true,
+        includeAccessibleRepositories: prefs.includeAccessibleRepositories ?? false,
         includeReviewed: prefs.includeReviewed ?? false,
         includeRecentlyClosed: prefs.includeRecentlyClosed ?? false,
       };
@@ -33,6 +34,7 @@ export default function Command() {
       includeReviewRequested: selectedCategory === PullRequestCategory.ReviewRequested,
       includeReviewed: selectedCategory === PullRequestCategory.Reviewed,
       includeOwnedRepositories: selectedCategory === PullRequestCategory.OwnedRepositories,
+      includeAccessibleRepositories: selectedCategory === PullRequestCategory.AccessibleRepositories,
       includeRecentlyClosed: prefs.includeRecentlyClosed ?? false,
     };
   }, [selectedCategory, prefs]);

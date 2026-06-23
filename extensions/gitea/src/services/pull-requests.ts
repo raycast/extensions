@@ -10,6 +10,7 @@ export type MyPullRequestsParams = {
   includeReviewRequested: boolean;
   includeReviewed: boolean;
   includeOwnedRepositories: boolean;
+  includeAccessibleRepositories: boolean;
   includeRecentlyClosed: boolean;
   owner?: string;
   query?: string;
@@ -18,9 +19,10 @@ export type MyPullRequestsParams = {
 };
 
 export async function getMyPullRequests(params: MyPullRequestsParams): Promise<PaginatedResult<Issue>> {
+  const q = params.query?.trim() ? params.query.trim() : undefined;
   const baseQuery = {
     type: "pulls",
-    q: params.query,
+    q,
     page: params.page,
     limit: params.limit,
   } satisfies IssueListParams;
@@ -31,7 +33,8 @@ export async function getMyPullRequests(params: MyPullRequestsParams): Promise<P
     !params.includeMentioned &&
     !params.includeReviewRequested &&
     !params.includeReviewed &&
-    !params.includeOwnedRepositories
+    !params.includeOwnedRepositories &&
+    !params.includeAccessibleRepositories
   ) {
     return { items: [], hasMore: false };
   }
@@ -48,6 +51,7 @@ export async function getMyPullRequests(params: MyPullRequestsParams): Promise<P
         enabled: params.includeOwnedRepositories && Boolean(params.owner),
         params: { ...baseQuery, state, owner: params.owner },
       },
+      { enabled: params.includeAccessibleRepositories, params: { ...baseQuery, state } },
     ],
     params.limit,
   );

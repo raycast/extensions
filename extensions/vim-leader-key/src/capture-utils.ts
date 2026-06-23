@@ -42,6 +42,10 @@ export function buildCapturedAction(input: CapturedActionInput): Action {
   };
 }
 
+export function normalizeCapturedKey(value: string): string {
+  return value.trim().slice(0, 1);
+}
+
 export function flattenGroupDestinations(
   config: RootConfig,
 ): GroupDestination[] {

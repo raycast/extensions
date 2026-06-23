@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Jellypod MCP Server] - 2026-06-19
+
+Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
+
 ## [Add Olostep MCP Server] - 2026-06-16
 
 Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.

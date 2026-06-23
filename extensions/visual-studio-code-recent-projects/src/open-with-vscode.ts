@@ -2,7 +2,7 @@ import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open,
 import { runAppleScript } from "@raycast/utils";
 import { build } from "./lib/preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
-import { isMac, isWin, openPathInVSCode } from "./lib/utils";
+import { isMac, isWin } from "./lib/utils";
 import { getCurrentExplorerPath } from "./utils/win-scripts";
 import { getEditorApplication } from "./utils/editor";
 
@@ -48,14 +48,21 @@ export default async function main() {
     }
 
     if (isWin) {
-      const currentPath = await getCurrentExplorerPath();
+      selectedItems = await getSelectedFinderItems();
 
-      // Raycast does not expose Windows multi-item file manager selection yet.
-      if (currentPath.length === 0) {
-        throw new Error("Could not determine the current Explorer path.");
+      if (selectedItems.length === 0) {
+        const currentPath = await getCurrentExplorerPath();
+
+        if (currentPath.length === 0) {
+          throw new Error("Not a valid directory.");
+        }
+
+        selectedItems = [{ path: currentPath }];
       }
 
-      await openPathInVSCode(currentPath);
+      for (const item of selectedItems) {
+        await open(item.path, editor);
+      }
     }
 
     await closeMainWindow();

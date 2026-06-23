@@ -1,11 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blackr",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Blackr",
   "description": "Turn your main display black for quick screen cleaning.",
   "icon": "icon.png",
   "author": "li_jin",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "System"
   ],
@@ -38,23 +42,27 @@
   ],
   "scripts": {
     "build": "npm run build-native && ray build -e dist",
-    "build-native": "swiftc native/BlackrOverlay.swift -O -target arm64-apple-macos12 -o assets/blackr-overlay-arm64 && swiftc native/BlackrOverlay.swift -O -target x86_64-apple-macos12 -o assets/blackr-overlay-x64 && lipo -create assets/blackr-overlay-arm64 assets/blackr-overlay-x64 -output assets/blackr-overlay && rm assets/blackr-overlay-arm64 assets/blackr-overlay-x64 && chmod 755 assets/blackr-overlay",
+    "build-native": "node scripts/build-native.js",
     "dev": "npm run build-native && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.89.1"
+    "@raycast/api": "^1.104.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.10.2",
-    "eslint": "^9.17.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "20.9.0",
+    "eslint": "9.36.0",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2"
   },
-  "platforms": [
-    "macOS"
-  ]
+  "overrides": {
+    "@eslint/js": "9.36.0",
+    "@typescript-eslint/eslint-plugin": "8.45.0",
+    "@typescript-eslint/parser": "8.45.0",
+    "@typescript-eslint/utils": "8.45.0",
+    "@typescript-eslint/visitor-keys": "8.45.0"
+  }
 }

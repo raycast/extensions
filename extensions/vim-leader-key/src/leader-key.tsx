@@ -6,11 +6,14 @@ import {
   confirmAlert,
   Icon,
   List,
+  environment,
+  getApplications,
   getPreferenceValues,
   LocalStorage,
   showToast,
   Toast,
   useNavigation,
+  type Application,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
@@ -29,9 +32,41 @@ import {
 } from "./storage";
 import { executeAction, getActionIcon } from "./actions";
 import { AddItemForm, EditItemForm } from "./forms";
+import {
+  groupApplicationsForOpenWith,
+  type OpenWithApplicationGroups,
+} from "./browser-utils";
+import {
+  getChildPath,
+  getIdleSearchText,
+  getParentPath,
+  getSearchSelectionPath,
+  getVisibleSearchText,
+  isClearingGroupNavigationGuard,
+} from "./leader-navigation";
+import { getFaviconUrl, normalizeCustomIconValue } from "./url-icons";
+import {
+  renderKeyboardLayoutMarkdown,
+  renderKeyboardLayoutMetadata,
+  type KeyboardLayoutSize,
+  type KeyboardLayoutMetadataRow,
+} from "./keyboard-layout";
 
 const STORAGE_KEY = "leader-key-config";
 const LEGACY_STORAGE_KEY = "key-mappings";
+const LAYOUT_MODE_STORAGE_KEY = "leader-key-layout-mode";
+const KEYBOARD_LAYOUT_SIZE_STORAGE_KEY = "leader-key-keyboard-layout-size";
+
+type LayoutMode = "dual-column" | "single-column";
+
+const DEFAULT_LAYOUT_MODE: LayoutMode = "dual-column";
+const DEFAULT_KEYBOARD_LAYOUT_SIZE: KeyboardLayoutSize = "default";
+
+const KEYBOARD_LAYOUT_SIZE_LABELS: Record<KeyboardLayoutSize, string> = {
+  compact: "Compact",
+  default: "Default",
+  large: "Large",
+};
 
 interface SearchResult {
   item: ActionOrGroup;
@@ -42,6 +77,19 @@ interface SearchResult {
 }
 
 type NavigationPush = ReturnType<typeof useNavigation>["push"];
+
+interface LeaderKeyMenuProps {
+  config: RootConfig | null;
+  isLoading: boolean;
+  currentPath: string[];
+  navigationDepth: number;
+  layoutMode: LayoutMode;
+  keyboardLayoutSize: KeyboardLayoutSize;
+  onConfigUpdate: (config: RootConfig) => void;
+  onConfigReload: () => Promise<void>;
+  onLayoutModeChange: (mode: LayoutMode) => void;
+  onKeyboardLayoutSizeChange: (size: KeyboardLayoutSize) => void;
+}
 
 function getTimeoutMs(): number | null {
   const prefs = getPreferenceValues<Preferences>();
@@ -57,6 +105,18 @@ function getTimeoutMs(): number | null {
 
   const clamped = Math.max(2.5, Math.min(6, seconds));
   return clamped * 1000;
+}
+
+function normalizeLayoutMode(value: unknown): LayoutMode {
+  return value === "single-column" || value === "dual-column"
+    ? value
+    : DEFAULT_LAYOUT_MODE;
+}
+
+function normalizeKeyboardLayoutSize(value: unknown): KeyboardLayoutSize {
+  return value === "compact" || value === "default" || value === "large"
+    ? value
+    : DEFAULT_KEYBOARD_LAYOUT_SIZE;
 }
 
 function searchAllItems(config: RootConfig, query: string): SearchResult[] {
@@ -103,30 +163,190 @@ function searchAllItems(config: RootConfig, query: string): SearchResult[] {
 export default function LeaderKey() {
   const [config, setConfig] = useState<RootConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(DEFAULT_LAYOUT_MODE);
+  const [keyboardLayoutSize, setKeyboardLayoutSize] =
+    useState<KeyboardLayoutSize>(DEFAULT_KEYBOARD_LAYOUT_SIZE);
+
+  const loadConfig = useCallback(async () => {
+    setIsLoading(true);
+    const data = await getConfig();
+    setConfig(data);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadLayoutSettings() {
+      const [storedLayoutMode, storedKeyboardLayoutSize] = await Promise.all([
+        LocalStorage.getItem<string>(LAYOUT_MODE_STORAGE_KEY),
+        LocalStorage.getItem<string>(KEYBOARD_LAYOUT_SIZE_STORAGE_KEY),
+      ]);
+
+      if (!isCancelled) {
+        setLayoutMode(normalizeLayoutMode(storedLayoutMode));
+        setKeyboardLayoutSize(
+          normalizeKeyboardLayoutSize(storedKeyboardLayoutSize),
+        );
+      }
+    }
+
+    void loadLayoutSettings();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  return (
+    <LeaderKeyMenu
+      config={config}
+      isLoading={isLoading}
+      currentPath={[]}
+      navigationDepth={0}
+      layoutMode={layoutMode}
+      keyboardLayoutSize={keyboardLayoutSize}
+      onConfigUpdate={setConfig}
+      onConfigReload={loadConfig}
+      onLayoutModeChange={setLayoutMode}
+      onKeyboardLayoutSizeChange={setKeyboardLayoutSize}
+    />
+  );
+}
+
+function LeaderKeyMenu({
+  config,
+  isLoading,
+  currentPath,
+  navigationDepth,
+  layoutMode,
+  keyboardLayoutSize,
+  onConfigUpdate,
+  onConfigReload,
+  onLayoutModeChange,
+  onKeyboardLayoutSizeChange,
+}: LeaderKeyMenuProps) {
+  const [searchText, setSearchText] = useState(() =>
+    getIdleSearchText(currentPath),
+  );
   const [searchMode, setSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmedResults, setConfirmedResults] = useState<SearchResult[]>([]);
   const [keySequence, setKeySequence] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
-  useEffect(() => {
-    loadConfig();
-    setCurrentPath([]);
-    setSearchText("");
+  const resetMenuState = useCallback(() => {
+    setSearchText(getIdleSearchText(currentPath));
     setSearchMode(false);
     setSearchQuery("");
     setConfirmedResults([]);
     setKeySequence("");
-  }, []);
+  }, [currentPath]);
 
-  async function loadConfig() {
-    const data = await getConfig();
-    setConfig(data);
-    setIsLoading(false);
-  }
+  const resetToRootMenu = useCallback(() => {
+    resetMenuState();
+
+    for (let index = 0; index < navigationDepth; index++) {
+      pop();
+    }
+  }, [navigationDepth, pop, resetMenuState]);
+
+  const navigateToPath = useCallback(
+    (nextPath: string[]) => {
+      resetMenuState();
+
+      const isCurrentPath =
+        currentPath.length === nextPath.length &&
+        currentPath.every((id, index) => id === nextPath[index]);
+
+      if (isCurrentPath) {
+        return;
+      }
+
+      push(
+        <LeaderKeyMenu
+          config={config}
+          isLoading={isLoading}
+          currentPath={nextPath}
+          navigationDepth={navigationDepth + 1}
+          layoutMode={layoutMode}
+          keyboardLayoutSize={keyboardLayoutSize}
+          onConfigUpdate={onConfigUpdate}
+          onConfigReload={onConfigReload}
+          onLayoutModeChange={onLayoutModeChange}
+          onKeyboardLayoutSizeChange={onKeyboardLayoutSizeChange}
+        />,
+      );
+    },
+    [
+      config,
+      currentPath,
+      isLoading,
+      layoutMode,
+      keyboardLayoutSize,
+      navigationDepth,
+      onConfigReload,
+      onConfigUpdate,
+      onKeyboardLayoutSizeChange,
+      onLayoutModeChange,
+      push,
+      resetMenuState,
+    ],
+  );
+
+  const handleToggleLayoutMode = useCallback(async () => {
+    const nextLayoutMode =
+      layoutMode === "dual-column" ? "single-column" : "dual-column";
+
+    onLayoutModeChange(nextLayoutMode);
+    await LocalStorage.setItem(LAYOUT_MODE_STORAGE_KEY, nextLayoutMode);
+    await showToast({
+      style: Toast.Style.Success,
+      title:
+        nextLayoutMode === "dual-column"
+          ? "Keyboard layout shown"
+          : "Keyboard layout hidden",
+    });
+  }, [layoutMode, onLayoutModeChange]);
+
+  const handleKeyboardLayoutSizeChange = useCallback(
+    async (size: KeyboardLayoutSize) => {
+      onKeyboardLayoutSizeChange(size);
+      await LocalStorage.setItem(KEYBOARD_LAYOUT_SIZE_STORAGE_KEY, size);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Keyboard layout size updated",
+        message: KEYBOARD_LAYOUT_SIZE_LABELS[size],
+      });
+    },
+    [onKeyboardLayoutSizeChange],
+  );
+
+  const handleAddItem = useCallback(
+    (itemType: "action" | "group") => {
+      if (!config) {
+        return;
+      }
+
+      push(
+        <AddItemForm
+          config={config}
+          parentPath={currentPath}
+          itemType={itemType}
+          onSave={async (newConfig) => {
+            await saveConfig(newConfig);
+            onConfigUpdate(newConfig);
+          }}
+        />,
+      );
+    },
+    [config, currentPath, onConfigUpdate, push],
+  );
 
   async function handleDelete(item: ActionOrGroup, itemPath: string[]) {
     const confirmed = await confirmAlert({
@@ -145,7 +365,7 @@ export default function LeaderKey() {
     if (confirmed && config) {
       const newConfig = await deleteItem(config, itemPath);
       await saveConfig(newConfig);
-      setConfig(newConfig);
+      onConfigUpdate(newConfig);
       await showToast({ style: Toast.Style.Success, title: "Item deleted" });
     }
   }
@@ -164,7 +384,8 @@ export default function LeaderKey() {
     if (confirmed) {
       await LocalStorage.removeItem(STORAGE_KEY);
       await LocalStorage.removeItem(LEGACY_STORAGE_KEY);
-      await loadConfig();
+      await onConfigReload();
+      resetToRootMenu();
       await showToast({
         style: Toast.Style.Success,
         title: "Configuration cleared",
@@ -172,6 +393,8 @@ export default function LeaderKey() {
       });
     }
   }
+
+  const breadcrumb = getBreadcrumb(config, currentPath);
 
   const currentGroup = config
     ? currentPath.length === 0
@@ -181,6 +404,17 @@ export default function LeaderKey() {
 
   const items = currentGroup?.actions || [];
   const groupedItems = groupAndSortItems(items);
+  const isShowingKeyboardLayout = layoutMode === "dual-column";
+  const getKeyboardLayoutMarkdown = useCallback(
+    (selectedKey?: string) =>
+      renderKeyboardLayoutMarkdown(items, {
+        appearance: environment.appearance,
+        selectedKey,
+        size: keyboardLayoutSize,
+        title: breadcrumb || "Root",
+      }),
+    [breadcrumb, items, keyboardLayoutSize],
+  );
 
   const searchResults = useMemo(() => {
     if (!searchMode || !config || !searchQuery) {
@@ -200,14 +434,9 @@ export default function LeaderKey() {
     }
 
     timeoutRef.current = setTimeout(() => {
-      setSearchText("");
-      setCurrentPath([]);
-      setSearchMode(false);
-      setSearchQuery("");
-      setConfirmedResults([]);
-      setKeySequence("");
+      resetToRootMenu();
     }, timeoutMs);
-  }, []);
+  }, [resetToRootMenu]);
 
   useEffect(() => {
     return () => {
@@ -250,14 +479,12 @@ export default function LeaderKey() {
           setSearchMode(false);
 
           if (isGroup(exactMatch.item)) {
-            setCurrentPath(exactMatch.path);
+            navigateToPath(exactMatch.path);
           } else {
             const browser = resolveBrowser(config!, exactMatch.path);
             executeAction(
               exactMatch.item as ActionItem,
-              () => {
-                setCurrentPath([]);
-              },
+              resetToRootMenu,
               browser,
             );
           }
@@ -279,69 +506,56 @@ export default function LeaderKey() {
       }
 
       setSearchText(text);
+      const visibleText = getVisibleSearchText(text);
 
-      if (!text || !currentGroup) {
+      if (isClearingGroupNavigationGuard(text, currentPath)) {
+        pop();
         return;
       }
 
-      if (text.length === 1) {
+      if (!visibleText || !currentGroup) {
+        return;
+      }
+
+      if (visibleText.length === 1) {
         const matchingItem = currentGroup.actions.find(
-          (item) => item.key === text,
+          (item) => item.key === visibleText,
         );
 
         if (matchingItem) {
           if (isGroup(matchingItem)) {
-            setCurrentPath([...currentPath, matchingItem.id]);
-            setSearchText("");
+            navigateToPath(getChildPath(currentPath, matchingItem.id));
           } else {
             const browser = resolveBrowser(config!, [
               ...currentPath,
               matchingItem.id,
             ]);
-            executeAction(
-              matchingItem,
-              () => {
-                setCurrentPath([]);
-                setSearchText("");
-              },
-              browser,
-            );
+            executeAction(matchingItem, resetToRootMenu, browser);
           }
         } else {
-          setSearchText("");
+          setSearchText(getIdleSearchText(currentPath));
           showToast({
             style: Toast.Style.Failure,
             title: "No action assigned",
-            message: `Key "${text}" is not bound to any action`,
+            message: `Key "${visibleText}" is not bound to any action`,
           });
         }
       } else {
-        setSearchText("");
+        setSearchText(getIdleSearchText(currentPath));
       }
     },
-    [currentGroup, currentPath, resetTimeout, searchMode, confirmedResults],
+    [
+      config,
+      confirmedResults,
+      currentGroup,
+      currentPath,
+      navigateToPath,
+      pop,
+      resetTimeout,
+      resetToRootMenu,
+      searchMode,
+    ],
   );
-
-  const handleGoBack = useCallback(() => {
-    if (confirmedResults.length > 0) {
-      setConfirmedResults([]);
-      setKeySequence("");
-      setSearchText("");
-      setSearchMode(true);
-      setSearchQuery("");
-      return;
-    }
-    if (searchMode) {
-      setSearchMode(false);
-      setSearchQuery("");
-      setSearchText("");
-      return;
-    }
-    if (currentPath.length > 0) {
-      setCurrentPath(currentPath.slice(0, -1));
-      setSearchText("");
-    }
-  }, [currentPath, searchMode, confirmedResults]);
 
   const handleEnterSearchMode = useCallback(() => {
     setSearchMode(true);
@@ -352,10 +566,10 @@ export default function LeaderKey() {
   const handleExitSearchMode = useCallback(() => {
     setSearchMode(false);
     setSearchQuery("");
-    setSearchText("");
+    setSearchText(getIdleSearchText(currentPath));
     setConfirmedResults([]);
     setKeySequence("");
-  }, []);
+  }, [currentPath]);
 
   const handleConfirmSearch = useCallback(() => {
     if (searchResults.length === 0) {
@@ -383,46 +597,28 @@ export default function LeaderKey() {
       setSearchMode(false);
 
       if (isGroup(result.item)) {
-        setCurrentPath(result.path);
+        navigateToPath(result.path);
       } else {
         const browser = resolveBrowser(config!, result.path);
-        executeAction(
-          result.item as ActionItem,
-          () => {
-            setCurrentPath([]);
-          },
-          browser,
-        );
+        executeAction(result.item as ActionItem, resetToRootMenu, browser);
       }
     },
-    [config],
+    [config, navigateToPath, resetToRootMenu],
   );
 
-  const handleSelectSearchResult = useCallback((result: SearchResult) => {
-    setSearchMode(false);
-    setSearchQuery("");
-    setSearchText("");
+  const handleSelectSearchResult = useCallback(
+    (result: SearchResult) => {
+      navigateToPath(getSearchSelectionPath(result.path, isGroup(result.item)));
+    },
+    [navigateToPath],
+  );
 
-    if (isGroup(result.item)) {
-      setCurrentPath(result.path);
-    } else {
-      const parentPath = result.path.slice(0, -1);
-      setCurrentPath(parentPath);
-    }
-  }, []);
-
-  const handleGoToParentGroup = useCallback((result: SearchResult) => {
-    setSearchMode(false);
-    setSearchQuery("");
-    setSearchText("");
-    setConfirmedResults([]);
-    setKeySequence("");
-
-    const parentPath = result.path.slice(0, -1);
-    setCurrentPath(parentPath);
-  }, []);
-
-  const breadcrumb = getBreadcrumb(config, currentPath);
+  const handleGoToParentGroup = useCallback(
+    (result: SearchResult) => {
+      navigateToPath(getParentPath(result.path));
+    },
+    [navigateToPath],
+  );
 
   const getPlaceholder = () => {
     if (confirmedResults.length > 0) {
@@ -437,9 +633,9 @@ export default function LeaderKey() {
       return "(Search -> Use ⌘↵ to continue using Key sequence after search, Tab to exit search)";
     }
     if (currentPath.length > 0) {
-      return `${breadcrumb} → Input a key | Use "Tab" to search`;
+      return `${breadcrumb} → Input a key | Backspace to parent | Tab to search`;
     }
-    return 'Input a key | Use "Tab" to search';
+    return "Input a key | Tab to search";
   };
 
   if (confirmedResults.length > 0 && config) {
@@ -449,6 +645,7 @@ export default function LeaderKey() {
         searchText={searchText}
         onSearchTextChange={handleSearchChange}
         searchBarPlaceholder={getPlaceholder()}
+        navigationTitle={breadcrumb || "Leader Key"}
         throttle={false}
         filtering={false}
       >
@@ -478,6 +675,7 @@ export default function LeaderKey() {
         searchText={searchText}
         onSearchTextChange={handleSearchChange}
         searchBarPlaceholder={getPlaceholder()}
+        navigationTitle={breadcrumb || "Leader Key"}
         throttle={false}
         filtering={false}
       >
@@ -537,9 +735,11 @@ export default function LeaderKey() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={isShowingKeyboardLayout}
       searchText={searchText}
       onSearchTextChange={handleSearchChange}
       searchBarPlaceholder={getPlaceholder()}
+      navigationTitle={breadcrumb || "Leader Key"}
       throttle={false}
     >
       {groupedItems.map((group) => (
@@ -556,28 +756,36 @@ export default function LeaderKey() {
               currentPath={currentPath}
               onSelect={() => {
                 if (isGroup(item)) {
-                  setCurrentPath([...currentPath, item.id]);
-                  setSearchText("");
+                  navigateToPath(getChildPath(currentPath, item.id));
                 } else {
                   const browser = resolveBrowser(config!, [
                     ...currentPath,
                     item.id,
                   ]);
-                  executeAction(
-                    item,
-                    () => {
-                      setCurrentPath([]);
-                      setSearchText("");
-                    },
-                    browser,
-                  );
+                  executeAction(item, resetToRootMenu, browser);
                 }
               }}
-              onGoBack={currentPath.length > 0 ? handleGoBack : undefined}
               onDelete={() => handleDelete(item, [...currentPath, item.id])}
-              onConfigUpdate={(newConfig) => setConfig(newConfig)}
+              onConfigUpdate={onConfigUpdate}
               onClearConfig={handleClearConfig}
               onEnterSearchMode={handleEnterSearchMode}
+              onAddAction={() => handleAddItem("action")}
+              onAddGroup={() => handleAddItem("group")}
+              layoutMode={layoutMode}
+              keyboardLayoutSize={keyboardLayoutSize}
+              keyboardLayoutMarkdown={
+                isShowingKeyboardLayout
+                  ? getKeyboardLayoutMarkdown(item.key)
+                  : undefined
+              }
+              keyboardLayoutMetadata={
+                isShowingKeyboardLayout
+                  ? renderKeyboardLayoutMetadata(items, item.key)
+                  : undefined
+              }
+              onToggleLayoutMode={handleToggleLayoutMode}
+              onKeyboardLayoutSizeChange={handleKeyboardLayoutSizeChange}
+              onActionComplete={resetToRootMenu}
               push={push}
             />
           ))}
@@ -596,41 +804,25 @@ export default function LeaderKey() {
                 shortcut={{ modifiers: [], key: "tab" }}
                 onAction={handleEnterSearchMode}
               />
+              <KeyboardLayoutToggleAction
+                layoutMode={layoutMode}
+                onToggle={handleToggleLayoutMode}
+              />
+              <KeyboardLayoutSizeSubmenu
+                currentSize={keyboardLayoutSize}
+                onChange={handleKeyboardLayoutSizeChange}
+              />
               <Action
                 title="Add Action"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                onAction={() =>
-                  push(
-                    <AddItemForm
-                      config={config!}
-                      parentPath={currentPath}
-                      itemType="action"
-                      onSave={async (newConfig) => {
-                        await saveConfig(newConfig);
-                        setConfig(newConfig);
-                      }}
-                    />,
-                  )
-                }
+                onAction={() => handleAddItem("action")}
               />
               <Action
                 title="Add Group"
                 icon={Icon.Folder}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-                onAction={() =>
-                  push(
-                    <AddItemForm
-                      config={config!}
-                      parentPath={currentPath}
-                      itemType="group"
-                      onSave={async (newConfig) => {
-                        await saveConfig(newConfig);
-                        setConfig(newConfig);
-                      }}
-                    />,
-                  )
-                }
+                onAction={() => handleAddItem("group")}
               />
               <Action
                 title="Clear All Configuration"
@@ -666,10 +858,7 @@ function SearchResultRow({
     if (isGroupItem) {
       return Icon.Folder;
     }
-    if (actionItem.type === "application") {
-      return { fileIcon: actionItem.value };
-    }
-    return getActionIcon(actionItem.type);
+    return getActionItemIcon(actionItem);
   }
 
   const pathDisplay = result.pathKeys.join(" → ");
@@ -747,10 +936,7 @@ function ConfirmedResultRow({
     if (isGroupItem) {
       return Icon.Folder;
     }
-    if (actionItem.type === "application") {
-      return { fileIcon: actionItem.value };
-    }
-    return getActionIcon(actionItem.type);
+    return getActionItemIcon(actionItem);
   }
 
   const keySequenceStr = result.pathKeys.join("");
@@ -816,22 +1002,38 @@ function ItemRow({
   config,
   currentPath,
   onSelect,
-  onGoBack,
   onDelete,
   onConfigUpdate,
   onClearConfig,
   onEnterSearchMode,
+  onAddAction,
+  onAddGroup,
+  layoutMode,
+  keyboardLayoutSize,
+  keyboardLayoutMarkdown,
+  keyboardLayoutMetadata,
+  onToggleLayoutMode,
+  onKeyboardLayoutSizeChange,
+  onActionComplete,
   push,
 }: {
   item: ActionOrGroup;
   config: RootConfig;
   currentPath: string[];
   onSelect: () => void;
-  onGoBack?: () => void;
   onDelete: () => void;
   onConfigUpdate: (config: RootConfig) => void;
   onClearConfig: () => void;
   onEnterSearchMode: () => void;
+  onAddAction: () => void;
+  onAddGroup: () => void;
+  layoutMode: LayoutMode;
+  keyboardLayoutSize: KeyboardLayoutSize;
+  keyboardLayoutMarkdown?: string;
+  keyboardLayoutMetadata?: KeyboardLayoutMetadataRow[];
+  onToggleLayoutMode: () => void;
+  onKeyboardLayoutSizeChange: (size: KeyboardLayoutSize) => void;
+  onActionComplete: () => void;
   push: NavigationPush;
 }) {
   const isGroupItem = isGroup(item);
@@ -841,10 +1043,7 @@ function ItemRow({
     if (isGroupItem) {
       return Icon.Folder;
     }
-    if (actionItem.type === "application") {
-      return { fileIcon: actionItem.value };
-    }
-    return getActionIcon(actionItem.type);
+    return getActionItemIcon(actionItem);
   }
 
   return (
@@ -864,6 +1063,14 @@ function ItemRow({
           },
         },
       ]}
+      detail={
+        keyboardLayoutMarkdown ? (
+          <KeyboardLayoutDetail
+            markdown={keyboardLayoutMarkdown}
+            metadata={keyboardLayoutMetadata}
+          />
+        ) : undefined
+      }
       actions={
         <ActionPanel>
           <Action
@@ -877,12 +1084,19 @@ function ItemRow({
             shortcut={{ modifiers: [], key: "tab" }}
             onAction={onEnterSearchMode}
           />
-          {onGoBack && (
-            <Action
-              title="Go Back"
-              icon={Icon.ArrowLeft}
-              shortcut={{ modifiers: [], key: "backspace" }}
-              onAction={onGoBack}
+          <KeyboardLayoutToggleAction
+            layoutMode={layoutMode}
+            onToggle={onToggleLayoutMode}
+          />
+          <KeyboardLayoutSizeSubmenu
+            currentSize={keyboardLayoutSize}
+            onChange={onKeyboardLayoutSizeChange}
+          />
+          {!isGroupItem && actionItem.type === "url" && (
+            <OpenWithBrowserSubmenu
+              action={actionItem}
+              defaultBrowser={resolveBrowser(config, [...currentPath, item.id])}
+              onComplete={onActionComplete}
             />
           )}
           <ActionPanel.Section title="Edit">
@@ -916,37 +1130,13 @@ function ItemRow({
               title="Add Action"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              onAction={() =>
-                push(
-                  <AddItemForm
-                    config={config}
-                    parentPath={currentPath}
-                    itemType="action"
-                    onSave={async (newConfig) => {
-                      await saveConfig(newConfig);
-                      onConfigUpdate(newConfig);
-                    }}
-                  />,
-                )
-              }
+              onAction={onAddAction}
             />
             <Action
               title="Add Group"
               icon={Icon.Folder}
               shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-              onAction={() =>
-                push(
-                  <AddItemForm
-                    config={config}
-                    parentPath={currentPath}
-                    itemType="group"
-                    onSave={async (newConfig) => {
-                      await saveConfig(newConfig);
-                      onConfigUpdate(newConfig);
-                    }}
-                  />,
-                )
-              }
+              onAction={onAddGroup}
             />
           </ActionPanel.Section>
           {!isGroupItem && (
@@ -965,6 +1155,184 @@ function ItemRow({
             />
           </ActionPanel.Section>
         </ActionPanel>
+      }
+    />
+  );
+}
+
+function KeyboardLayoutDetail({
+  markdown,
+  metadata,
+}: {
+  markdown: string;
+  metadata?: KeyboardLayoutMetadataRow[];
+}) {
+  return (
+    <List.Item.Detail
+      markdown={markdown}
+      metadata={
+        metadata && metadata.length > 0 ? (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="Information" />
+            {metadata.map((row) => (
+              <List.Item.Detail.Metadata.Label
+                key={row.title}
+                title={row.title}
+                text={row.text}
+              />
+            ))}
+          </List.Item.Detail.Metadata>
+        ) : undefined
+      }
+    />
+  );
+}
+
+function KeyboardLayoutToggleAction({
+  layoutMode,
+  onToggle,
+}: {
+  layoutMode: LayoutMode;
+  onToggle: () => void;
+}) {
+  const isDualColumn = layoutMode === "dual-column";
+
+  return (
+    <Action
+      title={isDualColumn ? "Hide Keyboard Layout" : "Show Keyboard Layout"}
+      icon={Icon.Keyboard}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+      onAction={onToggle}
+    />
+  );
+}
+
+function KeyboardLayoutSizeSubmenu({
+  currentSize,
+  onChange,
+}: {
+  currentSize: KeyboardLayoutSize;
+  onChange: (size: KeyboardLayoutSize) => void;
+}) {
+  const sizes: KeyboardLayoutSize[] = ["compact", "default", "large"];
+
+  return (
+    <ActionPanel.Submenu title="Keyboard Layout Size" icon={Icon.Keyboard}>
+      {sizes.map((size) => (
+        <Action
+          key={size}
+          title={KEYBOARD_LAYOUT_SIZE_LABELS[size]}
+          icon={size === currentSize ? Icon.Check : undefined}
+          onAction={() => onChange(size)}
+        />
+      ))}
+    </ActionPanel.Submenu>
+  );
+}
+
+function OpenWithBrowserSubmenu({
+  action,
+  defaultBrowser,
+  onComplete,
+}: {
+  action: ActionItem;
+  defaultBrowser?: string;
+  onComplete: () => void;
+}) {
+  const [applicationGroups, setApplicationGroups] =
+    useState<OpenWithApplicationGroups>({
+      recommended: [],
+      others: [],
+    });
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  async function loadApplications() {
+    if (hasLoaded || isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const applications = await getApplications();
+      applications.sort((a, b) => a.name.localeCompare(b.name));
+      setApplicationGroups(await groupApplicationsForOpenWith(applications));
+      setHasLoaded(true);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Load Applications",
+        message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu
+      title="Open with"
+      icon={Icon.Globe}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+      isLoading={isLoading}
+      filtering={{ keepSectionOrder: true }}
+      onOpen={() => {
+        void loadApplications();
+      }}
+    >
+      <ActionPanel.Section title="Default">
+        <Action
+          title="Default"
+          icon={Icon.Globe}
+          onAction={() => executeAction(action, onComplete, defaultBrowser)}
+        />
+      </ActionPanel.Section>
+      {applicationGroups.recommended.length > 0 && (
+        <ActionPanel.Section title="Recommended">
+          {applicationGroups.recommended.map((application) => (
+            <OpenWithApplicationAction
+              key={application.bundleId || application.path}
+              application={application}
+              action={action}
+              onComplete={onComplete}
+            />
+          ))}
+        </ActionPanel.Section>
+      )}
+      {applicationGroups.others.length > 0 && (
+        <ActionPanel.Section title="Others">
+          {applicationGroups.others.map((application) => (
+            <OpenWithApplicationAction
+              key={application.bundleId || application.path}
+              application={application}
+              action={action}
+              onComplete={onComplete}
+            />
+          ))}
+        </ActionPanel.Section>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+function OpenWithApplicationAction({
+  application,
+  action,
+  onComplete,
+}: {
+  application: Application;
+  action: ActionItem;
+  onComplete: () => void;
+}) {
+  return (
+    <Action
+      title={application.name}
+      icon={{ fileIcon: application.path }}
+      onAction={() =>
+        executeAction(action, onComplete, application.path, {
+          skipActiveBrowserResolution: true,
+        })
       }
     />
   );
@@ -991,22 +1359,58 @@ function getBreadcrumb(config: RootConfig | null, path: string[]): string {
   return parts.join(" → ");
 }
 
+function getActionItemIcon(action: ActionItem) {
+  if (action.type === "application") {
+    return { fileIcon: action.value };
+  }
+
+  if (action.type === "url") {
+    const customIcon = getCustomActionIcon(action.icon);
+    if (customIcon) {
+      return customIcon;
+    }
+
+    const faviconUrl = getFaviconUrl(action.value);
+    return faviconUrl
+      ? { source: faviconUrl, fallback: Icon.Globe }
+      : getActionIcon(action.type);
+  }
+
+  return getActionIcon(action.type);
+}
+
+function getCustomActionIcon(value: unknown) {
+  const icon = normalizeCustomIconValue(value);
+  if (!icon) {
+    return undefined;
+  }
+
+  const normalizedIconName = normalizeIconName(icon);
+  const builtInIcon = Object.entries(Icon).find(
+    ([name]) => normalizeIconName(name) === normalizedIconName,
+  )?.[1];
+
+  return builtInIcon || icon;
+}
+
+function normalizeIconName(value: string): string {
+  return value
+    .replace(/^Icon\./i, "")
+    .replace(/[^a-z0-9]/gi, "")
+    .toLowerCase();
+}
+
 function getValuePreview(action: ActionItem): string {
   const { type, value } = action;
 
   switch (type) {
     case "application":
       return value.split("/").pop()?.replace(".app", "") || value;
-    case "url": {
-      const urlScheme = process.env.RAYCAST_SCHEME ?? "raycast";
-      if (
-        value.startsWith(`${urlScheme}://`) ||
-        value.startsWith("raycast://")
-      ) {
+    case "url":
+      if (value.startsWith("raycast://")) {
         return "Raycast: " + value.split("/").pop();
       }
       return value.length > 40 ? value.substring(0, 37) + "..." : value;
-    }
     case "folder":
       return value.split("/").pop() || value;
     case "command":
@@ -1035,7 +1439,7 @@ const TYPE_ORDER: ItemType[] = [
 const TYPE_LABELS: Record<ItemType, string> = {
   group: "Groups",
   application: "Applications",
-  url: "URLs",
+  url: "URLs/Deeplinks",
   folder: "Folders",
   command: "Commands",
 };

@@ -21,7 +21,7 @@ export default function CreateViewActions({ title, view, todoistLink }: QuickLin
         }}
         shortcut={{
           macOS: { modifiers: ["cmd", "shift"], key: "n" },
-          windows: { modifiers: ["ctrl", "shift"], key: "n" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "n" },
         }}
       />
 

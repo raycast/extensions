@@ -1,16 +1,28 @@
-import { MenuBarExtra, open, openCommandPreferences, showHUD } from "@raycast/api";
+import { MenuBarExtra, getPreferenceValues, open, openCommandPreferences, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   getMatches,
+  getMatchCenterUrl,
+  matchesAroundToday,
   liveMatch,
   formatLine,
   menuBarTitle,
   goalsEnabled,
   setGoalsEnabled,
+  isFinishedMatch,
+  isLiveMatch,
+  isUpcomingMatch,
   type Match,
 } from "./lib/worldcup";
 
 const SCOREBOARD_URL = "https://www.espn.com/soccer/scoreboard";
+
+/** "all" -> show every match (radius -1); otherwise the window radius in days around today. */
+function windowRadius(): number {
+  const value = getPreferenceValues<Preferences.Menubar>().daysToShow;
+  if (value === "all") return -1;
+  return Number(value) || 0;
+}
 
 export default function Command() {
   // useCachedPromise paints the last known scores instantly on cold start,
@@ -21,8 +33,13 @@ export default function Command() {
   // on" flash before the async read settles.
   const { data: goals = true, mutate: mutateGoals } = useCachedPromise(goalsEnabled);
 
+  // The title tracks the live match regardless of the dropdown window (a live
+  // match is always today, so it's always in range anyway).
   const live = liveMatch(matches);
   const title = live ? menuBarTitle(live) : undefined;
+
+  const radius = windowRadius();
+  const visible = matchesAroundToday(matches, radius);
 
   async function toggleGoals() {
     const next = !goals;
@@ -33,11 +50,11 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={live ? undefined : "⚽"} title={title} isLoading={isLoading} tooltip="World Cup">
-      {matches.length === 0 && <MenuBarExtra.Item title="No fixtures today" />}
+      {visible.length === 0 && <MenuBarExtra.Item title={radius === 0 ? "No fixtures today" : "No fixtures"} />}
 
-      <Section heading="Live" matches={matches.filter((m) => m.state === "in")} />
-      <Section heading="Upcoming" matches={matches.filter((m) => m.state === "pre")} />
-      <Section heading="Finished" matches={matches.filter((m) => m.state === "post")} />
+      <Section heading="Live" matches={visible.filter(isLiveMatch)} />
+      <Section heading="Upcoming" matches={visible.filter(isUpcomingMatch)} />
+      <Section heading="Finished" matches={visible.filter(isFinishedMatch)} />
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
@@ -65,7 +82,7 @@ function Section({ heading, matches }: { heading: string; matches: Match[] }) {
   return (
     <MenuBarExtra.Section title={heading}>
       {matches.map((m) => (
-        <MenuBarExtra.Item key={m.id} title={formatLine(m)} onAction={() => open(SCOREBOARD_URL)} />
+        <MenuBarExtra.Item key={m.IdMatch} title={formatLine(m)} onAction={() => open(getMatchCenterUrl(m))} />
       ))}
     </MenuBarExtra.Section>
   );

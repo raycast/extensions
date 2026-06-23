@@ -18,7 +18,8 @@
     "anwarulislam",
     "yusifaliyevpro",
     "elibattistoni",
-    "clins1994"
+    "clins1994",
+    "just_me"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -48,7 +49,7 @@
     {
       "name": "extract-color",
       "title": "Extract Color from Selected Image",
-      "description": "Extract colors from the selected File Manager image",
+      "description": "Extract colors from the selected File Explorer image",
       "mode": "view"
     },
     {

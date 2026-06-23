@@ -95,6 +95,9 @@ async function openInITerm(directory: string, command: string): Promise<void> {
   await runAppleScript(`
     tell application "iTerm2"
       activate
+      if (count of windows) = 0 then
+        create window with default profile
+      end if
       tell current window
         create tab with default profile
         tell current session

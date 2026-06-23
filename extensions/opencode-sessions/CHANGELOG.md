@@ -1,5 +1,9 @@
 # OpenCode Sessions Changelog
 
+## [Fix iTerm2 resume with no open windows] - 2026-06-18
+
+- Create an iTerm2 window when the app is running but has no windows, so "Resume in Terminal" no longer fails silently
+
 ## [Update] - 2026-06-16
 
 - Added content search across session titles and message bodies

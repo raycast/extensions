@@ -1,22 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositorySort } from "../domain/repository-sort";
-import { getUserRepositories } from "../services/repositories";
+import { getRepositories } from "../services/repositories";
 import type { Repository } from "../types/api";
 import { usePaginatedResource } from "./usePaginatedResource";
 import { useUserRepositories } from "./useUserRepositories";
 
-vi.mock("react", () => ({
-  useMemo: (factory: () => unknown) => factory(),
+vi.mock("../services/repositories", () => ({
+  getRepositories: vi.fn(),
 }));
 
-vi.mock("../services/repositories", () => ({
-  getUserRepositories: vi.fn(),
+vi.mock("./useCurrentUser", () => ({
+  useCurrentUser: vi.fn(() => ({ user: { id: 42, login: "alice" }, isLoading: false })),
 }));
 
 const paginatedResource = vi.hoisted(() => ({
   options: undefined as
     | {
-        fetchPage: (params: { sort?: RepositorySort; page: number; limit: number }) => Promise<unknown>;
+        fetchPage: (params: {
+          sort?: RepositorySort;
+          query?: string;
+          uid?: number;
+          page: number;
+          limit: number;
+        }) => Promise<unknown>;
       }
     | undefined,
 }));
@@ -37,7 +43,7 @@ vi.mock("./usePaginatedResource", () => ({
   }),
 }));
 
-const mockedGetUserRepositories = vi.mocked(getUserRepositories);
+const mockedGetRepositories = vi.mocked(getRepositories);
 const mockedUsePaginatedResource = vi.mocked(usePaginatedResource);
 
 describe("useUserRepositories", () => {
@@ -46,24 +52,34 @@ describe("useUserRepositories", () => {
     vi.clearAllMocks();
   });
 
-  it("sorts current-user repositories client-side without passing sort to the unsupported API endpoint", async () => {
-    const result = useUserRepositories(RepositorySort.RecentlyUpdated);
+  it("fetches accessible current-user repositories with server-side search and sorting", async () => {
+    const result = useUserRepositories(RepositorySort.RecentlyUpdated, " app ");
 
-    expect(result.items.map((item) => item.full_name)).toEqual(["new", "old"]);
+    expect(result.items.map((item) => item.full_name)).toEqual(["old", "new"]);
     expect(mockedUsePaginatedResource).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: { sort: RepositorySort.RecentlyUpdated },
+        params: { sort: RepositorySort.RecentlyUpdated, query: "app", uid: 42 },
       }),
     );
 
-    mockedGetUserRepositories.mockResolvedValue({ items: [], hasMore: false });
+    mockedGetRepositories.mockResolvedValue({ items: [], hasMore: false });
     await paginatedResource.options?.fetchPage({
       sort: RepositorySort.RecentlyUpdated,
+      query: "app",
+      uid: 42,
       page: 3,
       limit: 25,
     });
 
-    expect(mockedGetUserRepositories).toHaveBeenCalledWith({ page: 3, limit: 25 });
+    expect(mockedGetRepositories).toHaveBeenCalledWith({
+      page: 3,
+      limit: 25,
+      q: "app",
+      uid: 42,
+      exclusive: false,
+      sort: "updated",
+      order: "desc",
+    });
   });
 });
 

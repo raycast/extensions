@@ -3,6 +3,7 @@ import { getClient } from "./client";
 import type { GiteaRepositorySortKey } from "../domain/repository-sort";
 import type { SortOrder } from "../domain/options";
 import { DEFAULT_PAGE_SIZE } from "../constants";
+import { throwApiError } from "./errors";
 
 /**
  * Parameters for repoSearch endpoint - supports server-side sorting.
@@ -11,6 +12,9 @@ import { DEFAULT_PAGE_SIZE } from "../constants";
 export type ListRepositoriesParams = {
   limit?: number;
   page?: number;
+  q?: string;
+  uid?: number;
+  exclusive?: boolean;
   sort?: GiteaRepositorySortKey;
   order?: SortOrder;
 };
@@ -21,11 +25,22 @@ export type ListRepositoriesParams = {
  */
 export async function listRepositories(params: ListRepositoriesParams = {}): Promise<Repository[]> {
   const client = getClient();
-  const { limit = DEFAULT_PAGE_SIZE, page, sort, order } = params;
-  const { data, error } = await client.GET("/repos/search", {
-    params: { query: { limit, ...(page ? { page } : {}), ...(sort ? { sort } : {}), ...(order ? { order } : {}) } },
+  const { limit = DEFAULT_PAGE_SIZE, page, q, uid, exclusive, sort, order } = params;
+  const { data, error, response } = await client.GET("/repos/search", {
+    params: {
+      query: {
+        limit,
+        ...(page ? { page } : {}),
+        ...(q ? { q } : {}),
+        ...(q ? { includeDesc: true } : {}),
+        ...(uid ? { uid } : {}),
+        ...(exclusive !== undefined ? { exclusive } : {}),
+        ...(sort ? { sort } : {}),
+        ...(order ? { order } : {}),
+      },
+    },
   });
-  if (error) throw new Error("Failed to fetch repositories");
+  if (error) throwApiError("Failed to fetch repositories", error, response);
   if (!data?.ok) throw new Error("Search failed for repositories");
   return data?.data ?? [];
 }
@@ -35,9 +50,9 @@ export type ListUserRepositoriesParams = { limit?: number; page?: number };
 export async function listUserRepositories(params: ListUserRepositoriesParams = {}): Promise<Repository[]> {
   const client = getClient();
   const { limit = DEFAULT_PAGE_SIZE, page } = params;
-  const { data, error } = await client.GET("/user/repos", {
+  const { data, error, response } = await client.GET("/user/repos", {
     params: { query: { limit, ...(page ? { page } : {}) } },
   });
-  if (error) throw new Error("Failed to fetch user repositories");
+  if (error) throwApiError("Failed to fetch user repositories", error, response);
   return data ?? [];
 }
