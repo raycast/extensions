@@ -65,7 +65,7 @@ const resolveSpotify = async (url: string): Promise<ResolvedTrack | null> => {
   const match = html
     .match(/<title>(.*?)<\/title>/i)?.[1]
     ?.match(/^(.+?) - song(?: and lyrics)? by (.+?) \| Spotify/i)
-  if (!match) return null
+  if (!match?.[1] || !match[2]) return null
   return { title: decodeEntities(match[1]), artist: decodeEntities(match[2]) }
 }
 
