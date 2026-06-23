@@ -1,6 +1,6 @@
 # Bookface Changelog
 
-## [New commands and YC CLI 0.0.14 support] - {PR_MERGE_DATE}
+## [New commands and YC CLI 0.0.14 support] - 2026-06-23
 
 - Added a `Log out of YC` command that clears stored YC CLI credentials (with a confirmation prompt).
 - Detect when the YC CLI is too old to run and route to an in-app **Update Required** screen that runs `yc update` for you, instead of failing with a raw error.
