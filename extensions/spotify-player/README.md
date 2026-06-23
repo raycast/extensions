@@ -6,7 +6,7 @@ Spotify's most common features, now at your fingertips. Search for music and pod
 
 ## Commands
 
-> Commands marked with "💸" require Spotify Premium. They control playback through the Spotify Web API [Player endpoints](https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback), each of which states: _"This API only works for users who have Spotify Premium."_ On macOS the extension falls back to controlling the Spotify desktop app via AppleScript, so some of these may still work without Premium; on Windows/Linux they require Premium.
+> Commands marked with "💸" require Spotify Premium. They control playback through the Spotify Web API [Player endpoints](https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback), each of which states: _"This API only works for users who have Spotify Premium."_ On macOS the extension falls back to controlling the Spotify desktop app via AppleScript, so some of these may still work without Premium.
 >
 > Browse commands (Search, Your Library, Now Playing, Menu Bar Player) are free to view, but the playback actions inside them (Play, Add to Queue, Start Radio, Skip, etc.) require Premium. The Queue command is free to view too, but is marked 💸 because playing or adding to the queue from it requires Premium.
 
@@ -58,6 +58,10 @@ Use this to add the current song to a playlist of your choice.
 
 Use this to remove the current song from the playlist it's in.
 
+### Set Volume (💸)
+
+Use this to set the volume to an arbitrary percent.
+
 ### Set Volume to 0% (💸)
 
 Use this to mute the volume.
@@ -90,9 +94,9 @@ Use this to turn the volume up by 10%.
 
 Use this to toggle shuffle.
 
-### Toggle Repeat (💸)
+### Cycle Repeat (💸)
 
-Use this to toggle repeat.
+Use this to cycle through repeat options.
 
 ### Start Radio (💸)
 
