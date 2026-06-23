@@ -1,6 +1,6 @@
 type GoogleInputToolsResponse = [string, [string, string[], ...unknown[]][]];
 
-export async function transliterate(input: string): Promise<string> {
+export async function transliterate(input: string): Promise<string | null> {
   if (!input.trim()) return "";
   try {
     const word = encodeURIComponent(input.trim());
@@ -9,10 +9,10 @@ export async function transliterate(input: string): Promise<string> {
     const data = (await res.json()) as GoogleInputToolsResponse;
     // Response format: ["SUCCESS", [["input", ["output1", "output2"], ...]]]
     if (data[0] === "SUCCESS") {
-      return data[1]?.[0]?.[1]?.[0] ?? input;
+      return data[1]?.[0]?.[1]?.[0] ?? null;
     }
-    return input;
+    return null;
   } catch {
-    return input;
+    return null;
   }
 }

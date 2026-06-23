@@ -5,14 +5,14 @@ import { addToHistory } from "./history-utils";
 
 export default function Command() {
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestId = useRef(0);
 
   function handleSearchChange(text: string) {
     setInput(text);
-    setOutput("");
+    setOutput(null);
     if (!text.trim()) {
       setIsLoading(false);
       return;
@@ -76,8 +76,10 @@ export default function Command() {
           <List.Item title={input} subtitle="Your Manglish input" accessories={[{ text: "Romanized" }]} />
         </>
       )}
-
-      {!output && !isLoading && input.trim() === "" && (
+      {output === null && !isLoading && input.trim() !== "" && (
+        <List.Item title="Transliteration failed" subtitle="Check your connection and try again" />
+      )}
+      {output === "" && !isLoading && input.trim() === "" && (
         <List.EmptyView title="Manglish Keyboard" description="Type anything in Manglish to get Malayalam script" />
       )}
     </List>
