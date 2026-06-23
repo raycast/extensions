@@ -86,9 +86,9 @@ export default async function convert(
         // AVIF -> PNG -> WebP
         const { decoderPath } = await getAVIFEncPaths();
         await using pngFile = await getScopedTempFile("tmp", "png");
-        execSync(`${decoderPath} '${item}' '${pngFile.path}'`);
+        execSync(`'${decoderPath}' '${item}' '${pngFile.path}'`);
         execSync(
-          `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile.path}' -o '${newPath}'`,
+          `'${cwebpPath}' ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile.path}' -o '${newPath}'`,
         );
       } else if (originalType.toLowerCase() == "pdf") {
         // PDF -> PNG -> WebP
@@ -102,12 +102,12 @@ export default async function convert(
         const pngFiles = readdirSync(folderPath).map((file) => path.join(folderPath, file));
         for (const pngFile of pngFiles) {
           execSync(
-            `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile}' -o '${pngFile.replace(".png", ".webp")}'`,
+            `'${cwebpPath}' ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile}' -o '${pngFile.replace(".png", ".webp")}'`,
           );
           await addItemToRemove(pngFile);
         }
       } else {
-        execSync(`${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${item}' -o '${newPath}'`);
+        execSync(`'${cwebpPath}' ${preferences.useLosslessConversion ? "-lossless" : ""} '${item}' -o '${newPath}'`);
       }
     } else if (originalType.toLowerCase() == "svg") {
       if (["AVIF", "PDF", "WEBP"].includes(desiredType)) {
@@ -122,14 +122,14 @@ export default async function convert(
       }
     } else if (desiredType == "SVG") {
       await using bmpFile = await getScopedTempFile("tmp", "bmp");
-      execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+      execSync(`chmod +x '${environment.assetsPath}/potrace/potrace'`);
       if (originalType.toLowerCase() == "webp") {
         // WebP -> PNG -> BMP -> SVG
         await using pngFile = await getScopedTempFile("tmp", "png");
         const [dwebpPath] = await getWebPBinaryPath();
-        execSync(`${dwebpPath} '${item}' -o '${pngFile.path}'`);
+        execSync(`'${dwebpPath}' '${item}' -o '${pngFile.path}'`);
         execSync(
-          `sips --setProperty format "bmp" '${pngFile.path}' --out '${bmpFile.path}' && ${environment.assetsPath}/potrace/potrace -s --tight -o '${newPath}' '${bmpFile.path}'`,
+          `sips --setProperty format "bmp" '${pngFile.path}' --out '${bmpFile.path}' && '${environment.assetsPath}/potrace/potrace' -s --tight -o '${newPath}' '${bmpFile.path}'`,
         );
       } else if (originalType.toLowerCase() == "pdf") {
         // PDF -> PNG -> BMP -> SVG
@@ -143,16 +143,16 @@ export default async function convert(
         const pngFiles = readdirSync(folderPath).map((file) => path.join(folderPath, file));
         for (const pngFile of pngFiles) {
           execSync(
-            `sips --setProperty format "bmp" '${pngFile}' --out '${bmpFile.path}' && ${
+            `sips --setProperty format "bmp" '${pngFile}' --out '${bmpFile.path}' && '${
               environment.assetsPath
-            }/potrace/potrace -s --tight -o '${pngFile.replace(".png", ".svg")}' '${bmpFile.path}'`,
+            }/potrace/potrace' -s --tight -o '${pngFile.replace(".png", ".svg")}' '${bmpFile.path}'`,
           );
           await addItemToRemove(pngFile);
         }
       } else {
         // Input Format -> BMP -> SVG
         execSync(
-          `sips --setProperty format "bmp" '${item}' --out '${bmpFile.path}' && ${environment.assetsPath}/potrace/potrace -s --tight -o '${newPath}' '${bmpFile.path}'`,
+          `sips --setProperty format "bmp" '${item}' --out '${bmpFile.path}' && '${environment.assetsPath}/potrace/potrace' -s --tight -o '${newPath}' '${bmpFile.path}'`,
         );
       }
     } else if (desiredType == "AVIF") {
@@ -172,7 +172,7 @@ export default async function convert(
           .filter((file) => file.endsWith(".png"));
         for (const pngFile of pngFiles) {
           execSync(
-            `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile}' '${pngFile.replace(".png", ".avif")}'`,
+            `'${encoderPath}' ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile}' '${pngFile.replace(".png", ".avif")}'`,
           );
           await addItemToRemove(pngFile);
         }
@@ -180,13 +180,13 @@ export default async function convert(
         await using pngFile = await getScopedTempFile("tmp", "png");
         await convert([item], "PNG", [pngFile.path], true);
         execSync(
-          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile.path}' '${newPath}'`,
+          `'${encoderPath}' ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile.path}' '${newPath}'`,
         );
       }
     } else if (originalType.toLowerCase() == "webp") {
       // WebP -> PNG -> Desired Format
       const [dwebpPath] = await getWebPBinaryPath();
-      execSync(`${dwebpPath} '${item}' -o '${newPath}'`);
+      execSync(`'${dwebpPath}' '${item}' -o '${newPath}'`);
       execSync(`sips --setProperty format ${desiredType.toLowerCase()} '${newPath}'`);
     } else if (originalType.toLowerCase() == "pdf") {
       // PDF -> Desired Format
@@ -199,7 +199,7 @@ export default async function convert(
       // AVIF -> PNG -> Desired Format
       const { decoderPath } = await getAVIFEncPaths();
       await using pngFile = await getScopedTempFile("tmp", "png");
-      execSync(`${decoderPath} '${item}' '${pngFile.path}'`);
+      execSync(`'${decoderPath}' '${item}' '${pngFile.path}'`);
       return await convert([pngFile.path], desiredType, [newPath]);
     } else {
       // General Input Format -> Desired Format

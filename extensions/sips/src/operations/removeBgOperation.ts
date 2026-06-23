@@ -133,13 +133,13 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
 
       const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
       execSync(
-        `${dwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${imagePath}" -o "${tempPNGfromWEBP.path}"`,
+        `"${dwebpPath}" ${preferences.useLosslessConversion ? "-lossless" : ""} "${imagePath}" -o "${tempPNGfromWEBP.path}"`,
       );
       await runRemoveBgScript(tempPNGfromWEBP.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
         execSync(
-          `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tempPNGnoBG.path}" -o "${newPath}"`,
+          `"${cwebpPath}" ${preferences.useLosslessConversion ? "-lossless" : ""} "${tempPNGnoBG.path}" -o "${newPath}"`,
         );
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".webp") + ".png");
@@ -155,9 +155,9 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await runRemoveBgScript(tempPNGfromSVG.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
-        execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+        execSync(`chmod +x "${environment.assetsPath}/potrace/potrace"`);
         execSync(
-          `sips --setProperty format bmp "${tempPNGnoBG.path}" --out "${tempSVG.path}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tempSVG.path}"`,
+          `sips --setProperty format bmp "${tempPNGnoBG.path}" --out "${tempSVG.path}" && "${environment.assetsPath}/potrace/potrace" -s --tight -o "${newPath}" "${tempSVG.path}"`,
         );
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".svg") + ".png");
@@ -170,12 +170,12 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await using tempPNGnoBG = await getScopedTempFile("sips-remove-bg-2", "png");
 
       const { encoderPath, decoderPath } = await getAVIFEncPaths();
-      execSync(`${decoderPath} "${imagePath}" "${tempPNGfromAVIF.path}"`);
+      execSync(`"${decoderPath}" "${imagePath}" "${tempPNGfromAVIF.path}"`);
       await runRemoveBgScript(tempPNGfromAVIF.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
         execSync(
-          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tempPNGnoBG.path}" "${newPath}"`,
+          `"${encoderPath}" ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tempPNGnoBG.path}" "${newPath}"`,
         );
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".avif") + ".png");

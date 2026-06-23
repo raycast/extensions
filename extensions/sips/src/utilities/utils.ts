@@ -283,7 +283,7 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
   const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
 
   execSync(
-    `${dwebpPath} "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
+    `"${dwebpPath}" "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && "${cwebpPath}" ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
   );
   return newPath;
 };
@@ -301,7 +301,7 @@ export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): 
 
   const { encoderPath, decoderPath } = await getAVIFEncPaths();
   execSync(
-    `${decoderPath} "${avifPath}" "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tmpFile.path}" "${newPath}"`,
+    `"${decoderPath}" "${avifPath}" "${tmpFile.path}" && ${command} "${tmpFile.path}" && "${encoderPath}" ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tmpFile.path}" "${newPath}"`,
   );
   return newPath;
 };
@@ -317,9 +317,9 @@ export const execSIPSCommandOnSVG = async (command: string, svgPath: string): Pr
   const newPath = (await getDestinationPaths([svgPath]))[0];
 
   await convertSVG("BMP", svgPath, tmpFile.path);
-  execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+  execSync(`chmod +x "${environment.assetsPath}/potrace/potrace"`);
   execSync(
-    `${command} "${tmpFile.path}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tmpFile.path}"`,
+    `${command} "${tmpFile.path}" && "${environment.assetsPath}/potrace/potrace" -s --tight -o "${newPath}" "${tmpFile.path}"`,
   );
   return newPath;
 };
