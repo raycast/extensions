@@ -30,7 +30,17 @@
       "subtitle": "Qobuz",
       "description": "Show the track currently playing in the Qobuz desktop app and copy its link.",
       "mode": "menu-bar",
-      "interval": "5s"
+      "interval": "5s",
+      "preferences": [
+        {
+          "name": "titleLength",
+          "type": "textfield",
+          "title": "Title Length",
+          "description": "Maximum characters shown in the menu bar before truncating.",
+          "default": "45",
+          "required": false
+        }
+      ]
     },
     {
       "name": "favourites",

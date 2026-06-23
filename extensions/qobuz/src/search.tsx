@@ -101,7 +101,7 @@ export default function Command() {
                 }
               }
               title={track.title}
-              subtitle={track.artist?.name ?? ""}
+              subtitle={track.album?.title ?? track.artist?.name ?? ""}
               actions={<TrackItemActions track={track} />}
             />
           ))}

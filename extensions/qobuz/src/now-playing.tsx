@@ -1,6 +1,7 @@
 import {
   Cache,
   Clipboard,
+  getPreferenceValues,
   Icon,
   MenuBarExtra,
   open,
@@ -20,11 +21,15 @@ const QUEUE_PREVIEW = 3
 const HISTORY_PREVIEW = 3
 
 // Keep the menu-bar title from eating the whole bar on long titles.
-const MAX_TITLE_LENGTH = 45
-const truncate = (text: string): string =>
-  text.length > MAX_TITLE_LENGTH
-    ? `${text.slice(0, MAX_TITLE_LENGTH - 1).trimEnd()}…`
-    : text
+const DEFAULT_TITLE_LENGTH = 45
+const truncate = (text: string, max: number): string =>
+  text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text
+
+const titleLength = (): number => {
+  const { titleLength } = getPreferenceValues<Preferences.NowPlaying>()
+  const parsed = Number(titleLength)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TITLE_LENGTH
+}
 
 // Track metadata (title, artist, art) never changes, so cache it by id. This
 // keeps the frequent menu-bar poll cheap: a steady-playing track and an
@@ -91,7 +96,10 @@ export default function Command() {
     track.album?.image?.small ? { source: track.album.image.small } : Icon.Music
 
   const title = data?.current
-    ? truncate(`${data.current.artist?.name ?? "?"} — ${data.current.title}`)
+    ? truncate(
+        `${data.current.artist?.name ?? "?"} — ${data.current.title}`,
+        titleLength(),
+      )
     : undefined
 
   return (
