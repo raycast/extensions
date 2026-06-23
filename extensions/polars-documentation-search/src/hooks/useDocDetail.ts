@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import type { InventoryItem } from "../lib/inventory";
 import { type DocDetail } from "../lib/doc-detail";
-import { loadDocDetail, type ResolvedDocumentationSource } from "../lib/docs-source";
+import { loadDocDetail, type ResolvedDocumentationSource, type SourcePreferences } from "../lib/docs-source";
 
 interface UseDocDetailResult {
   data?: DocDetail;
@@ -16,6 +16,7 @@ interface UseDocDetailResult {
 export function useDocDetail(
   item: InventoryItem | undefined,
   inventorySource?: ResolvedDocumentationSource,
+  preferences: SourcePreferences = getPreferenceValues<Preferences>(),
 ): UseDocDetailResult {
   const [data, setData] = useState<DocDetail | undefined>();
   const [isLoading, setIsLoading] = useState(Boolean(item));
@@ -41,7 +42,7 @@ export function useDocDetail(
       setError(undefined);
 
       try {
-        const result = await loadDocDetail(item, inventorySource, getPreferenceValues<Preferences>());
+        const result = await loadDocDetail(item, inventorySource, preferences);
         if (isCancelled) {
           return;
         }
@@ -69,7 +70,7 @@ export function useDocDetail(
     return () => {
       isCancelled = true;
     };
-  }, [item, inventorySource, reloadToken]);
+  }, [item, inventorySource, preferences.documentationSource, preferences.localDocsDirectory, reloadToken]);
 
   const revalidate = useCallback(() => {
     setReloadToken((current) => current + 1);

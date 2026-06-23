@@ -103,7 +103,7 @@ async function loadRemoteInventory(deps: LoaderDeps): Promise<InventoryItem[]> {
 
 async function loadLocalInventory(localDocsDirectory: string | undefined, deps: LoaderDeps): Promise<InventoryItem[]> {
   const docsDirectory = await getStableDocsDirectory(localDocsDirectory, deps);
-  const inventoryPath = path.join(docsDirectory, "objects.inv");
+  const inventoryPath = resolveInside(docsDirectory, "objects.inv");
   const inventory = await deps.readFileImpl(inventoryPath);
   return transformInventoryResponse(toArrayBuffer(inventory));
 }
@@ -127,23 +127,25 @@ async function loadLocalDocDetail(
   deps: LoaderDeps,
 ): Promise<DocDetail> {
   const docsDirectory = await getStableDocsDirectory(localDocsDirectory, deps);
-  const htmlPath = path.join(docsDirectory, item.docPath.split("#")[0] ?? item.docPath);
+  const htmlPath = resolveDocPath(docsDirectory, item.docPath);
   const html = await deps.readFileImpl(htmlPath, "utf-8");
   return parseDocDetail(html, item);
 }
 
 async function getStableDocsDirectory(localDocsDirectory: string | undefined, deps: LoaderDeps): Promise<string> {
   const directory = requireLocalDocsDirectory(localDocsDirectory);
-  const stablePath = path.join(directory, "stable");
+  const stablePath = resolveInside(directory, "stable");
+  let symlinkTarget: string | undefined;
 
   try {
-    const symlinkTarget = (await deps.readFileImpl(stablePath, "utf-8")).trim();
-    if (symlinkTarget) {
-      return path.resolve(directory, symlinkTarget);
-    }
+    symlinkTarget = (await deps.readFileImpl(stablePath, "utf-8")).trim();
   } catch {
     // Most downloads have a real stable directory. Windows Git checkouts can turn
     // a stable symlink into a text file containing the target directory name.
+  }
+
+  if (symlinkTarget) {
+    return resolveInside(directory, symlinkTarget);
   }
 
   return stablePath;
@@ -154,7 +156,33 @@ function requireLocalDocsDirectory(localDocsDirectory: string | undefined): stri
     throw new Error("Set Local Docs Directory in command preferences to use downloaded Polars docs.");
   }
 
-  return localDocsDirectory;
+  return localDocsDirectory.trim();
+}
+
+function resolveDocPath(docsDirectory: string, docPath: string): string {
+  const relativePath = docPath.split("#")[0] ?? docPath;
+  return resolveInside(docsDirectory, relativePath);
+}
+
+function resolveInside(baseDirectory: string, relativePath: string): string {
+  if (path.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath)) {
+    throw new Error(`Invalid local docs path: ${relativePath}`);
+  }
+
+  const segments = relativePath.split(/[\\/]+/);
+  if (segments.some((segment) => segment === "..")) {
+    throw new Error(`Invalid local docs path: ${relativePath}`);
+  }
+
+  const base = path.resolve(baseDirectory);
+  const resolved = path.resolve(base, relativePath);
+  const relative = path.relative(base, resolved);
+
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`Invalid local docs path: ${relativePath}`);
+  }
+
+  return resolved;
 }
 
 function toError(error: unknown): Error {

@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { loadInventory, type ResolvedDocumentationSource } from "../lib/docs-source";
+import { loadInventory, type ResolvedDocumentationSource, type SourcePreferences } from "../lib/docs-source";
 import { type InventoryItem } from "../lib/inventory";
 
 interface UseInventoryResult {
@@ -12,7 +12,7 @@ interface UseInventoryResult {
   revalidate: () => void;
 }
 
-export function useInventory(): UseInventoryResult {
+export function useInventory(preferences: SourcePreferences = getPreferenceValues<Preferences>()): UseInventoryResult {
   const [data, setData] = useState<InventoryItem[] | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
@@ -28,7 +28,7 @@ export function useInventory(): UseInventoryResult {
       setError(undefined);
 
       try {
-        const result = await loadInventory(getPreferenceValues<Preferences>());
+        const result = await loadInventory(preferences);
         if (isCancelled) {
           return;
         }
@@ -56,7 +56,7 @@ export function useInventory(): UseInventoryResult {
     return () => {
       isCancelled = true;
     };
-  }, [reloadToken]);
+  }, [preferences.documentationSource, preferences.localDocsDirectory, reloadToken]);
 
   const revalidate = useCallback(() => {
     setReloadToken((current) => current + 1);

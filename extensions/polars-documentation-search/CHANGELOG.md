@@ -6,12 +6,12 @@
 - Added automatic local fallback when the live Polars docs cannot be reached and a local docs directory is configured.
 - Added recovery actions and setup guidance when the live docs inventory fails to load.
 
-## [1.0.3] - {PR_MERGE_DATE}
+## [1.0.3] - 2026-03-02
 
 - Fixed objects inventory parsing to handle arbitrary whitespace between fields and validate malformed lines.
 - Fixed inline code markdown conversion to replace exact `<code>` nodes reliably in Cheerio traversal.
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-03-02
 
 - Fixed documentation error markdown to render real line breaks instead of literal `\n`.
 - Made full-screen documentation view fetch details when needed so it no longer gets stuck on loading fallback content.
@@ -20,7 +20,7 @@
 - Improved search responsiveness by maintaining only top-ranked matches instead of sorting every candidate.
 - Removed manual preferences typing in favor of Raycast's generated `Preferences` type.
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-03-02
 
 - Expanded alias mode to shorten common Polars names in rendered docs text:
 - `polars.` -> `pl.`
@@ -29,7 +29,7 @@
 - `LazyFrame` / `LazyDataFrame` -> `lf`
 - Updated object method signatures to use instance-style aliases (for example, `pl.DataFrame.select(...)` -> `df.select(...)`).
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-03-02
 
 - Added a full in-extension Polars API docs search and detail viewer backed by the official `objects.inv`.
 - Added symbol ranking, in-panel detail preview, full-screen detail view, and quick actions for URL/name/signature copy.

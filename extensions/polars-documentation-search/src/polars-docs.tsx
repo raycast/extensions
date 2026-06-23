@@ -6,7 +6,7 @@ import { type InventoryItem } from "./lib/inventory";
 import { buildMarkdown, type DocDetail } from "./lib/doc-detail";
 import { searchInventory } from "./lib/search";
 import { applyPrefixPreference } from "./lib/prefix";
-import { type ResolvedDocumentationSource } from "./lib/docs-source";
+import { getDocumentationSourceMode, type ResolvedDocumentationSource } from "./lib/docs-source";
 
 type DetailRenderState = {
   detail?: DocDetail;
@@ -18,6 +18,13 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const preferences = getPreferenceValues<Preferences>();
+  const sourcePreferences = useMemo(
+    () => ({
+      documentationSource: preferences.documentationSource,
+      localDocsDirectory: preferences.localDocsDirectory,
+    }),
+    [preferences.documentationSource, preferences.localDocsDirectory],
+  );
 
   const {
     data: inventory = [],
@@ -26,7 +33,7 @@ export default function Command() {
     source: inventorySource,
     remoteError: inventoryRemoteError,
     revalidate: revalidateInventory,
-  } = useInventory();
+  } = useInventory(sourcePreferences);
   const visibleInventory = useMemo(() => {
     if (!preferences.hideApiItems) {
       return inventory;
@@ -58,7 +65,7 @@ export default function Command() {
     isLoading: isLoadingDetail,
     error: selectedDetailError,
     remoteError: selectedDetailRemoteError,
-  } = useDocDetail(selectedItem, inventorySource);
+  } = useDocDetail(selectedItem, inventorySource, sourcePreferences);
 
   const listIsLoading = isLoadingInventory;
   const noResults = !listIsLoading && results.length === 0;
@@ -74,7 +81,7 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
     >
       {inventoryError ? (
-        <RecoveryItem error={inventoryError} onRetry={revalidateInventory} />
+        <RecoveryItem error={inventoryError} preferences={sourcePreferences} onRetry={revalidateInventory} />
       ) : noResults ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No results" description="Try a different Polars symbol." />
       ) : (
@@ -147,18 +154,34 @@ function getDetailMarkdown(
   return markdown;
 }
 
-function RecoveryItem({ error, onRetry }: { error: Error; onRetry: () => void }) {
+function RecoveryItem({
+  error,
+  preferences,
+  onRetry,
+}: {
+  error: Error;
+  preferences: Pick<Preferences, "documentationSource" | "localDocsDirectory">;
+  onRetry: () => void;
+}) {
+  const isLocalMode = getDocumentationSourceMode(preferences) === "local";
+  const hasLocalDirectory = Boolean(preferences.localDocsDirectory?.trim());
+  const title = "Unable to Load Polars Docs";
+  const subtitle =
+    isLocalMode || hasLocalDirectory
+      ? "Check your local docs folder or retry loading the live docs."
+      : "Configure a downloaded docs folder to keep searching locally.";
+  const markdown =
+    isLocalMode || hasLocalDirectory
+      ? `Raycast could not load the Polars documentation inventory.\n\n${error.message}\n\nCheck that **Local Docs Directory** points to a downloaded Polars docs folder containing a \`stable\` directory or symlink with \`objects.inv\` and the HTML documentation tree.`
+      : `Raycast could not load the live Polars documentation inventory.\n\n${error.message}\n\nDownload the Polars docs repository, extract or clone it locally, then set **Local Docs Directory** in this command's preferences. The extension expects the selected folder to contain a \`stable\` directory or symlink with \`objects.inv\` and the HTML documentation tree.`;
+
   return (
     <List.Item
       id="local-docs-recovery"
       icon={Icon.ExclamationMark}
-      title="Unable to Connect to Polars Docs"
-      subtitle="Configure a downloaded docs folder to keep searching locally."
-      detail={
-        <List.Item.Detail
-          markdown={`Raycast could not load the live Polars documentation inventory.\n\n${error.message}\n\nDownload the Polars docs repository, extract or clone it locally, then set **Local Docs Directory** in this command's preferences. The extension expects the selected folder to contain a \`stable\` directory or symlink with \`objects.inv\` and the HTML documentation tree.`}
-        />
-      }
+      title={title}
+      subtitle={subtitle}
+      detail={<List.Item.Detail markdown={markdown} />}
       actions={
         <ActionPanel>
           <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
