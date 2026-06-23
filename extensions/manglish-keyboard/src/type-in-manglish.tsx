@@ -79,7 +79,7 @@ export default function Command() {
       {output === null && !isLoading && input.trim() !== "" && (
         <List.Item title="Transliteration failed" subtitle="Check your connection and try again" />
       )}
-      {output === "" && !isLoading && input.trim() === "" && (
+      {output === null && !isLoading && input.trim() === "" && (
         <List.EmptyView title="Manglish Keyboard" description="Type anything in Manglish to get Malayalam script" />
       )}
     </List>
