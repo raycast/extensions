@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bump-name-match",
+  "title": "Bump Name Match",
+  "description": "Search baby names and view their full details",
+  "icon": "icon.png",
+  "author": "rob",
+  "categories": [
+    "Fun"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-names",
+      "title": "Search Names",
+      "subtitle": "Name Meanings",
+      "description": "Search baby names and view their details",
+      "mode": "view"
+    },
+    {
+      "name": "my-lists",
+      "title": "My Lists",
+      "subtitle": "BumpNameMatch",
+      "description": "Browse your favorite lists and manage saved names",
+      "mode": "view"
+    },
+    {
+      "name": "search-origins",
+      "title": "Search by Origin",
+      "subtitle": "BumpNameMatch",
+      "description": "Browse names by cultural origin, optionally filtered by gender",
+      "mode": "view"
+    },
+    {
+      "name": "naming-sessions",
+      "title": "Naming Sessions",
+      "subtitle": "BumpNameMatch Game",
+      "description": "Vote on names with your partner and see your matches",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Personal API key used to save names to your favorite lists and view them in My Lists. Create one at https://bumpnamematch.com/dashboard/api-keys",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
