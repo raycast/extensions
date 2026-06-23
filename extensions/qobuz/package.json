@@ -23,7 +23,7 @@
       "subtitle": "Qobuz",
       "description": "Show the track currently playing in the Qobuz desktop app and copy its link.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "10s"
     },
     {
       "name": "favourites",
@@ -48,14 +48,14 @@
     },
     {
       "name": "next",
-      "title": "Next Track",
+      "title": "Next",
       "subtitle": "Qobuz",
       "description": "Skip to the next track.",
       "mode": "no-view"
     },
     {
       "name": "previous",
-      "title": "Previous Track",
+      "title": "Previous",
       "subtitle": "Qobuz",
       "description": "Skip to the previous track.",
       "mode": "no-view"
