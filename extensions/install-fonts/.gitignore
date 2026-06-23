@@ -1,0 +1,5 @@
+node_modules
+dist
+.raycast
+package-lock.json
+.DS_Store
