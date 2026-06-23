@@ -13,6 +13,7 @@ export default function Command() {
   function handleSearchChange(text: string) {
     setInput(text);
     setOutput(null);
+
     if (!text.trim()) {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
@@ -23,17 +24,25 @@ export default function Command() {
       return;
     }
 
-    // Debounce — wait for user to stop typing before calling API
+    // Mark loading immediately so the UI doesn't show a false "failed" state
+    // during the debounce window.
+    setIsLoading(true);
+
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
     debounceTimer.current = setTimeout(async () => {
       const currentRequestId = ++requestId.current;
-      setIsLoading(true);
-      const result = await transliterate(text);
-      if (currentRequestId !== requestId.current) return; // stale, a newer request superseded this one
-      setOutput(result);
-      setIsLoading(false);
+      try {
+        const result = await transliterate(text);
+        if (currentRequestId !== requestId.current) return;
+        setOutput(result);
+      } catch {
+        if (currentRequestId !== requestId.current) return;
+        setOutput(null);
+      } finally {
+        if (currentRequestId === requestId.current) setIsLoading(false);
+      }
     }, 400); // wait 400ms after user stops typing
   }
 
