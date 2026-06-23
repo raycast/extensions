@@ -38,15 +38,11 @@ import {
   saveSession,
   type PomodoroSession,
 } from "./lib/pomodoro-state";
-import {
-  getPomodoroConfig,
-  getWorkSessionTypes,
-  type PomodoroConfig,
-} from "./lib/preferences";
+import { getPomodoroConfig, getWorkSessionTypes, type PomodoroConfig } from "./lib/preferences";
 import { syncTimerScheduler } from "./lib/timer-scheduler";
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", { hour12: false });
+  return new Date(iso).toLocaleString("en-US", { hour12: false });
 }
 
 export default function PomodoroStatusCommand() {
@@ -54,12 +50,8 @@ export default function PomodoroStatusCommand() {
   const [isLoading, setIsLoading] = useState(true);
   const [tick, setTick] = useState(Date.now());
   const { push } = useNavigation();
-  const [config, setConfig] = useState<PomodoroConfig>(() =>
-    getPomodoroConfig(),
-  );
-  const [workSessionTypes, setWorkSessionTypes] = useState<string[]>(() =>
-    getWorkSessionTypes(),
-  );
+  const [config, setConfig] = useState<PomodoroConfig>(() => getPomodoroConfig());
+  const [workSessionTypes, setWorkSessionTypes] = useState<string[]>(() => getWorkSessionTypes());
   const lastTickRef = useRef<number>(Date.now());
   const awaitingHandledSessionIdRef = useRef<string | null>(null);
 
@@ -90,10 +82,7 @@ export default function PomodoroStatusCommand() {
     return () => clearInterval(timer);
   }, []);
 
-  const snapshot = useMemo(
-    () => (session ? getSessionSnapshot(session, tick) : null),
-    [session, tick],
-  );
+  const snapshot = useMemo(() => (session ? getSessionSnapshot(session, tick) : null), [session, tick]);
   const effectiveSession = snapshot?.session ?? session;
 
   useEffect(() => {
@@ -107,8 +96,7 @@ export default function PomodoroStatusCommand() {
         return;
       }
 
-      const displayAwaiting =
-        snapshot?.displayStatus === "awaiting_confirmation";
+      const displayAwaiting = snapshot?.displayStatus === "awaiting_confirmation";
       const persistedAwaiting = session.status === "awaiting_confirmation";
 
       if (!displayAwaiting && !persistedAwaiting) {
@@ -209,8 +197,8 @@ export default function PomodoroStatusCommand() {
         <WorkLogForm
           session={session}
           config={config}
-          submitTitle="作業ログを保存して停止"
-          successMessage="作業セッションを終了して停止しました。"
+          submitTitle="Save Work Log and Stop"
+          successMessage="Work session ended and stopped."
           createNextSessionOnSubmit={false}
           onCompleted={async () => {
             await stopLoopingAudio();
@@ -223,8 +211,8 @@ export default function PomodoroStatusCommand() {
     }
 
     const confirmed = await confirmAlert({
-      title: "休憩を終了して停止しますか？",
-      message: "現在の休憩セッションを終了し、ループ音を停止します。",
+      title: "End break and stop?",
+      message: "This ends the current break session and stops looping audio.",
     });
 
     if (!confirmed) {
@@ -234,7 +222,7 @@ export default function PomodoroStatusCommand() {
     await applySessionUpdate(null);
     await showToast({
       style: Toast.Style.Success,
-      title: "休憩セッションを終了して停止しました",
+      title: "Break session ended and stopped",
     });
   }
 
@@ -267,7 +255,7 @@ export default function PomodoroStatusCommand() {
     const ok = await previewLoopingAudio("work", config, 5);
     await showToast({
       style: ok ? Toast.Style.Success : Toast.Style.Failure,
-      title: ok ? "作業音を5秒再生しました" : "作業音が見つかりません",
+      title: ok ? "Played work audio for 5 seconds" : "Work audio not found",
     });
   }
 
@@ -275,7 +263,7 @@ export default function PomodoroStatusCommand() {
     const ok = await previewLoopingAudio("break", config, 5);
     await showToast({
       style: ok ? Toast.Style.Success : Toast.Style.Failure,
-      title: ok ? "休憩音を5秒再生しました" : "休憩音が見つかりません",
+      title: ok ? "Played break audio for 5 seconds" : "Break audio not found",
     });
   }
 
@@ -283,7 +271,7 @@ export default function PomodoroStatusCommand() {
     const ok = await playAlarm(config);
     await showToast({
       style: ok ? Toast.Style.Success : Toast.Style.Failure,
-      title: ok ? "アラーム音を再生しました" : "アラーム音が見つかりません",
+      title: ok ? "Played alarm audio" : "Alarm audio not found",
     });
   }
 
@@ -292,16 +280,16 @@ export default function PomodoroStatusCommand() {
       return [
         "# PomoNotion Status",
         "",
-        "進行中のセッションはありません。ここから新しい作業セッションを開始できます。",
+        "No active session. Start a new work session from here.",
         "",
-        "## 現在のタイマー設定",
+        "## Current Timer Settings",
         "",
-        `- 作業: ${config.workMinutes} 分`,
-        `- 短休憩: ${config.shortBreakMinutes} 分`,
-        `- 長休憩: ${config.longBreakMinutes} 分`,
-        `- 長休憩の間隔: ${config.longBreakEvery} セットごと`,
+        `- Work: ${config.workMinutes} min`,
+        `- Short break: ${config.shortBreakMinutes} min`,
+        `- Long break: ${config.longBreakMinutes} min`,
+        `- Long break every: ${config.longBreakEvery} work sessions`,
         "",
-        "## 作業種類",
+        "## Session Types",
         "",
         ...workSessionTypes.map((type) => `- ${type}`),
       ].join("\n");
@@ -311,86 +299,76 @@ export default function PomodoroStatusCommand() {
     const availableActions: string[] = [];
 
     if (effectiveSession?.status === "running") {
-      availableActions.push("一時停止");
+      availableActions.push("Pause");
     }
 
     if (effectiveSession?.status === "paused") {
-      availableActions.push("再開");
+      availableActions.push("Resume");
     }
 
     if (
       effectiveSession?.kind === "work" &&
-      (effectiveSession?.status === "running" ||
-        effectiveSession?.status === "paused")
+      (effectiveSession?.status === "running" || effectiveSession?.status === "paused")
     ) {
-      availableActions.push("今の作業を終了");
+      availableActions.push("Finish Current Work");
     }
 
     if (
       effectiveSession?.kind !== "work" &&
-      (effectiveSession?.status === "running" ||
-        effectiveSession?.status === "paused")
+      (effectiveSession?.status === "running" || effectiveSession?.status === "paused")
     ) {
-      availableActions.push("今の休憩を終了");
+      availableActions.push("Finish Current Break");
     }
 
-    if (
-      effectiveSession?.status === "awaiting_confirmation" &&
-      effectiveSession?.kind === "work"
-    ) {
-      availableActions.push("作業ログを入力して終了");
+    if (effectiveSession?.status === "awaiting_confirmation" && effectiveSession?.kind === "work") {
+      availableActions.push("Enter Work Log and Finish");
     }
 
-    if (
-      effectiveSession?.status === "awaiting_confirmation" &&
-      effectiveSession?.kind !== "work"
-    ) {
-      availableActions.push("休憩を終了して次へ進む");
+    if (effectiveSession?.status === "awaiting_confirmation" && effectiveSession?.kind !== "work") {
+      availableActions.push("Finish Break and Continue");
     }
 
     if (effectiveSession) {
-      availableActions.push("セッションを破棄");
+      availableActions.push("Discard Session");
     }
 
     const lines = [
       "# PomoNotion Status",
       "",
-      `- 種別: ${getKindLabel(session.kind)}`,
-      `- 状態: ${getStatusLabel(snapshot.displayStatus)}`,
-      ...(session.kind === "work" && session.workType
-        ? [`- 作業種類: ${session.workType}`]
-        : []),
-      `- 開始時刻: ${formatDateTime(session.startedAt)}`,
-      `- 予定終了: ${formatDateTime(session.plannedEndAt)}`,
-      `- 完了済み作業セット数: ${session.completedWorkSessions}`,
+      `- Type: ${getKindLabel(session.kind)}`,
+      `- Status: ${getStatusLabel(snapshot.displayStatus)}`,
+      ...(session.kind === "work" && session.workType ? [`- Session type: ${session.workType}`] : []),
+      `- Started at: ${formatDateTime(session.startedAt)}`,
+      `- Planned end: ${formatDateTime(session.plannedEndAt)}`,
+      `- Completed work sessions: ${session.completedWorkSessions}`,
       "",
     ];
 
     if (snapshot.displayStatus === "awaiting_confirmation") {
-      lines.push(`- 延長時間: ${formatDuration(snapshot.overtimeMs)}`);
+      lines.push(`- Overtime: ${formatDuration(snapshot.overtimeMs)}`);
     } else if (session.status === "paused") {
-      lines.push("- 残り時間の計測は停止中です");
+      lines.push("- Remaining time is frozen while paused");
     } else {
-      lines.push(`- 残り時間: ${formatDuration(snapshot.remainingMs)}`);
+      lines.push(`- Remaining: ${formatDuration(snapshot.remainingMs)}`);
     }
 
     lines.push(
       "",
-      "## 今できること",
+      "## Available Actions",
       "",
       ...availableActions.map((action) => `- ${action}`),
       "",
-      "## 音声設定",
+      "## Audio",
       "",
-      `- 作業音: ${audio.work.label}`,
-      `- 休憩音: ${audio.break.label}`,
-      `- アラーム: ${audio.alarm.label}`,
+      `- Work audio: ${audio.work.label}`,
+      `- Break audio: ${audio.break.label}`,
+      `- Alarm: ${audio.alarm.label}`,
       "",
-      "## 補足",
+      "## Notes",
       "",
-      "- 作業音と休憩音はループ再生、アラームは単発再生です。",
-      "- 同梱音源は `assets/audio/` に配置すると自動で利用されます。",
-      "- 作業中でも `今の作業を終了` でその場でログ入力に進めます。",
+      "- Work and break audio loop; the alarm plays once.",
+      "- Bundled audio in `assets/audio/` is used automatically when present.",
+      "- During work, use **Finish Current Work** to enter your work log immediately.",
     );
 
     return lines.join("\n");
@@ -403,15 +381,11 @@ export default function PomodoroStatusCommand() {
       actions={
         <ActionPanel>
           {!effectiveSession ? (
-            <Action
-              title="作業種類を選んで開始"
-              icon={Icon.Play}
-              onAction={() => openStartSessionForm()}
-            />
+            <Action title="Choose Session Type and Start" icon={Icon.Play} onAction={() => openStartSessionForm()} />
           ) : null}
           {!effectiveSession ? (
             <Action
-              title="作業種類を編集"
+              title="Edit Session Types"
               icon={Icon.List}
               onAction={() =>
                 push(
@@ -426,7 +400,7 @@ export default function PomodoroStatusCommand() {
           ) : null}
           {!effectiveSession ? (
             <Action
-              title="タイマー設定を編集"
+              title="Edit Timer Settings"
               icon={Icon.Pencil}
               onAction={() =>
                 push(
@@ -441,35 +415,25 @@ export default function PomodoroStatusCommand() {
           ) : null}
           {effectiveSession &&
           effectiveSession.kind !== "work" &&
-          (effectiveSession.status === "running" ||
-            effectiveSession.status === "paused") ? (
-            <Action
-              title="今の休憩を終了"
-              icon={Icon.CheckCircle}
-              onAction={handleFinishBreak}
-            />
+          (effectiveSession.status === "running" || effectiveSession.status === "paused") ? (
+            <Action title="Finish Current Break" icon={Icon.CheckCircle} onAction={handleFinishBreak} />
           ) : null}
           {effectiveSession && effectiveSession.status === "running" ? (
-            <Action title="一時停止" icon={Icon.Pause} onAction={handlePause} />
+            <Action title="Pause" icon={Icon.Pause} onAction={handlePause} />
           ) : null}
           {effectiveSession && effectiveSession.status === "paused" ? (
-            <Action title="再開" icon={Icon.Play} onAction={handleResume} />
+            <Action title="Resume" icon={Icon.Play} onAction={handleResume} />
           ) : null}
           {effectiveSession &&
           effectiveSession.kind === "work" &&
-          (effectiveSession.status === "running" ||
-            effectiveSession.status === "paused") ? (
-            <Action
-              title="今の作業を終了"
-              icon={Icon.Stop}
-              onAction={handleFinishWorkNow}
-            />
+          (effectiveSession.status === "running" || effectiveSession.status === "paused") ? (
+            <Action title="Finish Current Work" icon={Icon.Stop} onAction={handleFinishWorkNow} />
           ) : null}
           {effectiveSession &&
           effectiveSession.status === "awaiting_confirmation" &&
           effectiveSession.kind === "work" ? (
             <Action
-              title="作業ログを入力して終了"
+              title="Enter Work Log and Finish"
               icon={Icon.Pencil}
               onAction={() =>
                 push(
@@ -491,45 +455,21 @@ export default function PomodoroStatusCommand() {
           {effectiveSession &&
           effectiveSession.status === "awaiting_confirmation" &&
           effectiveSession.kind !== "work" ? (
-            <Action
-              title="休憩を終了して次へ進む"
-              icon={Icon.CheckCircle}
-              onAction={handleFinishBreak}
-            />
+            <Action title="Finish Break and Continue" icon={Icon.CheckCircle} onAction={handleFinishBreak} />
           ) : null}
           {session ? (
             <Action
-              title="セッションを破棄"
+              title="Discard Session"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={handleDiscard}
             />
           ) : null}
-          <Action
-            title="作業音を試聴"
-            icon={Icon.SpeakerOn}
-            onAction={handlePreviewWorkAudio}
-          />
-          <Action
-            title="休憩音を試聴"
-            icon={Icon.Music}
-            onAction={handlePreviewBreakAudio}
-          />
-          <Action
-            title="アラーム音を試聴"
-            icon={Icon.Bell}
-            onAction={handlePreviewAlarmAudio}
-          />
-          <Action
-            title="状態を更新"
-            icon={Icon.ArrowClockwise}
-            onAction={refreshSession}
-          />
-          <Action
-            title="設定を開く"
-            icon={Icon.Gear}
-            onAction={openCommandPreferences}
-          />
+          <Action title="Preview Work Audio" icon={Icon.SpeakerOn} onAction={handlePreviewWorkAudio} />
+          <Action title="Preview Break Audio" icon={Icon.Music} onAction={handlePreviewBreakAudio} />
+          <Action title="Preview Alarm Audio" icon={Icon.Bell} onAction={handlePreviewAlarmAudio} />
+          <Action title="Refresh Status" icon={Icon.ArrowClockwise} onAction={refreshSession} />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
         </ActionPanel>
       }
     />

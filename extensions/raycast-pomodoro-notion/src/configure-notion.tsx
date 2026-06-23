@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -26,14 +18,14 @@ type ValidationState = {
 function buildMarkdown(state: ValidationState): string {
   const { notionToken, notionDatabaseId } = getNotionSettings();
   const lines: string[] = [
-    "# Notion接続設定",
+    "# Notion Setup",
     "",
-    "## 現在の設定",
+    "## Current Settings",
     "",
-    `- Token: ${notionToken ? "設定済み" : "未設定"}`,
-    `- Database ID: ${notionDatabaseId ? `\`${notionDatabaseId}\`` : "未設定"}`,
+    `- Token: ${notionToken ? "Configured" : "Not set"}`,
+    `- Database ID: ${notionDatabaseId ? `\`${notionDatabaseId}\`` : "Not set"}`,
     "",
-    "## 必須プロパティ",
+    "## Required Properties",
     "",
   ];
 
@@ -41,92 +33,73 @@ function buildMarkdown(state: ValidationState): string {
     lines.push(`- \`${name}\`: \`${propertyType}\``);
   }
 
-  lines.push("", "## 検証結果", "");
+  lines.push("", "## Validation", "");
 
   if (state.isLoading) {
-    lines.push("検証中です...");
+    lines.push("Validating...");
     return lines.join("\n");
   }
 
   if (state.error) {
-    lines.push(`- 状態: 失敗`, `- 内容: ${state.error}`);
+    lines.push(`- Status: Failed`, `- Details: ${state.error}`);
     return lines.join("\n");
   }
 
   if (!state.result) {
-    lines.push(
-      "まだ検証していません。Action から `接続確認` を実行してください。",
-    );
+    lines.push("Not validated yet. Run **Validate Connection** from the action panel.");
     return lines.join("\n");
   }
 
-  lines.push(`- 状態: ${state.result.ok ? "OK" : "要修正"}`);
+  lines.push(`- Status: ${state.result.ok ? "OK" : "Needs fixes"}`);
   if (state.result.databaseTitle) {
-    lines.push(`- データベース名: ${state.result.databaseTitle}`);
+    lines.push(`- Database: ${state.result.databaseTitle}`);
   }
 
   if (state.result.missingProperties.length > 0) {
-    lines.push(
-      "",
-      "### 不足プロパティ",
-      "",
-      ...state.result.missingProperties.map((name) => `- \`${name}\``),
-    );
+    lines.push("", "### Missing properties", "", ...state.result.missingProperties.map((name) => `- \`${name}\``));
   }
 
   if (state.result.invalidProperties.length > 0) {
-    lines.push("", "### 型不一致", "");
+    lines.push("", "### Type mismatches", "");
     for (const property of state.result.invalidProperties) {
-      lines.push(
-        `- \`${property.name}\`: expected \`${property.expected}\`, actual \`${property.actual}\``,
-      );
+      lines.push(`- \`${property.name}\`: expected \`${property.expected}\`, actual \`${property.actual}\``);
     }
   }
 
   if (state.result.focusOptions.length > 0) {
-    lines.push(
-      "",
-      "### Focus の選択肢",
-      "",
-      ...state.result.focusOptions.map((name) => `- ${name}`),
-    );
+    lines.push("", "### Focus options", "", ...state.result.focusOptions.map((name) => `- ${name}`));
   }
 
   if (state.result.sessionTypeOptions.length > 0) {
-    lines.push(
-      "",
-      "### Session Type の選択肢",
-      "",
-      ...state.result.sessionTypeOptions.map((name) => `- ${name}`),
-    );
+    lines.push("", "### Session Type options", "", ...state.result.sessionTypeOptions.map((name) => `- ${name}`));
   }
 
   if (state.result.missingFocusOptions.length > 0) {
     lines.push(
       "",
-      "### Focus の警告",
+      "### Focus warnings",
       "",
-      `- 推奨選択肢: ${REQUIRED_FOCUS_OPTIONS.join(", ")}`,
-      `- 未検出: ${state.result.missingFocusOptions.join(", ")}`,
+      `- Recommended options: ${REQUIRED_FOCUS_OPTIONS.join(", ")}`,
+      `- Missing in Notion: ${state.result.missingFocusOptions.join(", ")}`,
       "",
-      "現在の作業ログ入力フォームは既定で `高` / `中` / `低` を使います。",
-      "ただし、必須プロパティと型が正しければ接続自体は有効です。",
+      "The work log form defaults to `High` / `Medium` / `Low`.",
+      "Connection can still succeed if required properties and types are correct.",
     );
   }
 
   if (state.result.missingSessionTypeOptions.length > 0) {
     lines.push(
       "",
-      "### Session Type の警告",
+      "### Session Type warnings",
       "",
-      `- 拡張で設定済みの作業種類のうち、Notion 側で未検出: ${state.result.missingSessionTypeOptions.join(", ")}`,
+      `- Configured in the extension but missing in Notion: ${state.result.missingSessionTypeOptions.join(", ")}`,
       "",
-      "作業種類は Select として保存する前提です。Notion の `Session Type` プロパティに同じ選択肢を追加してください。",
+      "Session Type is saved as a Select property. Add matching options to Notion `Session Type`.",
     );
   }
 
   if (state.result.ok) {
-    lines.push("", "既存のこのデータベースへ、次回起動時も再接続可能です。");
+    lines.push("", "This database can be reused on the next launch.");
   }
 
   return lines.join("\n");
@@ -140,7 +113,7 @@ export default function ConfigureNotionCommand() {
     if (!notionToken || !notionDatabaseId) {
       setState({
         isLoading: false,
-        error: "Notion Token または Database ID が未設定です。",
+        error: "Notion Token or Database ID is not set.",
       });
       return;
     }
@@ -148,10 +121,7 @@ export default function ConfigureNotionCommand() {
     setState({ isLoading: true });
 
     try {
-      const result = await validatePomodoroDatabase(
-        notionToken,
-        notionDatabaseId,
-      );
+      const result = await validatePomodoroDatabase(notionToken, notionDatabaseId);
       setState({
         isLoading: false,
         result,
@@ -161,19 +131,15 @@ export default function ConfigureNotionCommand() {
         style: result.ok ? Toast.Style.Success : Toast.Style.Failure,
         title: result.ok
           ? result.missingFocusOptions.length > 0
-            ? "Notion接続を確認しました（警告あり）"
-            : "Notion接続を確認しました"
-          : "Notion構成に修正が必要です",
+            ? "Notion connection validated (warnings)"
+            : "Notion connection validated"
+          : "Notion setup needs fixes",
         message:
-          result.ok &&
-          (result.missingFocusOptions.length > 0 ||
-            result.missingSessionTypeOptions.length > 0)
+          result.ok && (result.missingFocusOptions.length > 0 || result.missingSessionTypeOptions.length > 0)
             ? [
-                result.missingFocusOptions.length > 0
-                  ? `Focus 警告: ${result.missingFocusOptions.join(", ")}`
-                  : null,
+                result.missingFocusOptions.length > 0 ? `Focus: ${result.missingFocusOptions.join(", ")}` : null,
                 result.missingSessionTypeOptions.length > 0
-                  ? `Session Type 警告: ${result.missingSessionTypeOptions.join(", ")}`
+                  ? `Session Type: ${result.missingSessionTypeOptions.join(", ")}`
                   : null,
               ]
                 .filter(Boolean)
@@ -181,7 +147,7 @@ export default function ConfigureNotionCommand() {
             : undefined,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "不明なエラー";
+      const message = error instanceof Error ? error.message : "Unknown error";
       setState({
         isLoading: false,
         error: message,
@@ -189,7 +155,7 @@ export default function ConfigureNotionCommand() {
 
       await showToast({
         style: Toast.Style.Failure,
-        title: "Notion接続の確認に失敗しました",
+        title: "Notion validation failed",
         message,
       });
     }
@@ -209,16 +175,8 @@ export default function ConfigureNotionCommand() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="接続確認"
-            icon={Icon.CheckCircle}
-            onAction={validateConnection}
-          />
-          <Action
-            title="Extension Preferences を開く"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Validate Connection" icon={Icon.CheckCircle} onAction={validateConnection} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

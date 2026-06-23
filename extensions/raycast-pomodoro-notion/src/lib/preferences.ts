@@ -3,22 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-export type FocusLevel = "高" | "中" | "低";
-
-export type ExtensionPreferences = {
-  notionToken?: string;
-  notionDatabaseId?: string;
-  workMinutes: string;
-  shortBreakMinutes: string;
-  longBreakMinutes: string;
-  longBreakEvery: string;
-  workSoundFile?: string;
-  breakSoundFile?: string;
-  alarmSoundFile?: string;
-  workVolume: string;
-  breakVolume: string;
-  alarmVolume: string;
-};
+export type FocusLevel = "High" | "Medium" | "Low";
 
 export type PomodoroConfig = {
   workMinutes: number;
@@ -34,31 +19,14 @@ export type PomodoroConfig = {
 };
 
 type PomodoroConfigOverrides = Partial<
-  Pick<
-    PomodoroConfig,
-    "workMinutes" | "shortBreakMinutes" | "longBreakMinutes" | "longBreakEvery"
-  >
+  Pick<PomodoroConfig, "workMinutes" | "shortBreakMinutes" | "longBreakMinutes" | "longBreakEvery">
 >;
 
-const POMODORO_CONFIG_OVERRIDES_FILE = join(
-  environment.supportPath,
-  "pomodoro-config-overrides.json",
-);
-const WORK_SESSION_TYPES_FILE = join(
-  environment.supportPath,
-  "work-session-types.json",
-);
-const DEFAULT_WORK_SESSION_TYPES = [
-  "メイン作業",
-  "執筆",
-  "読書",
-  "雑務",
-] as const;
+const POMODORO_CONFIG_OVERRIDES_FILE = join(environment.supportPath, "pomodoro-config-overrides.json");
+const WORK_SESSION_TYPES_FILE = join(environment.supportPath, "work-session-types.json");
+const DEFAULT_WORK_SESSION_TYPES = ["Main Work", "Writing", "Reading", "Admin"] as const;
 
-function parsePositiveInteger(
-  value: string | undefined,
-  fallback: number,
-): number {
+function parsePositiveInteger(value: string | undefined, fallback: number): number {
   const parsed = Number.parseInt(value ?? "", 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
@@ -72,8 +40,8 @@ function parseVolume(value: string | undefined, fallback: number): number {
   return Math.max(0, Math.min(parsed, 100));
 }
 
-export function getPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function getPomodoroConfig(): PomodoroConfig {
@@ -115,15 +83,9 @@ function loadPomodoroConfigOverrides(): PomodoroConfigOverrides {
   }
 }
 
-export async function savePomodoroConfigOverrides(
-  overrides: PomodoroConfigOverrides,
-): Promise<void> {
+export async function savePomodoroConfigOverrides(overrides: PomodoroConfigOverrides): Promise<void> {
   await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(
-    POMODORO_CONFIG_OVERRIDES_FILE,
-    JSON.stringify(overrides, null, 2),
-    "utf8",
-  );
+  await writeFile(POMODORO_CONFIG_OVERRIDES_FILE, JSON.stringify(overrides, null, 2), "utf8");
 }
 
 export function getWorkSessionTypes(): string[] {
@@ -140,9 +102,7 @@ export function getWorkSessionTypes(): string[] {
 
     const normalized = parsed
       .map((value) => (typeof value === "string" ? value.trim() : ""))
-      .filter(
-        (value, index, array) => value !== "" && array.indexOf(value) === index,
-      );
+      .filter((value, index, array) => value !== "" && array.indexOf(value) === index);
 
     return normalized.length > 0 ? normalized : [...DEFAULT_WORK_SESSION_TYPES];
   } catch {
@@ -153,20 +113,14 @@ export function getWorkSessionTypes(): string[] {
 export async function saveWorkSessionTypes(types: string[]): Promise<void> {
   const normalized = types
     .map((value) => value.trim())
-    .filter(
-      (value, index, array) => value !== "" && array.indexOf(value) === index,
-    );
+    .filter((value, index, array) => value !== "" && array.indexOf(value) === index);
 
   if (normalized.length === 0) {
-    throw new Error("作業種類は 1 つ以上必要です。");
+    throw new Error("At least one work session type is required.");
   }
 
   await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(
-    WORK_SESSION_TYPES_FILE,
-    JSON.stringify(normalized, null, 2),
-    "utf8",
-  );
+  await writeFile(WORK_SESSION_TYPES_FILE, JSON.stringify(normalized, null, 2), "utf8");
 }
 
 export function getNotionSettings(): {

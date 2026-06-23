@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { LaunchType, launchCommand } from "@raycast/api";
 
 import { playAlarmForSession, syncAudioForSession } from "./lib/audio";
 import {
@@ -9,24 +9,15 @@ import {
   saveSession,
 } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
-import {
-  buildCommandDeeplink,
-  cancelTimerScheduler,
-  syncTimerScheduler,
-} from "./lib/timer-scheduler";
+import { cancelTimerScheduler, syncTimerScheduler } from "./lib/timer-scheduler";
 
 const POMODORO_STATUS_COMMAND = "pomodoro-status";
 
-function openPomodoroStatus(): void {
-  const deeplink = buildCommandDeeplink(
-    POMODORO_STATUS_COMMAND,
-    "userInitiated",
-  );
-  const child = spawn("open", [deeplink], {
-    detached: true,
-    stdio: "ignore",
+async function openPomodoroStatus(): Promise<void> {
+  await launchCommand({
+    name: POMODORO_STATUS_COMMAND,
+    type: LaunchType.UserInitiated,
   });
-  child.unref();
 }
 
 export default async function Command() {
@@ -43,15 +34,13 @@ export default async function Command() {
     await saveSession(normalized);
   }
 
-  const statusJustElapsed =
-    loaded.status === "running" &&
-    normalized.status === "awaiting_confirmation";
+  const statusJustElapsed = loaded.status === "running" && normalized.status === "awaiting_confirmation";
 
   if (statusJustElapsed) {
     await syncAudioForSession(normalized, config);
     await cancelTimerScheduler();
     await playAlarmForSession(normalized.id, config);
-    openPomodoroStatus();
+    await openPomodoroStatus();
     return;
   }
 
@@ -71,5 +60,5 @@ export default async function Command() {
   await syncAudioForSession(updated, config);
   await cancelTimerScheduler();
   await playAlarmForSession(updated.id, config);
-  openPomodoroStatus();
+  await openPomodoroStatus();
 }

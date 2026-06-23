@@ -113,9 +113,7 @@ function isLoopShellProcess(pid: number, filePath: string): boolean {
     return false;
   }
 
-  return (
-    command.includes("while true; do afplay") && command.includes(filePath)
-  );
+  return command.includes("while true; do afplay") && command.includes(filePath);
 }
 
 /** 1 ループ = sh + afplay の 2 プロセス。それを超えたら二重起動とみなす */
@@ -133,16 +131,13 @@ function getBundledAudioPath(fileName: string): string | undefined {
   return existsSync(candidate) ? candidate : undefined;
 }
 
-function resolveLoopAudioSelection(
-  kind: AudioKind,
-  config: PomodoroConfig,
-): AudioSelection {
+function resolveLoopAudioSelection(kind: AudioKind, config: PomodoroConfig): AudioSelection {
   if (kind === "work") {
     if (config.workSoundFile && existsSync(config.workSoundFile)) {
       return {
         source: "user",
         filePath: config.workSoundFile,
-        label: `ユーザー指定: ${config.workSoundFile}`,
+        label: `Custom file: ${config.workSoundFile}`,
       };
     }
 
@@ -151,13 +146,13 @@ function resolveLoopAudioSelection(
       return {
         source: "bundled",
         filePath: bundled,
-        label: "同梱音源: rain-ambient.mp3",
+        label: "Bundled: rain-ambient.mp3",
       };
     }
 
     return {
       source: "none",
-      label: "未設定",
+      label: "Not set",
     };
   }
 
@@ -165,7 +160,7 @@ function resolveLoopAudioSelection(
     return {
       source: "user",
       filePath: config.breakSoundFile,
-      label: `ユーザー指定: ${config.breakSoundFile}`,
+      label: `Custom file: ${config.breakSoundFile}`,
     };
   }
 
@@ -174,13 +169,13 @@ function resolveLoopAudioSelection(
     return {
       source: "bundled",
       filePath: bundled,
-      label: "同梱音源: break-piano.mp3",
+      label: "Bundled: break-piano.mp3",
     };
   }
 
   return {
     source: "none",
-    label: "未設定",
+    label: "Not set",
   };
 }
 
@@ -189,7 +184,7 @@ function resolveAlarmSelection(config: PomodoroConfig): AudioSelection {
     return {
       source: "user",
       filePath: config.alarmSoundFile,
-      label: `ユーザー指定: ${config.alarmSoundFile}`,
+      label: `Custom file: ${config.alarmSoundFile}`,
     };
   }
 
@@ -198,7 +193,7 @@ function resolveAlarmSelection(config: PomodoroConfig): AudioSelection {
     return {
       source: "bundled",
       filePath: bundled,
-      label: "同梱音源: alarm-bell.mp3",
+      label: "Bundled: alarm-bell.mp3",
     };
   }
 
@@ -206,13 +201,13 @@ function resolveAlarmSelection(config: PomodoroConfig): AudioSelection {
     return {
       source: "system",
       filePath: DEFAULT_ALARM_SOUND,
-      label: `macOS標準音: ${DEFAULT_ALARM_SOUND}`,
+      label: `macOS system sound: ${DEFAULT_ALARM_SOUND}`,
     };
   }
 
   return {
     source: "none",
-    label: "未設定",
+    label: "Not set",
   };
 }
 
@@ -275,10 +270,7 @@ function killProcessTree(pid: number): void {
   }
 }
 
-function killProcessesMatching(
-  patterns: readonly string[],
-  signal: "SIGTERM" | "SIGKILL" = "SIGTERM",
-): void {
+function killProcessesMatching(patterns: readonly string[], signal: "SIGTERM" | "SIGKILL" = "SIGTERM"): void {
   const flag = signal === "SIGKILL" ? "-9" : undefined;
   for (const pattern of patterns) {
     spawnSync("pkill", flag ? ["-9", "-f", pattern] : ["-f", pattern], {
@@ -304,12 +296,7 @@ function isProcessAlive(pid: number): boolean {
   }
 }
 
-function isMatchingLoopActive(
-  state: AudioProcessState,
-  kind: AudioKind,
-  filePath: string,
-  volume: number,
-): boolean {
+function isMatchingLoopActive(state: AudioProcessState, kind: AudioKind, filePath: string, volume: number): boolean {
   if (typeof state.volume !== "number") {
     return false;
   }
@@ -318,11 +305,7 @@ function isMatchingLoopActive(
     return false;
   }
 
-  if (
-    state.kind !== kind ||
-    state.filePath !== filePath ||
-    state.volume !== volume
-  ) {
+  if (state.kind !== kind || state.filePath !== filePath || state.volume !== volume) {
     return false;
   }
 
@@ -367,24 +350,16 @@ async function playLoopingAudioInternal(
   const volume = resolveLoopVolume(kind, config);
   const existing = await getAudioState();
 
-  if (
-    !options?.restart &&
-    existing &&
-    isMatchingLoopActive(existing, kind, filePath, volume)
-  ) {
+  if (!options?.restart && existing && isMatchingLoopActive(existing, kind, filePath, volume)) {
     return true;
   }
 
   await stopLoopingAudioInternal();
 
-  const child = spawn(
-    "/bin/sh",
-    ["-c", buildLoopShellCommand(filePath, volume)],
-    {
-      detached: true,
-      stdio: "ignore",
-    },
-  );
+  const child = spawn("/bin/sh", ["-c", buildLoopShellCommand(filePath, volume)], {
+    detached: true,
+    stdio: "ignore",
+  });
   child.unref();
 
   if (child.pid) {
@@ -422,10 +397,7 @@ export async function playAlarm(config: PomodoroConfig): Promise<boolean> {
   return true;
 }
 
-export async function playAlarmForSession(
-  sessionId: string,
-  config: PomodoroConfig,
-): Promise<boolean> {
+export async function playAlarmForSession(sessionId: string, config: PomodoroConfig): Promise<boolean> {
   const lastSessionId = await getLastAlarmSessionId();
   if (lastSessionId === sessionId) {
     return false;
@@ -439,20 +411,14 @@ export async function playAlarmForSession(
   return played;
 }
 
-export async function previewLoopingAudio(
-  kind: AudioKind,
-  config: PomodoroConfig,
-  seconds = 5,
-): Promise<boolean> {
+export async function previewLoopingAudio(kind: AudioKind, config: PomodoroConfig, seconds = 5): Promise<boolean> {
   const selection = resolveLoopAudioSelection(kind, config);
   if (!selection.filePath) {
     return false;
   }
 
   const filePath = selection.filePath;
-  const afplayVolume = volumePercentToAfplayArgument(
-    resolveLoopVolume(kind, config),
-  );
+  const afplayVolume = volumePercentToAfplayArgument(resolveLoopVolume(kind, config));
   const command = `afplay -v ${afplayVolume} ${escapeShellArgument(filePath)} >/dev/null 2>&1 & pid=$!; sleep ${Math.max(
     1,
     Math.floor(seconds),
@@ -481,10 +447,7 @@ export async function syncAudioForSession(
     return;
   }
 
-  if (
-    session.status === "paused" ||
-    session.status === "awaiting_confirmation"
-  ) {
+  if (session.status === "paused" || session.status === "awaiting_confirmation") {
     await stopLoopingAudio();
     return;
   }

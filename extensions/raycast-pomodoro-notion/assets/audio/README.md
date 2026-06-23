@@ -1,35 +1,35 @@
-# 同梱音源の配置
+# Bundled audio
 
-このフォルダに以下の名前で音源を置くと、PomoNotion Raycast Extension が自動で検出して使います。
+Place audio files in this folder with the names below. PomoNotion Raycast Extension detects and uses them automatically.
 
-## 推奨ファイル名
-
-- `rain-ambient.mp3`
-  - 作業中の雨音
-  - 自然音ベース、遠くでまれに雷が鳴る雰囲気を想定
-- `break-piano.mp3`
-  - 休憩中のピアノ音楽
-  - 穏やかでループ再生に向くものを想定
-- `alarm-bell.mp3`
-  - セッション終了時の短いベル音
-
-## 現在配置されている音源
+## Recommended file names
 
 - `rain-ambient.mp3`
-  - 出典: [Pixabay - Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/)
+  - Rain ambience during work
+  - Natural sound with occasional distant thunder
 - `break-piano.mp3`
-  - 出典: [Pixabay - Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/)
+  - Calm piano music during breaks
+  - Suitable for looping
 - `alarm-bell.mp3`
-  - 出典: [Pixabay - Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/)
+  - Short bell when a session ends
 
-## 優先順位
+## Currently bundled
 
-1. Raycast Preferences で指定したユーザー音源
-2. このフォルダの同梱音源
-3. アラームのみ macOS 標準音
+- `rain-ambient.mp3`
+  - Source: [Pixabay - Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/)
+- `break-piano.mp3`
+  - Source: [Pixabay - Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/)
+- `alarm-bell.mp3`
+  - Source: [Pixabay - Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/)
 
-## 注意
+## Priority
 
-- 現在の再生は `afplay` ベースです
-- 長時間ループ向けに、極端に大きなファイルは避けてください
-- mp3 以外を使いたい場合は、Preferences 側で明示指定してください
+1. User-selected files in Raycast Preferences
+2. Bundled audio in this folder
+3. Alarm only: macOS system sound fallback
+
+## Notes
+
+- Playback uses `afplay`
+- Avoid extremely large files for long loops
+- For non-mp3 formats, specify files explicitly in Preferences

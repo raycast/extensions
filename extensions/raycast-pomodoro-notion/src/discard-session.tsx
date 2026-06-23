@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  Toast,
-  confirmAlert,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { WorkLogForm } from "./components/work-log-form";
@@ -22,7 +14,7 @@ import { getPomodoroConfig } from "./lib/preferences";
 import { syncTimerScheduler } from "./lib/timer-scheduler";
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", { hour12: false });
+  return new Date(iso).toLocaleString("en-US", { hour12: false });
 }
 
 export default function DiscardSessionCommand() {
@@ -47,8 +39,8 @@ export default function DiscardSessionCommand() {
 
   async function handleStopBreak() {
     const confirmed = await confirmAlert({
-      title: "休憩を終了して停止しますか？",
-      message: "現在の休憩セッションを終了し、ループ音を停止します。",
+      title: "End break and stop?",
+      message: "This ends the current break session and stops looping audio.",
     });
 
     if (!confirmed) {
@@ -61,7 +53,7 @@ export default function DiscardSessionCommand() {
     setSession(null);
     await showToast({
       style: Toast.Style.Success,
-      title: "休憩セッションを終了して停止しました",
+      title: "Break session ended and stopped",
     });
   }
 
@@ -70,15 +62,7 @@ export default function DiscardSessionCommand() {
   }
 
   if (!session) {
-    return (
-      <Detail
-        markdown={[
-          "# Discard Session",
-          "",
-          "停止または破棄するセッションがありません。",
-        ].join("\n")}
-      />
-    );
+    return <Detail markdown={["# Discard Session", "", "No session to stop or discard."].join("\n")} />;
   }
 
   if (session.kind === "work") {
@@ -86,8 +70,8 @@ export default function DiscardSessionCommand() {
       <WorkLogForm
         session={session}
         config={config}
-        submitTitle="作業ログを保存して停止"
-        successMessage="作業セッションを終了して停止しました。"
+        submitTitle="Save Work Log and Stop"
+        successMessage="Work session ended and stopped."
         createNextSessionOnSubmit={false}
         onCompleted={async () => {
           await stopLoopingAudio();
@@ -101,11 +85,11 @@ export default function DiscardSessionCommand() {
   const markdown = [
     "# Discard Session",
     "",
-    "- 現在のセッション種別: 休憩",
-    `- 開始時刻: ${formatDateTime(session.startedAt)}`,
-    `- 予定終了: ${formatDateTime(session.plannedEndAt)}`,
+    "- Current session type: Break",
+    `- Started at: ${formatDateTime(session.startedAt)}`,
+    `- Planned end: ${formatDateTime(session.plannedEndAt)}`,
     "",
-    "休憩中にこのコマンドを実行すると、Notion へ保存せずそのままループ音を止めて停止します。",
+    "During a break, this command stops looping audio without saving anything to Notion.",
   ].join("\n");
 
   return (
@@ -113,11 +97,7 @@ export default function DiscardSessionCommand() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="休憩を終了して停止"
-            icon={Icon.Stop}
-            onAction={handleStopBreak}
-          />
+          <Action title="End Break and Stop" icon={Icon.Stop} onAction={handleStopBreak} />
         </ActionPanel>
       }
     />

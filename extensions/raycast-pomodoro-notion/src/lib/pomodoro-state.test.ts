@@ -24,9 +24,7 @@ const config: PomodoroConfig = {
   alarmVolume: 80,
 };
 
-function buildWorkSession(
-  currentTime = Date.UTC(2026, 0, 1, 0, 0, 0),
-): PomodoroSession {
+function buildWorkSession(currentTime = Date.UTC(2026, 0, 1, 0, 0, 0)): PomodoroSession {
   return startWorkSession(config, currentTime);
 }
 
@@ -47,23 +45,13 @@ test("一時停止後に再開すると plannedEndAt が後ろへずれる", () 
   assert.equal(paused.status, "paused");
   assert.equal(paused.accumulatedActiveMs, 5 * 60_000);
   assert.equal(resumed.status, "running");
-  assert.equal(
-    resumed.activeStartedAt,
-    new Date(startAt + 10 * 60_000).toISOString(),
-  );
-  assert.equal(
-    resumed.plannedEndAt,
-    new Date(startAt + 42 * 60_000).toISOString(),
-  );
+  assert.equal(resumed.activeStartedAt, new Date(startAt + 10 * 60_000).toISOString());
+  assert.equal(resumed.plannedEndAt, new Date(startAt + 42 * 60_000).toISOString());
 });
 
 test("作業終了で短休憩へ進む", () => {
   const session = buildWorkSession();
-  const next = finishSessionAndContinue(
-    session,
-    config,
-    Date.UTC(2026, 0, 1, 0, 37, 0),
-  );
+  const next = finishSessionAndContinue(session, config, Date.UTC(2026, 0, 1, 0, 37, 0));
 
   assert.equal(next.kind, "shortBreak");
   assert.equal(next.completedWorkSessions, 1);
@@ -76,11 +64,7 @@ test("3セット目の作業終了で長休憩へ進む", () => {
     completedWorkSessions: 2,
   };
 
-  const next = finishSessionAndContinue(
-    thirdWork,
-    config,
-    Date.UTC(2026, 0, 1, 2, 0, 0),
-  );
+  const next = finishSessionAndContinue(thirdWork, config, Date.UTC(2026, 0, 1, 2, 0, 0));
 
   assert.equal(next.kind, "longBreak");
   assert.equal(next.completedWorkSessions, 3);

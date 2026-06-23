@@ -4,17 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { StartWorkSessionForm } from "./components/start-work-session-form";
 import { WorkLogForm } from "./components/work-log-form";
 import { syncAudioForSession } from "./lib/audio";
-import {
-  loadSession,
-  normalizeRestoredSession,
-  saveSession,
-  type PomodoroSession,
-} from "./lib/pomodoro-state";
+import { loadSession, normalizeRestoredSession, saveSession, type PomodoroSession } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
 import { syncTimerScheduler } from "./lib/timer-scheduler";
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", { hour12: false });
+  return new Date(iso).toLocaleString("en-US", { hour12: false });
 }
 
 export default function FinishCurrentSessionCommand() {
@@ -45,11 +40,9 @@ export default function FinishCurrentSessionCommand() {
   if (!session) {
     return (
       <Detail
-        markdown={[
-          "# Finish Current Session",
-          "",
-          "終了するセッションがありません。`Start Pomodoro` から開始してください。",
-        ].join("\n")}
+        markdown={["# Finish Current Session", "", "No session to finish. Start one from **Start Pomodoro**."].join(
+          "\n",
+        )}
       />
     );
   }
@@ -59,7 +52,7 @@ export default function FinishCurrentSessionCommand() {
       <WorkLogForm
         session={session}
         config={config}
-        submitTitle="作業ログを保存して現在の作業を終了"
+        submitTitle="Save Work Log and Finish Current Work"
         onCompleted={async (nextSession) => {
           setSession(nextSession);
           await syncTimerScheduler(nextSession);
@@ -72,11 +65,11 @@ export default function FinishCurrentSessionCommand() {
   const markdown = [
     "# Finish Current Session",
     "",
-    "- 現在のセッション種別: 休憩",
-    `- 開始時刻: ${formatDateTime(session.startedAt)}`,
-    `- 予定終了: ${formatDateTime(session.plannedEndAt)}`,
+    "- Current session type: Break",
+    `- Started at: ${formatDateTime(session.startedAt)}`,
+    `- Planned end: ${formatDateTime(session.plannedEndAt)}`,
     "",
-    "現在の休憩を終了して、次の作業セッションへ進みます。",
+    "End the current break and continue to the next work session.",
   ].join("\n");
 
   return (
@@ -85,15 +78,15 @@ export default function FinishCurrentSessionCommand() {
       actions={
         <ActionPanel>
           <Action
-            title="作業種類を選んで次の作業を開始"
+            title="Choose Session Type and Start Next Work"
             icon={Icon.CheckCircle}
             onAction={() =>
               push(
                 <StartWorkSessionForm
                   config={config}
                   completedWorkSessions={session.completedWorkSessions}
-                  submitTitle="作業種類を選んで次の作業を開始"
-                  successMessage="次の作業セッションを開始しました。"
+                  submitTitle="Choose Session Type and Start Next Work"
+                  successMessage="Started the next work session."
                   openPomodoroStatusOnComplete
                   onStarted={async () => {
                     setSession(null);

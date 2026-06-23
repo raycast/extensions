@@ -3,13 +3,15 @@ import {
   APIResponseError,
   Client,
   ClientErrorCode,
+  isFullDatabase,
+  isFullDataSource,
   isNotionClientError,
 } from "@notionhq/client";
 
 import { getWorkSessionTypes, type FocusLevel } from "./preferences";
 import type { PomodoroSession } from "./pomodoro-state";
 
-export const REQUIRED_FOCUS_OPTIONS = ["高", "中", "低"] as const;
+export const REQUIRED_FOCUS_OPTIONS = ["High", "Medium", "Low"] as const;
 
 export const REQUIRED_DATABASE_SCHEMA = {
   Name: "title",
@@ -43,12 +45,7 @@ function extractPlainTextFromTitle(property: unknown): string {
 
   return property
     .map((item) => {
-      if (
-        item &&
-        typeof item === "object" &&
-        "plain_text" in item &&
-        typeof item.plain_text === "string"
-      ) {
+      if (item && typeof item === "object" && "plain_text" in item && typeof item.plain_text === "string") {
         return item.plain_text;
       }
       return "";
@@ -57,39 +54,57 @@ function extractPlainTextFromTitle(property: unknown): string {
     .trim();
 }
 
-export async function validatePomodoroDatabase(
-  token: string,
-  databaseId: string,
-): Promise<ValidationResult> {
-  const notion = createNotionClient(token);
-  const response = await notion.databases.retrieve({ database_id: databaseId });
-  const database = response as unknown as {
-    title?: unknown;
-    data_sources?: Array<{ id: string }>;
-  };
+type DatabasePropertySchema = Record<
+  string,
+  {
+    type?: string;
+    select?: { options?: Array<{ name: string }> };
+  }
+>;
 
-  const firstDataSourceId = database.data_sources?.[0]?.id;
-  if (!firstDataSourceId) {
-    throw new Error(
-      "Notion データベースに data source が見つかりませんでした。",
-    );
+type DatabaseSchemaInfo = {
+  databaseTitle: string;
+  properties: DatabasePropertySchema;
+};
+
+async function loadDatabaseSchemaInfo(notion: Client, databaseId: string): Promise<DatabaseSchemaInfo> {
+  const response = await notion.databases.retrieve({ database_id: databaseId });
+
+  if (isFullDatabase(response)) {
+    const firstDataSourceId = response.data_sources[0]?.id;
+    if (firstDataSourceId) {
+      const dataSourceResponse = await notion.dataSources.retrieve({
+        data_source_id: firstDataSourceId,
+      });
+
+      if (!isFullDataSource(dataSourceResponse)) {
+        throw new Error("Could not load the Notion database schema. Check the Database ID and Connect permissions.");
+      }
+
+      return {
+        databaseTitle: extractPlainTextFromTitle(dataSourceResponse.title) || extractPlainTextFromTitle(response.title),
+        properties: dataSourceResponse.properties,
+      };
+    }
   }
 
-  const dataSourceResponse = await notion.dataSources.retrieve({
-    data_source_id: firstDataSourceId,
-  });
-  const dataSource = dataSourceResponse as unknown as {
+  const legacyResponse = response as {
+    properties?: DatabasePropertySchema;
     title?: unknown;
-    properties?: Record<
-      string,
-      {
-        type?: string;
-        select?: { options?: Array<{ name: string }> };
-      }
-    >;
   };
+  if (legacyResponse.properties) {
+    return {
+      databaseTitle: extractPlainTextFromTitle(legacyResponse.title),
+      properties: legacyResponse.properties,
+    };
+  }
 
-  const properties = dataSource.properties ?? {};
+  throw new Error("Could not load the Notion database schema. Check the Database ID and Connect permissions.");
+}
+
+export async function validatePomodoroDatabase(token: string, databaseId: string): Promise<ValidationResult> {
+  const notion = createNotionClient(token);
+  const { databaseTitle, properties } = await loadDatabaseSchemaInfo(notion, databaseId);
   const missingProperties: string[] = [];
   const invalidProperties: Array<{
     name: string;
@@ -106,9 +121,7 @@ export async function validatePomodoroDatabase(
 
     const typeMatches =
       property.type === expectedType ||
-      (name === "Work Note" &&
-        expectedType === "rich_text" &&
-        property.type === "text");
+      (name === "Work Note" && expectedType === "rich_text" && property.type === "text");
 
     if (!typeMatches) {
       invalidProperties.push({
@@ -119,24 +132,15 @@ export async function validatePomodoroDatabase(
     }
   }
 
-  const focusOptions =
-    properties.Focus?.select?.options?.map((option) => option.name) ?? [];
-  const missingFocusOptions = REQUIRED_FOCUS_OPTIONS.filter(
-    (option) => !focusOptions.includes(option),
-  );
+  const focusOptions = properties.Focus?.select?.options?.map((option) => option.name) ?? [];
+  const missingFocusOptions = REQUIRED_FOCUS_OPTIONS.filter((option) => !focusOptions.includes(option));
   const configuredWorkSessionTypes = getWorkSessionTypes();
-  const sessionTypeOptions =
-    properties["Session Type"]?.select?.options?.map((option) => option.name) ??
-    [];
-  const missingSessionTypeOptions = configuredWorkSessionTypes.filter(
-    (option) => !sessionTypeOptions.includes(option),
-  );
+  const sessionTypeOptions = properties["Session Type"]?.select?.options?.map((option) => option.name) ?? [];
+  const missingSessionTypeOptions = configuredWorkSessionTypes.filter((option) => !sessionTypeOptions.includes(option));
 
   return {
     ok: missingProperties.length === 0 && invalidProperties.length === 0,
-    databaseTitle:
-      extractPlainTextFromTitle(dataSource.title) ||
-      extractPlainTextFromTitle(database.title),
+    databaseTitle,
     missingProperties,
     invalidProperties,
     focusOptions,
@@ -152,31 +156,31 @@ function sleep(ms: number): Promise<void> {
 
 function buildFriendlyNotionErrorMessage(error: unknown): string {
   if (!isNotionClientError(error)) {
-    return error instanceof Error ? error.message : "不明なエラー";
+    return error instanceof Error ? error.message : "Unknown error";
   }
 
   if (APIResponseError.isAPIResponseError(error)) {
     switch (error.code) {
       case APIErrorCode.Unauthorized:
-        return "Notion Token が無効か、権限が不足しています。";
+        return "Notion Token is invalid or lacks permission.";
       case APIErrorCode.RestrictedResource:
       case APIErrorCode.ObjectNotFound:
-        return "Database ID が誤っているか、コネクトがデータベースに接続されていません。";
+        return "Database ID is incorrect, or the Connect is not linked to the database.";
       case APIErrorCode.ValidationError:
-        return `Notion データベースの構成が要件と一致していません。${error.message}`;
+        return `The Notion database schema does not match the required layout. ${error.message}`;
       case APIErrorCode.RateLimited:
-        return "Notion API の利用制限に達しました。少し待ってから再試行してください。";
+        return "Notion API rate limit reached. Wait a moment and try again.";
       case APIErrorCode.InternalServerError:
       case APIErrorCode.ServiceUnavailable:
       case APIErrorCode.GatewayTimeout:
-        return "Notion 側で一時的な障害が発生しています。少し待ってから再試行してください。";
+        return "Notion is temporarily unavailable. Wait a moment and try again.";
       default:
         return error.message;
     }
   }
 
   if (error.code === ClientErrorCode.RequestTimeout) {
-    return "Notion API への接続がタイムアウトしました。ネットワーク状態を確認して再試行してください。";
+    return "Notion API request timed out. Check your network and try again.";
   }
 
   return error.message;
@@ -197,10 +201,7 @@ function isRetryableNotionError(error: unknown): boolean {
     ].includes(error.code);
   }
 
-  return (
-    error.code === ClientErrorCode.RequestTimeout ||
-    error.code === ClientErrorCode.ResponseError
-  );
+  return error.code === ClientErrorCode.RequestTimeout || error.code === ClientErrorCode.ResponseError;
 }
 
 export async function createWorkLogPage(args: {
@@ -214,7 +215,7 @@ export async function createWorkLogPage(args: {
 }): Promise<void> {
   const { token, databaseId, session, note, focus, endAt, timeMinutes } = args;
   const notion = createNotionClient(token);
-  const title = `Pomodoro ${new Date(session.startedAt).toLocaleString("ja-JP", { hour12: false })}`;
+  const title = `Pomodoro ${new Date(session.startedAt).toLocaleString("en-US", { hour12: false })}`;
   const payload = {
     parent: {
       type: "database_id" as const,

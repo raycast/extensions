@@ -57,13 +57,8 @@ function getDurationMinutes(kind: SessionKind, config: PomodoroConfig): number {
   }
 }
 
-function getNextBreakKind(
-  completedWorkSessions: number,
-  config: PomodoroConfig,
-): SessionKind {
-  return completedWorkSessions % config.longBreakEvery === 0
-    ? "longBreak"
-    : "shortBreak";
+function getNextBreakKind(completedWorkSessions: number, config: PomodoroConfig): SessionKind {
+  return completedWorkSessions % config.longBreakEvery === 0 ? "longBreak" : "shortBreak";
 }
 
 function buildRunningSession(
@@ -93,10 +88,7 @@ function buildRunningSession(
   };
 }
 
-function requireConfig(
-  config: PomodoroConfig | undefined,
-  event: PomodoroEvent["type"],
-): PomodoroConfig {
+function requireConfig(config: PomodoroConfig | undefined, event: PomodoroEvent["type"]): PomodoroConfig {
   if (!config) {
     throw new Error(`PomodoroConfig is required for ${event}`);
   }
@@ -112,13 +104,7 @@ export function transitionSession(
 ): PomodoroSession | null {
   if (!session) {
     if (event.type === "START_WORK") {
-      return buildRunningSession(
-        "work",
-        requireConfig(config, event.type),
-        0,
-        undefined,
-        currentTime,
-      );
+      return buildRunningSession("work", requireConfig(config, event.type), 0, undefined, currentTime);
     }
 
     return null;
@@ -159,8 +145,7 @@ export function transitionSession(
         activeStartedAt: toIso(currentTime),
         pausedAt: undefined,
         plannedEndAt: new Date(
-          new Date(session.plannedEndAt).getTime() +
-            (currentTime - new Date(session.pausedAt).getTime()),
+          new Date(session.plannedEndAt).getTime() + (currentTime - new Date(session.pausedAt).getTime()),
         ).toISOString(),
         updatedAt: toIso(currentTime),
       };
@@ -190,13 +175,7 @@ export function transitionSession(
         );
       }
 
-      return buildRunningSession(
-        "work",
-        resolvedConfig,
-        session.completedWorkSessions,
-        undefined,
-        currentTime,
-      );
+      return buildRunningSession("work", resolvedConfig, session.completedWorkSessions, undefined, currentTime);
     }
 
     case "FINISH_AND_STOP":
@@ -211,47 +190,19 @@ export function startWorkSession(
   workType?: string,
   completedWorkSessions = 0,
 ): PomodoroSession {
-  return buildRunningSession(
-    "work",
-    config,
-    completedWorkSessions,
-    workType,
-    currentTime,
-  );
+  return buildRunningSession("work", config, completedWorkSessions, workType, currentTime);
 }
 
-export function pauseSession(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): PomodoroSession {
-  return (
-    transitionSession(session, { type: "PAUSE" }, undefined, currentTime) ??
-    session
-  );
+export function pauseSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
+  return transitionSession(session, { type: "PAUSE" }, undefined, currentTime) ?? session;
 }
 
-export function resumeSession(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): PomodoroSession {
-  return (
-    transitionSession(session, { type: "RESUME" }, undefined, currentTime) ??
-    session
-  );
+export function resumeSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
+  return transitionSession(session, { type: "RESUME" }, undefined, currentTime) ?? session;
 }
 
-export function confirmSessionEnd(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): PomodoroSession {
-  return (
-    transitionSession(
-      session,
-      { type: "TIMER_ELAPSED" },
-      undefined,
-      currentTime,
-    ) ?? session
-  );
+export function confirmSessionEnd(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
+  return transitionSession(session, { type: "TIMER_ELAPSED" }, undefined, currentTime) ?? session;
 }
 
 export function finishSessionAndContinue(
@@ -259,71 +210,35 @@ export function finishSessionAndContinue(
   config: PomodoroConfig,
   currentTime = Date.now(),
 ): PomodoroSession {
-  return (
-    transitionSession(
-      session,
-      { type: "FINISH_AND_CONTINUE" },
-      config,
-      currentTime,
-    ) ?? session
-  );
+  return transitionSession(session, { type: "FINISH_AND_CONTINUE" }, config, currentTime) ?? session;
 }
 
-export function finishSessionAndStop(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): null {
-  transitionSession(
-    session,
-    { type: "FINISH_AND_STOP" },
-    undefined,
-    currentTime,
-  );
+export function finishSessionAndStop(session: PomodoroSession, currentTime = Date.now()): null {
+  transitionSession(session, { type: "FINISH_AND_STOP" }, undefined, currentTime);
   return null;
 }
 
-export function handleSleepDetected(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): PomodoroSession {
-  return (
-    transitionSession(
-      session,
-      { type: "SLEEP_DETECTED" },
-      undefined,
-      currentTime,
-    ) ?? session
-  );
+export function handleSleepDetected(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
+  return transitionSession(session, { type: "SLEEP_DETECTED" }, undefined, currentTime) ?? session;
 }
 
-export function getSessionSnapshot(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): SessionSnapshot {
+export function getSessionSnapshot(session: PomodoroSession, currentTime = Date.now()): SessionSnapshot {
   const plannedEndMs = new Date(session.plannedEndAt).getTime();
   const remainingMs = Math.max(plannedEndMs - currentTime, 0);
   const overtimeMs = Math.max(currentTime - plannedEndMs, 0);
 
   const displayStatus =
-    session.status === "running" && currentTime >= plannedEndMs
-      ? "awaiting_confirmation"
-      : session.status;
+    session.status === "running" && currentTime >= plannedEndMs ? "awaiting_confirmation" : session.status;
 
   return {
-    session:
-      displayStatus === session.status
-        ? session
-        : { ...session, status: displayStatus },
+    session: displayStatus === session.status ? session : { ...session, status: displayStatus },
     remainingMs,
     overtimeMs,
     displayStatus,
   };
 }
 
-export function normalizeRestoredSession(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): PomodoroSession {
+export function normalizeRestoredSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
   if (session.status !== "running") {
     return session;
   }
@@ -342,52 +257,36 @@ export function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function getActualActiveMs(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): number {
-  if (
-    (session.status === "running" ||
-      session.status === "awaiting_confirmation") &&
-    session.activeStartedAt
-  ) {
-    return (
-      session.accumulatedActiveMs +
-      Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0)
-    );
+export function getActualActiveMs(session: PomodoroSession, currentTime = Date.now()): number {
+  if ((session.status === "running" || session.status === "awaiting_confirmation") && session.activeStartedAt) {
+    return session.accumulatedActiveMs + Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0);
   }
 
   return session.accumulatedActiveMs;
 }
 
-export function getActualActiveMinutes(
-  session: PomodoroSession,
-  currentTime = Date.now(),
-): number {
-  return Math.max(
-    0,
-    Math.round(getActualActiveMs(session, currentTime) / 60000),
-  );
+export function getActualActiveMinutes(session: PomodoroSession, currentTime = Date.now()): number {
+  return Math.max(0, Math.round(getActualActiveMs(session, currentTime) / 60000));
 }
 
 export function getKindLabel(kind: SessionKind): string {
   switch (kind) {
     case "work":
-      return "作業";
+      return "Work";
     case "shortBreak":
-      return "短休憩";
+      return "Short break";
     case "longBreak":
-      return "長休憩";
+      return "Long break";
   }
 }
 
 export function getStatusLabel(status: SessionStatus): string {
   switch (status) {
     case "running":
-      return "進行中";
+      return "Running";
     case "paused":
-      return "一時停止";
+      return "Paused";
     case "awaiting_confirmation":
-      return "終了待ち";
+      return "Awaiting confirmation";
   }
 }

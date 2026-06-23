@@ -1,253 +1,241 @@
 # PomoNotion Raycast Extension
 
-Raycast 上でポモドーロタイマーを動かし、作業ログを Notion に残す拡張です。  
-作業 BGM・休憩 BGM・アラーム、作業メモ、集中度の記録、途中終了、一時停止・再開までを 1 つにまとめています。
+A Raycast extension that runs a Pomodoro timer on macOS and saves work logs to Notion.  
+It combines work/break BGM, alarms, work notes, focus levels, early finish, pause, and resume in one workflow.
 
-> **対応 OS: macOS 専用**  
-> Raycast 本体は Windows 版もありますが、この拡張は **macOS 上の Raycast** 向けです。BGM 再生など OS 依存の機能があるため、Windows では利用できません。
+> **macOS only**  
+> Raycast also has a Windows app, but this extension targets **Raycast on macOS**. Audio playback and other OS-specific features are not available on Windows.
 
-**作者:** [こひなだまこと](https://x.com/pgp_workstyle)
+**Author:** [Kohinada Makoto](https://x.com/pgp_workstyle)
 
-## 何ができるか
+## Features
 
-- 作業・短休憩・長休憩のポモドーロサイクル
-- 作業中と休憩中で異なる BGM のループ再生（BGM は好みのファイルに変更可能）
-- セッション終了時のアラーム
-- 作業メモと集中度（高 / 中 / 低）の入力
-- Notion データベースへの作業ログ保存
-- 一時停止・再開を除いた **実作業時間** の記録
-- 作業中・休憩中それぞれの途中終了
+- Work, short break, and long break Pomodoro cycles
+- Looping BGM during work and breaks (replaceable in preferences)
+- Alarm when a session ends
+- Work notes and focus level (`High` / `Medium` / `Low`)
+- Work log storage in a Notion database
+- **Active work minutes** recorded (excluding paused time)
+- Early finish during work or breaks
 
-## English Summary
+## Who it's for
 
-PomoNotion Raycast Extension is a **macOS-only** Raycast extension that combines a Pomodoro timer with Notion logging.  
-Created by [こひなだまこと](https://x.com/pgp_workstyle).
+- Raycast users on **macOS**
+- People who want Pomodoro logs in Notion
+- People who want reviewable records, not just a timer
+- People who like ambient audio while switching between work and breaks
 
-After installation, set up a Notion database and extension preferences, then start from **Start Pomodoro** or **Pomodoro Status**.  
-Features include work / short break / long break cycles, bundled BGM (replaceable in preferences), pause and resume, early finish, and logging each work session with note, focus level, start time, end time, and actual active minutes.
+## Requirements
 
-The `Time` field is saved as a number calculated by the extension (excluding paused time), ready for Notion charts and dashboards.
+- **Raycast** (macOS)
+- **Notion** account (**work log saving works on the free plan**. Multiple dashboard charts are **recommended on Notion Plus** — see below)
+- A Notion work-log database (**recommended:** duplicate [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link))
 
-Default cycle: 37 minutes work, 3 minutes short break, 15 minutes long break after every 3 completed work sessions. All values are configurable in Raycast preferences.
+## Quick start
 
-## 想定ユーザー
+After installation:
 
-- **macOS** で Raycast を日常的に使っている人
-- 作業ログを Notion に残したい人
-- タイマーだけでなく、あとで振り返れる記録が欲しい人
-- BGM 付きで作業と休憩を切り替えたい人
+1. In Notion, **Duplicate** [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link), or create an equivalent **work log** database manually
+2. In Raycast, open **`Configure Notion`**, set `Notion Token` and `Notion Database ID`, and validate the connection
+3. Start a session from **`Start Pomodoro`** or **`Pomodoro Status`**
 
-## 必要なもの
+When using the template, follow the duplicated **Getting Started** page for Connect setup and database ID retrieval. See **Notion setup** below for details.
 
-- **Raycast**（macOS）
-- **Notion** アカウント（**作業ログ保存は無料プランで可**。Dashboard の複数 chart 表示は **Notion Plus 以上を推奨** — 下記参照）
-- 作業ログ用 Notion データベース（**推奨:** [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link)を Duplicate）
+### Default settings
 
-## クイックスタート
+- Work: 37 minutes
+- Short break: 3 minutes
+- Long break: 15 minutes
+- Long break every: 3 completed work sessions
+- Session types (`Session Type`): `Main Work` / `Writing` / `Reading` / `Admin`
 
-インストール後、次の 3 ステップで使い始められます。
+Timer lengths, volume, and BGM can be changed in Raycast → Extension **Preferences**.
 
-1. Notion で [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) を **Duplicate** するか、同等の **作業ログ** データベースを手動で用意する
-2. Raycast で **`Configure Notion`** を開き、`Notion Token`（コネクトのアクセストークン）と `Notion Database ID` を設定して接続を確認する
-3. **`Start Pomodoro`** または **`Pomodoro Status`** からセッションを開始する
+## Daily workflow
 
-テンプレート利用時は、Duplicate 先の **「はじめに」** に沿ってコネクト接続とデータベース ID の取得まで進めてください。手順の詳細は **Notion セットアップ** を参照。
+1. Start from **Start Pomodoro** or **Pomodoro Status** and choose a **session type**
+2. During work … work BGM loops (depending on settings and volume)
+3. When work ends … timer completes, or use **Finish Current Work**
+4. Enter a **work note** and **focus level**, then save to Notion
+5. Continue automatically to a **short break** or **long break**
+6. After a break, choose the next **session type** and resume
 
-### デフォルト設定
+**Review:** Use the Notion dashboard (weekly charts) or the **work log** database **Today** / **This Week** views. Breaks are not saved to Notion. If dashboard charts do not appear on the free plan, use the **work log** database views instead (see **Notion free plan and dashboard**).
 
-- 作業: 37 分
-- 短休憩: 3 分
-- 長休憩: 15 分
-- 長休憩の間隔: 3 セットごと
-- 作業種類（`Session Type`）: `メイン作業` / `執筆` / `読書` / `雑務`
+## Commands
 
-タイマー長・音量・BGM などは Raycast → 拡張 **Preferences**（設定）から変更できます。
+Search for these in the Raycast command palette:
 
-## 1日の使い方（概要）
-
-1. **Start Pomodoro** または **Pomodoro Status** から **作業種類** を選んで開始
-2. 作業中 … 作業 BGM がループ（設定・音量による）
-3. 作業終了 … タイマー満了、または **今の作業を終了**
-4. **作業メモ** と **集中度** を入力して Notion に保存
-5. **短休憩** または **長休憩** へ自動で進む
-6. 休憩後、次の **作業種類** を選んで再開
-
-**振り返り:** Notion の Dashboard（今週のチャート）や **作業ログ** DB の **今日** / **今週** ビューで確認できます。休憩は Notion に記録されません。Dashboard の chart が無料プランで表示されない場合は、**作業ログ** DB のビューを使ってください（**Notion 無料プランと Dashboard** 参照）。
-
-## 使えるコマンド
-
-Raycast のコマンドパレットで次の名前を検索してください。
-
-| コマンド | 用途 |
+| Command | Purpose |
 |---|---|
-| **Start Pomodoro** | 新しい作業セッションを開始 |
-| **Pause Pomodoro** | 現在のセッションを一時停止 |
-| **Resume Pomodoro** | 一時停止中のセッションを再開 |
-| **Finish Current Session** | 現在の作業または休憩を終了して次へ進む |
-| **Discard Session** | 作業中は Notion に保存してから停止 / 休憩中は保存せず停止 |
-| **Pomodoro Status** | 状態確認、一時停止・再開、作業ログ入力、途中終了、タイマー・作業種類の編集 |
-| **Configure Notion** | Notion 接続の確認とデータベース設定の検証 |
+| **Start Pomodoro** | Start a new work session |
+| **Pause Pomodoro** | Pause the current session |
+| **Resume Pomodoro** | Resume a paused session |
+| **Finish Current Session** | Finish the current work or break and continue |
+| **Discard Session** | During work: save to Notion then stop / during break: stop without saving |
+| **Pomodoro Status** | View status, pause/resume, enter work logs, early finish, edit timer and session types |
+| **Configure Notion** | Validate Notion connection and database schema |
 
-## 同梱音源
+## Bundled audio
 
-デフォルトで次の BGM・アラームが同梱されています。
+Default BGM and alarm files:
 
-| 用途 | 内容 | 出典 |
+| Use | Content | Source |
 |---|---|---|
-| 作業中 | 雨音（ループ） | [Pixabay — Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/) |
-| 休憩中 | ピアノ（ループ） | [Pixabay — Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/) |
-| 満了時 | ベル | [Pixabay — Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/) |
+| Work | Rain ambience (loop) | [Pixabay — Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/) |
+| Break | Piano (loop) | [Pixabay — Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/) |
+| Session end | Bell | [Pixabay — Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/) |
 
-いずれも [Pixabay](https://pixabay.com/) から取得した効果音です（[Pixabay Content License](https://pixabay.com/service/license-summary/) に基づく利用）。
+All are from [Pixabay](https://pixabay.com/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
 
-Raycast → 拡張 **Preferences** の `Work Sound File` / `Break Sound File` / `Alarm Sound File` で、お好みの音声ファイルに差し替えできます。
+Replace them in Raycast → Extension **Preferences** via `Work Sound File`, `Break Sound File`, and `Alarm Sound File`.
 
-## Notion セットアップ
+## Notion setup
 
-作業ログの保存先として、Notion データベース **1 つ** が必要です。  
-**推奨** は、Notion 上で公開している [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) を Duplicate する方法です（Dashboard・作業ログ DB・セットアップガイド「はじめに」が含まれます）。Raycast 拡張本体には Notion テンプレートは含まれません。
+You need **one** Notion database for work logs.  
+**Recommended:** duplicate the public [**PomoNotion Dashboard (Minimal)**](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) (includes dashboard, work log DB, and a Getting Started guide). The Raycast extension itself does not ship a Notion template.
 
-**Duplicate リンク:** https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link
+**Duplicate link:** https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link
 
-### PomoNotion Dashboard (Minimal) に含まれるもの
+### What's in PomoNotion Dashboard (Minimal)
 
-| 要素 | 内容 |
+| Item | Contents |
 |---|---|
-| Dashboard（トップ） | 今週サマリーのチャート 3 枚（日別作業時間 / 作業種類 / 集中度） |
-| **作業ログ** DB | 拡張連携先。ビュー（すべて / 今日 / 今週）とチャート 2 枚 |
-| **はじめに** | Notion 上のセットアップガイド |
+| Dashboard (top) | Three weekly summary charts (daily work time / session type / focus) |
+| **Work log** DB | Extension target. Views (All / Today / This Week) and two charts |
+| **Getting Started** | Notion setup guide |
 
-> **Notion 無料プランと Dashboard**  
-> Raycast 拡張による **作業ログの保存**（`Configure Notion`・DB への書き込み）は、Notion **無料プラン** でも利用できます。  
-> 一方、Minimal テンプレの **Dashboard（トップ）** は **chart ビューを 3 枚並べた構成** です。Notion **無料プラン** では **1 ページに表示できる chart の数に制限** があり、Dashboard 上の chart が **すべて表示されない** ことがあります（テンプレ全体では Dashboard 3 枚＋作業ログ DB 内 chart 2 枚）。  
-> **無料プラン** では **作業ログ** DB の **今日** / **今週** テーブルビューで振り返る運用を想定してください。Dashboard をフルに使う場合は **Notion Plus（有料）以上** を推奨します。
+> **Notion free plan and dashboard**  
+> **Saving work logs** via this extension (`Configure Notion` and database writes) works on Notion's **free plan**.  
+> The Minimal template **Dashboard** places **three chart views** on one page. On the **free plan**, Notion limits how many charts can appear on a single page, so dashboard charts may **not all render** (the template has 3 dashboard charts plus 2 in the work log DB).  
+> On the **free plan**, review logs with the **work log** DB **Today** / **This Week** table views. For the full dashboard experience, **Notion Plus (paid) or higher** is recommended.
 
-テンプレート利用時の流れ:
+Template workflow:
 
-1. [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link)を開き **Duplicate** して自分のワークスペースにコピーする
-2. 下記 **1〜5** の手順（コネクト作成 → DB 接続 → データベース ID 取得 → Raycast 設定）を行う  
-   ※ 詳細は Duplicate 先の **「はじめに」** を参照
-3. `Configure Notion` で接続確認が成功することを確認する
+1. Open [PomoNotion Dashboard (Minimal)](https://steady-lighter-6fe.notion.site/PomoNotion-Dashboard-Minimal-e88cd1874cd5837d9b19013da2c206e0?source=copy_link) and **Duplicate** it into your workspace
+2. Follow steps **1–5** below (create Connect → connect DB → get database ID → configure Raycast)  
+   See the duplicated **Getting Started** page for details
+3. Confirm **Configure Notion** reports a successful connection
 
-### 1. Notion コネクトを作成する
+### 1. Create a Notion Connect integration
 
-Notion の **コネクト** から **アクセストークン**（多くは `secret_…` で始まる文字列）を発行します。
+Issue an **access token** from Notion **Connect** (usually starts with `secret_…`).
 
-**おすすめ（ブラウザ）**
+**Recommended (browser)**
 
-1. [コネクト管理画面](https://app.notion.com/developers/connections) を開く
-2. **+ 新規コネクト** をクリック
-3. **名前**（例: `PomoNotion`）を入力し、**アクセストークン** と **ワークスペース** を選び、**コネクトを作成** をクリック
-4. 表示された **アクセストークン** をコピー
+1. Open the [Connect management page](https://app.notion.com/developers/connections)
+2. Click **+ New Connect**
+3. Enter a **name** (e.g. `PomoNotion`), choose **access token** and **workspace**, then click **Create Connect**
+4. Copy the displayed **access token**
 
-**Notion アプリから行く場合**
+**From the Notion app**
 
-1. 左サイドバー **上** の **ワークスペース名** → **設定**
-2. **コネクト** タブ → 一番下の **コネクトを作成または管理する**
-3. ブラウザで開いた [コネクト管理画面](https://app.notion.com/developers/connections) で、上記 **2〜4** を続ける
+1. Sidebar **workspace name** (top) → **Settings**
+2. **Connect** tab → **Create or manage Connect** at the bottom
+3. Continue steps **2–4** in the browser [Connect management page](https://app.notion.com/developers/connections)
 
-> アクセストークンはパスワードと同様に扱い、Raycast の **Notion Token** 以外に共有しないでください。
+> Treat the access token like a password. Do not share it outside Raycast **Notion Token**.
 
-このアクセストークンを Raycast 側の **Notion Token** に設定します。
+Set this token as **Notion Token** in Raycast.
 
-### 2. 作業ログ用データベースを用意する
+### 2. Prepare the work log database
 
-**テンプレートを使う場合**  
-Duplicate 後の **作業ログ** データベースをそのまま使います。プロパティ名・型・ビューは初期設定済みです。
+**Using the template**  
+Use the duplicated **work log** database as-is. Property names, types, and views are preconfigured.
 
-**手動で作る場合**  
-Notion で新しいデータベースを作成し、少なくとも以下のプロパティを **この名前・型のまま** 用意します。
+**Creating manually**  
+Create a new Notion database with at least these properties using **exact names and types**:
 
-| プロパティ | 型 | 補足 |
+| Property | Type | Notes |
 |---|---|---|
-| `Name` | Title | 拡張が自動入力 |
+| `Name` | Title | Filled automatically by the extension |
 | `Start` | Date | **Include time: ON** |
 | `End` | Date | **Include time: ON** |
-| `Work Note` | Text | 作業メモ（空可）。Rich text でも可 |
-| `Focus` | Select | 選択肢 `高` / `中` / `低` |
-| `Session Type` | Select | 下記の作業種類と **同じ文言** で選択肢を登録 |
-| `Time` | Number | Formula ではなく Number |
+| `Work Note` | Text | Work note (optional). Rich text also works |
+| `Focus` | Select | Options `High` / `Medium` / `Low` |
+| `Session Type` | Select | Register options matching session types below |
+| `Time` | Number | Number, not Formula |
 
-#### `Focus`（必須選択肢）
+#### `Focus` (required options)
 
-- `高`
-- `中`
-- `低`
+- `High`
+- `Medium`
+- `Low`
 
-#### `Session Type`（拡張の既定＝Minimal テンプレ初期値）
+#### `Session Type` (extension defaults = Minimal template)
 
-拡張は Raycast 側で作業種類を管理し、保存時に `Session Type` へ書き込みます。  
-**Notion の Select 選択肢と拡張の作業種類は同じ文言に揃えてください**（拡張は Notion へ選択肢を自動追加しません）。
+The extension manages session types in Raycast and writes them to `Session Type` on save.  
+**Keep Notion Select options and extension session types in sync** (the extension does not auto-create Notion options).
 
-既定の作業種類（テンプレート DB も同じ）:
+Default session types (same in the template DB):
 
-- `メイン作業`
-- `執筆`
-- `読書`
-- `雑務`
+- `Main Work`
+- `Writing`
+- `Reading`
+- `Admin`
 
-変更する場合は、Raycast の **Pomodoro Status** → **作業種類を編集** と、Notion の `Session Type` 選択肢を **両方** 更新してください。
+To change them, update both **Pomodoro Status** → **Edit Session Types** and the Notion `Session Type` options.
 
-### 3. 作業ログ DB にコネクトを接続する
+### 3. Connect the integration to the work log DB
 
-1. **作業ログ** データベースページをフルページで開く
-2. 右上 **⋯**（または **共有**）を開く
-3. **コネクションを追加** から、手順 1 で作ったコネクトを選び **接続**
+1. Open the **work log** database as a full page
+2. Open **⋯** (or **Share**) in the top right
+3. Choose **Add connections** and connect the Connect integration from step 1
 
-接続していないと、アクセストークンが正しくても拡張から保存できません。
+Without this connection, saving will fail even with a valid token.
 
-### 4. データベース ID を取得する
+### 4. Get the database ID
 
-**作業ログ** DB をフルページ表示にし、URL からデータベース ID（32 文字前後の英数字）を取得します。
+Open the **work log** DB as a full page and copy the database ID (about 32 alphanumeric characters) from the URL.
 
-- **作業ログ DB 本体** の URL を使う（「はじめに」や Dashboard の URL ではない）
-- `?v=` 以降は含めない
-- Duplicate 後はコピー先ごとに ID が変わるため、必ず自分の DB から取り直す
+- Use the **work log DB** URL (not Getting Started or Dashboard)
+- Do not include anything after `?v=`
+- After duplicating, each copy has its own ID — always copy from your DB
 
-この値を Raycast 側の `Notion Database ID` に設定します。
+Set this value as `Notion Database ID` in Raycast.
 
-### 5. Raycast 側で接続確認する
+### 5. Validate in Raycast
 
-1. `Configure Notion` を開く
-2. `Notion Token` を設定する
-3. `Notion Database ID` を設定する
-4. **接続を確認** を実行する
-5. 必須プロパティの不足や型不一致がないことを確認する
-6. `Focus` と `Session Type` の選択肢に関する表示は **警告** です。接続成功と混同しないでください
+1. Open `Configure Notion`
+2. Set `Notion Token`
+3. Set `Notion Database ID`
+4. Run **Validate Connection**
+5. Confirm required properties exist with correct types
+6. `Focus` and `Session Type` option warnings are **warnings only** — do not confuse them with connection failure
 
-## `Time` プロパティの考え方
+## How the `Time` property works
 
-`Time` は **`Number` プロパティ** 前提です。  
-Notion の Formula ではなく、拡張側で一時停止・再開を考慮した実作業時間を計算して直接保存します。
+`Time` must be a **`Number` property**.  
+The extension calculates active work minutes (excluding paused time) and writes the value directly — not via a Notion Formula.
 
-| プロパティ | 役割 |
+| Property | Role |
 |---|---|
-| `Start` / `End` | 開始・終了の時刻記録 |
-| `Time` | 集計用の実作業時間（一時停止分を除いた分単位の数値） |
+| `Start` / `End` | Start and end timestamps |
+| `Time` | Aggregated active work time in minutes (excluding pauses) |
 
-Notion のチャートや Dashboard の集計にそのまま使えます。
+Use it directly in Notion charts and dashboards.
 
-## プライバシー・データの保存先
+## Privacy and data storage
 
-| データ | 保存先 |
+| Data | Stored in |
 |---|---|
-| `Notion Token` / `Notion Database ID` | Raycast の拡張設定（Preferences）のみ |
-| 進行中セッション・タイマー状態 | お使いの Mac 上の Raycast 内 |
-| 作業ログ（メモ・集中度・時間など） | 設定した Notion データベース |
+| `Notion Token` / `Notion Database ID` | Raycast extension preferences only |
+| Active session / timer state | Raycast on your Mac |
+| Work logs (notes, focus, time, etc.) | Your configured Notion database |
 
-拡張作者のサーバーへデータを送信する仕組みはありません。
+No data is sent to the extension author’s servers.
 
-## 既知の制限
+## Known limitations
 
-- **macOS 専用**（Windows 版 Raycast では利用不可）
-- スリープ復帰時の自動一時停止は無効です。復帰後は **Pomodoro Status** で状態を確認してください
-- 満了処理は Raycast / macOS の状態に依存するため、アラームや通知のタイミングがずれる場合があります
-- 満了処理用の内部コマンド **Internal: Timer Elapsed** が検索結果に表示されることがあります（通常の操作では使いません）
-- **Notion 無料プラン** では、Minimal テンプレの **Dashboard（chart 3 枚）** が制限により **すべて表示されない** 場合があります（拡張によるログ保存自体は可能）。詳細は **Notion セットアップ** の「Notion 無料プランと Dashboard」を参照
+- **macOS only** (not available on Windows Raycast)
+- Auto-pause on sleep wake is disabled — check **Pomodoro Status** after waking your Mac
+- Timer completion timing may drift depending on Raycast / macOS state
+- The internal command **Internal: Timer Elapsed** may appear in search results (you normally do not need it)
+- On **Notion free plan**, the Minimal template **Dashboard (3 charts)** may not fully render due to chart limits (logging still works). See **Notion setup** → **Notion free plan and dashboard**
 
-## 作者・ライセンス
+## Author and license
 
-- **こひなだまこと** — [X（@pgp_workstyle）](https://x.com/pgp_workstyle)
-- Raycast Store 上の公開 ID: `hk_raycast`
-- 拡張のソースコード: MIT License（Copyright (c) 2026 こひなだまこと）
-- 同梱 BGM: [Pixabay Content License](https://pixabay.com/service/license-summary/)（出典は **同梱音源** を参照）
+- **Kohinada Makoto** — [X (@pgp_workstyle)](https://x.com/pgp_workstyle)
+- Raycast Store author ID: `hk_raycast`
+- Extension source code: MIT License (Copyright (c) 2026 Kohinada Makoto)
+- Bundled BGM: [Pixabay Content License](https://pixabay.com/service/license-summary/) (see **Bundled audio**)

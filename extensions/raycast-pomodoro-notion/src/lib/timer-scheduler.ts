@@ -22,9 +22,7 @@ export function buildCommandDeeplink(
 ): string {
   return `raycast://extensions/${encodeURIComponent(
     environment.ownerOrAuthorName,
-  )}/${encodeURIComponent(environment.extensionName)}/${encodeURIComponent(
-    commandName,
-  )}?launchType=${launchType}`;
+  )}/${encodeURIComponent(environment.extensionName)}/${encodeURIComponent(commandName)}?launchType=${launchType}`;
 }
 
 async function getTimerSchedulerState(): Promise<TimerSchedulerState | null> {
@@ -41,9 +39,7 @@ async function getTimerSchedulerState(): Promise<TimerSchedulerState | null> {
   }
 }
 
-async function setTimerSchedulerState(
-  state: TimerSchedulerState,
-): Promise<void> {
+async function setTimerSchedulerState(state: TimerSchedulerState): Promise<void> {
   await LocalStorage.setItem(TIMER_SCHEDULER_KEY, JSON.stringify(state));
 }
 
@@ -71,10 +67,7 @@ export async function cancelTimerScheduler(): Promise<void> {
 }
 
 async function scheduleTimerElapsed(session: PomodoroSession): Promise<void> {
-  const delaySeconds = Math.max(
-    0,
-    Math.ceil((new Date(session.plannedEndAt).getTime() - Date.now()) / 1000),
-  );
+  const delaySeconds = Math.max(0, Math.ceil((new Date(session.plannedEndAt).getTime() - Date.now()) / 1000));
   const deeplink = buildCommandDeeplink(TIMER_ELAPSED_COMMAND, "background");
   const command =
     delaySeconds > 0
@@ -98,20 +91,14 @@ async function scheduleTimerElapsed(session: PomodoroSession): Promise<void> {
   });
 }
 
-export async function syncTimerScheduler(
-  session: PomodoroSession | null,
-): Promise<void> {
+export async function syncTimerScheduler(session: PomodoroSession | null): Promise<void> {
   if (!session || session.status !== "running") {
     await cancelTimerScheduler();
     return;
   }
 
   const current = await getTimerSchedulerState();
-  if (
-    current &&
-    current.sessionId === session.id &&
-    current.plannedEndAt === session.plannedEndAt
-  ) {
+  if (current && current.sessionId === session.id && current.plannedEndAt === session.plannedEndAt) {
     return;
   }
 

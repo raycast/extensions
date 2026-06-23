@@ -1,26 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Keyboard,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Keyboard, Toast, showToast, useNavigation } from "@raycast/api";
 import { spawn } from "node:child_process";
 import { useState } from "react";
 
 import { syncAudioForSession } from "../lib/audio";
-import {
-  saveSession,
-  startWorkSession,
-  type PomodoroSession,
-} from "../lib/pomodoro-state";
+import { saveSession, startWorkSession, type PomodoroSession } from "../lib/pomodoro-state";
 import { getWorkSessionTypes, type PomodoroConfig } from "../lib/preferences";
-import {
-  buildCommandDeeplink,
-  syncTimerScheduler,
-} from "../lib/timer-scheduler";
+import { buildCommandDeeplink, syncTimerScheduler } from "../lib/timer-scheduler";
 import { WorkSessionTypesForm } from "./work-session-types-form";
 
 const POMODORO_STATUS_COMMAND = "pomodoro-status";
@@ -50,22 +35,20 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
   const {
     config,
     completedWorkSessions = 0,
-    submitTitle = "作業セッションを開始",
-    successMessage = "新しい作業セッションを開始しました。",
+    submitTitle = "Start Work Session",
+    successMessage = "Started a new work session.",
     openPomodoroStatusOnComplete = false,
     onStarted,
   } = props;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [workSessionTypes, setWorkSessionTypes] = useState<string[]>(() =>
-    getWorkSessionTypes(),
-  );
+  const [workSessionTypes, setWorkSessionTypes] = useState<string[]>(() => getWorkSessionTypes());
   const { pop, push } = useNavigation();
 
   async function startWithWorkType(workType?: string) {
     if (!workType) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "作業種類を選択してください",
+        title: "Select a work session type",
       });
       return;
     }
@@ -73,12 +56,7 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
     setIsSubmitting(true);
 
     try {
-      const session = startWorkSession(
-        config,
-        Date.now(),
-        workType,
-        completedWorkSessions,
-      );
+      const session = startWorkSession(config, Date.now(), workType, completedWorkSessions);
       await saveSession(session);
       await syncAudioForSession(session, config);
       await syncTimerScheduler(session);
@@ -86,18 +64,14 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
       await showToast({
         style: Toast.Style.Success,
         title: successMessage,
-        message: `${workType} / ${config.workMinutes}分`,
+        message: `${workType} / ${config.workMinutes} min`,
       });
 
       if (openPomodoroStatusOnComplete) {
-        const child = spawn(
-          "open",
-          [buildCommandDeeplink(POMODORO_STATUS_COMMAND, "userInitiated")],
-          {
-            detached: true,
-            stdio: "ignore",
-          },
-        );
+        const child = spawn("open", [buildCommandDeeplink(POMODORO_STATUS_COMMAND, "userInitiated")], {
+          detached: true,
+          stdio: "ignore",
+        });
         child.unref();
       }
 
@@ -114,10 +88,8 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
   const shortcutWorkTypeSlots = getShortcutWorkTypeSlots(workSessionTypes);
   const shortcutGuideText =
     shortcutWorkTypeSlots.length > 0
-      ? shortcutWorkTypeSlots
-          .map(({ key, workType }) => `⌘${key}: ${workType}`)
-          .join("\n")
-      : "作業種類が 2 つ以上あると、⌘2〜⌘5 で素早く開始できます。";
+      ? shortcutWorkTypeSlots.map(({ key, workType }) => `⌘${key}: ${workType}`).join("\n")
+      : "Add at least two work session types to use ⌘2 through ⌘5 shortcuts.";
 
   return (
     <Form
@@ -128,13 +100,13 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
           {shortcutWorkTypeSlots.map(({ key, workType }) => (
             <Action
               key={key}
-              title={`${workType} で開始`}
+              title={`Start: ${workType}`}
               shortcut={{ modifiers: ["cmd"], key }}
               onAction={() => startWithWorkType(workType)}
             />
           ))}
           <Action
-            title="作業種類を編集"
+            title="Edit Work Session Types"
             shortcut={Keyboard.Shortcut.Common.Edit}
             onAction={() =>
               push(
@@ -150,19 +122,15 @@ export function StartWorkSessionForm(props: StartWorkSessionFormProps) {
       }
     >
       <Form.Description
-        title="反映タイミング"
-        text="ここで選ぶ作業種類は、これから開始する作業セッションにだけ反映します。"
+        title="When this applies"
+        text="The work session type you choose here applies only to the session you are about to start."
       />
-      <Form.Dropdown
-        id="workType"
-        title="作業種類"
-        defaultValue={workSessionTypes[0]}
-      >
+      <Form.Dropdown id="workType" title="Work Session Type" defaultValue={workSessionTypes[0]}>
         {workSessionTypes.map((type) => (
           <Form.Dropdown.Item key={type} value={type} title={type} />
         ))}
       </Form.Dropdown>
-      <Form.Description title="ショートカット" text={shortcutGuideText} />
+      <Form.Description title="Shortcuts" text={shortcutGuideText} />
     </Form>
   );
 }

@@ -1,18 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
-import {
-  getPomodoroConfig,
-  savePomodoroConfigOverrides,
-  type PomodoroConfig,
-} from "../lib/preferences";
+import { getPomodoroConfig, savePomodoroConfigOverrides } from "../lib/preferences";
 
 type FormValues = {
   workMinutes: string;
@@ -22,31 +11,35 @@ type FormValues = {
 };
 
 type TimerConfigFormProps = {
-  onSaved: (config: PomodoroConfig) => Promise<void>;
+  onSaved: (config: ReturnType<typeof getPomodoroConfig>) => Promise<void>;
 };
-
-function isPositiveInteger(value: string): boolean {
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) && parsed > 0;
-}
 
 export function TimerConfigForm(props: TimerConfigFormProps) {
   const { onSaved } = props;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { pop } = useNavigation();
   const currentConfig = getPomodoroConfig();
+  const { pop } = useNavigation();
 
   async function handleSubmit(values: FormValues) {
+    const workMinutes = Number.parseInt(values.workMinutes, 10);
+    const shortBreakMinutes = Number.parseInt(values.shortBreakMinutes, 10);
+    const longBreakMinutes = Number.parseInt(values.longBreakMinutes, 10);
+    const longBreakEvery = Number.parseInt(values.longBreakEvery, 10);
+
     if (
-      !isPositiveInteger(values.workMinutes) ||
-      !isPositiveInteger(values.shortBreakMinutes) ||
-      !isPositiveInteger(values.longBreakMinutes) ||
-      !isPositiveInteger(values.longBreakEvery)
+      !Number.isFinite(workMinutes) ||
+      workMinutes <= 0 ||
+      !Number.isFinite(shortBreakMinutes) ||
+      shortBreakMinutes <= 0 ||
+      !Number.isFinite(longBreakMinutes) ||
+      longBreakMinutes <= 0 ||
+      !Number.isFinite(longBreakEvery) ||
+      longBreakEvery <= 0
     ) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "正の整数を入力してください",
-        message: "作業時間、休憩時間、長休憩間隔には 1 以上の整数が必要です。",
+        title: "Enter positive integers",
+        message: "Work, break, and long-break interval values must be 1 or greater.",
       });
       return;
     }
@@ -55,18 +48,18 @@ export function TimerConfigForm(props: TimerConfigFormProps) {
 
     try {
       await savePomodoroConfigOverrides({
-        workMinutes: Number.parseInt(values.workMinutes, 10),
-        shortBreakMinutes: Number.parseInt(values.shortBreakMinutes, 10),
-        longBreakMinutes: Number.parseInt(values.longBreakMinutes, 10),
-        longBreakEvery: Number.parseInt(values.longBreakEvery, 10),
+        workMinutes,
+        shortBreakMinutes,
+        longBreakMinutes,
+        longBreakEvery,
       });
 
       const updatedConfig = getPomodoroConfig();
       await onSaved(updatedConfig);
       await showToast({
         style: Toast.Style.Success,
-        title: "タイマー設定を更新しました",
-        message: "次に開始するセッションから反映されます。",
+        title: "Timer settings updated",
+        message: "Changes apply to the next session you start.",
       });
       pop();
     } finally {
@@ -79,35 +72,28 @@ export function TimerConfigForm(props: TimerConfigFormProps) {
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="タイマー設定を保存"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Timer Settings" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="反映タイミング"
-        text="現在進行中のセッションには反映せず、次に開始するセッションから使います。"
+        title="When this applies"
+        text="These values do not change the current session. They apply to the next session you start."
       />
-      <Form.TextField
-        id="workMinutes"
-        title="作業時間（分）"
-        defaultValue={String(currentConfig.workMinutes)}
-      />
+      <Form.TextField id="workMinutes" title="Work (minutes)" defaultValue={String(currentConfig.workMinutes)} />
       <Form.TextField
         id="shortBreakMinutes"
-        title="短休憩（分）"
+        title="Short Break (minutes)"
         defaultValue={String(currentConfig.shortBreakMinutes)}
       />
       <Form.TextField
         id="longBreakMinutes"
-        title="長休憩（分）"
+        title="Long Break (minutes)"
         defaultValue={String(currentConfig.longBreakMinutes)}
       />
       <Form.TextField
         id="longBreakEvery"
-        title="長休憩の間隔（セット）"
+        title="Long Break Every (work sessions)"
         defaultValue={String(currentConfig.longBreakEvery)}
       />
     </Form>

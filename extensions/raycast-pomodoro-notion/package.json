@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-pomodoro-notion",
   "title": "PomoNotion Raycast Extension",
   "description": "A Raycast Pomodoro timer with Notion logging, ambient audio, and active-minute tracking.",
@@ -44,8 +45,7 @@
       "description": "Pause the current Pomodoro session.",
       "mode": "no-view",
       "keywords": [
-        "pause",
-        "一時停止"
+        "pause"
       ]
     },
     {
@@ -55,8 +55,7 @@
       "mode": "no-view",
       "keywords": [
         "resume",
-        "restart",
-        "再開"
+        "restart"
       ]
     },
     {
@@ -72,10 +71,7 @@
       "mode": "view",
       "keywords": [
         "finish",
-        "end",
-        "終了",
-        "今の作業を終了",
-        "今の休憩を終了"
+        "end"
       ]
     },
     {
@@ -86,8 +82,7 @@
       "keywords": [
         "discard",
         "reset",
-        "破棄",
-        "ループ停止"
+        "stop"
       ]
     }
   ],
@@ -95,7 +90,7 @@
     {
       "name": "notionToken",
       "title": "Notion Token",
-      "description": "Notion Connect access token (アクセストークン) for the target database.",
+      "description": "Notion Connect access token for the target database.",
       "type": "password",
       "required": false,
       "placeholder": "secret_xxxxx"
@@ -205,8 +200,7 @@
   "dependencies": {
     "@notionhq/client": "^5.21.0",
     "@raycast/api": "^1.104.12",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react": "^19.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

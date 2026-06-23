@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -23,11 +16,7 @@ import {
   saveSession,
   type PomodoroSession,
 } from "../lib/pomodoro-state";
-import {
-  getNotionSettings,
-  type FocusLevel,
-  type PomodoroConfig,
-} from "../lib/preferences";
+import { getNotionSettings, type FocusLevel, type PomodoroConfig } from "../lib/preferences";
 import { syncTimerScheduler } from "../lib/timer-scheduler";
 
 type FormValues = {
@@ -45,7 +34,7 @@ type WorkLogFormProps = {
 };
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", { hour12: false });
+  return new Date(iso).toLocaleString("en-US", { hour12: false });
 }
 
 export function WorkLogForm(props: WorkLogFormProps) {
@@ -53,13 +42,13 @@ export function WorkLogForm(props: WorkLogFormProps) {
     session,
     config,
     onCompleted,
-    submitTitle = "作業ログを保存して休憩へ進む",
-    successMessage = "次の休憩セッションへ移行しました。",
+    submitTitle = "Save Work Log and Start Break",
+    successMessage = "Moved to the next break session.",
     createNextSessionOnSubmit = true,
   } = props;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [note, setNote] = useState("");
-  const [focus, setFocus] = useState<FocusLevel>("中");
+  const [focus, setFocus] = useState<FocusLevel>("Medium");
   const { pop } = useNavigation();
   const submittedRef = useRef(false);
 
@@ -70,14 +59,12 @@ export function WorkLogForm(props: WorkLogFormProps) {
       releaseWorkLogAudio();
 
       if (submittedRef.current) {
-        // 保存して休憩へ進む場合は onCompleted 側で休憩音を鳴らす。ここで止めると休憩音が消える。
         if (!createNextSessionOnSubmit) {
           void stopLoopingAudio();
         }
         return;
       }
 
-      // 保存画面を閉じただけ（未送信）のときは、作業セッションが続いていれば作業音を再開する。
       void (async () => {
         if (isWorkLogFormBlockingLoopAudio()) {
           return;
@@ -96,8 +83,8 @@ export function WorkLogForm(props: WorkLogFormProps) {
     if (!notionToken || !notionDatabaseId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Notion設定が不足しています",
-        message: "Token と Database ID を設定してください。",
+        title: "Notion settings are incomplete",
+        message: "Set Notion Token and Database ID first.",
       });
       return;
     }
@@ -118,9 +105,7 @@ export function WorkLogForm(props: WorkLogFormProps) {
         timeMinutes,
       });
 
-      const nextSession = createNextSessionOnSubmit
-        ? finishSessionAndContinue(session, config)
-        : null;
+      const nextSession = createNextSessionOnSubmit ? finishSessionAndContinue(session, config) : null;
 
       if (nextSession) {
         await saveSession(nextSession);
@@ -132,7 +117,7 @@ export function WorkLogForm(props: WorkLogFormProps) {
       await onCompleted(nextSession);
       await showToast({
         style: Toast.Style.Success,
-        title: "作業ログをNotionへ保存しました",
+        title: "Work log saved to Notion",
         message: successMessage,
       });
       submittedRef.current = true;
@@ -140,8 +125,8 @@ export function WorkLogForm(props: WorkLogFormProps) {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Notionへの保存に失敗しました",
-        message: error instanceof Error ? error.message : "不明なエラー",
+        title: "Failed to save to Notion",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSubmitting(false);
@@ -168,47 +153,42 @@ export function WorkLogForm(props: WorkLogFormProps) {
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
           <Action
-            title="保存（集中度: 高）"
+            title="Save with High Focus"
             shortcut={{ modifiers: ["cmd"], key: "1" }}
-            onAction={() => void submitWithFocus("高")}
+            onAction={() => void submitWithFocus("High")}
           />
           <Action
-            title="保存（集中度: 中）"
+            title="Save with Medium Focus"
             shortcut={{ modifiers: ["cmd"], key: "2" }}
-            onAction={() => void submitWithFocus("中")}
+            onAction={() => void submitWithFocus("Medium")}
           />
           <Action
-            title="保存（集中度: 低）"
+            title="Save with Low Focus"
             shortcut={{ modifiers: ["cmd"], key: "3" }}
-            onAction={() => void submitWithFocus("低")}
+            onAction={() => void submitWithFocus("Low")}
           />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="セッション情報"
-        text={`開始: ${formatDateTime(session.startedAt)}\n予定終了: ${formatDateTime(session.plannedEndAt)}`}
+        title="Session"
+        text={`Started: ${formatDateTime(session.startedAt)}\nPlanned end: ${formatDateTime(session.plannedEndAt)}`}
       />
       <Form.Description
-        title="集中度のショートカット"
-        text="⌘1 ＝ 高で保存 / ⌘2 ＝ 中で保存 / ⌘3 ＝ 低で保存（作業メモはそのまま反映されます）"
+        title="Focus shortcuts"
+        text="⌘1 = save as High / ⌘2 = Medium / ⌘3 = Low (your note is included)"
       />
       <Form.TextArea
         id="note"
-        title="作業メモ"
-        placeholder="このセッションで行った作業を入力してください"
+        title="Work Note"
+        placeholder="What did you work on during this session?"
         value={note}
         onChange={setNote}
       />
-      <Form.Dropdown
-        id="focus"
-        title="集中度"
-        value={focus}
-        onChange={(newValue) => setFocus(newValue as FocusLevel)}
-      >
-        <Form.Dropdown.Item value="高" title="高" />
-        <Form.Dropdown.Item value="中" title="中" />
-        <Form.Dropdown.Item value="低" title="低" />
+      <Form.Dropdown id="focus" title="Focus" value={focus} onChange={(newValue) => setFocus(newValue as FocusLevel)}>
+        <Form.Dropdown.Item value="High" title="High" />
+        <Form.Dropdown.Item value="Medium" title="Medium" />
+        <Form.Dropdown.Item value="Low" title="Low" />
       </Form.Dropdown>
     </Form>
   );

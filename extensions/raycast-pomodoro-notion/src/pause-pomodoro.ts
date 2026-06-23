@@ -1,7 +1,8 @@
-import { Toast, showToast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
-import { stopLoopingAudio } from "./lib/audio";
-import { loadSession, pauseSession, saveSession } from "./lib/pomodoro-state";
+import { pauseSession, loadSession, saveSession } from "./lib/pomodoro-state";
+import { syncAudioForSession } from "./lib/audio";
+import { getPomodoroConfig } from "./lib/preferences";
 import { syncTimerScheduler } from "./lib/timer-scheduler";
 
 export default async function Command() {
@@ -10,26 +11,27 @@ export default async function Command() {
   if (!session) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "進行中のセッションがありません",
+      title: "No active session",
     });
     return;
   }
 
   if (session.status === "paused") {
     await showToast({
-      style: Toast.Style.Success,
-      title: "すでに一時停止中です",
+      style: Toast.Style.Failure,
+      title: "Session is already paused",
     });
     return;
   }
 
-  const updated = pauseSession(session);
-  await saveSession(updated);
-  await stopLoopingAudio();
-  await syncTimerScheduler(updated);
+  const config = getPomodoroConfig();
+  const paused = pauseSession(session);
+  await saveSession(paused);
+  await syncAudioForSession(paused, config);
+  await syncTimerScheduler(paused);
 
   await showToast({
     style: Toast.Style.Success,
-    title: "ポモドーロを一時停止しました",
+    title: "Pomodoro paused",
   });
 }

@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  openCommandPreferences,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openCommandPreferences, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { StartWorkSessionForm } from "./components/start-work-session-form";
@@ -37,19 +30,17 @@ export default function StartPomodoroCommand() {
     const lines = [
       "# Start Pomodoro",
       "",
-      `- 作業: ${config.workMinutes} 分`,
-      `- 短休憩: ${config.shortBreakMinutes} 分`,
-      `- 長休憩: ${config.longBreakMinutes} 分`,
-      `- 長休憩の間隔: ${config.longBreakEvery} セットごと`,
+      `- Work: ${config.workMinutes} min`,
+      `- Short break: ${config.shortBreakMinutes} min`,
+      `- Long break: ${config.longBreakMinutes} min`,
+      `- Long break every: ${config.longBreakEvery} work sessions`,
       "",
     ];
 
     if (hasActiveSession) {
-      lines.push(
-        "進行中のセッションがあります。`Pomodoro Status` から状態を確認してください。",
-      );
+      lines.push("A session is already in progress. Check **Pomodoro Status** for details.");
     } else {
-      lines.push("新しい作業セッションを開始できます。");
+      lines.push("You can start a new work session.");
     }
 
     return lines.join("\n");
@@ -63,14 +54,14 @@ export default function StartPomodoroCommand() {
         <ActionPanel>
           {!hasActiveSession ? (
             <Action
-              title="作業種類を選んで開始"
+              title="Choose Session Type and Start"
               icon={Icon.Play}
               onAction={() =>
                 push(
                   <StartWorkSessionForm
                     config={config}
-                    submitTitle="作業種類を選んで開始"
-                    successMessage="新しい作業セッションを開始しました。"
+                    submitTitle="Choose Session Type and Start"
+                    successMessage="Started a new work session."
                     openPomodoroStatusOnComplete
                     onStarted={handleStarted}
                   />,
@@ -79,17 +70,9 @@ export default function StartPomodoroCommand() {
             />
           ) : null}
           {hasActiveSession ? (
-            <Action
-              title="Pomodoro Status を開く"
-              icon={Icon.List}
-              onAction={() => push(<PomodoroStatusCommand />)}
-            />
+            <Action title="Open Pomodoro Status" icon={Icon.List} onAction={() => push(<PomodoroStatusCommand />)} />
           ) : null}
-          <Action
-            title="設定を開く"
-            icon={Icon.Gear}
-            onAction={openCommandPreferences}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
         </ActionPanel>
       }
     />
