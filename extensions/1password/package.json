@@ -189,6 +189,14 @@
       "description": "Close Raycast window after copying a username or password."
     },
     {
+      "name": "reduceItemListMemoryUsage",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Reduce item list memory usage",
+      "description": "Load a lightweight summary when listing passwords instead of full item details. Uses less memory with large vaults, but username/email subtitles and search may be limited until an action fetches full details."
+    },
+    {
       "description": "Enter the CLI binary path",
       "name": "cliPath",
       "placeholder": "e.g., /usr/local/bin/op",

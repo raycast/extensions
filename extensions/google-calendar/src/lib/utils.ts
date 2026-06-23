@@ -154,3 +154,102 @@ export function toHumanReadableTime(date = new Date()) {
     timeZoneName: "short",
   });
 }
+
+const BASIC_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ANGLE_BRACKET_EMAIL_REGEX = /<([^<>\s@]+@[^\s@<>]+)>/;
+
+function normalizeAttendeeToken(token: string): string {
+  return token.trim().replace(/^[,;]+|[,;]+$/g, "");
+}
+
+function extractEmailAddress(value: string): string {
+  const angleBracketMatch = value.match(ANGLE_BRACKET_EMAIL_REGEX);
+  if (angleBracketMatch?.[1]) {
+    return angleBracketMatch[1].trim();
+  }
+
+  return value;
+}
+
+export function parseAttendeeEmails(attendees?: string | string[] | null): {
+  emails: string[];
+  invalidEntries: string[];
+} {
+  if (attendees === undefined || attendees === null) {
+    return { emails: [], invalidEntries: [] };
+  }
+
+  const rawEntries = Array.isArray(attendees) ? attendees : attendees.split(/[,\n;]/);
+  const normalizedEntries = rawEntries
+    .map((entry) => normalizeAttendeeToken(entry))
+    .map((entry) => extractEmailAddress(entry))
+    .filter((entry) => entry.length > 0);
+
+  const emails: string[] = [];
+  const invalidEntries: string[] = [];
+
+  for (const entry of normalizedEntries) {
+    if (BASIC_EMAIL_REGEX.test(entry)) {
+      emails.push(entry);
+    } else {
+      invalidEntries.push(entry);
+    }
+  }
+
+  return { emails, invalidEntries };
+}
+
+const DURATION_SEGMENT_REGEX =
+  /(\d+(?:\.\d+)?)\s*(milliseconds?|ms|seconds?|secs?|sec|s|minutes?|mins?|min|m|hours?|hrs?|hr|h|days?|d|weeks?|w)/gi;
+
+export function parseDurationMs(input?: string): number | undefined {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  const trimmed = input.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed) * 60 * 1000;
+  }
+
+  let total = 0;
+  let matchCount = 0;
+  let consumed = "";
+
+  for (const match of trimmed.matchAll(DURATION_SEGMENT_REGEX)) {
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    consumed += match[0];
+    matchCount += 1;
+
+    if (unit === "ms" || unit.startsWith("millisecond")) {
+      total += amount;
+    } else if (unit === "s" || unit.startsWith("sec")) {
+      total += amount * 1000;
+    } else if (unit === "m" || unit.startsWith("min")) {
+      total += amount * 60 * 1000;
+    } else if (unit === "h" || unit.startsWith("hr") || unit.startsWith("hour")) {
+      total += amount * 60 * 60 * 1000;
+    } else if (unit === "d" || unit.startsWith("day")) {
+      total += amount * 24 * 60 * 60 * 1000;
+    } else if (unit === "w" || unit.startsWith("week")) {
+      total += amount * 7 * 24 * 60 * 60 * 1000;
+    } else {
+      return undefined;
+    }
+  }
+
+  if (matchCount === 0) {
+    return undefined;
+  }
+
+  if (consumed.replace(/\s+/g, "") !== trimmed.replace(/\s+/g, "")) {
+    return undefined;
+  }
+
+  return total;
+}

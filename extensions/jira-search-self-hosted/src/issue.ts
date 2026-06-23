@@ -3,6 +3,7 @@ import { jiraImage } from "./image";
 import { ResultItem, SearchCommand } from "./command";
 import { Color, Icon, Image } from "@raycast/api";
 import { ErrorText } from "./exception";
+import { buildIssueSearchJql } from "./issue-search";
 
 interface IssueType {
   id: string;
@@ -82,52 +83,12 @@ function isIssueKey(query: string): boolean {
 }
 
 function buildJql(query: string): string {
-  const spaceAndInvalidChars = /[ "]/;
-
-  const statusRegex = /!([a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
-  const statusMatchingGroup = Array.from(query.matchAll(statusRegex));
-  const statuus = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
-
-  console.log("Status: ", statuus);
-  query = query.replace(statusRegex, "");
-
-  const assigneeRegex = /%([.@a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
-  const assigneeMatchingGroup = Array.from(query.matchAll(assigneeRegex));
-  const assignee = assigneeMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
-  query = query.replace(assigneeRegex, "");
-
-  const terms = query.split(spaceAndInvalidChars).filter((term) => term.length > 0);
-
-  const collectPrefixed = (prefix: string, terms: string[]): string[] =>
-    terms
-      .filter((term) => term.startsWith(prefix) && term.length > prefix.length)
-      .map((term) => term.substring(prefix.length));
-  const projects = collectPrefixed("@", terms);
-  const issueTypes = collectPrefixed("#", terms);
-
-  const unwantedTextTermChars = /[-+!*&]/;
-  const textTerms = terms
-    .filter((term) => !"@#!%".includes(term[0]))
-    .flatMap((term) => term.split(unwantedTextTermChars))
-    .filter((term) => term.length > 0);
-
-  const escapeStr = (str: string) => `"${str}"`;
-  const inClause = (entity: string, items: string[]) =>
-    items.length > 0 ? `${entity} IN (${items.map(escapeStr)})` : undefined;
-  const jqlConditions = [
-    inClause("project", projects),
-    inClause("issueType", issueTypes),
-    inClause("status", statuus),
-    inClause("assignee", assignee),
-    ...textTerms.map((term) => `text~"${term}*"`),
-  ];
-
-  const jql = jqlConditions.filter((condition) => condition !== undefined).join(" AND ");
-  return jql + " order by lastViewed desc";
+  return buildIssueSearchJql(query);
 }
 
 function jqlFor(query: string): string {
-  return isIssueKey(query) ? `key=${query}` : buildJql(query);
+  const trimmedQuery = query.trim();
+  return isIssueKey(trimmedQuery) ? `key=${trimmedQuery}` : buildJql(query);
 }
 
 export async function searchIssues(query: string): Promise<ResultItem[]> {
@@ -136,7 +97,7 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
   const result = await jiraFetchObject<Issues>(
     "/rest/api/2/search",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project or issue type") },
+    { 400: ErrorText("Invalid Query", "Unknown project, issue type, status, or assignee") },
   );
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,

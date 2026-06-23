@@ -1,5 +1,9 @@
 # goodreads Changelog
 
+## [Bugfix] - 2026-05-21
+
+- Restore book search results.
+
 ## [Windows Support] - 2026-03-01
 
 - Add Windows platform support

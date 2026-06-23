@@ -1,4 +1,4 @@
-import { KnowledgeBase, NoteSummary, RecallResult } from "./types";
+import { KnowledgeBase, NoteSummary, RecallResult, TaskProgress } from "./types";
 
 function truncatePreview(content?: string, maxLength = 280): string {
   if (!content) {
@@ -34,6 +34,28 @@ export function normalizeTagInput(raw: string): string[] {
     .split(/[,\n]/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+export function formatTaskProgress(progress: TaskProgress, processingMessage: string): string {
+  if (progress.status === "pending") {
+    return "Queued by GetNote";
+  }
+
+  if (progress.status === "processing") {
+    return processingMessage;
+  }
+
+  if (progress.status === "success") {
+    return progress.note_id && progress.note_id !== "0"
+      ? `Created note ${progress.note_id}`
+      : "Finishing note creation";
+  }
+
+  if (progress.status === "failed") {
+    return progress.error_msg || "The GetNote task failed";
+  }
+
+  return `Current task status: ${progress.status}`;
 }
 
 export function notePreviewMarkdown(

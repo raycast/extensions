@@ -26,6 +26,31 @@
   ],
   "preferences": [
     {
+      "name": "documentationSourceMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Documentation Source",
+      "description": "Choose whether the extension loads Pandas documentation from the official site or from a downloaded local docs folder.",
+      "default": "online",
+      "data": [
+        {
+          "title": "Online",
+          "value": "online"
+        },
+        {
+          "title": "Local Docs Directory",
+          "value": "local"
+        }
+      ]
+    },
+    {
+      "name": "localDocsDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Local Docs Directory",
+      "description": "Select the downloaded Pandas docs folder. The extension will read objects.inv and HTML pages from its stable subfolder."
+    },
+    {
       "name": "useShortPrefix",
       "type": "checkbox",
       "required": false,
@@ -46,7 +71,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^1.17.0",
     "cheerio": "^1.0.0"
   },
   "devDependencies": {
@@ -56,13 +80,15 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.5"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

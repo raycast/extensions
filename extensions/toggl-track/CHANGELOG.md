@@ -1,5 +1,17 @@
 # Toggl Track Changelog
 
+## [Show total duration of current project] - 2026-06-18
+
+- In the menu bar, show the total time of all time entries of the current project in addition to the total time of all entries.
+
+## [Quickstart New Timer] - 2026-06-17
+
+- Add a "Quickstart New Timer" command that opens the new time entry form directly, skipping the recent-entries list — assign it a global hotkey to start a timer from anywhere with one keystroke. On submit, Raycast closes immediately.
+
+## [Bug Fixes] - 2026-05-15
+
+- Fixed "Resume Time Entry" on recent entries: use `Action` with `onAction` instead of `Action.SubmitForm`, which is for form submission and was incorrect in the list action panel
+
 ## [Fix] - 2026-04-17
 
 - Clarified Low Data Mode documentation in README — activation takes effect on next command launch, and framed sync behavior as a user contract (up to 1 hour delay) rather than implementation details

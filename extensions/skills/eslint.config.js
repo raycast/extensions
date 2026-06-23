@@ -10,6 +10,12 @@ module.exports = defineConfig([
     },
     rules: {
       "n/prefer-node-protocol": ["error", { version: ">=16.0.0" }],
+      "@raycast/prefer-title-case": [
+        "warn",
+        {
+          extraFixedCaseWords: ["skills.sh"],
+        },
+      ],
     },
   },
 ]);

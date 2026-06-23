@@ -994,19 +994,19 @@ function getSelectedVersion(
 
 function toApiVersion(version: DocsSearchResult["craftVersion"] | undefined): string | undefined {
   if (!version) return undefined;
-  const match = version.match(/^([1-5])\.x$/);
+  const match = version.match(/^([1-6])\.x$/);
   return match?.[1];
 }
 
 function normalizeVersionValue(value: string | undefined): DocsSearchResult["craftVersion"] | undefined {
   if (!value) return undefined;
-  if (/^[1-5]\.x$/.test(value)) return value as DocsSearchResult["craftVersion"];
-  if (/^[1-5]$/.test(value)) return `${value}.x` as DocsSearchResult["craftVersion"];
+  if (/^[1-6]\.x$/.test(value)) return value as DocsSearchResult["craftVersion"];
+  if (/^[1-6]$/.test(value)) return `${value}.x` as DocsSearchResult["craftVersion"];
   return undefined;
 }
 
 function extractVersionFromUrl(url: string): DocsSearchResult["craftVersion"] | undefined {
-  const match = url.toLowerCase().match(/(?:^|\/)([1-5])\.x(?:\/|$|[?#])/);
+  const match = url.toLowerCase().match(/(?:^|\/)([1-6])\.x(?:\/|$|[?#])/);
   if (!match) return undefined;
   return `${match[1]}.x` as DocsSearchResult["craftVersion"];
 }

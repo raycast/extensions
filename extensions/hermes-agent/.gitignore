@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Raycast
+.raycast/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+.claude/
+reference-doc/
+
+# Auto-generated
+raycast-env.d.ts

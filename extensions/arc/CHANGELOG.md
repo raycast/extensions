@@ -1,5 +1,19 @@
 # Arc Changelog
 
+## [Fix SQL injection in history and download search] - 2026-06-23
+
+- Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection
+- Switch LIKE string literals from double quotes to single quotes (correct SQLite syntax)
+- Add missing escaping for the non-hook `getHistory` function
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Performance Improvement] - 2026-04-30
+
+- Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs
+
 ## [New Features] - 2026-04-24
 
 - Added `Reset all tabs in current space` command to reset all tabs in the currently active space (disabled by default).

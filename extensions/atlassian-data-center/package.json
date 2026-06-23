@@ -55,7 +55,7 @@
     "prettier": "^3.7.4",
     "type-fest": "^5.2.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.6"
   },
   "preferences": [
     {

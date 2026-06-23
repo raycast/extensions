@@ -4,6 +4,8 @@ import { useExec } from "@raycast/utils";
 import { SessionUsageCommandResponse, SessionUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
 const cache = new Cache();
@@ -31,7 +33,14 @@ export const useCCUsageSessionCli = () => {
       const parseResult = stringToJSON.pipe(SessionUsageCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid session usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid session usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
       cache.set(CACHE_KEY, JSON.stringify(parseResult.data));

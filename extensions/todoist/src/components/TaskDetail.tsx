@@ -3,7 +3,7 @@ import { format } from "date-fns";
 
 import { Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
-import { displayIncomingDate, isExactTimeTask } from "../helpers/dates";
+import { displayIncomingDate, displayRecurrence, isExactTimeTask } from "../helpers/dates";
 import { getTaskLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
@@ -55,6 +55,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps) {
     }) ?? [];
 
   const use12HourFormat = data?.user?.time_format === 1;
+  const recurrenceText = task ? displayRecurrence(task) : null;
 
   return (
     <Detail
@@ -81,6 +82,9 @@ export default function TaskDetail({ taskId }: TaskDetailProps) {
                 ) : null}
 
                 <Detail.Metadata.Label title="Date" text={displayedDate} icon={Icon.Calendar} />
+                {recurrenceText ? (
+                  <Detail.Metadata.Label title="Repeat" text={recurrenceText} icon={Icon.Repeat} />
+                ) : null}
                 <Detail.Metadata.Label title="Deadline" text={displayedDeadline} icon={Icon.BullsEye} />
 
                 {subTasks && subTasks?.length > 0 ? (

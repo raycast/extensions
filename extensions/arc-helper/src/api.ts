@@ -1,5 +1,10 @@
 const BASE_URL = "https://metaforge.app/api/arc-raiders";
 
+export interface GuideLink {
+  url: string;
+  label: string;
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -15,6 +20,13 @@ export interface Item {
   subcategory: string | null;
   loot_area: string | null;
   ammo_type: string | null;
+  shield_type?: string;
+  sources?: unknown[];
+  locations?: unknown[];
+  guide_links?: GuideLink[];
+  game_asset_id?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface QuestReward {
@@ -45,6 +57,13 @@ export interface Quest {
   marker_category: string | null;
   required_items: string[];
   rewards: QuestReward[];
+  image?: string;
+  guide_links?: GuideLink[];
+  trader_name?: string;
+  sort_order?: number;
+  position?: { x: number; y: number };
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Arc {
@@ -53,6 +72,8 @@ export interface Arc {
   description: string;
   icon: string;
   image: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface EventTimer {

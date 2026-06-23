@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.build/
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+*.pdf

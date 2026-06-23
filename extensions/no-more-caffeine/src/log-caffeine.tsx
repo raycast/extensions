@@ -19,8 +19,8 @@ interface FormValues {
 }
 
 export default function Command() {
-  const [drinkType, setDrinkType] = useState<string>("");
-  const [caffeineAmount, setCaffeineAmount] = useState<string>("");
+  const [drinkType, setDrinkType] = useState<string>(BUILT_IN_PRESETS[0]?.name ?? "");
+  const [caffeineAmount, setCaffeineAmount] = useState<string>(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
   const [submitted, setSubmitted] = useState(false);
   const [calculation, setCalculation] = useState<CaffeineCalculation | null>(null);
 
@@ -128,8 +128,8 @@ ${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine w
               onAction={() => {
                 setSubmitted(false);
                 setCalculation(null);
-                setDrinkType("");
-                setCaffeineAmount("");
+                setDrinkType(BUILT_IN_PRESETS[0]?.name ?? "");
+                setCaffeineAmount(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
               }}
             />
           </ActionPanel>

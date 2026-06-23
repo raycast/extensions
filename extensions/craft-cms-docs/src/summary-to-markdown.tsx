@@ -43,7 +43,14 @@ function normalizeHref(href: string | undefined): string | undefined {
   if (!href) return undefined;
   const value = href.trim();
   if (!value) return undefined;
-  if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("raycast://")) return value;
+  const raycastScheme = process.env.RAYCAST_SCHEME ?? "raycast";
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith(`${raycastScheme}://`) ||
+    value.startsWith("raycast://")
+  )
+    return value;
   if (value.startsWith("/")) return `https://craftcms.com${value}`;
   return undefined;
 }

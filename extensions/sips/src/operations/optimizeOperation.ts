@@ -7,7 +7,7 @@
  * Created at     : 2023-07-05 23:49:16
  */
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import * as fs from "fs";
 import path from "path";
 
@@ -15,7 +15,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { optimize as svgoOptimize } from "svgo";
 
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import {
   expandTilde,
   getDestinationPaths,
@@ -62,9 +62,14 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const [, cwebpPath] = await getWebPBinaryPath();
-  execSync(
-    `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
-  );
+  execFileSync(cwebpPath, [
+    ...(preferences.useLosslessConversion ? ["-lossless"] : []),
+    "-q",
+    String(amount),
+    webpPath,
+    "-o",
+    newPath,
+  ]);
   return newPath;
 };
 
@@ -93,8 +98,8 @@ const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const pngoutPath = `${environment.assetsPath}/pngout/pngout`;
-  execSync(`chmod +x ${pngoutPath}`);
-  execSync(`${pngoutPath} -s${strategy} -y -force "${pngPath}" "${newPath}"`);
+  execFileSync("chmod", ["+x", pngoutPath]);
+  execFileSync(pngoutPath, [`-s${strategy}`, "-y", "-force", pngPath, newPath]);
   return newPath;
 };
 
@@ -130,15 +135,17 @@ export default async function optimize(sourcePaths: string[], amount: number) {
 
       // Convert to JPEG
       await using jpegFile = await getScopedTempFile("tmp", "jpeg");
-      execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegFile.path}"`);
+      execFileSync(decoderPath, ["-q", String(amount), imgPath, jpegFile.path]);
 
       // Convert back to AVIF
       let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
-      execSync(
-        `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
-      );
+      execFileSync(encoderPath, [
+        ...(preferences.useLosslessConversion ? losslessAvifEncArgs : []),
+        jpegFile.path,
+        newPath,
+      ]);
     } else if (imgPath.toLowerCase().endsWith("pdf")) {
       // PDF -> JPEG -> PDF
       throw new Error(
@@ -163,7 +170,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
 
       await optimizeJPEG(imgPath, jpegFile.path, amount);
       const format = path.extname(newPath).slice(1).toLowerCase();
-      execSync(`sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`);
+      execFileSync("sips", ["--setProperty", "format", format, jpegFile.path, "--out", newPath]);
     }
   }
   await moveImageResultsToFinalDestination(resultPaths);

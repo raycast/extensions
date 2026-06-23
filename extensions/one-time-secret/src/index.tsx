@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { createClientFromPreferences } from "./create-client";
+import { DEFAULT_TTL_SECONDS, MIN_PASSPHRASE_LENGTH, TTL_OPTIONS } from "./constants";
 
 type Values = {
   lifetime: string;
@@ -18,8 +19,6 @@ type Values = {
   passphrase: string;
   secret: string;
 };
-
-const MIN_PASSPHRASE_LENGTH = 8;
 
 export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const { draftValues } = props;
@@ -56,7 +55,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       const ttl = Number.parseInt(values.lifetime, 10);
       const response = await client.concealSecret(
         values.secret,
-        Number.isNaN(ttl) ? 3600 : ttl,
+        Number.isNaN(ttl) ? DEFAULT_TTL_SECONDS : ttl,
         trimmedPass.length > 0 ? trimmedPass : null,
       );
 
@@ -114,17 +113,12 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         id="lifetime"
         title="Lifetime*"
         info="Required. How long should the secret be available for?"
+        defaultValue={String(DEFAULT_TTL_SECONDS)}
         storeValue
       >
-        <Form.Dropdown.Item value="300" title="5 minutes" />
-        <Form.Dropdown.Item value="1800" title="30 minutes" />
-        <Form.Dropdown.Item value="3600" title="1 hour" />
-        <Form.Dropdown.Item value="14400" title="4 hours" />
-        <Form.Dropdown.Item value="43200" title="12 hours" />
-        <Form.Dropdown.Item value="86400" title="1 day" />
-        <Form.Dropdown.Item value="259200" title="3 days" />
-        <Form.Dropdown.Item value="604800" title="7 days" />
-        <Form.Dropdown.Item value="1209600" title="14 days" />
+        {TTL_OPTIONS.map((o) => (
+          <Form.Dropdown.Item key={o.value} value={String(o.value)} title={o.title} />
+        ))}
       </Form.Dropdown>
     </Form>
   );

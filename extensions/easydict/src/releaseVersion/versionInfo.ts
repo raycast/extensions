@@ -26,9 +26,9 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.11.2";
+  version = "2.11.3";
   buildNumber = 30;
-  versionDate = "2026-04-12";
+  versionDate = "2026-05-15";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
@@ -37,25 +37,24 @@ export class Easydict {
 
 ### 💎 改进
 
-- 移除 \`crypto-js\` 和 \`qs\` 依赖，简化火山翻译
-- 用 \`nano-staged\` 替换 \`lint-staged\`
+- 优化类型安全。
 - 更新依赖，提升稳定性
 
 ### 🐞 修复
 
-- 支持 OpenAI 推理模型的 \`max_completion_tokens\` 参数
+- 移除密码字段的默认值，防止运行时类型不匹配。
 
 ---
 
 ### 💎 Improvement
 
-- Remove \`crypto-js\` and \`qs\` dependencies, and simplify Volcano translation
-- Replace \`lint-staged\` with \`nano-staged\`
+- Improve type safety.
 - Update dependencies and improve stability
 
 ### 🐞 Fixed
 
-- Support \`max_completion_tokens\` for OpenAI reasoning models
+- Remove default values for password fields to prevent runtime type mismatch.
+
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

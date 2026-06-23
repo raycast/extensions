@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -23,14 +23,34 @@ const PROFILES = JSON.parse(
   ),
 ) as WindowsTerminalSettings;
 
-function Actions(props: { name: string }) {
+function getWindowsTerminalEnv() {
+  const env = { ...process.env };
+  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "Path";
+  const systemRoot = env.SystemRoot ?? "C:\\Windows";
+  const pathParts = (env[pathKey] ?? "").split(";").filter(Boolean);
+  const requiredPathParts = [`${systemRoot}\\System32\\OpenSSH`, `${systemRoot}\\System32`, systemRoot];
+  const normalizePathPart = (pathPart: string) => pathPart.toLowerCase().replace(/\\+$/, "");
+
+  env[pathKey] = [
+    ...pathParts,
+    ...requiredPathParts.filter(
+      (requiredPathPart) =>
+        !pathParts.some((pathPart) => normalizePathPart(pathPart) === normalizePathPart(requiredPathPart)),
+    ),
+  ].join(";");
+
+  return env;
+}
+
+function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
       <Action
         icon={Icon.PlusSquare}
-        title="Open in New Tab"
+        title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
-          execFile("wt.exe", ["new-tab", "-p", props.name]);
+          const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
+          execFile("wt.exe", args, { env: getWindowsTerminalEnv() });
           await closeMainWindow();
         }}
       />
@@ -38,23 +58,21 @@ function Actions(props: { name: string }) {
         icon={Icon.PlusTopRightSquare}
         title="Open in New Window"
         onAction={async () => {
-          execFile("wt.exe", ["-p", props.name]);
+          execFile("wt.exe", ["-p", props.name], { env: getWindowsTerminalEnv() });
           await closeMainWindow();
         }}
       />
       <Action
         icon={Icon.Shield}
-        title="Open as Administrator"
+        title={props.quake ? "Open as Administrator (Quake)" : "Open as Administrator"}
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          execFile("powershell", [
-            "Start-Process",
-            "wt.exe",
-            "-ArgumentList",
-            `"-p","${props.name}"`,
-            "-Verb",
-            "RunAs",
-          ]);
+          // Quote the profile name so names containing spaces (e.g. "Command Prompt") survive
+          // Start-Process -Verb RunAs, which joins ArgumentList tokens with spaces and does not
+          // re-quote them before invoking ShellExecute.
+          const escapedName = props.name.replace(/'/g, "''");
+          const argumentList = props.quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
+          execFile("powershell", ["Start-Process", "wt.exe", "-ArgumentList", argumentList, "-Verb", "RunAs"]);
           await closeMainWindow();
         }}
       />
@@ -71,6 +89,7 @@ function Actions(props: { name: string }) {
 }
 
 export default function Command() {
+  const { openProfilesInQuakeWindow: quake } = getPreferenceValues<Preferences>();
   return (
     <List searchBarPlaceholder="Search all profiles...">
       <List.Section title="Profiles">
@@ -99,7 +118,7 @@ export default function Command() {
                     ? ["cmd"]
                     : []
               }
-              actions={<Actions name={item.name} />}
+              actions={<Actions name={item.name} quake={quake} />}
             />
           ))}
       </List.Section>
@@ -109,7 +128,12 @@ export default function Command() {
           {PROFILES.profiles.list
             .filter((item) => item.hidden !== true && item.source === "Windows.Terminal.SSH")
             .map((item) => (
-              <List.Item key={item.guid} icon={Icon.Network} title={item.name} actions={<Actions name={item.name} />} />
+              <List.Item
+                key={item.guid}
+                icon={Icon.Network}
+                title={item.name}
+                actions={<Actions name={item.name} quake={quake} />}
+              />
             ))}
         </List.Section>
       ) : null}
@@ -128,7 +152,7 @@ export default function Command() {
                 key={item.guid}
                 icon={Icon.HardDrive}
                 title={item.name}
-                actions={<Actions name={item.name} />}
+                actions={<Actions name={item.name} quake={quake} />}
               />
             ))}
         </List.Section>

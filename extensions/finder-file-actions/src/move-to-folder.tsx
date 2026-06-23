@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Form,
   Icon,
   List,
   LocalStorage,
@@ -14,6 +15,7 @@ import {
   showHUD,
   confirmAlert,
   LaunchProps,
+  useNavigation,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -23,13 +25,54 @@ import path from "path";
 
 import { searchSpotlight } from "./common/search-spotlight";
 import { SpotlightSearchPreferences, SpotlightSearchResult, PinnedFolder } from "./common/types";
-import { folderName, lastUsedSort, fixDoubleConcat } from "./common/utils";
+import { folderName, lastUsedSort, fixDoubleConcat, pinnedFolderName } from "./common/utils";
 import { fsAsync } from "./common/fs-async";
 import { CacheManager } from "./common/cache-manager";
 import { isFinderFrontmost } from "./common/finder";
 
 interface RecentFolder extends SpotlightSearchResult {
   lastUsed: Date;
+}
+
+interface PinnedFolderNameFormValues {
+  customName?: string;
+}
+
+function PinnedFolderNameForm({
+  folder,
+  defaultCustomName,
+  submitTitle,
+  onSubmit,
+}: {
+  folder: SpotlightSearchResult;
+  defaultCustomName?: string;
+  submitTitle: string;
+  onSubmit: (folder: SpotlightSearchResult, customName?: string) => Promise<void>;
+}) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: PinnedFolderNameFormValues) {
+    await onSubmit(folder, values.customName);
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="customName"
+        title="Custom Name"
+        defaultValue={defaultCustomName}
+        placeholder={folderName(folder)}
+      />
+      <Form.Description text={folder.path} />
+    </Form>
+  );
 }
 
 export default function Command(props: LaunchProps) {
@@ -51,6 +94,16 @@ export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
+  const normalizedSearchText = searchText.trim().toLowerCase();
+  const filteredPinnedFolders = pinnedFolders.filter((folder) => {
+    if (!normalizedSearchText) {
+      return true;
+    }
+
+    return [pinnedFolderName(folder), folderName(folder), folder.path].some((value) =>
+      value.toLowerCase().includes(normalizedSearchText),
+    );
+  });
 
   // Function to get selected files from Finder
   async function getSelectedFinderFiles() {
@@ -666,14 +719,14 @@ export default function Command(props: LaunchProps) {
     }
   }
 
-  async function pinFolder(folder: SpotlightSearchResult) {
+  async function pinFolder(folder: SpotlightSearchResult, customName?: string) {
     try {
-      await cacheManager.pinFolder(folder);
+      await cacheManager.pinFolder(folder, customName);
       await loadPinnedFolders();
       showToast({
         style: Toast.Style.Success,
         title: "Folder Pinned",
-        message: folderName(folder),
+        message: customName?.trim() || folderName(folder),
       });
     } catch (error) {
       console.error("Error pinning folder:", error);
@@ -700,6 +753,25 @@ export default function Command(props: LaunchProps) {
         style: Toast.Style.Failure,
         title: "Error",
         message: "Failed to unpin folder",
+      });
+    }
+  }
+
+  async function renamePinnedFolder(folder: SpotlightSearchResult, customName?: string) {
+    try {
+      await cacheManager.renamePinnedFolder(folder.path, customName);
+      await loadPinnedFolders();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Pinned Folder Renamed",
+        message: customName?.trim() || folderName(folder),
+      });
+    } catch (error) {
+      console.error("Error renaming pinned folder:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to rename pinned folder",
       });
     }
   }
@@ -760,7 +832,7 @@ export default function Command(props: LaunchProps) {
                 icon={Icon.ArrowUp}
                 actions={
                   <ActionPanel>
-                    <Action title="Go Up" onAction={navigateUp} />
+                    <Action title="Go up" onAction={navigateUp} />
                   </ActionPanel>
                 }
               />
@@ -877,21 +949,27 @@ export default function Command(props: LaunchProps) {
                       onAction={() => pinFolder(folder)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     />
+                    <Action.Push
+                      icon={Icon.Pencil}
+                      title="Pin with Custom Name"
+                      target={<PinnedFolderNameForm folder={folder} submitTitle="Pin Folder" onSubmit={pinFolder} />}
+                    />
                   </ActionPanel>
                 }
               />
             ))}
           </List.Section>
 
-          {!searchText && pinnedFolders.length > 0 && (
+          {filteredPinnedFolders.length > 0 && (
             <List.Section title="Pinned Folders">
-              {pinnedFolders.map((folder, index) => (
+              {filteredPinnedFolders.map((folder, index) => (
                 <List.Item
                   key={`pinned-${folder.path}-${index}`}
                   id={`pinned-${folder.path}-${index}`}
-                  title={folderName(folder)}
+                  title={pinnedFolderName(folder)}
                   subtitle={folder.path}
                   icon={Icon.Star}
+                  keywords={[folderName(folder), folder.path]}
                   accessories={[
                     {
                       text: folder.pinnedAt ? `Pinned: ${folder.pinnedAt.toLocaleDateString()}` : "",
@@ -904,6 +982,9 @@ export default function Command(props: LaunchProps) {
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="Metadata" />
                           <List.Item.Detail.Metadata.Label title="Name" text={folder.kMDItemFSName} />
+                          {folder.customName && (
+                            <List.Item.Detail.Metadata.Label title="Custom Name" text={folder.customName} />
+                          )}
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.Label title="Where" text={folder.path} />
                           <List.Item.Detail.Metadata.Separator />
@@ -956,6 +1037,18 @@ export default function Command(props: LaunchProps) {
                         icon={Icon.Sidebar}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                         onAction={() => setIsShowingDetail(!isShowingDetail)}
+                      />
+                      <Action.Push
+                        icon={Icon.Pencil}
+                        title="Rename Pinned Folder"
+                        target={
+                          <PinnedFolderNameForm
+                            folder={folder}
+                            defaultCustomName={folder.customName}
+                            submitTitle="Rename Folder"
+                            onSubmit={renamePinnedFolder}
+                          />
+                        }
                       />
                       <Action
                         icon={Icon.StarDisabled}
@@ -1045,6 +1138,11 @@ export default function Command(props: LaunchProps) {
                         title="Pin This Folder"
                         onAction={() => pinFolder(folder)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                      />
+                      <Action.Push
+                        icon={Icon.Pencil}
+                        title="Pin with Custom Name"
+                        target={<PinnedFolderNameForm folder={folder} submitTitle="Pin Folder" onSubmit={pinFolder} />}
                       />
                       <Action
                         icon={Icon.Trash}

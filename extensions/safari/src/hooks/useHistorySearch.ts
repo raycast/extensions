@@ -8,12 +8,15 @@ import { safariAppIdentifier } from "../utils";
 export const HISTORY_DB = `${resolve(homedir(), `Library/${safariAppIdentifier.replace(/ /g, "")}/`)}/History.db`;
 const LIMIT = 100;
 
+const escapeSQLStringLiteral = (value: string) => value.replace(/'/g, "''");
+
 export const getHistoryQuery = (searchText?: string) => {
   const whereClause = searchText
     ? _.chain(searchText)
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(url LIKE "%${term}%" OR title LIKE "%${term}%")`)
+        .map((term) => escapeSQLStringLiteral(term))
+        .map((term) => `(url LIKE '%${term}%' OR title LIKE '%${term}%')`)
         .join(" AND ")
         .value()
     : undefined;
@@ -31,7 +34,13 @@ export const getHistoryQuery = (searchText?: string) => {
 
 const useHistorySearch = (searchText?: string) => {
   const query = getHistoryQuery(searchText);
-  return useSQL<HistoryItem>(HISTORY_DB, query);
+  return useSQL<HistoryItem>(HISTORY_DB, query, {
+    permissionPriming: "This is required to search your Safari history.",
+    failureToastOptions: {
+      title: "Cannot search Safari history",
+      message: "Grant Raycast Full Disk Access, then try again.",
+    },
+  });
 };
 
 export default useHistorySearch;

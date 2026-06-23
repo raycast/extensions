@@ -35,6 +35,18 @@ const APP_NAMES: Record<string, string> = {
   "com.cursor.Cursor": "Cursor",
 };
 
+export function formatDateForWispr(date: Date): string {
+  const pad = (n: number, len = 2) => n.toString().padStart(len, "0");
+  const y = date.getUTCFullYear();
+  const mo = pad(date.getUTCMonth() + 1);
+  const d = pad(date.getUTCDate());
+  const h = pad(date.getUTCHours());
+  const mi = pad(date.getUTCMinutes());
+  const s = pad(date.getUTCSeconds());
+  const ms = pad(date.getUTCMilliseconds(), 3);
+  return `${y}-${mo}-${d} ${h}:${mi}:${s}.${ms} +00:00`;
+}
+
 export function getAppName(bundleId: string | null): string {
   if (!bundleId) return "Unknown";
   return APP_NAMES[bundleId] ?? bundleId.split(".").pop() ?? bundleId;

@@ -19,7 +19,7 @@ export function DirectoryItem(props: {
   const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
 
   const context = encodeURIComponent(JSON.stringify({ path: filePath }));
-  const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
+  const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
   return (
     <List.Item

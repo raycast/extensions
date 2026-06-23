@@ -90,7 +90,7 @@ export const IconActions = ({ id, setId, dataURIIcon, svgIcon, from, children }:
               },
             });
           } catch {
-            open("raycast://extensions/thomas/color-picker");
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomas/color-picker`);
           }
         }}
       />

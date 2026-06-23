@@ -1,10 +1,10 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
-import { homedir } from "os";
 import { EntryLike, RecentEntries } from "./types";
 import fs from "fs";
-import { isSameEntry } from "./utils";
+import { getAntigravitySupportPath, isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
+import path from "path";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -82,7 +82,7 @@ export function useRecentEntries() {
 }
 
 function getPath() {
-  return `${homedir()}/Library/Application Support/Antigravity/User/globalStorage/state.vscdb`;
+  return path.join(getAntigravitySupportPath(), "User/globalStorage/state.vscdb");
 }
 
 async function saveEntries(entries: EntryLike[]) {

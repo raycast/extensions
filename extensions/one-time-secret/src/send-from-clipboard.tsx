@@ -1,7 +1,6 @@
-import { Clipboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { createClientFromPreferences } from "./create-client";
-
-const THREE_HOURS_TTL_SECONDS = 10800;
+import { DEFAULT_TTL_SECONDS } from "./constants";
 
 export default async function Command() {
   const raw = await Clipboard.readText();
@@ -22,8 +21,10 @@ export default async function Command() {
   });
 
   try {
+    const { lifetime } = getPreferenceValues<Preferences.SendFromClipboard>();
+    const ttlSeconds = Number.parseInt(lifetime, 10) || DEFAULT_TTL_SECONDS;
     const client = createClientFromPreferences();
-    const response = await client.concealSecret(secret, THREE_HOURS_TTL_SECONDS, null);
+    const response = await client.concealSecret(secret, ttlSeconds, null);
     await Clipboard.copy(client.getShareableUrl(response.secretIdentifier));
 
     toast.style = Toast.Style.Success;

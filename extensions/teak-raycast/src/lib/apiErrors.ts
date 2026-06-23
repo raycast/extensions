@@ -60,18 +60,48 @@ export const normalizeLimit = (limit?: number): number => {
   return Math.max(1, Math.min(clamped, MAX_LIMIT));
 };
 
-export const buildCardsSearchParams = (
-  query: string,
-  limit = DEFAULT_LIMIT,
-): string => {
+export const buildCardsSearchParams = (input: {
+  createdAfter?: number;
+  createdBefore?: number;
+  favorited?: boolean;
+  limit?: number;
+  query?: string;
+  sort?: "newest" | "oldest";
+  tag?: string;
+  type?: string;
+}): string => {
   const search = new URLSearchParams();
-  const trimmedQuery = query.trim();
+  const trimmedQuery = input.query?.trim();
 
   if (trimmedQuery) {
     search.set("q", trimmedQuery);
   }
 
-  search.set("limit", String(normalizeLimit(limit)));
+  if (input.type?.trim()) {
+    search.set("type", input.type.trim());
+  }
+
+  if (input.tag?.trim()) {
+    search.set("tag", input.tag.trim());
+  }
+
+  if (input.favorited) {
+    search.set("favorited", "true");
+  }
+
+  if (input.sort === "oldest") {
+    search.set("sort", "oldest");
+  }
+
+  if (typeof input.createdAfter === "number") {
+    search.set("createdAfter", String(input.createdAfter));
+  }
+
+  if (typeof input.createdBefore === "number") {
+    search.set("createdBefore", String(input.createdBefore));
+  }
+
+  search.set("limit", String(normalizeLimit(input.limit)));
   return search.toString();
 };
 

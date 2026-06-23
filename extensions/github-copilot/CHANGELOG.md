@@ -1,5 +1,11 @@
 # GitHub Copilot Changelog
 
+## [Fix tasks without an associated pull request] - 2026-05-13
+
+- Handle tasks returned by the Copilot API that don't have an associated pull request
+- Show "Open in Browser" for tasks without a pull request
+- Fix `TypeError: Cannot read properties of undefined (reading 'toString')` when viewing the task list
+
 ## [Improve repository picker] - 2026-03-26
 
 - Remember "Recently used" repositories in the repository picker
