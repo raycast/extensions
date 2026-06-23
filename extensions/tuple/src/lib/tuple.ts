@@ -232,9 +232,22 @@ export async function exportTranscripts(directory: string, callId?: string): Pro
   await runTuple(args);
 }
 
-/** Fetch a stored call's transcript as plain text (`transcription show`, default format). */
-export function getTranscript(callId: string): Promise<string> {
-  return runTuple(["transcription", "show", callId]);
+// The CLI's `transcription show` colorizes output with ANSI SGR codes (e.g. ESC[1;36m) even when not
+// a TTY, and NO_COLOR doesn't suppress them. Built without a literal control char to satisfy no-control-regex.
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+/** Strip the CLI's ANSI color codes so transcript text is clean for display, AI prompts, and AI tools. */
+export function stripAnsi(text: string): string {
+  return text.replace(ANSI_PATTERN, "");
+}
+
+/**
+ * Fetch a stored call's transcript as plain text (`transcription show`, default format), with the
+ * CLI's ANSI color codes stripped so every consumer — including AI summarization and the
+ * read-transcript tool — gets clean text rather than escape sequences.
+ */
+export async function getTranscript(callId: string): Promise<string> {
+  return stripAnsi(await runTuple(["transcription", "show", callId]));
 }
 
 /**

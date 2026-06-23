@@ -26,6 +26,7 @@ import {
   exportTranscripts,
   getBinaryPath,
   getConnectPrompt,
+  stripAnsi,
   toFtsQuery,
 } from "./lib/tuple";
 import { StoredCall, TranscriptMatch, TupleErrorKind } from "./lib/types";
@@ -354,14 +355,9 @@ function buildTranscriptMarkdown(title: string, summary: string, transcript: str
   return `${heading}${summaryBlock}${body}`;
 }
 
-// The CLI's `transcription show` colorizes output with ANSI SGR codes (e.g. ESC[1;36m) even when not
-// a TTY, and NO_COLOR doesn't suppress them. Built without a literal control char to satisfy no-control-regex.
-const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
-
 /** Strip the CLI's ANSI color codes and put each utterance on its own line so markdown doesn't run them together. */
 function formatTranscript(raw: string): string {
-  return raw
-    .replace(ANSI_PATTERN, "")
+  return stripAnsi(raw)
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
