@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Fix missed daily schedules] - {PR_MERGE_DATE}
+## [Fix missed daily schedules] - 2026-06-23
 
 - Fixed "Run Immediately if Missed" for newly created daily schedules when the machine sleeps before the first background refresh checkpoint.
 
