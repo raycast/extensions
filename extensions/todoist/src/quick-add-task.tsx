@@ -21,8 +21,14 @@ async function QuickAddTask(props: QuickAddTaskProps) {
       popToRoot({ clearSearchBar: true });
     }
 
-    if (preferences.autoCreateLabels && props.arguments.text) {
-      const labelsToCreate = extractLabels(props.arguments.text);
+    let text = props.arguments.text || props.fallbackText;
+
+    if (!text) {
+      throw new Error("No text provided. Please provide a task text.");
+    }
+
+    if (preferences.autoCreateLabels) {
+      const labelsToCreate = extractLabels(text);
       if (labelsToCreate.length > 0) {
         await Promise.all(
           labelsToCreate.map(async (label) => addLabel({ name: label }, { data: undefined, setData: () => {} })),
@@ -30,7 +36,6 @@ async function QuickAddTask(props: QuickAddTaskProps) {
       }
     }
 
-    let text = props.arguments.text ?? props.fallbackText;
     if (props.arguments.description) {
       text = `${text} // ${props.arguments.description}`;
     }

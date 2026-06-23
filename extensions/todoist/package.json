@@ -138,7 +138,7 @@
           "name": "text",
           "placeholder": "Text (today 5pm p2)",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "description",

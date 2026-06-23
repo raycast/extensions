@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fix Quick Add Task fallback command] - 2026-06-23
+
+- Quick Add Task now works as a Raycast fallback command on Raycast 2.0+. Previously it failed with "Value is missing in argument" because the text argument was required.
+
 ## [Guard against empty sync response arrays] - 2026-06-19
 
 - Prevent cache corruption when the Todoist Sync API returns an empty array for projects, items, labels, filters, or notes during incremental sync mutations.
