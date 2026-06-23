@@ -25,7 +25,7 @@ export type PersonsArguments = {
 function Persons({ searchTerm }: { searchTerm: string }) {
   const { selectedId } = useContext(ProjectsContext);
   const { data, isLoading } = usePostHogClient<SearchResult>(
-    "projects/" + selectedId + "/persons?search=" + searchTerm
+    "projects/" + selectedId + "/persons?search=" + searchTerm,
   );
 
   return (
