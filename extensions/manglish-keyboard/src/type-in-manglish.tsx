@@ -14,6 +14,11 @@ export default function Command() {
     setInput(text);
     setOutput(null);
     if (!text.trim()) {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+      requestId.current++; // invalidate any in-flight request
       setIsLoading(false);
       return;
     }

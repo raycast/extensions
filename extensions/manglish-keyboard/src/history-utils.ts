@@ -20,7 +20,8 @@ export async function getHistory(): Promise<HistoryItem[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as HistoryItem[];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
