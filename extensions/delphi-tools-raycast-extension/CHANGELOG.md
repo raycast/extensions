@@ -1,6 +1,6 @@
 # Delphitools Changelog
 
-## [Initial Store Release] - {PR_MERGE_DATE}
+## [Initial Store Release] - 2026-06-23
 
 - Add the first Raycast Extension release for running delphitools from Raycast.
 - Include Commands for the full implemented delphitools catalogue tracked in `docs/progress.md`.
