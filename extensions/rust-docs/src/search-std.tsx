@@ -61,6 +61,38 @@ const FAVORITES_KEY = "rust-docs-favorites";
 const HISTORY_KEY = "rust-docs-history";
 const MAX_HISTORY = 10;
 
+function isDocItem(item: unknown): item is DocItem {
+  if (!item || typeof item !== "object") return false;
+
+  const candidate = item as Record<string, unknown>;
+
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.path === "string" &&
+    typeof candidate.desc === "string" &&
+    typeof candidate.type === "string" &&
+    typeof candidate.url === "string"
+  );
+}
+
+async function getStoredItems(key: string): Promise<DocItem[]> {
+  const storedValue = await LocalStorage.getItem<string>(key);
+  if (!storedValue) return [];
+
+  try {
+    const parsedValue = JSON.parse(storedValue);
+
+    if (Array.isArray(parsedValue) && parsedValue.every(isDocItem)) {
+      return parsedValue;
+    }
+  } catch {
+    // Fall through to clear invalid persisted data.
+  }
+
+  await LocalStorage.removeItem(key);
+  return [];
+}
+
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(fetchSearchIndex, [], {
     keepPreviousData: true,
@@ -74,52 +106,47 @@ export default function Command() {
   // Load favorites and history on mount
   useEffect(() => {
     (async () => {
-      const storedFavorites = await LocalStorage.getItem<string>(FAVORITES_KEY);
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
-      }
+      const [storedFavorites, storedHistory] = await Promise.all([
+        getStoredItems(FAVORITES_KEY),
+        getStoredItems(HISTORY_KEY),
+      ]);
 
-      const storedHistory = await LocalStorage.getItem<string>(HISTORY_KEY);
-      if (storedHistory) {
-        setHistory(JSON.parse(storedHistory));
-      }
+      setFavorites(storedFavorites);
+      setHistory(storedHistory.slice(0, MAX_HISTORY));
     })();
   }, []);
 
-  const toggleFavorite = useCallback(
-    async (item: DocItem) => {
-      let newFavorites;
-      const isFavorite = favorites.some((f) => f.url === item.url);
+  const toggleFavorite = useCallback(async (item: DocItem) => {
+    let toastTitle = "Added to Favorites";
 
+    setFavorites((previousFavorites) => {
+      const isFavorite = previousFavorites.some((f) => f.url === item.url);
+      let newFavorites;
       if (isFavorite) {
-        newFavorites = favorites.filter((f) => f.url !== item.url);
-        await showToast({
-          title: "Removed from Favorites",
-          style: Toast.Style.Success,
-        });
+        toastTitle = "Removed from Favorites";
+        newFavorites = previousFavorites.filter((f) => f.url !== item.url);
       } else {
-        newFavorites = [item, ...favorites];
-        await showToast({
-          title: "Added to Favorites",
-          style: Toast.Style.Success,
-        });
+        newFavorites = [item, ...previousFavorites];
       }
 
-      setFavorites(newFavorites);
-      await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-    },
-    [favorites],
-  );
+      void LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      return newFavorites;
+    });
 
-  const addToHistory = useCallback(
-    async (item: DocItem) => {
-      const filteredHistory = history.filter((h) => h.url !== item.url);
+    await showToast({
+      title: toastTitle,
+      style: Toast.Style.Success,
+    });
+  }, []);
+
+  const addToHistory = useCallback(async (item: DocItem) => {
+    setHistory((previousHistory) => {
+      const filteredHistory = previousHistory.filter((h) => h.url !== item.url);
       const newHistory = [item, ...filteredHistory].slice(0, MAX_HISTORY);
-      setHistory(newHistory);
-      await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-    },
-    [history],
-  );
+      void LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
 
   useEffect(() => {
     if (error) {

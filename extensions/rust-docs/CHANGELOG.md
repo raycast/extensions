@@ -4,6 +4,7 @@
 
 - Removed duplicate results for Rust items re-exported across `std`, `core`, and `alloc`
 - Reduced startup memory usage while building the Rust documentation search index
+- Improved reliability of saved favorites and recent search history
 - Removed deprecated `node-fetch` usage to avoid `punycode` deprecation warnings
 
 ## [Initial Version] - 2026-01-07

@@ -17,9 +17,6 @@ const STD_INDEX_URL = "https://doc.rust-lang.org/std/index.html";
 const CORE_ITEMS_URL = "https://doc.rust-lang.org/core/all.html";
 const ALLOC_ITEMS_URL = "https://doc.rust-lang.org/alloc/all.html";
 
-// Regex to capture lists of items.
-const ITEM_REGEX = /<a href="([^"]+)">([^<]+)<\/a>/g;
-
 export const fetchSearchIndex = async (): Promise<DocItem[]> => {
   try {
     const items: DocItem[] = [];
@@ -125,9 +122,10 @@ const parseIndexItems = (html: string): DocItem[] => {
 
 const parseHtmlIndex = (html: string, baseUrl: string): DocItem[] => {
   const items: DocItem[] = [];
+  const itemRegex = /<a href="([^"]+)">([^<]+)<\/a>/g;
   let match;
 
-  while ((match = ITEM_REGEX.exec(html)) !== null) {
+  while ((match = itemRegex.exec(html)) !== null) {
     const href = match[1];
     const fullPath = match[2];
 
