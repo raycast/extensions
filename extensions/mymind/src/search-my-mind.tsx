@@ -68,7 +68,7 @@ export default function Command() {
       <List
         isLoading={loading}
         onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search your mind…"
+        searchBarPlaceholder="Search… try tag:foo, type:Note, created:2026"
         searchBarAccessory={
           <List.Dropdown tooltip="View" value={viewMode} onChange={(v) => setViewMode(v as ViewMode)}>
             <List.Dropdown.Item title="Grid" value="grid" />

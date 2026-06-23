@@ -11,7 +11,7 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { deleteObject, loadCardMarkdown, MyMindObject, ObjectNote, pinObject, unpinObject } from "../api";
+import { deleteObject, loadCardMarkdown, MyMindObject, ObjectNote, pinObject, unpinObject, updateObject } from "../api";
 import AddNote from "../add-a-new-note";
 import { safeHostname } from "../utils";
 import { ManageTagsForm } from "./ManageTagsForm";
@@ -52,6 +52,15 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
   };
 
   const dominantColor = object.blob?.palette?.dominantColor ?? null;
+  const fileName = object.blob?.name?.trim() || null;
+
+  // Prefer the API 0.7.0 `mainEntity`, falling back to the deprecated
+  // `entityType` / `entities` shape while both are served.
+  const entityType = object.mainEntity?.["@type"]?.trim() || object.entityType?.trim() || null;
+  const mainEntityName = object.mainEntity?.name?.trim();
+  const entityNames = mainEntityName
+    ? [mainEntityName]
+    : Array.from(new Set(object.entities.map((e) => e.name?.trim()).filter((n): n is string => !!n)));
 
   return (
     <Detail
@@ -61,7 +70,9 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={new Date(object.created).toLocaleString()} />
           <Detail.Metadata.Label title="Modified" text={new Date(object.modified).toLocaleString()} />
-          {object.entityType && <Detail.Metadata.Label title="Type" text={object.entityType} />}
+          {entityType && <Detail.Metadata.Label title="Type" text={entityType} />}
+          {object.completed && <Detail.Metadata.Label title="Status" text="Completed" icon={Icon.CheckCircle} />}
+          {fileName && <Detail.Metadata.Label title="File" text={fileName} />}
           {object.source?.url && (
             <Detail.Metadata.Link
               title="Source"
@@ -76,15 +87,9 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
               ))}
             </Detail.Metadata.TagList>
           )}
-          {object.entities.length > 0 && (
+          {entityNames.length > 0 && (
             <Detail.Metadata.TagList title="Entities">
-              {Array.from(
-                new Map(
-                  object.entities
-                    .map((e) => [e.name?.trim() ?? e.id ?? "", e] as const)
-                    .filter(([key]) => key.length > 0),
-                ).keys(),
-              ).map((name) => (
+              {entityNames.map((name) => (
                 <Detail.Metadata.TagList.Item key={name} text={name} />
               ))}
             </Detail.Metadata.TagList>
@@ -151,6 +156,23 @@ export function CardActions({
     } catch (error) {
       toast.hide();
       await showFailureToast(error, { title: "Failed to unpin card" });
+    }
+  };
+
+  const handleToggleCompleted = async () => {
+    const next = !object.completed;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: next ? "Marking complete…" : "Marking incomplete…",
+    });
+    try {
+      await updateObject(object.id, { completed: next });
+      toast.style = Toast.Style.Success;
+      toast.title = next ? "Marked complete" : "Marked incomplete";
+      onChange?.();
+    } catch (error) {
+      toast.hide();
+      await showFailureToast(error, { title: "Failed to update card" });
     }
   };
 
@@ -246,6 +268,12 @@ export function CardActions({
           icon={Icon.PinDisabled}
           onAction={handleUnpin}
           shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+        />
+        <Action
+          title={object.completed ? "Mark as Incomplete" : "Mark as Complete"}
+          icon={object.completed ? Icon.Circle : Icon.CheckCircle}
+          onAction={handleToggleCompleted}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>

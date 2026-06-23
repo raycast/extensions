@@ -137,6 +137,7 @@ export async function unpinObject(id: string): Promise<void> {
 export interface UpdateObjectFields {
   title?: string;
   summary?: string | null;
+  completed?: boolean;
 }
 
 export async function updateObject(id: string, fields: UpdateObjectFields): Promise<void> {

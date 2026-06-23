@@ -26,11 +26,27 @@ That's it. Run **Search My Mind** to confirm the connection.
 | **Browse Tags** | List your tags; drill in to see all cards under a tag. |
 | **mymind Menu Bar** | Count of today's saves in the menu bar with a quick-capture shortcut. Enable from Raycast Preferences → Extensions → mymind → Menu Bar. |
 
+### Query syntax
+
+**Search My Mind** passes mymind's query language straight through, so you
+can combine free-text with structured filters:
+
+- `tag:foo` — cards with a tag (quote multi-word tags: `tag:"to read"`).
+- `type:Note` — filter by card type (`Note`, `Image`, `Link`, …).
+- `domain:nytimes.com` — cards saved from a domain.
+- `"a phrase"` — exact phrase match.
+- `-exclude` — exclude a term.
+- `completed:true` / `completed:false` — filter by completed state (toggle it with Cmd+Shift+C on a card).
+- **Date ranges** (`created:`, `bumped:`, `published:`) — match a year
+  (`created:2026`), a month (`bumped:2025-02`), or an instant plus a
+  duration. For example `created:2026 type:Note` finds notes created
+  this year.
+
 ### Card actions
 
 On any card you can:
 
-- **Show Details** (Enter) — markdown body + metadata sidebar, with the card's summary, notes, and dominant color when present.
+- **Show Details** (Enter) — markdown body + metadata sidebar, with the card's summary, notes, type, extracted entity, completed status, and dominant color when present.
 - **Find Related** (Cmd+Shift+R) — semantically related cards.
 - **Edit Card** (Cmd+E) — edit title, summary, and markdown body.
 - **Manage Spaces** (Cmd+Shift+S) — toggle the card in or out of any space.
@@ -39,6 +55,7 @@ On any card you can:
 - **Manage Links** (Cmd+Shift+K) — browse manual + WikiLink-inferred links to other cards; link a new card via semantic search; unlink (manual links only).
 - **Copy as Markdown** (Cmd+Shift+M).
 - **Pin / Unpin** (Cmd+Shift+P / Cmd+Ctrl+P).
+- **Mark as Complete / Incomplete** (Cmd+Shift+C) — toggle a card's completed state; pairs with the `completed:` search filter.
 - **Open in Browser** (Cmd+Enter) and **Open in mymind** (Cmd+Shift+Enter).
 - **Delete** (Cmd+Ctrl+X) — soft, recoverable for 30 days.
 
@@ -68,10 +85,11 @@ no Raycast UI opens.
 - **Recently Deleted** isn't yet exposed by the API, so there's no
   command to browse the trash. Restore is implemented internally and
   will surface as soon as listing is available.
-- **Article reader body** isn't returned by the API for `entityType:
-  "Article"` cards (mymind has it in their reader, but neither
-  `/content` nor `?contentAs=text/markdown` returns it). Show Details
-  falls back to a hint pointing at the source URL.
+- **Article reader body** isn't returned by the API for Article cards
+  (`mainEntity.@type: "Article"`, or the deprecated `entityType:
+  "Article"`) — mymind has it in their reader, but neither `/content`
+  nor `?contentAs=text/markdown` returns it. Show Details falls back to
+  a hint pointing at the source URL.
 
 ## Migrating from 1.x
 

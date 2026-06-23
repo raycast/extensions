@@ -53,6 +53,7 @@ export type Palette = z.infer<typeof PaletteSchema>;
 export const BlobReferenceSchema = z
   .object({
     url: z.string().nullish(),
+    name: z.string().nullish(),
     mime: z.string().nullish(),
     size: z.number().nullish(),
     palette: PaletteSchema.nullish(),
@@ -68,6 +69,17 @@ export const ObjectEntitySchema = z
   })
   .loose();
 export type ObjectEntity = z.infer<typeof ObjectEntitySchema>;
+
+// API 0.7.0 replaced the `entities` array with a single `mainEntity` whose
+// schema.org type lives in `@type`. Loose so the richer per-type fields
+// (Book, Movie, Product, Repository, XPost, …) pass through untouched.
+export const MainEntitySchema = z
+  .object({
+    "@type": z.string().nullish(),
+    name: z.string().nullish(),
+  })
+  .loose();
+export type MainEntity = z.infer<typeof MainEntitySchema>;
 
 export const LinkEndpointSchema = z
   .object({
@@ -88,7 +100,11 @@ export type Link = z.infer<typeof LinkSchema>;
 export const MyMindObjectSchema = z.object({
   id: z.string(),
   title: nullishString(),
+  // Deprecated by API 0.7.0 in favour of `mainEntity`; kept as a fallback
+  // while the old shape is still served in parallel.
   entityType: z.string().nullish(),
+  mainEntity: MainEntitySchema.nullish(),
+  completed: z.boolean().nullish(),
   summary: z.string().nullish(),
   content: z.unknown().nullish(),
   spaces: z

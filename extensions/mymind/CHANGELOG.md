@@ -21,7 +21,9 @@ support.
   `GET /objects?q=…&semantic=true&rerank=true`, returning hydrated
   objects in one round-trip. Empty query falls back to recency
   browsing. Defaults to a 5-column **Grid** with a Grid/List toggle
-  persisted across runs.
+  persisted across runs. Query syntax is passed through verbatim,
+  including the API 0.6.0 date-range filters (`created:`, `bumped:`,
+  `published:`) that match a year, month, or instant + duration.
 - **Add a New Note** — markdown notes via `POST /objects`, no more
   client-side prose conversion.
 - **Save to mymind** — one form, three behaviors auto-routed from your
@@ -46,8 +48,11 @@ support.
 
 - Show Details (Enter) with metadata sidebar and the markdown body
   rendered inline. Surfaces summary as a blockquote above the body,
-  appends a Notes section after, lists extracted `entities` as tags,
-  and shows dominant color from `blob.palette` as a tag.
+  appends a Notes section after, shows the extracted entity (the API
+  0.7.0 `mainEntity`, with a fallback to the deprecated `entities`
+  array) as tags with its `@type` as the Type label, flags `completed`
+  cards, shows dominant color from `blob.palette` as a tag, and shows
+  the original file name from `blob.name` (API 0.6.0) for uploads.
 - Manage Notes (Cmd+Shift+N) — add (`POST`), edit (`PUT`), and delete
   (`DELETE`) notes via `/objects/:id/notes/:noteId`.
 - Manage Links (Cmd+Shift+K) — list the cards linked to this one via
@@ -68,6 +73,9 @@ support.
 - Copy as Markdown (Cmd+Shift+M) — pulls markdown via
   `GET /objects/:id/content` with `Accept: text/markdown`.
 - Pin (Cmd+Shift+P) and Unpin (Cmd+Ctrl+P).
+- Mark as Complete / Incomplete (Cmd+Shift+C) — toggles the API 0.7.0
+  `completed` field via `PATCH /objects/:id`, complementing the
+  `completed:` search filter.
 - Open in Mymind (Cmd+Shift+Enter) and Copy mymind URL (Cmd+Shift+L)
   alongside the existing source URL actions.
 - Delete (Cmd+Ctrl+X) — soft delete, recoverable for 30 days.
