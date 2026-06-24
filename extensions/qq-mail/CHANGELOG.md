@@ -1,6 +1,6 @@
 # QQ Mail Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-24
 
 - Added verification code extraction and one-click copy from emails
 - Added virtual "Starred" folder with star/unstar actions
