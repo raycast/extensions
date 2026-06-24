@@ -32,8 +32,7 @@ export const getClient = async (): Promise<QobuzClient> => {
 
   if (token) {
     const cached = await localStore.load();
-    if (cached?.token === token)
-      return createQobuzClient({ store: localStore });
+    if (cached?.token === token) return createQobuzClient({ store: localStore });
     return connect({ token, store: localStore });
   }
 

@@ -1,18 +1,6 @@
-import {
-  Cache,
-  Clipboard,
-  getPreferenceValues,
-  Icon,
-  MenuBarExtra,
-  open,
-  showHUD,
-} from "@raycast/api";
+import { Cache, Clipboard, getPreferenceValues, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  defaultPlayerStatePath,
-  type QobuzClient,
-  type Track,
-} from "@kud/qobuz";
+import { defaultPlayerStatePath, type QobuzClient, type Track } from "@kud/qobuz";
 import { readFile } from "node:fs/promises";
 import { appLink, deepLink, getClient } from "./lib/client";
 import { sendMediaKey } from "./lib/media-keys";
@@ -37,10 +25,7 @@ const titleLength = (): number => {
 // when a genuinely new track appears.
 const cache = new Cache();
 
-const fetchTrack = async (
-  client: QobuzClient,
-  id: number,
-): Promise<Track | null> => {
+const fetchTrack = async (client: QobuzClient, id: number): Promise<Track | null> => {
   const key = `track-${id}`;
   const cached = cache.get(key);
   if (cached) return JSON.parse(cached) as Track;
@@ -58,25 +43,19 @@ export default function Command() {
     let histIds: number[] = [];
 
     try {
-      const state = JSON.parse(
-        await readFile(defaultPlayerStatePath(), "utf8"),
-      );
+      const state = JSON.parse(await readFile(defaultPlayerStatePath(), "utf8"));
       const queue = state?.playqueue?.data;
       const activeList = queue?.shuffled ? queue?.shuffledItems : queue?.items;
       const idx: number = queue?.currentIndex ?? 0;
       currentId = activeList?.[idx]?.trackId;
-      nextIds = (activeList ?? [])
-        .slice(idx + 1, idx + 1 + QUEUE_PREVIEW)
-        .map((i: { trackId: number }) => i.trackId);
+      nextIds = (activeList ?? []).slice(idx + 1, idx + 1 + QUEUE_PREVIEW).map((i: { trackId: number }) => i.trackId);
       histIds = (queue?.history ?? []).slice(0, HISTORY_PREVIEW);
     } catch {
       // player state absent — controls still work
     }
 
     const [current, nextResults, histResults] = await Promise.all([
-      currentId !== undefined
-        ? fetchTrack(client, currentId)
-        : Promise.resolve(null),
+      currentId !== undefined ? fetchTrack(client, currentId) : Promise.resolve(null),
       Promise.all(nextIds.map((id) => fetchTrack(client, id))),
       Promise.all(histIds.map((id) => fetchTrack(client, id))),
     ]);
@@ -98,41 +77,18 @@ export default function Command() {
     // when the menu closes, so there's no reliable way to refresh it sooner.
   };
 
-  const trackIcon = (track: Track) =>
-    track.album?.image?.small
-      ? { source: track.album.image.small }
-      : Icon.Music;
+  const trackIcon = (track: Track) => (track.album?.image?.small ? { source: track.album.image.small } : Icon.Music);
 
   const title = data?.current
-    ? truncate(
-        `${data.current.artist?.name ?? "?"} — ${data.current.title}`,
-        titleLength(),
-      )
+    ? truncate(`${data.current.artist?.name ?? "?"} — ${data.current.title}`, titleLength())
     : undefined;
 
   return (
-    <MenuBarExtra
-      icon={Icon.Music}
-      title={title}
-      isLoading={isLoading}
-      tooltip="Qobuz — Now Playing"
-    >
+    <MenuBarExtra icon={Icon.Music} title={title} isLoading={isLoading} tooltip="Qobuz — Now Playing">
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Play / Pause"
-          icon={Icon.Play}
-          onAction={control("play")}
-        />
-        <MenuBarExtra.Item
-          title="Previous"
-          icon={Icon.Rewind}
-          onAction={control("previous")}
-        />
-        <MenuBarExtra.Item
-          title="Next"
-          icon={Icon.Forward}
-          onAction={control("next")}
-        />
+        <MenuBarExtra.Item title="Play / Pause" icon={Icon.Play} onAction={control("play")} />
+        <MenuBarExtra.Item title="Previous" icon={Icon.Rewind} onAction={control("previous")} />
+        <MenuBarExtra.Item title="Next" icon={Icon.Forward} onAction={control("next")} />
       </MenuBarExtra.Section>
 
       {(data?.nextTracks.length ?? 0) > 0 && (
@@ -182,11 +138,7 @@ export default function Command() {
       )}
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Open Qobuz"
-          icon={Icon.Window}
-          onAction={() => open("qobuzapp://")}
-        />
+        <MenuBarExtra.Item title="Open Qobuz" icon={Icon.Window} onAction={() => open("qobuzapp://")} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

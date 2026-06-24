@@ -2,13 +2,7 @@ import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { Clipboard } from "@raycast/api";
 import type { Album, Track } from "@kud/qobuz";
-import {
-  appLink,
-  BRAND,
-  deepLink,
-  formatDuration,
-  getClient,
-} from "./lib/client";
+import { appLink, BRAND, deepLink, formatDuration, getClient } from "./lib/client";
 import {
   deezerByIsrc,
   findIsrc,
@@ -38,8 +32,7 @@ type Conversion =
       deezerUrl?: string;
     };
 
-const SUPPORTED_HINT =
-  "Copy a **Spotify**, **YouTube Music**, or **Qobuz** track link, then run this command.";
+const SUPPORTED_HINT = "Copy a **Spotify**, **YouTube Music**, or **Qobuz** track link, then run this command.";
 
 const UNRESOLVED_MESSAGE: Record<ResolveFailure, string> = {
   invalid: ["# Nothing to convert", "", SUPPORTED_HINT].join("\n"),
@@ -67,13 +60,10 @@ export default function Command() {
       if (outcome.direction === "from-qobuz") {
         const track = await client.tracks.get(outcome.qobuzTrackId);
         const album = track.album?.id
-          ? ((await client.albums.get(track.album.id).catch(() => undefined)) ??
-            null)
+          ? ((await client.albums.get(track.album.id).catch(() => undefined)) ?? null)
           : null;
         const query = `${track.artist?.name ?? ""} ${track.title}`.trim();
-        const deezerUrl = track.isrc
-          ? await deezerByIsrc(track.isrc)
-          : undefined;
+        const deezerUrl = track.isrc ? await deezerByIsrc(track.isrc) : undefined;
         return { mode: "from-qobuz", track, album, query, deezerUrl };
       }
 
@@ -82,23 +72,19 @@ export default function Command() {
       const query = `${resolved.artist} ${resolved.title}`;
       const isrc = await findIsrc(resolved);
 
-      let track = isrc
-        ? ((await client.tracks.match({ isrc, query })) ?? null)
-        : null;
+      let track = isrc ? ((await client.tracks.match({ isrc, query })) ?? null) : null;
       const exact = Boolean(track);
 
       if (!track) {
         // Approximate fallback: only trust a candidate that actually resembles
         // the source, so a track absent from Qobuz reports "no match" rather
         // than a confident wrong result.
-        const candidates = (await client.search.search(query, { limit: 5 }))
-          .tracks;
+        const candidates = (await client.search.search(query, { limit: 5 })).tracks;
         track = candidates.find((c) => isLikelyMatch(resolved, c)) ?? null;
       }
 
       const album = track?.album?.id
-        ? ((await client.albums.get(track.album.id).catch(() => undefined)) ??
-          null)
+        ? ((await client.albums.get(track.album.id).catch(() => undefined)) ?? null)
         : null;
 
       return { mode: "to-qobuz", resolved, track, album, exact };
@@ -123,10 +109,8 @@ export default function Command() {
 
 const renderMetadata = (data: Conversion | undefined) => {
   if (!data) return undefined;
-  if (data.mode === "to-qobuz" && data.track)
-    return <ToQobuzMetadata data={data} track={data.track} />;
-  if (data.mode === "from-qobuz")
-    return <FromQobuzMetadata data={data} track={data.track} />;
+  if (data.mode === "to-qobuz" && data.track) return <ToQobuzMetadata data={data} track={data.track} />;
+  if (data.mode === "from-qobuz") return <FromQobuzMetadata data={data} track={data.track} />;
   return undefined;
 };
 
@@ -138,18 +122,10 @@ const renderActions = (data: Conversion | undefined) => {
     return (
       <ActionPanel>
         {data.track.album?.id && (
-          <Action.Open
-            title="Open in Qobuz"
-            target={appLink.album(data.track.album.id)}
-            icon={Icon.Music}
-          />
+          <Action.Open title="Open in Qobuz" target={appLink.album(data.track.album.id)} icon={Icon.Music} />
         )}
         <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
-        <Action.Open
-          title="Play Track in Qobuz"
-          target={appLink.track(data.track.id)}
-          icon={Icon.Play}
-        />
+        <Action.Open title="Play Track in Qobuz" target={appLink.track(data.track.id)} icon={Icon.Play} />
         <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
       </ActionPanel>
     );
@@ -181,13 +157,8 @@ const renderActions = (data: Conversion | undefined) => {
           icon={Icon.MagnifyingGlass}
           url={spotifySearchUrl(data.query)}
         />
-        {data.deezerUrl && (
-          <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />
-        )}
-        <Action.CopyToClipboard
-          title="Copy Artist & Title"
-          content={data.query}
-        />
+        {data.deezerUrl && <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />}
+        <Action.CopyToClipboard title="Copy Artist & Title" content={data.query} />
       </ActionPanel>
     );
   }
@@ -195,19 +166,10 @@ const renderActions = (data: Conversion | undefined) => {
   return undefined;
 };
 
-function ToQobuzMetadata({
-  data,
-  track,
-}: {
-  data: Extract<Conversion, { mode: "to-qobuz" }>;
-  track: Track;
-}) {
+function ToQobuzMetadata({ data, track }: { data: Extract<Conversion, { mode: "to-qobuz" }>; track: Track }) {
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label
-        title="From"
-        text={`${data.resolved.artist} — ${data.resolved.title}`}
-      />
+      <Detail.Metadata.Label title="From" text={`${data.resolved.artist} — ${data.resolved.title}`} />
       <Detail.Metadata.TagList title="Match">
         <Detail.Metadata.TagList.Item
           text={data.exact ? "Exact (ISRC)" : "Approximate"}
@@ -220,13 +182,7 @@ function ToQobuzMetadata({
   );
 }
 
-function FromQobuzMetadata({
-  data,
-  track,
-}: {
-  data: Extract<Conversion, { mode: "from-qobuz" }>;
-  track: Track;
-}) {
+function FromQobuzMetadata({ data, track }: { data: Extract<Conversion, { mode: "from-qobuz" }>; track: Track }) {
   return (
     <Detail.Metadata>
       <TrackFacts track={track} />
@@ -246,18 +202,10 @@ function TrackFacts({ track }: { track: Track }) {
     <>
       <Detail.Metadata.Label title="Title" text={track.title} />
       <Detail.Metadata.Label title="Artist" text={track.artist?.name ?? "—"} />
-      {track.album?.title && (
-        <Detail.Metadata.Label title="Album" text={track.album.title} />
-      )}
-      <Detail.Metadata.Label
-        title="Duration"
-        text={formatDuration(track.duration) || "—"}
-      />
+      {track.album?.title && <Detail.Metadata.Label title="Album" text={track.album.title} />}
+      <Detail.Metadata.Label title="Duration" text={formatDuration(track.duration) || "—"} />
       <Detail.Metadata.TagList title="Quality">
-        <Detail.Metadata.TagList.Item
-          text={track.hires ? "Hi-Res" : "CD"}
-          color={BRAND}
-        />
+        <Detail.Metadata.TagList.Item text={track.hires ? "Hi-Res" : "CD"} color={BRAND} />
       </Detail.Metadata.TagList>
       {track.isrc && <Detail.Metadata.Label title="ISRC" text={track.isrc} />}
     </>
@@ -265,8 +213,7 @@ function TrackFacts({ track }: { track: Track }) {
 }
 
 const coverMarkdown = (track: Track, album: Album | null): string => {
-  const cover =
-    album?.image?.large ?? track.album?.image?.small ?? album?.image?.small;
+  const cover = album?.image?.large ?? track.album?.image?.small ?? album?.image?.small;
   return [
     cover ? `<img src="${cover}" width="220" height="220" />` : "",
     `# ${track.title}`,
@@ -274,10 +221,7 @@ const coverMarkdown = (track: Track, album: Album | null): string => {
   ].join("\n\n");
 };
 
-const buildMarkdown = (
-  data: Conversion | undefined,
-  isLoading: boolean,
-): string => {
+const buildMarkdown = (data: Conversion | undefined, isLoading: boolean): string => {
   if (isLoading || !data || data.mode === "empty") return "";
 
   if (data.mode === "error") return UNRESOLVED_MESSAGE[data.reason];

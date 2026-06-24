@@ -7,29 +7,19 @@ export type ResolvedTrack = {
   artist: string;
 };
 
-export type ResolveFailure =
-  | "invalid"
-  | "qobuz"
-  | "unsupported-type"
-  | "unknown";
+export type ResolveFailure = "invalid" | "qobuz" | "unsupported-type" | "unknown";
 
 export type ResolveOutcome =
   | { ok: true; direction: "to-qobuz"; track: ResolvedTrack }
   | { ok: true; direction: "from-qobuz"; qobuzTrackId: number }
   | { ok: false; reason: ResolveFailure };
 
-export const spotifySearchUrl = (query: string) =>
-  `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+export const spotifySearchUrl = (query: string) => `https://open.spotify.com/search/${encodeURIComponent(query)}`;
 
-export const ytMusicSearchUrl = (query: string) =>
-  `https://music.youtube.com/search?q=${encodeURIComponent(query)}`;
+export const ytMusicSearchUrl = (query: string) => `https://music.youtube.com/search?q=${encodeURIComponent(query)}`;
 
-export const deezerByIsrc = async (
-  isrc: string,
-): Promise<string | undefined> => {
-  const res = await fetch(`https://api.deezer.com/track/isrc:${isrc}`).catch(
-    () => null,
-  );
+export const deezerByIsrc = async (isrc: string): Promise<string | undefined> => {
+  const res = await fetch(`https://api.deezer.com/track/isrc:${isrc}`).catch(() => null);
   if (!res || !res.ok) return undefined;
   const track = (await res.json()) as { link?: string };
   return track.link;
@@ -40,14 +30,10 @@ const isQobuz = (host: string) => host.endsWith("qobuz.com");
 const isSpotify = (host: string) => host.endsWith("open.spotify.com");
 
 const isYouTube = (host: string) =>
-  host.endsWith("music.youtube.com") ||
-  host.endsWith("youtube.com") ||
-  host.endsWith("youtu.be");
+  host.endsWith("music.youtube.com") || host.endsWith("youtube.com") || host.endsWith("youtu.be");
 
 const metaContent = (html: string, property: string): string | undefined =>
-  html.match(
-    new RegExp(`<meta[^>]+property="${property}"[^>]+content="([^"]*)"`, "i"),
-  )?.[1];
+  html.match(new RegExp(`<meta[^>]+property="${property}"[^>]+content="([^"]*)"`, "i"))?.[1];
 
 const resolveSpotify = async (url: string): Promise<ResolvedTrack | null> => {
   const res = await fetch(url, { headers: { "User-Agent": CRAWLER_UA } });
@@ -58,13 +44,10 @@ const resolveSpotify = async (url: string): Promise<ResolvedTrack | null> => {
   // e.g. "Kid Cudi · Passion, Pain & Demon Slayin' · Song · 2016".
   const title = metaContent(html, "og:title");
   const artist = metaContent(html, "og:description")?.split(" · ")[0];
-  if (title && artist)
-    return { title: decodeEntities(title), artist: decodeEntities(artist) };
+  if (title && artist) return { title: decodeEntities(title), artist: decodeEntities(artist) };
 
   // Fallback: parse the document title.
-  const match = html
-    .match(/<title>(.*?)<\/title>/i)?.[1]
-    ?.match(/^(.+?) - song(?: and lyrics)? by (.+?) \| Spotify/i);
+  const match = html.match(/<title>(.*?)<\/title>/i)?.[1]?.match(/^(.+?) - song(?: and lyrics)? by (.+?) \| Spotify/i);
   if (!match?.[1] || !match[2]) return null;
   return { title: decodeEntities(match[1]), artist: decodeEntities(match[2]) };
 };
@@ -90,9 +73,7 @@ export const resolveLink = async (input: string): Promise<ResolveOutcome> => {
   }
   const host = url.hostname;
   const ok = (track: ResolvedTrack | null): ResolveOutcome =>
-    track
-      ? { ok: true, direction: "to-qobuz", track }
-      : { ok: false, reason: "unknown" };
+    track ? { ok: true, direction: "to-qobuz", track } : { ok: false, reason: "unknown" };
 
   // A Qobuz track link is the reverse direction: find it on the other services.
   if (isQobuz(host)) {
@@ -117,21 +98,14 @@ type DeezerSearch = { data?: { id: number }[] };
 type DeezerTrack = { isrc?: string };
 
 const deezerSearch = async (query: string): Promise<number | undefined> => {
-  const res = await fetch(
-    `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=1`,
-  );
+  const res = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=1`);
   if (!res.ok) return undefined;
   const data = (await res.json()) as DeezerSearch;
   return data.data?.[0]?.id;
 };
 
-export const findIsrc = async ({
-  title,
-  artist,
-}: ResolvedTrack): Promise<string | undefined> => {
-  const id =
-    (await deezerSearch(`artist:"${artist}" track:"${title}"`)) ??
-    (await deezerSearch(`${artist} ${title}`));
+export const findIsrc = async ({ title, artist }: ResolvedTrack): Promise<string | undefined> => {
+  const id = (await deezerSearch(`artist:"${artist}" track:"${title}"`)) ?? (await deezerSearch(`${artist} ${title}`));
   if (id === undefined) return undefined;
   const res = await fetch(`https://api.deezer.com/track/${id}`);
   if (!res.ok) return undefined;
@@ -149,8 +123,7 @@ const normalize = (text: string): string =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-const tokenSet = (text: string): Set<string> =>
-  new Set(normalize(text).split(" ").filter(Boolean));
+const tokenSet = (text: string): Set<string> => new Set(normalize(text).split(" ").filter(Boolean));
 
 const overlap = (a: Set<string>, b: Set<string>): number => {
   if (a.size === 0 || b.size === 0) return 0;
@@ -169,14 +142,8 @@ export const isLikelyMatch = (
   resolved: ResolvedTrack,
   candidate: { title: string; artist?: { name?: string } },
 ): boolean => {
-  const titleScore = overlap(
-    tokenSet(resolved.title),
-    tokenSet(candidate.title),
-  );
-  const artistScore = overlap(
-    tokenSet(resolved.artist),
-    tokenSet(candidate.artist?.name ?? ""),
-  );
+  const titleScore = overlap(tokenSet(resolved.title), tokenSet(candidate.title));
+  const artistScore = overlap(tokenSet(resolved.artist), tokenSet(candidate.artist?.name ?? ""));
   return titleScore >= 0.6 && artistScore > 0;
 };
 

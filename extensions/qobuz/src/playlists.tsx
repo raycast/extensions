@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Grid,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Grid, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import type { Playlist } from "@kud/qobuz";
 import { appLink, BRAND, deepLink, getClient } from "./lib/client";
@@ -45,9 +36,7 @@ export default function Command() {
               tooltip: playlist.description || playlist.name,
             }}
             title={playlist.name}
-            subtitle={
-              playlist.description || `${playlist.tracksCount ?? 0} tracks`
-            }
+            subtitle={playlist.description || `${playlist.tracksCount ?? 0} tracks`}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -55,18 +44,12 @@ export default function Command() {
                   icon={Icon.AppWindowList}
                   target={<PlaylistTracks playlist={playlist} />}
                 />
-                <Action.Open
-                  title="Open in Qobuz"
-                  target={appLink.playlist(playlist.id)}
-                  icon={Icon.Music}
-                />
+                <Action.Open title="Open in Qobuz" target={appLink.playlist(playlist.id)} icon={Icon.Music} />
                 <Action.OpenInBrowser title="Open in Browser" url={web} />
                 <Action.Push
                   title="Edit Description"
                   icon={Icon.Pencil}
-                  target={
-                    <EditDescription playlist={playlist} onSaved={revalidate} />
-                  }
+                  target={<EditDescription playlist={playlist} onSaved={revalidate} />}
                 />
                 <Action.CopyToClipboard title="Copy Share Link" content={web} />
               </ActionPanel>
@@ -78,13 +61,7 @@ export default function Command() {
   );
 }
 
-function EditDescription({
-  playlist,
-  onSaved,
-}: {
-  playlist: Playlist;
-  onSaved: () => void;
-}) {
+function EditDescription({ playlist, onSaved }: { playlist: Playlist; onSaved: () => void }) {
   const { pop } = useNavigation();
 
   const submit = async (values: { description: string }) => {

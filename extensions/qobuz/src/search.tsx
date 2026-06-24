@@ -2,11 +2,7 @@ import { Grid, Icon } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { BRAND, getClient } from "./lib/client";
-import {
-  AlbumItemActions,
-  ArtistItemActions,
-  TrackItemActions,
-} from "./lib/details";
+import { AlbumItemActions, ArtistItemActions, TrackItemActions } from "./lib/details";
 
 const EMPTY = { query: "", albums: [], artists: [], tracks: [] };
 
@@ -43,11 +39,7 @@ export default function Command() {
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search Qobuz for albums, artists, tracks…"
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter results"
-          value={filter}
-          onChange={(value) => setFilter(value as Filter)}
-        >
+        <Grid.Dropdown tooltip="Filter results" value={filter} onChange={(value) => setFilter(value as Filter)}>
           <Grid.Dropdown.Item title="All" value="all" />
           <Grid.Dropdown.Item title="Albums" value="albums" />
           <Grid.Dropdown.Item title="Artists" value="artists" />
@@ -61,10 +53,7 @@ export default function Command() {
           {results.albums.map((album) => (
             <Grid.Item
               key={`album-${album.id}`}
-              content={
-                album.image?.large ??
-                album.image?.small ?? { source: Icon.Music, tintColor: BRAND }
-              }
+              content={album.image?.large ?? album.image?.small ?? { source: Icon.Music, tintColor: BRAND }}
               title={album.title}
               subtitle={album.artist?.name ?? ""}
               actions={<AlbumItemActions album={album} />}
@@ -78,9 +67,7 @@ export default function Command() {
           {results.artists.map((artist) => (
             <Grid.Item
               key={`artist-${artist.id}`}
-              content={
-                artist.picture ?? { source: Icon.Person, tintColor: BRAND }
-              }
+              content={artist.picture ?? { source: Icon.Person, tintColor: BRAND }}
               title={artist.name}
               actions={<ArtistItemActions artist={artist} />}
             />
