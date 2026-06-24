@@ -2,9 +2,9 @@ import {
   Action,
   ActionPanel,
   Form,
+  popToRoot,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
 import { upsertTarget, Target } from "./foxhop";
 
@@ -23,8 +23,6 @@ type FormValues = {
 };
 
 export const UpsertTargetForm = ({ target, onSave }: Props) => {
-  const { pop } = useNavigation();
-
   const handleSubmit = async (values: FormValues) => {
     if (!values.url.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "URL is required" });
@@ -40,7 +38,7 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
         pick: values.pick || undefined,
       });
       onSave();
-      pop();
+      await popToRoot();
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
@@ -93,19 +91,19 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
         title="Strategy"
         defaultValue={target?.strategy ?? "hostname"}
       >
-        <Form.Dropdown.Item value="hostname" title="hostname" />
-        <Form.Dropdown.Item value="prefix" title="prefix" />
-        <Form.Dropdown.Item value="exact" title="exact" />
-        <Form.Dropdown.Item value="search" title="search" />
+        <Form.Dropdown.Item value="hostname" title="Hostname" />
+        <Form.Dropdown.Item value="prefix" title="Prefix" />
+        <Form.Dropdown.Item value="exact" title="Exact" />
+        <Form.Dropdown.Item value="search" title="Search" />
       </Form.Dropdown>
       <Form.Dropdown
         id="pick"
         title="Pick"
         defaultValue={target?.pick ?? "recent"}
       >
-        <Form.Dropdown.Item value="recent" title="recent" />
-        <Form.Dropdown.Item value="first" title="first" />
-        <Form.Dropdown.Item value="pinned" title="pinned" />
+        <Form.Dropdown.Item value="recent" title="Recent" />
+        <Form.Dropdown.Item value="first" title="First" />
+        <Form.Dropdown.Item value="pinned" title="Pinned" />
       </Form.Dropdown>
     </Form>
   );

@@ -42,12 +42,17 @@ const slugify = (s: string) =>
 const faviconFor = (target: Target) =>
   getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
 
+const titleCase = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
+
 const accessoriesFor = (target: Target): List.Item.Accessory[] => {
   const items: List.Item.Accessory[] = [];
   if (target.favorite) items.push({ icon: Icon.Star, tooltip: "Favourite" });
-  if (target.pick && target.pick !== "recent") items.push({ tag: target.pick });
+  if (target.pick && target.pick !== "recent") {
+    items.push({ tag: titleCase(target.pick) });
+  }
   if (target.strategy && target.strategy !== "hostname") {
-    items.push({ tag: target.strategy });
+    items.push({ tag: titleCase(target.strategy) });
   }
   return items;
 };
