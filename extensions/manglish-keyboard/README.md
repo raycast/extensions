@@ -10,10 +10,10 @@ A Raycast extension to type Malayalam using English phonetics (Manglish). Just t
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `Type in Manglish` | Main transliterator — type English phonetics, get Malayalam |
-| `Transliteration History` | Browse and copy recent transliterations |
+| Command                   | Description                                                 |
+| ------------------------- | ----------------------------------------------------------- |
+| `Type in Manglish`        | Main transliterator — type English phonetics, get Malayalam |
+| `Transliteration History` | Browse and copy recent transliterations                     |
 
 ## How to Use
 
@@ -24,17 +24,17 @@ A Raycast extension to type Malayalam using English phonetics (Manglish). Just t
 
 ## Examples
 
-| You type | You get | Meaning |
-|---|---|---|
-| `namaskaram` | നമസ്കാരം | Hello / Greetings |
-| `nanni` | നന്നി | Thank you |
-| `enthu vishesham` | എന്തു വിശേഷം | What's up? |
-| `keralam` | കേരളം | Kerala |
-| `malayalam` | മലയാളം | Malayalam |
-| `amma` | അമ്മ | Mother |
-| `vellam` | വെള്ളം | Water |
-| `mazha` | മഴ | Rain |
-| `snehം` | സ്നേഹം | Love |
+| You type          | You get      | Meaning           |
+| ----------------- | ------------ | ----------------- |
+| `namaskaram`      | നമസ്കാരം     | Hello / Greetings |
+| `nanni`           | നന്നി        | Thank you         |
+| `enthu vishesham` | എന്തു വിശേഷം | What's up?        |
+| `keralam`         | കേരളം        | Kerala            |
+| `malayalam`       | മലയാളം       | Malayalam         |
+| `amma`            | അമ്മ         | Mother            |
+| `vellam`          | വെള്ളം       | Water             |
+| `mazha`           | മഴ           | Rain              |
+| `snehം`           | സ്നേഹം       | Love              |
 
 ## Transliteration Engine
 
