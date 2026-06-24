@@ -177,7 +177,7 @@ export default function MenuBarccusage() {
                   title="Unable to fetch limits"
                   subtitle="Check Claude Code authentication"
                   icon={Icon.ExclamationMark}
-                  onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+                  onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
                 />
               )}
               {effectiveLimitsData && (
@@ -249,7 +249,7 @@ export default function MenuBarccusage() {
                   : undefined
               }
               icon={Icon.Calendar}
-              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
             />
           </MenuBarExtra.Section>
 
@@ -262,7 +262,7 @@ export default function MenuBarccusage() {
                   : undefined
               }
               icon={Icon.Calendar}
-              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
             />
           </MenuBarExtra.Section>
 
@@ -270,7 +270,7 @@ export default function MenuBarccusage() {
             <MenuBarExtra.Item
               title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
               icon={Icon.BarChart}
-              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
             />
           </MenuBarExtra.Section>
 
@@ -278,7 +278,7 @@ export default function MenuBarccusage() {
             <MenuBarExtra.Item
               title={formatUsageTitle(totalLoading, totalUsage, "No usage data available")}
               icon={Icon.Coins}
-              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
             />
           </MenuBarExtra.Section>
 
@@ -302,7 +302,7 @@ export default function MenuBarccusage() {
                   .filter(Boolean)
                   .join(" · ")}
                 icon={Icon.Gauge}
-                onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+                onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
               />
             </MenuBarExtra.Section>
           )}
@@ -320,7 +320,7 @@ export default function MenuBarccusage() {
                 workingTime.yesterdayMs > 0 ? `vs yesterday: ${formatDuration(workingTime.yesterdayMs)}` : undefined
               }
               icon={Icon.Clock}
-              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
             />
           </MenuBarExtra.Section>
 

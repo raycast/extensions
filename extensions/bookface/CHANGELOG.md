@@ -1,5 +1,15 @@
 # Bookface Changelog
 
+## [New commands and YC CLI 0.0.14 support] - 2026-06-23
+
+- Added a `Log out of YC` command that clears stored YC CLI credentials (with a confirmation prompt).
+- Detect when the YC CLI is too old to run and route to an in-app **Update Required** screen that runs `yc update` for you, instead of failing with a raw error.
+- Render Knowledge Base articles in search results (previously dropped silently).
+- Show what the YC agent searched ("What the agent did") beneath each Ask answer.
+- Export or copy the full set of search results for a selected type as CSV (`⌘⇧E` / `⌘⇧C`), reaching every match rather than just the displayed page.
+- Fixed large searches (e.g. "stripe") returning no results — the CLI's output is now captured reliably regardless of size.
+- Added a **Check Again** action to the signed-out screens so you can refresh after logging in, plus a Verbose Logging preference for diagnostics.
+
 ## [Initial Version] - 2026-06-08
 
 - Added `Search YC` command — search Bookface across people, YC and non-YC companies, schools, posts, deals, employers, and Startup Library articles, with a type-filter dropdown and per-type secondary actions.

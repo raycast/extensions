@@ -321,7 +321,7 @@
     "promptfoo": "^0.121.11",
     "tsx": "^4.21.0",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "scripts": {
     "build": "ray build",

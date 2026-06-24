@@ -68,7 +68,7 @@ function DocumentationSection(docs: [Doc[], Doc[]]) {
 
 function DocItem({ doc }: { doc: Doc }) {
   const quicklink = {
-    link: `raycast://extensions/${environment.ownerOrAuthorName}/${
+    link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${environment.ownerOrAuthorName}/${
       environment.extensionName
     }/search-entries?arguments=${encodeURIComponent(JSON.stringify({ slug: doc.slug }))}`,
     name: doc.version ? `Search DevDocs ${doc.name} ${doc.version} Entries` : `Search DevDocs ${doc.name} Entries`,

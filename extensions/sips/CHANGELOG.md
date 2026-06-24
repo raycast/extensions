@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Fix Commands on Asset Paths Containing Spaces] - 2026-06-23
+
+- Fixed the Optimize, Convert, and Remove Background commands failing for PNG, GIF, BMP, TGA, WebP, AVIF, and SVG images when the extension's assets path contains a space (e.g. `~/Library/Application Support/...`). The bundled binary paths (`pngout`, `dwebp`, `cwebp`, `avifdec`, `avifenc`, `potrace`) are now quoted before being passed to the shell.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

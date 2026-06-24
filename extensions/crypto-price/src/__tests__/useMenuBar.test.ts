@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { beforeEach, expect, jest, test } from "@jest/globals";
-import { useSource } from "#/sources";
 import type { Coin } from "#/types";
 import { useMenuBar } from "../useMenuBar";
 
@@ -12,12 +12,17 @@ jest.mock(
   { virtual: true },
 );
 
-jest.mock("#/sources", () => ({
-  useSource: jest.fn(),
-}));
+// Mock the data hook so `fetchPrices` never runs; we only test the title/items/sections mapping.
+jest.mock(
+  "@raycast/utils",
+  () => ({
+    useCachedPromise: jest.fn(),
+  }),
+  { virtual: true },
+);
 
 const getPreferenceValuesMock = jest.mocked(getPreferenceValues);
-const useSourceMock = jest.mocked(useSource);
+const useCachedPromiseMock = jest.mocked(useCachedPromise);
 
 const doge: Coin = {
   name: "Dogecoin",
@@ -25,6 +30,7 @@ const doge: Coin = {
   price: 0.2,
   high24h: 0.25,
   low24h: 0.18,
+  quoteCurrency: "USD",
   priceDisplay: "$0.20",
   more: {
     "Market Cap": "$29B",
@@ -37,6 +43,7 @@ const eth: Coin = {
   price: 3500,
   high24h: 3600,
   low24h: 3400,
+  quoteCurrency: "USD",
   priceDisplay: "$3,500",
   more: {
     "Market Cap": "$420B",
@@ -45,7 +52,7 @@ const eth: Coin = {
 
 beforeEach(() => {
   getPreferenceValuesMock.mockReturnValue({
-    source: "CryptoCompare",
+    source: "Binance",
     currency: "USD",
     style: "price",
     coins: "DOGE | NOTACOIN ETH",
@@ -53,13 +60,17 @@ beforeEach(() => {
 });
 
 test("skips configured symbols missing from a partial source response", () => {
-  useSourceMock.mockReturnValue({
+  useCachedPromiseMock.mockReturnValue({
     isLoading: false,
-    coins: {
-      DOGE: doge,
-      ETH: eth,
+    data: {
+      coins: {
+        DOGE: doge,
+        ETH: eth,
+      },
+      source: "Binance",
     },
-  });
+    // Fields we don't use in useMenuBar; cast keeps the mock shape minimal.
+  } as unknown as ReturnType<typeof useCachedPromise>);
 
   expect(useMenuBar()).toEqual({
     isLoading: false,
@@ -71,5 +82,6 @@ test("skips configured symbols missing from a partial source response", () => {
         items: ["Market Cap: $29B"],
       },
     ],
+    activeSource: "Binance",
   });
 });

@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
+
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
+
 ## [Fix Set Status deep link with raw emoji] - 2026-06-13
 
 - Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.

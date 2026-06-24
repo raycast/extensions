@@ -2,36 +2,241 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tuple",
   "title": "Tuple",
-  "description": "Initiate pairing sessions in Tuple.",
-  "icon": "tuple.png",
-  "author": "inxilpro",
+  "description": "Browse and call contacts, control your active call, and search transcripts from your Tuple pair programming sessions.",
+  "icon": "extension-icon.png",
+  "author": "stephendolan",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Communication"
+  ],
+  "keywords": [
+    "pair programming",
+    "pairing",
+    "remote",
+    "screen sharing",
+    "transcript",
+    "transcription",
+    "call",
+    "ai",
+    "summary"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
-      "name": "index",
-      "title": "Start a Pairing Session",
-      "subtitle": "Tuple",
-      "description": "Start pairing sessions in Tuple.",
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Browse your contacts and start a call.",
       "mode": "view"
+    },
+    {
+      "name": "active-call",
+      "title": "Active Call",
+      "description": "Show and control your active call from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "search-calls",
+      "title": "Search Calls",
+      "description": "Browse recent calls, search what was said, and ask AI about them.",
+      "mode": "view"
+    },
+    {
+      "name": "search-rooms",
+      "title": "Search Rooms",
+      "description": "Browse your personal and team rooms, see who's in them, and join.",
+      "mode": "view"
+    },
+    {
+      "name": "join-personal-room",
+      "title": "Join Personal Room",
+      "description": "Join your most recent personal room.",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-title-summary",
+      "title": "Generate Title & Summary",
+      "description": "Generate and save a title & summary for your most recent call with AI — applied immediately, no review.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "description": "Mute or unmute your microphone in the active call.",
+      "mode": "no-view"
+    },
+    {
+      "name": "hang-up",
+      "title": "End Call",
+      "description": "Hang up the active call.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-recent-calls",
+      "title": "List Recent Calls",
+      "description": "List recent recorded Tuple calls (most recent first), optionally filtered by participant."
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "description": "Full-text search across all stored call transcripts; returns matching spoken segments."
+    },
+    {
+      "name": "read-transcript",
+      "title": "Read Transcript",
+      "description": "Read the full speaker-attributed transcript of one recorded call."
+    },
+    {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "List Tuple contacts with online status, favorite, and recent flags."
+    },
+    {
+      "name": "get-active-call",
+      "title": "Get Active Call",
+      "description": "Report whether the user is on a call right now, with whom, and their mute state."
+    },
+    {
+      "name": "list-rooms",
+      "title": "List Rooms",
+      "description": "List personal and team Tuple rooms and who is currently in each."
+    }
+  ],
+  "ai": {
+    "instructions": "Calls are recorded Tuple pair-programming sessions stored locally. The tools are read-only. To answer questions about what was said, use search-transcripts with a few focused key words or a name (all terms must appear in a segment, so keep queries specific; search again with different terms to broaden). For recency or 'who/when' questions, use list-recent-calls (it accepts a participant filter and includes any saved summary). Resolve a person to their email with list-contacts when needed; contacts carry an online/busy/offline status, so use it for presence questions like 'who is around right now?' (busy means in a call). Rooms are persistent named spaces distinct from calls and can be occupied even when the user isn't on a call — use list-rooms for 'who is in a room?' or 'which rooms are active?'. Use read-transcript only when you need a call's full text. Cite the call (participants and date) in answers.",
+    "evals": [
+      {
+        "input": "@tuple am I on a call right now?",
+        "mocks": {
+          "get-active-call": {
+            "inCall": true,
+            "callId": "abc123",
+            "muted": false,
+            "participants": [
+              "Riley Chen"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-active-call"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tuple when did I last talk with Jordan?",
+        "mocks": {
+          "list-recent-calls": [
+            {
+              "callId": "abc123",
+              "title": "",
+              "startedAt": "2026-06-20T10:00:00Z",
+              "endedAt": "2026-06-20T10:30:00Z",
+              "participants": [
+                "Jordan Alvarez"
+              ],
+              "segments": 120
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-recent-calls"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tuple what did we say about the migration?",
+        "mocks": {
+          "search-transcripts": [
+            {
+              "callId": "abc123",
+              "time": "2026-06-20T10:05:00Z",
+              "speaker": "Jordan Alvarez",
+              "text": "the migration is on track"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-transcripts"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tuple is anyone in a room right now?",
+        "mocks": {
+          "list-rooms": {
+            "personal": [],
+            "team": [
+              {
+                "name": "Compiler Cat",
+                "slug": "tXFZbE",
+                "url": "https://tuple.app/c/tXFZbE",
+                "favorited": false,
+                "occupants": [
+                  "Riley Chen"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-rooms"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "tuplePath",
+      "title": "Tuple CLI Path",
+      "description": "Path to the tuple CLI executable. Leave blank to auto-detect (/opt/homebrew/bin then /usr/local/bin); set this only if you installed it elsewhere.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/usr/local/bin/tuple"
+    },
+    {
+      "name": "exportDirectory",
+      "title": "Transcript Export Folder",
+      "description": "Where exported transcripts are saved. Defaults to your Downloads folder.",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0"
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   }
 }

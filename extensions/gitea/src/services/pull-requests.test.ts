@@ -31,8 +31,8 @@ describe("pull request services", () => {
         includeReviewRequested: false,
         includeReviewed: false,
         includeOwnedRepositories: false,
+        includeAccessibleRepositories: false,
         includeRecentlyClosed: false,
-        owner: "alice",
       }),
     ).resolves.toEqual({ items: [], hasMore: false });
     expect(issueApi.search).not.toHaveBeenCalled();
@@ -57,6 +57,7 @@ describe("pull request services", () => {
         includeReviewRequested: true,
         includeReviewed: false,
         includeOwnedRepositories: false,
+        includeAccessibleRepositories: false,
         includeRecentlyClosed: false,
         query: "fix",
         page: 2,
@@ -89,7 +90,7 @@ describe("pull request services", () => {
     });
   });
 
-  it("includes recently closed and owned repository searches when requested", async () => {
+  it("includes closed pull requests in repositories the user owns when requested", async () => {
     issueApi.search.mockResolvedValueOnce([pullRequest({ id: 1, title: "owned" })]);
 
     await expect(
@@ -100,6 +101,7 @@ describe("pull request services", () => {
         includeReviewRequested: false,
         includeReviewed: false,
         includeOwnedRepositories: true,
+        includeAccessibleRepositories: false,
         includeRecentlyClosed: true,
         owner: "alice",
         limit: 10,
@@ -116,6 +118,52 @@ describe("pull request services", () => {
       limit: 10,
       state: "all",
       owner: "alice",
+    });
+  });
+
+  it("does not issue an owned repository search until the current user's owner is known", async () => {
+    await expect(
+      getMyPullRequests({
+        includeCreated: false,
+        includeAssigned: false,
+        includeMentioned: false,
+        includeReviewRequested: false,
+        includeReviewed: false,
+        includeOwnedRepositories: true,
+        includeAccessibleRepositories: false,
+        includeRecentlyClosed: false,
+      }),
+    ).resolves.toEqual({ items: [], hasMore: false });
+
+    expect(issueApi.search).not.toHaveBeenCalled();
+  });
+
+  it("includes broad accessible repository pull requests only when requested", async () => {
+    issueApi.search.mockResolvedValueOnce([pullRequest({ id: 1, title: "accessible" })]);
+
+    await expect(
+      getMyPullRequests({
+        includeCreated: false,
+        includeAssigned: false,
+        includeMentioned: false,
+        includeReviewRequested: false,
+        includeReviewed: false,
+        includeOwnedRepositories: false,
+        includeAccessibleRepositories: true,
+        includeRecentlyClosed: true,
+        limit: 10,
+      }),
+    ).resolves.toEqual({
+      items: [pullRequest({ id: 1, title: "accessible" })],
+      hasMore: false,
+    });
+
+    expect(issueApi.search).toHaveBeenCalledWith({
+      type: "pulls",
+      q: undefined,
+      page: undefined,
+      limit: 10,
+      state: "all",
     });
   });
 });

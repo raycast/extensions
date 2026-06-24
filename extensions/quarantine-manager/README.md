@@ -16,7 +16,7 @@ Developers and power users frequently need to check and clear this flag — for 
 
 ### Manage Quarantine
 
-A single command that does it all. Opens a file picker (or uses your current Finder selection), scans the target, and lets you inspect **and** clear quarantine from the same place — no switching commands.
+A single command that does it all. Opens a file picker (or uses your current Finder selection — including **multiple** items at once), scans the targets, and lets you inspect **and** clear quarantine from the same place — no switching commands. The picker remembers your **last selection**, so re-checking the same folder is one keystroke (`⌘R`).
 
 **What it shows:**
 
@@ -35,18 +35,19 @@ A single command that does it all. Opens a file picker (or uses your current Fin
 
 ### Apps & folders — select & batch-remove
 
-Point it at a directory and you get an uninstaller-style checklist:
+Point it at one or more directories/apps (or a mix of files and folders) and you get an uninstaller-style checklist:
 
 - **Apps (`.app`)** are scanned **recursively** — bundles often hold many internal quarantined files, and each one is listed.
 - **Plain folders** are scanned **one level deep** (immediate contents only), so large directories like Downloads stay fast.
+- **Select several apps at once** and they're scanned together into a single list.
 
-Every quarantined item is shown as a **selectable row** (all selected by default). Toggle individual files with `⌘S`, **Select All** `⌘⇧A` / **Deselect All** `⌘⇧D`, sort by path / source / date, then press **Enter** on **Remove Quarantine from Selected** to clear exactly the files you picked in one pass — or remove just one. The section header tracks `N of M selected`.
+Every quarantined item is shown as a **selectable row** (all selected by default). Toggle individual files with `⌘↵`, **Select All** `⌘⇧A` / **Deselect All** `⌘⇧D`, sort by path / source / date, then press **Enter** on **Remove Quarantine from Selected** to clear exactly the files you picked. The whole selection is cleared in **one pass with at most one admin prompt** — no per-app password dialogs. The section header tracks `N of M selected`.
 
 ---
 
 ## Tips
 
-- **Select a file in Finder first** — if you already have a file selected, the command skips the picker entirely and loads it immediately
+- **Select files in Finder first** — if you already have one or more items selected, the command skips the picker entirely and scans them immediately
 - **Protected files** — if the file requires elevated permissions, the extension will prompt for your admin password via a standard macOS dialog
 - **The xattr command** — use "Copy Remove Command" to get the terminal equivalent if you prefer to run it manually or use it in a script
 

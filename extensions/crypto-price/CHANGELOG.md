@@ -1,5 +1,13 @@
 # Crypto Price
 
+## [Add source failover] - 2026-06-16
+
+- Default source is now Binance — CryptoCompare's free API now requires an API key
+- Automatically fall back across sources (Binance → CoinGecko → OKX → Coinbase → Kraken) so one unavailable or region-blocked source no longer breaks the menu bar
+- Add an optional CryptoCompare API key preference
+- Show which source provided the price in the dropdown
+- Fix a crash when opening the menu bar while a price fetch is failing
+
 ## [Support any coin] - 2026-06-15
 
 - Remove the built-in allowlist so any coin symbol supported by the data source can be added (e.g. TRX, DOGE, ADA)

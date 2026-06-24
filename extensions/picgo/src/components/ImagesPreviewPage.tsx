@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Grid, Icon, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { IImgInfo } from "picgo";
-import { exportFormats } from "../util/format";
-import { useEffect, useMemo, useState } from "react";
+import { exportFormats, type ExportFormatKey } from "../util/format";
+import { useEffect, useState } from "react";
 import FormatListPage from "./FormatListPage";
 
 interface Props {
@@ -9,8 +9,8 @@ interface Props {
 }
 
 export default function ImagesPreviewPage({ imgs }: Props) {
-    const [formatKey, setFormatKey] = useState<keyof typeof exportFormats>("url");
-    const format = useMemo(() => exportFormats[formatKey]!, [formatKey]);
+    const [formatKey, setFormatKey] = useState<ExportFormatKey>("url");
+    const format = exportFormats[formatKey];
     const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const validImgs = imgs.filter((i) => i.imgUrl);
 
@@ -35,11 +35,15 @@ export default function ImagesPreviewPage({ imgs }: Props) {
             inset={Grid.Inset.Small}
             navigationTitle="Image Preview"
             searchBarAccessory={
-                <Grid.Dropdown storeValue={true} onChange={(v) => setFormatKey(v)} tooltip="Image Formats">
-                    {Object.keys(exportFormats).map((k) => {
-                        const f = exportFormats[k];
-                        return <Grid.Dropdown.Item key={f.name} title={f.label} value={f.name} />;
-                    })}
+                <Grid.Dropdown
+                    onChange={(value) => {
+                        setFormatKey((value || "url") as ExportFormatKey);
+                    }}
+                    tooltip="Image Formats"
+                >
+                    {Object.values(exportFormats).map((format) => (
+                        <Grid.Dropdown.Item key={format.name} title={format.label} value={format.name} />
+                    ))}
                 </Grid.Dropdown>
             }
         >

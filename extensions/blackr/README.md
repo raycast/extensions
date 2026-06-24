@@ -1,6 +1,6 @@
 # Blackr
 
-Blackr is a simple Raycast extension for quick screen cleaning. Run it from Raycast to cover your main display with a black screen, making dust, fingerprints, and smudges easier to see before wiping the display.
+Blackr is a simple Raycast extension for quick screen cleaning on macOS and Windows. Run it from Raycast to cover your main display with a black screen, making dust, fingerprints, and smudges easier to see before wiping the display.
 
 ## Usage
 
@@ -20,10 +20,15 @@ Blackr accepts durations from `10` to `600` seconds. Empty or invalid values fal
 
 - Covers the main display only.
 - Shows a subtle `Exit` button near the bottom center.
-- Press `Esc` to dismiss early, same as clicking `Exit`.
+- Exits when you click `Exit`, press `Esc`, or reach the configured duration.
 - Exits automatically after the configured duration.
 - Does not turn off the display or change brightness.
 - Does not collect data, access the network, or store user content.
+
+## Platform Support
+
+- macOS uses a small native Swift overlay.
+- Windows uses a packaged PowerShell and WinForms overlay.
 
 ## Why Blackr?
 

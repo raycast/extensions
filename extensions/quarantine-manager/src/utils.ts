@@ -327,30 +327,40 @@ export function removeAllAttributes(
 }
 
 /**
- * Returns the currently selected file in Finder, or null if nothing is selected.
- * Uses spawnSync to avoid blocking React's event loop.
+ * Returns every item currently selected in Finder (empty if nothing is selected).
+ * Uses spawnSync to avoid blocking React's event loop. One POSIX path per line.
  */
-export function getFinderSelection(): string | null {
+export function getFinderSelections(): string[] {
   const result = spawnSync(
     "osascript",
     [
       "-e",
       `tell application "Finder"`,
       "-e",
-      `set sel to selection`,
+      `set out to ""`,
       "-e",
-      `if (count of sel) > 0 then return POSIX path of (item 1 of sel as alias)`,
+      `repeat with anItem in (get selection)`,
+      "-e",
+      `set out to out & POSIX path of (anItem as alias) & linefeed`,
+      "-e",
+      `end repeat`,
+      "-e",
+      `return out`,
       "-e",
       `end tell`,
     ],
     { encoding: "utf8", timeout: 5000 },
   );
 
-  const selected = (result.stdout ?? "").trim();
-  if (selected.length > 0 && fs.existsSync(selected)) {
-    return selected;
-  }
-  return null;
+  return (result.stdout ?? "")
+    .split("\n")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0 && fs.existsSync(p));
+}
+
+/** Keeps only the paths that still exist on disk. */
+export function existingPaths(paths: string[]): string[] {
+  return paths.filter((p) => fs.existsSync(p));
 }
 
 export interface ParsedQuarantine {

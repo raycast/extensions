@@ -24,6 +24,7 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     macos: "com.vscodium.VSCodiumInsiders",
     windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" },
   },
+  Devin: { macos: "com.exafunction.windsurf", windows: { name: "Devin", exe: "Devin.exe" } },
   Windsurf: { macos: "com.exafunction.windsurf", windows: { name: "Windsurf", exe: "Windsurf.exe" } },
   Lingma: { macos: "com.aliyun.lingma.ide", windows: { name: "Lingma", exe: "Lingma.exe" } },
 };
@@ -40,7 +41,16 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
   const bundleId = bundleIdMap[buildName];
   if (isMac) {
     if (bundleId) {
-      const app = apps.find((app) => app.bundleId === bundleId.macos);
+      const app = apps.find((app) => {
+        if (app.bundleId !== bundleId.macos) return false;
+
+        // Special case for Windsurf and Devin where the bundle ID is the same for both builds
+        if (app.bundleId === "com.exafunction.windsurf") {
+          return app.path.toLowerCase().includes(`${buildName.toLowerCase()}.app`);
+        }
+
+        return true;
+      });
       if (app) return app;
     }
   } else {

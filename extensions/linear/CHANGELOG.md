@@ -1,5 +1,11 @@
 # Linear Changelog
 
+## [Templates, Copy Title as Link, and Auth Fix] - 2026-06-17
+
+- Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138
+- Add a "Copy title as link" action to issue copy actions. Copy the issue title as a Markdown/HTML link for pasting into Slack and other apps, matching Linear’s native shortcut. See https://github.com/raycast/extensions/issues/28588
+- Fix initial OAuth connection failures that show Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
+
 ## [Set Priority shortcut] - 2026-06-10
 
 - Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.

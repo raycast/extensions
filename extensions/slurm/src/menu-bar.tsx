@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from "react";
 import { Color, Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { listJobs, type Job } from "./lib/slurm";
+import { listJobsBrief, type Job } from "./lib/slurm";
 import { useActiveHosts, useSlurmUsers } from "./lib/session";
 import { fetchPerCluster } from "./lib/multi";
 import { openMasterInTerminal } from "./lib/ssh";
+import { countByState, formatMenuTitle } from "./lib/jobs";
 
 export default function MenuBar() {
   const { hosts, isLoading: hostsLoading } = useActiveHosts();
@@ -21,22 +22,25 @@ export default function MenuBar() {
     async (key: string) => {
       const pairs = JSON.parse(key) as Array<[string, string]>;
       const list = pairs.map(([h]) => h).filter(Boolean);
-      return fetchPerCluster<Job[]>(list, (h) => listJobs(h, users[h] ?? ""));
+      return fetchPerCluster<Job[]>(list, (h) => listJobsBrief(h, users[h] ?? ""));
     },
     [usersKey],
     { execute: ready, keepPreviousData: true },
   );
 
+  // Only ticks while the dropdown is open (Raycast suspends the menu-bar process
+  // otherwise). Background refresh of the title/color is driven by the manifest
+  // `interval`, which Raycast caps at a 1-minute minimum.
   useEffect(() => {
     if (!ready) return;
-    const t = setInterval(() => revalidate(), 30_000);
+    const t = setInterval(() => revalidate(), 20_000);
     return () => clearInterval(t);
   }, [ready, usersKey, revalidate]);
 
   const clusters = results ?? [];
   const allJobs = clusters.flatMap((r) => (r.ok ? r.data : []));
   const counts = countByState(allJobs);
-  const title = formatTitle(counts);
+  const title = formatMenuTitle(counts);
   const anyError = clusters.some((r) => !r.ok);
   const tint = pickTint(counts, anyError);
   const hostsLabel = hosts.length > 0 ? hosts.join(", ") : "no cluster";
@@ -69,7 +73,7 @@ export default function MenuBar() {
         <MenuBarExtra.Section key={r.host} title={r.host}>
           {r.ok ? (
             <>
-              <MenuBarExtra.Item title={`Summary — ${formatTitle(countByState(r.data))}`} icon={Icon.BarChart} />
+              <MenuBarExtra.Item title={`Summary — ${formatMenuTitle(countByState(r.data))}`} icon={Icon.BarChart} />
               {renderJobsSubsection("Running", r.data, "RUNNING")}
               {renderJobsSubsection("Pending", r.data, "PENDING")}
               {renderJobsSubsection("Completing", r.data, "COMPLETING")}
@@ -137,24 +141,6 @@ function renderJobsSubsection(label: string, jobs: Job[], state: string) {
       ))}
     </>
   );
-}
-
-function countByState(jobs: Job[]): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const j of jobs) out[j.state] = (out[j.state] ?? 0) + 1;
-  return out;
-}
-
-function formatTitle(counts: Record<string, number>): string {
-  const r = counts.RUNNING ?? 0;
-  const p = counts.PENDING ?? 0;
-  const c = counts.COMPLETING ?? 0;
-  if (!r && !p && !c) return "idle";
-  const parts: string[] = [];
-  if (r) parts.push(`R${r}`);
-  if (p) parts.push(`P${p}`);
-  if (c) parts.push(`CG${c}`);
-  return parts.join("·");
 }
 
 function pickTint(counts: Record<string, number>, hasError: boolean): Color {

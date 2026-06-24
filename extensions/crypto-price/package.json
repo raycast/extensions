@@ -5,6 +5,9 @@
   "description": "Keep an eye on Bitcoin (BTC), Ethereum (ETH), and other cryptocurrency prices and more directly from your system menu bar",
   "icon": "command-icon.png",
   "author": "gutenye",
+  "contributors": [
+    "zampa"
+  ],
   "categories": [
     "Finance"
   ],
@@ -74,18 +77,34 @@
     {
       "name": "source",
       "title": "Source",
-      "description": "Source to use for fetching the price",
+      "description": "Preferred source for fetching the price. If it's unavailable, the extension automatically falls back to the other sources.",
       "type": "dropdown",
       "required": false,
-      "default": "CryptoCompare",
+      "default": "Binance",
       "data": [
-        {
-          "title": "CryptoCompare",
-          "value": "CryptoCompare"
-        },
         {
           "title": "Binance",
           "value": "Binance"
+        },
+        {
+          "title": "CoinGecko",
+          "value": "CoinGecko"
+        },
+        {
+          "title": "OKX",
+          "value": "OKX"
+        },
+        {
+          "title": "Coinbase",
+          "value": "Coinbase"
+        },
+        {
+          "title": "Kraken",
+          "value": "Kraken"
+        },
+        {
+          "title": "CryptoCompare (needs API key)",
+          "value": "CryptoCompare"
         }
       ]
     },
@@ -95,6 +114,13 @@
       "description": "Coins to enable, default is BTC | ETH BNB SOL XRP",
       "type": "textfield",
       "default": "BTC | ETH BNB SOL XRP",
+      "required": false
+    },
+    {
+      "name": "cryptoCompareApiKey",
+      "title": "CryptoCompare API Key",
+      "description": "Optional. A free CryptoCompare (CCData) API key. Only needed to use CryptoCompare as a source — its public API now requires a key.",
+      "type": "password",
       "required": false
     }
   ],

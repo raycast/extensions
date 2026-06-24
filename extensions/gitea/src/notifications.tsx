@@ -18,11 +18,16 @@ export default function Command() {
     <List
       isLoading={isLoading}
       pagination={pagination}
-      searchBarAccessory={<NotificationDropdown options={NotificationFilterOptions} onFilterChange={setFilter} />}
+      searchBarAccessory={
+        <NotificationDropdown options={NotificationFilterOptions} value={filter} onFilterChange={setFilter} />
+      }
       throttle
     >
       {items.length <= 0 ? (
-        <List.EmptyView icon={Icon.Tray} title="No unread notifications." />
+        <List.EmptyView
+          icon={Icon.Tray}
+          title={filter === NotificationStatusFilter.All ? "No notifications found." : "No unread notifications."}
+        />
       ) : (
         <>
           <List.Section>

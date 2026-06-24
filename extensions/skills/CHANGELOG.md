@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Add Update All Skills Command] - 2026-06-16
+
+- Add a standalone "Update All Skills" command to update all installed skills directly from Raycast
+
 ## [Fix Skill Contents for Nested Skills] - 2026-06-09
 
 - Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree

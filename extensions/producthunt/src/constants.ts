@@ -9,4 +9,4 @@ export const HOST_URL = "https://www.producthunt.com/";
 // because getPreferenceValues() is snapshotted at command launch: updated API credentials are NOT
 // picked up by a running command (a plain Refresh re-reads the same stale snapshot). Reloading forces
 // a new process that re-reads preferences, so it's the only way to apply just-edited keys in place.
-export const RELOAD_EXTENSIONS_DEEPLINK = "raycast://extensions/raycast/raycast/reload-extensions";
+export const RELOAD_EXTENSIONS_DEEPLINK = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/reload-extensions`;
