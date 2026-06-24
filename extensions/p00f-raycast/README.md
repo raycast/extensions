@@ -59,6 +59,7 @@ git clone https://github.com/mcdays94/p00f.git
 cd p00f
 npm install --prefix packages/raycast
 npm link --prefix packages/raycast ../core    # link the in-repo core for live iteration
+npm run build --prefix packages/core          # build the in-repo core (re-run after changing packages/core/src)
 npm run dev --prefix packages/raycast
 ```
 
