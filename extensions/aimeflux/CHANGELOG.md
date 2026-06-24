@@ -1,4 +1,4 @@
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-06-24
 
 - Added Raycast commands for dictation, text processing, history browsing, mode inspection, replacements, watch folders, and community packages.
 - Added dedicated command icons based on the AimeFlux logo.
