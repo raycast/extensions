@@ -99,11 +99,13 @@
     "prettier": "^3.2.4",
     "react": "^18.2.0",
     "typescript": "^5.3.3",
+    "vite": "6.4.3",
     "vitest": "^4.1.9"
   },
   "overrides": {
     "@typescript-eslint/typescript-estree": {
       "minimatch": "^9.0.7"
-    }
+    },
+    "vite": "6.4.3"
   }
 }
