@@ -14,7 +14,8 @@ function escapePowerShellString(value: string): string {
     .replace(/`/g, "``") // backtick (PS escape char) must come first
     .replace(/"/g, '`"') // double-quote
     .replace(/\$/g, "`$") // variable sigil
-    .replace(/@\{/g, "`@{"); // splatting sigil
+    .replace(/@\{/g, "`@{") // hashtable literal
+    .replace(/@\(/g, "`@("); // array subexpression
 }
 
 const DetailPassword = ({
