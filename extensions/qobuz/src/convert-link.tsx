@@ -99,8 +99,9 @@ export default function Command() {
     },
     [],
     {
-      onError: (error) =>
-        showFailureToast(error, { title: "Couldn't convert link" }),
+      onError: (error) => {
+        showFailureToast(error, { title: "Couldn't convert link" });
+      },
     },
   );
 

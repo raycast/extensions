@@ -254,8 +254,9 @@ export function PlaylistTracks({ playlist }: { playlist: Playlist }) {
     },
     [playlist.id],
     {
-      onError: (error) =>
-        showFailureToast(error, { title: "Couldn't load tracks" }),
+      onError: (error) => {
+        showFailureToast(error, { title: "Couldn't load tracks" });
+      },
     },
   );
 
