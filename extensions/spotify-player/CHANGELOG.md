@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Upade README] - 2026-06-24
+
+- Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
+
 ## [Fix stale seek position in menu bar] - 2026-06-20
 
 - Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.

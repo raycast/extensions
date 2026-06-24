@@ -45,6 +45,8 @@
 /extensions/ai-stats                                                @JonathanRReed
 /extensions/ai-text-to-calendar                                     @izm51 @ViGeng
 /extensions/ai-usage-tracker                                        @cdeligny
+/extensions/ai-voice-studio                                         @xwzhangSZU
+/extensions/aimeflux                                                @erdiegoant
 /extensions/aimlab                                                  @whitespacecode
 /extensions/air-quality                                             @earthpyy
 /extensions/airplane                                                @pradeepb28
@@ -248,6 +250,7 @@
 /extensions/bootstrap-icons                                         @RobErskine
 /extensions/bored                                                   @BossElijah
 /extensions/botpress                                                @ermek-botpress
+/extensions/bouncer-email-verifier                                  @ekamran
 /extensions/braid                                                   @felixhabib
 /extensions/braintick                                               @SamarpitSantoki
 /extensions/brand-dev                                               @xmok
@@ -614,6 +617,7 @@
 /extensions/dig                                                     @danielbahl @pernielsentikaer @j3lte
 /extensions/digger                                                  @chrismessina
 /extensions/digitalocean                                            @ShukantPal @xmok @scoop
+/extensions/dinopass                                                @joecampo
 /extensions/directadmin-reseller                                    @xmok
 /extensions/directus                                                @bryantgillespie
 /extensions/discogs                                                 @vigosan
@@ -1038,6 +1042,7 @@
 /extensions/have-i-been-pwned                                       @narghev
 /extensions/haystack                                                @dimuuu @pernielsentikaer @Faria22
 /extensions/hazeover                                                @ratoru
+/extensions/hdr-toggle                                              @abdullah-shabib
 /extensions/hdri-library                                            @chadgsg
 /extensions/headlines                                               @Aayush9029 @pernielsentikaer
 /extensions/hebrew-date-zmanim                                      @mendelg
@@ -1436,6 +1441,7 @@
 /extensions/man-pages                                               @SKaplanOfficial
 /extensions/mandarin-chinese-dictionary                             @CofCat456
 /extensions/manga-calendar                                          @jueet
+/extensions/manglish-keyboard                                       @mdsherinoff
 /extensions/manifest-viewer                                         @stonko1994
 /extensions/manotori                                                @xmok
 /extensions/mantine                                                 @EmilMalanczak
@@ -2694,7 +2700,7 @@
 /extensions/tududi                                                  @ariedov
 /extensions/tuneblade                                               @KibbeWater
 /extensions/tunnelblick                                             @SamuelNitsche @vkhitrin
-/extensions/tuple                                                   @inxilpro
+/extensions/tuple                                                   @stephendolan
 /extensions/turso                                                   @Spioune
 /extensions/tuya-smart                                              @AndresMorelos @anwarulislam
 /extensions/tv-remote                                               @alexibuild
@@ -2885,7 +2891,7 @@
 /extensions/whoop                                                   @Josha1len
 /extensions/whosampled                                              @ajtruex @pernielsentikaer @anisub710
 /extensions/wi-fi                                                   @koinzhang @louishuyng
-/extensions/wifi-password-reveal                                    @louishuyng @xmok
+/extensions/wifi-password-reveal                                    @louishuyng @xmok @0xdhrv
 /extensions/wifi-share                                              @robinsrk
 /extensions/wiggle-text                                             @PineappleRind
 /extensions/wikipedia                                               @vimtor @shubzkothekar @NikosEfthias @menahishayan @pernielsentikaer @Ek2100 @sergiivelykodnyi @j3lte @peterbrinck @koinzhang
@@ -2906,6 +2912,7 @@
 /extensions/wipet                                                   @RobiMez
 /extensions/wireguard                                               @sbugzu @xmok
 /extensions/wise-accounts                                           @robsel118 @imvasen
+/extensions/wise-lens                                               @jorgetoh
 /extensions/wise-quotes                                             @HugoLiconV
 /extensions/wispr-flow                                              @05bmckay @cv087 @05bmckay @YONN2222 @travis-cook-sfdc
 /extensions/wistia                                                  @ddoria921 @xmok
