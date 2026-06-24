@@ -1,8 +1,10 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
 import { BASE_URL, DISPLAY_LATEX_URL, DOWNLOAD_DIR, ExportType, QuickLatexPreferences } from "./utils";
 import { parse, stringify } from "svgson";
-import fetch from "node-fetch";
+import fetch, { RequestInit } from "node-fetch";
 import fs from "fs";
+
+export type PreviewAbortSignal = NonNullable<RequestInit["signal"]>;
 
 async function editSVG(text: string) {
   const preferences = getPreferenceValues<QuickLatexPreferences>();
@@ -56,16 +58,19 @@ export function getDisplayLatex(searchText: string) {
   };
 }
 
-export async function getPreviewImage(searchText: string) {
-  const latex = searchText == "" ? "LaTeX" : searchText;
-  const res = await fetch(getPreviewUrl(latex));
+export async function getPreviewImage(searchText: string, signal?: PreviewAbortSignal) {
+  const latex = searchText === "" ? "LaTeX" : searchText;
+  const res = await fetch(getPreviewUrl(latex), { signal });
 
   if (!res.ok) {
     throw new Error("Failed to fetch preview SVG");
   }
 
   const lightSvg = await res.text();
-  const darkSvg = lightSvg.replace("<svg ", '<svg fill="white" ');
+  const darkSvgNode = await parse(lightSvg);
+  darkSvgNode.attributes.fill = "white";
+  darkSvgNode.attributes.style = [darkSvgNode.attributes.style, "color:white;fill:white"].filter(Boolean).join(";");
+  const darkSvg = stringify(darkSvgNode);
 
   return {
     source: {
