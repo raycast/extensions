@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import {
   focusTarget,
@@ -35,6 +36,9 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/gi, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
+
+const faviconFor = (target: Target) =>
+  getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
 
 type OpenTabPickerProps = {
   onSave: () => void;
@@ -69,6 +73,7 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
       {tabs.map((tab) => (
         <List.Item
           key={tab.id}
+          icon={tab.favIconUrl ?? getFavicon(tab.url, { fallback: Icon.Globe })}
           title={tab.title}
           subtitle={tab.url}
           actions={
@@ -207,6 +212,7 @@ export default function FocusTab() {
       {targets.map((target) => (
         <List.Item
           key={target.name}
+          icon={faviconFor(target)}
           title={target.title ?? target.name}
           subtitle={target.match}
           accessories={[{ text: target.pick ?? "recent" }]}
