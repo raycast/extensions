@@ -84,10 +84,13 @@ type Input = {
  * `meta` fields: `total` (matches across all pages), `count` (returned in this
  * page), `limit`, `offset`, and `more` (true when further pages exist).
  *
- * Make a single call and answer from that page. Do NOT loop to fetch every
- * page — each call uses the user's API quota. If `meta.more` is true, just tell
- * the user how many total matches there are and that they can ask for more;
- * only then call again with a higher `offset`.
+ * Each call returns at most 100 countries (the API cap), and there are 250+
+ * countries in total — so one call never holds them all. When the user wants
+ * EVERY match (e.g. "all", "every", "the full list"), keep calling with
+ * `offset` increased by the previous `limit` until `meta.more` is false
+ * (roughly 3 calls for the whole world). Otherwise return the first page,
+ * report `meta.total`, and let the user ask for more — don't paginate beyond
+ * what's needed, since each call uses the user's API quota.
  */
 export default async function tool(input: Input) {
   const { success, countries, meta, error } = await searchCountries(

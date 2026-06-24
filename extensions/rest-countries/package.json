@@ -63,11 +63,11 @@
     {
       "name": "list-countries",
       "title": "List Countries",
-      "description": "List countries by criteria like region, subregion, language, currency, landlocked status, or organisation membership."
+      "description": "List countries by region, subregion, landlocked status, or organisation membership."
     }
   ],
   "ai": {
-    "instructions": "This extension provides data about countries from the REST Countries API. Use 'get-country' for questions about one specific country, 'list-countries' when the user asks by region, subregion, language, currency, landlocked status, or an organisation like the EU/NATO/UN, and 'find-countries' for free-text lookups (e.g. by capital city, demonym, or top-level domain like '.ca'). Region must be one of: Africa, Americas, Antarctic, Asia, Europe, Oceania. Make as few tool calls as possible to conserve the user's API quota: issue a single tool call, wait for its result, and only call another tool if that result is genuinely insufficient. Never run the same or overlapping queries in parallel or as a fallback — pick the single best tool and query for the question. When calling a tool, only pass the parameters the user actually asked for; never invent or default extra filters (for example, don't add 'landlocked: false' to a request for EU members). Every tool requires a 'fields' parameter listing the country properties to return — always request the minimal set that answers the question (e.g. ['names','capitals'] for a capital) and include 'names' so results stay identifiable. The list tools are paginated and return a 'meta' object — fetch only ONE page and answer from it; do NOT loop through pages to gather everything. If 'meta.more' is true, tell the user the total count and that they can ask for more, and only then fetch the next page with a higher 'offset'. When listing many countries, summarize with name, flag, and capital unless the user asks for more detail.",
+    "instructions": "This extension provides data about countries from the REST Countries API. Use 'get-country' for questions about one specific country, 'list-countries' when the user asks by region, subregion, landlocked status, or an organisation like the EU/NATO/UN, and 'find-countries' for free-text lookups such as language, currency, capital city, demonym, or top-level domain like '.ca'. For phrasings like 'French-speaking countries', 'countries that speak X', or 'countries that use the X currency', ALWAYS use find-countries with that term as the query. list-countries filters ONLY by region, subregion, landlocked, and membership — never use it to fetch all countries and then filter them yourself by language, currency, capital, or any other property. Region must be one of: Africa, Americas, Antarctic, Asia, Europe, Oceania. Make as few tool calls as possible to conserve the user's API quota: issue a single tool call, wait for its result, and only call another tool if that result is genuinely insufficient. Never run the same or overlapping queries in parallel or as a fallback — pick the single best tool and query for the question. When calling a tool, only pass the parameters the user actually asked for; never invent or default extra filters (for example, don't add 'landlocked: false' to a request for EU members). Every tool requires a 'fields' parameter listing the country properties to return — always request the minimal set that answers the question (e.g. ['names','capitals'] for a capital) and include 'names' so results stay identifiable. The list tools are paginated: each call returns at most 100 countries (the API cap) plus a 'meta' object with 'total', 'count', 'limit', 'offset', and 'more'. There are 250+ countries in total, so one call never holds them all. When the user wants EVERY matching result (e.g. 'all', 'every', 'the full list'), keep calling with 'offset' increased by the previous 'limit' until 'meta.more' is false — that's about 3 calls for the whole world. Otherwise return just the first page, tell the user the 'meta.total', and let them ask for more rather than paginating on your own. When listing many countries, summarize with name, flag, and capital unless the user asks for more detail.",
     "evals": [
       {
         "input": "@rest-countries what is the capital of Japan?",
@@ -109,6 +109,21 @@
           },
           {
             "meetsCriteria": "Identifies the country as Australia"
+          }
+        ]
+      },
+      {
+        "input": "@rest-countries spanish-speaking countries",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-countries",
+              "arguments": {
+                "query": {
+                  "includes": "spanish"
+                }
+              }
+            }
           }
         ]
       }

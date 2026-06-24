@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import { commonName, formatCapitals, formatNumber } from "../lib/format";
+import { commonName, formatNumber } from "../lib/format";
 import { CountryActions } from "./country-actions";
 import { CountryDetail } from "./country-detail";
 import type { Country } from "@yusifaliyevpro/countries";
@@ -20,9 +20,11 @@ export function CountryListItem({
       icon={country.flag?.url_png ? { source: country.flag.url_png } : Icon.Globe}
       title={commonName(country)}
       subtitle={showingDetail ? undefined : country.names?.official}
-      keywords={[country.codes?.alpha_2, country.codes?.alpha_3, formatCapitals(country)].filter((k): k is string =>
-        Boolean(k),
-      )}
+      keywords={[
+        country.codes?.alpha_2,
+        country.codes?.alpha_3,
+        ...(country.capitals?.map((c) => c.name) ?? []),
+      ].filter((k): k is string => Boolean(k))}
       accessories={
         showingDetail
           ? undefined

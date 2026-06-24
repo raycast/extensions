@@ -1,5 +1,5 @@
 import type { CountryFilters } from "@yusifaliyevpro/countries";
-import { getCountriesByCurrency, getCountriesByLang, getFilteredCountries } from "../lib/rest-countries";
+import { getFilteredCountries } from "../lib/rest-countries";
 import type { CountryField } from "../lib/types";
 
 type Membership =
@@ -30,16 +30,6 @@ type Input = {
    * user is specific (e.g. "Scandinavian"/"Nordic" → "Northern Europe").
    */
   subregion?: string;
-  /**
-   * Official/spoken language by its English name, e.g. "Spanish", "Arabic",
-   * "French", "Portuguese". For "Spanish-speaking countries" pass "Spanish".
-   */
-  language?: string;
-  /**
-   * Currency by ISO 4217 code or name, e.g. "EUR" or "Euro", "USD" or
-   * "US dollar", "GBP" or "Pound sterling".
-   */
-  currency?: string;
   /**
    * Only set this when the user EXPLICITLY mentions landlocked or coastal
    * countries. `true` returns only landlocked countries, `false` only coastal
@@ -80,26 +70,37 @@ type Input = {
 };
 
 /**
- * List countries matching one or more filters (region, subregion, language,
- * currency, landlocked status, organisation membership).
+ * List countries matching one or more property filters (region, subregion,
+ * landlocked status, organisation membership).
+ *
+ * This tool CANNOT filter by language, currency, capital, or any free text. For
+ * "X-speaking countries", "countries using the X currency", or any text lookup,
+ * use `find-countries` instead. Never call this with no filter to fetch all
+ * countries and then filter them yourself — that misses everything past the
+ * first page.
  *
  * Every field is optional and independent — pass ONLY the filters the user
  * actually mentioned and leave the rest out entirely. Never add a filter the
  * user didn't ask for, and never set a field to a "default" value just to fill
  * it in.
  *   - "EU members" → `{ membership: "eu" }`  (NOT landlocked: false, NOT a region)
- *   - "Spanish-speaking countries" → `{ language: "Spanish" }`
+ *   - "countries in Asia" → `{ region: "Asia" }`
  * Combine filters only when the user genuinely asks for several at once, e.g.
  * "EU countries that are landlocked" → `{ membership: "eu", landlocked: true }`.
+ * For lookups by language, currency, capital, or other free text, use
+ * `find-countries` instead.
  *
  * Returns the matching countries for ONE page plus a `meta` object describing
  * it: `total` (matches across all pages), `count` (returned this page),
  * `limit`, `offset`, and `more` (true when further pages exist).
  *
- * Make a single call and answer from that page. Do NOT loop to fetch every
- * page — each call uses the user's API quota. If `meta.more` is true, tell the
- * user the total and that they can ask for more; only then call again with a
- * higher `offset`.
+ * Each call returns at most 100 countries (the API cap), and there are 250+
+ * countries in total — so one call never holds them all. When the user wants
+ * EVERY match (e.g. "all", "every", "the full list"), keep calling with
+ * `offset` increased by the previous `limit` until `meta.more` is false
+ * (roughly 3 calls for the whole world). Otherwise return the first page,
+ * report `meta.total`, and let the user ask for more — don't paginate beyond
+ * what's needed, since each call uses the user's API quota.
  */
 export default async function tool(input: Input) {
   const filters: CountryFilters = {};
@@ -111,39 +112,9 @@ export default async function tool(input: Input) {
   const limit = Math.min(input.limit ?? 25, 100);
   const offset = input.offset ?? 0;
 
-  // Make sure the fields needed for client-side narrowing below are fetched,
-  // even if the AI requested a narrower set.
-  const requested = new Set<CountryField>(input.fields);
-  if (input.language && hasOtherFilters(input)) requested.add("languages");
-  if (input.currency && hasOtherFilters(input)) requested.add("currencies");
-  const fields = [...requested];
-
-  const result =
-    input.language && !hasOtherFilters(input)
-      ? await getCountriesByLang(input.language, fields, limit, offset)
-      : input.currency && !hasOtherFilters(input)
-        ? await getCountriesByCurrency(input.currency, fields, limit, offset)
-        : await getFilteredCountries(filters, fields, limit, offset);
+  const result = await getFilteredCountries(filters, input.fields, limit, offset);
 
   if (!result.success) throw result.error;
 
-  let countries = result.countries;
-
-  // The combined endpoint doesn't filter by language/currency, so narrow here.
-  if (input.language && hasOtherFilters(input)) {
-    const lang = input.language.toLowerCase();
-    countries = countries.filter((c) => (c.languages ?? []).some((l) => l.name.toLowerCase().includes(lang)));
-  }
-  if (input.currency && hasOtherFilters(input)) {
-    const cur = input.currency.toLowerCase();
-    countries = countries.filter((c) =>
-      (c.currencies ?? []).some((x) => x.code.toLowerCase() === cur || x.name.toLowerCase().includes(cur)),
-    );
-  }
-
-  return { countries, meta: result.meta };
-}
-
-function hasOtherFilters(input: Input) {
-  return Boolean(input.region || input.subregion || input.landlocked !== undefined || input.membership);
+  return { countries: result.countries, meta: result.meta };
 }

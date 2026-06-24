@@ -51,18 +51,6 @@ export const searchCountries = withCache(
   cacheOptions,
 );
 
-export const getCountriesByLang = withCache(
-  (lang: string, fields: Fields, limit: number, offset: number) =>
-    restCountries.getCountriesByLang({ lang, fields, limit, offset }),
-  cacheOptions,
-);
-
-export const getCountriesByCurrency = withCache(
-  (currency: string, fields: Fields, limit: number, offset: number) =>
-    restCountries.getCountriesByCurrency({ currency, fields, limit, offset }),
-  cacheOptions,
-);
-
 export const getFilteredCountries = withCache(
   (filters: CountryFilters, fields: Fields, limit: number, offset: number) =>
     restCountries.getCountries({ filters, fields, limit, offset }),
