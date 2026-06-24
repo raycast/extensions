@@ -1,24 +1,21 @@
-import { useSQL } from "@raycast/utils";
 import { existsSync } from "fs";
 import { ReactElement } from "react";
-import { NotInstalledError } from "../components";
-import { WorkspaceModel } from "../interfaces";
-import { getPlacesDbPath } from "../util";
-import { useRetrySQLError } from "./useRetrySQLError";
+import { NotInstalledError, UnknownError } from "../components";
+import { getZenSessionsPath, readZenWorkspacesFromSession } from "../util";
 import { useShortcuts } from "./useShortcuts";
 
 export const useWorkspaces = () => {
   const { shortcuts, errorView: shortcutsErrorView } = useShortcuts();
-  const { data: workspaces, isLoading, permissionView } = useListWorkspaces();
+  const { data: workspaces, isLoading, errorView: listErrorView } = useListWorkspaces();
 
-  const errorView = shortcutsErrorView || permissionView;
+  const errorView = shortcutsErrorView || listErrorView;
   if (!workspaces) {
     return { data: workspaces, isLoading, errorView: errorView as ReactElement };
   }
 
   const workspaceEntries = workspaces
     .map((ws) => {
-      const sc = shortcuts.find((s) => s.id === `zen-workspace-switch-${ws.position / 1000}`);
+      const sc = shortcuts.find((s) => s.id === `zen-workspace-switch-${ws.position / 1000 + 1}`);
 
       return {
         ...ws,
@@ -31,21 +28,17 @@ export const useWorkspaces = () => {
 };
 
 export const useListWorkspaces = () => {
-  const dbPath = getPlacesDbPath();
-  const inQuery = getAllWorkspacesQuery();
+  const sessionPath = getZenSessionsPath();
 
-  if (!existsSync(dbPath)) {
-    return { data: [], isLoading: false, permissionView: <NotInstalledError /> };
+  if (!existsSync(sessionPath)) {
+    return { data: undefined, isLoading: false, errorView: <NotInstalledError /> };
   }
 
-  const { data, isLoading, error, permissionView, revalidate } = useSQL<WorkspaceModel>(dbPath, inQuery);
-  useRetrySQLError({ error, onRetry: revalidate });
-
-  return { data, isLoading, permissionView: permissionView as ReactElement };
-};
-
-const getAllWorkspacesQuery = () => {
-  return `
-  SELECT * FROM zen_workspaces;
-  `;
+  try {
+    const data = readZenWorkspacesFromSession();
+    return { data, isLoading: false, errorView: undefined };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return { data: undefined, isLoading: false, errorView: <UnknownError message={message} /> };
+  }
 };

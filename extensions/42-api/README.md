@@ -4,19 +4,14 @@ Track your 42 logtime and find peers in the clusters directly from Raycast.
 
 ## Setup
 
-To use this extension, you need to provide your own 42 API credentials.
+This extension uses the Raycast PKCE proxy for 42 OAuth. You do not need to enter credentials in Raycast.
 
-### How to get your Client ID and Secret
+### 42 OAuth application setup
 
 1. Go to [42 Intranet Applications](https://profile.intra.42.fr/oauth/applications).
-2. Click **New Application**.
-3. Fill in the form:
-   - **Name**: Raycast (or any name you prefer)
-   - **Redirect URI**: `http://localhost` (This is required by the form but not used by the extension)
-   - **Scopes**: Select `public` and `profile`
-4. Click **Submit** to create the application.
-5. On the application page, you will find your credentials:
-   - Copy the **UID** and paste it into the **Client ID** field in the extension preferences.
-   - Copy the **Secret** and paste it into the **Client Secret** field in the extension preferences.
+2. Open the OAuth application used for this extension.
+3. Configure the redirect URI exactly as:
+   - `https://oauth.raycast.com/redirect`
+4. Ensure the application has the `public` and `profile` scopes.
 
-*Note: The Client Secret is only shown once when the application is created. If you lose it, you will need to reset it or create a new application.*
+The regular Raycast OAuth redirect (`https://raycast.com/redirect?packageName=Extension`) is for direct PKCE flows. This extension uses the Raycast OAuth proxy because 42 requires a client secret for the token exchange, so 42 must redirect to `https://oauth.raycast.com/redirect`.

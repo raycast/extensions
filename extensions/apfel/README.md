@@ -56,7 +56,7 @@ Explain local files & folders.
 - Apple Intelligence enabled
 - Apfel CLI from Homebrew or [source](https://github.com/Arthur-Ficial/apfel)
   - ```bash
-      brew install Arthur-Ficial/tap/apfel
+      brew install apfel
     ```
 
 # Thanks To

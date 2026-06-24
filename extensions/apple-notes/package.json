@@ -19,7 +19,8 @@
     "juan_saldana",
     "andreaselia",
     "fhf1121",
-    "charlesharries"
+    "charlesharries",
+    "janosorcsik"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -101,6 +102,15 @@
           "type": "textfield",
           "default": "25",
           "description": "The maximum number of notes to display in the menu bar",
+          "required": false
+        },
+        {
+          "name": "openSeparately",
+          "title": "Note actions",
+          "type": "checkbox",
+          "default": false,
+          "label": "Open notes in separate windows by default",
+          "description": "Pressing ⏎ will open notes in separate windows by default",
           "required": false
         }
       ]
@@ -449,24 +459,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.5",
-    "date-fns": "^4.1.0",
-    "lodash": "^4.17.23",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "date-fns": "^4.4.0",
     "node-html-markdown": "^2.0.0",
-    "pinyin-pro": "^3.28.0"
+    "pinyin-pro": "^3.28.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.24",
-    "@types/node": "^22.19.11",
-    "@types/react": "^19.2.14",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.16",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

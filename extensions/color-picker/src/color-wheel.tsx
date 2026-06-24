@@ -6,6 +6,8 @@ import { addToHistory } from "./lib/history";
 import { Color } from "./lib/types";
 import { getFormattedColor, isMac } from "./lib/utils";
 
+const COLOR_WHEEL_MARKDOWN = "![RGB Color Wheel](rgb-color-wheel.png)";
+
 export default function Command({
   launchContext = {},
 }: LaunchProps<{
@@ -68,5 +70,5 @@ export default function Command({
     pickAndHandleColor();
   }, []);
 
-  return <Detail markdown="![RGB Color Wheel](rgb-color-wheel.webp?&raycast-height=350)" />;
+  return <Detail markdown={COLOR_WHEEL_MARKDOWN} />;
 }

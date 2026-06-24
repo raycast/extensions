@@ -7,10 +7,12 @@ import {
   Icon,
   open,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import {
+  buildWallpaperMarkdown,
   setDesktopWallpaper,
   downloadWallpaper,
   getThumbnailUrl,
@@ -39,17 +41,6 @@ export default function Command() {
   return (
     <List isLoading={isLoading} isShowingDetail>
       {wallpapers?.map((wallpaper) => {
-        const imageUrl = getThumbnailUrl(wallpaper.url, { height: 280 });
-        const markdown = `
-<img src="${imageUrl}" alt="${wallpaper.name}" height="280" />
-
-**${wallpaper.name}**
-
-${wallpaper.artist}, ${wallpaper.creationDate}
-
-${wallpaper.description || ""}
-        `;
-
         return (
           <List.Item
             key={wallpaper.id}
@@ -59,19 +50,22 @@ ${wallpaper.description || ""}
               source: getThumbnailUrl(wallpaper.url, { width: 100 }),
               mask: Image.Mask.RoundedRectangle,
             }}
-            detail={<List.Item.Detail markdown={markdown} />}
+            detail={
+              <List.Item.Detail markdown={buildWallpaperMarkdown(wallpaper)} />
+            }
             actions={
               <ActionPanel>
                 <Action
                   title="Set Desktop Wallpaper"
                   icon={Icon.Desktop}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   onAction={async () => {
                     const toast = await showToast({
                       style: Toast.Style.Animated,
                       title: "Setting wallpaper...",
                     });
                     try {
-                      await setDesktopWallpaper(wallpaper.url, wallpaper.id);
+                      await setDesktopWallpaper(wallpaper);
                       toast.style = Toast.Style.Success;
                       toast.title = "Wallpaper set successfully";
                     } catch (error) {
@@ -93,11 +87,7 @@ ${wallpaper.description || ""}
                         title: "Downloading...",
                       });
                       try {
-                        const path = await downloadWallpaper(
-                          wallpaper.url,
-                          wallpaper.name,
-                          wallpaper.id,
-                        );
+                        const path = await downloadWallpaper(wallpaper);
                         toast.style = Toast.Style.Success;
                         toast.title = "Wallpaper downloaded";
                         toast.message = `Saved to ${path}`;
@@ -117,6 +107,7 @@ ${wallpaper.description || ""}
                     onAction={() =>
                       open(`https://anotherboring.day/art/${wallpaper.id}`)
                     }
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

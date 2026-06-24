@@ -1,5 +1,5 @@
 import { showFailureToast } from "@raycast/utils";
-import { toError } from "./errorUtils";
+import { logGranolaError, toError } from "./errorUtils";
 import getAccessToken from "./getAccessToken";
 import getUserInfo from "./getUserInfo";
 import { parseEventTime } from "./documentMatching";
@@ -259,6 +259,12 @@ async function handleApiError(response: Response, operationName: string): Promis
       error.retryAfterMs = retryAfterMs;
     }
   }
+
+  logGranolaError(`granolaApi.${operationName}`, error, {
+    status: response.status,
+    statusText: response.statusText,
+    url: response.url,
+  });
 
   throw error;
 }

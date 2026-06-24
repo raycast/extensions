@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blackr",
+  "version": "1.1.0",
+  "title": "Blackr",
+  "description": "Turn your main display black for quick screen cleaning.",
+  "icon": "icon.png",
+  "author": "li_jin",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "blackr",
+      "title": "Blackr",
+      "description": "Cover the main display with a black cleaning screen.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "durationSeconds",
+          "title": "Cleaning Duration",
+          "description": "How long Blackr should stay active before exiting automatically, in seconds.",
+          "type": "textfield",
+          "required": false,
+          "default": "60",
+          "placeholder": "60"
+        }
+      ]
+    }
+  ],
+  "keywords": [
+    "black screen",
+    "clean screen",
+    "display cleaning",
+    "screen cleaning",
+    "blackout"
+  ],
+  "scripts": {
+    "build": "npm run build-native && ray build -e dist",
+    "build-native": "node scripts/build-native.js",
+    "dev": "npm run build-native && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "20.9.0",
+    "eslint": "9.36.0",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2"
+  },
+  "overrides": {
+    "@eslint/js": "9.36.0",
+    "@typescript-eslint/eslint-plugin": "8.45.0",
+    "@typescript-eslint/parser": "8.45.0",
+    "@typescript-eslint/utils": "8.45.0",
+    "@typescript-eslint/visitor-keys": "8.45.0"
+  }
+}

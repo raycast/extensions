@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-airdrop",
+  "title": "Quick AirDrop",
+  "description": "Trigger the macOS AirDrop sheet for files, URLs, and clipboard contents — straight from Raycast",
+  "icon": "extension-icon.png",
+  "author": "ridemountainpig",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "airdrop-selected-file",
+      "title": "AirDrop Selected File",
+      "description": "AirDrop the file(s) currently selected in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "airdrop-clipboard",
+      "title": "AirDrop Clipboard",
+      "description": "AirDrop whatever is on the clipboard — file, URL, or text",
+      "mode": "no-view"
+    },
+    {
+      "name": "airdrop-browser-tab",
+      "title": "AirDrop Browser Tab",
+      "description": "AirDrop the URL of the active browser tab",
+      "mode": "no-view"
+    },
+    {
+      "name": "airdrop-selected-text",
+      "title": "AirDrop Selected Text",
+      "description": "AirDrop the text currently selected in the frontmost app",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

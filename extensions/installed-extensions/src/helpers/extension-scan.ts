@@ -1,10 +1,9 @@
 import fs from "fs/promises";
-import os from "os";
 import path from "path";
 import { showFailureToast } from "@raycast/utils";
 import { LOCAL_EXTENSION_UUID_PATTERN } from "./constants";
 import { ExtensionMetadata } from "../types";
-import { isWindows } from "./utils";
+import { getExtensionsDirectory } from "./raycast-config";
 
 export function packageJsonMatchesExtensionFilter(packageJsonPath: string, filter: string): boolean {
   if (filter === "all") return true;
@@ -71,10 +70,9 @@ function dedupePackageJsonPaths(paths: string[]): string[] {
 }
 
 export async function getPackageJsonFiles(): Promise<string[]> {
-  const configDirs = isWindows ? ["raycast-x"] : ["raycast", "raycast-x"];
-  const extensionDirs = configDirs.map((dir) => path.join(os.homedir(), ".config", dir, "extensions"));
-  const packageJsonFiles = await Promise.all(extensionDirs.map(getPackageJsonFilesFromDirectory));
-  return dedupePackageJsonPaths(packageJsonFiles.flat());
+  const extensionsDir = getExtensionsDirectory();
+  const packageJsonFiles = await getPackageJsonFilesFromDirectory(extensionsDir);
+  return dedupePackageJsonPaths(packageJsonFiles);
 }
 
 async function getPackageJsonFilesFromDirectory(extensionsDir: string): Promise<string[]> {

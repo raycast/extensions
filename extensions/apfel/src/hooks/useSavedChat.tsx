@@ -32,12 +32,11 @@ export function useSavedChat(): SavedChatHook {
         title: "Saving your answer...",
         style: Toast.Style.Animated,
       });
-      const newSavedChat: SavedChat = { ...chat, saved_at: new Date().toISOString() };
-      setData([...data, newSavedChat]);
+      setData((prev) => [...prev, { ...chat, saved_at: new Date().toISOString() }]);
       toast.title = "Answer saved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data],
+    [setData],
   );
 
   const remove = useCallback(
@@ -46,12 +45,11 @@ export function useSavedChat(): SavedChatHook {
         title: "Unsaving your answer...",
         style: Toast.Style.Animated,
       });
-      const newSavedChats = data.filter((savedAnswer) => savedAnswer.id !== chat.id);
-      setData(newSavedChats);
+      setData((prev) => prev.filter((savedAnswer) => savedAnswer.id !== chat.id));
       toast.title = "Answer unsaved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data],
+    [setData],
   );
 
   const clear = useCallback(async () => {

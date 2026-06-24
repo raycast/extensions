@@ -37,7 +37,24 @@ export interface HabiticaUser {
     lvl: number;
     gp: number;
     maxHealth?: number;
+    maxMP?: number;
     class?: string;
+    points?: number;
+    str?: number;
+    con?: number;
+    int?: number;
+    per?: number;
+  };
+  /** Death buff. Active when user died and must revive. */
+  needsCron?: boolean;
+  flags?: {
+    classSelected?: boolean;
+    rebirthEnabled?: boolean;
+  };
+  purchased?: {
+    plan?: {
+      mysteryItems?: string[];
+    };
   };
   party?: {
     quest?: {
@@ -61,8 +78,10 @@ export interface HabiticaUser {
       costume: Record<string, string>;
       owned: Record<string, boolean>;
     };
+    /** Pets store feed progress (5–50); -1 indicates a released pet. */
     pets: Record<string, number>;
-    mounts: Record<string, number>;
+    /** Mounts store boolean ownership; false indicates a released mount. */
+    mounts: Record<string, boolean>;
     currentPet?: string;
     currentMount?: string;
   };
@@ -78,6 +97,12 @@ export interface HabiticaUser {
     /** When true, render costume gear instead of equipped gear. */
     costume?: boolean;
   };
+}
+
+export interface HabiticaChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
 }
 
 export interface HabiticaTask {
@@ -96,6 +121,7 @@ export interface HabiticaTask {
   streak?: number;
   up?: boolean;
   down?: boolean;
+  checklist?: HabiticaChecklistItem[];
 }
 
 export interface HabiticaTag {
@@ -110,6 +136,8 @@ export interface CreateTaskBody {
   priority?: number;
   date?: string;
   tags?: string[];
+  attribute?: TaskAttribute;
+  checklist?: { text: string; completed?: boolean }[];
 }
 
 export interface UpdateTaskBody {
@@ -117,6 +145,7 @@ export interface UpdateTaskBody {
   notes?: string;
   priority?: number;
   date?: string;
+  attribute?: TaskAttribute;
 }
 
 /** Only the gear subset is fetched from /api/v3/content (fields=gear). */

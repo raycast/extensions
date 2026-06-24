@@ -1,4 +1,5 @@
 
+.DS_Store
 raycast-env.d.ts
 
 .raycast-swift-build
@@ -6,3 +7,6 @@ raycast-env.d.ts
 compiled_raycast_swift
 
 node_modules
+.claude
+.remember
+docs
