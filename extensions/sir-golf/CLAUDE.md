@@ -37,8 +37,9 @@ Key design patterns to preserve:
 
 Commands (in `package.json` `commands`, each a `src/<name>.tsx` default export):
 - `leaderboard` — unified view; the dropdown switches between "This Tournament" (live board) and season ranking categories (`LEADERBOARD_VIEWS`).
-- `golf-season` — schedule with a year dropdown (current + past seasons with winners), defaults to "All Tours" combined.
-- `rankings-menu` — `menu-bar` mode; current leader + scoring-average + FedEx leaders.
+- `golf-season` — schedule with a tour/region dropdown and a year nav (current + past seasons with winners), defaults to "All Tours" combined.
+
+A `menu-bar` command was prototyped and dropped before the store release (see sir.golf doc 10 §6b — golf is the weakest fit for that surface); revive it only as a seasonal Majors skin.
 
 `src/player-detail.tsx` is the shared player side pane used by Leaderboard (and reused patterns elsewhere).
 

@@ -2,6 +2,10 @@
 
 > **[sir.golf](https://sir.golf/)** — *A Nod to the Classics, A Bow to the Course.*
 
+[![Add to Raycast](https://www.raycast.com/julianpaul/sir-golf/install_button@2x.png)](https://www.raycast.com/julianpaul/sir-golf)
+
+<!-- The badge above resolves once the extension is live in the Raycast Store. -->
+
 Live **PGA Tour**, **LPGA** and **DP World Tour** leaderboards, the week's golf
 schedule with **every major badged**, and one-tap **Add to Calendar** — right
 inside Raycast. No account, no API key, no backend: it fetches directly from
@@ -80,7 +84,6 @@ src/espn.ts            shared ESPN data layer: fetchers, parsers, majors, .ics, 
 src/leaderboard.tsx    Leaderboard command (tournament + season rankings)
 src/golf-season.tsx    Golf Season command (schedule, majors, add-to-calendar, region filter)
 src/player-detail.tsx  shared player side-pane (headshot, bio, stats)
-src/rankings-menu.tsx  dormant menu-bar command — not registered; kept for a future Majors relaunch
 ```
 
 ## License
