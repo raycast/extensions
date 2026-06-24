@@ -1,6 +1,6 @@
 # HDR Toggle Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-24
 
 - List HDR-capable monitors with their current HDR state
 - Toggle HDR on each monitor independently via the Win32 DisplayConfig API
