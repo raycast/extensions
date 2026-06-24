@@ -61,9 +61,9 @@ export const WHATS_NEW_ENTRIES: WhatsNewEntry[] = [
     title: "Beta Launch",
     date: "2026-02-10",
     changes: [
-      "Search Finnish companies by company name and Business ID (PRH YTJ).",
-      "View company details with practical actions for copying and source links.",
-      "Read release notes in-app from the What's New section.",
+      "Search Finnish businesses by company name or Business ID using PRH YTJ open data.",
+      "Review ranked results and company details, including status, addresses, registers, and name history.",
+      "Copy IDs and addresses, open source pages, websites, and map links, and read release notes in-app.",
     ],
   },
 ];

@@ -9,9 +9,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Initial beta release of FBL - Finnish Business Lookup for Raycast.
-- Company search by company name and Business ID (PRH YTJ).
-- Company detail view with practical actions (copy IDs/addresses, open source pages).
-- In-app "What's New" version history section from the command root view.
+- Search Finnish businesses by company name or Business ID using PRH YTJ open data.
+- Review ranked results and company details, including status, addresses, registers, and name history.
+- Copy IDs and addresses, open source pages, websites, and map links.
+- Read release notes in-app from the "What's New" section.
 - Root `LICENSE` file (MIT).
 - `CHANGELOG.md` for release history.
 
