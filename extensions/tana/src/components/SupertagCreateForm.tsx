@@ -1,82 +1,67 @@
-import { Action, ActionPanel, Color, Form, Icon, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { SupertagNode, addSuperTag } from "../state";
-import { tanaColorOptions, getNodeIdFromURL } from "../utils";
+import { createPreferenceClient, getTanaPreferences } from "../api/preferenceClient";
+import { createTag } from "../api/tanaService";
+
+type CreatedTag = { id: string; name: string };
 
 type Values = {
-  id: string;
   name: string;
-  color?: string;
+  description?: string;
+  showCheckbox: boolean;
 };
 
 type SuperTagCreateFormProps = {
-  onCreate?: (node: SupertagNode) => void;
+  workspaceId?: string;
+  onCreate?: (tag: CreatedTag) => void;
 };
 
-export function SupertagCreateForm({ onCreate }: SuperTagCreateFormProps) {
+export function SupertagCreateForm({ workspaceId, onCreate }: SuperTagCreateFormProps) {
   const { pop } = useNavigation();
+  const resolvedWorkspaceId = workspaceId || getTanaPreferences().workspaceId?.trim() || "";
   const { handleSubmit, itemProps } = useForm<Values>({
-    async onSubmit({ id, name, color }) {
-      id = getNodeIdFromURL(id);
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Adding supertag" });
+    async onSubmit(values) {
+      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating Supertag" });
       await toast.show();
       try {
-        addSuperTag({ id, name, color });
-        onCreate?.({ id, name });
+        const result = await createTag(createPreferenceClient(resolvedWorkspaceId), resolvedWorkspaceId, values);
+        onCreate?.({ id: result.tagId, name: result.tagName });
         toast.style = Toast.Style.Success;
-        toast.message = "Supertag added";
+        toast.message = `${result.tagName} created`;
         pop();
       } catch (error) {
-        let message: string | undefined = undefined;
-        if (error instanceof Error) {
-          message = error.message;
-        }
         toast.style = Toast.Style.Failure;
-        toast.message = message;
+        toast.message = error instanceof Error ? error.message : "Unknown error";
       }
     },
-    validation: {
-      id: FormValidation.Required,
-      name: FormValidation.Required,
-    },
-    initialValues: { id: "", name: "", color: Color.PrimaryText },
+    validation: { name: FormValidation.Required },
+    initialValues: { name: "", description: "", showCheckbox: false },
   });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Supertag" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Supertag" onSubmit={handleSubmit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Name" placeholder="Enter name" {...itemProps.name} />
-      <Form.TextField title="Node ID" placeholder="Enter node ID" {...itemProps.id} />
-      <Form.Dropdown title="Color" placeholder="Select color" {...itemProps.color}>
-        {tanaColorOptions.map((color) => (
-          <Form.Dropdown.Item
-            key={color.name}
-            value={color.value}
-            title={color.name}
-            icon={{ source: Icon.Tag, tintColor: color.value }}
-          />
-        ))}
-      </Form.Dropdown>
+      <Form.TextField title="Name" placeholder="Project" {...itemProps.name} />
+      <Form.TextArea title="Description" placeholder="Optional description" {...itemProps.description} />
+      <Form.Checkbox label="Show checkbox on tagged nodes" {...itemProps.showCheckbox} />
+      {!resolvedWorkspaceId && (
+        <Form.Description title="Workspace" text="Select a workspace before creating a Supertag." />
+      )}
     </Form>
   );
 }
 
-export function CreateSupertagAction({
-  shortcut = true,
-  ...props
-}: SuperTagCreateFormProps & {
-  shortcut?: boolean;
-}) {
+export function CreateSupertagAction({ shortcut = true, ...props }: SuperTagCreateFormProps & { shortcut?: boolean }) {
   return (
     <Action.Push
-      title="Add Supertag"
+      title="Create Supertag"
       target={<SupertagCreateForm {...props} />}
-      icon={{ source: Icon.Tag, tintColor: Color.PrimaryText }}
+      icon={Icon.Plus}
       shortcut={shortcut ? { modifiers: ["cmd"], key: "n" } : undefined}
     />
   );

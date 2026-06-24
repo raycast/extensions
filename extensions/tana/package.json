@@ -4,7 +4,7 @@
   "title": "Tana",
   "description": "Write notes in Raycast, and capture them in Tana.",
   "icon": "tana-icon.png",
-  "author": "cheslip",
+  "author": "leodknuth",
   "contributors": [
     "neil_brown"
   ],
@@ -18,6 +18,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
+    "test:store": "node scripts/store-preflight.mjs",
+    "test:watch": "vitest",
     "publish": "ray publish"
   },
   "commands": [
@@ -29,10 +32,24 @@
       "mode": "view"
     },
     {
+      "name": "searchTanaCommand",
+      "title": "Search Tana",
+      "subtitle": "Tana",
+      "description": "Search, read, browse, and update Tana nodes",
+      "mode": "view"
+    },
+    {
+      "name": "todayCommand",
+      "title": "Today",
+      "subtitle": "Tana",
+      "description": "Browse and capture today's Tana nodes",
+      "mode": "view"
+    },
+    {
       "name": "manageTargetNodesCommand",
       "title": "Manage Target Nodes",
       "subtitle": "Tana",
-      "description": "Manage the nodes for Tana quick add",
+      "description": "Manage pinned targets for Tana Quick Add",
       "mode": "view"
     },
     {
@@ -41,15 +58,29 @@
       "subtitle": "Tana",
       "description": "Manage supertags for Tana quick add",
       "mode": "view"
+    },
+    {
+      "name": "diagnosticsCommand",
+      "title": "Diagnostics",
+      "subtitle": "Tana",
+      "description": "Check the Tana Local API connection and capabilities",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "workspaceApiToken",
-      "description": "API token for your Tana workspace",
+      "description": "Personal token for the Tana Local API/MCP",
       "type": "password",
       "required": true,
-      "title": "API Token"
+      "title": "Personal Token"
+    },
+    {
+      "name": "workspaceId",
+      "description": "Optional default workspace ID; workspaces are discovered from Tana Desktop",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Workspace ID"
     }
   ],
   "dependencies": {
@@ -61,12 +92,18 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "^8.56.0",
     "prettier": "^3.2.4",
     "react": "^18.2.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.7"
+    }
   }
 }

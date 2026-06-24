@@ -55,7 +55,7 @@ export function TargetNodeCreateForm({ onCreate }: TargetNodeCreateFormProps) {
   );
 }
 
-export function CreateTargetNodeAction({
+export function CreateTargetNodeManualAction({
   shortcut = true,
   ...props
 }: TargetNodeCreateFormProps & {
@@ -63,7 +63,7 @@ export function CreateTargetNodeAction({
 }) {
   return (
     <Action.Push
-      title="Add Target Node"
+      title="Add Target by Node ID"
       target={<TargetNodeCreateForm {...props} />}
       icon={Icon.Dot}
       shortcut={shortcut ? { modifiers: ["cmd"], key: "n" } : undefined}

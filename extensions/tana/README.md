@@ -1,64 +1,87 @@
-# Tana extension for Raycast
+# Tana for Raycast
+
+Use Tana Desktop's local MCP/API from Raycast. The extension connects only to
+`http://127.0.0.1:8262`; it does not perform web searches, call external AI
+services, proxy data through a cloud backend, or persist Tana note content.
+
+For a Chinese step-by-step user guide with workflow diagrams, see
+[`docs/tana-raycast-product-guide.md`](docs/tana-raycast-product-guide.md).
+
+## Requirements
+
+- Tana Desktop is running and the target workspace is loaded.
+- A current Personal Token from **Tana Settings → API Tokens**.
+- Raycast has the token in this extension's **Personal Token** password
+  preference. The optional workspace ID acts only as the initial default.
+
+Personal Tokens are Tana's advanced fallback authentication method. Tana
+recommends OAuth for clients that support it; this extension currently uses a
+Personal Token because the Raycast-to-local-MCP OAuth flow has not been proven.
+Never commit a token, paste it into an issue, or include it in a screenshot.
+
+See [Tana Local API and MCP](https://outliner.tana.inc/learn/features/local-api-mcp)
+for the current server and authentication documentation.
 
 ## Commands
 
-### Quick Add
+- **Quick Add** — capture plaintext, Unicode, or emoji to Inbox, Today, or a
+  pinned target; select a workspace and one or more discovered Supertags.
+- **Search Tana** — search by workspace, read nodes, page through children, open
+  in Tana, open in panel/tab, check/uncheck, tag, set fields, edit, move, move
+  to Trash, or add a note while browsing children.
+- **Today** — browse today's daily-note children, run node actions, or capture
+  directly to Today.
+- **Manage Target Nodes** — search Tana and pin frequently used destinations;
+  manual node ID or Tana URL entry remains available as a fallback.
+- **Manage Supertags** — list real workspace tags, inspect schema Markdown,
+  create a Supertag, add a field, or configure its checkbox.
+- **Diagnostics** — check health, workspace readiness, MCP protocol/service
+  metadata, available tools, missing core tools, and REST fallbacks without
+  displaying tokens or Tana content.
 
-Write a note in Raycast and and send it to Tana!
+Moving a node to Trash always requires a destructive confirmation. Structural
+mutations use stable node IDs; move rejects the selected node itself and its
+descendants as targets.
 
-The note may be customized by adding one or more supertags, or by setting a different target node (`Inbox` is the default).
+## Troubleshooting
 
-### Manage Supertags
+- **Tana is not reachable** — start Tana Desktop and retry Diagnostics.
+- **Authentication rejected** — create a new Personal Token, paste only the raw
+  token into Raycast preferences, and remove leading/trailing whitespace.
+- **Workspace is not ready** — open or switch to that workspace in Tana, then
+  retry.
+- **Missing required tools** — update Tana Desktop. Diagnostics lists the exact
+  missing names. `open_node` and `move_node` use the documented local REST
+  endpoints when those names are absent from MCP.
+- **Two Tana extensions appear** — disable the Raycast Store copy while testing
+  a local development installation so commands and preferences are unambiguous.
 
-Supertags may be added to Raycast by their node ID in order to attach them to notes. This command
-allows you you view, add, edit or delete Supertags within Raycast.
+If a token was exposed in chat, logs, source control, or a screenshot, delete it
+in Tana and create a replacement after testing.
 
-To add a supertag, you'll need its `nodeId`. This can be found in Tana by pressing `Cmd-K` on the
-desired supertag, and selecting `Copy link`. The `nodeId` is contained in the copied URL, however,
-the full URL may be pasted into the `Node ID` field for convenience.
-
-![](./media/copy-link-to-supertag.png)
-
-### Manage Target Nodes
-
-This command can be used if you want to send your note to a node other than **Inbox**. Here you can add,
-update and delete target nodes.
-
-To add a target node, you'll need the node's `nodeId`. This can be found in Tana by pressing `Cmd-K` on
-the desired target node, and selecting `Copy link`. The `nodeId` is contained in the copied URL, however,
-the full URL may be pasted into the `Node ID` field for convenience.
-
-![](./media/copy-link-to-node.png)
-
-## Limitations
-
-- Only single-node, plaintext notes are supported.
-- Modifying fields within supertags is not yet supported.
-- Supertags and target nodes are only added, modified, and deleted within Raycast. This extension does not
-  modify these within your Tana workspace.
-
-## Setup
-
-### Generate API token in Tana
-
-Please follow instructions in [Tana Documentation](https://tana.inc/docs/input-api#how-to-get-a-tana-api-token) to generate a token.
-Once generated, paste the token into the corresponding configuration in Raycast.
-
-If you have used this plugin before(in 2022), you also need to do the same thing since Tana have updated their API.
-![](./media/change-extension-configuration.png)
-
-## Contribution
+## Development
 
 ```bash
-npm install
-# dev
+npm ci
+npm test
+npm run lint
+npm run test:store
+npm run build
 npm run dev
-# publish
-npm run publish
-# pull contributions
-npx raycast/api@latest pull-contributions
 ```
 
-[Tana input api sample](https://github.com/tanainc/tana-input-api-samples)
+CI runs the same install, unit-test, Store preflight, lint, and
+TypeScript/build gates on Node 22. Tests use mocked local responses and must
+never contain a real token or real Tana content. Live mutation tests must use
+disposable nodes and tags created solely for that test run.
 
-[Tana import tool](https://github.com/tanainc/tana-import-tools)
+Publishing to the Raycast Store is intentionally separate from local acceptance:
+
+```bash
+npm run publish
+```
+
+Do not publish from a branch that contains local audit archives, personal
+tokens, personal emails, live workspace screenshots, or real node identifiers.
+`npm run publish` opens a real Raycast extension pull request and should only be
+run after a final release check.

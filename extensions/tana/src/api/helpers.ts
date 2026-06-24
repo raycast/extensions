@@ -1,16 +1,14 @@
-import { getPreferenceValues } from "@raycast/api";
-import { TanaAPIHelper } from "./TanaAPIClient";
 import { APIPlainNode } from "../types/types";
+import { createPreferenceClient, getTanaPreferences } from "./preferenceClient";
 
-export const TANA_URL = "https://europe-west1-tagr-prod.cloudfunctions.net";
+export const prefs = getTanaPreferences();
 
-type Preferences = {
-  workspaceApiToken: string;
-};
-export const prefs = getPreferenceValues<Preferences>();
-
-export const createPlainNode = async (node: APIPlainNode, targetNodeId: string): Promise<string> => {
-  const helper = new TanaAPIHelper(prefs.workspaceApiToken);
-  const tananode = await helper.createNode(node, targetNodeId);
-  return tananode.name;
+export const createPlainNode = async (
+  node: APIPlainNode,
+  targetNodeId: string,
+  workspaceId = prefs.workspaceId ?? "",
+): Promise<string> => {
+  const client = createPreferenceClient(workspaceId);
+  const result = await client.createNode(node, targetNodeId);
+  return result.createdNodes[0].nodeId;
 };

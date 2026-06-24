@@ -1,5 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { proxy, subscribe, useSnapshot } from "valtio";
+import { parseStoredNodes, scopedStorageKey } from "./storage";
 
 export type TanaLocalNode = {
   id: string;
@@ -63,20 +64,18 @@ export function updateSupertag(nodeId: string, values: Omit<SupertagNode, "id">)
   }
 }
 
+const configuredWorkspaceId = getPreferenceValues<{ workspaceId?: string }>().workspaceId ?? "";
+
 export async function loadNodes(key: "targetNodes" | "supertags"): Promise<TanaLocalNode[]> {
-  const nodesStr = await LocalStorage.getItem<string>(key);
-  let nodes: TanaLocalNode[] = [];
-
-  try {
-    nodes = JSON.parse(nodesStr || "[]");
-    if (!Array.isArray(nodes)) {
-      nodes = [];
-    }
-  } catch (e) {
-    console.error(e);
-    nodes = [];
+  const scopedKey = scopedStorageKey(key, configuredWorkspaceId);
+  const [scopedValue, legacyValue] = await Promise.all([
+    LocalStorage.getItem<string>(scopedKey),
+    LocalStorage.getItem<string>(key),
+  ]);
+  const nodes = parseStoredNodes(scopedValue ?? legacyValue);
+  if (scopedValue === undefined && legacyValue !== undefined) {
+    await LocalStorage.setItem(scopedKey, JSON.stringify(nodes));
   }
-
   return nodes;
 }
 
@@ -101,7 +100,7 @@ export function useLoadInitialState() {
 // Save state to Raycast LocalStorage on change
 subscribe(tanaLocal, async () => {
   await Promise.all([
-    LocalStorage.setItem("targetNodes", JSON.stringify(tanaLocal.targetNodes)),
-    LocalStorage.setItem("supertags", JSON.stringify(tanaLocal.supertags)),
+    LocalStorage.setItem(scopedStorageKey("targetNodes", configuredWorkspaceId), JSON.stringify(tanaLocal.targetNodes)),
+    LocalStorage.setItem(scopedStorageKey("supertags", configuredWorkspaceId), JSON.stringify(tanaLocal.supertags)),
   ]);
 });
