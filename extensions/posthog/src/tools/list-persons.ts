@@ -1,4 +1,4 @@
-import { clampLimit, getDefaultProjectId, pickProperties, posthogRequest } from "../posthog-client";
+import { listProjectResources, pickProperties } from "../posthog-client";
 
 type Input = {
   projectId?: number;
@@ -18,20 +18,14 @@ type Person = {
   created_at?: string;
 };
 
-type PersonsResponse = {
-  count?: number;
-  next?: string | null;
-  previous?: string | null;
-  results?: Person[];
-};
-
 export default async function tool({ search, projectId, limit, propertyKeys, maxPropertyValueLength }: Input = {}) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const response = await posthogRequest<PersonsResponse>(`projects/${resolvedProjectId}/persons/`, {
-    query: {
-      search,
-      limit: clampLimit(limit, 25, 100),
-    },
+  const { resolvedProjectId, response } = await listProjectResources<Person>({
+    projectId,
+    endpoint: "persons",
+    search,
+    limit,
+    defaultLimit: 25,
+    maxLimit: 100,
   });
 
   return {

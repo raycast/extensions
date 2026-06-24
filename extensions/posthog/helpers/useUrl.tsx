@@ -1,13 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-
-function normalizeHost(host?: string) {
-  if (!host) return "https://us.posthog.com";
-  const normalized = host.replace(/\/$/, "");
-  if (normalized === "https://app.posthog.com") return "https://us.posthog.com";
-  return normalized;
-}
+import { normalizeHost } from "../src/posthog-client";
 
 export function useUrl(path: string) {
-  const { dataRegionURL } = getPreferenceValues<{ dataRegionURL?: string }>();
+  const { dataRegionURL } = getPreferenceValues<Preferences>();
   return `${normalizeHost(dataRegionURL)}/${path}`;
 }

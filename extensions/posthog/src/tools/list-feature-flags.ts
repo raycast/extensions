@@ -1,11 +1,4 @@
-import { clampLimit, getDefaultProjectId, posthogRequest, truncateValue } from "../posthog-client";
-
-type Input = {
-  projectId?: number;
-  search?: string;
-  limit?: number;
-  includeFilters?: boolean;
-};
+import { listProjectResources, ProjectResourceSearchInput, truncateValue } from "../posthog-client";
 
 type FeatureFlag = {
   id?: number;
@@ -18,20 +11,19 @@ type FeatureFlag = {
   created_by?: { email?: string; first_name?: string };
 };
 
-type FeatureFlagsResponse = {
-  count?: number;
-  next?: string | null;
-  previous?: string | null;
-  results?: FeatureFlag[];
-};
-
-export default async function tool({ projectId, search, limit, includeFilters = false }: Input = {}) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const response = await posthogRequest<FeatureFlagsResponse>(`projects/${resolvedProjectId}/feature_flags/`, {
-    query: {
-      search,
-      limit: clampLimit(limit, 50, 100),
-    },
+export default async function tool({
+  projectId,
+  search,
+  limit,
+  includeFilters = false,
+}: ProjectResourceSearchInput = {}) {
+  const { resolvedProjectId, response } = await listProjectResources<FeatureFlag>({
+    projectId,
+    endpoint: "feature_flags",
+    search,
+    limit,
+    defaultLimit: 50,
+    maxLimit: 100,
   });
 
   return {

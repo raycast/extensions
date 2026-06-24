@@ -3,12 +3,6 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-type Preferences = {
-  personalAPIKey?: string;
-  dataRegionURL?: string;
-  defaultProjectId?: string;
-};
-
 type CredentialsFile = {
   host?: string;
   apiHost?: string;
@@ -28,7 +22,14 @@ type RequestOptions = {
   body?: unknown;
 };
 
-type PaginatedResponse<T> = {
+export type ProjectResourceSearchInput = {
+  projectId?: number;
+  search?: string;
+  limit?: number;
+  includeFilters?: boolean;
+};
+
+export type PaginatedResponse<T> = {
   count?: number;
   next?: string | null;
   previous?: string | null;
@@ -70,7 +71,7 @@ const MAX_LIMIT = 200;
 const MAX_QUERY_ROWS = 1000;
 const DEFAULT_CELL_LENGTH = 500;
 
-function normalizeHost(host?: string): string {
+export function normalizeHost(host?: string): string {
   if (!host) return DEFAULT_HOST;
   const normalized = host.replace(/\/$/, "");
   if (normalized === "https://app.posthog.com") return DEFAULT_HOST;
@@ -246,6 +247,32 @@ export async function listProjects(search?: string, limit?: number): Promise<Pag
   });
 }
 
+export async function listProjectResources<T>({
+  projectId,
+  endpoint,
+  search,
+  limit,
+  defaultLimit,
+  maxLimit,
+}: {
+  projectId?: number;
+  endpoint: string;
+  search?: string;
+  limit?: number;
+  defaultLimit?: number;
+  maxLimit?: number;
+}) {
+  const resolvedProjectId = getDefaultProjectId(projectId);
+  const response = await posthogRequest<PaginatedResponse<T>>(`projects/${resolvedProjectId}/${endpoint}/`, {
+    query: {
+      search,
+      limit: clampLimit(limit, defaultLimit, maxLimit),
+    },
+  });
+
+  return { resolvedProjectId, response };
+}
+
 function hasQueryResults(response: HogQLResponse): boolean {
   return Array.isArray(response.results) || Array.isArray(response.query_status?.results);
 }
@@ -304,6 +331,10 @@ export async function runHogQL({
 
   if (response.error || response.query_status?.error || status === "failed" || status === "error") {
     throw new Error(response.error ?? response.query_status?.error ?? "PostHog query failed");
+  }
+
+  if (!hasQueryResults(response) && attempts >= 30) {
+    throw new Error("PostHog query timed out after 30 seconds. Try simplifying the query or adding a LIMIT.");
   }
 
   const rows = results.slice(0, rowLimit).map((row) => {

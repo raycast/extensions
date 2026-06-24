@@ -96,16 +96,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.19",
+    "@raycast/api": "1.104.20",
     "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.3.1",
+    "@types/node": "^26.0.0",
     "@types/react": "19.0.10",
-    "eslint": "^9.35.0",
+    "eslint": "^10.5.0",
     "prettier": "^3.8.4",
-    "typescript": "^5.9.2"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -222,5 +222,9 @@
         }
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

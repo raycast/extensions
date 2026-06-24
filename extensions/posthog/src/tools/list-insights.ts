@@ -1,11 +1,4 @@
-import { clampLimit, getDefaultProjectId, posthogRequest, truncateValue } from "../posthog-client";
-
-type Input = {
-  projectId?: number;
-  search?: string;
-  limit?: number;
-  includeFilters?: boolean;
-};
+import { listProjectResources, ProjectResourceSearchInput, truncateValue } from "../posthog-client";
 
 type Insight = {
   id?: number;
@@ -20,20 +13,19 @@ type Insight = {
   created_by?: { email?: string; first_name?: string };
 };
 
-type InsightsResponse = {
-  count?: number;
-  next?: string | null;
-  previous?: string | null;
-  results?: Insight[];
-};
-
-export default async function tool({ projectId, search, limit, includeFilters = false }: Input = {}) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const response = await posthogRequest<InsightsResponse>(`projects/${resolvedProjectId}/insights/`, {
-    query: {
-      search,
-      limit: clampLimit(limit, 25, 100),
-    },
+export default async function tool({
+  projectId,
+  search,
+  limit,
+  includeFilters = false,
+}: ProjectResourceSearchInput = {}) {
+  const { resolvedProjectId, response } = await listProjectResources<Insight>({
+    projectId,
+    endpoint: "insights",
+    search,
+    limit,
+    defaultLimit: 25,
+    maxLimit: 100,
   });
 
   return {
