@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Upade README] - {PR_MERGE_DATE}
+## [Upade README] - 2026-06-24
 
 - Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
 
