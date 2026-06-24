@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [New Tuple Integration] - {PR_MERGE_DATE}
+## [New Tuple Integration] - 2026-06-24
 
 - Search Contacts: browse contacts with online status, favorites, and recents; start calls, toggle favorites, and copy emails
 - Active Call menu bar: see your current call and mute/unmute, add a person, copy AI context, or hang up
