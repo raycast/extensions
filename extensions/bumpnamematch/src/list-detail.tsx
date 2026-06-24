@@ -21,10 +21,9 @@ export function ListDetail({
   baseUrl: string;
   apiKey: string;
 }) {
-  const { data, isLoading, revalidate } = useFetch<ListDetailResponse>(
-    `${baseUrl}/api/favorite-lists/${list.id}`,
-    { headers: { "x-api-key": apiKey } },
-  );
+  const { data, isLoading, revalidate } = useFetch<ListDetailResponse>(`${baseUrl}/api/favorite-lists/${list.id}`, {
+    headers: { "x-api-key": apiKey },
+  });
   const items = data?.items ?? [];
 
   // Group rows into sections delimited by divider rows; name items go under the

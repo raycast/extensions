@@ -14,7 +14,9 @@ export function JoinSessionForm({
   const { pop } = useNavigation();
 
   async function handleSubmit(values: Form.Values) {
-    const code = String(values.inviteCode ?? "").trim().toUpperCase();
+    const code = String(values.inviteCode ?? "")
+      .trim()
+      .toUpperCase();
     if (!code) {
       await showToast({ style: Toast.Style.Failure, title: "Enter an invite code" });
       return;

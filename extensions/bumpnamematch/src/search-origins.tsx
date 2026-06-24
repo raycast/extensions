@@ -36,13 +36,7 @@ export default function Command() {
                 title="View Names"
                 icon={Icon.ChevronRight}
                 target={
-                  <OriginNames
-                    origin={origin}
-                    initialGender={gender}
-                    baseUrl={baseUrl}
-                    apiKey={apiKey}
-                    lists={lists}
-                  />
+                  <OriginNames origin={origin} initialGender={gender} baseUrl={baseUrl} apiKey={apiKey} lists={lists} />
                 }
               />
               <Action.OpenInBrowser

@@ -37,11 +37,7 @@ export default function Command() {
           description={`Set your Bump Name Match API key in this extension's preferences to view and manage your lists. Create one at ${baseUrl}/dashboard/api-keys`}
           actions={
             <ActionPanel>
-              <Action
-                title="Set API Key in Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Set API Key in Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action.OpenInBrowser title="Create an API Key" url={`${baseUrl}/dashboard/api-keys`} />
             </ActionPanel>
           }
@@ -68,10 +64,7 @@ export default function Command() {
                   icon={Icon.ChevronRight}
                   target={<ListDetail list={list} allLists={lists} baseUrl={baseUrl} apiKey={apiKey} />}
                 />
-                <Action.OpenInBrowser
-                  title="Open in Browser"
-                  url={`${baseUrl}/dashboard/favorite-lists/${list.id}`}
-                />
+                <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/dashboard/favorite-lists/${list.id}`} />
               </ActionPanel>
             }
           />

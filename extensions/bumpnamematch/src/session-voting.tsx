@@ -105,7 +105,11 @@ export function SessionVoting({
           <ActionPanel.Section>
             {matchesAction}
             <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/name/${slug}`} />
-            <Action.CopyToClipboard title="Copy Name" content={current.name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard
+              title="Copy Name"
+              content={current.name}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -69,7 +69,10 @@ export function NameMetadata({ nameData: n, baseUrl }: { nameData: Name; baseUrl
       <Detail.Metadata.Label title="Origin" text={n.origin} icon={Icon.Globe} />
       {n.currentRank != null && <Detail.Metadata.Label title="Current Rank" text={`#${n.currentRank}`} />}
       {n.ssaRank != null && (
-        <Detail.Metadata.Label title="US Popularity" text={n.ssaYear ? `#${n.ssaRank} (${n.ssaYear})` : `#${n.ssaRank}`} />
+        <Detail.Metadata.Label
+          title="US Popularity"
+          text={n.ssaYear ? `#${n.ssaRank} (${n.ssaYear})` : `#${n.ssaRank}`}
+        />
       )}
       {tags.length > 0 && (
         <Detail.Metadata.TagList title="Tags">

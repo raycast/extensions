@@ -29,9 +29,7 @@ export function SessionMatches({
           description="When you and your partner both like a name, it shows up here."
         />
       ) : (
-        names.map((name) => (
-          <NameListItem key={name.id} name={name} baseUrl={baseUrl} apiKey={apiKey} lists={lists} />
-        ))
+        names.map((name) => <NameListItem key={name.id} name={name} baseUrl={baseUrl} apiKey={apiKey} lists={lists} />)
       )}
     </List>
   );
