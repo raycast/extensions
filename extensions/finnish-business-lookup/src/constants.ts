@@ -59,7 +59,7 @@ export const WHATS_NEW_ENTRIES: WhatsNewEntry[] = [
   {
     version: "0.1.0",
     title: "Beta Launch",
-    date: "2026-02-10",
+    date: "2026-06-24",
     changes: [
       "Search Finnish businesses by company name or Business ID using PRH YTJ open data.",
       "Review ranked results and company details, including status, addresses, registers, and name history.",
