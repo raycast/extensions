@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "p00f-raycast",
   "title": "P00f",
   "description": "Create zero-knowledge, ephemeral p00f links from Raycast.",
@@ -9,7 +10,7 @@
     "macOS"
   ],
   "categories": [
-    "Productivity",
+    "Security",
     "Developer Tools"
   ],
   "keywords": [

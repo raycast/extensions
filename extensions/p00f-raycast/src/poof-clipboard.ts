@@ -1,15 +1,12 @@
 import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { readFile, stat } from "node:fs/promises";
 import { createClipboardPoof } from "./lib/clipboard";
-import {
-  createDefaultsFromPreferences,
-  type PoofPreferences,
-} from "./lib/preferences";
+import { createDefaultsFromPreferences } from "./lib/preferences";
 
 const http = (input: string, init?: RequestInit) => fetch(input, init);
 
 export default async function Command() {
-  const preferences = getPreferenceValues<PoofPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Creating Poof",

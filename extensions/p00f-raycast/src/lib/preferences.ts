@@ -1,14 +1,3 @@
-export interface PoofPreferences {
-  base: string;
-  defaultTtl: string;
-  defaultReveals: string;
-  defaultRevealAnchored: boolean;
-  defaultAllowViewerDelete: boolean;
-  defaultRequireTurnstile: boolean;
-  openInBrowserAfterCreate: boolean;
-  pasteAfterCreate: boolean;
-}
-
 export interface CreateDefaults {
   baseUrl: string;
   ttlMs: number;
@@ -20,7 +9,7 @@ export interface CreateDefaults {
 }
 
 export function createDefaultsFromPreferences(
-  preferences: PoofPreferences,
+  preferences: Preferences,
 ): CreateDefaults {
   return {
     baseUrl: preferences.base,

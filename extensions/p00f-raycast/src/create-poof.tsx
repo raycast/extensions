@@ -11,16 +11,13 @@ import {
 } from "@raycast/api";
 import { readFile, stat } from "node:fs/promises";
 import { createFormPoof, type CreatePoofFormValues } from "./lib/form";
-import {
-  createDefaultsFromPreferences,
-  type PoofPreferences,
-} from "./lib/preferences";
+import { createDefaultsFromPreferences } from "./lib/preferences";
 import { ResultDetail } from "./result-detail";
 
 const http = (input: string, init?: RequestInit) => fetch(input, init);
 
 export default function Command() {
-  const preferences = getPreferenceValues<PoofPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
   async function onSubmit(values: CreatePoofFormValues) {
