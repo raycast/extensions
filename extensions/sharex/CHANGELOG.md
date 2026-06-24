@@ -1,6 +1,6 @@
 # ShareX Changelog
 
-## [Fix] - 2026-06-24
+## [Fix] - {PR_MERGE_DATE}
 - Include media files stored directly in the configured screenshots folder.
 
 ## [Feature] - 2026-05-05
