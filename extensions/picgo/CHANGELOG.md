@@ -1,6 +1,6 @@
 # Picgo Changelog
 
-## [Bugfix: Image Grid Format Selection] - {PR_MERGE_DATE}
+## [Bugfix: Image Grid Format Selection] - 2026-06-24
 
 - Fix a crash when switching to the Image Grid view caused by an empty image format selection in newer Raycast versions.
 
