@@ -1,6 +1,6 @@
 # Wifi Password Reveal Changelog
 
-## [Fix Windows Password Retrieval] - {PR_MERGE_DATE}
+## [Fix Windows Password Retrieval] - 2026-06-24
 
 - Fixed intermittent "Command failed" errors on Windows by replacing `exec` (cmd.exe) with `runPowerShellScript` from `@raycast/utils`. PowerShell handles SSID quoting and Unicode characters correctly, where cmd.exe's `/s /c` quote-stripping could mangle profile names containing spaces or special characters.
 
