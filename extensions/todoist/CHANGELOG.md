@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Revert Quick Add Task fallback command fix] - 2026-06-24
+## [Revert Quick Add Task fallback command fix] - {PR_MERGE_DATE}
 
 - Reverted the Quick Add Task fallback command fix because making the `text` argument optional broke the hotkey workflow (command launched immediately with empty text instead of prompting for input).
 
