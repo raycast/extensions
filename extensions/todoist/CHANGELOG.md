@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix Quick Add Task fallback command] - {PR_MERGE_DATE}
+## [Fix Quick Add Task fallback command] - 2026-06-24
 
 - Quick Add Task now works as a Raycast fallback command on Raycast 2.0+. Previously it failed with "Value is missing in argument" because the text argument was required.
 
