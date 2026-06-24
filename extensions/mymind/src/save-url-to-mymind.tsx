@@ -2,13 +2,7 @@ import { LaunchProps, showHUD } from "@raycast/api";
 import { createObject, MyMindApiError } from "./api";
 import { looksLikeUrl, parseTags } from "./utils";
 
-interface Arguments {
-  url: string;
-  title?: string;
-  tags?: string;
-}
-
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SaveUrlToMymind }>) {
   const { url, title, tags } = props.arguments;
 
   if (!url || !looksLikeUrl(url)) {

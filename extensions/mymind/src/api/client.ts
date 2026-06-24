@@ -5,11 +5,6 @@ const BASE_URL = "https://api.mymind.com";
 const USER_AGENT = "raycast-mymind/2.4.0";
 const TOKEN_LIFETIME_SECONDS = 60;
 
-interface ApiPreferences {
-  keyId?: string;
-  secretKey?: string;
-}
-
 export class MyMindApiError extends Error {
   readonly status: number;
   readonly type?: string;
@@ -53,7 +48,7 @@ interface ResolvedCredentials {
 let cachedCredentials: { raw: string; resolved: ResolvedCredentials } | null = null;
 
 function getCredentials(): ResolvedCredentials {
-  const prefs = getPreferenceValues<ApiPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const keyId = prefs.keyId?.trim();
   const secretKey = prefs.secretKey?.trim();
   if (!keyId || !secretKey) {
@@ -65,7 +60,7 @@ function getCredentials(): ResolvedCredentials {
   }
   const resolved: ResolvedCredentials = {
     keyId,
-    encodedHeader: Buffer.from(JSON.stringify({ alg: "HS256", kid: keyId })).toString("base64"),
+    encodedHeader: Buffer.from(JSON.stringify({ alg: "HS256", kid: keyId })).toString("base64url"),
     secretBytes: decodeSecret(secretKey),
   };
   cachedCredentials = { raw, resolved };
@@ -82,7 +77,7 @@ function signRequestToken(path: string, method: string): string {
       iat: now,
       exp: now + TOKEN_LIFETIME_SECONDS,
     }),
-  ).toString("base64");
+  ).toString("base64url");
   const data = `${encodedHeader}.${payload}`;
   const sig = createHmac("sha256", secretBytes).update(data).digest("base64url");
   return `${data}.${sig}`;
