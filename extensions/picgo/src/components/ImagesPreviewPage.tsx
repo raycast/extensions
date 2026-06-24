@@ -36,8 +36,6 @@ export default function ImagesPreviewPage({ imgs }: Props) {
             navigationTitle="Image Preview"
             searchBarAccessory={
                 <Grid.Dropdown
-                    storeValue={true}
-                    defaultValue="url"
                     onChange={(value) => {
                         setFormatKey((value || "url") as ExportFormatKey);
                     }}
