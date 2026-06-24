@@ -14,10 +14,10 @@ type Props = {
 };
 
 type FormValues = {
-  name: string;
-  title: string;
-  match: string;
   url: string;
+  title: string;
+  name: string;
+  match: string;
   strategy: string;
   pick: string;
 };
@@ -26,12 +26,16 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
   const { pop } = useNavigation();
 
   const handleSubmit = async (values: FormValues) => {
+    if (!values.url.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "URL is required" });
+      return;
+    }
     try {
       await upsertTarget({
-        name: values.name,
-        match: values.match,
+        url: values.url.trim(),
+        name: values.name || undefined,
         title: values.title || undefined,
-        url: values.url || undefined,
+        match: values.match || undefined,
         strategy: values.strategy || undefined,
         pick: values.pick || undefined,
       });
@@ -55,28 +59,34 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
       }
     >
       <Form.TextField
-        id="name"
-        title="Name"
-        defaultValue={target?.name ?? ""}
-        placeholder="e.g. github"
+        id="url"
+        title="URL"
+        defaultValue={target?.url ?? ""}
+        placeholder="https://gemini.google.com"
+        info="The page to open if no matching tab is found. Name, match, and title are derived from it."
       />
       <Form.TextField
         id="title"
-        title="Title (optional)"
+        title="Title"
         defaultValue={target?.title ?? ""}
-        placeholder="e.g. GitHub"
+        placeholder="Derived from the URL (e.g. Gemini)"
+      />
+      <Form.Separator />
+      <Form.Description
+        title="Advanced"
+        text="Optional overrides — leave blank to derive from the URL."
+      />
+      <Form.TextField
+        id="name"
+        title="Name"
+        defaultValue={target?.name ?? ""}
+        placeholder="Derived (e.g. gemini)"
       />
       <Form.TextField
         id="match"
         title="Match"
         defaultValue={target?.match ?? ""}
-        placeholder="e.g. github.com"
-      />
-      <Form.TextField
-        id="url"
-        title="URL (optional)"
-        defaultValue={target?.url ?? ""}
-        placeholder="https://github.com"
+        placeholder="Derived (the URL hostname)"
       />
       <Form.Dropdown
         id="strategy"

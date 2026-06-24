@@ -1,4 +1,3 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Focus Tab: search and focus a saved Firefox tab target
-- Generate Hotkey Scripts: generate Raycast script commands per saved target
+- List Tabs: list, focus, favourite, add, edit, and delete saved Firefox tab targets, and generate or delete per-tab hotkey scripts

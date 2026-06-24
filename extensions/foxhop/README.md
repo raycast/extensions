@@ -7,7 +7,7 @@ Focus a specific Firefox tab from anywhere on macOS — manage your saved tab ta
 - **foxhop CLI** must be installed. Install via npm:
 
   ```bash
-  npm install -g foxhop
+  npm install -g @kud/foxhop-cli
   ```
 
   Or configure the full path to the binary in extension preferences if it is not on your PATH.
@@ -16,19 +16,21 @@ Focus a specific Firefox tab from anywhere on macOS — manage your saved tab ta
 
 ## Commands
 
-### Focus Tab
+### List Tabs
 
-Search your saved tab targets by name, title, or match pattern and focus the corresponding Firefox tab. Firefox is brought to the foreground automatically.
+Lists your saved tab targets (favourites first). Press `↵` to **Focus Tab** — activate the matching Firefox tab and bring Firefox to the foreground (it opens the tab if it isn't already open).
 
-Additional actions available per target:
+Per-target actions:
 
-- **Edit Target** — modify name, match pattern, strategy, or pick mode
-- **Add Target** — create a new target from scratch
+- **Focus Tab** (`↵`) — focus the matching tab
+- **Favourite / Unfavourite** (`⌘F`) — pin a target to the top of the list
+- **Edit Target** (`⌘E`) — edit it (URL-first; name, match, and title derive from the URL)
+- **Add Target** (`⌘N`) — add a new target (just paste a URL)
 - **Add from Open Tab** — pick a currently open Firefox tab and prefill the form
-- **Delete Target** — remove a target from your config
+- **Delete Target** (`⌃X`) — remove a target
 - **Generate Hotkey Scripts** — run `foxhop sync` to write Raycast script commands
-- **Open Config File** — open `~/.config/foxhop/tabs.json` in your default editor
-- **Refresh** (`⌘R`) — reload the target list
+- **Open Config File** — open `~/.config/foxhop/tabs.json`
+- **Refresh** (`⌘R`) — reload the list
 
 ### Generate Hotkey Scripts
 

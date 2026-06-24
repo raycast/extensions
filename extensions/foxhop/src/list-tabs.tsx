@@ -19,6 +19,8 @@ import {
   listTargets,
   removeTarget,
   syncScripts,
+  clearScripts,
+  toggleFavorite,
   Target,
 } from "./foxhop";
 import { UpsertTargetForm } from "./upsert-target-form";
@@ -39,6 +41,16 @@ const slugify = (s: string) =>
 
 const faviconFor = (target: Target) =>
   getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
+
+const accessoriesFor = (target: Target): List.Item.Accessory[] => {
+  const items: List.Item.Accessory[] = [];
+  if (target.favorite) items.push({ icon: Icon.Star, tooltip: "Favourite" });
+  if (target.pick && target.pick !== "recent") items.push({ tag: target.pick });
+  if (target.strategy && target.strategy !== "hostname") {
+    items.push({ tag: target.strategy });
+  }
+  return items;
+};
 
 type OpenTabPickerProps = {
   onSave: () => void;
@@ -75,7 +87,7 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
           key={tab.id}
           icon={tab.favIconUrl ?? getFavicon(tab.url, { fallback: Icon.Globe })}
           title={tab.title}
-          subtitle={tab.url}
+          subtitle={hostnameOf(tab.url)}
           actions={
             <ActionPanel>
               <Action.Push
@@ -101,11 +113,11 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
   );
 };
 
-export default function FocusTab() {
+export default function ListTabs() {
   const [targets, setTargets] = useState<Target[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadTargets = useCallback(async () => {
+  const load = useCallback(async () => {
     setIsLoading(true);
     try {
       setTargets(await listTargets());
@@ -121,8 +133,8 @@ export default function FocusTab() {
   }, []);
 
   useEffect(() => {
-    loadTargets();
-  }, [loadTargets]);
+    load();
+  }, [load]);
 
   const handleFocus = async (target: Target) => {
     try {
@@ -137,6 +149,19 @@ export default function FocusTab() {
     }
   };
 
+  const handleToggleFavorite = async (target: Target) => {
+    try {
+      await toggleFavorite(target.name);
+      await load();
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Toggle favourite failed",
+        message: String(err),
+      });
+    }
+  };
+
   const handleDelete = async (target: Target) => {
     const confirmed = await confirmAlert({
       title: "Delete target?",
@@ -146,7 +171,7 @@ export default function FocusTab() {
     if (!confirmed) return;
     try {
       await removeTarget(target.name);
-      await loadTargets();
+      await load();
       await showToast({ style: Toast.Style.Success, title: "Target deleted" });
     } catch (err) {
       await showToast({
@@ -175,6 +200,104 @@ export default function FocusTab() {
     }
   };
 
+  const handleClearScripts = async () => {
+    const confirmed = await confirmAlert({
+      title: "Delete generated hotkey scripts?",
+      message:
+        "Removes the scripts foxhop generated in ~/.config/foxhop/scripts. You can regenerate them anytime.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Deleting hotkey scripts…",
+    });
+    try {
+      const { removed } = await clearScripts();
+      toast.style = Toast.Style.Success;
+      toast.title = `Removed ${removed} hotkey script${removed === 1 ? "" : "s"}`;
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Delete failed";
+      toast.message = String(err);
+    }
+  };
+
+  const itemActions = (target: Target) => (
+    <ActionPanel>
+      <Action
+        title="Focus Tab"
+        icon={Icon.Globe}
+        onAction={() => handleFocus(target)}
+      />
+      <Action
+        title={target.favorite ? "Unfavourite" : "Favourite"}
+        icon={Icon.Star}
+        shortcut={{ modifiers: ["cmd"], key: "f" }}
+        onAction={() => handleToggleFavorite(target)}
+      />
+      <Action.Push
+        title="Edit Target"
+        icon={Icon.Pencil}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        target={<UpsertTargetForm target={target} onSave={load} />}
+      />
+      <Action.Push
+        title="Add Target"
+        icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        target={<UpsertTargetForm onSave={load} />}
+      />
+      <Action.Push
+        title="Add from Open Tab"
+        icon={Icon.List}
+        target={<OpenTabPicker onSave={load} />}
+      />
+      <Action
+        title="Delete Target"
+        icon={Icon.Trash}
+        style={Action.Style.Destructive}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        onAction={() => handleDelete(target)}
+      />
+      <Action
+        title="Generate Hotkey Scripts"
+        icon={Icon.Terminal}
+        onAction={handleGenerateScripts}
+      />
+      <Action
+        title="Delete Hotkey Scripts"
+        icon={Icon.Trash}
+        onAction={handleClearScripts}
+      />
+      <Action
+        title="Open Config File"
+        icon={Icon.Document}
+        onAction={() => open(`${process.env.HOME}/.config/foxhop/tabs.json`)}
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={load}
+      />
+    </ActionPanel>
+  );
+
+  const renderItem = (target: Target) => (
+    <List.Item
+      key={target.name}
+      icon={faviconFor(target)}
+      title={target.title ?? target.name}
+      subtitle={target.match}
+      accessories={accessoriesFor(target)}
+      actions={itemActions(target)}
+    />
+  );
+
+  const favorites = targets.filter((target) => target.favorite);
+  const others = targets.filter((target) => !target.favorite);
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tab targets…">
       <List.EmptyView
@@ -186,12 +309,12 @@ export default function FocusTab() {
             <Action.Push
               title="Add Target"
               icon={Icon.Plus}
-              target={<UpsertTargetForm onSave={loadTargets} />}
+              target={<UpsertTargetForm onSave={load} />}
             />
             <Action.Push
               title="Add from Open Tab"
               icon={Icon.List}
-              target={<OpenTabPicker onSave={loadTargets} />}
+              target={<OpenTabPicker onSave={load} />}
             />
             <Action
               title="Open Config File"
@@ -200,74 +323,17 @@ export default function FocusTab() {
                 open(`${process.env.HOME}/.config/foxhop/tabs.json`)
               }
             />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={loadTargets}
-            />
           </ActionPanel>
         }
       />
-      {targets.map((target) => (
-        <List.Item
-          key={target.name}
-          icon={faviconFor(target)}
-          title={target.title ?? target.name}
-          subtitle={target.match}
-          accessories={[{ text: target.pick ?? "recent" }]}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Focus"
-                icon={Icon.Globe}
-                onAction={() => handleFocus(target)}
-              />
-              <Action.Push
-                title="Edit Target"
-                icon={Icon.Pencil}
-                target={
-                  <UpsertTargetForm target={target} onSave={loadTargets} />
-                }
-              />
-              <Action.Push
-                title="Add Target"
-                icon={Icon.Plus}
-                target={<UpsertTargetForm onSave={loadTargets} />}
-              />
-              <Action.Push
-                title="Add from Open Tab"
-                icon={Icon.List}
-                target={<OpenTabPicker onSave={loadTargets} />}
-              />
-              <Action
-                title="Delete Target"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => handleDelete(target)}
-              />
-              <Action
-                title="Generate Hotkey Scripts"
-                icon={Icon.Terminal}
-                onAction={handleGenerateScripts}
-              />
-              <Action
-                title="Open Config File"
-                icon={Icon.Document}
-                onAction={() =>
-                  open(`${process.env.HOME}/.config/foxhop/tabs.json`)
-                }
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={loadTargets}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {favorites.length > 0 ? (
+        <List.Section title="Favourites">
+          {favorites.map(renderItem)}
+        </List.Section>
+      ) : null}
+      <List.Section title={favorites.length > 0 ? "Tabs" : undefined}>
+        {others.map(renderItem)}
+      </List.Section>
     </List>
   );
 }

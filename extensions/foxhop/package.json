@@ -14,16 +14,10 @@
   ],
   "commands": [
     {
-      "name": "focus-tab",
-      "title": "Focus Tab",
-      "description": "Search and focus a saved Firefox tab target",
+      "name": "list-tabs",
+      "title": "List Tabs",
+      "description": "List, focus, and manage your saved Firefox tab targets",
       "mode": "view"
-    },
-    {
-      "name": "generate-scripts",
-      "title": "Generate Hotkey Scripts",
-      "description": "Generate a Raycast script command per saved tab target",
-      "mode": "no-view"
     }
   ],
   "preferences": [

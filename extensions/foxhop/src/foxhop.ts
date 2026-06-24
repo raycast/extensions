@@ -16,6 +16,7 @@ export type Target = {
   url?: string;
   strategy?: "hostname" | "prefix" | "exact" | "search";
   pick?: "recent" | "first" | "pinned";
+  favorite?: boolean;
 };
 
 export type FirefoxTab = {
@@ -30,10 +31,10 @@ export type FirefoxTab = {
 };
 
 export type UpsertOptions = {
-  name: string;
-  match: string;
+  url: string;
+  name?: string;
   title?: string;
-  url?: string;
+  match?: string;
   strategy?: string;
   pick?: string;
 };
@@ -72,9 +73,10 @@ export const focusTarget = async (name: string): Promise<void> => {
 };
 
 export const upsertTarget = async (opts: UpsertOptions): Promise<void> => {
-  const args = ["add", opts.name, "--match", opts.match];
+  const args = ["add", opts.url];
+  if (opts.name) args.push("--name", opts.name);
   if (opts.title) args.push("--title", opts.title);
-  if (opts.url) args.push("--url", opts.url);
+  if (opts.match) args.push("--match", opts.match);
   if (opts.strategy) args.push("--strategy", opts.strategy);
   if (opts.pick) args.push("--pick", opts.pick);
   await run(args);
@@ -82,6 +84,10 @@ export const upsertTarget = async (opts: UpsertOptions): Promise<void> => {
 
 export const removeTarget = async (name: string): Promise<void> => {
   await run(["remove", name]);
+};
+
+export const toggleFavorite = async (name: string): Promise<void> => {
+  await run(["fav", name]);
 };
 
 export const listOpenTabs = async (): Promise<FirefoxTab[]> => {
@@ -97,5 +103,10 @@ export type SyncResult = {
 
 export const syncScripts = async (): Promise<SyncResult> => {
   const output = await run(["sync", "--json"]);
+  return JSON.parse(output) as SyncResult;
+};
+
+export const clearScripts = async (): Promise<SyncResult> => {
+  const output = await run(["sync", "--clean", "--json"]);
   return JSON.parse(output) as SyncResult;
 };
