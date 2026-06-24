@@ -37,7 +37,7 @@ export function buildSplitDetailMarkdown(company: UiCompany): string {
   return `# ${company.displayName}`;
 }
 
-export function buildSplitDetailMetadata(company: UiCompany): JSX.Element {
+export function buildSplitDetailMetadata(company: UiCompany) {
   const primaryAddress = getPrimaryAddressText(company);
   const mapLinks = buildMapSearchLinks(company.displayName, primaryAddress);
   const registrationDate = formatDate(company.registrationDate) ?? "Not available";
