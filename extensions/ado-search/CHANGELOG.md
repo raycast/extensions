@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Fix My Work Items settings not saving] - {PR_MERGE_DATE}
+Fixed the My Work Items setup form silently discarding selections (project, states, types, default repository, default base branch) that were made while option lists were still loading, which caused Save to persist the defaults.
+
 ## [Add My Work Items command] - 2026-06-04
 Added a "My Work Items" command: browse work items assigned to you across projects, filter and group by state/type/project, change state on single or multiple items, view descriptions with inline images plus acceptance criteria, repro steps, comments and attachments, create new work items, and create branches linked to a work item.
 

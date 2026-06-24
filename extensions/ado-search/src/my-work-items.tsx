@@ -1048,24 +1048,28 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const repoInList = !defaultRepo || repoList.some((r) => r.name === defaultRepo);
   const baseBranchInList = !defaultBaseBranch || branchList.includes(defaultBaseBranch);
 
+  // Only ignore onChange before the saved values have loaded (prevents the
+  // initial mount from clobbering them). Do NOT bail while option lists are
+  // still loading — that silently dropped the user's selections, so saving
+  // persisted the defaults.
   const handleProjectChange = (next: string) => {
-    if (!formInitialized || loadingProjects) return;
+    if (!formInitialized) return;
     setProject(next);
   };
   const handleStatesChange = (next: string[]) => {
-    if (!formInitialized || loadingStates || stateOptions.length === 0) return;
+    if (!formInitialized) return;
     setStates(next);
   };
   const handleTypesChange = (next: string[]) => {
-    if (!formInitialized || loadingTypes || typeOptions.length === 0) return;
+    if (!formInitialized) return;
     setTypes(next);
   };
   const handleRepoChange = (next: string) => {
-    if (!formInitialized || loadingRepos) return;
+    if (!formInitialized) return;
     setDefaultRepo(next);
   };
   const handleBaseBranchChange = (next: string) => {
-    if (!formInitialized || loadingBranches) return;
+    if (!formInitialized) return;
     setDefaultBaseBranch(next);
   };
 
