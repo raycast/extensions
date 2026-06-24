@@ -88,9 +88,9 @@ export function parseNetshWlanProfileEssentials(output: string): ResponseNetwork
 
     // Extract key content (password)
     else if (trimmedLine.startsWith("Key Content")) {
-      const parts = trimmedLine.split(":");
-      if (parts.length > 1) {
-        essentials.keyContent = parts[1].trim();
+      const colonIndex = trimmedLine.indexOf(":");
+      if (colonIndex !== -1) {
+        essentials.keyContent = trimmedLine.slice(colonIndex + 1).trim();
       }
     }
 
