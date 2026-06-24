@@ -155,13 +155,14 @@ export default function FocusTab() {
   const handleGenerateScripts = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Generating scripts…",
+      title: "Generating hotkey scripts…",
     });
     try {
-      const result = await syncScripts();
+      const { written, dir } = await syncScripts();
       toast.style = Toast.Style.Success;
-      toast.title = "Scripts generated";
-      toast.message = result;
+      toast.title = `Generated ${written} hotkey script${written === 1 ? "" : "s"}`;
+      toast.message = dir;
+      toast.primaryAction = { title: "Open Folder", onAction: () => open(dir) };
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Sync failed";

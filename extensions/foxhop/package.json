@@ -37,11 +37,29 @@
     },
     {
       "name": "browser",
-      "type": "textfield",
-      "title": "Firefox app name",
-      "description": "macOS app name to foreground (e.g. Firefox, Firefox Nightly)",
+      "type": "dropdown",
+      "title": "Firefox app",
+      "description": "Which Firefox app to foreground when focusing a tab",
       "default": "Firefox Nightly",
-      "required": false
+      "required": false,
+      "data": [
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Firefox Nightly",
+          "value": "Firefox Nightly"
+        },
+        {
+          "title": "Firefox Developer Edition",
+          "value": "Firefox Developer Edition"
+        },
+        {
+          "title": "Firefox Beta",
+          "value": "Firefox Beta"
+        }
+      ]
     }
   ],
   "dependencies": {

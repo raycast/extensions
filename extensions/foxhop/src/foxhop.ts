@@ -89,6 +89,13 @@ export const listOpenTabs = async (): Promise<FirefoxTab[]> => {
   return JSON.parse(output) as FirefoxTab[];
 };
 
-export const syncScripts = async (): Promise<string> => {
-  return run(["sync"]);
+export type SyncResult = {
+  dir: string;
+  written: number;
+  removed: number;
+};
+
+export const syncScripts = async (): Promise<SyncResult> => {
+  const output = await run(["sync", "--json"]);
+  return JSON.parse(output) as SyncResult;
 };
