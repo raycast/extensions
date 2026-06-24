@@ -42,7 +42,3 @@ Runs `foxhop sync` in the background and shows a HUD notification with the resul
 | Firefox app name | macOS app name used to foreground Firefox | `Firefox Nightly` |
 
 Set these via **Raycast → Extensions → foxhop → Settings** before first use.
-
-## Screenshots
-
-_Screenshots will be added here before store submission. Place PNG files in the `metadata/` directory._
