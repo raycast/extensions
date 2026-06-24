@@ -52,16 +52,12 @@ const buildEnv = (browser: string): NodeJS.ProcessEnv => ({
 
 const run = async (args: string[]): Promise<string> => {
   const { foxhopPath, browser } = getPreferenceValues<Preferences>();
-  try {
-    const { stdout, stderr } = await execFileAsync(foxhopPath, args, {
-      env: buildEnv(browser),
-    });
-    if (stderr) throw new Error(stderr);
-    return stdout.trim();
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new Error(message);
-  }
+  // execFile rejects on a non-zero exit code, which is the real failure signal.
+  // stderr alone is NOT an error — mise shims / Node can write warnings there on success.
+  const { stdout } = await execFileAsync(foxhopPath, args, {
+    env: buildEnv(browser),
+  });
+  return stdout.trim();
 };
 
 export const listTargets = async (): Promise<Target[]> => {
