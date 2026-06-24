@@ -1,6 +1,6 @@
 # SAP GUI Connector
 
-## [Customer Grouping, System Types & Language Prompt] - {PR_MERGE_DATE}
+## [Customer Grouping, System Types & Language Prompt] - 2026-06-24
 
 - Added a **customer name** and **system type** (E – development, Q – quality,
   P – production, S – other) to each system, so several customers can share the
