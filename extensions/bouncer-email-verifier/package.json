@@ -5,10 +5,21 @@
   "description": "Verify email deliverability with Bouncer from Raycast",
   "icon": "icon.png",
   "author": "eKamran",
-  "platforms": ["macOS"],
-  "categories": ["Developer Tools", "Productivity"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
-  "keywords": ["email", "verification", "deliverability", "bouncer"],
+  "keywords": [
+    "email",
+    "verification",
+    "deliverability",
+    "bouncer"
+  ],
   "commands": [
     {
       "name": "verify-email",
@@ -28,17 +39,19 @@
     }
   ],
   "scripts": {
-    "dev": "RAY_Target=x ray develop",
-    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "build": "ray build",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.12",
-    "react": "^19.2.6"
+    "@raycast/api": "^1.104.20",
+    "react": "^19.2.7"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
     "typescript": "^6.0.3"
   }
 }

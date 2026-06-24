@@ -43,17 +43,26 @@ export default function VerifyEmailCommand() {
 
   async function verifyEmail() {
     if (!cleanEmail) {
-      await showToast({ style: Toast.Style.Failure, title: "Enter email address" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Enter email address",
+      });
       return;
     }
 
     if (!isValidEnough) {
-      await showToast({ style: Toast.Style.Failure, title: "Invalid email format" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid email format",
+      });
       return;
     }
 
     setIsLoading(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Checking email..." });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Checking email...",
+    });
 
     try {
       const nextResult = await fetchVerification(cleanEmail, apiKey);
@@ -111,7 +120,10 @@ function ResultDetail(props: { result: VerificationResult; onBack: () => void; o
           <Detail.Metadata.Label
             title="Verdict"
             text={result.verdict}
-            icon={{ source: getVerdictIcon(result.verdict), tintColor: result.verdictColor }}
+            icon={{
+              source: getVerdictIcon(result.verdict),
+              tintColor: result.verdictColor,
+            }}
           />
           <Detail.Metadata.Label title="Score" text={result.score} />
           <Detail.Metadata.Label title="Email" text={result.email} />
