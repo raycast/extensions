@@ -28,6 +28,7 @@ export default function CommandWithCustoEmptyView(props: LaunchProps<{ arguments
         })
         .catch((error: unknown) => {
           if (isCurrent && !(error instanceof Error && error.name === "AbortError")) {
+            setPreviewImage(undefined);
             setIsLoading(false);
           }
         });
