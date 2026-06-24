@@ -4,11 +4,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  foxhopPath: string;
-  browser: string;
-};
-
 export type Target = {
   name: string;
   title?: string;
@@ -31,7 +26,7 @@ export type FirefoxTab = {
 };
 
 export type UpsertOptions = {
-  url: string;
+  url?: string;
   name?: string;
   title?: string;
   match?: string;
@@ -73,7 +68,8 @@ export const focusTarget = async (name: string): Promise<void> => {
 };
 
 export const upsertTarget = async (opts: UpsertOptions): Promise<void> => {
-  const args = ["add", opts.url];
+  const args = ["add"];
+  if (opts.url) args.push(opts.url);
   if (opts.name) args.push("--name", opts.name);
   if (opts.title) args.push("--title", opts.title);
   if (opts.match) args.push("--match", opts.match);

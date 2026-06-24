@@ -40,11 +40,9 @@ const slugify = (s: string) =>
     .replace(/^-|-$/g, "")
     .toLowerCase();
 
-const faviconFor = (target: Target) =>
-  getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
+const faviconFor = (target: Target) => getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
 
-const titleCase = (value: string) =>
-  value.charAt(0).toUpperCase() + value.slice(1);
+const titleCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 const accessoriesFor = (target: Target): List.Item.Accessory[] => {
   const items: List.Item.Accessory[] = [];
@@ -84,10 +82,7 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
   }, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search open Firefox tabs…"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search open Firefox tabs…">
       {tabs.map((tab) => (
         <List.Item
           key={tab.id}
@@ -229,8 +224,7 @@ export default function ListTabs() {
   const handleClearScripts = async () => {
     const confirmed = await confirmAlert({
       title: "Delete generated hotkey scripts?",
-      message:
-        "Removes the scripts foxhop generated in ~/.config/foxhop/scripts. You can regenerate them anytime.",
+      message: "Removes the scripts foxhop generated in ~/.config/foxhop/scripts. You can regenerate them anytime.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
@@ -251,11 +245,7 @@ export default function ListTabs() {
 
   const itemActions = (target: Target) => (
     <ActionPanel>
-      <Action
-        title="Focus Tab"
-        icon={Icon.Globe}
-        onAction={() => handleFocus(target)}
-      />
+      <Action title="Focus Tab" icon={Icon.Globe} onAction={() => handleFocus(target)} />
       <Action
         title={target.favorite ? "Unfavourite" : "Favourite"}
         icon={Icon.Star}
@@ -274,11 +264,7 @@ export default function ListTabs() {
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<UpsertTargetForm onSave={load} />}
       />
-      <Action.Push
-        title="Add from Open Tab"
-        icon={Icon.List}
-        target={<OpenTabPicker onSave={load} />}
-      />
+      <Action.Push title="Add from Open Tab" icon={Icon.List} target={<OpenTabPicker onSave={load} />} />
       <Action
         title="Delete Target"
         icon={Icon.Trash}
@@ -286,27 +272,14 @@ export default function ListTabs() {
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
         onAction={() => handleDelete(target)}
       />
-      <Action
-        title="Generate Hotkey Scripts"
-        icon={Icon.Terminal}
-        onAction={handleGenerateScripts}
-      />
-      <Action
-        title="Delete Hotkey Scripts"
-        icon={Icon.Trash}
-        onAction={handleClearScripts}
-      />
+      <Action title="Generate Hotkey Scripts" icon={Icon.Terminal} onAction={handleGenerateScripts} />
+      <Action title="Delete Hotkey Scripts" icon={Icon.Trash} onAction={handleClearScripts} />
       <Action
         title="Open Config File"
         icon={Icon.Document}
         onAction={() => open(`${process.env.HOME}/.config/foxhop/tabs.json`)}
       />
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={load}
-      />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={load} />
     </ActionPanel>
   );
 
@@ -352,34 +325,18 @@ export default function ListTabs() {
         icon={Icon.Globe}
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Add Target"
-              icon={Icon.Plus}
-              target={<UpsertTargetForm onSave={load} />}
-            />
-            <Action.Push
-              title="Add from Open Tab"
-              icon={Icon.List}
-              target={<OpenTabPicker onSave={load} />}
-            />
+            <Action.Push title="Add Target" icon={Icon.Plus} target={<UpsertTargetForm onSave={load} />} />
+            <Action.Push title="Add from Open Tab" icon={Icon.List} target={<OpenTabPicker onSave={load} />} />
             <Action
               title="Open Config File"
               icon={Icon.Document}
-              onAction={() =>
-                open(`${process.env.HOME}/.config/foxhop/tabs.json`)
-              }
+              onAction={() => open(`${process.env.HOME}/.config/foxhop/tabs.json`)}
             />
           </ActionPanel>
         }
       />
-      {favorites.length > 0 ? (
-        <List.Section title="Favourites">
-          {favorites.map(renderItem)}
-        </List.Section>
-      ) : null}
-      <List.Section title={favorites.length > 0 ? "Tabs" : undefined}>
-        {others.map(renderItem)}
-      </List.Section>
+      {favorites.length > 0 ? <List.Section title="Favourites">{favorites.map(renderItem)}</List.Section> : null}
+      <List.Section title={favorites.length > 0 ? "Tabs" : undefined}>{others.map(renderItem)}</List.Section>
     </List>
   );
 }
