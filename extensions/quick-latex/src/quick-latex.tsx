@@ -1,22 +1,39 @@
-import { Action, ActionPanel, LaunchProps, List, popToRoot, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Image, LaunchProps, List, popToRoot, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { downloadLatex, getDisplayLatex } from "./api";
-import { DEFAULT_ICON, ExportType, QuickLatexArguments, makeDonwloadDir, toClipboard } from "./utils";
+import { downloadLatex, getPreviewImage } from "./api";
+import { ExportType, QuickLatexArguments, makeDonwloadDir, toClipboard } from "./utils";
 
 export default function CommandWithCustoEmptyView(props: LaunchProps<{ arguments: QuickLatexArguments }>) {
   const [searchText, setSearchText] = useState(props.arguments.latex ?? "");
+  const [previewImage, setPreviewImage] = useState<Image.ImageLike>();
 
   useEffect(() => {
     makeDonwloadDir();
   }, []);
 
-  const icon = searchText == "" ? DEFAULT_ICON : getDisplayLatex(searchText);
+  useEffect(() => {
+    let isCurrent = true;
+    const timeout = setTimeout(() => {
+      getPreviewImage(searchText)
+        .then((image) => {
+          if (isCurrent) {
+            setPreviewImage(image);
+          }
+        })
+        .catch(() => undefined);
+    }, 200);
+
+    return () => {
+      isCurrent = false;
+      clearTimeout(timeout);
+    };
+  }, [searchText]);
 
   return (
-    <List onSearchTextChange={setSearchText} searchText={searchText}>
+    <List isLoading={previewImage == undefined} onSearchTextChange={setSearchText} searchText={searchText}>
       <List.EmptyView
-        icon={icon}
+        icon={previewImage}
         actions={
           <ActionPanel>
             {Object.values(ExportType).map((exportType) => (

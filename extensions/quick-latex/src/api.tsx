@@ -55,3 +55,35 @@ export function getDisplayLatex(searchText: string) {
     },
   };
 }
+
+export async function getPreviewImage(searchText: string) {
+  const latex = searchText == "" ? "LaTeX" : searchText;
+  const res = await fetch(getPreviewUrl(latex));
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch preview SVG");
+  }
+
+  const lightSvg = await res.text();
+  const darkSvg = lightSvg.replace("<svg ", '<svg fill="white" ');
+
+  return {
+    source: {
+      light: createPreviewCanvas(lightSvg),
+      dark: createPreviewCanvas(darkSvg),
+    },
+  };
+}
+
+function getPreviewUrl(latex: string) {
+  return BASE_URL + "svg.image?" + encodeURIComponent(latex);
+}
+
+function createPreviewCanvas(svg: string) {
+  const embeddedSvg = Buffer.from(svg).toString("base64");
+  const canvas = `<svg xmlns="http://www.w3.org/2000/svg" width="640px" height="280px" viewBox="0 0 640 280">
+    <image x="32" y="24" width="576" height="232" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,${embeddedSvg}" />
+  </svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(canvas)}`;
+}
