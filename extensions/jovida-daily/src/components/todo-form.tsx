@@ -90,11 +90,15 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
             update(todo.entry_id, {
               title: values.title,
               priority: values.priority as Priority,
+              // Emptying a field on edit must clear it, not be ignored.
               category: values.category || undefined,
+              clearCategory: !values.category,
               description: values.description || undefined,
+              clearDesc: !values.description,
               when,
               clearWhen: !values.when,
               subtasks: subtasks.length ? subtasks : undefined,
+              clearSubtasks: subtasks.length === 0,
               ...(remindChanged
                 ? values.remind
                   ? { reminders }
