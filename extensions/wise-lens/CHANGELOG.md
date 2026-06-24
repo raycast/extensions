@@ -1,6 +1,6 @@
 # Wise Lens Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-24
 
 - Dashboard command with a split detail view: prominent total balance, monthly and 30‑day spending tags, balances per currency, Jars (savings) section, and recent activity grouped by day.
 - Transactions command: full history with day grouping, keyword search and filters (incoming, outgoing, completed, this month).
