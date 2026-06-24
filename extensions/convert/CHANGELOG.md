@@ -1,5 +1,9 @@
 # Convert Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added support for modern space-separated hsl() color syntax
+
 ## [Update] - 2026-01-13
 
 - Added OKLCH color conversion
