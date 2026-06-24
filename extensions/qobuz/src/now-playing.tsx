@@ -89,7 +89,11 @@ export default function Command() {
   });
 
   const control = (key: Parameters<typeof sendMediaKey>[0]) => async () => {
-    await sendMediaKey(key).catch(() => {});
+    try {
+      await sendMediaKey(key);
+    } catch {
+      await showHUD("Couldn't control Qobuz — grant Accessibility permission");
+    }
     // The menu-bar repaints on its interval — Raycast tears this command down
     // when the menu closes, so there's no reliable way to refresh it sooner.
   };

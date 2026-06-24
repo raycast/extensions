@@ -2,7 +2,13 @@ import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { Clipboard } from "@raycast/api";
 import type { Album, Track } from "@kud/qobuz";
-import { appLink, BRAND, formatDuration, getClient } from "./lib/client";
+import {
+  appLink,
+  BRAND,
+  deepLink,
+  formatDuration,
+  getClient,
+} from "./lib/client";
 import {
   deezerByIsrc,
   findIsrc,
@@ -128,7 +134,7 @@ const renderActions = (data: Conversion | undefined) => {
   if (!data) return undefined;
 
   if (data.mode === "to-qobuz" && data.track) {
-    const albumUrl = data.album?.url;
+    const trackUrl = deepLink.track(data.track.id);
     return (
       <ActionPanel>
         {data.track.album?.id && (
@@ -138,17 +144,13 @@ const renderActions = (data: Conversion | undefined) => {
             icon={Icon.Music}
           />
         )}
-        {albumUrl && (
-          <Action.OpenInBrowser title="Open in Browser" url={albumUrl} />
-        )}
+        <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
         <Action.Open
           title="Play Track in Qobuz"
           target={appLink.track(data.track.id)}
           icon={Icon.Play}
         />
-        {albumUrl && (
-          <Action.CopyToClipboard title="Copy Qobuz Link" content={albumUrl} />
-        )}
+        <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
       </ActionPanel>
     );
   }
