@@ -34,12 +34,6 @@ const hostnameOf = (url: string) => {
   }
 };
 
-const slugify = (s: string) =>
-  s
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-|-$/g, "")
-    .toLowerCase();
-
 const faviconFor = (target: Target) => getFavicon(target.url ?? `https://${target.match}`, { fallback: Icon.Globe });
 
 const titleCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
@@ -97,10 +91,10 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
                 target={
                   <UpsertTargetForm
                     target={{
-                      name: slugify(hostnameOf(tab.url)),
+                      name: "",
                       title: tab.title,
                       url: tab.url,
-                      match: hostnameOf(tab.url),
+                      match: "",
                     }}
                     onSave={onSave}
                   />
