@@ -19,10 +19,6 @@ import {
 } from "./espn";
 import { PlayerDetailPane } from "./player-detail";
 
-interface Prefs {
-  defaultTour?: TourId;
-}
-
 interface Row {
   id: string;
   athleteId?: string;
@@ -36,7 +32,7 @@ interface Row {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const [tour, setTour] = useState<TourId>(prefs.defaultTour ?? "pga");
   const [view, setView] = useState<string>("tournament");
   const [showingDetail, setShowingDetail] = useState(true);
@@ -203,7 +199,6 @@ export default function Command() {
                   athleteId={r.athleteId}
                   active={selectedId === r.id}
                   name={r.name}
-                  flag={r.flag}
                   base={r.base}
                 />
               }

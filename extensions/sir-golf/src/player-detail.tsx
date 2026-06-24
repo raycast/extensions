@@ -13,10 +13,9 @@ export function PlayerDetailPane(props: {
   athleteId?: string;
   active: boolean;
   name: string;
-  flag?: string;
   base: { label: string; value: string }[];
 }) {
-  const { tour, athleteId, active, name, flag, base } = props;
+  const { tour, athleteId, active, name, base } = props;
 
   const { data, isLoading } = useCachedPromise(
     getAthleteDetail,
@@ -98,7 +97,6 @@ export function PlayerDetailPane(props: {
               text={s.value}
             />
           ))}
-          {flag && <List.Item.Detail.Metadata.Separator />}
         </List.Item.Detail.Metadata>
       }
     />

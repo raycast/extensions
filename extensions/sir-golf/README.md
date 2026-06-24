@@ -56,8 +56,6 @@ avoid false positives. **Add to Calendar** builds the `.ics` locally
 
 ## Known caveats
 
-See [`VALIDATION.md`](./VALIDATION.md) for the full Phase 0 findings. The headlines:
-
 - **Unofficial API, no SLA.** ESPN can change or remove it without notice.
 - **No tournament logos** — golf events carry none in ESPN's feed, so the tour/
   league logo is used on Golf Season events. Player country flags and headshots
@@ -76,10 +74,6 @@ See [`VALIDATION.md`](./VALIDATION.md) for the full Phase 0 findings. The headli
 ## Project layout
 
 ```
-spike/probe*.ts        throwaway data probers (Phase 0+) — kept as documentation
-spike/probe6-majors.ts major-detection + .ics check against the live feeds
-spike/make-icon.mjs    throwaway placeholder-icon generator (logo now used)
-VALIDATION.md          Phase 0 findings + GO/NO-GO
 src/espn.ts            shared ESPN data layer: fetchers, parsers, majors, .ics, watch guide
 src/leaderboard.tsx    Leaderboard command (tournament + season rankings)
 src/golf-season.tsx    Golf Season command (schedule, majors, add-to-calendar, region filter)

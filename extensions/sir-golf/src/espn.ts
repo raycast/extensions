@@ -378,7 +378,12 @@ export function buildEventIcs(opts: {
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${opts.uid}@sir.golf`,
-    "DTSTAMP:20260101T000000Z",
+    // RFC 5545: DTSTAMP is the moment this calendar object was created.
+    // A fixed constant breaks calendar apps that dedupe re-imports by DTSTAMP.
+    `DTSTAMP:${new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "")}`,
     start ? `DTSTART;VALUE=DATE:${start}` : "",
     end ? `DTEND;VALUE=DATE:${end}` : "",
     `SUMMARY:${esc(opts.name)}`,
@@ -891,7 +896,10 @@ export function formatDateRange(start?: string, end?: string): string {
 }
 
 export function totalColorTag(total: string): "red" | "green" | "secondary" {
-  if (total.startsWith("-")) return "red";
+  // Raycast convention: green = good, red = bad. Under par is good in golf,
+  // so under par → green and over par → red (inverting the golf-TV palette
+  // to match Raycast's UI semantics).
+  if (total.startsWith("-")) return "green";
   if (total === "E") return "secondary";
-  return "green";
+  return "red";
 }
