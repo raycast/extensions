@@ -83,12 +83,18 @@ let gpgExecutablePathOverride: string | undefined;
 
 function getExecutableCandidates(): string[] {
   const home = homedir();
-  return [
-    home ? join(home, ".cargo", "bin", "rpass") : undefined,
+  const candidates = [
     "/opt/homebrew/bin/rpass",
     "/usr/local/bin/rpass",
     "/usr/bin/rpass",
-  ].filter((candidate): candidate is string => Boolean(candidate));
+  ];
+  if (home) {
+    candidates.push(join(home, ".cargo", "bin", "rpass"));
+  }
+  if (process.platform === "win32" && home) {
+    candidates.push(join(home, ".cargo", "bin", "rpass.exe"));
+  }
+  return candidates;
 }
 
 function resolveExecutable(): string {
@@ -102,7 +108,7 @@ function resolveExecutable(): string {
 }
 
 function getGpgExecutableCandidates(): string[] {
-  return [
+  const candidates = [
     "/opt/homebrew/bin/gpg",
     "/usr/local/bin/gpg",
     "/usr/bin/gpg",
@@ -110,6 +116,20 @@ function getGpgExecutableCandidates(): string[] {
     "/usr/local/bin/gpg2",
     "/usr/bin/gpg2",
   ];
+  if (process.platform === "win32") {
+    const pf = process.env.ProgramFiles || "C:\\Program Files";
+    const pf86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
+    const home = homedir();
+    candidates.push(
+      join(pf86, "GnuPG", "bin", "gpg.exe"),
+      join(pf, "GnuPG", "bin", "gpg.exe"),
+      join(pf, "Git", "usr", "bin", "gpg.exe"),
+      ...(home
+        ? [join(home, "scoop", "apps", "gnupg", "current", "bin", "gpg.exe")]
+        : []),
+    );
+  }
+  return candidates;
 }
 
 function resolveGpgExecutable(): string | undefined {
