@@ -45,6 +45,8 @@ const buildEnv = (browser: string): NodeJS.ProcessEnv => ({
     `${process.env.HOME}/.local/share/mise/shims`,
     "/opt/homebrew/bin",
     "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
     process.env.PATH ?? "",
   ].join(":"),
   FOXHOP_BROWSER: browser,
