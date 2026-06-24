@@ -285,6 +285,14 @@ export default function Command() {
   async function submit({ force = false }: { force?: boolean } = {}) {
     if (!validate()) return;
 
+    if (!generatedSecret && !additionalLines.trim()) {
+      setErrors((current) => ({
+        ...current,
+        name: "Add content to the entry or generate a secret",
+      }));
+      return;
+    }
+
     const secret = generatedSecret;
 
     const confirmed = await confirmAlert({

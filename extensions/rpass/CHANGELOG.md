@@ -1,6 +1,6 @@
 # RPass Vault Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Vault command to browse, search, decrypt, copy, paste, edit, move, and delete password store entries
 - Add New Entry command to generate and save passwords or passphrases
