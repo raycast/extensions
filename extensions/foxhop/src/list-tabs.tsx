@@ -6,6 +6,7 @@ import {
   confirmAlert,
   Icon,
   List,
+  LocalStorage,
   open,
   showToast,
   Toast,
@@ -121,6 +122,23 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
 export default function ListTabs() {
   const [targets, setTargets] = useState<Target[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sort, setSort] = useState<"recent" | "alpha">("recent");
+  const [lastUsed, setLastUsed] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const savedSort = await LocalStorage.getItem<string>("sort");
+      if (savedSort === "recent" || savedSort === "alpha") setSort(savedSort);
+      const savedUsed = await LocalStorage.getItem<string>("lastUsed");
+      if (savedUsed) {
+        try {
+          setLastUsed(JSON.parse(savedUsed));
+        } catch {
+          // ignore corrupt state
+        }
+      }
+    })();
+  }, []);
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -144,6 +162,9 @@ export default function ListTabs() {
   const handleFocus = async (target: Target) => {
     try {
       await focusTarget(target.name);
+      const next = { ...lastUsed, [target.name]: Date.now() };
+      setLastUsed(next);
+      await LocalStorage.setItem("lastUsed", JSON.stringify(next));
       await closeMainWindow();
     } catch (err) {
       await showToast({
@@ -300,11 +321,31 @@ export default function ListTabs() {
     />
   );
 
-  const favorites = targets.filter((target) => target.favorite);
-  const others = targets.filter((target) => !target.favorite);
+  const onSortChange = async (value: string) => {
+    const next = value === "alpha" ? "alpha" : "recent";
+    setSort(next);
+    await LocalStorage.setItem("sort", next);
+  };
+
+  const sorter = (a: Target, b: Target) =>
+    sort === "alpha"
+      ? (a.title ?? a.name).localeCompare(b.title ?? b.name)
+      : (lastUsed[b.name] ?? 0) - (lastUsed[a.name] ?? 0);
+
+  const favorites = targets.filter((target) => target.favorite).sort(sorter);
+  const others = targets.filter((target) => !target.favorite).sort(sorter);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search tab targets…">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search tab targets…"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Sort" value={sort} onChange={onSortChange}>
+          <List.Dropdown.Item title="Recently Used" value="recent" />
+          <List.Dropdown.Item title="Alphabetical" value="alpha" />
+        </List.Dropdown>
+      }
+    >
       <List.EmptyView
         title="No tab targets yet"
         description="Add your first Firefox tab, then focus it from anywhere."
