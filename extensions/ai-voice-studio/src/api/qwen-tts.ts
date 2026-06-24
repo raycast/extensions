@@ -17,8 +17,10 @@ import {
 import { getSpeedOverride, parseRateString } from "../utils/qwen-playback-state";
 import { getQwenSettings, type QwenProviderSettings } from "../utils/provider-settings";
 import type { QwenTTSLanguageType, QwenTTSModel, TTSOptionOverrides, TTSOptions } from "./qwen-tts-types";
-
-const REQUEST_TIMEOUT_MS = 90_000;
+import { resolvePlaybackRate, validateVoiceForModel } from "./provider-option-helpers";
+import { prepareTTSInput, readNonEmptyAudioBase64, requestTTSWithTimeout, requirePreference } from "./shared-tts-api";
+import { TTSApiError, normalizeErrorCode } from "./tts-api-error";
+export { TTSApiError } from "./tts-api-error";
 
 interface QwenTTSResponse {
   output?: {
@@ -36,20 +38,13 @@ interface QwenTTSResponse {
 }
 
 export async function synthesizeSpeech(text: string, options: TTSOptions, signal?: AbortSignal): Promise<string> {
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    throw new Error("Text cannot be empty");
-  }
-
-  if (signal?.aborted) {
-    throw new TTSApiError("TTS synthesis cancelled", -7);
-  }
-
+  const trimmedText = prepareTTSInput(text, signal);
   const prefs = getPreferenceValues<Preferences>();
-  const apiKey = prefs.dashscopeApiKey?.trim();
-  if (!apiKey) {
-    throw new TTSApiError("Qwen DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);
-  }
+  const apiKey = requirePreference(
+    prefs,
+    "dashscopeApiKey",
+    "Qwen DashScope API key is required for Qwen-TTS. Add it in extension preferences.",
+  );
 
   const response = await postWithTimeout(
     buildSpeechSynthesizerUrl(options.baseUrl),
@@ -90,12 +85,7 @@ async function postWithTimeout(
   apiKey: string,
   signal?: AbortSignal,
 ): Promise<QwenTTSResponse> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortHandler = () => controller.abort();
-  signal?.addEventListener("abort", abortHandler, { once: true });
-
-  try {
+  return requestTTSWithTimeout(signal, async (requestSignal) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -103,7 +93,7 @@ async function postWithTimeout(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-      signal: controller.signal,
+      signal: requestSignal,
     });
 
     const text = await response.text();
@@ -118,53 +108,18 @@ async function postWithTimeout(
     }
 
     return data;
-  } catch (error) {
-    if (error instanceof TTSApiError) throw error;
-    if (signal?.aborted) {
-      throw new TTSApiError("TTS synthesis cancelled", -7);
-    }
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new TTSApiError(`Request timeout after ${REQUEST_TIMEOUT_MS / 1000} seconds`, -2);
-    }
-    throw new TTSApiError(error instanceof Error ? error.message : String(error), -6);
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener("abort", abortHandler);
-  }
+  });
 }
 
 async function fetchAudioUrl(url: string, signal?: AbortSignal): Promise<string> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortHandler = () => controller.abort();
-  signal?.addEventListener("abort", abortHandler, { once: true });
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) {
-      throw new TTSApiError(
-        `Qwen-TTS audio download failed: HTTP ${response.status} ${response.statusText}`,
-        response.status,
-      );
-    }
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.length === 0) {
-      throw new TTSApiError("Qwen-TTS returned an empty audio file.", -4);
-    }
-    return buffer.toString("base64");
-  } catch (error) {
-    if (error instanceof TTSApiError) throw error;
-    if (signal?.aborted) {
-      throw new TTSApiError("TTS synthesis cancelled", -7);
-    }
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new TTSApiError(`Request timeout after ${REQUEST_TIMEOUT_MS / 1000} seconds`, -2);
-    }
-    throw new TTSApiError(error instanceof Error ? error.message : String(error), -6);
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener("abort", abortHandler);
-  }
+  return requestTTSWithTimeout(signal, async (requestSignal) => {
+    const response = await fetch(url, { signal: requestSignal });
+    return readNonEmptyAudioBase64(
+      response,
+      "Qwen-TTS returned an empty audio file.",
+      "Qwen-TTS audio download failed",
+    );
+  });
 }
 
 function parseJson(text: string): QwenTTSResponse {
@@ -177,12 +132,6 @@ function parseJson(text: string): QwenTTSResponse {
 
 function formatApiError(data: QwenTTSResponse, status: number, statusText: string): string {
   return data.message || `Qwen-TTS request failed: HTTP ${status} ${statusText}`;
-}
-
-function normalizeErrorCode(code: string | number | undefined): number {
-  if (typeof code === "number") return code;
-  const parsed = Number(code);
-  return Number.isFinite(parsed) ? parsed : -6;
 }
 
 function buildSpeechSynthesizerUrl(baseUrl: string | undefined): string {
@@ -223,23 +172,19 @@ function buildOptionsFromSettings(
 ): TTSOptions {
   const model = normalizeModel(settings.model);
   const voice = voiceOverride || settings.voice || DEFAULT_VOICE;
-  const voiceConfig = getVoiceById(voice);
+  validateVoiceForModel({
+    getVoiceById,
+    isVoiceAvailableForModel,
+    model,
+    modelLabel: MODEL_LABELS[model],
+    providerName: "Qwen-TTS",
+    throwConfigError: (message) => {
+      throw new TTSApiError(message, -1);
+    },
+    voice,
+  });
 
-  if (!voiceConfig) {
-    throw new TTSApiError(
-      `Unknown voice "${voice}". Pick a Qwen-TTS voice in Setup Voice Defaults or Set Quick Read Voice.`,
-      -1,
-    );
-  }
-
-  if (!isVoiceAvailableForModel(voiceConfig, model)) {
-    throw new TTSApiError(
-      `${voiceConfig.name} is not available for ${MODEL_LABELS[model]}. Change the model or choose another voice.`,
-      -1,
-    );
-  }
-
-  const rate = typeof speedOverrideRate === "number" ? speedOverrideRate : parseRateString(settings.playbackRate);
+  const rate = resolvePlaybackRate(speedOverrideRate, settings.playbackRate, parseRateString);
 
   return {
     model,
@@ -274,14 +219,4 @@ function normalizeLanguageType(languageType: string | undefined): QwenTTSLanguag
   return QWEN_LANGUAGE_TYPES.includes(languageType as QwenTTSLanguageType)
     ? (languageType as QwenTTSLanguageType)
     : DEFAULT_LANGUAGE_TYPE;
-}
-
-export class TTSApiError extends Error {
-  code: number;
-
-  constructor(message: string, code: number) {
-    super(message);
-    this.name = "TTSApiError";
-    this.code = code;
-  }
 }

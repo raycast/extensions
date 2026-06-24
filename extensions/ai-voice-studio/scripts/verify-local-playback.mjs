@@ -1,11 +1,12 @@
 import fs from "node:fs";
-import Module from "node:module";
 import os from "node:os";
 import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
+import { assert } from "./lib/verify-helpers.mjs";
 import { writeVerificationEvidence } from "./lib/verification-evidence.mjs";
 
 const root = process.cwd();
+const loadTs = createTsLoader();
 const pidFile = path.join(os.tmpdir(), "ai-voice-studio.pid");
 const stopFile = path.join(os.tmpdir(), "ai-voice-studio.stop");
 const maxPlaybackMs = 3000;
@@ -82,27 +83,4 @@ function listAudioTempFiles() {
     .readdirSync(os.tmpdir())
     .filter((name) => /^ai-voice-studio-.*\.(mp3|wav)$/i.test(name))
     .sort();
-}
-
-function loadTs(relativePath) {
-  const filename = path.join(root, relativePath);
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
 }

@@ -46,6 +46,7 @@ import {
 } from "./utils/openai-playback-state";
 import { getOpenAISettings } from "./utils/provider-settings";
 import { getActiveQuickReadVoiceId } from "./utils/openai-voice-preferences";
+import { runStudioPlayback } from "./utils/studio-playback";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
 
 const PLAYBACK_RATE_OPTIONS = [
@@ -116,91 +117,45 @@ export default function OpenAIStudio() {
   }, [voices]);
 
   const handleSubmit = useCallback(async (values: StudioFormValues) => {
-    const textToRead = values.text.trim();
-    if (!textToRead) {
-      await showToast({ style: Toast.Style.Failure, title: "No text to read" });
-      return;
-    }
-
-    playerRef.current.stopPlayback();
-    await clearPlaybackStopRequest();
-    const player = new AudioPlayer();
-    playerRef.current = player;
-    setIsLoading(true);
-    setIsPlaying(true);
-
-    try {
-      const voiceMeta = getVoiceById(values.voiceId);
-      const voiceName = voiceMeta?.name ?? values.voiceId;
-      const rate = parseRateString(values.playbackRate);
-      await setSpeedOverride(rate);
-
-      const options = await buildOptionsFromPrefs(
-        values.voiceId,
-        { instructions: values.instructions?.trim() || undefined },
-        rate,
-      );
-      const studioInstruction = composeStyleInstruction({
-        tone: values.tone as OpenAITone,
-        expressiveness: values.expressiveness as OpenAIExpressiveness,
-        delivery: values.delivery as OpenAIDelivery,
-        accentFocus: values.accentFocus as OpenAIAccentFocus,
-        extraNotes: values.instructions?.trim(),
-      });
-      options.instructions = [studioInstruction, rateToInstruction(rate)].filter(Boolean).join("\n");
-      options.format = (values.responseFormat as OpenAIResponseFormat) || options.format;
-
-      const modelLabel = getModelLabel(options.model);
-      const chunks = chunkText(textToRead);
-      const totalChunks = chunks.length;
-
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Synthesizing${totalChunks > 1 ? ` · ${totalChunks} chunks` : ""}`,
-        message: `${voiceName} · ${modelLabel} · ${formatSpeed(rate)}`,
-      });
-
-      await setNowPlaying({
-        status: "synthesizing",
-        voiceId: values.voiceId,
-        voiceName,
-        modelLabel,
-        textPreview: previewText(textToRead),
-        totalChunks,
-        currentChunk: -1,
-        startedAt: Date.now(),
-        source: "OpenAI TTS Studio",
-      });
-
-      await playChunksWithLookahead(chunks, options, player, {
-        onChunkReady: async (index, total) => {
-          const label = total > 1 ? `Playing ${index + 1}/${total} · ${voiceName}` : `Playing · ${voiceName}`;
-          toast.title = label;
-          toast.message = `${modelLabel} · ${formatSpeed(rate)}`;
-          await patchNowPlaying({ status: "playing", currentChunk: index });
-        },
-        onFirstAudioReady: async () => {
-          setIsLoading(false);
-        },
-      });
-
-      if (player.isStopped()) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Stopped";
-        await markIdle();
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "Playback complete";
-        toast.message = `${voiceName} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
-        await markIdle();
-      }
-    } catch (error) {
-      await markError(error instanceof Error ? error.message : String(error));
-      await showTTSFailure(error);
-    } finally {
-      setIsLoading(false);
-      setIsPlaying(false);
-    }
+    await runStudioPlayback({
+      buildOptions: async (rate) => {
+        const options = await buildOptionsFromPrefs(
+          values.voiceId,
+          { instructions: values.instructions?.trim() || undefined },
+          rate,
+        );
+        const studioInstruction = composeStyleInstruction({
+          tone: values.tone as OpenAITone,
+          expressiveness: values.expressiveness as OpenAIExpressiveness,
+          delivery: values.delivery as OpenAIDelivery,
+          accentFocus: values.accentFocus as OpenAIAccentFocus,
+          extraNotes: values.instructions?.trim(),
+        });
+        options.instructions = [studioInstruction, rateToInstruction(rate)].filter(Boolean).join("\n");
+        options.format = (values.responseFormat as OpenAIResponseFormat) || options.format;
+        return options;
+      },
+      chunkText,
+      clearPlaybackStopRequest,
+      formatSpeed,
+      getModelLabel,
+      getVoiceName: (voiceId) => getVoiceById(voiceId)?.name ?? voiceId,
+      markError,
+      markIdle,
+      parseRateString,
+      patchNowPlaying,
+      playChunksWithLookahead,
+      playerRef,
+      rateValue: values.playbackRate,
+      setIsLoading,
+      setIsPlaying,
+      setNowPlaying,
+      setSpeedOverride,
+      showTTSFailure,
+      source: "OpenAI TTS Studio",
+      text: values.text,
+      voiceId: values.voiceId,
+    });
   }, []);
 
   const handleStop = useCallback(async () => {
@@ -385,11 +340,6 @@ function voiceIcon(gender: string) {
   if (gender === "female") return Icon.Female;
   if (gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
-}
-
-function previewText(text: string): string {
-  const trimmed = text.replace(/\s+/g, " ").trim();
-  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
 }
 
 function matchRateOptionValue(rate: number): string {

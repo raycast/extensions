@@ -38,6 +38,7 @@ import {
   SPEED_STEP,
 } from "./utils/mimo-playback-state";
 import { getMimoSettings } from "./utils/provider-settings";
+import { runStudioPlayback } from "./utils/studio-playback";
 import { OpenProviderSetupAction } from "./components/provider-setup-form";
 
 interface ControlFormValues extends Form.Values {
@@ -100,92 +101,46 @@ export default function MiMoStudio() {
   }, []);
 
   const handleSubmit = useCallback(async (values: ControlFormValues) => {
-    const textToRead = values.text.trim();
-    if (!textToRead) {
-      await showToast({ style: Toast.Style.Failure, title: "No text to read" });
-      return;
-    }
-
-    playerRef.current.stopPlayback();
-    await clearPlaybackStopRequest();
-    const player = new AudioPlayer();
-    playerRef.current = player;
-    setIsLoading(true);
-    setIsPlaying(true);
-
-    try {
-      const voiceMeta = getVoiceById(values.voiceId);
-      const voiceName = voiceMeta?.name ?? values.voiceId;
-      // Studio's rate dropdown is the source of truth for THIS submission;
-      // also persist as global override so menu bar / Quick Read agree.
-      const rate = parseRateString(values.speechRate);
-      await setSpeedOverride(rate);
-
-      const options = await buildOptionsFromPrefs(
-        values.voiceId,
-        {
-          additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
-          openingStyleTags: [...selectedTags(values.openingStyleTags), ...parseCustomTags(values.customAssistantTags)],
-          audioEventTags: [
-            ...selectedTags(values.rhythmTags),
-            ...selectedTags(values.emotionTags),
-            ...selectedTags(values.featureTags),
-            ...selectedTags(values.expressionTags),
-          ],
-        },
-        rate,
-      );
-      const modelLabel = getModelLabel(options.model);
-      const chunks = chunkText(textToRead);
-      const totalChunks = chunks.length;
-
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Synthesizing${totalChunks > 1 ? ` · ${totalChunks} chunks` : ""}`,
-        message: `${voiceName} · ${modelLabel} · ${formatSpeed(rate)}`,
-      });
-
-      await setNowPlaying({
-        status: "synthesizing",
-        voiceId: values.voiceId,
-        voiceName,
-        modelLabel,
-        textPreview: previewText(textToRead),
-        totalChunks,
-        currentChunk: -1,
-        startedAt: Date.now(),
-        source: "TTS Studio",
-      });
-
-      await playChunksWithLookahead(chunks, options, player, {
-        onChunkReady: async (index, total) => {
-          const label = total > 1 ? `Playing ${index + 1}/${total} · ${voiceName}` : `Playing · ${voiceName}`;
-          toast.title = label;
-          toast.message = `${modelLabel} · ${formatSpeed(rate)}`;
-          await patchNowPlaying({ status: "playing", currentChunk: index });
-        },
-        onFirstAudioReady: async () => {
-          setIsLoading(false);
-        },
-      });
-
-      if (player.isStopped()) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Stopped";
-        await markIdle();
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "Playback complete";
-        toast.message = `${voiceName} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
-        await markIdle();
-      }
-    } catch (error) {
-      await markError(error instanceof Error ? error.message : String(error));
-      await showTTSFailure(error);
-    } finally {
-      setIsLoading(false);
-      setIsPlaying(false);
-    }
+    await runStudioPlayback({
+      buildOptions: (rate) =>
+        buildOptionsFromPrefs(
+          values.voiceId,
+          {
+            additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
+            openingStyleTags: [
+              ...selectedTags(values.openingStyleTags),
+              ...parseCustomTags(values.customAssistantTags),
+            ],
+            audioEventTags: [
+              ...selectedTags(values.rhythmTags),
+              ...selectedTags(values.emotionTags),
+              ...selectedTags(values.featureTags),
+              ...selectedTags(values.expressionTags),
+            ],
+          },
+          rate,
+        ),
+      chunkText,
+      clearPlaybackStopRequest,
+      formatSpeed,
+      getModelLabel,
+      getVoiceName: (voiceId) => getVoiceById(voiceId)?.name ?? voiceId,
+      markError,
+      markIdle,
+      parseRateString,
+      patchNowPlaying,
+      playChunksWithLookahead,
+      playerRef,
+      rateValue: values.speechRate,
+      setIsLoading,
+      setIsPlaying,
+      setNowPlaying,
+      setSpeedOverride,
+      showTTSFailure,
+      source: "TTS Studio",
+      text: values.text,
+      voiceId: values.voiceId,
+    });
   }, []);
 
   const handleStop = useCallback(async () => {
@@ -413,11 +368,6 @@ function voiceIcon(gender: string) {
   if (gender === "female") return Icon.Female;
   if (gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
-}
-
-function previewText(text: string): string {
-  const trimmed = text.replace(/\s+/g, " ").trim();
-  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
 }
 
 /** Pick the dropdown option value (legacy or modern) closest to a given rate. */

@@ -1,29 +1,17 @@
-import fs from "node:fs";
-import Module from "node:module";
-import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
+import { assert, createLocalStorageStub } from "./lib/verify-helpers.mjs";
 
-const root = process.cwd();
 let preferences = {};
-const storage = new Map();
-const moduleCache = new Map();
+const storageStub = createLocalStorageStub();
 
 const raycastApiStub = {
-  LocalStorage: {
-    async getItem(key) {
-      return storage.get(key);
-    },
-    async setItem(key, value) {
-      storage.set(key, value);
-    },
-    async removeItem(key) {
-      storage.delete(key);
-    },
-  },
+  LocalStorage: storageStub.LocalStorage,
   getPreferenceValues() {
     return preferences;
   },
 };
+
+const loadTs = createTsLoader({ raycastApiStub });
 
 const settings = loadTs("src/utils/provider-settings.ts");
 
@@ -48,7 +36,7 @@ console.log(
 );
 
 async function verifyInvalidFallbacks() {
-  storage.clear();
+  storageStub.storage.clear();
   preferences = {
     defaultProvider: "bad-provider",
     qwenModel: "bad-qwen",
@@ -95,7 +83,7 @@ async function verifyInvalidFallbacks() {
 }
 
 async function verifyLegacyPreferencesIgnored() {
-  storage.clear();
+  storageStub.storage.clear();
   preferences = {
     defaultProvider: "openai",
     qwenModel: "qwen-tts",
@@ -144,7 +132,7 @@ async function verifyLegacyPreferencesIgnored() {
 }
 
 async function verifyTrimmedOverrideFields() {
-  storage.clear();
+  storageStub.storage.clear();
   preferences = {};
 
   await settings.saveProviderSettingsOverrides({
@@ -173,7 +161,7 @@ async function verifyTrimmedOverrideFields() {
 }
 
 async function verifyQuickSetupOverrides() {
-  storage.clear();
+  storageStub.storage.clear();
   preferences = {};
 
   await settings.saveProviderSettingsOverrides({
@@ -223,49 +211,4 @@ async function verifyQuickSetupOverrides() {
   assert(reset.defaultProvider === "qwen", "Clearing quick setup should return to defaults");
   assert(reset.qwen.voice === "Cherry", "Clearing quick setup should restore default Qwen-TTS voice");
   assert(reset.openai.voice === "cedar", "Clearing quick setup should restore default OpenAI voice");
-}
-
-function loadTs(relativePath) {
-  const filename = path.join(root, relativePath);
-  if (moduleCache.has(filename)) return moduleCache.get(filename).exports;
-
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  moduleCache.set(filename, mod);
-  const nativeRequire = mod.require.bind(mod);
-
-  mod.require = (request) => {
-    if (request === "@raycast/api") return raycastApiStub;
-    if (request.startsWith(".")) {
-      const next = resolveTs(path.resolve(path.dirname(filename), request));
-      return loadTs(path.relative(root, next));
-    }
-    return nativeRequire(request);
-  };
-
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function resolveTs(candidate) {
-  const candidates = [candidate, `${candidate}.ts`, `${candidate}.tsx`, `${candidate}.js`];
-  const found = candidates.find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
-  if (!found) throw new Error(`Cannot resolve module ${candidate}`);
-  return found;
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
 }

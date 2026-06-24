@@ -1,120 +1,29 @@
-import fs from "node:fs";
-import Module from "node:module";
-import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
+import {
+  assert,
+  binaryResponse,
+  createLocalStorageStub,
+  expectRejects,
+  installFetch,
+  jsonResponse,
+} from "./lib/verify-helpers.mjs";
 
-const root = process.cwd();
-const moduleCache = new Map();
 let preferences = {};
-let fetchCalls = [];
-const storage = new Map();
+const fetchCalls = [];
+const storageStub = createLocalStorageStub();
 
 const raycastApiStub = {
-  LocalStorage: {
-    async getItem(key) {
-      return storage.get(key);
-    },
-    async setItem(key, value) {
-      storage.set(key, value);
-    },
-    async removeItem(key) {
-      storage.delete(key);
-    },
-  },
+  LocalStorage: storageStub.LocalStorage,
   getPreferenceValues() {
     return preferences;
   },
 };
 
+const loadTs = createTsLoader({ raycastApiStub });
+
 function setPreferences(next) {
   preferences = next;
-  storage.clear();
-}
-
-function loadTs(relativePath) {
-  const filename = resolveTs(path.join(root, relativePath));
-  if (moduleCache.has(filename)) return moduleCache.get(filename).exports;
-
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  moduleCache.set(filename, mod);
-
-  const nativeRequire = mod.require.bind(mod);
-  mod.require = (request) => {
-    if (request === "@raycast/api") return raycastApiStub;
-    if (request.startsWith(".")) {
-      const next = resolveTs(path.resolve(path.dirname(filename), request));
-      return loadTs(path.relative(root, next));
-    }
-    return nativeRequire(request);
-  };
-
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function resolveTs(candidate) {
-  const candidates = [
-    candidate,
-    `${candidate}.ts`,
-    `${candidate}.tsx`,
-    `${candidate}.js`,
-    path.join(candidate, "index.ts"),
-    path.join(candidate, "index.tsx"),
-  ];
-  const found = candidates.find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
-  if (!found) throw new Error(`Cannot resolve module ${candidate}`);
-  return found;
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
-}
-
-function jsonResponse(body, status = 200, statusText = "OK") {
-  return new Response(JSON.stringify(body), {
-    status,
-    statusText,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function binaryResponse(body, status = 200, statusText = "OK") {
-  return new Response(Buffer.from(body), { status, statusText });
-}
-
-async function expectRejects(fn, predicate, message) {
-  try {
-    await fn();
-  } catch (error) {
-    assert(predicate(error), message);
-    return error;
-  }
-  throw new Error(message);
-}
-
-function installFetch(handler) {
-  fetchCalls = [];
-  globalThis.fetch = async (url, init = {}) => {
-    const call = { url: String(url), init, body: init.body ? JSON.parse(String(init.body)) : null };
-    fetchCalls.push(call);
-    if (init.signal?.aborted) {
-      throw new DOMException("Aborted", "AbortError");
-    }
-    return handler(call);
-  };
+  storageStub.storage.clear();
 }
 
 const qwen = loadTs("src/api/qwen-tts.ts");
@@ -218,7 +127,7 @@ async function verifyFocusedSetupOptionBuilders() {
 async function verifyQwen() {
   setPreferences({ dashscopeApiKey: "sk-dashscope-test" });
 
-  installFetch((call) => {
+  installFetch(fetchCalls, (call) => {
     assert(
       call.url === "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
       "Qwen-TTS should call DashScope multimodal generation endpoint",
@@ -246,7 +155,7 @@ async function verifyQwen() {
   });
   assert(qwenAudio === "cXdlbi1hdWRpbw==", "Qwen-TTS should return base64 audio data");
 
-  installFetch((call) => {
+  installFetch(fetchCalls, (call) => {
     if (call.url.endsWith("/generation")) {
       assert(!("instructions" in call.body.input), "Qwen-TTS should omit instructions for non-instruct model");
       assert(
@@ -272,7 +181,7 @@ async function verifyQwen() {
   });
   assert(qwenUrlAudio === Buffer.from("qwen-url-audio").toString("base64"), "Qwen-TTS should download audio URL");
 
-  installFetch(() => jsonResponse({ code: "InvalidParameter", message: "qwen error" }));
+  installFetch(fetchCalls, () => jsonResponse({ code: "InvalidParameter", message: "qwen error" }));
   await expectRejects(
     () =>
       qwen.synthesizeSpeech("Hello Qwen", {
@@ -313,7 +222,7 @@ async function verifyQwen() {
 async function verifyMiMo() {
   setPreferences({ mimoApiKey: "tp-mimo-test" });
 
-  installFetch((call) => {
+  installFetch(fetchCalls, (call) => {
     assert(call.url === "https://custom.mimo/v1/chat/completions", "MiMo should call the configured endpoint");
     assert(call.init.headers["api-key"] === "tp-mimo-test", "MiMo should send api-key header");
     assert(call.body.model === "mimo-v2.5-tts", "MiMo should send model");
@@ -331,7 +240,7 @@ async function verifyMiMo() {
   });
   assert(mimoAudio === "bWltby1hdWRpbw==", "MiMo should return base64 audio");
 
-  installFetch(() => jsonResponse({ error: { message: "mimo error", code: "400" } }));
+  installFetch(fetchCalls, () => jsonResponse({ error: { message: "mimo error", code: "400" } }));
   await expectRejects(
     () =>
       mimo.synthesizeSpeech("Hello MiMo", {
@@ -366,7 +275,7 @@ async function verifyMiMo() {
 async function verifyOpenAI() {
   setPreferences({ openaiApiKey: "sk-openai-test" });
 
-  installFetch((call) => {
+  installFetch(fetchCalls, (call) => {
     assert(call.url === "https://api.openai.com/v1/audio/speech", "OpenAI should call audio/speech endpoint");
     assert(call.init.headers.Authorization === "Bearer sk-openai-test", "OpenAI should send bearer auth");
     assert(call.body.model === "gpt-4o-mini-tts", "OpenAI should send model");
@@ -385,7 +294,7 @@ async function verifyOpenAI() {
   });
   assert(openAIAudio === Buffer.from("openai-audio").toString("base64"), "OpenAI should return base64 audio");
 
-  installFetch((call) => {
+  installFetch(fetchCalls, (call) => {
     assert(!("instructions" in call.body), "OpenAI should omit instructions for legacy TTS models");
     return binaryResponse("legacy-openai-audio");
   });
@@ -397,7 +306,9 @@ async function verifyOpenAI() {
     playbackRate: 1,
   });
 
-  installFetch(() => jsonResponse({ error: { message: "openai error", type: "bad_request" } }, 400, "Bad Request"));
+  installFetch(fetchCalls, () =>
+    jsonResponse({ error: { message: "openai error", type: "bad_request" } }, 400, "Bad Request"),
+  );
   await expectRejects(
     () =>
       openai.synthesizeSpeech("Hello OpenAI", {

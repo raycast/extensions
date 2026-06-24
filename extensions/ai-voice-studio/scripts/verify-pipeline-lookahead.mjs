@@ -1,75 +1,37 @@
-import fs from "node:fs";
-import Module from "node:module";
 import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
 
 const root = process.cwd();
 
-await verifyPipeline({
-  label: "Qwen-TTS",
-  modulePath: "src/utils/qwen-pipelined-reading.ts",
-  apiPath: "src/api/qwen-tts.ts",
-  statePath: "src/utils/qwen-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
-await verifyPipelineStopsBeforeNextPlayback({
-  label: "Qwen-TTS",
-  modulePath: "src/utils/qwen-pipelined-reading.ts",
-  apiPath: "src/api/qwen-tts.ts",
-  statePath: "src/utils/qwen-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
-await verifyPipelineAbortsDuringSynthesis({
-  label: "Qwen-TTS",
-  modulePath: "src/utils/qwen-pipelined-reading.ts",
-  apiPath: "src/api/qwen-tts.ts",
-  statePath: "src/utils/qwen-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
+const providers = [
+  {
+    label: "Qwen-TTS",
+    modulePath: "src/utils/qwen-pipelined-reading.ts",
+    apiPath: "src/api/qwen-tts.ts",
+    statePath: "src/utils/qwen-playback-state.ts",
+    options: { format: "wav", playbackRate: 1 },
+  },
+  {
+    label: "MiMo",
+    modulePath: "src/utils/mimo-pipelined-reading.ts",
+    apiPath: "src/api/mimo-tts.ts",
+    statePath: "src/utils/mimo-playback-state.ts",
+    options: { format: "wav", playbackRate: 1 },
+  },
+  {
+    label: "OpenAI",
+    modulePath: "src/utils/openai-pipelined-reading.ts",
+    apiPath: "src/api/openai-tts.ts",
+    statePath: "src/utils/openai-playback-state.ts",
+    options: { format: "mp3", playbackRate: 1 },
+  },
+];
 
-await verifyPipeline({
-  label: "MiMo",
-  modulePath: "src/utils/mimo-pipelined-reading.ts",
-  apiPath: "src/api/mimo-tts.ts",
-  statePath: "src/utils/mimo-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
-await verifyPipelineStopsBeforeNextPlayback({
-  label: "MiMo",
-  modulePath: "src/utils/mimo-pipelined-reading.ts",
-  apiPath: "src/api/mimo-tts.ts",
-  statePath: "src/utils/mimo-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
-await verifyPipelineAbortsDuringSynthesis({
-  label: "MiMo",
-  modulePath: "src/utils/mimo-pipelined-reading.ts",
-  apiPath: "src/api/mimo-tts.ts",
-  statePath: "src/utils/mimo-playback-state.ts",
-  options: { format: "wav", playbackRate: 1 },
-});
-
-await verifyPipeline({
-  label: "OpenAI",
-  modulePath: "src/utils/openai-pipelined-reading.ts",
-  apiPath: "src/api/openai-tts.ts",
-  statePath: "src/utils/openai-playback-state.ts",
-  options: { format: "mp3", playbackRate: 1 },
-});
-await verifyPipelineStopsBeforeNextPlayback({
-  label: "OpenAI",
-  modulePath: "src/utils/openai-pipelined-reading.ts",
-  apiPath: "src/api/openai-tts.ts",
-  statePath: "src/utils/openai-playback-state.ts",
-  options: { format: "mp3", playbackRate: 1 },
-});
-await verifyPipelineAbortsDuringSynthesis({
-  label: "OpenAI",
-  modulePath: "src/utils/openai-pipelined-reading.ts",
-  apiPath: "src/api/openai-tts.ts",
-  statePath: "src/utils/openai-playback-state.ts",
-  options: { format: "mp3", playbackRate: 1 },
-});
+for (const provider of providers) {
+  await verifyPipeline(provider);
+  await verifyPipelineStopsBeforeNextPlayback(provider);
+  await verifyPipelineAbortsDuringSynthesis(provider);
+}
 await verifyChunkEnginePrefetchUsesNextChunkOptions();
 
 console.log(
@@ -95,23 +57,18 @@ console.log(
 
 async function verifyPipeline({ label, modulePath, apiPath, statePath, options }) {
   const events = [];
-  const apiFile = path.join(root, apiPath);
-  const stateFile = path.join(root, statePath);
-  const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
-  const mod = loadTs(modulePath, {
-    [apiFile]: {
+  const mod = loadPipelineModule(
+    { modulePath, apiPath, statePath },
+    {
       synthesizeSpeech: async (text) => {
         events.push(`synth:start:${text}`);
         await delay(5);
         events.push(`synth:done:${text}`);
         return `audio:${text}`;
       },
-    },
-    [stateFile]: {
       hasPlaybackStopRequest: async () => false,
     },
-    [audioPlayerFile]: {},
-  });
+  );
 
   const player = {
     signal: new AbortController().signal,
@@ -185,11 +142,9 @@ async function verifyChunkEnginePrefetchUsesNextChunkOptions() {
 
 async function verifyPipelineStopsBeforeNextPlayback({ label, modulePath, apiPath, statePath, options }) {
   const events = [];
-  const apiFile = path.join(root, apiPath);
-  const stateFile = path.join(root, statePath);
-  const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
-  const mod = loadTs(modulePath, {
-    [apiFile]: {
+  const mod = loadPipelineModule(
+    { modulePath, apiPath, statePath },
+    {
       synthesizeSpeech: async (text, _options, signal) => {
         events.push(`synth:start:${text}`);
         await delay(text === "two" ? 25 : 5);
@@ -200,12 +155,9 @@ async function verifyPipelineStopsBeforeNextPlayback({ label, modulePath, apiPat
         events.push(`synth:done:${text}`);
         return `audio:${text}`;
       },
-    },
-    [stateFile]: {
       hasPlaybackStopRequest: async () => events.includes("play:done:audio:one"),
     },
-    [audioPlayerFile]: {},
-  });
+  );
 
   const controller = new AbortController();
   const player = {
@@ -232,11 +184,9 @@ async function verifyPipelineStopsBeforeNextPlayback({ label, modulePath, apiPat
 
 async function verifyPipelineAbortsDuringSynthesis({ label, modulePath, apiPath, statePath, options }) {
   const events = [];
-  const apiFile = path.join(root, apiPath);
-  const stateFile = path.join(root, statePath);
-  const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
-  const mod = loadTs(modulePath, {
-    [apiFile]: {
+  const mod = loadPipelineModule(
+    { modulePath, apiPath, statePath },
+    {
       synthesizeSpeech: (text, _options, signal) =>
         new Promise((resolve, reject) => {
           events.push(`synth:start:${text}`);
@@ -254,12 +204,9 @@ async function verifyPipelineAbortsDuringSynthesis({ label, modulePath, apiPath,
             resolve(`audio:${text}`);
           }, 1000);
         }),
-    },
-    [stateFile]: {
       hasPlaybackStopRequest: async () => events.includes("synth:start:one"),
     },
-    [audioPlayerFile]: {},
-  });
+  );
 
   const controller = new AbortController();
   const player = {
@@ -282,42 +229,18 @@ async function verifyPipelineAbortsDuringSynthesis({ label, modulePath, apiPath,
 }
 
 function loadTs(relativePath, stubs = {}) {
-  const filename = path.join(root, relativePath);
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  const nativeRequire = mod.require.bind(mod);
-
-  mod.require = (request) => {
-    if (request in stubs) return stubs[request];
-    if (request.startsWith(".")) {
-      const resolved = resolveTs(path.resolve(path.dirname(filename), request));
-      if (resolved in stubs) return stubs[resolved];
-      return loadTs(path.relative(root, resolved), stubs);
-    }
-    return nativeRequire(request);
-  };
-
-  mod._compile(compiled, filename);
-  return mod.exports;
+  return createTsLoader({ overrides: stubs })(relativePath);
 }
 
-function resolveTs(candidate) {
-  const candidates = [candidate, `${candidate}.ts`, `${candidate}.tsx`, `${candidate}.js`];
-  const found = candidates.find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
-  if (!found) throw new Error(`Cannot resolve module ${candidate}`);
-  return found;
+function loadPipelineModule({ modulePath, apiPath, statePath }, { synthesizeSpeech, hasPlaybackStopRequest }) {
+  const apiFile = path.join(root, apiPath);
+  const stateFile = path.join(root, statePath);
+  const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
+  return loadTs(modulePath, {
+    [apiFile]: { synthesizeSpeech },
+    [stateFile]: { hasPlaybackStopRequest },
+    [audioPlayerFile]: {},
+  });
 }
 
 function before(events, left, right) {

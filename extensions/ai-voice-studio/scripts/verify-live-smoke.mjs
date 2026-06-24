@@ -1,14 +1,11 @@
-import fs from "node:fs";
-import Module from "node:module";
 import os from "node:os";
 import path from "node:path";
-import ts from "typescript";
 import { loadProviderEnvFiles, sanitizeError } from "./lib/provider-env.mjs";
+import { createTsLoader } from "./lib/ts-loader.mjs";
+import { createLocalStorageStub } from "./lib/verify-helpers.mjs";
 
-const root = process.cwd();
-const moduleCache = new Map();
 let preferences = {};
-const storage = new Map();
+const storageStub = createLocalStorageStub();
 
 loadProviderEnvFiles();
 
@@ -21,21 +18,13 @@ const SHOULD_KEEP_AUDIO = process.env.AI_VOICE_STUDIO_KEEP_AUDIO === "1";
 let maxMs = 30000;
 
 const raycastApiStub = {
-  LocalStorage: {
-    async getItem(key) {
-      return storage.get(key);
-    },
-    async setItem(key, value) {
-      storage.set(key, value);
-    },
-    async removeItem(key) {
-      storage.delete(key);
-    },
-  },
+  LocalStorage: storageStub.LocalStorage,
   getPreferenceValues() {
     return preferences;
   },
 };
+
+const loadTs = createTsLoader({ raycastApiStub });
 
 if (process.env[LIVE_FLAG] !== "1") {
   console.error(
@@ -140,54 +129,6 @@ function setPreferences(next) {
 async function saveSetupOverrides(overrides) {
   const providerSettings = loadTs("src/utils/provider-settings.ts");
   await providerSettings.saveProviderSettingsOverrides(overrides);
-}
-
-function loadTs(relativePath) {
-  const filename = resolveTs(path.join(root, relativePath));
-  if (moduleCache.has(filename)) return moduleCache.get(filename).exports;
-
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  moduleCache.set(filename, mod);
-
-  const nativeRequire = mod.require.bind(mod);
-  mod.require = (request) => {
-    if (request === "@raycast/api") return raycastApiStub;
-    if (request.startsWith(".")) {
-      const next = resolveTs(path.resolve(path.dirname(filename), request));
-      return loadTs(path.relative(root, next));
-    }
-    return nativeRequire(request);
-  };
-
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function resolveTs(candidate) {
-  const candidates = [
-    candidate,
-    `${candidate}.ts`,
-    `${candidate}.tsx`,
-    `${candidate}.js`,
-    path.join(candidate, "index.ts"),
-    path.join(candidate, "index.tsx"),
-  ];
-  const found = candidates.find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
-  if (!found) throw new Error(`Cannot resolve module ${candidate}`);
-  return found;
 }
 
 async function timed(provider, format, playbackRate, fn) {

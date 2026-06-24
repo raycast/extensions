@@ -84,6 +84,15 @@ export async function playChunksWithLookahead<O extends AudioOptions>(
   });
 }
 
+export function createPipelinedPlayback<O extends AudioOptions>(provider: PipelineProvider<O>) {
+  return (
+    chunks: string[],
+    options: O,
+    player: AudioPlayer,
+    callbacks: PipelinedPlaybackCallbacks = {},
+  ): Promise<void> => playChunksWithLookahead(chunks, options, player, provider, callbacks);
+}
+
 function startPipelineSynthesisJob<O extends AudioOptions>(
   text: string,
   options: O,

@@ -1,7 +1,5 @@
-import fs from "node:fs";
-import Module from "node:module";
 import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
 
 const root = process.cwd();
 
@@ -143,7 +141,6 @@ async function verifySlowLatencyWarning() {
 }
 
 function loadCommand(provider, events, options = {}) {
-  const moduleCache = new Map();
   let currentPlayer = null;
   const audioPlayerFile = path.join(root, "src/utils/audio-player.ts");
   const providerFile = path.join(root, "src/utils/provider.ts");
@@ -308,7 +305,8 @@ function loadCommand(provider, events, options = {}) {
     },
   };
 
-  return loadTs("src/test-voice-setup.tsx", overrides, moduleCache);
+  const loadTs = createTsLoader({ overrides });
+  return loadTs("src/test-voice-setup.tsx");
 }
 
 function nowFromOption(ms) {
@@ -316,55 +314,6 @@ function nowFromOption(ms) {
     const currentNow = Date.now();
     Date.now = () => currentNow + ms;
   }
-}
-
-function loadTs(relativePath, overrides, moduleCache) {
-  const filename = resolveTs(path.join(root, relativePath));
-  if (moduleCache.has(filename)) return moduleCache.get(filename).exports;
-
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  moduleCache.set(filename, mod);
-
-  const nativeRequire = mod.require.bind(mod);
-  mod.require = (request) => {
-    if (overrides[request]) return overrides[request];
-    if (request.startsWith(".")) {
-      const next = resolveTs(path.resolve(path.dirname(filename), request));
-      if (overrides[next]) return overrides[next];
-      return loadTs(path.relative(root, next), overrides, moduleCache);
-    }
-    return nativeRequire(request);
-  };
-
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function resolveTs(candidate) {
-  const candidates = [
-    candidate,
-    `${candidate}.ts`,
-    `${candidate}.tsx`,
-    `${candidate}.js`,
-    path.join(candidate, "index.ts"),
-    path.join(candidate, "index.tsx"),
-  ];
-  const found = candidates.find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
-  if (!found) throw new Error(`Cannot resolve module ${candidate}`);
-  return found;
 }
 
 function labelProvider(provider) {

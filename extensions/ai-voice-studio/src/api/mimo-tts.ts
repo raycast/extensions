@@ -10,9 +10,12 @@ import {
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/mimo-playback-state";
 import { getMimoSettings, type MimoProviderSettings } from "../utils/provider-settings";
 import type { MimoTTSModel, TTSOptionOverrides, TTSOptions } from "./mimo-types";
+import { validateVoiceForModel } from "./provider-option-helpers";
+import { prepareTTSInput, requestTTSWithTimeout, requirePreference } from "./shared-tts-api";
+import { TTSApiError, normalizeErrorCode } from "./tts-api-error";
+export { TTSApiError } from "./tts-api-error";
 
 const DEFAULT_TOKEN_PLAN_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1";
-const REQUEST_TIMEOUT_MS = 90_000;
 const DEFAULT_AUDIO_FORMAT = "wav";
 
 interface MimoTTSResponse {
@@ -30,20 +33,13 @@ interface MimoTTSResponse {
 }
 
 export async function synthesizeSpeech(text: string, options: TTSOptions, signal?: AbortSignal): Promise<string> {
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    throw new Error("Text cannot be empty");
-  }
-
-  if (signal?.aborted) {
-    throw new TTSApiError("TTS synthesis cancelled", -7);
-  }
-
+  const trimmedText = prepareTTSInput(text, signal);
   const prefs = getPreferenceValues<Preferences>();
-  const apiKey = prefs.mimoApiKey?.trim();
-  if (!apiKey) {
-    throw new TTSApiError("MiMo Token Plan API key is required. Add it in extension preferences.", -1);
-  }
+  const apiKey = requirePreference(
+    prefs,
+    "mimoApiKey",
+    "MiMo Token Plan API key is required. Add it in extension preferences.",
+  );
   if (apiKey.startsWith("sk-")) {
     throw new TTSApiError("Use a MiMo Token Plan API key that starts with tp-, not a pay-as-you-go sk- key.", -1);
   }
@@ -77,12 +73,7 @@ async function postWithTimeout(
   apiKey: string,
   signal?: AbortSignal,
 ): Promise<MimoTTSResponse> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortHandler = () => controller.abort();
-  signal?.addEventListener("abort", abortHandler, { once: true });
-
-  try {
+  return requestTTSWithTimeout(signal, async (requestSignal) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -90,7 +81,7 @@ async function postWithTimeout(
         "api-key": apiKey,
       },
       body: JSON.stringify(body),
-      signal: controller.signal,
+      signal: requestSignal,
     });
 
     const text = await response.text();
@@ -105,19 +96,7 @@ async function postWithTimeout(
     }
 
     return data;
-  } catch (error) {
-    if (error instanceof TTSApiError) throw error;
-    if (signal?.aborted) {
-      throw new TTSApiError("TTS synthesis cancelled", -7);
-    }
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new TTSApiError(`Request timeout after ${REQUEST_TIMEOUT_MS / 1000} seconds`, -2);
-    }
-    throw new TTSApiError(error instanceof Error ? error.message : String(error), -6);
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener("abort", abortHandler);
-  }
+  });
 }
 
 function buildMessages(text: string, stylePrompt?: string): Array<{ role: "user" | "assistant"; content: string }> {
@@ -156,12 +135,6 @@ function parseJson(text: string): MimoTTSResponse {
 
 function formatApiError(data: MimoTTSResponse, status: number, statusText: string): string {
   return data.error?.message || `MiMo TTS request failed: HTTP ${status} ${statusText}`;
-}
-
-function normalizeErrorCode(code: string | number | undefined): number {
-  if (typeof code === "number") return code;
-  const parsed = Number(code);
-  return Number.isFinite(parsed) ? parsed : -6;
 }
 
 function buildChatCompletionsUrl(baseUrl: string | undefined): string {
@@ -204,21 +177,17 @@ function buildOptionsFromSettings(
 ): TTSOptions {
   const model = normalizeModel(settings.model);
   const voice = normalizeVoiceForModel(voiceOverride || settings.defaultVoice || DEFAULT_VOICE, model);
-  const voiceConfig = getVoiceById(voice);
-
-  if (!voiceConfig) {
-    throw new TTSApiError(
-      `Unknown voice "${voice}". Pick a MiMo voice in Setup Voice Defaults or Set Quick Read Voice.`,
-      -1,
-    );
-  }
-
-  if (!isVoiceAvailableForModel(voiceConfig, model)) {
-    throw new TTSApiError(
-      `${voiceConfig.name} is not available for ${MODEL_LABELS[model]}. Change the model or choose another voice.`,
-      -1,
-    );
-  }
+  validateVoiceForModel({
+    getVoiceById,
+    isVoiceAvailableForModel,
+    model,
+    modelLabel: MODEL_LABELS[model],
+    providerName: "MiMo",
+    throwConfigError: (message) => {
+      throw new TTSApiError(message, -1);
+    },
+    voice,
+  });
 
   const rate =
     typeof speedOverrideRate === "number"
@@ -279,14 +248,4 @@ function normalizeTags(tags: string[] | undefined): string[] {
 
 function isSingingTag(tag: string): boolean {
   return ["唱歌", "sing", "singing"].includes(tag.toLowerCase());
-}
-
-export class TTSApiError extends Error {
-  code: number;
-
-  constructor(message: string, code: number) {
-    super(message);
-    this.name = "TTSApiError";
-    this.code = code;
-  }
 }

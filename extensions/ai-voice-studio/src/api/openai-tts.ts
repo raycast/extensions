@@ -11,9 +11,12 @@ import { composeStyleInstruction } from "../constants/openai-style";
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/openai-playback-state";
 import { getOpenAISettings, type OpenAIProviderSettings } from "../utils/provider-settings";
 import type { OpenAITTSModel, OpenAIResponseFormat, TTSOptionOverrides, TTSOptions } from "./openai-types";
+import { resolvePlaybackRate, validateVoiceForModel } from "./provider-option-helpers";
+import { prepareTTSInput, readNonEmptyAudioBase64, requestTTSWithTimeout, requirePreference } from "./shared-tts-api";
+import { TTSApiError } from "./tts-api-error";
+export { TTSApiError } from "./tts-api-error";
 
 const DEFAULT_BASE_URL = "https://api.openai.com/v1";
-const REQUEST_TIMEOUT_MS = 90_000;
 
 interface OpenAIErrorResponse {
   error?: {
@@ -24,20 +27,13 @@ interface OpenAIErrorResponse {
 }
 
 export async function synthesizeSpeech(text: string, options: TTSOptions, signal?: AbortSignal): Promise<string> {
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    throw new Error("Text cannot be empty");
-  }
-
-  if (signal?.aborted) {
-    throw new TTSApiError("TTS synthesis cancelled", -7);
-  }
-
+  const trimmedText = prepareTTSInput(text, signal);
   const prefs = getPreferenceValues<Preferences>();
-  const apiKey = prefs.openaiApiKey?.trim();
-  if (!apiKey) {
-    throw new TTSApiError("OpenAI API key is required. Add it in extension preferences.", -1);
-  }
+  const apiKey = requirePreference(
+    prefs,
+    "openaiApiKey",
+    "OpenAI API key is required. Add it in extension preferences.",
+  );
 
   return postWithTimeout(
     `${DEFAULT_BASE_URL}/audio/speech`,
@@ -59,12 +55,7 @@ async function postWithTimeout(
   apiKey: string,
   signal?: AbortSignal,
 ): Promise<string> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortHandler = () => controller.abort();
-  signal?.addEventListener("abort", abortHandler, { once: true });
-
-  try {
+  return requestTTSWithTimeout(signal, async (requestSignal) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -72,31 +63,15 @@ async function postWithTimeout(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-      signal: controller.signal,
+      signal: requestSignal,
     });
 
     if (!response.ok) {
       throw new TTSApiError(await readErrorDetail(response), response.status);
     }
 
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.length === 0) {
-      throw new TTSApiError("OpenAI TTS returned an empty audio file.", -4);
-    }
-    return buffer.toString("base64");
-  } catch (error) {
-    if (error instanceof TTSApiError) throw error;
-    if (signal?.aborted) {
-      throw new TTSApiError("TTS synthesis cancelled", -7);
-    }
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new TTSApiError(`Request timeout after ${REQUEST_TIMEOUT_MS / 1000} seconds`, -2);
-    }
-    throw new TTSApiError(error instanceof Error ? error.message : String(error), -6);
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener("abort", abortHandler);
-  }
+    return readNonEmptyAudioBase64(response, "OpenAI TTS returned an empty audio file.", "OpenAI TTS request failed");
+  });
 }
 
 async function readErrorDetail(response: Response): Promise<string> {
@@ -141,26 +116,19 @@ function buildOptionsFromSettings(
 ): TTSOptions {
   const model = normalizeModel(settings.model);
   const voice = voiceOverride || settings.voice || DEFAULT_VOICE;
-  const voiceConfig = getVoiceById(voice);
+  validateVoiceForModel({
+    getVoiceById,
+    isVoiceAvailableForModel,
+    model,
+    modelLabel: MODEL_LABELS[model],
+    providerName: "OpenAI",
+    throwConfigError: (message) => {
+      throw new TTSApiError(message, -1);
+    },
+    voice,
+  });
 
-  if (!voiceConfig) {
-    throw new TTSApiError(
-      `Unknown voice "${voice}". Pick an OpenAI voice in Setup Voice Defaults or Set Quick Read Voice.`,
-      -1,
-    );
-  }
-
-  if (!isVoiceAvailableForModel(voiceConfig, model)) {
-    throw new TTSApiError(
-      `${voiceConfig.name} is not available for ${MODEL_LABELS[model]}. Change the model or choose another voice.`,
-      -1,
-    );
-  }
-
-  const rate =
-    typeof speedOverrideRate === "number"
-      ? speedOverrideRate
-      : parseRateString(settings.playbackRate || String(SPEED_DEFAULT));
+  const rate = resolvePlaybackRate(speedOverrideRate, settings.playbackRate || String(SPEED_DEFAULT), parseRateString);
 
   return {
     model,
@@ -212,14 +180,4 @@ function buildInstructions(settings: OpenAIProviderSettings, override: string | 
       });
   const parts = [base, rateToInstruction(rate)].filter(Boolean);
   return parts.join("\n");
-}
-
-export class TTSApiError extends Error {
-  constructor(
-    message: string,
-    public code: number,
-  ) {
-    super(message);
-    this.name = "TTSApiError";
-  }
 }

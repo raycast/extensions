@@ -1,10 +1,10 @@
 import fs from "node:fs";
-import Module from "node:module";
 import os from "node:os";
 import path from "node:path";
-import ts from "typescript";
+import { createTsLoader } from "./lib/ts-loader.mjs";
+import { assert, expectRejects } from "./lib/verify-helpers.mjs";
 
-const root = process.cwd();
+const loadTs = createTsLoader();
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-voice-studio-audio-test-"));
 const fakeAfplay = path.join(tempDir, "afplay");
 const fakeLog = path.join(tempDir, "afplay.log");
@@ -18,10 +18,10 @@ fs.writeFileSync(
   fakeAfplay,
   [
     "#!/bin/sh",
-    "for arg in \"$@\"; do printf '%s\\n' \"$arg\" >> \"$AI_VOICE_STUDIO_FAKE_AFPLAY_LOG\"; done",
+    'for arg in "$@"; do printf \'%s\\n\' "$arg" >> "$AI_VOICE_STUDIO_FAKE_AFPLAY_LOG"; done',
     "printf '__END__\\n' >> \"$AI_VOICE_STUDIO_FAKE_AFPLAY_LOG\"",
-    "if [ -n \"$AI_VOICE_STUDIO_FAKE_AFPLAY_SLEEP\" ]; then sleep \"$AI_VOICE_STUDIO_FAKE_AFPLAY_SLEEP\"; fi",
-    "if [ -n \"$AI_VOICE_STUDIO_FAKE_AFPLAY_EXIT\" ]; then exit \"$AI_VOICE_STUDIO_FAKE_AFPLAY_EXIT\"; fi",
+    'if [ -n "$AI_VOICE_STUDIO_FAKE_AFPLAY_SLEEP" ]; then sleep "$AI_VOICE_STUDIO_FAKE_AFPLAY_SLEEP"; fi',
+    'if [ -n "$AI_VOICE_STUDIO_FAKE_AFPLAY_EXIT" ]; then exit "$AI_VOICE_STUDIO_FAKE_AFPLAY_EXIT"; fi',
     "exit 0",
     "",
   ].join("\n"),
@@ -149,41 +149,11 @@ async function verifyIdleCleanupDoesNotRemoveForeignPid() {
 
 function readLastInvocation() {
   const content = fs.readFileSync(fakeLog, "utf8").trim();
-  const groups = content.split("__END__").map((group) => group.trim()).filter(Boolean);
+  const groups = content
+    .split("__END__")
+    .map((group) => group.trim())
+    .filter(Boolean);
   return groups.at(-1).split("\n").filter(Boolean);
-}
-
-function loadTs(relativePath) {
-  const filename = path.join(root, relativePath);
-  const source = fs.readFileSync(filename, "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: {
-      esModuleInterop: true,
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2023,
-    },
-    fileName: filename,
-  }).outputText;
-
-  const mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  mod._compile(compiled, filename);
-  return mod.exports;
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
-}
-
-async function expectRejects(fn, predicate, message) {
-  try {
-    await fn();
-  } catch (error) {
-    assert(predicate(error), message);
-    return;
-  }
-  throw new Error(message);
 }
 
 async function waitUntil(predicate, timeoutMs) {
