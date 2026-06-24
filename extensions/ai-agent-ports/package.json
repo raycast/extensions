@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-agent-ports",
+  "title": "AI Agent Ports",
+  "description": "Monitor and toggle the caffeinate state of your running AI coding agents — Codex, Claude, Gemini, and Cursor — from the menu bar, so long sessions never sleep mid-task.",
+  "icon": "icon.png",
+  "author": "ericxxx530",
+  "license": "MIT",
+  "categories": ["Developer Tools", "System"],
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "AI Agent Status",
+      "subtitle": "Caffeinate",
+      "description": "Show how many AI agent sessions are caffeinated in the menu bar, with one-click toggles to keep them awake or release them.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "agents",
+      "title": "Manage AI Agents",
+      "subtitle": "Caffeinate",
+      "description": "List running AI agent sessions grouped by project and caffeinate, release, pause, resume, or kill them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Ports CLI Path",
+      "description": "Absolute path to the `ports` binary. Leave blank to auto-detect common install locations.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "agentRoles",
+      "title": "Roles to Show",
+      "description": "Comma-separated `role` values from `ports find` to display. \"agent\" is the main interactive process; use \"*\" to show every role.",
+      "type": "textfield",
+      "required": false,
+      "default": "agent"
+    },
+    {
+      "name": "extraQueries",
+      "title": "Extra Search Terms",
+      "description": "Comma-separated extra terms passed to `ports find`, in addition to the built-in Codex, Claude, Gemini, and Cursor.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
