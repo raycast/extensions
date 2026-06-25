@@ -124,17 +124,17 @@ export default function RecentDocuments() {
                         }
                       }}
                     />
+                    <Action
+                      title="Copy File to Clipboard"
+                      icon={Icon.Document}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                      onAction={async () => {
+                        await Clipboard.copy({ file: doc.path });
+                        await showHUD("File copied");
+                      }}
+                    />
                   </>
                 ) : null}
-                <Action
-                  title="Copy File to Clipboard"
-                  icon={Icon.Document}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                  onAction={async () => {
-                    await Clipboard.copy({ file: doc.path });
-                    await showHUD("File copied");
-                  }}
-                />
                 <Action
                   title="Copy File Path"
                   icon={Icon.Clipboard}
