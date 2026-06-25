@@ -1,6 +1,6 @@
 # Logos Search Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-06-25
 
 ### Fixed
 
