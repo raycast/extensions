@@ -124,12 +124,7 @@ export async function openNewTab(): Promise<void> {
       title: "Opened new Otty tab",
     });
   } catch {
-    await runOtty(["open"]);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Opened new Otty window",
-      message: "New tab was unavailable, so Otty opened a new window.",
-    });
+    await runOttyCommand("Opened new Otty window", ["open"]);
   }
 }
 
