@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2026-05-27
+- Add snooze actions to Search Tasks.
+
 ## [Update] - 2025-10-30
 - Update to the package.json platforms property to include Windows.
 - Update to Search Tasks to not include tasks that are cancelled.

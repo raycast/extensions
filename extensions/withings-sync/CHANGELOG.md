@@ -1,5 +1,9 @@
 # Withings Sync Changelog
 
+## [Bug Fix] - 2026-05-26
+
+- Fixed crash on launch of Sync to Garmin command (TypeError: Cannot read properties of null (reading 'useState'))
+
 ## [Initial Version] - 2026-02-05
 
 - Added configurable lookback days preference (default: 7 days)

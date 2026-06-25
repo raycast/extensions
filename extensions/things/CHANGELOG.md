@@ -1,5 +1,16 @@
 # Things Changelog
 
+## [Bug Fixes] - 2026-06-04
+
+- Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
+
+## [Detail View for To-Dos] - 2026-05-25
+
+- Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).
+- "Open in Things" remains the secondary action (⌘O) on list rows and becomes the primary action inside the Detail view.
+- Added the to-do's creation date to the data model so it can be shown in the Detail sidebar.
+- Switched date formatting in list-row accessories to US English per the Raycast extension guidelines.
+
 ## [Bug Fixes] - 2026-05-20
 
 - Fix due date accessory not showing for to-dos due in 8–14 days

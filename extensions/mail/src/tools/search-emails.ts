@@ -44,6 +44,15 @@ type Input = {
    * @default "desc"
    */
   order?: "asc" | "desc";
+
+  /**
+   * Include emails from Trash in the search results.
+   *
+   * By default, emails in Trash are excluded.
+   *
+   * @default false
+   */
+  includeTrash?: boolean;
 };
 
 /**

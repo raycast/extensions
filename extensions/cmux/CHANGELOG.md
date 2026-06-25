@@ -1,5 +1,11 @@
 # cmux
 
+## [Improved workspace search] - 2026-05-27
+
+- Added workspace metadata from `cmux tree --all --json` for better matching
+- Search Workspaces now matches workspace descriptions and surface titles
+- Falls back to text parser when JSON output is unavailable
+
 ## [Improve workspace search] - 2026-05-20
 
 - Include workspace descriptions and open surface details when searching workspaces.

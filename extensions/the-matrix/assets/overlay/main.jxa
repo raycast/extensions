@@ -1,0 +1,660 @@
+ObjC.import("Cocoa");
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+ObjC.import("QuartzCore");
+ObjC.import("WebKit");
+
+const enterFadeMs = 900;
+const exitFadeMs = 4600;
+const exitSoundTailMs = 600;
+const cmatrixDefaultUpdateMs = 40;
+const glyphMinCode = 33;
+const glyphMaxCode = 122;
+const hiddenHeadRow = 0;
+const firstVisibleRow = 1;
+const stopPollIntervalSeconds = 0.03;
+const windowStates = [];
+
+function run(argv) {
+  const args = argv.filter((arg) => arg !== "--");
+  const stopFilePath = getArgValue(args, "--stop-file");
+  const overlayDir = getArgValue(args, "--overlay-dir") ?? defaultOverlayDir();
+  const audioEnabled = getArgValue(args, "--audio") !== "0";
+
+  const app = $.NSApplication.sharedApplication;
+  app.setActivationPolicy($.NSApplicationActivationPolicyAccessory);
+
+  createWindows(overlayDir, {
+    audioEnabled,
+  });
+
+  waitForStopRequest(stopFilePath);
+  beginGracefulShutdown();
+}
+
+function createWindows(overlayDir, options) {
+  const rendererPath = joinPath(overlayDir, "renderer.html");
+  const rendererUrl = makeRendererUrl(rendererPath, options);
+  const readAccessUrl = $.NSURL.fileURLWithPath(overlayDir);
+  const screens = $.NSScreen.screens;
+
+  for (let index = 0; index < Number(screens.count); index += 1) {
+    const screen = screens.objectAtIndex(index);
+    const frame = screen.frame;
+    const contentFrame = $.NSMakeRect(
+      0,
+      0,
+      frame.size.width,
+      frame.size.height,
+    );
+    const win = $.NSWindow.alloc.initWithContentRectStyleMaskBackingDefer(
+      frame,
+      $.NSWindowStyleMaskBorderless,
+      $.NSBackingStoreBuffered,
+      false,
+    );
+    const contentView = $.NSView.alloc.initWithFrame(contentFrame);
+    const config = $.WKWebViewConfiguration.alloc.init;
+
+    configureWindow(win);
+    configureWebView(config);
+    contentView.setWantsLayer(true);
+    contentView.layer.setMasksToBounds(false);
+
+    const webView = $.WKWebView.alloc.initWithFrameConfiguration(
+      $.NSMakeRect(0, 0, 1, 1),
+      config,
+    );
+
+    webView.setValueForKey(false, "drawsBackground");
+    webView.setWantsLayer(true);
+    webView.layer.setOpaque(false);
+    webView.setAlphaValue(0);
+
+    contentView.addSubview(webView);
+
+    const matrix = createMatrixRain(
+      contentView.layer,
+      contentFrame.size,
+    );
+
+    win.setContentView(contentView);
+    win.contentView.setWantsLayer(true);
+    win.contentView.layer.setOpaque(false);
+    win.setAlphaValue(0);
+    webView.loadFileURLAllowingReadAccessToURL(rendererUrl, readAccessUrl);
+    win.orderFrontRegardless;
+
+    windowStates.push({
+      win,
+      webView,
+      matrix,
+      fadeInStartedAt: Date.now(),
+      fadeInComplete: false,
+    });
+  }
+}
+
+function configureWindow(win) {
+  win.setOpaque(false);
+  win.setBackgroundColor($.NSColor.clearColor);
+  win.setIgnoresMouseEvents(true);
+  win.setCanHide(false);
+  win.setHidesOnDeactivate(false);
+  win.setLevel(overlayWindowLevel());
+  win.setCollectionBehavior(
+    $.NSWindowCollectionBehaviorCanJoinAllSpaces |
+      $.NSWindowCollectionBehaviorFullScreenAuxiliary |
+      $.NSWindowCollectionBehaviorStationary,
+  );
+  win.setReleasedWhenClosed(false);
+}
+
+function configureWebView(config) {
+  try {
+    config.setMediaTypesRequiringUserActionForPlayback(0);
+  } catch {
+    // Older WebKit versions do not expose this selector through JavaScriptCore.
+  }
+
+  try {
+    config.preferences.setValueForKey(
+      true,
+      "javaScriptCanOpenWindowsAutomatically",
+    );
+  } catch {
+    // Non-critical; the overlay does not open windows.
+  }
+}
+
+function createMatrixRain(rootLayer, size) {
+  const config = matrixConfig();
+  const width = Number(size.width);
+  const height = Number(size.height);
+  const scale = $.NSScreen.mainScreen.backingScaleFactor;
+  const rowCount = Math.ceil(height / config.rowHeight);
+  const columnCount = Math.ceil(width / config.columnStep);
+  const columns = [];
+
+  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+    const x = columnIndex * config.columnStep;
+    const cells = [{ glyph: undefined, isHead: false }];
+    const layers = [undefined];
+
+    for (let rowIndex = firstVisibleRow; rowIndex <= rowCount; rowIndex += 1) {
+      const layer = $.CALayer.layer;
+
+      layer.setFrame(
+        $.CGRectMake(
+          x,
+          height - rowIndex * config.rowHeight,
+          config.cellWidth,
+          config.rowHeight,
+        ),
+      );
+      layer.setContentsScale(scale);
+      layer.setHidden(true);
+      layer.setOpacity(config.bodyOpacity);
+      layer.setMasksToBounds(false);
+      rootLayer.addSublayer(layer);
+
+      layers[rowIndex] = layer;
+      cells[rowIndex] = {
+        glyph: rowIndex === firstVisibleRow ? " " : undefined,
+        isHead: false,
+      };
+    }
+
+    columns.push({
+      cells,
+      layers,
+      length: randomStreamLength(config, rowCount),
+      spaces: randomInteger(1, rowCount),
+    });
+  }
+
+  const matrix = {
+    columns,
+    config,
+    height,
+    history: [],
+    lastTickAt: Date.now(),
+    maxHistoryLength:
+      Math.ceil(exitFadeMs / (config.tickMs * config.historyEveryTicks)) + 12,
+    rowCount,
+    ticksSinceSnapshot: 0,
+  };
+
+  recordMatrixSnapshot(matrix);
+
+  return matrix;
+}
+
+function randomStreamLength(config, rowCount) {
+  return randomInteger(
+    config.minStreamLength,
+    Math.max(config.minStreamLength, rowCount - 1),
+  );
+}
+
+function updateMatrixRain(matrix) {
+  const now = Date.now();
+  const elapsed = now - matrix.lastTickAt;
+
+  if (elapsed < matrix.config.tickMs) {
+    return;
+  }
+
+  const dueSteps = Math.floor(elapsed / matrix.config.tickMs);
+  const stepCount = Math.min(2, dueSteps);
+
+  $.CATransaction.begin;
+  $.CATransaction.setDisableActions(true);
+
+  for (let step = 0; step < stepCount; step += 1) {
+    for (const column of matrix.columns) {
+      updateColumn(matrix, column);
+    }
+
+    matrix.ticksSinceSnapshot += 1;
+
+    if (matrix.ticksSinceSnapshot >= matrix.config.historyEveryTicks) {
+      recordMatrixSnapshot(matrix);
+      matrix.ticksSinceSnapshot = 0;
+    }
+  }
+
+  $.CATransaction.commit;
+
+  if (dueSteps > stepCount) {
+    matrix.lastTickAt = now;
+  } else {
+    matrix.lastTickAt += stepCount * matrix.config.tickMs;
+  }
+}
+
+function updateColumn(matrix, column) {
+  // Mirrors cmatrix's fixed terminal-cell update: append a new head cell,
+  // clear the tail when the stream is long enough, and leave body glyphs fixed.
+  if (
+    column.cells[hiddenHeadRow].glyph === undefined &&
+    column.cells[firstVisibleRow].glyph === " " &&
+    column.spaces > 0
+  ) {
+    column.spaces -= 1;
+  } else if (
+    column.cells[hiddenHeadRow].glyph === undefined &&
+    column.cells[firstVisibleRow].glyph === " "
+  ) {
+    column.length = randomStreamLength(matrix.config, matrix.rowCount);
+    setCell(matrix, column, hiddenHeadRow, randomGlyph(), false);
+    column.spaces = randomInteger(1, matrix.rowCount);
+  }
+
+  let rowIndex = hiddenHeadRow;
+  let firstColumnDone = false;
+
+  while (rowIndex <= matrix.rowCount) {
+    while (
+      rowIndex <= matrix.rowCount &&
+      isBlankGlyph(column.cells[rowIndex].glyph)
+    ) {
+      rowIndex += 1;
+    }
+
+    if (rowIndex > matrix.rowCount) {
+      break;
+    }
+
+    const tailRow = rowIndex;
+    let streamLength = 0;
+
+    while (
+      rowIndex <= matrix.rowCount &&
+      !isBlankGlyph(column.cells[rowIndex].glyph)
+    ) {
+      setCell(
+        matrix,
+        column,
+        rowIndex,
+        column.cells[rowIndex].glyph,
+        false,
+      );
+      rowIndex += 1;
+      streamLength += 1;
+    }
+
+    if (rowIndex > matrix.rowCount) {
+      setCell(matrix, column, tailRow, " ", false);
+      continue;
+    }
+
+    setCell(matrix, column, rowIndex, randomGlyph(), true);
+
+    if (streamLength > column.length || firstColumnDone) {
+      setCell(matrix, column, tailRow, " ", false);
+      setCell(matrix, column, hiddenHeadRow, undefined, false);
+    }
+
+    firstColumnDone = true;
+    rowIndex += 1;
+  }
+}
+
+function isBlankGlyph(glyph) {
+  return glyph === undefined || glyph === " ";
+}
+
+function setCell(matrix, column, rowIndex, glyph, isHead) {
+  const cell = column.cells[rowIndex];
+  const shouldRender = !isBlankGlyph(glyph) && rowIndex >= firstVisibleRow;
+  const nextIsHead = Boolean(shouldRender && isHead);
+
+  if (cell.glyph === glyph && cell.isHead === nextIsHead) {
+    return;
+  }
+
+  cell.glyph = glyph;
+  cell.isHead = nextIsHead;
+
+  const layer = column.layers[rowIndex];
+
+  if (!layer) {
+    return;
+  }
+
+  if (!shouldRender) {
+    layer.setHidden(true);
+    return;
+  }
+
+  layer.setContents(glyphImage(matrix.config, glyph, nextIsHead));
+  layer.setOpacity(
+    nextIsHead ? matrix.config.headOpacity : matrix.config.bodyOpacity,
+  );
+  layer.setHidden(false);
+}
+
+function glyphImage(config, glyph, isHead) {
+  const cache = isHead ? config.headImageCache : config.bodyImageCache;
+  const cached = cache.get(glyph);
+
+  if (cached) {
+    return cached;
+  }
+
+  const image = makeGlyphImage({
+    color: isHead ? headGlyphColor() : bodyGlyphColor(),
+    fontSize: config.fontSize,
+    height: config.rowHeight,
+    text: glyph,
+    width: config.cellWidth,
+  });
+
+  cache.set(glyph, image);
+  return image;
+}
+
+function makeGlyphImage(options) {
+  const { text, width, height, fontSize, color } = options;
+  const image = $.NSImage.alloc.initWithSize($.NSMakeSize(width, height));
+  const attributes = $.NSMutableDictionary.alloc.init;
+  const paragraphStyle = $.NSMutableParagraphStyle.alloc.init;
+  const font =
+    $.NSFont.fontWithNameSize("Menlo-Regular", fontSize) ??
+    $.NSFont.monospacedSystemFontOfSizeWeight(fontSize, $.NSFontWeightRegular);
+
+  paragraphStyle.setAlignment($.NSTextAlignmentLeft);
+  attributes.setObjectForKey(color, $.NSForegroundColorAttributeName);
+  attributes.setObjectForKey(font, $.NSFontAttributeName);
+  attributes.setObjectForKey(paragraphStyle, $.NSParagraphStyleAttributeName);
+
+  image.setTemplate(false);
+  image.lockFocus;
+  $.NSColor.clearColor.set;
+  $.NSRectFillUsingOperation(
+    $.NSMakeRect(0, 0, width, height),
+    $.NSCompositingOperationClear,
+  );
+
+  try {
+    $.NSGraphicsContext.currentContext.setShouldAntialias(true);
+  } catch {
+    // Antialiasing is cosmetic; keep drawing if this selector is unavailable.
+  }
+
+  $(text).drawInRectWithAttributes(
+    $.NSMakeRect(0, 0, width, height),
+    attributes,
+  );
+  image.unlockFocus;
+
+  return image;
+}
+
+function bodyGlyphColor() {
+  return $.NSColor.colorWithCalibratedRedGreenBlueAlpha(0.36, 0.82, 0.56, 0.92);
+}
+
+function headGlyphColor() {
+  return $.NSColor.colorWithCalibratedRedGreenBlueAlpha(0.9, 0.95, 0.9, 0.98);
+}
+
+function recordMatrixSnapshot(matrix) {
+  matrix.history.push(
+    matrix.columns.map((column) =>
+      column.cells.map((cell) =>
+        cell.glyph ? `${cell.isHead ? "1" : "0"}${cell.glyph}` : "",
+      ),
+    ),
+  );
+
+  if (matrix.history.length > matrix.maxHistoryLength) {
+    matrix.history.splice(0, matrix.history.length - matrix.maxHistoryLength);
+  }
+}
+
+function applyMatrixSnapshot(matrix, snapshot) {
+  for (
+    let columnIndex = 0;
+    columnIndex < matrix.columns.length;
+    columnIndex += 1
+  ) {
+    const column = matrix.columns[columnIndex];
+    const snapshotColumn = snapshot[columnIndex];
+
+    if (!snapshotColumn) {
+      continue;
+    }
+
+    for (let rowIndex = 0; rowIndex < column.cells.length; rowIndex += 1) {
+      const token = snapshotColumn[rowIndex];
+
+      if (!token) {
+        setCell(matrix, column, rowIndex, undefined, false);
+      } else {
+        setCell(matrix, column, rowIndex, token.slice(1), token[0] === "1");
+      }
+    }
+  }
+}
+
+function matrixConfig() {
+  const fontSize = 18;
+  const rowHeight = 22;
+
+  const config = {
+    bodyImageCache: new Map(),
+    bodyOpacity: 0.88,
+    cellWidth: 16,
+    columnStep: 22,
+    fontSize,
+    headImageCache: new Map(),
+    headOpacity: 0.98,
+    historyEveryTicks: 2,
+    minStreamLength: 3,
+    rowHeight,
+    tickMs: cmatrixDefaultUpdateMs,
+  };
+
+  for (let charCode = glyphMinCode; charCode <= glyphMaxCode; charCode += 1) {
+    const glyph = String.fromCharCode(charCode);
+
+    glyphImage(config, glyph, false);
+    glyphImage(config, glyph, true);
+  }
+
+  return config;
+}
+
+function waitForStopRequest(stopFilePath) {
+  while (!stopFilePath || !fileExists(stopFilePath)) {
+    updateWindows();
+    runLoopFor(stopPollIntervalSeconds);
+  }
+}
+
+function updateWindows() {
+  updateEnterFade();
+
+  for (const { matrix } of windowStates) {
+    updateMatrixRain(matrix);
+  }
+}
+
+function updateEnterFade() {
+  const now = Date.now();
+
+  for (const windowState of windowStates) {
+    if (windowState.fadeInComplete) {
+      continue;
+    }
+
+    const progress = Math.min(
+      1,
+      (now - windowState.fadeInStartedAt) / enterFadeMs,
+    );
+
+    windowState.win.setAlphaValue(easeOutCubic(progress));
+
+    if (progress >= 1) {
+      windowState.fadeInComplete = true;
+    }
+  }
+}
+
+function beginGracefulShutdown() {
+  for (const { win, webView, matrix } of windowStates) {
+    try {
+      win.setAlphaValue(1);
+      recordMatrixSnapshot(matrix);
+      webView.evaluateJavaScriptCompletionHandler(
+        "window.beginMatrixExit?.()",
+        () => undefined,
+      );
+    } catch {
+      // The window may already be closing.
+    }
+  }
+
+  rewindMatricesAndFadeWindows();
+  runLoopFor(exitSoundTailMs / 1000);
+
+  for (const { win } of windowStates) {
+    try {
+      win.orderOut(null);
+    } catch {
+      // Ignore windows that have already gone away.
+    }
+  }
+
+  $.NSApplication.sharedApplication.terminate(null);
+}
+
+function rewindMatricesAndFadeWindows() {
+  const startedAt = Date.now();
+
+  for (const { matrix } of windowStates) {
+    matrix.lastReverseFrameIndex = -1;
+  }
+
+  while (Date.now() - startedAt < exitFadeMs) {
+    const progress = Math.min(1, (Date.now() - startedAt) / exitFadeMs);
+    const alpha = 1 - progress;
+
+    $.CATransaction.begin;
+    $.CATransaction.setDisableActions(true);
+
+    for (const { win, matrix } of windowStates) {
+      const frameIndex = reverseHistoryFrameIndex(matrix, progress);
+
+      if (
+        frameIndex !== matrix.lastReverseFrameIndex &&
+        matrix.history[frameIndex]
+      ) {
+        applyMatrixSnapshot(matrix, matrix.history[frameIndex]);
+        matrix.lastReverseFrameIndex = frameIndex;
+      }
+
+      win.setAlphaValue(alpha);
+    }
+
+    $.CATransaction.commit;
+    runLoopFor(stopPollIntervalSeconds);
+  }
+
+  $.CATransaction.begin;
+  $.CATransaction.setDisableActions(true);
+
+  for (const { win, matrix } of windowStates) {
+    if (matrix.history[0]) {
+      applyMatrixSnapshot(matrix, matrix.history[0]);
+    }
+
+    win.setAlphaValue(0);
+  }
+
+  $.CATransaction.commit;
+}
+
+function reverseHistoryFrameIndex(matrix, progress) {
+  if (matrix.history.length <= 1) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    matrix.history.length -
+      1 -
+      Math.floor(progress * (matrix.history.length - 1)),
+  );
+}
+
+function easeOutCubic(value) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
+function makeRendererUrl(rendererPath, options) {
+  const fileUrl = $.NSURL.fileURLWithPath(rendererPath);
+  const components = $.NSURLComponents.componentsWithURLResolvingAgainstBaseURL(
+    fileUrl,
+    false,
+  );
+
+  components.setQuery(`audio=${options.audioEnabled ? "1" : "0"}`);
+
+  return components.URL;
+}
+
+function runLoopFor(seconds) {
+  $.NSRunLoop.currentRunLoop.runUntilDate(
+    $.NSDate.dateWithTimeIntervalSinceNow(seconds),
+  );
+}
+
+function overlayWindowLevel() {
+  try {
+    const level = $.CGWindowLevelForKey($.kCGAssistiveTechHighWindowLevelKey);
+
+    return Math.max(Number(level), Number($.NSScreenSaverWindowLevel));
+  } catch {
+    return $.NSScreenSaverWindowLevel;
+  }
+}
+
+function fileExists(filePath) {
+  return $.NSFileManager.defaultManager.fileExistsAtPath(filePath);
+}
+
+function defaultOverlayDir() {
+  return joinPath(
+    $.NSFileManager.defaultManager.currentDirectoryPath.js,
+    "assets/overlay",
+  );
+}
+
+function joinPath(basePath, childPath) {
+  return `${basePath.replace(/\/$/, "")}/${childPath}`;
+}
+
+function getArgValue(args, name) {
+  const index = args.indexOf(name);
+
+  if (index === -1) {
+    return undefined;
+  }
+
+  return args[index + 1];
+}
+
+function randomGlyph() {
+  return String.fromCharCode(randomInteger(glyphMinCode, glyphMaxCode));
+}
+
+function randomBetween(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function randomInteger(min, max) {
+  return Math.floor(randomBetween(min, max + 1));
+}

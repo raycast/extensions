@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shopify-shop",
+  "title": "Shopify Shop",
+  "description": "Browse and search products from a Shopify store.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-shop",
+      "title": "Browse Shop",
+      "description": "Browse and preview products from a Shopify store",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Store",
+      "description": "Search across products, pages, collections, and articles",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "storeUrl",
+      "title": "Shopify Store URL",
+      "description": "URL of your Shopify store (e.g. https://mystore.myshopify.com). The store must have its public JSON endpoints enabled (these are on by default for most Shopify themes).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://mystore.myshopify.com",
+      "default": "https://demostore.mock.shop"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.2",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

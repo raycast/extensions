@@ -1,5 +1,11 @@
 # No More Caffeine Changelog
 
+## [Fix Default Caffeine Amount] - 2026-06-09
+
+### 🐛 Bug Fixes
+
+- **Log Caffeine** - Caffeine amount is now pre-filled when opening the command or after logging another drink
+
 ## [Initial Version] - 2026-03-11
 
 ### ✨ Features

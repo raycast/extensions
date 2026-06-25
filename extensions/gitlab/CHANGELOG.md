@@ -1,5 +1,14 @@
 # GitLab Changelog
 
+## [Reduce MR list detail memory usage] - 2026-06-16
+
+- Reduce extra detail fetching in merge request list previews
+
+## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
+
+- Add "Hide Archived Projects" option to Issues Menu Bar settings
+- Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
+
 ## [Updates] - 2026-05-20
 
 - Contributor updates

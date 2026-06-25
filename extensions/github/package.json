@@ -1078,7 +1078,7 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^1.87.0",
+    "@raycast/api": "^1.104.17",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
@@ -1095,7 +1095,7 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.5",
     "@types/node": "^22.1.0",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.0.10",
     "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",

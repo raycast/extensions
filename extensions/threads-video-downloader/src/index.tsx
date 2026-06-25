@@ -11,7 +11,7 @@ export default function Command() {
           <ActionPanel>
             <Action
               title="Open Threads Extension"
-              onAction={() => open("raycast://extensions/chrismessina/threads")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/chrismessina/threads`)}
               icon={Icon.ArrowRight}
             />
             <Action

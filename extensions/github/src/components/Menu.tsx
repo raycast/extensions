@@ -9,6 +9,7 @@ import {
   launchCommand,
   openCommandPreferences,
 } from "@raycast/api";
+import type { JSX } from "react";
 import React, { ReactNode } from "react";
 
 function clipText(text: string) {
