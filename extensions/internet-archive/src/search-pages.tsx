@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Preferences = {
@@ -64,8 +65,11 @@ export default function SearchWebArchive() {
         }
       } catch (error) {
         if (!cancelled) {
-          await showToast({
-            style: Toast.Style.Failure,
+          setSnapshots([]);
+          setHasMore(false);
+          allSnapshotsRef.current = [];
+          nextIndexRef.current = 0;
+          await showFailureToast(error, {
             title: "Request Failed",
             message: error instanceof Error ? error.message : String(error),
           });
@@ -94,7 +98,7 @@ export default function SearchWebArchive() {
       throttle
     >
       {snapshots.map((snapshot) => {
-        const { snapshotUrl, calendarUrl } = buildSnapshotUrls(snapshot);
+        const { snapshotUrl, calendarUrl, displayUrl } = buildUrls(snapshot);
 
         const timestampText = formatTimestamp(snapshot.timestamp);
         const endtimestampText = formatTimestamp(snapshot.endtimestamp);
@@ -116,7 +120,7 @@ export default function SearchWebArchive() {
             key={`${snapshot.original}-${snapshot.timestamp}`}
             icon={Icon.Globe}
             id={snapshot.original}
-            title={{ value: snapshot.original, tooltip: "Original URL" }}
+            title={displayUrl}
             accessories={accessories}
             actions={
               <ActionPanel>
@@ -134,7 +138,7 @@ export default function SearchWebArchive() {
                 />
                 <Action.CopyToClipboard
                   title="Copy Original URL"
-                  content={snapshot.original}
+                  content={displayUrl}
                   shortcut={{
                     macOS: { modifiers: ["cmd", "shift"], key: "c" },
                     Windows: { modifiers: ["ctrl", "shift"], key: "c" },
@@ -157,13 +161,32 @@ function formatTimestamp(timestamp: string) {
   return `${timestamp.slice(0, 4)}-${timestamp.slice(4, 6)}-${timestamp.slice(6, 8)}`;
 }
 
-function buildSnapshotUrls(snapshot: Snapshot) {
+function buildUrls(snapshot: Snapshot) {
   // snapshotUrl points to a specific archived capture.
   // calendarUrl opens the Wayback calendar view for pages with multiple captures.
+
+  let displayUrl = "";
+  try {
+    displayUrl = escapeUrl(decodeURI(snapshot.original));
+  } catch {
+    displayUrl = escapeUrl(snapshot.original);
+  }
+
+  // timestamp === endtimestamp
+  const snapshotUrl = escapeUrl(`/web/${snapshot.timestamp}/${snapshot.original}`);
+  const calendarUrl = escapeUrl(`/web/${snapshot.timestamp}*/${snapshot.original}`);
+
   return {
-    snapshotUrl: `https://web.archive.org/web/${snapshot.endtimestamp}/${snapshot.original}`,
-    calendarUrl: `https://web.archive.org/web/${snapshot.endtimestamp}*/${snapshot.original}`,
+    displayUrl,
+    snapshotUrl: `https://web.archive.org${snapshotUrl}`,
+    calendarUrl: `https://web.archive.org${calendarUrl}`,
   };
+}
+
+const URL_ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const;
+
+function escapeUrl(url: string) {
+  return url.replace(/[&<>"']/g, (s) => URL_ESCAPE_MAP[s as keyof typeof URL_ESCAPE_MAP]);
 }
 
 function buildTimemapUrl(rawUrl: string) {
