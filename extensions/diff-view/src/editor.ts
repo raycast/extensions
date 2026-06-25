@@ -9,10 +9,6 @@ const execFileAsync = promisify(execFile);
 // Editors whose diff is opened through a `--diff` CLI bundled inside the app.
 export type Editor = "code" | "cursor" | "codium"; // VS Code, Cursor, or VSCodium
 
-interface Preferences {
-  editor: Editor;
-}
-
 // Maps each editor preference to its macOS application name (the CLI binary inside the bundle is
 // named the same as the preference value, e.g. `code`, `cursor`, `codium`).
 const EDITOR_APP_NAMES: Record<Editor, string> = {

@@ -11,10 +11,10 @@ export default async function main() {
     return;
   }
 
-  if (filePaths.length < 2) {
+  if (filePaths.length !== 2) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Select at least two files",
+      title: "Select exactly two files",
       message: "Select two files in Finder to compare them in your editor.",
     });
     return;
