@@ -10,7 +10,8 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -62,14 +63,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
-    "@types/node": "26.0.0",
+    "@types/node": "26.0.1",
     "@types/react": "19.2.17",
     "eslint": "10.5.0",
     "prettier": "3.8.4",
     "typescript": "6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
