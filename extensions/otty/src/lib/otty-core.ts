@@ -28,6 +28,12 @@ export function buildRunCommandArgs(command: string): string[] {
   return ["open", "--command", command];
 }
 
+export function buildSshCommandArgs(target: string): string[] {
+  return buildRunCommandArgs(
+    `ssh ${shellEscape(target.replace(/^ssh:\/\//, ""))}`,
+  );
+}
+
 export function buildFinderDirectoryScriptArgs(): string[] {
   return [
     "-e",

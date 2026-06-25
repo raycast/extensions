@@ -9,8 +9,8 @@ import {
   buildFinderDirectoryScriptArgs,
   buildOpenDirectoryTabArgs,
   buildRunCommandArgs,
+  buildSshCommandArgs,
   normalizeSshTarget,
-  shellEscape,
 } from "./otty-core";
 
 const execFileAsync = promisify(execFile);
@@ -145,17 +145,8 @@ export async function runShellCommand(command: string): Promise<void> {
 export async function openSshTarget(input: string): Promise<void> {
   const target = normalizeSshTarget(input);
 
-  if (target.kind === "url") {
-    await execFileAsync("/usr/bin/open", [target.value]);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Opened SSH URL in Otty",
-    });
-    return;
-  }
-
   await runOttyCommand(
     "Opening SSH in Otty",
-    buildRunCommandArgs(`ssh ${shellEscape(target.value)}`),
+    buildSshCommandArgs(target.value),
   );
 }

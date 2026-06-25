@@ -5,6 +5,7 @@ import {
   buildFinderDirectoryScriptArgs,
   buildOpenDirectoryTabArgs,
   buildRunCommandArgs,
+  buildSshCommandArgs,
   normalizeSshTarget,
   shellEscape,
 } from "./otty-core";
@@ -70,5 +71,26 @@ describe("Otty helper", () => {
     expect(shellEscape("ethan' OR '1'='1")).toBe(
       "'ethan'\\'' OR '\\''1'\\''='\\''1'",
     );
+  });
+
+  it("builds ssh command args and strips ssh:// prefix", () => {
+    expect(buildSshCommandArgs("ethan@example.com")).toEqual([
+      "open",
+      "--command",
+      "ssh 'ethan@example.com'",
+    ]);
+    expect(buildSshCommandArgs("ssh://ethan@example.com")).toEqual([
+      "open",
+      "--command",
+      "ssh 'ethan@example.com'",
+    ]);
+  });
+
+  it("escapes shell metacharacters in ssh targets", () => {
+    expect(buildSshCommandArgs("example.com; open -a Calculator")).toEqual([
+      "open",
+      "--command",
+      "ssh 'example.com; open -a Calculator'",
+    ]);
   });
 });
