@@ -82,8 +82,6 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "sync": "node scripts/sync-to-raycast.cjs",
-    "build:sync": "ray build -e dist -o dist && npm run sync",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

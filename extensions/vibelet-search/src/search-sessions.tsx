@@ -180,7 +180,7 @@ export default function SearchSessions() {
   const { data: allMetas, isLoading: isLoadingMetas } = useCachedPromise(
     async () => {
       try {
-        return loadAllSessionMetas();
+        return await loadAllSessionMetas();
       } catch (e) {
         showToast({ style: Toast.Style.Failure, title: "Failed to load sessions", message: String(e) });
         return [];
