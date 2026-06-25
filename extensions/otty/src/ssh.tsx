@@ -1,9 +1,7 @@
 import { openSshTarget } from "./lib/otty";
 
-type Arguments = {
-  target: string;
-};
-
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: {
+  arguments: Arguments.Ssh;
+}) {
   await openSshTarget(props.arguments.target);
 }

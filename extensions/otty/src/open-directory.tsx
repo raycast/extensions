@@ -1,9 +1,7 @@
 import { openDirectory } from "./lib/otty";
 
-type Arguments = {
-  directory: string;
-};
-
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: {
+  arguments: Arguments.OpenDirectory;
+}) {
   await openDirectory(props.arguments.directory);
 }

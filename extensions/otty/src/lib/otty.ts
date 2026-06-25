@@ -24,13 +24,9 @@ export {
   normalizeSshTarget,
 };
 
-type Preferences = {
-  ottyCliPath?: string;
-};
-
 export function getConfiguredCliPath(): string {
   const preferences = getPreferenceValues<Preferences>();
-  return preferences.ottyCliPath?.trim() || DEFAULT_OTTY_CLI_PATH;
+  return preferences.ottyCliPath.trim() || DEFAULT_OTTY_CLI_PATH;
 }
 
 export async function assertExecutable(path: string): Promise<void> {

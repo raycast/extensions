@@ -1,9 +1,7 @@
 import { runShellCommand } from "./lib/otty";
 
-type Arguments = {
-  command: string;
-};
-
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: {
+  arguments: Arguments.RunCommand;
+}) {
   await runShellCommand(props.arguments.command);
 }
