@@ -13,6 +13,6 @@ export default async function main() {
 
     await Clipboard.paste(result)
   } catch (error) {
-    handleError(error)
+    await handleError(error)
   }
 }
