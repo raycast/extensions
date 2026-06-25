@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [New Preference Option: Throw confettis on task completion] - {PR_MERGE_DATE}
+## [New Preference Option: Throw confettis on task completion] - 2026-06-25
 
 - Added preference options for throwing Raycast confettis on task completion
 
