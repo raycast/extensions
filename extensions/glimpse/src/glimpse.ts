@@ -14,7 +14,7 @@ const run = promisify(execFile);
 // A configured path wins; otherwise point at the default install location
 // (Raycast's minimal PATH won't include ~/.local/bin) and fall back to PATH.
 function binaryPath(): string {
-  const configured = getPreferenceValues<{ cliPath?: string }>().cliPath?.trim();
+  const configured = getPreferenceValues<Preferences>().cliPath?.trim();
   if (configured) {
     return configured.startsWith("~") ? join(homedir(), configured.slice(1)) : configured;
   }
