@@ -65,13 +65,22 @@ function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => v
   const isDone = task.completed;
 
   async function updateStatus(status: string) {
-    await setTaskStatus(task, status);
-    await showToast({
-      style: Toast.Style.Success,
-      title: status === task.doneStatus ? "Task completed" : "Task reopened",
-      message: task.title,
-    });
-    revalidate();
+    try {
+      await setTaskStatus(task, status);
+      await showToast({
+        style: Toast.Style.Success,
+        title: status === task.doneStatus ? "Task completed" : "Task reopened",
+        message: task.title,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not update task",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      revalidate();
+    }
   }
 
   return (
