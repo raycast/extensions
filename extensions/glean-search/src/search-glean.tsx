@@ -36,6 +36,8 @@ export default function Command() {
   const [results, setResults] = useState<GleanResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
+    let cancelled = false;
+
     const fetchResults = async () => {
       if (!searchText.trim()) {
         setResults([]);
@@ -61,9 +63,13 @@ export default function Command() {
           encoding: "utf-8",
         });
 
+        if (cancelled) return;
+
         const parsed: GleanSearchResponse = JSON.parse(stdout);
         setResults(parsed.results ?? []);
       } catch (error: unknown) {
+        if (cancelled) return;
+
         const typedError = error as Error & { code?: string; stderr?: string };
 
         if (typedError.code === "ENOENT") {
@@ -80,11 +86,15 @@ export default function Command() {
 
         setResults([]);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchResults();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchText]);
 
   return (
