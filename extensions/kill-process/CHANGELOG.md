@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-25
 
 - App grouping is now enabled by default and groups processes by `.app` bundle path for more accurate CPU and memory totals (fixes #25095)
 - Killing a grouped app now terminates all related child processes, not just the main process
