@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Fixed team field on issue creation] - {PR_MERGE_DATE}
+
+- Fixed Jira rejecting team custom field values during issue creation by wrapping the value in the expected `{ id }` object format
+- Added unit tests for custom field value handling
+
 ## [Fix Jira HTML response errors] - 2026-06-29
 
 - Fixed Jira requests crashing with `Unexpected token '<'` when Jira returns an HTML login, redirect, or SSO page instead of JSON (#23569, #23474, #23413, #23367).
