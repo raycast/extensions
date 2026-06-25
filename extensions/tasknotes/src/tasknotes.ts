@@ -615,7 +615,7 @@ function sanitizeFilename(value: string) {
   return (
     value
       .replace(/[<>:"/\\|?*#[\]]/g, "")
-      .replaceAll(/./g, (character) => {
+      .replaceAll(/./gs, (character) => {
         const code = character.charCodeAt(0);
         return code <= 31 || (code >= 127 && code <= 159) ? "" : character;
       })
