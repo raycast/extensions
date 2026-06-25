@@ -8,6 +8,7 @@ interface SpaceGroup {
   name: string;
   displayID: string;
   num: number;
+  isFullscreen: boolean;
 }
 
 interface WindowEntry {
@@ -17,6 +18,8 @@ interface WindowEntry {
   appPath: string;
   title: string;
   space: SpaceGroup;
+  isMinimized: boolean;
+  isHidden: boolean;
 }
 
 function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEntry[] } {
@@ -32,17 +35,33 @@ function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEn
         name: parts[1] || "Unknown",
         displayID: parts[2] || "Display",
         num: parseInt(parts[3] || "0", 10),
+        isFullscreen: parts[4] === "1",
       };
       spaces.push(currentSpace);
     } else if (line.startsWith("  ") && currentSpace) {
       const parts = line.trim().split("|");
-      if (parts.length >= 5) {
+      if (parts.length >= 7) {
+        // New format: wid|pid|owner|appPath|title|isMinimized|isHidden
+        windows.push({
+          windowID: parseInt(parts[0], 10),
+          pid: parseInt(parts[1], 10),
+          ownerName: parts[2],
+          appPath: parts[3],
+          title: parts.slice(4, parts.length - 2).join("|"),
+          isMinimized: parts[parts.length - 2] === "1",
+          isHidden: parts[parts.length - 1] === "1",
+          space: { ...currentSpace },
+        });
+      } else if (parts.length >= 5) {
+        // Legacy format: wid|pid|owner|appPath|title
         windows.push({
           windowID: parseInt(parts[0], 10),
           pid: parseInt(parts[1], 10),
           ownerName: parts[2],
           appPath: parts[3],
           title: parts.slice(4).join("|"),
+          isMinimized: false,
+          isHidden: false,
           space: { ...currentSpace },
         });
       }
@@ -55,12 +74,16 @@ export default function Command() {
   const [filterSpaceId, setFilterSpaceId] = useState("all");
 
   const { data, isLoading, revalidate } = usePromise(async () => {
-    const result = await runDesktopRenamerScript(`
-      tell application "DesktopRenamer"
-        get windows
-      end tell
-    `);
-    return parseWindowData(result);
+    try {
+      const result = await runDesktopRenamerScript(`
+        tell application "DesktopRenamer"
+          get windows
+        end tell
+      `);
+      return parseWindowData(result);
+    } catch {
+      return { spaces: [], windows: [] };
+    }
   });
 
   const allSpaces = data?.spaces ?? [];
@@ -110,7 +133,7 @@ export default function Command() {
       await delay(450); // Wait for the natural space switch animation
       // Move via DesktopRenamer's backend
       await runDesktopRenamerCommand(`move window to space "${escapeAppleScriptString(targetId)}"`);
-      await delay(600); // Wait for the backend's drag operation to complete
+      await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
       // Switch back to the original (current) desktop.
       await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(targetId)}"`);
       await showToast({
@@ -147,13 +170,27 @@ export default function Command() {
       await runDesktopRenamerCommand(`move window to space "${escapeAppleScriptString(targetSpace.id)}"`);
 
       if (originalSpaceId && originalSpaceId !== targetSpace.id) {
-        await delay(600); // Wait for the backend's drag operation to complete
+        await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
         await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(originalSpaceId)}"`);
+      } else if (entry.space.isFullscreen) {
+        await delay(1200); // Wait for un-fullscreen transition
       }
       await showToast({
         style: Toast.Style.Success,
         title: `Moved "${entry.title}" to ${targetSpace.name}`,
       });
+      revalidate();
+    } catch {
+      // Error handled by utils
+    }
+  }
+
+  async function handleWindowAction(entry: WindowEntry, action: string) {
+    try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: `Executing action: ${action}...` });
+      await runDesktopRenamerCommand(`execute window action "${entry.windowID}" pid "${entry.pid}" action "${action}"`);
+      toast.style = Toast.Style.Success;
+      toast.title = `Executed ${action}`;
       revalidate();
     } catch {
       // Error handled by utils
@@ -179,20 +216,25 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {visibleSpaces.map((space) => {
-        const windows = windowsBySpace.get(space.id) ?? [];
-        return (
-          <List.Section key={space.id} title={space.name} subtitle={`${space.displayID} · Space ${space.num}`}>
-            {windows.length === 0 ? (
-              <List.Item key={`empty-${space.id}`} title="No windows" icon={Icon.Minus} />
-            ) : (
-              windows.map((entry) => (
+      {visibleSpaces
+        .filter((space) => (windowsBySpace.get(space.id) ?? []).length > 0)
+        .map((space) => {
+          const windows = windowsBySpace.get(space.id) ?? [];
+          return (
+            <List.Section key={space.id} title={space.name} subtitle={`${space.displayID} · Space ${space.num}`}>
+              {windows.map((entry) => (
                 <List.Item
                   key={`${entry.windowID}`}
                   title={entry.title}
                   subtitle={entry.ownerName}
                   icon={entry.appPath ? { fileIcon: entry.appPath } : Icon.Window}
-                  accessories={[{ tag: { value: entry.space.name, color: Color.SecondaryText } }]}
+                  accessories={[
+                    ...(entry.isHidden ? [{ tag: { value: "Hidden", color: Color.Magenta } }] : []),
+                    ...(!entry.isHidden && entry.isMinimized
+                      ? [{ tag: { value: "Minimized", color: Color.Orange } }]
+                      : []),
+                    ...(entry.space.isFullscreen ? [{ tag: { value: "Full Screen", color: Color.Blue } }] : []),
+                  ]}
                   actions={
                     <ActionPanel>
                       <Action title="Switch to Window" icon={Icon.Window} onAction={() => switchToWindow(entry)} />
@@ -200,16 +242,16 @@ export default function Command() {
                         <Action
                           title="Move to Current Desktop"
                           icon={Icon.ArrowRight}
-                          shortcut={{ modifiers: ["cmd"], key: "m" }}
+                          shortcut={{ modifiers: ["cmd"], key: "t" }}
                           onAction={() => moveToCurrentDesktop(entry)}
                         />
                         <ActionPanel.Submenu
                           title="Move to Desktop…"
                           icon={Icon.List}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                         >
                           {allSpaces
-                            .filter((s) => s.id !== entry.space.id)
+                            .filter((s) => s.id !== entry.space.id && !s.isFullscreen)
                             .map((targetSpace) => (
                               <Action
                                 key={targetSpace.id}
@@ -219,14 +261,59 @@ export default function Command() {
                             ))}
                         </ActionPanel.Submenu>
                       </ActionPanel.Section>
+                      <ActionPanel.Section title="Window Actions">
+                        <Action
+                          title="Close Window"
+                          icon={Icon.XMarkCircle}
+                          shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+                          onAction={() => handleWindowAction(entry, "close")}
+                        />
+                        {(entry.isMinimized || entry.isHidden) && (
+                          <Action
+                            title="Restore Window"
+                            icon={Icon.ArrowUp}
+                            shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+                            onAction={() => handleWindowAction(entry, "restore")}
+                          />
+                        )}
+                        {!entry.isMinimized && (
+                          <Action
+                            title="Minimize Window"
+                            icon={Icon.Minus}
+                            shortcut={{ modifiers: ["ctrl", "shift"], key: "m" }}
+                            onAction={() => handleWindowAction(entry, "minimize")}
+                          />
+                        )}
+                        {!entry.isHidden && (
+                          <Action
+                            title="Hide Application"
+                            icon={Icon.EyeDisabled}
+                            shortcut={{ modifiers: ["ctrl", "shift"], key: "h" }}
+                            onAction={() => handleWindowAction(entry, "hide")}
+                          />
+                        )}
+                        <Action
+                          title={entry.space.isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
+                          icon={Icon.Maximize}
+                          shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
+                          onAction={() =>
+                            handleWindowAction(entry, entry.space.isFullscreen ? "exitFullScreen" : "enterFullScreen")
+                          }
+                        />
+                        <Action
+                          title="Quit Application"
+                          icon={Icon.Trash}
+                          shortcut={{ modifiers: ["ctrl", "shift"], key: "q" }}
+                          onAction={() => handleWindowAction(entry, "quit")}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
-              ))
-            )}
-          </List.Section>
-        );
-      })}
+              ))}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
