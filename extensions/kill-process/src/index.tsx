@@ -58,10 +58,11 @@ const isSortBy = (value: unknown): value is SortBy => {
 };
 
 export default function ProcessList() {
+  const canRefreshProcesses = shouldRefreshProcesses(environment.launchType);
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [visibleProcesses, setVisibleProcesses] = useState<VisibleProcess[]>([]);
   const [fetchError, setFetchError] = useState<string>();
-  const [isLoadingProcesses, setIsLoadingProcesses] = useState(true);
+  const [isLoadingProcesses, setIsLoadingProcesses] = useState(canRefreshProcesses);
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
@@ -77,7 +78,6 @@ export default function ProcessList() {
   const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT_BY);
   const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(DEFAULT_APP_GROUPING_ENABLED);
-  const canRefreshProcesses = shouldRefreshProcesses(environment.launchType);
   const isFetchingProcesses = useRef(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)

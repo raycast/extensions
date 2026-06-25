@@ -16,12 +16,12 @@ function useInterval(callback: () => void, delay: number | null) {
     }
 
     savedCallback.current();
-    const refreshEnabled = (delay ?? 0) > 0;
+    const refreshEnabled = delay > 0;
     if (!refreshEnabled) {
       return;
     }
 
-    const interval = Math.max(delay ?? 0, 1000);
+    const interval = Math.max(delay, 1000);
     const id = setInterval(() => savedCallback.current(), interval);
     return () => clearInterval(id);
   }, [delay]);
