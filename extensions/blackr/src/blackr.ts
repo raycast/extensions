@@ -12,14 +12,36 @@ const MAX_DURATION_SECONDS = 600;
 export default async function command() {
   const preferences = getPreferenceValues<Preferences.Blackr>();
   const durationSeconds = normalizeDuration(preferences.durationSeconds);
-  const overlayCommand = getOverlayCommand(durationSeconds);
 
   try {
     await closeMainWindow({ clearRootSearch: true });
-    await execFileAsync(overlayCommand.file, overlayCommand.args, {
-      timeout: (durationSeconds + 5) * 1000,
-      windowsHide: true,
-    });
+
+    if (process.platform === "darwin") {
+      const { blackrOverlay } = await import("swift:../swift/blackr-overlay");
+      await blackrOverlay(durationSeconds);
+      return;
+    }
+
+    if (process.platform === "win32") {
+      await execFileAsync(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          join(environment.assetsPath, "blackr-overlay.ps1"),
+          String(durationSeconds),
+        ],
+        {
+          timeout: (durationSeconds + 5) * 1000,
+          windowsHide: true,
+        },
+      );
+      return;
+    }
+
+    throw new Error(`Blackr is not supported on ${process.platform}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -37,29 +59,4 @@ function normalizeDuration(value: string | undefined): number {
   }
 
   return Math.min(Math.max(parsedValue, MIN_DURATION_SECONDS), MAX_DURATION_SECONDS);
-}
-
-function getOverlayCommand(durationSeconds: number): { file: string; args: string[] } {
-  if (process.platform === "darwin") {
-    return {
-      file: join(environment.assetsPath, "blackr-overlay"),
-      args: [String(durationSeconds)],
-    };
-  }
-
-  if (process.platform === "win32") {
-    return {
-      file: "powershell.exe",
-      args: [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        join(environment.assetsPath, "blackr-overlay.ps1"),
-        String(durationSeconds),
-      ],
-    };
-  }
-
-  throw new Error(`Blackr is not supported on ${process.platform}`);
 }

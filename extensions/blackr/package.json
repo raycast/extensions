@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blackr",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "title": "Blackr",
   "description": "Turn your main display black for quick screen cleaning.",
   "icon": "icon.png",
@@ -41,28 +41,23 @@
     "blackout"
   ],
   "scripts": {
-    "build": "npm run build-native && ray build -e dist",
-    "build-native": "node scripts/build-native.js",
-    "dev": "npm run build-native && ray develop",
+    "build": "ray build",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.9"
+    "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
-    "@types/node": "20.9.0",
+    "@types/node": "26.0.1",
     "eslint": "9.36.0",
-    "prettier": "3.5.3",
-    "typescript": "5.8.2"
+    "prettier": "3.8.4",
+    "typescript": "5.9.3"
   },
-  "overrides": {
-    "@eslint/js": "9.36.0",
-    "@typescript-eslint/eslint-plugin": "8.45.0",
-    "@typescript-eslint/parser": "8.45.0",
-    "@typescript-eslint/utils": "8.45.0",
-    "@typescript-eslint/visitor-keys": "8.45.0"
-  }
+  "contributors": [
+    "0xdhrv"
+  ]
 }
