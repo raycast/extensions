@@ -1,14 +1,11 @@
 import { open, showInFinder, showToast, Toast } from "@raycast/api";
 import { basename } from "path";
-import {
-  Command,
-  CompressArgs,
-  ConvertArgs,
-  describeResult,
-  PICMAL_WEBSITE,
-  PicmalNotInstalledError,
-  run,
-} from "./cli";
+import { Command, describeResult, PICMAL_WEBSITE, PicmalNotInstalledError, run, RunArgs } from "./cli";
+
+/** PDF-building commands produce one new PDF, so a "saved %" figure doesn't apply. */
+function isPdfBuilder(command: Command): boolean {
+  return command === "combine" || command === "images-to-pdf";
+}
 
 /**
  * Run a picmal-cli command with full Raycast toast feedback: an animated toast
@@ -16,7 +13,8 @@ import {
  * success / partial / failure toast with the right action (Show in Finder for
  * produced files, Open Picmal when licensing or tooling is the problem).
  */
-export async function runAndReport(command: Command, args: ConvertArgs | CompressArgs): Promise<void> {
+export async function runAndReport(command: Command, args: RunArgs): Promise<void> {
+  const buildsPdf = isPdfBuilder(command);
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: args.input.length > 1 ? `Processing ${args.input.length} files…` : "Processing…",
@@ -27,7 +25,10 @@ export async function runAndReport(command: Command, args: ConvertArgs | Compres
       toast.title = `${basename(input)} — ${Math.round(percent)}%`;
     });
 
-    const described = describeResult(result);
+    const described = describeResult(result, {
+      showSavings: !buildsPdf,
+      outputNoun: buildsPdf ? "PDF" : "file",
+    });
     // Raycast has no "warning" toast — partial batches use Failure so they read as
     // needing attention, while the title still surfaces how many succeeded.
     toast.style = described.kind === "success" ? Toast.Style.Success : Toast.Style.Failure;

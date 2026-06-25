@@ -52,7 +52,7 @@ export interface RunResult {
   exitCode: number;
 }
 
-export type Command = "convert" | "compress";
+export type Command = "convert" | "compress" | "combine" | "images-to-pdf";
 
 export interface ConvertArgs {
   input: string[];
@@ -69,6 +69,31 @@ export interface CompressArgs {
   stripMetadata?: boolean;
   overwrite?: boolean;
 }
+
+/** Merge two or more PDFs into one, in the order given (at least two inputs). */
+export interface CombineArgs {
+  input: string[];
+  /** Output file or directory. Default: `<first> (combined).pdf` next to the first input. */
+  output?: string;
+  overwrite?: boolean;
+}
+
+/** Build a multi-page PDF from images, one image per page (at least one input). */
+export interface ImagesToPDFArgs {
+  input: string[];
+  /** Page size: `fit` | `a4` | `letter` | `<W>x<H>mm`. Omit for `fit`. */
+  pageSize?: string;
+  /** JPEG quality for embedded images (40–100). Omit for the CLI default (85). */
+  quality?: number;
+  /** Password required to open the resulting PDF. */
+  password?: string;
+  /** Output file or directory. Default: `<first>.pdf` next to the first input. */
+  output?: string;
+  overwrite?: boolean;
+}
+
+/** Any argument shape accepted by {@link run}. */
+export type RunArgs = ConvertArgs | CompressArgs | CombineArgs | ImagesToPDFArgs;
 
 /** Progress callback for long audio/video transcodes (percent is 0–100). */
 export type ProgressHandler = (input: string, percent: number) => void;
@@ -120,37 +145,46 @@ export function isPicmalInstalled(): boolean {
   }
 }
 
-function buildArgs(command: Command, args: ConvertArgs | CompressArgs): string[] {
+function buildArgs(command: Command, args: RunArgs): string[] {
   const out: string[] = [command];
-  for (const path of args.input) {
-    out.push("--input", path);
-  }
-  if (command === "convert") {
-    out.push("--format", (args as ConvertArgs).format);
+
+  if (command === "convert" || command === "compress") {
+    // convert/compress: repeated --input flags, one output per input.
+    for (const path of args.input) out.push("--input", path);
+    if (command === "convert") {
+      out.push("--format", (args as ConvertArgs).format);
+    } else {
+      const preset = (args as CompressArgs).preset;
+      if (preset) out.push("--preset", preset);
+    }
+    const quality = (args as ConvertArgs | CompressArgs).quality;
+    if (typeof quality === "number") out.push("--quality", String(quality));
+    if ((args as ConvertArgs | CompressArgs).stripMetadata) out.push("--strip-metadata");
   } else {
-    const preset = (args as CompressArgs).preset;
-    if (preset) out.push("--preset", preset);
+    // combine/images-to-pdf: positional inputs, a single PDF output.
+    for (const path of args.input) out.push(path);
+    if (command === "images-to-pdf") {
+      const a = args as ImagesToPDFArgs;
+      if (a.pageSize) out.push("--page-size", a.pageSize);
+      if (typeof a.quality === "number") out.push("--quality", String(a.quality));
+      if (a.password) out.push("--password", a.password);
+    }
+    const output = (args as CombineArgs | ImagesToPDFArgs).output;
+    if (output) out.push("--output", output);
   }
-  if (typeof args.quality === "number") {
-    out.push("--quality", String(args.quality));
-  }
-  if (args.stripMetadata) out.push("--strip-metadata");
+
   if (args.overwrite) out.push("--overwrite");
   out.push("--json", "--quiet");
   return out;
 }
 
 /**
- * Spawn picmal-cli for `convert` or `compress`, parse its NDJSON streams, and
+ * Spawn picmal-cli for any {@link Command}, parse its NDJSON streams, and
  * resolve a {@link RunResult}. Never rejects on a CLI-level failure — those are
  * returned in `result.error` / `result.exitCode`. Rejects only on spawn
  * failure (e.g. binary vanished mid-run).
  */
-export function run(
-  command: Command,
-  args: ConvertArgs | CompressArgs,
-  onProgress?: ProgressHandler,
-): Promise<RunResult> {
+export function run(command: Command, args: RunArgs, onProgress?: ProgressHandler): Promise<RunResult> {
   const cli = locateCli();
   const argv = buildArgs(command, args);
 
@@ -221,21 +255,39 @@ export interface ResultDescriptor {
   offerGetPicmal?: boolean;
 }
 
+/** Options that tune presentation per command. */
+export interface DescribeOptions {
+  /**
+   * Show the size-savings figure in the success title. True for convert/compress
+   * (size reduction is the point); false for combine/images-to-pdf, where the
+   * output is a brand-new PDF and "saved %" would be meaningless (often negative).
+   */
+  showSavings?: boolean;
+  /** Noun for the produced output(s) in the success title. Defaults to "file". */
+  outputNoun?: string;
+}
+
 /**
  * Translate a {@link RunResult} into a presentation-ready {@link ResultDescriptor}.
  * Centralizes the success / partial-batch / failure tri-state and the mapping of
  * CLI error codes to friendly copy, so callers just render the descriptor.
  */
-export function describeResult(result: RunResult): ResultDescriptor {
+export function describeResult(result: RunResult, options?: DescribeOptions): ResultDescriptor {
   const produced = result.files.length;
   const failed = result.errors.length;
+  const showSavings = options?.showSavings ?? true;
+  const noun = options?.outputNoun ?? "file";
 
   // Full success: files produced, nothing failed.
   if (produced > 0 && failed === 0) {
-    const saved = totalSavingsPercent(result.files);
-    const noun = produced === 1 ? "file" : "files";
+    const countNoun = produced === 1 ? noun : `${noun}s`;
+    const saved = showSavings ? totalSavingsPercent(result.files) : undefined;
     const savedText = saved !== undefined ? ` · saved ${saved}%` : "";
-    return { kind: "success", title: `Done — ${produced} ${noun}${savedText}`, revealPath: result.files[0].output };
+    return {
+      kind: "success",
+      title: `Done — ${produced} ${countNoun}${savedText}`,
+      revealPath: result.files[0].output,
+    };
   }
 
   // Partial: some produced, some failed (CLI exit 9). Don't hide the wins.
@@ -294,9 +346,12 @@ export interface RunSummary {
 /**
  * Condense a {@link RunResult} into a flat, serializable {@link RunSummary} for
  * AI tools to read back to the user (output paths + per-file savings + errors).
+ * For PDF-creation ops pass `showSavings: false` so the savings figure (which is
+ * meaningless for a freshly-built PDF) is omitted from both summary and outputs.
  */
-export function summarizeRun(result: RunResult): RunSummary {
-  const described = describeResult(result);
+export function summarizeRun(result: RunResult, options?: DescribeOptions): RunSummary {
+  const described = describeResult(result, options);
+  const showSavings = options?.showSavings ?? true;
   return {
     status: described.kind,
     produced: result.files.length,
@@ -305,7 +360,7 @@ export function summarizeRun(result: RunResult): RunSummary {
     outputs: result.files.map((f) => ({
       input: f.input,
       output: f.output,
-      savedPercent: f.bytesIn > 0 ? Math.round(((f.bytesIn - f.bytesOut) / f.bytesIn) * 100) : null,
+      savedPercent: showSavings && f.bytesIn > 0 ? Math.round(((f.bytesIn - f.bytesOut) / f.bytesIn) * 100) : null,
     })),
     errors: result.errors.map((e) => ({ input: e.input, message: e.hint ?? e.message })),
   };

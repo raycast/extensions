@@ -10,19 +10,25 @@ Convert and compress images, audio, and video right from Raycast — powered by 
   default, with an optional **Compress after converting** option and metadata stripping.
 - **Compress Files** — Compress files while keeping their format, optionally driven by
   one of Picmal's built-in or custom presets.
+- **Combine PDFs** — Merge two or more PDFs into a single PDF, in the order shown.
+- **Images to PDF** — Build a multi-page PDF from images (one image per page) with a
+  page-size and quality choice and an optional open password.
 
-Both commands prefill from your current Finder selection. Output is written next to each
-input (compress adds a `_compressed` suffix), and a toast reports the size savings with a
-**Show in Finder** action.
+Every command prefills from your current Finder selection. Convert and compress write next
+to each input (compress adds a `_compressed` suffix); the PDF commands write a single new
+PDF next to the first input. A toast reports the result with a **Show in Finder** action.
 
 ## AI Tools
 
-With Raycast AI you can convert and compress without opening a command — e.g. _"@picmal
-convert these to webp"_ or _"@picmal compress the selected videos."_ Each action asks for
-confirmation, then reports the output paths and size savings.
+With Raycast AI you can run any of these without opening a command — e.g. _"@picmal convert
+these to webp"_, _"@picmal compress the selected videos"_, _"@picmal combine these PDFs"_,
+or _"@picmal make a PDF from these photos."_ Each action asks for confirmation, then reports
+the output paths (and size savings for convert/compress).
 
 - **Convert Files** — convert files to a target format.
 - **Compress Files** — compress files (optionally with a preset) while keeping their format.
+- **Combine PDFs** — merge two or more PDFs into one.
+- **Images to PDF** — create a multi-page PDF from images.
 
 ## Requirements
 

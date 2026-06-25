@@ -9,7 +9,7 @@
   "platforms": ["macOS"],
   "license": "MIT",
   "ai": {
-    "instructions": "Picmal converts and compresses images, audio, and video using the locally installed Picmal app's bundled tools. When the user asks to convert or compress files, prefer their current Finder selection or explicit absolute paths. Convert is a pure format change at maximum quality by default — only pass a quality (0–100) to convert-files when the user explicitly wants to also compress the converted file. Use compress-files (not convert) when the goal is to reduce size while keeping the format. Both operations write new files next to each input (compress adds a '_compressed' suffix) and never overwrite the originals unless the user explicitly asks to overwrite. After running, report the output paths and the size savings."
+    "instructions": "Picmal converts and compresses images, audio, and video — and builds PDFs — using the locally installed Picmal app's bundled tools. When the user asks to process files, prefer their current Finder selection or explicit absolute paths. Convert is a pure format change at maximum quality by default — only pass a quality (0–100) to convert-files when the user explicitly wants to also compress the converted file. Use compress-files (not convert) when the goal is to reduce size while keeping the format. Use combine-pdfs to merge two or more PDFs into one (page order = the order of the paths). Use images-to-pdf to turn one or more images into a multi-page PDF, one image per page. Convert/compress write new files next to each input (compress adds a '_compressed' suffix); the PDF tools write a single new PDF next to the first input. Nothing overwrites existing files unless the user explicitly asks to overwrite. After running, report the output paths; report size savings only for convert and compress (not for the PDF tools, which create new documents)."
   },
   "preferences": [
     {
@@ -83,6 +83,22 @@
       "description": "Compress selected files while keeping their format.",
       "mode": "view",
       "keywords": ["picmal", "image", "audio", "video", "shrink", "optimize", "reduce", "size", "preset", "ffmpeg", "imagemagick"]
+    },
+    {
+      "name": "combine",
+      "title": "Combine PDFs",
+      "subtitle": "Picmal",
+      "description": "Merge two or more PDFs into a single PDF.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "merge", "combine", "join", "concatenate", "document"]
+    },
+    {
+      "name": "images-to-pdf",
+      "title": "Images to PDF",
+      "subtitle": "Picmal",
+      "description": "Create a multi-page PDF from images, one image per page.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "image", "images", "photo", "scan", "document", "convert", "create"]
     }
   ],
   "tools": [
@@ -95,6 +111,16 @@
       "name": "compress-files",
       "title": "Compress Files",
       "description": "Compress images, audio, or video files while keeping their format using Picmal."
+    },
+    {
+      "name": "combine-pdfs",
+      "title": "Combine PDFs",
+      "description": "Merge two or more PDFs into a single PDF, in the order given, using Picmal."
+    },
+    {
+      "name": "images-to-pdf",
+      "title": "Images to PDF",
+      "description": "Create a multi-page PDF from images (one image per page) using Picmal."
     }
   ],
   "dependencies": {

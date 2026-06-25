@@ -8,3 +8,4 @@
 - Format and preset pickers restricted to what makes sense for the selected media type.
 - Quality, metadata stripping, and overwrite options, with per-extension defaults in preferences.
 - Live progress for long audio/video transcodes and a size-savings report with **Show in Finder**.
+- Added **Combine PDFs** and **Images to PDF** commands (and matching AI tools) for Picmal's PDF tools — merge PDFs in order, or build a multi-page PDF from images with page-size, quality, and optional password.
