@@ -167,11 +167,11 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     uris.push(`logosres:${versionUpper};ref=${encodedRef}`);
     uris.push(`https://ref.ly/${encodedRef};${version}`);
   } else {
-    // Native Logos scheme URIs first; https://ref.ly is the fallback because open() always
-    // succeeds for https URLs and would short-circuit the native schemes.
+    // User explicitly chose the ref.ly URL method; try it first. Native Logos scheme URIs
+    // are only a fallback if the ref.ly open somehow fails.
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
     uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
     uris.push(`logosref:Bible.${encodedRef}`);
-    uris.push(`https://ref.ly/${encodedRef};${version}`);
   }
 
   let lastError: unknown;
