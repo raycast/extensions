@@ -82,18 +82,24 @@ export default function NewFromTemplate() {
     const template = values.template;
     const name = values.name?.trim();
     const dest = values.destination?.[0];
-    if (!template)
-      return showFailureToast(new Error("Select a template"), { title: "No template" });
-    if (!name)
-      return showFailureToast(new Error("Enter a project name"), { title: "Missing name" });
-    if (!dest)
-      return showFailureToast(new Error("Choose a destination folder"), {
-        title: "No destination",
-      });
+    if (!template) {
+      await showFailureToast(new Error("Select a template"), { title: "No template" });
+      return;
+    }
+    if (!name) {
+      await showFailureToast(new Error("Enter a project name"), { title: "Missing name" });
+      return;
+    }
+    if (!dest) {
+      await showFailureToast(new Error("Choose a destination folder"), { title: "No destination" });
+      return;
+    }
 
     const def = defForPath(template);
-    if (!def)
-      return showFailureToast(new Error("Unknown template type"), { title: "Bad template" });
+    if (!def) {
+      await showFailureToast(new Error("Unknown template type"), { title: "Bad template" });
+      return;
+    }
 
     const plan = targetPathFor({
       destination: dest,
