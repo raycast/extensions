@@ -58,7 +58,7 @@ export default function ImagesToPDF() {
     },
     initialValues: { input: [], pageSize: "fit", quality: "", password: "", overwrite: false },
     validation: {
-      input: (value) => (!value || value.length === 0 ? "Select at least one image" : undefined),
+      input: (value) => (imagesOnly(value ?? [], formats).length === 0 ? "Select at least one image" : undefined),
       pageSize: FormValidation.Required,
     },
   });
