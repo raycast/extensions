@@ -154,7 +154,8 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
 
   if (preferences.openMethod === "logosres scheme") {
     // Raycast can only confirm URI handoff, not whether Logos resolves speculative logosres resources.
-    uris.push(`https://ref.ly/${encodedRef};${version}`);
+    // Try native Logos scheme URIs first; https://ref.ly is a last-resort fallback because open()
+    // always succeeds for https URLs and would short-circuit the native schemes.
     uris.push(`logosref:Bible.${encodedRef}`);
     uris.push(`logosref:${encodedRef}`);
     uris.push(`logosres:Bible;ref=Bible.${encodedRef}`);
@@ -164,12 +165,13 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     uris.push(`logosres:${versionUpper};ref=Bible${versionUpper}.${encodedRef}`);
     uris.push(`logosres:${version};ref=${encodedRef}`);
     uris.push(`logosres:${versionUpper};ref=${encodedRef}`);
-  } else {
-    // If ref.ly URL method is selected, try that first
     uris.push(`https://ref.ly/${encodedRef};${version}`);
-    // Direct scheme fallbacks
+  } else {
+    // Native Logos scheme URIs first; https://ref.ly is the fallback because open() always
+    // succeeds for https URLs and would short-circuit the native schemes.
     uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
     uris.push(`logosref:Bible.${encodedRef}`);
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
   }
 
   let lastError: unknown;
