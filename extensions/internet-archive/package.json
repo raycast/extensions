@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "internet-archive",
+  "title": "Internet Archive",
+  "version": "1.0.0",
+  "description": "Search content from the Internet Archive",
+  "icon": "icon.png",
+  "author": "tofrankie",
+  "license": "MIT",
+  "homepage": "https://www.raycast.com/tofrankie/internet-archive",
+  "bugs": {
+    "url": "https://github.com/tofrankie/raycast-internet-archive/issues",
+    "email": "1426203851@qq.com"
+  },
+  "categories": [
+    "Web"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
+  },
+  "commands": [
+    {
+      "name": "search-pages",
+      "mode": "view",
+      "title": "Search Pages",
+      "description": "Search archived web page snapshots by URL"
+    }
+  ]
+}
