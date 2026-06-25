@@ -10,6 +10,10 @@ export type SshTarget =
   | { kind: "url"; value: string }
   | { kind: "target"; value: string };
 
+export function shellEscape(input: string): string {
+  return `'${input.replace(/'/g, `'\\''`)}'`;
+}
+
 export function buildOpenDirectoryArgs(directory: string): CommandArgs {
   return {
     args: ["open", directory],

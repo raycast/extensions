@@ -10,6 +10,7 @@ import {
   buildOpenDirectoryTabArgs,
   buildRunCommandArgs,
   normalizeSshTarget,
+  shellEscape,
 } from "./otty-core";
 
 const execFileAsync = promisify(execFile);
@@ -155,6 +156,6 @@ export async function openSshTarget(input: string): Promise<void> {
 
   await runOttyCommand(
     "Opening SSH in Otty",
-    buildRunCommandArgs(`ssh ${target.value}`),
+    buildRunCommandArgs(`ssh ${shellEscape(target.value)}`),
   );
 }

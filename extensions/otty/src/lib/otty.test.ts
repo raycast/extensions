@@ -6,6 +6,7 @@ import {
   buildOpenDirectoryTabArgs,
   buildRunCommandArgs,
   normalizeSshTarget,
+  shellEscape,
 } from "./otty-core";
 
 describe("Otty helper", () => {
@@ -60,5 +61,14 @@ describe("Otty helper", () => {
       kind: "target",
       value: "ethan@example.com",
     });
+  });
+
+  it("shell-escapes ssh targets to prevent command injection", () => {
+    expect(shellEscape("example.com; open -a Calculator")).toBe(
+      "'example.com; open -a Calculator'",
+    );
+    expect(shellEscape("ethan' OR '1'='1")).toBe(
+      "'ethan'\\'' OR '\\''1'\\''='\\''1'",
+    );
   });
 });
