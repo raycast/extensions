@@ -17,17 +17,23 @@ export const useFocusedTask = () => {
   const [data, setData] = useCachedData();
 
   async function unfocusTask() {
+    if (!focusedTask.id) {
+      return;
+    }
+
     if (focusLabelName && focusLabelName.trim().length > 0) {
       if (commandMode === "view") {
         await showToast({ style: Toast.Style.Animated, title: "Removing focus label" });
       }
 
       // Need to sync the task before removing the label to avoid race condition.
-      const data = (await initialSync()) as SyncData;
-      const labels = data.items
-        .find((task: Task) => task.id === focusedTask.id)
-        ?.labels.filter((label) => label !== focusLabelName.trim());
-      await updateTask({ id: focusedTask.id, labels }, { data, setData });
+      const syncData = (await initialSync()) as SyncData;
+      const task = syncData.items.find((t) => t.id === focusedTask.id);
+
+      if (task) {
+        const labels = task.labels.filter((label) => label !== focusLabelName.trim());
+        await updateTask({ id: focusedTask.id, labels }, { data: syncData, setData });
+      }
     }
 
     setFocusedTask({ id: "", content: "" });

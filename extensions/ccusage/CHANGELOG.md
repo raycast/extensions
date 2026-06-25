@@ -1,5 +1,28 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Honor server rate-limit backoff] - 2026-06-10
+
+### Fixed
+
+- Usage Limits no longer freeze after the Claude API returns a rate-limit response. The fetch now honors the server's `retry-after` window, coordinates one backoff across the menu bar and main view, and shows the real wait time
+- An expired token in `~/.claude/.credentials.json` no longer shadows a fresh Keychain token
+
+## [Tolerate dateless sessions] - 2026-06-03
+
+### Fixed
+
+- Session views no longer crash when `ccusage` reports a session with no activity date (a non-Claude agent row, or one whose entries lack timestamps); the session shows "unknown" instead of failing the entire list
+
+### Changed
+
+- Schema validation failures now report the `ccusage` version and a redacted structural fingerprint of the output (field names and value types, never values), so version-specific schema drift is diagnosable from an error report alone
+
+## [Monochrome menu bar icon] - 2026-06-02
+
+### Added
+
+- Added a menu bar preference to use a monochrome icon instead of the extension icon
+
 ## [ccusage v20] - 2026-05-25
 
 ### Added

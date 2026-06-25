@@ -1,5 +1,31 @@
 # Visual Studio Code Changelog
 
+## [Revert: Windows project opening] - 2026-06-21
+
+- `getSelectedFinderItems` works on Windows; reverted.
+- Using the URL handler causes previous VS Code windows to close; reverted.
+- Bumped dependency versions
+
+## [Update] - 2026-06-17
+
+- Added support for Devin Desktop.
+
+## [Fix: Windows project opening] - 2026-06-17
+
+- Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
+
+## [Fix: macOS user Applications path] - 2026-06-05
+
+- Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
+
+## [Update] - 2026-06-02
+
+- Added support for IBM Bob.
+
+## [Fix: Search Recent Projects empty on macOS] - 2026-06-02
+
+- Fixed `Search Recent Projects` showing no results on macOS with VS Code 1.118+. The shared storage database (`.vscode-shared/sharedStorage/state.vscdb`) is placed in the home directory on all platforms, not inside `~/Library/Application Support`. Also removed a spurious `User/` path segment from the Windows shared storage path. Fixes [#28311](https://github.com/raycast/extensions/issues/28311).
+
 ## [Fix: Recent Projects on Windows] - 2026-05-25
 
 - Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.

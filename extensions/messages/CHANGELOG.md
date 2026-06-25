@@ -1,5 +1,19 @@
 # Messages Changelog
 
+## [Bug Fixes & Improvements] - 2026-06-10
+
+- Add `before` pagination cursor to load older messages in AI chat
+- Show contact name and photo when chat uses an email address instead of a phone number
+- Fix missing `await` on async calls (`showFailureToast`, `open`, `launchCommand`, `showToast`)
+- Fix AI instructions — skip message history fetch for simple sends
+- Remove deprecated AI model
+- Remove unused SQLite dependency from Swift package
+- Update packages
+- Exclude tapbacks and reactions from message results to reduce noise in AI context
+- Add reply-context (`replyingTo`) to messages — shows the text of the message being replied to when a message explicitly targets a non-adjacent earlier message
+- Return AI tool messages in chronological order (oldest first) with consecutive duplicate reply-context stripped
+- Improve AI instructions with message data format documentation and pagination guidance
+
 ## [Fix chat list memory usage] - 2026-05-28
 
 - Limit the initial chat lookup to the 50 displayed conversations before loading contact details.

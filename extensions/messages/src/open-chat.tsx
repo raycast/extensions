@@ -15,11 +15,6 @@ export default function Command() {
     return permissionView;
   }
 
-  const filteredChats = chats?.filter((chat) => {
-    if (chat.is_group) return !chat.group_name;
-    return true;
-  });
-
   // Allow only digits, spaces, parentheses, plus, and hyphens for phone input
   const isPotentialNumber = /^[0-9()+\-\s]+$/.test(searchText);
 
@@ -30,8 +25,8 @@ export default function Command() {
       throttle
       searchBarPlaceholder="Search chats or enter phone number..."
     >
-      {filteredChats && filteredChats.length > 0 ? (
-        filteredChats.map((chat) => {
+      {chats && chats.length > 0 ? (
+        chats.map((chat) => {
           const date = new Date(chat.last_message_date);
           return (
             <List.Item

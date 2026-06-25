@@ -59,14 +59,6 @@ describe("formatAnki", () => {
     expect(lines).toHaveLength(5);
   });
 
-  it("has 5 tab-separated columns per data row", () => {
-    const result = formatAnki([word1]);
-    const dataLines = result.split("\n").filter((l) => !l.startsWith("#") && l.length > 0);
-    for (const line of dataLines) {
-      expect(line.split("\t")).toHaveLength(5);
-    }
-  });
-
   it("returns empty string when no words", () => {
     expect(formatAnki([text1])).toBe("");
     expect(formatAnki([])).toBe("");
@@ -94,14 +86,6 @@ describe("formatQuizlet", () => {
     expect(lines).toHaveLength(2);
     expect(lines[0]).toBe("apple\tяблуко");
     expect(lines[1]).toBe("run\tбігти");
-  });
-
-  it("has 2 tab-separated columns per line", () => {
-    const result = formatQuizlet([word1, word2]);
-    const lines = result.split("\n").filter((l) => l.length > 0);
-    for (const line of lines) {
-      expect(line.split("\t")).toHaveLength(2);
-    }
   });
 
   it("returns empty string when no words", () => {

@@ -6,21 +6,13 @@ import { usePromise, useSQL } from "@raycast/utils";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import { fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import { ChatParticipant, fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export interface ChatParticipant {
-  chat_identifier: string;
-  service_name: "iMessage" | "SMS";
-  group_name: string | null;
-  display_name: string | null;
-  group_participants: string | null;
-  is_group: boolean;
-}
-
 export type SQLChat = ChatParticipant & {
   guid: string;
+  service_name: "iMessage" | "SMS";
   last_message_date: string;
 };
 
@@ -72,8 +64,8 @@ export function useChats(searchText: string = "") {
       END as group_name,
         CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
         strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-          MAX(message.date) / 1000000000 + strftime("%s", "2001-01-01"),
-          "unixepoch"
+          MAX(message.date) / 1000000000 + strftime('%s', '2001-01-01'),
+          'unixepoch'
         )) AS last_message_date,
         CASE
           WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)

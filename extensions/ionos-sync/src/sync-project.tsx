@@ -258,7 +258,7 @@ Please open **Extension Preferences** to enter your host and username.
 Press \`⌘ + ,\` while IONOS Sync is selected.`}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open Extension Preferences" url="raycast://preferences/extensions" />
+            <Action.OpenInBrowser title="Open Extension Preferences" url={`${process.env.RAYCAST_SCHEME ?? "raycast"}://preferences/extensions`} />
           </ActionPanel>
         }
       />

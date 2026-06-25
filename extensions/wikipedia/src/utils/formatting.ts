@@ -19,7 +19,7 @@ export function replaceLinks(text: string, language: string, links: string[] = [
   return text.replaceAll(regex, (link) => {
     const url = openInBrowser
       ? `https://${language}.wikipedia.org/wiki/${encodeURI(link)}`
-      : `raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title: link }))}`;
+      : `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title: link }))}`;
     return `[${link}](${url})`;
   });
 }
