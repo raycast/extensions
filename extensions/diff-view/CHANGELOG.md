@@ -1,6 +1,6 @@
 # Diff View Changelog
 
-## [Raycast 2 Beta fix, VSCodium support, file comparison, code cleansing] - {PR_MERGE_DATE}
+## [Raycast 2 Beta fix, VSCodium support, file comparison, code cleansing] - 2026-06-25
 
 - Added a new "Open with Editor" command to diff two files selected in Finder
 - Added VSCodium support
