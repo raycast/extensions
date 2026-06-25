@@ -49,10 +49,14 @@ function NowPlayingCommand() {
   const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
   const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
   const { meData } = useMe({ options: { execute: hasTrackData } });
-  const { containsMySavedTracksData, containsMySavedTracksIsLoading, containsMySavedTracksRevalidate } =
-    useContainsMyLikedTracks({
-      trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
-    });
+  const {
+    containsMySavedTracksData,
+    containsMySavedTracksError,
+    containsMySavedTracksIsLoading,
+    containsMySavedTracksRevalidate,
+  } = useContainsMyLikedTracks({
+    trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
+  });
 
   const ownedPlaylists = myPlaylistsData?.items?.filter((p) => p.owner?.id === meData?.id) ?? [];
   const { playlistsContainingTrack } = usePlaylistsContainingTrack({
@@ -138,13 +142,23 @@ function NowPlayingCommand() {
         <Detail.Metadata.Label title="Album" text={albumName} />
         <Detail.Metadata.Label
           title="Liked"
-          text={containsMySavedTracksIsLoading ? "Checking…" : trackAlreadyLiked ? "Yes" : "No"}
+          text={
+            containsMySavedTracksError
+              ? "Unknown"
+              : containsMySavedTracksIsLoading
+                ? "Checking…"
+                : trackAlreadyLiked
+                  ? "Yes"
+                  : "No"
+          }
           icon={
-            containsMySavedTracksIsLoading
-              ? { source: Icon.Clock, tintColor: Color.SecondaryText }
-              : trackAlreadyLiked
-                ? { source: Icon.Heart, tintColor: Color.Red }
-                : { source: Icon.HeartDisabled, tintColor: Color.SecondaryText }
+            containsMySavedTracksError
+              ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
+              : containsMySavedTracksIsLoading
+                ? { source: Icon.Clock, tintColor: Color.SecondaryText }
+                : trackAlreadyLiked
+                  ? { source: Icon.Heart, tintColor: Color.Red }
+                  : { source: Icon.HeartDisabled, tintColor: Color.SecondaryText }
           }
         />
         {inPlaylists.length > 0 && (
