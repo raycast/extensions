@@ -1,32 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
-
-export interface Preferences {
-  basePixel?: string;
-}
-
-const loadBasePixelsFromPreferences = () => {
-  const basePixel =
-    getPreferenceValues<Preferences>().basePixel === "" ? 16 : Number(getPreferenceValues<Preferences>().basePixel);
-  if (isNaN(basePixel)) {
-    return 16;
-  }
-  return basePixel;
-};
-
-const BASE_FONT_PIXELS = loadBasePixelsFromPreferences();
-
-export const REMtoPX = (rem: number) => rem * BASE_FONT_PIXELS;
-
-export const REMtoPT = (rem: number): number => rem * 12;
-
-export const PXtoREM = (px: number): number => px / BASE_FONT_PIXELS;
-
-export const PXtoPT = (px: number): number => px * 0.75;
-
-export const PTtoREM = (pt: number): number => pt / 12;
-
-export const PTtoPX = (pt: number): number => pt / 0.75;
-
 export const HEXtoRGB = (hex: string): number[] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$|^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 
@@ -216,7 +187,7 @@ export const HSLtoHEX = (hsl: number[]): string => {
   return `#${f(0)}${f(8)}${f(4)}`;
 };
 
-export const HSLtoHEXA = (hsl: number[]): string => {
+export const HSLtoHEXA = (hsl: [number, number, number, string]): string => {
   const h = hsl[0];
   const s = hsl[1];
   let l = hsl[2];
@@ -229,7 +200,8 @@ export const HSLtoHEXA = (hsl: number[]): string => {
       .toString(16)
       .padStart(2, "0");
   };
-  return `#${f(0)}${f(8)}${f(4)}${Math.round(a * 255)
+  const alpha = hsl[3].includes("%") ? parseInt(hsl[3], 10) / 100 : +hsl[3];
+  return `#${f(0)}${f(8)}${f(4)}${Math.round(alpha * 255)
     .toString(16)
     .padStart(2, "0")}`;
 };
@@ -244,14 +216,15 @@ export const HSLtoRGB = (hsl: number[]): number[] => {
   return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
 };
 
-export const HSLtoRGBA = (hsl: number[]): number[] => {
+export const HSLtoRGBA = (hsl: [number, number, number, string]): number[] => {
   const h = hsl[0];
   const s = (hsl[1] /= 100);
   const l = (hsl[2] /= 100);
   const k = (n: number) => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
   const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4)), hsl[3]];
+  const alpha = hsl[3].includes("%") ? parseInt(hsl[3], 10) / 100 : +hsl[3];
+  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4)), alpha];
 };
 
 // OKLCH Color Conversions
@@ -350,14 +323,4 @@ export const OKLCHtoHEX = (oklch: number[]): string => {
 export const OKLCHtoHSL = (oklch: number[]): number[] => {
   const rgb = OKLCHtoRGB(oklch);
   return RGBtoHSL(rgb);
-};
-
-export const Base64toDecode = (base64: string): string => {
-  const buff = Buffer.from(base64, "base64");
-  return buff.toString("ascii");
-};
-
-export const Base64toEncode = (base64: string): string => {
-  const buff = Buffer.from(base64);
-  return buff.toString("base64");
 };

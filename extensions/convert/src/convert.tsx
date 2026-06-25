@@ -2,13 +2,8 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { findClosestColor } from "./colors";
 
+import { REMtoPX, REMtoPT, PXtoREM, PXtoPT, PTtoREM, PTtoPX } from "./spacingsConversion";
 import {
-  REMtoPX,
-  REMtoPT,
-  PXtoREM,
-  PXtoPT,
-  PTtoREM,
-  PTtoPX,
   HEXtoRGBA,
   HEXtoRGB,
   HEXtoHSLA,
@@ -26,7 +21,8 @@ import {
   OKLCHtoRGB,
   OKLCHtoHEX,
   OKLCHtoHSL,
-} from "./conversions";
+} from "./colorsConversion";
+import { checkHslMatch } from "./matching";
 import { PXtoTailwindSpacing, REMtoTailwindSpacing } from "./spacings";
 
 function disableAdjustContrast(rawColor: string): Color.Dynamic {
@@ -131,22 +127,19 @@ export default function Command() {
     }
 
     // check if input is hsl color (comma-separated or space-separated)
-    const hslMatch = value.match(
-      /^hsla?\(\s*(?<h>\d{1,3})\s*(?:,\s*|\s+)(?<s>\d{1,3})%?\s*(?:,\s*|\s+)(?<l>\d{1,3})%?\s*(?:[,/]\s*(?<alpha>\d+\.?\d*|\.?\d+))?\s*\)$/i,
-    );
-    if (hslMatch && hslMatch.groups) {
+    const hslMatchGroups = checkHslMatch(value);
+    if (hslMatchGroups) {
       console.log("its a hsl");
-      const { h, s, l, alpha } = hslMatch.groups;
+      const { h, s, l, alpha } = hslMatchGroups;
       // if hsl color has alpha
       if (alpha) {
         setHEX(HSLtoHEX([+h, +s, +l]));
-        setHEXA(HSLtoHEXA([+h, +s, +l, +alpha]));
+        setHEXA(HSLtoHEXA([+h, +s, +l, alpha]));
         setRGB(HSLtoRGB([+h, +s, +l]));
-        setRGBA(HSLtoRGBA([+h, +s, +l, +alpha]));
+        setRGBA(HSLtoRGBA([+h, +s, +l, alpha]));
       } else {
         const hslToRgbResult = HSLtoRGB([+h, +s, +l]);
         setHEX(HSLtoHEX([+h, +s, +l]));
-        setHSL([+h, +s, +l]);
         setRGB(hslToRgbResult);
         setOKLCH(RGBtoOKLCH(hslToRgbResult));
         setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
