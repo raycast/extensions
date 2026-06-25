@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
-  environment,
   Form,
   getPreferenceValues,
   Icon,
@@ -19,9 +18,8 @@ import { getMessagesUrl, sendMessage } from "./helpers";
 import { useChats } from "./hooks/useChats";
 
 function createDeeplink(contactId: string, text: string) {
-  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const context = encodeURIComponent(JSON.stringify({ contactId, text }));
-  return `${protocol}extensions/thomaslombart/messages/send-message?launchContext=${context}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomaslombart/messages/send-message?launchContext=${context}`;
 }
 
 type Values = {

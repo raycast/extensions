@@ -568,6 +568,19 @@ export const sendMessage = async (
   let attachments =
     outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
   attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+  attachments = attachments.map(escapeAppleScriptString);
+
+  const messageAccount = message ? escapeAppleScriptString(message.account) : "";
+  const messageMailbox = mailbox ? escapeAppleScriptString(mailbox.name) : "";
+  const recipients = {
+    to: outgoingMessage.to.map(escapeAppleScriptString),
+    cc: outgoingMessage.cc.map(escapeAppleScriptString),
+    bcc: outgoingMessage.bcc.map(escapeAppleScriptString),
+  };
+  const sender = escapeAppleScriptString(outgoingMessage.from);
+  const subject = escapeAppleScriptString(outgoingMessage.subject);
+  const content = escapeAppleScriptString(outgoingMessage.content);
+  const messageId = message ? escapeAppleScriptString(String(message.id)) : "";
 
   const actionScript = (() => {
     switch (action) {
@@ -590,20 +603,18 @@ export const sendMessage = async (
     tell application "Mail"
       ${
         message && mailbox
-          ? `tell account "${message.account}"
-          set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+          ? `tell account "${messageAccount}"
+          set msg to (first message of (first mailbox whose name is "${messageMailbox}") whose id is "${messageId}")
         end tell`
           : ""
       }
-      set theTos to {"${outgoingMessage.to.join(`", "`)}"}
-      set theCcs to {"${outgoingMessage.cc.join(`", "`)}"}
-      set theBccs to {"${outgoingMessage.bcc.join(`", "`)}"}
+      set theTos to {"${recipients.to.join(`", "`)}"}
+      set theCcs to {"${recipients.cc.join(`", "`)}"}
+      set theBccs to {"${recipients.bcc.join(`", "`)}"}
       set theAttachments to {"${attachments.join(`", "`)}"}
       set newMessage to ${actionScript}
-      set senderValue to "${outgoingMessage.from}"
-      set properties of newMessage to {sender: senderValue, subject: "${
-        outgoingMessage.subject
-      }", content: "${outgoingMessage.content}", visible: false}
+      set senderValue to "${sender}"
+      set properties of newMessage to {sender: senderValue, subject: "${subject}", content: "${content}", visible: false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}

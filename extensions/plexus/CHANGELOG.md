@@ -1,5 +1,11 @@
 # Plexus Changelog
 
+## [Fix favicon and title caching] - 2026-06-23
+
+### Fixed
+
+- Each service now shows its own favicon and page title instead of briefly displaying the icon/title of a previously viewed service (disabled `keepPreviousData` in the favicon and page-title fetch hooks)
+
 ## [1.2.0] - 2026-06-01
 
 ### Added

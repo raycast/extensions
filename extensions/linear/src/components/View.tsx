@@ -21,7 +21,7 @@ interface AuthErrorBoundaryState {
 }
 
 /**
- * Catches OAuth errors (e.g. fetch failed, invalid_grant) and shows a recoverable
+ * Catches OAuth errors (e.g. invalid_grant) and shows a recoverable
  * "Sign In" screen instead of Raycast's generic "Something went wrong" overlay.
  */
 class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, AuthErrorBoundaryState> {

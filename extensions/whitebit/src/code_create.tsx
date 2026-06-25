@@ -45,7 +45,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.CodeCr
       toast.style = Style.Success;
       toast.title = "Code created successfully!";
 
-      open("raycast://confetti");
+      open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
 
       await popToRoot();
     } catch (e) {

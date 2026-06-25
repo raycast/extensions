@@ -1,15 +1,9 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
+import { List } from "@raycast/api";
 import { buildAppUrl } from "../helpers/appUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { ProjectResourceList } from "../helpers/ProjectResourceList";
+import { ResourceActions } from "../helpers/ResourceActions";
+import { WithProjects, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
-
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Dashboard[];
-};
 
 type Dashboard = {
   id: number;
@@ -25,28 +19,10 @@ type Dashboard = {
 };
 
 function Dashboards() {
-  const { selectedAccount, selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/dashboards", {
-    account: selectedAccount,
-    execute: selectedId !== null && selectedAccount !== null,
-  });
-
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search dashboards..."
-      searchBarAccessory={<ProjectSelector />}
-      isShowingDetail={true}
-      throttle
-    >
-      {data ? (
-        <List.Section title="Results">
-          {data.results.map((dashboard) => (
-            <ResultsListSection key={dashboard.id} dashboard={dashboard} />
-          ))}
-        </List.Section>
-      ) : null}
-    </List>
+    <ProjectResourceList<Dashboard> endpoint="dashboards" searchBarPlaceholder="Search dashboards..." isShowingDetail>
+      {(dashboards) => dashboards.map((dashboard) => <ResultsListSection key={dashboard.id} dashboard={dashboard} />)}
+    </ProjectResourceList>
   );
 }
 
@@ -87,20 +63,7 @@ const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
           }
         />
       }
-      actions={
-        <ActionPanel title={dashboard.name}>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={appUrl} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={appUrl}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={<ResourceActions title={dashboard.name} url={appUrl} />}
     />
   );
 };

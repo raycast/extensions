@@ -1,15 +1,9 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
+import { List } from "@raycast/api";
 import { buildAppUrl } from "../helpers/appUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { ProjectResourceList } from "../helpers/ProjectResourceList";
+import { ResourceActions } from "../helpers/ResourceActions";
+import { WithProjects, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
-
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Cohort[];
-};
 
 type Cohort = {
   id: number;
@@ -25,28 +19,10 @@ type Cohort = {
 };
 
 function Cohorts() {
-  const { selectedAccount, selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts", {
-    account: selectedAccount,
-    execute: selectedId !== null && selectedAccount !== null,
-  });
-
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search cohorts..."
-      searchBarAccessory={<ProjectSelector />}
-      isShowingDetail={true}
-      throttle
-    >
-      {data ? (
-        <List.Section title="Results">
-          {data.results.map((cohort) => (
-            <ResultsListSection key={cohort.id} cohort={cohort} />
-          ))}
-        </List.Section>
-      ) : null}
-    </List>
+    <ProjectResourceList<Cohort> endpoint="cohorts" searchBarPlaceholder="Search cohorts..." isShowingDetail>
+      {(cohorts) => cohorts.map((cohort) => <ResultsListSection key={cohort.id} cohort={cohort} />)}
+    </ProjectResourceList>
   );
 }
 
@@ -91,20 +67,7 @@ const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
           }
         />
       }
-      actions={
-        <ActionPanel title={cohort.name}>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={appUrl} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={appUrl}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={<ResourceActions title={cohort.name} url={appUrl} />}
     />
   );
 };

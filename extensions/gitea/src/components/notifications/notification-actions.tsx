@@ -8,12 +8,17 @@ export default function NotificationActions(props: {
   item: NotificationThread;
   mutate?: PaginatedResourceMutate<NotificationThread>;
 }) {
-  const subjectUrl = props.item.subject?.html_url;
+  const subjectUrl = props.item.subject?.latest_comment_html_url || props.item.subject?.html_url;
+  const notificationId = props.item.id != null ? String(props.item.id) : undefined;
   const isPinned = Boolean(props.item.pinned);
   const { readAll, runWithToast, updateStatus } = useNotificationActions();
 
   const runUpdate = async (toStatus: NotificationStatus) => {
-    const updatePromise = updateStatus({ id: String(props.item.id), toStatus });
+    if (!notificationId) {
+      throw new Error("Notification thread ID is missing");
+    }
+
+    const updatePromise = updateStatus({ id: notificationId, toStatus });
     if (props.mutate) {
       await props.mutate(updatePromise, { shouldRevalidateAfter: true });
       return;
@@ -30,7 +35,11 @@ export default function NotificationActions(props: {
   };
 
   const togglePinStatus = async () => {
-    const toStatus = isPinned ? NotificationStatus.Unread : NotificationStatus.Pinned;
+    const toStatus = isPinned
+      ? props.item.unread
+        ? NotificationStatus.Unread
+        : NotificationStatus.Read
+      : NotificationStatus.Pinned;
 
     await runWithToast(runUpdate(toStatus), {
       success: `${isPinned ? "Unpinned" : "Pinned"} notification`,
@@ -69,21 +78,25 @@ export default function NotificationActions(props: {
       </ActionPanel.Section>
       <ActionPanel.Section title="Actions">
         <Action title="Mark All as Read" icon={Icon.Eye} onAction={markAllAsRead} />
-        <Action
-          title={props.item.unread ? "Mark as Read" : "Mark as Unread"}
-          icon={props.item.unread ? Icon.Eye : Icon.EyeDisabled}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "r" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-          }}
-          onAction={toggleReadStatus}
-        />
-        <Action
-          title={props.item.pinned ? "Unpin Notification" : "Pin Notification"}
-          icon={Icon.Pin}
-          shortcut={Keyboard.Shortcut.Common.Pin}
-          onAction={togglePinStatus}
-        />
+        {notificationId ? (
+          <>
+            <Action
+              title={props.item.unread ? "Mark as Read" : "Mark as Unread"}
+              icon={props.item.unread ? Icon.Eye : Icon.EyeDisabled}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+              }}
+              onAction={toggleReadStatus}
+            />
+            <Action
+              title={props.item.pinned ? "Unpin Notification" : "Pin Notification"}
+              icon={Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+              onAction={togglePinStatus}
+            />
+          </>
+        ) : null}
       </ActionPanel.Section>
     </ActionPanel>
   );

@@ -1,34 +1,25 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { buildAppUrl, buildWebUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
-import { handleError } from "./utils/errors";
 import { stripHtml } from "./utils/stripHtml";
+import { handleError } from "./utils/errors";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      const result = await remoApi.listNotes({ limit: 50 });
+      return result.filter((n: Note) => n.isPinned);
+    },
+    [],
+    { onError: (error) => handleError(error, "Failed to fetch pinned notes") },
+  );
 
-  useEffect(() => {
-    async function fetchNotes() {
-      setIsLoading(true);
-      try {
-        const result = await remoApi.listNotes({ limit: 50 });
-        const pinned = result.filter((n: Note) => n.isPinned);
-        setNotes(pinned);
-      } catch (error) {
-        handleError(error, "Failed to fetch pinned notes");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchNotes();
-  }, []);
+  const notes = data ?? [];
 
   return (
-    <MenuBarExtra icon={Icon.Pencil} isLoading={isLoading} tooltip="Remo Pinned Notes">
+    <MenuBarExtra icon={Icon.Pin} isLoading={isLoading} tooltip="Remo Pinned Notes">
       {notes.length === 0 ? (
         <MenuBarExtra.Item title="No pinned notes" />
       ) : (

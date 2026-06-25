@@ -6,13 +6,21 @@
   "icon": "orion-icon.png",
   "author": "plonq",
   "contributors": [
-    "erics118"
+    "erics118",
+    "gianni_sanrochman"
   ],
   "categories": [
     "Web"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "command-bar",
+      "title": "Command Bar",
+      "subtitle": "Orion",
+      "description": "Search tabs, bookmarks, history, reading list, and the web in one place",
+      "mode": "view"
+    },
     {
       "name": "bookmarks",
       "title": "Search Orion Bookmarks",
@@ -55,20 +63,57 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "searchEngine",
+      "title": "Search Engine",
+      "description": "Engine used for the Command Bar's live suggestions and web-search fallback",
+      "type": "dropdown",
+      "required": false,
+      "default": "duckduckgo",
+      "data": [
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "Brave",
+          "value": "brave"
+        },
+        {
+          "title": "Kagi (no autocomplete)",
+          "value": "kagi"
+        }
+      ]
+    },
+    {
+      "name": "autoCloseLauncherTabs",
+      "title": "Command Bar",
+      "label": "Auto-close launcher tabs",
+      "description": "When the Command Bar opens, close leftover blank tabs created when Orion's homepage / new-tab is set to the Command Bar deeplink",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.0",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.6",
     "bplist-parser": "^0.3.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.6.0",
-    "@typescript-eslint/parser": "^6.6.0",
-    "eslint": "^8.49.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

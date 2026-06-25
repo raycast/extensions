@@ -1,0 +1,13 @@
+node_modules
+.DS_Store
+dist
+*.log
+.raycast
+.claude/
+
+# Local dev helper scripts and their inputs/outputs (kept out of the repo and the
+# store submission; the finished 2000x1250 screenshots in metadata/ are committed)
+scripts/
+shots-raw/
+_sstest_*
+hdr-toggle-demo.gif

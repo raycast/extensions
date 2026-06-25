@@ -130,22 +130,23 @@ export default function Command() {
       }
     }
 
-    // check if input is hsl color
+    // check if input is hsl color (comma-separated or space-separated)
     const hslMatch = value.match(
-      /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
+      /^hsla?\(\s*(?<h>\d{1,3})\s*(?:,\s*|\s+)(?<s>\d{1,3})%?\s*(?:,\s*|\s+)(?<l>\d{1,3})%?\s*(?:[,/]\s*(?<alpha>\d+\.?\d*|\.?\d+))?\s*\)$/i,
     );
-    if (hslMatch) {
+    if (hslMatch && hslMatch.groups) {
       console.log("its a hsl");
+      const { h, s, l, alpha } = hslMatch.groups;
       // if hsl color has alpha
-      if (hslMatch.groups && hslMatch.groups.alpha) {
-        setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
-        setHEXA(HSLtoHEXA([+hslMatch[2], +hslMatch[4], +hslMatch[7], +hslMatch.groups.alpha]));
-        setRGB(HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
-        setRGBA(HSLtoRGBA([+hslMatch[2], +hslMatch[4], +hslMatch[7], +hslMatch.groups.alpha]));
+      if (alpha) {
+        setHEX(HSLtoHEX([+h, +s, +l]));
+        setHEXA(HSLtoHEXA([+h, +s, +l, +alpha]));
+        setRGB(HSLtoRGB([+h, +s, +l]));
+        setRGBA(HSLtoRGBA([+h, +s, +l, +alpha]));
       } else {
-        const hslToRgbResult = HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
-        setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
-        setHSL([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
+        const hslToRgbResult = HSLtoRGB([+h, +s, +l]);
+        setHEX(HSLtoHEX([+h, +s, +l]));
+        setHSL([+h, +s, +l]);
         setRGB(hslToRgbResult);
         setOKLCH(RGBtoOKLCH(hslToRgbResult));
         setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));

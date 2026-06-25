@@ -1,15 +1,9 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
+import { List } from "@raycast/api";
 import { buildAppUrl } from "../helpers/appUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { ProjectResourceList } from "../helpers/ProjectResourceList";
+import { ResourceActions } from "../helpers/ResourceActions";
+import { WithProjects, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
-
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: FeatureFlag[];
-};
 
 type FeatureFlag = {
   id: number;
@@ -17,27 +11,12 @@ type FeatureFlag = {
 };
 
 function FeatureFlags() {
-  const { selectedAccount, selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/feature_flags", {
-    account: selectedAccount,
-    execute: selectedId !== null && selectedAccount !== null,
-  });
-
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search feature flags..."
-      searchBarAccessory={<ProjectSelector />}
-      throttle
-    >
-      {data ? (
-        <List.Section title="Results">
-          {data.results.map((featureFlag) => (
-            <ResultsListSection key={featureFlag.id} featureFlag={featureFlag} />
-          ))}
-        </List.Section>
-      ) : null}
-    </List>
+    <ProjectResourceList<FeatureFlag> endpoint="feature_flags" searchBarPlaceholder="Search feature flags...">
+      {(featureFlags) =>
+        featureFlags.map((featureFlag) => <ResultsListSection key={featureFlag.id} featureFlag={featureFlag} />)
+      }
+    </ProjectResourceList>
   );
 }
 
@@ -49,20 +28,7 @@ const ResultsListSection = ({ featureFlag }: { featureFlag: FeatureFlag }) => {
     <List.Item
       key={featureFlag.id}
       title={featureFlag.key}
-      actions={
-        <ActionPanel title={featureFlag.key}>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={appUrl} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={appUrl}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={<ResourceActions title={featureFlag.key} url={appUrl} />}
     />
   );
 };
