@@ -108,7 +108,10 @@ export default function SearchOpenTabs() {
             title={tab.name}
             subtitle={shortenPath(tab.folder)}
             icon={Icon.Document}
-            keywords={tab.name.split(/[_\-\s]+|(?<=[a-z])(?=[A-Z])/)}
+            keywords={tab.name.split(/[_\-\s]+/).flatMap((w) => {
+              const parts = w.split(/(?<=[a-z])(?=[A-Z])/);
+              return parts.length > 1 ? [w, ...parts] : [w];
+            })}
             actions={
               <ActionPanel>
                 <Action
