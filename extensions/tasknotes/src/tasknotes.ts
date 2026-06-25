@@ -269,7 +269,13 @@ function parseMarkdown(raw: string): { frontmatter: Record<string, unknown>; bod
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return undefined;
 
-  const frontmatter = YAML.parse(match[1]) ?? {};
+  let frontmatter: unknown;
+  try {
+    frontmatter = YAML.parse(match[1]) ?? {};
+  } catch {
+    return undefined;
+  }
+
   if (typeof frontmatter !== "object" || Array.isArray(frontmatter)) return undefined;
 
   return {
