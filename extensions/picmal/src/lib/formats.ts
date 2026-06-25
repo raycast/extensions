@@ -1,5 +1,8 @@
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { locateCli } from "./cli";
+
+const execFileAsync = promisify(execFile);
 
 /** Supported output formats grouped by media category. */
 export interface FormatGroups {
@@ -84,7 +87,7 @@ export function targetCategories(inputCategories: Set<MediaCategory>): Set<Media
  * single `completed` NDJSON line with a `formats` object. Returns empty groups
  * if the CLI can't be reached or parsed (callers degrade to a free-text field).
  */
-export function loadFormats(): FormatGroups {
+export async function loadFormats(): Promise<FormatGroups> {
   let cli: string;
   try {
     cli = locateCli();
@@ -93,7 +96,7 @@ export function loadFormats(): FormatGroups {
   }
 
   try {
-    const stdout = execFileSync(cli, ["formats", "--json"], { encoding: "utf8" });
+    const { stdout } = await execFileAsync(cli, ["formats", "--json"], { encoding: "utf8" });
     for (const line of stdout.split("\n")) {
       const trimmed = line.trim();
       if (!trimmed.startsWith("{")) continue;

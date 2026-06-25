@@ -1,5 +1,8 @@
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { locateCli } from "./cli";
+
+const execFileAsync = promisify(execFile);
 
 /** A compression preset row, mirrored from `presets list --json`. */
 export interface Preset {
@@ -15,7 +18,7 @@ export interface Preset {
  * emits a single `completed` NDJSON line with a `presets` array. Returns an
  * empty list if the CLI can't be reached (the form's preset picker is optional).
  */
-export function loadPresets(): Preset[] {
+export async function loadPresets(): Promise<Preset[]> {
   let cli: string;
   try {
     cli = locateCli();
@@ -24,7 +27,7 @@ export function loadPresets(): Preset[] {
   }
 
   try {
-    const stdout = execFileSync(cli, ["presets", "list", "--json"], { encoding: "utf8" });
+    const { stdout } = await execFileAsync(cli, ["presets", "list", "--json"], { encoding: "utf8" });
     for (const line of stdout.split("\n")) {
       const trimmed = line.trim();
       if (!trimmed.startsWith("{")) continue;

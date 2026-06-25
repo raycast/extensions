@@ -24,7 +24,7 @@ export default function Combine() {
   const { handleSubmit, itemProps, setValue, values } = useForm<CombineFormValues>({
     async onSubmit(values) {
       await runAndReport("combine", {
-        input: values.input,
+        input: pdfsOnly(values.input),
         overwrite: values.overwrite,
       });
       await popToRoot();

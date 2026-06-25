@@ -7,16 +7,7 @@ import { runAndReport } from "./lib/feedback";
 import { selectedFinderPaths } from "./lib/finder";
 import { FormatGroups, humanJoin, loadFormats, mediaRoots, selectedCategories, targetCategories } from "./lib/formats";
 import { convertDefaults } from "./lib/preferences";
-
-const QUALITY_OPTIONS = [
-  { title: "Automatic", value: "" },
-  { title: "Maximum (100)", value: "100" },
-  { title: "High (90)", value: "90" },
-  { title: "Balanced (80)", value: "80" },
-  { title: "Small (70)", value: "70" },
-  { title: "Smaller (60)", value: "60" },
-  { title: "Smallest (50)", value: "50" },
-];
+import { QUALITY_OPTIONS } from "./lib/constants";
 
 const GROUPS: { key: keyof FormatGroups; title: string; icon: Icon }[] = [
   { key: "image", title: "Image", icon: Icon.Image },
@@ -38,7 +29,7 @@ export default function Convert() {
   // Deferred so Spotlight (mdfind) never runs on the synchronous render path.
   const { data: installed } = usePromise(async () => isPicmalInstalled());
   const defaults = useMemo(() => convertDefaults(), []);
-  const { data: formats, isLoading: loadingFormats } = usePromise(async () => loadFormats());
+  const { data: formats, isLoading: loadingFormats } = usePromise(loadFormats);
   const { data: finderPaths, isLoading: loadingFinder } = usePromise(selectedFinderPaths);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ConvertFormValues>({

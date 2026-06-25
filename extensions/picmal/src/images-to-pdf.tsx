@@ -41,13 +41,13 @@ function imagesOnly(paths: string[], formats: FormatGroups | undefined): string[
 export default function ImagesToPDF() {
   // Deferred so Spotlight (mdfind) never runs on the synchronous render path.
   const { data: installed } = usePromise(async () => isPicmalInstalled());
-  const { data: formats, isLoading: loadingFormats } = usePromise(async () => loadFormats());
+  const { data: formats, isLoading: loadingFormats } = usePromise(loadFormats);
   const { data: finderPaths, isLoading: loadingFinder } = usePromise(selectedFinderPaths);
 
   const { handleSubmit, itemProps, setValue } = useForm<ImagesToPDFFormValues>({
     async onSubmit(values) {
       await runAndReport("images-to-pdf", {
-        input: values.input,
+        input: imagesOnly(values.input, formats),
         pageSize: values.pageSize || "fit",
         // Empty → omit so the CLI applies its default (85).
         quality: values.quality ? Number(values.quality) : undefined,

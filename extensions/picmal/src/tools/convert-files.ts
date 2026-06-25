@@ -26,8 +26,8 @@ export default async function (input: Input) {
   const result = await run("convert", {
     input: input.paths,
     format: input.format.trim().toLowerCase().replace(/^\./, ""),
-    // A provided quality compresses the output; omitted → max quality (format change only).
-    quality: input.quality ?? 100,
+    // Provided quality compresses; omitted → CLI does a pure format change (lets video stream-copy).
+    quality: input.quality,
     stripMetadata: input.stripMetadata,
     overwrite: input.overwrite,
   });
