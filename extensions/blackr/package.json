@@ -41,7 +41,7 @@
     "blackout"
   ],
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
@@ -55,14 +55,7 @@
     "@types/node": "26.0.1",
     "eslint": "9.36.0",
     "prettier": "3.8.4",
-    "typescript": "6.0.3"
-  },
-  "overrides": {
-    "@eslint/js": "9.36.0",
-    "@typescript-eslint/eslint-plugin": "8.45.0",
-    "@typescript-eslint/parser": "8.45.0",
-    "@typescript-eslint/utils": "8.45.0",
-    "@typescript-eslint/visitor-keys": "8.45.0"
+    "typescript": "5.9.3"
   },
   "contributors": [
     "0xdhrv"
