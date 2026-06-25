@@ -1,5 +1,9 @@
 # Google Tasks Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Await task creation before showing success and closing the create task form.
+
 ## [Fix] - 2026-03-31
 
 - Fix due date timezone shift for UTC+ users
