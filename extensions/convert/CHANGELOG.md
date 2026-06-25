@@ -1,6 +1,6 @@
 # Convert Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-25
 
 - Added support for modern space-separated hsl() color syntax
 
