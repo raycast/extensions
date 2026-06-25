@@ -21,6 +21,9 @@ const SCOPES = [
   "cohort:read",
   "dashboard:read",
   "person:read",
+  "insight:read",
+  "query:read",
+  "user:read",
 ].join(" ");
 
 type OAuthServerMetadata = {

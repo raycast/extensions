@@ -1,6 +1,8 @@
-import { clampLimit, getDefaultProjectId, posthogRequest, truncateValue } from "../posthog-client";
+import { clampLimit, posthogRequest, truncateValue } from "../posthog-client";
+import { requireAccountId, requireProjectId } from "../tool-auth";
 
 type Input = {
+  accountId?: string;
   projectId?: number;
   search?: string;
   /** Comma-separated table names to include. */
@@ -62,6 +64,7 @@ function extractSchemaTables(response: SchemaResponse): unknown[] {
 }
 
 export default async function tool({
+  accountId,
   projectId,
   search,
   tables,
@@ -69,11 +72,12 @@ export default async function tool({
   limitTables,
   limitColumnsPerTable,
 }: Input = {}) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
+  const resolvedAccountId = requireAccountId(accountId);
+  const resolvedProjectId = requireProjectId(projectId);
   const tableLimit = clampLimit(limitTables, 50, 200);
   const columnLimit = clampLimit(limitColumnsPerTable, 50, 200);
 
-  const response = await posthogRequest<SchemaResponse>(`projects/${resolvedProjectId}/query/`, {
+  const response = await posthogRequest<SchemaResponse>(resolvedAccountId, `projects/${resolvedProjectId}/query/`, {
     method: "POST",
     body: {
       query: {
@@ -103,6 +107,7 @@ export default async function tool({
     }));
 
   return {
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     tables: filteredTables,
     returnedTables: filteredTables.length,

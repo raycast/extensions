@@ -14,12 +14,18 @@ type Insight = {
 };
 
 export default async function tool({
+  accountId,
   projectId,
   search,
   limit,
   includeFilters = false,
 }: ProjectResourceSearchInput = {}) {
-  const { resolvedProjectId, response } = await listProjectResources<Insight>({
+  const {
+    accountId: resolvedAccountId,
+    resolvedProjectId,
+    response,
+  } = await listProjectResources<Insight>({
+    accountId,
     projectId,
     endpoint: "insights",
     search,
@@ -29,6 +35,7 @@ export default async function tool({
   });
 
   return {
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     count: response.count,
     next: response.next,

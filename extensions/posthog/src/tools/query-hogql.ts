@@ -1,6 +1,7 @@
 import { runHogQL } from "../posthog-client";
 
 type Input = {
+  accountId?: string;
   projectId?: number;
   query: string;
   maxRows?: number;

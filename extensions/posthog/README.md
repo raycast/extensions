@@ -10,10 +10,4 @@ You can connect multiple accounts. Commands that are scoped to a project let you
 
 ## Configuring AI Tools
 
-The AI tools use a `phx_` personal API key. Add it in the extension preferences, set `POSTHOG_PERSONAL_API_KEY`, or provide it through a PostHog credentials file.
-
-To create a personal API key:
-
-1. Go to https://us.posthog.com/me/settings or https://eu.posthog.com/me/settings
-2. Click "Create personal API key"
-3. Copy the token into the "Personal API Key" field in the extension preferences
+The AI tools use the same OAuth-connected accounts. Ask the AI assistant to list projects first; it will receive account IDs and project IDs, then pass those IDs to the analytics tools.

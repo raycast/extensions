@@ -1,26 +1,6 @@
-import { environment, getPreferenceValues } from "@raycast/api";
-import fs from "fs";
-import os from "os";
-import path from "path";
-
-type CredentialsFile = {
-  host?: string;
-  apiHost?: string;
-  personalAPIKey?: string;
-  personal_api_key?: string;
-  posthogPersonalApiKey?: string;
-  token?: string;
-  apiKey?: string;
-  api_key?: string;
-  projectId?: number | string;
-  project_id?: number | string;
-};
-
-type PostHogPreferences = {
-  personalAPIKey?: string;
-  dataRegionURL?: string;
-  defaultProjectId?: string;
-};
+import { accountLabel } from "../helpers/account-model";
+import { AuthenticatedPostHogAccount, getAuthenticatedAccounts } from "../helpers/posthog-auth";
+import { requireProjectId, resolveToolAccount } from "./tool-auth";
 
 type RequestOptions = {
   method?: "GET" | "POST";
@@ -29,6 +9,7 @@ type RequestOptions = {
 };
 
 export type ProjectResourceSearchInput = {
+  accountId?: string;
   projectId?: number;
   search?: string;
   limit?: number;
@@ -48,6 +29,25 @@ export type Project = {
   uuid?: string;
   organization?: { id?: string; name?: string };
   timezone?: string;
+};
+
+type ToolProject = {
+  accountId: string;
+  id: number;
+  name?: string;
+  uuid?: string;
+  organization?: { id?: string; name?: string };
+  timezone?: string;
+};
+
+type ToolAccountProjects = ReturnType<typeof accountSummary> & {
+  count?: number;
+  next?: string | null;
+  projects: ToolProject[];
+};
+
+type ToolAccountFailure = ReturnType<typeof accountSummary> & {
+  error: string;
 };
 
 export type HogQLResponse = {
@@ -72,110 +72,9 @@ export type HogQLResponse = {
   error?: string;
 };
 
-const DEFAULT_HOST = "https://us.posthog.com";
 const MAX_LIMIT = 200;
 const MAX_QUERY_ROWS = 1000;
 const DEFAULT_CELL_LENGTH = 500;
-
-export function normalizeHost(host?: string): string {
-  if (!host) return DEFAULT_HOST;
-  const normalized = host.replace(/\/$/, "");
-  if (normalized === "https://app.posthog.com") return DEFAULT_HOST;
-  return normalized;
-}
-
-function isPersonalApiKey(value?: string): value is string {
-  return Boolean(value && value.trim().startsWith("phx_"));
-}
-
-function readCredentialsFile(filePath?: string): CredentialsFile | undefined {
-  if (!filePath) return undefined;
-
-  try {
-    if (!fs.existsSync(filePath)) return undefined;
-    return JSON.parse(fs.readFileSync(filePath, "utf8")) as CredentialsFile;
-  } catch {
-    return undefined;
-  }
-}
-
-function getCredentialFiles(): CredentialsFile[] {
-  const candidates = [
-    process.env.POSTHOG_CONFIG,
-    path.join(process.cwd(), "credentials.json"),
-    path.join(environment.assetsPath, "..", "credentials.json"),
-    path.join(os.homedir(), ".config", "posthog", "credentials.json"),
-  ];
-
-  return candidates
-    .filter((candidate): candidate is string => Boolean(candidate))
-    .map(readCredentialsFile)
-    .filter(Boolean) as CredentialsFile[];
-}
-
-function getFileApiKey(file: CredentialsFile): string | undefined {
-  return (
-    file.personalAPIKey ??
-    file.personal_api_key ??
-    file.posthogPersonalApiKey ??
-    file.token ??
-    file.apiKey ??
-    file.api_key
-  );
-}
-
-function getFileHost(file: CredentialsFile): string | undefined {
-  return file.host ?? file.apiHost;
-}
-
-function getFileProjectId(file: CredentialsFile): number | string | undefined {
-  return file.projectId ?? file.project_id;
-}
-
-function getCredentials() {
-  const preferences = getPreferenceValues<PostHogPreferences>();
-  const files = getCredentialFiles();
-
-  const apiKey = [
-    process.env.POSTHOG_PERSONAL_API_KEY,
-    process.env.POSTHOG_API_KEY,
-    ...files.map(getFileApiKey),
-    preferences.personalAPIKey,
-  ].find(isPersonalApiKey);
-
-  if (!apiKey) {
-    throw new Error(
-      "Missing PostHog personal API key. Use a phx_ personal API key in extension preferences, POSTHOG_PERSONAL_API_KEY, POSTHOG_CONFIG, or ~/.config/posthog/credentials.json. Project keys starting with phc_ are intentionally ignored.",
-    );
-  }
-
-  const host = normalizeHost(
-    process.env.POSTHOG_HOST ??
-      process.env.POSTHOG_API_HOST ??
-      files.map(getFileHost).find(Boolean) ??
-      preferences.dataRegionURL,
-  );
-
-  const defaultProjectId =
-    process.env.POSTHOG_PROJECT_ID ?? files.map(getFileProjectId).find(Boolean) ?? preferences.defaultProjectId;
-
-  return {
-    apiKey,
-    host,
-    defaultProjectId: defaultProjectId ? Number(defaultProjectId) : undefined,
-  };
-}
-
-export function getDefaultProjectId(projectId?: number): number {
-  if (projectId) return projectId;
-
-  const { defaultProjectId } = getCredentials();
-  if (!defaultProjectId) {
-    throw new Error("Missing projectId. Pass projectId explicitly or set Default Project ID in preferences.");
-  }
-
-  return defaultProjectId;
-}
 
 function buildUrl(host: string, endpoint: string, query?: RequestOptions["query"]): string {
   const url = new URL(`/api/${endpoint.replace(/^\//, "")}`, host);
@@ -189,12 +88,40 @@ function buildUrl(host: string, endpoint: string, query?: RequestOptions["query"
   return url.toString();
 }
 
-export async function posthogRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { apiKey, host } = getCredentials();
-  const response = await fetch(buildUrl(host, endpoint, options.query), {
+function accountSummary(account: AuthenticatedPostHogAccount) {
+  return {
+    accountId: account.id,
+    label: accountLabel(account),
+    email: account.email,
+    name: account.name,
+    region: account.region,
+    baseUrl: account.baseUrl,
+  };
+}
+
+async function getConnectedAccounts(): Promise<AuthenticatedPostHogAccount[]> {
+  const { accounts } = await getAuthenticatedAccounts();
+
+  if (accounts.length === 0) {
+    throw new Error("No PostHog accounts are connected. Open Manage Accounts and connect a PostHog account.");
+  }
+
+  return accounts;
+}
+
+export async function getToolAccount(accountId: string | undefined): Promise<AuthenticatedPostHogAccount> {
+  return resolveToolAccount(await getConnectedAccounts(), accountId);
+}
+
+async function posthogRequestForAccount<T>(
+  account: AuthenticatedPostHogAccount,
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const response = await fetch(buildUrl(account.baseUrl, endpoint, options.query), {
     method: options.method ?? "GET",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${account.accessToken}`,
       "Content-Type": "application/json",
     },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
@@ -206,6 +133,14 @@ export async function posthogRequest<T>(endpoint: string, options: RequestOption
   }
 
   return (await response.json()) as T;
+}
+
+export async function posthogRequest<T>(
+  accountId: string | undefined,
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  return posthogRequestForAccount(await getToolAccount(accountId), endpoint, options);
 }
 
 export function clampLimit(limit: number | undefined, fallback = 50, max = MAX_LIMIT): number {
@@ -244,16 +179,59 @@ export function pickProperties(
   return Object.fromEntries(entries.map(([key, value]) => [key, truncateValue(value, maxLength)]));
 }
 
-export async function listProjects(search?: string, limit?: number): Promise<PaginatedResponse<Project>> {
-  return posthogRequest<PaginatedResponse<Project>>("projects/", {
-    query: {
-      search,
-      limit: clampLimit(limit),
-    },
+export async function listProjects(search?: string, limit?: number) {
+  const accounts = await getConnectedAccounts();
+  const results = await Promise.allSettled(
+    accounts.map(async (account) => {
+      const response = await posthogRequestForAccount<PaginatedResponse<Project>>(account, "projects/", {
+        query: {
+          search,
+          limit: clampLimit(limit),
+        },
+      });
+
+      return {
+        ...accountSummary(account),
+        count: response.count,
+        next: response.next,
+        projects: (response.results ?? []).map((project) => ({
+          accountId: account.id,
+          id: project.id,
+          name: project.name,
+          uuid: project.uuid,
+          timezone: project.timezone,
+          organization: project.organization
+            ? { id: project.organization.id, name: project.organization.name }
+            : undefined,
+        })),
+      };
+    }),
+  );
+
+  const accountResults: ToolAccountProjects[] = [];
+  const failures: ToolAccountFailure[] = [];
+
+  results.forEach((result, index) => {
+    const account = accounts[index];
+
+    if (result.status === "fulfilled") {
+      accountResults.push(result.value);
+    } else {
+      failures.push({
+        ...accountSummary(account),
+        error: String(result.reason),
+      });
+    }
   });
+
+  return {
+    accounts: accountResults,
+    failures,
+  };
 }
 
 export async function listProjectResources<T>({
+  accountId,
   projectId,
   endpoint,
   search,
@@ -261,6 +239,7 @@ export async function listProjectResources<T>({
   defaultLimit,
   maxLimit,
 }: {
+  accountId?: string;
   projectId?: number;
   endpoint: string;
   search?: string;
@@ -268,15 +247,20 @@ export async function listProjectResources<T>({
   defaultLimit?: number;
   maxLimit?: number;
 }) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const response = await posthogRequest<PaginatedResponse<T>>(`projects/${resolvedProjectId}/${endpoint}/`, {
-    query: {
-      search,
-      limit: clampLimit(limit, defaultLimit, maxLimit),
+  const account = await getToolAccount(accountId);
+  const resolvedProjectId = requireProjectId(projectId);
+  const response = await posthogRequestForAccount<PaginatedResponse<T>>(
+    account,
+    `projects/${resolvedProjectId}/${endpoint}/`,
+    {
+      query: {
+        search,
+        limit: clampLimit(limit, defaultLimit, maxLimit),
+      },
     },
-  });
+  );
 
-  return { resolvedProjectId, response };
+  return { accountId: account.id, resolvedProjectId, response };
 }
 
 function hasQueryResults(response: HogQLResponse): boolean {
@@ -292,11 +276,13 @@ function getQueryId(response: HogQLResponse): string | undefined {
 }
 
 export async function runHogQL({
+  accountId,
   projectId,
   query,
   maxRows,
   maxCellLength,
 }: {
+  accountId?: string;
   projectId?: number;
   query: string;
   maxRows?: number;
@@ -307,11 +293,12 @@ export async function runHogQL({
     throw new Error("Only read-only HogQL SELECT queries are supported.");
   }
 
-  const resolvedProjectId = getDefaultProjectId(projectId);
+  const account = await getToolAccount(accountId);
+  const resolvedProjectId = requireProjectId(projectId);
   const rowLimit = clampLimit(maxRows, 100, MAX_QUERY_ROWS);
   const cellLength = clampLimit(maxCellLength, DEFAULT_CELL_LENGTH, 5000);
 
-  let response = await posthogRequest<HogQLResponse>(`projects/${resolvedProjectId}/query/`, {
+  let response = await posthogRequestForAccount<HogQLResponse>(account, `projects/${resolvedProjectId}/query/`, {
     method: "POST",
     body: {
       query: {
@@ -327,7 +314,10 @@ export async function runHogQL({
 
   while (!hasQueryResults(response) && queryId && status !== "failed" && status !== "error" && attempts < 30) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    response = await posthogRequest<HogQLResponse>(`projects/${resolvedProjectId}/query/${queryId}/`);
+    response = await posthogRequestForAccount<HogQLResponse>(
+      account,
+      `projects/${resolvedProjectId}/query/${queryId}/`,
+    );
     status = getQueryStatus(response);
     attempts += 1;
   }
@@ -349,6 +339,7 @@ export async function runHogQL({
   });
 
   return {
+    accountId: account.id,
     projectId: resolvedProjectId,
     columns,
     types: response.types ?? response.query_status?.types,

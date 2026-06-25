@@ -1,6 +1,7 @@
 import { listProjectResources, pickProperties } from "../posthog-client";
 
 type Input = {
+  accountId?: string;
   projectId?: number;
   search?: string;
   limit?: number;
@@ -18,8 +19,20 @@ type Person = {
   created_at?: string;
 };
 
-export default async function tool({ search, projectId, limit, propertyKeys, maxPropertyValueLength }: Input = {}) {
-  const { resolvedProjectId, response } = await listProjectResources<Person>({
+export default async function tool({
+  accountId,
+  search,
+  projectId,
+  limit,
+  propertyKeys,
+  maxPropertyValueLength,
+}: Input = {}) {
+  const {
+    accountId: resolvedAccountId,
+    resolvedProjectId,
+    response,
+  } = await listProjectResources<Person>({
+    accountId,
     projectId,
     endpoint: "persons",
     search,
@@ -29,6 +42,7 @@ export default async function tool({ search, projectId, limit, propertyKeys, max
   });
 
   return {
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     count: response.count,
     next: response.next,

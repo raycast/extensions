@@ -1,6 +1,8 @@
-import { clampLimit, getDefaultProjectId, pickProperties, posthogRequest } from "../posthog-client";
+import { clampLimit, pickProperties, posthogRequest } from "../posthog-client";
+import { requireAccountId, requireProjectId } from "../tool-auth";
 
 type Input = {
+  accountId?: string;
   projectId?: number;
   event?: string;
   after?: string;
@@ -29,6 +31,7 @@ type EventsResponse = {
 };
 
 export default async function tool({
+  accountId,
   projectId,
   event,
   after,
@@ -37,8 +40,9 @@ export default async function tool({
   propertyKeys,
   maxPropertyValueLength,
 }: Input = {}) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const response = await posthogRequest<EventsResponse>(`projects/${resolvedProjectId}/events/`, {
+  const resolvedAccountId = requireAccountId(accountId);
+  const resolvedProjectId = requireProjectId(projectId);
+  const response = await posthogRequest<EventsResponse>(resolvedAccountId, `projects/${resolvedProjectId}/events/`, {
     query: {
       event,
       after,
@@ -48,6 +52,7 @@ export default async function tool({
   });
 
   return {
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     count: response.count,
     next: response.next,

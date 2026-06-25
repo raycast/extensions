@@ -12,13 +12,19 @@ type FeatureFlag = {
 };
 
 export default async function tool({
+  accountId,
   projectId,
   search,
   limit,
   includeFilters = false,
 }: ProjectResourceSearchInput = {}) {
-  const { resolvedProjectId, response } = await listProjectResources<FeatureFlag>({
+  const {
+    accountId: resolvedAccountId,
+    resolvedProjectId,
+    response,
+  } = await listProjectResources<FeatureFlag>({
     projectId,
+    accountId,
     endpoint: "feature_flags",
     search,
     limit,
@@ -27,6 +33,7 @@ export default async function tool({
   });
 
   return {
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     count: response.count,
     next: response.next,

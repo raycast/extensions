@@ -1,17 +1,30 @@
-import { getDefaultProjectId, posthogRequest, truncateValue } from "../posthog-client";
+import { posthogRequest, truncateValue } from "../posthog-client";
+import { requireAccountId, requireProjectId } from "../tool-auth";
 
 type Input = {
+  accountId?: string;
   projectId?: number;
   insightId: string;
   includeFilters?: boolean;
   includeResult?: boolean;
 };
 
-export default async function tool({ projectId, insightId, includeFilters = true, includeResult = false }: Input) {
-  const resolvedProjectId = getDefaultProjectId(projectId);
-  const insight = await posthogRequest<Record<string, unknown>>(`projects/${resolvedProjectId}/insights/${insightId}/`);
+export default async function tool({
+  accountId,
+  projectId,
+  insightId,
+  includeFilters = true,
+  includeResult = false,
+}: Input) {
+  const resolvedAccountId = requireAccountId(accountId);
+  const resolvedProjectId = requireProjectId(projectId);
+  const insight = await posthogRequest<Record<string, unknown>>(
+    resolvedAccountId,
+    `projects/${resolvedProjectId}/insights/${insightId}/`,
+  );
 
   return truncateValue({
+    accountId: resolvedAccountId,
     projectId: resolvedProjectId,
     id: insight.id,
     shortId: insight.short_id,

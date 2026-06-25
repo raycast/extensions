@@ -1,4 +1,9 @@
 import { posthogRequest, truncateValue } from "../posthog-client";
+import { requireAccountId } from "../tool-auth";
+
+type Input = {
+  accountId?: string;
+};
 
 type PostHogUser = {
   id?: number;
@@ -13,10 +18,12 @@ type PostHogUser = {
   };
 };
 
-export default async function tool() {
-  const user = await posthogRequest<PostHogUser>("users/@me/");
+export default async function tool({ accountId }: Input = {}) {
+  const resolvedAccountId = requireAccountId(accountId);
+  const user = await posthogRequest<PostHogUser>(resolvedAccountId, "users/@me/");
 
   return truncateValue({
+    accountId: resolvedAccountId,
     id: user.id,
     uuid: user.uuid,
     distinctId: user.distinct_id,
