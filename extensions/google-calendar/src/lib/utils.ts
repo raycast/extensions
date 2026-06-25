@@ -220,6 +220,29 @@ export const EVENT_COLORS = {
 
 export type EventColorName = keyof typeof EVENT_COLORS;
 
+const COLOR_ID_TO_NAME: Record<string, EventColorName> = Object.fromEntries(
+  Object.entries(EVENT_COLORS).map(([name, id]) => [id, name as EventColorName]),
+);
+
+/**
+ * Returns a human-readable, capitalized color name for a Google Calendar `colorId`
+ * (e.g. "2" → "Sage"). Falls back to "default" when no color is set, or to the raw
+ * id if it isn't part of the known palette.
+ */
+export function colorIdToName(colorId?: string | number | null): string {
+  if (colorId === undefined || colorId === null || String(colorId).trim().length === 0) {
+    return "default";
+  }
+
+  const id = String(colorId).trim();
+  const name = COLOR_ID_TO_NAME[id];
+  if (!name) {
+    return id;
+  }
+
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 /**
  * The official background hex value for each event `colorId`, as returned by the
  * Google Calendar `colors.get` endpoint. Used to snap an arbitrary hex code to

@@ -1,6 +1,12 @@
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, parseAttendeeEmails, resolveColorId, toISO8601WithTimezoneOffset } from "../lib/utils";
+import {
+  addSignature,
+  colorIdToName,
+  parseAttendeeEmails,
+  resolveColorId,
+  toISO8601WithTimezoneOffset,
+} from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -97,7 +103,7 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
   if (input.color !== undefined) {
     changes.push({
       name: "Color",
-      value: `${event.data.colorId || "default"} → ${resolveColorId(input.color) || "default"}`,
+      value: `${colorIdToName(event.data.colorId)} → ${colorIdToName(resolveColorId(input.color))}`,
     });
   }
 

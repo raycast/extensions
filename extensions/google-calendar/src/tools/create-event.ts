@@ -1,7 +1,13 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, parseAttendeeEmails, resolveColorId, toISO8601WithTimezoneOffset } from "../lib/utils";
+import {
+  addSignature,
+  colorIdToName,
+  parseAttendeeEmails,
+  resolveColorId,
+  toISO8601WithTimezoneOffset,
+} from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { calendar_v3 } from "@googleapis/calendar";
 import { randomUUID } from "node:crypto";
@@ -76,7 +82,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       { name: "Attendees", value: input.attendees },
       { name: "Description", value: input.description },
       { name: "Add Google Meet Link", value: input.addGoogleMeetLink ? "Yes" : "No" },
-      ...(input.color ? [{ name: "Color", value: input.color }] : []),
+      ...(input.color ? [{ name: "Color", value: colorIdToName(resolveColorId(input.color)) }] : []),
     ],
   };
 };
