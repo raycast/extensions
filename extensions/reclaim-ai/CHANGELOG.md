@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-06-25
 - Fix duplicate recurring events showing on the calendar when synced across multiple calendars
 
 ## [Update] - 2026-05-27
