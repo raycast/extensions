@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-25
 
 - Prevent View Pages from crashing when a Pages project has no latest deployment.
 
