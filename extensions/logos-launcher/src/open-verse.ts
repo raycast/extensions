@@ -153,19 +153,17 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
   const uris: string[] = [];
 
   if (preferences.openMethod === "logosres scheme") {
-    // Try to target specific translation via logosres
+    // Raycast can only confirm URI handoff, not whether Logos resolves speculative logosres resources.
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
+    uris.push(`logosref:Bible.${encodedRef}`);
+    uris.push(`logosref:${encodedRef}`);
+    uris.push(`logosres:Bible;ref=Bible.${encodedRef}`);
     uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
     uris.push(`logosres:${versionUpper};ref=Bible.${encodedRef}`);
     uris.push(`logosres:${version};ref=Bible${versionUpper}.${encodedRef}`);
     uris.push(`logosres:${versionUpper};ref=Bible${versionUpper}.${encodedRef}`);
     uris.push(`logosres:${version};ref=${encodedRef}`);
     uris.push(`logosres:${versionUpper};ref=${encodedRef}`);
-    // Try generic logosref (opens prioritized Bible)
-    uris.push(`logosref:Bible.${encodedRef}`);
-    uris.push(`logosref:${encodedRef}`);
-    uris.push(`logosres:Bible;ref=Bible.${encodedRef}`);
-    // Fallback to web link
-    uris.push(`https://ref.ly/${encodedRef};${version}`);
   } else {
     // If ref.ly URL method is selected, try that first
     uris.push(`https://ref.ly/${encodedRef};${version}`);

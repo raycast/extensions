@@ -307,6 +307,13 @@
     "typescript": "^5.8.2",
     "vitest": "^4.0.16"
   },
+  "overrides": {
+    "ajv": "^6.15.0",
+    "brace-expansion": "^1.1.15",
+    "flatted": "^3.4.2",
+    "picomatch": "^4.0.4",
+    "rollup": "^4.62.2"
+  },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
