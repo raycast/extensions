@@ -6,7 +6,6 @@
 # misc
 .DS_Store
 raycast-env.d.ts
-raycast-env.d.ts
 
 .raycast-swift-build
 .swiftpm

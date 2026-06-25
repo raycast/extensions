@@ -4,7 +4,7 @@
   "title": "Glean Search",
   "description": "Search your company's knowledge base via Glean",
   "icon": "icon.png",
-  "author": "thomas",
+  "author": "faizhasim",
   "categories": [
     "Productivity",
     "Web"
@@ -29,8 +29,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
