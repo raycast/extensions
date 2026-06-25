@@ -1,6 +1,6 @@
 # Blackr Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-06-25
 
 - Update the macOS overlay to use Swift.
 
