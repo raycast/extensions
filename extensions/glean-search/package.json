@@ -22,10 +22,18 @@
     {
       "type": "textfield",
       "name": "gleanHost",
-      "title": "Glean Host URL",
-      "description": "Optional. Override GLEAN_HOST env var (e.g. https://mycompany.glean.com)",
+      "title": "Glean Host",
+      "description": "Your Glean server URL (e.g. https://your-company-be.glean.com)",
+      "required": true,
+      "placeholder": "https://your-company-be.glean.com"
+    },
+    {
+      "type": "textfield",
+      "name": "gleanCliPath",
+      "title": "Custom CLI Path (optional)",
+      "description": "Override the glean binary path if not in PATH",
       "required": false,
-      "placeholder": "https://mycompany.glean.com"
+      "placeholder": "/opt/homebrew/bin/glean"
     }
   ],
   "dependencies": {
