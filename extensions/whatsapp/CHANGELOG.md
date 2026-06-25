@@ -1,6 +1,6 @@
 # WhatsApp Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-25
 - Prevent phone parsing from crashing when the default country preference is missing.
 
 ## [Enhancements] - 2026-05-16
