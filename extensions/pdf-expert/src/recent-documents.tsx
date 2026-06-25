@@ -73,6 +73,7 @@ export default function RecentDocuments() {
             key={doc.path}
             title={doc.name}
             subtitle={shortenPath(doc.folder)}
+            keywords={doc.name.split(/[_\-\s]+|(?<=[a-z])(?=[A-Z])/)}
             icon={
               doc.exists
                 ? Icon.Document
