@@ -92,7 +92,7 @@ export function restartProject(name: string): Promise<void> {
 }
 
 export async function renameProject(name: string, newName: string, cwd: string): Promise<void> {
-  const snapshotName = `${name}-temporary-snapshot`;
+  const snapshotName = `${newName}-temporary-snapshot`;
   const run = (args: string[]) => execFileAsync("ddev", args, { env: { ...process.env, PATH: PATH_OVERRIDE }, cwd });
 
   const toast = await showToast({ style: Toast.Style.Animated, title: `Renaming ${name} to ${newName}…` });
@@ -187,7 +187,10 @@ export function importDatabase(name: string, file: string): Promise<void> {
 }
 
 export function exportDatabase(name: string, file: string, gzip: boolean): Promise<void> {
-  return runDdev(["export-db", name, "--file", file, gzip ? "--gzip" : "--gzip=false"], {
+  // gzip defaults to true in DDEV; only pass the flag when disabling it.
+  const args = ["export-db", name, "--file", file];
+  if (!gzip) args.push("--gzip=false");
+  return runDdev(args, {
     inProgress: `Exporting ${name}…`,
     success: `Exported ${name} to ${file}`,
     failure: `Failed to export ${name}`,
