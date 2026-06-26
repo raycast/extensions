@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.4] - {PR_MERGE_DATE}
+## [1.4.4] - 2026-06-26
 
 - Add a `color` parameter to the `create-event` and `edit-event` AI tools so events can be created and recolored with a specific Google Calendar color (named color, `colorId` 1–11, or a hex code that snaps to the nearest supported event color)
 
