@@ -1,6 +1,6 @@
 # Convert Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-06-26
 
 - Added support for alpha as percentage in hsl()
 - Fixed HEXA alpha
