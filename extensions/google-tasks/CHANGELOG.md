@@ -1,6 +1,6 @@
 # Google Tasks Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-06-26
 
 - Await task creation before showing success and closing the create task form.
 
