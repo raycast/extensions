@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Group models by category in the model picker] - {PR_MERGE_DATE}
+
+- Group models in the model picker by their category, with humanized section titles
+
 ## [Fix tasks without an associated pull request] - 2026-05-13
 
 - Handle tasks returned by the Copilot API that don't have an associated pull request
