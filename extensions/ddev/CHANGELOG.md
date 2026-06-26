@@ -7,3 +7,4 @@
 - Start, stop, and restart projects.
 - List, take, and restore snapshots.
 - Rename projects.
+- Clear cache for Drupal projects.

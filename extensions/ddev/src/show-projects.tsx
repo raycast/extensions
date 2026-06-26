@@ -33,7 +33,7 @@ import {
   stopUnlistProject,
   takeSnapshot,
 } from "./lib/ddev";
-import { launchAndLoginProject } from "./lib/drush";
+import { clearCacheProject, launchAndLoginProject } from "./lib/drush";
 import { buildDescribeMarkdown } from "./lib/describe-markdown";
 
 type StatusFilter = "all" | "active";
@@ -272,11 +272,19 @@ export default function Command() {
                   {isDrupal && (
                     <ActionPanel.Section title="Drupal Commands">
                       <Action
-                        title="Launch Website (and Login)"
+                        title="Login Website (Drush Uli)"
                         icon={Icon.Key}
                         shortcut={{ modifiers: ["cmd"], key: "enter" }}
                         onAction={() => launchAndLoginProject(project.name, project.approot)}
                       />
+                      {isActive && (
+                        <Action
+                          title="Clear Cache (Drush Cr)"
+                          icon={Icon.Trash}
+                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          onAction={() => clearCacheProject(project.name, project.approot)}
+                        />
+                      )}
                     </ActionPanel.Section>
                   )}
 
@@ -357,7 +365,7 @@ export default function Command() {
                       <Action.Push
                         title="Rename Project"
                         icon={Icon.Pencil}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                         target={<RenameProjectForm name={project.name} approot={project.approot} onDone={revalidate} />}
                       />
                     )}

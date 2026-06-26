@@ -11,3 +11,11 @@ export function launchAndLoginProject(name: string, cwd: string): Promise<void> 
     },
   );
 }
+
+export function clearCacheProject(name: string, cwd: string): Promise<void> {
+  return runShell("ddev drush cr", cwd, {
+    inProgress: `Clearing cache for ${name}…`,
+    success: `Cleared cache for ${name}`,
+    failure: `Failed to clear cache for ${name}`,
+  });
+}
