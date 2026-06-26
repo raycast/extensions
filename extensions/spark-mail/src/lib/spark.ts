@@ -308,7 +308,10 @@ export function parseEvents(stdout: string): CalendarEvent[] {
       continue;
     }
     if (i > 0 && EVENT_TIME.test(lines[i])) {
-      const title = lines[i - 1].trim();
+      const prev = lines[i - 1];
+      const prevHeader = prev.match(DAY_HEADER);
+      let title = prev.trim();
+      if (!title || (prevHeader && /[A-Za-z]/.test(prevHeader[1]))) title = "";
       const time = lines[i].trim();
       const detail: string[] = [];
       let j = i + 1;
