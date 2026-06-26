@@ -63,17 +63,23 @@ func detectBarcode(keepImage: Bool, playSound: Bool) async -> String {
 }
 
 func captureScreen(keepImage: Bool) async -> CGImage? {
-  guard
-    let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false),
-    let display = content.displays.first
-  else {
+  guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false) else {
+    return nil
+  }
+
+  let mainDisplayID = NSScreen.main?.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
+  guard let display = content.displays.first(where: { $0.displayID == mainDisplayID }) ?? content.displays.first else {
     return nil
   }
 
   let configuration = SCStreamConfiguration()
-  let scale = NSScreen.main?.backingScaleFactor ?? 2
-  configuration.width = Int(CGFloat(display.width) * scale)
-  configuration.height = Int(CGFloat(display.height) * scale)
+  if let mode = CGDisplayCopyDisplayMode(display.displayID) {
+    configuration.width = mode.pixelWidth
+    configuration.height = mode.pixelHeight
+  } else {
+    configuration.width = display.width
+    configuration.height = display.height
+  }
   configuration.showsCursor = false
 
   let filter = SCContentFilter(display: display, excludingWindows: [])
