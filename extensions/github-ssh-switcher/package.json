@@ -14,7 +14,137 @@
       "title": "Switch GitHub SSH Account",
       "subtitle": "SSH Switcher",
       "description": "Clear current SSH keys and load the selected GitHub account key",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "account1Title",
+          "title": "Account 1 — Name",
+          "description": "Display name shown in the Raycast list",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Personal"
+        },
+        {
+          "name": "account1Subtitle",
+          "title": "Account 1 — Email / Username",
+          "description": "Shown as subtitle below the account name",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "user@example.com"
+        },
+        {
+          "name": "account1KeyPath",
+          "title": "Account 1 — SSH Key Path",
+          "description": "Absolute or ~-relative path to the private key file",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "~/.ssh/id_ed25519_github_personal"
+        },
+        {
+          "name": "account1Host",
+          "title": "Account 1 — SSH Host Alias",
+          "description": "Host alias from ~/.ssh/config that maps to github.com",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "github-personal"
+        },
+        {
+          "name": "account2Title",
+          "title": "Account 2 — Name",
+          "description": "Leave blank to disable this slot",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Work"
+        },
+        {
+          "name": "account2Subtitle",
+          "title": "Account 2 — Email / Username",
+          "description": "Shown as subtitle below the account name",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "user@company.com"
+        },
+        {
+          "name": "account2KeyPath",
+          "title": "Account 2 — SSH Key Path",
+          "description": "Absolute or ~-relative path to the private key file",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "~/.ssh/id_ed25519_github_work"
+        },
+        {
+          "name": "account2Host",
+          "title": "Account 2 — SSH Host Alias",
+          "description": "Host alias from ~/.ssh/config that maps to github.com",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "github-work"
+        },
+        {
+          "name": "account3Title",
+          "title": "Account 3 — Name",
+          "description": "Leave blank to disable this slot",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "University"
+        },
+        {
+          "name": "account3Subtitle",
+          "title": "Account 3 — Email / Username",
+          "description": "Shown as subtitle below the account name",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "user@university.edu"
+        },
+        {
+          "name": "account3KeyPath",
+          "title": "Account 3 — SSH Key Path",
+          "description": "Absolute or ~-relative path to the private key file",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "~/.ssh/id_ed25519_github_university"
+        },
+        {
+          "name": "account3Host",
+          "title": "Account 3 — SSH Host Alias",
+          "description": "Host alias from ~/.ssh/config that maps to github.com",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "github-university"
+        },
+        {
+          "name": "account4Title",
+          "title": "Account 4 — Name",
+          "description": "Leave blank to disable this slot",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Client"
+        },
+        {
+          "name": "account4Subtitle",
+          "title": "Account 4 — Email / Username",
+          "description": "Shown as subtitle below the account name",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "user@client.com"
+        },
+        {
+          "name": "account4KeyPath",
+          "title": "Account 4 — SSH Key Path",
+          "description": "Absolute or ~-relative path to the private key file",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "~/.ssh/id_ed25519_github_client"
+        },
+        {
+          "name": "account4Host",
+          "title": "Account 4 — SSH Host Alias",
+          "description": "Host alias from ~/.ssh/config that maps to github.com",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "github-client"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -143,12 +143,19 @@ export async function switchToAccount(
 
   // ── 1. Clear SSH agent ───────────────────────────────────────────────────
   const clearResult = await runCommand("ssh-add", ["-D"], env);
+  // "no identities" is benign — the agent was already empty.
+  const noIdentities = clearResult.stderr.toLowerCase().includes("the agent has no identities");
+  const clearOk = clearResult.exitCode === 0 || noIdentities;
   steps.push({
     title: "Clear SSH agent  `ssh-add -D`",
-    ok: clearResult.exitCode === 0,
+    ok: clearOk,
     output: clearResult.stderr || clearResult.stdout || "OK",
   });
-  // Non-fatal: we continue even if the agent had no identities loaded.
+  if (!clearOk) {
+    throw new Error(
+      clearResult.stderr || clearResult.stdout || `ssh-add -D exited with code ${clearResult.exitCode}`
+    );
+  }
 
   // ── 2. Load the private key ──────────────────────────────────────────────
   const addResult = await runCommand("ssh-add", [keyPath], env);
@@ -172,7 +179,7 @@ export async function switchToAccount(
   // The real outcome is determined by the content of the response message.
   // `BatchMode=yes` disables interactive prompts so the call never hangs.
   const testResult = await runCommand("ssh", ["-o", "BatchMode=yes", "-T", account.host], env);
-  const testOutput = (testResult.stdout || testResult.stderr).trim();
+  const testOutput = [testResult.stdout, testResult.stderr].filter(Boolean).join("\n").trim();
   const testOk = testOutput.toLowerCase().includes("successfully authenticated");
 
   steps.push({

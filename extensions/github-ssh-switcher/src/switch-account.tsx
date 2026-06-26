@@ -8,7 +8,7 @@
  */
 
 import { List, ActionPanel, Action, showToast, Toast, useNavigation, Detail } from "@raycast/api";
-import { ACCOUNTS } from "./accounts";
+import { getAccounts } from "./accounts";
 import { resolveEnv, switchToAccount } from "./ssh";
 import type { Account } from "./accounts";
 import type { Step } from "./ssh";
@@ -60,6 +60,7 @@ ${errorMessage}
 
 export default function Command() {
   const { push } = useNavigation();
+  const accounts = getAccounts();
 
   /**
    * Runs the SSH switch flow for the selected account.
@@ -96,7 +97,7 @@ export default function Command() {
 
   return (
     <List navigationTitle="GitHub SSH Switcher" searchBarPlaceholder="Search accounts…">
-      {ACCOUNTS.map((account) => (
+      {accounts.map((account) => (
         <List.Item
           key={account.host}
           title={account.title}
