@@ -5,6 +5,9 @@
   "description": "Opens the latest URL from Clipboard if one is found in the latest 6 entries",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "nthnchng"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -64,6 +67,14 @@
           "label": "Tel",
           "description": "Allow opening Tel URLs",
           "default": true
+        },
+        {
+          "name": "customSchemes",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom URL Schemes",
+          "description": "Comma-separated app deep-link schemes to also allow, e.g. obsidian, slack, vscode",
+          "placeholder": "obsidian, slack, vscode"
         }
       ]
     }
