@@ -3,11 +3,7 @@ import { useMemo, useEffect } from "react";
 import { useModels } from "../hooks/useModels";
 import { Model } from "../services/models";
 
-const getTitle = (name: string) => name;
-
-// Models whose name starts with "Auto" should be rendered outside of any
-// category section, at the very top of the dropdown.
-const isAutoModel = (model: Model) => model.name.toLowerCase().startsWith("auto");
+const isAutoModel = (model: Model) => model.id === "auto";
 
 // Convert a raw model_picker_category value (e.g. "lightweight_models") into a
 // human-friendly section title (e.g. "Lightweight Models").
@@ -116,7 +112,7 @@ export function ModelDropdown(
   if (models.length === 0) return null;
 
   const renderItem = (model: Model) => (
-    <Form.Dropdown.Item key={model.id} title={getTitle(model.name)} value={model.id} />
+    <Form.Dropdown.Item key={model.id} title={model.name} value={model.id} />
   );
 
   return (
