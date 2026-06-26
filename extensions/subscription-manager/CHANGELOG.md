@@ -1,6 +1,6 @@
 # Subscription Manager Changelog
 
-## [Export] - {PR_MERGE_DATE}
+## [Export] - 2026-06-26
 
 - Export subscriptions as JSON or CSV from the All Subscriptions command — save to Downloads or copy to the clipboard.
 - Export the spending report as Markdown from the Analytics command, reflecting the active Group By view.
