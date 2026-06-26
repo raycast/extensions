@@ -1,0 +1,11 @@
+# dependencies
+node_modules
+
+# Raycast build output & generated types
+dist
+raycast-env.d.ts
+
+# misc
+.DS_Store
+*.log
+.eslintcache
