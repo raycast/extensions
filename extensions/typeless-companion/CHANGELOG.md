@@ -1,6 +1,6 @@
 # Typeless Companion Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-26
 
 - Browse local Typeless history across dictations, Ask Anything, translations, and `No Transcript` entries.
 - Copy or paste saved transcripts and Ask Anything answers from Raycast.
