@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "miccast",
+  "title": "Miccast",
+  "description": "Quickly switch the active microphone input and audio output device.",
+  "icon": "icon.png",
+  "author": "brunojppb",
+  "categories": ["System"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-input",
+      "title": "Set Input Device",
+      "subtitle": "miccast",
+      "description": "Switch the active microphone input device.",
+      "icon": "microphone.png",
+      "mode": "view"
+    },
+    {
+      "name": "set-output",
+      "title": "Set Output Device",
+      "subtitle": "miccast",
+      "description": "Switch the active speaker/headphone output device.",
+      "icon": "speaker.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.20",
+    "@raycast/utils": "1.19.1",
+    "macos-audio-devices": "1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "24.13.2",
+    "@types/react": "19.2.17",
+    "eslint": "8.57.1",
+    "prettier": "3.8.4",
+    "react": "19.2.7",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
