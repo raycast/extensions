@@ -8,6 +8,8 @@ const enterFadeMs = 900;
 const exitFadeMs = 4600;
 const exitSoundTailMs = 600;
 const cmatrixDefaultUpdateMs = 40;
+const cmatrixMinUpdateMs = 10;
+const cmatrixMaxUpdateMs = 200;
 const glyphMinCode = 33;
 const glyphMaxCode = 122;
 const hiddenHeadRow = 0;
@@ -20,12 +22,14 @@ function run(argv) {
   const stopFilePath = getArgValue(args, "--stop-file");
   const overlayDir = getArgValue(args, "--overlay-dir") ?? defaultOverlayDir();
   const audioEnabled = getArgValue(args, "--audio") !== "0";
+  const rainTickMs = normalizeRainTickMs(getArgValue(args, "--speed"));
 
   const app = $.NSApplication.sharedApplication;
   app.setActivationPolicy($.NSApplicationActivationPolicyAccessory);
 
   createWindows(overlayDir, {
     audioEnabled,
+    rainTickMs,
   });
 
   waitForStopRequest(stopFilePath);
@@ -76,6 +80,7 @@ function createWindows(overlayDir, options) {
     const matrix = createMatrixRain(
       contentView.layer,
       contentFrame.size,
+      options,
     );
 
     win.setContentView(contentView);
@@ -127,8 +132,8 @@ function configureWebView(config) {
   }
 }
 
-function createMatrixRain(rootLayer, size) {
-  const config = matrixConfig();
+function createMatrixRain(rootLayer, size, options) {
+  const config = matrixConfig(options);
   const width = Number(size.width);
   const height = Number(size.height);
   const scale = $.NSScreen.mainScreen.backingScaleFactor;
@@ -439,7 +444,7 @@ function applyMatrixSnapshot(matrix, snapshot) {
   }
 }
 
-function matrixConfig() {
+function matrixConfig(options) {
   const fontSize = 18;
   const rowHeight = 22;
 
@@ -454,7 +459,7 @@ function matrixConfig() {
     historyEveryTicks: 2,
     minStreamLength: 3,
     rowHeight,
-    tickMs: cmatrixDefaultUpdateMs,
+    tickMs: options.rainTickMs,
   };
 
   for (let charCode = glyphMinCode; charCode <= glyphMaxCode; charCode += 1) {
@@ -465,6 +470,19 @@ function matrixConfig() {
   }
 
   return config;
+}
+
+function normalizeRainTickMs(value) {
+  const speedMs = Number(value);
+
+  if (!Number.isFinite(speedMs)) {
+    return cmatrixDefaultUpdateMs;
+  }
+
+  return Math.max(
+    cmatrixMinUpdateMs,
+    Math.min(cmatrixMaxUpdateMs, Math.round(speedMs)),
+  );
 }
 
 function waitForStopRequest(stopFilePath) {
