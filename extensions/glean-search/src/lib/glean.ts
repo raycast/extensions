@@ -1,4 +1,4 @@
-import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { open, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { promisify } from "util";
@@ -20,12 +20,11 @@ export interface GleanState {
 }
 
 function buildEnv(): NodeJS.ProcessEnv {
-  const preferences = getPreferenceValues<Preferences>();
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     PATH: ["/usr/local/bin", "/opt/homebrew/bin", "/usr/bin", "/bin", process.env.PATH].filter(Boolean).join(":"),
   };
-  const serverUrl = readGleanConfigServerUrl() || preferences.gleanHost;
+  const serverUrl = readGleanConfigServerUrl();
   if (serverUrl) {
     env.GLEAN_SERVER_URL = serverUrl;
   }
@@ -48,8 +47,7 @@ export function useGlean(): GleanState {
 
     const init = async () => {
       // Discover binary
-      const preferences = getPreferenceValues<Preferences>();
-      const path = await resolveGleanCli(preferences);
+      const path = await resolveGleanCli();
       if (cancelled) return;
 
       cliRef.current = path;
@@ -75,7 +73,7 @@ export function useGlean(): GleanState {
   // ── Determine whether user needs to provide email for instance lookup ──
   useEffect(() => {
     if (auth && auth.state === "unauthenticated") {
-      const serverUrl = readGleanConfigServerUrl() || getPreferenceValues<Preferences>().gleanHost;
+      const serverUrl = readGleanConfigServerUrl();
       setNeedsEmail(!serverUrl);
     } else {
       setNeedsEmail(false);
@@ -132,7 +130,7 @@ export function useGlean(): GleanState {
       const info = await checkGleanAuth(path);
       setAuth(info);
       // Re-evaluate whether email is still needed after successful auth
-      const serverUrl = readGleanConfigServerUrl() || getPreferenceValues<Preferences>().gleanHost;
+      const serverUrl = readGleanConfigServerUrl();
       setNeedsEmail(!serverUrl);
     } else {
       const isEmailError = result.message.toLowerCase().includes("reading email");
@@ -160,8 +158,7 @@ export function useGlean(): GleanState {
   const retryCliDiscovery = useCallback(async (): Promise<void> => {
     clearDownloadError();
     setIsInitializing(true);
-    const preferences = getPreferenceValues<Preferences>();
-    const path = await resolveGleanCli(preferences);
+    const path = await resolveGleanCli();
     cliRef.current = path;
     setCliPath(path);
     if (path) {

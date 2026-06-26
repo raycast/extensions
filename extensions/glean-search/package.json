@@ -18,24 +18,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "type": "textfield",
-      "name": "gleanHost",
-      "title": "Glean Host",
-      "description": "Your Glean server URL (e.g. https://your-company-be.glean.com)",
-      "required": true,
-      "placeholder": "https://your-company-be.glean.com"
-    },
-    {
-      "type": "textfield",
-      "name": "gleanCliPath",
-      "title": "Custom CLI Path (optional)",
-      "description": "Override the glean binary path if not in PATH",
-      "required": false,
-      "placeholder": "/opt/homebrew/bin/glean"
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.103.0"
   },

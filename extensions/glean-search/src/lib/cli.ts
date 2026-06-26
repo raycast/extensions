@@ -138,30 +138,21 @@ async function fetchReleaseInfo(): Promise<ReleaseInfo> {
  *
  * Returns null if all paths fail.
  */
-export async function resolveGleanCli(preferences: { gleanCliPath?: string }): Promise<string | null> {
-  // 1. Preference override
-  if (preferences.gleanCliPath) {
-    const customPath = preferences.gleanCliPath;
-    if (checkExecutable(customPath)) {
-      writeCliCache({ path: customPath, version: "", source: "preference" });
-      return customPath;
-    }
-  }
-
-  // 2. Cached path — quick check
+export async function resolveGleanCli(): Promise<string | null> {
+  // 1. Cached path — quick check
   const cached = readCliCache();
   if (cached && checkExecutable(cached.path)) {
     return cached.path;
   }
 
-  // 3. Cached download binary
+  // 2. Cached download binary
   const cachedBin = cachedBinPath();
   if (checkExecutable(cachedBin)) {
     writeCliCache({ path: cachedBin, version: cached?.version ?? "", source: "cache" });
     return cachedBin;
   }
 
-  // 4. Check common Homebrew / system paths directly
+  // 3. Check common Homebrew / system paths directly
   const commonPaths = ["/opt/homebrew/bin/glean", "/usr/local/bin/glean", "/usr/bin/glean"];
   for (const p of commonPaths) {
     if (checkExecutable(p)) {
@@ -170,7 +161,7 @@ export async function resolveGleanCli(preferences: { gleanCliPath?: string }): P
     }
   }
 
-  // 5. `which glean` — PATH lookup with standard dirs for Raycast's sandbox
+  // 4. `which glean` — PATH lookup with standard dirs for Raycast's sandbox
   try {
     const whichEnv = {
       ...process.env,
@@ -186,7 +177,7 @@ export async function resolveGleanCli(preferences: { gleanCliPath?: string }): P
     // not in PATH, continue
   }
 
-  // 6. Auto-download (always attempt, even if previous attempt failed)
+  // 5. Auto-download (always attempt, even if previous attempt failed)
   try {
     await downloadGleanCli(cached?.version, cached?.checksums);
     if (checkExecutable(cachedBin)) {
@@ -197,7 +188,7 @@ export async function resolveGleanCli(preferences: { gleanCliPath?: string }): P
     markDownloadFailed();
   }
 
-  // 7. Last resort — check PATH again in case something changed
+  // 6. Last resort — check PATH again in case something changed
   try {
     const whichEnv = {
       ...process.env,

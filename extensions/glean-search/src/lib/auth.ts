@@ -1,4 +1,4 @@
-import { getPreferenceValues, open } from "@raycast/api";
+import { open } from "@raycast/api";
 import { execFile, spawn } from "child_process";
 import { readFileSync } from "fs";
 import { homedir } from "os";
@@ -31,16 +31,12 @@ const execFileAsync = promisify(execFile);
  * or `{ state: "unauthenticated" }` if the CLI reports no valid session.
  */
 export async function checkGleanAuth(cliPath: string): Promise<AuthInfo> {
-  const preferences = getPreferenceValues<Preferences>();
-
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     PATH: ["/usr/local/bin", "/opt/homebrew/bin", process.env.PATH].filter(Boolean).join(":"),
   };
 
-  // Priority: 1) glean config file (saved after email-based instance lookup),
-  //            2) extension preference
-  const serverUrl = readGleanConfigServerUrl() || preferences.gleanHost;
+  const serverUrl = readGleanConfigServerUrl();
   if (serverUrl) {
     env.GLEAN_SERVER_URL = serverUrl;
   }
@@ -90,15 +86,12 @@ export async function checkGleanAuth(cliPath: string): Promise<AuthInfo> {
  * browser launcher when running in a child process.
  */
 export async function signInToGlean(cliPath: string, email?: string): Promise<{ success: boolean; message: string }> {
-  const preferences = getPreferenceValues<Preferences>();
-
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     PATH: ["/usr/local/bin", "/opt/homebrew/bin", process.env.PATH].filter(Boolean).join(":"),
   };
 
-  // Priority: 1) glean config file, 2) extension preference
-  const serverUrl = readGleanConfigServerUrl() || preferences.gleanHost;
+  const serverUrl = readGleanConfigServerUrl();
   if (serverUrl) {
     env.GLEAN_SERVER_URL = serverUrl;
   }
