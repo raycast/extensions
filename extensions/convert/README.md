@@ -25,7 +25,6 @@ Converts between **hex**, **rgb**, **hsl**, and **oklch**, including alpha/opaci
 - `#006699` — 6-digit
 - `#069` — 3-digit shorthand
 - `#00669980` — 8-digit with alpha
-- `#0698` — 4-digit shorthand with alpha
 
 **RGB / RGBA** (comma-separated)
 

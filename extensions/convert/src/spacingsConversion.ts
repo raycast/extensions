@@ -1,16 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  basePixel?: string;
-}
-
 const loadBasePixelsFromPreferences = () => {
-  const basePixel =
-    getPreferenceValues<Preferences>().basePixel === "" ? 16 : Number(getPreferenceValues<Preferences>().basePixel);
-  if (isNaN(basePixel)) {
+  const { basePixel } = getPreferenceValues<Preferences.Convert>();
+  const parsed = basePixel === "" || basePixel === undefined ? 16 : Number(basePixel);
+  if (isNaN(parsed)) {
     return 16;
   }
-  return basePixel;
+  return parsed;
 };
 
 const BASE_FONT_PIXELS = loadBasePixelsFromPreferences();
