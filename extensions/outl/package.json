@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "outl",
+  "title": "Outl",
+  "description": "Quick capture, search, and navigate your outl outliner from Raycast. Thin client over the outl CLI.",
+  "icon": "command-icon.png",
+  "author": "avelino",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "outl",
+      "description": "Append a line to today's journal without leaving Raycast.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "What's on your mind?",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "outl",
+      "description": "Search blocks and pages, then open the result in the outl app.",
+      "mode": "view"
+    },
+    {
+      "name": "open-today",
+      "title": "Open Today",
+      "subtitle": "outl",
+      "description": "Jump to today's journal in the outl app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-page",
+      "title": "New Page",
+      "subtitle": "outl",
+      "description": "Create a new page and open it in the outl app.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspace",
+      "title": "Workspace Path",
+      "description": "Absolute path to your outl workspace (the folder that contains .outl/, journals/, pages/).",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "outlBin",
+      "title": "outl Binary",
+      "description": "Path to the outl binary. Leave as 'outl' if it is on Raycast's PATH; otherwise use an absolute path (e.g. /opt/homebrew/bin/outl). Raycast often does not inherit your shell PATH.",
+      "type": "textfield",
+      "default": "outl",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "bunx @raycast/api@latest publish"
+  }
+}

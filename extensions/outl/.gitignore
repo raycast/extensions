@@ -1,0 +1,9 @@
+# Raycast build output
+/dist
+.ray
+
+# Dependencies (hoisted to the workspace root by bun)
+node_modules
+
+# Logs
+*.log
