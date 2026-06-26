@@ -18,6 +18,7 @@ export interface SpotlightSearchResult {
 }
 
 export interface PinnedFolder extends SpotlightSearchResult {
+  customName?: string;
   pinnedAt: Date;
   lastVerified: Date;
 }

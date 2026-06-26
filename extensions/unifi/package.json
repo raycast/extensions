@@ -170,5 +170,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "axios": "^1.8.4",
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
   }
 }

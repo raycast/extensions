@@ -3,7 +3,10 @@
   "name": "hue",
   "title": "Hue",
   "description": "Quickly and easily control Philips Hue lights",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "icon": "command-icon.png",
   "author": "pindab0ter",
   "contributors": [
@@ -99,23 +102,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
-    "@types/node-localstorage": "^1.3.3",
-    "@types/stream-json": "^1.7.8",
-    "@xstate/react": "^6.0.0",
-    "bonjour-service": "^1.3.0",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5",
+    "@xstate/react": "^6.1.0",
+    "bonjour-service": "^1.4.0",
     "chroma-js": "^3.2.0",
-    "jimp": "^1.6.0",
-    "stream-json": "^1.9.1",
-    "xstate": "^5.25.0"
+    "jimp": "^1.6.1",
+    "stream-json": "^3.0.0",
+    "xstate": "^5.32.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/node-localstorage": "^1.3.3",
     "@types/chroma-js": "^3.1.2",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

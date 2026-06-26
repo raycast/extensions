@@ -6,6 +6,11 @@ import { BookmarkItem } from "../bookmarks/types";
 
 const DIA_BUNDLE_ID = "company.thebrowser.dia";
 
+async function openInDia(url: string) {
+  await open(url, DIA_BUNDLE_ID);
+  await closeMainWindow();
+}
+
 export function BookmarkListItem({
   item,
   onNavigate,
@@ -54,6 +59,7 @@ export function BookmarkListItem({
 
   // URL bookmark
   if (item.url) {
+    const url = item.url;
     const pathText = item.path.length > 1 ? item.path.slice(0, -1).join(" › ") : undefined;
 
     return (
@@ -64,9 +70,9 @@ export function BookmarkListItem({
         icon={getSafeFavicon(item.url)}
         actions={
           <ActionPanel title={item.name}>
-            <Action.Open icon={Icon.Globe} title="Open Tab" target={item.url} application="company.thebrowser.dia" />
-            <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action title="Open in Dia" icon={Icon.Globe} onAction={() => openInDia(url)} />
+            <Action.OpenInBrowser url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard
               title="Copy Title"
               content={item.name}

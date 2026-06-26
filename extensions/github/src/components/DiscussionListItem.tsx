@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
+import type { JSX } from "react";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";
 import { DISCUSSION_SORT_TYPES_TO_QUERIES } from "../helpers/discussion";

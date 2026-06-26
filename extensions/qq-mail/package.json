@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qq-mail",
+  "title": "QQ Mail",
+  "description": "View and manage your QQ Mail inbox",
+  "icon": "icon.png",
+  "author": "ariesly15",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-emails",
+      "title": "Browse Email",
+      "subtitle": "QQ Mail",
+      "description": "View and manage your QQ Mail emails",
+      "mode": "view"
+    },
+    {
+      "name": "compose-email",
+      "title": "Compose Email",
+      "subtitle": "QQ Mail",
+      "description": "Compose and send a new email",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "QQ Email Address",
+      "description": "Your QQ email address (e.g. 123456@qq.com)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Authorization Code",
+      "description": "QQ Mail authorization code (not your QQ password). Get it from QQ Mail Settings → Account → POP3/IMAP/SMTP",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "emailsToLoad",
+      "title": "Emails to Load",
+      "description": "Number of emails to load per page",
+      "type": "dropdown",
+      "required": false,
+      "default": "20",
+      "data": [
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "name": "composeFormat",
+      "title": "Compose Format",
+      "description": "Format for composing emails",
+      "type": "dropdown",
+      "required": false,
+      "default": "markdown",
+      "data": [
+        {
+          "title": "Markdown (HTML)",
+          "value": "markdown"
+        },
+        {
+          "title": "Plain Text",
+          "value": "plaintext"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5",
+    "html-to-text": "^10.0.0",
+    "imapflow": "^1.3.3",
+    "mailparser": "^3.9.8",
+    "marked": "^18.0.4",
+    "nodemailer": "^8.0.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/html-to-text": "^9.0.4",
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "25.9.1",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "19.2.15",
+    "eslint": "^9.39.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,10 @@
 # Whois Changelog
 
+## [URL Sanitization & Subdomain Support] - 2026-06-01
+
+- Added automatic URL sanitization to strip protocol (`http/https`), paths, and `www.` prefixes from pasted inputs.
+- Implemented base domain extraction to query WHOIS for the registered domain (second-level domain) when subdomains are entered, preventing false-positive "Available" results.
+
 ## [WHOIS/RDAP Integration] - 2026-05-15
 
 - Added full WHOIS and RDAP domain lookup via `whoiser`.

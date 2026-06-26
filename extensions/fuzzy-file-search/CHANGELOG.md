@@ -1,5 +1,11 @@
 # Fuzzy File Search Changelog
 
+## [Directory and File Search Directives] - 2026-06-17
+
+- Add `-d` / `-f` query directives to search directories or files only
+- Parse directives before filtering so they are not passed to `fzf` as search terms
+- Debounce fzf filtering and cap results to avoid exceeding Raycast's extension memory limit
+
 ## [Open With Action] - 2026-03-12
 
 - Add "Open With" action to open files with a specific application (Cmd+O).

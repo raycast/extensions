@@ -7,6 +7,7 @@ import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise, MutatePromise } from "@raycast/utils";
 import {
   brewSearch,
+  clearCache,
   InstallableResults,
   InstalledMap,
   Cask,
@@ -17,6 +18,7 @@ import {
   SearchDownloadProgress,
   DownloadProgress,
   hasSearchCache,
+  invalidateChunkedCacheMemory,
 } from "../utils";
 
 interface UseBrewSearchOptions {
@@ -75,6 +77,21 @@ interface UseBrewSearchResult {
   indexTotals: IndexTotals | undefined;
   /** Ref to current download progress (for polling without re-renders) */
   downloadProgressRef: { current: SearchDownloadProgress };
+}
+
+/**
+ * Heuristic: does this error look like the chunked cache is broken on disk?
+ * Covers the user-reported "Failed to build chunked cache" plus ENOENT on the
+ * generated index/meta/chunk files, which is what users hit after a failed
+ * build leaves the cache directory empty.
+ */
+function isLikelyCacheError(error: Error): boolean {
+  if (error.name === "ParseError") return true;
+  const message = error.message ?? "";
+  return (
+    /chunked cache/i.test(message) ||
+    (/ENOENT/i.test(message) && /(index\.json|meta\.json|chunk-\d+\.json|\/formula\/|\/cask\/)/.test(message))
+  );
 }
 
 /** Default progress state for a file */
@@ -197,10 +214,30 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
         const isLock = isBrewLockError(error);
         const message = getErrorMessage(error);
 
+        // Offer a Clear Cache action for failures that look like cache
+        // corruption — primarily "Failed to build chunked cache" and any
+        // ENOENT on chunked cache files. Clearing forces a fresh download
+        // on the next search, which is how users currently recover.
+        const isCacheError = !isLock && isLikelyCacheError(error);
+
         await showToast({
           style: Toast.Style.Failure,
           title: isLock ? "Brew is Busy" : "Search failed",
           message: isLock ? "Another brew process is running. Please wait and try again." : message,
+          primaryAction: isCacheError
+            ? {
+                title: "Clear Cache & Retry",
+                onAction: async (toast) => {
+                  await toast.hide();
+                  await clearCache();
+                  // Drop in-memory index so the next search rebuilds the
+                  // chunked cache from scratch rather than reusing entries
+                  // that point at the chunk files we just deleted.
+                  invalidateChunkedCacheMemory();
+                  await mutate();
+                },
+              }
+            : undefined,
         });
       },
     },

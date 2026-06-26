@@ -1,5 +1,5 @@
-import { LocalStorage, environment } from "@raycast/api";
-import { SAPSystem } from "./types";
+import { Color, LocalStorage, environment } from "@raycast/api";
+import { SAPSystem, SystemType } from "./types";
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as crypto from "crypto";
@@ -7,6 +7,58 @@ import * as crypto from "crypto";
 const SYSTEMS_KEY = "sap-systems";
 const ENCRYPTION_KEY_STORAGE = "sap-encryption-key";
 const SAPC_FILE_CLEANUP_DELAY_MS = 5000;
+
+export const SYSTEM_TYPES: SystemType[] = ["E", "Q", "P", "S"];
+
+export const SYSTEM_TYPE_LABELS: Record<SystemType, string> = {
+  E: "Development",
+  Q: "Quality",
+  P: "Production",
+  S: "Other",
+};
+
+export const SYSTEM_TYPE_COLORS: Record<SystemType, Color> = {
+  E: Color.Green,
+  Q: Color.Yellow,
+  P: Color.Red,
+  S: Color.Blue,
+};
+
+function isSystemType(value: unknown): value is SystemType {
+  return value === "E" || value === "Q" || value === "P" || value === "S";
+}
+
+const SYSTEM_TYPE_ORDER: Record<SystemType, number> = { E: 0, Q: 1, P: 2, S: 3 };
+
+// Group systems by customer (alphabetically), with systems inside each customer
+// ordered E -> Q -> P -> S. Systems without a customer name are collected under
+// a fallback heading at the end.
+export function groupSystemsByCustomer(systems: SAPSystem[]): { customerName: string; systems: SAPSystem[] }[] {
+  const groups = new Map<string, SAPSystem[]>();
+  for (const system of systems) {
+    const key = system.customerName.trim() || "Ungrouped";
+    const bucket = groups.get(key);
+    if (bucket) {
+      bucket.push(system);
+    } else {
+      groups.set(key, [system]);
+    }
+  }
+
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => {
+      if (a === "Ungrouped") return 1;
+      if (b === "Ungrouped") return -1;
+      return a.localeCompare(b);
+    })
+    .map(([customerName, customerSystems]) => ({
+      customerName,
+      systems: customerSystems.sort(
+        (a, b) =>
+          SYSTEM_TYPE_ORDER[a.systemType] - SYSTEM_TYPE_ORDER[b.systemType] || a.systemId.localeCompare(b.systemId),
+      ),
+    }));
+}
 
 let cachedEncryptionKey: Buffer | null = null;
 let keyInitPromise: Promise<Buffer> | null = null;
@@ -97,13 +149,24 @@ function isValidSAPSystem(obj: unknown): obj is SAPSystem {
   );
 }
 
+// Fill in fields added in later versions (customerName, systemType) so the rest
+// of the app can assume they are always present.
+function migrateStoredSystem(system: SAPSystem): SAPSystem {
+  const raw = system as unknown as Record<string, unknown>;
+  return {
+    ...system,
+    customerName: typeof raw.customerName === "string" ? raw.customerName : "",
+    systemType: isSystemType(raw.systemType) ? raw.systemType : "P",
+  };
+}
+
 export async function getSAPSystems(): Promise<SAPSystem[]> {
   const systemsJson = await LocalStorage.getItem<string>(SYSTEMS_KEY);
   if (!systemsJson) return [];
   try {
     const parsed = JSON.parse(systemsJson);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isValidSAPSystem);
+    return parsed.filter(isValidSAPSystem).map(migrateStoredSystem);
   } catch {
     return [];
   }
@@ -219,11 +282,17 @@ function sanitizeFilename(name: string): string {
   return name.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
-export async function createAndOpenSAPCFile(system: SAPSystem): Promise<string> {
+export async function createAndOpenSAPCFile(system: SAPSystem, languageOverride?: string): Promise<string> {
   const password = await getPassword(system.id);
 
-  // Format: conn=/H/{application server}/S/32{instance number}&user={username}&lang={language}&client={client}&pass={password}
-  const connectionString = `conn=/H/${system.applicationServer}/S/32${system.instanceNumber}&user=${system.username}&lang=${system.language}&clnt=${system.client}&pass=${password}`;
+  // A language passed at connect time wins over the (possibly empty) stored one.
+  const language = (languageOverride ?? system.language).trim();
+
+  // Format: conn=/H/{application server}/S/32{instance number}&user={username}&lang={language}&clnt={client}&pass={password}
+  // The lang parameter is omitted entirely when no language is set, so the SAP
+  // GUI falls back to its own language prompt.
+  const langPart = language ? `&lang=${language}` : "";
+  const connectionString = `conn=/H/${system.applicationServer}/S/32${system.instanceNumber}&user=${system.username}${langPart}&clnt=${system.client}&pass=${password}`;
 
   // Use Raycast's support path for temp files (more appropriate than os.tmpdir)
   const tempDir = path.join(environment.supportPath, "sapc-files");

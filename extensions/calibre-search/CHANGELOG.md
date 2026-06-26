@@ -1,5 +1,11 @@
 # Calibre Library Changelog
 
+## [Fix Search Reset] - 2026-05-22
+
+### Fixed
+
+- Clearing the search bar after launching with a keyword argument now shows all books instead of re-applying the original argument
+
 ## [Initial Release] - 2026-05-18
 
 ### Added

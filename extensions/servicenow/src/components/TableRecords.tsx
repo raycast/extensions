@@ -22,10 +22,11 @@ const SPECIAL_AVATARS: Record<string, Image.ImageLike> = {
   system: { source: Icon.ComputerChip, tintColor: Color.Purple },
   admin: { source: Icon.Shield, tintColor: Color.Orange },
   guest: { source: Icon.PersonCircle, tintColor: Color.SecondaryText },
+  maint: { source: Icon.Cog, tintColor: Color.Blue },
 };
 
 interface DictionaryResponse {
-  result: { element: string }[];
+  result: { element: string; display: string }[];
 }
 
 type TableRecord = {
@@ -34,8 +35,12 @@ type TableRecord = {
   sys_updated_by?: string;
 } & Record<string, string | undefined>;
 
+// With sysparm_display_value=all every field arrives as { value, display_value }.
+// Null is returned by the API when a field has no value.
+type DisplayValuePair = { value: string | null; display_value: string | null } | null;
+
 interface TableRecordsResponse {
-  result: TableRecord[];
+  result: Record<string, DisplayValuePair>[];
 }
 
 interface LiveProfile {
@@ -77,17 +82,27 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     }
   };
 
-  const { data: displayField, isLoading: isLoadingDisplay } = useFetch(
-    `${instanceUrl}/api/now/table/sys_dictionary?sysparm_query=name=${table.name}^display=true&sysparm_fields=element&sysparm_limit=1&sysparm_exclude_reference_link=true`,
+  // Fetch the table's own columns (display flag included) before the records load.
+  // We derive both the display field and — for database views — whether the
+  // sys_updated_on column exists, so we can decide the order-by upfront.
+  const { data: tableMeta, isLoading: isLoadingDisplay } = useFetch(
+    `${instanceUrl}/api/now/table/sys_dictionary?sysparm_query=name=${table.name}^elementISNOTEMPTY&sysparm_fields=element,display&sysparm_limit=2000&sysparm_exclude_reference_link=true`,
     {
       headers,
       execute: !!authHeader,
       keepPreviousData: true,
       mapResult(response: DictionaryResponse) {
-        return { data: response.result[0]?.element ?? null };
+        const rows = response.result ?? [];
+        return {
+          data: {
+            displayField: rows.find((r) => r.display === "true")?.element ?? null,
+            hasUpdatedOn: rows.some((r) => r.element === "sys_updated_on"),
+          },
+        };
       },
     },
   );
+  const displayField = tableMeta?.displayField ?? null;
 
   const fields = useMemo(() => {
     const set = new Set<string>(["sys_id", "sys_updated_on", "sys_updated_by", ...FALLBACK_DISPLAY_FIELDS]);
@@ -95,8 +110,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     return Array.from(set);
   }, [displayField]);
 
-  // Loaded before the records fetch so the URL builder can match search text
-  // against the updater's display name (live_profile.document.name).
+  // Maps each updater login to its photo/display name for the row avatar + tooltip.
   const { data: users = [] } = useFetch(
     `${instanceUrl}/api/now/table/live_profile?sysparm_query=type=user&sysparm_fields=sys_id,photo,document.user_name,document.name`,
     {
@@ -120,15 +134,25 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
   // table (querying LIKE on a non-existent field would 400 the whole request).
   const [searchableFields, setSearchableFields] = useState<string[]>([]);
 
+  // Ordering by sys_updated_on 500s the whole request when the table lacks that
+  // column (database views). For views (v_*) the dictionary lists every column —
+  // no inheritance — so its absence there is authoritative and we skip the
+  // order-by upfront. For normal tables sys_updated_on is inherited and won't show
+  // in the table's own dictionary rows, so we keep ordering on and let the onError
+  // fallback below disable it for the rare non-view table that also lacks it.
+  const isDatabaseView = table.name.startsWith("v_");
+  const [orderByDisabled, setOrderByDisabled] = useState(false);
+  const orderByUpdated = !orderByDisabled && (!isDatabaseView || (tableMeta?.hasUpdatedOn ?? true));
+
   // Shared between the records fetch and the "Open <table> List" action so the
   // browser opens the same filtered view the user is looking at.
   const sysparmQuery = useMemo(() => {
     const terms = searchTerm.trim().split(/\s+/).filter(Boolean);
     const filters: string[] = [];
     if (extraQuery) filters.push(extraQuery);
-    // Each term gets its own (displayField OR sys_updated_by OR matching-users)
-    // group; groups are ANDed via the `^` join — so "importmate ruben" finds an
-    // "Importmate …" record updated by anyone named Ruben.
+    // Each term gets its own (displayField OR sys_updated_by) group; groups are
+    // ANDed via the `^` join — so "importmate ruben" finds an "Importmate …"
+    // record whose updater login contains "ruben".
     for (const term of terms) {
       const orParts: string[] = [];
       if (searchableFields.length > 0) {
@@ -137,24 +161,16 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
         orParts.push(`123TEXTQUERY321=${term}`);
       }
       orParts.push(`sys_updated_byLIKE${term}`);
-      const lower = term.toLowerCase();
-      const matchingUsernames = users
-        .filter((u) => u["document.name"]?.toLowerCase().includes(lower))
-        .map((u) => u["document.user_name"])
-        .filter(Boolean);
-      if (matchingUsernames.length > 0) {
-        orParts.push(`sys_updated_byIN${matchingUsernames.join(",")}`);
-      }
       filters.push(orParts.join("^OR"));
     }
-    filters.push("ORDERBYDESCsys_updated_on");
+    if (orderByUpdated) filters.push("ORDERBYDESCsys_updated_on");
     return filters.join("^");
-  }, [searchTerm, extraQuery, searchableFields, users]);
+  }, [searchTerm, extraQuery, searchableFields, orderByUpdated]);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
       const params = new URLSearchParams({
-        sysparm_display_value: "true",
+        sysparm_display_value: "all",
         sysparm_exclude_reference_link: "true",
         sysparm_limit: "100",
         sysparm_offset: String(options.page * 100),
@@ -167,12 +183,43 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
       headers,
       execute: !!authHeader && !isLoadingDisplay,
       keepPreviousData: true,
+      async parseResponse(response) {
+        if (!response.ok) {
+          // Tag the status so onError can tell a 500 (unknown ORDERBY column) from
+          // a 401/network error that shouldn't trigger the order-by fallback.
+          const err = new Error(response.statusText || `HTTP ${response.status}`);
+          (err as Error & { status?: number }).status = response.status;
+          throw err;
+        }
+        return response.json();
+      },
       onError: (err) => {
+        // Only a 500 means the table lacks sys_updated_on (database views aside).
+        // Drop the order-by and let the query memo recompute, which retries the
+        // fetch automatically. Auth/network errors surface immediately instead.
+        if (orderByUpdated && (err as Error & { status?: number }).status === 500) {
+          setOrderByDisabled(true);
+          return;
+        }
         console.error(err);
         showToast(Toast.Style.Failure, "Could not fetch records", err.message);
       },
       mapResult(response: TableRecordsResponse) {
-        return { data: response.result, hasMore: response.result.length > 0 };
+        // Flatten { value, display_value } pairs to the plain string shape the rest
+        // of the component expects. Use display_value everywhere except sys_updated_on,
+        // where we keep the raw value: it's the internal UTC timestamp
+        // (2026-05-20 17:49:24) that `new Date(... + " UTC")` can parse, whereas the
+        // display value is localized to the instance's format/timezone and isn't.
+        const flattened = response.result.map(
+          (rec) =>
+            Object.fromEntries(
+              Object.entries(rec).map(([key, pair]) => [
+                key,
+                key === "sys_updated_on" ? pair?.value : pair?.display_value,
+              ]),
+            ) as TableRecord,
+        );
+        return { data: flattened, hasMore: response.result.length > 0 };
       },
     },
   );
@@ -297,7 +344,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
         </List.Dropdown>
       }
     >
-      {error ? (
+      {error && !isLoading ? (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could Not Fetch Records"
@@ -328,8 +375,8 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                   tooltip: "Favorite",
                 });
               }
-              if (record.sys_updated_on) {
-                const updatedDate = new Date(record.sys_updated_on + " UTC");
+              const updatedDate = record.sys_updated_on ? new Date(record.sys_updated_on + " UTC") : null;
+              if (updatedDate && !isNaN(updatedDate.getTime())) {
                 const daysAgo = differenceInCalendarDays(new Date(), updatedDate);
                 const dateLabel =
                   daysAgo === 0
@@ -351,9 +398,14 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                 const displayName = sysUser?.name ?? liveProfile?.["document.name"] ?? userName;
                 const photoPath = liveProfile?.photo || sysUser?.photo;
                 const special = SPECIAL_AVATARS[userName.toLowerCase()];
+                // Drop decorator tokens like "(Admin)" so initials come from the real name words.
+                const trimmed = displayName
+                  .trim()
+                  .split(/\s+/)
+                  .filter((word) => /^\p{L}/u.test(word))
+                  .join(" ");
                 // getAvatarIcon picks the first letter of the first and last words.
                 // Split a single-word name so it still produces two initials (e.g. "system" → "SY").
-                const trimmed = displayName.trim();
                 const nameForAvatar =
                   trimmed.includes(" ") || trimmed.length < 2 ? trimmed : `${trimmed[0]} ${trimmed.slice(1)}`;
                 accessories.push({
@@ -362,7 +414,10 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                     (photoPath
                       ? { source: `${instanceUrl}/${photoPath}.iix?t=small`, mask: Image.Mask.Circle }
                       : getAvatarIcon(nameForAvatar)),
-                  tooltip: `Updated by: ${displayName}`,
+                  tooltip:
+                    displayName === userName
+                      ? `Updated by: ${displayName}`
+                      : `Updated by: ${displayName} (${userName})`,
                 });
               }
               return (

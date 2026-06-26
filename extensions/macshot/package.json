@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macshot",
+  "title": "Macshot",
+  "description": "Trigger macshot URL scheme actions from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "Tien-Lam",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "screenshot",
+    "capture",
+    "screen recording",
+    "ocr",
+    "macshot"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture Area",
+      "description": "Open macshot://capture.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Full Screen",
+      "description": "Open macshot://capture-fullscreen.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-last",
+      "title": "Capture Last Area",
+      "description": "Open macshot://capture-last.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Open macshot://quick-capture.",
+      "mode": "no-view"
+    },
+    {
+      "name": "ocr",
+      "title": "Capture OCR",
+      "description": "Open macshot://ocr.",
+      "mode": "no-view"
+    },
+    {
+      "name": "scroll-capture",
+      "title": "Scroll Capture",
+      "description": "Open macshot://scroll-capture.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record",
+      "title": "Record Area",
+      "description": "Open macshot://record.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-fullscreen",
+      "title": "Record Full Screen",
+      "description": "Open macshot://record-fullscreen.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "description": "Open macshot://stop-recording.",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "description": "Open macshot://history.",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Open Settings",
+      "description": "Open macshot://settings.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

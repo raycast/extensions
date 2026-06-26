@@ -14,6 +14,7 @@ import {
   LaunchType,
   launchCommand,
   Clipboard,
+  Cache,
 } from "@raycast/api";
 import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
@@ -206,6 +207,10 @@ function RepositoryListItem({
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
             <RepositoryQuickLinkAction repositoryPath={repo.path} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            <RepositoriesClearCacheAction />
             <Action
               title="Remove from List"
               onAction={handleRemove}
@@ -599,4 +604,31 @@ function RepositoryAttachedLinksAction({ remotes }: { remotes: Record<string, Re
       ))}
     </ActionPanel.Submenu>
   );
+}
+
+/**
+ * Action for clearing the extension cache.
+ */
+function RepositoriesClearCacheAction() {
+  const handleClearCache = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Extension Cache?",
+      message: "This clears all data stored in Raycast Cache (UI state, filters, drafts, and other cached preferences)",
+      primaryAction: {
+        title: "Clear Cache",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      new Cache().clear();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cache cleared",
+        message: "Extension cache has been cleared",
+      });
+    }
+  };
+
+  return <Action title="Clear Cache" icon={Icon.Eraser} onAction={handleClearCache} style={Action.Style.Destructive} />;
 }

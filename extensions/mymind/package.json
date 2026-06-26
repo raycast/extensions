@@ -74,5 +74,9 @@
       "title": "Authenticity Token",
       "description": "Your MyMind Authenticity Token value. Go to https://arian.gg/blog/setup for instructions."
     }
-  ]
+  ],
+  "overrides": {
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
+  }
 }

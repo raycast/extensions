@@ -4,6 +4,7 @@ import { OllamaApiChatMessageRole } from "../../ollama/enum";
 import { Ollama } from "../../ollama/ollama";
 import {
   OllamaApiChatMessage,
+  OllamaApiChatMessageToolCall,
   OllamaApiChatRequestBody,
   OllamaApiChatResponse,
   OllamaApiTagsResponseModel,
@@ -12,13 +13,13 @@ import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../set
 import { RaycastChat } from "../../settings/types";
 import { RaycastImage } from "../../types";
 import { GetAvailableModel, PromptTokenParser } from "../function";
-import { McpServerConfig, McpToolInfo } from "../../mcp/types";
-import { McpClientMultiServer } from "../../mcp/mcp";
-import { PromptContext } from "./type";
+import { GetOllamaApiTools, Tool, ToolResult } from "./tools/main";
+import { ToolsOllama } from "./tools/ollama";
+import { getSystemPrompt } from "./prompt";
+import { McpServerConfig } from "../types";
+import { ToolMcp } from "./tools/mcp";
 
 const preferences = getPreferenceValues<Preferences>();
-
-let McpClient: McpClientMultiServer;
 
 /**
  * Set Chat by given index.
@@ -98,9 +99,13 @@ export async function NewChat(
 export function ClipboardConversation(chat?: RaycastChat): string {
   let clipboard = "";
   if (chat) {
-    chat.messages.map(
-      (value) => (clipboard += `Question:\n${value.messages[0].content}\n\nAnswer:${value.messages[1].content}\n\n`),
-    );
+    for (const msg of chat.messages)
+      for (const m of msg.messages) {
+        if (m.role === OllamaApiChatMessageRole.USER) clipboard += `Question:\n${m.content}\n\n`;
+        else if (m.role === OllamaApiChatMessageRole.ASSISTANT) clipboard += `Answer:\n${m.content}\n\n`;
+        else if (m.role === OllamaApiChatMessageRole.TOOL && m.tool_name)
+          clipboard += `Tool Calls Name: "${m.tool_name}", Content: ${m.content}`;
+      }
   }
   return clipboard;
 }
@@ -110,101 +115,63 @@ export function ClipboardConversation(chat?: RaycastChat): string {
  * @param chat.
  * @param query - User Prompt.
  * @param image.
- * @param context.
  */
-function GetMessagesForInference(
-  chat: RaycastChat,
-  query: string,
-  image?: RaycastImage[],
-  context?: PromptContext,
-): OllamaApiChatMessage[] {
+function GetMessagesForInference(chat: RaycastChat, query: string, image?: RaycastImage[]): OllamaApiChatMessage[] {
   const messages: OllamaApiChatMessage[] = [];
+
+  /* Add System Prompt */
+  messages.push({ role: OllamaApiChatMessageRole.SYSTEM, content: getSystemPrompt() });
 
   /* Slice Messages */
   chat.messages
     .slice(chat.messages.length - Number(preferences.ollamaChatHistoryMessagesNumber))
     .forEach((v) => messages.push(...v.messages));
 
-  /* Create Prompt */
-  let content = query;
-  if (context && context.tools) {
-    content = `Respond to the user's prompt using the provided context information. Cite sources with url when available.\nUser Prompt: '${query}'`;
-    if (context.tools) content += `Context from Tools Calling: '${context.tools.data}'\n`;
-  }
-
   /* Add User Query */
   messages.push({
     role: OllamaApiChatMessageRole.USER,
-    content: content,
+    content: query,
     images: image && image.map((i) => i.base64),
   });
 
   return messages;
 }
 
-/**
- * Initialize McpClient.
- */
-async function InitMcpClient(): Promise<void> {
-  const mcpServerConfigRaw = await LocalStorage.getItem<string>("mcp_server_config");
-  if (!mcpServerConfigRaw) throw "Mcp Servers are not configured";
-  const mcpServerConfig: McpServerConfig = JSON.parse(mcpServerConfigRaw);
-  McpClient = new McpClientMultiServer(mcpServerConfig);
-}
+/* Get Mcp Server Tools */
+async function ToolsMcp(mcpServerNames: string[]): Promise<Tool[]> {
+  const tools: Tool[] = [];
 
-/**
- * Inference with tools from Mcp Servers.
- * @param query - User Prompt.
- * @param chat.
- * @param image.
- */
-async function ToolsCall(
-  query: string,
-  chat: RaycastChat,
-  image?: RaycastImage[],
-): Promise<[string | undefined, McpToolInfo[] | undefined]> {
-  await showToast({ style: Toast.Style.Animated, title: "🧰 Tool Calling..." });
+  /* Get Configures Mcp Server from LocalStorage */
+  let config: McpServerConfig;
+  try {
+    const configRaw = await LocalStorage.getItem<string>("mcp_server_config");
+    if (!configRaw) return tools;
+    config = JSON.parse(configRaw);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error)
+      await showToast({ style: Toast.Style.Failure, title: "Error Loading Mcp Server Config", message: error.message });
+    return tools;
+  }
 
-  /* Initialize McpClient if undefined. */
-  if (McpClient === undefined) {
-    await InitMcpClient().catch((e) => {
-      showToast({ title: "Error", message: e, style: Toast.Style.Failure });
-    });
-    if (McpClient === undefined) {
-      delete chat.mcp_server;
-      return [undefined, undefined];
+  /* Get Tools from all Mcp Server */
+  for (const name of mcpServerNames) {
+    /* Get Mcp Server Param */
+    const c = config.mcpServers[name];
+    if (!c) continue;
+
+    /* Get Tools */
+    try {
+      const t = await ToolMcp(config.mcpServers[name]);
+      tools.push(...t);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error)
+        await showToast({ style: Toast.Style.Failure, title: `Error on Mcp Server "${name}"`, message: error.message });
     }
   }
 
-  /* Select model tag to use. */
-  let model = chat.models.main;
-  if (chat.models.tools) model = chat.models.tools;
-
-  /* Get Tools */
-  const tools = await McpClient.GetToolsOllama(true, chat.mcp_server);
-
-  /* Inference with tools */
-  const o = new Ollama(model.server);
-  const body: OllamaApiChatRequestBody = {
-    model: model.tag,
-    messages: GetMessagesForInference(chat, query, image),
-    keep_alive: model.keep_alive,
-    tools: tools,
-  };
-  const response = await o.OllamaApiChatNoStream(body);
-
-  /* Call tools on Mcp Server */
-  if (response.message?.tool_calls) {
-    /* Get Mcp Tools Info */
-    const toolsInfo = McpClient.GetToolsInfoForOllama(response.message.tool_calls);
-
-    /* Call tools */
-    const data = await McpClient.CallToolsForOllama(response.message.tool_calls);
-
-    if (data.length > 0) return [JSON.stringify(data), toolsInfo];
-  }
-
-  return [undefined, undefined];
+  return tools;
 }
 
 /**
@@ -213,171 +180,283 @@ async function ToolsCall(
 async function Inference(
   query: string,
   image: RaycastImage[] | undefined,
-  context: PromptContext,
+  tools: Tool[],
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
-  let thinkingStarted = false;
-  let responseStarted = false;
-
-  let model = chat.models.main;
-  if (image && chat.models.vision) model = chat.models.vision;
-
-  const body: OllamaApiChatRequestBody = {
-    model: model.tag,
-    messages: GetMessagesForInference(chat, query, image, context),
-    think: model.thinking,
-    keep_alive: model.keep_alive,
-  };
-
   await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
-  const ml = chat.messages.length;
-  const o = new Ollama(model.server);
-  o.OllamaApiChat(body)
-    .then(async (emiter) => {
-      // Get Thinking Text
-      emiter.on("thinking", async (data: string) => {
-        // showToast when thinking process started
-        if (!thinkingStarted) {
-          thinkingStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
-        }
+
+  const msgRequestBody: OllamaApiChatMessage[] = GetMessagesForInference(chat, query, image);
+  let isFirstMessage = true;
+
+  /* eslint-disable-next-line no-constant-condition */
+  while (true) {
+    let thinkingStarted = false;
+    let responseStarted = false;
+
+    /* Set Model */
+    let model = chat.models.main;
+    if (tools.length && chat.models.tools) {
+      model = chat.models.tools;
+    } else if (image && chat.models.vision) {
+      model = chat.models.vision;
+    }
+
+    /* Init Ollama Client and set Request Body */
+    const o = new Ollama(model.server);
+    const body: OllamaApiChatRequestBody = {
+      model: model.tag,
+      messages: msgRequestBody,
+      think: model.thinking,
+      keep_alive: model.keep_alive,
+    };
+
+    /* Init Tools Array and Add Tools into the body */
+    const toolCalls: Promise<ToolResult>[] = [];
+    if (tools.length) body.tools = GetOllamaApiTools(tools);
+
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
+      const emiter = await o.OllamaApiChat(body);
+
+      /* Push first Assistant message and save changes with setChat() */
+      msgRequestBody.push({ role: OllamaApiChatMessageRole.ASSISTANT, content: "" });
+      if (isFirstMessage) {
         setChat((prevState) => {
           if (!prevState) return undefined;
-
-          if (prevState.messages.length === ml) {
-            return {
-              ...prevState,
-              messages: [
-                ...prevState.messages,
-                {
-                  model: chat.models.main.tag,
-                  created_at: "",
-                  images: image,
-                  messages: [
-                    { role: OllamaApiChatMessageRole.USER, content: query },
-                    { role: OllamaApiChatMessageRole.ASSISTANT, thinking: data, content: "" },
-                  ],
-                  done: false,
-                },
-              ],
-            };
-          } else {
-            const newMessages = [...prevState.messages];
-            const lastMsgIndex = newMessages.length - 1;
-            const lastMsg = { ...newMessages[lastMsgIndex] };
-            const lastMsgMessages = [...lastMsg.messages];
-            const assistantMsg = { ...lastMsgMessages[1] };
-
-            assistantMsg.thinking += data;
-            lastMsgMessages[1] = assistantMsg;
-            lastMsg.messages = lastMsgMessages;
-            newMessages[lastMsgIndex] = lastMsg;
-
-            return {
-              ...prevState,
-              messages: newMessages,
-            };
-          }
-        });
-      });
-
-      // Get Response Text
-      emiter.on("data", async (data: string) => {
-        // showToast when  process started
-        if (!responseStarted) {
-          responseStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
-        }
-        setChat((prevState) => {
-          if (!prevState) return undefined;
-
-          if (prevState.messages.length === ml) {
-            return {
-              ...prevState,
-              messages: [
-                ...prevState.messages,
-                {
-                  model: chat.models.main.tag,
-                  created_at: "",
-                  images: image,
-                  messages: [
-                    { role: OllamaApiChatMessageRole.USER, content: query },
-                    { role: OllamaApiChatMessageRole.ASSISTANT, content: data },
-                  ],
-                  done: false,
-                },
-              ],
-            };
-          } else {
-            const newMessages = [...prevState.messages];
-            const lastMsgIndex = newMessages.length - 1;
-            const lastMsg = { ...newMessages[lastMsgIndex] };
-            const lastMsgMessages = [...lastMsg.messages];
-            const assistantMsg = { ...lastMsgMessages[1] };
-
-            assistantMsg.content += data;
-            lastMsgMessages[1] = assistantMsg;
-            lastMsg.messages = lastMsgMessages;
-            newMessages[lastMsgIndex] = lastMsg;
-
-            return {
-              ...prevState,
-              messages: newMessages,
-            };
-          }
-        });
-      });
-
-      // Get Metadata
-      emiter.on("done", async (data: OllamaApiChatResponse) => {
-        await showToast({ style: Toast.Style.Success, title: "👍 Done." });
-        setChat((prevState) => {
-          if (!prevState) return undefined;
-
-          const newMessages = [...prevState.messages];
-          const lastMsgIndex = newMessages.length - 1;
-          const lastMsg = newMessages[lastMsgIndex];
-
-          newMessages[lastMsgIndex] = {
-            ...data,
-            images: image,
-            tools: context.tools && context.tools.meta,
-            messages: lastMsg.messages,
+          return {
+            ...prevState,
+            messages: [
+              ...prevState.messages,
+              {
+                model: model.tag,
+                created_at: "",
+                images: image,
+                messages: [
+                  { role: OllamaApiChatMessageRole.USER, content: query },
+                  { role: OllamaApiChatMessageRole.ASSISTANT, content: "" },
+                ],
+                done: false,
+              },
+            ],
           };
+        });
+        isFirstMessage = false;
+      } else {
+        setChat((prevState) => {
+          if (!prevState) return undefined;
 
-          setLoading(false);
-          return { ...prevState, messages: newMessages };
+          /* Push new Assistant Message on last Message */
+          const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+            /* Skip all value except last */
+            if (groupIndex != groupArr.length - 1) return group;
+
+            return {
+              ...group,
+              messages: group.messages.concat([{ role: OllamaApiChatMessageRole.ASSISTANT, content: "" }]),
+            };
+          });
+
+          return { ...prevState, messages: updatedMessages };
+        });
+      }
+
+      const processEmiter = () => {
+        /* Get Tools Call */
+        emiter.on("tool_calls", (data: OllamaApiChatMessageToolCall[]) => {
+          /* Push "tool_calls" on messages */
+          const message = msgRequestBody.findLast((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+          if (message?.tool_calls) message.tool_calls.push(...data);
+          else if (message) message.tool_calls = data;
+
+          setChat((prevState) => {
+            if (!prevState) return undefined;
+
+            /* Update tool_calls of last Assistant Message */
+            const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+              /* Skip all value except last */
+              if (groupIndex != groupArr.length - 1) return group;
+
+              const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
+                const isLastAssistant =
+                  value.role === OllamaApiChatMessageRole.ASSISTANT &&
+                  valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+
+                /* Skip all value except last Assistant Message */
+                if (!isLastAssistant) return value;
+
+                return { ...value, tool_calls: [...(value.tool_calls ?? []), ...data] };
+              });
+
+              return { ...group, messages: updatedMsg };
+            });
+
+            return { ...prevState, messages: updatedMessages };
+          });
+
+          /* Push Tool Function into Array */
+          for (const toolcall of data) {
+            const tool = tools.find((v) => v.name === toolcall.function.name);
+            if (tool) toolCalls.push(tool.fn(toolcall.function.arguments));
+          }
+        });
+
+        /* Get Thinking Text */
+        emiter.on("thinking", async (data: string) => {
+          /* showToast when thinking process started */
+          if (!thinkingStarted) {
+            thinkingStarted = true;
+            await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+          }
+
+          const msgAssistant = msgRequestBody.findLast((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+          if (msgAssistant) msgAssistant.thinking = (msgAssistant.thinking ?? "") + data;
+          setChat((prevState) => {
+            if (!prevState) return undefined;
+
+            /* Update thinking of last Assistant Message */
+            const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+              /* Skip all value except last */
+              if (groupIndex != groupArr.length - 1) return group;
+
+              const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
+                const isLastAssistant =
+                  value.role === OllamaApiChatMessageRole.ASSISTANT &&
+                  valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+
+                /* Skip all value except last Assistant Message */
+                if (!isLastAssistant) return value;
+
+                return { ...value, thinking: (value.thinking ?? "") + data };
+              });
+
+              return { ...group, messages: updatedMsg };
+            });
+
+            return { ...prevState, messages: updatedMessages };
+          });
+        });
+
+        /* Get Response Text */
+        emiter.on("data", async (data: string) => {
+          /* showToast when  process started */
+          if (!responseStarted) {
+            responseStarted = true;
+            await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+          }
+
+          setChat((prevState) => {
+            if (!prevState) return undefined;
+
+            /* Update content of last Assistant Message */
+            const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+              /* Skip all value except last */
+              if (groupIndex != groupArr.length - 1) return group;
+
+              const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
+                const isLastAssistant =
+                  value.role === OllamaApiChatMessageRole.ASSISTANT &&
+                  valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+
+                /* Skip all value except last Assistant Message */
+                if (!isLastAssistant) return value;
+
+                return { ...value, content: value.content + data };
+              });
+
+              return { ...group, messages: updatedMsg };
+            });
+
+            return { ...prevState, messages: updatedMessages };
+          });
+        });
+      };
+      processEmiter();
+
+      /* Get Metadata */
+      await new Promise<void>((resolve) => {
+        emiter.once("done", async (data: OllamaApiChatResponse) => {
+          /* Continue Iteration on ToolCalls */
+          if (toolCalls.length) {
+            await showToast({ style: Toast.Style.Animated, title: "🧰 Tool Calling..." });
+
+            const promises = await Promise.all(toolCalls);
+            const toolMessages: OllamaApiChatMessage[] = promises.map(
+              (v) => <OllamaApiChatMessage>{ ...v, role: OllamaApiChatMessageRole.TOOL },
+            );
+            msgRequestBody.push(...toolMessages);
+
+            setChat((prevState) => {
+              if (!prevState) return undefined;
+
+              /* Push Tool Messages on last Message */
+              const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+                /* Skip all value except last */
+                if (groupIndex != groupArr.length - 1) return group;
+
+                return { ...group, messages: group.messages.concat(toolMessages) };
+              });
+
+              return { ...prevState, messages: updatedMessages };
+            });
+          } else {
+            /* Set Last Message */
+            await showToast({ style: Toast.Style.Success, title: "👍 Done." });
+            setChat((prevState) => {
+              if (!prevState) return undefined;
+
+              /* Update Metadata of last Message */
+              const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
+                /* Skip all value except last */
+                if (groupIndex != groupArr.length - 1) return group;
+
+                return { ...data, images: image, messages: group.messages };
+              });
+
+              return { ...prevState, messages: updatedMessages };
+            });
+          }
+          resolve();
         });
       });
-    })
-    .catch(async (e: Error) => {
-      await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
-      setLoading(false);
-    });
+      emiter.removeAllListeners();
+
+      /* Brake Loop if no tool was required */
+      if (!toolCalls.length) {
+        break;
+      }
+    } catch (e) {
+      if (e instanceof Error) await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
+      break;
+    }
+  }
+  setLoading(false);
 }
 
 export async function Run(
   query: string,
   image: RaycastImage[] | undefined,
+  toolsOllamaEnabled: boolean,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
   setLoading(true);
 
-  const context: PromptContext = {};
-
   /* Parse token on query */
   query = await PromptTokenParser(query);
 
-  /* Call Tools of mcp_server is defined */
-  if (chat.mcp_server) {
-    const [data, meta] = await ToolsCall(query, chat, image);
-    if (data && meta) context.tools = { data: data, meta: meta };
+  /* Load Enabled Tools */
+  const tools: Tool[] = [];
+  /* Load Ollama Api Tools if Enabled */
+  if (toolsOllamaEnabled) tools.push(...ToolsOllama());
+  /* Load Tools from Mcp Server */
+  if (chat.mcp_server?.length) {
+    const t = await ToolsMcp(chat.mcp_server);
+    tools.push(...t);
   }
 
   /* Start Inference */
-  await Inference(query, image, context, chat, setChat, setLoading);
+  await Inference(query, image, tools, chat, setChat, setLoading);
 }

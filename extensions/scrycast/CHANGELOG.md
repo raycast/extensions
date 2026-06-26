@@ -1,13 +1,18 @@
-## [Unreleased] - 2026-05-11
+## [Unreleased] - 2026-06-26
 
 ### Added
 - Search My Collection command — import your ManaBox CSV and browse or search your personal card collection
 - Collection indicators in Search Cards — ✅ for exact printing owned, ☑️ for a different printing owned
+- Import Commander Decks from Archidekt or Moxfield (or paste your decklist)
 
 ### Changed
 - "Saved Cards" renamed to "Bookmarked Cards"; "Save Card" action renamed to "Bookmark Card"
 - Collection browse defaults to most expensive cards first
 - Collection stats show total copies and set count
+
+### Fixed
+- Incorrect Scryfall headers were showing bad requests
+
 
 ## [Initial Release] - 2026-03-26
 

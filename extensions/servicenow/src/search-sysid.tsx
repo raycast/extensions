@@ -16,10 +16,15 @@ import {
 } from "@raycast/api";
 
 import Actions from "./components/Actions";
+import InstanceForm from "./components/InstanceForm";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
-import { ServiceNowClient } from "./utils/serviceNowClient";
+import {
+  authenticationFailedMessage,
+  backgroundScriptBlockedMessage,
+  ServiceNowClient,
+} from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
@@ -40,7 +45,15 @@ function sourceSuffix(source: SysIdSource | null): string {
 
 export default function SearchSysId(props: LaunchProps) {
   const { sys_id: argSysId, instanceName } = props.arguments;
-  const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    selectedInstance,
+    setSelectedInstance,
+    editInstance,
+    deleteInstance,
+    mutate,
+    isLoading: isLoadingInstances,
+  } = useInstances();
   const argTrimmed = argSysId?.trim() || null;
   const argInitial = argTrimmed && SYS_ID_RE.test(argTrimmed) ? argTrimmed : null;
   const argInvalid = argTrimmed !== null && argInitial === null;
@@ -53,6 +66,8 @@ export default function SearchSysId(props: LaunchProps) {
   }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [canReconfigure, setCanReconfigure] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -95,6 +110,7 @@ export default function SearchSysId(props: LaunchProps) {
     let cancelled = false;
     setIsLoading(true);
     setErrorMessage(null);
+    setCanReconfigure(false);
 
     (async () => {
       const client = new ServiceNowClient(selectedInstance, (updated) => {
@@ -103,22 +119,21 @@ export default function SearchSysId(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
-        setErrorMessage("Authentication failed");
+        setErrorMessage(authenticationFailedMessage(selectedInstance));
+        setCanReconfigure(true);
         setIsLoading(false);
         return;
       }
       await client.startBackgroundScript(findSysID(sysId), (response) => {
         if (cancelled) return;
         const answer = response.match(/###(.*)###/);
-        if (response.length === 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Search for Sys ID",
-            message: "Admin access is required.",
-          });
-          setErrorMessage("Admin access is required to run this lookup.");
+        if (answer == null) {
+          // No marker means the background script never ran (missing admin access or SSO + basic auth).
+          showToast({ style: Toast.Style.Failure, title: "Could Not Run Lookup" });
+          setErrorMessage(backgroundScriptBlockedMessage(selectedInstance));
+          setCanReconfigure(true);
           setIsLoading(false);
-        } else if (answer != null && answer[1]) {
+        } else if (answer[1] && answer[1] !== "NOT_FOUND") {
           const table = answer[1].split("^")[0];
           open(buildServiceNowUrl(selectedInstance.name, `${table}.do?sys_id=${sysId}`));
           popToRoot();
@@ -134,7 +149,7 @@ export default function SearchSysId(props: LaunchProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedInstance?.id, sysId]);
+  }, [selectedInstance?.id, sysId, retryCount]);
 
   const onInstanceChange = (newValue: string) => {
     const found = instances.find((i) => i.id === newValue);
@@ -244,6 +259,19 @@ export default function SearchSysId(props: LaunchProps) {
           description={errorMessage}
           actions={
             <ActionPanel>
+              {canReconfigure && selectedInstance && (
+                <Action.Push
+                  title="Edit Profile"
+                  icon={Icon.Pencil}
+                  target={
+                    <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
+                  }
+                  onPop={() => {
+                    mutate();
+                    setRetryCount((c) => c + 1);
+                  }}
+                />
+              )}
               <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />
             </ActionPanel>
           }

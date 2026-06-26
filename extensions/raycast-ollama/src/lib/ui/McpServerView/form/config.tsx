@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import * as React from "react";
-import { McpServerConfig } from "../../../mcp/types";
+import { McpServerConfig } from "../../types";
 import { GetInitialValueConfig } from "./function";
+import { ToolMcp } from "../../ChatView/tools/mcp";
 
 interface props {
   setShow: (value: boolean) => void;
@@ -16,18 +17,38 @@ interface FormData {
 }
 
 export function McpServerFormConfig(props: props): React.JSX.Element {
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { handleSubmit, itemProps } = useForm<FormData>({
     async onSubmit(values) {
+      /* Set Loading */
+      setIsLoading(true);
+
       /* Deep copy of the old config */
-      const newConfig: McpServerConfig = JSON.parse(JSON.stringify(props.config));
+      const newConfig: McpServerConfig = structuredClone(props.config);
       if (props.configName) delete newConfig.mcpServers[props.configName];
 
       /* Save new mcp server config  */
       const configToSave: McpServerConfig = JSON.parse(values.config);
-      Object.keys(configToSave.mcpServers).forEach((key) => {
+      for (const key of Object.keys(configToSave.mcpServers)) {
+        /* Test Mcp Server */
+        try {
+          await ToolMcp(configToSave.mcpServers[key]);
+        } catch (error) {
+          console.error(error);
+          if (error instanceof Error)
+            await showToast({
+              style: Toast.Style.Failure,
+              title: `Error on Mcp Server "${key}"`,
+              message: error.message,
+            });
+          /* Set Loading */
+          setIsLoading(false);
+          return;
+        }
         newConfig.mcpServers[key] = configToSave.mcpServers[key];
-      });
+      }
       await props.setConfig(newConfig);
+      setIsLoading(false);
       props.setShow(false);
     },
     initialValues: {
@@ -77,7 +98,7 @@ export function McpServerFormConfig(props: props): React.JSX.Element {
   }
 
   return (
-    <Form actions={<ActionMain />}>
+    <Form actions={<ActionMain />} isLoading={isLoading}>
       <Form.TextArea
         title="Mcp Server Config"
         info="Copy Mcp Server config in json format"

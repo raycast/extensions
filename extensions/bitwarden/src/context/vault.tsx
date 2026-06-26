@@ -18,7 +18,7 @@ export type VaultState = Vault & {
 export type VaultContextType = VaultState & {
   isEmpty: boolean;
   syncItems: () => Promise<void>;
-  loadItems: () => Promise<void>;
+  loadItems: (options?: { suppressErrorToast?: boolean }) => Promise<void>;
   currentFolderId: Nullable<string>;
   setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
   updateState: (next: React.SetStateAction<VaultState>) => void;
@@ -58,7 +58,7 @@ export function VaultProvider(props: VaultProviderProps) {
     }
   }, session.active && session.token);
 
-  async function loadItems() {
+  async function loadItems(options?: { suppressErrorToast?: boolean }) {
     try {
       setState({ isLoading: true });
 
@@ -80,7 +80,9 @@ export function VaultProvider(props: VaultProviderProps) {
       publishItems(items);
       cacheVault(items, folders);
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
+      if (!options?.suppressErrorToast) {
+        await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
+      }
       captureException("Failed to load vault items", error);
     } finally {
       setState({ isLoading: false });
@@ -96,9 +98,14 @@ export function VaultProvider(props: VaultProviderProps) {
       style: Toast.Style.Animated,
     });
     try {
-      await bitwarden.sync();
-      await loadItems();
-      await toast.hide();
+      const { error } = await bitwarden.sync();
+      if (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to sync vault";
+        toast.message = getDisplayableErrorMessage(error);
+      }
+      await loadItems({ suppressErrorToast: !!error });
+      if (!error) await toast.hide();
     } catch (error) {
       await bitwarden.logout();
       toast.style = Toast.Style.Failure;

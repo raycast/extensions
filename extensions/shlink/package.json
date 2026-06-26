@@ -54,7 +54,7 @@
         "is-url": "^1.2.4"
     },
     "devDependencies": {
-        "@raycast/eslint-config": "^1.0.8",
+        "@raycast/eslint-config": "^2.1.1",
         "@types/is-url": "^1.2.32",
         "@types/node": "20.8.10",
         "@types/react": "18.3.3",

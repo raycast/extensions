@@ -4,6 +4,10 @@ import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
 import * as storage from "./storage";
 import { isDefined } from "./utils";
 
+// Raycast commands can run in separate processes, so disable the SDK's service
+// event subscriptions before SonosManager adds listeners in @svrooij/sonos.
+process.env.SONOS_DISABLE_EVENTS = "true";
+
 export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
   const playing = await isPlaying();
   const icon = playing ? `▶︎` : `⏸︎`;

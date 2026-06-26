@@ -1,4 +1,4 @@
-import { McpServerConfig } from "../../mcp/types";
+import { McpServerConfig } from "../types";
 
 /**
  * Delete Mcp Server Config from LocalStorage.

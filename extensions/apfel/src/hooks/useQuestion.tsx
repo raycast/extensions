@@ -10,7 +10,7 @@ export function useQuestion(props: { initialQuestion: string }): Omit<QuestionHo
     async (question: string) => {
       setData(question);
     },
-    [setData, data],
+    [setData],
   );
 
   return useMemo(() => ({ data, update }), [data, update]);

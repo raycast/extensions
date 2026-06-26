@@ -16,11 +16,16 @@ import {
 } from "@raycast/api";
 
 import Actions from "./components/Actions";
+import InstanceForm from "./components/InstanceForm";
 import TableRecords from "./components/TableRecords";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
-import { ServiceNowClient } from "./utils/serviceNowClient";
+import {
+  authenticationFailedMessage,
+  backgroundScriptBlockedMessage,
+  ServiceNowClient,
+} from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
@@ -62,7 +67,15 @@ function decodeHtmlEntities(str: string): string {
 
 export default function FindReferences(props: LaunchProps) {
   const { table: argTable, sysId: argSysId, instanceName } = props.arguments;
-  const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    selectedInstance,
+    setSelectedInstance,
+    editInstance,
+    deleteInstance,
+    mutate,
+    isLoading: isLoadingInstances,
+  } = useInstances();
   const hasAnyArg = !!(argTable || argSysId || instanceName);
   const argTableTrimmed = argTable?.trim() || null;
   const argSysIdTrimmed = argSysId?.trim() || null;
@@ -77,6 +90,8 @@ export default function FindReferences(props: LaunchProps) {
   const [references, setReferences] = useState<Reference[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -170,6 +185,7 @@ export default function FindReferences(props: LaunchProps) {
     let cancelled = false;
     setIsLoading(true);
     setErrorFetching(false);
+    setErrorMessage(null);
     setReferences(null);
 
     (async () => {
@@ -179,6 +195,7 @@ export default function FindReferences(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
+        setErrorMessage(authenticationFailedMessage(selectedInstance));
         setErrorFetching(true);
         setIsLoading(false);
         return;
@@ -186,12 +203,12 @@ export default function FindReferences(props: LaunchProps) {
       await client.startBackgroundScript(findReferences(target.table, target.sysId), (response) => {
         if (cancelled) return;
         const match = response.match(/###([\s\S]*?)###/);
-        if (!match || !match[1]) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Search References",
-            message: "Check that you are an admin and the table name is correct.",
-          });
+        if (!match) {
+          // No marker means the background script never ran (missing admin access or SSO + basic auth).
+          showToast({ style: Toast.Style.Failure, title: "Could Not Search References" });
+          setErrorMessage(
+            `${backgroundScriptBlockedMessage(selectedInstance)} Also confirm the table name is correct.`,
+          );
           setErrorFetching(true);
           setIsLoading(false);
           return;
@@ -211,7 +228,7 @@ export default function FindReferences(props: LaunchProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedInstance?.id, target?.table, target?.sysId]);
+  }, [selectedInstance?.id, target?.table, target?.sysId, retryCount]);
 
   const onInstanceChange = (newValue: string) => {
     const found = instances.find((i) => i.id === newValue);
@@ -319,7 +336,26 @@ export default function FindReferences(props: LaunchProps) {
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could Not Fetch References"
-          description="Check that you are an admin on this instance and that the table name is correct."
+          description={
+            errorMessage ?? "Check that you are an admin on this instance and that the table name is correct."
+          }
+          actions={
+            errorMessage && selectedInstance ? (
+              <ActionPanel>
+                <Action.Push
+                  title="Edit Profile"
+                  icon={Icon.Pencil}
+                  target={
+                    <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
+                  }
+                  onPop={() => {
+                    mutate();
+                    setRetryCount((c) => c + 1);
+                  }}
+                />
+              </ActionPanel>
+            ) : undefined
+          }
         />
       ) : references && references.length === 0 ? (
         <List.EmptyView

@@ -32,7 +32,7 @@
     "eslint": "^9.31.0",
     "prettier": "^3.6.2",
     "typescript": "~5.8.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "icon": "extension-icon.png",
   "license": "MIT",
