@@ -5,6 +5,7 @@ import { join } from "path";
 import { Subscription } from "./types";
 
 const CSV_COLUMNS: (keyof Subscription)[] = [
+  "id",
   "name",
   "amount",
   "currency",
@@ -16,6 +17,8 @@ const CSV_COLUMNS: (keyof Subscription)[] = [
   "status",
   "paymentMethod",
   "notes",
+  "iconUrl",
+  "color",
 ];
 
 function csvCell(value: unknown): string {
@@ -40,8 +43,9 @@ export function toCSV(subscriptions: Subscription[]): string {
 function timestampedFilename(prefix: string, extension: string): string {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
-  const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-  return `${prefix}-${stamp}.${extension}`;
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const time = `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `${prefix}-${date}-${time}.${extension}`;
 }
 
 async function saveToDownloads(contents: string, prefix: string, extension: string): Promise<string> {
@@ -82,12 +86,20 @@ export async function copyToClipboard(subscriptions: Subscription[], format: "js
     return;
   }
   const contents = format === "json" ? toJSON(subscriptions) : toCSV(subscriptions);
-  await Clipboard.copy(contents);
-  await showToast({
-    style: Toast.Style.Success,
-    title: `Copied ${subscriptions.length} subscription${subscriptions.length !== 1 ? "s" : ""}`,
-    message: `As ${format.toUpperCase()}`,
-  });
+  try {
+    await Clipboard.copy(contents);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Copied ${subscriptions.length} subscription${subscriptions.length !== 1 ? "s" : ""}`,
+      message: `As ${format.toUpperCase()}`,
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Copy failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 /** Save a pre-built report string (e.g. the analytics Markdown) to ~/Downloads. */
@@ -114,10 +126,18 @@ export async function exportReportToFile(report: string, prefix: string): Promis
 
 /** Copy a pre-built report string to the clipboard. */
 export async function copyReportToClipboard(report: string): Promise<void> {
-  await Clipboard.copy(report);
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Report copied",
-    message: "As Markdown",
-  });
+  try {
+    await Clipboard.copy(report);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Report copied",
+      message: "As Markdown",
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Copy failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
