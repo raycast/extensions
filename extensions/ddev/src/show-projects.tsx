@@ -81,8 +81,9 @@ function TakeSnapshotForm({ name, approot, onDone }: { name: string; approot: st
 }
 
 function SnapshotListView({ name, approot }: { name: string; approot: string }) {
-  const { isLoading, data, error, revalidate } = useExec("ddev", ["snapshot", name, "--list", "--json-output"], {
+  const { isLoading, data, error, revalidate } = useExec("ddev", ["snapshot", "--list", "--json-output"], {
     env: ddevEnv,
+    cwd: approot,
     parseOutput: ({ stdout }) => parseSnapshotList(stdout, name),
   });
 
