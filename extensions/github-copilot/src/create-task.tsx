@@ -116,7 +116,12 @@ function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.TextArea title="Prompt" placeholder="Describe a coding task to work on" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder="Describe a coding task to work on"
+        info="You can ask the agent to open a pull request in your prompt if you want one"
+        {...itemProps.prompt}
+      />
       <RepositoryDropdown
         organizations={data?.organizations.nodes.map((org) => org.login)}
         itemProps={itemProps.repository}

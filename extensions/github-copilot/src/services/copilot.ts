@@ -179,7 +179,7 @@ async function createTask(
   } = {
     event_content: prompt,
     problem_statement: prompt,
-    create_pull_request: true,
+    create_pull_request: false,
     base_ref: branch,
   };
 
