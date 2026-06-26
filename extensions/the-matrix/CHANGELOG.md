@@ -1,6 +1,6 @@
 # The Matrix Changelog
 
-## [Add Speed to Preferences] - {PR_MERGE_DATE}
+## [Add Speed to Preferences] - 2026-06-26
 
 - Add a validated editable **Speed (ms)** preference to control Matrix rain timing.
 
