@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Force LANG / LC_ALL to UTF-8 Locale] - {PR_MERGE_DATE}
+## [Force LANG / LC_ALL to UTF-8 Locale] - 2026-06-26
 - Force LANG and LC_ALL to UTF-8 to allow emoji and other multibyte names to be rendered correctly
 
 ## [Make PATH configurable] - 2025-10-09
