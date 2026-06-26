@@ -13,6 +13,11 @@ describe("HSLtoRGBA", () => {
     assert.deepEqual(result, [28, 24, 23, 0.1]);
   });
 
+  it("converts with decimal percentage alpha", () => {
+    const result = HSLtoRGBA([10, 10, 10, "10.5%"]);
+    assert.deepEqual(result, [28, 24, 23, 0.105]);
+  });
+
   it("percentage and decimal alpha produce the same rgba", () => {
     const fromDecimal = HSLtoRGBA([10, 10, 10, "0.1"]);
     const fromPercent = HSLtoRGBA([10, 10, 10, "10%"]);
@@ -29,6 +34,11 @@ describe("HSLtoHEXA", () => {
   it("converts fully-saturated mid-lightness green", () => {
     const result = HSLtoHEXA([120, 100, 25, "50%"]);
     assert.equal(result, "#00800080");
+  });
+
+  it("converts with decimal percentage alpha", () => {
+    const result = HSLtoHEXA([120, 100, 25, "50.5%"]);
+    assert.equal(result, "#00800081");
   });
 });
 

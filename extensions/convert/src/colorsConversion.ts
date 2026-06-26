@@ -1,3 +1,5 @@
+import { parseAlpha } from "./matching.ts";
+
 const rgbNormalizedToHsl = (r: number, g: number, b: number): number[] => {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -48,8 +50,6 @@ const hslToRgbChannels = (h: number, sPercent: number, lPercent: number): number
   const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
 };
-
-const parseHslAlpha = (alpha: string): number => (alpha.includes("%") ? parseFloat(alpha) / 100 : +alpha);
 
 export const HEXtoRGB = (hex: string): number[] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$|^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
@@ -108,7 +108,7 @@ export const RGBtoHSLA = (rgb: number[]): number[] => [...RGBtoHSL([rgb[0], rgb[
 export const HSLtoHEX = (hsl: number[]): string => `#${hslToHexChannels(hsl[0], hsl[1], hsl[2])}`;
 
 export const HSLtoHEXA = (hsl: [number, number, number, string]): string => {
-  const alpha = parseHslAlpha(hsl[3]);
+  const alpha = parseAlpha(hsl[3]);
   return `#${hslToHexChannels(hsl[0], hsl[1], hsl[2])}${Math.round(alpha * 255)
     .toString(16)
     .padStart(2, "0")}`;
@@ -118,7 +118,7 @@ export const HSLtoRGB = (hsl: number[]): number[] => hslToRgbChannels(hsl[0], hs
 
 export const HSLtoRGBA = (hsl: [number, number, number, string]): number[] => [
   ...hslToRgbChannels(hsl[0], hsl[1], hsl[2]),
-  parseHslAlpha(hsl[3]),
+  parseAlpha(hsl[3]),
 ];
 
 // OKLCH Color Conversions
