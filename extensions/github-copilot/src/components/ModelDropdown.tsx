@@ -111,9 +111,7 @@ export function ModelDropdown(
 
   if (models.length === 0) return null;
 
-  const renderItem = (model: Model) => (
-    <Form.Dropdown.Item key={model.id} title={model.name} value={model.id} />
-  );
+  const renderItem = (model: Model) => <Form.Dropdown.Item key={model.id} title={model.name} value={model.id} />;
 
   return (
     <Form.Dropdown
