@@ -8,6 +8,11 @@
   "categories": ["Developer Tools"],
   "license": "MIT",
   "platforms": ["macOS"],
+  "screenshots": [
+    { "path": "metadata/github-ssh-switcher/1.png" },
+    { "path": "metadata/github-ssh-switcher/2.png" },
+    { "path": "metadata/github-ssh-switcher/3.png" }
+  ],
   "commands": [
     {
       "name": "switch-account",
