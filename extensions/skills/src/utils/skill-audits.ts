@@ -1,5 +1,6 @@
 import {
   API_BASE_URL,
+  SKILLS_BASE_URL,
   buildSkillUrl,
   buildGithubIssueUrl,
   type AuditStatus,
@@ -128,6 +129,13 @@ function buildSecurityAuditUrl(skill: Skill, provider: string): string {
   return `${buildSkillUrl(skill)}/security/${encodeURIComponent(provider)}`;
 }
 
+function normalizeSecurityAuditUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  if (value.startsWith("https://") || value.startsWith("http://")) return value;
+  if (value.startsWith("/")) return `${SKILLS_BASE_URL}${value}`;
+  return undefined;
+}
+
 function slugifyProviderLabel(label: string): string {
   return label
     .trim()
@@ -137,9 +145,12 @@ function slugifyProviderLabel(label: string): string {
 }
 
 type SkillAuditApiEntry = {
+  auditUrl?: unknown;
+  href?: unknown;
   provider?: unknown;
   slug?: unknown;
   status?: unknown;
+  url?: unknown;
 };
 
 type SkillAuditApiResponse = {
@@ -159,7 +170,11 @@ function parseSkillAuditApiEntry(skill: Skill, entry: SkillAuditApiEntry): Skill
     provider,
     providerLabel,
     status: parseAuditStatus(entry.status),
-    url: buildSecurityAuditUrl(skill, provider),
+    url:
+      normalizeSecurityAuditUrl(entry.url) ??
+      normalizeSecurityAuditUrl(entry.href) ??
+      normalizeSecurityAuditUrl(entry.auditUrl) ??
+      buildSecurityAuditUrl(skill, provider),
   };
 }
 
