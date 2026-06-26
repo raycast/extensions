@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dailyweb-newsy",
   "title": "Dailyweb.pl Newsy",
-  "description": "Przeglądaj najnowsze wpisy z Dailyweb.pl",
+  "description": "Browse the latest posts from Dailyweb.pl",
   "icon": "icon.png",
   "author": "lczulak",
   "categories": [
@@ -13,13 +13,13 @@
     {
       "name": "index",
       "title": "Dailyweb.pl Newsy",
-      "description": "Przeglądaj najnowsze wpisy z Dailyweb.pl",
+      "description": "Browse the latest posts from Dailyweb.pl",
       "mode": "view"
     },
     {
       "name": "background",
-      "title": "Dailyweb.pl — Sprawdź Nowe Wpisy",
-      "description": "Sprawdza nowe wpisy w tle i pokazuje powiadomienie",
+      "title": "Dailyweb.pl — Check for New Posts",
+      "description": "Checks for new posts in the background and shows a notification",
       "mode": "no-view",
       "interval": "30m",
       "disabledByDefault": true
@@ -28,39 +28,39 @@
   "preferences": [
     {
       "name": "enableNotifications",
-      "title": "Powiadomienia w tle",
-      "description": "Pokazuj powiadomienie gdy pojawi się nowy wpis",
+      "title": "Background Notifications",
+      "description": "Show a notification when a new post appears",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "label": "Włącz powiadomienia"
+      "label": "Enable notifications"
     },
     {
       "name": "notificationInterval",
-      "title": "Częstotliwość sprawdzania",
-      "description": "Co ile godzin sprawdzać nowe wpisy",
+      "title": "Check Frequency",
+      "description": "How often to check for new posts",
       "type": "dropdown",
       "default": "1",
       "required": false,
       "data": [
         {
-          "title": "Co godzinę",
+          "title": "Every hour",
           "value": "1"
         },
         {
-          "title": "Co 3 godziny",
+          "title": "Every 3 hours",
           "value": "3"
         },
         {
-          "title": "Co 6 godzin",
+          "title": "Every 6 hours",
           "value": "6"
         }
       ]
     },
     {
       "name": "notificationCategory",
-      "title": "Kategoria powiadomień",
-      "description": "Powiadamiaj tylko o wpisach z tej kategorii",
+      "title": "Notification Category",
+      "description": "Only notify about posts in this category",
       "type": "dropdown",
       "default": "0",
       "required": false,
@@ -70,7 +70,7 @@
           "value": "0"
         },
         {
-          "title": "Aktualności",
+          "title": "News",
           "value": "9169"
         },
         {
@@ -78,37 +78,37 @@
           "value": "12429"
         },
         {
-          "title": "Rozrywka",
+          "title": "Entertainment",
           "value": "10516"
         },
         {
-          "title": "Gry",
+          "title": "Games",
           "value": "12184"
         }
       ]
     },
     {
       "name": "layout",
-      "title": "Układ",
-      "description": "Lista — okładka i tytuł; Siatka — karty z okładką, tytułem i autorem",
+      "title": "Layout",
+      "description": "List — cover and title; Grid — cards with cover, title, and author",
       "type": "dropdown",
       "default": "grid",
       "required": false,
       "data": [
         {
-          "title": "Lista",
+          "title": "List",
           "value": "list"
         },
         {
-          "title": "Siatka",
+          "title": "Grid",
           "value": "grid"
         }
       ]
     },
     {
       "name": "gridColumns",
-      "title": "Kolumny siatki",
-      "description": "Ile kart w jednym rzędzie (układ Siatka)",
+      "title": "Grid Columns",
+      "description": "Number of cards per row (Grid layout)",
       "type": "dropdown",
       "default": "2",
       "required": false,
@@ -125,8 +125,8 @@
     },
     {
       "name": "postsPerPage",
-      "title": "Liczba wpisów",
-      "description": "Ile wpisów wczytać naraz",
+      "title": "Number of Posts",
+      "description": "How many posts to load at once",
       "type": "dropdown",
       "default": "5",
       "required": false,
@@ -151,16 +151,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.19",
-    "@raycast/utils": "2.2.5"
+    "@raycast/api": "1.104.20",
+    "@raycast/utils": "2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
-    "eslint": "9.39.4",
-    "prettier": "3.8.3",
-    "typescript": "5.9.3"
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "10.5.0",
+    "prettier": "3.8.4",
+    "typescript": "6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -169,5 +169,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

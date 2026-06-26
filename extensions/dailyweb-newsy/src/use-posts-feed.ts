@@ -2,8 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { groupByDate } from "./categories";
-import { BASE_URL } from "./constants";
+import { BASE_URL, WP_JSON_HEADERS } from "./constants";
 import type { AuthorFilter, Post } from "./types";
+import { parsePostsResponse } from "./utils";
 
 export function usePostsFeed() {
   const { postsPerPage } = getPreferenceValues<Preferences>();
@@ -36,12 +37,15 @@ export function usePostsFeed() {
     data: newPosts,
     isLoading,
     error,
+    revalidate,
   } = useFetch<Post[]>(buildUrl(), {
     keepPreviousData: false,
+    headers: WP_JSON_HEADERS,
+    parseResponse: parsePostsResponse,
   });
 
   useEffect(() => {
-    if (!newPosts) return;
+    if (!Array.isArray(newPosts)) return;
     if (page === 1) {
       setAllPosts(newPosts);
     } else {
@@ -53,7 +57,10 @@ export function usePostsFeed() {
     setHasMore(newPosts.length === Number(postsPerPage));
   }, [newPosts, page, postsPerPage]);
 
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  const refresh = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+    revalidate();
+  }, [revalidate]);
 
   const onSearchTextChange = useCallback((text: string) => {
     setAuthorFilter(null);

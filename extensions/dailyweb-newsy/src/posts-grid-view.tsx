@@ -90,7 +90,7 @@ export function PostsGridView(feed: Feed) {
       }}
       onSearchTextChange={onSearchTextChange}
       onSelectionChange={handleSelectionChange}
-      searchBarPlaceholder="Szukaj wpisów…"
+      searchBarPlaceholder="Search posts…"
       searchBarAccessory={
         <GridCategoryDropdown
           categoryId={categoryId}

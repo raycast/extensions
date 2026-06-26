@@ -37,7 +37,7 @@ export function PostActionPanel({
   return (
     <ActionPanel>
       <Action
-        title="Otwórz w przeglądarce"
+        title="Open in Browser"
         icon={Icon.Globe}
         onAction={async () => {
           await markRead(post.id);
@@ -45,26 +45,26 @@ export function PostActionPanel({
         }}
       />
       <Action.CopyToClipboard
-        title="Kopiuj link"
+        title="Copy Link"
         content={post.link}
         shortcut={{ modifiers: ["cmd"], key: "." }}
       />
       {read ? (
         <Action
-          title="Oznacz jako nieprzeczytany"
+          title="Mark as Unread"
           icon={Icon.Circle}
           onAction={() => markUnread(post.id)}
         />
       ) : (
         <Action
-          title="Oznacz jako przeczytany"
+          title="Mark as Read"
           icon={Icon.CheckCircle}
           onAction={() => markRead(post.id)}
         />
       )}
       {primaryCat && categoryId !== String(primaryCat.id) && (
         <Action
-          title={`Pokaż kategorię: ${primaryCat.name}`}
+          title={`Show Category: ${primaryCat.name}`}
           icon={Icon.Tag}
           onAction={() => {
             setAuthorFilter(null);
@@ -74,14 +74,14 @@ export function PostActionPanel({
       )}
       {author && !authorFilter && (
         <Action
-          title={`Więcej od: ${author.name}`}
+          title={`More from: ${author.name}`}
           icon={Icon.Person}
           onAction={() => setAuthorFilter({ id: author.id, name: author.name })}
         />
       )}
       {(authorFilter || categoryId !== "0") && (
         <Action
-          title="Pokaż wszystkie wpisy"
+          title="Show All Posts"
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
@@ -91,13 +91,13 @@ export function PostActionPanel({
         />
       )}
       <Action
-        title="Odśwież"
+        title="Refresh"
         icon={Icon.RotateClockwise}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
         onAction={refresh}
       />
       <Action
-        title="Ustawienia rozszerzenia"
+        title="Extension Preferences"
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />

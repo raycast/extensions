@@ -1,11 +1,11 @@
 import { LocalStorage, showHUD, getPreferenceValues } from "@raycast/api";
-import { decodeHtmlEntities } from "./utils";
-import { BASE_URL, LAST_CHECK_KEY, LAST_NOTIFIED_KEY } from "./constants";
-
-interface Post {
-  id: number;
-  title: { rendered: string };
-}
+import { decodeHtmlEntities, parsePostsResponse } from "./utils";
+import {
+  BASE_URL,
+  LAST_CHECK_KEY,
+  LAST_NOTIFIED_KEY,
+  WP_JSON_HEADERS,
+} from "./constants";
 
 export default async function Command() {
   const prefs = getPreferenceValues<Preferences>();
@@ -34,10 +34,11 @@ export default async function Command() {
   try {
     const res = await fetch(
       `${BASE_URL}/wp-json/wp/v2/posts?${params.toString()}`,
+      { headers: WP_JSON_HEADERS },
     );
     if (!res.ok) return;
 
-    const posts: Post[] = await res.json();
+    const posts = await parsePostsResponse(res);
     if (!posts.length) return;
 
     const latest = posts[0];
@@ -51,7 +52,7 @@ export default async function Command() {
           0,
           60,
         );
-        await showHUD(`Nowy wpis na Dailyweb: ${title}`);
+        await showHUD(`New post on Dailyweb: ${title}`);
       }
     }
   } catch {

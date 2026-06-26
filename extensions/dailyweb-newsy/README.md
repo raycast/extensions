@@ -1,10 +1,10 @@
 # Dailyweb.pl Newsy — Raycast Extension
 
-Czytnik wpisów z [Dailyweb.pl](https://dailyweb.pl) dla Raycasta. Przeglądaj najnowsze artykuły, filtruj po kategorii lub autorze, szukaj — bez opuszczania Raycasta.
+A feed reader for [Dailyweb.pl](https://dailyweb.pl) built for Raycast. Browse the latest articles, filter by category or author, and search — without ever leaving Raycast.
 
 ---
 
-## Wymagania
+## Requirements
 
 - [Raycast](https://raycast.com) 1.26+
 - Node.js 22.14+
@@ -12,7 +12,7 @@ Czytnik wpisów z [Dailyweb.pl](https://dailyweb.pl) dla Raycasta. Przeglądaj n
 
 ---
 
-## Instalacja (tryb deweloperski)
+## Installation (developer mode)
 
 ```bash
 git clone <repo>
@@ -21,131 +21,134 @@ npm install
 npm run dev
 ```
 
-Raycast automatycznie wykryje rozszerzenie i załaduje je w sekcji **Development**.
+Raycast will automatically detect the extension and load it under the **Development** section.
 
 ---
 
-## Funkcje
+## Features
 
-### Główny ekran — lista lub siatka
+### Main screen — list or grid
 
-W **Ustawieniach** wybierz układ **Lista** albo **Siatka**:
+In **Preferences**, choose between **List** and **Grid** layouts:
 
-| Układ | Widok |
-|-------|--------|
-| **Siatka** (domyślnie) | Karty: okładka, tytuł, data · autor |
-| **Lista** | Wiersze: okładka + tytuł; podgląd po prawej |
+| Layout             | View                                            |
+| ------------------ | ----------------------------------------------- |
+| **Grid** (default) | Cards: cover image, title, date · author        |
+| **List**           | Rows: cover + title; preview panel on the right |
 
-- **Sekcje czasowe** — wpisy pogrupowane na: *Dziś*, *Wczoraj*, *Wcześniej*
-- **Panel podglądu** — po prawej stronie: pełny tytuł, zajawka, autor (z avatarem), kategoria, data, link
-- **Miniatura** — okładka artykułu jako ikona po lewej stronie listy
-- **Wiersz listy** — tylko okładka i tytuł (autor, kategoria i data w panelu podglądu po prawej)
-- **Nieprzeczytane** — śledzone w LocalStorage; oznaczenie po podglądzie lub otwarciu (akcje w panelu Cmd+K)
-- **Doładowanie wpisów** — przewiń na dół lub użyj „Załaduj więcej” w stopce Raycasta
+- **Time sections** — posts grouped into: _Today_, _Yesterday_, _Earlier_
+- **Preview panel** — on the right: full title, excerpt, author (with avatar), category, date, link
+- **Thumbnail** — article cover image as an icon on the left side of the list
+- **List row** — cover image and title only (author, category, and date appear in the preview panel on the right)
+- **Unread tracking** — tracked in LocalStorage; marked as read after previewing or opening (actions available in the Cmd+K panel)
+- **Load more posts** — scroll to the bottom or use "Load more" in the Raycast footer
 
-### Wyszukiwanie
+### Search
 
-Wpisz frazę w pasku wyszukiwania — lista przełącza się w tryb wyszukiwania po stronie serwera (`?search=`). Po wyczyszczeniu wraca do przeglądania z sekcjami.
+Type a phrase in the search bar — the list switches to server-side search mode (`?search=`). Clearing the search returns to browsing with sections.
 
-### Filtrowanie po kategorii
+### Filter by category
 
-Dropdown po prawej stronie paska — dostępne kategorie:
+Dropdown on the right side of the search bar — available categories:
 
-| Sekcja | Kategorie |
-|--------|-----------|
-| Tech | Tech (wszystkie), Mobile, Sprzęt, Foto Video, AI, Audio, Smart Home, Web |
-| Rozrywka | Rozrywka (wszystkie), Gry, Gaming, Filmy i seriale, Lifestyle |
-| Inne | Aktualności, Marketing i nowe media |
+| Section       | Categories                                                              |
+| ------------- | ----------------------------------------------------------------------- |
+| Tech          | Tech (all), Mobile, Hardware, Photo & Video, AI, Audio, Smart Home, Web |
+| Entertainment | Entertainment (all), Games, Gaming, Movies & Series, Lifestyle          |
+| Other         | News, Marketing & New Media                                             |
 
-### Akcje (Cmd+K na zaznaczonym wpisie)
+### Actions (Cmd+K on a selected post)
 
-| Akcja | Skrót | Opis |
-|-------|-------|------|
-| Otwórz w przeglądarce | Enter | Otwiera artykuł w domyślnej przeglądarce |
-| Kopiuj link | Cmd+. | Kopiuje URL do schowka |
-| Pokaż kategorię: X | — | Filtruje listę po kategorii aktualnego wpisu |
-| Więcej od: [autor] | — | Filtruje listę po autorze aktualnego wpisu |
-| Pokaż wszystkie wpisy | Cmd+R | Reset filtrów (autor/kategoria) |
-| Odśwież | Cmd+Shift+R | Pobiera listę od nowa |
-| Ustawienia rozszerzenia | — | Otwiera panel ustawień |
-
----
-
-## Ustawienia
-
-Dostępne w: **Raycast Preferences → Extensions → Dailyweb.pl Newsy**
-
-| Ustawienie | Opcje | Domyślnie | Opis |
-|------------|-------|-----------|------|
-| Powiadomienia w tle | tak/nie | nie | Włącz powiadomienia o nowych wpisach |
-| Częstotliwość sprawdzania | Co godzinę / Co 3h / Co 6h | Co godzinę | Jak często sprawdzać nowe wpisy |
-| Kategoria powiadomień | All, Aktualności, Mobile, Rozrywka, Gry | All | Powiadamiaj tylko o wybranej kategorii |
-| Układ | Lista / Siatka | Siatka | Siatka = karty; Lista = wiersze z podglądem |
-| Kolumny siatki | 2 / 3 | 3 | Liczba kart w rzędzie (tylko układ Siatka) |
-| Liczba wpisów | 5 / 10 / 15 / 30 | 5 | Ile wpisów wczytać naraz |
+| Action              | Shortcut    | Description                                     |
+| ------------------- | ----------- | ----------------------------------------------- |
+| Open in browser     | Enter       | Opens the article in the default browser        |
+| Copy link           | Cmd+.       | Copies the URL to the clipboard                 |
+| Show category: X    | —           | Filters the list by the current post's category |
+| More from: [author] | —           | Filters the list by the current post's author   |
+| Show all posts      | Cmd+R       | Resets filters (author/category)                |
+| Refresh             | Cmd+Shift+R | Re-fetches the post list                        |
+| Extension settings  | —           | Opens the preferences panel                     |
 
 ---
 
-## Powiadomienia w tle
+## Settings
 
-Rozszerzenie zawiera ukrytą komendę sprawdzającą nowe wpisy. Jest wyłączona domyślnie — nie widać jej w wyszukiwarce Raycasta.
+Available at: **Raycast Preferences → Extensions → Dailyweb.pl Newsy**
 
-**Jak włączyć:**
+| Setting                  | Options                                 | Default    | Description                                |
+| ------------------------ | --------------------------------------- | ---------- | ------------------------------------------ |
+| Background notifications | on/off                                  | off        | Enable notifications for new posts         |
+| Check frequency          | Every hour / Every 3h / Every 6h        | Every hour | How often to check for new posts           |
+| Notification category    | All, News, Mobile, Entertainment, Games | All        | Notify only for the selected category      |
+| Layout                   | List / Grid                             | Grid       | Grid = cards; List = rows with preview     |
+| Grid columns             | 2 / 3                                   | 3          | Number of cards per row (Grid layout only) |
+| Posts per page           | 5 / 10 / 15 / 30                        | 5          | How many posts to load at a time           |
+
+---
+
+## Background notifications
+
+The extension includes a hidden background command that checks for new posts. It is disabled by default and does not appear in Raycast's search.
+
+**How to enable:**
+
 1. Raycast Preferences → Extensions → Dailyweb.pl Newsy
-2. Przy komendzie *„sprawdź nowe wpisy"* — przełącz toggle na **włączone**
-3. W ustawieniach rozszerzenia zaznacz **Włącz powiadomienia**
+2. Next to the _"check for new posts"_ command — toggle it **on**
+3. In the extension settings, enable **Enable notifications**
 
-**Jak działa:**
-- Raycast budzi komendę co 30 minut (granularność systemu)
-- Przy każdym przebudzeniu sprawdza czy minął czas z preferencji (1h/3h/6h) — jeśli nie, kończy bez akcji
-- Jeśli czas minął: pobiera najnowszy wpis (opcjonalnie z wybranej kategorii)
-- Porównuje z ostatnio zgłoszonym ID (zapisanym w LocalStorage)
-- Jeśli pojawił się nowy wpis — pokazuje HUD z tytułem
-- Przy pierwszym uruchomieniu zapisuje ID bez powiadomienia (brak false-positive)
+**How it works:**
+
+- Raycast wakes the command every 30 minutes (system granularity)
+- On each wake, it checks whether the interval set in preferences (1h/3h/6h) has elapsed — if not, it exits without any action
+- If the interval has elapsed: it fetches the latest post (optionally from the selected category)
+- Compares it against the last reported ID (stored in LocalStorage)
+- If a new post has appeared — it shows a HUD notification with the title
+- On first run, it saves the ID without sending a notification (no false positives)
 
 ---
 
-## Źródło danych
+## Data source
 
-Rozszerzenie używa publicznego WordPress REST API Dailyweb.pl:
+The extension uses the Dailyweb.pl public WordPress REST API:
 
 ```
 https://dailyweb.pl/wp-json/wp/v2/posts?_embed&per_page=5&page=1
 ```
 
-Parametr `_embed` dociąga w jednym żądaniu: miniaturę (`wp:featuredmedia`), autora z avatarem (`author`), kategorie (`wp:term`).
+The `_embed` parameter fetches in a single request: the thumbnail (`wp:featuredmedia`), the author with avatar (`author`), and categories (`wp:term`).
 
-**Znane ograniczenia:**
-- Niektóre wpisy Dailyweb.pl prowadzą do przekierowania na stalka.pl lub inny portal z tej samej sieci — redirect dzieje się po stronie serwera HTTP, API nie ujawnia docelowego URL
-- Excerpt może być pusty dla niektórych wpisów — panel podglądu wyświetla wtedy tylko tytuł
+**Known limitations:**
+
+- Some Dailyweb.pl posts redirect to stalka.pl or another portal within the same network — the redirect happens at the HTTP server level and the API does not expose the final destination URL
+- The excerpt may be empty for some posts — the preview panel will then display only the title
 
 ---
 
-## Struktura projektu
+## Project structure
 
 ```
 ├── assets/
-│   └── icon.png              # Ikona rozszerzenia (512×512, logo Dailyweb)
+│   └── icon.png              # Extension icon (512×512, Dailyweb logo)
 ├── src/
-│   ├── index.tsx             # Router: lista vs siatka
-│   ├── posts-list-view.tsx   # Układ lista
-│   ├── posts-grid-view.tsx   # Układ siatka
-│   ├── background.tsx        # Komenda tła — powiadomienia
-│   ├── use-posts-feed.ts     # Pobieranie i filtry wpisów
-│   ├── constants.ts          # BASE_URL, klucze LocalStorage
-│   ├── use-read-posts.ts     # Stan przeczytanych wpisów
+│   ├── index.tsx             # Router: list vs grid
+│   ├── posts-list-view.tsx   # List layout
+│   ├── posts-grid-view.tsx   # Grid layout
+│   ├── background.tsx        # Background command — notifications
+│   ├── use-posts-feed.ts     # Post fetching and filters
+│   ├── constants.ts          # BASE_URL, LocalStorage keys
+│   ├── use-read-posts.ts     # Read posts state
 │   └── utils.ts              # decodeHtmlEntities, formatDate, stripHtml
-├── package.json              # Manifest rozszerzenia + zależności
+├── package.json              # Extension manifest + dependencies
 └── tsconfig.json
 ```
 
 ---
 
-## Rozwój
+## Development
 
 ```bash
-npm run dev      # tryb deweloperski z hot-reload
-npm run build    # build produkcyjny
+npm run dev      # developer mode with hot-reload
+npm run build    # production build
 npm run lint     # ESLint
 ```
 

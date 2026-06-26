@@ -16,7 +16,7 @@ function CategoryItems({
   return (
     <>
       {CATEGORY_SECTIONS.map((section) =>
-        section.title === "Wszystkie" ? (
+        section.title === "All" ? (
           section.items.map((cat) => (
             <DropdownItem key={cat.id} title={cat.name} value={cat.id} />
           ))
@@ -37,7 +37,7 @@ export function ListCategoryDropdown({
   onChange,
 }: CategoryDropdownProps) {
   return (
-    <List.Dropdown tooltip="Kategoria" onChange={onChange} value={categoryId}>
+    <List.Dropdown tooltip="Category" onChange={onChange} value={categoryId}>
       <CategoryItems
         DropdownItem={List.Dropdown.Item}
         DropdownSection={List.Dropdown.Section}
@@ -51,7 +51,7 @@ export function GridCategoryDropdown({
   onChange,
 }: CategoryDropdownProps) {
   return (
-    <Grid.Dropdown tooltip="Kategoria" onChange={onChange} value={categoryId}>
+    <Grid.Dropdown tooltip="Category" onChange={onChange} value={categoryId}>
       <CategoryItems
         DropdownItem={Grid.Dropdown.Item}
         DropdownSection={Grid.Dropdown.Section}

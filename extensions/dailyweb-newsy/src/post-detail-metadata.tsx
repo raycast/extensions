@@ -17,7 +17,7 @@ export function PostDetailMetadata({
     <List.Item.Detail.Metadata>
       {author && (
         <List.Item.Detail.Metadata.Label
-          title="Autor"
+          title="Author"
           text={author.name}
           icon={{
             source:
@@ -30,14 +30,14 @@ export function PostDetailMetadata({
       )}
       {primaryCat && (
         <List.Item.Detail.Metadata.Label
-          title="Kategoria"
+          title="Category"
           text={primaryCat.name}
         />
       )}
-      <List.Item.Detail.Metadata.Label title="Data" text={dateStr} />
+      <List.Item.Detail.Metadata.Label title="Date" text={dateStr} />
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Link
-        title="Otwórz"
+        title="Open"
         text="Dailyweb.pl"
         target={link}
       />

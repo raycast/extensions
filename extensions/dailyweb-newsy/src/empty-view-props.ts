@@ -8,26 +8,30 @@ export function getEmptyViewProps(
   categoryId: string,
 ) {
   if (error) {
+    const description =
+      error instanceof Error
+        ? error.message
+        : "Check your internet connection.";
     return {
       icon: Icon.Warning,
-      title: "Nie udało się połączyć z Dailyweb",
-      description: "Sprawdź połączenie internetowe.",
+      title: "Could not load posts",
+      description,
     };
   }
   if (authorFilter) {
     return {
       icon: Icon.Person,
-      title: `Brak wpisów autora ${authorFilter.name}.`,
+      title: `No posts by ${authorFilter.name}.`,
     };
   }
   if (searchText) {
     return {
       icon: Icon.MagnifyingGlass,
-      title: `Brak wyników dla „${searchText}".`,
+      title: `No results for "${searchText}".`,
     };
   }
   if (categoryId !== "0") {
-    return { icon: Icon.Document, title: "Brak wpisów w tej kategorii." };
+    return { icon: Icon.Document, title: "No posts in this category." };
   }
-  return { icon: Icon.Document, title: "Brak wpisów." };
+  return { icon: Icon.Document, title: "No posts." };
 }

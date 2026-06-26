@@ -2,16 +2,16 @@ import type { Post } from "./types";
 
 export const CATEGORY_SECTIONS = [
   {
-    title: "Wszystkie",
-    items: [{ id: "0", name: "Wszystkie" }],
+    title: "All",
+    items: [{ id: "0", name: "All" }],
   },
   {
     title: "Tech",
     items: [
-      { id: "10517", name: "Tech (wszystkie)" },
+      { id: "10517", name: "Tech (all)" },
       { id: "12429", name: "Mobile" },
-      { id: "28870", name: "Sprzęt" },
-      { id: "15577", name: "Foto Video" },
+      { id: "28870", name: "Hardware" },
+      { id: "15577", name: "Photo & Video" },
       { id: "30532", name: "AI" },
       { id: "25860", name: "Audio" },
       { id: "25642", name: "Smart Home" },
@@ -19,20 +19,20 @@ export const CATEGORY_SECTIONS = [
     ],
   },
   {
-    title: "Rozrywka",
+    title: "Entertainment",
     items: [
-      { id: "10516", name: "Rozrywka (wszystkie)" },
-      { id: "12184", name: "Gry" },
+      { id: "10516", name: "Entertainment (all)" },
+      { id: "12184", name: "Games" },
       { id: "28868", name: "Gaming" },
-      { id: "15384", name: "Filmy i seriale" },
+      { id: "15384", name: "Movies & TV" },
       { id: "4718", name: "Lifestyle" },
     ],
   },
   {
-    title: "Inne",
+    title: "Other",
     items: [
-      { id: "9169", name: "Aktualności" },
-      { id: "7559", name: "Marketing i nowe media" },
+      { id: "9169", name: "News" },
+      { id: "7559", name: "Marketing & New Media" },
     ],
   },
 ];
@@ -62,8 +62,8 @@ export function groupByDate(posts: Post[]): { title: string; posts: Post[] }[] {
   }
 
   return [
-    { title: "Dziś", posts: today },
-    { title: "Wczoraj", posts: yesterday },
-    { title: "Wcześniej", posts: older },
+    { title: "Today", posts: today },
+    { title: "Yesterday", posts: yesterday },
+    { title: "Earlier", posts: older },
   ].filter((g) => g.posts.length > 0);
 }

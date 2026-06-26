@@ -1,5 +1,9 @@
 export const BASE_URL = "https://dailyweb.pl";
 
+export const WP_JSON_HEADERS = {
+  Accept: "application/json",
+};
+
 export const LAST_NOTIFIED_KEY = "dwr_lastNotifiedPostId";
 export const LAST_CHECK_KEY = "dwr_lastCheckTime";
 export const READ_POSTS_KEY = "dwr_readPostIds";

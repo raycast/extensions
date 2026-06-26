@@ -1,3 +1,25 @@
+import type { Post } from "./types";
+
+export async function parsePostsResponse(response: Response): Promise<Post[]> {
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  const data: unknown = await response.json();
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (data && typeof data === "object" && "message" in data) {
+    const message = (data as { message: unknown }).message;
+    if (typeof message === "string") {
+      throw new Error(message);
+    }
+  }
+
+  throw new Error("Unexpected response from Dailyweb API");
+}
+
 export function stripHtml(str: string): string {
   return str.replace(/<[^>]*>/g, "").trim();
 }
@@ -30,18 +52,16 @@ export function formatDate(dateStr: string): string {
   yesterday.setDate(now.getDate() - 1);
 
   if (sameDay(date, now)) {
-    if (diffMins < 1) return "właśnie teraz";
-    if (diffMins === 1) return "1 minutę temu";
-    if (diffMins < 5) return `${diffMins} minuty temu`;
-    if (diffMins < 60) return `${diffMins} minut temu`;
-    if (diffHours === 1) return "godzinę temu";
-    if (diffHours < 5) return `${diffHours} godziny temu`;
-    return `${diffHours} godzin temu`;
+    if (diffMins < 1) return "just now";
+    if (diffMins === 1) return "1 minute ago";
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours === 1) return "1 hour ago";
+    return `${diffHours} hours ago`;
   }
 
-  if (sameDay(date, yesterday)) return "wczoraj";
+  if (sameDay(date, yesterday)) return "yesterday";
 
-  return date.toLocaleDateString("pl-PL", {
+  return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",

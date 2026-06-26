@@ -97,7 +97,7 @@ export function PostsListView(feed: Feed) {
       }}
       onSearchTextChange={onSearchTextChange}
       onSelectionChange={handleSelectionChange}
-      searchBarPlaceholder="Szukaj wpisów…"
+      searchBarPlaceholder="Search posts…"
       searchBarAccessory={
         <ListCategoryDropdown
           categoryId={categoryId}

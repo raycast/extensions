@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "target": "ES2022",
     "jsx": "react-jsx",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
     "resolveJsonModule": true,
