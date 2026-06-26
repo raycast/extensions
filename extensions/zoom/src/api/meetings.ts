@@ -108,12 +108,21 @@ async function fetchUpcomingMeetings() {
     "https://api.zoom.us/v2/users/me/meetings?type=upcoming&page_size=300",
     "Fetch meetings",
   );
-  const invitedMeetingsResponse = await fetchMeetingList(
-    "https://api.zoom.us/v2/users/me/upcoming_meetings",
-    "Fetch upcoming meetings",
-  );
 
-  return mergeMeetingResponses(hostedMeetingsResponse, invitedMeetingsResponse);
+  try {
+    const invitedMeetingsResponse = await fetchMeetingList(
+      "https://api.zoom.us/v2/users/me/upcoming_meetings",
+      "Fetch upcoming meetings",
+    );
+
+    if (Array.isArray(invitedMeetingsResponse.meetings)) {
+      return mergeMeetingResponses(hostedMeetingsResponse, invitedMeetingsResponse);
+    }
+  } catch {
+    // Invited meetings are supplementary; fall back to hosted meetings.
+  }
+
+  return hostedMeetingsResponse;
 }
 
 export async function getUpcomingMeetings() {
