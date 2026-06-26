@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
+
+- Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
+
 ## [Upade README] - 2026-06-24
 
 - Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs

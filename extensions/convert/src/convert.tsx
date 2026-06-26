@@ -2,13 +2,8 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { findClosestColor } from "./colors";
 
+import { REMtoPX, REMtoPT, PXtoREM, PXtoPT, PTtoREM, PTtoPX } from "./spacingsConversion";
 import {
-  REMtoPX,
-  REMtoPT,
-  PXtoREM,
-  PXtoPT,
-  PTtoREM,
-  PTtoPX,
   HEXtoRGBA,
   HEXtoRGB,
   HEXtoHSLA,
@@ -26,7 +21,8 @@ import {
   OKLCHtoRGB,
   OKLCHtoHEX,
   OKLCHtoHSL,
-} from "./conversions";
+} from "./colorsConversion";
+import { checkHslMatch, checkRgbMatch, parseAlpha, parseRgbChannel } from "./matching";
 import { PXtoTailwindSpacing, REMtoTailwindSpacing } from "./spacings";
 
 function disableAdjustContrast(rawColor: string): Color.Dynamic {
@@ -68,7 +64,6 @@ export default function Command() {
     // check if input is rem
     const remMatch = value.match(/(\d+|^.\d+|^,\d+|^\d+,\d+|^\d+.\d+)(\srem|rem)/i);
     if (remMatch) {
-      console.log("its a rem");
       setPX(REMtoPX(Number(remMatch[1])));
       setPT(REMtoPT(Number(remMatch[1])));
       setTailwind(REMtoTailwindSpacing(Number(remMatch[1])));
@@ -77,7 +72,6 @@ export default function Command() {
     // check if input is px
     const pxMatch = value.match(/(\d+|^.\d+|^,\d+|^\d+,\d+|^\d+.\d+)(\spx|px)/);
     if (pxMatch) {
-      console.log("its a px");
       setREM(PXtoREM(Number(pxMatch[1])));
       setPT(PXtoPT(Number(pxMatch[1])));
       setTailwind(PXtoTailwindSpacing(Number(pxMatch[1])));
@@ -86,7 +80,6 @@ export default function Command() {
     // check if input is pt
     const ptMatch = value.match(/(\d+|^.\d+|^,\d+|^\d+,\d+|^\d+.\d+)(\spt|pt)/i);
     if (ptMatch) {
-      console.log("its a pt");
       setREM(PTtoREM(Number(ptMatch[1])));
       setPX(PTtoPX(Number(ptMatch[1])));
     }
@@ -94,15 +87,19 @@ export default function Command() {
     // check if input is hex color
     const hexMatch = value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})(?<alpha>[A-Fa-f0-9]{2})?$/i);
     if (hexMatch) {
-      console.log("its a hex");
-      // if hex color has alpha
-      if (hexMatch.groups && hexMatch.groups.alpha) {
+      const hexWithoutAlpha = `#${hexMatch[1]}`;
+      const hexToRgbResult = HEXtoRGB(hexWithoutAlpha);
+
+      if (hexMatch.groups?.alpha) {
+        setHEX(RGBtoHEX(hexToRgbResult));
+        setHEXA(value);
         setRGBA(HEXtoRGBA(value));
-        setRGB(HEXtoRGB(hexMatch[1]));
+        setRGB(hexToRgbResult);
         setHSLA(HEXtoHSLA(value));
-        setHSL(HEXtoHSL(hexMatch[1]));
+        setHSL(HEXtoHSL(hexWithoutAlpha));
+        setOKLCH(RGBtoOKLCH(hexToRgbResult));
+        setClosestColor(findClosestColor(hexToRgbResult[0], hexToRgbResult[1], hexToRgbResult[2]));
       } else {
-        const hexToRgbResult = HEXtoRGB(value);
         setRGB(hexToRgbResult);
         setHSL(HEXtoHSL(value));
         setOKLCH(HEXtoOKLCH(value));
@@ -110,43 +107,52 @@ export default function Command() {
       }
     }
 
-    // check if input is rgb color
-    const rgbMatch = value.match(
-      /^rgb(a)?\((\d{1,3}),(\s)?(\d{1,3}),(\s)?(\d{1,3})(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
-    );
-    if (rgbMatch) {
-      console.log("its a rgb");
-      // if rgb color has alpha
-      if (rgbMatch.groups && rgbMatch.groups.alpha) {
-        setHEX(RGBtoHEX([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
-        setHEXA(RGBtoHEXA([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6], +rgbMatch.groups.alpha]));
-        setHSL(RGBtoHSL([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
-        setHSLA(RGBtoHSLA([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6], +rgbMatch.groups.alpha]));
+    // check if input is rgb color (comma- or space-separated)
+    const rgbMatchGroups = checkRgbMatch(value);
+    if (rgbMatchGroups) {
+      const { r, g, b, alpha } = rgbMatchGroups;
+      const rgbResult = [parseRgbChannel(r), parseRgbChannel(g), parseRgbChannel(b)];
+
+      if (alpha) {
+        const rgbaResult = [...rgbResult, parseAlpha(alpha)];
+        setHEX(RGBtoHEX(rgbResult));
+        setHEXA(RGBtoHEXA(rgbaResult));
+        setRGB(rgbResult);
+        setRGBA(rgbaResult);
+        setHSL(RGBtoHSL([...rgbResult]));
+        setHSLA(RGBtoHSLA(rgbaResult));
+        setOKLCH(RGBtoOKLCH(rgbResult));
+        setClosestColor(findClosestColor(rgbResult[0], rgbResult[1], rgbResult[2]));
       } else {
-        setHEX(RGBtoHEX([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
-        setHSL(RGBtoHSL([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
-        setOKLCH(RGBtoOKLCH([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
-        setClosestColor(findClosestColor(+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]));
+        setHEX(RGBtoHEX(rgbResult));
+        setRGB(rgbResult);
+        setHSL(RGBtoHSL([...rgbResult]));
+        setOKLCH(RGBtoOKLCH(rgbResult));
+        setClosestColor(findClosestColor(rgbResult[0], rgbResult[1], rgbResult[2]));
       }
     }
 
     // check if input is hsl color (comma-separated or space-separated)
-    const hslMatch = value.match(
-      /^hsla?\(\s*(?<h>\d{1,3})\s*(?:,\s*|\s+)(?<s>\d{1,3})%?\s*(?:,\s*|\s+)(?<l>\d{1,3})%?\s*(?:[,/]\s*(?<alpha>\d+\.?\d*|\.?\d+))?\s*\)$/i,
-    );
-    if (hslMatch && hslMatch.groups) {
-      console.log("its a hsl");
-      const { h, s, l, alpha } = hslMatch.groups;
-      // if hsl color has alpha
+    const hslMatchGroups = checkHslMatch(value);
+    if (hslMatchGroups) {
+      const { h, s, l, alpha } = hslMatchGroups;
+      const hslValues = [+h, +s, +l];
+
       if (alpha) {
-        setHEX(HSLtoHEX([+h, +s, +l]));
-        setHEXA(HSLtoHEXA([+h, +s, +l, +alpha]));
-        setRGB(HSLtoRGB([+h, +s, +l]));
-        setRGBA(HSLtoRGBA([+h, +s, +l, +alpha]));
+        const hslToRgbResult = HSLtoRGB(hslValues);
+        const alphaValue = parseAlpha(alpha);
+        setHEX(HSLtoHEX(hslValues));
+        setHEXA(HSLtoHEXA([+h, +s, +l, alpha]));
+        setRGB(hslToRgbResult);
+        setRGBA(HSLtoRGBA([+h, +s, +l, alpha]));
+        setHSL(hslValues);
+        setHSLA([+h, +s, +l, alphaValue]);
+        setOKLCH(RGBtoOKLCH(hslToRgbResult));
+        setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
       } else {
-        const hslToRgbResult = HSLtoRGB([+h, +s, +l]);
-        setHEX(HSLtoHEX([+h, +s, +l]));
-        setHSL([+h, +s, +l]);
+        const hslToRgbResult = HSLtoRGB(hslValues);
+        setHEX(HSLtoHEX(hslValues));
+        setHSL(hslValues);
         setRGB(hslToRgbResult);
         setOKLCH(RGBtoOKLCH(hslToRgbResult));
         setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
@@ -156,20 +162,19 @@ export default function Command() {
     // check if input is oklch color
     const oklchMatch = value.match(/^oklch\(\s*([\d.]+)(%)?\s+([\d.]+)\s+([\d.]+)\s*\)$/i);
     if (oklchMatch) {
-      console.log("its an oklch");
-      // Parse L, C, H values
       let l = parseFloat(oklchMatch[1]);
-      // If L has %, convert from percentage to 0-1 range
       if (oklchMatch[2] === "%") {
         l = l / 100;
       }
       const c = parseFloat(oklchMatch[3]);
       const h = parseFloat(oklchMatch[4]);
 
-      const oklchToRgbResult = OKLCHtoRGB([l, c, h]);
-      setHEX(OKLCHtoHEX([l, c, h]));
+      const oklchValues = [l, c, h];
+      const oklchToRgbResult = OKLCHtoRGB(oklchValues);
+      setOKLCH(oklchValues);
+      setHEX(OKLCHtoHEX(oklchValues));
       setRGB(oklchToRgbResult);
-      setHSL(OKLCHtoHSL([l, c, h]));
+      setHSL(OKLCHtoHSL(oklchValues));
       setClosestColor(findClosestColor(oklchToRgbResult[0], oklchToRgbResult[1], oklchToRgbResult[2]));
     }
   };

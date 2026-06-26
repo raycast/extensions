@@ -1,52 +1,7 @@
-import { Action, ActionPanel, AI, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { aiAvailable, generateCallMetadata, summaryPrompt, transcriptContext } from "./lib/ai";
+import { aiAvailable, CallDraft, CallMetadata, generateCallMetadata } from "./lib/ai";
 import { setCallSummary, setCallTitle } from "./lib/tuple";
-
-/**
- * Run a one-shot streaming AI completion. `buildPrompt` is awaited once on mount (it loads the
- * transcript), then the answer streams into `markdown`. Gated on Raycast Pro.
- */
-function useAICompletion(buildPrompt: () => Promise<string>) {
-  const [markdown, setMarkdown] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | undefined>();
-
-  useEffect(() => {
-    let cancelled = false;
-    // Abort the request on unmount so the model stops generating and a late chunk can't update state.
-    const controller = new AbortController();
-
-    (async () => {
-      try {
-        const prompt = await buildPrompt();
-        const stream = AI.ask(prompt, { creativity: "low", signal: controller.signal });
-        stream.on("data", (chunk) => {
-          if (!cancelled) {
-            setMarkdown((current) => current + chunk);
-          }
-        });
-        await stream;
-      } catch (err) {
-        if (!cancelled) {
-          setError(err as Error);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-    // Intentionally run once per mounted view (the prompt builder is captured at mount).
-  }, []);
-
-  return { markdown, isLoading, error };
-}
 
 function ProRequired({ navigationTitle }: { navigationTitle: string }) {
   return (
@@ -64,110 +19,42 @@ function ProRequired({ navigationTitle }: { navigationTitle: string }) {
   );
 }
 
-/** AI-drafted title + summary for a call, shown in an editable form, then written back. */
-export function GenerateCallMetadata({
-  callId,
-  title,
-  onApplied,
-}: {
-  callId: string;
-  title: string;
-  /** Called with the saved values so callers can refresh or optimistically update their view. */
-  onApplied?: (applied: { title: string; summary: string }) => void;
-}) {
-  if (!aiAvailable()) {
-    return <ProRequired navigationTitle={`Title & Summary: ${title}`} />;
+/** Write a drafted title + summary back to the call. Title is left untouched when blank (an empty
+ *  title would be worse than the existing one); an empty summary is allowed and clears the field. */
+async function writeMetadata(callId: string, applied: CallDraft): Promise<void> {
+  if (applied.title) {
+    await setCallTitle(callId, applied.title);
   }
-  return <GenerateMetadataForm callId={callId} title={title} onApplied={onApplied} />;
+  await setCallSummary(callId, applied.summary);
 }
 
-function GenerateMetadataForm({
-  callId,
-  title,
-  onApplied,
-}: {
-  callId: string;
-  title: string;
-  onApplied?: (applied: { title: string; summary: string }) => void;
-}) {
-  const { pop } = useNavigation();
-  const [draft, setDraft] = useState<{ title: string; summary: string } | undefined>();
-  const [error, setError] = useState<Error | undefined>();
-
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    (async () => {
-      try {
-        const metadata = await generateCallMetadata(callId, controller.signal);
-        if (!cancelled) {
-          setDraft({ title: metadata.title.trim() || title, summary: metadata.summary });
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err as Error);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, []);
-
-  if (error) {
-    return (
-      <Detail navigationTitle={`Title & Summary: ${title}`} markdown={`# Couldn’t Generate\n\n${error.message}`} />
-    );
+/** Write a draft back to the call with toast feedback, then pop to the previous view on success. */
+async function applyMetadata(
+  callId: string,
+  applied: CallDraft,
+  onApplied: ((applied: CallDraft) => void) | undefined,
+  pop: () => void,
+): Promise<void> {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Updating call…" });
+  try {
+    await writeMetadata(callId, applied);
+    toast.style = Toast.Style.Success;
+    // writeMetadata only writes the title when it's non-blank, so don't claim we touched it otherwise.
+    toast.title = applied.title ? "Title & Summary Updated" : "Summary Updated";
+    onApplied?.(applied);
+    pop();
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could Not Update Call";
+    toast.message = error instanceof Error ? error.message : String(error);
   }
-  if (!draft) {
-    return (
-      <Detail
-        isLoading
-        navigationTitle={`Title & Summary: ${title}`}
-        markdown="_Reading the transcript and drafting a title & summary…_"
-      />
-    );
-  }
-
-  return (
-    <Form
-      navigationTitle={`Title & Summary: ${title}`}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Apply to Call"
-            icon={Icon.Check}
-            onSubmit={async (values: { title: string; summary: string }) => {
-              const toast = await showToast({ style: Toast.Style.Animated, title: "Updating call…" });
-              try {
-                const applied = { title: values.title.trim(), summary: values.summary.trim() };
-                if (applied.title) {
-                  await setCallTitle(callId, applied.title);
-                }
-                await setCallSummary(callId, applied.summary);
-                toast.style = Toast.Style.Success;
-                toast.title = "Title & Summary Updated";
-                onApplied?.(applied);
-                pop();
-              } catch (err) {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Could Not Update Call";
-                toast.message = err instanceof Error ? err.message : String(err);
-              }
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="AI drafted these from the transcript. Edit if you like, then apply." />
-      <Form.TextField id="title" title="Title" defaultValue={draft.title} />
-      <Form.TextArea id="summary" title="Summary" defaultValue={draft.summary} />
-    </Form>
-  );
 }
 
-/** Streamed AI summary of a single call. */
+/**
+ * AI-drafted title + summary for a call, shown read-only for a quick review, then written back with
+ * one "Apply to Call". "Edit Before Applying" drops into a form seeded with the same draft (no second
+ * model call) when you want to tweak first. Gated on Raycast Pro.
+ */
 export function SummarizeCall({
   callId,
   title,
@@ -175,8 +62,8 @@ export function SummarizeCall({
 }: {
   callId: string;
   title: string;
-  /** Called with the saved summary when the user applies it to the call. */
-  onApplied?: (summary: string) => void;
+  /** Called with the saved values so callers can refresh or optimistically update their view. */
+  onApplied?: (applied: CallDraft) => void;
 }) {
   if (!aiAvailable()) {
     return <ProRequired navigationTitle={`Summary: ${title}`} />;
@@ -191,44 +78,137 @@ function SummaryDetail({
 }: {
   callId: string;
   title: string;
-  onApplied?: (summary: string) => void;
+  onApplied?: (applied: CallDraft) => void;
 }) {
   const { pop } = useNavigation();
-  const { markdown, isLoading, error } = useAICompletion(async () => summaryPrompt(await transcriptContext(callId)));
-  const body = error ? `# Couldn’t Summarize\n\n${error.message}` : markdown || "_Summarizing…_";
-  const canApply = Boolean(markdown.trim()) && !isLoading && !error;
+  const [draft, setDraft] = useState<CallMetadata | undefined>();
+  const [error, setError] = useState<Error | undefined>();
+
+  useEffect(() => {
+    let cancelled = false;
+    // Abort the request on unmount so the model stops generating and a late resolution can't set state.
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const metadata = await generateCallMetadata(callId, controller.signal);
+        if (!cancelled) {
+          setDraft(metadata);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err as Error);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
+
+  if (error) {
+    return <Detail navigationTitle={`Summary: ${title}`} markdown={`# Couldn’t Summarize\n\n${error.message}`} />;
+  }
+  if (!draft) {
+    return (
+      <Detail
+        isLoading
+        navigationTitle={`Summary: ${title}`}
+        markdown="_Reading the transcript and drafting a title & summary…_"
+      />
+    );
+  }
+
+  const draftTitle = draft.title.trim();
+  const draftSummary = draft.summary.trim();
+  const heading = draftTitle ? `# ${draftTitle}\n\n` : "";
+  // Only offer one-tap apply for a cleanly parsed draft that actually has a summary. Requiring a
+  // summary matters: writeMetadata writes it unconditionally, so a parsed-but-empty draft would
+  // silently clear an existing summary. A non-JSON reply (parsed: false) or empty one routes through
+  // the editable form instead, where the raw text is visible and salvageable.
+  const canApply = draft.parsed && Boolean(draftSummary);
+  const markdown = canApply
+    ? `${heading}${draftSummary}`
+    : `${heading}${draftSummary}\n\n---\n\n_The model didn’t return a clean title & summary. Use **Edit Before Applying** to fix it up._`;
+
+  // Raycast's pop lands back on this page (not the originating list), so mirror an edit-form save into
+  // our own draft: the page then shows what was saved and a second Apply is idempotent rather than
+  // re-applying the original draft over the user's edits.
+  const handleEditApplied = (applied: CallDraft) => {
+    setDraft({ title: applied.title, summary: applied.summary, parsed: true });
+    onApplied?.(applied);
+  };
 
   return (
     <Detail
-      isLoading={isLoading}
       navigationTitle={`Summary: ${title}`}
-      markdown={body}
+      markdown={markdown}
       actions={
-        canApply ? (
-          <ActionPanel>
+        <ActionPanel>
+          {canApply && (
             <Action
               title="Apply to Call"
               icon={Icon.Check}
-              onAction={async () => {
-                const toast = await showToast({ style: Toast.Style.Animated, title: "Saving summary…" });
-                try {
-                  const summary = markdown.trim();
-                  await setCallSummary(callId, summary);
-                  toast.style = Toast.Style.Success;
-                  toast.title = "Summary Saved";
-                  onApplied?.(summary);
-                  pop();
-                } catch (err) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Could Not Save Summary";
-                  toast.message = err instanceof Error ? err.message : String(err);
-                }
-              }}
+              onAction={() => applyMetadata(callId, { title: draftTitle, summary: draftSummary }, onApplied, pop)}
             />
-            <Action.CopyToClipboard title="Copy Summary" content={markdown} icon={Icon.Clipboard} />
-          </ActionPanel>
-        ) : undefined
+          )}
+          <Action.Push
+            title="Edit Before Applying"
+            icon={Icon.Pencil}
+            target={
+              <EditCallMetadata
+                callId={callId}
+                title={title}
+                draft={{ title: draftTitle || title, summary: draftSummary }}
+                description="AI drafted these from the transcript. Edit if you like, then apply."
+                onApplied={handleEditApplied}
+              />
+            }
+          />
+          <Action.CopyToClipboard title="Copy Summary" content={draftSummary} icon={Icon.Clipboard} />
+        </ActionPanel>
       }
     />
+  );
+}
+
+/**
+ * Editable title + summary, seeded with `draft`, then written back on submit. Used both to tweak a
+ * fresh AI draft and to hand-edit a call's existing title/summary — the latter involves no AI, so this
+ * form is not Pro-gated. `description` sets the helper text above the fields for each context.
+ */
+export function EditCallMetadata({
+  callId,
+  title,
+  draft,
+  description = "Edit the title and summary, then apply.",
+  onApplied,
+}: {
+  callId: string;
+  title: string;
+  draft: CallDraft;
+  description?: string;
+  onApplied?: (applied: CallDraft) => void;
+}) {
+  const { pop } = useNavigation();
+  return (
+    <Form
+      navigationTitle={`Title & Summary: ${title}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Apply to Call"
+            icon={Icon.Check}
+            onSubmit={(values: { title: string; summary: string }) =>
+              applyMetadata(callId, { title: values.title.trim(), summary: values.summary.trim() }, onApplied, pop)
+            }
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text={description} />
+      <Form.TextField id="title" title="Title" defaultValue={draft.title} />
+      <Form.TextArea id="summary" title="Summary" defaultValue={draft.summary} />
+    </Form>
   );
 }

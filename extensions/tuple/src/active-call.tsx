@@ -1,6 +1,5 @@
 import { Clipboard, Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { CallPerson, callParticipants, isActiveCall, isCallMuted, isTranscribing, personName } from "./lib/call";
 import { useTupleJson } from "./lib/hooks";
 import {
   addToCall,
@@ -12,41 +11,46 @@ import {
   stopTranscription,
   unmuteCall,
 } from "./lib/tuple";
-import { Contact, TupleState } from "./lib/types";
+import { CallView, CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
 
 export default function ActiveCallMenuBar() {
-  // `state` carries the current call, the current user (to drop self from the roster), and contacts
-  // (so Add Person needs no extra exec) in one call. No failureTitle: the menu bar renders its own states.
-  const { data, isLoading, error, revalidate } = useTupleJson<TupleState>(["state"]);
-  const classified = error ? classifyError(error) : undefined;
+  // The roster comes from `tuple call current` (normalized, self already excluded); online
+  // contacts for "Add Person" come from `tuple contacts list --status online`, fetched only while
+  // in a call. Neither reads the full `tuple state` blob. `call current` exits non-zero when not
+  // in a call, which classifyError maps to NoActiveCall — a normal state, not a failure.
+  const call = useTupleJson<CallView>(["call", "current"]);
+  const callError = call.error ? classifyError(call.error) : undefined;
+  const noActiveCall = callError?.kind === TupleErrorKind.NoActiveCall;
+  const realError = callError && !noActiveCall ? callError : undefined;
+  const activeCall = callError ? undefined : call.data;
 
-  if (classified) {
+  const contacts = useTupleJson<Contact[]>(["contacts", "list", "--status", "online"], {
+    execute: Boolean(activeCall),
+  });
+
+  if (realError) {
     return (
-      <MenuBarExtra isLoading={isLoading} icon={{ source: Icon.Warning, tintColor: Color.Red }} tooltip="Tuple">
-        <MenuBarExtra.Item title={classified.message} />
-        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+      <MenuBarExtra isLoading={call.isLoading} icon={{ source: Icon.Warning, tintColor: Color.Red }} tooltip="Tuple">
+        <MenuBarExtra.Item title={realError.message} />
+        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={call.revalidate} />
       </MenuBarExtra>
     );
   }
 
-  const call = data?.current_call;
-
-  if (!isActiveCall(call)) {
+  if (!activeCall) {
     return (
-      <MenuBarExtra isLoading={isLoading} icon={Icon.VideoDisabled} tooltip="Tuple — no active call">
+      <MenuBarExtra isLoading={call.isLoading} icon={Icon.VideoDisabled} tooltip="Tuple — no active call">
         <MenuBarExtra.Item title="No Active Call" />
       </MenuBarExtra>
     );
   }
 
-  const others = callParticipants(call, data?.current_user?.id);
-  const muted = isCallMuted(call);
-  const transcribing = isTranscribing(call);
-  const onlineContacts = (data?.contacts ?? []).filter((contact) => contact.status === "online");
+  const others = activeCall.participants;
+  const onlineContacts = contacts.data ?? [];
 
   return (
     <MenuBarExtra
-      isLoading={isLoading}
+      isLoading={call.isLoading}
       icon={{ source: Icon.Video, tintColor: Color.Green }}
       title={memberSummary(others)}
       tooltip="Tuple — in a call"
@@ -54,34 +58,34 @@ export default function ActiveCallMenuBar() {
       {others.length > 0 && (
         <MenuBarExtra.Section title="In a Call">
           {others.map((person) => (
-            <MenuBarExtra.Item key={person.id ?? person.email} title={personName(person)} icon={Icon.Person} />
+            <MenuBarExtra.Item key={person.id || person.email} title={personName(person)} icon={Icon.Person} />
           ))}
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={muted ? "Unmute" : "Mute"}
-          icon={muted ? Icon.MicrophoneDisabled : Icon.Microphone}
-          onAction={() => runAction(muted ? unmuteCall : muteCall, revalidate)}
+          title={activeCall.muted ? "Unmute" : "Mute"}
+          icon={activeCall.muted ? Icon.MicrophoneDisabled : Icon.Microphone}
+          onAction={() => runAction(activeCall.muted ? unmuteCall : muteCall, call.revalidate)}
         />
         <MenuBarExtra.Item
-          title={transcribing ? "Stop Transcription" : "Start Transcription"}
-          icon={transcribing ? Icon.Stop : Icon.SpeechBubble}
-          onAction={() => runAction(transcribing ? stopTranscription : startTranscription, revalidate)}
+          title={activeCall.transcribing ? "Stop Transcription" : "Start Transcription"}
+          icon={activeCall.transcribing ? Icon.Stop : Icon.SpeechBubble}
+          onAction={() => runAction(activeCall.transcribing ? stopTranscription : startTranscription, call.revalidate)}
         />
-        <AddPersonSubmenu contacts={onlineContacts} onChange={revalidate} />
+        <AddPersonSubmenu contacts={onlineContacts} onChange={call.revalidate} />
         <MenuBarExtra.Item title="Copy AI Context" icon={Icon.Clipboard} onAction={copyCallContext} />
         <MenuBarExtra.Item
           title="Hang Up"
           icon={Icon.PhoneRinging}
-          onAction={() => runAction(hangUpCall, revalidate)}
+          onAction={() => runAction(hangUpCall, call.revalidate)}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
 
-/** Online contacts the user can add to the current call (sourced from the same state payload). */
+/** Online contacts the user can add to the current call. */
 function AddPersonSubmenu({ contacts, onChange }: { contacts: Contact[]; onChange: () => void }) {
   if (contacts.length === 0) {
     return null;
@@ -121,11 +125,15 @@ async function runAction(action: () => Promise<void>, onChange: () => void) {
   }
 }
 
-function memberSummary(people: CallPerson[]): string | undefined {
+function personName(person: CallViewParticipant): string {
+  return person.name || person.email || "Participant";
+}
+
+function memberSummary(people: CallViewParticipant[]): string | undefined {
   if (people.length === 0) {
     return undefined;
   }
   const [first] = people;
-  const name = first.short_name ?? first.full_name ?? first.email ?? "In call";
+  const name = first.name || first.email || "In call";
   return people.length === 1 ? name : `${name} +${people.length - 1}`;
 }
