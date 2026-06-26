@@ -35,7 +35,10 @@ function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEn
         name: parts[1] || "Unknown",
         displayID: parts[2] || "Display",
         num: parseInt(parts[3] || "0", 10),
-        isFullscreen: parts[4] === "1",
+        // parts[4] (isFullscreen) is only present in the 5-field format.
+        // When absent (legacy 4-field format), default to true to avoid
+        // offering the space as a move destination for fullscreen spaces.
+        isFullscreen: parts.length >= 5 ? parts[4] === "1" : true,
       };
       spaces.push(currentSpace);
     } else if (line.startsWith("  ") && currentSpace) {
@@ -53,15 +56,18 @@ function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEn
           space: { ...currentSpace },
         });
       } else if (parts.length >= 5) {
-        // Legacy format: wid|pid|owner|appPath|title
+        // Legacy format: wid|pid|owner|appPath|title (no state fields).
+        // Default both to true so the UI shows Restore and hides Minimize/Hide
+        // rather than the reverse — safer to offer a restore that may no-op
+        // than to offer minimize for an already-minimized window.
         windows.push({
           windowID: parseInt(parts[0], 10),
           pid: parseInt(parts[1], 10),
           ownerName: parts[2],
           appPath: parts[3],
           title: parts.slice(4).join("|"),
-          isMinimized: false,
-          isHidden: false,
+          isMinimized: true,
+          isHidden: true,
           space: { ...currentSpace },
         });
       }
@@ -74,16 +80,12 @@ export default function Command() {
   const [filterSpaceId, setFilterSpaceId] = useState("all");
 
   const { data, isLoading, revalidate } = usePromise(async () => {
-    try {
-      const result = await runDesktopRenamerScript(`
-        tell application "DesktopRenamer"
-          get windows
-        end tell
-      `);
-      return parseWindowData(result);
-    } catch {
-      return { spaces: [], windows: [] };
-    }
+    const result = await runDesktopRenamerScript(`
+      tell application "DesktopRenamer"
+        get windows
+      end tell
+    `);
+    return parseWindowData(result);
   });
 
   const allSpaces = data?.spaces ?? [];
@@ -224,7 +226,7 @@ export default function Command() {
             <List.Section key={space.id} title={space.name} subtitle={`${space.displayID} · Space ${space.num}`}>
               {windows.map((entry) => (
                 <List.Item
-                  key={`${entry.windowID}`}
+                  key={`${entry.windowID}-${entry.pid}`}
                   title={entry.title}
                   subtitle={entry.ownerName}
                   icon={entry.appPath ? { fileIcon: entry.appPath } : Icon.Window}

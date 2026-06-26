@@ -3,8 +3,9 @@ import { runDesktopRenamerCommand, escapeAppleScriptString } from "./utils";
 import { useSpaces, Space, RenameSpaceForm } from "./spaces";
 
 export default function Command() {
-  const { spaces, groupedSpaces, currentName, isLoading, revalidate } = useSpaces();
-  const currentSpace = spaces.find((s) => s.name === currentName);
+  const { spaces, groupedSpaces, currentId, isLoading, revalidate } = useSpaces();
+  const currentSpaceId = currentId ? currentId.split(",")[0]?.trim() : null;
+  const currentSpace = currentSpaceId ? spaces.find((s) => s.id === currentSpaceId) : undefined;
 
   async function moveWindow(space: Space) {
     try {
@@ -31,7 +32,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => {
-        const filtered = spaces.filter((s) => !s.isFullscreen && s.name !== currentName);
+        const filtered = spaces.filter((s) => !s.isFullscreen && s.id !== currentSpaceId);
         if (filtered.length === 0) return null;
         return (
           <List.Section key={displayID} title={displayID}>

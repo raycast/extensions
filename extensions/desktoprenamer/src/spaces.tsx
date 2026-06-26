@@ -45,7 +45,10 @@ export function useSpaces() {
           name: parts[1] || "Unknown",
           displayID: parts[2] || "Main",
           num: parseInt(parts[3] || "0", 10),
-          isFullscreen: parts[4] === "1",
+          // parts[4] (isFullscreen) is only present in the 5-field format.
+          // When absent (legacy 4-field format), default to true to avoid
+          // offering the space as a move destination for fullscreen spaces.
+          isFullscreen: parts.length >= 5 ? parts[4] === "1" : true,
           appPath: parts[5] || undefined,
         };
       });

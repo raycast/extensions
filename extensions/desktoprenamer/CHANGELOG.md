@@ -1,6 +1,6 @@
 # DesktopRenamer Changelog
 
-## [Window Actions] - 2026-06-25
+## [Window Actions] - {PR_MERGE_DATE}
 
 - Added window actions to `Batch Move Windows` and `List Windows` commands
 - Added displaying app icon for full screen desktops
