@@ -1,4 +1,4 @@
-## [Release 1] - 2026-06-26
+## [Release 1] - {PR_MERGE_DATE}
 
 ### Added
 - Search My Collection command — import your ManaBox CSV and browse or search your personal card collection
