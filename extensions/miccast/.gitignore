@@ -2,6 +2,7 @@ node_modules
 dist
 build
 build-test
+raw-shots
 *.zip
 .DS_Store
 raycast-env.d.ts
