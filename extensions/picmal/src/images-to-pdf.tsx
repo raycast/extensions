@@ -34,7 +34,9 @@ interface ImagesToPDFFormValues {
 
 /** Keep only the image files from a list of paths, per Picmal's known formats. */
 function imagesOnly(paths: string[], formats: FormatGroups | undefined): string[] {
-  if (!formats) return paths;
+  // No usable format list (CLI unreachable/unparsed → empty groups): don't filter,
+  // let the CLI decide. Otherwise filtering would reject every file.
+  if (!formats || formats.image.length === 0) return paths;
   return paths.filter((path) => categorize(path, formats) === "image");
 }
 
