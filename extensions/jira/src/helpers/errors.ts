@@ -13,12 +13,17 @@ export function getRateLimitErrorMessage(retryAfter: string | null): string {
 }
 
 function parseRetryAfter(retryAfter: string): number | null {
-  const seconds = Number(retryAfter);
+  const normalizedRetryAfter = retryAfter.trim();
+  if (!normalizedRetryAfter) {
+    return null;
+  }
+
+  const seconds = Number(normalizedRetryAfter);
   if (!Number.isNaN(seconds) && seconds >= 0) {
     return Math.ceil(seconds);
   }
 
-  const retryDate = Date.parse(retryAfter);
+  const retryDate = Date.parse(normalizedRetryAfter);
   if (!Number.isNaN(retryDate)) {
     const deltaSeconds = Math.ceil((retryDate - Date.now()) / 1000);
     return deltaSeconds > 0 ? deltaSeconds : null;
