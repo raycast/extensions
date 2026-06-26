@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Create tasks without auto-opening a pull request] - {PR_MERGE_DATE}
+## [Create tasks without auto-opening a pull request] - 2026-06-26
 
 - Create tasks without auto-opening a pull request, with a prompt placeholder explaining that users can ask Copilot to open a PR
 - Group models in the model picker by their category, with humanized section titles
