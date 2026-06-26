@@ -7,7 +7,7 @@ export interface Space {
   name: string;
   displayID: string;
   num: number;
-  isFullscreen: boolean;
+  isFullscreen: boolean | undefined;
   appPath?: string;
 }
 
@@ -46,9 +46,9 @@ export function useSpaces() {
           displayID: parts[2] || "Main",
           num: parseInt(parts[3] || "0", 10),
           // parts[4] (isFullscreen) is only present in the 5-field format.
-          // When absent (legacy 4-field format), default to true to avoid
-          // offering the space as a move destination for fullscreen spaces.
-          isFullscreen: parts.length >= 5 ? parts[4] === "1" : true,
+          // When absent (legacy 4-field format), leave undefined so filters
+          // treat the space as an unknown-status (allow as move target).
+          isFullscreen: parts.length >= 5 ? parts[4] === "1" : undefined,
           appPath: parts[5] || undefined,
         };
       });
