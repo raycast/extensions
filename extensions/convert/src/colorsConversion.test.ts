@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { HSLtoHEXA, HSLtoRGBA } from "./colorsConversion.ts";
+import { HEXtoHSL, HEXtoHSLA, HSLtoHEXA, HSLtoRGBA } from "./colorsConversion.ts";
 
 describe("HSLtoRGBA", () => {
   it("converts with alpha as decimal number", () => {
@@ -29,5 +29,20 @@ describe("HSLtoHEXA", () => {
   it("converts fully-saturated mid-lightness green", () => {
     const result = HSLtoHEXA([120, 100, 25, "50%"]);
     assert.equal(result, "#00800080");
+  });
+});
+
+describe("HEXtoHSLA", () => {
+  it("matches HEXtoHSL for opaque channels", () => {
+    const hsl = HEXtoHSL("#ff0080");
+    const hsla = HEXtoHSLA("#ff0080ff");
+    assert.deepEqual(hsla.slice(0, 3), hsl);
+    assert.equal(hsla[3], 1);
+  });
+
+  it("handles shorthand hex with alpha", () => {
+    const hsla = HEXtoHSLA("#00669980");
+    assert.deepEqual(hsla.slice(0, 3), HEXtoHSL("#006699"));
+    assert.equal(hsla[3], 128 / 255);
   });
 });

@@ -2,117 +2,76 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { checkHslMatch } from "./matching.ts";
 
+function assertHslMatchValues(
+  input: string,
+  expected: { h: string; s: string; l: string; alpha?: string | undefined },
+) {
+  const groups = checkHslMatch(input);
+  assert.notEqual(groups, null, "Failed to find hsl match");
+  assert.equal(groups!.h, expected.h);
+  assert.equal(groups!.s, expected.s);
+  assert.equal(groups!.l, expected.l);
+  if ("alpha" in expected) {
+    assert.equal(groups!.alpha, expected.alpha);
+  }
+}
+
+function assertHslAlphaMatch(input: string, expectedAlpha: string) {
+  const groups = checkHslMatch(input);
+  assert.notEqual(groups, null, "Failed to find hsl match");
+  assert.equal(groups!.alpha, expectedAlpha);
+}
+
 describe("hsl regex", () => {
   describe("comma-separated", () => {
     it("matches hsl with % signs", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120, 50%, 75%)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
-      assert.equal(alpha, undefined);
+      assertHslMatchValues("hsl(120, 50%, 75%)", { h: "120", s: "50", l: "75", alpha: undefined });
     });
 
     it("matches hsl without % signs", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120, 50, 75)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
+      assertHslMatchValues("hsl(120, 50, 75)", { h: "120", s: "50", l: "75" });
     });
 
     it("matches hsla with decimal alpha", () => {
-      const hslMatchGroups = checkHslMatch("hsla(120, 50%, 75%, 0.5)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
-      assert.equal(alpha, "0.5");
+      assertHslMatchValues("hsla(120, 50%, 75%, 0.5)", { h: "120", s: "50", l: "75", alpha: "0.5" });
     });
 
     it("matches hsla with integer alpha", () => {
-      const hslMatchGroups = checkHslMatch("hsla(120, 50%, 75%, 1)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { alpha } = hslMatchGroups!;
-      assert.equal(alpha, "1");
+      assertHslAlphaMatch("hsla(120, 50%, 75%, 1)", "1");
     });
 
     it("matches hsla with leading-dot alpha (.5)", () => {
-      const hslMatchGroups = checkHslMatch("hsla(120, 50%, 75%, .5)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { alpha } = hslMatchGroups!;
-      assert.equal(alpha, ".5");
+      assertHslAlphaMatch("hsla(120, 50%, 75%, .5)", ".5");
     });
   });
 
   describe("space-separated", () => {
     it("matches hsl with % signs", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120 50% 75%)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
-      assert.equal(alpha, undefined);
+      assertHslMatchValues("hsl(120 50% 75%)", { h: "120", s: "50", l: "75", alpha: undefined });
     });
 
     it("matches hsl without % signs", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120 50 75)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
+      assertHslMatchValues("hsl(120 50 75)", { h: "120", s: "50", l: "75" });
     });
 
     it("matches hsl with slash alpha as number (modern CSS syntax)", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120 50% 75% / 0.5)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
-      assert.equal(alpha, "0.5");
+      assertHslMatchValues("hsl(120 50% 75% / 0.5)", { h: "120", s: "50", l: "75", alpha: "0.5" });
     });
 
     it("matches hsl with slash alpha as percentage (modern CSS syntax)", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120 50% 75% / 50%)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
-      assert.equal(alpha, "50%");
+      assertHslMatchValues("hsl(120 50% 75% / 50%)", { h: "120", s: "50", l: "75", alpha: "50%" });
     });
 
     it("matches hsl with slash alpha as integer (no percent)", () => {
-      const hslMatchGroups = checkHslMatch("hsl(10 10% 10% / 0.1)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "10");
-      assert.equal(s, "10");
-      assert.equal(l, "10");
-      assert.equal(alpha, "0.1");
+      assertHslMatchValues("hsl(10 10% 10% / 0.1)", { h: "10", s: "10", l: "10", alpha: "0.1" });
     });
 
     it("matches hsl with slash alpha as integer percentage", () => {
-      const hslMatchGroups = checkHslMatch("hsl(10 10% 10% / 10%)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l, alpha } = hslMatchGroups!;
-      assert.equal(h, "10");
-      assert.equal(s, "10");
-      assert.equal(l, "10");
-      assert.equal(alpha, "10%");
+      assertHslMatchValues("hsl(10 10% 10% / 10%)", { h: "10", s: "10", l: "10", alpha: "10%" });
     });
 
     it("matches hsla with comma alpha", () => {
-      const hslMatchGroups = checkHslMatch("hsla(120 50% 75%, 0.3)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { alpha } = hslMatchGroups!;
-      assert.equal(alpha, "0.3");
+      assertHslAlphaMatch("hsla(120 50% 75%, 0.3)", "0.3");
     });
   });
 
@@ -128,21 +87,11 @@ describe("hsl regex", () => {
 
   describe("whitespace tolerance", () => {
     it("matches with extra spaces inside parens", () => {
-      const hslMatchGroups = checkHslMatch("hsl(  120,  50%,  75%  )");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
+      assertHslMatchValues("hsl(  120,  50%,  75%  )", { h: "120", s: "50", l: "75" });
     });
 
     it("matches with no spaces", () => {
-      const hslMatchGroups = checkHslMatch("hsl(120,50%,75%)");
-      assert.notEqual(hslMatchGroups, null, "Failed to find hsl match");
-      const { h, s, l } = hslMatchGroups!;
-      assert.equal(h, "120");
-      assert.equal(s, "50");
-      assert.equal(l, "75");
+      assertHslMatchValues("hsl(120,50%,75%)", { h: "120", s: "50", l: "75" });
     });
   });
 

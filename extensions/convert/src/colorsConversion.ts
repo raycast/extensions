@@ -1,3 +1,56 @@
+const rgbNormalizedToHsl = (r: number, g: number, b: number): number[] => {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+
+    h /= 6;
+  }
+
+  return [Number(Math.round((h * 360) % 360)), Number(Math.round(s * 100)), Number(Math.round(l * 100))];
+};
+
+const hslToHexChannels = (h: number, s: number, lightnessPercent: number): string => {
+  const l = lightnessPercent / 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `${f(0)}${f(8)}${f(4)}`;
+};
+
+const hslToRgbChannels = (h: number, sPercent: number, lPercent: number): number[] => {
+  const s = sPercent / 100;
+  const l = lPercent / 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+};
+
+const parseHslAlpha = (alpha: string): number => (alpha.includes("%") ? parseFloat(alpha) / 100 : +alpha);
+
 export const HEXtoRGB = (hex: string): number[] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$|^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 
@@ -13,12 +66,7 @@ export const HEXtoRGB = (hex: string): number[] => {
 export const HEXtoRGBA = (hex: string): number[] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
-    ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-        Math.round((parseInt(result[4], 16) / 255) * 100) / 100,
-      ]
+    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16), parseInt(result[4], 16) / 255]
     : [0, 0, 0, 0];
 };
 
@@ -33,120 +81,19 @@ export const HEXtoHSL = (hex: string): number[] => {
   if (!match) return [];
 
   // Convert the hex string to an RGB array
-  let [r, g, b] = match.map((x) => parseInt(x, 16));
+  const [r, g, b] = match.map((x) => parseInt(x, 16));
 
-  // Normalize the RGB values
-  r /= 255;
-  g /= 255;
-  b /= 255;
-
-  // Find the minimum and maximum RGB values
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-
-  // Initialize the HSL values
-  let h = 0;
-  let s = 0;
-  let l = (max + min) / 2;
-
-  // Calculate the HSL values
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-
-    h /= 6;
-  }
-
-  // Format the HSL values to CSS syntax
-  h = Number(Math.round((h * 360) % 360));
-  s = Number(Math.round(s * 100));
-  l = Number(Math.round(l * 100));
-
-  // Return the HSL values as a number array
-  return [h, s, l];
+  return rgbNormalizedToHsl(r / 255, g / 255, b / 255);
 };
 
 export const HEXtoHSLA = (hex: string): number[] => {
   const rgba = HEXtoRGBA(hex);
-  const r = (rgba[0] /= 255);
-  const g = (rgba[1] /= 255);
-  const b = (rgba[2] /= 255);
-  const l = Math.max(r, g, b);
-  const s = l - Math.min(r, g, b);
-  const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-  return [
-    Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
-    Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
-    Math.round((100 * (2 * l - s)) / 2),
-    rgba[3],
-  ];
+  return [...RGBtoHSL([rgba[0], rgba[1], rgba[2]]), rgba[3]];
 };
 
 export const RGBtoHEX = (rgb: number[]): string => `#${rgb.map((x) => x.toString(16).padStart(2, "0")).join("")}`;
 
-// export const RGBtoHSL = (rgb: number[]): number[] => {
-//   const r = (rgb[0] /= 255);
-//   const g = (rgb[1] /= 255);
-//   const b = (rgb[2] /= 255);
-//   const l = Math.max(r, g, b);
-//   const s = l - Math.min(r, g, b);
-//   const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-//   return [
-//     Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
-//     Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
-//     Math.round((100 * (2 * l - s)) / 2),
-//   ];
-// };
-
-export const RGBtoHSL = (rgb: number[]): number[] => {
-  const r = (rgb[0] /= 255);
-  const g = (rgb[1] /= 255);
-  const b = (rgb[2] /= 255);
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  let l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-
-    h /= 6;
-  }
-
-  // Format the HSL values to CSS syntax
-  h = Number(Math.round((h * 360) % 360));
-  s = Number(Math.round(s * 100));
-  l = Number(Math.round(l * 100));
-
-  return [h, s, l];
-};
+export const RGBtoHSL = (rgb: number[]): number[] => rgbNormalizedToHsl(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 
 export const RGBtoHEXA = (rgb: number[]): string =>
   `#${rgb
@@ -156,76 +103,23 @@ export const RGBtoHEXA = (rgb: number[]): string =>
     .toString(16)
     .padStart(2, "0")}`;
 
-export const RGBtoHSLA = (rgb: number[]): number[] => {
-  const r = (rgb[0] /= 255);
-  const g = (rgb[1] /= 255);
-  const b = (rgb[2] /= 255);
-  const l = Math.max(r, g, b);
-  const s = l - Math.min(r, g, b);
-  const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-  return [
-    Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
-    Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
-    Math.round((100 * (2 * l - s)) / 2),
-    rgb[3],
-  ];
-};
+export const RGBtoHSLA = (rgb: number[]): number[] => [...RGBtoHSL([rgb[0], rgb[1], rgb[2]]), rgb[3]];
 
-export const HSLtoHEX = (hsl: number[]): string => {
-  const h = hsl[0];
-  const s = hsl[1];
-  let l = hsl[2];
-  l /= 100;
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, "0");
-  };
-  return `#${f(0)}${f(8)}${f(4)}`;
-};
+export const HSLtoHEX = (hsl: number[]): string => `#${hslToHexChannels(hsl[0], hsl[1], hsl[2])}`;
 
 export const HSLtoHEXA = (hsl: [number, number, number, string]): string => {
-  const h = hsl[0];
-  const s = hsl[1];
-  let l = hsl[2];
-  l /= 100;
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, "0");
-  };
-  const alpha = hsl[3].includes("%") ? parseInt(hsl[3], 10) / 100 : +hsl[3];
-  return `#${f(0)}${f(8)}${f(4)}${Math.round(alpha * 255)
+  const alpha = parseHslAlpha(hsl[3]);
+  return `#${hslToHexChannels(hsl[0], hsl[1], hsl[2])}${Math.round(alpha * 255)
     .toString(16)
     .padStart(2, "0")}`;
 };
 
-export const HSLtoRGB = (hsl: number[]): number[] => {
-  const h = hsl[0];
-  const s = (hsl[1] /= 100);
-  const l = (hsl[2] /= 100);
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
-};
+export const HSLtoRGB = (hsl: number[]): number[] => hslToRgbChannels(hsl[0], hsl[1], hsl[2]);
 
-export const HSLtoRGBA = (hsl: [number, number, number, string]): number[] => {
-  const h = hsl[0];
-  const s = (hsl[1] /= 100);
-  const l = (hsl[2] /= 100);
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  const alpha = hsl[3].includes("%") ? parseInt(hsl[3], 10) / 100 : +hsl[3];
-  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4)), alpha];
-};
+export const HSLtoRGBA = (hsl: [number, number, number, string]): number[] => [
+  ...hslToRgbChannels(hsl[0], hsl[1], hsl[2]),
+  parseHslAlpha(hsl[3]),
+];
 
 // OKLCH Color Conversions
 const linearToSRGB = (c: number): number => {
