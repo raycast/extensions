@@ -1,6 +1,6 @@
 # Password Generator Changelog
 
-## [Add Copy Random Password command] - 2026-06-26
+## [Add Copy Random Password command] - {PR_MERGE_DATE}
 
 - Added `Copy Random Password` no-view command that generates a password and copies it directly to the clipboard, with command preferences for number of characters, using numbers, and using special characters.
 
