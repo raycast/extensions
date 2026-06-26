@@ -1,12 +1,12 @@
 # Changelog
 
-All notable changes to **miccast** are documented here. The 1.0.0 entry is
+All notable changes to **miccast** are documented here. The initial entry is
 curated; subsequent entries are appended automatically by the release workflow
 (`.github/workflows/release.yml`) from the commit messages in each release.
 
 <!-- new-release-anchor -->
 
-## [1.0.0] - 2026-06-26
+## [Initial Release] - {PR_MERGE_DATE}
 
 - **Set Input Device** — switch the active microphone from a searchable list;
   the current device is marked so you always see what's selected.
