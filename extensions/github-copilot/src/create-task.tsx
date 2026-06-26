@@ -118,8 +118,7 @@ function Command() {
     >
       <Form.TextArea
         title="Prompt"
-        placeholder="Describe a coding task to work on"
-        info="You can ask the agent to open a pull request in your prompt if you want one"
+        placeholder={"Give Copilot a background task to work on.\nIf you want Copilot to open a PR, just ask."}
         {...itemProps.prompt}
       />
       <RepositoryDropdown
