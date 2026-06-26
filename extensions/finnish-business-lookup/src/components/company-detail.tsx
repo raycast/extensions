@@ -5,6 +5,7 @@ import { getRawCompanyApiUrl, searchCompanies } from "../api/prh";
 import { AUTHORITY_LABELS, REGISTER_LABELS, YTJ_SEARCH_URL } from "../constants";
 import { formatAddress, formatDate } from "../lib/format";
 import { buildMapSearchLinks } from "../lib/maps";
+import { escapeMarkdownText, formatMarkdownLink } from "../lib/markdown";
 import {
   getEntryLabel,
   getNameTimelineEntries,
@@ -36,24 +37,6 @@ function getStatusText(label?: string, code?: string): string {
   }
 
   return "Not available";
-}
-
-function normalizeMarkdownText(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
-}
-
-function escapeMarkdownText(value: string): string {
-  return normalizeMarkdownText(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/([`*_[\]{}()#+.!|>-])/g, "\\$1");
-}
-
-function escapeMarkdownLinkTarget(target: string): string {
-  return target.replace(/\s/g, "%20").replace(/>/g, "%3E");
-}
-
-function formatMarkdownLink(text: string, target: string): string {
-  return `[${escapeMarkdownText(text)}](<${escapeMarkdownLinkTarget(target)}>)`;
 }
 
 function buildAddressesMarkdown(company: UiCompany): string[] {

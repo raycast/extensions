@@ -1,5 +1,6 @@
 import { Color, List } from "@raycast/api";
 import { formatDate } from "./format";
+import { escapeMarkdownText } from "./markdown";
 import { buildMapSearchLinks } from "./maps";
 import { getPrimaryAddressText } from "./selectors";
 import type { UiCompany } from "../types/ui";
@@ -34,7 +35,7 @@ function buildNamePreview(names: string[], limit: number): string {
 }
 
 export function buildSplitDetailMarkdown(company: UiCompany): string {
-  return `# ${company.displayName}`;
+  return `# ${escapeMarkdownText(company.displayName)}`;
 }
 
 export function buildSplitDetailMetadata(company: UiCompany) {
