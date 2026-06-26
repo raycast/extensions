@@ -9,7 +9,8 @@
     "anwarulislam",
     "xilopaint",
     "pernielsentikaer",
-    "chrismessina"
+    "chrismessina",
+    "huzef_ansari"
   ],
   "categories": [
     "Productivity"
@@ -194,12 +195,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

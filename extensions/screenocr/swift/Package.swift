@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "ScreenOCR",
-    platforms: [.macOS(.v12)],
+    platforms: [.macOS("15.0")],
     dependencies: [
       .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.0.4")
     ],
