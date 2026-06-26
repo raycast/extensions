@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Use Security Audit API] - {PR_MERGE_DATE}
+## [Use Security Audit API] - 2026-06-26
 
 - Use the Skills security audit API instead of parsing audit data from the skills.sh HTML page
 
