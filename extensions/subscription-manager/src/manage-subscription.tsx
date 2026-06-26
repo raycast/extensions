@@ -5,7 +5,14 @@ import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { SubscriptionList } from "./subscription-list";
 import { useSubscriptions } from "./storage";
-import { buildCalendarMarkdown, formatCurrency, formatCycle, getMonthSubscriptions, getMonthlyTotal } from "./utils";
+import {
+  buildCalendarMarkdown,
+  formatCurrency,
+  formatCycle,
+  getMonthSubscriptions,
+  getMonthlyTotal,
+  getSubscriptionIcon,
+} from "./utils";
 
 interface RatesResponse {
   rates: Record<string, number>;
@@ -64,7 +71,7 @@ export default function ManageSubscription() {
                   i === 0 || monthSubs[i - 1].billingDay !== sub.billingDay ? `${sub.billingDay} ${monthName}` : ""
                 }
                 text={`${sub.name} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
-                icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+                icon={getSubscriptionIcon(sub)}
               />
             ))
           ) : (
@@ -116,7 +123,7 @@ export default function ManageSubscription() {
                 <Action.Push
                   key={sub.id}
                   title={`${sub.billingDay} ${monthName} · ${sub.name}`}
-                  icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+                  icon={getSubscriptionIcon(sub)}
                   target={<SubscriptionDetail id={sub.id} />}
                 />
               ))}

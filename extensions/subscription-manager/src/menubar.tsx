@@ -2,7 +2,14 @@ import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } fr
 import { useFetch } from "@raycast/utils";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
-import { formatCurrency, formatCycle, getMonthlyTotal, getSubscriptionsForDay } from "./utils";
+import {
+  formatCurrency,
+  formatCycle,
+  getMonthSubscriptions,
+  getMonthlyTotal,
+  getSubscriptionsForDay,
+  getSubscriptionIcon,
+} from "./utils";
 
 interface RatesResponse {
   rates: Record<string, number>;
@@ -23,7 +30,7 @@ export default function MenubarCommand() {
 
   const monthlyTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, ratesData?.rates);
   const totalStr = isLoading ? "" : formatCurrency(monthlyTotal, prefs.primaryCurrency);
-  const showInTitle = (prefs.showTotalIn ?? "title") !== "dropdown";
+  const showInTitle = (prefs.showTotalIn ?? "dropdown") !== "dropdown";
 
   const todaySubs = getSubscriptionsForDay(today.getDate(), month, year, subscriptions);
 
@@ -34,24 +41,7 @@ export default function MenubarCommand() {
     if (subs.length > 0) upcomingDays.push({ date: d, subs });
   }
 
-  const allThisMonth = subscriptions
-    .filter((s) => s.status === "active")
-    .filter((s) => {
-      const start = new Date(s.startDate + "T00:00:00");
-      switch (s.billingCycle) {
-        case "monthly":
-          return true;
-        case "yearly":
-          return start.getMonth() === month;
-        case "quarterly":
-          return (month - start.getMonth() + 12) % 3 === 0;
-        case "half-yearly":
-          return (month - start.getMonth() + 12) % 6 === 0;
-        default:
-          return true;
-      }
-    })
-    .sort((a, b) => a.billingDay - b.billingDay);
+  const allThisMonth = getMonthSubscriptions(month, year, subscriptions);
 
   async function openCalendar() {
     await launchCommand({ name: "manage-subscription", type: LaunchType.UserInitiated });
@@ -92,7 +82,7 @@ export default function MenubarCommand() {
               key={sub.id}
               title={sub.name}
               subtitle={`${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
-              icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(sub)}
               onAction={openCalendar}
             />
           ))}
@@ -107,7 +97,7 @@ export default function MenubarCommand() {
                 key={`${sub.id}-${date.getDate()}`}
                 title={sub.name}
                 subtitle={`${date.getDate()} ${date.toLocaleString("default", { month: "short" })} · ${formatCurrency(sub.amount, sub.currency)}`}
-                icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+                icon={getSubscriptionIcon(sub)}
                 onAction={openCalendar}
               />
             )),
@@ -122,7 +112,7 @@ export default function MenubarCommand() {
               key={sub.id}
               title={sub.name}
               subtitle={`${sub.billingDay} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
-              icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(sub)}
               onAction={openCalendar}
             />
           ))}

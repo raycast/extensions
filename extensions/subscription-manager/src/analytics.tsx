@@ -1,9 +1,16 @@
 import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import { copyReportToClipboard, exportReportToFile } from "./export";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
-import { formatCurrency, getMonthlyEquivalent, getMonthlyTotal, getNextBillingDate } from "./utils";
+import {
+  formatCurrency,
+  getMonthlyEquivalent,
+  getMonthlyTotal,
+  getNextBillingDate,
+  getSubscriptionIcon,
+} from "./utils";
 
 type GroupBy = "category" | "cycle" | "list";
 
@@ -45,7 +52,8 @@ export default function AnalyticsCommand() {
 
   const thisMonthTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, rates);
   const lastMonthTotal = getMonthlyTotal(subscriptions, lastMonth, lastMonthYear, prefs.primaryCurrency, rates);
-  const yearlyForecast = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0) * 12;
+  const activeMonthlyTotal = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0);
+  const yearlyForecast = activeMonthlyTotal * 12;
 
   const groups: Record<string, Subscription[]> = {};
   for (const sub of active) {
@@ -63,7 +71,8 @@ export default function AnalyticsCommand() {
   for (const sub of active) {
     const next = getNextBillingDate(sub);
     if (!next) continue;
-    const days = Math.round((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.round((next.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24));
     if (!nextBill || days < nextBill.daysAway) nextBill = { name: sub.name, daysAway: days };
   }
 
@@ -76,7 +85,7 @@ export default function AnalyticsCommand() {
 
   const breakdownRows = groupTotals
     .map(({ key, total, count }) => {
-      const pct = thisMonthTotal > 0 ? (total / thisMonthTotal) * 100 : 0;
+      const pct = activeMonthlyTotal > 0 ? (total / activeMonthlyTotal) * 100 : 0;
       const label = key.charAt(0).toUpperCase() + key.slice(1);
       return `| ${label} | \`${buildBar(pct)}\` | ${formatCurrency(total, prefs.primaryCurrency)} | ${pct.toFixed(0)}% | ${count} sub${count !== 1 ? "s" : ""} |`;
     })
@@ -138,7 +147,7 @@ ${topRows}
           />
           <Detail.Metadata.Label
             title="Avg Cost / Sub"
-            text={active.length > 0 ? formatCurrency(thisMonthTotal / active.length, prefs.primaryCurrency) : "—"}
+            text={active.length > 0 ? formatCurrency(activeMonthlyTotal / active.length, prefs.primaryCurrency) : "—"}
             icon={Icon.BarChart}
           />
           <Detail.Metadata.Separator />
@@ -157,7 +166,7 @@ ${topRows}
             <Detail.Metadata.Label
               title="Most Expensive"
               text={`${mostExpensive.name} · ${formatCurrency(toMonthlyPrimary(mostExpensive), prefs.primaryCurrency)} /mo`}
-              icon={{ source: mostExpensive.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+              icon={getSubscriptionIcon(mostExpensive)}
             />
           )}
           {nextBill && (
@@ -175,6 +184,20 @@ ${topRows}
             <Action title="By Category" icon={Icon.Tag} onAction={() => setGroupBy("category")} />
             <Action title="By Billing Cycle" icon={Icon.ArrowClockwise} onAction={() => setGroupBy("cycle")} />
             <Action title="By List" icon={Icon.List} onAction={() => setGroupBy("list")} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ActionPanel.Submenu
+              title="Export Report"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            >
+              <Action title="Copy as Markdown" icon={Icon.Clipboard} onAction={() => copyReportToClipboard(markdown)} />
+              <Action
+                title="Save as Markdown"
+                icon={Icon.Document}
+                onAction={() => exportReportToFile(markdown, "subscription-report")}
+              />
+            </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>
       }

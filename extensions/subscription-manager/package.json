@@ -15,10 +15,18 @@
   ],
   "license": "MIT",
   "screenshots": [
-    { "path": "metadata/subscription-manager-1.png" },
-    { "path": "metadata/subscription-manager-2.png" },
-    { "path": "metadata/subscription-manager-3.png" },
-    { "path": "metadata/subscription-manager-4.png" }
+    {
+      "path": "metadata/subscription-manager-1.png"
+    },
+    {
+      "path": "metadata/subscription-manager-2.png"
+    },
+    {
+      "path": "metadata/subscription-manager-3.png"
+    },
+    {
+      "path": "metadata/subscription-manager-4.png"
+    }
   ],
   "commands": [
     {
@@ -51,7 +59,9 @@
       "description": "Sends reminders before your subscriptions bill",
       "mode": "no-view",
       "interval": "5m",
-      "platforms": ["macOS"]
+      "platforms": [
+        "macOS"
+      ]
     },
     {
       "name": "menubar",
@@ -67,8 +77,14 @@
           "required": false,
           "default": "dropdown",
           "data": [
-            { "title": "Beside icon", "value": "title" },
-            { "title": "In dropdown", "value": "dropdown" }
+            {
+              "title": "Beside icon",
+              "value": "title"
+            },
+            {
+              "title": "In dropdown",
+              "value": "dropdown"
+            }
           ]
         },
         {
@@ -79,9 +95,18 @@
           "required": false,
           "default": "upcoming",
           "data": [
-            { "title": "Full month", "value": "full-month" },
-            { "title": "Upcoming only", "value": "upcoming" },
-            { "title": "Minimal", "value": "minimal" }
+            {
+              "title": "Full month",
+              "value": "full-month"
+            },
+            {
+              "title": "Upcoming only",
+              "value": "upcoming"
+            },
+            {
+              "title": "Minimal",
+              "value": "minimal"
+            }
           ]
         }
       ]
@@ -96,29 +121,98 @@
       "required": false,
       "default": "INR",
       "data": [
-        { "title": "🇮🇳 Indian Rupee (INR)", "value": "INR" },
-        { "title": "🇺🇸 US Dollar (USD)", "value": "USD" },
-        { "title": "🇪🇺 Euro (EUR)", "value": "EUR" },
-        { "title": "🇬🇧 British Pound (GBP)", "value": "GBP" },
-        { "title": "🇯🇵 Japanese Yen (JPY)", "value": "JPY" },
-        { "title": "🇦🇺 Australian Dollar (AUD)", "value": "AUD" },
-        { "title": "🇨🇦 Canadian Dollar (CAD)", "value": "CAD" },
-        { "title": "🇸🇬 Singapore Dollar (SGD)", "value": "SGD" },
-        { "title": "🇧🇷 Brazilian Real (BRL)", "value": "BRL" },
-        { "title": "🇨🇭 Swiss Franc (CHF)", "value": "CHF" },
-        { "title": "🇨🇳 Chinese Yuan (CNY)", "value": "CNY" },
-        { "title": "🇭🇰 Hong Kong Dollar (HKD)", "value": "HKD" },
-        { "title": "🇮🇩 Indonesian Rupiah (IDR)", "value": "IDR" },
-        { "title": "🇰🇷 South Korean Won (KRW)", "value": "KRW" },
-        { "title": "🇲🇽 Mexican Peso (MXN)", "value": "MXN" },
-        { "title": "🇲🇾 Malaysian Ringgit (MYR)", "value": "MYR" },
-        { "title": "🇳🇴 Norwegian Krone (NOK)", "value": "NOK" },
-        { "title": "🇳🇿 New Zealand Dollar (NZD)", "value": "NZD" },
-        { "title": "🇵🇭 Philippine Peso (PHP)", "value": "PHP" },
-        { "title": "🇸🇪 Swedish Krona (SEK)", "value": "SEK" },
-        { "title": "🇹🇭 Thai Baht (THB)", "value": "THB" },
-        { "title": "🇹🇷 Turkish Lira (TRY)", "value": "TRY" },
-        { "title": "🇿🇦 South African Rand (ZAR)", "value": "ZAR" }
+        {
+          "title": "🇮🇳 Indian Rupee (INR)",
+          "value": "INR"
+        },
+        {
+          "title": "🇺🇸 US Dollar (USD)",
+          "value": "USD"
+        },
+        {
+          "title": "🇪🇺 Euro (EUR)",
+          "value": "EUR"
+        },
+        {
+          "title": "🇬🇧 British Pound (GBP)",
+          "value": "GBP"
+        },
+        {
+          "title": "🇯🇵 Japanese Yen (JPY)",
+          "value": "JPY"
+        },
+        {
+          "title": "🇦🇺 Australian Dollar (AUD)",
+          "value": "AUD"
+        },
+        {
+          "title": "🇨🇦 Canadian Dollar (CAD)",
+          "value": "CAD"
+        },
+        {
+          "title": "🇸🇬 Singapore Dollar (SGD)",
+          "value": "SGD"
+        },
+        {
+          "title": "🇧🇷 Brazilian Real (BRL)",
+          "value": "BRL"
+        },
+        {
+          "title": "🇨🇭 Swiss Franc (CHF)",
+          "value": "CHF"
+        },
+        {
+          "title": "🇨🇳 Chinese Yuan (CNY)",
+          "value": "CNY"
+        },
+        {
+          "title": "🇭🇰 Hong Kong Dollar (HKD)",
+          "value": "HKD"
+        },
+        {
+          "title": "🇮🇩 Indonesian Rupiah (IDR)",
+          "value": "IDR"
+        },
+        {
+          "title": "🇰🇷 South Korean Won (KRW)",
+          "value": "KRW"
+        },
+        {
+          "title": "🇲🇽 Mexican Peso (MXN)",
+          "value": "MXN"
+        },
+        {
+          "title": "🇲🇾 Malaysian Ringgit (MYR)",
+          "value": "MYR"
+        },
+        {
+          "title": "🇳🇴 Norwegian Krone (NOK)",
+          "value": "NOK"
+        },
+        {
+          "title": "🇳🇿 New Zealand Dollar (NZD)",
+          "value": "NZD"
+        },
+        {
+          "title": "🇵🇭 Philippine Peso (PHP)",
+          "value": "PHP"
+        },
+        {
+          "title": "🇸🇪 Swedish Krona (SEK)",
+          "value": "SEK"
+        },
+        {
+          "title": "🇹🇭 Thai Baht (THB)",
+          "value": "THB"
+        },
+        {
+          "title": "🇹🇷 Turkish Lira (TRY)",
+          "value": "TRY"
+        },
+        {
+          "title": "🇿🇦 South African Rand (ZAR)",
+          "value": "ZAR"
+        }
       ]
     },
     {
@@ -147,11 +241,26 @@
       "required": false,
       "default": "1",
       "data": [
-        { "title": "Disabled", "value": "disabled" },
-        { "title": "Same day", "value": "0" },
-        { "title": "1 day before", "value": "1" },
-        { "title": "3 days before", "value": "3" },
-        { "title": "7 days before", "value": "7" }
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        },
+        {
+          "title": "Same day",
+          "value": "0"
+        },
+        {
+          "title": "1 day before",
+          "value": "1"
+        },
+        {
+          "title": "3 days before",
+          "value": "3"
+        },
+        {
+          "title": "7 days before",
+          "value": "7"
+        }
       ]
     },
     {
@@ -171,11 +280,26 @@
       "required": false,
       "default": "disabled",
       "data": [
-        { "title": "Disabled", "value": "disabled" },
-        { "title": "Same day", "value": "0" },
-        { "title": "1 day before", "value": "1" },
-        { "title": "3 days before", "value": "3" },
-        { "title": "7 days before", "value": "7" }
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        },
+        {
+          "title": "Same day",
+          "value": "0"
+        },
+        {
+          "title": "1 day before",
+          "value": "1"
+        },
+        {
+          "title": "3 days before",
+          "value": "3"
+        },
+        {
+          "title": "7 days before",
+          "value": "7"
+        }
       ]
     },
     {

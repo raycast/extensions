@@ -1,4 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Icon, getPreferenceValues } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { BillingCycle, Subscription } from "./types";
 
@@ -6,9 +7,29 @@ export function generateId(): string {
   return randomUUID();
 }
 
-export function getFaviconUrl(name: string): string {
-  const domain = name.toLowerCase().replace(/\s+/g, "");
-  return `https://www.google.com/s2/favicons?domain=${domain}.com&sz=64`;
+export function getServiceUrl(nameOrDomain: string, isDomain = false): string {
+  if (isDomain) return `https://${nameOrDomain}`;
+  const domain = nameOrDomain.toLowerCase().replace(/\s+/g, "");
+  return `https://${domain}.com`;
+}
+
+function getSubscriptionFaviconUrl(sub: Pick<Subscription, "name" | "iconUrl">): string {
+  const preset = PRESET_SERVICES.find((s) => s.name === sub.name);
+  if (sub.iconUrl) {
+    const legacyMatch = sub.iconUrl.match(/domain=([^&]+)/);
+    if (legacyMatch) return `https://${legacyMatch[1]}`;
+    return sub.iconUrl;
+  }
+  if (preset) return `https://${preset.domain}`;
+  return getServiceUrl(sub.name);
+}
+
+export function getSubscriptionIcon(sub: Pick<Subscription, "name" | "iconUrl">) {
+  return getFavicon(getSubscriptionFaviconUrl(sub), { fallback: Icon.CreditCard });
+}
+
+export function getServiceIcon(domain: string) {
+  return getFavicon(getServiceUrl(domain, true), { fallback: Icon.Globe });
 }
 
 export function formatCurrency(amount: number, currency: string): string {
@@ -35,6 +56,21 @@ export function formatCycle(cycle: BillingCycle): string {
     case "weekly":
       return "/wk";
   }
+}
+
+export function formatStartDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function isSubscriptionActiveInMonth(sub: Subscription, month: number, year: number): boolean {
+  const start = new Date(sub.startDate + "T00:00:00");
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  if (start > lastDayOfMonth) return false;
+  if (sub.billingCycle === "monthly") return true;
+  if (sub.billingCycle === "yearly") return start.getMonth() === month;
+  if (sub.billingCycle === "quarterly") return (month - start.getMonth() + 12) % 3 === 0;
+  if (sub.billingCycle === "half-yearly") return (month - start.getMonth() + 12) % 6 === 0;
+  return true;
 }
 
 export function getMonthlyEquivalent(amount: number, cycle: BillingCycle): number {
@@ -64,16 +100,7 @@ export function getMonthlyTotal(
 ): number {
   return subscriptions
     .filter((s) => s.status === "active")
-    .filter((s) => {
-      const start = new Date(s.startDate + "T00:00:00");
-      const lastDayOfMonth = new Date(year, month + 1, 0);
-      if (start > lastDayOfMonth) return false;
-      if (s.billingCycle === "monthly") return true;
-      if (s.billingCycle === "yearly") return start.getMonth() === month;
-      if (s.billingCycle === "quarterly") return (month - start.getMonth() + 12) % 3 === 0;
-      if (s.billingCycle === "half-yearly") return (month - start.getMonth() + 12) % 6 === 0;
-      return true;
-    })
+    .filter((s) => isSubscriptionActiveInMonth(s, month, year))
     .reduce((sum, s) => {
       const monthly = getMonthlyEquivalent(s.amount, s.billingCycle);
       if (!primaryCurrency || !rates || s.currency === primaryCurrency) return sum + monthly;
@@ -100,21 +127,21 @@ export function getSubscriptionsForDay(
   subscriptions: Subscription[],
 ): Subscription[] {
   return subscriptions.filter((s) => {
-    if (s.status !== "active" || s.billingDay !== day) return false;
+    if (s.status !== "active") return false;
     const start = new Date(s.startDate + "T00:00:00");
     const subStart = new Date(year, month, day);
     if (subStart < new Date(start.getFullYear(), start.getMonth(), start.getDate())) return false;
     switch (s.billingCycle) {
       case "monthly":
-        return true;
+        return s.billingDay === day;
       case "yearly":
-        return start.getMonth() === month;
+        return s.billingDay === day && start.getMonth() === month;
       case "quarterly":
-        return (month - start.getMonth() + 12) % 3 === 0;
+        return s.billingDay === day && (month - start.getMonth() + 12) % 3 === 0;
       case "half-yearly":
-        return (month - start.getMonth() + 12) % 6 === 0;
+        return s.billingDay === day && (month - start.getMonth() + 12) % 6 === 0;
       case "weekly":
-        return true;
+        return Math.round((subStart.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) % 7 === 0;
     }
   });
 }
@@ -122,16 +149,7 @@ export function getSubscriptionsForDay(
 export function getMonthSubscriptions(month: number, year: number, subscriptions: Subscription[]): Subscription[] {
   return subscriptions
     .filter((s) => s.status === "active")
-    .filter((s) => {
-      const start = new Date(s.startDate + "T00:00:00");
-      const lastDayOfMonth = new Date(year, month + 1, 0);
-      if (start > lastDayOfMonth) return false;
-      if (s.billingCycle === "monthly") return true;
-      if (s.billingCycle === "yearly") return start.getMonth() === month;
-      if (s.billingCycle === "quarterly") return (month - start.getMonth() + 12) % 3 === 0;
-      if (s.billingCycle === "half-yearly") return (month - start.getMonth() + 12) % 6 === 0;
-      return true;
-    })
+    .filter((s) => isSubscriptionActiveInMonth(s, month, year))
     .sort((a, b) => a.billingDay - b.billingDay);
 }
 

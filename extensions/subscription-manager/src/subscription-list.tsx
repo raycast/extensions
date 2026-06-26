@@ -1,11 +1,29 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { useSubscriptions } from "./storage";
-import { CATEGORIES, formatCurrency, formatCycle } from "./utils";
+import { confirmAndDeleteSubscription } from "./subscription-actions";
+import { copyToClipboard, exportToFile } from "./export";
+import { Subscription } from "./types";
+import { CATEGORIES, formatCurrency, formatCycle, getSubscriptionIcon } from "./utils";
 
 type SortKey = "name" | "amount" | "billingDay" | "category";
+
+function ExportSubmenu({ subscriptions }: { subscriptions: Subscription[] }) {
+  return (
+    <ActionPanel.Submenu
+      title="Export Subscriptions"
+      icon={Icon.Download}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+    >
+      <Action title="Save as JSON" icon={Icon.Document} onAction={() => exportToFile(subscriptions, "json")} />
+      <Action title="Save as CSV" icon={Icon.Document} onAction={() => exportToFile(subscriptions, "csv")} />
+      <Action title="Copy as JSON" icon={Icon.Clipboard} onAction={() => copyToClipboard(subscriptions, "json")} />
+      <Action title="Copy as CSV" icon={Icon.Clipboard} onAction={() => copyToClipboard(subscriptions, "csv")} />
+    </ActionPanel.Submenu>
+  );
+}
 
 const STATUS_ICON = {
   active: { source: Icon.CheckCircle, tintColor: Color.Green },
@@ -44,7 +62,7 @@ export function SubscriptionList() {
         {items.map((sub) => (
           <List.Item
             key={sub.id}
-            icon={{ source: sub.iconUrl ?? Icon.CreditCard, fallback: Icon.CreditCard }}
+            icon={getSubscriptionIcon(sub)}
             title={sub.name}
             subtitle={sub.category}
             accessories={[
@@ -87,18 +105,7 @@ export function SubscriptionList() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={async () => {
-                      const confirmed = await confirmAlert({
-                        title: `Delete "${sub.name}"?`,
-                        message: "This action cannot be undone.",
-                        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-                      });
-                      if (confirmed) {
-                        await deleteSubscription(sub.id);
-                        await showToast({ style: Toast.Style.Success, title: "Subscription Deleted" });
-                        await popToRoot();
-                      }
-                    }}
+                    onAction={() => confirmAndDeleteSubscription(sub.name, () => deleteSubscription(sub.id))}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Sort By">
@@ -114,6 +121,7 @@ export function SubscriptionList() {
                     target={<AddSubscriptionForm />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
+                  <ExportSubmenu subscriptions={subscriptions} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
