@@ -15,9 +15,6 @@ export default async function Command() {
   try {
     const preferences = getPreferenceValues<Preferences>();
     const alreadyRunning = await isOverlayRunning();
-    const speedMs = alreadyRunning
-      ? undefined
-      : parseSpeedPreference(preferences.speed);
 
     await closeMainWindow({
       clearRootSearch: true,
@@ -28,7 +25,7 @@ export default async function Command() {
       ? undefined
       : startOverlay({
           soundsOn: preferences.soundsOn,
-          speedMs,
+          speedMs: parseSpeedPreference(preferences.speed),
         });
 
     await showToast({
