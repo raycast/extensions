@@ -127,7 +127,7 @@ function buildNameTimelineMarkdown(company: UiCompany): string {
 
   const lines = timelineEntries.map((entry) => {
     const categoryLabel = getNameCategoryLabel(entry.category);
-    return `- ${entry.name} (${categoryLabel}; ${formatDateRange(entry.registrationDate, entry.endDate)})`;
+    return `- ${escapeMarkdownText(entry.name)} (${categoryLabel}; ${formatDateRange(entry.registrationDate, entry.endDate)})`;
   });
 
   return `## Names
@@ -148,7 +148,7 @@ function buildRegisterGroupsMarkdown(company: UiCompany, languageOrder: PrhLangu
 
   for (const group of groups) {
     const registerLabel = REGISTER_LABELS[group.register] ?? `Register ${group.register}`;
-    sections.push(`### ${registerLabel}`);
+    sections.push(`### ${escapeMarkdownText(registerLabel)}`);
 
     if (group.activeEntries.length) {
       sections.push("- Active");
@@ -156,7 +156,7 @@ function buildRegisterGroupsMarkdown(company: UiCompany, languageOrder: PrhLangu
         const label = getEntryLabel(entry, languageOrder);
         const authority = AUTHORITY_LABELS[entry.authority] ?? `Authority ${entry.authority}`;
         const dateText = formatDateRange(entry.registrationDate, entry.endDate);
-        sections.push(`  - ${label} (${authority}; ${dateText})`);
+        sections.push(`  - ${escapeMarkdownText(label)} (${escapeMarkdownText(authority)}; ${dateText})`);
       }
     }
 
@@ -166,7 +166,7 @@ function buildRegisterGroupsMarkdown(company: UiCompany, languageOrder: PrhLangu
         const label = getEntryLabel(entry, languageOrder);
         const authority = AUTHORITY_LABELS[entry.authority] ?? `Authority ${entry.authority}`;
         const dateText = formatDateRange(entry.registrationDate, entry.endDate);
-        sections.push(`  - ${label} (${authority}; ${dateText})`);
+        sections.push(`  - ${escapeMarkdownText(label)} (${escapeMarkdownText(authority)}; ${dateText})`);
       }
     }
   }
@@ -187,20 +187,20 @@ function buildMarkdown(company: UiCompany): string {
   const registersSection = buildRegisterGroupsMarkdown(company, company.languageOrder);
   const lastModified = formatDate(company.lastModified) ?? company.lastModified ?? "Not available";
 
-  return `# ${company.displayName}
+  return `# ${escapeMarkdownText(company.displayName)}
 
 ## At a Glance
-- Official name: ${currentLegalName}
-- Y-tunnus: ${company.businessId}
-- Business ID status: ${status}
-- Trade register status: ${tradeStatus}
-- Company form: ${companyFormText}
-- Last modified: ${lastModified}
+- Official name: ${escapeMarkdownText(currentLegalName)}
+- Y-tunnus: ${escapeMarkdownText(company.businessId)}
+- Business ID status: ${escapeMarkdownText(status)}
+- Trade register status: ${escapeMarkdownText(tradeStatus)}
+- Company form: ${escapeMarkdownText(companyFormText)}
+- Last modified: ${escapeMarkdownText(lastModified)}
 
 ## Profile
-- EUID: ${company.euId ?? "Not available"}
-- EU VAT number: ${company.euVatNumber ?? "Not available"}
-- Main business line: ${mainBusinessLineText}
+- EUID: ${company.euId ? escapeMarkdownText(company.euId) : "Not available"}
+- EU VAT number: ${company.euVatNumber ? escapeMarkdownText(company.euVatNumber) : "Not available"}
+- Main business line: ${escapeMarkdownText(mainBusinessLineText)}
 - Website: ${company.website ? formatMarkdownLink(company.website, company.website) : "Not available"}
 - Primary address: ${primaryAddress ? escapeMarkdownText(primaryAddress) : "Not available"}
 
@@ -214,7 +214,7 @@ ${registersSection}
 ## Dates
 - Registration date: ${formatDate(company.registrationDate) ?? "Not available"}
 - End date: ${formatDate(company.endDate) ?? "Not available"}
-- Last modified: ${lastModified}
+- Last modified: ${escapeMarkdownText(lastModified)}
 `;
 }
 
