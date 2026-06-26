@@ -198,6 +198,7 @@ export function usePrhSearch(): UsePrhSearchResult {
   const [totalResults, setTotalResults] = useState(0);
   const requestTokenRef = useRef(0);
   const hasHydratedCacheRef = useRef(false);
+  const pendingLoadMoreRef = useRef(false);
 
   const {
     value: persistedCacheValue,
@@ -259,6 +260,7 @@ export function usePrhSearch(): UsePrhSearchResult {
     setIsRefreshing(false);
     setIsLoadingMore(false);
     setIsCachedResult(false);
+    pendingLoadMoreRef.current = false;
   }, [cacheBaseKey]);
 
   useEffect(() => {
@@ -306,6 +308,7 @@ export function usePrhSearch(): UsePrhSearchResult {
         setIsRefreshing(false);
       } else {
         setIsLoadingMore(false);
+        pendingLoadMoreRef.current = false;
       }
 
       return () => {
@@ -380,6 +383,7 @@ export function usePrhSearch(): UsePrhSearchResult {
             setIsRefreshing(false);
           } else {
             setIsLoadingMore(false);
+            pendingLoadMoreRef.current = false;
           }
         }
       }
@@ -404,10 +408,11 @@ export function usePrhSearch(): UsePrhSearchResult {
   const hasMoreResults = totalResults > companies.length;
 
   const loadNextPage = useCallback(() => {
-    if (!cacheBaseKey || isLoading || isRefreshing || isLoadingMore || !hasMoreResults) {
+    if (!cacheBaseKey || isLoading || isRefreshing || isLoadingMore || pendingLoadMoreRef.current || !hasMoreResults) {
       return;
     }
 
+    pendingLoadMoreRef.current = true;
     setPage((current) => current + 1);
   }, [cacheBaseKey, hasMoreResults, isLoading, isLoadingMore, isRefreshing]);
 

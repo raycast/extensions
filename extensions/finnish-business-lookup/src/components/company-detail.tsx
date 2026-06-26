@@ -38,6 +38,24 @@ function getStatusText(label?: string, code?: string): string {
   return "Not available";
 }
 
+function normalizeMarkdownText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function escapeMarkdownText(value: string): string {
+  return normalizeMarkdownText(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/([`*_[\]{}()#+.!|>-])/g, "\\$1");
+}
+
+function escapeMarkdownLinkTarget(target: string): string {
+  return target.replace(/\s/g, "%20").replace(/>/g, "%3E");
+}
+
+function formatMarkdownLink(text: string, target: string): string {
+  return `[${escapeMarkdownText(text)}](<${escapeMarkdownLinkTarget(target)}>)`;
+}
+
 function buildAddressesMarkdown(company: UiCompany): string[] {
   if (!company.addresses.length) {
     return ["- No addresses available"];
@@ -52,7 +70,7 @@ function buildAddressesMarkdown(company: UiCompany): string[] {
 
       const typeLabel = address.type === 1 ? "Street" : address.type === 2 ? "Postal" : `Type ${address.type}`;
       const mapLinks = buildMapSearchLinks(company.displayName, formatted);
-      const addressText = mapLinks ? `[${formatted}](${mapLinks.googleMaps})` : formatted;
+      const addressText = mapLinks ? formatMarkdownLink(formatted, mapLinks.googleMaps) : escapeMarkdownText(formatted);
       const since = formatDate(address.registrationDate);
       const sinceText = since ? ` _(since ${since})_` : "";
 
@@ -183,8 +201,8 @@ function buildMarkdown(company: UiCompany): string {
 - EUID: ${company.euId ?? "Not available"}
 - EU VAT number: ${company.euVatNumber ?? "Not available"}
 - Main business line: ${mainBusinessLineText}
-- Website: ${company.website ? `[${company.website}](${company.website})` : "Not available"}
-- Primary address: ${primaryAddress ?? "Not available"}
+- Website: ${company.website ? formatMarkdownLink(company.website, company.website) : "Not available"}
+- Primary address: ${primaryAddress ? escapeMarkdownText(primaryAddress) : "Not available"}
 
 ${namesSection}
 
