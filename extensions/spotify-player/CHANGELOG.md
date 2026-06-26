@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Show Liked Songs Status in Now Playing] - {PR_MERGE_DATE}
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
 
 - Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
 
