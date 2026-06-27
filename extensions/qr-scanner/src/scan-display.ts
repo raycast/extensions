@@ -5,15 +5,13 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { promisify } from "node:util";
-import jsQR from "jsqr";
-import { PNG } from "pngjs";
+import { captureDisplay, wait } from "./capture";
+import { decodeQrFromPng } from "./decode";
+import { detectContentType } from "./content-type";
 
-const execFileAsync = promisify(execFile);
 const SCREENSHOT_DELAY_MS = 250;
 
 export default async function Command() {
@@ -38,8 +36,9 @@ export default async function Command() {
       return;
     }
 
+    const info = detectContentType(qrContent);
     await Clipboard.copy(qrContent);
-    await showHUD("Copied QR code contents to clipboard");
+    await showHUD(`Copied ${info.label} to clipboard`);
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not scan display";
@@ -47,68 +46,4 @@ export default async function Command() {
   } finally {
     await rm(tempDirectory, { force: true, recursive: true });
   }
-}
-
-async function captureDisplay(outputPath: string) {
-  switch (process.platform) {
-    case "darwin":
-      await execFileAsync("screencapture", ["-x", outputPath]);
-      return;
-    case "win32":
-      await captureWindowsDisplay(outputPath);
-      return;
-    default:
-      throw new Error("This command currently supports macOS and Windows.");
-  }
-}
-
-function wait(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-async function captureWindowsDisplay(outputPath: string) {
-  const escapedOutputPath = outputPath.replaceAll("'", "''");
-  const script = `
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-$screens = [System.Windows.Forms.Screen]::AllScreens
-$left = ($screens | ForEach-Object { $_.Bounds.Left } | Measure-Object -Minimum).Minimum
-$top = ($screens | ForEach-Object { $_.Bounds.Top } | Measure-Object -Minimum).Minimum
-$right = ($screens | ForEach-Object { $_.Bounds.Right } | Measure-Object -Maximum).Maximum
-$bottom = ($screens | ForEach-Object { $_.Bounds.Bottom } | Measure-Object -Maximum).Maximum
-$width = $right - $left
-$height = $bottom - $top
-
-$bitmap = New-Object System.Drawing.Bitmap $width, $height
-$graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-$graphics.CopyFromScreen($left, $top, 0, 0, $bitmap.Size)
-$bitmap.Save('${escapedOutputPath}', [System.Drawing.Imaging.ImageFormat]::Png)
-$graphics.Dispose()
-$bitmap.Dispose()
-`;
-
-  await execFileAsync("powershell.exe", [
-    "-NoProfile",
-    "-NonInteractive",
-    "-ExecutionPolicy",
-    "Bypass",
-    "-Command",
-    script,
-  ]);
-}
-
-async function decodeQrFromPng(path: string) {
-  const pngBuffer = await readFile(path);
-  const image = PNG.sync.read(pngBuffer);
-  const clampedData = new Uint8ClampedArray(
-    image.data.buffer,
-    image.data.byteOffset,
-    image.data.byteLength,
-  );
-  const result = jsQR(clampedData, image.width, image.height, {
-    inversionAttempts: "attemptBoth",
-  });
-
-  return result?.data;
 }

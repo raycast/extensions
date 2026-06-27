@@ -31,19 +31,12 @@
       "title": "Scan QR Code from File",
       "description": "Select or drag-and-drop an image file to scan it for QR codes.",
       "mode": "view"
-    },
-    {
-      "name": "scan-clipboard",
-      "title": "Scan QR Code from Clipboard",
-      "description": "Scan an image copied to your clipboard (e.g., from Snipping Tool).",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "jsqr": "^1.4.0",
-    "pngjs": "^7.0.0",
-    "screenshot-desktop": "^1.15.4"
+    "pngjs": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
