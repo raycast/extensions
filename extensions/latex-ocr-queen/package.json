@@ -6,6 +6,12 @@
   "icon": "icon.png",
   "author": "licinta",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "ocr-formula",

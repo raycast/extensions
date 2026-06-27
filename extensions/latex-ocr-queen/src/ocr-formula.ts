@@ -10,7 +10,7 @@ import { normalizeLatexOutput } from "./lib/latex";
 import {
   ConfigurationError,
   buildRuntimeConfig,
-  type Preferences,
+  type CommandPreferences,
 } from "./lib/preferences";
 import { recognizeFormula } from "./lib/ocr";
 
@@ -21,7 +21,7 @@ export default async function Command(): Promise<void> {
   });
 
   try {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<CommandPreferences>();
     const config = buildRuntimeConfig(preferences);
     const image = await getImageInput(preferences.imageSource ?? "capture");
 

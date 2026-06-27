@@ -2,19 +2,7 @@ export type Provider = "siliconflow" | "minimax" | "openai" | "custom";
 export type ImageSourceMode = "capture" | "auto" | "finder" | "clipboard";
 export type OutputMode = "latex" | "inline" | "display";
 
-export interface Preferences {
-  provider?: Provider;
-  imageSource?: ImageSourceMode;
-  outputMode?: OutputMode;
-  siliconflowApiToken?: string;
-  minimaxApiToken?: string;
-  openaiApiToken?: string;
-  customApiToken?: string;
-  customBaseUrl?: string;
-  model?: string;
-  temperature?: string;
-  maxTokens?: string;
-}
+export type CommandPreferences = Preferences.OcrFormula;
 
 export interface RuntimeConfig {
   provider: Provider;
@@ -32,7 +20,7 @@ interface ProviderDefinition {
   baseUrl: string;
   defaultModel: string;
   fallbackModels?: string[];
-  tokenPreference: keyof Preferences;
+  tokenPreference: keyof CommandPreferences;
   tokenEnvironmentNames: string[];
 }
 
@@ -83,7 +71,9 @@ const PROVIDERS: Record<Provider, ProviderDefinition> = {
   },
 };
 
-export function buildRuntimeConfig(preferences: Preferences): RuntimeConfig {
+export function buildRuntimeConfig(
+  preferences: CommandPreferences,
+): RuntimeConfig {
   const provider = preferences.provider ?? "siliconflow";
   const definition = PROVIDERS[provider];
   const baseUrl = normalizeBaseUrl(
@@ -134,7 +124,7 @@ export function toChatCompletionsUrl(baseUrl: string): string {
 function resolveBaseUrl(
   provider: Provider,
   definition: ProviderDefinition,
-  preferences: Preferences,
+  preferences: CommandPreferences,
 ): string {
   if (provider !== "custom") {
     return definition.baseUrl;
@@ -151,7 +141,7 @@ function resolveBaseUrl(
 }
 
 function resolveApiToken(
-  preferences: Preferences,
+  preferences: CommandPreferences,
   definition: ProviderDefinition,
 ): string {
   const tokenFromPreferences = nonEmptyString(
