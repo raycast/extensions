@@ -108,9 +108,34 @@ export function detectContentType(raw: string): ContentInfo {
  * Format: WIFI:T:WPA;S:MyNetwork;P:MyPassword;;
  */
 function extractWifiField(raw: string, field: string): string | undefined {
-  const pattern = new RegExp(`(?:^|[;:])${field}:((?:\\\\.|[^;])*)`, "i");
-  const match = raw.match(pattern);
-  return match?.[1] ? unescapeWifiValue(match[1]) : undefined;
+  // Parse fields respecting backslash escapes — an unescaped ; is a delimiter,
+  // an unescaped : separates the field key from its value.
+  const body = raw.replace(/^WIFI:/i, "");
+  const segments: string[] = [];
+  let current = "";
+
+  for (let i = 0; i < body.length; i++) {
+    if (body[i] === "\\" && i + 1 < body.length) {
+      current += body[++i];
+    } else if (body[i] === ";") {
+      segments.push(current);
+      current = "";
+    } else {
+      current += body[i];
+    }
+  }
+  if (current) segments.push(current);
+
+  for (const seg of segments) {
+    const colon = seg.indexOf(":");
+    if (
+      colon !== -1 &&
+      seg.slice(0, colon).toUpperCase() === field.toUpperCase()
+    ) {
+      return seg.slice(colon + 1) || undefined;
+    }
+  }
+  return undefined;
 }
 
 function normalizeSmsUrl(raw: string) {
@@ -124,8 +149,4 @@ function normalizeSmsUrl(raw: string) {
   const encodedMessage = message ? `?body=${encodeURIComponent(message)}` : "";
 
   return `sms:${recipient}${encodedMessage}`;
-}
-
-function unescapeWifiValue(value: string) {
-  return value.replace(/\\([\\;,":])/g, "$1");
 }
