@@ -8,7 +8,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { readFileSync, statSync } from "fs";
 import { basename } from "path";
 import { apiPostMultipart, TypeWhisperError } from "./api";
@@ -84,6 +84,7 @@ export default function Command() {
   const { push } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const didChooseFile = useRef(false);
 
   useEffect(() => {
     if (process.platform !== "darwin") {
@@ -100,7 +101,13 @@ export default function Command() {
           .find(isSupportedAudioFile);
 
         if (selectedAudioFile && isMounted) {
-          setSelectedFiles([selectedAudioFile]);
+          setSelectedFiles((currentFiles) => {
+            if (didChooseFile.current || currentFiles.length > 0) {
+              return currentFiles;
+            }
+
+            return [selectedAudioFile];
+          });
         }
       } catch {
         // Keep the file picker empty when Finder is not active or has no usable selection.
@@ -113,6 +120,11 @@ export default function Command() {
       isMounted = false;
     };
   }, []);
+
+  function handleFileChange(files: string[]) {
+    didChooseFile.current = true;
+    setSelectedFiles(files);
+  }
 
   async function handleSubmit(values: {
     file: string[];
@@ -190,7 +202,7 @@ export default function Command() {
         id="file"
         title="Audio File"
         value={selectedFiles}
-        onChange={setSelectedFiles}
+        onChange={handleFileChange}
         allowMultipleSelection={false}
         canChooseDirectories={false}
       />

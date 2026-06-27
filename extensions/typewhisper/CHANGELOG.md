@@ -1,6 +1,6 @@
 # TypeWhisper Changelog
 
-## [Finder Selection for File Transcription] - 2026-06-27
+## [Finder Selection for File Transcription] - {PR_MERGE_DATE}
 
 - Prefill Transcribe File with the selected Finder audio file when available
 - Keep the file picker as a fallback when Finder has no supported audio file selected
