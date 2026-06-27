@@ -1,0 +1,12 @@
+[
+	{
+		"username": "user@example.com",
+		"issuer": "GitHub",
+		"algorithm": "SHA1",
+		"digits": 6,
+		"period": "30",
+		"tags": ["work"],
+		"notes": "test account",
+		"secret": "JBSWY3DPEHPK3PXP"
+	}
+]

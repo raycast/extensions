@@ -6,8 +6,15 @@ import { useSQL, usePromise } from "@raycast/utils";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import { decodeHexString, fuzzySearch } from "../helpers";
-import { ChatParticipant, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import {
+  buildMessagesQuery,
+  ChatParticipant,
+  decodeHexString,
+  fuzzySearch,
+  createContactMap,
+  getContactOrGroupInfo,
+  ChatOrMessageInfo,
+} from "../helpers";
 import { Filter } from "../my-messages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -25,12 +32,14 @@ export type SQLMessage = ChatParticipant & {
   attachment_filename: string | null;
   attachment_name: string | null;
   attachment_mime_type: string | null;
+  reply_body: string | null;
 };
 
 export type Message = SQLMessage & {
   avatar?: Image.ImageLike;
   sender: string;
   senderName: string;
+  replyingTo?: string | null;
 };
 
 export function useMessages(searchText?: string, filter?: Filter) {
@@ -59,7 +68,6 @@ export function useMessages(searchText?: string, filter?: Filter) {
   })();
 
   const buildQuery = () => {
-    let filters = "";
     const filterConditions: string[] = [];
 
     if (filterSpam) {
@@ -69,60 +77,13 @@ export function useMessages(searchText?: string, filter?: Filter) {
       filterConditions.push(`(chat.is_filtered IS NULL OR chat.is_filtered != ${MessageFilterStatus.UNKNOWN_SENDER})`);
     }
 
-    if (filterConditions.length > 0) {
-      filters = `AND (${filterConditions.join(" AND ")})`;
-    }
+    const spamFilters = filterConditions.length > 0 ? `AND (${filterConditions.join(" AND ")})` : "";
 
-    return `
-      SELECT
-        message.guid,
-        strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-          message.date / 1000000000 + strftime("%s", "2001-01-01"),
-          "unixepoch"
-        )) AS date,
-        strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-          message.date_read / 1000000000 + strftime("%s", "2001-01-01"),
-          "unixepoch"
-        )) AS date_read,
-        message.is_from_me,
-        message.is_audio_message,
-        message.is_sent,
-        message.is_read,
-        chat.chat_identifier,
-        chat.display_name,
-        CASE
-          WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
-          THEN chat.display_name
-          ELSE NULL
-        END as group_name,
-        message.service,
-        hex(message.attributedBody) as body,
-        CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
-        CASE
-          WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
-          ELSE handle.id
-        END as group_participants,
-        attachment.filename as attachment_filename,
-        attachment.transfer_name as attachment_name,
-        attachment.mime_type as attachment_mime_type
-      FROM
-        message
-        JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
-        JOIN chat ON chat_message_join.chat_id = chat."ROWID"
-        LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
-        LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
-        LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
-        LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
-      WHERE
-        message.attributedBody IS NOT NULL
-        ${filterClause}
-        ${filters}
-      GROUP BY
-        message.guid
-      ORDER BY
-        date DESC
-      LIMIT ${searchText ? "1000" : "50"};
-    `;
+    return buildMessagesQuery({
+      filterClause,
+      spamFilters,
+      limit: searchText ? "1000" : "50",
+    });
   };
 
   const {
@@ -156,6 +117,8 @@ export function useMessages(searchText?: string, filter?: Filter) {
 
         const { avatar, displayName } = getContactOrGroupInfo(messageInfo, contactMap);
 
+        const decodedReply = m.reply_body ? decodeHexString(m.reply_body) : null;
+
         return {
           ...m,
           body: decodedBody,
@@ -166,6 +129,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
           is_audio_message: Boolean(m.is_audio_message),
           is_sent: Boolean(m.is_sent),
           is_read: m.is_sent ? true : Boolean(m.is_read),
+          replyingTo: decodedReply || null,
         };
       });
     },

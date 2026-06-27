@@ -40,6 +40,18 @@ export interface LocationStats {
   [date: string]: string;
 }
 
+/**
+ * 42 Location record from the API
+ */
+export interface Location {
+  id: number;
+  begin_at: string;
+  end_at: string | null;
+  host?: string | null;
+  primary?: boolean;
+  campus_id?: number;
+}
+
 // =============================================================================
 // UTILITY TYPES
 // =============================================================================

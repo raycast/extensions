@@ -1,5 +1,9 @@
 # Karakeep Changelog
 
+## [2.3.2] - 2026-06-05
+
+- Fixed bookmark preview images not rendering by caching previews locally and escaping local image paths in Markdown
+
 ## [2.3.1] - 2026-04-01
 
 - Fixed an issue where typing an existing tag name in the Add New Tag picker would not add it to the Tags list

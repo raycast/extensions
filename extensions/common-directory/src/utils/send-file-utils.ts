@@ -76,11 +76,11 @@ export const getItemAndSend = async (action: ActionType, toPath = ""): Promise<b
   if (isEmpty(toPath)) {
     toPath = await getChooseFolder()
       .then(async (_path) => {
-        await open("raycast://");
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`);
         return _path;
       })
       .catch(async () => {
-        await open("raycast://");
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`);
         return "";
       });
   }

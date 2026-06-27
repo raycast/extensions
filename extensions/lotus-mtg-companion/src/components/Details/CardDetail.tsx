@@ -13,12 +13,28 @@ export function CardDetail({ card, isLoading = false }: CardDetailProps) {
     const cardSetIcon = useFetch<ScryfallSet>(card.set_uri).data;
     const cardRulings = useFetch<ScryfallRulings>(card.rulings_uri).data;
 
+    const oracleText =
+        card.oracle_text ??
+        card.card_faces
+            ?.filter((face) => face.oracle_text)
+            .map((face) => `**${face.name}**\n\n${face.oracle_text}`)
+            .join("\n\n---\n\n") ??
+        "";
+
+    const flavorText =
+        card.flavor_text ??
+        card.card_faces
+            ?.map((face) => face.flavor_text)
+            .filter(Boolean)
+            .join("\n\n") ??
+        "";
+
     const markdown = `
 ![](${getCardImage(card)}?raycast-width=350&raycast-height=300)
 
-${card.oracle_text}
+${oracleText}
 
-${card.flavor_text ? `*${card.flavor_text}*` : ""}
+${flavorText ? `*${flavorText}*` : ""}
 
 ${cardRulings && cardRulings.data.length > 0 ? `### Rulings\n\n ${cardRulings.data.map((ruling) => `*${ruling.published_at}* — ${ruling.comment} \n\n`).join("")}` : ""}
 `;
@@ -33,13 +49,28 @@ ${cardRulings && cardRulings.data.length > 0 ? `### Rulings\n\n ${cardRulings.da
                     {/* Card info */}
                     <Detail.Metadata.Label title="Name" text={card.name} />
                     <Detail.Metadata.Label title="Type" text={card.type_line} />
-                    {card.mana_cost.length > 0 && (
+                    {(card.mana_cost?.length ?? 0) > 0 && (
                         <Detail.Metadata.TagList title="Mana">
                             {getMana(card)?.map((mana, index) => (
                                 <Detail.Metadata.TagList.Item text={mana.symbol} color={mana.color} key={index} />
                             ))}
                         </Detail.Metadata.TagList>
                     )}
+                    {card.card_faces &&
+                        !card.mana_cost &&
+                        card.card_faces
+                            .filter((face) => (face.mana_cost?.length ?? 0) > 0)
+                            .map((face, faceIndex) => (
+                                <Detail.Metadata.TagList key={faceIndex} title={`Mana (${face.name})`}>
+                                    {getMana(face)?.map((mana, index) => (
+                                        <Detail.Metadata.TagList.Item
+                                            text={mana.symbol}
+                                            color={mana.color}
+                                            key={index}
+                                        />
+                                    ))}
+                                </Detail.Metadata.TagList>
+                            ))}
                     {card.produced_mana && (
                         <Detail.Metadata.TagList title="Produced Mana">
                             {getProducedMana(card)?.map((mana, index) => (
@@ -62,7 +93,7 @@ ${cardRulings && cardRulings.data.length > 0 ? `### Rulings\n\n ${cardRulings.da
                             icon={{ source: "shield.png", tintColor: Color.PrimaryText }}
                         />
                     )}
-                    {card.keywords.length > 0 && (
+                    {card.keywords && card.keywords.length > 0 && (
                         <>
                             <Detail.Metadata.Separator />
                             <Detail.Metadata.TagList title="Keywords">
@@ -107,7 +138,18 @@ ${cardRulings && cardRulings.data.length > 0 ? `### Rulings\n\n ${cardRulings.da
                     )}
                     {/* Artist */}
                     <Detail.Metadata.Separator />
-                    <Detail.Metadata.Label title="Artist" text={card.artist} />
+                    {card.artist && <Detail.Metadata.Label title="Artist" text={card.artist} />}
+                    {!card.artist &&
+                        card.card_faces &&
+                        card.card_faces
+                            .filter((face) => face.artist)
+                            .map((face, index) => (
+                                <Detail.Metadata.Label
+                                    key={index}
+                                    title={`Artist (${face.name})`}
+                                    text={face.artist!}
+                                />
+                            ))}
                     {/* Open */}
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.Link title="Scryfall" target={card.scryfall_uri} text="Open in Browser" />
