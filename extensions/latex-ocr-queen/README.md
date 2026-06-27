@@ -1,10 +1,10 @@
-# LaTeX OCR Queen
+# VLM Formula OCR
 
-Raycast extension for recognizing selected formula screenshots as LaTeX.
+Raycast extension for recognizing selected formula screenshots as LaTeX with VLM providers.
 
 ## Usage
 
-1. Run `OCR Formula` in Raycast.
+1. Run `VLM Formula OCR` in Raycast.
 2. Drag to select the formula area with the macOS screenshot selector.
 3. The recognized LaTeX is copied to the clipboard.
 
@@ -24,7 +24,7 @@ as convenience fallbacks. MiniMax Token Plan users can also use
 
 ## Providers
 
-- SiliconFlow Qwen2.5-VL: `https://api.siliconflow.cn/v1`
+- SiliconFlow Qwen-VL: `https://api.siliconflow.cn/v1`
 - MiniMax: `https://api.minimax.io/v1`
 - OpenAI: `https://api.openai.com/v1`
 - Custom OpenAI-compatible endpoint

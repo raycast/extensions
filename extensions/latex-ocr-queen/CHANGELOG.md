@@ -1,4 +1,4 @@
-# LaTeX OCR Queen Changelog
+# VLM Formula OCR Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

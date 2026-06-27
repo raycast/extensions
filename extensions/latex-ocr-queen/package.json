@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "latex-ocr-queen",
-  "title": "LaTeX OCR Queen",
-  "description": "OCR selected formula screenshots into LaTeX with Qwen2.5-VL, MiniMax, or OpenAI-compatible vision models.",
+  "title": "VLM Formula OCR",
+  "description": "Capture formula screenshots and convert them to LaTeX with VLM providers like Qwen-VL, MiniMax, and OpenAI.",
   "icon": "icon.png",
   "author": "licinta",
   "license": "MIT",
@@ -15,8 +15,8 @@
   "commands": [
     {
       "name": "ocr-formula",
-      "title": "OCR Formula",
-      "description": "Recognize the selected screenshot formula and copy LaTeX to the clipboard.",
+      "title": "VLM Formula OCR",
+      "description": "Capture a formula screenshot, recognize it with a VLM, and copy LaTeX to the clipboard.",
       "mode": "no-view",
       "preferences": [
         {
@@ -28,7 +28,7 @@
           "description": "Choose which vision API should recognize the formula.",
           "data": [
             {
-              "title": "SiliconFlow Qwen2.5-VL",
+              "title": "SiliconFlow Qwen-VL",
               "value": "siliconflow"
             },
             {
