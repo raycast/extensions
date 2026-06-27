@@ -58,11 +58,7 @@ function Person(props: PersonProps) {
           </>
 
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ macOS:{modifiers: ["cmd"], key: "."}, Windows: {modifiers: ["ctrl"], key: "."} }}
-              title={STRINGS.copyTitle}
-              content={name}
-            />
+            <Action.CopyToClipboard shortcut={Keyboard.Shortcut.Common.Pin} title={STRINGS.copyTitle} content={name} />
             <Action.CopyToClipboard
               shortcut={Keyboard.Shortcut.Common.CopyPath}
               title={STRINGS.copyUrl}

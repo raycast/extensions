@@ -90,11 +90,7 @@ function BookItem(props: BookItemProps) {
           </>
 
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ macOS:{modifiers: ["cmd"], key: "."}, Windows: {modifiers: ["ctrl"], key: "."} }}
-              title={STRINGS.copyTitle}
-              content={title}
-            />
+            <Action.CopyToClipboard shortcut={Keyboard.Shortcut.Common.Pin} title={STRINGS.copyTitle} content={title} />
             <Action.CopyToClipboard
               shortcut={Keyboard.Shortcut.Common.CopyPath}
               title={STRINGS.copyUrl}

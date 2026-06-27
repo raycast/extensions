@@ -5,7 +5,9 @@
   "description": "Search Goodreads books, authors and more",
   "icon": "goodreads-icon.png",
   "author": "puneeth",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok"
+  ],
   "platforms": [
     "macOS",
     "Windows"
