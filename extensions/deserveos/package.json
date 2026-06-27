@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deserveos",
+  "title": "DeserveOS",
+  "description": "Talk to your DeserveOS CRM, get today's deal briefing, and stay on top of follow-ups and reminders — without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "ensaktas",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "workspaceUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Workspace URL",
+      "placeholder": "https://acme.app.deserveos.com",
+      "description": "Your DeserveOS workspace URL, including the subdomain (e.g. https://acme.app.deserveos.com). Used to sign you into the right workspace and to open records in the browser."
+    },
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "https://app.deserveos.com",
+      "title": "API Base URL",
+      "placeholder": "https://app.deserveos.com",
+      "description": "The DeserveOS API host. Leave the default unless you self-host."
+    }
+  ],
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask Your CRM",
+      "subtitle": "DeserveOS",
+      "description": "Ask the DeserveOS sales copilot anything about your pipeline, deals, people and companies.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "What needs my attention today?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "today",
+      "title": "Today's Briefing",
+      "subtitle": "DeserveOS",
+      "description": "Your morning deal briefing — at-risk deals, silent threads and what needs a reply.",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Reminders & Tasks",
+      "subtitle": "DeserveOS",
+      "description": "Open tasks and follow-up reminders, sorted by due date.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search CRM",
+      "subtitle": "DeserveOS",
+      "description": "Search people, companies and deals in your workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Log In to DeserveOS",
+      "subtitle": "DeserveOS",
+      "description": "Sign in to your DeserveOS workspace in the browser (Google or email).",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
