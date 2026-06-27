@@ -610,7 +610,7 @@ $result = [PSCustomObject]@{
     addresses = if ($adapter) { $adapter.addresses } else { @() }
     signalQuality = if ($wirelessInfo) { $wirelessInfo.signalQuality } else { $null }
   }
-  volume = ([Native]::GetVolumeInfoJson() | ConvertFrom-Json)
+  volume = (try { [Native]::GetVolumeInfoJson() | ConvertFrom-Json } catch { [PSCustomObject]@{ level = 0; muted = $false; deviceName = "Unknown"; deviceKind = "speaker" } })
   battery = ([Native]::GetPowerInfoJson() | ConvertFrom-Json)
 }
 
