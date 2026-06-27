@@ -40,7 +40,7 @@ export default function BookDetails(props: BookDetailsProps) {
           />
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              shortcut={Keyboard.Shortcut.Common.Pin}
+              shortcut={{ macOS:{modifiers: ["cmd"], key: "."}, Windows: {modifiers: ["ctrl"], key: "."} }}
               title={STRINGS.copyTitle}
               content={bookTitle}
             />
