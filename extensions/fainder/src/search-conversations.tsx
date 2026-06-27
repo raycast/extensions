@@ -418,7 +418,7 @@ function relativeDate(value?: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "yesterday";
   if (days < 7) return `${days}d ago`;
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
   }).format(new Date(time));
@@ -430,7 +430,7 @@ function startedDate(value?: string | null): string {
   if (Number.isNaN(time)) return value;
   const deltaHours = Math.floor((Date.now() - time) / 3_600_000);
   if (deltaHours < 24) {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date(time));
@@ -449,10 +449,7 @@ function contextLine(result: SearchResult): string {
     parts.push(project);
   }
   parts.push(labelProvider(result.provider));
-  if (parts.length > 0) return parts.join("  ·  ");
-  return result.matched_in === "title"
-    ? "Conversation title match"
-    : `matched in ${result.matched_in}`;
+  return parts.join("  ·  ");
 }
 
 function compactMessages(value?: number | null): string {
@@ -470,7 +467,7 @@ function lastLong(value?: string | null): string {
   if (!value) return "-";
   const time = new Date(value).getTime();
   if (Number.isNaN(time)) return value;
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
