@@ -1,8 +1,8 @@
 # AI Translate for Raycast
 
-AI Translate is a small Raycast extension for everyday translation and screenshot OCR.
+AI Translate is a small Raycast extension for everyday translation and screenshot OCR, built around current large language models.
 
-It is built for a modest but common problem: sometimes you want to translate a sentence or read text from an image without opening a large translation app. AI Translate keeps those steps inside Raycast and lets you bring your own API keys for the model providers you already use.
+It lets you bring your own API keys so you can work directly with the latest LLMs from multiple providers. The hope is to support users — especially non-native English speakers — who want flexible, guided translation rather than only the fastest one-shot result. This includes comparing how different models express the same idea, reviewing OCR output carefully, and using integrated listening practice.
 
 It does not try to replace professional translation, legal review, or careful human editing. For important writing, citations, contracts, academic text, or public-facing copy, please treat the output as a draft and review it yourself.
 
@@ -86,17 +86,17 @@ Read-aloud is a convenience feature, not a full audiobook or speech production t
 
 AI Translate 是一个比较轻量的 Raycast 扩展，主要服务三个日常场景：选中文本翻译、截图文字翻译，以及截图/OCR 文本整理。
 
-它的目标不是做一个“万能翻译器”，也不替代人工审校。更合适的用法是：你在读网页、PDF、软件界面、聊天记录或英文草稿时，想快速得到一个可用的译文或 OCR 文本，然后再根据具体语境自己判断。
+它的目标不是做一个“万能翻译器”，也不替代人工审校。更合适的用法是：你在读网页、PDF、软件界面、聊天记录或英文草稿时，希望借助当前最好的大模型得到自然、准确的译文或 OCR 文本，尤其适合有英语学习或深入理解需求的用户（而不仅仅是快速浏览翻译结果）。你可以比较不同模型的表达、配合朗读练习、仔细检查截图识别结果，再根据具体语境自己判断和学习。
 
 目前它有几个特点：
 
 - **以意译和自然表达为默认方向**：默认提示词更重视目标语言里的自然说法，而不是逐词对应。
 - **适合不可复制文本**：截图后可以先 OCR，再检查识别结果，最后翻译。
 - **支持多个模型服务商**：可以按自己的 API key 启用 DeepSeek（`deepseek-v4-flash`/`deepseek-v4-pro`，Anthropic-compatible 路径并默认关闭 thinking）、小米 MiMo（`mimo-v2.5`/`mimo-v2.5-pro`，同上）、Gemini（默认 `gemini-3.5-flash`/`gemini-3.1-pro-preview`）、OpenAI / ChatGPT（默认 `gpt-4.1-mini`/`gpt-4.1`，GPT-5.x 推理模型自动加 `reasoning_effort=minimal`）。
-- **可比较多个 provider 的输出**：开启多个 provider 后，可以在同一个列表里看不同模型的结果、耗时和状态。
+- **可比较多个 provider 的输出**：开启多个 provider 后，可以在同一个列表里看不同模型的结果、耗时和状态。这对想通过对比学习不同模型表达方式的用户特别有帮助。
 - **支持快速替换工作流**：`Translate & Paste` 适合绑定全局快捷键，直接把结果粘回原位置。
 - **保留本地历史**：复制或粘贴过的翻译结果会进入本地历史，方便回看；旧版本留下的改写记录仍可显示。
-- **默认模型与运行时选择分层**：`Settings` / Preferences 管稳定默认值，包括翻译与截图翻译共用的默认 provider/model；Action Panel 管当前任务里的 provider 范围、具体模型、朗读 provider/model、翻译风格、提示词场景、OCR engine 和自定义 prompt。
+- **默认模型与运行时选择分层**：`Settings` / Preferences 管稳定默认值，包括翻译与截图翻译共用的默认 provider/model；Action Panel 管当前任务里的 provider 范围、具体模型、朗读 provider/model、翻译风格、提示词场景、OCR engine 和自定义 prompt。运行时可以方便切换不同模型，便于学习和对比。
 
 请注意，法律文本、学术文本、合同、公开发布内容和高风险材料仍然需要人工核验。模型输出可能误解上下文、遗漏限定语，OCR 也可能识别错字。
 
