@@ -169,26 +169,20 @@ function buildUrls(snapshot: WaybackCdxServerSnapshot) {
   // snapshotUrl points to a specific archived capture.
   // calendarUrl opens the Wayback calendar view for pages with multiple captures.
 
-  let displayUrl = "";
+  const { original, timestamp } = snapshot;
+
+  let displayUrl = original;
   try {
-    displayUrl = escapeUrl(decodeURI(snapshot.original));
-  } catch {
-    displayUrl = escapeUrl(snapshot.original);
-  }
+    displayUrl = decodeURI(original);
+  } catch {}
 
   // timestamp === endtimestamp, means there is only one snapshot
-  const snapshotUrl = escapeUrl(`/web/${snapshot.timestamp}/${snapshot.original}`);
-  const calendarUrl = escapeUrl(`/web/${snapshot.timestamp}*/${snapshot.original}`);
+  const snapshotUrl = `/web/${timestamp}/${original}`;
+  const calendarUrl = `/web/${timestamp}*/${original}`;
 
   return {
     displayUrl,
     snapshotUrl: `https://web.archive.org${snapshotUrl}`,
     calendarUrl: `https://web.archive.org${calendarUrl}`,
   };
-}
-
-const URL_ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const;
-
-function escapeUrl(url: string) {
-  return url.replace(/[&<>"']/g, (s) => URL_ESCAPE_MAP[s as keyof typeof URL_ESCAPE_MAP]);
 }
