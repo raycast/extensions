@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/tsconfig.json",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
     "module": "ESNext",

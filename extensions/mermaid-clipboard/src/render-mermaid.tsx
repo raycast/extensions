@@ -13,14 +13,11 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { deflate } from "pako";
+import { createHash } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { useCallback, useEffect, useState } from "react";
-
-interface Preferences {
-  theme: "auto" | "default" | "dark" | "neutral" | "forest";
-}
 
 // Width of the rendered PNG. Larger = sharper on Retina, scaled down to fit the Detail pane.
 const RENDER_WIDTH = 1400;
@@ -97,11 +94,13 @@ export default function RenderMermaid() {
       }
 
       const buffer = Buffer.from(await response.arrayBuffer());
-      // Unique filename so the Detail pane reloads the image on re-render.
-      const imagePath = join(
-        environment.supportPath,
-        `mermaid-${buffer.length}-${code.length}.png`,
-      );
+      // Content-hashed filename: distinct diagrams get distinct paths, so the
+      // Detail pane never serves a stale image from a colliding name.
+      const hash = createHash("sha256")
+        .update(buffer)
+        .digest("hex")
+        .slice(0, 16);
+      const imagePath = join(environment.supportPath, `mermaid-${hash}.png`);
       await writeFile(imagePath, buffer);
 
       // supportPath contains a space ("Application Support"); a bare path breaks
