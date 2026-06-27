@@ -1,5 +1,11 @@
 # goodreads Changelog
 
+## [Copy Cover URL in Book Details] - {PR_MERGE_DATE}
+
+- Add `Copy` to book details (ref: [Issue #28910](https://github.com/raycast/extensions/issues/28910))
+- chore: update deps
+0 update: many `shortcut` to be cross-platform
+
 ## [Bugfix] - 2026-05-21
 
 - Restore book search results.

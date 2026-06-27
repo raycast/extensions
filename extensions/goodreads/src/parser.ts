@@ -16,12 +16,12 @@ interface ExtractDescriptor {
 type ExtractedValue<T extends ExtractValue, M extends ExtractMap> = T extends ExtractDescriptor[]
   ? NonNullable<ExtractedValue<T[0], M>>[]
   : T extends ExtractDescriptor
-  ? T["value"] extends ExtractMap
-    ? ExtractedMap<T["value"]>
-    : T["value"] extends string
-    ? ReturnType<typeof prop>
-    : string
-  : unknown;
+    ? T["value"] extends ExtractMap
+      ? ExtractedMap<T["value"]>
+      : T["value"] extends string
+        ? ReturnType<typeof prop>
+        : string
+    : unknown;
 
 type ExtractedMap<M extends ExtractMap> = {
   [K in keyof M]: ExtractedValue<M[K], M>;
@@ -53,7 +53,7 @@ export const parse = <M extends ExtractMap>(extractionTemplate: M, html: string)
  */
 const extract = <M extends ExtractMap, T extends AnyNode>(
   extractionTemplate: M,
-  cheerioObject: Cheerio<T>
+  cheerioObject: Cheerio<T>,
 ): ExtractedMap<M> => {
   const result: Record<string, unknown> = {};
 

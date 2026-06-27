@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { fetchPeopleByName, getDetailsPageUrl } from "./goodreads-api";
 import { STRINGS } from "./strings";
 import { useCachedPromise } from "@raycast/utils";
@@ -58,13 +58,9 @@ function Person(props: PersonProps) {
           </>
 
           <ActionPanel.Section>
+            <Action.CopyToClipboard shortcut={Keyboard.Shortcut.Common.Pin} title={STRINGS.copyTitle} content={name} />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              title={STRINGS.copyTitle}
-              content={name}
-            />
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
               title={STRINGS.copyUrl}
               content={detailsPageUrl}
             />
