@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qr-scanner",
+  "title": "QR Scanner",
+  "description": "Scan QR codes from your display and copy their contents to the clipboard.",
+  "icon": "command-icon.png",
+  "author": "arshaaad",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scan-display",
+      "title": "Scan Display for QR Code",
+      "description": "Quickly scan your display for one QR code and copy the decoded content.",
+      "mode": "no-view"
+    },
+    {
+      "name": "scan-multiple",
+      "title": "Scan Multiple QR Codes",
+      "description": "Deep scan your display for multiple QR codes and choose what to copy.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.30",
+    "@types/pngjs": "^6.0.5",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
