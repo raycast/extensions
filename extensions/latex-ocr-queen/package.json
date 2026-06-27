@@ -1,0 +1,170 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "latex-ocr-queen",
+  "title": "LaTeX OCR Queen",
+  "description": "OCR selected formula screenshots into LaTeX with Qwen2.5-VL, MiniMax, or OpenAI-compatible vision models.",
+  "icon": "icon.png",
+  "author": "licinta",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ocr-formula",
+      "title": "OCR Formula",
+      "description": "Recognize the selected screenshot formula and copy LaTeX to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "provider",
+          "title": "Provider",
+          "type": "dropdown",
+          "required": true,
+          "default": "siliconflow",
+          "description": "Choose which vision API should recognize the formula.",
+          "data": [
+            {
+              "title": "SiliconFlow Qwen2.5-VL",
+              "value": "siliconflow"
+            },
+            {
+              "title": "MiniMax",
+              "value": "minimax"
+            },
+            {
+              "title": "OpenAI",
+              "value": "openai"
+            },
+            {
+              "title": "Custom OpenAI-Compatible",
+              "value": "custom"
+            }
+          ]
+        },
+        {
+          "name": "imageSource",
+          "title": "Image Source",
+          "type": "dropdown",
+          "required": true,
+          "default": "capture",
+          "description": "Choose where the screenshot image is read from.",
+          "data": [
+            {
+              "title": "Capture Selection",
+              "value": "capture"
+            },
+            {
+              "title": "Auto: Finder Selection, Then Clipboard",
+              "value": "auto"
+            },
+            {
+              "title": "Finder Selection",
+              "value": "finder"
+            },
+            {
+              "title": "Clipboard",
+              "value": "clipboard"
+            }
+          ]
+        },
+        {
+          "name": "outputMode",
+          "title": "Output",
+          "type": "dropdown",
+          "required": true,
+          "default": "latex",
+          "description": "Choose how the copied LaTeX should be wrapped.",
+          "data": [
+            {
+              "title": "LaTeX Only",
+              "value": "latex"
+            },
+            {
+              "title": "Inline Math",
+              "value": "inline"
+            },
+            {
+              "title": "Display Math",
+              "value": "display"
+            }
+          ]
+        },
+        {
+          "name": "siliconflowApiToken",
+          "title": "SiliconFlow API Token",
+          "type": "password",
+          "required": false,
+          "description": "Overrides SILICONFLOW_API_TOKEN from the environment."
+        },
+        {
+          "name": "minimaxApiToken",
+          "title": "MiniMax API Token",
+          "type": "password",
+          "required": false,
+          "description": "Overrides MINIMAX_API_TOKEN from the environment."
+        },
+        {
+          "name": "openaiApiToken",
+          "title": "OpenAI API Token",
+          "type": "password",
+          "required": false,
+          "description": "Overrides OPENAI_API_TOKEN from the environment."
+        },
+        {
+          "name": "customApiToken",
+          "title": "Custom API Token",
+          "type": "password",
+          "required": false,
+          "description": "Token for Custom OpenAI-Compatible provider."
+        },
+        {
+          "name": "customBaseUrl",
+          "title": "Custom Base URL",
+          "type": "textfield",
+          "required": false,
+          "description": "Base URL for Custom OpenAI-Compatible provider.",
+          "placeholder": "https://api.example.com/v1"
+        },
+        {
+          "name": "model",
+          "title": "Model",
+          "type": "textfield",
+          "required": false,
+          "description": "Overrides the provider default model.",
+          "placeholder": "Leave empty to use provider default."
+        },
+        {
+          "name": "temperature",
+          "title": "Temperature",
+          "type": "textfield",
+          "required": false,
+          "description": "Sampling temperature from 0 to 2.",
+          "placeholder": "0"
+        },
+        {
+          "name": "maxTokens",
+          "title": "Max Tokens",
+          "type": "textfield",
+          "required": false,
+          "description": "Maximum completion tokens for OCR output.",
+          "placeholder": "512"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.10",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.1",
+    "typescript": "^5.8.3"
+  }
+}
