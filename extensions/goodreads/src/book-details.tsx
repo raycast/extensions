@@ -44,16 +44,18 @@ export default function BookDetails(props: BookDetailsProps) {
               title={STRINGS.copyTitle}
               content={bookTitle}
             />
-            <Action.CopyToClipboard
-              shortcut={Keyboard.Shortcut.Common.CopyPath}
-              title={STRINGS.copyUrl}
-              content={details.url}
-            />
-            {data.cover.source && (
+            {details?.url && (
+              <Action.CopyToClipboard
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
+                title={STRINGS.copyUrl}
+                content={details.url}
+              />
+            )}
+            {details?.cover?.source && (
               <Action.CopyToClipboard
                 shortcut={Keyboard.Shortcut.Common.Copy}
                 title={STRINGS.copyCoverUrl}
-                content={data.cover.source}
+                content={details.cover.source}
               />
             )}
           </ActionPanel.Section>
