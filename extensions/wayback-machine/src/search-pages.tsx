@@ -171,10 +171,12 @@ function buildUrls(snapshot: WaybackCdxServerSnapshot) {
 
   const { original, timestamp } = snapshot;
 
-  let displayUrl = original;
+  let displayUrl = "";
   try {
     displayUrl = decodeURI(original);
-  } catch {}
+  } catch {
+    displayUrl = original;
+  }
 
   // timestamp === endtimestamp, means there is only one snapshot
   const snapshotUrl = `/web/${timestamp}/${original}`;
