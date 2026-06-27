@@ -1,12 +1,37 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, access, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import jsQR from "jsqr";
 import { PNG } from "pngjs";
 
 const execFileAsync = promisify(execFile);
+
+// Cached path to the compiled detect-qr binary (macOS only).
+let compiledBinaryPath: string | null = null;
+
+async function getVisionBinary(): Promise<string> {
+  if (compiledBinaryPath) return compiledBinaryPath;
+
+  const binDir = join(tmpdir(), "raycast-qr-bin");
+  const binPath = join(binDir, "detect-qr");
+
+  const exists = (p: string) =>
+    access(p).then(
+      () => true,
+      () => false,
+    );
+  if (!(await exists(binPath))) {
+    await mkdir(binDir, { recursive: true });
+    const scriptPath = join(environment.assetsPath, "detect-qr.swift");
+    await execFileAsync("swiftc", [scriptPath, "-o", binPath]);
+  }
+
+  compiledBinaryPath = binPath;
+  return binPath;
+}
 
 /**
  * Decode a single QR code from a PNG file.
@@ -14,12 +39,7 @@ const execFileAsync = promisify(execFile);
  */
 export async function decodeQrFromPng(path: string) {
   if (process.platform === "darwin") {
-    const results = await decodeWithVision(path);
-    if (results.length > 0) {
-      return results[0];
-    }
-    // Vision ran successfully but found nothing — try jsQR as a fallback
-    return decodeQrFromPngWithJsQR(path);
+    return decodeWithVision(path).then((r) => r[0]);
   }
   return decodeQrFromPngWithJsQR(path);
 }
@@ -30,32 +50,30 @@ export async function decodeQrFromPng(path: string) {
  */
 export async function decodeQrsFromPng(path: string) {
   if (process.platform === "darwin") {
-    const results = await decodeWithVision(path);
-    if (results.length > 0) {
-      return results;
-    }
-    // Vision ran successfully but found nothing — try jsQR as a fallback
-    return decodeQrsFromPngWithJsQR(path);
+    return decodeWithVision(path);
   }
   return decodeQrsFromPngWithJsQR(path);
 }
 
 /**
- * Use Apple's Vision framework (via Swift script interpreter) for
- * hardware-accelerated QR detection. Finds all QR codes in a single pass.
+ * Use Apple's Vision framework via a compiled binary for fast QR detection.
+ * Compiles detect-qr.swift on first run and caches the binary.
  */
 async function decodeWithVision(path: string): Promise<string[]> {
   try {
-    const scriptPath = join(environment.assetsPath, "detect-qr.swift");
-    const { stdout, stderr } = await execFileAsync("swift", [scriptPath, path]);
+    const binary = await getVisionBinary();
+    const { stdout, stderr } = await execFileAsync(binary, [path]);
     if (stderr.trim()) {
       console.error("Vision stderr:", stderr.trim());
     }
     const lines = stdout.trim().split("\n").filter(Boolean);
     return [...new Set(lines)];
   } catch (error) {
-    // Fall back to jsQR if Swift execution fails
-    console.error("Vision failed, falling back to jsQR:", error instanceof Error ? error.message : String(error));
+    // Fall back to jsQR if compilation or execution fails
+    console.error(
+      "Vision failed, falling back to jsQR:",
+      error instanceof Error ? error.message : String(error),
+    );
     return decodeQrsFromPngWithJsQR(path);
   }
 }
