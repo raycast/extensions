@@ -17,7 +17,6 @@ import { join } from "node:path";
 import { captureDisplay, wait } from "./capture";
 import { decodeQrsFromPng } from "./decode";
 import { ContentInfo, detectContentType } from "./content-type";
-import ScanFile from "./scan-file";
 
 const SCREENSHOT_DELAY_MS = 250;
 
@@ -58,10 +57,11 @@ export default function Command() {
       <List
         actions={
           <ActionPanel>
-            <Action.Push
-              icon={Icon.Document}
-              title="Scan QR Code from File"
-              target={<ScanFile />}
+            <Action
+              icon={Icon.RotateClockwise}
+              title="Rescan Display"
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={scan}
             />
           </ActionPanel>
         }
@@ -69,7 +69,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="Could not scan display"
-          description={`${state.message}\n\nPress Enter to select or drag-and-drop a screenshot file instead.`}
+          description={state.message}
         />
       </List>
     );
