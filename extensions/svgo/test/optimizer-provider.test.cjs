@@ -9,6 +9,11 @@ const repositoryRoot = path.resolve(__dirname, "..");
 const buildDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-svgo-test-"));
 
 async function main() {
+  const manifest = JSON.parse(fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8"));
+  assert.deepEqual(manifest.platforms, ["macOS"]);
+  assert.doesNotMatch(fs.readFileSync(path.join(repositoryRoot, "src/index.tsx"), "utf8"), /type Provider =/);
+  assert.doesNotMatch(fs.readFileSync(path.join(repositoryRoot, "src/optimizer.ts"), "utf8"), /type Provider =/);
+
   execFileSync("npx", ["tsc", "--project", "tsconfig.json", "--rootDir", "src", "--outDir", buildDirectory], {
     cwd: repositoryRoot,
     stdio: "pipe",

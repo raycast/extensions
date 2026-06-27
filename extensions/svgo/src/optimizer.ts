@@ -11,10 +11,8 @@ import { optimizeSvgWithOxvg } from "./oxvg";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { optimize: svgoOptimize } = require("svgo") as typeof import("svgo");
 
-type Provider = "svgo" | "oxvg";
-
-function getProvider(): Provider {
-  const { provider } = getPreferenceValues<{ provider: Provider }>();
+function getProvider(): Preferences["provider"] {
+  const { provider } = getPreferenceValues<Preferences>();
   return provider ?? "svgo";
 }
 

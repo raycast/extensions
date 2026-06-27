@@ -99,7 +99,6 @@
     "test": "node test/optimizer-provider.test.cjs"
   },
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ]
 }

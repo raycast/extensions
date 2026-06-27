@@ -4,10 +4,8 @@ import { isOxvgAvailable } from "./oxvg";
 import { optimizeSvgWithSvgo } from "./optimizer";
 import { configHelper, SVGOPlugin } from "./utils-2";
 
-type Provider = "svgo" | "oxvg";
-
 export default function SVGOConfig() {
-  const { provider } = getPreferenceValues<{ provider: Provider }>();
+  const { provider } = getPreferenceValues<Preferences>();
   const [config, setConfig] = useState<SVGOPlugin[]>([]);
   const [forceUpdate, setForceUpdate] = useState(false);
   const triggerUpdate = () => setForceUpdate((cur) => !cur);
