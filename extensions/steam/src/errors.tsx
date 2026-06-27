@@ -36,7 +36,7 @@ export const NoApiKey = () => {
 };
 
 export const NoWebApiKey = () => {
-  const { token } = getPreferenceValues<{ token?: string }>();
+  const { token } = getPreferenceValues<Preferences>();
   const markdown =
     "To search Steam users and load profile information, set your Web API Key in the preferences.\n\nGrab an API key from Steam here:\n\n[https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey)\n\n\nPress `Enter` to continue";
 

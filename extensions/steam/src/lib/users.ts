@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { GameDataSimple } from "../types";
 
-type Preferences = {
-  token?: string;
-};
-
 type SteamApiErrorOptions = {
   status?: number;
 };
@@ -204,11 +200,14 @@ export async function searchSteamUsers(
     try {
       const communityResults = await searchSteamCommunityUsers(query, maxResults);
       totalCount = communityResults.totalCount;
-      const steamids = await resolveCommunitySteamIds(communityResults.results, key);
+      const resolvedCommunityResults = await resolveCommunitySearchResults(communityResults.results, key);
+      const steamids = resolvedCommunityResults
+        .map((result) => result.steamid)
+        .filter((steamid): steamid is string => Boolean(steamid));
       const summaries = await getPlayerSummaries(steamids, key);
       const summaryById = new Map(summaries.map((summary) => [summary.steamid, summary]));
 
-      for (const communityResult of communityResults.results) {
+      for (const communityResult of resolvedCommunityResults) {
         const steamid = communityResult.steamid;
         if (!steamid || results.some((result) => result.steamid === steamid)) continue;
 
@@ -283,19 +282,18 @@ function getRequiredSteamWebApiKey() {
   return key;
 }
 
-async function resolveCommunitySteamIds(results: CommunitySearchResult[], key: string) {
-  const resolved = await Promise.all(
+async function resolveCommunitySearchResults(results: CommunitySearchResult[], key: string) {
+  return Promise.all(
     results.map(async (result) => {
-      if (result.steamid) return result.steamid;
+      if (result.steamid) return result;
 
       const vanity = getVanityFromProfileUrl(result.profileurl);
-      if (!vanity) return undefined;
+      if (!vanity) return result;
 
-      return resolveVanityUrl(vanity, key).catch(() => undefined);
+      const steamid = await resolveVanityUrl(vanity, key).catch(() => undefined);
+      return { ...result, steamid };
     }),
   );
-
-  return resolved.filter((steamid): steamid is string => Boolean(steamid));
 }
 
 async function resolveSteamUserIdentifier(

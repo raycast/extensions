@@ -76,18 +76,30 @@ export default async function searchSteamUsersTool(input: Input): Promise<Output
 
   try {
     const search = await searchSteamUsers(query, { maxResults });
-    const results = await Promise.all(
+    const profileResults = await Promise.allSettled(
       search.results.slice(0, maxResults).map(async (result) => {
         const profile = await getSteamUserProfile(result.steamid, { includeExtras: true });
         return toToolResult(profile, result.matchType);
       }),
     );
+    const results = profileResults.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+    const warnings = [
+      ...search.warnings,
+      ...profileResults.flatMap((result, index) => {
+        if (result.status === "fulfilled") return [];
+
+        const user = search.results[index];
+        return [
+          `Could not load profile details for ${user?.personaname ?? user?.steamid ?? "a result"}: ${getToolErrorMessage(result.reason)}`,
+        ];
+      }),
+    ];
 
     return {
       query: search.query,
       totalCommunityMatches: search.totalCount,
       results,
-      warnings: search.warnings,
+      warnings,
     };
   } catch (error) {
     return {
@@ -96,6 +108,10 @@ export default async function searchSteamUsersTool(input: Input): Promise<Output
       warnings: [error instanceof Error ? error.message : String(error)],
     };
   }
+}
+
+function getToolErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function toToolResult(profile: SteamUserProfile, matchType: SteamUserSearchResult["matchType"]): ToolUserResult {
