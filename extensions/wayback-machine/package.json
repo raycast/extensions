@@ -8,7 +8,8 @@
   "contributors": [
     "andreaselia",
     "j3lte",
-    "chrismessina"
+    "chrismessina",
+    "tofrankie"
   ],
   "categories": [
     "Web",
@@ -54,6 +55,12 @@
       "name": "saveMultiple",
       "title": "Save Multiple to Wayback Machine",
       "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
+    },
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Search archived webpages snapshots",
       "mode": "view"
     }
   ],

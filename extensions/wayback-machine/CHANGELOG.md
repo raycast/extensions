@@ -1,5 +1,9 @@
 # Wayback Machine Changelog
 
+## [Add] - {PR_MERGE_DATE}
+
+- Add `Search Pages` command
+
 ## [Update dependencies & add Default View preference] - 2026-01-01
 
 - Added preference to set default view to open on Wayback Machine
