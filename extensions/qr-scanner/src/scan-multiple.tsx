@@ -159,7 +159,6 @@ export default function Command() {
                       <Action
                         icon={Icon.Clipboard}
                         title="Copy All QR Contents"
-                        shortcut={Keyboard.Shortcut.Common.Copy}
                         onAction={() =>
                           copyAllQrContents(state.results.map((r) => r.raw))
                         }

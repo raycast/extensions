@@ -68,7 +68,12 @@ export function detectContentType(raw: string): ContentInfo {
   }
 
   if (SMS_PATTERN.test(trimmed)) {
-    return { type: "sms", label: "SMS", icon: Icon.Message, url: trimmed };
+    return {
+      type: "sms",
+      label: "SMS",
+      icon: Icon.Message,
+      url: normalizeSmsUrl(trimmed),
+    };
   }
 
   if (WIFI_PATTERN.test(trimmed)) {
@@ -103,7 +108,24 @@ export function detectContentType(raw: string): ContentInfo {
  * Format: WIFI:T:WPA;S:MyNetwork;P:MyPassword;;
  */
 function extractWifiField(raw: string, field: string): string | undefined {
-  const pattern = new RegExp(`${field}:([^;]*)`, "i");
+  const pattern = new RegExp(`(?:^|;)${field}:((?:\\\\.|[^;])*)`, "i");
   const match = raw.match(pattern);
-  return match?.[1] || undefined;
+  return match?.[1] ? unescapeWifiValue(match[1]) : undefined;
+}
+
+function normalizeSmsUrl(raw: string) {
+  const smstoMatch = raw.match(/^smsto:([^:]*):?(.*)$/i);
+
+  if (!smstoMatch) {
+    return raw.replace(/^SMS:/i, "sms:");
+  }
+
+  const [, recipient, message] = smstoMatch;
+  const encodedMessage = message ? `?body=${encodeURIComponent(message)}` : "";
+
+  return `sms:${recipient}${encodedMessage}`;
+}
+
+function unescapeWifiValue(value: string) {
+  return value.replace(/\\([\\;,":])/g, "$1");
 }

@@ -25,12 +25,6 @@
       "title": "Scan Multiple QR Codes",
       "description": "Deep scan your display for multiple QR codes and choose what to copy.",
       "mode": "view"
-    },
-    {
-      "name": "scan-file",
-      "title": "Scan QR Code from File",
-      "description": "Select or drag-and-drop an image file to scan it for QR codes.",
-      "mode": "view"
     }
   ],
   "dependencies": {
