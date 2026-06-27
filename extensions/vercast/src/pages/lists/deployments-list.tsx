@@ -27,7 +27,8 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate,
   } = useFetch(url, {
     headers: FetchHeaders,
-    execute: Boolean(user && teams),
+    // Allow executing when a selectedTeam is stored even if `teams` failed to load.
+    execute: Boolean(user && (teams || selectedTeam)),
     parseResponse: parseVercelResponse<{ deployments: Deployment[] }>,
     failureToastOptions: {
       title: "Failed to fetch deployments",
