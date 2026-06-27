@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vnc-quick-connect",
+  "title": "VNC Quick Connect",
+  "description": "Open VNC connections in RealVNC Viewer from Raycast.",
+  "icon": "icon.png",
+  "author": "night",
+  "license": "MIT",
+  "categories": [
+    "Applications"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open VNC Connection",
+      "subtitle": "VNC Viewer",
+      "description": "Open RealVNC Viewer with an IP address and port.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "address",
+          "type": "text",
+          "placeholder": "192.168.1.10 5900",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "viewerPath",
+          "title": "RealVNC Viewer Path",
+          "description": "Path to the local RealVNC Viewer executable.",
+          "type": "textfield",
+          "required": true,
+          "default": "/Applications/VNC Viewer.app/Contents/MacOS/vncviewer"
+        },
+        {
+          "name": "preferUnencrypted",
+          "title": "Prefer Unencrypted Connections",
+          "label": "Prefer unencrypted connections when the server allows it",
+          "description": "Ask RealVNC Viewer to prefer unencrypted connections when the server allows it.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "suppressUnencryptedWarning",
+          "title": "Suppress Unencrypted Connection Warning",
+          "label": "Hide RealVNC Viewer's unencrypted-connection warning",
+          "description": "Hide RealVNC Viewer's warning for unencrypted connections. Use only on trusted networks.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
