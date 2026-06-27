@@ -1,6 +1,6 @@
 # goodreads Changelog
 
-## [Copy Cover URL in Book Details] - {PR_MERGE_DATE}
+## [Copy Cover URL in Book Details] - 2026-06-27
 
 - Add `Copy` to book details (ref: [Issue #28910](https://github.com/raycast/extensions/issues/28910))
 - chore: update deps
