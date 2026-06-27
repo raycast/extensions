@@ -1,12 +1,22 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { promisify } from "util";
 import { clearDownloadError, resolveGleanCli } from "./cli";
 import { checkGleanAuth, readGleanConfigServerUrl, signInToGlean } from "./auth";
 import type { AuthInfo, GleanResult, GleanSearchResponse } from "./types";
 
-const execFileAsync = promisify(execFile);
+function execFileAsync(
+  file: string,
+  args: readonly string[],
+  options?: Record<string, unknown>,
+): Promise<{ stdout: string; stderr: string }> {
+  const { promise, resolve, reject } = Promise.withResolvers<{ stdout: string; stderr: string }>();
+  execFile(file, args, options as import("child_process").ExecFileOptions | null | undefined, (err, stdout, stderr) => {
+    if (err) reject(err);
+    else resolve({ stdout: stdout as string, stderr: stderr as string });
+  });
+  return promise;
+}
 
 export interface GleanState {
   cliPath: string | null;

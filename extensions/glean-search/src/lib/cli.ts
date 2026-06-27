@@ -14,9 +14,19 @@ import {
 import { chmod, rename, rm, mkdir } from "fs/promises";
 import https from "https";
 import { join } from "path";
-import { promisify } from "util";
 
-const execFileAsync = promisify(execFile);
+function execFileAsync(
+  file: string,
+  args: readonly string[],
+  options?: Record<string, unknown>,
+): Promise<{ stdout: string; stderr: string }> {
+  const { promise, resolve, reject } = Promise.withResolvers<{ stdout: string; stderr: string }>();
+  execFile(file, args, options as import("child_process").ExecFileOptions | null | undefined, (err, stdout, stderr) => {
+    if (err) reject(err);
+    else resolve({ stdout: stdout as string, stderr: stderr as string });
+  });
+  return promise;
+}
 
 const BIN_NAME = process.platform === "win32" ? "glean.exe" : "glean";
 
@@ -81,7 +91,7 @@ function writeCliCache(info: CliInfo): void {
   }
 }
 
-function checkExecutable(p: string): boolean {
+export function checkExecutable(p: string): boolean {
   try {
     accessSync(p, constants.X_OK);
     return true;

@@ -1,0 +1,14 @@
+[tools]
+python = "3.12"
+
+[tasks.setup]
+description = "Install project dependencies (Python + zensical)"
+run = "pip install -r requirements.txt"
+
+[tasks.docs-build]
+description = "Build the documentation site"
+run = "zensical build --clean"
+
+[tasks.docs-serve]
+description = "Serve the documentation site locally"
+run = "zensical serve"

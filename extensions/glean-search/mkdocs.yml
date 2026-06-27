@@ -1,0 +1,140 @@
+# glean-search documentation
+# https://faizhasim.github.io/glean-search
+
+site_name: Glean Search
+site_description: Search your company's knowledge base via Glean from Raycast
+site_url: https://faizhasim.github.io/glean-search
+repo_url: https://github.com/faizhasim/glean-search
+repo_name: faizhasim/glean-search
+copyright: Copyright &copy; 2026 faizhasim
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    # Light mode — Nord polar day
+    - media: "(prefers-color-scheme: light)"
+      scheme: nord
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    # Dark mode — Nord polar night
+    - media: "(prefers-color-scheme: dark)"
+      scheme: nord-dark
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+    - announce.dismiss
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/images/icon-logo.png
+  favicon: assets/images/icon-favicon.png
+
+extra_css:
+  - stylesheets/nord.css
+
+markdown_extensions:
+  # Admonitions / callouts
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+  # Tabs
+  - pymdownx.tabbed:
+      alternate_style: true
+
+  # Code highlighting
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+  # Text formatting
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+
+  # Table of contents
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section
+
+  # Attributes (for images, badges, etc.)
+  - attr_list
+  - md_in_html
+
+  # Definition lists
+  - def_list
+
+plugins:
+  - search:
+      separator: '[\s\-_]+'
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/faizhasim
+
+  generator: false
+
+  consent:
+    title: Cookie consent
+    description: >-
+      This site uses cookies for analytics. Your privacy matters —
+      you can accept or decline.
+
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+
+  - Getting Started:
+    - getting-started/index.md
+    - Installation: getting-started/install.md
+    - Quick Start: getting-started/quick-start.md
+
+  - How-to Guides:
+    - how-to/index.md
+    - Development: how-to/development.md
+    - Testing: how-to/testing.md
+
+  - Reference:
+    - reference/index.md
+    - Configuration: reference/configuration.md
+    - Architecture: reference/architecture.md
+    - Search Query: reference/search-query.md
+
+  - Explanation:
+    - explanation/index.md
+    - ADRs:
+      - explanation/adrs/index.md
+      - ADR-0001: explanation/adrs/0001-use-architectural-decision-records.md
+      - ADR-0002: explanation/adrs/0002-cli-auto-download.md
+      - ADR-0003: explanation/adrs/0003-oauth-auth-flow.md

@@ -1,0 +1,28 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+  ],
+  labels: ["dependencies"],
+  rangeStrategy: "bump",
+  schedule: ["before 9am on monday"],
+
+  // Group all non-major updates into one PR and automerge on passing CI.
+  packageRules: [
+    {
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "non-major",
+      automerge: true,
+    },
+    {
+      // Lock file maintenance refreshes bun.lock without touching package.json.
+      // Lowest risk category — automerge unconditionally.
+      matchUpdateTypes: ["lockFileMaintenance"],
+      automerge: true,
+    },
+  ],
+
+  lockFileMaintenance: {
+    enabled: true,
+  },
+}

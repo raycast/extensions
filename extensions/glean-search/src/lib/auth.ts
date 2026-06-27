@@ -3,8 +3,20 @@ import { execFile, spawn } from "child_process";
 import { readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { promisify } from "util";
 import type { AuthInfo } from "./types";
+
+function execFileAsync(
+  file: string,
+  args: readonly string[],
+  options?: Record<string, unknown>,
+): Promise<{ stdout: string; stderr: string }> {
+  const { promise, resolve, reject } = Promise.withResolvers<{ stdout: string; stderr: string }>();
+  execFile(file, args, options as import("child_process").ExecFileOptions | null | undefined, (err, stdout, stderr) => {
+    if (err) reject(err);
+    else resolve({ stdout: stdout as string, stderr: stderr as string });
+  });
+  return promise;
+}
 
 /**
  * Read server_url from ~/.glean/config.json if it exists.
@@ -20,8 +32,6 @@ export function readGleanConfigServerUrl(): string | null {
     return null;
   }
 }
-
-const execFileAsync = promisify(execFile);
 
 /**
  * Check whether the glean CLI is authenticated.
