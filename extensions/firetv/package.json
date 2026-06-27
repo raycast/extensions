@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firetv",
+  "title": "Fire TV Cast",
+  "description": "Cast YouTube and Stremio to Fire TV via Home Assistant",
+  "icon": "icon.png",
+  "author": "gtarraga",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cast-youtube",
+      "title": "Cast YouTube",
+      "subtitle": "Fire TV Cast",
+      "description": "Turn on Fire TV and projector, play YouTube in SmartTube",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "YouTube Link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "cast-stremio",
+      "title": "Cast Stremio",
+      "subtitle": "Fire TV Cast",
+      "description": "Turn on Fire TV and projector, open movie or show in Stremio",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Movie/Series Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "haUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Home Assistant URL",
+      "description": "Base URL of your Home Assistant instance",
+      "placeholder": "https://homeassistant.local"
+    },
+    {
+      "name": "haToken",
+      "type": "password",
+      "required": true,
+      "title": "Home Assistant Token",
+      "description": "Long-lived access token from HA → Security"
+    },
+    {
+      "name": "entityId",
+      "type": "textfield",
+      "required": true,
+      "title": "Fire TV Entity",
+      "description": "media_player entity for Fire TV",
+      "placeholder": "media_player.fire_tv"
+    },
+    {
+      "name": "hasProjector",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Projector Connected",
+      "description": "Wake projector via Wake-on-LAN before casting",
+      "label": "Projector Connected"
+    },
+    {
+      "name": "projectorEntityId",
+      "type": "textfield",
+      "required": false,
+      "title": "Projector Entity",
+      "description": "media_player entity for projector",
+      "placeholder": "media_player.projector"
+    },
+    {
+      "name": "projectorMac",
+      "type": "textfield",
+      "required": false,
+      "title": "Projector MAC Address",
+      "description": "MAC address for Wake-on-LAN magic packet",
+      "placeholder": "00:00:00:00:00:00"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^1.17.0",
+    "jiti": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
