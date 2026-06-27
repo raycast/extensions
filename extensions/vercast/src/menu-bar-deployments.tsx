@@ -5,22 +5,29 @@ import {
   MenuBarExtra,
   open,
   openCommandPreferences,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import useVercel from "./hooks/use-vercel-info";
 import { StateIcon } from "./pages/lists/deployments-list";
 import { Deployment, Team } from "./types";
 import fromNow from "./utils/time";
-import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "./vercel";
+import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL, parseVercelResponse } from "./vercel";
 
 export default function MenuBarDeployments() {
   const { user, teams, selectedTeam } = useVercel();
-  const { maxDeployments } = getPreferenceValues<{ maxDeployments?: string }>();
+  const { maxDeployments } = getPreferenceValues<Preferences.MenuBarDeployments>();
   const limit = maxDeployments ? parseInt(maxDeployments) : 10;
-  const url = getFetchDeploymentsURL(selectedTeam, undefined, limit);
+  const team = teams?.find((t: Team) => t.id === selectedTeam);
+  const url = getFetchDeploymentsURL(selectedTeam, undefined, limit, team?.slug);
 
   const { isLoading, data } = useFetch(url, {
     headers: FetchHeaders,
+    execute: Boolean(user && teams),
+    parseResponse: parseVercelResponse<{ deployments: Deployment[] }>,
+    failureToastOptions: {
+      title: "Failed to fetch deployments",
+    },
     mapResult(result: { deployments: Deployment[] }) {
       return {
         data: result.deployments,
@@ -31,7 +38,6 @@ export default function MenuBarDeployments() {
   });
 
   const deployments = data || [];
-  const team = teams?.find((t: Team) => t.id === selectedTeam);
 
   return (
     <MenuBarExtra
@@ -78,7 +84,7 @@ export default function MenuBarDeployments() {
         />
         <MenuBarExtra.Item
           title="Open in Raycast"
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={async () => {
             try {
               await launchCommand({ name: "search-deployments", type: LaunchType.UserInitiated });

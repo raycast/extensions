@@ -1,9 +1,11 @@
-import { fetchDeployments } from "../vercel";
+import { fetchDeployments, fetchTeams } from "../vercel";
 
 type Input = {
   teamId?: string;
 };
 
 export default async function getDeployments({ teamId }: Input) {
-  return fetchDeployments(teamId ?? undefined, 100, 100);
+  const slug = teamId ? (await fetchTeams()).find((team) => team.id === teamId)?.slug : undefined;
+
+  return fetchDeployments(teamId ?? undefined, 100, 100, slug);
 }

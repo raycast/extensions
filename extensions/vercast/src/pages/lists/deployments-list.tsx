@@ -4,9 +4,11 @@ import fromNow from "../../utils/time";
 import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
-import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
+import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL, parseVercelResponse } from "../../vercel";
 import {
   getDeploymentId,
+  getCommitDeploymentBranch,
+  getCommitMessage,
   isDeploymentCancellable,
   runCancelDeployment,
   CANCEL_DEPLOYMENT_ACTION,
@@ -16,7 +18,8 @@ import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   const { user, teams, selectedTeam } = useVercel();
-  const url = getFetchDeploymentsURL(selectedTeam, projectId);
+  const team = teams?.find((team: Team) => team.id === selectedTeam);
+  const url = getFetchDeploymentsURL(selectedTeam, projectId, 100, team?.slug);
 
   const {
     isLoading,
@@ -24,6 +27,11 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate,
   } = useFetch(url, {
     headers: FetchHeaders,
+    execute: Boolean(user && teams),
+    parseResponse: parseVercelResponse<{ deployments: Deployment[] }>,
+    failureToastOptions: {
+      title: "Failed to fetch deployments",
+    },
     mapResult(result: { deployments: Deployment[] }) {
       return {
         data: result.deployments,
@@ -36,7 +44,6 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate();
   };
 
-  const team = teams?.find((team: Team) => team.id === selectedTeam);
   return (
     <List
       throttle
@@ -117,19 +124,6 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
 };
 
 export default DeploymentsList;
-
-const getCommitMessage = (deployment: Deployment) => {
-  // TODO: determine others
-  if (deployment.meta.githubCommitMessage) {
-    return deployment.meta.githubCommitMessage;
-  }
-  return "No commit message";
-};
-
-const getCommitDeploymentBranch = (deployment: Deployment) => {
-  // TODO: support other providers beside GitHub
-  return deployment.meta.githubCommitRef ?? null;
-};
 
 export const StateIcon = (state?: DeploymentState) => {
   switch (state) {

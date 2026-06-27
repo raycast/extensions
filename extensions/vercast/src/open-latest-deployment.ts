@@ -29,16 +29,16 @@ export default async function Command() {
 
   // Validate that the selected team still exists
   let validTeamId = selectedTeamId;
+  const team = selectedTeamId ? teams.find((team) => team.id === selectedTeamId) : undefined;
   if (selectedTeamId) {
-    const teamExists = teams.some((team) => team.id === selectedTeamId);
-    if (!teamExists) {
+    if (!team) {
       await LocalStorage.removeItem("selectedTeamId");
       validTeamId = undefined;
     }
   }
 
   // Fetch the latest deployment
-  const deployment = await fetchLatestDeployment(validTeamId);
+  const deployment = await fetchLatestDeployment(validTeamId, team?.slug);
 
   if (!deployment) {
     toast.style = Toast.Style.Failure;
@@ -47,21 +47,25 @@ export default async function Command() {
     return;
   }
 
-  // Determine which URL to open based on preferences
-  const preferences = getPreferenceValues<Preferences.OpenLatestDeployment>();
-  const openTarget = preferences.openTarget ?? "vercel";
+  const { openTarget } = getPreferenceValues<Preferences.OpenLatestDeployment>();
 
   let url: string;
-  if (openTarget === "deployUrl") {
-    url = `https://${deployment.url}`;
-  } else {
-    // Open Vercel Dashboard deployment page
-    const team = validTeamId ? teams.find((t) => t.id === validTeamId) : undefined;
-    const slugOrUsername = team?.slug || user.username;
+  switch (openTarget) {
+    case "deployUrl":
+      url = `https://${deployment.url}`;
+      break;
+    case "vercel": {
+      const slugOrUsername = team?.slug || user.username;
 
-    // @ts-expect-error Property id does not exist on type Deployment (but it does in practice)
-    const deploymentId = deployment.id || deployment.uid;
-    url = getDeploymentURL(slugOrUsername, deployment.name, deploymentId);
+      // @ts-expect-error Property id does not exist on type Deployment (but it does in practice)
+      const deploymentId = deployment.id || deployment.uid;
+      url = getDeploymentURL(slugOrUsername, deployment.name, deploymentId);
+      break;
+    }
+    default: {
+      const unhandledTarget: never = openTarget;
+      throw new Error(`Unhandled open target: ${String(unhandledTarget)}`);
+    }
   }
 
   toast.style = Toast.Style.Success;
