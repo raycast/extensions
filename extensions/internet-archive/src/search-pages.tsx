@@ -1,10 +1,6 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-type Preferences = {
-  defaultUrl?: string;
-};
 
 type Snapshot = {
   original: string;
@@ -17,36 +13,56 @@ type Snapshot = {
 
 const PAGE_SIZE = 20;
 
-export default function SearchWebArchive() {
-  const { defaultUrl } = getPreferenceValues<Preferences>();
-  const [searchText, setSearchText] = useState(defaultUrl ?? "");
+export default function SearchPages() {
+  const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const allSnapshotsRef = useRef<Snapshot[]>([]);
-  const nextIndexRef = useRef(0);
+  const pageRef = useRef(0);
+  const trimmedSearchText = searchText.trim();
 
   const loadNextPage = useCallback(() => {
-    const allSnapshots = allSnapshotsRef.current;
-    const nextIndex = nextIndexRef.current;
-    const nextSnapshots = allSnapshots.slice(nextIndex, nextIndex + PAGE_SIZE);
-
-    if (nextSnapshots.length === 0) {
-      setHasMore(false);
+    if (!trimmedSearchText) {
       return;
     }
 
-    nextIndexRef.current = nextIndex + nextSnapshots.length;
-    setSnapshots((current) => [...current, ...nextSnapshots]);
-    setHasMore(nextIndexRef.current < allSnapshots.length);
-  }, []);
+    const nextPage = pageRef.current + 1;
+
+    void (async () => {
+      setIsLoading(true);
+      try {
+        const nextSnapshots = await fetchPages(trimmedSearchText, nextPage, PAGE_SIZE);
+
+        if (nextSnapshots.length === 0) {
+          setHasMore(false);
+          pageRef.current = nextPage;
+          await showToast({
+            style: Toast.Style.Success,
+            title: "No more results",
+          });
+          return;
+        }
+
+        setSnapshots((current) => [...current, ...nextSnapshots]);
+        pageRef.current = nextPage;
+        setHasMore(nextSnapshots.length === PAGE_SIZE);
+      } catch (error) {
+        await showFailureToast(error, {
+          title: "Request Failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [trimmedSearchText]);
 
   useEffect(() => {
-    if (!searchText) {
+    pageRef.current = 0;
+
+    if (!trimmedSearchText) {
       setSnapshots([]);
       setHasMore(false);
-      allSnapshotsRef.current = [];
-      nextIndexRef.current = 0;
       return;
     }
 
@@ -55,20 +71,15 @@ export default function SearchWebArchive() {
     async function run() {
       setIsLoading(true);
       try {
-        const result = await fetchPages(searchText);
+        const result = await fetchPages(trimmedSearchText, 0, PAGE_SIZE);
         if (!cancelled) {
-          const initialSnapshots = result.slice(0, PAGE_SIZE);
-          allSnapshotsRef.current = result;
-          setSnapshots(initialSnapshots);
-          nextIndexRef.current = initialSnapshots.length;
-          setHasMore(result.length > initialSnapshots.length);
+          setSnapshots(result);
+          setHasMore(result.length === PAGE_SIZE);
         }
       } catch (error) {
         if (!cancelled) {
           setSnapshots([]);
           setHasMore(false);
-          allSnapshotsRef.current = [];
-          nextIndexRef.current = 0;
           await showFailureToast(error, {
             title: "Request Failed",
             message: error instanceof Error ? error.message : String(error),
@@ -86,7 +97,7 @@ export default function SearchWebArchive() {
     return () => {
       cancelled = true;
     };
-  }, [searchText]);
+  }, [trimmedSearchText]);
 
   return (
     <List
@@ -117,7 +128,7 @@ export default function SearchWebArchive() {
 
         return (
           <List.Item
-            key={`${snapshot.original}-${snapshot.timestamp}`}
+            key={snapshot.original}
             icon={Icon.Globe}
             id={snapshot.original}
             title={displayUrl}
@@ -189,23 +200,24 @@ function escapeUrl(url: string) {
   return url.replace(/[&<>"']/g, (s) => URL_ESCAPE_MAP[s as keyof typeof URL_ESCAPE_MAP]);
 }
 
-function buildTimemapUrl(rawUrl: string) {
+// https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
+function buildTimemapUrl(rawUrl: string, page: number, limit: number) {
   const params = new URLSearchParams({
     url: rawUrl,
     matchType: "prefix",
     collapse: "urlkey",
     output: "json",
     fl: "original,mimetype,timestamp,endtimestamp,groupcount,uniqcount",
-    filter: "!statuscode:[45]..",
-    limit: "10000",
-    _: String(Date.now()),
+    filter: "mimetype:text/html",
+    page: String(page),
+    limit: String(limit),
   });
 
-  return `https://web.archive.org/web/timemap/json?${params.toString()}`;
+  return `https://web.archive.org/cdx/search/cdx?${params.toString()}`;
 }
 
-async function fetchPages(targetUrl: string): Promise<Snapshot[]> {
-  const timemapUrl = buildTimemapUrl(targetUrl);
+async function fetchPages(targetUrl: string, page: number, limit: number): Promise<Snapshot[]> {
+  const timemapUrl = buildTimemapUrl(targetUrl, page, limit);
 
   let response: Response;
   try {
