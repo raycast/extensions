@@ -108,7 +108,7 @@ export function detectContentType(raw: string): ContentInfo {
  * Format: WIFI:T:WPA;S:MyNetwork;P:MyPassword;;
  */
 function extractWifiField(raw: string, field: string): string | undefined {
-  const pattern = new RegExp(`(?:^|;)${field}:((?:\\\\.|[^;])*)`, "i");
+  const pattern = new RegExp(`(?:^|[;:])${field}:((?:\\\\.|[^;])*)`, "i");
   const match = raw.match(pattern);
   return match?.[1] ? unescapeWifiValue(match[1]) : undefined;
 }
