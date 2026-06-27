@@ -33,6 +33,9 @@ declare module "culori" {
 
   /** Reduce chroma until the color fits the target gamut, returned in `mode`. */
   export function clampChroma(color: CuloriColor, mode?: string, rgbGamut?: string): CuloriColor;
+
+  /** Alpha-composite a stack of colors (bottom-first) using the given blend mode. */
+  export function blend(colors: Array<string | CuloriColor>, mode?: string): CuloriColor;
 }
 
 declare module "apca-w3" {

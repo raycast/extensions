@@ -21,14 +21,18 @@ export function contrastRatio(fg: string | CuloriColor, bg: string | CuloriColor
   return round2(rawRatio(fg, bg));
 }
 
-/** Full WCAG evaluation: 2dp ratio plus AA/AAA pass flags (compared against the shown ratio). */
+/**
+ * Full WCAG evaluation. Pass flags compare the RAW (unrounded) ratio against the
+ * thresholds — a raw 4.4976 must fail AA even though it rounds to 4.50 for display.
+ * Only the `ratio` field is rounded (2dp), for display.
+ */
 export function evaluateWcag(fg: string, bg: string): WcagResult {
-  const ratio = contrastRatio(fg, bg);
+  const raw = rawRatio(fg, bg);
   return {
-    ratio,
-    aaNormal: ratio >= WCAG_AA_NORMAL,
-    aaLarge: ratio >= WCAG_AA_LARGE,
-    aaaNormal: ratio >= WCAG_AAA_NORMAL,
-    aaaLarge: ratio >= WCAG_AAA_LARGE,
+    ratio: round2(raw),
+    aaNormal: raw >= WCAG_AA_NORMAL,
+    aaLarge: raw >= WCAG_AA_LARGE,
+    aaaNormal: raw >= WCAG_AAA_NORMAL,
+    aaaLarge: raw >= WCAG_AAA_LARGE,
   };
 }

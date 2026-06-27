@@ -24,9 +24,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^1.17.0",
     "apca-w3": "0.1.9",
-    "colorparsley": "0.1.8",
     "culori": "4.0.2"
   },
   "devDependencies": {

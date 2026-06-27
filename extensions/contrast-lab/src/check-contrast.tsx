@@ -7,22 +7,20 @@ import {
   type ApcaWeight,
   type ContrastResult,
 } from "./lib/contrast";
-import { parseColor, toHex } from "./lib/color";
+import { parseColor } from "./lib/color";
 
 const WEIGHTS: ApcaWeight[] = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
-/** Parse the font-size field; fall back to the default when blank or NaN. */
+/** Parse the font-size field; fall back to the default unless it is finite and > 0. */
 function parseFontSize(raw: string): number {
-  const trimmed = raw.trim();
-  if (trimmed === "") return DEFAULT_FONT_SIZE_PX;
-  const n = Number(trimmed);
-  return Number.isNaN(n) ? DEFAULT_FONT_SIZE_PX : n;
+  const n = Number(raw.trim());
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_FONT_SIZE_PX;
 }
 
-/** Convert any parseable color string to a hex string for the SVG/icons. */
-function toHexOr(input: string, fallback: string): string {
+/** Whether a color string parses and carries partial transparency (alpha < 1). */
+function hadAlpha(input: string): boolean {
   const parsed = parseColor(input);
-  return parsed ? toHex(parsed) : fallback;
+  return parsed !== undefined && (parsed.alpha ?? 1) < 1;
 }
 
 const mark = (ok: boolean): string => (ok ? "✓" : "✗");
@@ -130,8 +128,10 @@ function ResultView({ result }: { result: ContrastResult }) {
   // exists at the AA target).
   const hasRealFix = !fixForWcagAA.alreadyPasses;
 
-  const fgHex = toHexOr(input.foreground, "#000000");
-  const bgHex = toHexOr(input.background, "#ffffff");
+  // Use the opaque colors actually scored so the swatch matches the numbers (a
+  // translucent input previews as the composited color, not as opaque black).
+  const fgHex = result.resolved.foreground;
+  const bgHex = result.resolved.background;
 
   return (
     <Detail
@@ -209,6 +209,10 @@ function ResultView({ result }: { result: ContrastResult }) {
 function buildMarkdown(result: ContrastResult, fgHex: string, bgHex: string): string {
   const { input, fixForWcagAA } = result;
   const parts: string[] = ["# Contrast Preview"];
+
+  if (hadAlpha(input.foreground) || hadAlpha(input.background)) {
+    parts.push("_Translucent input composited over its background before scoring._");
+  }
 
   parts.push(`**Original** — \`${fgHex}\` on \`${bgHex}\``);
   parts.push(`![original](${swatch(bgHex, fgHex, "Original", input.fontSizePx, input.fontWeight)})`);

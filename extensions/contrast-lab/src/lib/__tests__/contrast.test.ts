@@ -49,6 +49,14 @@ test("WCAG levels: #000 on #fff passes everything; #ffa500 on #fff fails all", (
   );
 });
 
+test("WCAG levels compare the RAW ratio: #6e7978 on #fff rounds to 4.50 but fails AA", () => {
+  // Raw ratio is 4.4976; it rounds to 4.50 for display but must NOT count as AA-passing.
+  const { wcag } = analyze({ foreground: "#6e7978", background: "#ffffff" });
+  assert.equal(wcag.ratio, 4.5); // display value rounds up
+  assert.equal(wcag.aaNormal, false); // raw 4.4976 < 4.5
+  assert.equal(wcag.aaLarge, true); // raw >= 3
+});
+
 // --- APCA Lc (signed) --------------------------------------------------------
 
 const APCA_FIXTURES: Array<[string, string, number]> = [
@@ -157,4 +165,31 @@ test("invalid color: valid=false, helpful error, zeroed sub-results", () => {
   assert.equal(result.wcag.ratio, 0);
   assert.equal(result.apca.lc, 0);
   assert.equal(result.fixForWcagAA.hex, "");
+});
+
+// --- Translucent compositing -------------------------------------------------
+
+test("translucent fg is composited over the bg before scoring: rgba(0,0,0,0.5) on #fff", () => {
+  const result = analyze({ foreground: "rgba(0,0,0,0.5)", background: "#ffffff" });
+  assert.equal(result.valid, true);
+  assert.equal(result.resolved.foreground, "#808080"); // 50% black over white
+  // ~3.98, NOT ~21 (which is what scoring it as opaque black would give).
+  assert.ok(result.wcag.ratio > 3.9 && result.wcag.ratio < 4.05, `expected ~3.98, got ${result.wcag.ratio}`);
+  assert.equal(result.wcag.aaNormal, false);
+  assert.equal(result.wcag.aaLarge, true);
+});
+
+test("translucent hex (#00000080) is composited, not treated as opaque black", () => {
+  const { wcag } = analyze({ foreground: "#00000080", background: "#ffffff" });
+  // 8-digit `80` alpha is 0.502, so it lands one step off #808080; just prove it composited.
+  assert.ok(wcag.ratio < 5, `expected a composited ratio < 5, got ${wcag.ratio}`);
+});
+
+// --- Invalid font sizes ------------------------------------------------------
+
+test("invalid font sizes (<=0, non-finite) fall back to the default 16", () => {
+  for (const bad of [-5, 0, Infinity]) {
+    const { input } = analyze({ foreground: "#000000", background: "#ffffff", fontSizePx: bad });
+    assert.equal(input.fontSizePx, 16, `fontSizePx ${bad} should fall back to 16`);
+  }
 });

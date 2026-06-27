@@ -3,7 +3,7 @@
 // in one structured object. This module is pure (no Raycast/React imports) so it
 // can be unit-tested with Node's test runner and reused anywhere.
 
-import { isValidColor } from "./color";
+import { isValidColor, compositeOver } from "./color";
 import { evaluateWcag } from "./wcag";
 import { evaluateApca } from "./apca";
 import { nearestPassing } from "./fix";
@@ -43,6 +43,7 @@ export interface ContrastResult {
   valid: boolean; // false if either color failed to parse
   error?: string;
   input: Required<ContrastInput>;
+  resolved: { foreground: string; background: string }; // opaque hex actually scored (alpha composited)
   wcag: WcagResult;
   apca: ApcaResult;
   fixForWcagAA: FixResult; // nearest passing foreground for WCAG AA normal (target 4.5)
@@ -59,6 +60,7 @@ function zeroedResult(input: Required<ContrastInput>, error: string): ContrastRe
     valid: false,
     error,
     input,
+    resolved: { foreground: "", background: "" },
     wcag: { ratio: 0, aaNormal: false, aaLarge: false, aaaNormal: false, aaaLarge: false },
     apca: { lc: 0, absLc: 0, minFontPx: null, passesAtSize: false },
     fixForWcagAA: { hex: "", oklch: "", ratio: 0, alreadyPasses: false },
@@ -67,10 +69,13 @@ function zeroedResult(input: Required<ContrastInput>, error: string): ContrastRe
 
 /** Validate the input colors, then compute WCAG, APCA, and the nearest passing fix. */
 export function analyze(input: ContrastInput): ContrastResult {
+  const fs = input.fontSizePx;
   const resolved: Required<ContrastInput> = {
     foreground: input.foreground,
     background: input.background,
-    fontSizePx: input.fontSizePx ?? DEFAULT_FONT_SIZE_PX,
+    // Accept a font size only if it is a finite number > 0; otherwise use the default.
+    // (Number() / the form can yield 0, -5, or Infinity, which are not valid sizes.)
+    fontSizePx: typeof fs === "number" && Number.isFinite(fs) && fs > 0 ? fs : DEFAULT_FONT_SIZE_PX,
     fontWeight: input.fontWeight ?? DEFAULT_FONT_WEIGHT,
   };
 
@@ -81,11 +86,17 @@ export function analyze(input: ContrastInput): ContrastResult {
     return zeroedResult(resolved, `Could not parse the ${which} color. Use hex (3/4/6/8), rgb(), hsl(), or oklch().`);
   }
 
+  // Flatten any alpha before scoring: bg over white, then fg over the resolved bg.
+  // WCAG/APCA assume opaque colors, so translucent inputs must be composited first.
+  const opaqueBg = compositeOver(resolved.background, "#ffffff");
+  const opaqueFg = compositeOver(resolved.foreground, opaqueBg);
+
   return {
     valid: true,
     input: resolved,
-    wcag: evaluateWcag(resolved.foreground, resolved.background),
-    apca: evaluateApca(resolved.foreground, resolved.background, resolved.fontSizePx, resolved.fontWeight),
-    fixForWcagAA: nearestPassing(resolved.foreground, resolved.background, WCAG_AA_TARGET),
+    resolved: { foreground: opaqueFg, background: opaqueBg },
+    wcag: evaluateWcag(opaqueFg, opaqueBg),
+    apca: evaluateApca(opaqueFg, opaqueBg, resolved.fontSizePx, resolved.fontWeight),
+    fixForWcagAA: nearestPassing(opaqueFg, opaqueBg, WCAG_AA_TARGET),
   };
 }

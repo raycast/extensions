@@ -2,7 +2,7 @@
 // parsing, OKLCH conversion, sRGB gamut mapping, hex/oklch formatting, and luminance.
 // Everything here is framework-free and unit-testable.
 
-import { parse, wcagLuminance, converter, formatHex, clampChroma, type CuloriColor } from "culori";
+import { parse, wcagLuminance, converter, formatHex, clampChroma, blend, type CuloriColor } from "culori";
 
 /** An OKLCH color with the channels we rely on guaranteed present after conversion. */
 export interface OklchColor extends CuloriColor {
@@ -50,6 +50,19 @@ export function gamutMapOklch(l: number, c: number, h: number): OklchColor {
 /** Format a color as a `#rrggbb` hex string. Inputs here are always representable. */
 export function toHex(color: CuloriColor): string {
   return formatHex(color) ?? "#000000";
+}
+
+/**
+ * Composite a possibly-translucent color over an opaque backdrop and return an
+ * opaque hex. WCAG/APCA assume opaque colors, so alpha inputs (e.g. `rgba(...)`,
+ * `#rrggbbaa`) must be flattened before scoring or they score like opaque colors.
+ */
+export function compositeOver(color: string, backdropHex: string): string {
+  const parsed = parse(color);
+  if (!parsed) return backdropHex;
+  const alpha = parsed.alpha ?? 1;
+  if (alpha >= 1) return toHex(parsed); // already opaque
+  return formatHex(blend([backdropHex, color], "normal")) ?? backdropHex;
 }
 
 /** Format OKLCH coordinates as a rounded `oklch()` string (L 3dp, C 4dp, H 2dp). */
