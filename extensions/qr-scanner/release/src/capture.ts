@@ -1,10 +1,9 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, mkdir, access } from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
-import * as fs from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
@@ -42,11 +41,9 @@ async function captureWindowsDisplay(outputPath: string) {
     const tmpManifest = path.join(os.tmpdir(), "screenCapture", "app.manifest");
 
     // Copy the bat and manifest from Raycast assets to the temp folder
-    if (!fs.existsSync(tmpBat) || !fs.existsSync(tmpManifest)) {
-      const tmpDir = path.join(os.tmpdir(), "screenCapture");
-      if (!fs.existsSync(tmpDir)) {
-        await mkdir(tmpDir, { recursive: true });
-      }
+    const exists = async (p: string) => access(p).then(() => true, () => false);
+    if (!(await exists(tmpBat)) || !(await exists(tmpManifest))) {
+      await mkdir(path.join(os.tmpdir(), "screenCapture"), { recursive: true });
 
       const includeBat = path.join(
         environment.assetsPath,

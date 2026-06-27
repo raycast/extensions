@@ -26,6 +26,10 @@ npm run dev
 
 Then run **Scan Display for QR Code** or **Scan Multiple QR Codes** from Raycast.
 
+## Limitations
+
+- **Multi-code detection on Windows** — On Windows, QR decoding uses [jsQR](https://github.com/cozmo/jsQR), which decodes one symbol per image pass. The multi-scan command works around this with region-based tiling, but two QR codes placed very close together may not be isolated into separate tiles and one could be missed. On macOS, Apple's Vision framework handles multiple codes natively without this limitation.
+
 ## Notes
 
 - This command is designed for Raycast on macOS and Windows.

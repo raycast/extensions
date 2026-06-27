@@ -18,7 +18,8 @@ export async function decodeQrFromPng(path: string) {
     if (results.length > 0) {
       return results[0];
     }
-    return undefined;
+    // Vision ran successfully but found nothing — try jsQR as a fallback
+    return decodeQrFromPngWithJsQR(path);
   }
   return decodeQrFromPngWithJsQR(path);
 }
@@ -29,7 +30,12 @@ export async function decodeQrFromPng(path: string) {
  */
 export async function decodeQrsFromPng(path: string) {
   if (process.platform === "darwin") {
-    return decodeWithVision(path);
+    const results = await decodeWithVision(path);
+    if (results.length > 0) {
+      return results;
+    }
+    // Vision ran successfully but found nothing — try jsQR as a fallback
+    return decodeQrsFromPngWithJsQR(path);
   }
   return decodeQrsFromPngWithJsQR(path);
 }
@@ -41,11 +47,15 @@ export async function decodeQrsFromPng(path: string) {
 async function decodeWithVision(path: string): Promise<string[]> {
   try {
     const scriptPath = join(environment.assetsPath, "detect-qr.swift");
-    const { stdout } = await execFileAsync("swift", [scriptPath, path]);
+    const { stdout, stderr } = await execFileAsync("swift", [scriptPath, path]);
+    if (stderr.trim()) {
+      console.error("Vision stderr:", stderr.trim());
+    }
     const lines = stdout.trim().split("\n").filter(Boolean);
     return [...new Set(lines)];
-  } catch {
+  } catch (error) {
     // Fall back to jsQR if Swift execution fails
+    console.error("Vision failed, falling back to jsQR:", error instanceof Error ? error.message : String(error));
     return decodeQrsFromPngWithJsQR(path);
   }
 }
@@ -102,6 +112,8 @@ function decodeImageRegions(image: PNG) {
 
     if (decoded) {
       contents.add(decoded);
+      // Already decoded at native resolution — skip the 2× upscale pass
+      continue;
     }
 
     if (cropped.width <= 900 && cropped.height <= 900) {
