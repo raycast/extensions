@@ -28,18 +28,20 @@ const useVercel = () => {
         const [userResult, teamsResult] = await Promise.allSettled([fetchUser(), fetchTeams()]);
 
         const fetchedUser = userResult.status === "fulfilled" ? userResult.value : undefined;
-        const fetchedTeams = teamsResult.status === "fulfilled" ? teamsResult.value : [];
+        const fetchedTeams = teamsResult.status === "fulfilled" ? teamsResult.value : undefined;
 
         if (fetchedUser) {
           setUser(fetchedUser);
         }
 
-        setTeams(fetchedTeams);
+        if (fetchedTeams) {
+          setTeams(fetchedTeams);
 
-        if (selectedTeamId) {
-          const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
-          if (!selectedTeam) {
-            setSelectedTeamId(undefined);
+          if (selectedTeamId) {
+            const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
+            if (!selectedTeam) {
+              setSelectedTeamId(undefined);
+            }
           }
         }
       }

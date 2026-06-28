@@ -24,13 +24,15 @@ export default async function Command() {
   // Get the selected team from local storage
   const selectedTeamId = await LocalStorage.getItem<string>("selectedTeamId");
 
-  // Fetch user and teams in parallel
-  const [user, teams] = await Promise.all([fetchUser(), fetchTeams()]);
+  // Fetch user and teams in parallel, but keep the stored team usable if team lookup fails.
+  const [userResult, teamsResult] = await Promise.allSettled([fetchUser(), fetchTeams()]);
+  const user = userResult.status === "fulfilled" ? userResult.value : undefined;
+  const teams = teamsResult.status === "fulfilled" ? teamsResult.value : undefined;
 
   // Validate that the selected team still exists
   let validTeamId = selectedTeamId;
-  const team = selectedTeamId ? teams.find((team) => team.id === selectedTeamId) : undefined;
-  if (selectedTeamId) {
+  const team = selectedTeamId ? teams?.find((team) => team.id === selectedTeamId) : undefined;
+  if (selectedTeamId && teams) {
     if (!team) {
       await LocalStorage.removeItem("selectedTeamId");
       validTeamId = undefined;
@@ -55,7 +57,10 @@ export default async function Command() {
       url = `https://${deployment.url}`;
       break;
     case "vercel": {
-      const slugOrUsername = team?.slug || user.username;
+      const slugOrUsername = team?.slug || user?.username;
+      if (!slugOrUsername) {
+        throw new Error("Failed to resolve Vercel dashboard owner");
+      }
 
       // @ts-expect-error Property id does not exist on type Deployment (but it does in practice)
       const deploymentId = deployment.id || deployment.uid;
