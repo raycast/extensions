@@ -1,8 +1,11 @@
-import type { WaybackCdxServerSnapshot } from "./lib";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+
+import type { WaybackCdxServerSnapshot } from "./lib";
 import { fetchPages } from "./lib";
+import { buildUrls } from "./search-pages-url";
 
 const PAGE_SIZE = 20;
 
@@ -163,28 +166,4 @@ function formatTimestamp(timestamp: string) {
   }
 
   return `${timestamp.slice(0, 4)}-${timestamp.slice(4, 6)}-${timestamp.slice(6, 8)}`;
-}
-
-function buildUrls(snapshot: WaybackCdxServerSnapshot) {
-  // snapshotUrl points to a specific archived capture.
-  // calendarUrl opens the Wayback calendar view for pages with multiple captures.
-
-  const { original, timestamp } = snapshot;
-
-  let displayUrl = "";
-  try {
-    displayUrl = decodeURI(original);
-  } catch {
-    displayUrl = original;
-  }
-
-  // timestamp === endtimestamp, means there is only one snapshot
-  const snapshotUrl = `/web/${timestamp}/${original}`;
-  const calendarUrl = `/web/${timestamp}*/${original}`;
-
-  return {
-    displayUrl,
-    snapshotUrl: `https://web.archive.org${snapshotUrl}`,
-    calendarUrl: `https://web.archive.org${calendarUrl}`,
-  };
 }
