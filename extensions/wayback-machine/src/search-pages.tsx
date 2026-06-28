@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import type { WaybackCdxServerSnapshot } from "./lib";
@@ -146,10 +146,7 @@ export default function SearchPages() {
                 <Action.CopyToClipboard
                   title="Copy Original URL"
                   content={displayUrl}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                  }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
               </ActionPanel>
             }
