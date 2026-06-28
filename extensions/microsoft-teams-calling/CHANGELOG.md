@@ -1,6 +1,6 @@
 # Microsoft Teams Changelog
 
-## [Fix Inverted Toggle Notifications] - {PR_MERGE_DATE}
+## [Fix Inverted Toggle Notifications] - 2026-06-28
 
 - Fix the microphone and camera toggle notifications showing the inverted state in New Teams. The extension now waits for the actually updated meeting state instead of the stale state Teams reports first.
 - Remove the incorrect camera notification that was shown when leaving a call.
