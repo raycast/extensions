@@ -13,7 +13,9 @@ function makeTempFile(content: string): { dir: string; filePath: string } {
 
 test("resolveCodexAuthToken prefers local Codex login token over preference token", async () => {
   const { resolveCodexAuthToken } = await import("./auth");
-  const { dir, filePath } = makeTempFile(JSON.stringify({ tokens: { access_token: "local-token" } }));
+  const { dir, filePath } = makeTempFile(
+    JSON.stringify({ tokens: { access_token: "local-token", account_id: "account-id" } }),
+  );
 
   try {
     const token = resolveCodexAuthToken({
@@ -58,7 +60,9 @@ test("normalizeCodexAuthorizationHeader adds Bearer prefix when missing", async 
 
 test("resolveCodexAuthTokens exposes primary/local/preference tokens", async () => {
   const { resolveCodexAuthTokens } = await import("./auth");
-  const { dir, filePath } = makeTempFile(JSON.stringify({ tokens: { access_token: "local-token" } }));
+  const { dir, filePath } = makeTempFile(
+    JSON.stringify({ tokens: { access_token: "local-token", account_id: "account-id" } }),
+  );
 
   try {
     const tokens = resolveCodexAuthTokens({
@@ -68,7 +72,9 @@ test("resolveCodexAuthTokens exposes primary/local/preference tokens", async () 
 
     assert.deepEqual(tokens, {
       primaryToken: "local-token",
+      primaryAccountId: "account-id",
       localToken: "local-token",
+      localAccountId: "account-id",
       preferenceToken: "pref-token",
     });
   } finally {

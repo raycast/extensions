@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
-import { resolveCodexAuthToken, resolveCodexAuthTokens } from "./auth";
-import { httpFetch, normalizeBearerToken } from "../agents/http";
+import { resolveCodexAuthTokens } from "./auth";
+import { httpFetch } from "../agents/http";
+import { parseDate } from "../agents/format";
 import { loadAccounts } from "../accounts/storage";
 import type { AccountUsageState } from "../accounts/types";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
+const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
 
 const CODEX_HEADERS = {
   Accept: "application/json",
@@ -13,17 +15,79 @@ const CODEX_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
-export async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
+export async function fetchCodexUsage(
+  token: string,
+  accountId?: string | null,
+): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
+  const accountHeaders = getCodexAccountHeaders(accountId);
   const { data, error } = await httpFetch({
     url: CODEX_USAGE_API,
-    headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
+    token,
+    headers: { ...CODEX_HEADERS, ...accountHeaders },
     unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
   });
   if (error) return { usage: null, error };
-  return parseCodexApiResponse(data);
+
+  const resetCredits = await fetchCodexResetCredits(token, accountId);
+  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, nextExpiresAt: null });
 }
 
-function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error: CodexError | null } {
+async function fetchCodexResetCredits(
+  token: string,
+  accountId?: string | null,
+): Promise<{ availableCount: number; nextExpiresAt: string | null } | null> {
+  const { data, error } = await httpFetch({
+    url: CODEX_RESET_CREDITS_API,
+    token,
+    headers: {
+      ...CODEX_HEADERS,
+      ...getCodexAccountHeaders(accountId),
+      "OpenAI-Beta": "codex-1",
+      originator: "Codex Desktop",
+    },
+    timeoutMs: 4000,
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+  });
+
+  if (error || !data || typeof data !== "object") {
+    return null;
+  }
+
+  const response = data as {
+    available_count?: number;
+    credits?: Array<{
+      status?: string;
+      expires_at?: string | null;
+    }>;
+  };
+
+  const availableCount = typeof response.available_count === "number" ? response.available_count : null;
+  if (availableCount === null || availableCount < 0) {
+    return null;
+  }
+
+  const now = Date.now();
+  const nextExpiresAt = (response.credits ?? [])
+    .filter((credit) => credit.status === "available" && typeof credit.expires_at === "string")
+    .map((credit) => credit.expires_at as string)
+    .filter((expiresAt) => {
+      const timestamp = Date.parse(expiresAt);
+      return Number.isFinite(timestamp) && timestamp > now;
+    })
+    .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+
+  return { availableCount, nextExpiresAt: nextExpiresAt ?? null };
+}
+
+function getCodexAccountHeaders(accountId?: string | null): Record<string, string> {
+  const trimmedAccountId = accountId?.trim();
+  return trimmedAccountId ? { "ChatGPT-Account-ID": trimmedAccountId } : {};
+}
+
+function parseCodexApiResponse(
+  data: unknown,
+  resetCredits: CodexUsage["resetCredits"] | null = null,
+): { usage: CodexUsage | null; error: CodexError | null } {
   try {
     if (!data || typeof data !== "object") {
       return {
@@ -41,19 +105,22 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
         primary_window?: {
           used_percent: number;
           limit_window_seconds: number;
-          reset_after_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
         };
         secondary_window?: {
           used_percent: number;
           limit_window_seconds: number;
-          reset_after_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
         };
       };
       code_review_rate_limit?: {
         primary_window?: {
           used_percent: number;
           limit_window_seconds: number;
-          reset_after_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
         };
       };
       credits?: {
@@ -80,12 +147,12 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
       account: response.plan_type || "Unknown",
       fiveHourLimit: {
         percentageRemaining: 100 - primaryWindow.used_percent,
-        resetsInSeconds: primaryWindow.reset_after_seconds,
+        resetsInSeconds: getResetsInSeconds(primaryWindow),
         limitWindowSeconds: primaryWindow.limit_window_seconds,
       },
       weeklyLimit: {
         percentageRemaining: 100 - secondaryWindow.used_percent,
-        resetsInSeconds: secondaryWindow.reset_after_seconds,
+        resetsInSeconds: getResetsInSeconds(secondaryWindow),
         limitWindowSeconds: secondaryWindow.limit_window_seconds,
       },
       credits: {
@@ -93,13 +160,14 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
         unlimited: response.credits?.unlimited || false,
         balance: response.credits?.balance || "0",
       },
+      resetCredits: resetCredits ?? undefined,
     };
 
     if (response.code_review_rate_limit?.primary_window) {
       const reviewWindow = response.code_review_rate_limit.primary_window;
       usage.codeReviewLimit = {
         percentageRemaining: 100 - reviewWindow.used_percent,
-        resetsInSeconds: reviewWindow.reset_after_seconds,
+        resetsInSeconds: getResetsInSeconds(reviewWindow),
         limitWindowSeconds: reviewWindow.limit_window_seconds,
       };
     }
@@ -114,6 +182,19 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
       },
     };
   }
+}
+
+function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: number }): number {
+  if (typeof window.reset_after_seconds === "number") {
+    return Math.max(0, Math.floor(window.reset_after_seconds));
+  }
+
+  if (typeof window.reset_at !== "number") {
+    return 0;
+  }
+
+  const resetAt = parseDate(String(window.reset_at));
+  return resetAt ? Math.max(0, Math.floor((resetAt.getTime() - Date.now()) / 1000)) : 0;
 }
 
 export { formatDuration } from "../agents/format";
@@ -131,7 +212,7 @@ export function useCodexUsage(enabled = true) {
     setIsLoading(true);
     setError(null);
 
-    const token = resolveCodexAuthToken();
+    const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
 
     if (!token) {
       setUsage(null);
@@ -144,7 +225,7 @@ export function useCodexUsage(enabled = true) {
       return;
     }
 
-    const result = await fetchCodexUsage(token);
+    const result = await fetchCodexUsage(token, primaryAccountId);
     if (requestId !== requestIdRef.current) {
       return;
     }
@@ -203,7 +284,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
     const manualAccounts = await loadAccounts("codex");
 
     // Get auto-detected token from codex auth file
-    const { localToken } = resolveCodexAuthTokens();
+    const { localToken, localAccountId } = resolveCodexAuthTokens();
 
     // Build list of all accounts: manual + auto-detected (if not duplicate)
     const accounts = [...manualAccounts];
@@ -242,7 +323,8 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
     // Kick off all fetches in parallel
     const results = await Promise.all(
       accounts.map(async (account) => {
-        const result = await fetchCodexUsage(account.token);
+        const accountId = account.token === localToken ? localAccountId : null;
+        const result = await fetchCodexUsage(account.token, accountId);
         return { account, result };
       }),
     );

@@ -1,3 +1,7 @@
+import { ProxyAgent, fetch as undiciFetch } from "undici";
+
+const proxyAgents = new Map<string, ProxyAgent>();
+
 export function normalizeBearerToken(token: string): string {
   return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 }
@@ -22,6 +26,61 @@ export interface HttpFetchResult {
   error: HttpFetchError | null;
 }
 
+function getProxyUrl(url: string): string | null {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return null;
+  }
+
+  if (isNoProxyHost(parsedUrl.hostname)) {
+    return null;
+  }
+
+  const proxyUrl =
+    parsedUrl.protocol === "https:"
+      ? process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy
+      : process.env.HTTP_PROXY || process.env.http_proxy;
+  const trimmedProxyUrl = proxyUrl?.trim();
+  if (!trimmedProxyUrl || !/^https?:\/\//i.test(trimmedProxyUrl)) {
+    return null;
+  }
+
+  return trimmedProxyUrl;
+}
+
+function isNoProxyHost(hostname: string): boolean {
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy;
+  if (!noProxy) {
+    return false;
+  }
+
+  const normalizedHostname = hostname.toLowerCase();
+  return noProxy
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+    .some((entry) => {
+      if (entry === "*") {
+        return true;
+      }
+      const normalizedEntry = entry.startsWith(".") ? entry.slice(1) : entry;
+      return normalizedHostname === normalizedEntry || normalizedHostname.endsWith(`.${normalizedEntry}`);
+    });
+}
+
+function getProxyAgent(proxyUrl: string): ProxyAgent {
+  const cachedAgent = proxyAgents.get(proxyUrl);
+  if (cachedAgent) {
+    return cachedAgent;
+  }
+
+  const agent = new ProxyAgent(proxyUrl);
+  proxyAgents.set(proxyUrl, agent);
+  return agent;
+}
+
 export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchResult> {
   const {
     url,
@@ -42,7 +101,16 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
   }
 
   try {
-    const response = await fetch(url, { method, headers: allHeaders, body, signal: controller.signal });
+    const proxyUrl = getProxyUrl(url);
+    const response = proxyUrl
+      ? await undiciFetch(url, {
+          method,
+          headers: allHeaders,
+          body,
+          signal: controller.signal,
+          dispatcher: getProxyAgent(proxyUrl),
+        })
+      : await fetch(url, { method, headers: allHeaders, body, signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (response.status === 401) {

@@ -1,5 +1,10 @@
 # Agent Usage Changelog
 
+## [Improve Codex Usage Details] - 2026-06-28
+
+- Show Codex manual limit reset credits and their next expiration time when available
+- Support proxy environment variables for agent usage requests
+
 ## [Support Claude Config Directory] - 2026-06-16
 
 - Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
