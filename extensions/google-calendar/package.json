@@ -5,14 +5,15 @@
   "description": "Manage your Google calendar easily. Create events, search contacts, and check out your upcoming schedule.",
   "icon": "icon.png",
   "author": "thomas",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "contributors": [
     "j3lte",
     "markusjura",
     "fabitosh",
     "geekyed",
     "dangkhoipro",
-    "0xdhrv"
+    "0xdhrv",
+    "peduarte"
   ],
   "categories": [
     "Productivity",

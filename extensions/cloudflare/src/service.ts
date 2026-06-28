@@ -98,7 +98,7 @@ interface PageItem {
   subdomain: string;
   domains: string;
   source?: SourceItem;
-  latest_deployment: DeploymentItem;
+  latest_deployment: DeploymentItem | null;
 }
 
 interface Source {
@@ -117,14 +117,14 @@ interface Page {
   status: DeploymentStatus;
 }
 
-type DeploymentStatus = 'active' | 'success' | 'failure';
+type DeploymentStatus = 'active' | 'success' | 'failure' | 'unknown';
 
 interface DeploymentItem {
   id: string;
   url: string;
   latest_stage: {
     status: DeploymentStatus;
-  };
+  } | null;
   deployment_trigger: {
     metadata: {
       commit_hash: string;
@@ -466,7 +466,7 @@ function formatPage(item: PageItem): Page {
           },
         }
       : undefined,
-    status: latest_deployment.latest_stage.status,
+    status: latest_deployment?.latest_stage?.status ?? 'unknown',
   };
 }
 
@@ -479,7 +479,7 @@ function formatDeployment(item: DeploymentItem): Deployment {
       hash: deployment_trigger.metadata.commit_hash,
       message: deployment_trigger.metadata.commit_message,
     },
-    status: latest_stage.status,
+    status: latest_stage?.status ?? 'unknown',
     source: {
       type: source.type,
       config: {

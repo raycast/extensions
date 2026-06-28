@@ -22,7 +22,8 @@
     "chris_van_es",
     "vicampuzano",
     "ErBlack",
-    "byheaven"
+    "byheaven",
+    "tofrankie"
   ],
   "license": "MIT",
   "preferences": [
@@ -715,5 +716,5 @@
     "macOS",
     "Windows"
   ],
-  "version": "1.0.1"
+  "version": "1.0.2"
 }

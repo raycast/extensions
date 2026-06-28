@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Omit paid task fields unless requested] - 2026-06-28
+
+- **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.
+
 ## [Revert Quick Add Task fallback command fix] - 2026-06-24
 
 - Reverted the Quick Add Task fallback command fix because making the `text` argument optional broke the hotkey workflow (command launched immediately with empty text instead of prompting for input).

@@ -1,14 +1,15 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { constants } from "fs";
 import { access } from "fs/promises";
 import { Process } from "../types";
+import type { CommandSpec } from "./platform";
 import {
   isWindows,
   getKillAllCommand,
   getKillCommand,
   getKillTreeCommand,
-  getProcessListCommand,
-  getProcessPerformanceCommand,
+  getProcessListCommandSpec,
+  getProcessPerformanceCommandSpec,
   getProcessRunningCheckCommand,
   getRestartLaunchPath,
   getRestartCommand,
@@ -34,6 +35,19 @@ function executeCommand(command: string): Promise<void> {
       }
 
       resolve();
+    });
+  });
+}
+
+function executeCommandWithOutput(command: CommandSpec): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile(command.executable, command.args, EXEC_OPTIONS, (error, stdout) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(stdout);
     });
   });
 }
@@ -85,40 +99,30 @@ async function assertRestartLaunchPathExists(process: Process): Promise<void> {
  * On Windows, CPU values are placeholders (0) until fetchProcessPerformance() is called
  */
 export async function fetchRunningProcesses(): Promise<Process[]> {
-  return new Promise((resolve, reject) => {
-    exec(getProcessListCommand(), EXEC_OPTIONS, (err, stdout) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const stdout = await executeCommandWithOutput(getProcessListCommandSpec());
+  const parsed = isWindows
+    ? parseWindowsProcesses(stdout)
+    : (stdout.split("\n").map(parseProcessLine).filter(Boolean) as Partial<Process>[]);
 
-      const parsed = isWindows
-        ? parseWindowsProcesses(stdout)
-        : (stdout.split("\n").map(parseProcessLine).filter(Boolean) as Partial<Process>[]);
+  return parsed
+    .filter((p) => p?.processName)
+    .map((p) => {
+      const path = p.path || "";
+      const processName = p.processName || "";
+      const type = getProcessType(path);
 
-      const processes = parsed
-        .filter((p) => p?.processName)
-        .map((p) => {
-          const path = p.path || "";
-          const processName = p.processName || "";
-          const type = getProcessType(path);
-
-          return {
-            id: p.id || 0,
-            pid: p.pid || 0,
-            cpu: p.cpu || 0,
-            mem: p.mem || 0,
-            type,
-            path,
-            processName,
-            appName: type === "app" ? getAppName(path, processName) : undefined,
-          } as Process;
-        })
-        .filter((p) => p.processName !== "");
-
-      resolve(processes);
-    });
-  });
+      return {
+        id: p.id || 0,
+        pid: p.pid || 0,
+        cpu: p.cpu || 0,
+        mem: p.mem || 0,
+        type,
+        path,
+        processName,
+        appName: type === "app" ? getAppName(path, processName) : undefined,
+      } as Process;
+    })
+    .filter((p) => p.processName !== "");
 }
 
 /**
@@ -131,16 +135,12 @@ export async function fetchProcessPerformance(): Promise<Map<number, number>> {
     return new Map();
   }
 
-  return new Promise((resolve) => {
-    exec(getProcessPerformanceCommand(), EXEC_OPTIONS, (err, stdout) => {
-      if (err) {
-        console.error("Failed to fetch CPU performance data:", err);
-        resolve(new Map());
-        return;
-      }
-      resolve(parseWindowsPerformanceData(stdout));
-    });
-  });
+  try {
+    return parseWindowsPerformanceData(await executeCommandWithOutput(getProcessPerformanceCommandSpec()));
+  } catch (error) {
+    console.error("Failed to fetch CPU performance data:", error);
+    return new Map();
+  }
 }
 
 export async function terminateProcess(processId: number, force = false): Promise<void> {
