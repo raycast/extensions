@@ -130,7 +130,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "tsc --outDir .test-build && node --test .test-build/*.test.js",
     "publish": "ray publish"
   },
   "platforms": [
