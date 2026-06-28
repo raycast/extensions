@@ -7,6 +7,7 @@ export interface Action {
   label?: string;
   value: string;
   browser?: string;
+  icon?: string;
 }
 
 export interface Group {

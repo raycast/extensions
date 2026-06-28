@@ -1,4 +1,4 @@
-import { Action, Alert, Icon } from "@raycast/api";
+import { Action, Alert, Color, Icon } from "@raycast/api";
 import { updateAllSkills, updateSkill } from "../../utils/skills-cli";
 import { withSkillAction } from "../../utils/with-skill-action";
 import type { MutateSkills } from "../../hooks/useInstalledSkills";
@@ -19,6 +19,7 @@ export function UpdateSkillAction({ skillName, mutate }: UpdateSkillActionProps)
       onAction={() =>
         withSkillAction({
           confirm: {
+            icon: { source: Icon.ArrowClockwise, tintColor: Color.Orange },
             title: isSingle ? `Update "${skillName}"?` : "Update All Skills?",
             message: isSingle
               ? `This will update "${skillName}" to the latest version.`

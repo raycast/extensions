@@ -77,37 +77,37 @@ function useCaffeinateInfo(execute: boolean) {
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
-  // Always execute to get time remaining info, even when we have launch context
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
-  // Use launch context for immediate status if available, otherwise use data from useExec
   const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState(caffeinateStatus);
+  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
 
+  const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
+
   useEffect(() => {
-    setLocalCaffeinateStatus(caffeinateStatus);
+    setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
 
   useEffect(() => {
-    if (!localCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
+    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
     const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
-  }, [localCaffeinateStatus, data.totalSeconds, data.startTime]);
+  }, [displayCaffeinateStatus, data.totalSeconds, data.startTime]);
 
   const liveRemaining = (() => {
-    if (!localCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return null;
+    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return null;
     const remain = data.totalSeconds - Math.floor((Date.now() - data.startTime) / 1000);
     return remain > 0 ? `${formatDuration(remain)} remain` : null;
   })();
 
-  const indefinitelyActive = localCaffeinateStatus && data.totalSeconds === null;
+  const indefinitelyActive = displayCaffeinateStatus && data.totalSeconds === null;
 
   const untilActive =
-    localCaffeinateStatus &&
+    displayCaffeinateStatus &&
     data.totalSeconds !== null &&
     data.startTime !== null &&
     !DURATION_PRESETS.some((p) => p.seconds === data.totalSeconds);
@@ -141,7 +141,7 @@ export default function Command(props: LaunchProps) {
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !localCaffeinateStatus && !isLoading) {
+  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
     return null;
   }
 
@@ -149,14 +149,14 @@ export default function Command(props: LaunchProps) {
     <MenuBarExtra
       isLoading={caffeinateLoader}
       icon={
-        localCaffeinateStatus
+        displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
           : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (
         <>
-          {localCaffeinateStatus && <MenuBarExtra.Item title="Decaffeinate" onAction={handleDeactivate} />}
+          {displayCaffeinateStatus && <MenuBarExtra.Item title="Decaffeinate" onAction={handleDeactivate} />}
           <MenuBarExtra.Section title="Caffeinate">
             <MenuBarExtra.Item
               title="Indefinitely"
@@ -164,7 +164,7 @@ export default function Command(props: LaunchProps) {
               onAction={indefinitelyActive ? handleDeactivate : () => handleStartFor(null, "indefinitely")}
             />
             {DURATION_PRESETS.map(({ label, seconds }) => {
-              const isActive = localCaffeinateStatus && data.totalSeconds === seconds;
+              const isActive = displayCaffeinateStatus && data.totalSeconds === seconds;
               return (
                 <MenuBarExtra.Item
                   key={label}

@@ -1,14 +1,25 @@
 import { createEmptyCard, State } from "ts-fsrs";
 import { supabase } from "./supabase";
-import type { DictionaryEntry, AddCardResult, CardState } from "../types";
+import type { DictionaryEntry, AddCardResult, RemoveCardResult, CardState } from "../types";
 
 const POSTGRESQL_UNIQUE_VIOLATION = "23505";
+
+/** Sentinel returned when the server-side trigger rejects an over-limit insert. */
+export const PLAN_LIMIT_ERROR = "PLAN_LIMIT";
+
+/**
+ * Reason: the `enforce_free_card_limit` trigger raises an exception whose message
+ * contains "FREE_CARD_LIMIT" when a free user exceeds the cap.
+ */
+function _isPlanLimitViolation(error: { message?: string }): boolean {
+  return !!error.message?.includes("FREE_CARD_LIMIT");
+}
 
 /**
  * Reason: Supabase may return the violation as a postgres code or as a message string
  * depending on the client version and error context.
  */
-function isDuplicateViolation(error: { code?: string; message?: string }): boolean {
+function _isDuplicateViolation(error: { code?: string; message?: string }): boolean {
   return (
     error.code === POSTGRESQL_UNIQUE_VIOLATION ||
     !!error.message?.includes("duplicate") ||
@@ -19,7 +30,7 @@ function isDuplicateViolation(error: { code?: string; message?: string }): boole
 /**
  * Maps FSRS State enum to our CardState string type.
  */
-function fsrsStateToCardState(fsrsState: State): CardState {
+function _fsrsStateToCardState(fsrsState: State): CardState {
   switch (fsrsState) {
     case State.New:
       return "new";
@@ -36,12 +47,12 @@ function fsrsStateToCardState(fsrsState: State): CardState {
  * Creates the initial FSRS values for a brand-new card.
  * next_review is not set — it will be computed after the first review.
  */
-function createFsrsInitialState() {
+function _createFsrsInitialState() {
   const card = createEmptyCard();
   return {
     stability: card.stability ?? 0,
     difficulty: card.difficulty,
-    cardState: fsrsStateToCardState(card.state),
+    cardState: _fsrsStateToCardState(card.state),
   };
 }
 
@@ -72,7 +83,7 @@ export async function addCardToDeck(userId: string, entry: DictionaryEntry, deck
   }
 
   // Seed FSRS defaults for new cards
-  const { stability, difficulty, cardState } = createFsrsInitialState();
+  const { stability, difficulty, cardState } = _createFsrsInitialState();
 
   const { data: insertedCard, error: insertError } = await supabase
     .from("user_cards")
@@ -90,8 +101,12 @@ export async function addCardToDeck(userId: string, entry: DictionaryEntry, deck
     .single();
 
   if (insertError) {
-    if (isDuplicateViolation(insertError)) {
+    if (_isDuplicateViolation(insertError)) {
       return { success: false, error: "This card is already in your deck" };
+    }
+
+    if (_isPlanLimitViolation(insertError)) {
+      return { success: false, error: PLAN_LIMIT_ERROR };
     }
 
     return { success: false, error: "Failed to add card to deck" };
@@ -102,4 +117,20 @@ export async function addCardToDeck(userId: string, entry: DictionaryEntry, deck
   }
 
   return { success: true, cardId: insertedCard.id };
+}
+
+/**
+ * Removes a card from the user's deck. Used to undo an accidental add.
+ *
+ * @param cardId - The user_cards row id returned by {@link addCardToDeck}
+ * @returns Success, or failure with an error message
+ */
+export async function removeCardFromDeck(cardId: string): Promise<RemoveCardResult> {
+  const { error } = await supabase.from("user_cards").delete().eq("id", cardId);
+
+  if (error) {
+    return { success: false, error: "Failed to remove card from deck" };
+  }
+
+  return { success: true };
 }

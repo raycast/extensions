@@ -1,5 +1,11 @@
 # Zed Recent Projects Changelog
 
+## [Fix Stale Project Status in Search Menu] - 2026-06-07
+
+- Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.
+- Update to @raycast/api 1.104.
+- Update primary action title dynamically based on window open status
+
 ## [Fix Non-POSIX Shell Support] - 2026-05-17
 
 - Fix projects silently failing to open when the user's default shell is non-POSIX (nushell, elvish, xonsh, pwsh, ...) by falling back to `/bin/zsh` for the `env -i ... -lc` invocation. Previously only fish was handled this way.

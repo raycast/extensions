@@ -255,11 +255,22 @@ export type Issue = {
 };
 
 export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
-  const resolvedIconUri = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
-  issuetype.iconUrl = resolvedIconUri;
+  await resolveIssueTypeIconUri(issuetype);
 
   return issuetype;
 };
+
+async function resolveIssueTypeIconUri(issuetype?: IssueType) {
+  if (!issuetype?.iconUrl) {
+    return;
+  }
+
+  try {
+    issuetype.iconUrl = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
+  } catch {
+    // Keep the original Jira icon URL when Jira returns an HTML error page instead of image content.
+  }
+}
 
 type GetIssuesResponse = {
   issues?: Issue[];
@@ -316,10 +327,7 @@ export async function getIssues({ jql } = { jql: "" }) {
 
   const resolvedIssues = await Promise.all(
     rawIssues.map(async (issue) => {
-      const iconUrl = issue?.fields?.issuetype?.iconUrl;
-      if (iconUrl) {
-        issue.fields.issuetype.iconUrl = await getAuthenticatedUri(iconUrl, "image/jpeg");
-      }
+      await resolveIssueTypeIconUri(issue?.fields?.issuetype);
       return issue;
     }),
   );
@@ -400,7 +408,7 @@ async function getCreateIssueMetadataWithParams(params: {
     result.projects.map(async (project) => {
       const resolvedIssueTypes = await Promise.all(
         project.issuetypes.map(async (issueType) => {
-          issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
+          await resolveIssueTypeIconUri(issueType);
           return issueType;
         }),
       );
@@ -503,12 +511,9 @@ export async function getIssue(issueIdOrKey: string) {
     return issue;
   }
 
-  issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+  await resolveIssueTypeIconUri(issue.fields.issuetype);
   if (issue.fields.parent) {
-    issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(
-      issue.fields.parent.fields.issuetype.iconUrl,
-      "image/jpeg",
-    );
+    await resolveIssueTypeIconUri(issue.fields.parent.fields.issuetype);
   }
 
   return issue;

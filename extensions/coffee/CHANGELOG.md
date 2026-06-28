@@ -7,6 +7,14 @@
 - Merged the picker form into the existing `Caffeinate Until` command; the typed time argument is now optional (leave empty to use the picker).
 - Clicking an active menu item now deactivates caffeination.
 
+## [Fix] - 2026-06-05
+
+- Fixed a typo in the "Caffeinate While" command description ("an certain app" → "a certain app").
+
+## [Fix] - 2026-06-02
+
+- Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added a Toggle shortcut for pausing and resuming caffeination schedules.

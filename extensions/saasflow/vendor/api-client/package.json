@@ -1,0 +1,30 @@
+{
+    "name": "@saasflow/api-client",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./openapi.json": "./src/generated/openapi.json",
+        "./*.js": "./src/*.ts",
+        "./*": "./src/*.ts"
+    },
+    "scripts": {
+        "check-tsc": "tsc --noEmit",
+        "lint": "oxlint src",
+        "lint-fix": "oxlint src --fix",
+        "format": "oxfmt src",
+        "format-check": "oxfmt --check src",
+        "test": "vitest run --silent --passWithNoTests"
+    },
+    "dependencies": {
+        "openapi-fetch": "^0.17.0"
+    },
+    "devDependencies": {
+        "@types/node": "^25.7.0",
+        "oxfmt": "^0.49.0",
+        "oxlint": "^1.64.0",
+        "typescript": "6.0.3",
+        "vitest": "^4.1.6"
+    }
+}

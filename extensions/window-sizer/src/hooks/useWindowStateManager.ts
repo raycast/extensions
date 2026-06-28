@@ -4,6 +4,7 @@ import { log, error as logError } from "../utils/logger";
 import { WindowDetailsObject, WindowState } from "../types";
 import { getActiveWindowInfo } from "../swift-app";
 import { CachedItem, createCacheItem, isCacheValid, HOUR_IN_MS } from "../utils/storageUtils";
+import { isTimeoutError, withTimeout } from "../utils/timeout";
 
 // Main storage key for all window states
 const WINDOW_STATES_STORAGE_KEY = "window-states";
@@ -187,7 +188,10 @@ export function useWindowStateManager() {
       if (controller.signal.aborted) return null;
 
       // Use Swift API to get window details
-      const windowDetails = (await getActiveWindowInfo()) as WindowDetailsObject;
+      const windowDetails = (await withTimeout(
+        getActiveWindowInfo(),
+        "Get active window state",
+      )) as WindowDetailsObject;
 
       if (controller.signal.aborted) return null;
 
@@ -220,6 +224,9 @@ export function useWindowStateManager() {
       };
     } catch (err) {
       logError("Error getting window info:", err);
+      if (isTimeoutError(err)) {
+        throw err;
+      }
       return null;
     } finally {
       removeOperation(controller);
@@ -255,6 +262,9 @@ export function useWindowStateManager() {
       return saved; // Return the actual status of the save operation
     } catch (err) {
       logError("Error saving window state:", err);
+      if (isTimeoutError(err)) {
+        throw err;
+      }
       return false;
     } finally {
       removeOperation(controller);
@@ -324,6 +334,9 @@ export function useWindowStateManager() {
       return null;
     } catch (err) {
       logError("Error getting window state:", err);
+      if (isTimeoutError(err)) {
+        throw err;
+      }
       return null;
     } finally {
       removeOperation(controller);

@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-cup",
-  "title": "FIFA World Cup Qatar 2022™",
-  "description": "See all FIFA World Cup Qatar 2022™ matches",
+  "title": "FIFA World Cup 2026™",
+  "description": "See all FIFA World Cup 2026™ matches",
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [
     "djpowers",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "brunocbreis"
   ],
   "categories": [
     "News",
@@ -21,31 +22,336 @@
       "subtitle": "FIFA World Cup",
       "description": "See all matches calendar and results",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "World Cup Menu Bar",
+      "subtitle": "FIFA World Cup",
+      "description": "Shows the live match score in the menu bar with a dropdown of the day's fixtures",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "daysToShow",
+          "title": "Days to Show",
+          "description": "How wide a window of fixtures to list in the dropdown, centered on today.",
+          "type": "dropdown",
+          "required": false,
+          "default": "0",
+          "data": [
+            { "title": "Today only", "value": "0" },
+            { "title": "Yesterday to tomorrow", "value": "1" },
+            { "title": "Last & next 3 days", "value": "3" },
+            { "title": "Last & next week", "value": "7" },
+            { "title": "All matches", "value": "all" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "score-subtitle",
+      "title": "World Cup Live Score",
+      "subtitle": "FIFA World Cup",
+      "description": "Shows the live score under the command name, and alerts you when a goal is scored",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "country",
+          "title": "Your Country",
+          "description": "Goals are celebratory (⚽🎉) unless scored against this team (⚽😭)",
+          "type": "dropdown",
+          "required": false,
+          "default": "",
+          "data": [
+            { "title": "None", "value": "" },
+            { "title": "Argentina", "value": "ARG" },
+            { "title": "Australia", "value": "AUS" },
+            { "title": "Austria", "value": "AUT" },
+            { "title": "Belgium", "value": "BEL" },
+            { "title": "Brazil", "value": "BRA" },
+            { "title": "Canada", "value": "CAN" },
+            { "title": "Cape Verde", "value": "CPV" },
+            { "title": "Chile", "value": "CHI" },
+            { "title": "Colombia", "value": "COL" },
+            { "title": "Costa Rica", "value": "CRC" },
+            { "title": "Croatia", "value": "CRO" },
+            { "title": "Côte d'Ivoire", "value": "CIV" },
+            { "title": "Czechia", "value": "CZE" },
+            { "title": "Denmark", "value": "DEN" },
+            { "title": "Ecuador", "value": "ECU" },
+            { "title": "Egypt", "value": "EGY" },
+            { "title": "England", "value": "ENG" },
+            { "title": "France", "value": "FRA" },
+            { "title": "Germany", "value": "GER" },
+            { "title": "Ghana", "value": "GHA" },
+            { "title": "Iran", "value": "IRN" },
+            { "title": "Italy", "value": "ITA" },
+            { "title": "Japan", "value": "JPN" },
+            { "title": "Jordan", "value": "JOR" },
+            { "title": "Mexico", "value": "MEX" },
+            { "title": "Morocco", "value": "MAR" },
+            { "title": "Netherlands", "value": "NED" },
+            { "title": "New Zealand", "value": "NZL" },
+            { "title": "Nigeria", "value": "NGA" },
+            { "title": "Norway", "value": "NOR" },
+            { "title": "Panama", "value": "PAN" },
+            { "title": "Paraguay", "value": "PAR" },
+            { "title": "Peru", "value": "PER" },
+            { "title": "Poland", "value": "POL" },
+            { "title": "Portugal", "value": "POR" },
+            { "title": "Qatar", "value": "QAT" },
+            { "title": "Saudi Arabia", "value": "KSA" },
+            { "title": "Scotland", "value": "SCO" },
+            { "title": "Senegal", "value": "SEN" },
+            { "title": "Serbia", "value": "SRB" },
+            { "title": "South Africa", "value": "RSA" },
+            { "title": "South Korea", "value": "KOR" },
+            { "title": "Spain", "value": "ESP" },
+            { "title": "Switzerland", "value": "SUI" },
+            { "title": "Tunisia", "value": "TUN" },
+            { "title": "United States", "value": "USA" },
+            { "title": "Uruguay", "value": "URU" },
+            { "title": "Uzbekistan", "value": "UZB" },
+            { "title": "Wales", "value": "WAL" }
+          ]
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-matches",
+      "title": "Search Matches",
+      "description": "Search FIFA World Cup 2026 matches by country, country combination, and status. Use it for next match, head-to-head, schedule, result, live, and venue questions."
+    },
+    {
+      "name": "get-goal-totals",
+      "title": "Get Goal Totals",
+      "description": "Count FIFA World Cup 2026 goals by country or player using FIFA match live data. Use it for questions about how many goals a team or athlete has scored."
+    }
+  ],
+  "ai": {
+    "instructions": "Use the tools for FIFA World Cup 2026 schedule, result, live match, venue, and goal questions. Country inputs can be names or FIFA tricodes. For questions asking when two countries play each other, call search-matches with mode all; if no match is returned, say no currently scheduled head-to-head match in the published FIFA schedule. For questions asking about either country or each country's next match, call search-matches with mode any. Do not invent knockout matches or TBD opponents that are not returned by the tools. If a tool returns unresolvedCountries, say which country could not be matched.",
+    "evals": [
+      {
+        "input": "@world-cup When does Brazil play next?",
+        "mocks": {
+          "search-matches": {
+            "competition": "FIFA World Cup 2026",
+            "query": {
+              "countries": [
+                "Brazil"
+              ],
+              "mode": "any",
+              "status": "upcoming",
+              "limit": 1
+            },
+            "resolvedCountries": [
+              {
+                "code": "BRA",
+                "name": "Brazil"
+              }
+            ],
+            "unresolvedCountries": [],
+            "totalMatches": 1,
+            "returnedMatches": 1,
+            "matches": [
+              {
+                "id": "400021457",
+                "dateUtc": "2026-06-20T00:30:00Z",
+                "localDate": "6/20/2026, 9:30:00 AM",
+                "status": "pre",
+                "stage": "Group C",
+                "venue": "MetLife Stadium, New York New Jersey",
+                "home": {
+                  "code": "BRA",
+                  "name": "Brazil"
+                },
+                "away": {
+                  "code": "HAI",
+                  "name": "Haiti"
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-matches"
+          },
+          {
+            "includes": "Brazil"
+          },
+          {
+            "includes": "Haiti"
+          }
+        ]
+      },
+      {
+        "input": "@world-cup When do Brazil and the United States play each other?",
+        "mocks": {
+          "search-matches": {
+            "competition": "FIFA World Cup 2026",
+            "query": {
+              "countries": [
+                "Brazil",
+                "United States"
+              ],
+              "mode": "all",
+              "status": "upcoming",
+              "limit": 1
+            },
+            "resolvedCountries": [
+              {
+                "code": "BRA",
+                "name": "Brazil"
+              },
+              {
+                "code": "USA",
+                "name": "USA"
+              }
+            ],
+            "unresolvedCountries": [],
+            "totalMatches": 0,
+            "returnedMatches": 0,
+            "matches": [],
+            "note": "No matches were found for the requested country combination and status in the currently published FIFA schedule."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-matches"
+          },
+          {
+            "includes": "no"
+          },
+          {
+            "includes": "scheduled"
+          }
+        ]
+      },
+      {
+        "input": "@world-cup How many goals has Mexico scored?",
+        "mocks": {
+          "get-goal-totals": {
+            "competition": "FIFA World Cup 2026",
+            "query": {
+              "country": "Mexico",
+              "limit": 10
+            },
+            "resolvedCountry": {
+              "code": "MEX",
+              "name": "Mexico"
+            },
+            "matchesCounted": 1,
+            "failedMatchDetailRequests": 0,
+            "totalGoals": 2,
+            "teams": [
+              {
+                "country": "Mexico",
+                "code": "MEX",
+                "goals": 2
+              }
+            ],
+            "players": [
+              {
+                "player": "Santiago GIMENEZ",
+                "country": "Mexico",
+                "countryCode": "MEX",
+                "goals": 1
+              },
+              {
+                "player": "Edson ALVAREZ",
+                "country": "Mexico",
+                "countryCode": "MEX",
+                "goals": 1
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-goal-totals"
+          },
+          {
+            "includes": "2"
+          },
+          {
+            "includes": "Mexico"
+          }
+        ]
+      },
+      {
+        "input": "@world-cup How many goals did Santiago Gimenez score?",
+        "mocks": {
+          "get-goal-totals": {
+            "competition": "FIFA World Cup 2026",
+            "query": {
+              "player": "Santiago Gimenez",
+              "limit": 10
+            },
+            "matchesCounted": 1,
+            "failedMatchDetailRequests": 0,
+            "totalGoals": 1,
+            "teams": [
+              {
+                "country": "Mexico",
+                "code": "MEX",
+                "goals": 1
+              }
+            ],
+            "players": [
+              {
+                "player": "Santiago GIMENEZ",
+                "country": "Mexico",
+                "countryCode": "MEX",
+                "goals": 1
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-goal-totals"
+          },
+          {
+            "includes": "Santiago"
+          },
+          {
+            "includes": "1"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
-    "@types/lodash.groupby": "^4.6.7",
-    "cross-fetch": "^3.1.5",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "@types/lodash.groupby": "^4.6.9",
+    "date-fns": "^4.3.0",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

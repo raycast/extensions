@@ -5,7 +5,10 @@
   "description": "Reveal any saved WiFi Password on macOS or Windows",
   "icon": "extension_icon.png",
   "author": "louishuyng",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok",
+    "0xdhrv"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -19,7 +22,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

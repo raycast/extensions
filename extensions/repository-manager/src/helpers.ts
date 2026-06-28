@@ -78,7 +78,7 @@ export const resizeEditorWindow = async (editorApp: Application): Promise<void> 
         await execAsync(`osascript -e 'tell application "${editorApp.name}" to activate'`)
 
         setTimeout(() => {
-            open(`raycast://extensions/raycast/window-management/${preferences.windowResizeMode}`).catch(() => {
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/window-management/${preferences.windowResizeMode}`).catch(() => {
                 // Silently fail if window management extension is not available
             })
         }, WINDOW_RESIZE_DELAY)

@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { Icon, List, Toast, showToast } from "@raycast/api";
 import DiskSection, { parseDiskSections } from "./features/disk/components/DiskSection";
 import { SizesView, cycleSizesView, loadSizesView, saveSizesView } from "./utils/sizesViewUtils";
@@ -12,8 +12,11 @@ export default function ListDisks(): JSX.Element {
   const [filter, setFilter] = useState("all");
   const [sizesView, setSizesView] = useState<SizesView>(SizesView.Full);
   const [, setDiskUpdateTrigger] = useState(0);
+  const didInit = useRef(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     loadSizesView().then(setSizesView);
     fetchDisks("Init");
   }, []);
@@ -121,7 +124,7 @@ export default function ListDisks(): JSX.Element {
             }, BATCH_TIMEOUT_MS);
           }
         }
-      })
+      }),
     );
 
     await Promise.allSettled(sectionInitPromises);

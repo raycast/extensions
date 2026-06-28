@@ -1,5 +1,9 @@
 # Speedtest Changelog
 
+## [Fix Progress Parsing] - 2026-05-21
+
+- Fixed Speedtest runs crashing when progress output arrives in combined chunks.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added shortcuts for copying the speedtest summary and selected section data.

@@ -58,7 +58,7 @@
     "execa": "6.1.0",
     "fast-xml-parser": "3.20.3",
     "html-entities": "2.3.2",
-    "node-fetch": "3.0.0",
+    "node-fetch": "^3.3.2",
     "raycast-toolkit": "1.0.3",
     "tempy": "2.0.0"
   },

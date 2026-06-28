@@ -157,5 +157,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "valibot": "1.2.0"
+  }
 }

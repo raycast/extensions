@@ -7,6 +7,11 @@ export type DesktopContext = Readonly<{
   windows: WindowManagement.Window[];
 }>;
 
+function isRaycastWindow(window: WindowManagement.Window) {
+  const appName = window.application?.name?.toLowerCase();
+  return appName === "raycast" || appName === "raycast beta";
+}
+
 export async function getDesktopContext(): Promise<DesktopContext | null> {
   if (!environment.canAccess(WindowManagement)) {
     await showFailureToast("WindowManagement Not Available", {
@@ -33,6 +38,7 @@ export async function getDesktopContext(): Promise<DesktopContext | null> {
   const { excludedApps } = getUserPreferences();
 
   const resizableWindows = windows?.filter((window) => {
+    if (isRaycastWindow(window)) return false;
     if (!window.resizable || !window.positionable) return false;
     if (excludedApps.length > 0) {
       const appName = (window.application?.name ?? "").toLowerCase();
