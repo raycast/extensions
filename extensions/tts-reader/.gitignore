@@ -13,4 +13,6 @@ compiled_raycast_swift
 .DS_Store
 CLAUDE.md
 .claude
+.agents
+.workflow
 tts_output.wav
