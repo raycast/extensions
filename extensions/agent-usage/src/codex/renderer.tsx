@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatDuration } from "../agents/format";
+import { formatDuration, formatResetTime } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -10,6 +10,18 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui";
+
+function formatResetCreditExpiry(expiresAt: string): string {
+  const date = new Date(expiresAt);
+  if (Number.isNaN(date.getTime())) return formatResetTime(expiresAt);
+
+  return `${formatResetTime(expiresAt)} (${date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })})`;
+}
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
   const fallback = formatErrorOrNoData("Codex", usage, error);
@@ -27,6 +39,13 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   if (u.codeReviewLimit) {
     text += `\n\nCode Review Limit: ${u.codeReviewLimit.percentageRemaining}% remaining`;
     text += `\nResets In: ${formatDuration(u.codeReviewLimit.resetsInSeconds)}`;
+  }
+
+  if (u.resetCredits) {
+    text += `\n\nReset Credits: ${u.resetCredits.availableCount} available`;
+    for (const [index, credit] of u.resetCredits.credits.entries()) {
+      text += `\nReset #${index + 1} Expires: ${formatResetCreditExpiry(credit.expiresAt)}`;
+    }
   }
 
   text += `\n\nCredits: ${u.credits.unlimited ? "Unlimited" : u.credits.balance}`;
@@ -70,6 +89,20 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       )}
 
       <List.Item.Detail.Metadata.Separator />
+
+      {u.resetCredits && (
+        <>
+          <List.Item.Detail.Metadata.Label title="Reset Credits" text={`${u.resetCredits.availableCount} available`} />
+          {u.resetCredits.credits.map((credit, index) => (
+            <List.Item.Detail.Metadata.Label
+              key={`${credit.id ?? "reset-credit"}-${credit.expiresAt}`}
+              title={`Reset #${index + 1} Expires`}
+              text={formatResetCreditExpiry(credit.expiresAt)}
+            />
+          ))}
+          <List.Item.Detail.Metadata.Separator />
+        </>
+      )}
 
       <List.Item.Detail.Metadata.Label title="Credits" text={u.credits.unlimited ? "Unlimited" : u.credits.balance} />
     </List.Item.Detail.Metadata>

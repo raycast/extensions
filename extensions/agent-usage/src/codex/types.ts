@@ -20,6 +20,13 @@ export interface CodexUsage {
     unlimited: boolean;
     balance: string;
   };
+  resetCredits?: {
+    availableCount: number;
+    credits: {
+      id: string | null;
+      expiresAt: string;
+    }[];
+  };
 }
 
 export interface CodexError {

@@ -6,6 +6,7 @@ import { loadAccounts } from "../accounts/storage";
 import type { AccountUsageState } from "../accounts/types";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
+const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
 
 const CODEX_HEADERS = {
   Accept: "application/json",
@@ -14,16 +15,40 @@ const CODEX_HEADERS = {
 };
 
 export async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
-  const { data, error } = await httpFetch({
-    url: CODEX_USAGE_API,
-    headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
-    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
-  });
+  const [usageResponse, resetCredits] = await Promise.all([
+    httpFetch({
+      url: CODEX_USAGE_API,
+      headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
+      unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+    }),
+    fetchCodexResetCredits(token),
+  ]);
+
+  const { data, error } = usageResponse;
   if (error) return { usage: null, error };
-  return parseCodexApiResponse(data);
+  const result = parseCodexApiResponse(data);
+  if (result.usage && resetCredits) {
+    result.usage.resetCredits = resetCredits;
+  }
+  return result;
 }
 
-function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error: CodexError | null } {
+async function fetchCodexResetCredits(token: string): Promise<CodexUsage["resetCredits"] | null> {
+  const { data, error } = await httpFetch({
+    url: CODEX_RESET_CREDITS_API,
+    headers: {
+      ...CODEX_HEADERS,
+      Authorization: normalizeBearerToken(token),
+      "OAI-Product-Sku": "CODEX",
+    },
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+  });
+
+  if (error) return null;
+  return parseCodexResetCreditsResponse(data);
+}
+
+export function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error: CodexError | null } {
   try {
     if (!data || typeof data !== "object") {
       return {
@@ -114,6 +139,49 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
       },
     };
   }
+}
+
+export function parseCodexResetCreditsResponse(data: unknown): CodexUsage["resetCredits"] | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const response = data as {
+    available_count?: number | string;
+    credits?: {
+      id?: string;
+      status?: string;
+      expires_at?: string;
+    }[];
+  };
+
+  const credits = Array.isArray(response.credits)
+    ? response.credits
+        .filter((credit) => {
+          return (
+            typeof credit.expires_at === "string" &&
+            credit.expires_at.length > 0 &&
+            (!credit.status || credit.status === "available")
+          );
+        })
+        .map((credit) => ({
+          id: credit.id ?? null,
+          expiresAt: credit.expires_at as string,
+        }))
+        .sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime())
+    : [];
+
+  const availableCount =
+    typeof response.available_count === "number"
+      ? response.available_count
+      : typeof response.available_count === "string"
+        ? Number.parseInt(response.available_count, 10)
+        : credits.length;
+
+  return {
+    availableCount: Number.isFinite(availableCount) ? availableCount : credits.length,
+    credits,
+  };
 }
 
 export { formatDuration } from "../agents/format";

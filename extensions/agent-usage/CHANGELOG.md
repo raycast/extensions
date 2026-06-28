@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Show Codex Reset Credits] - 2026-06-28
+
+- Show Codex reset credits and their expiration times in Codex usage details
+
 ## [Support Claude Config Directory] - 2026-06-16
 
 - Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
