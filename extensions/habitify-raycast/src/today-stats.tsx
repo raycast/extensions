@@ -49,27 +49,29 @@ function computeSummary(habits: TodayHabit[]): Summary {
 }
 
 function getDatesForWeek(): string[] {
-  const today = new Date();
-  const day = today.getDay();
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const day = today.getUTCDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - ((day === 0 ? 7 : day) - 1));
+  monday.setUTCDate(today.getUTCDate() - ((day === 0 ? 7 : day) - 1));
   const dates: string[] = [];
   const current = new Date(monday);
   while (current <= today) {
     dates.push(formatUTCDate(current));
-    current.setDate(current.getDate() + 1);
+    current.setUTCDate(current.getUTCDate() + 1);
   }
   return dates;
 }
 
 function getDatesForMonth(): string[] {
-  const today = new Date();
-  const first = new Date(today.getFullYear(), today.getMonth(), 1);
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const first = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
   const dates: string[] = [];
   const current = new Date(first);
   while (current <= today) {
     dates.push(formatUTCDate(current));
-    current.setDate(current.getDate() + 1);
+    current.setUTCDate(current.getUTCDate() + 1);
   }
   return dates;
 }
