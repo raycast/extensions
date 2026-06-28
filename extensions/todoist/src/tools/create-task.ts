@@ -154,6 +154,7 @@ function isValidDuration(duration: Input["duration"]): duration is NonNullable<I
   return (
     duration != null &&
     (duration.unit === "minute" || duration.unit === "day") &&
+    Number.isFinite(duration.amount) &&
     Number.isInteger(duration.amount) &&
     duration.amount > 0
   );
