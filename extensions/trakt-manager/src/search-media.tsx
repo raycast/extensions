@@ -13,74 +13,39 @@ import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { TraktMovieListItem, TraktShowListItem, withPagination } from "./lib/schema";
 
-type WatchlistFilterType = "all" | "movie" | "show";
-
-type WatchlistItem = { mediaType: "movie"; item: TraktMovieListItem } | { mediaType: "show"; item: TraktShowListItem };
-
-const watchlistQuery = {
-  limit: 10,
-  extended: "full,cloud9" as const,
-  sort_by: "added" as const,
-};
-
-const sortByAddedAt = (items: WatchlistItem[]) =>
-  [...items].sort((a, b) => {
-    const aTime = a.item.last_updated_at ? new Date(a.item.last_updated_at).getTime() : 0;
-    const bTime = b.item.last_updated_at ? new Date(b.item.last_updated_at).getTime() : 0;
-    return bTime - aTime;
-  });
+type SearchMediaItem =
+  | { mediaType: "movie"; item: TraktMovieListItem }
+  | { mediaType: "show"; item: TraktShowListItem };
 
 export default function Command() {
   const abortable = useRef<AbortController | undefined>(undefined);
-  const [mediaType, setMediaType] = useState<WatchlistFilterType>("all");
+  const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   const {
     isLoading,
-    data: watchlist,
+    data: media,
     pagination,
-    revalidate,
   } = useCachedPromise(
-    (mediaType: WatchlistFilterType) => async (options: PaginationOptions) => {
-      await setTimeout(100);
+    (searchText: string) => async (options: PaginationOptions) => {
+      if (!searchText) return { data: [], hasMore: false };
+      await setTimeout(200);
 
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
 
       const fetchOptions = { signal: abortable.current.signal };
-      const page = options.page + 1;
-      const sortHow = mediaType === "all" ? ("desc" as const) : ("asc" as const);
-      const query = { ...watchlistQuery, page, sort_how: sortHow };
-
-      if (mediaType === "movie") {
-        const response = await traktClient.movies.getWatchlistMovies({ query, fetchOptions });
-
-        if (response.status !== 200) return { data: [], hasMore: false };
-        const paginatedResponse = withPagination(response);
-
-        return {
-          data: paginatedResponse.data.map((item) => ({ mediaType: "movie" as const, item })),
-          hasMore:
-            paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
-        };
-      }
-
-      if (mediaType === "show") {
-        const response = await traktClient.shows.getWatchlistShows({ query, fetchOptions });
-
-        if (response.status !== 200) return { data: [], hasMore: false };
-        const paginatedResponse = withPagination(response);
-
-        return {
-          data: paginatedResponse.data.map((item) => ({ mediaType: "show" as const, item })),
-          hasMore:
-            paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
-        };
-      }
+      const query = {
+        query: searchText,
+        page: options.page + 1,
+        limit: 10,
+        fields: "title" as const,
+        extended: "full,cloud9" as const,
+      };
 
       const [moviesResponse, showsResponse] = await Promise.all([
-        traktClient.movies.getWatchlistMovies({ query, fetchOptions }),
-        traktClient.shows.getWatchlistShows({ query, fetchOptions }),
+        traktClient.movies.searchMovies({ query, fetchOptions }),
+        traktClient.shows.searchShows({ query, fetchOptions }),
       ]);
 
       const movies =
@@ -92,10 +57,10 @@ export default function Command() {
           ? withPagination(showsResponse)
           : { data: [] as TraktShowListItem[], pagination: null };
 
-      const merged = sortByAddedAt([
+      const merged: SearchMediaItem[] = [
         ...movies.data.map((item) => ({ mediaType: "movie" as const, item })),
         ...shows.data.map((item) => ({ mediaType: "show" as const, item })),
-      ]);
+      ];
 
       const moviesHasMore =
         movies.pagination !== null &&
@@ -109,7 +74,7 @@ export default function Command() {
         hasMore: moviesHasMore || showsHasMore,
       };
     },
-    [mediaType],
+    [searchText],
     {
       initialData: undefined,
       keepPreviousData: true,
@@ -123,31 +88,12 @@ export default function Command() {
     },
   );
 
-  const removeShowFromWatchlist = useCallback(async (show: TraktShowListItem) => {
-    await traktClient.shows.removeShowFromWatchlist({
-      body: {
-        shows: [
-          {
-            ids: {
-              trakt: show.show.ids.trakt,
-            },
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
-
-  const removeMovieFromWatchlist = useCallback(async (movie: TraktMovieListItem) => {
-    await traktClient.movies.removeMovieFromWatchlist({
+  const addMovieToWatchlist = useCallback(async (movie: TraktMovieListItem) => {
+    await traktClient.movies.addMovieToWatchlist({
       body: {
         movies: [
           {
-            ids: {
-              trakt: movie.movie.ids.trakt,
-            },
+            ids: { trakt: movie.movie.ids.trakt },
           },
         ],
       },
@@ -162,10 +108,25 @@ export default function Command() {
       body: {
         movies: [
           {
-            ids: {
-              trakt: movie.movie.ids.trakt,
-            },
+            ids: { trakt: movie.movie.ids.trakt },
             watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
+  const addShowToWatchlist = useCallback(async (show: TraktShowListItem) => {
+    await traktClient.shows.addShowToWatchlist({
+      body: {
+        shows: [
+          {
+            ids: {
+              trakt: show.show.ids.trakt,
+            },
           },
         ],
       },
@@ -228,10 +189,10 @@ export default function Command() {
     });
   }, []);
 
-  const onMediaTypeChange = useCallback((newValue: string) => {
+  const handleSearchTextChange = useCallback((text: string): void => {
     abortable.current?.abort();
     abortable.current = new AbortController();
-    setMediaType(newValue as WatchlistFilterType);
+    setSearchText(text);
   }, []);
 
   const handleMovieAction = useCallback(
@@ -239,21 +200,20 @@ export default function Command() {
       setActionLoading(true);
       try {
         await action(movie);
-        revalidate();
         showToast({
           title: message,
           style: Toast.Style.Success,
         });
-      } catch (error) {
+      } catch (e) {
         showToast({
-          title: (error as Error).message,
+          title: (e as Error).message,
           style: Toast.Style.Failure,
         });
       } finally {
         setActionLoading(false);
       }
     },
-    [revalidate],
+    [],
   );
 
   const handleShowAction = useCallback(
@@ -261,21 +221,20 @@ export default function Command() {
       setActionLoading(true);
       try {
         await action(show);
-        revalidate();
         showToast({
           title: message,
           style: Toast.Style.Success,
         });
-      } catch (error) {
+      } catch (e) {
         showToast({
-          title: (error as Error).message,
+          title: (e as Error).message,
           style: Toast.Style.Failure,
         });
       } finally {
         setActionLoading(false);
       }
     },
-    [revalidate],
+    [],
   );
 
   const movieMarkdown = useCallback((movie: TraktMovieListItem) => {
@@ -303,22 +262,6 @@ export default function Command() {
                 actions={(movie) => (
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action
-                        title="Add to History"
-                        icon={Icon.Clock}
-                        shortcut={Keyboard.Shortcut.Common.Duplicate}
-                        onAction={() => handleMovieAction(movie, addMovieToHistory, "Movie added to history")}
-                      />
-                      <Action
-                        title="Remove from Watchlist"
-                        icon={Icon.Trash}
-                        shortcut={Keyboard.Shortcut.Common.Remove}
-                        onAction={() =>
-                          handleMovieAction(movie, removeMovieFromWatchlist, "Movie removed from watchlist")
-                        }
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section>
                       <Action.OpenInBrowser
                         icon={getFavicon(TRAKT_APP_URL)}
                         title="Open in Trakt"
@@ -338,16 +281,16 @@ export default function Command() {
             }
           />
           <Action
+            title="Add to Watchlist"
+            icon={Icon.Bookmark}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            onAction={() => handleMovieAction(item, addMovieToWatchlist, "Movie added to watchlist")}
+          />
+          <Action
             title="Add to History"
             icon={Icon.Clock}
             shortcut={Keyboard.Shortcut.Common.Duplicate}
             onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
-          />
-          <Action
-            title="Remove from Watchlist"
-            icon={Icon.Trash}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={() => handleMovieAction(item, removeMovieFromWatchlist, "Movie removed from watchlist")}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -366,7 +309,7 @@ export default function Command() {
         </ActionPanel.Section>
       </ActionPanel>
     ),
-    [addMovieToHistory, handleMovieAction, movieMarkdown, movieMetadata, removeMovieFromWatchlist],
+    [addMovieToHistory, addMovieToWatchlist, handleMovieAction, movieMarkdown, movieMetadata],
   );
 
   const showActions = useCallback(
@@ -399,50 +342,41 @@ export default function Command() {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action
+            title="Add to Watchlist"
+            icon={Icon.Bookmark}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            onAction={() => handleShowAction(item, addShowToWatchlist, "Show added to watchlist")}
+          />
+          <Action
             title="Add to History"
             icon={Icon.Clock}
             shortcut={Keyboard.Shortcut.Common.Duplicate}
             onAction={() => handleShowAction(item, addShowToHistory, "Show added to history")}
           />
-          <Action
-            title="Remove from Watchlist"
-            icon={Icon.Trash}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={() => handleShowAction(item, removeShowFromWatchlist, "Show removed from watchlist")}
-          />
         </ActionPanel.Section>
       </ActionPanel>
     ),
-    [addShowToHistory, checkInFirstEpisodeToHistory, handleShowAction, removeShowFromWatchlist],
-  );
-
-  const searchBarAccessory = (
-    <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
-      <Grid.Dropdown.Item value="all" title="All" />
-      <Grid.Dropdown.Item value="movie" title="Movies" />
-      <Grid.Dropdown.Item value="show" title="Shows" />
-    </Grid.Dropdown>
+    [addShowToHistory, addShowToWatchlist, checkInFirstEpisodeToHistory, handleShowAction],
   );
 
   return (
     <GenericGrid
       isLoading={isLoading || actionLoading}
-      emptyViewTitle="No watchlist available"
-      searchBarPlaceholder="Search watchlist"
-      searchBarAccessory={searchBarAccessory}
+      emptyViewTitle="Search for movies and shows"
+      searchBarPlaceholder="Search for movies and shows"
+      onSearchTextChange={handleSearchTextChange}
+      throttle={true}
       pagination={pagination}
-      items={watchlist}
+      items={media}
       aspectRatio="9/16"
       fit={Grid.Fit.Fill}
       title={(item) => (item.mediaType === "movie" ? item.item.movie.title : item.item.show.title)}
-      subtitle={(item) =>
-        item.mediaType === "movie" ? item.item.movie.year?.toString() || "" : item.item.show.year?.toString() || ""
-      }
+      subtitle={(item) => (item.mediaType === "show" ? item.item.show.year?.toString() || "" : "")}
       poster={(item) =>
         getPosterUrl(item.mediaType === "movie" ? item.item.movie.images : item.item.show.images, "poster.png")
       }
       keyFn={(item, index) =>
-        item.mediaType === "movie" ? `${item.item.movie.ids.trakt}-${index}` : `${item.item.show.ids.trakt}-${index}`
+        `${item.mediaType}-${item.mediaType === "movie" ? item.item.movie.ids.trakt : item.item.show.ids.trakt}-${index}`
       }
       actions={(item) => (item.mediaType === "movie" ? movieActions(item.item) : showActions(item.item))}
     />

@@ -163,7 +163,7 @@ export default function Command() {
                     <ActionPanel>
                       <ActionPanel.Section>
                         <Action
-                          title="Check-in"
+                          title="Check-In"
                           icon={Icon.Checkmark}
                           shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                           onAction={() => handleAction(show, checkInEpisode, "Episode checked-in")}
@@ -195,7 +195,7 @@ export default function Command() {
               }
             />
             <Action
-              title="Check-in"
+              title="Check-In"
               icon={Icon.Checkmark}
               onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
             />

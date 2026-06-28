@@ -153,7 +153,7 @@ export const EpisodeGrid = ({
                     <ActionPanel>
                       <ActionPanel.Section>
                         <Action
-                          title="Check-in"
+                          title="Check-In"
                           icon={Icon.Checkmark}
                           onAction={() => handleAction(episode, checkInEpisode, "Episode checked-in")}
                         />
@@ -186,7 +186,7 @@ export const EpisodeGrid = ({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title="Check-in"
+              title="Check-In"
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.Edit}
               onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}

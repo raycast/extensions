@@ -403,7 +403,7 @@ export default function Command() {
               target={<SeasonGrid showId={item.ids.trakt} slug={item.ids.slug} imdbId={item.ids.imdb} />}
             />
             <Action
-              title="Check-in"
+              title="Check-In"
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={() => handleShowAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
