@@ -2,13 +2,7 @@ import { bodyOf, failIfNotOk, get, post } from "./api";
 import { showHUD } from "@raycast/api";
 
 export type Availability =
-  | "Available"
-  | "Busy"
-  | "DoNotDisturb"
-  | "BeRightBack"
-  | "Away"
-  | "Offline"
-  | "PresenceUnknown";
+  "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "Offline" | "PresenceUnknown";
 type Activity = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "OffWork" | "Unknown";
 
 function activityFor(availability: Availability): Activity {
@@ -22,7 +16,7 @@ function activityFor(availability: Availability): Activity {
   }
 }
 
-function readableAvailability(availability: Availability) {
+export function readableAvailability(availability: string) {
   return availability
     .replaceAll(/([A-Z])/g, " $1")
     .toLowerCase()
@@ -81,19 +75,27 @@ export async function getAvailability() {
   return presence.availability;
 }
 
-export async function setAvailability(availability?: Availability) {
+export async function applyAvailability(availability?: Availability) {
   if (availability) {
     await setPreferredPresence(availability);
   } else {
     await clearPreferredPresence();
   }
+}
+
+export function presenceResultMessage(availability?: Availability): string {
   switch (availability) {
     case undefined:
-      return await showHUD("Reset availability to default");
+      return "Reset availability to default";
     case "Busy":
     case "DoNotDisturb":
-      return await showHUD(`Set status to "${readableAvailability(availability)}" (expires in 1 day)`);
+      return `Set status to "${readableAvailability(availability)}" (expires in 1 day)`;
     default:
-      return await showHUD(`Set status to "${readableAvailability(availability)}" (expires in 7 days)`);
+      return `Set status to "${readableAvailability(availability)}" (expires in 7 days)`;
   }
+}
+
+export async function setAvailability(availability?: Availability) {
+  await applyAvailability(availability);
+  return await showHUD(presenceResultMessage(availability));
 }

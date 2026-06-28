@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { usePromise } from "@raycast/utils";
-import { FunctionReturningPromise, UnwrapReturn } from "@raycast/utils/dist/types";
 
-export function usePromiseWithTimeout<T extends FunctionReturningPromise>(
+// Mirrors @raycast/utils' (no longer exported) `FunctionReturningPromise` so this
+// wrapper stays assignable to `usePromise`'s overloads. The `any` here matches the
+// library's own signature, hence the targeted lint exception.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function usePromiseWithTimeout<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   args: Parameters<T>,
   timeout = 5000,
-  defaultValue: UnwrapReturn<T>
+  defaultValue: Awaited<ReturnType<T>>,
 ) {
-  const [result, setResult] = useState<UnwrapReturn<T> | null>(null);
+  const [result, setResult] = useState<Awaited<ReturnType<T>> | null>(null);
   const { isLoading, data, error } = usePromise(fn, args);
 
   useEffect(() => {

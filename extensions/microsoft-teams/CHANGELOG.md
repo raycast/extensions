@@ -1,5 +1,13 @@
 # Microsoft Teams Changelog
 
+## [AI Extension] - {PR_MERGE_DATE}
+
+Features
+
+- Added Raycast AI support: manage your Microsoft Teams presence and status directly from Raycast AI.
+- AI tools to get, set, and clear your presence.
+- AI tools to get, set, and clear your status message, including an optional expiry and a confirmation before the status is applied.
+
 ## [Update] - 2026-06-15
 
 # Features

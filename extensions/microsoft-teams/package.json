@@ -47,6 +47,38 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-presence",
+      "title": "Get Presence",
+      "description": "Get your current Microsoft Teams presence (availability)."
+    },
+    {
+      "name": "set-presence",
+      "title": "Set Presence",
+      "description": "Set your Microsoft Teams presence."
+    },
+    {
+      "name": "clear-presence",
+      "title": "Clear Presence",
+      "description": "Clear your manually set Microsoft Teams presence, returning to the automatically calculated presence."
+    },
+    {
+      "name": "get-status",
+      "title": "Get Status",
+      "description": "Get your current Microsoft Teams status message, including its expiry."
+    },
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "description": "Set your Microsoft Teams status message with an optional expiry. Shown above the compose box when people message you by default (pinned)."
+    },
+    {
+      "name": "clear-status",
+      "title": "Clear Status",
+      "description": "Clear your Microsoft Teams status message."
+    }
+  ],
   "preferences": [
     {
       "type": "textfield",
@@ -82,20 +114,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.15.0",
-    "@types/luxon": "^3.3.0",
-    "luxon": "^3.3.0",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "@types/luxon": "^3.7.2",
+    "luxon": "^3.7.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.1",
+    "react": "^19.2.7",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

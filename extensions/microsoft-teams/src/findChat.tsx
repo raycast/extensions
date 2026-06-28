@@ -58,7 +58,7 @@ function ChatItem({ chat }: { chat: Chat }) {
     getPresence,
     [chat.id],
     3000,
-    defaultPresence()
+    defaultPresence(),
   );
 
   useEffect(() => {
@@ -71,10 +71,10 @@ function ChatItem({ chat }: { chat: Chat }) {
         source: isLoading
           ? Icon.CircleProgress
           : chat.chatType !== "oneOnOne"
-          ? chatIcon[chat.chatType]
-          : availability !== undefined
-          ? presenceIcon[availability]
-          : Icon.Person,
+            ? chatIcon[chat.chatType]
+            : availability !== undefined
+              ? presenceIcon[availability]
+              : Icon.Person,
       }}
       title={chatTitle(chat)}
       accessories={[{ tag: new Date(chat.lastMessagePreview?.createdDateTime ?? chat.createdDateTime) }]}

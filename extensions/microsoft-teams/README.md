@@ -37,6 +37,7 @@ These features are currently available:
 - Set your status
 - Find chats by name or member and open them in Teams
 - Call a user directly with audio or video
+- Manage your presence and status from Raycast AI (get, set, and clear) — ask Raycast AI things like "set my Teams status to 'in a meeting' until 5pm"
 
 ## Setup
 

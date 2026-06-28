@@ -75,11 +75,11 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
   if (!response.ok) {
     if (tokenResponse.error_description?.includes("AADSTS7000218")) {
       throw new Error(
-        "Microsoft app registration is configured as a confidential client. In Azure Portal, set Authentication -> Platform to 'Mobile and desktop applications' with redirect URI 'https://raycast.com/redirect?packageName=Extension' and enable 'Allow public client flows'."
+        "Microsoft app registration is configured as a confidential client. In Azure Portal, set Authentication -> Platform to 'Mobile and desktop applications' with redirect URI 'https://raycast.com/redirect?packageName=Extension' and enable 'Allow public client flows'.",
       );
     }
     throw new Error(
-      tokenResponse.error_description ?? tokenResponse.error ?? `Token request failed with status ${response.status}`
+      tokenResponse.error_description ?? tokenResponse.error ?? `Token request failed with status ${response.status}`,
     );
   }
 

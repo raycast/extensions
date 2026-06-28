@@ -108,13 +108,13 @@ function UserItem({ user, onOpenUser }: { user: User; onOpenUser: () => Promise<
     getPresence,
     [user.id],
     3000,
-    defaultPresence()
+    defaultPresence(),
   );
   const { data: photoDataUrl } = usePromiseWithTimeout<typeof getUserPhotoDataUrl>(
     getUserPhotoDataUrl,
     [user.id],
     3000,
-    undefined
+    undefined,
   );
   const availability = currentPresence?.activity ?? currentPresence?.availability;
   const accessories = [
@@ -180,7 +180,7 @@ export default function FindUser() {
   const resultUsers = rankUsers(
     searchedList.filter((user) => !recentIds.has(user.id)),
     trimmedQuery,
-    recentPositionById
+    recentPositionById,
   );
 
   async function markUserAsRecent(user: User) {
