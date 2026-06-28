@@ -1,0 +1,6 @@
+.agents
+.workflow
+.git
+.gitignore
+.DS_Store
+node_modules
