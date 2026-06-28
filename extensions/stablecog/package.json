@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stablecog",
+  "title": "Stablecog",
+  "description": "Create amazing art in seconds with AI. Generate and upscale images with Stablecog.",
+  "icon": "stablecog.png",
+  "owner": "stablecog",
+  "access": "public",
+  "author": "yektagg",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "imagine",
+      "title": "Imagine",
+      "subtitle": "Stablecog",
+      "description": "Create art with AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "Prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "imagine-advanced",
+      "title": "Imagine (Advanced)",
+      "subtitle": "Stablecog",
+      "description": "Create art with AI using advanced options.",
+      "mode": "view"
+    },
+    {
+      "name": "upscale",
+      "title": "Upscale",
+      "subtitle": "Stablecog",
+      "description": "Upscale images with AI.",
+      "mode": "view"
+    },
+    {
+      "name": "search-your-history",
+      "title": "Search Your History",
+      "subtitle": "Stablecog",
+      "description": "Search your history on Stablecog.",
+      "mode": "view"
+    },
+    {
+      "name": "search-gallery",
+      "title": "Search Gallery",
+      "subtitle": "Stablecog",
+      "description": "Search the Stablecog gallery.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Model",
+      "default": "FLUX.1",
+      "type": "dropdown",
+      "description": "The AI image model to use for creating images.",
+      "name": "model",
+      "required": false,
+      "data": [
+        {
+          "title": "FLUX.1",
+          "value": "FLUX.1"
+        },
+        {
+          "title": "Stable Diffusion 3",
+          "value": "Stable Diffusion 3"
+        },
+        {
+          "title": "Kandinsky 2.2",
+          "value": "Kandinsky 2.2"
+        },
+        {
+          "title": "SDXL",
+          "value": "SDXL"
+        }
+      ]
+    },
+    {
+      "title": "Number of Outputs",
+      "default": "2",
+      "type": "dropdown",
+      "description": "The number of images to create.",
+      "name": "num_outputs",
+      "required": false,
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "title": "Aspect Ratio",
+      "default": "1:1",
+      "type": "dropdown",
+      "description": "The aspect ratio of the image to create.",
+      "name": "aspect_ratio",
+      "required": false,
+      "data": [
+        {
+          "title": "Square (1:1)",
+          "value": "1:1"
+        },
+        {
+          "title": "Portrait (2:3)",
+          "value": "2:3"
+        },
+        {
+          "title": "Landscape (3:2)",
+          "value": "3:2"
+        },
+        {
+          "title": "Mobile (9:16)",
+          "value": "9:16"
+        },
+        {
+          "title": "Desktop (16:9)",
+          "value": "16:9"
+        },
+        {
+          "title": "Squarish (4:5)",
+          "value": "4:5"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
+    "file-type": "^18.5.0",
+    "form-data-encoder": "^3.0.0",
+    "formdata-node": "^5.0.1",
+    "image-size": "^1.0.2",
+    "js-base64": "^3.7.5",
+    "node-fetch": "^3.3.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
+  }
+}

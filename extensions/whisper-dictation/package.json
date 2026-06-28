@@ -1,0 +1,214 @@
+{
+  "name": "whisper-dictation",
+  "version": "1.0.0",
+  "title": "Whisper Dictation",
+  "description": "A powerful dictation tool that uses Whisper for speech-to-text transcription, with AI-powered refinement options.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "author": "finjo",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "screenshots": [
+    "configure-ai.png",
+    "history.png",
+    "recording.png",
+    "download-models.png",
+    "dictate-prompt-selection.png",
+    "transcribed.png"
+  ],
+  "commands": [
+    {
+      "name": "dictate-simple",
+      "title": "Dictate",
+      "subtitle": "Whisper Dictation",
+      "description": "Convert speech to text using Whisper (no AI refinement)",
+      "mode": "view"
+    },
+    {
+      "name": "dictate",
+      "title": "Dictate with AI",
+      "subtitle": "Whisper Dictation",
+      "description": "Convert speech to text with AI refinement options",
+      "mode": "view"
+    },
+    {
+      "name": "download-model",
+      "title": "Download Whisper Model",
+      "subtitle": "Whisper Dictation",
+      "description": "Choose and download a model for transcription",
+      "mode": "view"
+    },
+    {
+      "name": "dictation-history",
+      "title": "Dictation History",
+      "subtitle": "Whisper Dictation",
+      "description": "View, copy, and manage past transcriptions",
+      "mode": "view"
+    },
+    {
+      "name": "configure-ai",
+      "title": "Configure AI Refinement",
+      "subtitle": "Whisper Dictation",
+      "description": "Configure AI powered speech refinement",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "whisperExecutable",
+      "title": "Whisper Executable Path",
+      "description": "Path to whisper-cpp main executable. Default assumes Homebrew on Apple Silicon. Check /usr/local/bin/whisper-cli for Intel.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "/opt/homebrew/bin/whisper-cli",
+      "default": "/opt/homebrew/bin/whisper-cli"
+    },
+    {
+      "name": "modelPath",
+      "title": "Whisper Model Path",
+      "description": "Path to your custom Whisper model file (.bin). Handled automatically if model downloaded through extension.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/path/to/your/ggml-MODEL.bin"
+    },
+    {
+      "name": "soxExecutablePath",
+      "title": "SoX Executable Path",
+      "description": "Full path to the 'sox' command-line audio utility. Default assumes Homebrew on Apple Silicon. Check /usr/local/bin/sox for Intel.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "/opt/homebrew/bin/sox",
+      "default": "/opt/homebrew/bin/sox"
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action After Transcription",
+      "description": "Action to perform automatically after transcription completes",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "None (Show Options)",
+          "value": "none"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste Text",
+          "value": "paste"
+        },
+        {
+          "title": "Copy & Paste Text",
+          "value": "copy_paste"
+        }
+      ]
+    },
+    {
+      "name": "aiRefinementMethod",
+      "title": "AI Refinement Method",
+      "description": "Choose which AI service to use for refining transcriptions",
+      "type": "dropdown",
+      "required": false,
+      "default": "disabled",
+      "data": [
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        },
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "Ollama/External API",
+          "value": "ollama"
+        }
+      ]
+    },
+    {
+      "name": "promptBeforeDictation",
+      "title": "Choose AI prompt before each dictation",
+      "description": "When enabled, you'll be asked to select an AI refinement prompt before each dictation session (only when AI refinement is enabled)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Ask for a prompt every time"
+    },
+    {
+      "name": "aiModel",
+      "title": "Raycast AI Model",
+      "description": "Select which AI model to use for refinement",
+      "type": "dropdown",
+      "required": false,
+      "default": "OpenAI_GPT4o-mini",
+      "data": [
+        {
+          "title": "GPT-4o mini",
+          "value": "OpenAI_GPT4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "OpenAI_GPT4o"
+        },
+        {
+          "title": "Claude Haiku",
+          "value": "Anthropic_Claude_Haiku"
+        }
+      ]
+    },
+    {
+      "name": "ollamaEndpoint",
+      "title": "Ollama/API Endpoint",
+      "description": "URL of your Ollama server or OpenAI compatible API (v1)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:11434",
+      "default": "http://localhost:11434"
+    },
+    {
+      "name": "ollamaApiKey",
+      "title": "API Key",
+      "description": "API key for authentication with the API server. Leave blank if not required.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "ollamaModel",
+      "title": "Model",
+      "description": "Name of the model to use with Ollama/External API (e.g. llama3.2:latest, gpt-4o-mini, claude-3-5-haiku-latest)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "llama3.2:latest",
+      "default": "llama3.2:latest"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^1.8.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,152 @@
+import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { Task } from "../api/tasks";
+import { asanaToRaycastColor } from "../helpers/colors";
+import { getDueDateColor, getDueDateText } from "../helpers/task";
+import { useSubtasks } from "../hooks/useSubtasks";
+import { useTaskDetail } from "../hooks/useTaskDetail";
+import SubtasksList from "./SubtasksList";
+import TaskActions from "./TaskActions";
+
+type TaskDetailProps = {
+  task: Task;
+  workspace?: string;
+  mutateList?: MutatePromise<Task[] | undefined>;
+};
+
+export default function TaskDetail({ task: originalTask, workspace, mutateList }: TaskDetailProps) {
+  const { data: task, isLoading: isLoadingDetail, mutate: mutateDetail } = useTaskDetail(originalTask);
+  const { data: subtasks, isLoading: isLoadingSubtasks, mutate: mutateSubtasks } = useSubtasks(task.gid);
+
+  const isLoading = isLoadingDetail || isLoadingSubtasks;
+
+  let markdown = `# ${task.name}`;
+
+  if (task.html_notes) {
+    const notes = NodeHtmlMarkdown.translate(task.html_notes.replace(/\n/g, "<br/>"));
+    markdown += `\n\n${notes}`;
+  }
+
+  if (subtasks && subtasks.length > 0) {
+    markdown += `\n\n---\n\n## Subtasks\n\n`;
+    subtasks.forEach((subtask) => {
+      const checkmark = subtask.completed ? "- [x]" : "- [ ]";
+      markdown += `${checkmark} ${subtask.name}\n`;
+    });
+  }
+
+  return (
+    <Detail
+      navigationTitle={task.name}
+      isLoading={isLoading}
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Completion Status"
+            icon={task.completed ? Icon.CheckCircle : Icon.Circle}
+            text={task.completed ? "Completed" : "Incomplete"}
+          />
+
+          {task.parent && <Detail.Metadata.Label title="Parent Task" icon={Icon.Dot} text={task.parent.name} />}
+
+          <Detail.Metadata.Label
+            title="Assignee"
+            icon={task.assignee ? getAvatarIcon(task.assignee.name) : Icon.Person}
+            text={task.assignee?.name || "Unassigned"}
+          />
+
+          {task.memberships && task.memberships.length > 0 && task.memberships.some((m) => m.section) ? (
+            <Detail.Metadata.TagList title="Section">
+              {task.memberships
+                .filter((membership) => membership.section)
+                .map((membership) => (
+                  <Detail.Metadata.TagList.Item key={membership.section!.gid} text={membership.section!.name} />
+                ))}
+            </Detail.Metadata.TagList>
+          ) : null}
+
+          <Detail.Metadata.Label
+            title="Due Date"
+            icon={{ source: Icon.Calendar, tintColor: getDueDateColor(task) }}
+            text={getDueDateText(task)}
+          />
+
+          {subtasks && subtasks.length > 0 && (
+            <Detail.Metadata.Label
+              title="Subtasks"
+              icon={Icon.CheckList}
+              text={`${subtasks.length} ${subtasks.length === 1 ? "subtask" : "subtasks"}`}
+            />
+          )}
+
+          {task.projects && task.projects.length > 0 ? (
+            <Detail.Metadata.TagList title={task.projects.length === 1 ? "Project" : "Projects"}>
+              {task.projects.map((project) => {
+                return (
+                  <Detail.Metadata.TagList.Item
+                    key={project.gid}
+                    text={project.name}
+                    color={project.color ? asanaToRaycastColor(project.color) : Color.PrimaryText}
+                  />
+                );
+              })}
+            </Detail.Metadata.TagList>
+          ) : null}
+
+          {task.tags && task.tags.length > 0 ? (
+            <Detail.Metadata.TagList title={task.tags.length === 1 ? "Tag" : "Tags"}>
+              {task.tags.map((tag) => {
+                return <Detail.Metadata.TagList.Item key={tag.gid} text={tag.name} />;
+              })}
+            </Detail.Metadata.TagList>
+          ) : null}
+
+          {task.custom_fields && task.custom_fields.length > 0
+            ? task.custom_fields.map((field) => {
+                if (field.resource_subtype === "enum" && field.enum_value) {
+                  return (
+                    <Detail.Metadata.TagList key={field.gid} title={field.name}>
+                      <Detail.Metadata.TagList.Item
+                        text={field.enum_value.name}
+                        color={asanaToRaycastColor(field.enum_value.color)}
+                      />
+                    </Detail.Metadata.TagList>
+                  );
+                }
+
+                return (
+                  <Detail.Metadata.Label
+                    key={field.gid}
+                    title={field.name}
+                    text={field.display_value ? field.display_value : "None"}
+                  />
+                );
+              })
+            : null}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          {subtasks && subtasks.length > 0 && (
+            <Action.Push
+              title="View Subtasks"
+              icon={Icon.CheckList}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              target={<SubtasksList parentTask={task} workspace={workspace} />}
+            />
+          )}
+          <TaskActions
+            task={task}
+            workspace={workspace}
+            isDetail={true}
+            mutateList={mutateList}
+            mutateDetail={mutateDetail}
+            mutateSubtasks={mutateSubtasks}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}

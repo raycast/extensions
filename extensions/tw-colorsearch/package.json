@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tw-colorpicker",
+  "title": "Tailwind CSS Colorpicker",
+  "description": "Search Tailwind CSS colors to use the HEX or RGB color value in projects that don't use Tailwind CSS classes.",
+  "icon": "icon-tw-logo.png",
+  "author": "magicjaqk",
+  "contributors": [
+    "ridemountainpig",
+    "SebDanielsson"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Color Search",
+      "subtitle": "Tailwind CSS",
+      "description": "Show Tailwind CSS color list and convert to HEX or RGB.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "culori": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/culori": "^4.0.0",
+    "@types/node": "^22.15.34",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "~5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

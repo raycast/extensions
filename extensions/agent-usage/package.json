@@ -1,0 +1,225 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-usage",
+  "title": "Agent Usage",
+  "description": "Monitor AI coding agent usage across Amp, Claude, Codex, Copilot, Droid, Gemini, Kimi, Synthetic, Antigravity, z.ai, MiniMax, and OpenCode Go",
+  "icon": "extension-icon.png",
+  "author": "thuggyduck",
+  "contributors": [
+    "alexi.build",
+    "adrianbonpin",
+    "garrick_zhang"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showAmp",
+      "type": "checkbox",
+      "title": "Visible Agents",
+      "label": "Show Amp",
+      "description": "Show Amp usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showClaude",
+      "type": "checkbox",
+      "label": "Show Claude",
+      "description": "Show Claude usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showCodex",
+      "type": "checkbox",
+      "label": "Show Codex",
+      "description": "Show Codex usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showCopilot",
+      "type": "checkbox",
+      "label": "Show Copilot",
+      "description": "Show Copilot usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDroid",
+      "type": "checkbox",
+      "label": "Show Droid",
+      "description": "Show Droid usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showGemini",
+      "type": "checkbox",
+      "label": "Show Gemini",
+      "description": "Show Gemini usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showKimi",
+      "type": "checkbox",
+      "label": "Show Kimi",
+      "description": "Show Kimi usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showSynthetic",
+      "type": "checkbox",
+      "label": "Show Synthetic",
+      "description": "Show Synthetic usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showAntigravity",
+      "type": "checkbox",
+      "label": "Show Antigravity",
+      "description": "Show Antigravity usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showZai",
+      "type": "checkbox",
+      "label": "Show z.ai (GLM)",
+      "description": "Show z.ai (GLM) usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMinimax",
+      "type": "checkbox",
+      "label": "Show MiniMax",
+      "description": "Show MiniMax usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showOpencodeGo",
+      "type": "checkbox",
+      "label": "Show OpenCode Go",
+      "description": "Show OpenCode Go subscription usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "ampDisplayMode",
+      "type": "dropdown",
+      "title": "Amp Display Mode",
+      "description": "Display Amp remaining as amount or percentage",
+      "default": "amount",
+      "required": false,
+      "data": [
+        {
+          "value": "amount",
+          "title": "Amount"
+        },
+        {
+          "value": "percentage",
+          "title": "Percentage"
+        }
+      ]
+    },
+    {
+      "name": "copilotAuthToken",
+      "type": "password",
+      "title": "Copilot Authorization Token (Optional)",
+      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
+      "required": false
+    },
+    {
+      "name": "kimiAuthToken",
+      "type": "password",
+      "title": "Kimi Authorization Token (Optional)",
+      "description": "Auto-detected from OpenCode login (kimi-for-coding). Fallback: paste the Authorization header value from https://www.kimi.com/code/console DevTools. Format: 'Bearer eyJ...' or just 'eyJ...'",
+      "required": false
+    },
+    {
+      "name": "syntheticApiToken",
+      "type": "password",
+      "title": "Synthetic API Token (Optional)",
+      "description": "Auto-detected from OpenCode login (synthetic). Fallback: paste your Synthetic API key from https://synthetic.new/billing.",
+      "required": false
+    },
+    {
+      "name": "zaiApiToken",
+      "type": "password",
+      "title": "z.ai API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "minimaxApiToken",
+      "type": "password",
+      "title": "MiniMax API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from MINIMAX_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "opencodegoWorkspaceId",
+      "type": "textfield",
+      "title": "OpenCode Go Workspace ID",
+      "description": "Your OpenCode workspace ID (e.g. wrk_abc123 or just the suffix after wrk_). Found in the OpenCode dashboard URL.",
+      "required": false
+    },
+    {
+      "name": "opencodegoAuthCookie",
+      "type": "password",
+      "title": "OpenCode Go Auth Cookie",
+      "description": "The 'auth' cookie value from your OpenCode session. Open opencode.ai, log in, then copy the 'auth' cookie from DevTools (Application → Cookies).",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "agent-usage",
+      "title": "Agent Usage",
+      "subtitle": "Show Agents Usage",
+      "description": "Show agents usage",
+      "mode": "view"
+    },
+    {
+      "name": "agent-usage-menubar",
+      "title": "Agent Usage Menu Bar",
+      "subtitle": "Agent Usage",
+      "description": "Show agent usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'"
+  }
+}

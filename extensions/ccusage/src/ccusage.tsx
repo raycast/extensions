@@ -1,0 +1,23 @@
+import { List } from "@raycast/api";
+import { DailyUsage } from "./components/DailyUsage";
+import { WeeklyUsage } from "./components/WeeklyUsage";
+import { SessionUsage } from "./components/SessionUsage";
+import { CostAnalysis } from "./components/CostAnalysis";
+import { ModelBreakdown } from "./components/ModelBreakdown";
+import { UsageLimits } from "./components/UsageLimits";
+import { preferences } from "./preferences";
+
+export default function CCUsage() {
+  const selectedItemId = preferences.defaultView;
+
+  return (
+    <List selectedItemId={selectedItemId} isShowingDetail>
+      <DailyUsage />
+      <WeeklyUsage />
+      <SessionUsage />
+      <CostAnalysis />
+      <ModelBreakdown />
+      <UsageLimits />
+    </List>
+  );
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudstash",
+  "description": "Save links to Cloudstash",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "author": "birdie",
+  "platforms": [
+    "macOS"
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "effect": "4.0.0-beta.39"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.8",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.1"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "save-link",
+      "title": "Save to Cloudstash",
+      "description": "Paste a URL to save it to Cloudstash",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "save",
+        "link",
+        "url",
+        "bookmark"
+      ]
+    },
+    {
+      "name": "save-clipboard-url",
+      "title": "Save Clipboard URL",
+      "description": "Save the URL from your clipboard to Cloudstash",
+      "mode": "no-view",
+      "keywords": [
+        "save",
+        "clipboard",
+        "link",
+        "url",
+        "bookmark"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Only change this if you self-host Cloudstash",
+      "type": "textfield",
+      "default": "https://cloudstash.dev",
+      "required": false
+    }
+  ],
+  "title": "Cloudstash"
+}

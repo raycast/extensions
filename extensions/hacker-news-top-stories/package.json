@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hacker-news-top-stories",
+  "title": "Hacker News Top Stories",
+  "description": "A menubar extension to view top stories on Hacker News based on a configurable points threshold.",
+  "icon": "icon.png",
+  "author": "KevinBatdorf",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-top-stories",
+      "title": "Hacker News Top Stories Menu Bar",
+      "description": "View recent Hacker News stories based on a configurable points threshold.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "points",
+      "title": "Minimum Points",
+      "description": "Minimum points to show stories. Updating this will reset your activity.",
+      "type": "textfield",
+      "default": "500",
+      "required": false
+    },
+    {
+      "name": "enableNotifications",
+      "title": "Notifications",
+      "description": "Enable notifications for new stories.",
+      "label": "Enable Notifications",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "useStoryIcon",
+      "title": "Notification Icon",
+      "description": "Use the story icon instead of the default Hacker News icon.",
+      "label": "Use Story Icons",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.1",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.2",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

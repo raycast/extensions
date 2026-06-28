@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "&"
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "*"
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": ")"
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": "0"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "="
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": "q",
+        "upper": "Q"
+    },
+    "KeyW": {
+        "lower": "ㅜ",
+        "upper": "우"
+    },
+    "KeyE": {
+        "lower": "ㅔ",
+        "upper": "에"
+    },
+    "KeyR": {
+        "lower": "ㄹ",
+        "upper": "R"
+    },
+    "KeyT": {
+        "lower": "ㅌ",
+        "upper": "T"
+    },
+    "KeyY": {
+        "lower": "ㅣ",
+        "upper": "이"
+    },
+    "KeyU": {
+        "lower": "ㅜ",
+        "upper": "우"
+    },
+    "KeyI": {
+        "lower": "ㅣ",
+        "upper": "이"
+    },
+    "KeyO": {
+        "lower": "ㅗ",
+        "upper": "오"
+    },
+    "KeyP": {
+        "lower": "ㅍ",
+        "upper": "P"
+    },
+    "BracketLeft": {
+        "lower": "[",
+        "upper": "₩"
+    },
+    "BracketRight": {
+        "lower": "[",
+        "upper": "}"
+    },
+    "KeyA": {
+        "lower": "ㅏ",
+        "upper": "아"
+    },
+    "KeyS": {
+        "lower": "ㅅ",
+        "upper": "ㅆ"
+    },
+    "KeyD": {
+        "lower": "ㄷ",
+        "upper": "ㄸ"
+    },
+    "KeyF": {
+        "lower": "ㅍ",
+        "upper": "F"
+    },
+    "KeyG": {
+        "lower": "ㄱ",
+        "upper": "ㄲ"
+    },
+    "KeyH": {
+        "lower": "ㅎ",
+        "upper": "H"
+    },
+    "KeyJ": {
+        "lower": "ㅈ",
+        "upper": "ㅉ"
+    },
+    "KeyK": {
+        "lower": "ㅋ",
+        "upper": "K"
+    },
+    "KeyL": {
+        "lower": "ㄹ",
+        "upper": "L"
+    },
+    "Semicolon": {
+        "lower": ";",
+        "upper": "+"
+    },
+    "Quote": {
+        "lower": ":",
+        "upper": "\""
+    },
+    "Backquote": {
+        "lower": "₩",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "|"
+    },
+    "KeyZ": {
+        "lower": "z",
+        "upper": "Z"
+    },
+    "KeyX": {
+        "lower": "ㅇ",
+        "upper": "ㅇ"
+    },
+    "KeyC": {
+        "lower": "ㅊ",
+        "upper": "C"
+    },
+    "KeyV": {
+        "lower": "v",
+        "upper": "V"
+    },
+    "KeyB": {
+        "lower": "ㅂ",
+        "upper": "ㅃ"
+    },
+    "KeyN": {
+        "lower": "ㄴ",
+        "upper": "N"
+    },
+    "KeyM": {
+        "lower": "ㅁ",
+        "upper": "M"
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "<"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": ">"
+    },
+    "Slash": {
+        "lower": "/",
+        "upper": "?"
+    }
+}

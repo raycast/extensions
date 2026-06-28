@@ -1,0 +1,60 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Group
+order: 1
+slug: /core/group/
+category: "layout"
+description: "Compose elements and components in a horizontal flex container"
+props: ["Group"]
+import: "import { Group } from '@mantine/core';"
+source: "mantine-core/src/components/Group/Group.tsx"
+docs: "core/Group.mdx"
+styles: ["Group", "single-node"]
+---
+
+import { GroupDemos } from "@mantine/demos";
+
+## Usage
+
+<Demo data={GroupDemos.configurator} />
+
+## Group children
+
+Group component uses `className` prop to add styles to its children, child components must accept it::
+
+```tsx
+// Will not work with Group – component does not handle className
+const MyButton = ({ label }) => <button>{label}</button>;
+
+// Will work with Group – handles className
+const MyButton = ({ label, className }) => <button className={className}>{label}</button>;
+
+// Will work with Group – handles className
+const MyButton = ({ label, ...others }) => <button {...others}>{label}</button>;
+```
+
+**!important** Group will work only with React elements. Strings, numbers, fragments and other parts will
+not have correct styles:
+
+```tsx
+// Invalid Group usage, do not do this
+import { Group } from "@mantine/core";
+
+function InvalidDemo() {
+  return (
+    <Group>
+      First string
+      <>
+        <div>element inside fragment</div>
+      </>
+      {20}
+    </Group>
+  );
+}
+```
+
+## Browser support
+
+Group uses [flexbox gap](https://caniuse.com/flexbox-gap) to add spacing between children.
+In older browsers Group children will not have spacing.

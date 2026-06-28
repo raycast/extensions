@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "word-count",
+  "title": "Word Count",
+  "description": "Count characters, words, sentences, and paragraphs in text.",
+  "icon": "word-count.png",
+  "access": "public",
+  "author": "itsmingjie",
+  "contributors": [
+    "koayon",
+    "chrismessina",
+    "litomore",
+    "aryan_thatte"
+  ],
+  "pastContributors": [
+    "danulqua"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "crossExtensions": [
+    "huzef44/screenocr"
+  ],
+  "commands": [
+    {
+      "name": "count",
+      "title": "Count",
+      "subtitle": "Word Count",
+      "description": "Count characters, words, sentences, and paragraphs in text.",
+      "mode": "view",
+      "keywords": [
+        "word",
+        "character",
+        "sentence",
+        "paragraph"
+      ]
+    },
+    {
+      "name": "count-screenshot",
+      "title": "Count from Screenshot",
+      "subtitle": "Word Count",
+      "description": "Capture a screenshot and count words, characters, sentences, and paragraphs using OCR.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "ocr",
+        "word",
+        "character",
+        "sentence",
+        "paragraph",
+        "capture"
+      ]
+    },
+    {
+      "name": "count-overlay",
+      "title": "Word Count in Overlay",
+      "subtitle": "Word Count",
+      "description": "Show word count in an overlay on top of other applications.",
+      "mode": "no-view",
+      "keywords": [
+        "overlay",
+        "word",
+        "character",
+        "sentence",
+        "paragraph"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "raycast-cross-extension": "^0.2.3",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "js-yaml": "4.1.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "jest"
+  }
+}

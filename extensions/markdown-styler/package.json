@@ -1,0 +1,40 @@
+{
+  "name": "markdown-styler",
+  "title": "Markdown Styler",
+  "description": "Convert Markdown to styled HTML with inline CSS for content platforms",
+  "icon": "command-icon.png",
+  "author": "qcrao",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mp-style-markdown",
+      "title": "Style Markdown",
+      "subtitle": "Convert to Styled Format",
+      "description": "Convert Markdown to styled HTML with inline CSS for content platforms",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.17.0",
+    "marked": "^9.1.2"
+  },
+  "devDependencies": {
+    "@types/marked": "^5.0.2",
+    "@types/node": "18.8.3",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

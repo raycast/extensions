@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flight-miles-calculator",
+  "title": "Flight Miles Calculator",
+  "description": "Calculate how many miles you earn for a flight.",
+  "icon": "extension_icon.png",
+  "author": "DannySeidel",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "keywords": [
+    "flight",
+    "airplane",
+    "aviation",
+    "miles",
+    "distance",
+    "travel",
+    "calculator"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Calculate Miles Earned",
+      "description": "Calculate how many miles you earn for a flight.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

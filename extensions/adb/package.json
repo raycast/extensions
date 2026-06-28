@@ -1,0 +1,249 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adb",
+  "title": "Android Debug Bridge (Adb) Commands",
+  "description": "Run useful adb commands",
+  "icon": "adb.png",
+  "author": "Quentin23Soleil",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "adb-current-activity",
+      "title": "Current Activity",
+      "description": "Get the current activity name and put it in your clipboard",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "adb-screenshots",
+      "title": "Take Screenshot",
+      "description": "Takes a screenshot, saves it, and put it in your clipboard for easy-sharing",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-open-locale-settings",
+      "title": "Open Locale Settings",
+      "description": "Open the locale settings on your device",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-open-developer-settings",
+      "title": "Open Developer Settings",
+      "description": "Open the developer settings on your device",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-toggle-layout-bounds",
+      "title": "Toggle Layout Bounds",
+      "description": "Show or Hide the layout bounds",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "adb-wifi",
+      "title": "Enable or Disable Wifi",
+      "description": "enable/disable wifi",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-airplane",
+      "title": "Enable or Disable Airplane Mode",
+      "description": "enable/disable airplane mode (all connectivity on/off)",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-dark-mode",
+      "title": "Enable or Disable Dark Mode",
+      "description": "enable/disable/auto dark mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-uninstall",
+      "title": "Uninstall",
+      "description": "Uninstall an app using its package name",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-clear-app-data",
+      "title": "Clear App Data",
+      "description": "Remove all files and cache for an app",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-force-stop",
+      "title": "Force Stop App",
+      "description": "Force stop an app via its package name",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-soft-kill",
+      "title": "Softly Kill App",
+      "description": "Kill an app process to test state save/restoration",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-font-size",
+      "title": "Change the Font Size",
+      "description": "Increase or decrease font size",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "factor",
+          "placeholder": "1.0 - 1.3",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-display-size",
+      "title": "Change the Display Density",
+      "description": "Increase or decrease the display density",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "factor",
+          "placeholder": "0.5 - 3.0",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-large-font-display",
+      "title": "Set Display/Font to Large",
+      "description": "Set the display and fond size to large values",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-reset-font-display",
+      "title": "Reset Display/Font Size",
+      "description": "Resets the font and display sizes to normal values",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-open-url",
+      "title": "Open Url",
+      "description": "Open an url through ADB (deeplink)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "yourapp:// (or http[s]://)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-write",
+      "title": "Write Text",
+      "description": "Send text to the device",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "your text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-animation-scale",
+      "title": "Change the Animation Scale",
+      "description": "Increase or decrease the animation scale",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "factor",
+          "placeholder": "0 - 10.0",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-restart",
+      "title": "Restart ADB",
+      "disabledByDefault": true,
+      "description": "Restart ADB by killing the ADB server and starting again",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/Android/sdk"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "expand-tilde": "^2.0.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/expand-tilde": "^2.0.2",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "moment": "^2.29.4",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "search-github-stars",
+  "title": "GitHub Stars",
+  "description": "Display and filter your recent GitHub stars",
+  "icon": "icon.png",
+  "author": "mrmartineau",
+  "contributors": [
+    "prince_yadav"
+  ],
+  "keywords": [
+    "stars"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Starred Repositories",
+      "subtitle": "GitHub",
+      "description": "Display and filter your recent GitHub stars",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubUsername",
+      "type": "textfield",
+      "title": "GitHub username",
+      "description": "Please enter the GitHub username",
+      "required": true
+    },
+    {
+      "name": "resultsCount",
+      "type": "textfield",
+      "title": "Results count",
+      "description": "The number of results to display",
+      "required": false,
+      "default": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2",
+    "fetch-readme": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.2",
+    "@types/parse-github-url": "^1.0.3",
+    "@types/react": "^19.2.13",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "eslint": "^8.23.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

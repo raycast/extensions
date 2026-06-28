@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-maps-search",
+  "title": "Apple Maps Search",
+  "description": "Quickly search Apple Maps or find directions.",
+  "icon": "apple-maps-icon.png",
+  "author": "djpowers",
+  "contributors": [
+    "ratoru",
+    "SebDanielsson"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "directions",
+    "navigation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "directionsHome",
+      "title": "Directions Home",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions from your current location to your home.",
+      "mode": "no-view",
+      "keywords": [
+        "travel home"
+      ]
+    },
+    {
+      "name": "directionsTo",
+      "title": "Directions To",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions to a destination.",
+      "mode": "view",
+      "keywords": [
+        "travel to"
+      ]
+    },
+    {
+      "name": "searchMaps",
+      "title": "Search Maps",
+      "subtitle": "Apple Maps",
+      "description": "Find a specific place or category on Apple Maps.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Location or Category",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "find place"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "homeAddress",
+      "title": "Home Address",
+      "description": "Enter your home address as you would enter it into Apple Maps.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Street Address, City, State, ZIP Code"
+    },
+    {
+      "name": "preferredMode",
+      "title": "Preferred Mode of Transport",
+      "description": "Select your preferred type of transport.",
+      "type": "dropdown",
+      "required": true,
+      "default": "r",
+      "data": [
+        {
+          "title": "Driving",
+          "value": "d"
+        },
+        {
+          "title": "Walking",
+          "value": "w"
+        },
+        {
+          "title": "Transit",
+          "value": "r"
+        },
+        {
+          "title": "Cycling",
+          "value": "c"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "ray pull-contributions"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

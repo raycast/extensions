@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "handy",
+  "title": "Handy",
+  "description": "Control Handy speech-to-text: transcription history, dictionary, model selection, and recording",
+  "icon": "handy.png",
+  "author": "mattiacolombomc",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "handyBinaryPath",
+      "title": "Handy Binary Path",
+      "description": "Path to the Handy binary (used for Toggle Recording)",
+      "type": "textfield",
+      "default": "/Applications/Handy.app/Contents/MacOS/Handy",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "subtitle": "Handy",
+      "description": "Toggle Handy transcription recording on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Last Transcript",
+      "subtitle": "Handy",
+      "description": "Copy the most recent transcription to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-transcript",
+      "title": "Paste Last Transcript",
+      "subtitle": "Handy",
+      "description": "Paste the most recent transcription into the active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-dictionary-word",
+      "title": "Add Dictionary Word",
+      "subtitle": "Handy",
+      "description": "Quickly add a word to the custom dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "subtitle": "Handy",
+      "description": "Add and remove custom words",
+      "mode": "view"
+    },
+    {
+      "name": "select-model",
+      "title": "Select Model",
+      "subtitle": "Handy",
+      "description": "Switch the active transcription model",
+      "mode": "view"
+    },
+    {
+      "name": "select-language",
+      "title": "Select Language",
+      "subtitle": "Handy",
+      "description": "Set the transcription language for the active model",
+      "mode": "view"
+    },
+    {
+      "name": "open-recordings-folder",
+      "title": "Open Recordings Folder",
+      "subtitle": "Handy",
+      "description": "Open the recordings directory in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "subtitle": "Handy",
+      "description": "Browse and copy transcription history",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.3",
+    "execa": "^9.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.14",
+    "better-sqlite3": "^12.8.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ESLINT_USE_FLAT_CONFIG=false npx eslint src --ext .ts,.tsx --fix",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false npx eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

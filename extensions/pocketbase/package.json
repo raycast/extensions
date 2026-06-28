@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pocketbase",
+  "title": "PocketBase",
+  "description": "Manage PocketBase",
+  "icon": "pocketbase.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "pocketbase_url",
+      "title": "PocketBase URL",
+      "type": "textfield",
+      "required": true,
+      "description": "URL of PocketBase Instance",
+      "placeholder": "https://app.pockethost.io/"
+    },
+    {
+      "name": "pocketbase_email",
+      "title": "PocketBase Email Address",
+      "type": "textfield",
+      "required": true,
+      "description": "Email Address of the Admin",
+      "placeholder": "admin@example.com"
+    },
+    {
+      "name": "pocketbase_password",
+      "title": "PocketBase Password",
+      "type": "password",
+      "required": true,
+      "description": "Password of the Admin",
+      "placeholder": "hunter2"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-collections",
+      "title": "Search Collections",
+      "subtitle": "PocketBase",
+      "description": "Search Collections and their Records",
+      "mode": "view"
+    },
+    {
+      "name": "search-backups",
+      "title": "Search Backups",
+      "subtitle": "PocketBase",
+      "description": "Search Backups",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
+    "filesize": "^11.0.2",
+    "pocketbase": "^0.21.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

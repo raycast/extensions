@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figma-link-cleaner",
+  "title": "Figma Link Cleaner",
+  "description": "Clean and shorten Figma URLs instantly. Removes tracking parameters, file slugs, and creates ultra-short fgma.cc links with one hotkey.",
+  "icon": "icon.png",
+  "author": "iamshubhransh",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "figma",
+    "url",
+    "link",
+    "shortener",
+    "clean",
+    "design",
+    "clipboard"
+  ],
+  "commands": [
+    {
+      "name": "clean-figma-link",
+      "title": "Clean Figma Link",
+      "subtitle": "Figma",
+      "description": "Copies the current Figma selection link (via Cmd+L), cleans it by removing tracking params, and optionally shortens via fgma.cc",
+      "mode": "no-view",
+      "hotkey": {
+        "modifiers": [
+          "ctrl"
+        ],
+        "key": "l"
+      },
+      "keywords": [
+        "figma",
+        "link",
+        "url",
+        "clean",
+        "shorten",
+        "copy"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "shortenerEnabled",
+      "type": "checkbox",
+      "title": "URL Shortening",
+      "label": "Enable fgma.cc shortening",
+      "description": "When enabled, cleaned URLs will also be shortened via fgma.cc for even shorter links (e.g., fgma.cc/abc123)",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key (Optional)",
+      "description": "Optional API key for fgma.cc authentication. Leave empty for public use.",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

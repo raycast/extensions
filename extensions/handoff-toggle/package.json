@@ -1,0 +1,49 @@
+{
+  "name": "handoff-toggle",
+  "title": "Handoff Toggle",
+  "description": "Toggle macOS Handoff feature on/off",
+  "icon": "icon.png",
+  "author": "wellsgz",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Handoff",
+      "description": "Toggle macOS Handoff feature",
+      "mode": "no-view"
+    },
+    {
+      "name": "check",
+      "title": "Check Handoff Status",
+      "description": "Check current Handoff status",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/utils": "^1.10.1",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "raycast": {
+    "schemaVersion": 1
+  }
+}

@@ -1,0 +1,110 @@
+---
+description: Cursor Costs Extension Development Guidelines
+globs: ["src/**/*.tsx", "src/**/*.ts"]
+alwaysApply: true
+---
+
+# Cursor Costs Extension Guidelines
+
+## Project Structure
+
+```text
+src/
+├── cursor-costs-menu.tsx    # Menu bar command
+├── cursor-costs-list.tsx    # List view command
+├── hooks/
+│   └── useCursorUsage.ts    # Data fetching hook with caching
+├── utils/
+│   └── formatting.ts        # Formatting utilities
+└── types.ts                 # TypeScript interfaces
+```
+
+## Key Components
+
+### Menu Bar Command (`cursor-costs-menu.tsx`)
+
+- Shows usage in menu bar title (configurable: percent, cost, usage, or both)
+- Displays sections: Subscription, Cost, Models, Tokens
+- Uses `MenuBarExtra` component from Raycast API
+- Preferences control visibility and display format
+
+### List Command (`cursor-costs-list.tsx`)
+
+- Full-screen list view with model breakdown
+- Searchable by model name
+- Toggle detail panel with `⌘D`
+- Copy actions for model names and costs
+
+### Data Hook (`useCursorUsage.ts`)
+
+- Fetches from two API endpoints (usage-summary, aggregated-usage-events)
+- Uses `useCachedPromise` from `@raycast/utils` for caching
+- Configurable revalidation interval
+- Safe toast handling (no toasts in background mode)
+
+## Coding Conventions
+
+### Error Handling
+
+```typescript
+// For async actions that don't need result
+void open("https://cursor.com");
+void openExtensionPreferences();
+
+// For API errors, show user-friendly messages
+if (error.message.includes("token")) {
+  // Authentication error - guide user to get new token
+}
+```
+
+### Formatting Functions
+
+All formatting utilities are in `src/utils/formatting.ts`:
+
+- `formatCents(cents, context)` - Format cents to dollars
+- `formatTokens(tokens)` - Short format: 15.8m, 1.2k
+- `formatTokensFull(tokens)` - Full format: 15,800,000
+- `calculatePercentage(value, total)` - Returns percentage (can exceed 100%)
+- `getProgressIcon(percentage)` - Returns appropriate progress icon
+
+### Preferences
+
+- Global preferences: token, refresh interval, date range
+- Menu bar preferences: display format, visibility toggles
+- Access with `getPreferenceValues<PreferencesType>()`
+
+### Type Safety
+
+- All API responses have TypeScript interfaces in `types.ts`
+- Use `ModelAggregation` for per-model data
+- Use `CombinedUsageData` for combined API response
+- Handle null/undefined values explicitly
+
+## Performance
+
+### Memoization
+
+Use `useMemo` for expensive computations:
+
+```typescript
+const sortedModels = useMemo(() => {
+  return sortModelsByCost(data?.usage?.aggregations);
+}, [data?.usage?.aggregations]);
+```
+
+### Background Mode
+
+- Check `environment.launchType` before showing toasts
+- Menu bar commands run in background mode with `interval`
+- Don't show UI feedback in background mode
+
+## Testing Checklist
+
+- [ ] Menu bar shows correct format based on preferences
+- [ ] Error states show helpful messages
+- [ ] Token expiration provides clear instructions
+- [ ] All sections can be toggled via preferences
+- [ ] List view search works correctly
+- [ ] Copy actions work for model name and cost
+- [ ] Refresh works in both commands
+- [ ] Dark/light theme icons display correctly

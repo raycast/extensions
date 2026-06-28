@@ -1,0 +1,1 @@
+export { useAllZoneVolumesQuery } from './useVolumesQuery'

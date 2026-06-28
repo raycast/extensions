@@ -1,0 +1,6 @@
+
+###
+GET https://doutu.lccyy.com/doutu/items?keyword=hi&pageNum=1&pageSize=50 HTTP/1.1
+
+###
+GET https://doutu.lccyy.com/doutu/items?keyword=hi&pageNum=2&pageSize=50 HTTP/1.1

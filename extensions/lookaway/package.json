@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lookaway",
+  "version": "1.0.2",
+  "title": "Lookaway",
+  "description": "Control the Lookaway app for managing breaks.",
+  "icon": "lookaway-icon.png",
+  "author": "kush",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "startLookaway",
+      "title": "Start Lookaway",
+      "description": "Starts the Lookaway application.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stopLookaway",
+      "title": "Stop Lookaway",
+      "description": "Stops the Lookaway application.",
+      "mode": "no-view"
+    },
+    {
+      "name": "startNextBreak",
+      "title": "Start Next Break",
+      "description": "Starts the next scheduled break immediately.",
+      "mode": "no-view"
+    },
+    {
+      "name": "startLongBreak",
+      "title": "Start Long Break",
+      "description": "Starts a long break immediately.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pauseTimer",
+      "title": "Pause Work Mode",
+      "description": "Pauses the Lookaway work mode indefinitely.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pauseTimerTemporarily",
+      "title": "Pause Work Mode Temporarily",
+      "description": "Pauses the Lookaway work mode for a specific duration.",
+      "mode": "view"
+    },
+    {
+      "name": "postponeBreak",
+      "title": "Postpone Break",
+      "description": "Postpones the upcoming break by a specific duration.",
+      "mode": "view"
+    },
+    {
+      "name": "resumeTimer",
+      "title": "Resume Work Mode",
+      "description": "Resumes the Lookaway work mode if paused.",
+      "mode": "no-view"
+    },
+    {
+      "name": "openSettings",
+      "title": "Open Lookaway Settings",
+      "description": "Opens the Lookaway application settings.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "format:check": "prettier --check . --ignore-path .gitignore",
+    "format:write": "prettier --write . --ignore-path .gitignore",
+    "publish": "ray publish"
+  }
+}

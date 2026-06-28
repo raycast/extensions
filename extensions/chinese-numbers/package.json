@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chinese-numbers",
+  "title": "Chinese Numbers",
+  "description": "Chinese Numbers is a Raycast Extension to convert Arabic numbers to Chinese numbers.",
+  "icon": "chinese-numbers.png",
+  "author": "raffeyang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Chinese Numbers",
+      "subtitle": "Chinese Numbers",
+      "description": "Chinese Numbers is a Raycast Extension to convert Arabic numbers to Chinese numbers.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "nzh": "^1.0.8"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

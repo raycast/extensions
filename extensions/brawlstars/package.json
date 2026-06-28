@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brawlstars",
+  "title": "Brawl Stars Search",
+  "description": "Extension to search for Brawl Stars players, clubs and brawlers",
+  "icon": "brawstarLogo.png",
+  "categories": [
+    "Other"
+  ],
+  "author": "Maxime_GUILIANI",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "brawlers",
+      "title": "Search Brawlers",
+      "description": "List Of All Brawlers",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Search Club",
+      "description": "Search For A Club With Its Tag (# is not required)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Club Id",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "player",
+      "title": "Search Player",
+      "description": "Search For A Player With His Tag (# is not required)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Player Id",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "placeholder": "Generate at https://developer.brawlstars.com",
+      "description": "See the extension's README for instructions about how to create a token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

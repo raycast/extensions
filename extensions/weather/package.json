@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "weather",
+  "title": "Weather",
+  "description": "Weather forecast via wttr.in",
+  "icon": "weather.png",
+  "author": "tonka3000",
+  "contributors": [
+    "xilopaint",
+    "ridemountainpig",
+    "pernielsentikaer",
+    "proprocrastinator"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Weather",
+      "description": "Weather forecast via wttr.in",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Weather Menu Bar",
+      "description": "Show weather in menu bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "showmenuicon",
+          "description": "Show Icon",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appearance",
+          "label": "Show Icon",
+          "default": true
+        },
+        {
+          "name": "showmenutext",
+          "description": "Show Text",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Text",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "unitsystem",
+      "type": "dropdown",
+      "title": "Unit System",
+      "required": false,
+      "default": "metric",
+      "description": "Unit System",
+      "data": [
+        {
+          "title": "Metric System",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial Units",
+          "value": "imperial"
+        }
+      ]
+    },
+    {
+      "name": "defaultquery",
+      "type": "textfield",
+      "title": "Default query",
+      "placeholder": "Empty or location (e.g. London)",
+      "required": false,
+      "default": "",
+      "description": "Default query when search bar is empty. Same content as in the search bar."
+    },
+    {
+      "name": "clockformat",
+      "description": "Clock Format",
+      "type": "dropdown",
+      "title": "Clock Format",
+      "default": "12h",
+      "required": false,
+      "data": [
+        {
+          "title": "12 Hours",
+          "value": "12h"
+        },
+        {
+          "title": "24 Hours",
+          "value": "24h"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3",
+    "javascript-time-ago": "^2.6.4",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/moment": "^2.13.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "0.3.0",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

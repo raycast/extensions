@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkace-search",
+  "title": "LinkAce Search",
+  "description": "Search, filter, and open links from your LinkAce instance",
+  "icon": "extension-icon.png",
+  "author": "zisoft",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-linkace",
+      "title": "Search LinkAce",
+      "subtitle": "Search bookmarks from your LinkAce instance",
+      "description": "Search, filter, inspect, and open links from LinkAce",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchTerm",
+          "type": "text",
+          "placeholder": "Search term"
+        }
+      ]
+    },
+    {
+      "name": "test-linkace-connection",
+      "title": "Test LinkAce Connection",
+      "subtitle": "Verify URL, API key, and proxy settings",
+      "description": "Test connectivity and authentication for your LinkAce instance",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "linkaceUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "LinkAce URL",
+      "description": "Base URL of your LinkAce instance",
+      "placeholder": "https://linkace.example.com"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Personal API key used to access your LinkAce instance"
+    },
+    {
+      "name": "proxyUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Proxy URL",
+      "description": "Optional HTTP/HTTPS proxy URL used for API requests. Overrides environment and system proxy settings.",
+      "placeholder": "http://proxy.example.com:8080"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^1.17.0",
+    "pac-resolver": "^9.0.1",
+    "proxy-from-env": "^2.1.0",
+    "quickjs-wasi": "^2.2.0",
+    "undici": "^8.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/proxy-from-env": "^1.0.4",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

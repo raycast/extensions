@@ -1,0 +1,183 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tabbit",
+  "description": "Open Tabbit Browser windows and URLs from Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "test": "node --test",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "^0.28.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Tabbit",
+      "description": "Open a new Tabbit tab",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Tabbit",
+      "description": "Open a new Tabbit window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "New Incognito Window",
+      "subtitle": "Tabbit",
+      "description": "Open a new incognito window in Tabbit",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-url-in-tabbit",
+      "title": "Open URL in Tabbit",
+      "subtitle": "Tabbit",
+      "description": "Open a URL in Tabbit Browser. Search text with your selected search engine.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "title": "Search Engine",
+          "description": "Search engine to use when the input is not a URL.",
+          "type": "dropdown",
+          "required": true,
+          "default": "bing",
+          "data": [
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Brave Search",
+              "value": "brave"
+            },
+            {
+              "title": "Yahoo",
+              "value": "yahoo"
+            },
+            {
+              "title": "Baidu",
+              "value": "baidu"
+            },
+            {
+              "title": "Sogou",
+              "value": "sogou"
+            },
+            {
+              "title": "360 Search",
+              "value": "so"
+            },
+            {
+              "title": "Yandex",
+              "value": "yandex"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Tabbit",
+      "description": "Search bookmarks in Tabbit",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabbit",
+      "title": "Search Tabbit",
+      "subtitle": "Tabbit",
+      "description": "Search tabs, history, and bookmarks in Tabbit",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Tabbit",
+      "description": "Search browsing history in Tabbit",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Tabbit",
+      "description": "Search and switch open tabs in Tabbit",
+      "mode": "view"
+    }
+  ],
+  "title": "Tabbit",
+  "author": "AkaChou",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "tabbitVersion",
+      "title": "Tabbit Version",
+      "description": "Choose which Tabbit app to use when both the CN and international versions are installed.",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "CN (Tabbit Browser)",
+          "value": "cn"
+        },
+        {
+          "title": "International (Tabbit)",
+          "value": "global"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pm2",
+  "title": "PM2",
+  "type": "module",
+  "description": "Advanced, production process manager for Node.js.",
+  "icon": "pm2-icon.png",
+  "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "external": [
+    "../../tools/prompt",
+    "blessed/lib/colors",
+    "fsevents",
+    "pty.js",
+    "term.js"
+  ],
+  "commands": [
+    {
+      "name": "main",
+      "title": "PM2 List",
+      "description": "List all PM2 processes.",
+      "mode": "view"
+    },
+    {
+      "name": "api",
+      "title": "PM2 API",
+      "description": "Raycast PM2 API command.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "required": true,
+      "name": "nodePath",
+      "title": "node bin path",
+      "description": "Your node binary path",
+      "placeholder": "e.g. /opt/homebrew/bin/node"
+    },
+    {
+      "type": "dropdown",
+      "required": false,
+      "name": "defaultNodeExecutor",
+      "title": "Default Node.js executor",
+      "default": "raycastNodePath",
+      "description": "Select the default Node.js executor for running PM2 commands",
+      "data": [
+        {
+          "title": "Raycast Built-in",
+          "value": "raycastNodePath"
+        },
+        {
+          "title": "Preference Settings",
+          "value": "preferenceNodePath"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "required": false,
+      "name": "pm2Home",
+      "title": "PM2 Home Directory",
+      "default": "",
+      "description": "The directory where PM2 stores its configuration files and logs",
+      "placeholder": "e.g. /Users/litomore/.pm3"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.18.1",
+    "pm2": "^7.0.1",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.23.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
