@@ -1,6 +1,6 @@
 # Wayback Machine Changelog
 
-## [Add] - {PR_MERGE_DATE}
+## [Add] - 2026-06-28
 
 - Add `Search Pages` command
 
