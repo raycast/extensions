@@ -12,6 +12,7 @@ import useVercel from "./hooks/use-vercel-info";
 import { StateIcon } from "./pages/lists/deployments-list";
 import { Deployment, Team } from "./types";
 import fromNow from "./utils/time";
+import { getDeploymentOwnerSlug } from "./utils/deployment-owner";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL, parseVercelResponse } from "./vercel";
 
 export default function MenuBarDeployments() {
@@ -63,7 +64,7 @@ export default function MenuBarDeployments() {
               onAction={() => {
                 if (user) {
                   const deploymentUrl = getDeploymentURL(
-                    team?.slug || user.username || "",
+                    getDeploymentOwnerSlug({ deployment, team, username: user.username }) || user.username,
                     deployment.name,
                     deployment.uid,
                   );

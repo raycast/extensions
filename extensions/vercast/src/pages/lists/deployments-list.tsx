@@ -14,6 +14,7 @@ import {
   CANCEL_DEPLOYMENT_ACTION,
   CANCEL_DEPLOYMENT_SHORTCUT,
 } from "../../deployment";
+import { getDeploymentOwnerSlug } from "../../utils/deployment-owner";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
@@ -73,7 +74,11 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 {user && (
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
-                    url={getDeploymentURL(team?.slug || user.username, deployment.name, getDeploymentId(deployment))}
+                    url={getDeploymentURL(
+                      getDeploymentOwnerSlug({ deployment, team, username: user.username }) || user.username,
+                      deployment.name,
+                      getDeploymentId(deployment),
+                    )}
                     icon={Icon.Link}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "v" },

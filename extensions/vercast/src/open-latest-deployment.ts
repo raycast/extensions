@@ -1,6 +1,7 @@
 import { getPreferenceValues, LocalStorage, open, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { fetchLatestDeployment, fetchTeams, fetchUser, getDeploymentURL } from "./vercel";
 import isValidToken from "./utils/is-valid-token";
+import { getDeploymentOwnerSlug } from "./utils/deployment-owner";
 
 export default async function Command() {
   const toast = await showToast({
@@ -57,7 +58,7 @@ export default async function Command() {
       url = `https://${deployment.url}`;
       break;
     case "vercel": {
-      const slugOrUsername = team?.slug || user?.username;
+      const slugOrUsername = getDeploymentOwnerSlug({ deployment, team, username: user?.username });
       if (!slugOrUsername) {
         throw new Error("Failed to resolve Vercel dashboard owner");
       }
