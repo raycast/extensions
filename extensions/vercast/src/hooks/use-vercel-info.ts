@@ -24,9 +24,16 @@ const useVercel = () => {
         if (selectedTeamId) {
           setSelectedTeamId(selectedTeamId);
         }
-        const [fetchedUser, fetchedTeams] = await Promise.all([fetchUser(), fetchTeams()]);
+        // Fetch user and teams but ensure one failing request doesn't block the other.
+        const [userResult, teamsResult] = await Promise.allSettled([fetchUser(), fetchTeams()]);
 
-        setUser(fetchedUser);
+        const fetchedUser = userResult.status === "fulfilled" ? userResult.value : undefined;
+        const fetchedTeams = teamsResult.status === "fulfilled" ? teamsResult.value : [];
+
+        if (fetchedUser) {
+          setUser(fetchedUser);
+        }
+
         setTeams(fetchedTeams);
 
         if (selectedTeamId) {
