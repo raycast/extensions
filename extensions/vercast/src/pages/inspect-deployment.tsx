@@ -14,6 +14,7 @@ import {
   CANCEL_DEPLOYMENT_ACTION,
   CANCEL_DEPLOYMENT_SHORTCUT,
 } from "../deployment";
+import { getDeploymentOwnerSlug } from "../utils/deployment-owner";
 
 type Props = {
   deployment: Deployment;
@@ -63,7 +64,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
     if (deployment.inspectorURL) return deployment.inspectorURL;
 
-    const teamSlug = selectedTeam?.slug || username;
+    const teamSlug = getDeploymentOwnerSlug({ deployment, team: selectedTeam, username });
 
     if (!teamSlug) {
       showToast({
