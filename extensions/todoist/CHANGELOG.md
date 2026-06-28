@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Omit paid task fields unless requested] - {PR_MERGE_DATE}
+## [Omit paid task fields unless requested] - 2026-06-28
 
 - **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.
 
