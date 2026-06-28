@@ -57,6 +57,333 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-me",
+      "title": "Get My Profile",
+      "description": "Get the authenticated user's Cal.com profile (id, username, name, email, timezone, default schedule id, organization).",
+      "icon": "logo.png",
+      "keywords": ["me", "profile", "user", "account"]
+    },
+    {
+      "name": "update-me",
+      "title": "Update My Profile",
+      "description": "Update the authenticated user's profile (name, username, bio, timezone, week start, time format, locale). Shows a confirmation before applying.",
+      "icon": "logo.png",
+      "keywords": ["profile", "update", "settings"]
+    },
+    {
+      "name": "get-event-types",
+      "title": "List Event Types",
+      "description": "List event types (booking links) for a user. Each event type has a numeric id, slug, title, lengthInMinutes, locations, and bookingUrl.",
+      "icon": "logo.png",
+      "keywords": ["event", "types", "links", "list"]
+    },
+    {
+      "name": "get-event-type",
+      "title": "Get Event Type",
+      "description": "Get a single event type by numeric id.",
+      "icon": "logo.png",
+      "keywords": ["event", "type"]
+    },
+    {
+      "name": "create-event-type",
+      "title": "Create Event Type",
+      "description": "Create a new event type (booking link). Requires title and lengthInMinutes. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["event", "type", "create", "new"]
+    },
+    {
+      "name": "update-event-type",
+      "title": "Update Event Type",
+      "description": "Update fields on an event type by id. Shows a confirmation listing the changes.",
+      "icon": "logo.png",
+      "keywords": ["event", "type", "edit", "update"]
+    },
+    {
+      "name": "delete-event-type",
+      "title": "Delete Event Type",
+      "description": "Permanently delete an event type. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["event", "type", "delete", "remove"]
+    },
+    {
+      "name": "get-bookings",
+      "title": "List Bookings",
+      "description": "List bookings with filters (status, date range, attendee, event type). Returns slim records (uid, title, start, end, hosts, attendees, status, meetingUrl). Use this before any per-booking action to look up the uid.",
+      "icon": "logo.png",
+      "keywords": ["bookings", "meetings", "list", "upcoming", "past"]
+    },
+    {
+      "name": "get-booking",
+      "title": "Get Booking",
+      "description": "Get a single booking by uid (look up via get-bookings if unknown).",
+      "icon": "logo.png",
+      "keywords": ["booking", "meeting", "details"]
+    },
+    {
+      "name": "create-booking",
+      "title": "Create Booking",
+      "description": "Create a booking on an event type. Requires eventTypeId, start (ISO 8601), and the attendee's name, email, and IANA timezone. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["booking", "create", "schedule", "book"]
+    },
+    {
+      "name": "reschedule-booking",
+      "title": "Reschedule Booking",
+      "description": "Reschedule a booking to a new ISO 8601 start time. Shows a confirmation. Look up the bookingUid via get-bookings first.",
+      "icon": "logo.png",
+      "keywords": ["reschedule", "move", "booking"]
+    },
+    {
+      "name": "cancel-booking",
+      "title": "Cancel Booking",
+      "description": "Cancel a booking by uid with a reason shared with attendees. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["cancel", "booking"]
+    },
+    {
+      "name": "confirm-booking",
+      "title": "Confirm Booking",
+      "description": "Confirm a pending booking that requires manual confirmation. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["confirm", "booking", "approve"]
+    },
+    {
+      "name": "mark-booking-absent",
+      "title": "Mark Booking No-Show",
+      "description": "Mark a booking (or specific attendees/host) as no-show. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["no-show", "absent", "missed"]
+    },
+    {
+      "name": "get-booking-attendees",
+      "title": "List Booking Attendees",
+      "description": "Get all attendees for a booking by uid.",
+      "icon": "logo.png",
+      "keywords": ["attendees", "guests", "booking"]
+    },
+    {
+      "name": "add-booking-attendee",
+      "title": "Add Booking Attendee",
+      "description": "Add an attendee (name, email, IANA timezone) to an existing booking. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["add", "attendee", "guest", "invite"]
+    },
+    {
+      "name": "get-booking-attendee",
+      "title": "Get Booking Attendee",
+      "description": "Get a specific attendee by id within a booking.",
+      "icon": "logo.png",
+      "keywords": ["attendee", "guest"]
+    },
+    {
+      "name": "get-schedules",
+      "title": "List Schedules",
+      "description": "List all availability schedules. Each schedule has a name, timezone, isDefault flag, weekly availability rules, and date overrides.",
+      "icon": "logo.png",
+      "keywords": ["schedules", "availability", "list"]
+    },
+    {
+      "name": "get-schedule",
+      "title": "Get Schedule",
+      "description": "Get a single availability schedule by id.",
+      "icon": "logo.png",
+      "keywords": ["schedule", "availability"]
+    },
+    {
+      "name": "get-default-schedule",
+      "title": "Get Default Schedule",
+      "description": "Get the user's default availability schedule.",
+      "icon": "logo.png",
+      "keywords": ["default", "schedule", "availability"]
+    },
+    {
+      "name": "create-schedule",
+      "title": "Create Schedule",
+      "description": "Create a new availability schedule (name, IANA timezone, optional weekly availability + overrides). Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["schedule", "create", "availability"]
+    },
+    {
+      "name": "update-schedule",
+      "title": "Update Schedule",
+      "description": "Update fields on a schedule (name, timeZone, isDefault, availability, overrides). Shows a confirmation listing changes.",
+      "icon": "logo.png",
+      "keywords": ["schedule", "update", "edit"]
+    },
+    {
+      "name": "delete-schedule",
+      "title": "Delete Schedule",
+      "description": "Permanently delete a schedule. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["schedule", "delete", "remove"]
+    },
+    {
+      "name": "get-availability",
+      "title": "Get Available Slots",
+      "description": "Get available time slots for an event type within a window. Requires eventTypeId, start, end (ISO 8601). Optional duration, timeZone (IANA), username.",
+      "icon": "logo.png",
+      "keywords": ["availability", "slots", "free", "open"]
+    },
+    {
+      "name": "get-busy-times",
+      "title": "Get Busy Times",
+      "description": "Get busy intervals across the user's connected calendars within an ISO 8601 window.",
+      "icon": "logo.png",
+      "keywords": ["busy", "calendar", "blocked"]
+    },
+    {
+      "name": "get-conferencing-apps",
+      "title": "List Conferencing Apps",
+      "description": "List connected conferencing apps (Zoom, Google Meet, etc.).",
+      "icon": "logo.png",
+      "keywords": ["zoom", "meet", "conferencing", "video"]
+    },
+    {
+      "name": "calculate-routing-form-slots",
+      "title": "Calculate Routing Form Slots",
+      "description": "Calculate available slots based on a routing form response. Requires routingFormId, response (field-id → value map), start, end.",
+      "icon": "logo.png",
+      "keywords": ["routing", "form", "slots"]
+    },
+    {
+      "name": "get-org-memberships",
+      "title": "List Organization Memberships",
+      "description": "List memberships for an organization (requires admin/owner role).",
+      "icon": "logo.png",
+      "keywords": ["organization", "members", "team"]
+    },
+    {
+      "name": "create-org-membership",
+      "title": "Create Organization Membership",
+      "description": "Add a user to an organization with a role (OWNER/ADMIN/MEMBER). Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["organization", "invite", "add", "member"]
+    },
+    {
+      "name": "get-org-membership",
+      "title": "Get Organization Membership",
+      "description": "Get a single organization membership by id.",
+      "icon": "logo.png",
+      "keywords": ["organization", "member"]
+    },
+    {
+      "name": "delete-org-membership",
+      "title": "Remove Organization Membership",
+      "description": "Remove a user from an organization. Shows a confirmation.",
+      "icon": "logo.png",
+      "keywords": ["organization", "remove", "kick"]
+    },
+    {
+      "name": "get-org-routing-forms",
+      "title": "List Organization Routing Forms",
+      "description": "List routing forms for an organization.",
+      "icon": "logo.png",
+      "keywords": ["routing", "forms", "organization"]
+    },
+    {
+      "name": "get-org-routing-form-responses",
+      "title": "Get Routing Form Responses",
+      "description": "Get responses submitted to an organization's routing form.",
+      "icon": "logo.png",
+      "keywords": ["routing", "form", "responses"]
+    }
+  ],
+  "ai": {
+    "instructions": "This extension exposes Cal.com's v2 API surface — the same surface as Cal.com's official MCP server (mcp.cal.com), but via the user's existing API key so no OAuth handshake is needed.\n\nGeneral rules:\n- ALWAYS look up booking UIDs via get-bookings before calling cancel-booking, reschedule-booking, confirm-booking, mark-booking-absent, get-booking-attendees, add-booking-attendee, or get-booking. Never invent or guess a uid. If the user references a meeting by description (e.g. \"my 2pm tomorrow\", \"meeting with John\"), call get-bookings first with appropriate filters and disambiguate from the results.\n- ALWAYS use the booking `uid` (a string like \"abc123xyz\") for per-booking actions — NOT the numeric `id`. The two are different.\n- ALWAYS pass timezones in IANA format (e.g. \"America/Los_Angeles\", \"Europe/Berlin\"). Never abbreviations like \"PST\".\n- ALWAYS pass datetimes as ISO 8601 with explicit offset or `Z` (e.g. \"2026-06-01T14:00:00-07:00\" or \"2026-06-01T21:00:00Z\"). Never naive local strings.\n\nBooking lookup tips:\n- For \"this week\" / \"next week\" queries, use get-bookings with `status: \"upcoming\"` and filter the results client-side by start range — the API does not need explicit date params for short windows.\n- For \"past meetings with X\" queries, use get-bookings with `status: \"past\"` and `attendeeName` or `attendeeEmail`.\n- For pending approvals, use `status: \"unconfirmed\"`.\n\nAvailability / scheduling:\n- get-availability needs an eventTypeId. Call get-event-types first if the user hasn't named a specific type — pick the best match by length (\"30 min chat\" → 30-min event type).\n- For \"when am I free Monday\", use get-availability with start=Monday 00:00 in the user's timezone and end=Monday 23:59. Default the user's timezone via get-me if not specified.\n\nWrite-tool confirmations:\n- All create/update/delete/cancel/reschedule/mark/add tools show a confirmation dialog before executing. Present the user with the full action context so they can verify (e.g. \"Cancel your 2pm meeting with john@example.com on June 5?\") — do not call the tool blindly.\n\nOrganization tools:\n- Only call org-* tools if the user is in an organization (get-me returns organization.id when applicable). If they aren't, surface a clear message instead of guessing an organizationId.\n\nOOO note:\n- The extension's Raycast commands (Out of Office, Create Out of Office) handle OOO. Out-of-office is not part of Cal.com's MCP server tool surface, so it is not exposed as an AI tool here — direct the user to the OOO commands for those workflows.",
+    "evals": [
+      {
+        "input": "@cal-com-share-meeting-links what bookings do I have this week?",
+        "mocks": {
+          "get-bookings": [
+            {
+              "id": 1,
+              "uid": "abc123",
+              "title": "Demo Call",
+              "start": "2026-05-19T14:00:00Z",
+              "end": "2026-05-19T14:30:00Z",
+              "status": "ACCEPTED",
+              "hosts": [{ "id": 42, "name": "Andrew", "email": "andrew@hill.com" }],
+              "attendees": [{ "name": "John", "email": "john@example.com", "timeZone": "America/Los_Angeles" }]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-bookings",
+              "arguments": { "status": "upcoming" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@cal-com-share-meeting-links what event types do I have?",
+        "mocks": {
+          "get-me": { "id": 42, "username": "andrew", "name": "Andrew", "email": "andrew@hill.com", "timeZone": "America/Los_Angeles" },
+          "get-event-types": [
+            { "id": 1, "title": "30 Min Meeting", "slug": "30min", "lengthInMinutes": 30 }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-event-types"
+          }
+        ]
+      },
+      {
+        "input": "@cal-com-share-meeting-links show me my availability schedules",
+        "mocks": {
+          "get-schedules": [
+            { "id": 1, "name": "Working Hours", "timeZone": "America/Los_Angeles", "isDefault": true }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-schedules"
+          }
+        ]
+      },
+      {
+        "input": "@cal-com-share-meeting-links show me available slots for my 30 minute event type next Monday from 9am to 5pm Pacific time",
+        "mocks": {
+          "get-me": { "id": 42, "username": "andrew", "name": "Andrew", "email": "andrew@hill.com", "timeZone": "America/Los_Angeles" },
+          "get-event-types": [
+            { "id": 42, "title": "30 Min Meeting", "slug": "30min", "lengthInMinutes": 30 }
+          ],
+          "get-availability": { "slots": {} }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-availability",
+              "arguments": {
+                "eventTypeId": 42
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@cal-com-share-meeting-links who am I?",
+        "mocks": {
+          "get-me": {
+            "id": 42,
+            "username": "andrew",
+            "name": "Andrew",
+            "email": "andrew@hill.com",
+            "timeZone": "America/Los_Angeles"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-me"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "token",
@@ -66,13 +393,30 @@
       "description": "Cal.com API Key",
       "link": "https://app.cal.com/settings/developer",
       "placeholder": "Cal.com API Key"
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "Server Region",
+      "description": "Choose your Cal.com server region. Use Europe if your account is on cal.eu.",
+      "default": "global",
+      "data": [
+        {
+          "title": "Global (cal.com)",
+          "value": "global"
+        },
+        {
+          "title": "Europe (cal.eu)",
+          "value": "eu"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^2.2.3",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
     "axios": "^1.8.4",
-    "dayjs": "^1.11.11",
     "moment": "^2.30.1"
   },
   "devDependencies": {

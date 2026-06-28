@@ -7,7 +7,7 @@ export default function Command() {
         <LinkListItem title="Familiarize yourself with Raycast" link="https://raycast.com/manual" />
         <LinkListItem title="Install extensions from our public store" link="https://www.raycast.com/store" />
         <LinkListItem title="Build your own extensions with our API" link="https://developers.raycast.com" />
-        <LinkListItem title="Invite your teammates" link="raycast://organizations/CaschysBlog/manage" />
+        <LinkListItem title="Invite your teammates" link={`${process.env.RAYCAST_SCHEME ?? "raycast"}://organizations/CaschysBlog/manage`} />
       </List.Section>
       <List.Section title="Next Steps">
         <LinkListItem title="Join the Raycast community" link="https://raycast.com/community" />

@@ -9,6 +9,7 @@ Expected on Unwrap: lines within the same quote depth merge; depth changes break
 > Continues here.
 
 > Outer quote
+>
 > > Nested quote with its own paragraph
 > > continuing here.
 

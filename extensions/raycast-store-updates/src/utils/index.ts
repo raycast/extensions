@@ -1,13 +1,76 @@
-import { GitHubPR, GitHubPRFile, StoreItem } from "../types";
-import { environment } from "@raycast/api";
+import { Feed, GitHubPR, GitHubPRFile, StoreItem } from "../types";
+import { Cache, environment, getPreferenceValues } from "@raycast/api";
 import { readdirSync, readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 
-const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
+export const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
+export const FEED_URL = "https://www.raycast.com/store/feed.json";
+export const GITHUB_PRS_URL =
+  "https://api.github.com/repos/raycast/extensions/pulls?state=closed&sort=updated&direction=desc&per_page=50";
+
+/**
+ * Builds headers for GitHub REST API calls. When the optional `githubToken`
+ * preference is set, an Authorization header is added, raising the rate limit
+ * from 60 to 5,000 requests/hour. Falls back to unauthenticated access.
+ */
+export function githubHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { Accept: "application/vnd.github.v3+json" };
+  try {
+    const { githubToken } = getPreferenceValues<Preferences>();
+    const token = githubToken?.trim();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // Preferences unavailable — proceed unauthenticated.
+  }
+  return headers;
+}
 
 // Platform icon colors (tintColor format)
 export const MACOS_TINT_COLOR = "#000000CC"; // 80% black
 export const WINDOWS_TINT_COLOR = "#0078D7"; // Windows blue
+
+// Raycast Store category colors, keyed by the canonical category names.
+export const CATEGORY_COLORS: Record<string, string> = {
+  Applications: "#8E44AD",
+  Communication: "#E67E22",
+  Data: "#16A085",
+  Documentation: "#7F8C8D",
+  "Design Tools": "#E91E63",
+  "Developer Tools": "#2980B9",
+  Finance: "#27AE60",
+  Fun: "#F39C12",
+  Media: "#E74C3C",
+  News: "#3498DB",
+  Productivity: "#9B59B6",
+  Security: "#C0392B",
+  System: "#34495E",
+  Web: "#1ABC9C",
+  Other: "#95A5A6",
+};
+
+/**
+ * Runs an async mapper over `items` with a bounded number of concurrent
+ * executions, preserving input order in the result. Prevents opening dozens of
+ * sockets at once (e.g. when enriching every feed item with its package.json).
+ */
+export async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const workerCount = Math.max(1, Math.min(limit, items.length));
+  const workers = Array.from({ length: workerCount }, async () => {
+    for (let index = cursor++; index < items.length; index = cursor++) {
+      results[index] = await fn(items[index], index);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
 
 /**
  * Parses the Raycast Store URL to extract author and extension name.
@@ -35,7 +98,7 @@ export function createStoreDeeplink(url: string): string {
   if (!parsed) {
     return url;
   }
-  return `raycast://extensions/${parsed.author}/${parsed.extension}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${parsed.author}/${parsed.extension}`;
 }
 
 /**
@@ -92,7 +155,9 @@ export async function fetchExtensionSlugFromPRFiles(prNumber: number): Promise<s
   try {
     const response = await fetch(
       `https://api.github.com/repos/raycast/extensions/pulls/${prNumber}/files?per_page=100`,
-      { headers: { Accept: "application/vnd.github.v3+json" } },
+      {
+        headers: githubHeaders(),
+      },
     );
     if (!response.ok) return null;
     const files = (await response.json()) as GitHubPRFile[];
@@ -133,7 +198,9 @@ export async function fetchRemovedSlugsFromPR(prNumber: number): Promise<string[
   try {
     const response = await fetch(
       `https://api.github.com/repos/raycast/extensions/pulls/${prNumber}/files?per_page=100`,
-      { headers: { Accept: "application/vnd.github.v3+json" } },
+      {
+        headers: githubHeaders(),
+      },
     );
     if (!response.ok) return [];
     const files = (await response.json()) as GitHubPRFile[];
@@ -187,11 +254,7 @@ export function extractLatestChanges(changelog: string): string {
   return result.join("\n").trim();
 }
 
-/**
- * Fetches the package.json for an extension to get the correct owner/title.
- * Returns extension metadata or null if not found.
- */
-export async function fetchExtensionPackageInfo(slug: string): Promise<{
+export interface ExtensionPackageInfo {
   owner: string;
   title: string;
   name: string;
@@ -200,33 +263,89 @@ export async function fetchExtensionPackageInfo(slug: string): Promise<{
   version: string;
   categories: string[];
   icon: string;
-} | null> {
-  try {
-    const response = await fetch(`${RAW_CONTENT_BASE}/${slug}/package.json`);
-    if (!response.ok) return null;
-    const pkg = (await response.json()) as {
-      owner?: string;
-      title?: string;
-      name?: string;
-      author?: string;
-      description?: string;
-      platforms?: string[];
-      version?: string;
-      categories?: string[];
-      icon?: string;
-    };
-    const owner = pkg.owner ?? pkg.author ?? slug;
-    const title = pkg.title ?? pkg.name ?? slug;
-    const name = pkg.name ?? slug;
-    const description = pkg.description ?? "";
-    const platforms = pkg.platforms ?? ["macOS"];
-    const version = pkg.version ?? "";
-    const categories = (pkg.categories ?? []).filter((c) => typeof c === "string" && c.trim().length > 0);
-    const icon = pkg.icon ?? "";
-    return { owner, title, name, description, platforms, version, categories, icon };
-  } catch {
-    return null;
+}
+
+const packageInfoCache = new Cache({ namespace: "store-updates-package-info" });
+const PACKAGE_INFO_TTL_MS = 6 * 60 * 60 * 1000; // 6h for resolved extensions (metadata changes rarely)
+const PACKAGE_INFO_MISS_TTL_MS = 15 * 60 * 1000; // 15m for 404s (a new extension may appear soon)
+const inFlightPackageInfo = new Map<string, Promise<ExtensionPackageInfo | null>>();
+
+interface CachedPackageInfo {
+  ts: number;
+  data: ExtensionPackageInfo | null;
+}
+
+/**
+ * Fetches the package.json for an extension to get the correct owner/title.
+ * Results are cached (persistent, with a TTL) and concurrent requests for the
+ * same slug are de-duplicated. Returns extension metadata or null if not found.
+ */
+export async function fetchExtensionPackageInfo(slug: string): Promise<ExtensionPackageInfo | null> {
+  if (!slug) return null;
+
+  // Serve from the persistent cache when still fresh.
+  const cachedRaw = packageInfoCache.get(slug);
+  if (cachedRaw) {
+    try {
+      const cached = JSON.parse(cachedRaw) as CachedPackageInfo;
+      const ttl = cached.data ? PACKAGE_INFO_TTL_MS : PACKAGE_INFO_MISS_TTL_MS;
+      if (Date.now() - cached.ts < ttl) return cached.data;
+    } catch {
+      // Corrupt cache entry — fall through and refetch.
+    }
   }
+
+  // De-duplicate concurrent requests for the same slug within a run.
+  const inFlight = inFlightPackageInfo.get(slug);
+  if (inFlight) return inFlight;
+
+  const request = (async (): Promise<ExtensionPackageInfo | null> => {
+    try {
+      const response = await fetch(`${RAW_CONTENT_BASE}/${slug}/package.json`);
+      if (!response.ok) {
+        packageInfoCache.set(slug, JSON.stringify({ ts: Date.now(), data: null } satisfies CachedPackageInfo));
+        return null;
+      }
+      const pkg = (await response.json()) as {
+        owner?: string;
+        title?: string;
+        name?: string;
+        author?: string;
+        description?: string;
+        platforms?: unknown;
+        version?: string;
+        categories?: unknown;
+        icon?: string;
+      };
+      // Validate remote-controlled fields: never trust that arrays are arrays of strings.
+      const platforms = Array.isArray(pkg.platforms)
+        ? pkg.platforms.filter((p): p is string => typeof p === "string" && p.trim().length > 0)
+        : [];
+      const categories = Array.isArray(pkg.categories)
+        ? pkg.categories.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+        : [];
+      const info: ExtensionPackageInfo = {
+        owner: pkg.owner ?? pkg.author ?? slug,
+        title: pkg.title ?? pkg.name ?? slug,
+        name: pkg.name ?? slug,
+        description: pkg.description ?? "",
+        platforms: platforms.length > 0 ? platforms : ["macOS"],
+        version: pkg.version ?? "",
+        categories,
+        icon: pkg.icon ?? "",
+      };
+      packageInfoCache.set(slug, JSON.stringify({ ts: Date.now(), data: info } satisfies CachedPackageInfo));
+      return info;
+    } catch {
+      // Network/parse error: don't cache, allow a later retry.
+      return null;
+    } finally {
+      inFlightPackageInfo.delete(slug);
+    }
+  })();
+
+  inFlightPackageInfo.set(slug, request);
+  return request;
 }
 
 /**
@@ -276,14 +395,12 @@ export async function convertPRsToStoreItems(
     }
   }
 
-  // Batch fetch file-based slugs for regular update PRs in parallel
+  // Batch fetch file-based slugs for regular update PRs with bounded concurrency
   if (needsFileFallback.length > 0) {
-    const slugResults = await Promise.all(
-      needsFileFallback.map(async (pr) => ({
-        pr,
-        slug: await fetchExtensionSlugFromPRFiles(pr.number),
-      })),
-    );
+    const slugResults = await mapWithConcurrency(needsFileFallback, 8, async (pr) => ({
+      pr,
+      slug: await fetchExtensionSlugFromPRFiles(pr.number),
+    }));
 
     for (const { pr, slug } of slugResults) {
       if (!slug) continue;
@@ -295,75 +412,87 @@ export async function convertPRsToStoreItems(
     }
   }
 
-  // Fetch package.json for all update candidates in parallel
-  const updatedItems = await Promise.all(
-    updateCandidates.map(async ({ pr, slug }) => {
-      const pkgInfo = await fetchExtensionPackageInfo(slug);
-      const owner = pkgInfo?.owner ?? pr.user.login;
-      const title =
-        pkgInfo?.title ??
-        slug
-          .split("-")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
+  // Fetch package.json for all update candidates with bounded concurrency
+  const updatedItems = await mapWithConcurrency(updateCandidates, 8, async ({ pr, slug }) => {
+    let resolvedSlug = slug;
+    let pkgInfo = await fetchExtensionPackageInfo(resolvedSlug);
 
-      const description = pkgInfo?.description ?? pr.title;
-      const iconUrl = pkgInfo?.icon ? getExtensionIconUrl(slug, pkgInfo.icon) : "";
+    // The title-derived slug may not match the real folder name (e.g. display
+    // name != slug). Fall back to the authoritative slug from the PR's changed
+    // file paths before emitting an item with a guessed store URL.
+    if (!pkgInfo) {
+      const fileSlug = await fetchExtensionSlugFromPRFiles(pr.number);
+      if (fileSlug && fileSlug !== resolvedSlug) {
+        const filePkgInfo = await fetchExtensionPackageInfo(fileSlug);
+        if (filePkgInfo) {
+          resolvedSlug = fileSlug;
+          pkgInfo = filePkgInfo;
+        }
+      }
+    }
 
-      return {
-        id: `pr-${pr.number}`,
-        title,
-        summary: description,
-        image: iconUrl || pr.user.avatar_url,
-        date: pr.merged_at!,
-        authorName: pr.user.login,
-        authorUrl: pr.user.html_url,
-        url: `https://www.raycast.com/${owner}/${slug}`,
-        type: "updated" as const,
-        extensionSlug: slug,
-        prUrl: pr.html_url,
-        platforms: pkgInfo?.platforms ?? ["macOS"],
-        version: pkgInfo?.version,
-        categories: pkgInfo?.categories,
-        extensionIcon: pkgInfo?.icon,
-      };
-    }),
-  );
+    const owner = pkgInfo?.owner ?? pr.user.login;
+    const title =
+      pkgInfo?.title ??
+      resolvedSlug
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+    const description = pkgInfo?.description ?? pr.title;
+    const iconUrl = pkgInfo?.icon ? getExtensionIconUrl(resolvedSlug, pkgInfo.icon) : "";
+
+    return {
+      id: `pr-${pr.number}`,
+      title,
+      summary: description,
+      image: iconUrl || pr.user.avatar_url,
+      date: pr.merged_at!,
+      authorName: pr.user.login,
+      authorUrl: pr.user.html_url,
+      url: `https://www.raycast.com/${owner}/${resolvedSlug}`,
+      type: "updated" as const,
+      extensionSlug: resolvedSlug,
+      prUrl: pr.html_url,
+      platforms: pkgInfo?.platforms ?? ["macOS"],
+      version: pkgInfo?.version,
+      categories: pkgInfo?.categories,
+      extensionIcon: pkgInfo?.icon,
+    };
+  });
 
   // Process removal PRs: fetch their deleted slugs, confirm via 404, emit one item per slug
   const removedSeen = new Set<string>();
-  const removalResults = await Promise.all(
-    removalCandidatePRs.map(async (pr) => {
-      const slugs = await fetchRemovedSlugsFromPR(pr.number);
-      const items: StoreItem[] = [];
-      for (const slug of slugs) {
-        if (removedSeen.has(slug)) continue;
-        // Confirm the extension is truly gone (package.json 404)
-        const pkgInfo = await fetchExtensionPackageInfo(slug);
-        if (pkgInfo !== null) continue; // Still exists — not actually removed
-        removedSeen.add(slug);
-        const title = slug
-          .split("-")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
-        items.push({
-          id: `pr-${pr.number}-removed-${slug}`,
-          title,
-          summary: `This extension has been removed from the Raycast Store.`,
-          image: pr.user.avatar_url,
-          date: pr.merged_at!,
-          authorName: pr.user.login,
-          authorUrl: pr.user.html_url,
-          url: pr.html_url,
-          type: "removed" as const,
-          extensionSlug: slug,
-          prUrl: pr.html_url,
-          platforms: ["macOS"],
-        });
-      }
-      return items;
-    }),
-  );
+  const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
+    const slugs = await fetchRemovedSlugsFromPR(pr.number);
+    const items: StoreItem[] = [];
+    for (const slug of slugs) {
+      if (removedSeen.has(slug)) continue;
+      // Confirm the extension is truly gone (package.json 404)
+      const pkgInfo = await fetchExtensionPackageInfo(slug);
+      if (pkgInfo !== null) continue; // Still exists — not actually removed
+      removedSeen.add(slug);
+      const title = slug
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+      items.push({
+        id: `pr-${pr.number}-removed-${slug}`,
+        title,
+        summary: `This extension has been removed from the Raycast Store.`,
+        image: pr.user.avatar_url,
+        date: pr.merged_at!,
+        authorName: pr.user.login,
+        authorUrl: pr.user.html_url,
+        url: pr.html_url,
+        type: "removed" as const,
+        extensionSlug: slug,
+        prUrl: pr.html_url,
+        platforms: ["macOS"],
+      });
+    }
+    return items;
+  });
 
   const removedItems = removalResults.flat();
 
@@ -371,14 +500,78 @@ export async function convertPRsToStoreItems(
 }
 
 /**
+ * Self-contained scan used by the menu-bar command (and background refreshes).
+ * Fetches the feed + merged PRs and returns the combined new + updated items,
+ * sorted newest-first. New items use feed fields directly (no extra network);
+ * updated items reuse convertPRsToStoreItems. Removed items are intentionally
+ * omitted — the menu bar surfaces things to discover, not removals.
+ */
+export async function scanStoreUpdates(): Promise<StoreItem[]> {
+  const [feed, prs] = await Promise.all([
+    (async (): Promise<Feed | null> => {
+      try {
+        const response = await fetch(FEED_URL);
+        if (!response.ok) return null;
+        return (await response.json()) as Feed;
+      } catch {
+        return null;
+      }
+    })(),
+    (async (): Promise<GitHubPR[] | null> => {
+      try {
+        const response = await fetch(GITHUB_PRS_URL, { headers: githubHeaders() });
+        if (!response.ok) return null;
+        return (await response.json()) as GitHubPR[];
+      } catch {
+        return null;
+      }
+    })(),
+  ]);
+
+  const newItems: StoreItem[] = (feed?.items ?? [])
+    .map((item): StoreItem | null => {
+      const parsed = parseExtensionUrl(item.url);
+      if (!parsed) return null;
+      return {
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        image: item.image,
+        date: item.date_modified,
+        authorName: item.author.name,
+        authorUrl: item.author.url,
+        url: item.url,
+        type: "new",
+        extensionSlug: parsed.extension,
+      };
+    })
+    .filter((item): item is StoreItem => item !== null);
+
+  const newItemDates = new Map<string, string>();
+  for (const item of newItems) {
+    if (item.extensionSlug) newItemDates.set(item.extensionSlug, item.date);
+  }
+
+  let updatedItems: StoreItem[] = [];
+  if (prs) {
+    const { updated } = await convertPRsToStoreItems(prs, newItemDates);
+    updatedItems = updated;
+  }
+
+  return [...newItems, ...updatedItems].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+/**
  * Gets the set of installed extension slugs by reading from the Raycast
- * application support directory.
+ * support directory. Each extension directory contains a package.json with a
+ * `name` field.
  *
- * Extensions are stored in:
- *   ~/Library/Application Support/com.raycast.macos/extensions/
- * Each extension directory contains a package.json with `name` field.
- *
- * We use the Raycast environment.assetsPath to locate the support directory.
+ * The location is derived relatively from environment.assetsPath
+ * (.../extensions/<ext-id>/assets -> .../extensions) so it does not hardcode a
+ * platform-specific path. On macOS this resolves under
+ * ~/Library/Application Support/com.raycast.macos/extensions/; the Windows
+ * layout has not been verified, so callers should treat an empty result as
+ * "unknown" rather than "no matching extensions" on Windows.
  */
 export function getInstalledExtensionSlugs(): Set<string> {
   const slugs = new Set<string>();

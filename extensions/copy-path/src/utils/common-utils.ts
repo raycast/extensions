@@ -6,6 +6,7 @@ import {
   getFocusWindowPath,
   getFocusWindowTitle,
   getQSpacePathUrls,
+  getVSCodeActiveFilePath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
@@ -31,7 +32,7 @@ import {
 } from "../types/preferences";
 import parseUrl from "parse-url";
 import * as os from "node:os";
-import { firefoxBrowsers } from "./constants";
+import { firefoxBrowsers, vsCodeBundleIds } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -119,7 +120,10 @@ export const copyFinderPath = async () => {
 
 export const copyWindowPath = async (app: Application) => {
   const { useTildeForHome } = await getPreferenceValues();
-  let path = await getFocusWindowPath(app);
+  let path = vsCodeBundleIds.includes(app.bundleId ?? "") ? await getVSCodeActiveFilePath(app) : "";
+  if (isEmpty(path)) {
+    path = await getFocusWindowPath(app);
+  }
   if (useTildeForHome) {
     path = path.replace(os.homedir(), "~");
   }

@@ -8,8 +8,8 @@ Expected on Unwrap: same
 before
 
 | Column A | Column B |
-| --- | --- |
-| 1 | 2 |
-| 3 | 4 |
+| -------- | -------- |
+| 1        | 2        |
+| 3        | 4        |
 
 after

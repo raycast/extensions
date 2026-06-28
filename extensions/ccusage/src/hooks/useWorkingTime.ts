@@ -5,6 +5,7 @@ import { Block } from "../types/usage-types";
 type WorkingTimeResult = {
   todayMs: number;
   yesterdayMs: number;
+  activeBlock: Block | null;
   isLoading: boolean;
   error: Error | undefined;
   revalidate: () => void;
@@ -36,6 +37,7 @@ export const useWorkingTime = (): WorkingTimeResult => {
   const blocks = data?.blocks ?? [];
   const todayMs = workingMsForDate(blocks, todayStr, now);
   const yesterdayMs = workingMsForDate(blocks, yesterdayStr, now);
+  const activeBlock = blocks.find((b) => b.isActive && !b.isGap) ?? null;
 
-  return { todayMs, yesterdayMs, isLoading, error, revalidate };
+  return { todayMs, yesterdayMs, activeBlock, isLoading, error, revalidate };
 };

@@ -31,6 +31,14 @@
       "subtitle": "WhatsApp",
       "description": "Add existing WhatsApp groups to open them later",
       "mode": "view"
+    },
+    {
+      "name": "import-from-database",
+      "title": "Import Chats from Database",
+      "subtitle": "WhatsApp",
+      "description": "Import chats from the local WhatsApp database on macOS",
+      "mode": "view",
+      "platforms": ["macOS"]
     }
   ],
   "tools": [
@@ -137,6 +145,17 @@
     "Applications",
     "Communication",
     "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "defaultCountry",
+      "title": "Default Country",
+      "description": "ISO 3166-1 country code (e.g. IL, US, GB) used to parse local phone numbers without a + prefix. Leave empty to require full international format.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "IL"
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.0",

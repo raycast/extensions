@@ -6,9 +6,22 @@
   "license": "MIT",
   "author": "chrismessina",
   "icon": "extension-icon.png",
-  "platforms": ["macOS"],
-  "categories": ["Productivity"],
-  "keywords": ["markdown", "reflow", "wrap", "unwrap", "format", "text", "prose", "fold"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "markdown",
+    "reflow",
+    "wrap",
+    "unwrap",
+    "format",
+    "text",
+    "prose",
+    "fold"
+  ],
   "scripts": {
     "dev": "ray develop",
     "lint": "ray lint",
@@ -39,8 +52,14 @@
       "required": false,
       "default": "selection",
       "data": [
-        { "title": "Selected Text", "value": "selection" },
-        { "title": "Clipboard", "value": "clipboard" }
+        {
+          "title": "Selected Text",
+          "value": "selection"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
       ]
     },
     {
@@ -51,8 +70,14 @@
       "required": false,
       "default": "paste",
       "data": [
-        { "title": "Paste", "value": "paste" },
-        { "title": "Copy", "value": "copy" }
+        {
+          "title": "Paste",
+          "value": "paste"
+        },
+        {
+          "title": "Copy",
+          "value": "copy"
+        }
       ]
     },
     {
@@ -115,6 +140,15 @@
           "required": false,
           "default": false,
           "label": "Keep Blank Lines"
+        },
+        {
+          "name": "flattenBullets",
+          "title": "Bullet Indentation",
+          "description": "Re-indent bullet and numbered lists to a fixed 2-space-per-level step, removing the leading spaces that pasted terminal or rich-text content adds in front of markers. Nesting depth is preserved by relative indent order.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Strip Bullet Indentation"
         }
       ]
     }

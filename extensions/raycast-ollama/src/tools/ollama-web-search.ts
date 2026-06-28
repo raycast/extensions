@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import "../lib/polyfill/node-fetch";
 
 const pref = getPreferenceValues<Preferences>();
 const key = pref.ollamaApiKey;

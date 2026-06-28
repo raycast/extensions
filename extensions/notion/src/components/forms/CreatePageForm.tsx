@@ -110,13 +110,19 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           title: "Page created",
           primaryAction: {
             title: "Open Page",
-            shortcut: { modifiers: ["cmd"], key: "o" },
+            shortcut: {
+              macOS: { modifiers: ["cmd"], key: "o" },
+              Windows: { modifiers: ["ctrl"], key: "o" },
+            },
             onAction: () => handleOnOpenPage(page, setRecentPage),
           },
           secondaryAction: page.url
             ? {
                 title: "Copy URL",
-                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                shortcut: {
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                },
                 onAction: () => {
                   Clipboard.copy(page.url as string);
                 },
@@ -186,7 +192,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   function getQuicklink(): Quicklink {
-    const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
+    const url = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HenriChabrand/notion/create-database-page`;
     const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? databasePropertyIds };
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
@@ -206,7 +212,12 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const renderSubmitAction = (type: "main" | "second") => {
     const shortcut: Keyboard.Shortcut | undefined =
-      type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
+      type === "second"
+        ? {
+            macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+          }
+        : undefined;
 
     if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
       return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;

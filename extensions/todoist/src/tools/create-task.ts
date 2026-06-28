@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
 import { mapPriority } from "../helpers/priorities";
+import { parseOptionalStringList } from "../helpers/parseStringList";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -85,7 +86,7 @@ type Input = {
    */
   deadline?: { date: string };
   /**
-   * Optional paid Todoist task duration. Omit this field entirely unless the user explicitly asks for a task duration.
+   * The duration of the task. Omit unless the user explicitly asks for a Todoist duration.
    * @property unit - The time unit ('minute' or 'day')
    * @property amount - Positive integer representing the amount of time
    */
@@ -118,9 +119,9 @@ type Input = {
    */
   collapsed?: boolean;
   /**
-   * Array of label names that may represent either personal or shared labels
+   * JSON array of label names (e.g. ["work", "urgent"]) or comma-separated label names
    */
-  labels?: string[];
+  labels?: string;
   /**
    * The ID of user who assigns the task. Only relevant for shared projects.
    * Must be 0 or a valid user ID from project collaborators
@@ -141,28 +142,41 @@ type Input = {
   auto_parse_labels?: boolean;
 };
 
-function sanitizePaidFields(input: Input) {
-  const sanitizedInput = { ...input };
+type TaskArgs = Omit<Input, "labels"> & {
+  labels?: string[];
+};
 
-  if (!sanitizedInput.deadline?.date?.trim()) {
-    delete sanitizedInput.deadline;
-  }
+function isValidDeadline(deadline: Input["deadline"]): deadline is NonNullable<Input["deadline"]> {
+  return typeof deadline?.date === "string" && deadline.date.trim().length > 0;
+}
 
-  if (
-    sanitizedInput.duration === undefined ||
-    !Number.isFinite(sanitizedInput.duration.amount) ||
-    sanitizedInput.duration.amount <= 0
-  ) {
-    delete sanitizedInput.duration;
-  }
-
-  return sanitizedInput;
+function isValidDuration(duration: Input["duration"]): duration is NonNullable<Input["duration"]> {
+  return (
+    duration != null &&
+    (duration.unit === "minute" || duration.unit === "day") &&
+    Number.isInteger(duration.amount) &&
+    duration.amount > 0
+  );
 }
 
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
-  const args = sanitizePaidFields(input);
-  args.priority = mapPriority(args.priority);
+  const { labels, ...taskInput } = input;
+  const args: TaskArgs = {
+    ...taskInput,
+    priority: mapPriority(taskInput.priority),
+    ...(labels ? { labels: parseOptionalStringList(labels) } : {}),
+  };
+
+  if (isValidDeadline(input.deadline)) {
+    args.deadline = { date: input.deadline.date.trim() };
+  } else {
+    delete args.deadline;
+  }
+
+  if (!isValidDuration(input.duration)) {
+    delete args.duration;
+  }
 
   return syncRequest({
     sync_token,

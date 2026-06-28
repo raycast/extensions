@@ -29,10 +29,11 @@ export default async function Command() {
     const messages = await executeSQL<{ body: string }>(DB_PATH, query);
 
     if (messages.length === 0) {
-      return showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: `No messages found in the last ${NUMBER_OF_MINUTES} minutes`,
       });
+      return;
     }
 
     for (const message of messages) {
@@ -96,7 +97,7 @@ export default async function Command() {
     }
 
     // If no OTP found at all
-    return showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: "No OTP code found in recent messages",
     });
@@ -109,8 +110,8 @@ export default async function Command() {
           message: "Raycast needs full disk access.",
           primaryAction: {
             title: "Open System Settings → Privacy",
-            onAction: (toast) => {
-              open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
+            onAction: async (toast) => {
+              await open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
               toast.hide();
             },
           },

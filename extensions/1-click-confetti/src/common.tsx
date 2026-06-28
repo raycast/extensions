@@ -8,9 +8,9 @@ const windowsCommand = `powershell -c "Add-Type -AssemblyName presentationCore; 
 
 export function Shoot({ playSound }: { playSound: boolean }) {
   if (process.platform === "win32") {
-    open("raycast://extensions/raycast/raycast/confetti");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
   } else {
-    open("raycast://confetti");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
   }
 
   if (playSound) {

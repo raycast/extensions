@@ -216,7 +216,13 @@ export interface Stash {
 /**
  * Known Git hosting providers.
  */
-export type RemoteProvider = "GitHub" | "GitLab" | "Bitbucket" | "Azure DevOps" | "Gitea" | undefined;
+export enum RemoteProvider {
+  GitHub = "GitHub",
+  GitLab = "GitLab",
+  Bitbucket = "Bitbucket",
+  AzureDevOps = "Azure DevOps",
+  Gitea = "Gitea",
+}
 
 export type RemoteWebPage = Action.OpenInBrowser.Props;
 /**
@@ -230,7 +236,8 @@ export type Remote = {
   organizationName?: string;
   displayName: string;
   repositoryName?: string;
-  provider: RemoteProvider;
+  provider?: RemoteProvider;
+  isOverridedProvider?: boolean;
   avatarUrl?: string;
   webPages: {
     fileRelated: (filePath: string, ref?: string) => RemoteWebPage[];

@@ -76,6 +76,30 @@
       "title": "Explain Directory",
       "description": "Explain the directory using Apfel",
       "mode": "view"
+    },
+    {
+      "name": "ocr-file",
+      "title": "Read Text from File",
+      "description": "Extract text from a file using auge",
+      "mode": "view"
+    },
+    {
+      "name": "ocr-clipboard",
+      "title": "Read Text from Clipboard",
+      "description": "Extract text from the image in your clipboard using auge",
+      "mode": "view"
+    },
+    {
+      "name": "ocr-qr",
+      "title": "Scan QR Code / Barcode",
+      "description": "Decode a QR code or barcode from clipboard or a file using auge",
+      "mode": "view"
+    },
+    {
+      "name": "ocr-screen",
+      "title": "Read Text from Screen Area",
+      "description": "Select a screen region and extract text to clipboard using auge",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

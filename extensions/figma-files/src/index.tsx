@@ -142,14 +142,10 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
 
       {filteredFiles?.map((team: TeamFiles) =>
         team.files.map((project) =>
-          project.files?.length != 0 ? (
+          (project.files?.length ?? 0) > 0 ? (
             <Grid.Section
               key={team.name + project.name + "-project"}
-              title={`${project.name} ${
-                project.files?.length != 0
-                  ? `(${project.files?.length} File${project.files?.length === 1 ? "" : "s"})`
-                  : ""
-              }`}
+              title={`${project.name} (${project.files!.length} File${project.files!.length === 1 ? "" : "s"})`}
               subtitle={team.name}
             >
               {project.files?.map((file) => (

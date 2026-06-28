@@ -68,5 +68,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "axios": "0.31.1"
   }
 }

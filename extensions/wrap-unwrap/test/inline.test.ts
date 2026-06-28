@@ -20,10 +20,15 @@ test("protectInline handles double-backtick spans", () => {
 });
 
 test("protectInline replaces inline links", () => {
-  const { protected: p, tokens } = protectInline("see [the docs](https://example.com/a b) now");
+  const { protected: p, tokens } = protectInline(
+    "see [the docs](https://example.com/a b) now",
+  );
   assert.equal(tokens.length, 1);
   assert.equal(tokens[0], "[the docs](https://example.com/a b)");
-  assert.equal(restoreInline(p, tokens), "see [the docs](https://example.com/a b) now");
+  assert.equal(
+    restoreInline(p, tokens),
+    "see [the docs](https://example.com/a b) now",
+  );
 });
 
 test("protectInline replaces reference links", () => {
@@ -34,7 +39,9 @@ test("protectInline replaces reference links", () => {
 });
 
 test("protectInline replaces autolinks", () => {
-  const { protected: p, tokens } = protectInline("ping <https://example.com> please");
+  const { protected: p, tokens } = protectInline(
+    "ping <https://example.com> please",
+  );
   assert.equal(tokens.length, 1);
   assert.equal(tokens[0], "<https://example.com>");
   assert.equal(restoreInline(p, tokens), "ping <https://example.com> please");
@@ -44,6 +51,24 @@ test("protectInline handles multiple tokens in one string", () => {
   const input = "use `foo` and [bar](https://x.test) and <https://y.test>";
   const { protected: p, tokens } = protectInline(input);
   assert.equal(tokens.length, 3);
+  assert.equal(restoreInline(p, tokens), input);
+});
+
+test("restoreInline handles a token immediately followed by digits", () => {
+  // Regression: a greedy placeholder index regex would absorb the trailing
+  // digits ("042" parsed as index 42), dropping both the span and the digits.
+  const input = "`foo`42 and `bar`9";
+  const { protected: p, tokens } = protectInline(input);
+  assert.equal(tokens.length, 2);
+  assert.equal(restoreInline(p, tokens), input);
+});
+
+test("restoreInline handles ten-plus tokens with digits adjacent", () => {
+  // Two-digit indices must not be truncated by an adjacent literal digit.
+  const spans = Array.from({ length: 12 }, (_, n) => `\`s${n}\`${n}`);
+  const input = spans.join(" ");
+  const { protected: p, tokens } = protectInline(input);
+  assert.equal(tokens.length, 12);
   assert.equal(restoreInline(p, tokens), input);
 });
 

@@ -139,7 +139,7 @@ export const SelectDesignSystem = (props: SelectDesignSystemProps) => {
     sdk.cache.purgeCache()
 
     // Celebrate!
-    spawnSync(`open raycast://confetti`, { shell: true })
+    spawnSync(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`, { shell: true })
 
     // Go to the commands
     showSuccessToast("You are all set!", "Start by searching your data!")

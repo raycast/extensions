@@ -31,15 +31,19 @@
     "roberto.cinetto",
     "emiliocantuc",
     "raxityo",
-    "yusifaliyevpro"
+    "yusifaliyevpro",
+    "jkker",
+    "sillashead"
   ],
   "keywords": [
     "vscode",
     "antigravity",
+    "bob",
     "cursor",
     "codium",
     "kiro",
     "positron",
+    "devin",
     "windsurf",
     "trae",
     "trae-cn",
@@ -56,7 +60,7 @@
     {
       "name": "open-with-vscode",
       "title": "Open with Visual Studio Code",
-      "description": "Open the currently selected Finder item with VS Code",
+      "description": "Open the currently selected file manager item with VS Code",
       "mode": "no-view"
     },
     {
@@ -103,6 +107,10 @@
           "value": "Cursor"
         },
         {
+          "title": "IBM Bob",
+          "value": "IBM Bob"
+        },
+        {
           "title": "Kiro",
           "value": "Kiro"
         },
@@ -137,6 +145,10 @@
         {
           "title": "Visual Studio Code - Insiders",
           "value": "Code - Insiders"
+        },
+        {
+          "title": "Devin",
+          "value": "Devin"
         },
         {
           "title": "Windsurf",
@@ -212,27 +224,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.101.0",
-    "@raycast/utils": "^2.2.2",
-    "cache-func": "^1.0.2",
-    "lodash.get": "^4.4.2",
-    "prettier": "^3.5.3",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "cache-func": "^1.1.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash.get": "^4.4.7",
     "@types/node": "22.13.10",
-    "@types/react": "^19.0.10",
-    "@types/sql.js": "^1.4.3",
+    "@types/react": "^19.2.17",
     "eslint": "^9.39.2",
-    "eslint-plugin-react": "^7.26.1",
-    "react": "^19.0.10",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
     "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist",
+    "build": "ray build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"

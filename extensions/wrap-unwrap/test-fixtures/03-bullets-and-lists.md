@@ -10,15 +10,17 @@ Expected on Unwrap: continuation lines merge into the parent item
   with a continuation line
 
 * Asterisk bullets
-+ Plus bullets
+
+- Plus bullets
 
 1. First ordered
 2. Second ordered
+
 10) Tenth ordered with paren style
 
 - [ ] An unchecked task
 - [x] A checked task
-- [X] Capital X also works
+- [x] Capital X also works
 
 - Outer
   - Nested under outer

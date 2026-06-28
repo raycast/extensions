@@ -1,8 +1,15 @@
 # MarkMarks Changelog
 
-## [1.1.0] - 2026-01-20
+## [Bug Fixes] - 2026-05-20
+
+- Fixed opening bookmarks from Safari so links target Safari directly
+
+## [1.1.0] - 2026-05-19
 
 - Add Dia browser support
+- Add Zen browser support
+- Open bookmarks in the active browser when possible
+- Improve bookmark search for multi-word and fuzzy queries
 
 ## [Initial Release] - 2026-01-08
 

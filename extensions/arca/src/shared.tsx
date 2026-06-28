@@ -130,6 +130,27 @@ turndown.addRule("linkPreviewCard", {
   },
 });
 
+// Task mention chip:
+// <span data-type="task-mention" data-task-id="123" data-identifier="42"
+//       data-title="Fix the login bug" data-workspace-slug="myapp">
+turndown.addRule("taskMention", {
+  filter: (node) => node.nodeName === "SPAN" && (node as Element).getAttribute("data-type") === "task-mention",
+  replacement: (_, node) => {
+    const el = node as Element;
+    const identifier = el.getAttribute("data-identifier");
+    const slug = el.getAttribute("data-workspace-slug");
+    const title = el.getAttribute("data-title");
+    if (identifier != null && slug) {
+      const ref = `#${slug.toUpperCase()}-${identifier}`;
+      return title ? `${title} (${ref})` : ref;
+    }
+    if (identifier != null) {
+      return title ? `${title} (#${identifier})` : `#${identifier}`;
+    }
+    return el.textContent || "#?";
+  },
+});
+
 export function htmlToMarkdown(html: string): string {
   return turndown.turndown(html).trim();
 }

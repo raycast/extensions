@@ -87,7 +87,13 @@ export class Device {
         icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.CopyName}
       />,
-      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
+      <Action
+        title="Refresh"
+        key="refresh-action"
+        onAction={() => refreshDevice(this)}
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+      />,
       ...additionalActions,
     ];
   }
