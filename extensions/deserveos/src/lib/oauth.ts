@@ -1,6 +1,6 @@
-import { LocalStorage, OAuth } from '@raycast/api';
+import { LocalStorage, OAuth } from "@raycast/api";
 
-import { getApiBaseUrl, getWorkspaceUrl } from './preferences';
+import { getApiBaseUrl, getWorkspaceUrl } from "./preferences";
 
 // Browser-based sign-in via DeserveOS's native-app OAuth2 + PKCE flow. The user
 // authenticates however they normally do on the web (Google included), so we
@@ -8,20 +8,20 @@ import { getApiBaseUrl, getWorkspaceUrl } from './preferences';
 // (RFC 7591) the first time, then run the standard authorization-code flow.
 
 export class AuthError extends Error {
-  constructor(message = 'You are not connected to DeserveOS.') {
+  constructor(message = "You are not connected to DeserveOS.") {
     super(message);
-    this.name = 'AuthError';
+    this.name = "AuthError";
   }
 }
 
-const SCOPE = 'api profile';
+const SCOPE = "api profile";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: 'DeserveOS',
-  providerIcon: 'extension-icon.png',
-  providerId: 'deserveos',
-  description: 'Connect your DeserveOS workspace to Raycast.',
+  providerName: "DeserveOS",
+  providerIcon: "extension-icon.png",
+  providerId: "deserveos",
+  description: "Connect your DeserveOS workspace to Raycast.",
 });
 
 // The authorize page lives on the workspace subdomain (it carries the workspace
@@ -41,14 +41,14 @@ type OAuthTokenResponse = {
 
 async function registerClient(redirectUri: string): Promise<string> {
   const response = await fetch(registerEndpoint(), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
-      client_name: 'DeserveOS for Raycast',
+      client_name: "DeserveOS for Raycast",
       redirect_uris: [redirectUri],
-      grant_types: ['authorization_code', 'refresh_token'],
-      response_types: ['code'],
-      token_endpoint_auth_method: 'none',
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      token_endpoint_auth_method: "none",
       scope: SCOPE,
     }),
   });
@@ -60,11 +60,7 @@ async function registerClient(redirectUri: string): Promise<string> {
   };
 
   if (!json.client_id) {
-    throw new Error(
-      json.error_description ??
-        json.error ??
-        'Could not register the Raycast app with DeserveOS.',
-    );
+    throw new Error(json.error_description ?? json.error ?? "Could not register the Raycast app with DeserveOS.");
   }
 
   return json.client_id;
@@ -79,12 +75,10 @@ async function getClientId(redirectUri: string): Promise<string> {
   return clientId;
 }
 
-async function postToken(
-  body: Record<string, string>,
-): Promise<OAuthTokenResponse> {
+async function postToken(body: Record<string, string>): Promise<OAuthTokenResponse> {
   const response = await fetch(tokenEndpoint(), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify(body),
   });
 
@@ -94,11 +88,7 @@ async function postToken(
   };
 
   if (!response.ok || !json.access_token) {
-    throw new Error(
-      json.error_description ??
-        json.error ??
-        `Token request failed (HTTP ${response.status}).`,
-    );
+    throw new Error(json.error_description ?? json.error ?? `Token request failed (HTTP ${response.status}).`);
   }
 
   return json;
@@ -110,7 +100,7 @@ export async function authorize(): Promise<void> {
   // we can register an OAuth client whose redirect URI matches exactly.
   const probe = await client.authorizationRequest({
     endpoint: authorizeEndpoint(),
-    clientId: 'pending',
+    clientId: "pending",
     scope: SCOPE,
   });
   const redirectUri = probe.redirectURI;
@@ -125,7 +115,7 @@ export async function authorize(): Promise<void> {
   const { authorizationCode } = await client.authorize(request);
 
   const tokens = await postToken({
-    grant_type: 'authorization_code',
+    grant_type: "authorization_code",
     code: authorizationCode,
     code_verifier: request.codeVerifier,
     redirect_uri: redirectUri,
@@ -138,11 +128,11 @@ export async function authorize(): Promise<void> {
 async function refresh(refreshToken: string): Promise<string> {
   const clientId = await LocalStorage.getItem<string>(clientIdKey());
   if (!clientId) {
-    throw new AuthError('Please reconnect to DeserveOS.');
+    throw new AuthError("Please reconnect to DeserveOS.");
   }
 
   const tokens = await postToken({
-    grant_type: 'refresh_token',
+    grant_type: "refresh_token",
     refresh_token: refreshToken,
     client_id: clientId,
   });
@@ -167,9 +157,7 @@ export async function getValidAccessToken(): Promise<string> {
 export async function forceRefresh(): Promise<string> {
   const tokenSet = await client.getTokens();
   if (!tokenSet?.refreshToken) {
-    throw new AuthError(
-      'Your session has expired. Please reconnect to DeserveOS.',
-    );
+    throw new AuthError("Your session has expired. Please reconnect to DeserveOS.");
   }
   return refresh(tokenSet.refreshToken);
 }

@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
-import { useState } from 'react';
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 
 import {
   type CompanyRecord,
@@ -9,21 +9,18 @@ import {
   searchCompanies,
   searchOpportunities,
   searchPeople,
-} from './lib/api';
-import { AuthError } from './lib/oauth';
-import { formatMoney, formatStage, stageColor } from './lib/format';
-import { LoginPromptList } from './lib/login-prompt';
-import { getWorkspaceUrl } from './lib/preferences';
+} from "./lib/api";
+import { AuthError } from "./lib/oauth";
+import { formatMoney, formatStage, stageColor } from "./lib/format";
+import { LoginPromptList } from "./lib/login-prompt";
+import { getWorkspaceUrl } from "./lib/preferences";
 
 const personName = (person: PersonRecord): string => {
-  const name = [person.name?.firstName, person.name?.lastName]
-    .filter(Boolean)
-    .join(' ');
-  return name || person.emails?.primaryEmail || 'Unnamed person';
+  const name = [person.name?.firstName, person.name?.lastName].filter(Boolean).join(" ");
+  return name || person.emails?.primaryEmail || "Unnamed person";
 };
 
-const recordUrl = (objectNameSingular: string, id: string) =>
-  `${getWorkspaceUrl()}/object/${objectNameSingular}/${id}`;
+const recordUrl = (objectNameSingular: string, id: string) => `${getWorkspaceUrl()}/object/${objectNameSingular}/${id}`;
 
 type SearchResults = {
   people: PersonRecord[];
@@ -34,7 +31,7 @@ type SearchResults = {
 const EMPTY: SearchResults = { people: [], companies: [], opportunities: [] };
 
 export default function Command() {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
 
   const { data, isLoading, error } = usePromise(
     async (text: string): Promise<SearchResults> => {
@@ -56,10 +53,7 @@ export default function Command() {
   }
 
   const results = data ?? EMPTY;
-  const isEmpty =
-    results.people.length === 0 &&
-    results.companies.length === 0 &&
-    results.opportunities.length === 0;
+  const isEmpty = results.people.length === 0 && results.companies.length === 0 && results.opportunities.length === 0;
 
   return (
     <List
@@ -69,34 +63,18 @@ export default function Command() {
       searchBarPlaceholder="Search people, companies and deals…"
     >
       {searchText.trim().length < 2 ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search your CRM"
-          description="Type at least 2 characters."
-        />
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Search your CRM" description="Type at least 2 characters." />
       ) : (
         isEmpty &&
-        !isLoading && (
-          <List.EmptyView
-            icon={Icon.MagnifyingGlass}
-            title={`No results for "${searchText.trim()}"`}
-          />
-        )
+        !isLoading && <List.EmptyView icon={Icon.MagnifyingGlass} title={`No results for "${searchText.trim()}"`} />
       )}
 
       <List.Section
         title="Deals"
-        subtitle={
-          results.opportunities.length
-            ? `${results.opportunities.length}`
-            : undefined
-        }
+        subtitle={results.opportunities.length ? `${results.opportunities.length}` : undefined}
       >
         {results.opportunities.map((deal) => {
-          const amount = formatMoney(
-            deal.amount?.amountMicros,
-            deal.amount?.currencyCode,
-          );
+          const amount = formatMoney(deal.amount?.amountMicros, deal.amount?.currencyCode);
           return (
             <List.Item
               key={deal.id}
@@ -104,7 +82,7 @@ export default function Command() {
                 source: Icon.BankNote,
                 tintColor: stageColor(deal.stage),
               }}
-              title={deal.name ?? 'Untitled deal'}
+              title={deal.name ?? "Untitled deal"}
               subtitle={deal.company?.name ?? undefined}
               accessories={[
                 ...(amount ? [{ text: amount }] : []),
@@ -117,10 +95,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open in Deserveos"
-                    url={recordUrl('opportunity', deal.id)}
-                  />
+                  <Action.OpenInBrowser title="Open in Deserveos" url={recordUrl("opportunity", deal.id)} />
                 </ActionPanel>
               }
             />
@@ -128,12 +103,7 @@ export default function Command() {
         })}
       </List.Section>
 
-      <List.Section
-        title="People"
-        subtitle={
-          results.people.length ? `${results.people.length}` : undefined
-        }
-      >
+      <List.Section title="People" subtitle={results.people.length ? `${results.people.length}` : undefined}>
         {results.people.map((person) => (
           <List.Item
             key={person.id}
@@ -142,21 +112,13 @@ export default function Command() {
             subtitle={person.jobTitle ?? undefined}
             accessories={[
               ...(person.company?.name ? [{ text: person.company.name }] : []),
-              ...(person.emails?.primaryEmail
-                ? [{ icon: Icon.Envelope, tooltip: person.emails.primaryEmail }]
-                : []),
+              ...(person.emails?.primaryEmail ? [{ icon: Icon.Envelope, tooltip: person.emails.primaryEmail }] : []),
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open in Deserveos"
-                  url={recordUrl('person', person.id)}
-                />
+                <Action.OpenInBrowser title="Open in Deserveos" url={recordUrl("person", person.id)} />
                 {person.emails?.primaryEmail && (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={person.emails.primaryEmail}
-                  />
+                  <Action.CopyToClipboard title="Copy Email" content={person.emails.primaryEmail} />
                 )}
               </ActionPanel>
             }
@@ -164,29 +126,17 @@ export default function Command() {
         ))}
       </List.Section>
 
-      <List.Section
-        title="Companies"
-        subtitle={
-          results.companies.length ? `${results.companies.length}` : undefined
-        }
-      >
+      <List.Section title="Companies" subtitle={results.companies.length ? `${results.companies.length}` : undefined}>
         {results.companies.map((company) => (
           <List.Item
             key={company.id}
             icon={Icon.Building}
-            title={company.name ?? 'Unnamed company'}
+            title={company.name ?? "Unnamed company"}
             subtitle={company.domainName?.primaryLinkUrl ?? undefined}
-            accessories={
-              company.employees
-                ? [{ text: `${company.employees} employees` }]
-                : []
-            }
+            accessories={company.employees ? [{ text: `${company.employees} employees` }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open in Deserveos"
-                  url={recordUrl('company', company.id)}
-                />
+                <Action.OpenInBrowser title="Open in Deserveos" url={recordUrl("company", company.id)} />
               </ActionPanel>
             }
           />

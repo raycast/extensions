@@ -6,18 +6,16 @@ export class GqlError extends Error {
 
   constructor(message: string, code?: string) {
     super(message);
-    this.name = 'GqlError';
+    this.name = "GqlError";
     this.code = code;
   }
 }
 
 export const isUnauthenticated = (error: unknown): boolean =>
   error instanceof GqlError &&
-  (error.code === 'UNAUTHENTICATED' ||
-    error.code === 'UNAUTHENTICATED_ERROR' ||
-    /unauthenticated|unauthorized|invalid token|jwt expired|expired token/i.test(
-      error.message,
-    ));
+  (error.code === "UNAUTHENTICATED" ||
+    error.code === "UNAUTHENTICATED_ERROR" ||
+    /unauthenticated|unauthorized|invalid token|jwt expired|expired token/i.test(error.message));
 
 type GqlResponse<TData> = {
   data?: TData;
@@ -33,10 +31,10 @@ export async function rawGql<TData>(
   let response: Response;
   try {
     response = await fetch(endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        accept: 'application/json',
+        "content-type": "application/json",
+        accept: "application/json",
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ query, variables }),
@@ -44,7 +42,7 @@ export async function rawGql<TData>(
   } catch (networkError) {
     throw new GqlError(
       `Could not reach your DeserveOS workspace. Check the Workspace URL in the extension preferences.\n${
-        networkError instanceof Error ? networkError.message : ''
+        networkError instanceof Error ? networkError.message : ""
       }`.trim(),
     );
   }
@@ -53,17 +51,12 @@ export async function rawGql<TData>(
   try {
     json = (await response.json()) as GqlResponse<TData>;
   } catch {
-    throw new GqlError(
-      `Unexpected response (HTTP ${response.status}) from the server.`,
-    );
+    throw new GqlError(`Unexpected response (HTTP ${response.status}) from the server.`);
   }
 
   if (Array.isArray(json.errors) && json.errors.length > 0) {
     const first = json.errors[0];
-    throw new GqlError(
-      first.message ?? 'GraphQL error',
-      first.extensions?.code,
-    );
+    throw new GqlError(first.message ?? "GraphQL error", first.extensions?.code);
   }
 
   if (!response.ok) {
@@ -71,7 +64,7 @@ export async function rawGql<TData>(
   }
 
   if (json.data === undefined || json.data === null) {
-    throw new GqlError('The server returned an empty response.');
+    throw new GqlError("The server returned an empty response.");
   }
 
   return json.data;

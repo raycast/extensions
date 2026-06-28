@@ -1,6 +1,6 @@
-import { isUnauthenticated, rawGql } from './client';
-import { forceRefresh, getValidAccessToken } from './oauth';
-import { getCoreEndpoint, getMetadataEndpoint } from './preferences';
+import { isUnauthenticated, rawGql } from "./client";
+import { forceRefresh, getValidAccessToken } from "./oauth";
+import { getCoreEndpoint, getMetadataEndpoint } from "./preferences";
 
 // Authenticated GraphQL request with a single transparent refresh-and-retry on
 // an UNAUTHENTICATED response (covers tokens revoked server-side between calls).
@@ -23,13 +23,9 @@ async function authedRequest<TData>(
 }
 
 // auth + AI chat + custom DeserveOS resolvers
-export const requestMetadata = <TData>(
-  query: string,
-  variables: Record<string, unknown> = {},
-) => authedRequest<TData>(getMetadataEndpoint(), query, variables);
+export const requestMetadata = <TData>(query: string, variables: Record<string, unknown> = {}) =>
+  authedRequest<TData>(getMetadataEndpoint(), query, variables);
 
 // dynamic workspace records (people, companies, opportunities, tasks)
-export const requestCore = <TData>(
-  query: string,
-  variables: Record<string, unknown> = {},
-) => authedRequest<TData>(getCoreEndpoint(), query, variables);
+export const requestCore = <TData>(query: string, variables: Record<string, unknown> = {}) =>
+  authedRequest<TData>(getCoreEndpoint(), query, variables);

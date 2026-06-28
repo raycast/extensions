@@ -1,30 +1,20 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  LaunchType,
-  List,
-  launchCommand,
-} from '@raycast/api';
+import { Action, ActionPanel, Detail, Icon, LaunchType, List, launchCommand } from "@raycast/api";
 
 const LoginAction = () => (
   <Action
     title="Log in to Deserveos"
     icon={Icon.Key}
-    onAction={() =>
-      launchCommand({ name: 'login', type: LaunchType.UserInitiated })
-    }
+    onAction={() => launchCommand({ name: "login", type: LaunchType.UserInitiated })}
   />
 );
 
 const MESSAGE = [
-  '# Not logged in',
-  '',
-  'You need to sign in to your DeserveOS workspace before using this command.',
-  '',
-  'Run **Log in to DeserveOS** (press ↵ below), then come back.',
-].join('\n');
+  "# Not logged in",
+  "",
+  "You need to sign in to your DeserveOS workspace before using this command.",
+  "",
+  "Run **Log in to DeserveOS** (press ↵ below), then come back.",
+].join("\n");
 
 export function LoginPromptDetail() {
   return (

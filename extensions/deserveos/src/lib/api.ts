@@ -1,6 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
-import { requestCore, requestMetadata } from './request';
+import { requestCore, requestMetadata } from "./request";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -38,8 +38,8 @@ export async function listOpenTasks(): Promise<CrmTask[]> {
       }
     }`,
     {
-      filter: { status: { neq: 'DONE' } },
-      orderBy: [{ dueAt: 'AscNullsLast' }],
+      filter: { status: { neq: "DONE" } },
+      orderBy: [{ dueAt: "AscNullsLast" }],
       limit: 100,
     },
   );
@@ -118,9 +118,7 @@ export async function searchCompanies(text: string): Promise<CompanyRecord[]> {
   return data.companies.edges.map((edge) => edge.node);
 }
 
-export async function searchOpportunities(
-  text: string,
-): Promise<OpportunityRecord[]> {
+export async function searchOpportunities(text: string): Promise<OpportunityRecord[]> {
   const data = await requestCore<{
     opportunities: Connection<OpportunityRecord>;
   }>(
@@ -168,7 +166,7 @@ const CREATE_CHAT_THREAD = `
 // Raycast plugin always uses DeserveOS's AI so it stays fast and reliable and
 // never depends on the user's BYO provider limits. Keep in sync with the server
 // constant DESERVEOS_PLATFORM_MODEL_ID.
-const DESERVEOS_PLATFORM_MODEL_ID = 'deserveos-platform';
+const DESERVEOS_PLATFORM_MODEL_ID = "deserveos-platform";
 
 const SEND_CHAT_MESSAGE = `
   mutation SendChatMessage($threadId: UUID!, $text: String!, $messageId: UUID!, $modelId: String) {
@@ -192,26 +190,21 @@ const GET_CHAT_MESSAGES = `
 `;
 
 async function createChatThread(): Promise<string> {
-  const data = await requestMetadata<{ createChatThread: { id: string } }>(
-    CREATE_CHAT_THREAD,
-  );
+  const data = await requestMetadata<{ createChatThread: { id: string } }>(CREATE_CHAT_THREAD);
   return data.createChatThread.id;
 }
 
 async function getChatMessages(threadId: string): Promise<ChatMessage[]> {
-  const data = await requestMetadata<{ chatMessages: ChatMessage[] }>(
-    GET_CHAT_MESSAGES,
-    { threadId },
-  );
+  const data = await requestMetadata<{ chatMessages: ChatMessage[] }>(GET_CHAT_MESSAGES, { threadId });
   return data.chatMessages ?? [];
 }
 
 const extractText = (message: ChatMessage): string =>
   [...message.parts]
-    .filter((part) => part.type === 'text' && part.textContent)
+    .filter((part) => part.type === "text" && part.textContent)
     .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
     .map((part) => part.textContent)
-    .join('')
+    .join("")
     .trim();
 
 // Collapse duplicate concurrent calls (e.g. a dev-mode double render) so the
@@ -219,11 +212,8 @@ const extractText = (message: ChatMessage): string =>
 // double the AI token usage and worsen any provider rate limit.
 const inFlight = new Map<string, Promise<CopilotAnswer>>();
 
-export function askCopilot(
-  question: string,
-  existingThreadId?: string,
-): Promise<CopilotAnswer> {
-  const key = `${existingThreadId ?? 'new'}:${question}`;
+export function askCopilot(question: string, existingThreadId?: string): Promise<CopilotAnswer> {
+  const key = `${existingThreadId ?? "new"}:${question}`;
   const pending = inFlight.get(key);
   if (pending) return pending;
 
@@ -237,18 +227,13 @@ export function askCopilot(
 // Send a message and poll until the worker persists the assistant reply. The
 // generation runs in a background job regardless of any streaming subscription,
 // so polling chatMessages reliably yields the final answer.
-async function runAskCopilot(
-  question: string,
-  existingThreadId?: string,
-): Promise<CopilotAnswer> {
+async function runAskCopilot(question: string, existingThreadId?: string): Promise<CopilotAnswer> {
   const threadId = existingThreadId ?? (await createChatThread());
   const messageId = randomUUID();
 
   const before = await getChatMessages(threadId);
   const knownAssistantIds = new Set(
-    before
-      .filter((message) => message.role === 'assistant')
-      .map((message) => message.id),
+    before.filter((message) => message.role === "assistant").map((message) => message.id),
   );
 
   await requestMetadata(SEND_CHAT_MESSAGE, {
@@ -266,14 +251,11 @@ async function runAskCopilot(
 
     const messages = await getChatMessages(threadId);
     const reply = messages
-      .filter(
-        (message) =>
-          message.role === 'assistant' && !knownAssistantIds.has(message.id),
-      )
+      .filter((message) => message.role === "assistant" && !knownAssistantIds.has(message.id))
       .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
       .pop();
 
-    if (reply && reply.status === 'sent') {
+    if (reply && reply.status === "sent") {
       const answer = extractText(reply);
       if (answer.length > 0) {
         return { threadId, answer };

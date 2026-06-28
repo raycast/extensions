@@ -1,41 +1,20 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  type LaunchProps,
-  useNavigation,
-} from '@raycast/api';
-import { usePromise } from '@raycast/utils';
+import { Action, ActionPanel, Detail, Form, Icon, type LaunchProps, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
-import { askCopilot } from './lib/api';
-import { AuthError } from './lib/oauth';
-import { LoginPromptDetail } from './lib/login-prompt';
-import { getWorkspaceUrl } from './lib/preferences';
+import { askCopilot } from "./lib/api";
+import { AuthError } from "./lib/oauth";
+import { LoginPromptDetail } from "./lib/login-prompt";
+import { getWorkspaceUrl } from "./lib/preferences";
 
-function AnswerView({
-  question,
-  threadId,
-}: {
-  question: string;
-  threadId?: string;
-}) {
+function AnswerView({ question, threadId }: { question: string; threadId?: string }) {
   const { push } = useNavigation();
-  const { data, isLoading, error } = usePromise(
-    (q: string, t?: string) => askCopilot(q, t),
-    [question, threadId],
-  );
+  const { data, isLoading, error } = usePromise((q: string, t?: string) => askCopilot(q, t), [question, threadId]);
 
   if (error instanceof AuthError) {
     return <LoginPromptDetail />;
   }
 
-  const body = isLoading
-    ? '_Thinking…_'
-    : error
-      ? `⚠️ ${error.message}`
-      : (data?.answer ?? '');
+  const body = isLoading ? "_Thinking…_" : error ? `⚠️ ${error.message}` : (data?.answer ?? "");
 
   const markdown = `### ${question}\n\n${body}`;
 
@@ -52,13 +31,8 @@ function AnswerView({
               onAction={() => push(<FollowUpForm threadId={data.threadId} />)}
             />
           )}
-          {data && (
-            <Action.CopyToClipboard title="Copy Answer" content={data.answer} />
-          )}
-          <Action.OpenInBrowser
-            title="Open Deserveos"
-            url={getWorkspaceUrl()}
-          />
+          {data && <Action.CopyToClipboard title="Copy Answer" content={data.answer} />}
+          <Action.OpenInBrowser title="Open Deserveos" url={getWorkspaceUrl()} />
         </ActionPanel>
       }
     />
@@ -85,18 +59,12 @@ function FollowUpForm({ threadId }: { threadId: string }) {
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="question"
-        title="Follow-up"
-        placeholder="Ask a follow-up question…"
-      />
+      <Form.TextArea id="question" title="Follow-up" placeholder="Ask a follow-up question…" />
     </Form>
   );
 }
 
-export default function Command(
-  props: LaunchProps<{ arguments: { question: string } }>,
-) {
+export default function Command(props: LaunchProps<{ arguments: { question: string } }>) {
   const question = props.arguments.question?.trim();
 
   if (!question) {
