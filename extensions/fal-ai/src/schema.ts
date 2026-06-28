@@ -164,7 +164,7 @@ function normalizeSchema(schema: JsonSchema | undefined): JsonSchema {
 function getEnumValues(schema: JsonSchema) {
   const values =
     schema.enum ??
-    schema.anyOf
+    [...(schema.anyOf ?? []), ...(schema.oneOf ?? [])]
       ?.map((variant) => variant.const)
       .filter((value) => value !== undefined);
   return values?.map(String);

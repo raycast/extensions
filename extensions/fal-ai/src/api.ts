@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import {
-  Preferences,
   FalAsset,
   FalModel,
   FalModelsResponse,

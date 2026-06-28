@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2026-06-23
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Create media with fal.ai models from Raycast.
 - Search and filter models by type.

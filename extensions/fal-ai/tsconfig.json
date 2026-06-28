@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["raycast-env.d.ts", "src/**/*.ts", "src/**/*.tsx"]
 }

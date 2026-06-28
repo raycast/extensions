@@ -1,7 +1,3 @@
-export type Preferences = {
-  apiKey: string;
-};
-
 export type FalModel = {
   endpoint_id: string;
   metadata?: {

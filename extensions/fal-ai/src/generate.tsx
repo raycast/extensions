@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { getModel, searchModels, submitGeneration } from "./api";
-import { extractMediaUrls, inferMediaType } from "./media";
+import { inferMediaType } from "./media";
 import {
   extractInputFields,
   getPrompt,
@@ -30,7 +30,7 @@ import {
   toggleFavoriteModel,
   upsertRecord,
 } from "./storage";
-import { FalModel, GenerationRecord, Preferences, SchemaField } from "./types";
+import { FalModel, GenerationRecord, SchemaField } from "./types";
 
 type ModelFilter =
   | "all"
@@ -45,7 +45,7 @@ type ModelFilter =
   | "3d";
 
 export default function GenerateCommand() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Generate>();
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<ModelFilter>("all");
   const [models, setModels] = useState<FalModel[]>([]);
@@ -439,7 +439,7 @@ function GenerationForm({ endpointId }: { endpointId: string }) {
         responseUrl: response.response_url,
         statusUrl: response.status_url,
         cancelUrl: response.cancel_url,
-        mediaUrls: extractMediaUrls(input),
+        mediaUrls: [],
         createdAt: now,
         updatedAt: now,
       };
