@@ -203,7 +203,11 @@ export default function Command() {
     const c = new MeetingClient({
       onConnected: () => {
         setClient(c);
-        c.requestMeetingState();
+        c.requestMeetingState().then((msg) => {
+          if (msg) {
+            updateState(msg);
+          }
+        });
       },
       onMessage: updateState,
       onError: () => {

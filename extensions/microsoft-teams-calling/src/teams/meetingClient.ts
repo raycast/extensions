@@ -152,7 +152,7 @@ export class MeetingClient {
   private tokenSave: Promise<void> = Promise.resolve();
   private connectedWithToken = false;
   private lastCommandFinished = false;
-  private lastUpdate = {} as UpdateMessage;
+  private lastUpdate: UpdateMessage | undefined;
   private settleTimer: ReturnType<typeof setTimeout> | undefined;
   private settleBaseline: MeetingState | undefined;
   private static readonly settleFallbackMs = 1000;
@@ -350,9 +350,9 @@ export class MeetingClient {
     await this.tokenSave;
   }
 
-  public async requestMeetingState(): Promise<UpdateMessage> {
+  public async requestMeetingState(): Promise<UpdateMessage | undefined> {
     // The Teams API offers no explicit state query on this protocol, so we
-    // return the last state we received.
+    // return the last state we received, or undefined if none has arrived yet.
     return Promise.resolve(this.lastUpdate);
   }
 
