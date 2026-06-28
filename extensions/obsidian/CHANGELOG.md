@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Add] - {PR_MERGE_DATE}
+## [Add] - 2026-06-28
 
 - Added vault path display to the Open Vault command
 
