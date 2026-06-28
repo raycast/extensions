@@ -1,0 +1,38 @@
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All DOM queries appear to be guarded","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"Minimal optional chaining opportunities","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No direct NaN comparisons","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All NaN checks use Number.isNaN()","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":1,"title":"Bitwise operations detected - ensure integer inputs","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All comparisons use strict equality","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":20,"title":"Type comparisons - verify both sides match","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":51,"title":"Async functions found","description":"Verifying proper await/error handling..."}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All async operations appear protected","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":0,"title":"Async fallback disabled","description":"Run with --fail-on-warning to surface missing .catch()/try blocks when ast-grep is unavailable"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"Hooks dependency arrays look accurate","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":0,"title":"TypeScript compiler not detected","description":"Install the 'typescript' npm package to enable structural type narrowing validation"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"Error handling patterns look healthy","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No eval() detected","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"warning","count":1,"title":"fetch() without AbortSignal cancellation","description":"Pass a signal from AbortSignal.timeout() or an AbortController so callers can bound stalled requests"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"critical","count":6,"title":"Secret, signature, or token compared with ==/!=","description":"Use crypto.timingSafeEqual(), WebCrypto verify(), or a reviewed constant-time helper for bearer tokens, HMACs, CSRF values, and reset secrets"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No request-derived raw SQL construction detected","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No unbounded Request body parsers detected","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No request-controlled RegExp construction detected","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No tainted sources reach dangerous sinks","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":47,"title":"Arrow functions with { } - verify return intent","description":"() => {x:1} returns undefined; wrap object: () => ({x:1})"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":73,"title":"Many callback-style functions detected","description":"Review for unnecessary nesting; prefer async/await or Promises"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All parseInt calls specify radix","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"JSON.parse usage appears guarded by try/catch","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"warning","count":2,"title":"Switch cases may be missing break","description":"Add break or /* falls through */"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"Minimal console usage","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No debugger statements","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":0,"title":"Event listeners attached","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":0,"title":"Event listeners removed","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No var declarations (using let/const)","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"Using const appropriately","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":150,"title":"Many variable declarations - check for unused vars","description":"Use ESLint no-unused-vars for precision"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"No technical debt markers","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"info","count":0,"title":"DOM queries found","description":"Ensure all queries have null checks before property access"}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All tracked resource acquisitions have matching cleanups","description":""}
+{"type":"finding","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","severity":"good","count":0,"title":"All tracked resource acquisitions have matching cleanups","description":""}
+{"type":"scanner","project":"/Users/andypai/Projects/raycast-tts-reader","language":"js","files":14,"critical":6,"warning":3,"info":342,"timestamp":"2026-06-26T21:47:50Z"}
+{"type":"totals","project":"/Users/andypai/Projects/raycast-tts-reader","files":14,"critical":6,"warning":3,"info":342,"timestamp":"2026-06-26T21:47:51Z"}

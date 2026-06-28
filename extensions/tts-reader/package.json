@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tts-reader",
+  "version": "2.2.0",
+  "title": "TTS Reader",
+  "description": "Text-to-speech reader powered by any TTS provider",
+  "icon": "extension-icon.png",
+  "author": "andypai",
+  "license": "MIT",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "tts",
+    "text to speech",
+    "voice",
+    "speech",
+    "reader"
+  ],
+  "commands": [
+    {
+      "name": "read-selected-text",
+      "title": "Read Selected Text",
+      "description": "Immediately reads the selected text or clipboard content without confirmation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-text-editor",
+      "title": "Read Text with Editor",
+      "description": "Opens an editor to review and modify text before reading aloud.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-audio",
+      "title": "Stop Audio",
+      "description": "Immediately stop the current audio playback.",
+      "mode": "no-view"
+    },
+    {
+      "name": "onboarding",
+      "title": "Get Started",
+      "description": "Onboarding and configuration for TTS Reader.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "title": "Server URL",
+      "description": "TTS server endpoint URL (typically http://localhost:8000).",
+      "defaultValue": "http://localhost:8000",
+      "required": false
+    },
+    {
+      "name": "voice",
+      "type": "textfield",
+      "title": "Voice",
+      "description": "Voice name to use for speech synthesis.",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "speed",
+      "type": "textfield",
+      "title": "Speed",
+      "description": "Playback speed (0.25-4.0). Requires ffmpeg when not 1.0.",
+      "defaultValue": "1.0",
+      "required": false
+    },
+    {
+      "name": "outputFormat",
+      "type": "dropdown",
+      "title": "Output Format",
+      "description": "Audio format for output files. Requires ffmpeg when not WAV.",
+      "defaultValue": "wav",
+      "required": false,
+      "data": [
+        {
+          "value": "wav",
+          "title": "WAV"
+        },
+        {
+          "value": "mp3",
+          "title": "MP3"
+        },
+        {
+          "value": "m4a",
+          "title": "M4A"
+        },
+        {
+          "value": "flac",
+          "title": "FLAC"
+        }
+      ]
+    },
+    {
+      "name": "saveAudioFiles",
+      "type": "checkbox",
+      "title": "Save Audio Files",
+      "description": "Save generated audio files to ~/.cache/raycast-tts/ for debugging and reuse.",
+      "defaultValue": false,
+      "required": false,
+      "label": "Save Audio Files"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.6"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "npm@10.9.8"
+}

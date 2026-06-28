@@ -1,0 +1,253 @@
+{
+  "project": "/Users/andypai/Projects/raycast-tts-reader",
+  "timestamp": "2026-06-26T21:47:51Z",
+  "scanners": [
+    {
+      "project": "/Users/andypai/Projects/raycast-tts-reader",
+      "timestamp": "2026-06-26T21:47:50Z",
+      "files": 14,
+      "critical": 6,
+      "warning": 3,
+      "info": 342,
+      "version": "4.7",
+      "language": "js",
+      "extras": {
+        "deep_guard": {
+          "unguarded": 0,
+          "guarded": 0,
+          "samples": []
+        }
+      },
+      "findings": [
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All DOM queries appear to be guarded",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "Minimal optional chaining opportunities",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No direct NaN comparisons",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All NaN checks use Number.isNaN()",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 1,
+          "title": "Bitwise operations detected - ensure integer inputs",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All comparisons use strict equality",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 20,
+          "title": "Type comparisons - verify both sides match",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 51,
+          "title": "Async functions found",
+          "description": "Verifying proper await/error handling..."
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All async operations appear protected",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 0,
+          "title": "Async fallback disabled",
+          "description": "Run with --fail-on-warning to surface missing .catch()/try blocks when ast-grep is unavailable"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "Hooks dependency arrays look accurate",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 0,
+          "title": "TypeScript compiler not detected",
+          "description": "Install the 'typescript' npm package to enable structural type narrowing validation"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "Error handling patterns look healthy",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No eval() detected",
+          "description": ""
+        },
+        {
+          "severity": "warning",
+          "count": 1,
+          "title": "fetch() without AbortSignal cancellation",
+          "description": "Pass a signal from AbortSignal.timeout() or an AbortController so callers can bound stalled requests"
+        },
+        {
+          "severity": "critical",
+          "count": 6,
+          "title": "Secret, signature, or token compared with ==/!=",
+          "description": "Use crypto.timingSafeEqual(), WebCrypto verify(), or a reviewed constant-time helper for bearer tokens, HMACs, CSRF values, and reset secrets"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No request-derived raw SQL construction detected",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No unbounded Request body parsers detected",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No request-controlled RegExp construction detected",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No tainted sources reach dangerous sinks",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 47,
+          "title": "Arrow functions with { } - verify return intent",
+          "description": "() => {x:1} returns undefined; wrap object: () => ({x:1})"
+        },
+        {
+          "severity": "info",
+          "count": 73,
+          "title": "Many callback-style functions detected",
+          "description": "Review for unnecessary nesting; prefer async/await or Promises"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All parseInt calls specify radix",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "JSON.parse usage appears guarded by try/catch",
+          "description": ""
+        },
+        {
+          "severity": "warning",
+          "count": 2,
+          "title": "Switch cases may be missing break",
+          "description": "Add break or /* falls through */"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "Minimal console usage",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No debugger statements",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 0,
+          "title": "Event listeners attached",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 0,
+          "title": "Event listeners removed",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No var declarations (using let/const)",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "Using const appropriately",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 150,
+          "title": "Many variable declarations - check for unused vars",
+          "description": "Use ESLint no-unused-vars for precision"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "No technical debt markers",
+          "description": ""
+        },
+        {
+          "severity": "info",
+          "count": 0,
+          "title": "DOM queries found",
+          "description": "Ensure all queries have null checks before property access"
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All tracked resource acquisitions have matching cleanups",
+          "description": ""
+        },
+        {
+          "severity": "good",
+          "count": 0,
+          "title": "All tracked resource acquisitions have matching cleanups",
+          "description": ""
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "critical": 6,
+    "warning": 3,
+    "info": 342,
+    "files": 14
+  },
+  "generated_at": "2026-06-26T21:47:51Z",
+  "git": {
+    "repository": "https://github.com/abpai/raycast-tts-reader",
+    "commit": "597e2e66644ea5e7e711263b1e094bc8533a493d",
+    "blob_base": "https://github.com/abpai/raycast-tts-reader/blob/597e2e66644ea5e7e711263b1e094bc8533a493d"
+  }
+}
