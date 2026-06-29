@@ -24,6 +24,7 @@ export interface CodexUsage {
     availableCount: number | null;
     nextExpiresAt: string | null;
   };
+  resetCreditsError?: string;
 }
 
 export interface CodexError {

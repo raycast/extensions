@@ -36,6 +36,9 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
     if (u.resetCredits.nextExpiresAt) {
       text += `\nNext Expires In: ${formatResetTime(u.resetCredits.nextExpiresAt)}`;
     }
+    if (u.resetCreditsError) {
+      text += `\nReset Credits Error: ${u.resetCreditsError}`;
+    }
   }
 
   return text;
@@ -92,6 +95,9 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
               title="Next Expires In"
               text={formatResetTime(u.resetCredits.nextExpiresAt)}
             />
+          )}
+          {u.resetCreditsError && (
+            <List.Item.Detail.Metadata.Label title="Reset Credits Error" text={u.resetCreditsError} />
           )}
         </>
       )}

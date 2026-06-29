@@ -34,7 +34,7 @@ function getProxyUrl(url: string): string | null {
     return null;
   }
 
-  if (isNoProxyHost(parsedUrl.hostname)) {
+  if (isNoProxyHost(parsedUrl.hostname, parsedUrl.port || getDefaultPort(parsedUrl.protocol))) {
     return null;
   }
 
@@ -50,7 +50,31 @@ function getProxyUrl(url: string): string | null {
   return trimmedProxyUrl;
 }
 
-function isNoProxyHost(hostname: string): boolean {
+function getDefaultPort(protocol: string): string | undefined {
+  if (protocol === "https:") {
+    return "443";
+  }
+  if (protocol === "http:") {
+    return "80";
+  }
+  return undefined;
+}
+
+function parseNoProxyEntry(entry: string): { hostname: string; port?: string } {
+  if (entry.startsWith("[")) {
+    const hostEnd = entry.indexOf("]");
+    if (hostEnd !== -1) {
+      const port = entry.slice(hostEnd + 1).startsWith(":") ? entry.slice(hostEnd + 2) : undefined;
+      return { hostname: entry.slice(1, hostEnd), port };
+    }
+  }
+
+  const colonIndex = entry.lastIndexOf(":");
+  const hasPort = colonIndex > -1 && entry.indexOf(":") === colonIndex;
+  return hasPort ? { hostname: entry.slice(0, colonIndex), port: entry.slice(colonIndex + 1) } : { hostname: entry };
+}
+
+function isNoProxyHost(hostname: string, port?: string): boolean {
   const noProxy = process.env.NO_PROXY || process.env.no_proxy;
   if (!noProxy) {
     return false;
@@ -65,7 +89,11 @@ function isNoProxyHost(hostname: string): boolean {
       if (entry === "*") {
         return true;
       }
-      const normalizedEntry = entry.startsWith(".") ? entry.slice(1) : entry;
+      const { hostname: entryHostname, port: entryPort } = parseNoProxyEntry(entry);
+      const normalizedEntry = entryHostname.startsWith(".") ? entryHostname.slice(1) : entryHostname;
+      if (entryPort && entryPort !== port) {
+        return false;
+      }
       return normalizedHostname === normalizedEntry || normalizedHostname.endsWith(`.${normalizedEntry}`);
     });
 }

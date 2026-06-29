@@ -15,6 +15,11 @@ const CODEX_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
+interface CodexResetCreditsResult {
+  resetCredits: CodexUsage["resetCredits"] | null;
+  error: CodexError | null;
+}
+
 export async function fetchCodexUsage(
   token: string,
   accountId?: string | null,
@@ -28,14 +33,11 @@ export async function fetchCodexUsage(
   });
   if (error) return { usage: null, error };
 
-  const resetCredits = await fetchCodexResetCredits(token, accountId);
-  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, nextExpiresAt: null });
+  const { resetCredits, error: resetCreditsError } = await fetchCodexResetCredits(token, accountId);
+  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, nextExpiresAt: null }, resetCreditsError);
 }
 
-async function fetchCodexResetCredits(
-  token: string,
-  accountId?: string | null,
-): Promise<{ availableCount: number; nextExpiresAt: string | null } | null> {
+async function fetchCodexResetCredits(token: string, accountId?: string | null): Promise<CodexResetCreditsResult> {
   const { data, error } = await httpFetch({
     url: CODEX_RESET_CREDITS_API,
     token,
@@ -49,8 +51,15 @@ async function fetchCodexResetCredits(
     unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
   });
 
-  if (error || !data || typeof data !== "object") {
-    return null;
+  if (error) {
+    return { resetCredits: null, error };
+  }
+
+  if (!data || typeof data !== "object") {
+    return {
+      resetCredits: null,
+      error: { type: "parse_error", message: "Invalid reset-credit response format" },
+    };
   }
 
   const response = data as {
@@ -63,7 +72,10 @@ async function fetchCodexResetCredits(
 
   const availableCount = typeof response.available_count === "number" ? response.available_count : null;
   if (availableCount === null || availableCount < 0) {
-    return null;
+    return {
+      resetCredits: null,
+      error: { type: "parse_error", message: "Invalid reset-credit response format" },
+    };
   }
 
   const now = Date.now();
@@ -76,7 +88,7 @@ async function fetchCodexResetCredits(
     })
     .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
 
-  return { availableCount, nextExpiresAt: nextExpiresAt ?? null };
+  return { resetCredits: { availableCount, nextExpiresAt: nextExpiresAt ?? null }, error: null };
 }
 
 function getCodexAccountHeaders(accountId?: string | null): Record<string, string> {
@@ -87,6 +99,7 @@ function getCodexAccountHeaders(accountId?: string | null): Record<string, strin
 function parseCodexApiResponse(
   data: unknown,
   resetCredits: CodexUsage["resetCredits"] | null = null,
+  resetCreditsError: CodexError | null = null,
 ): { usage: CodexUsage | null; error: CodexError | null } {
   try {
     if (!data || typeof data !== "object") {
@@ -161,6 +174,7 @@ function parseCodexApiResponse(
         balance: response.credits?.balance || "0",
       },
       resetCredits: resetCredits ?? undefined,
+      resetCreditsError: resetCreditsError?.message,
     };
 
     if (response.code_review_rate_limit?.primary_window) {
