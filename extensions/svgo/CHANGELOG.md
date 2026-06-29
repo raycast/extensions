@@ -1,6 +1,6 @@
 # SVGO Changelog
 
-## [OXVG provider & SVGO v4] - {PR_MERGE_DATE}
+## [OXVG provider & SVGO v4] - 2026-06-29
 
 - Add **Optimization Provider** preference to choose between SVGO (default) and OXVG (experimental, faster on large SVGs)
 - Upgrade to SVGO v4 and update `@raycast/api` and `is-svg` dependencies
