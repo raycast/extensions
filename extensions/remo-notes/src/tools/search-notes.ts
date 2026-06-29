@@ -1,5 +1,5 @@
 import { remoApi } from "../utils/api";
-import { notePlainText } from "../utils/noteDisplay";
+import { notePlainText, truncate } from "../utils/noteDisplay";
 
 type Input = {
   /**
@@ -19,6 +19,6 @@ export default async function tool(input: Input) {
     title: note.title || "Untitled",
     isLocked: note.isLocked ?? false,
     updatedAt: new Date(note.updatedAt).toISOString(),
-    snippet: note.summary || notePlainText(note).slice(0, 200),
+    snippet: note.summary || truncate(notePlainText(note), 200),
   }));
 }

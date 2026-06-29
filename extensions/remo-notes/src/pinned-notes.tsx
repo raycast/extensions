@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { buildAppUrl, buildWebUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
-import { notePlainText } from "./utils/noteDisplay";
+import { notePlainText, truncate } from "./utils/noteDisplay";
 import { handleError } from "./utils/errors";
 
 export default function Command() {
@@ -33,7 +33,7 @@ export default function Command() {
                   ? "Locked Note"
                   : note.isE2E
                     ? "Encrypted Note"
-                    : (note.summary || notePlainText(note)).substring(0, 30)
+                    : truncate(note.summary || notePlainText(note), 30)
               }
               icon={note.isLocked || note.isE2E ? Icon.Lock : Icon.Document}
               onAction={() => open(buildAppUrl(`/notes/${note._id}`))}

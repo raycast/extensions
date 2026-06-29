@@ -5,7 +5,7 @@ import { buildAppUrl } from "../config";
 import type { Folder, Note } from "../types";
 import { remoApi } from "../utils/api";
 import { handleError } from "../utils/errors";
-import { noteHasContent, noteMarkdown, notePlainText } from "../utils/noteDisplay";
+import { noteHasContent, noteMarkdown, notePlainText, truncate } from "../utils/noteDisplay";
 
 interface NoteListItemProps {
   note: Note;
@@ -83,7 +83,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
             ? "Locked Note"
             : note.isE2E
               ? "Encrypted Note"
-              : (note.summary || notePlainText(note)).substring(0, 50)
+              : truncate(note.summary || notePlainText(note), 50)
       }
       accessories={
         isShowingDetail
