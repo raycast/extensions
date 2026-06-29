@@ -12,48 +12,56 @@ export interface CodexAccountCandidate {
   needsAccountId: boolean;
 }
 
-function hasDuplicateManualAccount(
-  candidate: AccountEntry,
-  seenTokens: Set<string>,
-  seenAccountIds: Set<string>,
-): boolean {
-  const accountId = candidate.accountId?.trim();
-  return seenTokens.has(candidate.token) || Boolean(accountId && seenAccountIds.has(accountId));
-}
-
 export function buildCodexAccountCandidates(
   discoveredAccounts: CodexOAuthAccount[],
   manualAccounts: AccountEntry[],
 ): CodexAccountCandidate[] {
   const candidates: CodexAccountCandidate[] = [];
-  const seenTokens = new Set<string>();
+  const candidatesByToken = new Map<string, CodexAccountCandidate>();
   const seenAccountIds = new Set<string>();
 
+  const registerCandidate = (candidate: CodexAccountCandidate): void => {
+    candidates.push(candidate);
+    candidatesByToken.set(candidate.token, candidate);
+    if (candidate.accountId) {
+      seenAccountIds.add(candidate.accountId);
+    }
+  };
+
   for (const account of discoveredAccounts) {
-    const accountId = account.accountId?.trim() || null;
-    candidates.push({
+    registerCandidate({
       id: account.id,
       label: account.label,
       token: account.token,
-      accountId,
+      accountId: account.accountId?.trim() || null,
       source: "codex-home",
       // Discovered OAuth tokens can fetch their default account even without an
       // explicit account ID (matching the single-account useCodexUsage path).
       needsAccountId: false,
     });
-    seenTokens.add(account.token);
-    if (accountId) {
-      seenAccountIds.add(accountId);
-    }
   }
 
   for (const account of manualAccounts) {
-    if (hasDuplicateManualAccount(account, seenTokens, seenAccountIds)) {
+    const accountId = account.accountId?.trim() || null;
+    const existing = candidatesByToken.get(account.token);
+
+    if (existing) {
+      // Same token as an already-added account. Keep the existing (file-backed)
+      // token, but adopt this entry's explicit account ID if the existing one
+      // lacked it — otherwise the manually configured account would be lost and
+      // the fetch would fall back to the token's default account.
+      if (!existing.accountId && accountId) {
+        existing.accountId = accountId;
+        seenAccountIds.add(accountId);
+      }
       continue;
     }
 
-    const accountId = account.accountId?.trim() || null;
-    candidates.push({
+    if (accountId && seenAccountIds.has(accountId)) {
+      continue;
+    }
+
+    registerCandidate({
       id: account.id,
       label: account.label,
       token: account.token,
@@ -61,10 +69,6 @@ export function buildCodexAccountCandidates(
       source: "manual",
       needsAccountId: !accountId,
     });
-    seenTokens.add(account.token);
-    if (accountId) {
-      seenAccountIds.add(accountId);
-    }
   }
 
   return candidates;

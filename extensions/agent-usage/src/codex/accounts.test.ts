@@ -66,6 +66,41 @@ test("buildCodexAccountCandidates skips manual accounts duplicated by token or a
   );
 });
 
+test("buildCodexAccountCandidates backfills a manual account ID onto a token-matched discovered account that lacks one", () => {
+  const discoveredWithoutAccountId: CodexOAuthAccount = {
+    id: "codex-active-missing-account",
+    label: "Active",
+    token: "active-token",
+    accountId: null,
+    userId: null,
+    source: "active",
+    authFilePath: "/tmp/.codex/auth.json",
+  };
+  const manualAccounts: AccountEntry[] = [
+    { id: "manual-work", label: "Manual Work", token: "active-token", accountId: "acct_manual" },
+  ];
+
+  const candidates = buildCodexAccountCandidates([discoveredWithoutAccountId], manualAccounts);
+
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0].id, "codex-active-missing-account");
+  assert.equal(candidates[0].source, "codex-home");
+  assert.equal(candidates[0].accountId, "acct_manual");
+  assert.equal(candidates[0].needsAccountId, false);
+});
+
+test("buildCodexAccountCandidates keeps a discovered account ID over a token-matched manual one", () => {
+  const manualAccounts: AccountEntry[] = [
+    { id: "manual-work", label: "Manual Work", token: "active-token", accountId: "acct_manual" },
+  ];
+
+  const candidates = buildCodexAccountCandidates([discoveredAccount], manualAccounts);
+
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0].id, "codex-active");
+  assert.equal(candidates[0].accountId, "acct_active");
+});
+
 test("buildCodexAccountCandidates marks manual Codex entries without account IDs as unsafe to fetch", () => {
   const manualAccounts: AccountEntry[] = [{ id: "manual-no-account", label: "Manual", token: "manual-token" }];
 
