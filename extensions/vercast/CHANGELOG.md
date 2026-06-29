@@ -1,5 +1,11 @@
 # Vercast Changelog
 
+## [2.19] - 2026-06-29
+
+- Fix deployment fetching for selected Vercel teams by including team slugs in deployment API requests
+- Improve deployment list and menu bar errors when Vercel returns API failures
+- Improve environment variable target handling in forms and AI tools
+
 ## [2.18] - 2026-05-27
 
 - Use orange status dot for in-progress deployments (building/initializing) for better contrast with ready (green)
@@ -8,6 +14,7 @@
 ## [2.17] - 2026-02-20
 
 - Added `Cancel Deployment` action to deployments
+
 ## [2.16] - 2026-02-15
 
 - Added `Search AI Gateway Logs` command

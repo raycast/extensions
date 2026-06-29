@@ -1,29 +1,42 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { LockdockNeedsUpdate } from "./components/LockdockNeedsUpdate";
 import { LockdockNotInstalled } from "./components/LockdockNotInstalled";
 import { LockdockNotRunning } from "./components/LockdockNotRunning";
-import { DockStatus, getState, isIpcRunning, lockDock, unlockDock } from "./lib/ipc";
+import {
+  DockStatus,
+  getState,
+  LockdockNotRunningError,
+  LockdockUnsupportedVersionError,
+  lockDock,
+  unlockDock,
+} from "./lib/lockdock";
 import { getLockDockPathSafe } from "./lib/binary";
 
 export default function Command() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isRunning = isIpcRunning();
+  const binPath = getLockDockPathSafe();
   const {
     isLoading,
     data: status,
+    error,
     revalidate,
   } = usePromise(getState, [], {
     failureToastOptions: { title: "Failed to load Dock status" },
-    execute: isRunning,
+    execute: binPath !== null,
   });
 
-  if (!isRunning) {
-    const binPath = getLockDockPathSafe();
-    if (!binPath) {
-      return <LockdockNotInstalled />;
-    }
+  if (!binPath) {
+    return <LockdockNotInstalled />;
+  }
+
+  if (error instanceof LockdockNotRunningError) {
     return <LockdockNotRunning binPath={binPath} />;
+  }
+
+  if (error instanceof LockdockUnsupportedVersionError) {
+    return <LockdockNeedsUpdate version={error.version} />;
   }
 
   const runAction = async (

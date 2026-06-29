@@ -18,7 +18,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     toast.style = Style.Success;
     toast.title = "Applied successfully!";
 
-    await open("raycast://confetti");
+    await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
 
     await popToRoot();
   } catch (e) {

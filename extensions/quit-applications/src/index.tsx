@@ -154,7 +154,7 @@ async function restartAppWithToast(app: string): Promise<boolean> {
 function getQuickLinkForApp(appName: string, action: string): string {
   const context = JSON.stringify({ appName, action });
   const encodedContext = encodeURIComponent(context);
-  return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
 }
 
 type CommandProps = {

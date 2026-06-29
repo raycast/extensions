@@ -20,10 +20,9 @@ export function parseNetshWlanProfiles(output: string): string[] {
     }
 
     if (inUserProfilesSection && trimmedLine.startsWith("All User Profile")) {
-      // Extract the profile name after ': '
-      const parts = trimmedLine.split(": ");
-      if (parts.length > 1) {
-        userProfiles.push(parts[1].trim());
+      const colonIdx = trimmedLine.indexOf(": ");
+      if (colonIdx !== -1) {
+        userProfiles.push(trimmedLine.substring(colonIdx + 2).trim());
       }
     }
   }
@@ -89,9 +88,9 @@ export function parseNetshWlanProfileEssentials(output: string): ResponseNetwork
 
     // Extract key content (password)
     else if (trimmedLine.startsWith("Key Content")) {
-      const parts = trimmedLine.split(":");
-      if (parts.length > 1) {
-        essentials.keyContent = parts[1].trim();
+      const colonIndex = trimmedLine.indexOf(":");
+      if (colonIndex !== -1) {
+        essentials.keyContent = trimmedLine.slice(colonIndex + 1).trim();
       }
     }
 

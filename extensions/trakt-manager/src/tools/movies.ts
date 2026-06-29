@@ -1,7 +1,5 @@
-import { initTraktClient } from "../lib/client";
-import { withPagination } from "../lib/schema";
-
-const traktClient = initTraktClient();
+import { TraktMovieListItem } from "../lib/schema";
+import { createSearchTool, toolTraktClient } from "./search-tool";
 
 type Input = {
   /**
@@ -40,29 +38,6 @@ type Input = {
  * data: List of movies with title, year, overview, rating, genres
  * hasMore: True if more pages are available
  */
-const tool = async (input: Input) => {
-  const { title, page } = input;
-  const response = await traktClient.movies.searchMovies({
-    query: {
-      query: title,
-      page: page,
-      limit: 10,
-      fields: "title",
-      extended: "full,cloud9",
-    },
-    fetchOptions: {
-      signal: AbortSignal.timeout(3600),
-    },
-  });
-
-  if (response.status !== 200) return { data: [], hasMore: false };
-  const paginatedResponse = withPagination(response);
-
-  return {
-    data: paginatedResponse.data,
-    hasMore:
-      paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
-  };
-};
+const tool = createSearchTool<TraktMovieListItem, Input>(toolTraktClient.movies.searchMovies);
 
 export default tool;

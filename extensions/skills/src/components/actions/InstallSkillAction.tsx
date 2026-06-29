@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCallback, useState } from "react";
-import { AUDIT_PROVIDER_LABELS, type Skill } from "../../shared";
+import { formatAuditProviderLabel, type Skill } from "../../shared";
 import { useSkillAudits } from "../../hooks/useSkillAudits";
 import { useAvailableAgents } from "../../hooks/useAvailableAgents";
 import { type InstalledSkillMatch } from "../../hooks/useInstalledSkillMatches";
@@ -75,9 +75,7 @@ function getConfirmationMessage({
 
   if (auditRisk === "failed") {
     const failedProviders = joinWithAnd(
-      auditResult.audits
-        .filter((audit) => audit.status === "fail")
-        .map((audit) => AUDIT_PROVIDER_LABELS[audit.provider]),
+      auditResult.audits.filter((audit) => audit.status === "fail").map((audit) => formatAuditProviderLabel(audit)),
     );
     return `Security audits by ${failedProviders} failed for this skill. ${reviewMessage}`;
   }
@@ -145,6 +143,7 @@ function buildConfirmation({
   ].join("\n\n");
 
   return {
+    icon: hasAuditRisk ? { source: Icon.Warning, tintColor: Color.Red } : Icon.Download,
     title: `${operation} "${skill.name}"${TITLE_SUFFIX_BY_RISK[auditRisk]}?`,
     message,
     primaryAction: {
@@ -204,7 +203,7 @@ function AgentPickerInstallForm({
     }
 
     const auditResult = await resolveAuditResult(skill, prefetchedAuditResult);
-    const { title, message, primaryAction } = buildConfirmation({
+    const { icon, title, message, primaryAction } = buildConfirmation({
       skill,
       auditResult,
       selectedAgents,
@@ -213,6 +212,7 @@ function AgentPickerInstallForm({
     });
 
     const confirmed = await confirmAlert({
+      icon,
       title,
       message,
       primaryAction,

@@ -31,6 +31,10 @@ interface RawProcess {
 interface RawListener {
   pid: number;
   port: number;
+  // True when the socket is bound beyond loopback (wildcard or a concrete
+  // LAN address), i.e. the server is reachable from other devices on the
+  // network. Drives the "Copy Network URL" action.
+  lanExposed: boolean;
 }
 
 // Capture stdout even when the child exits non-zero (lsof exits 1 if any of
@@ -97,8 +101,17 @@ async function listListeners(): Promise<RawListener[]> {
       currentPid = parseInt(line.slice(1), 10);
     } else if (line[0] === "n" && currentPid > 0) {
       const addr = line.slice(1);
-      const port = parseInt(addr.slice(addr.lastIndexOf(":") + 1), 10);
-      if (port > 0) out.push({ pid: currentPid, port });
+      const colon = addr.lastIndexOf(":");
+      const port = parseInt(addr.slice(colon + 1), 10);
+      if (port > 0) {
+        const host = addr.slice(0, colon);
+        const lanExposed = !(
+          host === "127.0.0.1" ||
+          host === "[::1]" ||
+          host.startsWith("127.")
+        );
+        out.push({ pid: currentPid, port, lanExposed });
+      }
     }
   }
   return out;
@@ -140,9 +153,18 @@ interface GitInfo {
   branch: string;
 }
 
-// Resolve git common-dir and branch for a cwd. Returns undefined when cwd
-// isn't inside a git working tree. One process spawn per call.
-async function getGitInfo(cwd: string): Promise<GitInfo | undefined> {
+interface GitProbe {
+  info: GitInfo | undefined;
+  // Absolute path to the HEAD file that defines `branch` (per-worktree for
+  // linked worktrees). Its mtime changes on every checkout, which makes it a
+  // cheap cache-invalidation signal: see getGitInfoCached.
+  headPath?: string;
+}
+
+// Resolve git common-dir, branch, and HEAD path for a cwd. Returns
+// info: undefined when cwd isn't inside a git working tree. One process
+// spawn per call; callers should go through getGitInfoCached.
+async function probeGit(cwd: string): Promise<GitProbe> {
   try {
     const { stdout } = await execFileAsync("git", [
       "-C",
@@ -151,29 +173,122 @@ async function getGitInfo(cwd: string): Promise<GitInfo | undefined> {
       "--git-common-dir",
       "--abbrev-ref",
       "HEAD",
+      "--git-path",
+      "HEAD",
     ]);
-    const [commonDirRaw, branchRaw] = stdout.trim().split("\n");
-    if (!commonDirRaw) return undefined;
+    // rev-parse prints one line per request, in argument order.
+    const [commonDirRaw, branchRaw, headRaw] = stdout.trim().split("\n");
+    if (!commonDirRaw) return { info: undefined };
     const commonDir = path.isAbsolute(commonDirRaw)
       ? commonDirRaw
       : path.resolve(cwd, commonDirRaw);
     const branch = branchRaw === "HEAD" ? "" : (branchRaw ?? "");
-    return { commonDir, branch };
+    const headPath = headRaw
+      ? path.isAbsolute(headRaw)
+        ? headRaw
+        : path.resolve(cwd, headRaw)
+      : undefined;
+    return { info: { commonDir, branch }, headPath };
   } catch {
-    return undefined;
+    return { info: undefined };
   }
+}
+
+interface GitCacheEntry {
+  probe: GitProbe;
+  headMtimeMs?: number;
+  checkedAt: number;
+}
+
+// Per-cwd git cache. Spawning `git rev-parse` for every project on every
+// poll is the kind of background cost that adds up in a long-lived
+// dashboard session; the data it returns only changes on checkout. The HEAD
+// file's mtime is bumped by every checkout (including in linked worktrees,
+// which each have their own HEAD), so a single statSync per project per poll
+// replaces the spawn. Non-git cwds re-probe on a coarse TTL so a `git init`
+// under a running server is eventually picked up.
+const gitCache = new Map<string, GitCacheEntry>();
+const NON_GIT_RECHECK_MS = 60_000;
+
+async function getGitInfoCached(cwd: string): Promise<GitInfo | undefined> {
+  const entry = gitCache.get(cwd);
+  if (entry) {
+    if (entry.probe.info && entry.probe.headPath) {
+      try {
+        const mtime = fs.statSync(entry.probe.headPath).mtimeMs;
+        if (mtime === entry.headMtimeMs) return entry.probe.info;
+      } catch {
+        // HEAD vanished (repo deleted out from under us); fall through to a
+        // fresh probe.
+      }
+    } else if (Date.now() - entry.checkedAt < NON_GIT_RECHECK_MS) {
+      return entry.probe.info;
+    }
+  }
+  const probe = await probeGit(cwd);
+  let headMtimeMs: number | undefined;
+  if (probe.headPath) {
+    try {
+      headMtimeMs = fs.statSync(probe.headPath).mtimeMs;
+    } catch {
+      // Unreadable HEAD just means we re-probe next poll.
+    }
+  }
+  gitCache.set(cwd, { probe, headMtimeMs, checkedAt: Date.now() });
+  return probe.info;
 }
 
 // ---------------------------------------------------------------------------
 // Pure aggregation (cross-platform)
 // ---------------------------------------------------------------------------
 
+type ShopifyTool = "shopify-theme" | "shopify-app" | "shopify-hydrogen";
+
+function commandBase(token: string): string {
+  return path.basename(token).replace(/\.(?:cmd|exe|ps1)$/i, "");
+}
+
+function shopifyToolFromArgs(
+  tokens: string[],
+  index: number,
+): ShopifyTool | null {
+  const area = tokens[index + 1];
+  const command = tokens[index + 2];
+  if (area === "theme" && command === "dev") return "shopify-theme";
+  if (area === "app" && command === "dev") return "shopify-app";
+  if (area === "hydrogen" && command === "dev") return "shopify-hydrogen";
+  return null;
+}
+
+function detectShopifyTool(command: string): ShopifyTool | null {
+  const tokens = command.trim().split(/\s+/);
+  if (tokens.length < 3) return null;
+
+  if (commandBase(tokens[0]) === "shopify") {
+    return shopifyToolFromArgs(tokens, 0);
+  }
+
+  // Global Shopify CLI installs commonly show up as:
+  //   node /path/to/bin/shopify theme dev
+  // Keep this bounded so wrapper commands like `concurrently ... shopify theme
+  // dev` don't get mislabeled if the wrapper ever owns a listener.
+  if (["node", "nodejs", "bun", "npx"].includes(commandBase(tokens[0]))) {
+    for (let i = 1; i < Math.min(tokens.length - 2, 5); i++) {
+      if (commandBase(tokens[i]) !== "shopify") continue;
+      return shopifyToolFromArgs(tokens, i);
+    }
+  }
+
+  return null;
+}
+
 // A candidate is anything launched from node_modules (broader than .bin/ so
-// we catch `node node_modules/serve/build/main.js` etc.) OR a bare bun
-// process. Over-collection is harmless: only PIDs with a LISTEN socket
-// survive the join below.
+// we catch `node node_modules/serve/build/main.js` etc.), a bare bun process,
+// OR a Shopify CLI dev process. Over-collection is harmless: only PIDs with a
+// LISTEN socket survive the join below.
 function isCandidate(proc: RawProcess): boolean {
   if (/node_modules\//.test(proc.command)) return true;
+  if (detectShopifyTool(proc.command)) return true;
   const exec = proc.command.split(/\s+/, 1)[0];
   return /(\/|^)bun$/.test(exec);
 }
@@ -184,6 +299,9 @@ function detectRuntime(command: string): "node" | "bun" {
 }
 
 function detectTool(command: string, cwd: string): string {
+  const shopifyTool = detectShopifyTool(command);
+  if (shopifyTool) return shopifyTool;
+
   // 1. Prefer the .bin/ name (e.g. node_modules/.bin/vite)
   const bin = command.match(/node_modules\/\.bin\/(\S+)/);
   if (bin) {
@@ -216,11 +334,22 @@ function hasSvelteConfig(cwd: string): boolean {
 // because configured dev ports (3000, 4321, 5173, 8080) are always below
 // ephemeral ports (32768+); without this the displayed port flickers across
 // refreshes.
-function lowestPortPerPid(listeners: RawListener[]): Map<number, number> {
-  const out = new Map<number, number>();
-  for (const { pid, port } of listeners) {
+//
+// lanExposed is tracked for the CHOSEN port specifically (OR'd across
+// same-port binds, e.g. separate IPv4 and IPv6 sockets), not for any socket
+// of the PID. A loopback-only HTTP server whose HMR socket happens to bind
+// wildcard must not advertise a network URL that can't actually connect.
+function lowestPortPerPid(
+  listeners: RawListener[],
+): Map<number, { port: number; lanExposed: boolean }> {
+  const out = new Map<number, { port: number; lanExposed: boolean }>();
+  for (const { pid, port, lanExposed } of listeners) {
     const cur = out.get(pid);
-    if (cur === undefined || port < cur) out.set(pid, port);
+    if (cur === undefined || port < cur.port) {
+      out.set(pid, { port, lanExposed });
+    } else if (port === cur.port && lanExposed) {
+      cur.lanExposed = true;
+    }
   }
   return out;
 }
@@ -228,6 +357,19 @@ function lowestPortPerPid(listeners: RawListener[]): Map<number, number> {
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
+
+// Per-PID metadata cache. A process's cwd, tool, and runtime are immutable
+// for its lifetime, so we resolve them once per PID and skip the second lsof
+// (cwd lookup) plus the tool-detection regexes on every later poll. Keyed by
+// pid and validated against lstart so a recycled PID can't inherit a dead
+// process's metadata.
+interface PidMeta {
+  lstart: string;
+  cwd: string;
+  tool: string;
+  runtime: "node" | "bun";
+}
+const pidMetaCache = new Map<number, PidMeta>();
 
 export async function fetchServers(): Promise<DevServer[]> {
   const [procs, listeners, aliasesByPort] = await Promise.all([
@@ -237,45 +379,72 @@ export async function fetchServers(): Promise<DevServer[]> {
   ]);
   const candidates = procs.filter(isCandidate);
   const portByPid = lowestPortPerPid(listeners);
-  // Only query cwds for candidates that are actually listening, which keeps the
-  // lsof argument list short and skips dead PIDs.
-  const finalPids = candidates
-    .map((p) => p.pid)
-    .filter((pid) => portByPid.has(pid));
-  const cwdByPid = await listCwds(finalPids);
+  const live = candidates.filter((p) => portByPid.has(p.pid));
 
-  // Look up git info per unique cwd, in parallel. Worktrees of the same repo
-  // share a git common-dir, so we use that path as the project key, which collapses
-  // sibling worktrees into one group while still letting us show the branch on
-  // each row. The project's display name is the basename of the common-dir's
-  // parent (the repo root).
-  const uniqueCwds = [...new Set([...cwdByPid.values()])];
+  // Resolve cwds only for PIDs we haven't seen before (or whose lstart says
+  // the PID was recycled). On a steady-state poll this list is empty and the
+  // lsof cwd query is skipped entirely.
+  const unseen = live.filter(
+    (p) => pidMetaCache.get(p.pid)?.lstart !== p.lstart,
+  );
+  const cwdByPid = await listCwds(unseen.map((p) => p.pid));
+  for (const proc of unseen) {
+    const cwd = cwdByPid.get(proc.pid);
+    if (!cwd) continue; // shouldn't happen for live processes, but be safe
+    pidMetaCache.set(proc.pid, {
+      lstart: proc.lstart,
+      cwd,
+      tool: detectTool(proc.command, cwd),
+      runtime: detectRuntime(proc.command),
+    });
+  }
+  // Evict entries for processes that are gone so the cache stays bounded.
+  const livePids = new Set(live.map((p) => p.pid));
+  for (const pid of pidMetaCache.keys()) {
+    if (!livePids.has(pid)) pidMetaCache.delete(pid);
+  }
+
+  // Look up git info per unique cwd, in parallel (cached by HEAD mtime, see
+  // getGitInfoCached). Worktrees of the same repo share a git common-dir, so
+  // we use that path as the project key, which collapses sibling worktrees
+  // into one group while still letting us show the branch on each row. The
+  // project's display name is the basename of the common-dir's parent (the
+  // repo root).
+  const uniqueCwds = [
+    ...new Set(
+      live
+        .map((p) => pidMetaCache.get(p.pid)?.cwd)
+        .filter((c): c is string => Boolean(c)),
+    ),
+  ];
   const gitByCwd = new Map<string, GitInfo | undefined>();
   await Promise.all(
-    uniqueCwds.map(async (cwd) => gitByCwd.set(cwd, await getGitInfo(cwd))),
+    uniqueCwds.map(async (cwd) =>
+      gitByCwd.set(cwd, await getGitInfoCached(cwd)),
+    ),
   );
 
   const servers: DevServer[] = [];
-  for (const proc of candidates) {
-    const port = portByPid.get(proc.pid);
-    if (port === undefined) continue;
-    const cwd = cwdByPid.get(proc.pid);
-    if (!cwd) continue; // shouldn't happen for live processes, but be safe
-    const tool = detectTool(proc.command, cwd);
+  for (const proc of live) {
+    const meta = pidMetaCache.get(proc.pid);
+    if (!meta) continue;
+    const listener = portByPid.get(proc.pid);
+    if (listener === undefined) continue;
+    const port = listener.port;
     // Drop the portless proxy daemon itself. It's a node process out of
     // node_modules/portless/ that binds 80/443/1355, and would otherwise
     // appear as a phantom "dev server" row. Child processes spawned by
     // portless run their own framework binary (next, vite, …) so they
     // resolve to that tool, not "portless".
-    if (tool === "portless") continue;
-    const git = gitByCwd.get(cwd);
+    if (meta.tool === "portless") continue;
+    const git = gitByCwd.get(meta.cwd);
     // For git projects: key is the shared .git dir path (stable across all
     // worktrees of the repo), name is the basename of its parent (the repo
     // root). For non-git: both fall back to the worktree itself.
     const projectName = git
       ? path.basename(path.dirname(git.commonDir))
-      : path.basename(cwd) || cwd;
-    const projectKey = git ? git.commonDir : cwd;
+      : path.basename(meta.cwd) || meta.cwd;
+    const projectKey = git ? git.commonDir : meta.cwd;
     const customUrls = aliasesByPort.get(port);
     const localUrl = `http://localhost:${port}`;
     servers.push({
@@ -284,12 +453,13 @@ export async function fetchServers(): Promise<DevServer[]> {
       url: customUrls?.[0] ?? localUrl,
       localUrl,
       customUrls,
-      tool,
-      runtime: detectRuntime(proc.command),
-      cwd,
+      tool: meta.tool,
+      runtime: meta.runtime,
+      cwd: meta.cwd,
       projectKey,
       projectName,
       branch: git?.branch || undefined,
+      lanExposed: listener.lanExposed,
       startedAt: new Date(proc.lstart),
     });
   }
@@ -395,12 +565,39 @@ export function canonicalCwd(p: string): string {
   }
 }
 
-// Walk up from a filesystem path to the nearest directory containing a
-// package.json. Used to resolve a Finder selection (which may be a file, a
-// subfolder, or the project root itself) to a project root we can spawn in.
-// The returned path is canonicalized so it round-trips through process
-// inspection without symlink-induced mismatches. Returns null when the
-// path isn't inside any Node project.
+// A Shopify theme root. Shopify CLI requires only `layout/theme.liquid` to
+// treat a directory as a theme ("Only a layout directory containing a
+// theme.liquid file is required"), so that's the canonical marker.
+// `shopify.theme.toml` (the CLI's optional environments file) is accepted as
+// a secondary signal for repos that keep one at the root.
+export function isShopifyThemeRoot(dir: string): boolean {
+  return (
+    fs.existsSync(path.join(dir, "layout", "theme.liquid")) ||
+    fs.existsSync(path.join(dir, "shopify.theme.toml"))
+  );
+}
+
+// A Shopify app root. Per Shopify's app-structure docs, shopify.app.toml
+// "represents the root of the app".
+export function isShopifyAppRoot(dir: string): boolean {
+  return fs.existsSync(path.join(dir, "shopify.app.toml"));
+}
+
+function isProjectRoot(dir: string): boolean {
+  return (
+    fs.existsSync(path.join(dir, "package.json")) ||
+    isShopifyThemeRoot(dir) ||
+    isShopifyAppRoot(dir)
+  );
+}
+
+// Walk up from a filesystem path to the nearest directory that looks like a
+// startable project: one containing a package.json, or a Shopify theme/app
+// root (themes have no package.json at all). Used to resolve a Finder
+// selection (which may be a file, a subfolder, or the project root itself)
+// to a project root we can spawn in. The returned path is canonicalized so
+// it round-trips through process inspection without symlink-induced
+// mismatches. Returns null when the path isn't inside any known project.
 export function findProjectRoot(startPath: string): string | null {
   let cur: string;
   try {
@@ -410,7 +607,7 @@ export function findProjectRoot(startPath: string): string | null {
     return null;
   }
   for (;;) {
-    if (fs.existsSync(path.join(cur, "package.json"))) return canonicalCwd(cur);
+    if (isProjectRoot(cur)) return canonicalCwd(cur);
     const parent = path.dirname(cur);
     if (parent === cur) return null;
     cur = parent;
@@ -420,6 +617,37 @@ export function findProjectRoot(startPath: string): string | null {
 // Slugify cwd for use in a temp-dir log filename.
 function cwdSlug(cwd: string): string {
   return cwd.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "root";
+}
+
+// Decide what command starts this project's dev server.
+//
+// 1. A package.json dev script always wins: it's the project's explicit
+//    intent, and scaffolded Shopify apps and Hydrogen storefronts already
+//    ship `dev: shopify app dev` / `shopify hydrogen dev` there, so they
+//    resolve through this branch like any other Node project. Explicit
+//    scripts also cover themes that wrap `shopify theme dev` in
+//    concurrently-style tooling.
+// 2. With no usable script, fall back to the Shopify CLI for theme and app
+//    roots. Themes are the important case: they have no package.json, so
+//    nothing else could ever start (or restart) them.
+//
+// First-run caveat for the Shopify fallbacks: `shopify theme dev` / `app
+// dev` prompt for login and store selection when the CLI has no remembered
+// state. A detached spawn can't answer prompts, so the 15s watchdog fires
+// and the startup log shows the prompt text. After a one-time
+// `shopify theme dev --store <store>` in a terminal, the CLI remembers the
+// store and starts cleanly from here.
+function planSpawn(cwd: string): { cmd: string; args: string[] } | null {
+  const script = pickDevScript(cwd);
+  if (script) {
+    const pm = detectPackageManager(cwd);
+    const [cmd, baseArgs] = PM_RUN[pm];
+    return { cmd, args: [...baseArgs, script] };
+  }
+  if (isShopifyThemeRoot(cwd))
+    return { cmd: "shopify", args: ["theme", "dev"] };
+  if (isShopifyAppRoot(cwd)) return { cmd: "shopify", args: ["app", "dev"] };
+  return null;
 }
 
 // Spawn a dev server for a project. Shared by the Start Dev Server flow
@@ -442,17 +670,15 @@ function cwdSlug(cwd: string): string {
 //   the PID has been replaced by the new server. Use `spawnLogPath(cwd)`
 //   to reach it from error toasts.
 //
-// Throws if pickDevScript can't find a runnable script.
+// Throws if planSpawn can't find a runnable command.
 export async function startDevServer(cwd: string): Promise<void> {
-  const script = pickDevScript(cwd);
-  if (!script) {
+  const plan = planSpawn(cwd);
+  if (!plan) {
     throw new Error(
-      "No dev script found in package.json. Expected one of: dev, start, develop, or a script that invokes a known dev-server tool.",
+      "No way to start this project. Expected a package.json with a dev/start/develop script (or one invoking a known dev-server tool), or a Shopify theme/app root.",
     );
   }
-  const pm = detectPackageManager(cwd);
-  const [cmd, baseArgs] = PM_RUN[pm];
-  const args = [...baseArgs, script];
+  const { cmd, args } = plan;
   const out = fs.openSync(spawnLogPath(cwd), "a");
   const child = spawn("/bin/zsh", ["-ilc", 'exec "$0" "$@"', cmd, ...args], {
     cwd,

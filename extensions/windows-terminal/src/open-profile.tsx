@@ -23,6 +23,25 @@ const PROFILES = JSON.parse(
   ),
 ) as WindowsTerminalSettings;
 
+function getWindowsTerminalEnv() {
+  const env = { ...process.env };
+  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "Path";
+  const systemRoot = env.SystemRoot ?? "C:\\Windows";
+  const pathParts = (env[pathKey] ?? "").split(";").filter(Boolean);
+  const requiredPathParts = [`${systemRoot}\\System32\\OpenSSH`, `${systemRoot}\\System32`, systemRoot];
+  const normalizePathPart = (pathPart: string) => pathPart.toLowerCase().replace(/\\+$/, "");
+
+  env[pathKey] = [
+    ...pathParts,
+    ...requiredPathParts.filter(
+      (requiredPathPart) =>
+        !pathParts.some((pathPart) => normalizePathPart(pathPart) === normalizePathPart(requiredPathPart)),
+    ),
+  ].join(";");
+
+  return env;
+}
+
 function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
@@ -31,7 +50,7 @@ function Actions(props: { name: string; quake: boolean }) {
         title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
           const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
-          execFile("wt.exe", args);
+          execFile("wt.exe", args, { env: getWindowsTerminalEnv() });
           await closeMainWindow();
         }}
       />
@@ -39,7 +58,7 @@ function Actions(props: { name: string; quake: boolean }) {
         icon={Icon.PlusTopRightSquare}
         title="Open in New Window"
         onAction={async () => {
-          execFile("wt.exe", ["-p", props.name]);
+          execFile("wt.exe", ["-p", props.name], { env: getWindowsTerminalEnv() });
           await closeMainWindow();
         }}
       />

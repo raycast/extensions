@@ -1,5 +1,33 @@
 # Todoist Changelog
 
+## [Omit paid task fields unless requested] - 2026-06-28
+
+- **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.
+
+## [Revert Quick Add Task fallback command fix] - 2026-06-24
+
+- Reverted the Quick Add Task fallback command fix because making the `text` argument optional broke the hotkey workflow (command launched immediately with empty text instead of prompting for input).
+
+## [Fix Quick Add Task fallback command] - 2026-06-24
+
+- Quick Add Task now works as a Raycast fallback command on Raycast 2.0+. Previously it failed with "Value is missing in argument" because the text argument was required.
+
+## [Guard against empty sync response arrays] - 2026-06-19
+
+- Prevent cache corruption when the Todoist Sync API returns an empty array for projects, items, labels, filters, or notes during incremental sync mutations.
+
+## [Keep recurrence when rescheduling] - 2026-06-19
+
+- **Recurring tasks keep their repeat rule** when you change the due date from task actions or the menu bar (including shortcuts like Today, Tomorrow, Next Week, and Next Weekend).
+- **Hourly recurring tasks** still anchor an all-day due to the current time when rescheduled.
+- **Focused task** no longer unfocuses while the menu bar is loading, and removing the focus label is skipped safely when the task is missing.
+- **AI tools** accept comma-separated or JSON-array strings for labels, resource types, and comment notification user IDs.
+- **Windows**: Fixed the Create View Quicklink keyboard shortcut (`Ctrl` + `Shift` + `N`).
+
+## [Fix Create Task tool paid fields] - 2026-05-28
+
+- The Create Task tool now omits empty or invalid `deadline` and `duration` fields so standard task creation works for Todoist Free plan users.
+
 ## [Include deadlines in Today] - 2026-05-20
 
 - Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
@@ -47,16 +75,20 @@
 - Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
 
 ## [Show deadline as how many days remains] - 2026-03-31
+
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 
 ## [Fix reminders and Create Task NLP parsing] - 2026-03-06
+
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
 
 ## [Fixing Todoist PR updates] - 2026-02-11
+
 - Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
 
 ## [Set Due Date to Everyday for Existing Tasks] - 2025-10-10
+
 - **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
 
 ## [Improved Due Time Handling] - 2025-09-04

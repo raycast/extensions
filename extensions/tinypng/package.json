@@ -21,6 +21,40 @@
       "mode": "no-view"
     },
     {
+      "name": "compressImagesMultipleTimes",
+      "title": "Compress Images Multiple Times",
+      "subtitle": "TinyPNG",
+      "description": "Compress selected images with TinyPNG multiple times.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "count",
+          "placeholder": "2 times",
+          "type": "dropdown",
+          "description": "Number of compression passes",
+          "required": false,
+          "data": [
+            {
+              "value": "2 times",
+              "title": "2 times"
+            },
+            {
+              "value": "3 times",
+              "title": "3 times"
+            },
+            {
+              "value": "4 times",
+              "title": "4 times"
+            },
+            {
+              "value": "5 times",
+              "title": "5 times"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "resizingImages",
       "title": "Resizing Images",
       "subtitle": "TinyPNG",
@@ -96,18 +130,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
+    "@raycast/api": "^1.104.20",
     "node-fetch": "^3.3.2",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.1",
-    "typescript": "^5.4.5",
-    "vitest": "^2.1.9"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -117,5 +151,8 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx -y @raycast/api@latest publish",
     "test": "vitest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
