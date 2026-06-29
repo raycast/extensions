@@ -150,16 +150,24 @@ export function transitionSession(
         updatedAt: toIso(currentTime),
       };
 
-    case "TIMER_ELAPSED":
+    case "TIMER_ELAPSED": {
       if (session.status !== "running") {
         return session;
       }
 
+      const plannedEndMs = new Date(session.plannedEndAt).getTime();
+      const activeMsBeforeEnd = session.activeStartedAt
+        ? Math.max(Math.min(currentTime, plannedEndMs) - new Date(session.activeStartedAt).getTime(), 0)
+        : 0;
+
       return {
         ...session,
         status: "awaiting_confirmation",
+        activeStartedAt: undefined,
+        accumulatedActiveMs: session.accumulatedActiveMs + activeMsBeforeEnd,
         updatedAt: toIso(currentTime),
       };
+    }
 
     case "FINISH_AND_CONTINUE": {
       const resolvedConfig = requireConfig(config, event.type);
@@ -258,8 +266,14 @@ export function formatDuration(ms: number): string {
 }
 
 export function getActualActiveMs(session: PomodoroSession, currentTime = Date.now()): number {
-  if ((session.status === "running" || session.status === "awaiting_confirmation") && session.activeStartedAt) {
-    return session.accumulatedActiveMs + Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0);
+  if (session.status === "awaiting_confirmation") {
+    return session.accumulatedActiveMs;
+  }
+
+  if (session.status === "running" && session.activeStartedAt) {
+    const plannedEndMs = new Date(session.plannedEndAt).getTime();
+    const segmentEnd = Math.min(currentTime, plannedEndMs);
+    return session.accumulatedActiveMs + Math.max(segmentEnd - new Date(session.activeStartedAt).getTime(), 0);
   }
 
   return session.accumulatedActiveMs;

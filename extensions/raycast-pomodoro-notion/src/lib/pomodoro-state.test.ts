@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import type { PomodoroConfig } from "./preferences";
 import {
+  confirmSessionEnd,
   finishSessionAndContinue,
   getActualActiveMinutes,
   getSessionSnapshot,
@@ -101,4 +102,24 @@ test("実作業時間は一時停止中の時間を含めない", () => {
   const resumed = resumeSession(paused, startAt + 20 * 60_000);
 
   assert.equal(getActualActiveMinutes(resumed, startAt + 30 * 60_000), 20);
+});
+
+test("awaiting_confirmation では確認待ち中に作業時間が増えない", () => {
+  const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
+  const session = buildWorkSession(startAt);
+  const elapsed = confirmSessionEnd(session, startAt + 37 * 60_000);
+
+  assert.equal(elapsed.status, "awaiting_confirmation");
+  assert.equal(elapsed.accumulatedActiveMs, 37 * 60_000);
+  assert.equal(getActualActiveMinutes(elapsed, startAt + 55 * 60_000), 37);
+});
+
+test("期限切れ running は normalize 後に pause できない", () => {
+  const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
+  const session = buildWorkSession(startAt);
+  const normalized = normalizeRestoredSession(session, startAt + 40 * 60_000);
+  const paused = pauseSession(normalized, startAt + 41 * 60_000);
+
+  assert.equal(normalized.status, "awaiting_confirmation");
+  assert.equal(paused.status, "awaiting_confirmation");
 });
